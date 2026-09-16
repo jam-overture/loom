@@ -25,7 +25,7 @@ import { RULES } from "./the-rules"
  * worth having.
  *
  * **It has to be complete**, because its claim is *these are all of the
- * questions* and *there is no fourth answer* — a page listing six of seven rules
+ * questions* and *there is no fourth answer* — a page listing seven of eight rules
  * is worse than a page listing none, since a reader who checks one of the six is
  * given a reason to believe the missing one does not exist.
  *

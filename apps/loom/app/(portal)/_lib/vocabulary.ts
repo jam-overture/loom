@@ -390,6 +390,8 @@ const RULE_SENTENCES: Readonly<Record<DispositionReasonCode, string>> = {
   "discards-later-work": "It would write over work already done, so nobody may do it alone.",
   "redirected-submission":
     "It would send what people type into a form to a different place than before, so nobody may do it alone.",
+  "repointed-binding":
+    "It would put different data of yours on the page than before, so nobody may do it alone.",
   /*
    * Was "Riskier than a request from here is allowed to be without asking."
    *

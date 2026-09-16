@@ -244,3 +244,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0158](0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md) | Counting a window of reader signals and forgetting it are one operation | Accepted | §4c (reader signals) |
 | [0159](0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md) | An instrument may reach a state, and may never assert one | Accepted | §1 (process) |
 | [0160](0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md) | Where a rendering depends on a fact about the content that no rule can observe, the tree declares the fact and never the layout | Accepted | §4b |
+| 0161 | *No record on this branch* | — | — |
+| 0162 | *No record on this branch* | — | — |
+| [0163](0163-a-binding-is-weighed-like-a-destination.md) | A binding is weighed like a destination, and its params are half of it | Accepted | §2 |

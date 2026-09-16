@@ -97,7 +97,7 @@ export type ChangeRecord = Request & {
  * exists to prove.
  *
  * **Exported since 28 August, and the reason is the best property the rules
- * page has.** That page explains the seven questions the rules ask; this map
+ * page has.** That page explains the eight questions the rules ask; this map
  * holds what the site *says* when one of them answers. If the explanation were
  * written out again over there, the two would drift — and the drift would be
  * invisible, because a reader never sees them on the same screen. They are one
@@ -117,6 +117,8 @@ export const BECAUSE = {
     "This would write over work that was done after it was planned, so it waits for a person.",
   "redirected-submission":
     "This would send what people type on the page somewhere else, so it waits for a person.",
+  "repointed-binding":
+    "This would put different data of yours on the page, so it waits for a person.",
   "stakes-above-ceiling":
     "This weighs more than your rules let a request through on its own, so it waits for a person to say yes.",
 } satisfies Record<DispositionReasonCode, string>
@@ -150,6 +152,7 @@ const RAISED_BY = {
   "discards-later-work": "it writes over work done since it was planned",
   "nested-target": "it would leave a button inside a link, where nobody can click it",
   "redirected-submission": "it changes where the page sends what people type",
+  "repointed-binding": "it changes which of your data the page shows",
 } satisfies Record<StakeFactorCode, string>
 
 /** What each weight is called, in the one word the site uses for it everywhere. */
