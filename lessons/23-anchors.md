@@ -99,11 +99,11 @@ yourself in about fifteen lines.
    policy, and then say what a deployment that disagrees can actually do about
    it.
 
-4. The starter library registers ninety-six primitives. The runtime hands a node
-   that carries a usable anchor an attribute bundle to spread — `{...loom.anchor}`
-   — exactly as it hands one the attributes that make it editable. **How many of
-   the ninety-six spread it?** Write a number, **rate your confidence 1–5**, and
-   then write what a page gets when a primitive does not.
+4. The runtime hands a node that carries a usable anchor an attribute bundle to
+   spread — `{...loom.anchor}` — exactly as it hands one the attributes that make
+   it editable. **How many primitives in the starter library spread it?** Write a
+   number, **rate your confidence 1–5**, and then write what a page gets when a
+   primitive does not.
 
 Do not read on until all four are written. Question 4 is this lesson's question,
 and the useful thing is not the number — it is whether your estimate came from
@@ -826,8 +826,8 @@ The output:
 
 Read those six lines together, because each one is ordinary and the set is not.
 
-**The reserved key reaches nothing.** Not one of the ninety-six primitives in the
-starter library spreads `loom.anchor`. The runtime checked the slug, claimed it in
+**The reserved key reaches nothing.** Not one primitive in the starter library
+spreads `loom.anchor`. The runtime checked the slug, claimed it in
 the ledger, built an attribute bundle and offered it, and the section dropped it —
 exercise B's third case, shipping. The answer to Predict 4 is **zero**.
 

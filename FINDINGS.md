@@ -8,6 +8,71 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — **not a defect**; nothing behaves wrongly today, and the thing to decide
+is what the test should be asserting
+
+Found while researching a lesson on the ceiling (0140) that I did not end up
+writing — lesson 18 already teaches most of it, so the subject went to
+`liveness.ts` instead. `src/` is your lane and nothing here is touched.
+
+`src/deadline.ts` guards the losing promise:
+
+```ts
+const answered = attempt(controller.signal)
+answered.catch(() => undefined)
+
+return Promise.race([answered, reached]).finally(() => clearTimeout(timer))
+```
+
+and the module says what that is for, in a sentence a reader has no reason to
+doubt:
+
+> This never rejects for a reason `attempt` did not give it, and it never leaves
+> a rejection unhandled: a promise that loses the race is still going to settle,
+> and an unhandled rejection arriving after the answer would take a Node server
+> down for a call the runtime had already reported on.
+
+**`Promise.race` subscribes to every promise it is given.** It attaches a
+reaction to `answered` synchronously, in the same tick, so a rejection arriving
+after the race is decided already has a handler and Node never reports it. The
+explicit `.catch` is defensive rather than load-bearing on this code path.
+
+Measured on this checkout, by deleting the two characters' worth of line from a
+working copy and running the suites that exercise it:
+
+| suite | without the line |
+| --- | --- |
+| `src/deadline.test.ts` (11 tests, including *"does not leave a late rejection unhandled"*) | **passes** |
+| `src/data/resolve.test.ts`, `src/submit/resolve.test.ts`, `src/interpretation/interpreter.test.ts` (79 tests) | **passes** |
+
+Both reverted; `git status` was clean before this branch committed anything.
+
+**Why it is worth five minutes rather than a shrug.** The line is cheap and I
+would keep it: it is the kind of guard that becomes load-bearing the moment
+somebody replaces `Promise.race` with a hand-rolled resolver, which is a
+plausible refactor. What is worth changing is the *test*, because right now the
+repository contains a test whose name states a property, which passes, and which
+would pass identically if the mechanism it is named for were deleted. That is
+[lesson 25](../lessons/25-exhaustiveness.md)'s weakest-row problem in a new
+place: the second source is the same promise semantics that would have made the
+test pass anyway.
+
+Three shapes, and the choice is yours:
+
+- **Assert the mechanism**, not the outcome — spy on `answered`'s handlers, or
+  construct the case where `race` is not what subscribes.
+- **Rename the test** to what it does check (*a late rejection does not reach the
+  caller*), and say in the comment that Node's own behaviour supplies most of it.
+- **Say so in the module comment**: the sentence quoted above reads as *this
+  module prevents X*, and the honest version is *this module is written so that X
+  stays impossible if the race is ever replaced*.
+
+Nothing is blocked and nothing is red.
+
+---
 ## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -689,7 +754,13 @@ gradient, who has no way to find out that one palette holds one colour in both.
 ---
 ## 2026-09-13 — a lesson transcript pins the size of the library, so every primitive added falsifies another lane's prose
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:** open
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:**
+**closed by `lessons-37-liveness`** — the first of the three options below is
+taken: no lesson states the library's size in prose any more, in any of the five
+places that did — six, in the end: one of the two in lesson 24 said
+*ninety-five* and was already wrong. The transcripts still print it, and still go red when it moves,
+which is the half that was working. Original status below.
+**Status:** open
 — the mechanical half is done on `primitives-28-what-catches-the-eye`; the
 editorial half is yours
 
