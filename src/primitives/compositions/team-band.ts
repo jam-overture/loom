@@ -60,6 +60,7 @@ const PEOPLE = [
 
 export const teamBand: Composition = {
   id: "team",
+  part: "team",
   label: "Team",
   promise: "Four people in a grid, each with a role and a line about them.",
   rationale:

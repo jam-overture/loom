@@ -41,6 +41,7 @@ import type { Composition } from "./composition.js"
  */
 export const ctaBand: Composition = {
   id: "cta",
+  part: "cta",
   label: "Closing call to action",
   promise: "A closing band on the accent ground: a headline, a sentence and two buttons side by side.",
   rationale:

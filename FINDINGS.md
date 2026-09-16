@@ -8,6 +8,95 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-16 — an inline style beat a rule for the third time in three days, and this one cost a band half its width
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-36-the-phrasebook-and-the-page`** — filed because the
+*pattern* is now three instances and wants naming, not because the defect is open
+
+[0155](decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md)
+was written on 14 September from the pager's side. On 15 September it turned up
+again in `loom.comparison` and `loom.comparison-row`, where two inline
+`min-width`s were the only two numbers in the band no rule could reach. **This
+is the third, on 16 September**, and the shape is identical every time: a value
+the primitive knows, written inline because that is where a component naturally
+puts it, in a place where some *other* rendering needs to cancel it.
+
+`loom.marquee` set `padding-inline-end` on its run so the run and its echo tile
+seamlessly while travelling. Two renderings have nothing to tile against — the
+still one and the reduced-motion one, where the track becomes a block and the
+run wraps — and both have rules that would have cancelled it. Inline beat both.
+
+**What it cost, measured at 1280px:**
+
+| | run content box | item | gap | needs for two |
+| --- | --- | --- | --- | --- |
+| before | **1048px** | 512px | 32px | **1056px** |
+
+Eight pixels. A testimonial wall went from two columns to one, 789px tall with
+half the band empty, and `loom.logo-cloud` has had the same dead column in its
+reduced-motion rendering since it shipped. Nothing reported it, nothing could:
+the animated rendering — which is what everybody looks at — was always correct.
+
+**The fix is the shape 0155 prescribes** and is worth reusing: the primitive
+declares the value as a **custom property** (`--loom-marquee-gap`) and the
+stylesheet decides where it applies. A custom property rather than a class per
+density, because the value is a prop and a rule cannot enumerate six densities
+without six rules — and a custom property is the one thing a rule *can* read
+back off an element. After: 2 rows × 2, 378px, with the animated rendering
+byte-identical.
+
+**Why this is filed rather than just fixed.** Three instances in three days, all
+found by accident and each by a different accident — a pager's tile, a
+screenshot at 390px, a screenshot that looked ugly. **Nothing in the repository
+looks for this.** An inline property that a rule tries to override fails
+silently: no error, no warning, no test. A check that walked the rendered markup
+for inline properties also named in the stylesheet would have found all three at
+once, and is a `Loom daily build` shaped thing rather than a primitive. Offered,
+not asked for.
+
+---
+## 2026-09-16 — every screenshot this lane takes forces reduced motion, so a moving band has never been photographed moving
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit of the instrument, named so a reviewer knows what a picture is
+not telling them
+
+`tools/specimen/playwright.ts` sets `reducedMotion: "reduce"`, and it is right
+to: an entrance animation photographed mid-flight is a blank band, and a
+screenshot that differs run to run is not a check. Every shot in every
+`reports/` file has been taken this way.
+
+The consequence was invisible while the only moving band was a logo wall, whose
+static fallback looks like the moving one with the motion removed. It is not
+invisible now. `testimonials-wall` **is** its motion — the claim it makes is
+*there are more of these than you are going to read* — and the photograph shows
+a static two-column grid of quotes, which is a different band making a different
+claim.
+
+So a reviewer approving that band from its picture has approved something else.
+The static rendering is now good (see the finding above, which is where the
+eight pixels were found), and that half genuinely matters more, because a reader
+who asked for calm is a real audience and the travelling version is one they
+never see. But **the band the picture shows is not the band most readers get**,
+and no report has ever said so.
+
+**Three shapes, none obviously right, smallest first:**
+
+1. **Say so in the report.** One line under any shot containing a marquee. Free,
+   and relies on every future run remembering.
+2. **A second shot per specimen, with motion allowed, at a pinned animation
+   time.** Playwright can pause an animation at a timestamp, so it is
+   deterministic. Costs a flag on `defineSpecimen` and a second file per theme.
+3. **Leave it.** Defensible: 0055 makes motion a static stylesheet precisely so
+   the *page* does not depend on it, and the still rendering is the honest floor.
+
+**Recommendation: 2**, but only when a second band's subject is its motion.
+Today it is one, and building the affordance for one caller is inventing a
+structure ahead of its reader — which is the mistake the catalogue's own doc
+comment avoided on 13 September and was right to.
+
+---
 ## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**

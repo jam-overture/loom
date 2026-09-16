@@ -502,11 +502,14 @@ export * from "./layout.js"
  * and adds no type: everything it builds is in `STARTER_PRIMITIVES` above, and
  * `compositions.test.ts` fails if that stops being true.
  */
-export type { Composition, CompositionPlan, CompositionTarget } from "./compositions/index.js"
+export type { Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./compositions/index.js"
 export {
   COMPOSITION_INTERPRETER,
+  COMPOSITION_PARTS,
   compositionById,
   compositionInterpreter,
+  compositionsForPart,
+  PAGE_SEQUENCE,
   planComposition,
   STARTER_COMPOSITIONS,
 } from "./compositions/index.js"

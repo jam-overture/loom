@@ -18,8 +18,11 @@ import { createTree, type LoomTree } from "../tree/tree.js"
 import { createStarterPrimitiveRegistry } from "./index.js"
 import {
   COMPOSITION_INTERPRETER,
+  COMPOSITION_PARTS,
   compositionById,
   compositionInterpreter,
+  compositionsForPart,
+  PAGE_SEQUENCE,
   planComposition,
   STARTER_COMPOSITIONS,
   type Composition,
@@ -118,11 +121,62 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers nineteen bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(19)
+  it("offers twenty-three bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(23)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it("declares a part the page sequence knows, for every band", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      expect(COMPOSITION_PARTS).toContain(composition.part)
+    }
+  })
+
+  /**
+   * The convention {@link PAGE_SEQUENCE} is derived from, asserted rather than
+   * trusted: a part's canonical design is the band whose id **is** the part's
+   * name. A part with no canonical design would silently vanish from the page —
+   * `flatMap` would drop it and the page would render clean with a hole in it —
+   * so the hole is caught here instead.
+   */
+  it("gives every part a canonical design whose id is the part's name", () => {
+    for (const part of COMPOSITION_PARTS) {
+      const canonical = compositionById(part)
+
+      expect(canonical, `no canonical design for the ${part} band`).toBeDefined()
+      expect((canonical as Composition).part).toBe(part)
+    }
+  })
+
+  it("answers which designs a part has, and says none for a part with no alternate", () => {
+    expect(compositionsForPart("hero").map((composition) => composition.id)).toEqual(["hero", "hero-split"])
+    expect(compositionsForPart("footer").map((composition) => composition.id)).toEqual(["footer"])
+  })
+
+  /**
+   * The rule the catalogue's index states, made checkable: a second design of a
+   * part earns its place by building a **different set of nodes**, because a
+   * band that differs only in its props is a `configure` of the first and does
+   * not belong in a catalogue at all.
+   *
+   * Shape rather than ids, since every build mints fresh ones. Two designs of a
+   * part whose node types read the same in the same order are the near-miss
+   * this asserts against — and it is a cheap check that would have caught the
+   * tempting `layout: "cards" | "matrix"` version of `pricing-matrix`.
+   */
+  it("makes every alternate design differ from its canonical in structure, not in props", () => {
+    const shapeOf = (node: LoomNode): readonly string[] =>
+      node.kind === "text" ? ["#text"] : [node.kind === "element" ? node.type : "#slot", ...node.children.flatMap(shapeOf)]
+
+    for (const part of COMPOSITION_PARTS) {
+      const designs = compositionsForPart(part)
+      if (designs.length < 2) continue
+
+      const shapes = designs.map((design) => shapeOf(design.build(sequentialIdFactory())).join(" "))
+      expect(new Set(shapes).size, `two designs of the ${part} band build the same tree`).toBe(shapes.length)
+    }
   })
 
   it("finds a band by its id, and nothing by a name that is not one", () => {
@@ -214,15 +268,22 @@ describe("what a band renders", () => {
   })
 
   /**
-   * The nine bands are one page, which is the claim `STARTER_COMPOSITIONS`
+   * One design of each band is one page, which is the claim `PAGE_SEQUENCE`
    * makes by being ordered. A page that renders clean under both palettes is
    * the whole of what that claim can be held to here; whether it *reads* as a
    * page is what the screenshots in the report are for.
+   *
+   * **This assertion used to be made of `STARTER_COMPOSITIONS`**, and moving it
+   * is the whole of what 0162 changed. The catalogue is now a phrasebook of
+   * twenty-three designs including two heroes, and two heroes are not a page —
+   * which the test below about level-one headings says louder than this one.
    */
-  it("assembles one page from the nine, in order, under both palettes", () => {
+  it("assembles one page from one design of each band, in order, under both palettes", () => {
+    expect(PAGE_SEQUENCE).toHaveLength(COMPOSITION_PARTS.length)
+
     for (const theme of [EDITORIAL, BOLD]) {
       const ids = sequentialIdFactory()
-      const bands = STARTER_COMPOSITIONS.map((composition) => composition.build(ids))
+      const bands = PAGE_SEQUENCE.map((composition) => composition.build(ids))
       const { markup, diagnostics } = render(pageOf(theme, bands, ids), true)
 
       expect(diagnostics).toEqual([])
@@ -452,10 +513,16 @@ describe("what a band puts on a page", () => {
 
   it("gives the page one level-one heading and no other", () => {
     /**
-     * Nine bands assembled in order are one document outline, and the hero is
-     * the only band that opens one. A second `level: 1` further down is the
-     * defect a hand-built page acquires by copying a hero's heading into a
+     * The page sequence assembled in order is one document outline, and the
+     * hero is the only band that opens one. A second `level: 1` further down is
+     * the defect a hand-built page acquires by copying a hero's heading into a
      * section, and it is invisible in every palette.
+     *
+     * **This is the assertion that forced 0162.** It is made of the page and
+     * not of the catalogue, and the difference is now load-bearing: the
+     * phrasebook holds `hero` and `hero-split`, both of which open a document,
+     * and a catalogue that was also a page could not hold both. The test did
+     * not need changing to say that — it needed pointing at the right list.
      */
     const levelsIn = (node: LoomNode): readonly number[] => {
       if (node.kind === "text") return []
@@ -468,9 +535,22 @@ describe("what a band puts on a page", () => {
     }
 
     const ids = sequentialIdFactory()
-    const levels = STARTER_COMPOSITIONS.flatMap((composition) => levelsIn(composition.build(ids)))
+    const levels = PAGE_SEQUENCE.flatMap((composition) => levelsIn(composition.build(ids)))
 
     expect(levels.filter((level) => level === 1)).toHaveLength(1)
+  })
+
+  /**
+   * And the other half, which is the part a single list could not have said: a
+   * band that opens a document is fine in the phrasebook and is only a defect
+   * *on a page*. Two heroes each carrying one `level: 1` is exactly right.
+   */
+  it("lets the phrasebook hold two bands that each open a document", () => {
+    const ids = sequentialIdFactory()
+    const opens = (composition: Composition): boolean =>
+      JSON.stringify(composition.build(ids)).includes('"level":1')
+
+    expect(compositionsForPart("hero").filter(opens)).toHaveLength(2)
   })
 })
 

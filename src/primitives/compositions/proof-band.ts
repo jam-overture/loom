@@ -39,6 +39,7 @@ const CUSTOMERS = ["Northwind", "Kestrel", "Aperture Labs", "Meridian", "Halcyon
 
 export const proofBand: Composition = {
   id: "proof",
+  part: "proof",
   label: "Logo wall",
   promise: "A quiet row of six customer names under a single line of introduction.",
   rationale:

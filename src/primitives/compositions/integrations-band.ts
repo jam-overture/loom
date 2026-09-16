@@ -40,6 +40,7 @@ const TOOLS = ["GitHub", "Linear", "Figma", "Slack", "Notion", "Vercel", "Sentry
 
 export const integrationsBand: Composition = {
   id: "integrations",
+  part: "integrations",
   label: "Works with",
   promise: "Eight tools circling a mark in the middle, with the centre named.",
   rationale:
