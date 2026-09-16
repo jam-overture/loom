@@ -10,6 +10,7 @@ import {
   HOME,
   PUTTING_IT_BACK,
   SITE_ROUTES,
+  WHAT_READERS_DO,
   THE_RECORD,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
@@ -269,6 +270,7 @@ describe("the page itself", () => {
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
+      WHAT_READERS_DO,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

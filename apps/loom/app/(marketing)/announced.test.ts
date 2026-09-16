@@ -67,6 +67,7 @@ const PAGE_MODULES: Readonly<Record<string, () => Promise<PageModule>>> = {
   "/who-can-ask": () => import("./who-can-ask/page"),
   "/the-record": () => import("./the-record/page"),
   "/putting-it-back": () => import("./putting-it-back/page"),
+  "/what-readers-do": () => import("./what-readers-do/page"),
   "/when-it-goes-wrong": () => import("./when-it-goes-wrong/page"),
   "/what-you-run": () => import("./what-you-run/page"),
   "/your-components": () => import("./your-components/page"),

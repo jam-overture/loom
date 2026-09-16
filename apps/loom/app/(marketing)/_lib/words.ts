@@ -41,6 +41,35 @@ export const PROSE_PROPS: readonly string[] = [
    */
   "heading",
   "label",
+  /**
+   * The figure beside a meter's label — *nine of twelve*, *5 of 10*.
+   *
+   * Added 16 September with the readers page, which is nine meters and the one
+   * band on this site whose whole content is figures. Every one of them is copy
+   * a reader reads and none of it was scanned: the register could not see it,
+   * and neither could the check that no page prints a bare percentage, which is
+   * the assertion that exists because a rate without its denominator is the one
+   * number on this site that would flatter.
+   */
+  "readout",
+  /**
+   * The figure on a stat, which is the largest type on the front door.
+   *
+   * Added 16 September for the same reason as `readout` and it is the older
+   * omission of the two: *96*, *100+* and *4* have stood on the front door in
+   * the biggest characters on the site since the facts band was written, and
+   * nothing that reads this site's words could see any of them. `facts.test.ts`
+   * checks those three against the repository, which is why it never showed up
+   * — the numbers were right, and unreadable to every other check.
+   *
+   * **It scans one string that is not copy**, and the trade is deliberate:
+   * `loom.option`'s `value` is what a form submits rather than what a reader
+   * reads. Nothing on this site uses that primitive, an option's value is still
+   * a string somebody here wrote, and having it checked for jargon it should not
+   * contain is a far smaller cost than the two figures-only primitives staying
+   * invisible. `loom.meter`'s value is a number and is unaffected.
+   */
+  "value",
   "caption",
   "question",
   "answer",

@@ -70,7 +70,23 @@ const nameOf = (band: ElementNode): string | undefined => {
   return NAMED_TYPES[band.type] ?? written ?? headingOf(band)
 }
 
-type Band = { readonly id: string; readonly name: string }
+/**
+ * A band, as the two things anything outside this module wants to know about
+ * one: which band it is, and what a reader would call it.
+ *
+ * **`what` is here as of 16 September and it is the same string a reader signal
+ * carries.** A signal names a band by its id *and* by what kind of band it is,
+ * so anything minting one off this page needs both — and going back to the page
+ * for the second is a second walk that can disagree with the first. It is
+ * `what` rather than `type` because this type is read by page builders, and
+ * `type` is the word the machinery uses for it.
+ */
+export type Band = {
+  readonly id: string
+  readonly name: string
+  /** The kind of band it is, as the library registered it. */
+  readonly what: string
+}
 
 /** Every band of a page, in the order a reader meets them. */
 export const bandsOf = (page: LoomTree): readonly Band[] =>
@@ -79,7 +95,7 @@ export const bandsOf = (page: LoomTree): readonly Band[] =>
 
     const name = nameOf(child)
 
-    return name === undefined ? [] : [{ id: child.id, name }]
+    return name === undefined ? [] : [{ id: child.id, name, what: child.type }]
   })
 
 /** The outline as words, which is what the page prints when nothing has changed. */
