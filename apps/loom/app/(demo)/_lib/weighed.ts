@@ -154,3 +154,35 @@ export const weighedOf = (record: ChangeRecord): readonly WeighedAnswer[] | unde
   record.stakes === undefined || record.reversibility === undefined
     ? undefined
     : [damageAnswer(record.stakes), reversalAnswer(record.reversibility)]
+
+/**
+ * The same pair in one line, for a card a visitor has already read.
+ *
+ * The box above is the argument, and it is the *first* card's argument. By the
+ * fifth ask the rail was printing it five times — measured at 1280×900, a
+ * hundred and fifty pixels of panel per card with the same two questions on
+ * every one of them, in a rail 3,851px long against 857px of screen. A visitor
+ * scrolling that is not reading the weighing again; they are looking for the
+ * one line that says which ask this card is.
+ *
+ * So the pair folds to this, and the box is one click under it. **Nothing is
+ * removed** — `TheReasoning` puts the whole panel, the rule and the ceiling
+ * behind the summary this string is, which is the maintainer's standing
+ * direction for this surface applied to repetition rather than to vocabulary.
+ *
+ * **Not a third wording.** The level is `STAKES[…].label`, the same string the
+ * damage answer prints, and the clause is the portal's `reversibilityWord` —
+ * whose own note says the two clauses "read straight after a stakes label
+ * without a colon in sight", which is exactly the sentence wanted here and the
+ * reason this needed no new words. A summary that paraphrased its own panel is
+ * the drift this module exists to refuse, and `weighed.test.ts` asserts the
+ * brief and the open answers name the same level and the same direction.
+ *
+ * Absent on the same terms as the pair: an ask that never reached assessment
+ * has nothing to be brief about, and `TheReasoning` falls back to naming what
+ * is behind the arrow rather than claiming a verdict.
+ */
+export const weighedBrief = (record: ChangeRecord): string | undefined =>
+  record.stakes === undefined || record.reversibility === undefined
+    ? undefined
+    : `${STAKES[record.stakes.level].label}, and ${reversibilityWord(record.reversibility.reversible)}.`

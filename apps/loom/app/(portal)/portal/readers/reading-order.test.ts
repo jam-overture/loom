@@ -1,0 +1,104 @@
+import { describe, expect, it } from "vitest"
+
+import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
+
+import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
+
+/**
+ * The properties that separate this screen from every other one in the portal.
+ *
+ * The first is that it is the only screen here whose subject is not Loom. Every
+ * other one reports what the runtime did; this one reports what people did, and
+ * the runtime's vocabulary for that — `viewed`, `dwelled`, `activated`,
+ * `disclosed` — is exactly the kind of word the 18 August redirection exists to
+ * keep off a surface. A kind is a perfectly good name for an event and no name
+ * at all for a thing a person did.
+ *
+ * The second is that this screen is empty on every deployment that has not
+ * switched measurement on, which is all of them by default (0136). So the empty
+ * state is not an edge case here — it is the screen, for most readers, most of
+ * the time, and it is pinned as hard as the populated one.
+ *
+ * The third is that it takes nothing and proposes nothing. A number here is an
+ * argument for a person to make a change with, never a change; the same shape
+ * 0031 fixed for calibration, for the same reason.
+ */
+const source = screenSource(portalFile("portal", "readers", "page.tsx"))
+
+describe("the reader screen's reading order", () => {
+  it("names what the reader is looking at before it opens any technical record", () => {
+    const heading = source.indexOf("<h1")
+    const disclosure = source.indexOf("<TechnicalDetail")
+
+    expect(heading).toBeGreaterThan(-1)
+    expect(disclosure).toBeGreaterThan(heading)
+  })
+
+  /**
+   * A strip above the heading puts six destinations in front of a reader who
+   * has not been told which page they are on yet.
+   */
+  it("puts the heading before the strip of other views", () => {
+    expect(source.indexOf("<PageViews")).toBeGreaterThan(source.indexOf("<h1"))
+  })
+
+  /**
+   * Read from the runtime rather than written out, so a fifth kind — `completed`
+   * is approved and on its way — is inside this rule the day it exists rather
+   * than the day somebody remembers to add it here.
+   */
+  it("never prints the runtime's word for a kind of signal", () => {
+    for (const kind of READER_SIGNAL_KINDS) {
+      expect([kind, source.includes(`"${kind}"`)]).toEqual([kind, false])
+      expect([kind, source.includes(`>${kind}<`)]).toEqual([kind, false])
+    }
+  })
+
+  it("offers nothing to press, because a reading is not a control", () => {
+    expect(source).not.toContain("<form")
+    expect(source).not.toContain("<button")
+  })
+
+  /**
+   * The empty state is where a new person actually starts on this screen, and a
+   * dead end is the way it fails. `StateNotice` makes an action mandatory on the
+   * `empty` tone at the type level; what a type cannot check is that the action
+   * leads somewhere that teaches them how to end the state.
+   */
+  it("sends a reader with nothing to look at to the guide that would change that", () => {
+    expect(source).toContain('tone="empty"')
+    expect(source).toContain("/docs/the-runtime/what-your-readers-do")
+  })
+
+  /**
+   * Batches that have arrived and not been counted are a different state from a
+   * deployment nothing has ever reported to, and the two are indistinguishable
+   * without the second read. A refactor that dropped it would leave a reader
+   * hunting for a fault in a page that is working.
+   */
+  it("tells an uncounted window apart from a deployment nobody has visited", () => {
+    expect(source).toContain("portalReaderSignals.read")
+    expect(source).toContain("arriving")
+  })
+
+  /**
+   * The counters are the screen and the buffer is one sentence. A read of the
+   * counters that fails is reported as the screen failing; a read of the buffer
+   * that fails costs the sentence and nothing else, which is why one of them
+   * returns early and the other cannot.
+   */
+  it("fails the screen on the read that is the screen, and not on the one that is a footnote", () => {
+    expect(source).toContain("if (!counted.ok)")
+    expect(source).toContain("buffered.ok ?")
+    expect(source).not.toContain("if (!buffered.ok)")
+  })
+
+  it("says so rather than implying it when the counters will not outlive the process", () => {
+    expect(source).toContain("signalsAreDurable")
+  })
+
+  it("never reverses a row or a column to place something", () => {
+    expect(source).not.toContain("flex-row-reverse")
+    expect(source).not.toContain("flex-col-reverse")
+  })
+})
