@@ -48,10 +48,10 @@ describe("PageViews", () => {
     const out = screen.getByText("Every page →")
 
     expect(out.getAttribute("href")).toBe("/portal/trust")
-    expect(links(container)).toHaveLength(6)
+    expect(links(container)).toHaveLength(7)
   })
 
-  it("names itself, so the strip is not five unexplained links", () => {
+  it("names itself, so the strip is not six unexplained links", () => {
     render(<PageViews treeId={TREE} current="page" />)
 
     expect(screen.getByLabelText("Views of this page")).not.toBeNull()
@@ -60,7 +60,7 @@ describe("PageViews", () => {
   /**
    * Asserted as whole labels rather than by substring. A tab reading `trees` or
    * `calibration` is the runtime's vocabulary back on the surface, and a strip
-   * is the most repeated text in the portal — it appears on all five screens.
+   * is the most repeated text in the portal — it appears on all six screens.
    */
   it("asks a question a person would ask, on every tab", () => {
     const { container } = render(<PageViews treeId={TREE} current="page" />)
@@ -69,6 +69,7 @@ describe("PageViews", () => {
       "The page",
       screenName("/portal/activity"),
       screenName("/portal/history"),
+      "What did people do?",
       "Can you trust it?",
       "Does it add up?",
       "Every page →",

@@ -60,6 +60,7 @@ const SIZES = ["Just me", "2–10", "11–50", "More than 50"] as const
 
 export const contactBand: Composition = {
   id: "contact",
+  part: "contact",
   label: "Contact",
   promise: "A five-question form in two columns, with a submit button and a reply promise beneath it.",
   rationale:

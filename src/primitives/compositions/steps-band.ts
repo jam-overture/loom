@@ -62,6 +62,7 @@ const STEPS = [
 
 export const stepsBand: Composition = {
   id: "steps",
+  part: "steps",
   label: "How it works",
   promise: "Three numbered steps laid across the page, with a rail running between them.",
   rationale:

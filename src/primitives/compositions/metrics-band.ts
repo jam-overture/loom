@@ -38,6 +38,7 @@ const METRICS = [
 
 export const metricsBand: Composition = {
   id: "metrics",
+  part: "metrics",
   label: "Metrics",
   promise: "A full-width surface carrying four large figures with their labels.",
   rationale:

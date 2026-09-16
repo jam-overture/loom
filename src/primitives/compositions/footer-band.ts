@@ -80,6 +80,7 @@ const LEGAL = [
 
 export const footerBand: Composition = {
   id: "footer",
+  part: "footer",
   label: "Footer",
   promise: "Four columns of links with a wordmark beside them, over a legal line.",
   rationale:

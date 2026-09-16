@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type TreeId } from "../ids.js"
-import { SUBMIT_PROP_KEY } from "../reserved-props.js"
-import { formTree, sampleTree, type FormTree, type SampleTree } from "../testing/fixtures.js"
+import type { JsonObject } from "../json.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
+import {
+  boundTree,
+  formTree,
+  sampleTree,
+  type BoundTree,
+  type FormTree,
+  type SampleTree,
+} from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
@@ -435,5 +443,107 @@ describe("analyzeDelta on a change of destination", () => {
 
     expect(result.value.nestedTargets).toEqual([])
     expect(result.value.redirectedSubmissions).toHaveLength(1)
+  })
+})
+
+describe("analyzeDelta on a change of what is asked for", () => {
+  const analyzeBound = (build: (ids: BoundTree["ids"]) => TreeOperation[]) => {
+    const { tree, ids } = boundTree()
+    const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)))
+    if (!result.ok) throw new Error(result.error.code)
+
+    return { analysis: result.value, ids }
+  }
+
+  const reads = (source: string, params: JsonObject = {}) => ({
+    [DATA_PROP_KEY]: { items: { source, params } },
+  })
+
+  it("reports a configure that moves what a region reads", () => {
+    const { analysis, ids } = analyzeBound((ids) => [
+      { op: "configure", nodeId: ids.bound, set: reads("orders.mine"), unset: [] },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([
+      {
+        nodeId: ids.bound,
+        name: "items",
+        kind: "source",
+        from: "catalogue.services",
+        to: "orders.mine",
+      },
+    ])
+  })
+
+  /**
+   * The whole point of the factor: without it this delta is indistinguishable
+   * from any other prop tweak on an unprotected node.
+   */
+  it("is the only thing that separates it from an ordinary prop change", () => {
+    const { analysis } = analyzeBound((ids) => [
+      { op: "configure", nodeId: ids.bound, set: reads("orders.mine"), unset: [] },
+    ])
+
+    expect(analysis.configuredPropKeys).toEqual([DATA_PROP_KEY])
+    expect(analysis.removedNodeCount).toBe(0)
+    expect(analysis.insertedNodeCount).toBe(0)
+    expect(analysis.repointedBindings).toHaveLength(1)
+  })
+
+  it("reports a params move on one source", () => {
+    const { analysis, ids } = analyzeBound((ids) => [
+      {
+        op: "configure",
+        nodeId: ids.bound,
+        set: reads("catalogue.services", { limit: 6 }),
+        unset: [],
+      },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([
+      {
+        nodeId: ids.bound,
+        name: "items",
+        kind: "params",
+        from: "catalogue.services",
+        to: "catalogue.services",
+      },
+    ])
+  })
+
+  it("reports nothing for a region that gains a binding", () => {
+    const { analysis } = analyzeBound((ids) => [
+      { op: "configure", nodeId: ids.aside, set: reads("orders.mine"), unset: [] },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([])
+  })
+
+  it("reports nothing for an inserted node, however it binds", () => {
+    const arrival = buildElement(spare, {
+      type: "loom.card",
+      props: reads("orders.mine"),
+    })
+    const { analysis } = analyzeBound((ids) => [
+      { op: "insert", parentId: ids.page, index: 0, node: arrival },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([])
+  })
+
+  it("reports nothing for a region that loses its binding", () => {
+    const { analysis } = analyzeBound((ids) => [
+      { op: "configure", nodeId: ids.bound, set: {}, unset: [DATA_PROP_KEY] },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([])
+  })
+
+  it("reports nothing when the binding is left alone", () => {
+    const { analysis } = analyzeBound((ids) => [
+      { op: "configure", nodeId: ids.bound, set: { title: "Our services" }, unset: [] },
+    ])
+
+    expect(analysis.repointedBindings).toEqual([])
   })
 })

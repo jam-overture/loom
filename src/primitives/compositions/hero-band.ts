@@ -44,6 +44,7 @@ import type { Composition } from "./composition.js"
  */
 export const heroBand: Composition = {
   id: "hero",
+  part: "hero",
   label: "Hero",
   promise: "A full-height opening band: eyebrow, headline, a lead sentence and two buttons.",
   rationale:

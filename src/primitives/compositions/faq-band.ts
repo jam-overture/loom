@@ -69,6 +69,7 @@ const QUESTIONS: readonly Question[] = [
 
 export const faqBand: Composition = {
   id: "faq",
+  part: "faq",
   label: "FAQ",
   promise: "Five questions at a reading width, with the first one already open.",
   rationale:

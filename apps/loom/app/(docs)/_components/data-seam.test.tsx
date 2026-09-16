@@ -133,6 +133,24 @@ describe("who may repoint a binding", () => {
     )
   })
 
+  /**
+   * The block was a binary until 0163 made this comparison produce a refusal,
+   * and it read a refused change as "held for a person" — the opposite of what
+   * the prose beside it says. This is the check that a fourth kind, or a third
+   * one arriving again, cannot be rendered as its opposite.
+   */
+  it("reads each verdict as what it is, refusal included", async () => {
+    const verdicts = await produceRepointing()
+
+    render(await WhoMayRepointIt())
+
+    const printed = document.body.textContent ?? ""
+
+    expect(verdicts.map((verdict) => verdict.kind)).toContain("rejected")
+    expect(printed).toContain("Refused outright")
+    expect(printed).not.toContain("Held for a person and")
+  })
+
   it("names the reason code beside each of them", async () => {
     const verdicts = await produceRepointing()
 

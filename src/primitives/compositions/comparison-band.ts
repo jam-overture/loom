@@ -71,6 +71,7 @@ const COLUMNS = ["Overture", "Hand-rolled", "The incumbent"] as const
 
 export const comparisonBand: Composition = {
   id: "comparison",
+  part: "comparison",
   label: "Comparison",
   promise: "A five-row comparison table against two alternatives, with the first column steered.",
   rationale:

@@ -62,6 +62,7 @@ const POSTS = [
 
 export const articlesBand: Composition = {
   id: "articles",
+  part: "articles",
   label: "Writing",
   promise: "Four recent posts in a grid, with the newest running across the top.",
   rationale:
