@@ -58,7 +58,7 @@ measured rather than argued — restoring the old shape gives
 document. The test was not in the way; it was the instrument saying the two jobs
 had come apart.
 
-[0161](../decisions/0161-the-catalogue-is-a-phrasebook-and-the-page-is-one-derived-path-through-it.md)
+[0162](../decisions/0162-the-catalogue-is-a-phrasebook-and-the-page-is-one-path-through-it.md)
 splits them:
 
 | | what it is |
@@ -81,7 +81,7 @@ names, so the next fifty designs cost the published surface nothing.
 
 ## The rule that keeps this from becoming a dumping ground
 
-This is the half of 0161 I most want looked at, because it is what stops a
+This is the half of 0162 I most want looked at, because it is what stops a
 phrasebook turning into shades of one.
 
 > **A design earns a catalogue entry only by building a different set of nodes.**

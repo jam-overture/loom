@@ -1,8 +1,18 @@
-# 0161. The catalogue is a phrasebook of designs, and the page is one derived path through it
+# 0162. The catalogue is a phrasebook of designs, and the page is one derived path through it
 
 **Status:** Accepted
 **Date:** 2026-09-16
 **Section:** §4b
+
+> **Renumbered on 2026-09-16**, from 0161, when the branch that carried it
+> (#313) was merged. `main` had meanwhile accepted a different 0161 — *a public
+> page writes to one application endpoint, and is counted by a key that outlives
+> nothing* (#312) — and two records sharing a number is fatal (0097). The record
+> that was already on `main` keeps the number. Nothing in this record changed
+> but its number; 0162 was the next number free on `main` and on every open
+> branch, 0163 being claimed by #314. References on this branch were updated
+> with it, and the note below is the reasoning as it stood when the record was
+> written.
 
 > **Why this number.** The highest record on `main` is `0160`, and `0158` and
 > `0159` are both taken. Nothing is skipped here.

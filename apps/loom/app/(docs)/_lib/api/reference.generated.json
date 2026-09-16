@@ -6854,7 +6854,7 @@
               "kind": "value",
               "signature": "const READER_SIGNALS_EVENT = \"loom:signals\"",
               "truncated": false,
-              "summary": "The DOM event a batch is dispatched as, on the root element. It bubbles."
+              "summary": ""
             },
             {
               "name": "VisibilityObserver",
@@ -7020,6 +7020,48 @@
           ]
         },
         {
+          "module": "signals/deliver",
+          "title": "Deliver",
+          "summary": "Getting a batch off the page.",
+          "symbols": [
+            {
+              "name": "DEFAULT_READER_SIGNAL_PATH",
+              "kind": "value",
+              "signature": "const DEFAULT_READER_SIGNAL_PATH = \"/api/reader-signals\"",
+              "truncated": false,
+              "summary": "Where a delivery goes when the host has no opinion."
+            },
+            {
+              "name": "SendBeacon",
+              "kind": "type",
+              "signature": "type SendBeacon = (url: string, body: Blob) => boolean;",
+              "truncated": false,
+              "summary": "`navigator.sendBeacon`, narrowed to what this uses. `false` means it would not take it."
+            },
+            {
+              "name": "PostBatch",
+              "kind": "type",
+              "signature": "type PostBatch = (url: string, body: string) => void;",
+              "truncated": false,
+              "summary": "The fallback. Called only when a beacon was unavailable or refused the batch."
+            },
+            {
+              "name": "DeliverOptions",
+              "kind": "type",
+              "signature": "type DeliverOptions = {\n    /** Where to post. {@link DEFAULT_READER_SIGNAL_PATH} when absent. */\n    readonly url?: string;\n    /** The browser's, when absent. A test passes its own. */\n    readonly beacon?: SendBeacon | null;\n    /** `fetch` with `keepalive`, when absent. */\n    readonly post?: PostBatch;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "deliverReaderSignals",
+              "kind": "function",
+              "signature": "const deliverReaderSignals: (options?: DeliverOptions) => ((batch: ReaderSignalBatch) => void)",
+              "truncated": false,
+              "summary": "A `send` for `broadcastReaderSignals` that posts each batch."
+            }
+          ]
+        },
+        {
           "module": "signals/fold",
           "title": "Fold",
           "summary": "Batches folded into what a node was read like: time on screen, whether it was reached, what readers did in it.",
@@ -7107,6 +7149,76 @@
               "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown) => Promise<Result<IngestOutcome, IngestError>>",
               "truncated": false,
               "summary": "Parse a delivery and keep it."
+            }
+          ]
+        },
+        {
+          "module": "signals/intake",
+          "title": "Intake",
+          "summary": "Who may post a batch, and how often.",
+          "symbols": [
+            {
+              "name": "CROWDED_SUBJECT",
+              "kind": "value",
+              "signature": "const CROWDED_SUBJECT = \"crowded\"",
+              "truncated": false,
+              "summary": "A subject the gate could not make room for."
+            },
+            {
+              "name": "IntakePolicy",
+              "kind": "type",
+              "signature": "type IntakePolicy = {\n    /** The largest delivery the door will read, in bytes. */\n    readonly maxBytes: number;\n    /** Deliveries one subject may make inside a window. */\n    readonly deliveries: number;\n    readonly windowMs: number;\n    /** How many subjects the counter distinguishes before {@link CROWDED_SUBJECT}. */\n    readonly subjects: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "DEFAULT_INTAKE_POLICY",
+              "kind": "value",
+              "signature": "const DEFAULT_INTAKE_POLICY: IntakePolicy",
+              "truncated": false,
+              "summary": "`sendBeacon` is specified to refuse a body over 64 KB, so a delivery larger than that did not come from a beacon — which makes the ceiling a statement about the sender rather than a number somebody liked. `fetch` has no such limit and the fallback path is held to the same one deliberately."
+            },
+            {
+              "name": "IntakeCount",
+              "kind": "type",
+              "signature": "type IntakeCount = {\n    readonly deliveries: number;\n    readonly windowStartedAt: number;\n};",
+              "truncated": false,
+              "summary": "What the gate remembers about one subject: a fixed window and a count inside it. Two numbers and no identity, for `AttemptRecord`'s reason."
+            },
+            {
+              "name": "IntakeVerdict",
+              "kind": "type",
+              "signature": "type IntakeVerdict = {\n    readonly code: \"admitted\";\n    readonly count: IntakeCount;\n} | {\n    readonly code: \"too-large\";\n    readonly count: IntakeCount;\n    readonly limit: number;\n    readonly given: number;\n} | {\n    readonly code: \"too-often\";\n    readonly limit: number;\n    readonly retryAfterMs: number;\n};",
+              "truncated": false,
+              "summary": "`too-large` carries the count as `admitted` does, because it spent one: a caller whose body was refused has still had their delivery read far enough to refuse it. `too-often` carries none — the count that refused them is already what there is to remember."
+            },
+            {
+              "name": "describeIntakeVerdict",
+              "kind": "function",
+              "signature": "const describeIntakeVerdict: (verdict: IntakeVerdict) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "admit",
+              "kind": "function",
+              "signature": "const admit: (count: IntakeCount | null, bytes: number, now: number, policy: IntakePolicy) => IntakeVerdict",
+              "truncated": false,
+              "summary": "Whether this delivery is allowed, given what the subject has already sent."
+            },
+            {
+              "name": "IntakeGate",
+              "kind": "type",
+              "signature": "type IntakeGate = {\n    /**\n     * The policy this gate counts by.\n     *\n     * Carried on the gate rather than left beside it, because a caller holding\n     * both had two copies that could disagree — and the one that decides is\n     * whichever the gate was built with, silently. A door has one policy.\n     */\n    readonly policy: IntakePolicy;\n    readonly admit: (subject: string, bytes: number, now: number) => IntakeVerdict;\n    /** How many subjects are being counted. For a status endpoint, not for a decision. */\n    readonly subjects: () => number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "createIntakeGate",
+              "kind": "function",
+              "signature": "const createIntakeGate: (policy?: IntakePolicy) => IntakeGate",
+              "truncated": false,
+              "summary": "The counter that `admit` decides against."
             }
           ]
         },
@@ -7463,7 +7575,7 @@
               "kind": "value",
               "signature": "const READER_SIGNALS_EVENT = \"loom:signals\"",
               "truncated": false,
-              "summary": "The DOM event a batch is dispatched as, on the root element. It bubbles."
+              "summary": ""
             },
             {
               "name": "VisibilityObserver",
@@ -7520,6 +7632,48 @@
               "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
               "truncated": false,
               "summary": "Start broadcasting reader signals from the page under `root`."
+            }
+          ]
+        },
+        {
+          "module": "signals/deliver",
+          "title": "Deliver",
+          "summary": "Getting a batch off the page.",
+          "symbols": [
+            {
+              "name": "DEFAULT_READER_SIGNAL_PATH",
+              "kind": "value",
+              "signature": "const DEFAULT_READER_SIGNAL_PATH = \"/api/reader-signals\"",
+              "truncated": false,
+              "summary": "Where a delivery goes when the host has no opinion."
+            },
+            {
+              "name": "SendBeacon",
+              "kind": "type",
+              "signature": "type SendBeacon = (url: string, body: Blob) => boolean;",
+              "truncated": false,
+              "summary": "`navigator.sendBeacon`, narrowed to what this uses. `false` means it would not take it."
+            },
+            {
+              "name": "PostBatch",
+              "kind": "type",
+              "signature": "type PostBatch = (url: string, body: string) => void;",
+              "truncated": false,
+              "summary": "The fallback. Called only when a beacon was unavailable or refused the batch."
+            },
+            {
+              "name": "DeliverOptions",
+              "kind": "type",
+              "signature": "type DeliverOptions = {\n    /** Where to post. {@link DEFAULT_READER_SIGNAL_PATH} when absent. */\n    readonly url?: string;\n    /** The browser's, when absent. A test passes its own. */\n    readonly beacon?: SendBeacon | null;\n    /** `fetch` with `keepalive`, when absent. */\n    readonly post?: PostBatch;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "deliverReaderSignals",
+              "kind": "function",
+              "signature": "const deliverReaderSignals: (options?: DeliverOptions) => ((batch: ReaderSignalBatch) => void)",
+              "truncated": false,
+              "summary": "A `send` for `broadcastReaderSignals` that posts each batch."
             }
           ]
         }

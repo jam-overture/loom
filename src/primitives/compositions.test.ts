@@ -274,7 +274,7 @@ describe("what a band renders", () => {
    * page is what the screenshots in the report are for.
    *
    * **This assertion used to be made of `STARTER_COMPOSITIONS`**, and moving it
-   * is the whole of what 0161 changed. The catalogue is now a phrasebook of
+   * is the whole of what 0162 changed. The catalogue is now a phrasebook of
    * twenty-three designs including two heroes, and two heroes are not a page —
    * which the test below about level-one headings says louder than this one.
    */
@@ -518,7 +518,7 @@ describe("what a band puts on a page", () => {
      * the defect a hand-built page acquires by copying a hero's heading into a
      * section, and it is invisible in every palette.
      *
-     * **This is the assertion that forced 0161.** It is made of the page and
+     * **This is the assertion that forced 0162.** It is made of the page and
      * not of the catalogue, and the difference is now load-bearing: the
      * phrasebook holds `hero` and `hero-split`, both of which open a document,
      * and a catalogue that was also a page could not hold both. The test did

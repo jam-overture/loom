@@ -20,12 +20,12 @@ import { pricingMatrixBand } from "./compositions/pricing-matrix-band.js"
 import { testimonialsWallBand } from "./compositions/testimonials-wall-band.js"
 
 /**
- * The four designs 0161 added, and one of the canonicals they are alternates
+ * The four designs 0162 added, and one of the canonicals they are alternates
  * *to*, so the photograph shows the thing the record is actually about.
  *
  * The choice of which canonical to include is the whole design of this
  * specimen. A shot of four new bands alone proves each one renders; it says
- * nothing about the claim 0161 rests on, which is that a second design of a
+ * nothing about the claim 0162 rests on, which is that a second design of a
  * part is a **different set of nodes** rather than the same band with different
  * props. `features` and `features-alternating` side by side is that claim in
  * one frame — six tiles above three argued rows — and it is the pair a reader
