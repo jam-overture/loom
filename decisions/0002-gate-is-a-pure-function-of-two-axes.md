@@ -14,6 +14,12 @@
 > anything here. The number is now held against `ESCALATION_LADDER` by
 > `src/record-claims.test.ts`, so this sentence cannot go stale again.
 
+> **Amended 2026-09-16**, under the same rule, and by the check the amendment
+> above installed rather than by anybody noticing. The count read *seven* and the
+> ladder has eight rungs: [0163](0163-a-binding-is-weighed-like-a-destination.md)
+> adds `repointed-binding` beside `redirected-submission`, for the reason 0071
+> gave about the other end of the same pipe. Nothing here is reversed.
+
 ## Context
 
 Something has to decide whether a proposed change may be applied, and that
@@ -38,7 +44,7 @@ mark the change irreversible, and vice versa. Stakes are recorded as named
 factors rather than collapsed to a number, so a disposition can say "removes 14
 nodes and destroys `commerce.cart`" instead of "high".
 
-The decision is seven ordered rules, first match wins; the order encodes
+The decision is eight ordered rules, first match wins; the order encodes
 precedence. Irreversibility is escalated **before** the stakes ceiling is
 consulted, so a small permanent change is never quietly auto-applied.
 

@@ -160,17 +160,21 @@ const judge = async (
 const OUT_OF_THE_BOX: GatePolicy = defaultGatePolicy
 
 /**
- * The same policy, having said one thing: that the questions this page asks are
- * not for an instruction to change on its own.
+ * The same policy, having said one thing: that damage this size is not something
+ * this deployment offers at all.
  *
- * `loom:data` is an ordinary prop key to `protectedPropKeys`, which is the point
- * — the knob that exists for a primitive's own props reaches the runtime's keys
- * too, and a deployment that cares does not need a new setting.
+ * Until 0163 the second column here added `loom:data` to `protectedPropKeys`,
+ * because the runtime weighed a repointed binding as an ordinary prop change and
+ * that line was the only thing between one and a silent apply. The runtime now
+ * weighs it itself, so that column compared two policies that agree. What is
+ * worth showing beside the free one instead is the floor, which stays sovereign
+ * over the escalation: a host that has called this much damage refusable gets a
+ * refusal rather than a question.
  */
-const GUARDED: GatePolicy = {
+const REFUSES: GatePolicy = {
   ...defaultGatePolicy,
-  policyId: "loom-docs-guards-its-questions",
-  protectedPropKeys: [...defaultGatePolicy.protectedPropKeys, DATA_PROP_KEY],
+  policyId: "loom-docs-refuses-this-much",
+  refusalFloor: "high",
 }
 
 /**
@@ -179,16 +183,17 @@ const GUARDED: GatePolicy = {
  * The expected disposition of each is asserted inside `judge`, so a change to
  * the Gate that made either of these untrue stops the build rather than leaving
  * the page printing a confident lie about what a deployment is protected from.
+ * That is what caught this pair when 0163 landed.
  */
 export const produceRepointing = async (): Promise<readonly RepointVerdict[]> => [
   {
     label: "The policy you get for free",
-    difference: "protectedPropKeys is empty — the runtime's own default.",
-    ...(await judge("repointfree", OUT_OF_THE_BOX, "accepted")),
+    difference: "Nothing said about your data — the runtime's own default.",
+    ...(await judge("repointfree", OUT_OF_THE_BOX, "requires-confirmation")),
   },
   {
     label: "One line added",
-    difference: `protectedPropKeys names ${DATA_PROP_KEY}.`,
-    ...(await judge("repointguarded", GUARDED, "requires-confirmation")),
+    difference: 'refusalFloor is "high".',
+    ...(await judge("repointrefuses", REFUSES, "rejected")),
   },
 ]

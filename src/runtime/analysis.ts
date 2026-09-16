@@ -15,6 +15,7 @@ import {
   type NestedTarget,
 } from "./nesting.js"
 import { redirectedSubmissionsBetween, type RedirectedSubmission } from "./redirection.js"
+import { repointedBindingsBetween, type RepointedBinding } from "./repointing.js"
 
 /**
  * Facts about what a delta does, extracted before anyone judges it.
@@ -93,6 +94,17 @@ export type ChangeAnalysis = {
    * loses a destination is not here; `redirection.ts` says why.
    */
   readonly redirectedSubmissions: readonly RedirectedSubmission[]
+  /**
+   * Bindings this change points somewhere else — a node that asked one question
+   * under a name before and asks a different one under that name after.
+   *
+   * The other end of the pipe from `redirectedSubmissions`, measured the same
+   * way and needing host vocabulary just as little: `loom:data` is the runtime's
+   * own key. A node that gains or loses a binding is not here; `repointing.ts`
+   * says why, and why a params change counts where a submission has no params
+   * to move.
+   */
+  readonly repointedBindings: readonly RepointedBinding[]
   /**
    * Distance from the root of the shallowest touched position, where the root
    * is 0. A change near the root restructures the page; a change deep in a leaf
@@ -277,6 +289,7 @@ export const analyzeDelta = (
     configuredPropKeys: Array.from(tally.propKeys),
     nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
     redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
+    repointedBindings: repointedBindingsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,
   })
 }

@@ -116,25 +116,25 @@ describe("the counts this page writes out", () => {
 describe("what the page says the runtime decided", () => {
   /**
    * Both halves of the repointing section are claims about a verdict. The page
-   * says the free policy applies the change and the guarded one sends it to a
-   * person, and the producer asserts the dispositions themselves — this is the
-   * check that the *prose* still describes the columns beside it.
+   * says the free policy sends the change to a person and the lowered floor
+   * refuses it outright, and the producer asserts the dispositions themselves —
+   * this is the check that the *prose* still describes the columns beside it.
    */
   it("describes each verdict the way the Gate gave it", async () => {
-    const [free, guarded] = await produceRepointing()
+    const [free, refuses] = await produceRepointing()
 
-    expect(free?.kind).toBe("accepted")
-    expect(guarded?.kind).toBe("requires-confirmation")
+    expect(free?.kind).toBe("requires-confirmation")
+    expect(refuses?.kind).toBe("rejected")
 
-    expect(flowed).toContain("the Gate applies it")
-    expect(flowed).toContain("every change to one goes to a person")
+    expect(flowed).toContain("the Gate still sends the change to a person")
+    expect(flowed).toContain("gets a refusal rather than a question")
   })
 
-  it("prints the line it tells a reader to add", async () => {
-    const [, guarded] = await produceRepointing()
+  it("prints the line that produced the second column", async () => {
+    const [, refuses] = await produceRepointing()
 
-    expect(guarded?.detail).toContain("loom:data")
-    expect(page).toContain('protectedPropKeys: ["loom:data"],')
+    expect(refuses?.reasonCode).toBe("stakes-at-refusal-floor")
+    expect(page).toContain('refusalFloor: "high",')
   })
 
   /**

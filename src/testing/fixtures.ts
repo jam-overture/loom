@@ -1,5 +1,6 @@
 import { sequentialIdFactory, type NodeId } from "../ids.js"
-import { SUBMIT_PROP_KEY } from "../reserved-props.js"
+import type { JsonObject } from "../json.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
@@ -90,5 +91,44 @@ export const formTree = (to = "newsletter.subscribe"): FormTree => {
   return {
     tree: createTree(page, idFactory),
     ids: { page: page.id, form: form.id, aside: aside.id },
+  }
+}
+
+export type BoundTree = {
+  readonly tree: LoomTree
+  readonly ids: {
+    readonly page: NodeId
+    readonly bound: NodeId
+    /** A sibling that asks nothing, so a test can put a binding onto one. */
+    readonly aside: NodeId
+  }
+}
+
+/**
+ * A page whose card already reads from somewhere. `formTree`'s twin at the other
+ * end of the pipe, separate from both for the reason that one gives: every count
+ * in the stakes and analysis suites is asserted against an exact tree size, and
+ * a fixture that grows makes unrelated tests wrong.
+ *
+ * Internal, unlike `formTree`. A published entry point is a promise (see
+ * `testing/index.ts`), and nothing outside this package has asked for this one.
+ */
+export const boundTree = (source = "catalogue.services", params: JsonObject = {}): BoundTree => {
+  const idFactory = sequentialIdFactory("bound")
+
+  const bound = buildElement(idFactory, {
+    type: "loom.card",
+    props: { [DATA_PROP_KEY]: { items: { source, params } } },
+  })
+  const aside = buildElement(idFactory, { type: "loom.card" })
+  const page = buildElement(idFactory, {
+    type: "loom.page",
+    props: { title: "Services" },
+    children: [bound, aside],
+  })
+
+  return {
+    tree: createTree(page, idFactory),
+    ids: { page: page.id, bound: bound.id, aside: aside.id },
   }
 }

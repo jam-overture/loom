@@ -267,6 +267,7 @@ export const MISS_CAUSE_LABELS: Readonly<Record<MissCause, string>> = {
   irreversible: "sure about a change that could not be undone",
   "discards-later-work": "sure about a change that would have thrown away later work",
   "redirected-submission": "sure about a change that would have sent a form somewhere else",
+  "repointed-binding": "sure about a change that would have shown different data than before",
   "stakes-above-ceiling": "sure about a change too big to apply without asking",
   "confidence-below-minimum": "sure, and still under the bar it had to clear",
   "within-policy": "turned down with nothing in your rules against it",
@@ -296,6 +297,8 @@ export const MISS_CAUSE_NOTES: Readonly<Record<MissCause, string>> = {
     "These would have written over work that landed after the AI read the page. It was sure about a page that had already moved on.",
   "redirected-submission":
     "These would have moved where a form sends what people type. Both ends were registered, so nothing left your deployment — what the AI was sure about is that the next visitor's message should arrive somewhere else.",
+  "repointed-binding":
+    "These would have moved which of your data a region of the page reads. Both sources were registered, so nothing was invented — what the AI was sure about is that the next visitor should see something else of yours.",
   "stakes-above-ceiling":
     "Size, not correctness. These may well have been right — your rules decline to apply changes this large without a person, whatever the AI thinks.",
   "confidence-below-minimum":

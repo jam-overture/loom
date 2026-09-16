@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory } from "../ids.js"
 import { buildProposal } from "../testing/doubles.js"
-import { formTree, sampleTree, type FormTree, type SampleTree } from "../testing/fixtures.js"
+import {
+  boundTree,
+  formTree,
+  sampleTree,
+  type BoundTree,
+  type FormTree,
+  type SampleTree,
+} from "../testing/fixtures.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 
 import { assessChange, type ChangeAssessment } from "./assessment.js"
@@ -482,6 +489,141 @@ describe("a change of destination", () => {
 })
 
 /**
+ * The same rule at the other end of the same pipe: a binding decides which of a
+ * host's data reaches a public page, so moving one is held for a person for
+ * every reason moving a destination is (0163).
+ */
+describe("a change of what is asked for", () => {
+  type BoundScenario = {
+    readonly policy?: GatePolicy
+    readonly origin?: IntentOrigin
+    readonly build: (ids: BoundTree["ids"]) => TreeOperation[]
+  }
+
+  const decideOnBinding = (scenario: BoundScenario) => {
+    const { tree, ids } = boundTree()
+    const policy = scenario.policy ?? defaultGatePolicy
+
+    const proposal = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: scenario.build(ids),
+      },
+      ...(scenario.origin ? { origin: scenario.origin } : {}),
+    })
+
+    const assessed = assessChange(tree, proposal, policy, spare.deltaId())
+    if (!assessed.ok) throw new Error(assessed.error.code)
+
+    return gate(assessed.value, policy)
+  }
+
+  const rebind = (ids: BoundTree["ids"]): TreeOperation[] => [
+    {
+      op: "configure",
+      nodeId: ids.bound,
+      set: { "loom:data": { items: { source: "orders.mine", params: {} } } },
+      unset: [],
+    },
+  ]
+
+  it("holds a change that moves what a region reads, and names both ends", () => {
+    const disposition = decideOnBinding({ build: rebind })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("repointed-binding")
+    expect(disposition.reason.detail).toContain("catalogue.services")
+    expect(disposition.reason.detail).toContain("orders.mine")
+    expect(disposition.stakes).toBe("high")
+  })
+
+  it("holds it for an origin whose ceiling would otherwise allow it", () => {
+    const disposition = decideOnBinding({ build: rebind, origin: "developer" })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("repointed-binding")
+  })
+
+  it("holds it for a policy that trusts every origin completely", () => {
+    const trusting = gatePolicySchema.parse({
+      autoApplyCeiling: { developer: "critical", "user-instruction": "critical" },
+    })
+
+    expect(decideOnBinding({ build: rebind, policy: trusting, origin: "developer" }).kind).toBe(
+      "requires-confirmation"
+    )
+  })
+
+  /** The floor stays sovereign, exactly as it does for a moved destination. */
+  it("refuses rather than holds when the host's floor reaches it", () => {
+    const strict = gatePolicySchema.parse({ refusalFloor: "high" })
+    const disposition = decideOnBinding({ build: rebind, policy: strict })
+
+    expect(disposition.kind).toBe("rejected")
+    expect(disposition.reason.code).toBe("stakes-at-refusal-floor")
+  })
+
+  /**
+   * The case the finding was filed about: before this rule, the workaround was
+   * for a host to put `loom:data` in `protectedPropKeys`, which no default
+   * deployment does. It still works, and it is no longer the only thing between
+   * a repointed binding and a silent apply.
+   */
+  it("holds it without the host protecting the prop key, which is the point", () => {
+    const silent = gatePolicySchema.parse({})
+    const disposition = decideOnBinding({ build: rebind, policy: silent })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("repointed-binding")
+  })
+
+  it("holds a change that asks the same source for something else", () => {
+    const disposition = decideOnBinding({
+      build: (ids) => [
+        {
+          op: "configure",
+          nodeId: ids.bound,
+          set: { "loom:data": { items: { source: "catalogue.services", params: { limit: 6 } } } },
+          unset: [],
+        },
+      ],
+    })
+
+    expect(disposition.kind).toBe("requires-confirmation")
+    expect(disposition.reason.code).toBe("repointed-binding")
+    expect(disposition.reason.detail).toContain("for something else")
+  })
+
+  it("accepts a region that gains a binding, which shows something new and moves nothing", () => {
+    const disposition = decideOnBinding({
+      build: (ids) => [
+        {
+          op: "configure",
+          nodeId: ids.aside,
+          set: { "loom:data": { items: { source: "orders.mine", params: {} } } },
+          unset: [],
+        },
+      ],
+    })
+
+    expect(disposition.kind).toBe("accepted")
+  })
+
+  it("leaves a change that touches no binding exactly where it was", () => {
+    const disposition = decideOnBinding({
+      build: (ids) => [
+        { op: "configure", nodeId: ids.bound, set: { title: "Our services" }, unset: [] },
+      ],
+    })
+
+    expect(disposition.kind).toBe("accepted")
+  })
+})
+
+/**
  * The ladder as a published list, which is what four surfaces describe in prose.
  *
  * A record states how many rungs there are, a lesson teaches them in order, a
@@ -498,6 +640,7 @@ describe("the escalation ladder, published", () => {
       "irreversible",
       "discards-later-work",
       "redirected-submission",
+      "repointed-binding",
       "stakes-above-ceiling",
       "confidence-below-minimum",
     ])
