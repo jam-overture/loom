@@ -24068,6 +24068,102 @@ correlated inside one page view** by an opaque key that never persists. A kind
 carrying content, a visitor id, or a tree prop that turns measurement on are all
 supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
+## 2026-09-15 — the capture half has no mouth: nothing in the deployment receives a batch, so step 4's counters can never be anything but empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— found by building step 4 against it
+
+Step 3 of [`docs/signals.md`](docs/signals.md) landed on `main` in #295:
+`ingestReaderSignals`, a `ReaderSignalJournal` and a `ReaderTallyStore` with two
+implementations each, `rollUp`, and the fold module. Every piece of it is real
+and this lane has now built the portal view on top of it.
+
+**Nothing connects it to the outside.** `ingestReaderSignals` is called by its
+own test and by nothing else in this repository:
+
+```
+$ grep -rn "ingestReaderSignals" apps/ prototypes/ tools/
+(no matches)
+```
+
+There is no route handler anywhere in `apps/loom/app` that a published page can
+POST a batch to, and nothing anywhere calls `rollUp` on the window a journal
+holds. So on a real deployment the chain is: a page broadcasts → the batch has
+nowhere to go → the journal stays empty → no rollup runs → the tally store stays
+empty → `/portal/readers` shows its empty state, correctly and for ever.
+
+**This is not a defect in step 3 and it is not in this lane's reach.** Step 3's
+text scopes exactly what it delivered, and the two missing pieces are both
+application shell rather than portal:
+
+- **An endpoint.** Something a `broadcastReaderSignals` call can be pointed at,
+  which parses with `parseReaderSignalBatch`, calls `ingestReaderSignals`, and
+  says nothing back. It is a public route — the pages that post to it are
+  public — so it is the one piece of this whose shape is a security question as
+  well as a plumbing one: a rate limit, a size cap, and the fact that
+  `MAX_BATCHES_PER_DELIVERY` already exists suggests the runtime was written
+  expecting one.
+- **Something that runs the rollup.** `rollUp` is pure and the tally store's
+  `apply` is atomic; what is absent is the thing that reads a window and calls
+  them. `src/telemetry/retention.ts` and `apps/loom/scripts/telemetry-prune.ts`
+  are the shape that already exists for the other subsystem's equivalent.
+
+**What it costs until then.** The portal view is complete, tested and honest —
+its empty state distinguishes *nothing has arrived* from *something arrived and
+has not been counted*, and tells a reader how to make a page report back. What
+it cannot do is be non-empty, on any deployment, including the one the
+maintainer opens. The commercial argument in `docs/signals.md` — *"a deployment
+that can see, app by app, which bands readers reach has a reason to open the
+portal every day"* — is one route handler and one scheduled fold away, and not a
+step closer than that.
+
+**Not built here**, because an ingestion endpoint is the application shell's and
+a rollup runner is the framework's, and because a public write path added from
+the lane that owns the read path is exactly the boundary 0018 draws.
+
+## 2026-09-15 — the populated state of a portal screen can be photographed without staging any markup, and was
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe worth keeping, filed against the standing finding of 13 September
+
+13 September filed that *the portal's three most important screens cannot be
+photographed, because a healthy deployment never reaches their important state*,
+and worked around it by rendering the component from that commit into the live
+screen. That is honest and it requires a paragraph of explanation and the
+maintainer's trust.
+
+`/portal/readers` is the fourth screen with the same shape and the sharpest case
+yet — the finding above means it is empty on **every** deployment, not merely on
+a healthy one — and this run photographed its populated state without staging any
+markup at all:
+
+```
+NODE_OPTIONS="--import file:///tmp/shot/preload.mjs" next start
+```
+
+where the preload builds a `memoryReaderTallyStore()`, `apply`s a rollup to it,
+and assigns it to `globalThis[Symbol.for("loom.portal.readerTallies")]` before
+the application's own module memoises one. `_lib/reader-signals.ts` picks it up
+through the same `??=` carrier every other store in this portal uses.
+
+**What that buys over the 13 September technique.** The shipped page code runs:
+the real read, the real grouping, the real naming out of the served tree, the
+real Next render, the real shell and stylesheet. Nothing is injected into the
+DOM and no component is rendered out of context. The only fiction is *who put
+the counters there* — a script rather than a reader — which is precisely the
+fiction a fixture is.
+
+**Why it generalises.** Every store in this portal is memoised on a
+`Symbol.for` carrier for the serverless reasons `store.ts` sets out, and that
+same carrier is a supported seam from outside the process. `/portal/checkup`'s
+red path is reachable the same way: the tree store's carrier, with a snapshot
+that disagrees with its own log.
+
+**Why it is not the answer to the standing finding.** It photographs a state;
+it does not make one reachable. A person evaluating Loom still cannot click to
+any of these screens and see them populated, and that is what 13 September asked
+for. This is a better tool for making the report, not a substitute for a
+deployment that can show its own interesting states.
 ## 2026-09-15 — a form can ask for nine kinds of answer and not for a file, and a target cannot say so either
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
