@@ -54,6 +54,7 @@ export type RuleId =
   | "cannot-undo"
   | "writes-over-work"
   | "form-destination"
+  | "which-data-a-page-shows"
   | "how-risk-is-measured"
 
 /** One line of the technical record: the field's own name, and what it is set to. */
@@ -255,6 +256,16 @@ export const rulesOf = (policy: GatePolicy): readonly PlainRule[] => [
     rows: [],
     settings: [],
     code: "redirected-submission",
+  },
+  {
+    id: "which-data-a-page-shows",
+    title: "Changes to which of your data a page shows",
+    reading:
+      "If a change would point a part of a page at different data of yours than it showed before, a person is asked first. The other end of the rule above it, and on always for the same reason: which of your data comes out should not depend on who asked for it to change. Changing what a part asks for counts as well as where it asks — showing a different field is a different page, however small the edit looks.",
+    outcome: "requires-confirmation",
+    rows: [],
+    settings: [],
+    code: "repointed-binding",
   },
   {
     id: "how-risk-is-measured",

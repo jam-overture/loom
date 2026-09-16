@@ -1,0 +1,367 @@
+import type { NodeId, PrimitiveType, TreeId } from "@loom/runtime"
+import type { StoredTally } from "@loom/runtime/signals"
+
+import { nounOf, type PartName } from "./part-name"
+
+/**
+ * What readers did on a page, read the way a person asks it.
+ *
+ * ## What the counters actually are
+ *
+ * A `StoredTally` is one part of one revision of one page, with six numbers on
+ * it. Five of them are plain counts — dwell, clicks, opens, closes — and the
+ * two that matter most are not counts of *events* at all:
+ *
+ * - **`views`** is how many distinct page views said anything about this part.
+ * - **`reached`** is how many of those page views actually *saw* it.
+ *
+ * Both are correlated inside one page view by the opaque key of
+ * [0146](../../../../../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md),
+ * which never persists and never identifies anybody. That is what makes "3 of
+ * 40 visits" answerable without there being any such thing as a visitor here.
+ *
+ * ## Why this module exists rather than a component doing it
+ *
+ * Every sentence this screen says is arithmetic over those numbers, and
+ * arithmetic that is done in a component is arithmetic no test can assert
+ * without a renderer. The screen's job is to put the sentences in order; the
+ * question of *which part fewest people saw* is settled here.
+ *
+ * ## The one thing these numbers are not
+ *
+ * They are not a rate unless a total is beside them. A part reached by two
+ * people out of two is not "100%" in any sense a person should act on, and a
+ * portal that printed one would be inventing confidence the data does not
+ * have — the same defect `/portal/trust` refuses when it leaves an empty
+ * confidence band blank rather than showing a zero. So every reading here
+ * carries its denominator, and the only place a bare rate appears is inside the
+ * technical disclosure, where a reader has asked for it.
+ */
+
+/** One part of one revision, named the way a person would say it. */
+export type PartReading = {
+  readonly nodeId: NodeId
+  /** The registered type, kept for the disclosure. Never on the surface. */
+  readonly type: PrimitiveType
+  readonly name: PartName
+  readonly views: number
+  readonly reached: number
+  readonly dwellMs: number
+  readonly activations: number
+  readonly opens: number
+  readonly closes: number
+}
+
+/**
+ * One revision of one page, and everything heard about it.
+ *
+ * Revisions are kept apart rather than added together, because that is what the
+ * rollup does and for the reason it gives: *"a signal about the fourth section
+ * means nothing once a proposal has moved it"*. Adding two revisions of a part
+ * together is exactly the arithmetic that makes before-versus-after unreadable.
+ */
+export type RevisionReading = {
+  readonly treeId: TreeId
+  readonly revision: number
+  /**
+   * The closest thing these counters hold to a page-view count: the most page
+   * views any single part was mentioned by.
+   *
+   * It is a floor rather than a measurement, and the disclosure says so. A part
+   * at the top of a page is mentioned by essentially every view that broadcast
+   * anything, so in practice the floor is tight — but a page whose every part
+   * is behind a disclosure would report fewer views than it had, and a number
+   * presented as exact would be a claim this data cannot make.
+   */
+  readonly views: number
+  /** Ordered by how many people saw each part, most first. */
+  readonly parts: readonly PartReading[]
+}
+
+const partName = (nodeId: NodeId, type: PrimitiveType, names: ReadonlyMap<string, PartName>) =>
+  /*
+   * A tally holds an id and a registered type and no node, so a part whose node
+   * is still in the page being served is named from that node — words and all —
+   * and a part whose node has since been removed is named from the only thing
+   * left, its type.
+   *
+   * `nounOf` is `part-name.ts`'s, deliberately. That module is where a part is
+   * named, and reading a registered type into a noun here would be the fourth
+   * function to do it — which is an open finding of this lane's already, and not
+   * one to make worse while closing something else.
+   */
+  names.get(nodeId) ?? { name: `the ${nounOf(type)}`, nodeId }
+
+/**
+ * Most-seen first.
+ *
+ * The order is the reading. Reach falls as a reader goes down a page, so a list
+ * sorted by it is, in practice, the page in the order people met it — without
+ * this module having to hold a tree to know what that order was. That matters
+ * for more than tidiness: the counters outlive the revision they describe, so a
+ * screen that needed the tree to order them could only ever order the newest
+ * one.
+ *
+ * Ties break on dwell and then on id, so the same counters always produce the
+ * same list. An order that shuffled between two reads of unchanged data would
+ * make a screenshot useless as evidence.
+ */
+const byReach = (left: PartReading, right: PartReading): number =>
+  right.reached - left.reached || right.dwellMs - left.dwellMs || left.nodeId.localeCompare(right.nodeId)
+
+/**
+ * Group stored counters into one reading per revision, newest revision first.
+ *
+ * Tallies for several pages may arrive in one read — an unscoped screen asks
+ * for every tree the handle can see — so the grouping is on both halves of the
+ * key, and the sort puts the newest revision of each page first within its own
+ * page rather than across all of them.
+ */
+export const revisionReadings = (
+  tallies: readonly StoredTally[],
+  names: ReadonlyMap<string, PartName> = new Map()
+): readonly RevisionReading[] => {
+  const grouped = new Map<string, PartReading[]>()
+  const keys = new Map<string, { readonly treeId: TreeId; readonly revision: number }>()
+
+  for (const tally of tallies) {
+    const key = `${tally.treeId}\u0000${tally.revision}`
+    keys.set(key, { treeId: tally.treeId, revision: tally.revision })
+
+    const reading: PartReading = {
+      nodeId: tally.nodeId,
+      type: tally.type,
+      name: partName(tally.nodeId, tally.type, names),
+      views: tally.views,
+      reached: tally.reached,
+      dwellMs: tally.dwellMs,
+      activations: tally.activations,
+      opens: tally.opens,
+      closes: tally.closes,
+    }
+
+    const existing = grouped.get(key)
+    if (existing === undefined) grouped.set(key, [reading])
+    else existing.push(reading)
+  }
+
+  return [...grouped.entries()]
+    .map(([key, parts]) => {
+      const { treeId, revision } = keys.get(key)!
+
+      return {
+        treeId,
+        revision,
+        views: parts.reduce((most, part) => Math.max(most, part.views), 0),
+        parts: [...parts].sort(byReach),
+      }
+    })
+    .sort(
+      (left, right) => left.treeId.localeCompare(right.treeId) || right.revision - left.revision
+    )
+}
+
+/** Every page with a reading, in the order a person meets them. */
+export type PageReading = {
+  readonly treeId: TreeId
+  /** Newest first. Never empty — a page with no counters is not a page here. */
+  readonly revisions: readonly RevisionReading[]
+}
+
+export const pageReadings = (readings: readonly RevisionReading[]): readonly PageReading[] => {
+  const grouped = new Map<TreeId, RevisionReading[]>()
+
+  for (const reading of readings) {
+    const existing = grouped.get(reading.treeId)
+    if (existing === undefined) grouped.set(reading.treeId, [reading])
+    else existing.push(reading)
+  }
+
+  return [...grouped.entries()].map(([treeId, revisions]) => ({ treeId, revisions }))
+}
+
+/**
+ * The five things worth saying about a revision out loud.
+ *
+ * Each is a part, or nothing. Nothing is a real answer and is said as one — a
+ * page where nobody clicked anything has an honest sentence about that, and a
+ * section that silently disappears leaves a reader unable to tell "I looked"
+ * from "nothing looked".
+ */
+export type Highlights = {
+  /** The part fewest people got to. Absent when every part was seen equally. */
+  readonly fewestSaw?: PartReading
+  /** Where people stayed longest, per person who got there. */
+  readonly longest?: PartReading
+  readonly mostClicked?: PartReading
+  readonly mostOpened?: PartReading
+}
+
+/**
+ * Dwell per person who reached the part, rather than dwell in total.
+ *
+ * Total dwell rewards the part the most people saw, which is the top of the
+ * page every time — a "people stayed longest here" that always answers *the
+ * heading* is a sentence that carries no information. Per reader is the
+ * question somebody is actually asking.
+ */
+export const dwellEach = (part: PartReading): number =>
+  part.reached === 0 ? 0 : part.dwellMs / part.reached
+
+const best = (
+  parts: readonly PartReading[],
+  score: (part: PartReading) => number
+): PartReading | undefined => {
+  const ranked = parts.filter((part) => score(part) > 0)
+  if (ranked.length === 0) return undefined
+
+  return ranked.reduce((most, part) => (score(part) > score(most) ? part : most))
+}
+
+export const highlightsOf = (reading: RevisionReading): Highlights => {
+  const { parts } = reading
+  if (parts.length === 0) return {}
+
+  const least = parts[parts.length - 1]!
+  const most = parts[0]!
+
+  return {
+    /*
+     * A page whose parts were all reached the same number of times has no
+     * "fewest", and saying one anyway would point a reader at a part that is
+     * doing nothing wrong. One part on its own is the same case.
+     */
+    ...(least.reached < most.reached ? { fewestSaw: least } : {}),
+    ...withKey("longest", best(parts, dwellEach)),
+    ...withKey("mostClicked", best(parts, (part) => part.activations)),
+    ...withKey("mostOpened", best(parts, (part) => part.opens)),
+  }
+}
+
+const withKey = <K extends string>(
+  key: K,
+  part: PartReading | undefined
+): Partial<Record<K, PartReading>> => (part === undefined ? {} : ({ [key]: part } as Record<K, PartReading>))
+
+/**
+ * What changed for readers when the page changed.
+ *
+ * This is the measurement the whole product is for — *before versus after a
+ * change* — and it is answerable here only because the rollup refuses to add
+ * revisions together. A part is comparable when both revisions heard from
+ * somebody about it; a part that is new, gone, or unheard-of in one of the two
+ * is left out rather than compared against a zero, because an absent
+ * denominator is not a fall to nothing.
+ */
+export type ReachSide = {
+  readonly reached: number
+  readonly views: number
+}
+
+export type ReachShift = {
+  readonly nodeId: NodeId
+  readonly name: PartName
+  readonly before: ReachSide
+  readonly after: ReachSide
+}
+
+/**
+ * Both counts are kept rather than the rate they produce, because the two
+ * windows are not the same size and a reader has to be able to see that. *Up
+ * sixty points* over four visits and over four hundred are the same number and
+ * different news, and a shift that carried only its rates would have thrown
+ * away the half that says which.
+ */
+export const rateOf = (side: ReachSide): number =>
+  side.views === 0 ? 0 : side.reached / side.views
+
+export const shiftOf = (shift: ReachShift): number => rateOf(shift.after) - rateOf(shift.before)
+
+/**
+ * Comparable parts, biggest change first, risers and fallers together.
+ *
+ * Sorted by size of change rather than by direction: a reader wants the parts
+ * the change moved, and which way it moved them is the second question. Ties
+ * break on id so the list does not shuffle between reads.
+ */
+export const reachShifts = (
+  before: RevisionReading,
+  after: RevisionReading
+): readonly ReachShift[] => {
+  const earlier = new Map(before.parts.map((part) => [part.nodeId, part]))
+
+  return after.parts
+    .flatMap((part) => {
+      const was = earlier.get(part.nodeId)
+      if (was === undefined || was.views === 0 || part.views === 0) return []
+
+      return [
+        {
+          nodeId: part.nodeId,
+          name: part.name,
+          before: { reached: was.reached, views: was.views },
+          after: { reached: part.reached, views: part.views },
+        },
+      ]
+    })
+    .sort(
+      (left, right) =>
+        Math.abs(shiftOf(right)) - Math.abs(shiftOf(left)) || left.nodeId.localeCompare(right.nodeId)
+    )
+}
+
+/**
+ * How long, in words somebody would use out loud.
+ *
+ * Milliseconds are the runtime's unit and nobody says them. The rounding is
+ * deliberately coarse and the word "about" is not decoration: dwell is measured
+ * by a browser that stops counting when a tab is hidden, so a figure to the
+ * millisecond would be precision this measurement does not have. The exact
+ * number stays one click down, where a reader who wants it has asked for it.
+ */
+export const plainDuration = (ms: number): string => {
+  if (ms < 1_000) return "under a second"
+  if (ms < 60_000) {
+    const seconds = Math.round(ms / 1_000)
+
+    return `about ${seconds} ${seconds === 1 ? "second" : "seconds"}`
+  }
+  if (ms < 3_600_000) {
+    const minutes = Math.round(ms / 60_000)
+
+    return `about ${minutes} ${minutes === 1 ? "minute" : "minutes"}`
+  }
+
+  const hours = Math.round(ms / 3_600_000)
+
+  return `about ${hours} ${hours === 1 ? "hour" : "hours"}`
+}
+
+/**
+ * A count against the visits it is a count of.
+ *
+ * Never a percentage on the surface. Two of two is not the same news as two
+ * hundred of two hundred, and a page that printed "100%" for both would be
+ * making the smallest sample in the portal look like the strongest evidence in
+ * it. The denominator is what a person needs to know how much to believe.
+ */
+export const outOfVisits = (count: number, views: number): string =>
+  `${count} of the ${views} ${views === 1 ? "visit" : "visits"}`
+
+/**
+ * A change in reach, as a person would read it.
+ *
+ * Percentage points, because this one *is* a comparison of two rates and the
+ * difference between them is the whole sentence. It is inside the comparison
+ * block, under a heading that says both denominators, rather than standing
+ * alone the way a bare rate would.
+ */
+export const plainShift = (shift: ReachShift): string => {
+  const points = Math.round(shiftOf(shift) * 100)
+
+  if (points === 0) return "about the same"
+
+  const size = Math.abs(points)
+
+  return `${points > 0 ? "up" : "down"} ${size} ${size === 1 ? "point" : "points"}`
+}

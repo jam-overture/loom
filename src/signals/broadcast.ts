@@ -48,6 +48,23 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  */
 
 /** The DOM event a batch is dispatched as, on the root element. It bubbles. */
+/**
+ * The delivery helper travels with this entry point rather than getting one of
+ * its own.
+ *
+ * `deliver.ts` imports nothing at runtime, so it costs the same bytes reached
+ * from here as it would through a door of its own — and a host who is starting
+ * a broadcaster in a browser bundle is exactly the host who needs a `send`. One
+ * import line for the two things that are always used together.
+ */
+export {
+  DEFAULT_READER_SIGNAL_PATH,
+  deliverReaderSignals,
+  type DeliverOptions,
+  type PostBatch,
+  type SendBeacon,
+} from "./deliver.js"
+
 export const READER_SIGNALS_EVENT = "loom:signals"
 
 /**

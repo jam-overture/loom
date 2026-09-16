@@ -172,6 +172,30 @@ export const NAV_GROUPS: readonly (readonly ShellNavItem[])[] = [
       ),
     },
     {
+      /**
+       * The one entry in this rail that is not about something Loom did.
+       *
+       * It sits in the record group rather than beside `Pages`, because it is a
+       * record of what happened and not a thing the deployment holds — and it
+       * sits before `Trust` because it is evidence rather than a judgement. The
+       * two entries above it say what was asked and what changed; this says what
+       * that did to the people the page was for, which is the only question here
+       * whose answer moves while nobody is asking anything.
+       *
+       * `Readers` rather than `Signals`. A signal is the runtime's word for one
+       * anonymous report from a page, and there is no sense in which a person
+       * opens a portal to look at signals.
+       */
+      label: "Readers",
+      href: "/portal/readers",
+      icon: (
+        <svg {...strokeProps}>
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" />
+          <circle cx="12" cy="12" r="2.5" />
+        </svg>
+      ),
+    },
+    {
       label: "Trust",
       href: "/portal/trust",
       icon: (

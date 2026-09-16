@@ -15,6 +15,7 @@ import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
 import { puttingItBackPageTree, type BackContext } from "./pages/putting-it-back"
 import { theRecordPageTree, type RecordContext } from "./pages/the-record"
 import { theRulesPageTree } from "./pages/the-rules"
+import { whatReadersDoPageTree } from "./pages/what-readers-do"
 import { whatYouRunPageTree } from "./pages/what-you-run"
 import {
   DEMONSTRATED_ASK,
@@ -31,6 +32,7 @@ import {
   PUTTING_IT_BACK,
   THE_RECORD,
   THE_RULES,
+  WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHEN_IT_GOES_WRONG,
   WHO_CAN_ASK,
@@ -74,6 +76,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [WHO_CAN_ASK.path, whoCanAskPageTree],
   [PUTTING_IT_BACK.path, puttingItBackPageTree],
   [YOUR_COMPONENTS.path, yourComponentsPageTree],
+  [WHAT_READERS_DO.path, whatReadersDoPageTree],
 ])
 
 /** The page as it is written, before anything the visitor asked for. */

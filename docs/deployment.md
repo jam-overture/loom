@@ -333,7 +333,74 @@ This deletes the *account* of what happened — proposals, dispositions, rationa
 It cannot touch a tree or a revision: those live in `loom_trees` and
 `loom_revisions`, which this never reads (0016, 0023).
 
-### 8. Reader signals — the buffer only empties when you run this
+### 8. Reader signals — nothing arrives until you open the door
+
+Reader signals are off unless you ask for them (0136), and that is now true at
+both ends. A page says nothing unless its own code starts a broadcaster, and
+**this deployment keeps nothing unless you set one variable**:
+
+```bash
+LOOM_SIGNAL_INTAKE=on
+```
+
+Unset, `/api/reader-signals` answers `404` to every delivery — a deployment that
+never asked for reader signals does not have that endpoint and does not have a
+table filling up because the application it deployed happens to carry a route.
+
+A value that is neither on nor off is **not** read as off. `LOOM_SIGNAL_INTAKE=enabled`
+gets a `503` naming what you typed, because a deployment that configured
+something and got silence is the failure nobody notices.
+
+Ask any deployment which of those it is:
+
+```bash
+curl https://your-deployment/api/reader-signals
+```
+
+```json
+{ "intake": "on", "durable": true, "maxBytes": 65536, "deliveries": 120,
+  "windowMs": 60000, "subjects": 3, "detail": "reader signals are being collected" }
+```
+
+`durable: false` means `DATABASE_URL` is unset, so batches are being kept in the
+instance's memory — fine for `pnpm dev`, and on serverless it means the collector
+in step 9 reads a database no instance wrote to.
+
+**The page has to be told to post.** Rendering with `addressed: true` and starting
+a broadcaster is still the host's call, per page:
+
+```ts
+broadcastReaderSignals(root, { send: deliverReaderSignals() })
+```
+
+`deliverReaderSignals` posts to `/api/reader-signals` — `sendBeacon` where the
+browser has it, so the last batch of a page view survives the page closing, and a
+`keepalive` fetch where it does not. Pass `{ url }` to send somewhere else; note
+that a beacon cannot preflight, so a cross-origin URL needs CORS on the far end
+or the browser refuses the delivery before it is sent.
+
+**Who may post, and how often.** The endpoint is public — a published page is
+public, so a session check is not available, and 0146 forbids the endpoint
+learning anything about who is posting. What it does instead:
+
+| | |
+| --- | --- |
+| a delivery over **64 KB** | `413`. That is the ceiling `sendBeacon` itself imposes, so a larger delivery did not come from one. Measured off the bytes, never off `content-length` |
+| more than **120 deliveries a minute** from one sender | `429` with `Retry-After`. A broadcaster flushes every five seconds, so that is eight tabs' worth |
+| a delivery that is not a batch | `400`, naming which batch of the delivery and why. Nothing is kept unless all of it parses |
+
+A sender is a keyed digest of the forwarded-for entry `LOOM_PORTAL_TRUSTED_PROXY_HOPS`
+hops from the right — the same reading the sign-in throttle uses, and the only one
+a caller cannot steer by sending a header. The key is random, minted per process
+and never stored, so the digests are meaningless to the next process and there is
+nothing anywhere that could turn one back into an address.
+
+**The counter is in memory, so it is per instance.** A deployment running eight
+instances tolerates roughly eight times that rate. That is the same caveat the
+sign-in throttle carries, and the answer is the same: a durable counter would mean
+a database write to decide whether to allow a database write.
+
+### 9. Reader signals — the buffer only empties when you run this
 
 Different from retention above, and the difference matters. Telemetry pruning is
 optional housekeeping; this is the **only** thing that turns reader signals into
@@ -392,10 +459,11 @@ The counters took the window and the buffer would not drop it. Delete
 before the next run; a second run over the same batches doubles those counters
 permanently.
 
-**Nothing fills the buffer yet.** `ingestReaderSignals` is published and no route
-handler calls it, so on today's `main` this finds an empty buffer and says so.
-The endpoint a browser posts to is not built — it is a public write surface and
-wants its own decision about who may post and how often.
+**An empty buffer is the honest answer to three different questions**, and step 8
+is how you tell them apart: the door is shut, or it is open and no page on this
+deployment has been told to post, or pages are posting and you have not run this
+yet. The collector says which of its own — it reports nothing ripe rather than
+nothing at all — and `GET /api/reader-signals` answers the first two.
 
 ### If the password leaks
 

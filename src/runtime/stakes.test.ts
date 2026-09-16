@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { bindingNameSchema } from "../data/source.js"
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { endpointIdSchema } from "../submit/endpoint.js"
@@ -23,6 +24,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   configuredPropKeys: [],
   nestedTargets: [],
   redirectedSubmissions: [],
+  repointedBindings: [],
   shallowestAffectedDepth: 5,
   ...overrides,
 })
@@ -362,6 +364,91 @@ describe("assessStakes on a redirected submission", () => {
     const assessment = stakesOf(
       analysisOf({
         redirectedSubmissions: redirected(1),
+        nestedTargets: [
+          {
+            nodeId: nodeIdSchema.parse("n_inner"),
+            type: primitiveTypeSchema.parse("loom.action"),
+            ancestorId: nodeIdSchema.parse("n_card"),
+            ancestorType: primitiveTypeSchema.parse("loom.card"),
+          },
+        ],
+      })
+    )
+
+    expect(assessment.level).toBe("critical")
+  })
+})
+
+describe("assessStakes on a repointed binding", () => {
+  const repointed = (count: number, kind: "source" | "params" = "source") =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_card${index}`),
+      name: bindingNameSchema.parse("items"),
+      kind,
+      from: "catalogue.services",
+      to: kind === "source" ? `orders.mine${index}` : "catalogue.services",
+    }))
+
+  it("is high, not critical: repointing is a change somebody may legitimately want", () => {
+    const assessment = stakesOf(analysisOf({ repointedBindings: repointed(1) }))
+
+    expect(assessment.level).toBe("high")
+    expect(stakeFactor(assessment, "repointed-binding")?.detail).toBe(
+      "repoints a binding: n_card0.items from catalogue.services to orders.mine0"
+    )
+  })
+
+  it("names every binding that moved, and both of its ends", () => {
+    const assessment = stakesOf(analysisOf({ repointedBindings: repointed(2) }))
+
+    expect(stakeFactor(assessment, "repointed-binding")?.detail).toBe(
+      "repoints 2 bindings: n_card0.items from catalogue.services to orders.mine0; n_card1.items from catalogue.services to orders.mine1"
+    )
+  })
+
+  /** A params move must not print one source twice, which would read as no change. */
+  it("says the source was asked for something else when only the params moved", () => {
+    const assessment = stakesOf(analysisOf({ repointedBindings: repointed(1, "params") }))
+
+    expect(stakeFactor(assessment, "repointed-binding")?.detail).toBe(
+      "repoints a binding: n_card0.items asks catalogue.services for something else"
+    )
+  })
+
+  it("says nothing about a change that repoints none", () => {
+    expect(stakeFactor(stakesOf(analysisOf()), "repointed-binding")).toBeUndefined()
+  })
+
+  it("needs no host vocabulary, unlike every protected list", () => {
+    const silent = gatePolicySchema.parse({})
+
+    expect(codesOf(analysisOf({ repointedBindings: repointed(1) }), silent)).toContain(
+      "repointed-binding"
+    )
+  })
+
+  /** The two ends of one pipe weigh the same, which is the claim 0163 makes. */
+  it("weighs the same as a redirected submission", () => {
+    const arriving = stakesOf(analysisOf({ repointedBindings: repointed(1) }))
+    const leaving = stakesOf(
+      analysisOf({
+        redirectedSubmissions: [
+          {
+            nodeId: nodeIdSchema.parse("n_form0"),
+            from: endpointIdSchema.parse("newsletter.subscribe"),
+            to: endpointIdSchema.parse("contact.enquiry"),
+          },
+        ],
+      })
+    )
+
+    expect(arriving.level).toBe(leaving.level)
+  })
+
+  it("does not outrank a nested target, which is the one that is simply wrong", () => {
+    const assessment = stakesOf(
+      analysisOf({
+        repointedBindings: repointed(1),
         nestedTargets: [
           {
             nodeId: nodeIdSchema.parse("n_inner"),

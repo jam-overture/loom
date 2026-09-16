@@ -260,7 +260,7 @@ export const WHEN_IT_GOES_WRONG: SiteRoute = {
  * rules can give a change — to all four askers, while the page is being built,
  * and prints the sixteen answers as marks. It also answers the question the
  * table invites and never addresses: **what does being the trusted asker not
- * buy you?** Three of the seven rules refuse to consult who asked at all, and
+ * buy you?** Four of the eight rules refuse to consult who asked at all, and
  * the floor is sovereign over all of them.
  *
  * It is a description of code rather than a position, so it did not wait on the
@@ -345,6 +345,37 @@ export const PUTTING_IT_BACK: SiteRoute = {
 }
 
 /**
+ * Where a request might come from, which is the half of the argument the other
+ * eight pages all start after.
+ *
+ * Every one of them opens with somebody asking for something. Nothing said what
+ * would make anybody ask — and the project's own stated reason for existing is
+ * that a page should be able to change from how people actually use it, which
+ * takes somebody being able to see how people actually use it. That is
+ * `docs/signals.md`, approved on 13 September, and the fifth step of it is this
+ * page.
+ *
+ * **Off the bar, which makes six of ten**, and the reason is the 12 September
+ * finding rather than this page's importance: `loom.nav` cannot group, so the
+ * bar has no way to carry ten destinations under three headings and the footer's
+ * map is doing that job alone. The measurement is recorded on the finding again
+ * rather than argued with here.
+ */
+export const WHAT_READERS_DO: SiteRoute = {
+  path: "/what-readers-do",
+  label: "What readers do",
+  /**
+   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
+   * only the half of a title that is exactly the wordmark, so the name inside a
+   * clause prints twice on the card.
+   */
+  title: "What readers do — which parts of your page people reach, without knowing who any of them are",
+  description:
+    "Loom can count what readers did band by band: how far down they got, how long they stayed, what they used and what they opened. It counts the bands and never the people — no name, no account, nothing that follows anybody anywhere — and a change is still something somebody asks for.",
+  inMenu: false,
+}
+
+/**
  * Every route, in nav order. A route that is not here has no way to be reached.
  *
  * The order is the order a stranger needs them in, not the order they were
@@ -368,7 +399,18 @@ export const PUTTING_IT_BACK: SiteRoute = {
  * that anything is written down has no use for the news that one of the things
  * written down is reversible.
  *
- * **Then the objection**, which arrives the moment a reader believes the five
+ * **`/what-readers-do` closes that group rather than opening the site**, and
+ * the temptation was to put it first. It is the input half of the whole premise
+ * — what would make anybody ask for a change — so it reads like a beginning.
+ * It is not one: a reader who has not yet been told that a change is weighed,
+ * recorded and reversible has no reason to care that the page can also count
+ * who reached which band, and every sentence on it about *asking for something*
+ * is a sentence the five pages above it have already earned. So it sits third
+ * in *what you are left holding*, after the record and the way back: what you
+ * end up with is a paper trail, an undo, and a page that can say what it did
+ * for the people reading it.
+ *
+ * **Then the objection**, which arrives the moment a reader believes the six
  * above rather than before it: *and when it doesn't work?* It sits where it does
  * because a reader who has not yet understood that a change is weighed at all
  * has no use for the list of ways one can fail to happen.
@@ -393,6 +435,7 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
   WHO_CAN_ASK,
   THE_RECORD,
   PUTTING_IT_BACK,
+  WHAT_READERS_DO,
   WHEN_IT_GOES_WRONG,
   WHAT_YOU_RUN,
   YOUR_COMPONENTS,

@@ -9,6 +9,7 @@ import {
   PUTTING_IT_BACK,
   internalHref,
   SITE_ROUTES,
+  WHAT_READERS_DO,
   SITE_THEME_NAMES,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
@@ -288,6 +289,7 @@ describe("its place in the navigation", () => {
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
+      WHAT_READERS_DO,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

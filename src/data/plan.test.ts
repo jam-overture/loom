@@ -5,7 +5,7 @@ import { DATA_PROP_KEY } from "../reserved-props.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
-import { planTreeData } from "./plan.js"
+import { EMPTY_DATA_PLAN, planDataIn, planTreeData } from "./plan.js"
 
 const treeOf = (...props: readonly Record<string, unknown>[]): LoomTree => {
   const idFactory = sequentialIdFactory()
@@ -127,5 +127,23 @@ describe("planTreeData", () => {
     const tree = treeOf({ [DATA_PROP_KEY]: { services: binding("catalogue.services") } })
 
     expect(planTreeData(tree)).toEqual(planTreeData(tree))
+  })
+})
+
+describe("planDataIn", () => {
+  /**
+   * The property the runtime needs it for: a tree that exists only as the result
+   * of applying a delta is a node, and nothing has minted an id for it.
+   */
+  it("plans a bare root exactly as the tree planner plans the tree around it", () => {
+    const tree = treeOf({ [DATA_PROP_KEY]: { services: binding("catalogue.services") } })
+
+    expect(planDataIn(tree.root)).toEqual(planTreeData(tree))
+  })
+
+  it("finds nothing in a root that asks nothing", () => {
+    const tree = treeOf({})
+
+    expect(planDataIn(tree.root)).toEqual(EMPTY_DATA_PLAN)
   })
 })

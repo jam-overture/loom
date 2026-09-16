@@ -9,9 +9,14 @@
 > Two rules still read confidence; only the size of the list they sit in moved.
 > Held against `ESCALATION_LADDER` by `src/record-claims.test.ts` from now on.
 
+> **Amended 2026-09-16**, under the same rule, and caught by that check. The
+> count read *seven* and the ladder has eight rungs since
+> [0163](0163-a-binding-is-weighed-like-a-destination.md). Still two rules read
+> confidence; again only the size of the list they sit in moved.
+
 ## Context
 
-Two of the Gate's seven rules read `provenance.confidence`: one refuses a change
+Two of the Gate's eight rules read `provenance.confidence`: one refuses a change
 below the floor, one escalates a change below the minimum. That number is
 supplied by the proposer — since 2026-07-28, by a real model, which reports its
 own confidence in its own reply.

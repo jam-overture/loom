@@ -88,10 +88,10 @@ export const serviceList = definePrimitive({
   },
 })
 
-// page.mdx:310 — the inside of an object literal
-const objectAtLine310 = {
-protectedPropKeys: ["loom:data"],
+// page.mdx:311 — the inside of an object literal
+const objectAtLine311 = {
+refusalFloor: "high",
 }
 
-export { objectAtLine35, services, built, sources, data, rendered, rows, objectAtLine310, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
+export { objectAtLine35, services, built, sources, data, rendered, rows, objectAtLine311, z, createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData, renderLoomTree, createElement, definePrimitive }
 export type { LoomPrimitiveProps }

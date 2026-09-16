@@ -300,27 +300,31 @@ line:
 
 <WhoMayRepointIt />
 
-The first column is a deployment that has said nothing about its own data. The
-change is reversible, it touches nothing the policy protects, and the Gate
-applies it — so a band that was showing the shop's services quietly starts
-showing somebody's orders instead.
+The first column is a deployment that has said nothing about its own data, and
+the Gate still sends the change to a person. You do not have to ask for that: a
+binding is the runtime's own key, both sources were registered by you in either
+case, and which of your data comes out should not depend on who asked for it to
+change.
 
 The second column has added one line:
 
 ```ts object-body
-protectedPropKeys: ["loom:data"],
+refusalFloor: "high",
 ```
 
-`loom:data` is an ordinary prop key as far as that setting is concerned, which is
-why no new knob is needed. A deployment that cares which questions its pages ask
-says so once, and every change to one goes to a person.
+That is a deployment which has decided damage this size is not something it
+offers at all, and it gets a refusal rather than a question. The floor stays
+sovereign over the escalation — it is consulted first, so lowering it turns every
+held change of this weight into a refused one.
 
-<Callout kind="warning">
-  **Nothing makes that decision for you.** A change that repoints a *form* is
-  weighed by the runtime whatever your policy says, because where a visitor's
-  data goes should not depend on who asked for it to move. A change that repoints
-  a *binding* — which of your data comes out — is weighed like any other prop.
-  The asymmetry is filed. Until it is settled, add the line.
+<Callout>
+  **Changing the params counts too.** A binding is a source *and* the parameters
+  to ask it with, and `{ field: "bio" }` becoming `{ field: "salary" }` changes
+  which of your data comes out without touching the source. The runtime cannot
+  tell a parameter that selects data from one that merely shapes it without
+  asking your registry, so it treats an ambiguous change as selection: widening a
+  `limit` will also ask. That trade is
+  [0163](https://github.com/jam-overture/loom/blob/main/decisions/0163-a-binding-is-weighed-like-a-destination.md).
 </Callout>
 
 ## What your app owes a reader
