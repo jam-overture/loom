@@ -1045,3 +1045,77 @@ describe("the landed half of a card", () => {
     expect(screen.queryByText(/This came off the page/)).toBeNull()
   })
 })
+
+/**
+ * A card that has already been read.
+ *
+ * The card cannot see where it sits in the rail, so this is the one thing about
+ * itself it is told (`_lib/reasoning.ts`). What matters is that being told
+ * changes the card's *shape* and never its *contents* — the whole of the
+ * argument above is still in the DOM, one click down, which is what
+ * `the-reasoning.test.tsx` checks block by block and what these two check from
+ * the card's own side.
+ */
+describe("a card whose reasoning has already been made", () => {
+  it("folds the weighing, the rule and the comparison under one line", () => {
+    const { container } = render(<RecordCard record={APPLIED} reasoning="folded" />)
+
+    const summaries = [...container.querySelectorAll("summary")].map((s) => s.textContent ?? "")
+
+    expect(summaries.some((s) => s.includes("Low risk, and you could undo it."))).toBe(true)
+    /* And the technical record is still its own click, not swallowed into this one. */
+    expect(summaries.some((s) => s.includes("Show the full record"))).toBe(true)
+  })
+
+  /**
+   * Nothing is ever removed. The two questions, the rule's own sentence and the
+   * ceiling comparison are all still on a folded card — and so is the line
+   * saying what the change did, which is the one thing that genuinely differs
+   * between two cards and so must never be the thing that folds.
+   */
+  it("keeps every word of the account, and leaves what the change did in the open", () => {
+    const record: ChangeRecord = {
+      ...APPLIED,
+      did: [
+        {
+          sentence: "This came off the page, and everything under it went too.",
+          words: [],
+          more: 0,
+        },
+      ],
+    }
+
+    render(<RecordCard record={record} reasoning="folded" />)
+
+    expect(screen.getByText(WEIGHED_QUESTIONS.damage)).toBeTruthy()
+    expect(screen.getByText(WEIGHED_QUESTIONS.reversal)).toBeTruthy()
+    expect(screen.getByText(ruleSentence("within-policy"))).toBeTruthy()
+
+    const did = screen.getByText("This came off the page, and everything under it went too.")
+
+    expect(did.closest("details")).toBeNull()
+  })
+
+  /**
+   * The undo is the demo's payoff — *the inverse, as a button that really puts
+   * it back* — and a fold that put it behind a click would have taken the point
+   * of the surface with it.
+   */
+  it("leaves the undo where a visitor can press it", () => {
+    render(<RecordCard record={APPLIED} reasoning="folded" />)
+
+    const undo = screen.getByRole("button", { name: UNDO_LABEL })
+
+    expect(undo.closest("details")).toBeNull()
+  })
+
+  /** A card rendered on its own has nothing above it, so it argues in full. */
+  it("shows the working when nothing says otherwise", () => {
+    const { container } = render(<RecordCard record={APPLIED} />)
+
+    expect(screen.getByText(WEIGHED_QUESTIONS.damage).closest("details")).toBeNull()
+    expect(
+      [...container.querySelectorAll("summary")].map((s) => s.textContent ?? "")
+    ).toEqual(["Show the full record"])
+  })
+})

@@ -166,6 +166,7 @@ const tierNode = (ids: IdFactory, plan: Plan): ElementNode => {
 
 export const pricingBand: Composition = {
   id: "pricing",
+  part: "pricing",
   label: "Pricing",
   promise: "Three plans side by side, each with its perks and its button, and one marked as the popular one.",
   rationale:

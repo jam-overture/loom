@@ -151,6 +151,24 @@ const confirmRedirectedSubmission: GateRule = {
   fires: (assessment) => stakeFactor(assessment.stakes, "redirected-submission")?.detail ?? null,
 }
 
+/**
+ * A change that points a region at different data is never applied without a
+ * person, whatever latitude its origin has.
+ *
+ * The same argument as the rule above, at the other end of the same pipe. That
+ * one keeps the next visitor's message from arriving somewhere else unnoticed;
+ * this one keeps something the host never meant to publish from appearing on a
+ * public page unnoticed. Neither fact depends on who asked.
+ *
+ * Below the refusal floor for the same reason, so a host that has declared this
+ * much damage refusable still gets a refusal.
+ */
+const confirmRepointedBinding: GateRule = {
+  code: "repointed-binding",
+  kind: "requires-confirmation",
+  fires: (assessment) => stakeFactor(assessment.stakes, "repointed-binding")?.detail ?? null,
+}
+
 const confirmAboveCeiling: GateRule = {
   code: "stakes-above-ceiling",
   kind: "requires-confirmation",
@@ -191,6 +209,7 @@ const ESCALATION_RULES: readonly GateRule[] = [
   confirmIrreversible,
   confirmDiscardsLaterWork,
   confirmRedirectedSubmission,
+  confirmRepointedBinding,
   confirmAboveCeiling,
   confirmBelowMinimumConfidence,
 ]

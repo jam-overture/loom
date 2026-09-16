@@ -260,7 +260,7 @@ export const WHEN_IT_GOES_WRONG: SiteRoute = {
  * rules can give a change — to all four askers, while the page is being built,
  * and prints the sixteen answers as marks. It also answers the question the
  * table invites and never addresses: **what does being the trusted asker not
- * buy you?** Three of the seven rules refuse to consult who asked at all, and
+ * buy you?** Four of the eight rules refuse to consult who asked at all, and
  * the floor is sovereign over all of them.
  *
  * It is a description of code rather than a position, so it did not wait on the

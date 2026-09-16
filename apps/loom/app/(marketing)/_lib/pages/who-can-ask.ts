@@ -58,7 +58,7 @@ import {
  * **The second half is the one the reader this site is for actually needs.** A
  * compliance reader told that a trusted asker gets more latitude asks the next
  * question immediately: *so what stops something claiming to be the trusted
- * one?* The answer is unusually good — of the seven rules, three refuse to
+ * one?* The answer is unusually good — of the eight rules, four refuse to
  * consult who asked at all, and the floor is sovereign over every one of them —
  * and it is read off the same sixteen runs rather than promised.
  *
@@ -342,7 +342,7 @@ export const readingOf = (requests: readonly WeighedRequest[]): string =>
  * answers to a client or a regulator hears one thing in that: *so the way to
  * get a change through is to be, or to claim to be, the trusted one.* The
  * answer is the best thing on this page and it is a measurement rather than a
- * promise — across the sixteen runs above, exactly one of the seven rules ever
+ * promise — across the sixteen runs above, exactly one of the eight rules ever
  * gave two askers different answers.
  *
  * The three printed under it are the ones whose sentences say so in their own
@@ -407,7 +407,7 @@ const cannotBuy = (
       stack(ids, { direction: "row", gap: "snug", wrap: true }, [
         action(
           ids,
-          "The seven, one by one",
+          "The eight, one by one",
           internalHref(context.origin, THE_RULES.path, context.theme),
           { variant: "secondary", scale: "medium" }
         ),

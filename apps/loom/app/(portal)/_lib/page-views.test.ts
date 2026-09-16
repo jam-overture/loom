@@ -20,8 +20,8 @@ const TREE = "t_seed1" as TreeId
 /** A page as every caller of `scopedLead` now holds one: named, with its id kept. */
 const NAMED: PageName = { name: "Autumn arrivals", treeId: TREE, derived: true }
 
-const KEYS: readonly PageViewKey[] = ["page", "asked", "changed", "trust", "checkup"]
-const SCOPED: readonly ScopedView[] = ["asked", "changed", "trust", "checkup"]
+const KEYS: readonly PageViewKey[] = ["page", "asked", "changed", "readers", "trust", "checkup"]
+const SCOPED: readonly ScopedView[] = ["asked", "changed", "readers", "trust", "checkup"]
 
 describe("pageViewsFor", () => {
   it("offers every view of the page, in a fixed order", () => {
@@ -33,6 +33,7 @@ describe("pageViewsFor", () => {
       "/portal/pages/t_seed1",
       "/portal/activity?tree=t_seed1",
       "/portal/history?tree=t_seed1",
+      "/portal/readers?tree=t_seed1",
       "/portal/trust?tree=t_seed1",
       "/portal/checkup?tree=t_seed1",
     ])
@@ -101,6 +102,7 @@ describe("where the strip points", () => {
       "/portal/pages",
       "/portal/activity",
       "/portal/history",
+      "/portal/readers",
       "/portal/trust",
       "/portal/checkup",
     ])
@@ -184,8 +186,8 @@ describe("scopedLead", () => {
 /**
  * The check the wiring cannot forget.
  *
- * Five screens have to render the strip and each has to claim a different one of
- * the five views, and none of that is visible from any one screen's own tests. A
+ * Six screens have to render the strip and each has to claim a different one of
+ * the six views, and none of that is visible from any one screen's own tests. A
  * sixth view added to the module with no screen behind it, or a screen that
  * quietly drops the strip in a refactor, both come back here — which is the
  * failure that left `/portal/trust?tree=` reachable only by typing a URL for as
@@ -195,6 +197,7 @@ const SCREENS: Readonly<Record<PageViewKey, readonly string[]>> = {
   page: ["portal", "pages", "[treeId]", "page.tsx"],
   asked: ["portal", "activity", "page.tsx"],
   changed: ["portal", "history", "page.tsx"],
+  readers: ["portal", "readers", "page.tsx"],
   trust: ["portal", "trust", "page.tsx"],
   checkup: ["portal", "checkup", "page.tsx"],
 }

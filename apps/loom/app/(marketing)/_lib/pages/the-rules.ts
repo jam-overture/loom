@@ -71,7 +71,7 @@ import type { PageContext } from "./home"
  * until today, and the note here said so and called it the honest limit: the
  * Gate asks them in the order of `ESCALATION_RULES` in `src/runtime/gate.ts`,
  * that constant was not exported, and a reordering there would have left this
- * page listing the right seven questions in a stale order. Filed for
+ * page listing the right eight questions in a stale order. Filed for
  * `Loom daily build` on 28 August and answered by #181 — `ESCALATION_LADDER` is
  * exported from `@loom/runtime`, **derived from the rules themselves rather than
  * declared beside them**, so it cannot disagree with the order it describes.
@@ -97,12 +97,13 @@ const QUESTIONS: readonly Rule[] = [
   { code: "irreversible", asks: "Could you put the page back afterwards?" },
   { code: "discards-later-work", asks: "Would this quietly wipe out something done since?" },
   { code: "redirected-submission", asks: "Would this change where the page sends what people type?" },
+  { code: "repointed-binding", asks: "Would this change which of your data the page shows?" },
   { code: "stakes-above-ceiling", asks: "Is this bigger than what whoever asked may do unwatched?" },
   { code: "confidence-below-minimum", asks: "Was it sure enough to go through with nobody looking?" },
 ]
 
 /**
- * The seven questions, in the order the rules are actually asked in.
+ * The eight questions, in the order the rules are actually asked in.
  *
  * Built by walking the ladder rather than by sorting the list, so the runtime's
  * order is the one thing that decides: a rung with no question here is a rule
@@ -224,7 +225,7 @@ const answers = (ids: IdFactory): LoomNode =>
   )
 
 /**
- * The seven questions, printed in the words the site will use on the day one of
+ * The eight questions, printed in the words the site will use on the day one of
  * them fires.
  *
  * A `loom.milestone-list` rather than a grid because the order is the content:

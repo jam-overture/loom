@@ -67,6 +67,7 @@ const CREDENTIALS = [
 
 export const credentialsBand: Composition = {
   id: "credentials",
+  part: "credentials",
   label: "Certifications",
   promise: "Four certifications in a grid, each with its issuer, its year and a line about scope.",
   rationale:

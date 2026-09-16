@@ -62,6 +62,7 @@ const QUOTES = [
 
 export const testimonialsBand: Composition = {
   id: "testimonials",
+  part: "testimonials",
   label: "Testimonials",
   promise: "A titled band with three quotes side by side, each with its attribution.",
   rationale:

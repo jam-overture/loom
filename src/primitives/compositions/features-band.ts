@@ -50,6 +50,7 @@ const FEATURES = [
 
 export const featuresBand: Composition = {
   id: "features",
+  part: "features",
   label: "Feature grid",
   promise: "A titled band with a lead sentence over six feature tiles that wrap to the width.",
   rationale:

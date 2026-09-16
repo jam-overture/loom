@@ -140,7 +140,7 @@ export type Answer = "went-ahead" | "stopped-and-asked" | "was-refused"
 export type AskerAnswer = {
   readonly origin: IntentOrigin
   readonly answer: Answer
-  /** Which of the seven rules decided it, or the one code that is not a rule. */
+  /** Which of the eight rules decided it, or the one code that is not a rule. */
   readonly decidedBy: DispositionReasonCode
 }
 

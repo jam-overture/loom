@@ -66,6 +66,19 @@ import { createElement, type ReactElement } from "react"
 export const STYLESHEET_HREF = "loom-primitives"
 export const STYLESHEET_PRECEDENCE = "loom"
 
+/**
+ * The space a `loom.marquee` puts between its items, declared by the primitive
+ * and applied by the rules below.
+ *
+ * It is a custom property rather than an inline `gap` because the *same* value
+ * is wanted in two places that need different conditions: between the items
+ * always, and after the last one **only while the run is tiling against its
+ * own echo**. An inline declaration can express the first and cannot express
+ * the second, which is 0155 — and the cost of getting it wrong was measured,
+ * in `loom.marquee`'s own doc comment, at eight pixels and one whole column.
+ */
+export const MARQUEE_GAP = "--loom-marquee-gap"
+
 /** Class names the library's primitives apply. Exported so a test can name them. */
 export const LIBRARY_CLASS = {
   /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */
@@ -1126,6 +1139,8 @@ details[open] > summary .loom-marker {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  gap: var(--loom-marquee-gap);
+  padding-inline-end: var(--loom-marquee-gap);
 }
 .loom-marquee-reverse {
   animation-direction: reverse;
@@ -1163,6 +1178,8 @@ details[open] > summary .loom-marker {
 }
 .loom-marquee-still .loom-marquee-run {
   flex-wrap: wrap;
+  /** Nothing to tile against: one run, no echo. The trailing gap would be a dead column. */
+  padding-inline-end: 0;
 }
 .loom-offering {
   container-type: inline-size;
@@ -1888,6 +1905,7 @@ details[open] > summary .loom-marker {
   }
   .loom-marquee-run {
     flex-wrap: wrap;
+    padding-inline-end: 0;
   }
   .loom-marquee-echo {
     display: none;

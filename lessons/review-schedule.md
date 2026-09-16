@@ -1183,6 +1183,53 @@ not.
 
 ---
 
+## Set AD — two days after lesson 25
+
+Interleaved with 03, 05, 09, 15, 16, 18 and 24. Heavy on 18, because that lesson
+and this one are the same defect met from its two sides; and heavy on 09, because
+the consequence the lesson's fourth exercise prints is a rung of the ladder going
+silent while behaving exactly as designed.
+
+1. Name the three questions you can ask about a closed set. Say which one a
+   compiler answers, give the reason it cannot answer the second in terms of what
+   a type is rather than what a compiler lacks, and then say which of the three
+   lesson 18's dead `unavailable` was an instance of. *(18, 25)*
+2. Write the signature of `everyMemberOf` from memory. Then say what breaks if the
+   function is not curried, and what breaks if `[Union] extends [List[number]]`
+   loses its square brackets — the *how* in each case, not the fact. *(25)*
+3. A field is added to a Zod schema and not to the hand-written type below it,
+   joined by `const value: Type = schema.parse({})`. Give the number of errors,
+   then the same for the opposite drift, then the rule about assignability that
+   makes both answers inevitable. *(25)*
+4. You are reviewing a pull request that adds a completeness check. State the one
+   question that ranks it. Then rank these four and say which two are closest and
+   what separates them: a test against `schema.options`; an `everyMemberOf` call;
+   a test against a second hand-written copy; a `Record<Union, true>` in a test
+   file. *(25)*
+5. Trace `STAKE_ORDER.indexOf(level)` returning `-1` through `compareStakes`,
+   `isAtLeast` and `highestStake`, and say what the Gate does with a change
+   carrying that level — naming the two rungs involved and what each returns, and
+   why `null` from a rung is not the same as a rung deciding. *(09, 25)*
+6. Nothing in the runtime throws, and every refusal is a member of a closed set.
+   Say what that buys an audit trail, then say which of this lesson's three
+   questions the audit trail depends on being true and which of them anything
+   checks. *(05, 16, 25)*
+7. `everyMemberOf` does nothing at run time, and nothing in the runtime reads
+   `copy` or `role`. Say what each of those two facts buys, what each costs, and
+   name the class of consumer that gets no protection from the first. Then say
+   what the two have in common as a *kind* of guarantee. *(15, 24, 25)*
+8. There are four operations in a delta, and `TREE_OPERATIONS` says so in a value.
+   Say why that list exists at all given that the number is not expected to
+   change, what checks it today, and what would have to be true for the check to
+   be worth less than it looks. *(03, 25)*
+
+Question 4 is the point of the set — it is the one that transfers to code that
+has nothing to do with Loom. Question 3 is where a confident half-answer is most
+likely: an answer that gives the two numbers and not the asymmetry underneath
+them has memorised the result rather than the rule.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1226,3 +1273,4 @@ renders this file rather than restating it.
 | AA | 2 days after L22 | | |
 | AB | 2 days after L23 | | |
 | AC | 2 days after L24 | | |
+| AD | 2 days after L25 | | |

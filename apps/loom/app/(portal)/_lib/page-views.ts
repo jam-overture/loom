@@ -5,8 +5,15 @@ import { screenName } from "./screen-names"
 import type { PlainLine } from "./vocabulary"
 
 /**
- * The five things the portal can tell you about one page, and how to get to each
+ * The six things the portal can tell you about one page, and how to get to each
  * of them.
+ *
+ * It was five until 15 September, when the reader view landed and the strip grew
+ * the one question on it that is not about Loom: *what did people do?* The
+ * others are all answerable from the record of what was proposed and accepted,
+ * which is why they existed first — and it is exactly why the missing one was
+ * the valuable one, because a deployment that cannot see what its readers did
+ * has no way to judge any of the changes the other five describe.
  *
  * The portal's rail is organised by screen, which is how the portal is built
  * rather than how anybody uses it. A person does not think "I will visit the
@@ -45,7 +52,7 @@ import type { PlainLine } from "./vocabulary"
  * on the run that rewrites its screen.
  */
 
-export type PageViewKey = "page" | "asked" | "changed" | "trust" | "checkup"
+export type PageViewKey = "page" | "asked" | "changed" | "trust" | "checkup" | "readers"
 
 export type PageView = {
   readonly key: PageViewKey
@@ -63,6 +70,13 @@ export type PageView = {
  * it, then what actually happened, which is the order those two occur in. Trust
  * and the checkup come last because both are judgements *about* the first three
  * and neither is answerable until they exist.
+ *
+ * `What did people do?` sits between the record and the judgements, and the
+ * position is the argument: the first three are what Loom did to the page and
+ * the last two are whether it did it well, while this one is what happened to
+ * the page once it was out in the world. It is the only view here that is not
+ * about Loom at all, and it is the only one whose answer could change without
+ * anybody asking for anything.
  */
 const VIEWS: readonly {
   readonly key: PageViewKey
@@ -73,6 +87,7 @@ const VIEWS: readonly {
   { key: "page", label: "The page", path: "/portal/pages" },
   { key: "asked", label: screenName("/portal/activity"), path: "/portal/activity" },
   { key: "changed", label: screenName("/portal/history"), path: "/portal/history" },
+  { key: "readers", label: "What did people do?", path: "/portal/readers" },
   { key: "trust", label: "Can you trust it?", path: "/portal/trust" },
   { key: "checkup", label: "Does it add up?", path: "/portal/checkup" },
 ]
@@ -178,6 +193,11 @@ const SCOPED_LEADS: Readonly<Record<ScopedView, { readonly before: string; reado
       before: "Every change that has actually been made to ",
       after:
         ", newest first — and, for each one, exactly what undoing it would put back. The page as it stands keeps no record of what it replaced; this does.",
+    },
+    readers: {
+      before: "How far people got down ",
+      after:
+        ", what they opened and what they clicked — part by part, and per version of the page, so a change can be read against the one before it. Visits are counted; nobody is identified.",
     },
     trust: {
       before: "Every time the AI proposes a change it says how sure it is. This is how those claims have held up on ",

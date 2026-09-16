@@ -3,6 +3,7 @@ import { describeNestedTarget } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import { describeRedirectedSubmission } from "./redirection.js"
+import { describeRepointedBinding } from "./repointing.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -33,6 +34,7 @@ export type StakeFactorCode =
   | "discards-later-work"
   | "nested-target"
   | "redirected-submission"
+  | "repointed-binding"
 
 export type StakeFactor = {
   readonly code: StakeFactorCode
@@ -270,6 +272,38 @@ const redirectedSubmission = ({ analysis }: StakeInput): StakeFactor | null => {
   }
 }
 
+/**
+ * A region pointed at different data, as damage.
+ *
+ * `high`, plus a rule in the Gate, for every reason `redirectedSubmission` above
+ * gives — and the pairing is the argument. That factor measures where a
+ * visitor's data goes; this one measures which of the host's data arrives, and
+ * they are the two ends of one pipe. Repointing is often exactly right: a
+ * deployment that splits one catalogue into two repoints its pages, and refusing
+ * that would mean no proposal could ever move a binding at all. What must not
+ * happen is that it goes through without anybody noticing, which is a question
+ * of who decides rather than of whether it may be done.
+ *
+ * A level alone cannot say "never auto-apply" while ceilings are per origin
+ * (0002), so the rule carries that and the level carries the damage. Which of a
+ * deployment's data comes out should not depend on who asked for it to change.
+ *
+ * Host-independent, so no vocabulary knob: `loom:data` is the runtime's own key,
+ * and both sources were registered by the host in either case.
+ */
+const repointedBinding = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { repointedBindings } = analysis
+  if (repointedBindings.length === 0) return null
+
+  return {
+    code: "repointed-binding",
+    level: "high",
+    detail: `repoints ${
+      repointedBindings.length === 1 ? "a binding" : `${repointedBindings.length} bindings`
+    }: ${repointedBindings.map(describeRepointedBinding).join("; ")}`,
+  }
+}
+
 const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   protectedTypeRemoved,
   protectedTypeTouched,
@@ -281,6 +315,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   discardsLaterWork,
   nestedTarget,
   redirectedSubmission,
+  repointedBinding,
 ]
 
 export const assessStakes = (input: StakeInput, policy: GatePolicy): StakeAssessment => {

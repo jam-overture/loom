@@ -28,6 +28,7 @@ const WHY_HELD: Record<QueuedChange["reason"], string> = {
   irreversible: "Undoing it would not undo what it did",
   "discards-later-work": "It would write over work already in the log",
   "redirected-submission": "It would send a form somewhere else",
+  "repointed-binding": "It would show different data than before",
   "confidence-below-floor": "The planner was barely guessing",
   "stakes-at-refusal-floor": "Past what this deployment will offer at all",
   "within-policy": "Nothing in the policy stood in the way",

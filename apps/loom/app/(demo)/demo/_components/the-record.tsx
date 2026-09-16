@@ -4,6 +4,7 @@ import type { MarkedPage } from "@/app/(demo)/_lib/marked"
 import type { MovedNote } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
+import { reasoningFor } from "@/app/(demo)/_lib/reasoning"
 import { askedLine, undoOffer } from "@/app/(demo)/_lib/undo"
 
 import { AnswerInView } from "./answer-in-view"
@@ -139,12 +140,26 @@ export const TheRecord = ({
            * about the marks the page drew.
            */
           const words = marked.words.get(record.recordId)
+          const reading = held.get(record.recordId)
 
           return (
             <RecordCard
               key={record.recordId}
               record={record}
               offer={undoOffer(record, records)}
+              /*
+               * Whether this card still argues its case or folds it under one
+               * line — read here because it is a fact about the *list*: which
+               * card is newest, and whether this one's hold is still live.
+               * Same shape as `offer` and `asked`, and for the same reason.
+               *
+               * `moved` comes off the held reading rather than the record,
+               * which is the same source `awaitingAnswer` above uses to decide
+               * the rail must not scroll to a question nobody can answer — and
+               * the two must agree: a card the rail has given up on is not a
+               * card whose reasoning is urgent.
+               */
+              reasoning={reasoningFor(record, records, reading?.moved !== undefined)}
               /*
                * An undo is quoted by the control that raised it, and which
                * control that was is a fact about the card above this one: an
@@ -156,7 +171,7 @@ export const TheRecord = ({
               {...(words === undefined || marked.tone === undefined
                 ? {}
                 : { mark: { label: words, tone: marked.tone } })}
-              {...(held.get(record.recordId) ?? {})}
+              {...(reading ?? {})}
             />
           )
         })}

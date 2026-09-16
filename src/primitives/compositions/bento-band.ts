@@ -59,6 +59,7 @@ const FEATURES = [
 
 export const bentoBand: Composition = {
   id: "bento",
+  part: "bento",
   label: "Feature mosaic",
   promise: "Four features in cells of unequal width, with the first running across the top.",
   rationale:
