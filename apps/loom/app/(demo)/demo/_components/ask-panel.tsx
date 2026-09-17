@@ -4,6 +4,11 @@ import { useActionState } from "react"
 
 import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
 import { toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
+import {
+  ASKS_HEADING,
+  ASKS_HEADING_WHILE_WAITING,
+  type SetAside,
+} from "@/app/(demo)/_lib/set-aside"
 
 import { askForChange } from "../actions"
 
@@ -39,6 +44,13 @@ import { askForChange } from "../actions"
  * The revision the visitor was looking at travels with the ask. That is not
  * client authority: it is the client saying what it saw, so the server can
  * refuse a change aimed at a page that has moved.
+ *
+ * **The panel has a second state, and it is the one a stranger reaches on their
+ * second press.** Once an ask is waiting on an answer, every control here moves
+ * the page on and kills it — so the panel says so before the press, offers the
+ * way down to the open question, and gives up its green button to the one under
+ * that question. `set-aside.ts` owns both the words and the measurement they are
+ * for.
  */
 
 /**
@@ -69,15 +81,48 @@ export const AskPanel = ({
   revision,
   available,
   modelConfigured,
+  waiting,
 }: {
   readonly revision: number
   readonly available: readonly DemoPresetId[]
   readonly modelConfigured: boolean
+  /**
+   * The question the visitor already has open, when they have one.
+   *
+   * Computed by the page rather than here, for the reason every other reading on
+   * this surface is: whether a hold can still be answered is a fact about the
+   * store and the tree's revision together, and the panel has neither.
+   */
+  readonly waiting?: SetAside
 }) => {
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
   const offered = DEMO_PRESETS.filter((preset) => available.includes(preset.id))
-  const leading = offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
+  const nominated = offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
+
+  /**
+   * The green button, and it steps aside while a question is open.
+   *
+   * **The green on this rail belongs to the demo's next step, and once a
+   * question exists that step is not a new ask.** With nothing open the green is
+   * *Take the numbers off* — the press that meets the Gate. With a question open
+   * it is **Apply this change**, down inside the card (`record-card.tsx`), which
+   * is the press that gets past it. A green here at the same time would have the
+   * panel competing with the question it just produced, at the size that wins,
+   * for the press that costs the visitor the question.
+   *
+   * So the claim is about this panel rather than about the count: a card that is
+   * waiting carries exactly one green (`record-card.test.tsx`), and while any is,
+   * this panel carries none. A visitor holding two questions has two cards
+   * offering an answer, which is right — each is the next step for its own ask.
+   *
+   * The preset is not withdrawn — it drops into the list below, at the position
+   * the table gives it, so the four asks already there do not move under the
+   * visitor's cursor. Withdrawing it would narrow the demo at exactly the moment
+   * a visitor is exploring, which is the shape of this fix this lane argued
+   * against (`set-aside.ts`).
+   */
+  const leading = waiting === undefined ? nominated : undefined
   const rest = offered.filter((preset) => preset.id !== leading?.id)
 
   return (
@@ -105,9 +150,76 @@ export const AskPanel = ({
         </form>
       )}
 
+      {/*
+        * What the next press would cost, above everything it is true of — and
+        * pinned, because the one thing a caution has to be is on screen.
+        *
+        * **Measured, after the first version of it was scrolled past.** Pressing
+        * the lead sends `AnswerInView` to bring the 503px card into the rail's
+        * scroller, and `block: "nearest"` — the minimum movement, which is the
+        * right rule — puts the rail at a scrollTop of about 400. That carries
+        * the claim, the frame sentence, the list's own heading, the first ask
+        * and a caution sitting statically above them all off the top. What was
+        * left on screen was four live buttons and the question they would kill,
+        * with nothing between them saying so: the warning had been written and
+        * placed exactly where the visitor was not looking.
+        *
+        * So it sticks to the top of the rail's scroller for as long as any ask
+        * control is in view, and releases when the panel does.
+        *
+        * **The fives here are the rail's own `p-5`**, and they are a deliberate
+        * coupling rather than magic: `-mx-5` and `px-5` take the strip to both
+        * edges so nothing shows beside it, and `lg:-top-5` pins it flush with
+        * the scroller's top rather than twenty pixels down — measured, because a
+        * sticky `top-0` inside a padded scroller leaves exactly that gap and a
+        * button's bottom edge slides through it. The bottom border is what makes
+        * the card passing underneath read as passing underneath.
+        *
+        * Only on a wide screen, because only there is the rail a scroller. On a
+        * phone the document scrolls and the strip pins to the viewport, where a
+        * negative offset would take the first line of the sentence off the top
+        * of it. `record-card.tsx` carries the matching `scroll-mt-28` for both,
+        * so the card the link points at does not land behind this.
+        *
+        * **Amber, which is not decoration.** It is the tone this rail gives an
+        * open question everywhere else it has one — the `Waiting on you` badge,
+        * the rule on the card's *what would happen*, the ring on the stage — and
+        * this is a fourth place saying the same thing about the same question.
+        *
+        * It governs the free-text box as well as the buttons, which is why it is
+        * a sibling above both rather than a line inside the list: a sentence
+        * posted to the model moves the page exactly as a preset does.
+        */}
+      {waiting && (
+        <div className="bg-surface-page border-edge-subtle sticky top-0 z-10 -mx-5 border-b px-5 py-3 lg:-top-5 lg:pt-5">
+          <div className="border-awaiting-ink flex flex-col gap-1.5 border-l-2 pl-2.5">
+            <p className="text-ink-secondary text-xs">{waiting.sentence}</p>
+            {/*
+              * The way out, and it is a link rather than a button because it
+              * goes somewhere rather than doing something. `record-card.tsx`
+              * puts the record id on the card's own element, so this lands on
+              * the card carrying **Apply this change** — the answer is given
+              * there, on the card that says what it is answering, and never
+              * from up here where the question is not in sight.
+              */}
+            <a
+              href={`#${waiting.recordId}`}
+              className="text-ink-secondary hover:text-ink group inline-flex items-center gap-1.5 self-start text-xs transition-colors"
+            >
+              {waiting.answerLabel}
+              <span aria-hidden="true" className="transition-transform group-hover:translate-y-0.5">
+                ↓
+              </span>
+            </a>
+          </div>
+        </div>
+      )}
+
       {rest.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-ink-muted text-2xs tracking-wide uppercase">or ask for one of these</p>
+          <p className="text-ink-muted text-2xs tracking-wide uppercase">
+            {waiting === undefined ? ASKS_HEADING : ASKS_HEADING_WHILE_WAITING}
+          </p>
           <ul className="flex flex-col gap-1">
             {rest.map((preset) => (
               <li key={preset.id}>

@@ -7,6 +7,7 @@ import { comparisonBand } from "./comparison-band.js"
 import { contactBand } from "./contact-band.js"
 import { credentialsBand } from "./credentials-band.js"
 import { ctaBand } from "./cta-band.js"
+import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
 import { featuresBand } from "./features-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
@@ -15,11 +16,14 @@ import { heroBand } from "./hero-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
 import { metricsBand } from "./metrics-band.js"
+import { metricsChartBand } from "./metrics-chart-band.js"
 import { navBand } from "./nav-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
+import { proofStoryBand } from "./proof-story-band.js"
 import { stepsBand } from "./steps-band.js"
+import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
@@ -40,6 +44,7 @@ export {
   contactBand,
   credentialsBand,
   ctaBand,
+  ctaSignupBand,
   faqBand,
   featuresBand,
   featuresAlternatingBand,
@@ -48,11 +53,14 @@ export {
   heroSplitBand,
   integrationsBand,
   metricsBand,
+  metricsChartBand,
   navBand,
   pricingBand,
   pricingMatrixBand,
   proofBand,
+  proofStoryBand,
   stepsBand,
+  stepsCardsBand,
   teamBand,
   testimonialsBand,
   testimonialsWallBand,
@@ -106,12 +114,15 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   heroBand,
   heroSplitBand,
   proofBand,
+  proofStoryBand,
   featuresBand,
   featuresAlternatingBand,
   bentoBand,
   stepsBand,
+  stepsCardsBand,
   integrationsBand,
   metricsBand,
+  metricsChartBand,
   pricingBand,
   pricingMatrixBand,
   comparisonBand,
@@ -124,6 +135,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   faqBand,
   contactBand,
   ctaBand,
+  ctaSignupBand,
   footerBand,
 ]
 

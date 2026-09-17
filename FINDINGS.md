@@ -8,11 +8,224 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-17 — lesson 25's worked example is a defect in the Gate, and fixing the defect is what the lesson is now blocking
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` first, then
+`Loom daily build` · **Status:** open — **the order matters and the build is red
+between the two**, so their half lands first
+
+`framework-40` closed your 15 September finding about `STAKE_ORDER`, but only the
+half that a type can check. The other half — `rankOf` answering the top of the
+scale instead of `-1` for a level it cannot place — is written, measured, argued
+in
+[0166](decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) as
+**Proposed**, and left out of the branch, because making it turns `pnpm verify`
+red for all four surfaces.
+
+**Why it goes red.** Lesson 25 does not merely mention this arithmetic; it is
+built on it. `transcripts.test.ts` re-runs exercise D's fenced block against the
+live runtime, and the fix changes five of its nine printed lines:
+
+| exercise D prints | today | after the fix |
+| --- | --- | --- |
+| `compareStakes(fifth, critical)` | `-4` | `1` |
+| `compareStakes(fifth, low)` | `-1` | `4` |
+| `isAtLeast(fifth, critical)` | `false` | **`true`** |
+| `isAtLeast(fifth, low)` | `false` | **`true`** |
+| `highestStake([low, fifth])` | `low` | **`catastrophic`** |
+
+Which is one test. The prose is the larger half, and none of it is checked by
+anything:
+
+- **The warm-up, question 4** quotes `expect(STAKE_ORDER).toEqual([…])` *"in
+  full"* and asks the reader to say what it does and does not protect against.
+  That test no longer exists — it was replaced by one held against
+  `stakeLevelSchema.options`. The exercise's answer is now *"nothing, it was
+  replaced"*, which is a fine answer to a question the lesson is no longer asking.
+- **The five-row taxonomy** puts `STAKE_ORDER` in row 5, *nothing / nothing*. It
+  is row 1 now, *the compiler, at the declaration*. The row itself is still true
+  and still worth teaching; its named instance moved.
+- **The paragraph after the table**, and **three paragraphs after exercise D**,
+  read the transcript line by line — *"`isAtLeast(fifth, "low")` is `false` is the
+  line to stare at"*, *"the most severe change the system can describe would be
+  applied without being mentioned"*.
+- **"This is not live today"** appears twice, resting on the schema refusing a
+  fifth member. After `framework-40` there is a second reason, and it is the one
+  the lesson is about: the list stops compiling. That is arguably a better ending
+  for the lesson than the one it has.
+
+**What this lane thinks the shape is, offered rather than decided.** The lesson
+does not lose its example, it gains a second act — the defect, then what closing
+it cost and what closing it could not reach. The part `everyMemberOf` fixed and
+the part it could not are a sharper pair than the defect alone, because the
+second is the one that explains why a compile-time check is not the whole answer.
+But it is your lesson and this is a reader's opinion.
+
+**The measurement, so the stakes are yours to weigh.** Under
+`defaultGatePolicy`, an assessment carrying an unplaceable level is **`accepted` /
+`within-policy`**, where `critical` is **`rejected`**. It is not reachable through
+`stakeLevelSchema`, and after `framework-40` it is not reachable by adding a
+member to it either — the remaining routes are a cast at a seam and a disposition
+read back off a record a newer deployment wrote. So this is not urgent. It is
+also not nothing, and it is the second time in two days that a runtime fix has
+sat behind surface prose that counts something (#320 is the first, for
+`Loom docs`).
+
+`stake-level.test.ts` currently **pins the wrong behaviour on purpose**, with a
+comment saying so and pointing at 0166. That block is what inverts when your half
+lands. Ping this lane and it is a ten-line change.
+## 2026-09-17 — the class of defect this lane keeps finding by accident has a name now: a CSS value that a *layout context* overrides, and nothing looks for it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — a generalisation of the 16 September entry below, filed because the
+fourth instance was found by a different mechanism than the first three and the
+existing finding does not cover it
+
+On 16 September this lane filed *"an inline style beat a rule for the third time
+in three days"* and proposed a check that walks the rendered markup for **inline
+properties also named in the stylesheet**. That check would have caught all
+three instances it was written about. **It would not have caught today's**, and
+the difference is what this entry is for.
+
+`loom.badge` declares `display: "inline-flex"`, which means *shrink-wrap to your
+content*. Nothing overrides it and no stylesheet rule contradicts it. It is
+simply **not what `inline-flex` means once the element is a flex item**: a flex
+container blockifies its children and stretches them on the cross axis, so a
+badge placed directly inside a `loom.card` — a flex column — becomes a full-width
+bar. Measured in Chromium at 1280px:
+
+| | badge reading `01` | card inner width |
+| --- | --- | --- |
+| before | **281px** | 281px |
+| after `align-self: flex-start` | **40px** | 281px |
+
+Four primitives in the same directory already carry that line — `control.ts`,
+`loom.perk`, `loom.feature`, `loom.milestone` — each with a comment saying why.
+`loom.badge` never did, and `catches-the-eye.specimen.ts` has photographed
+"Most popular" as a full-width bar since it shipped. Nobody reported it; the
+specimen is about lights and nobody was looking at the badge.
+
+**So the shape is: a declaration that is correct in isolation and wrong in the
+context the element is placed into.** No rule is overridden, so a
+stylesheet-versus-inline diff sees nothing. The properties in this family are
+small and enumerable — `display: inline-*` under a flex parent, `width` under a
+grid item, `margin` collapsing — and the only instrument that sees any of them
+is a browser with a layout engine, which is the specimen harness and not
+`vitest`.
+
+**Two shapes, and I do not think the second is worth it yet:**
+
+1. **Extend the specimen harness to assert, not only photograph.** It already
+   has a browser, a served page and a viewport. A specimen could declare a
+   handful of expectations — *this element is narrower than its parent* — and
+   fail the run. Cheap, because the expensive half exists. This is the one I
+   would build.
+2. **A general audit for the family.** Walk every rendered primitive in every
+   layout context and flag the combinations. Comprehensive and almost certainly
+   not worth it: the number of real instances is four in a month, and the false
+   positives (a `loom.button` with `width: "full"` *wants* to stretch) need a
+   per-primitive allowlist that is the same work as writing the assertions by
+   hand.
+
+The badge itself is fixed and tested in this lane's branch. What is filed is the
+instrument, and **the 16 September entry's proposal should not be closed by
+building it** — it catches a different family, and both are real.
+
+Offered, not asked for. Nothing is blocked.
+## 2026-09-16 — the submit seam never got the reason split the data seam got, and the page that counts to five is why it is worth planning
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, then
+`Loom daily build` · **Status:** open — **not a defect today**; it is a change
+that cannot be made from one lane alone, filed so the two halves are done in the
+right order.
+
+Found while closing the 14 September `EMPTY_DATA_RESOLUTION` finding, whose fix
+is [0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+
+On 12 September `not-resolved` was split out of `no-such-source` in
+`DataUnavailable`, and `src/data/adapter.ts` records why at length: an
+unregistered source is fixed in the registry by whoever owns the data, a binding
+nothing resolved is fixed in the composition root by whoever wired the render,
+and sharing a code made a diagnostic say *"no source is registered for it — this
+binding was never resolved"*, which is two sentences contradicting each other.
+
+**`SubmissionUnavailable` never got that split, and carries the same contradiction
+today.** `buildSubmissionResolution` gives a planned submission with no answer:
+
+```ts
+reason: "no-such-endpoint",
+detail: "this submission was never resolved",
+```
+
+and `describeSubmissionUnavailable` renders that as *"no endpoint is registered
+for it — this submission was never resolved"*. Word for word the sentence the
+data seam's comment holds up as the thing not to say. Nothing behaves wrongly:
+the form renders untargeted either way and the diagnostic is emitted. What is
+wrong is that it sends a reader to the registry for a fault in their composition
+root, and that anything counting reasons pools the two.
+
+**Why this is not in the fix that found it.** Adding `not-resolved` to
+`SubmissionUnavailable` widens a published union, and `(docs)` is built on its
+being exactly five:
+
+| where | what breaks |
+| --- | --- |
+| `(docs)/_lib/submit/claims.test.ts:75` | `Record<SubmissionUnavailable["reason"], true>` — fails to compile, naming the new reason. The comment above it says it is *"kept where a sixth reason would be added"*, so this is working exactly as designed |
+| `(docs)/_lib/submit/claims.test.ts` | *"says five ways there is no target, and prints five"* — asserts `trouble.length === 5` and that the page's source contains `"Five reasons"` |
+| `(docs)/_lib/submit/seam.test.tsx:181` | asserts the sorted list of the five reason names |
+| `(docs)/_lib/submit/endpoints.ts:96` | a comment calling `no-such-endpoint` *"the fifth"* |
+
+The compile failure is mechanical. The rest is not: the page has to produce a
+sixth trouble row and its prose has to stop saying five, and that is **surface
+content in the documentation lane**, which the framework brief says not to write.
+`Loom docs` also owns the page whose argument changes, so it should decide how a
+sixth row reads rather than be handed one.
+
+**Suggested order, and it only works this way round.** `Loom docs` says whether
+the page wants the sixth reason and what it says; then this lane adds
+`not-resolved` to the union, gives `buildSubmissionResolution` the honest reason,
+and fixes the sentence — in one pull request with the fixtures, because between
+the two halves the build is red. Doing it in the other order breaks `(docs)` on
+`main`.
+
+**Not urgent.** No page is wrong, no form misbehaves, and 0164 deliberately routed
+around it: the new `submit-unresolved` diagnostic carries `resolution:
+"unrelated"` and says *"came from resolving a different plan than this tree"*
+without needing a new reason at all. This finding is about the older, narrower
+sentence inside `buildSubmissionResolution`, which is still contradicting itself.
+
+---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — **not a defect**; nothing behaves wrongly today, and the thing to decide
-is what the test should be asserting
+**closed by `framework-40-a-check-that-cannot-fail`**, taking shapes 2 and 3 and
+not shape 1
+
+Re-measured on this checkout before deciding: the line deleted from a working
+copy, then `src/deadline.test.ts`, `src/data/resolve.test.ts`,
+`src/submit/resolve.test.ts` and `src/interpretation/interpreter.test.ts` run
+together — **90 tests, all passing**, including the one named for the mechanism.
+The file was restored from a copy rather than by `git checkout`, which is the trap
+#313 recorded and #321 hit.
+
+**Shape 1 was not taken and the reason is worth recording.** Asserting the
+mechanism means constructing a case where `Promise.race` is not what subscribes,
+and there is no such case while `race` is what the function returns — any test
+that reached the `catch` would have to be testing a `withCeiling` that does not
+exist yet. A test that can only be written after the refactor it is insuring
+against is not a test, it is a plan.
+
+So: the test is renamed to what it checks — *"does not let a late rejection reach
+the process"* — and its comment says outright that it passes with the line
+deleted, and why that is still worth keeping the line for. The module comment
+stops claiming the property as this module's and names `Promise.race` as where
+most of it comes from. The line keeps a one-line comment saying which half is
+load-bearing.
+
+The line stays, as the finding recommended. What is gone is the repository
+containing a sentence that reads *this module prevents X* when the honest version
+is *this module is written so that X stays impossible if the race is ever
+replaced*.
 
 Found while researching a lesson on the ceiling (0140) that I did not end up
 writing — lesson 18 already teaches most of it, so the subject went to
@@ -163,7 +376,35 @@ comment avoided on 13 September and was right to.
 ## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — latent, and the second half is one line of schema away from being live
+**closed by `framework-40-a-check-that-cannot-fail`** for both lists, with the
+runtime half of `STAKE_ORDER` split out and re-filed below, blocked on lesson 25.
+[0166](decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) is
+the record.
+
+Both lists are now `everyMemberOf`, so a member added to either union stops the
+declaration compiling in the file that is wrong. The ranking said *"the fix is
+not obviously `everyMemberOf`"* and offered three shapes; the record takes the
+third — keep the order explicit, force only completeness — and says why deriving
+it from `stakeLevelSchema.options` was rejected, which is that it would make the
+order a member is declared in load-bearing for the Gate's arithmetic.
+
+`stake-level.test.ts` no longer holds the list against a third hand-written copy.
+It holds it against `stakeLevelSchema.options` plus a duplicate check, which is
+the shape `gate.test.ts` already used for `ESCALATION_LADDER`.
+
+**Measured on `main` before and after, because the ranking's point was that
+nothing failed.** A fifth member added to `stakeLevelSchema`: on `main`,
+`pnpm typecheck` clean and all four tests green. On the branch,
+`src/runtime/stake-level.ts(32,51): error TS2554`. A fourth `UnjudgedReason`:
+two errors on the branch, none on `main`.
+
+**The third option — making `rankOf` refuse to answer `-1` — is not in that
+branch, and it is the half with a live consequence.** Measured end to end rather
+than inferred: under `defaultGatePolicy`, whose `refusalFloor` is `critical`, an
+assessment carrying a level the order cannot place is **`accepted` /
+`within-policy`**, where `critical` itself is **`rejected` /
+`stakes-at-refusal-floor`**. It fails open. See the entry filed below for why it
+is deferred rather than shipped, and what has to happen first.
 
 Found while writing lesson 25, which teaches `everyMemberOf` and therefore had to
 rank every completeness check in the runtime in order to explain why the helper
@@ -519,7 +760,22 @@ today, and cheaper to leave until a third case says which way it should go.
 
 ## 2026-09-14 — a bound tree rendered against `EMPTY_DATA_RESOLUTION` drops every question in silence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-39-a-resolution-that-cannot-answer` on 16 September —
+shape (1), fix the door, recorded as
+[0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+The middle row now reports, and the walk reports the same way for the submit
+seam, which had the identical hole and which this finding did not look at.
+Shape (3) is rejected in the record with reasons; shape (2) is rejected too and
+`EMPTY_DATA_RESOLUTION` stays exported. Exercise H keeps working — nothing about
+`buildDataResolution` changed — and the paragraph under it gets its second
+instance rather than going stale, as this finding predicted. One residual is
+named in the record and not fixed: a hand-written resolution answering *some* of
+a node's bindings stays silent, because catching it means parsing on every
+render.
+
+*The original finding follows, unchanged.*
+
 — found while writing Exercise H for lesson 18. Latent rather than live: nothing
 in this repository passes it, and it is exported from the package root.
 
@@ -21063,7 +21319,9 @@ framework routine stopped adding to it on 16 August.
 ## 2026-09-10 — `textIn` has something to ask now, and the queue is still reading text children
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
-open — a note on `Loom demo`'s entry of the same day, not a second ask
+closed by `portal-28-the-words-it-takes-away` on 16 September — the queue calls
+`copyIn`, and the entry's prediction held exactly: what it gained immediately
+was *knowing that the list exists*
 
 `Loom demo` filed *the plain reading of a change prints registered type ids, and
 misses copy held in props* against `(portal)/_lib/effect-view.ts` this morning,
@@ -21242,7 +21500,9 @@ answered by somebody else.
 
 ## 2026-09-01 — `OperationEffect.text` finds no words on a primitive that carries its content in props
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-28-the-words-it-takes-away` on 16 September — the reading reads settings
+now, and says so when it cannot
 
 `(portal)/_lib/proposal-effect.ts:169` — `textIn` walks the subtree and keeps
 only nodes whose `kind` is `"text"`. A `loom.stat-grid` carries every figure it
@@ -25209,7 +25469,13 @@ would move together are the module, the variable name and the `.env.example`
 entry, and that is its own small unit for a run with nothing better to do.
 ## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-19-the-question-in-the-way` (16 September)** — shape (1) taken, and taken
+further than one line: the caution is pinned to the top of the rail because the
+first version of it was measured being scrolled past, and the panel gives up its
+green button while a question is open. Shape (3), the automatic re-ask, is not in
+it and is **filed separately below** on 16 September, which is what this entry
+recommended.
 
 Two presses, in the order the panel puts them in, driven against a real
 `next build` at 1280×900:
@@ -25381,3 +25647,234 @@ free of consequence for your own tests.** Any assertion of the form *this markup
 contains no `data-` attributes*, and any snapshot, changes the day you turn it
 on. It is gated on the switch here, so this deployment's markup is byte-identical
 until somebody sets the variable.
+## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Driven against a real `next build` at 1280×900, two presses of one button:
+
+| | the rail |
+| --- | --- |
+| press **Take the numbers off** | `Waiting on you` · *“Take the numbers band off the page.”* |
+| press **Take the numbers off** again | `Waiting on you` · *“Take the numbers band off the page.”*<br>`Waiting on you` · *“Take the numbers band off the page.”* |
+
+Two cards, word for word identical, each with its own **Apply this change**, each
+about the same four nodes. Answering either applies the removal and moves the
+revision, which kills the other where it stands — so the second press buys the
+visitor a duplicate question and a guaranteed `Nothing changed` card.
+
+**Why it is offered.** `availablePresets` asks each preset whether it has
+anything to do, and `trim.plan` looks for a `loom.stat-grid` on the tree. While
+the removal is only *held*, the grid is still there — a hold changes no tree
+(0017) — so the preset can still plan, and the panel honours `available` exactly
+as it should. Nothing in the chain is wrong: the filter is a question about the
+tree, and the tree has not moved.
+
+**It is reachable in two clicks from the demo's own leading button**, and it got
+easier to notice rather than easier to hit this run: `demo-19` demotes the lead
+into the list while a question is open, so the same ask sits among the others
+rather than under the cursor. The count in the new caution is what surfaced it —
+*“2 questions are still waiting on you”* about one removal asked twice.
+
+**Two shapes, and this lane can do either.**
+
+1. **Do not offer an ask that is already waiting.** The panel already knows which
+   presets produced the open questions: `ChangeRecord.presetId` is stamped by
+   `askedWith` for exactly this kind of use, and `set-aside.ts` already walks the
+   open questions. Filtering those ids out of `available` is small, and it is the
+   same rule `availablePresets` follows — never offer a press whose only outcome
+   is nothing.
+2. **Fold the second ask onto the first.** Honest about what the runtime does
+   (two intents, two proposals) only if the card says so, and it is more
+   machinery than the case deserves.
+
+**Recommend (1)**, with the caution's plural left in place: two *different*
+questions open at once is a real state the demo should keep, and this only stops
+one question being asked of itself twice.
+
+## 2026-09-16 — the automatic re-ask, and whether a surface may ask on a visitor's behalf
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Shape (3) of the 15 September finding closed by `demo-19`, carried out of it
+deliberately. The caution now tells a visitor, before the press, that asking for
+something else sets their open question aside. What it does not do is get the
+question back.
+
+The machinery is already there and already correct: a card the page has moved
+past offers **Ask for this again**, which posts the same `presetId` against the
+revision the page is actually at, through `askForChange` — the identical path the
+panel takes, weighed afresh, and the Gate may hold it again (`PageMovedOn`,
+`moved.ts`). Spending that without waiting to be asked is a few lines.
+
+**The argument, which is why it is not a few lines.** A surface re-asking on a
+visitor's behalf is the demo making a decision, on the one surface whose whole
+claim is that decisions are recorded rather than assumed. That is survivable —
+Loom's claim is not *nothing happens without you*, it is *everything that happens
+is written down* — but only if the re-ask **writes its own record saying it was
+automatic**, in the same plain voice as everything else on the rail: *your
+question was overtaken by a later change, so Loom asked it again against the page
+as it now stands.* `ChangeRecord` has no field for that today, and `origin` is
+the runtime's word for what kind of act an intent was, so this needs either a new
+provenance the demo owns or a new one the runtime does — and the second is
+`Loom daily build`'s, not this lane's.
+
+**It also multiplies cards**, which is the thing three runs of this lane have
+been cutting back. Five presses currently leave three dead cards; re-asking each
+would leave three dead cards *and* three live ones. Superseding the dead card in
+place is the obvious answer and it collides with the maintainer's standing
+direction that **nothing is ever removed**.
+
+**Recommend** it is designed before it is built, and that the design question
+above — what a record says about an ask nobody made — is settled first. Not
+escalated: nothing here touches the tree schema, the delta model or an `Accepted`
+record yet, and it may well not need to.
+
+## 2026-09-16 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane an eighteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil again, and the reason is the one the seventeenth run gave.**
+What decided this unit was a measurement — the rail sitting at a scrollTop of
+about 400 after the press, with the caution that had just been written 40 pixels
+above the fold. No reference gallery answers where a warning has to be. The two
+things this run did reach for instead were both already in the repository: the
+rail's own amber, which it gives an open question in three other places, and its
+own rule that a consequence is said under the control it is about.
+---
+## 2026-09-16 — ninety-six primitives are registered and none of them has said which of its settings a reader reads
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— measured today against `dist/`, and it is now visible on a screen rather than
+latent
+
+`copyIn` landed on 6 September and the portal's review queue started calling it
+today. It distinguishes *this primitive shows no words of its own* from *nobody
+has said* and reports only the second (0122), which is the right bargain and the
+reason this is worth a line.
+
+Counted, not estimated:
+
+```
+node -e "const {STARTER_PRIMITIVES}=require('./dist/primitives/index.js');
+console.log(STARTER_PRIMITIVES.length, STARTER_PRIMITIVES.filter(p=>p.copy===undefined).length)"
+→ 96 96
+```
+
+**All ninety-six.** `loom.code` is the near miss and worth naming so nobody else
+greps for it and stops: it has `text: { copy: "Copy", copied: "Copied" }`, which
+is a declared *string* for its button and not a copy declaration.
+
+`loom.stat` is the sharpest case, and 0052 is why it exists at all — a fixed
+field stays a setting, so `value`, `label` and `caption` are props and the part
+has no text children:
+
+```
+copyIn(theStatGrid, demoRegistry)
+→ words: []
+   unread: loom.stat-grid (columns) · loom.stat ×3 (value, label, caption)
+```
+
+That is a real read of `(demo)/_lib/page-tree.ts` against `demoRegistry` on this
+branch, not a fixture.
+
+**What it costs today, on a surface a stranger sees first.** The demo's leading
+ask is *Take the numbers off*, which removes that grid. Until this morning the
+record card said the change took away three pieces and listed no words, which
+is what `Loom demo` filed on 1 September. It now says *"Loom can't list the
+words in 4 parts of this: nobody has said which of their settings a reader
+reads."* That is an improvement — a silence became a stated gap — and it is
+still a caveat on the demo's payoff, and the only thing that removes it is a
+declaration on the primitives.
+
+**The ask, which is small per primitive and only you can make it.** `copy: [...]`
+on anything that shows words it holds itself, `copy: []` on the arrangements
+that show none. The registry refuses a declaration naming a prop the schema does
+not have, so a typo fails at registration rather than quietly reading as "has
+not said". The portal's own four declare `copy: []` and a test now fails on a
+fifth registered without one; the same guard over `STARTER_PRIMITIVES` would end
+this permanently.
+
+Not done here: `src/primitives/` is your lane, and there is nothing in the
+portal that can answer for a component it did not write (0018).
+
+---
+## 2026-09-16 — the review queue has been photographed populated, which is the first of the three screens the 13 September finding named
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe, filed against the standing findings of 13 and 15 September
+
+15 September filed that a portal screen's populated state can be photographed by
+seeding its store's `Symbol.for` carrier from a `--import` preload, and predicted
+that it generalises. It does. `/portal/pages/[treeId]`'s review queue — the
+first screen 13 September named, and the one thing this portal shows that no
+repository, log or build output has ever seen — was photographed with three
+held proposals in it today.
+
+Two things had to be added to the 15 September recipe, and both are the reason
+`pnpm shoot` still cannot take this picture:
+
+- **The carrier is `Symbol.for("loom.portal.holds")`** and what goes on it is a
+  `memoryHoldStore()` with three `HeldProposal`s `hold`ed into it. Nothing is
+  faked past that: the page's own read, its own reading against the served tree,
+  the real Next render, shell and stylesheet. The only fiction is who proposed
+  them — a script rather than a model.
+- **The screen needs a session**, so the script signs in: `LOOM_PORTAL_SESSION_SECRET`
+  and `LOOM_PORTAL_REVIEWERS` set for the run, then fill `input[name="key"]` and
+  **wait on leaving `/portal/sign-in`**. Not on the network, and not on
+  `document.cookie` — the form posts by fetch so the page is idle before the
+  cookie exists, and the cookie is `httpOnly` so the browser cannot be asked.
+  There is no `actor` field: the roster is keyed by the key.
+
+One honest caveat about the third of the three photographs, because it is the
+one the change was for. The caveat sentence fires on a part whose author has not
+declared its copy, and every primitive this portal registers has declared, so
+the fixture's proposal *adds* a piece of a type this deployment does not
+register. That reaches `copyFor` by exactly the path an undeclared registered
+primitive reaches it by — the sentence is about the declaration and not about
+the registration — and it is the honest way to photograph a sentence whose real
+subject is the starter library, filed above.
+
+**Still not the answer to 13 September.** It photographs a state; it does not
+make one reachable. A person evaluating Loom still cannot click to a populated
+review queue.
+
+---
+## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— not a defect and nothing is blocked; a run has to pick one and this run
+explains which
+
+The file has two sections about the same thing and they contradict each other.
+
+*Commit identity*, near the network policy:
+
+> **Author every commit as `jonathanbravecredit <60827135+…>`** … a run that
+> reaches for it authors a commit as an account the Vercel project's team does
+> not know — so the deployment comes back **Blocked**
+
+*Commit identity, and the preview that goes missing*, at the end of the file:
+
+> **Do not set a commit author.** Use whatever the session is already configured
+> with — on every run so far that is `Claude <noreply@anthropic.com>`
+
+Both sections describe the same symptom, a pull request with no preview URL, and
+both are internally consistent. The later one is dated 9 September, names the
+account that actually fails (`jpizzo`, from the session's own opening note), and
+lists *both* working identities including the one the earlier section mandates.
+So the later one appears to be the correct and more recent account, and the
+earlier one to be what it superseded without being edited.
+
+**This run did what the later section says** — set nothing, committed as the
+session default — which is also what every run with a preview has done. Nothing
+rides on the choice as long as it is one of the two; what costs a run is
+reading the first section, setting the author to the maintainer's address from
+the opening note, and losing the preview.
+
+Worth resolving by deleting or dating the earlier section, which is the sort of
+edit only the file's owner should make.

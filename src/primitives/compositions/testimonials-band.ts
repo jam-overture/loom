@@ -71,7 +71,19 @@ export const testimonialsBand: Composition = {
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
       type: "loom.section",
-      props: { eyebrow: "What people say", width: "wide" },
+      /**
+       * The anchor was missing here and present on `testimonials-wall`, which
+       * meant `#testimonials` resolved on a page that had taken the alternate
+       * design and resolved nowhere on a page that had taken this one. A nav
+       * link that works or does not depending on which design of a band a host
+       * chose is the worst shape a defect of this kind can have, because the
+       * page it is broken on is the default.
+       *
+       * An anchor belongs to the **part**, not to the design — the same reason
+       * `hero` and `hero-split` both answer to `#top`
+       * ([0165](../../../decisions/0165-an-anchor-belongs-to-the-part-and-is-unique-over-the-assembled-page.md)).
+       */
+      props: { eyebrow: "What people say", width: "wide", anchor: "testimonials" },
       children: [
         buildSlot(ids, "heading", [
           buildElement(ids, {

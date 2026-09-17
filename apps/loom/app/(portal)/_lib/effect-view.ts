@@ -48,6 +48,22 @@ import type { OperationEffect, ProposalEffect, ValueChange } from "./proposal-ef
  * against the type — *"the loom.heading's title"* — would now sit against an id.
  * `"Changes the title and width of the heading “Prices” n_h."` puts the name
  * where a name belongs, at the end of the clause and not inside a contraction.
+ *
+ * ## The words it takes away, 16 September
+ *
+ * The one sentence on this card that was not a plain-language problem was a
+ * *truth* problem, and it had been wrong since the card was written. `its
+ * words` read text children only, and 0052 keeps a fixed field as a setting —
+ * so every primitive that carries its content in settings reported no words at
+ * all, and a proposal to delete a band of headline figures was described to a
+ * reviewer as taking away three pieces and nothing to read.
+ *
+ * Three sentences come out of that rather than one, because the reading now has
+ * three answers: the words, *how many more there are than the preview shows*,
+ * and the parts whose author has said nothing. The third is the one worth
+ * arguing about, and the argument is on `unreadableSentence`: a silence about
+ * words is not the same news as no words, and a reviewer is the last person who
+ * should have the difference rounded off for them.
  */
 
 const plural = (count: number, noun: string): string =>
@@ -237,10 +253,55 @@ const wordsSentence = (effect: OperationEffect): string | null => {
   if (effect.text.length === 0) return null
 
   const quoted = effect.text.map((line) => `“${line}”`).join(" · ")
+  /**
+   * The cut, said rather than made silently. Three of nine is a preview; three
+   * printed as though they were all of them is an account of a deletion with
+   * six words missing from it, and the reviewer has no way to tell which they
+   * were reading. Found by reading this function against `textTotal` after the
+   * reading it feeds started answering for props as well as text children — a
+   * stat grid crosses the limit on its second figure.
+   */
+  const rest = effect.textTotal - effect.text.length
+  const more = rest > 0 ? ` and ${plural(rest, "word")} more` : ""
 
   return effect.op === "remove"
-    ? `The words it takes away: ${quoted}`
-    : `The words it adds: ${quoted}`
+    ? `The words it takes away: ${quoted}${more}`
+    : `The words it adds: ${quoted}${more}`
+}
+
+/**
+ * The words this reading could not see, said to the person being asked to
+ * approve their deletion.
+ *
+ * `copyIn` has three answers where a text walk had two, and this is the third:
+ * a part whose author has never said which of its settings a reader reads. It
+ * is not *no words* — that is what the old reading called it, and it is how a
+ * proposal to delete a page's headline numbers came to be described as taking
+ * away nothing.
+ *
+ * So it is said, and what it claims is exactly *cannot list* — not that there
+ * are words and not that there are none. Nothing here knows whether a
+ * `loom.stat`'s `value` is a figure a reader reads or a flag nobody sees, and a
+ * portal that guessed would be answering a question only the component's author
+ * can. A reviewer told *I cannot list these* can go and look at the page; one
+ * told nothing has no reason to.
+ *
+ * One sentence for both directions, which is the opposite of the choice
+ * `wordsSentence` makes above, and for a reason rather than for economy: the
+ * direction of words that *are* known is the news, and the direction of an
+ * absence is not. *Adds words I cannot show you* and *takes away words I
+ * cannot show you* prompt the same single action, which is to look.
+ *
+ * *Settings* rather than props, which is the word this file already uses for
+ * the same thing further up — *"Takes away the width of the heading"*.
+ */
+const unreadableSentence = (effect: OperationEffect): string | null => {
+  const parts = effect.unreadable.reduce((total, kind) => total + kind.parts, 0)
+  if (parts === 0) return null
+
+  return parts === 1
+    ? "Loom can’t list the words in one part of this: nobody has said which of its settings a reader reads."
+    : `Loom can’t list the words in ${parts} parts of this: nobody has said which of their settings a reader reads.`
 }
 
 export type PlainOperation = {
@@ -252,6 +313,19 @@ export type PlainOperation = {
   readonly place: readonly string[]
   /** The words arriving or leaving, said in the direction they travel. */
   readonly words: string | null
+  /**
+   * That some of them could not be read, when some could not. `null` on the
+   * ordinary operation, where every type involved has declared — so this line
+   * appears exactly when a reader would otherwise be looking at a silence.
+   */
+  readonly unreadWords: string | null
+  /**
+   * Which types said nothing, and what they carry. Belongs one click down
+   * beside `technical`: the sentence above tells a reviewer they are missing
+   * something, and this tells whoever maintains the primitives what to declare
+   * to end it — `loom.stat ×3 — value, label, caption`.
+   */
+  readonly technicalUnread: readonly string[]
   /** Before and after, per setting. Carried through untouched. */
   readonly changes: readonly ValueChange[]
   /** The delta's own account of this operation, verbatim. Belongs one click down. */
@@ -283,6 +357,11 @@ export const plainOperationEffect = (effect: OperationEffect): PlainOperation =>
     standing: effect.missing ? NOT_ON_PAGE : effect.inert ? NO_CHANGE : null,
     place: effect.placeNames,
     words: wordsSentence(effect),
+    unreadWords: unreadableSentence(effect),
+    technicalUnread: effect.unreadable.map(
+      (kind) =>
+        `${kind.type}${kind.parts === 1 ? "" : ` ×${kind.parts}`} — ${kind.settings.join(", ")}`
+    ),
     changes: effect.changes,
     /**
      * `label` rather than `subject`: the record says what it has always said.
