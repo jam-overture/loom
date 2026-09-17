@@ -11,7 +11,9 @@ import {
   PRODUCT_SURFACES,
   SITE_ROUTES,
   surfaceHref,
+  WHAT_READERS_DO,
 } from "./site"
+import { wordsOf } from "./words"
 
 /**
  * The chrome, as a tree rather than as markup.
@@ -39,6 +41,10 @@ const context = (current = HOME): ChromeContext => ({
 
 const header = (current = HOME): LoomNode => siteHeader(sequentialIdFactory("t"), context(current))
 const footer = (current = HOME): LoomNode => siteFooter(sequentialIdFactory("t"), context(current))
+
+/** The same footer, on a deployment that is counting its readers. */
+const counting = (current = HOME): LoomNode =>
+  siteFooter(sequentialIdFactory("t"), { ...context(current), counting: true })
 
 /** Every element node in the subtree, in document order. */
 const elements = (node: LoomNode): readonly ElementNode[] => [
@@ -252,5 +258,32 @@ describe("the footer", () => {
 
   it("keeps the palette switcher, which is the site's claim made checkable", () => {
     expect(labelOf(footer())).toContain(PALETTE_SWITCHER_LABEL)
+  })
+
+  /**
+   * The disclosure, which is in the chrome because the counting is: a
+   * broadcaster is started by the layout, so the page somebody landed on is not
+   * the page that decides whether they are counted.
+   *
+   * Asserted in both directions. A note that appeared on a deployment counting
+   * nobody would be a false statement about this site, and a note that failed to
+   * appear on one that is counting would be the thing the note exists to
+   * prevent.
+   */
+  it("says what is being counted, on a deployment that is counting", () => {
+    const words = wordsOf(counting())
+
+    expect(words).toContain("This page counts which of its parts you reach")
+    expect(words).toContain("never who you are")
+  })
+
+  it("says nothing about counting on a deployment that counts nobody", () => {
+    expect(wordsOf(footer())).not.toContain("counts which of its parts")
+  })
+
+  it("points the disclosure at the page that says the rest of it", () => {
+    expect(hrefsIn(counting())).toContain(
+      internalHref(ORIGIN, WHAT_READERS_DO.path, DEFAULT_THEME)
+    )
   })
 })

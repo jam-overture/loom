@@ -562,6 +562,7 @@ export const whenItGoesWrongPageTree = (context: WrongContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: WHEN_IT_GOES_WRONG,
+    counting: context.counting === true,
   }
 
   return createTree(

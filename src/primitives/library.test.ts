@@ -1090,6 +1090,30 @@ describe("the pricing band", () => {
     expect(lastPerkAt).toBeLessThan(actionAt)
   })
 
+  it("keeps a badge the width of its label when its parent is a flex column", () => {
+    /**
+     * `display: inline-flex` does not survive being a flex item: a flex
+     * container blockifies its children and stretches them on the cross axis,
+     * so a badge placed directly inside a `loom.card` — a flex column — grew to
+     * the card's full inner width. Measured in Chromium at 1280px on
+     * 17 September: **281px for a badge reading `01`, against a card whose
+     * inner width is 281px**, in the `steps-cards` band and in
+     * `catches-the-eye.specimen.ts`, which has photographed "Most popular" as a
+     * full-width bar since it shipped. After `align-self`, 40px.
+     *
+     * Asserted on the declaration rather than on the width, because vitest has
+     * no layout engine — and that is the honest limit of this test. What it
+     * catches is the line being dropped, which is how the defect got here: four
+     * neighbours in this directory carry it and `loom.badge` never did.
+     */
+    const { markup } = render(pricingPage(EDITORIAL))
+    const labelAt = markup.indexOf("Most popular")
+    const badge = markup.slice(markup.lastIndexOf("<span", labelAt), labelAt)
+
+    expect(labelAt).toBeGreaterThan(-1)
+    expect(badge).toContain("align-self:flex-start")
+  })
+
   it("declares the two strings a perk owns, so a deployment has something to replace", () => {
     /**
      * 0060's seam, adopted. The strings were inline in the component until the

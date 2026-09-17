@@ -449,6 +449,7 @@ export const yourComponentsPageTree = (context: PageContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: YOUR_COMPONENTS,
+    counting: context.counting === true,
   }
 
   return createTree(

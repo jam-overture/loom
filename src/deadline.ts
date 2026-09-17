@@ -50,10 +50,17 @@ export const describeCeiling = (ms: number): string => {
  * implementation that ignores the signal still cannot delay the answer — it can
  * only fail to release what it is holding.
  *
- * This never rejects for a reason `attempt` did not give it, and it never leaves
- * a rejection unhandled: a promise that loses the race is still going to settle,
- * and an unhandled rejection arriving after the answer would take a Node server
- * down for a call the runtime had already reported on.
+ * This never rejects for a reason `attempt` did not give it, and a rejection
+ * arriving after the race is decided never reaches Node as an unhandled one —
+ * which would take a server down for a call the runtime had already reported on.
+ *
+ * Most of that second half is `Promise.race`'s, not this module's: `race`
+ * subscribes to every promise it is handed, synchronously, so the loser already
+ * has a reaction attached by the time it settles. The explicit `catch` below
+ * therefore changes nothing about how this code behaves today, and `deadline.test.ts`
+ * says so where it would otherwise read as the test of a mechanism it cannot see.
+ * The line stays because the property is worth keeping true under an edit that
+ * replaces the race with a hand-rolled resolver, where it stops being free.
  */
 export const withCeiling = <T>(
   ceilingMs: number,
@@ -71,6 +78,7 @@ export const withCeiling = <T>(
   })
 
   const answered = attempt(controller.signal)
+  /** Belt to `race`'s braces, and the module comment says which is load-bearing. */
   answered.catch(() => undefined)
 
   return Promise.race([answered, reached]).finally(() => {

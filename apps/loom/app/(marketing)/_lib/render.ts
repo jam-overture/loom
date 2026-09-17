@@ -25,6 +25,7 @@ import {
 } from "./pages/when-it-goes-wrong"
 import { whoCanAskPageTree, type AskersContext } from "./pages/who-can-ask"
 import { yourComponentsPageTree } from "./pages/your-components"
+import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
 import {
   HOME,
@@ -306,15 +307,42 @@ export const pageTreeFor = async (
  * asynchronous. The registry that validates the props and the theme registry
  * that resolves the root are passed here and only here, so a page cannot be
  * rendered without both.
+ *
+ * **`addressed` writes each node's id and type onto the markup**, and the root's
+ * tree id and revision, which are the addresses a reader signal carries (0136).
+ * It is off unless this deployment is collecting, for two reasons that point the
+ * same way: the attributes are bytes in every response and nothing would read
+ * them, and a page carrying the addresses while nothing broadcasts is a page
+ * that looks instrumented and is not. Off, the markup is byte-identical to what
+ * this site served yesterday.
+ *
+ * It is a parameter with a default rather than a lookup inside, so a test can
+ * render both pages — the one that is counting and the one that is not — and a
+ * caller cannot get a page whose markup and whose words disagree.
  */
-export const renderTree = (page: LoomTree): RenderOutput =>
+export const renderTree = (page: LoomTree, addressed = readersCountedHere()): RenderOutput =>
   renderLoomTree(page, {
     resolver: siteRegistry,
     validator: siteRegistry,
     themes: siteThemes,
+    addressed,
   })
 
+/**
+ * The page, with the one fact about the deployment that the page is allowed to
+ * mention, read once.
+ *
+ * Read here rather than in each builder so that the words and the markup cannot
+ * come apart: the same boolean says *this page is counting you* in the footer
+ * and puts the addresses on the bands that would be counted. `counting` in the
+ * context wins when a caller supplies it, which is how the tests render both
+ * halves without an environment variable.
+ */
 export const renderSitePage = async (
   route: SiteRoute,
   context: SitePageContext
-): Promise<RenderOutput> => renderTree(await pageTreeFor(route, context))
+): Promise<RenderOutput> => {
+  const counting = context.counting ?? readersCountedHere()
+
+  return renderTree(await pageTreeFor(route, { ...context, counting }), counting)
+}

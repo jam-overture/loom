@@ -1,3 +1,5 @@
+import { everyMemberOf } from "../closed-set.js"
+
 import type { EpisodeFold, ProposalEpisode } from "./episode.js"
 
 /**
@@ -23,7 +25,21 @@ export type CalibrationVerdict = "survived" | "rejected"
  */
 export type UnjudgedReason = "awaiting-answer" | "failed" | "unsettled"
 
-export const UNJUDGED_REASONS: readonly UnjudgedReason[] = ["awaiting-answer", "failed", "unsettled"]
+/**
+ * The buckets a fold has to open before the first proposal arrives, so a reason
+ * nobody hit still reads as zero rather than as missing.
+ *
+ * Checked where it is written because nothing else could: this union has no
+ * schema to hold it against, one consumer, and a member added without a bucket
+ * costs a telemetry row that never appears — the quietest way a list goes stale.
+ * `src/tree/delta.ts` has named it an exemplar of that remedy since it was
+ * written, which until now it was not.
+ */
+export const UNJUDGED_REASONS: readonly UnjudgedReason[] = everyMemberOf<UnjudgedReason>()([
+  "awaiting-answer",
+  "failed",
+  "unsettled",
+])
 
 /**
  * A repair (0006) is scored as its own proposal, not merged into the one it
