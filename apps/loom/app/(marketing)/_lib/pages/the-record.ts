@@ -582,6 +582,7 @@ export const theRecordPageTree = (context: RecordContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: THE_RECORD,
+    counting: context.counting === true,
   }
 
   /**

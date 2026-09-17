@@ -29,10 +29,16 @@ import { bandsOf, type Band } from "../outline"
  * the arithmetic, run while the page is being built.
  *
  * **Scripted, and the page says so where it prints them.** Nobody's actual visit
- * is in here and none could be: this deployment counts nothing, because counting
- * is off unless a host turns it on (0136). These are the same move as the front
- * door's five prepared requests — invented input, real machinery, and a sentence
- * beside it saying which half is which.
+ * is in here and none ever will be: what this site broadcasts goes to
+ * `/api/reader-signals` on the deployment serving it, and nothing reads a
+ * counter back into a page. These are the same move as the front door's five
+ * prepared requests — invented input, real machinery, and a sentence beside it
+ * saying which half is which.
+ *
+ * Whether the *reader* of that page is being counted is a separate question with
+ * two answers, and the page gives whichever is true of the deployment it is
+ * running on (`readingsLead`). Counting is off unless a host turns it on (0136),
+ * and it is off unless `LOOM_SIGNAL_INTAKE` says otherwise.
  *
  * Pure and deterministic. No clock, no randomness the caller cannot name, and
  * the ids come off the tree it is handed rather than being written here, so a

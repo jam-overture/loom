@@ -51,13 +51,19 @@ import { homePageTree, type PageContext } from "./home"
  *
  * ## What it may claim, and the line it does not cross
  *
- * Two things in the plan are not on `main` yet — the address a browser delivers
- * to, and the portal screen that reads the counters — so **no band on this page
- * promises a screen or an endpoint.** What it claims is what the arithmetic in
- * this repository does, demonstrated by running it: what is counted, what is
- * refused, and what the numbers look like when they come out. A page that
- * described a screen nobody can open would be the one kind of marketing copy
- * this site has never published.
+ * It was written the day before the address a browser delivers to existed, so
+ * **no band on it promises a screen or an endpoint**, and that is still true:
+ * what it claims is what the arithmetic in this repository does, demonstrated
+ * by running it — what is counted, what is refused, and what the numbers look
+ * like when they come out. A page that described a screen nobody can open would
+ * be the one kind of marketing copy this site has never published.
+ *
+ * **What changed on 17 September is that this site is now one of the pages it
+ * is describing.** `/api/reader-signals` landed on `main` (#312), so the layout
+ * starts a broadcaster and these ten pages send batches whenever the deployment
+ * serving them is collecting. Two sentences here are therefore a function of
+ * `context.counting` rather than a claim about somebody else's deployment —
+ * `readingsLead` and `barsAnswer`, both below, with the reasoning beside them.
  *
  * It also does not claim that a page changes itself from what readers did.
  * Deriving a request from a signal is explicitly out of scope in the approved
@@ -101,7 +107,7 @@ export const PLAINLY: Readonly<Record<ReaderSignalKind, { readonly title: string
   },
   activated: {
     title: "They used something in it",
-    body: "A link followed, a button pressed, a field filled in. The band it happened in is named; what was typed is not.",
+    body: "A link followed, a button pressed, a field filled in. The link or the button is named; what somebody typed into it is not.",
   },
   disclosed: {
     title: "They opened something",
@@ -224,6 +230,33 @@ const bandBar = (ids: IdFactory, reading: BandReading): LoomNode =>
   })
 
 /**
+ * Where the numbers in the band below came from, and whether the reader of it
+ * is one of them.
+ *
+ * Both halves are true on either deployment and the order is what changes: the
+ * bars are a fixture in both cases, and *are you being counted right now* has
+ * two answers. It was one sentence with one answer until 17 September, and it
+ * could afford to be — this surface broadcast nothing, so *this site counts
+ * nobody* was true of it by doing nothing at all. It now sends batches when its
+ * deployment is collecting, so the sentence had to become a function of the
+ * deployment rather than a claim about it.
+ *
+ * **Which is the whole of what this site sells, applied to itself.** A page
+ * that can say what changed on it, who asked and which rule allowed it should
+ * certainly be able to say whether it is counting the person reading it, and
+ * *the copy went stale when the wiring changed* is the failure this page's own
+ * questions band promises Loom does not have.
+ *
+ * Two sentences rather than one with a clause swapped, because the useful order
+ * is different: a deployment that counts nobody should lead with the fixture,
+ * and one that is counting should lead with the reader.
+ */
+const readingsLead = (counting: boolean): string =>
+  counting
+    ? `Counting is on here, so this page is counting what you do with it as you read: which of its bands you reach, how long you stay, what you press — and nothing whatever about you. The ${SCRIPTED_VISITS.length} visits in the bars below are still made up, and the arithmetic still is not: they go through the same working your own pages would use, while this page is being built.`
+    : `The visits are made up and nobody reading this page has been counted: counting is off unless you turn it on, and on this deployment it is off. The arithmetic is not made up — ${SCRIPTED_VISITS.length} scripted visits go through the same working the rest of it would use, while this page is being built.`
+
+/**
  * The band the page exists for: the front door, read by twelve people.
  *
  * It is about **this site's own front door** rather than an imagined page,
@@ -238,11 +271,7 @@ const theReadings = (ids: IdFactory, readings: FrontDoorReadings, context: PageC
     { tone: "surface", width: "wide", eyebrow: "Counted, not claimed" },
     "How far down this site's front page people got",
     [
-      prose(
-        ids,
-        `The visits are made up — this site counts nobody, because counting is off unless you turn it on. The arithmetic is not: ${SCRIPTED_VISITS.length} scripted visits go through the same working the rest of it would use, while this page is being built.`,
-        { size: "lead", measured: true }
-      ),
+      prose(ids, readingsLead(context.counting === true), { size: "lead", measured: true }),
       stack(ids, { direction: "column", gap: "normal" }, [
         ...readings.bands.map((reading) => bandBar(ids, reading)),
       ]),
@@ -445,7 +474,23 @@ const thenWhat = (ids: IdFactory, context: PageContext): LoomNode =>
     ]
   )
 
-const asked = (ids: IdFactory): LoomNode =>
+/**
+ * *Do the bars come from real visitors?* — no on either deployment, and the
+ * second sentence is the one that changes.
+ *
+ * A reader on a deployment that is counting them deserves the awkward half of
+ * the answer in the same breath as the reassuring half: the bars are a fixture,
+ * **and** you are being counted, and those two facts are not in tension because
+ * what is kept about you is a band and a number of seconds. Leaving the second
+ * out would be technically answering the question asked and dishonestly
+ * answering the one meant.
+ */
+const barsAnswer = (counting: boolean): string =>
+  counting
+    ? "No. The twelve visits are written down in the code that builds this page, and the working that turns them into those bars is the same working your deployment would run. Your own visit is being counted — counting is on here — but it goes into this deployment's own figures rather than into those bars, and what it adds up to is bands and seconds rather than anything about you."
+    : "No, and they say so where they are. This deployment counts nobody: counting is off unless you turn it on. Twelve visits are written down in the code that builds this page, and the working that turns them into those bars is the same working your deployment would run."
+
+const asked = (ids: IdFactory, counting: boolean): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Questions" }, "The ones people ask about this", [
     buildElement(ids, {
       type: "loom.faq-list",
@@ -488,8 +533,7 @@ const asked = (ids: IdFactory): LoomNode =>
           type: "loom.faq",
           props: {
             question: "Do the bars on this page come from real visitors?",
-            answer:
-              "No, and they say so where they are. This deployment counts nobody. Twelve visits are written down in the code that builds this page, and the working that turns them into those bars is the same working your deployment would run.",
+            answer: barsAnswer(counting),
           },
         }),
       ],
@@ -527,6 +571,7 @@ export const whatReadersDoPageTree = (context: PageContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: WHAT_READERS_DO,
+    counting: context.counting === true,
   }
 
   /**
@@ -554,7 +599,7 @@ export const whatReadersDoPageTree = (context: PageContext): LoomTree => {
         theFunnel(ids, readings),
         neverKnows(ids),
         thenWhat(ids, context),
-        asked(ids),
+        asked(ids, context.counting === true),
         closing(ids, context),
         siteFooter(ids, chrome),
       ],

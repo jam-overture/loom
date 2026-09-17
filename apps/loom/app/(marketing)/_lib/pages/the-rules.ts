@@ -524,7 +524,12 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const theRulesPageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("rules")
-  const chrome: ChromeContext = { origin: context.origin, theme: context.theme, current: THE_RULES }
+  const chrome: ChromeContext = {
+    origin: context.origin,
+    theme: context.theme,
+    current: THE_RULES,
+    counting: context.counting === true,
+  }
 
   return createTree(
     buildElement(ids, {
