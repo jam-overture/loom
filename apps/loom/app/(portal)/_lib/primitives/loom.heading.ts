@@ -23,6 +23,8 @@ export const loomHeading = definePrimitive({
   description: "A section title; level 1 to 3.",
   props,
   slots: [],
+  /** Shows no words of its own — every one of them is a child. `registry.ts` has why `[]` is said. */
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const level = LEVELS[given.level ?? 2]
 

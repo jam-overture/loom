@@ -118,7 +118,13 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
    */
   const changes = (holds.ok ? holds.value : []).map((held) => ({
     held,
-    effect: describeProposalEffect(rendered.value.tree, held.proposal.delta),
+    /**
+     * The registry is the third half of the reading, and it is this
+     * deployment's: which of a part's settings a reader reads is declared by
+     * whoever wrote the component, so the only honest answer available here is
+     * the one the primitives this host registered gave.
+     */
+    effect: describeProposalEffect(rendered.value.tree, held.proposal.delta, portalRegistry),
   }))
 
   /**

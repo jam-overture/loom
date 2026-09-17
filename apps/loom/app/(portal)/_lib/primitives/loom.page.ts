@@ -13,6 +13,8 @@ export const loomPage = definePrimitive({
   description: "The root of a page; stacks its children vertically.",
   props,
   slots: [],
+  /** Shows no words of its own — every one of them is a child. `registry.ts` has why `[]` is said. */
+  copy: [],
   component: ({ loom, children }: LoomPrimitiveProps<Props>) =>
     createElement("div", { ...loom.editable, className: "flex flex-col gap-4" }, children),
 })
