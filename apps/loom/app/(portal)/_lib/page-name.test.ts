@@ -14,7 +14,17 @@ import { memoryTreeStore } from "@loom/runtime/store"
 
 import { seedTree } from "./seed"
 
-import { UNTITLED, nameFor, nameFrom, nameReading, namesOf, pageNameOf, unnamed } from "./page-name"
+import {
+  UNTITLED,
+  headsOf,
+  nameFor,
+  nameFrom,
+  nameReading,
+  namesIn,
+  namesOf,
+  pageNameOf,
+  unnamed,
+} from "./page-name"
 
 /**
  * What a page is called, derived from the page.
@@ -241,6 +251,60 @@ describe("naming a listed page of trees", () => {
       name: UNTITLED,
       treeId: missing,
       derived: false,
+    })
+  })
+
+  /**
+   * The read a name is taken from, kept rather than thrown away. The front
+   * door's queue describes a waiting change against the page it is waiting on,
+   * and that page is the one this listing already read — a second fan-out to
+   * get it back would be a query per row added for nothing.
+   */
+  describe("keeping the pages the names came off", () => {
+    it("hands back the page it read, not only what it is called", async () => {
+      const { store, trees } = await stored()
+
+      const heads = await headsOf(
+        store,
+        trees.map((tree) => tree.treeId)
+      )
+
+      expect(heads.get(trees[0]!.treeId)?.treeId).toBe(trees[0]!.treeId)
+      expect(heads.size).toBe(2)
+    })
+
+    /**
+     * The one difference from `namesOf`, and it is deliberate. A name has a
+     * stand-in and a page does not: a caller handed an empty tree for a page it
+     * never read would describe a change against a fiction.
+     */
+    it("leaves out a page it could not read rather than standing in for it", async () => {
+      const { store } = await stored()
+
+      expect((await headsOf(store, [treeIdSchema.parse("t_nothinghere")])).size).toBe(0)
+    })
+
+    it("names every id asked about, read or not, from pages already in hand", async () => {
+      const { store, trees } = await stored()
+      const missing = treeIdSchema.parse("t_nothinghere")
+      const asked = [...trees.map((tree) => tree.treeId), missing]
+
+      const names = namesIn(asked, await headsOf(store, asked))
+
+      expect(names.size).toBe(3)
+      expect(names.get(trees[0]!.treeId)?.name).toBe("Autumn arrivals")
+      expect(names.get(missing)).toEqual(unnamed(missing))
+    })
+
+    /**
+     * `namesOf` is now the composition of the two, so this is the guard that
+     * the split did not change what the screens using it already see.
+     */
+    it("reads the same as naming a listing in one call", async () => {
+      const { store, trees } = await stored()
+      const asked = [...trees.map((tree) => tree.treeId), treeIdSchema.parse("t_nothinghere")]
+
+      expect(namesIn(asked, await headsOf(store, asked))).toEqual(await namesOf(store, asked))
     })
   })
 })
