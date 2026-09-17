@@ -247,3 +247,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0161](0161-a-public-page-writes-to-one-application-endpoint-and-is-counted-by-a-key-that-outlives-nothing.md) | A public page writes to one application endpoint, and is counted by a key that outlives nothing | Accepted | §4c (reader signals), §5 (the application) |
 | [0162](0162-the-catalogue-is-a-phrasebook-and-the-page-is-one-path-through-it.md) | The catalogue is a phrasebook of designs, and the page is one derived path through it | Accepted | §4b |
 | [0163](0163-a-binding-is-weighed-like-a-destination.md) | A binding is weighed like a destination, and its params are half of it | Accepted | §2 |
+| 0164 | *No record on this branch* | — | — |
+| 0165 | *No record on this branch* | — | — |
+| [0166](0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) | A list that ranks is checked where it is written, and a level the scale cannot place is the heaviest one | Accepted for the first half (the completeness check), **Proposed for | §2 |

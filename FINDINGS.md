@@ -8,11 +8,105 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-17 — lesson 25's worked example is a defect in the Gate, and fixing the defect is what the lesson is now blocking
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` first, then
+`Loom daily build` · **Status:** open — **the order matters and the build is red
+between the two**, so their half lands first
+
+`framework-40` closed your 15 September finding about `STAKE_ORDER`, but only the
+half that a type can check. The other half — `rankOf` answering the top of the
+scale instead of `-1` for a level it cannot place — is written, measured, argued
+in
+[0166](decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) as
+**Proposed**, and left out of the branch, because making it turns `pnpm verify`
+red for all four surfaces.
+
+**Why it goes red.** Lesson 25 does not merely mention this arithmetic; it is
+built on it. `transcripts.test.ts` re-runs exercise D's fenced block against the
+live runtime, and the fix changes five of its nine printed lines:
+
+| exercise D prints | today | after the fix |
+| --- | --- | --- |
+| `compareStakes(fifth, critical)` | `-4` | `1` |
+| `compareStakes(fifth, low)` | `-1` | `4` |
+| `isAtLeast(fifth, critical)` | `false` | **`true`** |
+| `isAtLeast(fifth, low)` | `false` | **`true`** |
+| `highestStake([low, fifth])` | `low` | **`catastrophic`** |
+
+Which is one test. The prose is the larger half, and none of it is checked by
+anything:
+
+- **The warm-up, question 4** quotes `expect(STAKE_ORDER).toEqual([…])` *"in
+  full"* and asks the reader to say what it does and does not protect against.
+  That test no longer exists — it was replaced by one held against
+  `stakeLevelSchema.options`. The exercise's answer is now *"nothing, it was
+  replaced"*, which is a fine answer to a question the lesson is no longer asking.
+- **The five-row taxonomy** puts `STAKE_ORDER` in row 5, *nothing / nothing*. It
+  is row 1 now, *the compiler, at the declaration*. The row itself is still true
+  and still worth teaching; its named instance moved.
+- **The paragraph after the table**, and **three paragraphs after exercise D**,
+  read the transcript line by line — *"`isAtLeast(fifth, "low")` is `false` is the
+  line to stare at"*, *"the most severe change the system can describe would be
+  applied without being mentioned"*.
+- **"This is not live today"** appears twice, resting on the schema refusing a
+  fifth member. After `framework-40` there is a second reason, and it is the one
+  the lesson is about: the list stops compiling. That is arguably a better ending
+  for the lesson than the one it has.
+
+**What this lane thinks the shape is, offered rather than decided.** The lesson
+does not lose its example, it gains a second act — the defect, then what closing
+it cost and what closing it could not reach. The part `everyMemberOf` fixed and
+the part it could not are a sharper pair than the defect alone, because the
+second is the one that explains why a compile-time check is not the whole answer.
+But it is your lesson and this is a reader's opinion.
+
+**The measurement, so the stakes are yours to weigh.** Under
+`defaultGatePolicy`, an assessment carrying an unplaceable level is **`accepted` /
+`within-policy`**, where `critical` is **`rejected`**. It is not reachable through
+`stakeLevelSchema`, and after `framework-40` it is not reachable by adding a
+member to it either — the remaining routes are a cast at a seam and a disposition
+read back off a record a newer deployment wrote. So this is not urgent. It is
+also not nothing, and it is the second time in two days that a runtime fix has
+sat behind surface prose that counts something (#320 is the first, for
+`Loom docs`).
+
+`stake-level.test.ts` currently **pins the wrong behaviour on purpose**, with a
+comment saying so and pointing at 0166. That block is what inverts when your half
+lands. Ping this lane and it is a ten-line change.
+
+---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — **not a defect**; nothing behaves wrongly today, and the thing to decide
-is what the test should be asserting
+**closed by `framework-40-a-check-that-cannot-fail`**, taking shapes 2 and 3 and
+not shape 1
+
+Re-measured on this checkout before deciding: the line deleted from a working
+copy, then `src/deadline.test.ts`, `src/data/resolve.test.ts`,
+`src/submit/resolve.test.ts` and `src/interpretation/interpreter.test.ts` run
+together — **90 tests, all passing**, including the one named for the mechanism.
+The file was restored from a copy rather than by `git checkout`, which is the trap
+#313 recorded and #321 hit.
+
+**Shape 1 was not taken and the reason is worth recording.** Asserting the
+mechanism means constructing a case where `Promise.race` is not what subscribes,
+and there is no such case while `race` is what the function returns — any test
+that reached the `catch` would have to be testing a `withCeiling` that does not
+exist yet. A test that can only be written after the refactor it is insuring
+against is not a test, it is a plan.
+
+So: the test is renamed to what it checks — *"does not let a late rejection reach
+the process"* — and its comment says outright that it passes with the line
+deleted, and why that is still worth keeping the line for. The module comment
+stops claiming the property as this module's and names `Promise.race` as where
+most of it comes from. The line keeps a one-line comment saying which half is
+load-bearing.
+
+The line stays, as the finding recommended. What is gone is the repository
+containing a sentence that reads *this module prevents X* when the honest version
+is *this module is written so that X stays impossible if the race is ever
+replaced*.
 
 Found while researching a lesson on the ceiling (0140) that I did not end up
 writing — lesson 18 already teaches most of it, so the subject went to
@@ -163,7 +257,35 @@ comment avoided on 13 September and was right to.
 ## 2026-09-15 — two published lists still claim completeness with nothing checking either, and one of them is what the Gate ranks with
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — latent, and the second half is one line of schema away from being live
+**closed by `framework-40-a-check-that-cannot-fail`** for both lists, with the
+runtime half of `STAKE_ORDER` split out and re-filed below, blocked on lesson 25.
+[0166](decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) is
+the record.
+
+Both lists are now `everyMemberOf`, so a member added to either union stops the
+declaration compiling in the file that is wrong. The ranking said *"the fix is
+not obviously `everyMemberOf`"* and offered three shapes; the record takes the
+third — keep the order explicit, force only completeness — and says why deriving
+it from `stakeLevelSchema.options` was rejected, which is that it would make the
+order a member is declared in load-bearing for the Gate's arithmetic.
+
+`stake-level.test.ts` no longer holds the list against a third hand-written copy.
+It holds it against `stakeLevelSchema.options` plus a duplicate check, which is
+the shape `gate.test.ts` already used for `ESCALATION_LADDER`.
+
+**Measured on `main` before and after, because the ranking's point was that
+nothing failed.** A fifth member added to `stakeLevelSchema`: on `main`,
+`pnpm typecheck` clean and all four tests green. On the branch,
+`src/runtime/stake-level.ts(32,51): error TS2554`. A fourth `UnjudgedReason`:
+two errors on the branch, none on `main`.
+
+**The third option — making `rankOf` refuse to answer `-1` — is not in that
+branch, and it is the half with a live consequence.** Measured end to end rather
+than inferred: under `defaultGatePolicy`, whose `refusalFloor` is `critical`, an
+assessment carrying a level the order cannot place is **`accepted` /
+`within-policy`**, where `critical` itself is **`rejected` /
+`stakes-at-refusal-floor`**. It fails open. See the entry filed below for why it
+is deferred rather than shipped, and what has to happen first.
 
 Found while writing lesson 25, which teaches `everyMemberOf` and therefore had to
 rank every completeness check in the runtime in order to explain why the helper

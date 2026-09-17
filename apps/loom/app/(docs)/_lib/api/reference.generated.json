@@ -2010,7 +2010,7 @@
               "kind": "value",
               "signature": "const STAKE_ORDER: readonly StakeLevel[]",
               "truncated": false,
-              "summary": ""
+              "summary": "The scale in severity order, which is the order and not merely the set."
             },
             {
               "name": "compareStakes",
@@ -7764,7 +7764,7 @@
               "kind": "value",
               "signature": "const UNJUDGED_REASONS: readonly UnjudgedReason[]",
               "truncated": false,
-              "summary": ""
+              "summary": "The buckets a fold has to open before the first proposal arrives, so a reason nobody hit still reads as zero rather than as missing."
             },
             {
               "name": "verdictOf",
