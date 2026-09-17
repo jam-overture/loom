@@ -15,6 +15,7 @@ import {
   type TreeDelta,
   type TreeOperation,
 } from "@loom/runtime"
+import { copyIn, type CopyDeclarations } from "@loom/runtime/sdk"
 
 import { partNameOf, placeNameOf, type PartName } from "./part-name"
 
@@ -46,6 +47,41 @@ const VALUE_LIMIT = 72
 
 /** How many of a subtree's strings are previewed. Enough to recognise it by. */
 const TEXT_PREVIEW_LIMIT = 3
+
+/**
+ * A part whose author has never said which of its settings a reader reads.
+ *
+ * `copyIn` reports one of these per part; this is grouped by type, because that
+ * is the level a reader and a maintainer both act at. *Three stats carry
+ * `value`, `label` and `caption`* is one fact about one primitive; three
+ * separate entries saying the same thing is the same fact printed three times,
+ * and the one thing somebody would go and do about it — declare `copy` on
+ * `loom.stat` — is done once.
+ */
+export type UnreadablePart = {
+  /** The registered type, exactly as the part carries it. */
+  readonly type: string
+  /** How many parts of this type the operation touches. */
+  readonly parts: number
+  /** Every string-valued setting they carry, in the order they were met. */
+  readonly settings: readonly string[]
+}
+
+/**
+ * The words a subtree holds, and what could not be read.
+ *
+ * `total` is before the preview cut, because a list of three that is really
+ * nine is a reading that has quietly dropped six words from the account of a
+ * deletion — and the preview limit exists to keep a card short, not to make
+ * the count smaller than it is.
+ */
+type WordReading = {
+  readonly preview: readonly string[]
+  readonly total: number
+  readonly unreadable: readonly UnreadablePart[]
+}
+
+const NO_WORDS: WordReading = { preview: [], total: 0, unreadable: [] }
 
 const collapse = (value: string): string => value.replace(/\s+/gu, " ").trim()
 
@@ -144,8 +180,19 @@ export type OperationEffect = {
   readonly from: string | null
   /** Before and after, per key. Empty for anything but a reconfigure. */
   readonly changes: readonly ValueChange[]
-  /** The words this operation brings or takes, for a reader who knows the page by its text. */
+  /**
+   * The words this operation brings or takes, for a reader who knows the page
+   * by its text. A preview: `textTotal` is how many there are.
+   */
   readonly text: readonly string[]
+  /** Every word the operation carries, of which `text` shows the first few. */
+  readonly textTotal: number
+  /**
+   * The parts travelling with it whose words nobody has spoken for, grouped by
+   * type. Empty when every type involved has declared — which is the ordinary
+   * case and the one that keeps the card quiet.
+   */
+  readonly unreadable: readonly UnreadablePart[]
   /** How many nodes travel with it — an insert brings them, a remove takes them. */
   readonly carries: number | null
   /** This tree has no node under the id the operation names. */
@@ -203,11 +250,49 @@ const pathReadings = (
 
 const countNodes = (node: LoomNode): number => Array.from(walkTree(node)).length
 
-const textIn = (node: LoomNode): readonly string[] =>
-  Array.from(walkTree(node))
-    .filter((candidate): candidate is Extract<LoomNode, { kind: "text" }> => candidate.kind === "text")
-    .slice(0, TEXT_PREVIEW_LIMIT)
-    .map((candidate) => truncate(collapse(candidate.value)))
+/**
+ * The words a subtree puts on, or takes off, a page.
+ *
+ * This walked text children and kept only those, which is the reading
+ * [0052](../../../../../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+ * made wrong: a fixed field stays a prop, so `loom.stat` holds its figure, its
+ * label and its caption as settings and has no text children at all. A
+ * proposal deleting three headline numbers was described to a reviewer as
+ * *"Deletes the stat grid, and the 3 pieces inside it"* with **no words line** —
+ * on a band that is nothing but words. `Loom demo` filed it on 1 September
+ * against this function by name.
+ *
+ * `copyIn` is the runtime's answer and this is a consumer of it (0018). The
+ * part worth knowing is that it has three outcomes rather than two: the words
+ * it read, and — separately — the parts whose author has said nothing, which
+ * are neither *no words* nor words it can show. That third answer is why this
+ * returns a shape rather than a list. A reading that rounded *I cannot tell
+ * you* down to *there are none* would be wrong in exactly the direction nobody
+ * checks, which is what the old one did to every primitive in the library.
+ */
+const wordsIn = (node: LoomNode, copy: CopyDeclarations): WordReading => {
+  const read = copyIn(node, copy)
+
+  const byType = new Map<string, { parts: number; settings: string[] }>()
+  for (const part of read.unread) {
+    const seen = byType.get(part.type) ?? { parts: 0, settings: [] }
+
+    byType.set(part.type, {
+      parts: seen.parts + 1,
+      settings: [...seen.settings, ...part.props.filter((name) => !seen.settings.includes(name))],
+    })
+  }
+
+  return {
+    preview: read.words.slice(0, TEXT_PREVIEW_LIMIT).map((value) => truncate(collapse(value))),
+    total: read.words.length,
+    unreadable: [...byType].map(([type, seen]) => ({
+      type,
+      parts: seen.parts,
+      settings: seen.settings,
+    })),
+  }
+}
 
 const childrenOfNode = (node: LoomNode | null): readonly LoomNode[] =>
   node === null || node.kind === "text" ? [] : node.children
@@ -299,12 +384,17 @@ const configureDetail = (changes: readonly ValueChange[]): string => {
 }
 
 /** The effect of one operation on the tree as the operations before it left it. */
-const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => {
+const effectOf = (
+  root: LoomNode,
+  operation: TreeOperation,
+  copy: CopyDeclarations
+): OperationEffect => {
   const verb = VERBS[operation.op]
 
   switch (operation.op) {
     case "insert": {
       const carries = countNodes(operation.node)
+      const words = wordsIn(operation.node, copy)
       const parent = findNode(root, operation.parentId)
       const occupant = childrenOfNode(parent)[operation.index]
       const path = pathReadings(root, operation.parentId, true)
@@ -321,7 +411,9 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
         before: occupant === undefined ? null : placeNameOf(occupant),
         from: null,
         changes: [],
-        text: textIn(operation.node),
+        text: words.preview,
+        textTotal: words.total,
+        unreadable: words.unreadable,
         carries,
         missing: parent === null,
         inert: false,
@@ -332,6 +424,7 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
       const node = findNode(root, operation.nodeId)
       const carries = node === null ? null : countNodes(node)
       const path = pathReadings(root, operation.nodeId)
+      const words = node === null ? NO_WORDS : wordsIn(node, copy)
 
       return {
         op: operation.op,
@@ -350,7 +443,9 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
         before: null,
         from: null,
         changes: [],
-        text: node === null ? [] : textIn(node),
+        text: words.preview,
+        textTotal: words.total,
+        unreadable: words.unreadable,
         carries,
         missing: node === null,
         inert: false,
@@ -376,7 +471,15 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
         /** `null` when it is not leaving: a move within one parent has no elsewhere to name. */
         from: from === null || from.id === operation.parentId ? null : placeNameOf(from),
         changes: [],
+        /**
+         * A move carries its words to a different place and neither adds nor
+         * takes one, so there is nothing to report in either direction — and
+         * nothing that could go unread either, which is why this is empty
+         * rather than unknown.
+         */
         text: [],
+        textTotal: 0,
+        unreadable: [],
         carries: null,
         missing: node === null,
         inert: node !== null && isInertMove(root, operation),
@@ -400,7 +503,16 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
         before: null,
         from: null,
         changes,
+        /**
+         * A reconfigure that writes over a setting a reader reads *is* a change
+         * of words, and `changes` is already the sharper account of it: it
+         * shows the old value and the new one side by side, which a list of
+         * words cannot. Reporting the same fact twice, once without its before
+         * side, would be the weaker half shouting over the stronger.
+         */
         text: [],
+        textTotal: 0,
+        unreadable: [],
         carries: null,
         missing: node === null,
         inert: node !== null && changes.length > 0 && changes.every((change) => change.inert),
@@ -423,15 +535,27 @@ const effectOf = (root: LoomNode, operation: TreeOperation): OperationEffect => 
  * that cannot be described is the interesting one — it is why the whole delta
  * would be refused — and hiding the four operations after it would leave the
  * reviewer unable to see what was being asked for at all.
+ *
+ * **`copy` is the deployment's registry**, and it is a third argument rather
+ * than a module import for the reason the other two are arguments: which
+ * settings a reader reads is the *host's* answer, declared by whoever wrote the
+ * component (0018), so a portal that reached for its own registry here would be
+ * answering for every deployment from the four primitives it happens to
+ * register. Anything with a `copyFor` satisfies it, which is what lets a test
+ * state the declarations it is testing against in two lines.
  */
-export const describeProposalEffect = (tree: LoomTree, delta: TreeDelta): ProposalEffect => {
+export const describeProposalEffect = (
+  tree: LoomTree,
+  delta: TreeDelta,
+  copy: CopyDeclarations
+): ProposalEffect => {
   const applied = applyDelta(tree, delta)
 
   const operations: OperationEffect[] = []
   let state: LoomNode = tree.root
 
   for (const operation of delta.operations) {
-    operations.push(effectOf(state, operation))
+    operations.push(effectOf(state, operation, copy))
 
     const advanced = applyOperation(state, operation)
     if (advanced.ok) state = advanced.value
