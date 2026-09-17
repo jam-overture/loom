@@ -68,7 +68,20 @@ export const bentoBand: Composition = {
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
       type: "loom.section",
-      props: { width: "wide", eyebrow: "What it does", anchor: "features" },
+      /**
+       * `what-it-does` rather than `features`, which is what this carried until
+       * 17 September and which `features-band` also carries. Both are on the
+       * canonical page, so the document had **two elements with `id="features"`**
+       * and a link to `#features` reached the first of them — leaving this band
+       * unaddressable by the one mechanism `anchorSchema` exists to provide.
+       *
+       * Nothing could see it. `anchor.ts` says so in its own header: uniqueness
+       * *"is a fact about a tree"* and a per-node schema cannot check one. The
+       * assertion that now can is over the assembled page rather than over this
+       * file, which is
+       * [0165](../../../decisions/0165-an-anchor-belongs-to-the-part-and-is-unique-over-the-assembled-page.md).
+       */
+      props: { width: "wide", eyebrow: "What it does", anchor: "what-it-does" },
       children: [
         buildSlot(ids, "heading", [
           buildElement(ids, {

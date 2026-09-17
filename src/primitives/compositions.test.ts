@@ -101,6 +101,30 @@ const typesIn = (node: LoomNode): readonly string[] => {
   return [...here, ...node.children.flatMap(typesIn)]
 }
 
+/**
+ * Every `anchor` a subtree declares, in document order.
+ *
+ * Only three primitives carry one — `loom.section`, `loom.hero`, `loom.callout`
+ * — but reading the prop by name rather than the type keeps this true when a
+ * fourth is given one, and an anchor is the only prop in the library that a
+ * node writes straight into the document as an `id`.
+ */
+const anchorsIn = (node: LoomNode): readonly string[] => {
+  if (node.kind === "text") return []
+  const anchor = node.kind === "element" ? (node.props as Record<string, unknown>)["anchor"] : undefined
+  const here = typeof anchor === "string" ? [anchor] : []
+
+  return [...here, ...node.children.flatMap(anchorsIn)]
+}
+
+/** Every `loom.stat-chart` in a subtree, paired with the children it plots. */
+const chartsIn = (node: LoomNode): readonly (readonly LoomNode[])[] => {
+  if (node.kind === "text") return []
+  const here = node.kind === "element" && node.type === "loom.stat-chart" ? [node.children] : []
+
+  return [...here, ...node.children.flatMap(chartsIn)]
+}
+
 const idsIn = (node: LoomNode): readonly string[] => {
   if (node.kind === "text") return [node.id]
 
@@ -121,8 +145,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers twenty-three bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(23)
+  it("offers twenty-seven bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(27)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -176,6 +200,29 @@ describe("the starter compositions", () => {
 
       const shapes = designs.map((design) => shapeOf(design.build(sequentialIdFactory())).join(" "))
       expect(new Set(shapes).size, `two designs of the ${part} band build the same tree`).toBe(shapes.length)
+    }
+  })
+
+  /**
+   * An anchor belongs to the part, not to the design.
+   *
+   * `hero` and `hero-split` both answer to `#top`, and they have to: a nav link
+   * written against the canonical design has to keep working when a host swaps
+   * in the alternate, and a fragment that silently stops resolving is a defect
+   * only the people who arrived from a menu ever see.
+   *
+   * **This found one.** `testimonials` carried no anchor and
+   * `testimonials-wall` carried `#testimonials`, so the link worked on a page
+   * that had taken the alternate and not on the default page. Restoring that
+   * asymmetry fails here by name.
+   */
+  it("gives every design of a part the same anchors as its canonical", () => {
+    for (const part of COMPOSITION_PARTS) {
+      const designs = compositionsForPart(part)
+      if (designs.length < 2) continue
+
+      const anchors = designs.map((design) => JSON.stringify(anchorsIn(design.build(sequentialIdFactory()))))
+      expect(new Set(anchors).size, `designs of the ${part} band disagree about their anchors: ${anchors.join(" ")}`).toBe(1)
     }
   })
 
@@ -297,6 +344,98 @@ describe("what a band renders", () => {
       expect(positions.every((position) => position >= 0)).toBe(true)
       expect([...positions].sort((left, right) => left - right)).toEqual(positions)
     }
+  })
+
+  /**
+   * No two bands on the page answer to the same name.
+   *
+   * `anchor.ts` states in its own header that this is exactly what it cannot
+   * check — *"a schema validates one node's props and duplication is a fact
+   * about a tree"* — and names the render seam as where it belongs. It is not
+   * there yet, and in the meantime the assembled page is a tree this lane owns
+   * and can assert over, which is 0125's rule about where a property of a
+   * *page* is measured.
+   *
+   * **This found one.** `features` and `bento` both carried `anchor: "features"`
+   * and both are on the canonical page, so the document rendered two elements
+   * with `id="features"` and a link to `#features` reached the first. The bento
+   * band was unreachable by fragment from the day it shipped, with no error, no
+   * diagnostic and no failing test — the whole of what a duplicate id does is
+   * that the second one stops being found.
+   */
+  it("gives the assembled page no two bands that answer to the same anchor", () => {
+    const ids = sequentialIdFactory()
+    const anchors = PAGE_SEQUENCE.flatMap((composition) => anchorsIn(composition.build(ids)))
+
+    expect(anchors.length).toBeGreaterThan(0)
+    expect(new Set(anchors).size, `the page carries a duplicate anchor: ${anchors.join(" ")}`).toBe(anchors.length)
+  })
+
+  /**
+   * A plotted figure without a magnitude draws a column of no height.
+   *
+   * `loom.stat` takes `magnitude` as optional because a stat in a
+   * `loom.stat-grid` has nothing to be a magnitude *of*; inside a
+   * `loom.stat-chart` it is what gives the bar its height, and its absence is
+   * the quietest failure in this band's vicinity. Nothing refuses it — the
+   * schema is satisfied, the render is total, the diagnostics are empty — and
+   * what a reader gets is a chart with a gap in the series where one month's
+   * bar should be. So the check has to be about the *pair*, which is what this
+   * is: any stat under a chart, in any band, now or later.
+   */
+  it("gives every plotted figure a magnitude to be drawn at", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      for (const plotted of chartsIn(composition.build(sequentialIdFactory()))) {
+        expect(plotted.length, `${composition.id} plots nothing`).toBeGreaterThan(0)
+
+        for (const point of plotted) {
+          const magnitude = point.kind === "element" ? (point.props as Record<string, unknown>)["magnitude"] : undefined
+
+          expect(typeof magnitude, `a point in ${composition.id} has no magnitude and would draw nothing`).toBe("number")
+        }
+      }
+    }
+  })
+
+  /**
+   * The clearest statement of 0162's rule that the catalogue contains, pinned
+   * so it stays true.
+   *
+   * `steps` and `steps-cards` say **the same three things in the same three
+   * sentences** on purpose, so that what is left over between them is exactly
+   * the difference the rule is about: ten nodes where a step's title and body
+   * are props on a leaf, against twenty-eight where they are nodes with text
+   * children of their own. Neither band is better; they cost different
+   * amounts to drop in and reach different amounts afterwards.
+   *
+   * Both halves are asserted, because either alone is weak. Identical text with
+   * identical structure would be a `configure` and must not be in the catalogue;
+   * different structure with different text would prove nothing about the rule,
+   * since every other pair in the phrasebook differs in its copy too.
+   */
+  it("makes steps and steps-cards the same words in two different sets of nodes", () => {
+    const textIn = (node: LoomNode): readonly string[] =>
+      node.kind === "text" ? [node.value] : node.children.flatMap(textIn)
+
+    const row = (compositionById("steps") as Composition).build(sequentialIdFactory())
+    const cards = (compositionById("steps-cards") as Composition).build(sequentialIdFactory())
+
+    /** The copy a milestone holds is in its props, so the rendered words are the comparison. */
+    const wordsOf = (composition: Composition): string => {
+      const ids = sequentialIdFactory()
+      const { markup } = render(pageOf(EDITORIAL, [composition.build(ids)], ids))
+
+      return (treeMarkup(markup).replace(/<[^>]*>/g, " ").match(/\S+/g) ?? []).join(" ")
+    }
+
+    for (const step of ["Connect what you already use", "Describe the change in a sentence", "Approve what you meant"]) {
+      expect(wordsOf(compositionById("steps") as Composition)).toContain(step)
+      expect(wordsOf(compositionById("steps-cards") as Composition)).toContain(step)
+    }
+
+    expect(textIn(row)).not.toEqual(textIn(cards))
+    expect(nodesIn(row)).toBe(10)
+    expect(nodesIn(cards)).toBe(28)
   })
 
   it("carries the same number of nodes into the page as it built", () => {
