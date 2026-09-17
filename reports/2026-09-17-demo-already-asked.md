@@ -2,8 +2,10 @@
 
 **Routine:** `Loom demo` · **Branch:** `demo-20-already-asked` · **17 September 2026**
 
-**Deployed preview:** on the pull request — public, no sign-in, at `/demo`.
-Press **Take the numbers off**, then look at the list of asks under the caution.
+**Deployed preview:**
+https://loom-git-demo-20-already-asked-jpizzolato36-6341s-projects.vercel.app/demo
+— public, no sign-in. Press **Take the numbers off**, then look at the list of
+asks under the caution.
 
 The twentieth run of this lane. It takes the finding the nineteenth filed and
 recommended, and takes the shape the finding recommended.
