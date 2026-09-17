@@ -2,6 +2,11 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
+import {
+  ASKS_HEADING,
+  ASKS_HEADING_WHILE_WAITING,
+  type SetAside,
+} from "@/app/(demo)/_lib/set-aside"
 
 import { AskPanel } from "./ask-panel"
 
@@ -150,6 +155,139 @@ describe("the ask panel", () => {
     expect(forms.length).toBe(DEMO_PRESETS.length + 1)
     for (const form of forms) {
       expect(form.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe("7")
+    }
+  })
+})
+
+/**
+ * The second state, which is the one a stranger reaches on their second press.
+ *
+ * Measured at 1280×900 against a real `next build`: press the green button,
+ * then press the first entry under *or ask for one of these*, and the question
+ * the demo has just asked comes back `Nothing changed`. `set-aside.ts` holds the
+ * measurement and the argument; these are the properties the markup has to keep.
+ */
+describe("the ask panel, while a question is waiting", () => {
+  const WAITING: SetAside = {
+    questions: 1,
+    recordId: "i_held",
+    sentence: "One question is still waiting on you. Anything else you ask for moves the page on.",
+    answerLabel: "Answer it first",
+  }
+
+  const open = () =>
+    render(<AskPanel revision={3} available={ALL} modelConfigured={true} waiting={WAITING} />)
+
+  /**
+   * The green on this rail belongs to the demo's next step, and once a question
+   * exists that step is not a new ask: *Take the numbers off* with nothing open,
+   * **Apply this change** once something is (`record-card.tsx` holds the other
+   * half — a waiting card carries exactly one). A green here at the same time is
+   * the panel competing with the question it just produced, at the size that
+   * wins, for the press that costs the visitor the question.
+   */
+  it("gives up its green button while the question below has one", () => {
+    const { container } = open()
+
+    expect(container.querySelector(".bg-affirm")).toBeNull()
+  })
+
+  it("keeps its green button when nothing is waiting", () => {
+    const { container } = render(<AskPanel revision={3} available={ALL} modelConfigured={true} />)
+
+    expect(container.querySelector(".bg-affirm")).toBeTruthy()
+  })
+
+  /**
+   * The lead steps into the list rather than out of the panel. Withdrawing an
+   * ask would narrow the demo at exactly the moment a visitor is exploring,
+   * which is the shape of this fix the lane argued against — the other asks
+   * really do work, and a stranger who wants to see the page move twice is
+   * allowed to.
+   */
+  it("still offers every ask, the demoted lead included", () => {
+    open()
+
+    for (const preset of DEMO_PRESETS) {
+      expect(screen.getByRole("button", { name: new RegExp(preset.label, "i") })).toBeTruthy()
+      expect(screen.getByRole("button", { name: new RegExp(preset.label, "i") }).hasAttribute("disabled")).toBe(false)
+    }
+  })
+
+  /**
+   * Above every control it is true of, and that includes the free-text box: a
+   * sentence posted to the model moves the page exactly as a preset does. The
+   * assertion is document order rather than a class, because what makes a
+   * caution a caution is that it is read first.
+   */
+  it("says what the press would cost before anything is there to press", () => {
+    const { container } = open()
+
+    const caution = screen.getByText(WAITING.sentence)
+    const controls = [...container.querySelectorAll("button"), ...container.querySelectorAll("textarea")]
+
+    expect(controls.length).toBeGreaterThan(0)
+    for (const control of controls) {
+      expect(caution.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    }
+  })
+
+  /**
+   * The property the first version of this lost, and the reason it is a class
+   * rather than a look: pressing the lead sends `AnswerInView` to bring the
+   * 503px card into the rail, and `block: "nearest"` leaves the scroller at a
+   * scrollTop of about 400 — which carries a statically placed caution off the
+   * top and leaves four live buttons on screen with nothing between them and the
+   * question they would kill.
+   */
+  it("stays on screen while the controls it is about are", () => {
+    open()
+
+    const pinned = screen.getByText(WAITING.sentence).closest("div")?.parentElement
+
+    expect(pinned?.className).toContain("sticky")
+    expect(pinned?.className).toContain("top-0")
+  })
+
+  it("says nothing of the kind when nothing is waiting", () => {
+    render(<AskPanel revision={3} available={ALL} modelConfigured={true} />)
+
+    expect(screen.queryByText(WAITING.sentence)).toBeNull()
+    expect(screen.queryByRole("link", { name: /answer it first/i })).toBeNull()
+  })
+
+  /**
+   * The way out goes to the card carrying **Apply this change**, because that is
+   * where the question is in sight. `record-card.tsx` puts the record id on the
+   * card's own element, which is what this fragment lands on.
+   */
+  it("offers the way down to the question, by the card's own id", () => {
+    open()
+
+    const link = screen.getByRole("link", { name: /answer it first/i })
+
+    expect(link.getAttribute("href")).toBe(`#${WAITING.recordId}`)
+  })
+
+  /**
+   * *“or ask for one of these”* is the second half of a sentence whose first
+   * half is the green button. With the button gone, the *or* points at nothing.
+   */
+  it("stops calling the list an alternative to a button that is no longer there", () => {
+    open()
+
+    expect(screen.getByText(ASKS_HEADING_WHILE_WAITING)).toBeTruthy()
+    expect(screen.queryByText(ASKS_HEADING)).toBeNull()
+  })
+
+  it("carries the revision on every form, the demoted lead's included", () => {
+    const { container } = open()
+
+    const forms = [...container.querySelectorAll("form")]
+
+    expect(forms.length).toBe(DEMO_PRESETS.length + 1)
+    for (const form of forms) {
+      expect(form.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe("3")
     }
   })
 })

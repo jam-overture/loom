@@ -15,6 +15,7 @@ import {
   SITE_ROUTES,
   SITE_THEMES,
   surfaceHref,
+  WHAT_READERS_DO,
   type SiteRoute,
   type SiteThemeName,
 } from "./site"
@@ -75,6 +76,18 @@ export type ChromeContext = {
   /** What the visitor has asked the front door for, when they are on it. */
   readonly ask?: AskId
   readonly approve?: boolean
+  /**
+   * Whether this deployment is counting the person reading the page, which the
+   * foot of every page says when it is.
+   *
+   * It is in the chrome rather than on one page because it is true of all ten:
+   * a broadcaster is started by the layout, so the page a reader happens to
+   * have landed on is not the page that decides whether they are counted. A
+   * site that counted on ten pages and disclosed on one would be making the
+   * argument this site sells in exactly the form it tells a reader not to
+   * accept.
+   */
+  readonly counting?: boolean
 }
 
 /**
@@ -180,6 +193,42 @@ const linkGroup = (
   })
 
 /**
+ * What the foot of the page says when this deployment is counting its readers,
+ * and says nowhere when it is not.
+ *
+ * **It is here because it has to be on every page.** The broadcaster is started
+ * by the layout, so whichever of the ten pages somebody landed on is counting
+ * them, and the one page *about* counting cannot be the only page that mentions
+ * it — a reader who never reaches `/what-readers-do` would never have been told.
+ * The footer is the band every page ends with and the one that already carries
+ * the things that are true of the whole site.
+ *
+ * **What it may promise is exactly what `asked.ts` asks for**, which is why the
+ * sentence names parts rather than people: the bands a reader reached, how long
+ * they were on screen, and what they pressed. The second half is the one worth
+ * the words — there is nowhere in a signal to put a name, an account or
+ * anything that joins one visit to another (0146), so *never who you are* is a
+ * property of the record rather than a setting somebody left switched on.
+ *
+ * The link is the page that says the rest of it, labelled with its own route
+ * label so the two cannot drift apart.
+ */
+const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
+  stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
+    prose(
+      ids,
+      "This page counts which of its parts you reach, how long you stay and what you press — and never who you are.",
+      { size: "small", tone: "muted" }
+    ),
+    link(
+      ids,
+      WHAT_READERS_DO.label,
+      internalHref(context.origin, WHAT_READERS_DO.path, context.theme),
+      { tone: "muted", scale: "small" }
+    ),
+  ])
+
+/**
  * The band that closes the page, and the only complete map of the product on
  * it.
  *
@@ -226,6 +275,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
       ]),
       buildSlot(ids, "note", [
         prose(ids, PLACEHOLDER_COPY.licence, { size: "small", tone: "muted" }),
+        ...(context.counting === true ? [countingNote(ids, context)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link
          * to the same route wearing another palette, and what comes back is the

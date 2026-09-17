@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="920" height="660" fill="#fbfaf8"/>
+
+  <text x="32" y="38" font-size="19" font-weight="650" fill="#1c1917">A check that cannot fail for the reason it is named</text>
+  <text x="32" y="60" font-size="13.5" fill="#57534e">The same edit — a fifth member added to <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">stakeLevelSchema</tspan> — run against both branches. Every number below</text>
+  <text x="32" y="78" font-size="13.5" fill="#57534e">is an actual run on this checkout, not a reading of the code.</text>
+
+  <!-- MAIN -->
+  <rect x="32" y="96" width="416" height="196" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="124" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">ON MAIN</text>
+
+  <rect x="52" y="138" width="376" height="34" rx="7" fill="#f7f6f4" stroke="#e7e5e4"/>
+  <text x="68" y="160" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">pnpm typecheck</text>
+  <text x="412" y="160" font-size="12.5" text-anchor="end" fill="#15803d">clean</text>
+
+  <rect x="52" y="178" width="376" height="34" rx="7" fill="#f7f6f4" stroke="#e7e5e4"/>
+  <text x="68" y="200" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">stake-level.test.ts</text>
+  <text x="412" y="200" font-size="12.5" text-anchor="end" fill="#15803d">4 passed</text>
+
+  <rect x="52" y="218" width="376" height="54" rx="7" fill="#fdf6f6" stroke="#e8cfcf"/>
+  <text x="68" y="240" font-size="12.5" fill="#9f1239">Nothing fails.</text>
+  <text x="68" y="259" font-size="11.5" fill="#78716c">The test compared a copy with a copy.</text>
+
+  <!-- BRANCH -->
+  <rect x="472" y="96" width="416" height="196" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="492" y="124" font-size="12" font-weight="650" fill="#78716c" letter-spacing="0.06em">ON THIS BRANCH</text>
+
+  <rect x="492" y="138" width="376" height="74" rx="7" fill="#fdf9f3" stroke="#e8dcc8"/>
+  <text x="508" y="160" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#9a3412">src/runtime/stake-level.ts(32,51)</text>
+  <text x="508" y="178" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#9a3412">error TS2554: Expected 2 arguments,</text>
+  <text x="508" y="196" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#9a3412">but got 1.</text>
+
+  <rect x="492" y="218" width="376" height="54" rx="7" fill="#f4f8f5" stroke="#cfe0d4"/>
+  <text x="508" y="240" font-size="12.5" fill="#15803d">The declaration stops compiling.</text>
+  <text x="508" y="259" font-size="11.5" fill="#78716c">In the file that is wrong, before any test runs.</text>
+
+  <!-- second panel -->
+  <text x="32" y="330" font-size="15" font-weight="650" fill="#1c1917">And the half that is not in this branch</text>
+  <text x="32" y="352" font-size="13.5" fill="#57534e">The finding inferred this from <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">gate.ts</tspan>. Measured end to end instead: one assessment, one policy, the</text>
+  <text x="32" y="370" font-size="13.5" fill="#57534e">stakes level swapped. <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">defaultGatePolicy.refusalFloor</tspan> is <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5">critical</tspan>.</text>
+
+  <rect x="32" y="388" width="856" height="164" rx="10" fill="#ffffff" stroke="#e7e5e4"/>
+
+  <text x="52" y="416" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">STAKES LEVEL ON THE ASSESSMENT</text>
+  <text x="560" y="416" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">THE GATE</text>
+
+  <rect x="52" y="428" width="816" height="42" rx="7" fill="#f4f8f5" stroke="#cfe0d4"/>
+  <text x="68" y="454" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">critical</text>
+  <text x="560" y="454" font-size="13" fill="#15803d">rejected — stakes-at-refusal-floor</text>
+
+  <rect x="52" y="478" width="816" height="42" rx="7" fill="#fdf6f6" stroke="#e8cfcf"/>
+  <text x="68" y="504" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">a level the order cannot place</text>
+  <text x="560" y="504" font-size="13" font-weight="650" fill="#9f1239">accepted — within-policy</text>
+
+  <text x="52" y="540" font-size="11.5" fill="#78716c">It fails open: the one change the Gate could not weigh is the one it applies with nobody asked.</text>
+
+  <!-- footer -->
+  <rect x="32" y="570" width="856" height="62" rx="10" fill="#faf9f7" stroke="#e7e5e4"/>
+  <text x="52" y="594" font-size="12.5" fill="#44403c">That fix is one line here and a rewrite of lesson 25, which teaches this arithmetic as its worked example and</text>
+  <text x="52" y="613" font-size="12.5" fill="#44403c">live-checks the transcript. Filed for <tspan font-style="italic">Loom lessons</tspan> with the order; 0166 records it as Proposed. Not shipped today.</text>
+</svg>

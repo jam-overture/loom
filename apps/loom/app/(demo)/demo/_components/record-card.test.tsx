@@ -152,14 +152,22 @@ const EFFECT: ProposalEffect = {
       from: null,
       changes: [],
       /*
-       * Empty, and that is the fixture being accurate rather than lazy. The
-       * portal's `text` walks text nodes, and a `loom.stat-grid` carries every
-       * figure it prints in props — so on the demo's leading ask this field is
-       * genuinely empty, which is the whole reason this lane harvests its own
-       * words. Filling it here would make the test agree with a page that does
-       * not exist.
+       * Empty, and that is the fixture being accurate rather than lazy. A
+       * `loom.stat-grid` carries every figure it prints in props, so on the
+       * demo's leading ask there are no words to list — which is the whole
+       * reason this lane harvests its own. Filling it here would make the test
+       * agree with a page that does not exist.
+       *
+       * `unreadable` is the same fact from the other side, and it arrived on
+       * 16 September when the portal's reading moved from text children to
+       * `copyIn`. The reason the figures cannot be listed is now on the record:
+       * nothing has declared which of `loom.stat`'s settings a reader reads, so
+       * the reading says it cannot list them rather than reporting none. Kept
+       * accurate here for the same reason `text` is.
        */
       text: [],
+      textTotal: 0,
+      unreadable: [{ type: "loom.stat", parts: 3, settings: ["value", "label", "caption"] }],
       carries: 4,
       missing: false,
       inert: false,
@@ -387,6 +395,36 @@ describe("a record card", () => {
     expect(screen.getByRole("button", { name: "No thanks" })).toBeTruthy()
     expect(screen.queryByRole("button", { name: /undo/ })).toBeNull()
     expect(screen.getByText("restructures at depth 1 · medium")).toBeTruthy()
+  })
+
+  /**
+   * The other half of a property that spans two files: the green on this rail
+   * belongs to the demo's next step, and while a question is open that step is
+   * this card's answer rather than a new ask — so a waiting card carries exactly
+   * one, and `AskPanel` gives its own up (`set-aside.ts`). The class is asserted
+   * rather than the look because it is the only thing the two files share.
+   */
+  it("carries one green button while it is the question waiting", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const answer = screen.getByRole("button", { name: "Apply this change" })
+
+    expect(container.querySelectorAll(".bg-affirm").length).toBe(1)
+    expect(answer.className).toContain("bg-affirm")
+  })
+
+  /**
+   * The other coupling to the same strip. `AskPanel`'s **Answer it first** is a
+   * fragment pointing at this card's own id, and the strip it sits in is pinned
+   * to the top of the rail — so without a scroll margin the fragment lands the
+   * card behind the band that sent the visitor to it, `Waiting on you` and the
+   * utterance included. Measured: the strip is 103px at 1280×900, and the card
+   * arrives at 156 against a rail top of 44.
+   */
+  it("leaves room for what the rail pins above it", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    expect(container.querySelector("li")?.className).toContain("scroll-mt-28")
   })
 
   it("shows the stake factors the Gate actually cited", () => {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
+import { CountReaders } from "@/app/(marketing)/_components/count-readers"
+import { readersCountedHere } from "@/app/(marketing)/_lib/readers/counting"
 import { HOME, siteOrigin } from "@/app/(marketing)/_lib/site"
 
 import "./globals.css"
@@ -55,6 +57,24 @@ export const metadata: Metadata = {
  */
 const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"
 
+/**
+ * The one thing this layout mounts, and the only code of this site that runs in
+ * a browser.
+ *
+ * It is here rather than on a page because a broadcaster's subject is *a
+ * visit*, not a page: it is started once against the tree the document
+ * contains, and every one of the ten pages is counted on the same terms or none
+ * of them is. It draws nothing, so the claim the comment above makes — the
+ * chrome is in the tree, not wrapped around it — is untouched.
+ *
+ * **Absent unless this deployment collects.** `readersCountedHere` is the same
+ * answer `render.ts` uses to decide whether the markup carries the addresses a
+ * signal names, so a broadcaster is never started on a page that cannot be
+ * measured, and a page is never addressed with nothing listening. Off — which
+ * is the default, and what this deployment is until somebody sets
+ * `LOOM_SIGNAL_INTAKE` — nothing is rendered here, nothing is downloaded, and
+ * no batch is sent anywhere.
+ */
 const RootLayout = ({ children }: { readonly children: ReactNode }) => (
   <html lang="en">
     <head>
@@ -62,7 +82,10 @@ const RootLayout = ({ children }: { readonly children: ReactNode }) => (
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       <link rel="stylesheet" href={GEIST} />
     </head>
-    <body>{children}</body>
+    <body>
+      {children}
+      {readersCountedHere() ? <CountReaders /> : null}
+    </body>
   </html>
 )
 

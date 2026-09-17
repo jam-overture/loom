@@ -101,11 +101,18 @@ describe("withCeiling", () => {
   })
 
   /**
-   * The failure this prevents is not a wrong answer, it is a process exit: a
-   * rejection that arrives after the race has already been decided has nobody
-   * left to catch it, and Node ends the server on an unhandled one.
+   * The failure in view is not a wrong answer, it is a process exit: Node ends
+   * the server on an unhandled rejection, and a rejection arriving after the
+   * race is decided is the one with nobody left to catch it.
+   *
+   * Named for the outcome rather than for the `catch` in `withCeiling`, because
+   * it cannot tell whether that line is there. `Promise.race` subscribes to both
+   * promises synchronously, so this passes identically with the line deleted —
+   * measured. Keeping the old name would have made it the second source in
+   * lesson 25's sense: a check whose agreement is guaranteed by the same
+   * mechanism it was supposed to be independent of.
    */
-  it("does not leave a late rejection unhandled", async () => {
+  it("does not let a late rejection reach the process", async () => {
     const unhandled: unknown[] = []
     const onUnhandled = (reason: unknown): void => {
       unhandled.push(reason)

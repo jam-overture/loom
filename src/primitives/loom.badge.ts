@@ -76,6 +76,26 @@ export const loomBadge = definePrimitive({
           ...TONES[given.tone ?? "accent"],
           display: "inline-flex",
           alignItems: "center",
+          /**
+           * Shrink-wraps rather than filling its parent, which `inline-flex`
+           * alone does not buy: a flex container blockifies its items and
+           * stretches them on the cross axis, so a badge placed directly in a
+           * `loom.card` — a flex column — became a full-width bar with two
+           * characters in it. Measured at 1280px on 17 September: a badge
+           * reading `01` was **281px wide against a card whose inner width is
+           * 281px**, in `steps-cards` and in `catches-the-eye.specimen.ts`,
+           * where "Most popular" has been photographed that way since it
+           * shipped.
+           *
+           * The same line, for the same reason, that `control.ts`,
+           * `loom.perk`, `loom.feature` and `loom.milestone` already carry.
+           * It belongs on the child rather than on every container that might
+           * hold one, which is
+           * [0155](../../decisions/0155-a-container-may-only-add-to-its-children-what-they-left-unspoken.md):
+           * a badge's width is a thing a badge knows, and a card that reached
+           * in to set it would be four containers each deciding it separately.
+           */
+          alignSelf: "flex-start",
           gap: space(1),
           /**
            * Padded off the spacing scale on the inline axis and off the type

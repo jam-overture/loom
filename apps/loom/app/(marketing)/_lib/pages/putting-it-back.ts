@@ -21,8 +21,9 @@ import {
   THE_RECORD,
   THE_RULES,
   WHEN_IT_GOES_WRONG,
-  type SiteThemeName,
 } from "../site"
+
+import type { PageContext } from "./home"
 
 /**
  * The page for the fourth quarter of the difference.
@@ -44,9 +45,14 @@ import {
  * only because the front door happens to offer both an addition and a removal.
  */
 
-export type BackContext = {
-  readonly origin: string
-  readonly theme: SiteThemeName
+/**
+ * `PageContext` and the trips, as of 17 September — it spelled out its own
+ * `origin` and `theme` until then, which is how it came to be the one page
+ * context that could not be told whether the deployment counts its readers. The
+ * two contexts beside it (`MechanismContext`, `RecordContext`) were already
+ * written this way; this is them, not a new idea.
+ */
+export type BackContext = PageContext & {
   /**
    * The round trips, made where a page builder cannot: a builder is synchronous
    * and a request through the whole sequence is not. The same seam, and the same
@@ -409,6 +415,7 @@ export const puttingItBackPageTree = (context: BackContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: PUTTING_IT_BACK,
+    counting: context.counting === true,
   }
   const trips = context.trips ?? []
 
