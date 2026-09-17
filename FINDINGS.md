@@ -25207,7 +25207,13 @@ would move together are the module, the variable name and the `.env.example`
 entry, and that is its own small unit for a run with nothing better to do.
 ## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-19-the-question-in-the-way` (16 September)** — shape (1) taken, and taken
+further than one line: the caution is pinned to the top of the rail because the
+first version of it was measured being scrolled past, and the panel gives up its
+green button while a question is open. Shape (3), the automatic re-ask, is not in
+it and is **filed separately below** on 16 September, which is what this entry
+recommended.
 
 Two presses, in the order the panel puts them in, driven against a real
 `next build` at 1280×900:
@@ -25276,6 +25282,104 @@ above it. No reference gallery answers that. It is worth saying plainly at this
 point that the brief's instruction to consult `21st.dev` for the visual standard
 has never once been executable, and the lane has not been held back by it.
 
+## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Driven against a real `next build` at 1280×900, two presses of one button:
+
+| | the rail |
+| --- | --- |
+| press **Take the numbers off** | `Waiting on you` · *“Take the numbers band off the page.”* |
+| press **Take the numbers off** again | `Waiting on you` · *“Take the numbers band off the page.”*<br>`Waiting on you` · *“Take the numbers band off the page.”* |
+
+Two cards, word for word identical, each with its own **Apply this change**, each
+about the same four nodes. Answering either applies the removal and moves the
+revision, which kills the other where it stands — so the second press buys the
+visitor a duplicate question and a guaranteed `Nothing changed` card.
+
+**Why it is offered.** `availablePresets` asks each preset whether it has
+anything to do, and `trim.plan` looks for a `loom.stat-grid` on the tree. While
+the removal is only *held*, the grid is still there — a hold changes no tree
+(0017) — so the preset can still plan, and the panel honours `available` exactly
+as it should. Nothing in the chain is wrong: the filter is a question about the
+tree, and the tree has not moved.
+
+**It is reachable in two clicks from the demo's own leading button**, and it got
+easier to notice rather than easier to hit this run: `demo-19` demotes the lead
+into the list while a question is open, so the same ask sits among the others
+rather than under the cursor. The count in the new caution is what surfaced it —
+*“2 questions are still waiting on you”* about one removal asked twice.
+
+**Two shapes, and this lane can do either.**
+
+1. **Do not offer an ask that is already waiting.** The panel already knows which
+   presets produced the open questions: `ChangeRecord.presetId` is stamped by
+   `askedWith` for exactly this kind of use, and `set-aside.ts` already walks the
+   open questions. Filtering those ids out of `available` is small, and it is the
+   same rule `availablePresets` follows — never offer a press whose only outcome
+   is nothing.
+2. **Fold the second ask onto the first.** Honest about what the runtime does
+   (two intents, two proposals) only if the card says so, and it is more
+   machinery than the case deserves.
+
+**Recommend (1)**, with the caution's plural left in place: two *different*
+questions open at once is a real state the demo should keep, and this only stops
+one question being asked of itself twice.
+
+## 2026-09-16 — the automatic re-ask, and whether a surface may ask on a visitor's behalf
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Shape (3) of the 15 September finding closed by `demo-19`, carried out of it
+deliberately. The caution now tells a visitor, before the press, that asking for
+something else sets their open question aside. What it does not do is get the
+question back.
+
+The machinery is already there and already correct: a card the page has moved
+past offers **Ask for this again**, which posts the same `presetId` against the
+revision the page is actually at, through `askForChange` — the identical path the
+panel takes, weighed afresh, and the Gate may hold it again (`PageMovedOn`,
+`moved.ts`). Spending that without waiting to be asked is a few lines.
+
+**The argument, which is why it is not a few lines.** A surface re-asking on a
+visitor's behalf is the demo making a decision, on the one surface whose whole
+claim is that decisions are recorded rather than assumed. That is survivable —
+Loom's claim is not *nothing happens without you*, it is *everything that happens
+is written down* — but only if the re-ask **writes its own record saying it was
+automatic**, in the same plain voice as everything else on the rail: *your
+question was overtaken by a later change, so Loom asked it again against the page
+as it now stands.* `ChangeRecord` has no field for that today, and `origin` is
+the runtime's word for what kind of act an intent was, so this needs either a new
+provenance the demo owns or a new one the runtime does — and the second is
+`Loom daily build`'s, not this lane's.
+
+**It also multiplies cards**, which is the thing three runs of this lane have
+been cutting back. Five presses currently leave three dead cards; re-asking each
+would leave three dead cards *and* three live ones. Superseding the dead card in
+place is the obvious answer and it collides with the maintainer's standing
+direction that **nothing is ever removed**.
+
+**Recommend** it is designed before it is built, and that the design question
+above — what a record says about an ask nobody made — is settled first. Not
+escalated: nothing here touches the tree schema, the delta model or an `Accepted`
+record yet, and it may well not need to.
+
+## 2026-09-16 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane an eighteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil again, and the reason is the one the seventeenth run gave.**
+What decided this unit was a measurement — the rail sitting at a scrollTop of
+about 400 after the press, with the caution that had just been written 40 pixels
+above the fold. No reference gallery answers where a warning has to be. The two
+things this run did reach for instead were both already in the repository: the
+rail's own amber, which it gives an open question in three other places, and its
+own rule that a consequence is said under the control it is about.
 ---
 ## 2026-09-16 — ninety-six primitives are registered and none of them has said which of its settings a reader reads
 

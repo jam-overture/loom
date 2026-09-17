@@ -397,6 +397,36 @@ describe("a record card", () => {
     expect(screen.getByText("restructures at depth 1 · medium")).toBeTruthy()
   })
 
+  /**
+   * The other half of a property that spans two files: the green on this rail
+   * belongs to the demo's next step, and while a question is open that step is
+   * this card's answer rather than a new ask — so a waiting card carries exactly
+   * one, and `AskPanel` gives its own up (`set-aside.ts`). The class is asserted
+   * rather than the look because it is the only thing the two files share.
+   */
+  it("carries one green button while it is the question waiting", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    const answer = screen.getByRole("button", { name: "Apply this change" })
+
+    expect(container.querySelectorAll(".bg-affirm").length).toBe(1)
+    expect(answer.className).toContain("bg-affirm")
+  })
+
+  /**
+   * The other coupling to the same strip. `AskPanel`'s **Answer it first** is a
+   * fragment pointing at this card's own id, and the strip it sits in is pinned
+   * to the top of the rail — so without a scroll margin the fragment lands the
+   * card behind the band that sent the visitor to it, `Waiting on you` and the
+   * utterance included. Measured: the strip is 103px at 1280×900, and the card
+   * arrives at 156 against a rail top of 44.
+   */
+  it("leaves room for what the rail pins above it", () => {
+    const { container } = render(<RecordCard record={HELD} />)
+
+    expect(container.querySelector("li")?.className).toContain("scroll-mt-28")
+  })
+
   it("shows the stake factors the Gate actually cited", () => {
     render(<RecordCard record={HELD} />)
 
