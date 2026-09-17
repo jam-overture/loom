@@ -268,16 +268,15 @@ describe("counting the readers of this site", () => {
     RevealsWhatItWatches.last?.reveal()
     unmount()
 
-    const types = [...new Set(seen.flatMap((batch) => batch.signals.map((signal) => signal.type)))]
+    const bands: readonly string[] = BAND_TYPES
+    const types = [
+      ...new Set(seen.flatMap((batch) => batch.signals.map((signal) => signal.type as string))),
+    ].sort()
 
     expect(types.length).toBeGreaterThan(0)
-    expect(types.sort()).toEqual(
-      [...BAND_TYPES].filter((type) => types.includes(type)).sort()
-    )
-    for (const type of types) {
-      expect((BAND_TYPES as readonly string[]).includes(type), `${type} is not a band`).toBe(true)
-    }
     expect(types).toContain("loom.section")
+    /** Named in the failure rather than counted, so a red test says what leaked. */
+    expect(types.filter((type) => !bands.includes(type))).toEqual([])
   })
 
   it("reports nothing about a press on something that is not a control", () => {
