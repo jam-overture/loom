@@ -146,6 +146,26 @@ describe("the bars", () => {
   })
 
   /**
+   * The same page on a deployment that *is* counting, which is the state the
+   * copy above stopped being true of on 17 September.
+   *
+   * Both sentences are asserted rather than one, because the pair is the
+   * promise: a reader is told they are being counted **and** told the bars are
+   * still a fixture, and a page that swapped one and forgot the other would be
+   * the most misleading of the four possible pages.
+   */
+  it("tells a reader being counted that they are, and that the bars still are not them", () => {
+    const counting = wordsOf(
+      treeFor(WHAT_READERS_DO, { origin: ORIGIN, theme: DEFAULT_THEME, counting: true }).root
+    ).toLowerCase()
+
+    expect(counting).toContain("counting is on here")
+    expect(counting).toContain("your own visit is being counted")
+    expect(counting).not.toContain("this deployment counts nobody")
+    expect(counting).not.toContain("counting is off")
+  })
+
+  /**
    * Not one figure on this page is a rate, and the band that shows a funnel is
    * the reason the check is worth having rather than obvious: *one of two* is
    * fifty per cent, and fifty per cent is the number a page selling this would

@@ -585,6 +585,7 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: WHAT_YOU_RUN,
+    counting: context.counting === true,
   }
 
   return createTree(

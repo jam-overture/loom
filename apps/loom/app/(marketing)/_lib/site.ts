@@ -260,8 +260,19 @@ export const WHEN_IT_GOES_WRONG: SiteRoute = {
  * rules can give a change — to all four askers, while the page is being built,
  * and prints the sixteen answers as marks. It also answers the question the
  * table invites and never addresses: **what does being the trusted asker not
- * buy you?** Four of the eight rules refuse to consult who asked at all, and
- * the floor is sovereign over all of them.
+ * buy you?** Seven of the eight rules never look at who asked, and the floor is
+ * sovereign over all of them.
+ *
+ * That number was *four* until 17 September and was never derived — it came
+ * from counting the rungs whose own comments say "whatever latitude its origin
+ * has", which is the wrong question: a rule that never mentions origin because
+ * it never reads one refuses to consult the asker just as completely as a rule
+ * that says so. Read off `ESCALATION_RULES`, exactly one rung consults it —
+ * `stakes-above-ceiling`, through `ceilingFor(policy, origin)`, which is 0002's
+ * "one place origin is load-bearing" and the reason this page exists. The
+ * page's own measured version of the same claim is below `cannotBuy` in
+ * `who-can-ask.ts`, and it agrees: across the sixteen runs, one rule out of the
+ * eight ever answered two askers differently.
  *
  * It is a description of code rather than a position, so it did not wait on the
  * licence line: nothing on it says what Loom costs, who it is for, or what may

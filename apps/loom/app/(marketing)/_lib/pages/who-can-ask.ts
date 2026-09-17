@@ -34,8 +34,9 @@ import {
   THE_RULES,
   WHEN_IT_GOES_WRONG,
   WHO_CAN_ASK,
-  type SiteThemeName,
 } from "../site"
+
+import type { PageContext } from "./home"
 
 /**
  * The page for the input to a verdict that is about people rather than about
@@ -58,17 +59,25 @@ import {
  * **The second half is the one the reader this site is for actually needs.** A
  * compliance reader told that a trusted asker gets more latitude asks the next
  * question immediately: *so what stops something claiming to be the trusted
- * one?* The answer is unusually good — of the eight rules, four refuse to
- * consult who asked at all, and the floor is sovereign over every one of them —
- * and it is read off the same sixteen runs rather than promised.
+ * one?* The answer is unusually good — of the eight rules, seven never look at
+ * who asked at all, and the floor is sovereign over every one of them — and it
+ * is read off the same sixteen runs rather than promised.
+ *
+ * **Seven rather than four, re-derived on 17 September** at the request of the
+ * finding `Loom daily build` filed with the eighth rung. Four was a count of
+ * the rungs whose comments say *whatever latitude its origin has*; the question
+ * the sentence asks is which rungs read an origin, and the answer off
+ * `ESCALATION_RULES` is one — `stakes-above-ceiling`, through
+ * `ceilingFor(policy, origin)`. The band below says the measured half of it,
+ * which is the same fact arrived at from the sixteen runs rather than from the
+ * rules.
  *
  * Nothing here is positioning. Every claim is a description of code in this
  * repository or a measurement taken on this site's own front page.
  */
 
-export type AskersContext = {
-  readonly origin: string
-  readonly theme: SiteThemeName
+/** `PageContext` and the sixteen runs. See `BackContext` for why it is written this way. */
+export type AskersContext = PageContext & {
   /**
    * The sixteen runs, made where a page builder cannot: a builder is
    * synchronous and a request through the whole sequence is not. The same seam,
@@ -455,6 +464,7 @@ export const whoCanAskPageTree = (context: AskersContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: WHO_CAN_ASK,
+    counting: context.counting === true,
   }
   const weighed = context.weighed ?? []
 

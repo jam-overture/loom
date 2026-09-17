@@ -25224,8 +25224,9 @@ pages than this, and it is the shape this lane's brief names as the one to study
 ## 2026-09-16 — the marketing site can describe reader signals and cannot yet send one, and the reason is a branch
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — deliberately not done this run, recorded so the next run does not
-re-derive it
+**closed** on 17 September by `marketing-28-speaking-through-the-door`, which did
+exactly what the last paragraph of this entry said it would, once #312 was on
+`main`
 
 `/what-readers-do` is the marketing half of step 5 of
 [`docs/signals.md`](docs/signals.md), and the other half — **this surface
@@ -25296,8 +25297,13 @@ Nothing else on the page was touched, and the compiled fence was regenerated wit
 ## 2026-09-16 — the ladder is eight rungs, and eight strings across three surfaces said seven
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing` · **Status:**
-open — counts corrected mechanically, the claim behind one of them is yours to
-re-check
+**closed** on 17 September by `marketing-28-speaking-through-the-door`. The claim
+was re-derived and the answer is **seven of the eight**, not four: four counted
+the rungs whose comments say *whatever latitude its origin has*, and the
+sentence asks which rungs read an origin — which off `ESCALATION_RULES` is one,
+`stakes-above-ceiling`, through `ceilingFor(policy, origin)`. Both comments now
+say seven and say how it was counted. Nothing rendered was wrong: the only
+count in front of a reader was the link label you had already fixed
 
 Adding a rung made every sentence that counts them wrong. `record-claims.test.ts`
 caught the two in `decisions/` and nothing guards the ones on the surfaces, which
@@ -25538,6 +25544,109 @@ above it. No reference gallery answers that. It is worth saying plainly at this
 point that the brief's instruction to consult `21st.dev` for the visual standard
 has never once been executable, and the lane has not been held back by it.
 
+## 2026-09-17 — a press is filed against the button, and `rollUp` has no way to say which band it was in
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — measured, not a defect in anything, and it makes one band of
+`/what-readers-do` unreproducible from real signals
+
+Found by wiring this surface up to actually broadcast and then asking the
+resulting batch what it said. `count-readers.test.tsx` presses a
+`loom.action` inside a band of the front door and reads the delivery back:
+
+```
+signals: [{ kind: "activated", type: "loom.action", nodeId: "<the button>" }]
+```
+
+**The band is not in it, and cannot be.** `broadcastReaderSignals` files a
+signal against the *nearest addressed element* to what was pressed
+(`nearestAddressed`), and every control in the starter library is an addressed
+node of its own — so the answer is always the button or the link, never the
+section it sits in. Narrowing `types.activated` to band types does not walk
+further up either: the nearest addressed element fails the filter and the signal
+is dropped, so asking for band-level activations produces **none** rather than
+band-level ones.
+
+**Why it matters beyond a curiosity.** Two things on
+`/what-readers-do` are band-level activation claims:
+
+| what the page prints | where it comes from |
+| --- | --- |
+| *157 seconds on screen in total, 5 used something in it*, per band | `ReaderTally.activations` for that band |
+| *Of the 10 readers who got as far as "…", 5 used something in it* | a `FunnelPair` whose second leg is an activation |
+
+Both are computed, both are correct arithmetic, and both are computed over
+**scripted visits that mint `activated` against band ids** — which is a thing no
+browser will ever send. On real signals those figures are zero for every band,
+forever, and the page would not notice: the arithmetic is the same and the input
+is empty. The fixture is not wrong about the machinery it demonstrates
+(`rollUp`); it is wrong about which nodes the machinery receives.
+
+**What would fix it is a decision rather than a patch, which is why this is
+filed and not attempted.** Three shapes, and they are not equivalent:
+
+1. **The signal carries the band as well as the control.** A second address on
+   an `activated` signal — *this button, in that band* — read off the same walk
+   the broadcaster is already doing. It is the only one that makes both a
+   per-control and a per-band report possible from one batch, and it changes the
+   signal schema, so it is yours and it is probably a record.
+2. **`rollUp` is given the tree.** It could attribute a control's signal to its
+   nearest band by walking the page. Cheap to describe and wrong in one
+   important way: the counters would then depend on a tree the collector happens
+   to have, and a batch filed under revision 4 read against revision 9 would
+   attribute presses to bands that have moved.
+3. **Nothing changes, and the page stops promising it.** Also acceptable. *Which
+   button did people press* is a good report on its own, and this lane can say
+   that instead — but it would mean the fixture and one funnel question on
+   `/what-readers-do` are rewritten to be about controls, which is a worse page
+   and a smaller claim.
+
+This lane's copy has been corrected for the fact either way: the tile that said
+*the band it happened in is named* now says *the link or the button is named*,
+because that sentence was describing the page's fixture rather than the
+machinery. The figures stay as they are pending your decision, beside a sentence
+that already says the visits are made up.
+
+## 2026-09-17 — this surface broadcasts now, and the other three can copy fourteen lines
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo`, `Loom docs`,
+`Loom lessons` · **Status:** open for you three — the marketing quarter of the
+15 September finding *the door is open and nobody is speaking through it* is
+done, and this is the recipe rather than another request
+
+`marketing-28-speaking-through-the-door` does the two calls #312's finding asked
+each reader-facing surface for, and the shape is worth copying rather than
+re-deriving:
+
+| piece | what it is |
+| --- | --- |
+| `_lib/readers/counting.ts` | one function: is `LOOM_SIGNAL_INTAKE` on? It reads `readIntakeSwitch` from `app/_lib/reader-signals/settings.ts` rather than parsing the variable again, so a surface cannot disagree with the endpoint about whether the deployment collects |
+| `render.ts` | `addressed:` is that boolean, so the markup carries the four addresses only on a deployment that is collecting |
+| `_components/count-readers.tsx` | `"use client"`, returns `null`, starts one broadcaster on `[data-loom-tree]` with `send: deliverReaderSignals()`, stops on unmount |
+| `layout.tsx` | mounts it when the same boolean is true |
+
+**Three things learned doing it, each of which would have cost you a run:**
+
+- **Import from `@loom/runtime/signals/broadcast`, and take
+  `ReaderSignalBatch` as a `type`.** The value import from
+  `@loom/runtime/signals` is the 66 KB one (0136); a type import is erased.
+  `deliverReaderSignals` travels with the broadcast entry point, so both come
+  from one line.
+- **Keep the environment read out of the client component's module graph.**
+  `settings.ts` reaches the portal's proxy-hop resolver; the kinds and types this
+  surface asks for live in a separate module whose only import is a type, and
+  the boolean crosses as a boolean.
+- **A silent broadcaster is unfalsifiable, so make it say something.** The
+  component sets `data-reader-signals="broadcasting"` or `"unaddressed"` on
+  `<html>` — nothing a reader sees, and the difference between *this works* and
+  *this looks exactly like a site nobody is visiting* in both a jsdom test and a
+  real browser.
+
+Also worth knowing before you wire the addresses on: **`addressed: true` is not
+free of consequence for your own tests.** Any assertion of the form *this markup
+contains no `data-` attributes*, and any snapshot, changes the day you turn it
+on. It is gated on the switch here, so this deployment's markup is byte-identical
+until somebody sets the variable.
 ## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open

@@ -83,6 +83,21 @@ export type PageContext = {
   readonly record?: ChangeRecord
   /** And what happened when the visitor put it back, once they have. */
   readonly undone?: ChangeRecord
+  /**
+   * Whether this deployment is counting the person reading the page.
+   *
+   * The one thing in this context that is a fact about the *deployment* rather
+   * than about the address, and it is here because a page that counts its
+   * readers has to be able to say so. `render.ts` reads it once per request
+   * (`readersCountedHere`) and the same boolean decides three things: the
+   * markup carries the addresses a signal names, the layout starts a
+   * broadcaster, and the footer and `/what-readers-do` tell a reader which of
+   * the two pages they are looking at.
+   *
+   * Absent means off, which is what a builder called without it — every test
+   * that predates this, and every page tree built as a fixture — should get.
+   */
+  readonly counting?: boolean
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
@@ -617,6 +632,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
     origin: context.origin,
     theme: context.theme,
     current: HOME,
+    counting: context.counting === true,
     ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
   }
 
