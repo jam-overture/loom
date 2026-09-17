@@ -2,7 +2,7 @@ import type { ReaderSignalBatch } from "@loom/runtime/signals"
 import { render } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { CONTROL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
+import { BAND_TYPES, CONTROL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
 import { renderTree, treeFor } from "@/app/(marketing)/_lib/render"
 import { HOME } from "@/app/(marketing)/_lib/site"
 
@@ -19,14 +19,20 @@ import { COUNTING_ATTRIBUTE, CountReaders } from "./count-readers"
  * So this renders the real front door, presses the things a reader presses, and
  * reads the batches back.
  *
- * **`IntersectionObserver` is stubbed rather than driven**, which is the
- * arrangement `(docs)` reached for the same reason: jsdom has none, and without
- * one the broadcaster's constructor throws before it reaches anything worth
- * testing. The stub observes nothing, so `viewed` and `dwelled` cannot appear
- * here — the runtime's own `broadcast.test.ts` covers those by passing its own
- * observer. What is left is exactly what this file is for: the two kinds that
- * are delegated from the root, and therefore prove this component handed the
- * broadcaster the right element.
+ * **`IntersectionObserver` is stubbed**, which is the arrangement `(docs)`
+ * reached for the same reason: jsdom has none, and without one the
+ * broadcaster's constructor throws before it reaches anything worth testing.
+ * There are two stubs and they answer different questions. `NoObserver` watches
+ * nothing, so the kinds that are delegated from the root — a press, an opening —
+ * are the only thing that can happen, which is what proves this component
+ * handed the broadcaster the right element. `RevealsWhatItWatches` hands back
+ * everything it was given, which is what proves this component asked for the
+ * bands rather than for the page.
+ *
+ * Neither is a substitute for the real thing, and neither pretends to be: what
+ * a browser does with a half-visible section is the runtime's own
+ * `broadcast.test.ts`, and what this deployment does with a real reader was
+ * measured in Chromium against `next start` and is in the report.
  */
 
 class NoObserver {
@@ -35,6 +41,58 @@ class NoObserver {
   disconnect(): void {}
   takeRecords(): [] {
     return []
+  }
+}
+
+/**
+ * An observer that hands back everything it was given as *on screen*, on
+ * demand.
+ *
+ * jsdom lays nothing out, so nothing is ever visible and the two kinds that
+ * depend on visibility cannot happen by themselves. This is the smallest stub
+ * that makes them happen: it keeps what the broadcaster asked it to watch, and
+ * `reveal` reports all of it as read.
+ *
+ * **It is here because of the one mutation the first eight tests missed.** With
+ * no `types` at all, the broadcaster reports every kind about every addressed
+ * primitive — and nothing above notices, because every control this site has is
+ * one it asks about, and `viewed` never fired. What the broadcaster *observes*
+ * is decided by `types`, so an observer that says what it was handed is exactly
+ * the instrument that can tell the difference between *the bands* and
+ * *everything on the page*.
+ */
+class RevealsWhatItWatches {
+  static last: RevealsWhatItWatches | undefined
+
+  private readonly watched: Element[] = []
+
+  constructor(private readonly report: (entries: readonly unknown[]) => void) {
+    RevealsWhatItWatches.last = this
+  }
+
+  observe(element: Element): void {
+    this.watched.push(element)
+  }
+
+  unobserve(): void {}
+
+  disconnect(): void {}
+
+  takeRecords(): [] {
+    return []
+  }
+
+  /** Everything this was asked to watch, reported as more than half on screen. */
+  reveal(): void {
+    this.report(
+      this.watched.map((target) => ({
+        target,
+        isIntersecting: true,
+        intersectionRatio: 1,
+        intersectionRect: { height: 200 },
+        rootBounds: { height: 800 },
+      }))
+    )
   }
 }
 
@@ -192,6 +250,36 @@ describe("counting the readers of this site", () => {
    * dropped where it happens, which is what makes `asked.ts` a promise rather
    * than a filter on a report somebody could take off later.
    */
+  /**
+   * What this site asks to be told about, held to the promise rather than to
+   * the filter: the bands are reported as read, and the dozens of addressed
+   * nodes inside them are not reported at all.
+   *
+   * It is the same claim `asked.ts` makes in prose — *asking both of everything
+   * would bury the reading that matters* — and the only assertion here that
+   * fails when the component stops narrowing what it asks for.
+   */
+  it("hears about the bands coming into view, and about nothing inside them", () => {
+    const { seen, send } = batches()
+
+    globals.IntersectionObserver = RevealsWhatItWatches
+    const { unmount } = site({ addressed: true, send })
+
+    RevealsWhatItWatches.last?.reveal()
+    unmount()
+
+    const types = [...new Set(seen.flatMap((batch) => batch.signals.map((signal) => signal.type)))]
+
+    expect(types.length).toBeGreaterThan(0)
+    expect(types.sort()).toEqual(
+      [...BAND_TYPES].filter((type) => types.includes(type)).sort()
+    )
+    for (const type of types) {
+      expect((BAND_TYPES as readonly string[]).includes(type), `${type} is not a band`).toBe(true)
+    }
+    expect(types).toContain("loom.section")
+  })
+
   it("reports nothing about a press on something that is not a control", () => {
     const { seen, send } = batches()
 
