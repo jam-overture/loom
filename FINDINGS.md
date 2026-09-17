@@ -8,6 +8,66 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-17 — the class of defect this lane keeps finding by accident has a name now: a CSS value that a *layout context* overrides, and nothing looks for it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — a generalisation of the 16 September entry below, filed because the
+fourth instance was found by a different mechanism than the first three and the
+existing finding does not cover it
+
+On 16 September this lane filed *"an inline style beat a rule for the third time
+in three days"* and proposed a check that walks the rendered markup for **inline
+properties also named in the stylesheet**. That check would have caught all
+three instances it was written about. **It would not have caught today's**, and
+the difference is what this entry is for.
+
+`loom.badge` declares `display: "inline-flex"`, which means *shrink-wrap to your
+content*. Nothing overrides it and no stylesheet rule contradicts it. It is
+simply **not what `inline-flex` means once the element is a flex item**: a flex
+container blockifies its children and stretches them on the cross axis, so a
+badge placed directly inside a `loom.card` — a flex column — becomes a full-width
+bar. Measured in Chromium at 1280px:
+
+| | badge reading `01` | card inner width |
+| --- | --- | --- |
+| before | **281px** | 281px |
+| after `align-self: flex-start` | **40px** | 281px |
+
+Four primitives in the same directory already carry that line — `control.ts`,
+`loom.perk`, `loom.feature`, `loom.milestone` — each with a comment saying why.
+`loom.badge` never did, and `catches-the-eye.specimen.ts` has photographed
+"Most popular" as a full-width bar since it shipped. Nobody reported it; the
+specimen is about lights and nobody was looking at the badge.
+
+**So the shape is: a declaration that is correct in isolation and wrong in the
+context the element is placed into.** No rule is overridden, so a
+stylesheet-versus-inline diff sees nothing. The properties in this family are
+small and enumerable — `display: inline-*` under a flex parent, `width` under a
+grid item, `margin` collapsing — and the only instrument that sees any of them
+is a browser with a layout engine, which is the specimen harness and not
+`vitest`.
+
+**Two shapes, and I do not think the second is worth it yet:**
+
+1. **Extend the specimen harness to assert, not only photograph.** It already
+   has a browser, a served page and a viewport. A specimen could declare a
+   handful of expectations — *this element is narrower than its parent* — and
+   fail the run. Cheap, because the expensive half exists. This is the one I
+   would build.
+2. **A general audit for the family.** Walk every rendered primitive in every
+   layout context and flag the combinations. Comprehensive and almost certainly
+   not worth it: the number of real instances is four in a month, and the false
+   positives (a `loom.button` with `width: "full"` *wants* to stretch) need a
+   per-primitive allowlist that is the same work as writing the assertions by
+   hand.
+
+The badge itself is fixed and tested in this lane's branch. What is filed is the
+instrument, and **the 16 September entry's proposal should not be closed by
+building it** — it catches a different family, and both are real.
+
+Offered, not asked for. Nothing is blocked.
+
+---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
