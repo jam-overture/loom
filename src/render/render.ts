@@ -336,14 +336,17 @@ const renderContextFor = (
  * that has none. The plan was read from this same tree before the walk began, so
  * the lookup is a map read: nothing here parses, asks or waits.
  */
-const nodeDataFor = (node: ElementNode, context: RenderContext): NodeData => {
+const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContext): NodeData => {
   if (!context.data) {
-    context.collect({ code: "data-unresolved", nodeId: node.id })
+    context.collect({ code: "data-unresolved", nodeId: node.id, resolution: "absent" })
 
     return NO_DATA
   }
 
+  let reported = 0
+
   for (const problem of context.data.problemsFor(node.id)) {
+    reported += 1
     context.collect(
       problem.kind === "misdeclared"
         ? { code: "data-misdeclared", nodeId: node.id, error: problem.error }
@@ -357,8 +360,49 @@ const nodeDataFor = (node: ElementNode, context: RenderContext): NodeData => {
     )
   }
 
-  return context.data.lookup(node.id)
+  const data = context.data.lookup(node.id)
+
+  /**
+   * A resolution that answered nothing for a node that asked for something has
+   * never heard of the node: `buildDataResolution` gives every planned binding an
+   * outcome and every malformed declaration a problem, so silence on both means
+   * the answers were built from a different tree's plan.
+   *
+   * Said here rather than left to the seam because the seam cannot say it — a
+   * resolution is asked about a node id and has no way to know the node declared
+   * anything. The walk holds both halves, which is what makes this the only place
+   * the two facts meet.
+   */
+  if (reported === 0 && !hasAnswers(data) && asksForSomething(declared)) {
+    context.collect({ code: "data-unresolved", nodeId: node.id, resolution: "unrelated" })
+  }
+
+  return data
 }
+
+/** Whether the resolution answered this node at all. Early-return rather than
+ * `Object.keys`, because it runs on every bound node of every render and the
+ * question is only ever whether the bag is empty. */
+const hasAnswers = (data: NodeData): boolean => {
+  for (const _name in data) return true
+
+  return false
+}
+
+/**
+ * Whether a declaration is a question at all. The one value that asks for
+ * nothing is an object with no entries — `"loom:data": {}` — and a render that
+ * answered it with nothing has served it correctly.
+ *
+ * Everything else asks, malformed included: a string or a number under
+ * `loom:data` is not a node that stayed quiet, it is a node whose declaration
+ * the plan will refuse. It did ask; the plan is the thing that judges how well.
+ *
+ * Deliberately a shape test rather than a parse — the walk's contract, stated in
+ * `nodeDataFor` above, is that nothing here parses.
+ */
+const asksForSomething = (declared: unknown): boolean =>
+  typeof declared !== "object" || declared === null || Object.keys(declared).length > 0
 
 /**
  * The target for a node that named an endpoint, and a diagnostic when it has
@@ -370,12 +414,15 @@ const nodeSubmissionFor = (
   context: RenderContext
 ): SubmissionOutcome | undefined => {
   if (!context.submissions) {
-    context.collect({ code: "submit-unresolved", nodeId: node.id })
+    context.collect({ code: "submit-unresolved", nodeId: node.id, resolution: "absent" })
 
     return undefined
   }
 
+  let reported = 0
+
   for (const problem of context.submissions.problemsFor(node.id)) {
+    reported += 1
     context.collect(
       problem.kind === "misdeclared"
         ? { code: "submit-misdeclared", nodeId: node.id, error: problem.error }
@@ -388,7 +435,18 @@ const nodeSubmissionFor = (
     )
   }
 
-  return context.submissions.lookup(node.id)
+  const outcome = context.submissions.lookup(node.id)
+
+  /**
+   * The data seam's case exactly, and it needs no emptiness test: a submission is
+   * one declaration rather than a map, so a node that carries `loom:submit` at all
+   * has asked, and `buildSubmissionResolution` answers every planned one.
+   */
+  if (reported === 0 && !outcome) {
+    context.collect({ code: "submit-unresolved", nodeId: node.id, resolution: "unrelated" })
+  }
+
+  return outcome
 }
 
 /**
@@ -575,7 +633,10 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     context.collect({ code: "props-undeclared", nodeId: node.id, type: node.type })
   }
 
-  const data = reserved[DATA_PROP_KEY] === undefined ? NO_DATA : nodeDataFor(node, context)
+  const data =
+    reserved[DATA_PROP_KEY] === undefined
+      ? NO_DATA
+      : nodeDataFor(node, reserved[DATA_PROP_KEY], context)
 
   const submit =
     reserved[SUBMIT_PROP_KEY] === undefined ? undefined : nodeSubmissionFor(node, context)

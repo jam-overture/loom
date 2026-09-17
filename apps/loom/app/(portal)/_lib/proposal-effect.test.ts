@@ -12,8 +12,29 @@ import {
   type TreeDelta,
   type TreeOperation,
 } from "@loom/runtime"
+import type { CopyDeclarations } from "@loom/runtime/sdk"
 
-import { describeProposalEffect, formatValue } from "./proposal-effect"
+import { describeProposalEffect as describeAgainst, formatValue } from "./proposal-effect"
+
+/**
+ * Declarations for the three types this file's tree is built from, all of which
+ * hold their words as children and show none of their own — which is what the
+ * portal's own four primitives declare, and what keeps the reading's third
+ * answer out of every assertion that is not about it.
+ *
+ * Wrapped rather than threaded through twenty-seven call sites, because every
+ * one of those sites is a test about a verb, a path or a count and would read
+ * worse for carrying a registry it does not care about. The tests that *are*
+ * about the declarations call `describeAgainst` directly with their own, which
+ * is the point of `CopyDeclarations` being an interface a fixture can satisfy.
+ */
+const DECLARED: CopyDeclarations = { copyFor: () => [] }
+
+/** Nothing has declared anything — the state of most of the starter library today. */
+const UNDECLARED: CopyDeclarations = { copyFor: () => undefined }
+
+const describeProposalEffect = (tree: LoomTree, delta: TreeDelta) =>
+  describeAgainst(tree, delta, DECLARED)
 
 /**
  * One page, three bands, with a heading whose words are worth recognising. Ids
@@ -567,5 +588,185 @@ describe("describeProposalEffect", () => {
       subject: { name: "the heading “Ship faster”", nodeId: HEADING },
       missing: false,
     })
+  })
+})
+
+/**
+ * What a change would take off the page, in the words that are on it.
+ *
+ * `Loom demo` filed on 1 September that this module's reading walked text
+ * children and kept only those, and that
+ * [0052](../../../../../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+ * makes that the wrong half of the tree: a fixed field stays a setting, so a
+ * band of headline figures has no text children at all and a proposal to delete
+ * it reported *no words*. These are the three answers the reading has now, and
+ * the third is the one that did not exist before — a part nobody has spoken
+ * for is neither words nor the absence of them.
+ */
+describe("the words an operation carries", () => {
+  const STAT = primitiveTypeSchema.parse("loom.stat")
+
+  /** A band of three figures, each carrying every word it prints as a setting. */
+  const statTree = (): LoomTree => {
+    const ids = sequentialIdFactory("s")
+
+    return createTree(
+      buildElement(ids, {
+        type: "loom.stat-grid",
+        props: { columns: 3, align: "centre" },
+        children: [
+          buildElement(ids, {
+            type: "loom.stat",
+            props: { value: "3,400", label: "appointments", caption: "last year", tone: "loud" },
+            children: [],
+          }),
+          buildElement(ids, {
+            type: "loom.stat",
+            props: { value: "12", label: "clinicians", caption: "on call", tone: "loud" },
+            children: [],
+          }),
+        ],
+      }),
+      ids
+    )
+  }
+
+  const GRID = nodeIdSchema.parse("n_s3")
+
+  /** The author's answer: three of a stat's four settings are words, `tone` is not. */
+  const STATS_DECLARED: CopyDeclarations = {
+    copyFor: (type) => (type === STAT ? ["value", "label", "caption"] : []),
+  }
+
+  it("reads the words a part holds in its settings, not only its text children", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "remove", nodeId: GRID }]),
+      STATS_DECLARED
+    )
+
+    expect(effect.operations[0]?.text).toEqual(["3,400", "appointments", "last year"])
+    expect(effect.operations[0]?.unreadable).toEqual([])
+  })
+
+  /**
+   * The cut said out loud. Six words previewed as three is an account of a
+   * deletion with three words missing and no way for the reader to tell.
+   */
+  it("counts every word it found, not only the ones it previews", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "remove", nodeId: GRID }]),
+      STATS_DECLARED
+    )
+
+    expect(effect.operations[0]?.text).toHaveLength(3)
+    expect(effect.operations[0]?.textTotal).toBe(6)
+  })
+
+  /**
+   * The defect, stated as the test that would have caught it. This is what the
+   * starter library looks like today: nothing has declared, so the old reading
+   * reported an empty list and the card said nothing at all.
+   */
+  it("says it cannot read a part's words rather than reporting none", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "remove", nodeId: GRID }]),
+      UNDECLARED
+    )
+
+    expect(effect.operations[0]?.text).toEqual([])
+    expect(effect.operations[0]?.textTotal).toBe(0)
+    expect(effect.operations[0]?.unreadable).toEqual([
+      { type: "loom.stat-grid", parts: 1, settings: ["align"] },
+      { type: "loom.stat", parts: 2, settings: ["value", "label", "caption", "tone"] },
+    ])
+  })
+
+  /**
+   * Grouped by type, because that is the level both readers act at: a person is
+   * told how many parts, and whoever maintains the primitives is told which one
+   * to declare. Two stats saying the same thing twice would be the same fact
+   * printed twice and the same fix named twice.
+   */
+  it("groups the parts it cannot read by type, and counts them", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "remove", nodeId: GRID }]),
+      { copyFor: (type) => (type === STAT ? undefined : []) }
+    )
+
+    expect(effect.operations[0]?.unreadable).toEqual([
+      { type: "loom.stat", parts: 2, settings: ["value", "label", "caption", "tone"] },
+    ])
+  })
+
+  /**
+   * `[]` is believed and absence is not (0122). A primitive that has said it
+   * shows no words of its own must not be reported as a silence, or every
+   * arrangement in a library would raise the caveat and the caveat would stop
+   * meaning anything.
+   */
+  it("believes a part that declared it shows no words of its own", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "remove", nodeId: GRID }]),
+      { copyFor: () => [] }
+    )
+
+    expect(effect.operations[0]).toMatchObject({ text: [], textTotal: 0, unreadable: [] })
+  })
+
+  /** An insert has no node on the page yet, so the only account of it is the delta's. */
+  it("reads an arriving part's words out of the proposal", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [
+        {
+          op: "insert",
+          parentId: GRID,
+          index: 0,
+          node: {
+            kind: "element",
+            id: nodeIdSchema.parse("n_arriving"),
+            type: STAT,
+            props: { value: "980", label: "referrals" },
+            children: [],
+          },
+        },
+      ]),
+      STATS_DECLARED
+    )
+
+    expect(effect.operations[0]).toMatchObject({
+      verb: "add",
+      text: ["980", "referrals"],
+      textTotal: 2,
+      unreadable: [],
+    })
+  })
+
+  /**
+   * A move carries the same words to a different place. Reporting them as
+   * arriving would be a change of address read as a change of content — and
+   * there is nothing that could go unread either, which is why the second
+   * field is empty rather than unknown.
+   */
+  it("reports no words either way for a move", () => {
+    const tree = statTree()
+    const effect = describeAgainst(
+      tree,
+      deltaOf(tree, [{ op: "move", nodeId: nodeIdSchema.parse("n_s1"), parentId: GRID, index: 1 }]),
+      UNDECLARED
+    )
+
+    expect(effect.operations[0]).toMatchObject({ text: [], textTotal: 0, unreadable: [] })
   })
 })

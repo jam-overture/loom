@@ -35,13 +35,24 @@ export type NodeSubmissionProblem =
     }
 
 export interface SubmissionResolution {
-  /** `undefined` for the overwhelming majority of nodes, which declare none. */
+  /**
+   * `undefined` for the overwhelming majority of nodes, which declare none — and
+   * for that reason it is not a way to say "I have no target for you". A node that
+   * declares `loom:submit` and gets `undefined` with no problem beside it earns a
+   * `submit-unresolved` diagnostic from the walk, for the reason the data seam's
+   * twin gives at length.
+   */
   readonly lookup: (nodeId: NodeId) => SubmissionOutcome | undefined
   readonly problemsFor: (nodeId: NodeId) => readonly NodeSubmissionProblem[]
 }
 
 const NO_PROBLEMS: readonly NodeSubmissionProblem[] = Object.freeze([])
 
+/**
+ * The resolution of a plan in which nothing posts anywhere, which is the only
+ * tree it is correct for. `EMPTY_DATA_RESOLUTION` has the same shape, the same
+ * purpose and the same trap.
+ */
 export const EMPTY_SUBMISSION_RESOLUTION: SubmissionResolution = {
   lookup: () => undefined,
   problemsFor: () => NO_PROBLEMS,

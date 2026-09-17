@@ -13,6 +13,7 @@ import { plainChange, settingsOf, type PlainChange } from "@/app/(demo)/_lib/pla
 import { availablePresets } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
+import { setAside } from "@/app/(demo)/_lib/set-aside"
 import { spotlightsAcross, spotlitChanges } from "@/app/(demo)/_lib/spotlight"
 import { isUndo } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
@@ -170,8 +171,28 @@ const DemoPage = async () => {
    */
   const answerable = held.filter((one) => movedOn(one.baseRevision, tree.revision) === undefined)
 
+  /**
+   * The question the visitor already has open, for the panel that is about to
+   * offer them four ways to lose it.
+   *
+   * Computed from `answerable` rather than from the records, because a record
+   * keeps the `heldProposalId` it was written with and what makes a question
+   * *live* is the store plus the revision — which is the same list the three
+   * readings above are computed for, and the same reason they are.
+   */
+  const waiting = setAside(records, new Set(answerable.map((one) => one.proposalId)))
+
   const effects = new Map<string, ProposalEffect>(
-    answerable.map((one) => [one.proposalId, describeProposalEffect(tree, one.proposal.delta)])
+    answerable.map((one) => [
+      one.proposalId,
+      /**
+       * The registry is the third half of the reading: which of a part's
+       * settings a reader reads is declared by whoever wrote the component, so
+       * the words a deletion takes away can only be read against the primitives
+       * this surface registered.
+       */
+      describeProposalEffect(tree, one.proposal.delta, demoRegistry),
+    ])
   )
 
   /**
@@ -351,6 +372,7 @@ const DemoPage = async () => {
             revision={tree.revision}
             available={availablePresets(tree, randomIdFactory)}
             modelConfigured={isDemoModelConfigured}
+            {...(waiting === undefined ? {} : { waiting })}
           />
 
           {rendered.diagnostics.length > 0 && (
