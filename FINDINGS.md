@@ -21063,7 +21063,9 @@ framework routine stopped adding to it on 16 August.
 ## 2026-09-10 — `textIn` has something to ask now, and the queue is still reading text children
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
-open — a note on `Loom demo`'s entry of the same day, not a second ask
+closed by `portal-28-the-words-it-takes-away` on 16 September — the queue calls
+`copyIn`, and the entry's prediction held exactly: what it gained immediately
+was *knowing that the list exists*
 
 `Loom demo` filed *the plain reading of a change prints registered type ids, and
 misses copy held in props* against `(portal)/_lib/effect-view.ts` this morning,
@@ -21242,7 +21244,9 @@ answered by somebody else.
 
 ## 2026-09-01 — `OperationEffect.text` finds no words on a primitive that carries its content in props
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-28-the-words-it-takes-away` on 16 September — the reading reads settings
+now, and says so when it cannot
 
 `(portal)/_lib/proposal-effect.ts:169` — `textIn` walks the subtree and keeps
 only nodes whose `kind` is `"text"`. A `loom.stat-grid` carries every figure it
@@ -25376,3 +25380,136 @@ above the fold. No reference gallery answers where a warning has to be. The two
 things this run did reach for instead were both already in the repository: the
 rail's own amber, which it gives an open question in three other places, and its
 own rule that a consequence is said under the control it is about.
+---
+## 2026-09-16 — ninety-six primitives are registered and none of them has said which of its settings a reader reads
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— measured today against `dist/`, and it is now visible on a screen rather than
+latent
+
+`copyIn` landed on 6 September and the portal's review queue started calling it
+today. It distinguishes *this primitive shows no words of its own* from *nobody
+has said* and reports only the second (0122), which is the right bargain and the
+reason this is worth a line.
+
+Counted, not estimated:
+
+```
+node -e "const {STARTER_PRIMITIVES}=require('./dist/primitives/index.js');
+console.log(STARTER_PRIMITIVES.length, STARTER_PRIMITIVES.filter(p=>p.copy===undefined).length)"
+→ 96 96
+```
+
+**All ninety-six.** `loom.code` is the near miss and worth naming so nobody else
+greps for it and stops: it has `text: { copy: "Copy", copied: "Copied" }`, which
+is a declared *string* for its button and not a copy declaration.
+
+`loom.stat` is the sharpest case, and 0052 is why it exists at all — a fixed
+field stays a setting, so `value`, `label` and `caption` are props and the part
+has no text children:
+
+```
+copyIn(theStatGrid, demoRegistry)
+→ words: []
+   unread: loom.stat-grid (columns) · loom.stat ×3 (value, label, caption)
+```
+
+That is a real read of `(demo)/_lib/page-tree.ts` against `demoRegistry` on this
+branch, not a fixture.
+
+**What it costs today, on a surface a stranger sees first.** The demo's leading
+ask is *Take the numbers off*, which removes that grid. Until this morning the
+record card said the change took away three pieces and listed no words, which
+is what `Loom demo` filed on 1 September. It now says *"Loom can't list the
+words in 4 parts of this: nobody has said which of their settings a reader
+reads."* That is an improvement — a silence became a stated gap — and it is
+still a caveat on the demo's payoff, and the only thing that removes it is a
+declaration on the primitives.
+
+**The ask, which is small per primitive and only you can make it.** `copy: [...]`
+on anything that shows words it holds itself, `copy: []` on the arrangements
+that show none. The registry refuses a declaration naming a prop the schema does
+not have, so a typo fails at registration rather than quietly reading as "has
+not said". The portal's own four declare `copy: []` and a test now fails on a
+fifth registered without one; the same guard over `STARTER_PRIMITIVES` would end
+this permanently.
+
+Not done here: `src/primitives/` is your lane, and there is nothing in the
+portal that can answer for a component it did not write (0018).
+
+---
+## 2026-09-16 — the review queue has been photographed populated, which is the first of the three screens the 13 September finding named
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe, filed against the standing findings of 13 and 15 September
+
+15 September filed that a portal screen's populated state can be photographed by
+seeding its store's `Symbol.for` carrier from a `--import` preload, and predicted
+that it generalises. It does. `/portal/pages/[treeId]`'s review queue — the
+first screen 13 September named, and the one thing this portal shows that no
+repository, log or build output has ever seen — was photographed with three
+held proposals in it today.
+
+Two things had to be added to the 15 September recipe, and both are the reason
+`pnpm shoot` still cannot take this picture:
+
+- **The carrier is `Symbol.for("loom.portal.holds")`** and what goes on it is a
+  `memoryHoldStore()` with three `HeldProposal`s `hold`ed into it. Nothing is
+  faked past that: the page's own read, its own reading against the served tree,
+  the real Next render, shell and stylesheet. The only fiction is who proposed
+  them — a script rather than a model.
+- **The screen needs a session**, so the script signs in: `LOOM_PORTAL_SESSION_SECRET`
+  and `LOOM_PORTAL_REVIEWERS` set for the run, then fill `input[name="key"]` and
+  **wait on leaving `/portal/sign-in`**. Not on the network, and not on
+  `document.cookie` — the form posts by fetch so the page is idle before the
+  cookie exists, and the cookie is `httpOnly` so the browser cannot be asked.
+  There is no `actor` field: the roster is keyed by the key.
+
+One honest caveat about the third of the three photographs, because it is the
+one the change was for. The caveat sentence fires on a part whose author has not
+declared its copy, and every primitive this portal registers has declared, so
+the fixture's proposal *adds* a piece of a type this deployment does not
+register. That reaches `copyFor` by exactly the path an undeclared registered
+primitive reaches it by — the sentence is about the declaration and not about
+the registration — and it is the honest way to photograph a sentence whose real
+subject is the starter library, filed above.
+
+**Still not the answer to 13 September.** It photographs a state; it does not
+make one reachable. A person evaluating Loom still cannot click to a populated
+review queue.
+
+---
+## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— not a defect and nothing is blocked; a run has to pick one and this run
+explains which
+
+The file has two sections about the same thing and they contradict each other.
+
+*Commit identity*, near the network policy:
+
+> **Author every commit as `jonathanbravecredit <60827135+…>`** … a run that
+> reaches for it authors a commit as an account the Vercel project's team does
+> not know — so the deployment comes back **Blocked**
+
+*Commit identity, and the preview that goes missing*, at the end of the file:
+
+> **Do not set a commit author.** Use whatever the session is already configured
+> with — on every run so far that is `Claude <noreply@anthropic.com>`
+
+Both sections describe the same symptom, a pull request with no preview URL, and
+both are internally consistent. The later one is dated 9 September, names the
+account that actually fails (`jpizzo`, from the session's own opening note), and
+lists *both* working identities including the one the earlier section mandates.
+So the later one appears to be the correct and more recent account, and the
+earlier one to be what it superseded without being edited.
+
+**This run did what the later section says** — set nothing, committed as the
+session default — which is also what every run with a preview has done. Nothing
+rides on the choice as long as it is one of the two; what costs a run is
+reading the first section, setting the author to the maintainer's address from
+the opening note, and losing the preview.
+
+Worth resolving by deleting or dating the earlier section, which is the sort of
+edit only the file's owner should make.

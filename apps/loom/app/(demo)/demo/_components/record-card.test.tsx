@@ -152,14 +152,22 @@ const EFFECT: ProposalEffect = {
       from: null,
       changes: [],
       /*
-       * Empty, and that is the fixture being accurate rather than lazy. The
-       * portal's `text` walks text nodes, and a `loom.stat-grid` carries every
-       * figure it prints in props — so on the demo's leading ask this field is
-       * genuinely empty, which is the whole reason this lane harvests its own
-       * words. Filling it here would make the test agree with a page that does
-       * not exist.
+       * Empty, and that is the fixture being accurate rather than lazy. A
+       * `loom.stat-grid` carries every figure it prints in props, so on the
+       * demo's leading ask there are no words to list — which is the whole
+       * reason this lane harvests its own. Filling it here would make the test
+       * agree with a page that does not exist.
+       *
+       * `unreadable` is the same fact from the other side, and it arrived on
+       * 16 September when the portal's reading moved from text children to
+       * `copyIn`. The reason the figures cannot be listed is now on the record:
+       * nothing has declared which of `loom.stat`'s settings a reader reads, so
+       * the reading says it cannot list them rather than reporting none. Kept
+       * accurate here for the same reason `text` is.
        */
       text: [],
+      textTotal: 0,
+      unreadable: [{ type: "loom.stat", parts: 3, settings: ["value", "label", "caption"] }],
       carries: 4,
       missing: false,
       inert: false,

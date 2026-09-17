@@ -48,6 +48,8 @@ const operation = (over: Partial<OperationEffect> = {}): OperationEffect => ({
   from: null,
   changes: [{ key: "title", before: `"Ship faster"`, after: `"Ship safer"`, inert: false }],
   text: [],
+  textTotal: 0,
+  unreadable: [],
   carries: null,
   missing: false,
   inert: false,
@@ -308,6 +310,129 @@ describe("plainOperationEffect", () => {
 
     it("says nothing when no words move", () => {
       expect(plainOperationEffect(operation()).words).toBeNull()
+    })
+
+    /**
+     * The preview cut, said rather than made silently. Three of nine printed as
+     * though they were all of them is an account of a deletion with six words
+     * missing from it and no way for the reader to tell which.
+     */
+    it("says how many more words there are than it shows", () => {
+      expect(
+        plainOperationEffect(
+          operation({
+            op: "remove",
+            verb: "delete",
+            text: ["3,400", "appointments", "last year"],
+            textTotal: 9,
+          })
+        ).words
+      ).toBe("The words it takes away: “3,400” · “appointments” · “last year” and 6 words more")
+    })
+
+    it("says nothing extra when the preview is all of them", () => {
+      expect(
+        plainOperationEffect(
+          operation({ op: "remove", verb: "delete", text: ["3,400"], textTotal: 1 })
+        ).words
+      ).toBe("The words it takes away: “3,400”")
+    })
+  })
+
+  /**
+   * The third answer the reading has, and the one this card did not have until
+   * 16 September: a part whose author has never said which of its settings a
+   * reader reads. It is neither words nor the absence of words, and reporting it
+   * as the second is how a proposal to delete a band of headline figures came to
+   * be described to a reviewer as taking away nothing to read.
+   */
+  describe("the words it cannot read", () => {
+    const UNREAD = [{ type: "loom.stat", parts: 3, settings: ["value", "label", "caption"] }]
+
+    it("says it cannot list them rather than reporting none", () => {
+      expect(
+        plainOperationEffect(
+          operation({ op: "remove", verb: "delete", text: [], textTotal: 0, unreadable: UNREAD })
+        ).unreadWords
+      ).toBe(
+        "Loom can’t list the words in 3 parts of this: nobody has said which of their settings a reader reads."
+      )
+    })
+
+    it("agrees with itself about one part", () => {
+      expect(
+        plainOperationEffect(
+          operation({
+            op: "remove",
+            verb: "delete",
+            unreadable: [{ type: "loom.stat", parts: 1, settings: ["value"] }],
+          })
+        ).unreadWords
+      ).toBe(
+        "Loom can’t list the words in one part of this: nobody has said which of its settings a reader reads."
+      )
+    })
+
+    /**
+     * One sentence for both directions, unlike the words that *are* known. The
+     * direction of an absence prompts the same single action either way, which
+     * is to go and look at the page.
+     */
+    it("reads the same whether the part is arriving or leaving", () => {
+      const arriving = plainOperationEffect(
+        operation({ op: "insert", verb: "add", unreadable: UNREAD })
+      )
+      const leaving = plainOperationEffect(
+        operation({ op: "remove", verb: "delete", unreadable: UNREAD })
+      )
+
+      expect(arriving.unreadWords).toBe(leaving.unreadWords)
+    })
+
+    /**
+     * The caveat has to be absent on the ordinary step, or it stops being a
+     * caveat. Every primitive the portal registers declares `copy: []`, so this
+     * is what the queue says about its own pages.
+     */
+    it("says nothing when every part has been spoken for", () => {
+      expect(plainOperationEffect(operation()).unreadWords).toBeNull()
+      expect(plainOperationEffect(operation()).technicalUnread).toEqual([])
+    })
+
+    /**
+     * The surface sentence tells a reviewer something is missing; this tells
+     * whoever maintains the primitives what to declare to end it. One line per
+     * type, because that is what somebody would go and edit.
+     */
+    it("names the types that said nothing, one click down", () => {
+      expect(
+        plainOperationEffect(
+          operation({
+            op: "remove",
+            verb: "delete",
+            unreadable: [
+              ...UNREAD,
+              { type: "loom.stat-grid", parts: 1, settings: ["align"] },
+            ],
+          })
+        ).technicalUnread
+      ).toEqual(["loom.stat ×3 — value, label, caption", "loom.stat-grid — align"])
+    })
+
+    /** The caveat is a sentence a reviewer reads unasked, so the word list applies to it. */
+    it("says it without a word out of the runtime's vocabulary", () => {
+      for (const parts of [1, 3]) {
+        const sentence = plainOperationEffect(
+          operation({
+            op: "remove",
+            verb: "delete",
+            unreadable: [{ type: "loom.stat", parts, settings: ["value"] }],
+          })
+        ).unreadWords
+
+        expect(sentence).not.toBeNull()
+        expect(runtimeWordsIn(sentence ?? ""), sentence ?? "").toEqual([])
+      }
     })
   })
 

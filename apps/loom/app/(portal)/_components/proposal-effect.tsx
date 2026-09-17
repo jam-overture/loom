@@ -122,6 +122,22 @@ const OperationRow = ({ operation }: { readonly operation: PlainOperation }) => 
     )}
 
     {operation.words !== null && <p className="text-ink-muted">{operation.words}</p>}
+
+    {/*
+      * What the reading could not see, beside what it could.
+      *
+      * On the surface rather than in the disclosure, and that is the decision
+      * worth defending: it is a caveat, and this lane's rule is that the
+      * technical record goes one click down. A caveat is not the record. The
+      * line above says what a deletion takes away, and a reviewer who reads it
+      * as complete when it is not has been misled by the plain half — which is
+      * the one failure the plain half is never allowed to have. The names of
+      * the types that said nothing are the record, and those are one click
+      * down.
+      */}
+    {operation.unreadWords !== null && (
+      <p className="text-ink-secondary">{operation.unreadWords}</p>
+    )}
   </li>
 )
 
@@ -186,6 +202,18 @@ export const ProposalEffectView = ({ effect }: { readonly effect: ProposalEffect
                   {operation.technicalPlace.join(" › ")}
                 </span>
               )}
+              {/*
+                * Which types have not declared their copy, and what they carry.
+                * The sentence on the surface tells a reviewer that something is
+                * missing from what they are reading; this is the half that says
+                * what would end it, and it is addressed to whoever maintains
+                * the primitives rather than to whoever is pressing the button.
+                */}
+              {operation.technicalUnread.map((kind) => (
+                <span key={kind} className="text-ink-muted font-mono">
+                  no copy declared: {kind}
+                </span>
+              ))}
             </li>
           ))}
         </ol>

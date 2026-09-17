@@ -183,7 +183,16 @@ const DemoPage = async () => {
   const waiting = setAside(records, new Set(answerable.map((one) => one.proposalId)))
 
   const effects = new Map<string, ProposalEffect>(
-    answerable.map((one) => [one.proposalId, describeProposalEffect(tree, one.proposal.delta)])
+    answerable.map((one) => [
+      one.proposalId,
+      /**
+       * The registry is the third half of the reading: which of a part's
+       * settings a reader reads is declared by whoever wrote the component, so
+       * the words a deletion takes away can only be read against the primitives
+       * this surface registered.
+       */
+      describeProposalEffect(tree, one.proposal.delta, demoRegistry),
+    ])
   )
 
   /**
