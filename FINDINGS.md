@@ -25544,6 +25544,61 @@ above it. No reference gallery answers that. It is worth saying plainly at this
 point that the brief's instruction to consult `21st.dev` for the visual standard
 has never once been executable, and the lane has not been held back by it.
 
+## 2026-09-17 — the write path has no registry, so a proposal may insert a word nobody registered and the log keeps it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+documented on `/docs/getting-started/quickstart` as what is true; not a defect
+anybody has to fix today, and possibly the right design
+
+Found by running the quickstart file rather than by reading anything. Two
+variations of it, both of which end `committed`:
+
+- A delta whose `insert` names `app.nonesuch`, a primitive type nothing
+  registered. Revision appended. The page draws with an `unknown-primitive`
+  diagnostic and the node is absent from the output.
+- A delta whose `insert` carries a `text` prop 200 characters long, against a
+  schema whose maximum is 160. Revision appended. The page draws with an
+  `invalid-props` diagnostic and the node renders **without its props**.
+
+Neither reached a refusal, and neither could have. `CompositionRuntime` is
+`interpreter`, `policySource`, `events`, `clock`, `idFactory` and an optional
+`repairer` — **there is no resolver and no validator anywhere on the write
+path**, so nothing between the interpreter and `store.append` has the means to
+ask whether the primitive exists or whether its schema accepts these props. The
+Gate reads the shape of the change (stakes, reversibility, protected types); it
+never reads the vocabulary.
+
+**Why this is worth your ruling rather than a patch.** The docs say, in several
+places and correctly, that the registry is the allowlist of what a proposal may
+say. What is actually true is narrower and worth stating precisely:
+
+- the **catalogue** bounds what a model is *shown*,
+- the **render seam** bounds what reaches a *screen*, reporting the rest as
+  diagnostics rather than blanking the page,
+- and **nothing bounds what a delta may say**, so the log is the one place an
+  unrenderable node is kept rather than refused.
+
+There is a real argument for exactly that. A tree may legitimately name a
+primitive a later deployment rolled back, which is why `renderLoomTree` reports
+instead of throwing (0050 and the diagnostics table on *Rendering a tree*), and
+a write path that refused unknown types would make a rollback un-undoable.
+
+The narrower thing that is missing either way is a **seam**: a host cannot opt
+in. There is no optional `validator` on `CompositionRuntime` for a deployment
+that would rather refuse a proposal it can never draw than append it and find
+out at render. Today the only way to get that behaviour is to validate before
+calling `commitIntent`, which puts the check outside the one write path — the
+exact arrangement 0017 exists to prevent.
+
+**What this lane did instead of waiting.** The quickstart says it plainly, in the
+warning under *Things worth breaking*, and both experiments are run by
+`quickstart.test.ts` rather than described — so if a validator seam does land,
+the page's claim goes red and gets rewritten rather than quietly becoming false.
+
+**Not filed as ARCHITECTURAL.** Nothing here contradicts an `Accepted` record
+and nothing proposed touches the tree schema or the delta model. An optional
+validator on `CompositionRuntime` would be additive; whether it should exist is
+yours.
 ## 2026-09-17 — a press is filed against the button, and `rollUp` has no way to say which band it was in
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**

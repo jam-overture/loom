@@ -1,0 +1,170 @@
+import { QuickstartFile, QuickstartOutput } from "@/app/(docs)/_components/quickstart"
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+
+export const metadata = pageMetadata("getting-started", "quickstart")
+
+# Quickstart
+
+One file. One command. No database, no API key, no framework.
+
+By the end of this page you will have done the three things Loom exists for, on
+your own machine:
+
+- **registered a component of your own** — a word nothing could say until you
+  said it could,
+- **drawn a page that was never written as markup**, and
+- **watched three people-sized requests hit that page** and come back with three
+  different answers: yes, ask a person first, and no.
+
+The rest of this site takes each of those apart slowly. This page does all three
+at once, so that you have something running before you decide whether any of it
+is worth your afternoon.
+
+## What you need
+
+A directory with nothing in it, and Node. Then one install:
+
+```bash
+pnpm add @loom/runtime react react-dom zod
+```
+
+<Callout kind="warning">
+  Pre-production alpha, and the package is not on a public registry yet — see
+  [Installation](/docs/getting-started/installation) for how it is consumed
+  today. Everything below is real and runs; where you get the package from is
+  the part that is still moving.
+</Callout>
+
+## The file
+
+Save it as **`quickstart.mts`**. The `m` matters, and it is the one detail worth
+reading before you paste: it is what tells Node the file is a module. A project
+that `pnpm add` just created does not say so anywhere, and the same file named
+`quickstart.ts` stops before it runs with a complaint about top-level `await`
+that will not tell you any of this.
+
+<QuickstartFile />
+
+## Run it
+
+<QuickstartOutput />
+
+## What just happened
+
+Each step of the file, in the order it runs them. Nothing here is a special mode
+— it is the same runtime a deployment runs, with memory where a deployment would
+put a database.
+
+**1 — You added a word.** `definePrimitive` gives a name (`app.notice`), a
+schema for what it takes, and a React component that draws it. Before that line,
+nothing anywhere in the system could propose a notice. That is the deal Loom
+asks you to take, and it is the whole of it: *AI can only say things your
+registry has words for.*
+
+**2 — You wrote a page down as data.** No JSX file, no template. Three nodes:
+a page, a heading, a sentence. Each names a primitive the registry knows and
+carries props that primitive declared. It is JSON — you could print it, store
+it, send it over a wire, read it back.
+
+**3 — You drew it.** `renderLoomTree` turns the data into React elements. It is
+synchronous and it never fails: anything it could not honour comes back beside
+the element in a list of `diagnostics`, and the run prints any it gets. On a
+healthy render that list is empty, which is why you saw none.
+
+**4 — You gave the page somewhere to live.** A tree store keeps the page and its
+history; a hold store keeps changes that are waiting for a person. Both are in
+memory here. `@loom/runtime/postgres` implements the same two contracts, and
+nothing after that line in the file would change.
+
+**5 — You filled the seam where a model goes.** An *interpreter* turns a
+sentence into a written-down plan of operations. A deployment points that at a
+model. This one is a lookup table — which is why the file runs with no API key,
+and which is the point worth taking away: **the runtime does not care where a
+proposal came from, only what it says.**
+
+**6 — You wrote the rules.** The policy is yours, not the runtime's. This one
+names the heading as the thing worth protecting. A real deployment would name
+its checkout, its prices, its consent notice.
+
+**7 — You asked.** `commitIntent` is one function and one route in: read the
+page as it stands now, plan, judge, and — only if the Gate allowed it — append
+to the log. There is no second way in, which is why the log can be trusted.
+
+**8 — You read the log.** Two rows, because two of the three asks reached the
+page. The refused one is not in it: the log records what happened, not what was
+asked for.
+
+## Three asks, three answers
+
+The interesting part is that all three requests were reasonable, and they did
+not get the same answer.
+
+**"Add a notice to the end of the page."** → **committed.** A new node at the
+end of a page threatens nothing, so the Gate said yes on its own and the page
+grew. Note *which* node it added: one of yours. Had you not written step 1, this
+sentence could not have been said at all.
+
+**"Make the headline smaller."** → **held.** You named headings protected, so
+changing one is not the Gate's to wave through. It wrote the proposal down, put
+it aside and stopped. **Nothing had changed on the page at that moment** — a
+hold is not a slow yes.
+
+Then `confirmHeld` answered it. That is not a way *around* the Gate: it hands
+the same change back to be judged again, against the page as it now stands, and
+only then is it applied. A change the Gate would refuse today stays refused,
+however emphatically you say yes.
+
+**"Delete the headline."** → **refused.** Destroying the protected thing is a
+step further than shrinking it, and there is no version of it the Gate will
+offer. The sentence it prints is its own — *destroys protected `loom.heading`* —
+and it is the sentence you would put in front of whoever asked.
+
+<Callout kind="note">
+  One word in your policy bought both of the last two answers. You named
+  `loom.heading` protected; the runtime decided on its own that *reconfiguring*
+  something protected is worth a person's time and *destroying* it is not worth
+  offering. Same primitive, two different verdicts, no second rule written.
+</Callout>
+
+## Things worth breaking
+
+The file is short enough to vandalise, and three edits teach more than reading
+it twice. Each is one line.
+
+**Empty the protected list.** Change `protectedPrimitiveTypes: ["loom.heading"]`
+to `[]` and run it again. All three asks are committed, including the deletion,
+and the page ends at revision 3. Nothing about the Gate changed — your policy
+did. That is the point of a policy being a host's choice.
+
+**Break a prop.** Make the notice's `text` longer than the 160 characters its
+schema allows. The change is still committed, and the render prints
+`invalid-props`: the node is drawn without props rather than the page being
+blanked. It is worth knowing which seam caught it, because it is not the one
+most people guess — see below.
+
+**Add a fourth sentence** to the lookup table that the three existing ones do
+not cover, and ask for it. The interpreter declines, and the run reports
+`not-interpreted` — a change nobody could plan is a different ending from a
+change that was planned and refused.
+
+<Callout kind="warning">
+  The prop experiment shows a real edge. The write path has no registry, so it
+  cannot check a proposal's props against the schema of the primitive it names —
+  or check that the primitive is registered at all. The registry bounds what a
+  model is *shown* and what a render will *draw*; it does not bound what a delta
+  may *say*. That is why `diagnostics` is not a debug channel to leave unread.
+</Callout>
+
+## Where to go next
+
+You have now done, in one file, what the six pages of this section do slowly and
+properly. If it worked, the slow version is worth the hour: **[Installation](/docs/getting-started/installation)**
+is step one, and [Introduction](/docs/getting-started/introduction) lays out the
+route.
+
+If you would rather go straight at the part you just skipped over: registering
+primitives properly is
+[Primitives and the registry](/docs/building-with-loom/primitives), deciding what
+may be touched is [What AI may change](/docs/building-with-loom/what-ai-may-change),
+and the three answers above are
+[What the Gate decides](/docs/the-runtime/what-the-gate-decides).

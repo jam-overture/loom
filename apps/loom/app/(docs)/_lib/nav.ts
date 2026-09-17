@@ -118,6 +118,12 @@ const orderedSections: readonly DocsSection[] = [
           "What Loom is, and the bargain it asks you to take: a bounded vocabulary in exchange for a change you can review.",
       },
       {
+        slug: "quickstart",
+        title: "Quickstart",
+        summary:
+          "One file and one command: register a primitive of your own, draw a page nobody wrote as markup, and watch three asks get three different answers.",
+      },
+      {
         slug: "installation",
         title: "Installation",
         summary: "Install the runtime and find your way around its ten entry points.",
