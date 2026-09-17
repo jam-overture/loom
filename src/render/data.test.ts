@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
 import { createDataRegistry, defineSource, type DataRegistry, type SourceEntry } from "../data/adapter.js"
+import { planTreeData } from "../data/plan.js"
+import { buildDataResolution, EMPTY_DATA_RESOLUTION } from "../data/resolution.js"
 import { resolveTreeData } from "../data/resolve.js"
 import { sequentialIdFactory } from "../ids.js"
 import { DATA_PROP_KEY } from "../reserved-props.js"
@@ -11,6 +13,7 @@ import { err, ok } from "../result.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
+import { describeRenderDiagnostic, type RenderDiagnostic } from "./diagnostics.js"
 import { staticPrimitiveResolver, type LoomPrimitive, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { renderRequest, type TreeSource } from "./request.js"
@@ -141,7 +144,106 @@ describe("a primitive's data", () => {
     const rendered = renderLoomTree(tree, { resolver })
 
     expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["data-unresolved"])
+    expect(rendered.diagnostics[0]).toMatchObject({ resolution: "absent" })
     expect(renderToStaticMarkup(rendered.element)).toContain("unbound")
+  })
+
+  /**
+   * The three ways to hand a bound tree a render with no answers, filed by
+   * `Loom lessons` on 14 September as a table in which the middle row was silent.
+   * It is asserted as a table because the defect was not any one row's behaviour
+   * — each was defensible alone — but the fact that three routes to one mistake
+   * reported three different amounts.
+   */
+  describe("a render with no answers for a tree that asks", () => {
+    const declared = { services: { source: "catalogue.services" } }
+
+    it("says so when the resolution was built from a different tree's plan", () => {
+      const tree = treeBinding(declared)
+      const rendered = renderLoomTree(tree, { resolver, data: EMPTY_DATA_RESOLUTION })
+
+      expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["data-unresolved"])
+      expect(rendered.diagnostics[0]).toMatchObject({ resolution: "unrelated" })
+    })
+
+    it("sends a reader to the composition root rather than to the registry", () => {
+      const tree = treeBinding(declared)
+      const { diagnostics } = renderLoomTree(tree, { resolver, data: EMPTY_DATA_RESOLUTION })
+      const sentence = describeRenderDiagnostic(diagnostics[0] as RenderDiagnostic)
+
+      expect(sentence).toContain("a different plan than this tree")
+      expect(sentence).not.toContain("was given no resolution")
+    })
+
+    it("reports every route, and never none of them", () => {
+      const tree = treeBinding(declared)
+
+      const routes = {
+        "nothing at all": renderLoomTree(tree, { resolver }),
+        EMPTY_DATA_RESOLUTION: renderLoomTree(tree, { resolver, data: EMPTY_DATA_RESOLUTION }),
+        "a resolution of this plan with no answers": renderLoomTree(tree, {
+          resolver,
+          data: buildDataResolution(planTreeData(tree), new Map()),
+        }),
+      }
+
+      expect(
+        Object.fromEntries(
+          Object.entries(routes).map(([route, rendered]) => [
+            route,
+            rendered.diagnostics.map((diagnostic) => diagnostic.code),
+          ])
+        )
+      ).toEqual({
+        "nothing at all": ["data-unresolved"],
+        EMPTY_DATA_RESOLUTION: ["data-unresolved"],
+        "a resolution of this plan with no answers": ["data-unavailable"],
+      })
+    })
+
+    it("stays silent for a declaration that asked for nothing", () => {
+      const rendered = renderLoomTree(treeBinding({}), {
+        resolver,
+        data: EMPTY_DATA_RESOLUTION,
+      })
+
+      expect(rendered.diagnostics).toEqual([])
+    })
+
+    /**
+     * A malformed declaration is a node that asked badly, not one that stayed
+     * quiet. Against a resolution built from this tree it is `data-misdeclared`;
+     * against one that never saw the node, nobody is left to say either thing,
+     * so the walk says the one it can.
+     */
+    it("counts a declaration that is not an object at all as having asked", () => {
+      for (const declared of ["catalogue.services", 7, [], { services: 1 }]) {
+        const rendered = renderLoomTree(treeBinding(declared), {
+          resolver,
+          data: EMPTY_DATA_RESOLUTION,
+        })
+
+        expect(
+          rendered.diagnostics.map((diagnostic) => diagnostic.code),
+          JSON.stringify(declared)
+        ).toEqual(Array.isArray(declared) ? [] : ["data-unresolved"])
+      }
+    })
+
+    it("says it once for a malformed declaration a real resolution already reported", async () => {
+      const tree = treeBinding({ services: { source: "NOT A SOURCE" } })
+      const rendered = await renderWith(tree, registryOf(listSource([])))
+
+      expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["data-misdeclared"])
+    })
+
+    it("stays silent when the answers are the ones this tree asked for", async () => {
+      const tree = treeBinding({ services: { source: "catalogue.services" } })
+      const rendered = await renderWith(tree, registryOf(listSource(["writing"])))
+
+      expect(rendered.diagnostics).toEqual([])
+      expect(renderToStaticMarkup(rendered.element)).toContain("writing")
+    })
   })
 
   it("reports a malformed declaration and renders the node without data", async () => {

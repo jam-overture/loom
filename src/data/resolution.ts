@@ -49,13 +49,32 @@ export type NodeDataProblem =
     }
 
 export interface DataResolution {
-  /** Always answers; a node with no bindings gets `NO_DATA`. */
+  /**
+   * Always answers. `NO_DATA` means *this node asked for nothing* — it is not a
+   * way to say "I have no answers for you", and an implementation that uses it as
+   * one is reporting an absence as a satisfied request.
+   *
+   * The render walk holds a resolution to that: a node that declares bindings and
+   * gets `NO_DATA` with no problems beside it earns a `data-unresolved`
+   * diagnostic, because the only way to be in that state honestly is to have been
+   * built from a different tree's plan.
+   */
   readonly lookup: (nodeId: NodeId) => NodeData
   readonly problemsFor: (nodeId: NodeId) => readonly NodeDataProblem[]
 }
 
 const NO_PROBLEMS: readonly NodeDataProblem[] = Object.freeze([])
 
+/**
+ * The resolution of a plan that asks nothing, which is the only tree it is
+ * correct for.
+ *
+ * It exists so `resolveDataPlan` can short-circuit an empty plan, and its name
+ * makes it the obvious thing to reach for when writing a composition root that
+ * has no data — which is the one use it does not serve. Handed a tree whose nodes
+ * do bind, it answers `NO_DATA` for all of them, and every one of those bindings
+ * is reported `unresolved` by the walk rather than disappearing.
+ */
 export const EMPTY_DATA_RESOLUTION: DataResolution = {
   lookup: () => NO_DATA,
   problemsFor: () => NO_PROBLEMS,

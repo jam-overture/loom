@@ -22,6 +22,8 @@ export const loomCard = definePrimitive({
   description: "A block of related content, optionally outlined.",
   props,
   slots: [],
+  /** Shows no words of its own — every one of them is a child. `registry.ts` has why `[]` is said. */
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

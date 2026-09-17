@@ -74,6 +74,125 @@ sat behind surface prose that counts something (#320 is the first, for
 `stake-level.test.ts` currently **pins the wrong behaviour on purpose**, with a
 comment saying so and pointing at 0166. That block is what inverts when your half
 lands. Ping this lane and it is a ten-line change.
+## 2026-09-17 — the class of defect this lane keeps finding by accident has a name now: a CSS value that a *layout context* overrides, and nothing looks for it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — a generalisation of the 16 September entry below, filed because the
+fourth instance was found by a different mechanism than the first three and the
+existing finding does not cover it
+
+On 16 September this lane filed *"an inline style beat a rule for the third time
+in three days"* and proposed a check that walks the rendered markup for **inline
+properties also named in the stylesheet**. That check would have caught all
+three instances it was written about. **It would not have caught today's**, and
+the difference is what this entry is for.
+
+`loom.badge` declares `display: "inline-flex"`, which means *shrink-wrap to your
+content*. Nothing overrides it and no stylesheet rule contradicts it. It is
+simply **not what `inline-flex` means once the element is a flex item**: a flex
+container blockifies its children and stretches them on the cross axis, so a
+badge placed directly inside a `loom.card` — a flex column — becomes a full-width
+bar. Measured in Chromium at 1280px:
+
+| | badge reading `01` | card inner width |
+| --- | --- | --- |
+| before | **281px** | 281px |
+| after `align-self: flex-start` | **40px** | 281px |
+
+Four primitives in the same directory already carry that line — `control.ts`,
+`loom.perk`, `loom.feature`, `loom.milestone` — each with a comment saying why.
+`loom.badge` never did, and `catches-the-eye.specimen.ts` has photographed
+"Most popular" as a full-width bar since it shipped. Nobody reported it; the
+specimen is about lights and nobody was looking at the badge.
+
+**So the shape is: a declaration that is correct in isolation and wrong in the
+context the element is placed into.** No rule is overridden, so a
+stylesheet-versus-inline diff sees nothing. The properties in this family are
+small and enumerable — `display: inline-*` under a flex parent, `width` under a
+grid item, `margin` collapsing — and the only instrument that sees any of them
+is a browser with a layout engine, which is the specimen harness and not
+`vitest`.
+
+**Two shapes, and I do not think the second is worth it yet:**
+
+1. **Extend the specimen harness to assert, not only photograph.** It already
+   has a browser, a served page and a viewport. A specimen could declare a
+   handful of expectations — *this element is narrower than its parent* — and
+   fail the run. Cheap, because the expensive half exists. This is the one I
+   would build.
+2. **A general audit for the family.** Walk every rendered primitive in every
+   layout context and flag the combinations. Comprehensive and almost certainly
+   not worth it: the number of real instances is four in a month, and the false
+   positives (a `loom.button` with `width: "full"` *wants* to stretch) need a
+   per-primitive allowlist that is the same work as writing the assertions by
+   hand.
+
+The badge itself is fixed and tested in this lane's branch. What is filed is the
+instrument, and **the 16 September entry's proposal should not be closed by
+building it** — it catches a different family, and both are real.
+
+Offered, not asked for. Nothing is blocked.
+## 2026-09-16 — the submit seam never got the reason split the data seam got, and the page that counts to five is why it is worth planning
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, then
+`Loom daily build` · **Status:** open — **not a defect today**; it is a change
+that cannot be made from one lane alone, filed so the two halves are done in the
+right order.
+
+Found while closing the 14 September `EMPTY_DATA_RESOLUTION` finding, whose fix
+is [0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+
+On 12 September `not-resolved` was split out of `no-such-source` in
+`DataUnavailable`, and `src/data/adapter.ts` records why at length: an
+unregistered source is fixed in the registry by whoever owns the data, a binding
+nothing resolved is fixed in the composition root by whoever wired the render,
+and sharing a code made a diagnostic say *"no source is registered for it — this
+binding was never resolved"*, which is two sentences contradicting each other.
+
+**`SubmissionUnavailable` never got that split, and carries the same contradiction
+today.** `buildSubmissionResolution` gives a planned submission with no answer:
+
+```ts
+reason: "no-such-endpoint",
+detail: "this submission was never resolved",
+```
+
+and `describeSubmissionUnavailable` renders that as *"no endpoint is registered
+for it — this submission was never resolved"*. Word for word the sentence the
+data seam's comment holds up as the thing not to say. Nothing behaves wrongly:
+the form renders untargeted either way and the diagnostic is emitted. What is
+wrong is that it sends a reader to the registry for a fault in their composition
+root, and that anything counting reasons pools the two.
+
+**Why this is not in the fix that found it.** Adding `not-resolved` to
+`SubmissionUnavailable` widens a published union, and `(docs)` is built on its
+being exactly five:
+
+| where | what breaks |
+| --- | --- |
+| `(docs)/_lib/submit/claims.test.ts:75` | `Record<SubmissionUnavailable["reason"], true>` — fails to compile, naming the new reason. The comment above it says it is *"kept where a sixth reason would be added"*, so this is working exactly as designed |
+| `(docs)/_lib/submit/claims.test.ts` | *"says five ways there is no target, and prints five"* — asserts `trouble.length === 5` and that the page's source contains `"Five reasons"` |
+| `(docs)/_lib/submit/seam.test.tsx:181` | asserts the sorted list of the five reason names |
+| `(docs)/_lib/submit/endpoints.ts:96` | a comment calling `no-such-endpoint` *"the fifth"* |
+
+The compile failure is mechanical. The rest is not: the page has to produce a
+sixth trouble row and its prose has to stop saying five, and that is **surface
+content in the documentation lane**, which the framework brief says not to write.
+`Loom docs` also owns the page whose argument changes, so it should decide how a
+sixth row reads rather than be handed one.
+
+**Suggested order, and it only works this way round.** `Loom docs` says whether
+the page wants the sixth reason and what it says; then this lane adds
+`not-resolved` to the union, gives `buildSubmissionResolution` the honest reason,
+and fixes the sentence — in one pull request with the fixtures, because between
+the two halves the build is red. Doing it in the other order breaks `(docs)` on
+`main`.
+
+**Not urgent.** No page is wrong, no form misbehaves, and 0164 deliberately routed
+around it: the new `submit-unresolved` diagnostic carries `resolution:
+"unrelated"` and says *"came from resolving a different plan than this tree"*
+without needing a new reason at all. This finding is about the older, narrower
+sentence inside `buildSubmissionResolution`, which is still contradicting itself.
 
 ---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
@@ -641,7 +760,22 @@ today, and cheaper to leave until a third case says which way it should go.
 
 ## 2026-09-14 — a bound tree rendered against `EMPTY_DATA_RESOLUTION` drops every question in silence
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-39-a-resolution-that-cannot-answer` on 16 September —
+shape (1), fix the door, recorded as
+[0164](decisions/0164-a-resolution-that-cannot-answer-is-not-a-node-that-did-not-ask.md).
+The middle row now reports, and the walk reports the same way for the submit
+seam, which had the identical hole and which this finding did not look at.
+Shape (3) is rejected in the record with reasons; shape (2) is rejected too and
+`EMPTY_DATA_RESOLUTION` stays exported. Exercise H keeps working — nothing about
+`buildDataResolution` changed — and the paragraph under it gets its second
+instance rather than going stale, as this finding predicted. One residual is
+named in the record and not fixed: a hand-written resolution answering *some* of
+a node's bindings stays silent, because catching it means parsing on every
+render.
+
+*The original finding follows, unchanged.*
+
 — found while writing Exercise H for lesson 18. Latent rather than live: nothing
 in this repository passes it, and it is exported from the package root.
 
@@ -21185,7 +21319,9 @@ framework routine stopped adding to it on 16 August.
 ## 2026-09-10 — `textIn` has something to ask now, and the queue is still reading text children
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
-open — a note on `Loom demo`'s entry of the same day, not a second ask
+closed by `portal-28-the-words-it-takes-away` on 16 September — the queue calls
+`copyIn`, and the entry's prediction held exactly: what it gained immediately
+was *knowing that the list exists*
 
 `Loom demo` filed *the plain reading of a change prints registered type ids, and
 misses copy held in props* against `(portal)/_lib/effect-view.ts` this morning,
@@ -21364,7 +21500,9 @@ answered by somebody else.
 
 ## 2026-09-01 — `OperationEffect.text` finds no words on a primitive that carries its content in props
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal` · **Status:** closed by
+`portal-28-the-words-it-takes-away` on 16 September — the reading reads settings
+now, and says so when it cannot
 
 `(portal)/_lib/proposal-effect.ts:169` — `textIn` walks the subtree and keeps
 only nodes whose `kind` is `"text"`. A `loom.stat-grid` carries every figure it
@@ -25325,7 +25463,13 @@ would move together are the module, the variable name and the `.env.example`
 entry, and that is its own small unit for a run with nothing better to do.
 ## 2026-09-15 — the demo's leading question is destroyed by the next button a visitor presses
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-19-the-question-in-the-way` (16 September)** — shape (1) taken, and taken
+further than one line: the caution is pinned to the top of the rail because the
+first version of it was measured being scrolled past, and the panel gives up its
+green button while a question is open. Shape (3), the automatic re-ask, is not in
+it and is **filed separately below** on 16 September, which is what this entry
+recommended.
 
 Two presses, in the order the panel puts them in, driven against a real
 `next build` at 1280×900:
@@ -25393,3 +25537,235 @@ screen, and a card twelve of whose fourteen lines were word for word the card
 above it. No reference gallery answers that. It is worth saying plainly at this
 point that the brief's instruction to consult `21st.dev` for the visual standard
 has never once been executable, and the lane has not been held back by it.
+
+## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Driven against a real `next build` at 1280×900, two presses of one button:
+
+| | the rail |
+| --- | --- |
+| press **Take the numbers off** | `Waiting on you` · *“Take the numbers band off the page.”* |
+| press **Take the numbers off** again | `Waiting on you` · *“Take the numbers band off the page.”*<br>`Waiting on you` · *“Take the numbers band off the page.”* |
+
+Two cards, word for word identical, each with its own **Apply this change**, each
+about the same four nodes. Answering either applies the removal and moves the
+revision, which kills the other where it stands — so the second press buys the
+visitor a duplicate question and a guaranteed `Nothing changed` card.
+
+**Why it is offered.** `availablePresets` asks each preset whether it has
+anything to do, and `trim.plan` looks for a `loom.stat-grid` on the tree. While
+the removal is only *held*, the grid is still there — a hold changes no tree
+(0017) — so the preset can still plan, and the panel honours `available` exactly
+as it should. Nothing in the chain is wrong: the filter is a question about the
+tree, and the tree has not moved.
+
+**It is reachable in two clicks from the demo's own leading button**, and it got
+easier to notice rather than easier to hit this run: `demo-19` demotes the lead
+into the list while a question is open, so the same ask sits among the others
+rather than under the cursor. The count in the new caution is what surfaced it —
+*“2 questions are still waiting on you”* about one removal asked twice.
+
+**Two shapes, and this lane can do either.**
+
+1. **Do not offer an ask that is already waiting.** The panel already knows which
+   presets produced the open questions: `ChangeRecord.presetId` is stamped by
+   `askedWith` for exactly this kind of use, and `set-aside.ts` already walks the
+   open questions. Filtering those ids out of `available` is small, and it is the
+   same rule `availablePresets` follows — never offer a press whose only outcome
+   is nothing.
+2. **Fold the second ask onto the first.** Honest about what the runtime does
+   (two intents, two proposals) only if the card says so, and it is more
+   machinery than the case deserves.
+
+**Recommend (1)**, with the caution's plural left in place: two *different*
+questions open at once is a real state the demo should keep, and this only stops
+one question being asked of itself twice.
+
+## 2026-09-16 — the automatic re-ask, and whether a surface may ask on a visitor's behalf
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+
+Shape (3) of the 15 September finding closed by `demo-19`, carried out of it
+deliberately. The caution now tells a visitor, before the press, that asking for
+something else sets their open question aside. What it does not do is get the
+question back.
+
+The machinery is already there and already correct: a card the page has moved
+past offers **Ask for this again**, which posts the same `presetId` against the
+revision the page is actually at, through `askForChange` — the identical path the
+panel takes, weighed afresh, and the Gate may hold it again (`PageMovedOn`,
+`moved.ts`). Spending that without waiting to be asked is a few lines.
+
+**The argument, which is why it is not a few lines.** A surface re-asking on a
+visitor's behalf is the demo making a decision, on the one surface whose whole
+claim is that decisions are recorded rather than assumed. That is survivable —
+Loom's claim is not *nothing happens without you*, it is *everything that happens
+is written down* — but only if the re-ask **writes its own record saying it was
+automatic**, in the same plain voice as everything else on the rail: *your
+question was overtaken by a later change, so Loom asked it again against the page
+as it now stands.* `ChangeRecord` has no field for that today, and `origin` is
+the runtime's word for what kind of act an intent was, so this needs either a new
+provenance the demo owns or a new one the runtime does — and the second is
+`Loom daily build`'s, not this lane's.
+
+**It also multiplies cards**, which is the thing three runs of this lane have
+been cutting back. Five presses currently leave three dead cards; re-asking each
+would leave three dead cards *and* three live ones. Superseding the dead card in
+place is the obvious answer and it collides with the maintainer's standing
+direction that **nothing is ever removed**.
+
+**Recommend** it is designed before it is built, and that the design question
+above — what a record says about an ask nobody made — is settled first. Not
+escalated: nothing here touches the tree schema, the delta model or an `Accepted`
+record yet, and it may well not need to.
+
+## 2026-09-16 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane an eighteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil again, and the reason is the one the seventeenth run gave.**
+What decided this unit was a measurement — the rail sitting at a scrollTop of
+about 400 after the press, with the caution that had just been written 40 pixels
+above the fold. No reference gallery answers where a warning has to be. The two
+things this run did reach for instead were both already in the repository: the
+rail's own amber, which it gives an open question in three other places, and its
+own rule that a consequence is said under the control it is about.
+---
+## 2026-09-16 — ninety-six primitives are registered and none of them has said which of its settings a reader reads
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— measured today against `dist/`, and it is now visible on a screen rather than
+latent
+
+`copyIn` landed on 6 September and the portal's review queue started calling it
+today. It distinguishes *this primitive shows no words of its own* from *nobody
+has said* and reports only the second (0122), which is the right bargain and the
+reason this is worth a line.
+
+Counted, not estimated:
+
+```
+node -e "const {STARTER_PRIMITIVES}=require('./dist/primitives/index.js');
+console.log(STARTER_PRIMITIVES.length, STARTER_PRIMITIVES.filter(p=>p.copy===undefined).length)"
+→ 96 96
+```
+
+**All ninety-six.** `loom.code` is the near miss and worth naming so nobody else
+greps for it and stops: it has `text: { copy: "Copy", copied: "Copied" }`, which
+is a declared *string* for its button and not a copy declaration.
+
+`loom.stat` is the sharpest case, and 0052 is why it exists at all — a fixed
+field stays a setting, so `value`, `label` and `caption` are props and the part
+has no text children:
+
+```
+copyIn(theStatGrid, demoRegistry)
+→ words: []
+   unread: loom.stat-grid (columns) · loom.stat ×3 (value, label, caption)
+```
+
+That is a real read of `(demo)/_lib/page-tree.ts` against `demoRegistry` on this
+branch, not a fixture.
+
+**What it costs today, on a surface a stranger sees first.** The demo's leading
+ask is *Take the numbers off*, which removes that grid. Until this morning the
+record card said the change took away three pieces and listed no words, which
+is what `Loom demo` filed on 1 September. It now says *"Loom can't list the
+words in 4 parts of this: nobody has said which of their settings a reader
+reads."* That is an improvement — a silence became a stated gap — and it is
+still a caveat on the demo's payoff, and the only thing that removes it is a
+declaration on the primitives.
+
+**The ask, which is small per primitive and only you can make it.** `copy: [...]`
+on anything that shows words it holds itself, `copy: []` on the arrangements
+that show none. The registry refuses a declaration naming a prop the schema does
+not have, so a typo fails at registration rather than quietly reading as "has
+not said". The portal's own four declare `copy: []` and a test now fails on a
+fifth registered without one; the same guard over `STARTER_PRIMITIVES` would end
+this permanently.
+
+Not done here: `src/primitives/` is your lane, and there is nothing in the
+portal that can answer for a component it did not write (0018).
+
+---
+## 2026-09-16 — the review queue has been photographed populated, which is the first of the three screens the 13 September finding named
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe, filed against the standing findings of 13 and 15 September
+
+15 September filed that a portal screen's populated state can be photographed by
+seeding its store's `Symbol.for` carrier from a `--import` preload, and predicted
+that it generalises. It does. `/portal/pages/[treeId]`'s review queue — the
+first screen 13 September named, and the one thing this portal shows that no
+repository, log or build output has ever seen — was photographed with three
+held proposals in it today.
+
+Two things had to be added to the 15 September recipe, and both are the reason
+`pnpm shoot` still cannot take this picture:
+
+- **The carrier is `Symbol.for("loom.portal.holds")`** and what goes on it is a
+  `memoryHoldStore()` with three `HeldProposal`s `hold`ed into it. Nothing is
+  faked past that: the page's own read, its own reading against the served tree,
+  the real Next render, shell and stylesheet. The only fiction is who proposed
+  them — a script rather than a model.
+- **The screen needs a session**, so the script signs in: `LOOM_PORTAL_SESSION_SECRET`
+  and `LOOM_PORTAL_REVIEWERS` set for the run, then fill `input[name="key"]` and
+  **wait on leaving `/portal/sign-in`**. Not on the network, and not on
+  `document.cookie` — the form posts by fetch so the page is idle before the
+  cookie exists, and the cookie is `httpOnly` so the browser cannot be asked.
+  There is no `actor` field: the roster is keyed by the key.
+
+One honest caveat about the third of the three photographs, because it is the
+one the change was for. The caveat sentence fires on a part whose author has not
+declared its copy, and every primitive this portal registers has declared, so
+the fixture's proposal *adds* a piece of a type this deployment does not
+register. That reaches `copyFor` by exactly the path an undeclared registered
+primitive reaches it by — the sentence is about the declaration and not about
+the registration — and it is the honest way to photograph a sentence whose real
+subject is the starter library, filed above.
+
+**Still not the answer to 13 September.** It photographs a state; it does not
+make one reachable. A person evaluating Loom still cannot click to a populated
+review queue.
+
+---
+## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— not a defect and nothing is blocked; a run has to pick one and this run
+explains which
+
+The file has two sections about the same thing and they contradict each other.
+
+*Commit identity*, near the network policy:
+
+> **Author every commit as `jonathanbravecredit <60827135+…>`** … a run that
+> reaches for it authors a commit as an account the Vercel project's team does
+> not know — so the deployment comes back **Blocked**
+
+*Commit identity, and the preview that goes missing*, at the end of the file:
+
+> **Do not set a commit author.** Use whatever the session is already configured
+> with — on every run so far that is `Claude <noreply@anthropic.com>`
+
+Both sections describe the same symptom, a pull request with no preview URL, and
+both are internally consistent. The later one is dated 9 September, names the
+account that actually fails (`jpizzo`, from the session's own opening note), and
+lists *both* working identities including the one the earlier section mandates.
+So the later one appears to be the correct and more recent account, and the
+earlier one to be what it superseded without being edited.
+
+**This run did what the later section says** — set nothing, committed as the
+session default — which is also what every run with a preview has done. Nothing
+rides on the choice as long as it is one of the two; what costs a run is
+reading the first section, setting the author to the maintainer's address from
+the opening note, and losing the preview.
+
+Worth resolving by deleting or dating the earlier section, which is the sort of
+edit only the file's owner should make.
