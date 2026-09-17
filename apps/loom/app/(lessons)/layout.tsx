@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
+import { RecordNotice } from "./_components/notice"
+import { ProgressProvider } from "./_components/store"
 import { COURSE_THEME_STYLE } from "./_lib/loom"
 import * as style from "./_components/style"
 
@@ -68,7 +70,23 @@ const LessonsLayout = ({ children }: { readonly children: ReactNode }) => (
           </Link>
         </nav>
 
-        {children}
+        {/*
+          * One record for the page, and the notice that speaks for it.
+          *
+          * The provider is what makes the several components that read the
+          * record read the same one: marking a lesson in the syllabus moves the
+          * due line above it, because there is now one store rather than one per
+          * component. The notice is above the page rather than inside it, and on
+          * every page of the course — what it has to say is never about the
+          * lesson underneath it, it is that the lesson underneath it is not
+          * being recorded, and a reader who meets that at the bottom of a set
+          * has already spent the ten minutes.
+          */}
+        <ProgressProvider>
+          <RecordNotice />
+
+          {children}
+        </ProgressProvider>
       </div>
     </body>
   </html>

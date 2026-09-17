@@ -11,6 +11,7 @@ import {
   unpackRecord,
   type MergeReport,
 } from "../_lib/record"
+import { recordIsKnown } from "../_lib/reading"
 import * as style from "./style"
 import { useProgress } from "./store"
 
@@ -72,7 +73,7 @@ const alreadyHere = (report: MergeReport): readonly string[] =>
   ])
 
 export const StudyRecord = () => {
-  const { progress, ready, today, update } = useProgress()
+  const { progress, ready, today, update, record } = useProgress()
   const [pending, setPending] = useState<Pending | undefined>(undefined)
   const [problem, setProblem] = useState<string | undefined>(undefined)
   const [done, setDone] = useState<string | undefined>(undefined)
@@ -168,9 +169,17 @@ export const StudyRecord = () => {
         <h2 style={style.label}>What this browser holds</h2>
 
         {empty ? (
+          /*
+           * *Nothing yet* is an answer, and this page may only give it when it
+           * has one. A blocked browser and a value nothing could parse both
+           * arrive here with an empty record, and telling somebody whose record
+           * is sitting unread under this very key that they have nothing yet is
+           * the single most wrong sentence this surface could print.
+           */
           <p style={style.note}>
-            Nothing yet. Work through a lesson or a review set and there will be something here worth
-            keeping — which is the point at which this page stops being informational.
+            {recordIsKnown(record.reading)
+              ? "Nothing yet. Work through a lesson or a review set and there will be something here worth keeping — which is the point at which this page stops being informational."
+              : "This browser could not be read, so there is nothing to show and that is not the same as nothing being there — the note above this page says which it is. Anything you do in this tab will still appear here, and can still be saved as a file."}
           </p>
         ) : (
           <>
