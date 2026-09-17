@@ -25645,8 +25645,13 @@ yours.
 ## 2026-09-17 — a press is filed against the button, and `rollUp` has no way to say which band it was in
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — measured, not a defect in anything, and it makes one band of
-`/what-readers-do` unreproducible from real signals
+**closed** by `framework-41-the-region-it-happened-in` — shape 1, the signal
+carrying the band as well as the control, recorded as
+[0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md).
+A delegated signal now carries `within`, and the per-band figure is
+`ReaderTally.engaged` rather than a funnel. **A second finding below says what
+`/what-readers-do` can now compute, and what in its fixture is still a thing no
+browser sends.**
 
 Found by wiring this surface up to actually broadcast and then asking the
 resulting batch what it said. `count-readers.test.tsx` presses a
@@ -25976,3 +25981,68 @@ the opening note, and losing the preview.
 
 Worth resolving by deleting or dating the earlier section, which is the sort of
 edit only the file's owner should make.
+## 2026-09-17 — the band is on the signal now, and `/what-readers-do` can stop minting a press no browser sends
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
+`Loom portal` for the second half · **Status:** open — the half in the framework
+is done and green on `main`; what remains is one fixture and one figure, both in
+your lane
+
+Closing your 17 September finding. Shape 1 was taken —
+[0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
+— so this is the recipe rather than an answer you have to go and find.
+
+**What a batch says now.** An `activated` or a `disclosed` carries `within`: the
+addressed nodes it happened inside, nearest first, up to and including the root.
+Press a `loom.action` in a band and the delivery reads
+
+```
+signals: [{ kind: "activated", type: "loom.action", nodeId: "<the button>",
+            within: [{ nodeId: "<the band>", type: "loom.section" },
+                     { nodeId: "<the page>", type: "loom.page" }] }]
+```
+
+Nothing in `count-readers.tsx` changes to get it: the walk is on by default and
+`broadcastReaderSignals` was already doing it to find the node.
+
+**The two figures, and what each is now.**
+
+| what the page prints | what it should read |
+| --- | --- |
+| *157 seconds on screen, 5 used something in it*, per band | `dwellMs` and **`engaged`** on the band's own tally |
+| *Of the 10 readers who got as far as "…", 5 used something in it* | **`reached` and `engaged` on that same one row** — no `FunnelPair` |
+
+`engaged` is **distinct page views in which a reader used something strictly
+inside the node**, at any depth, counting presses and disclosures alike. It is a
+view counter like `views` and `reached`, so it is the one a rate may be taken of
+— which is what both of your sentences are. The second question needs no pair
+configured in advance any more, and a funnel is still the right shape for the
+*other* kind of question, where the two ends are different nodes.
+
+**What is still a fiction in the fixture, and it is the reason this is filed
+rather than just closed.** `visits.ts` mints `activated` against band ids. That
+was the only way to make the arithmetic demonstrate anything and it is a thing no
+browser will ever send — it is now *also* the wrong shape, because a real
+band-level number arrives as somebody else's `within`. The scripted visit that
+presses something should mint the press against a control and name the band in
+`within`; then the fixture and a real deployment produce the same tally through
+the same code, and the sentence beside it about the visits being made up stays
+true for the right reason.
+
+**Two things to know before you change it.**
+
+- **Absent is not empty.** A signal with no `within` is *nobody walked*; one with
+  `within: []` is *nothing addressed above it*. `rollUp` adds nothing for the
+  first, which is why a fixture that omits the field reports every band as zero
+  rather than as the page.
+- **`engaged` needs the view key**, exactly as `reached` does. An uncorrelated
+  batch contributes nothing to it, so a fixture batch without a `view` produces a
+  band row with a plausible `dwellMs` and a zero here.
+
+**For `Loom portal`:** `StoredTally` carries `engaged`, and the two fixtures in
+`(portal)/_lib/reading-view.test.ts` and `portal/readers/_components/
+page-reading.test.tsx` were given `engaged: 0` from this lane so the build would
+compile — a two-line diff in your lane, named here rather than left for you to
+find in a blame. Nothing on the reading view reads it yet. A per-node row that
+shows a band's time on screen beside four zeroes has a fifth number now, and it
+is the only one on that row that is ever about a band.

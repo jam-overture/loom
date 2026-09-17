@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest"
 
 import {
   activated,
+  activatedIn,
   batchOf,
+  disclosedIn,
   dwelled,
   nodeId,
   OTHER_TREE,
@@ -171,6 +173,89 @@ describe("rollUp", () => {
       const rollup = rollUp([batchOf([viewed("pricing"), activated("buy")])], { pairs: [PAIR] })
 
       expect(rollup.funnels[0]).toMatchObject({ reached: 0, converted: 0 })
+    })
+  })
+
+  /**
+   * The counter a region is reported by. Everything else on a tally is about
+   * the node itself, and a band is never the node anybody pressed.
+   */
+  describe("engaged", () => {
+    it("credits the regions a press happened inside, and not the region with the press", () => {
+      const rollup = rollUp([batchOf([activatedIn("buy", "pricing", "page")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "buy")).toMatchObject({ activations: 1, engaged: 0 })
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ activations: 0, engaged: 1 })
+      expect(tallyFor(rollup, "page")).toMatchObject({ activations: 0, engaged: 1 })
+    })
+
+    /**
+     * The reason this is a view counter rather than an occurrence one. *Five
+     * readers used something in this band* is the sentence a page wants, and one
+     * reader pressing five times is not five readers.
+     */
+    it("counts one reader who pressed four things in a band as one engaged view", () => {
+      const rollup = rollUp([
+        batchOf([activatedIn("buy", "pricing"), activatedIn("compare", "pricing")], { view: viewKey(1) }),
+        batchOf([activatedIn("buy", "pricing"), activatedIn("help", "pricing")], { view: viewKey(1) }),
+      ])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ engaged: 1 })
+    })
+
+    it("counts two readers as two", () => {
+      const rollup = rollUp([
+        batchOf([activatedIn("buy", "pricing")], { view: viewKey(1) }),
+        batchOf([activatedIn("buy", "pricing")], { view: viewKey(2) }),
+      ])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ engaged: 2 })
+    })
+
+    /** Opening a disclosure is a reader using something, and it is never reported as a press. */
+    it("counts a disclosure opened inside a region", () => {
+      const rollup = rollUp([batchOf([disclosedIn("terms", true, "pricing")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ engaged: 1, opens: 0 })
+      expect(tallyFor(rollup, "terms")).toMatchObject({ engaged: 0, opens: 1 })
+    })
+
+    /**
+     * Absent ancestry is *nobody looked*, not *there was nothing above it*, so
+     * it adds nothing rather than being read as a press at the top of the page.
+     */
+    it("adds nothing for a signal that carries no ancestry", () => {
+      const rollup = rollUp([batchOf([viewed("pricing"), activated("buy")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ reached: 1, engaged: 0 })
+    })
+
+    it("adds nothing from a batch nothing can correlate, like every other view counter", () => {
+      const rollup = rollUp([batchOf([activatedIn("buy", "pricing")])])
+
+      expect(tallyFor(rollup, "pricing")).toBeUndefined()
+      expect(rollup.uncorrelated).toBe(1)
+    })
+
+    /**
+     * A region a host asked for no other kind about still gets a row. Its
+     * `views` stays 0 on purpose: somebody used something in it, and nothing
+     * measured whether it was ever on screen — two different facts, and a row
+     * that claimed a view would be the wrong one.
+     */
+    it("gives a region named only by an ancestry a row, with no view claimed for it", () => {
+      const rollup = rollUp([batchOf([activatedIn("buy", "pricing")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ views: 0, reached: 0, engaged: 1, dwellMs: 0 })
+    })
+
+    it("keeps regions apart by revision, like every other counter", () => {
+      const rollup = rollUp([
+        batchOf([activatedIn("buy", "pricing")], { view: viewKey(1), revision: 1 }),
+        batchOf([activatedIn("buy", "pricing")], { view: viewKey(2), revision: 2 }),
+      ])
+
+      expect(rollup.tallies.filter((tally) => tally.nodeId === nodeId("pricing"))).toHaveLength(2)
     })
   })
 

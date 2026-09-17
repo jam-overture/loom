@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
 
-import { batchOf, activated, dwelled, nodeId, primitiveType, viewed } from "../testing/reader-signal-contract.js"
+import {
+  activated,
+  activatedIn,
+  batchOf,
+  disclosedIn,
+  dwelled,
+  nodeId,
+  primitiveType,
+  viewed,
+} from "../testing/reader-signal-contract.js"
 
 import { EMPTY_READINGS, foldReaderSignals, nodeReadingsOf, readingsOf } from "./fold.js"
 
@@ -81,6 +90,37 @@ describe("foldReaderSignals", () => {
   })
 })
 
+describe("engagements", () => {
+  /**
+   * The occurrence count, because a fold is one page view. How many *readers*
+   * used something in a band is a question about many views, and it is
+   * `ReaderTally.engaged`.
+   */
+  it("counts every use inside a region, however many the reader made", () => {
+    const readings = readingsOf([
+      batchOf([activatedIn("buy", "pricing", "page"), activatedIn("compare", "pricing", "page")]),
+      batchOf([disclosedIn("terms", true, "pricing", "page")]),
+    ])
+
+    expect(readings.engagements[nodeId("pricing")]).toBe(3)
+    expect(readings.engagements[nodeId("page")]).toBe(3)
+  })
+
+  it("never counts a control's own use as a use inside it", () => {
+    const readings = readingsOf([batchOf([activatedIn("buy", "pricing")])])
+
+    expect(readings.activations[nodeId("buy")]).toBe(1)
+    expect(readings.engagements[nodeId("buy")]).toBeUndefined()
+    expect(readings.activations[nodeId("pricing")]).toBeUndefined()
+  })
+
+  it("adds nothing for a signal whose sender did not walk", () => {
+    const readings = readingsOf([batchOf([activated("buy")])])
+
+    expect(readings.engagements).toEqual({})
+  })
+})
+
 describe("nodeReadingsOf", () => {
   it("puts the longest on screen first", () => {
     const rows = nodeReadingsOf(
@@ -101,6 +141,19 @@ describe("nodeReadingsOf", () => {
       activations: 0,
       opens: 0,
       closes: 0,
+      engagements: 0,
+    })
+  })
+
+  it("gives a region a row and a type from an ancestry alone", () => {
+    const rows = nodeReadingsOf(readingsOf([batchOf([activatedIn("buy", "pricing")])]))
+
+    expect(rows.map((row) => row.nodeId)).toContain(nodeId("pricing"))
+    expect(rows.find((row) => row.nodeId === nodeId("pricing"))).toMatchObject({
+      type: primitiveType("loom.section"),
+      engagements: 1,
+      activations: 0,
+      reached: false,
     })
   })
 
