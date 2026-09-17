@@ -27,6 +27,17 @@ import type { PropsIssue } from "./props.js"
  * that it happened, and it is shaped for §6 to consume.
  */
 
+/**
+ * Which way a render came to have no answer for a node that asked for one.
+ *
+ * Both seams that resolve a tree's questions before the walk — data and
+ * submissions — can be handed nothing at all or handed a resolution that was
+ * built from some other tree. The distinction is worth carrying because it sends
+ * a different person to a different line: `absent` is a composition root that
+ * never resolved, and `unrelated` is one that resolved the wrong plan.
+ */
+export type UnresolvedResolution = "absent" | "unrelated"
+
 export type RenderDiagnostic =
   | {
       readonly code: "unknown-primitive"
@@ -107,9 +118,21 @@ export type RenderDiagnostic =
       readonly unavailable: DataUnavailable
     }
   | {
-      /** The tree asks for data and this render was given no resolution. */
+      /**
+       * A node asks for data and this render has no answers for it — neither a
+       * value nor a named reason there is none.
+       *
+       * There are two ways to arrive here and they are fixed in the same place
+       * by the same person, which is why they are one code carrying which:
+       * `absent`, a render given no resolution at all, and `unrelated`, a render
+       * given one built from a different tree's plan. The second is the one that
+       * used to say nothing: `EMPTY_DATA_RESOLUTION` answers `NO_DATA` for every
+       * node, so a composition root that reached for it as a neutral "no data"
+       * value got a page whose every binding vanished in silence.
+       */
       readonly code: "data-unresolved"
       readonly nodeId: NodeId
+      readonly resolution: UnresolvedResolution
     }
   | {
       /**
@@ -134,9 +157,17 @@ export type RenderDiagnostic =
       readonly unavailable: SubmissionUnavailable
     }
   | {
-      /** The tree names an endpoint and this render was given no resolution. */
+      /**
+       * A node names an endpoint and this render has no target for it — neither
+       * one nor a named reason there is none. `absent` and `unrelated` are the
+       * two routes the data seam's twin describes, for the same reasons:
+       * `EMPTY_SUBMISSION_RESOLUTION` answers `undefined` for every node, and a
+       * form whose target went missing that way rendered a submit button
+       * pointing nowhere with nothing said about it.
+       */
       readonly code: "submit-unresolved"
       readonly nodeId: NodeId
+      readonly resolution: UnresolvedResolution
     }
   | {
       /**
@@ -258,13 +289,17 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
     case "data-unavailable":
       return `node ${diagnostic.nodeId} binds "${diagnostic.name}" to "${diagnostic.source}" and it could not be answered — ${describeDataUnavailable(diagnostic.unavailable)}`
     case "data-unresolved":
-      return `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`
+      return diagnostic.resolution === "absent"
+        ? `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`
+        : `node ${diagnostic.nodeId} asks for data and the resolution this render was given has no answer for it, so it rendered with none — the answers came from resolving a different plan than this tree`
     case "submit-misdeclared":
       return `node ${diagnostic.nodeId} declares a submission that is not an endpoint id under \`to\`, so it rendered with no target — ${describeSubmissionError(diagnostic.error)}`
     case "submit-unavailable":
       return `node ${diagnostic.nodeId} posts to "${diagnostic.to}" and no target could be given for it — ${describeSubmissionUnavailable(diagnostic.unavailable)}`
     case "submit-unresolved":
-      return `node ${diagnostic.nodeId} names an endpoint and this render was given no resolution, so it rendered with no target`
+      return diagnostic.resolution === "absent"
+        ? `node ${diagnostic.nodeId} names an endpoint and this render was given no resolution, so it rendered with no target`
+        : `node ${diagnostic.nodeId} names an endpoint and the resolution this render was given has no target for it, so it rendered with none — the targets came from resolving a different plan than this tree`
     case "frame-refused":
       return `node ${diagnostic.nodeId} frames "${diagnostic.prop}" and it will not be framed — ${describeFrameRefusal(diagnostic.refusal)}`
     case "frame-same-origin":
