@@ -7,6 +7,7 @@ import { promisify } from "node:util"
 import { afterAll, describe, expect, it } from "vitest"
 
 import { REPOSITORY_ROOT } from "../architecture/source"
+import { readPageSource } from "../search/headings"
 
 import {
   QUICKSTART_COMMANDS,
@@ -190,6 +191,20 @@ describe("what the page says about the file", () => {
 
   it("runs the file under the name it tells the reader to save it as", () => {
     expect(QUICKSTART_COMMANDS.at(-1)).toContain(QUICKSTART_FILENAME)
+  })
+
+  /**
+   * *Things worth breaking* asks a reader to exceed the notice's maximum and
+   * says what it is. The number lives in the file's schema, and a page that
+   * carries its own copy of it is wrong the first time the schema moves — with
+   * nothing failing, because the experiment still produces a diagnostic either
+   * way and only the instruction has gone stale.
+   */
+  it("quotes the schema's own maximum rather than a second copy of it", () => {
+    const maximum = /\.max\((?<max>\d+)\)/u.exec(source)?.groups?.max
+
+    expect(maximum).toBeDefined()
+    expect(readPageSource("getting-started", "quickstart")).toContain(`${maximum} characters`)
   })
 })
 
