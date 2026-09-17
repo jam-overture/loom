@@ -217,7 +217,7 @@ const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
     prose(
       ids,
-      "This page counts which of its parts readers reach, how long they stay and what they press — and never who you are.",
+      "This page counts which of its parts you reach, how long you stay and what you press — and never who you are.",
       { size: "small", tone: "muted" }
     ),
     link(
