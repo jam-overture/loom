@@ -50,12 +50,30 @@ describe("the review queue", () => {
     window.localStorage.clear()
   })
 
-  it("gives a reader who has done nothing three sets and nothing to do", () => {
+  /**
+   * *No set is due today. That is the schedule working, not the schedule empty.*
+   * This page said that to everybody who had nothing due, and for a reader who
+   * has not marked a lesson it is a reassurance about a schedule that does not
+   * exist — every set is waiting on a date nobody has been asked for. The two
+   * situations are one `some` apart and were one sentence.
+   */
+  it("tells a reader who has done nothing that nothing is scheduled, not that they are up to date", () => {
     const { container } = on(TODAY, <Queue sets={SETS} parts={PARTS} questionKeys={KEYS} />)
 
     expect(container.textContent).toContain("Waiting on a lesson (3)")
-    expect(container.textContent).toContain("No set is due today")
+    expect(container.textContent).toContain("Nothing is due, because nothing is scheduled")
+    expect(container.textContent).toContain("no lesson has been marked here")
+    expect(container.textContent).not.toContain("That is the schedule working")
     expect(container.textContent).toContain("when lesson 01 is done")
+  })
+
+  it("keeps the reassurance for the reader it is true of", () => {
+    stored({ lessons: { "1": daysAgo(1) }, sets: {} })
+
+    const { container } = on(TODAY, <Queue sets={SETS} parts={PARTS} questionKeys={KEYS} />)
+
+    expect(container.textContent).toContain("That is the schedule working")
+    expect(container.textContent).not.toContain("Nothing is due, because nothing is scheduled")
   })
 
   it("puts a set in the queue two days after the lesson it follows", () => {

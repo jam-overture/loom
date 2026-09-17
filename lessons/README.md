@@ -163,6 +163,19 @@ keeps the earlier day you did it, re-answers add up rather than overwrite, and
 importing the same file twice does nothing the second time. Save a copy the day
 you have something worth losing.
 
+**And it now says when it has no record, rather than answering as though it
+had one.** An empty record used to mean four things and produce one sentence:
+you are new here; your record is on your other machine; this browser will not
+store anything, so nothing you do today survives the tab; or something is stored
+under that key and nothing could read it. The first is a fact about you and the
+other three are the page having no way to find out — which is the distinction
+lessons 24 and 26 are about, one floor down from where they teach it. So the
+read reports which of them it is: the queue says *nothing is scheduled* instead
+of *you are up to date*, a browser that will not keep anything says so before
+you spend the ten minutes rather than after, and a stored value that could not
+be read is handed back to you and **not written over**, because it is the only
+copy and the page is in no position to decide it is worthless.
+
 ## The one-paragraph version
 
 Read this *after* lesson 01, not before — it is a summary, and summaries are

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { calibrationOf } from "../_lib/calibration"
 import { correctionQueue, dueCorrections, knownOnly } from "../_lib/corrections"
 import { dueNow, queueFor, type PartLessons, type QueueEntry, type ScheduledSet } from "../_lib/queue"
+import { recordIsKnown } from "../_lib/reading"
 import { CorrectionsPanel } from "./corrections"
 import * as style from "./style"
 import { useProgress } from "./store"
@@ -72,7 +73,7 @@ const Row = ({ entry }: { readonly entry: QueueEntry }) => (
 )
 
 export const Queue = ({ sets, parts, questionKeys }: QueueProps) => {
-  const { progress, ready, today } = useProgress()
+  const { progress, ready, today, record } = useProgress()
 
   if (!ready) return <p style={style.note}>Working out what is due&hellip;</p>
 
@@ -82,9 +83,50 @@ export const Queue = ({ sets, parts, questionKeys }: QueueProps) => {
   const known = new Set(questionKeys)
   const corrections = dueCorrections(knownOnly(correctionQueue(progress, today), known))
 
+  /**
+   * Whether anything here has a date at all.
+   *
+   * *No set is due today* is a true sentence in two situations that could not be
+   * less alike, and this page used to follow it with the same reassurance in
+   * both: **that is the schedule working, not the schedule empty.** For a reader
+   * who has worked through four lessons and has nothing due until Thursday, that
+   * is the most useful sentence on the page. For somebody who has just arrived,
+   * it is the page telling them a schedule is working when there is no schedule
+   * — every set is waiting on a lesson, and the thing standing between them and
+   * a queue is one date they have not been asked for yet.
+   *
+   * A set gets a date from the lesson it follows and from nothing else, so the
+   * distinction is already in the queue and needs no second source: if not one
+   * entry has left `unscheduled`, nothing has been scheduled and the schedule is
+   * not working. It is uninformed, which is a different thing and a fixable one.
+   */
+  const scheduled = entries.some((entry) => entry.status !== "unscheduled")
+
   return (
     <div style={style.column(6)}>
-      {next === undefined ? (
+      {next === undefined && !scheduled ? (
+        <div style={style.column(2)}>
+          <p style={style.note}>
+            <strong style={{ color: style.ink }}>Nothing is due, because nothing is scheduled.</strong>{" "}
+            Every set below is waiting on the lesson it follows, and a set&rsquo;s date is computed
+            from the day you worked that lesson through — so until one lesson is marked, this queue
+            has nothing to compute from and is not telling you that you are up to date.
+          </p>
+          <p style={style.note}>
+            {recordIsKnown(record.reading)
+              ? "That is what this browser holds, and it holds it honestly: no lesson has been marked here."
+              : "And it could not read what this browser holds, so it cannot even tell you that much — see the note above."}{" "}
+            <Link href="/lessons" style={{ color: style.highlight }}>
+              Mark a lesson on the syllabus
+            </Link>{" "}
+            and its sets get dates, or{" "}
+            <Link href="/lessons/record" style={{ color: style.highlight }}>
+              bring in a record
+            </Link>{" "}
+            if you have been working through the course somewhere else.
+          </p>
+        </div>
+      ) : next === undefined ? (
         <p style={style.note}>
           No set is due today. That is the schedule working, not the schedule empty — a set you do
           early is a set you remember instead of retrieve.
@@ -203,16 +245,26 @@ export const DueSummary = ({ sets, parts, questionKeys }: QueueProps) => {
 
   if (!ready) return <p style={style.note}>&nbsp;</p>
 
-  const due = dueNow(queueFor(sets, progress, parts, today))
+  const entries = queueFor(sets, progress, parts, today)
+  const due = dueNow(entries)
   const known = new Set(questionKeys)
   const corrections = dueCorrections(knownOnly(correctionQueue(progress, today), known))
+  const scheduled = entries.some((entry) => entry.status !== "unscheduled")
 
+  /**
+   * The same distinction as the queue's, in one line, because this is the line
+   * a reader meets first. *No set is due for review today* under a syllabus
+   * nobody has marked is the front page of the course reporting a result it has
+   * not computed.
+   */
   const setsLine =
-    due.length === 0
-      ? "No set is due for review today. "
-      : `Due for review: Set ${due[0]?.set.letter}${
+    due.length > 0
+      ? `Due for review: Set ${due[0]?.set.letter}${
           due.length > 1 ? `, and ${due.length - 1} more behind it` : ""
         }. `
+      : scheduled
+        ? "No set is due for review today. "
+        : "No review set has a date yet — mark a lesson below and the sets that follow it get one. "
 
   return (
     <p style={style.note}>

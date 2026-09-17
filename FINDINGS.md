@@ -8,6 +8,51 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-17 — a shot list can click and wait, and cannot photograph a state that lives in the browser before the page loads
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — **a gap, not a defect**; the harness does exactly what it says
+
+`tools/screenshot/plan.ts` takes a `do` list of two steps, `click` and `wait`,
+and the docblock on `stepSchema` is right about why they are `strict`. What
+neither of them can reach is a page whose subject is **what the browser already
+held when it loaded**, and this lane has just shipped three such screens:
+
+| the state | what has to be true before the first paint |
+| --- | --- |
+| a record that could not be parsed | a value under `loom.lessons.progress.v1` |
+| storage blocked | `window.localStorage` throws on access |
+| a record brought from another machine | a populated key |
+
+None of those is reachable by clicking, because by the time there is something
+to click the page has already read the record and decided what to say. So the
+three pictures in `lessons/reports/2026-09-17-*` were taken by a twenty-line
+Playwright script in a scratch directory rather than by `pnpm shoot`, which is
+the arrangement [0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to stop being normal: a lane that keeps its own launcher is a lane whose
+`wide` will drift from everyone else's, and that has happened in this repository
+once already.
+
+**It is small, and it is one field.** A shot could carry what the browser starts
+with — a `storage` map applied before navigation, or an `initScript` string — and
+the second form covers the blocked case too, which a map cannot. Either is a
+`page.addInitScript` call in `../specimen/capture.ts` and a Zod field here.
+
+**Two things worth deciding rather than assuming**, which is why this is filed
+instead of attempted:
+
+- An `initScript` is arbitrary JavaScript in a JSON file, and the harness's whole
+  posture is that a shot list is *input* — Zod rather than a hand-written type,
+  `strict` on every step, so that a misspelling is loud. A field that runs
+  whatever it is given is the opposite of that posture, whatever it buys.
+- A `storage` map has neither problem and does not reach the blocked case, which
+  is the state most worth photographing, because it is the one a reader cannot
+  see is happening.
+
+`tools/` is yours and the call is yours. Nothing here is urgent: the pictures got
+taken, and what it cost was a scratch directory and ten minutes.
+
+---
 ## 2026-09-16 — the one line in `withCeiling` that is not about time is not load-bearing, and the test named for it cannot tell
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
