@@ -5585,14 +5585,21 @@
             {
               "name": "UnreadCopy",
               "kind": "type",
-              "signature": "type UnreadCopy = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Its string-valued props, in the order the node carries them. */\n    readonly props: readonly string[];\n};",
+              "signature": "type UnreadCopy = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /**\n     * Its string-valued props, in the order the node carries them.\n     *\n     * String-valued, and that is a decision rather than an accident. Where\n     * nothing has been declared, a value that is not a string is not a candidate\n     * word at all: a `loom.divider` holding `weight: 2` would otherwise be\n     * reported as a part whose words a reader might lose, and every layout\n     * primitive in the library would join it. The opposite call is made on the\n     * declared side, and a declaration is the whole of the difference.\n     */\n    readonly props: readonly string[];\n};",
               "truncated": false,
               "summary": "A node whose words this reading could not see, and the props it could not classify."
             },
             {
+              "name": "UnspokenCopy",
+              "kind": "type",
+              "signature": "type UnspokenCopy = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** The declared copy props holding a non-string value, in declaration order. */\n    readonly props: readonly string[];\n};",
+              "truncated": false,
+              "summary": "A prop a type declared as copy, holding something this reading will not turn into a word."
+            },
+            {
               "name": "NodeCopy",
               "kind": "type",
-              "signature": "type NodeCopy = {\n    /**\n     * In reading order: each element's own declared copy before its children's,\n     * because a stat's label is above the things under it and a card's title is\n     * above its body. Blank and whitespace-only values are left out — a caller\n     * composing a sentence wants words, and an empty string is not one.\n     */\n    readonly words: readonly string[];\n    /** What this reading could not see. Empty when every type under it declared. */\n    readonly unread: readonly UnreadCopy[];\n};",
+              "signature": "type NodeCopy = {\n    /**\n     * In reading order: each element's own declared copy before its children's,\n     * because a stat's label is above the things under it and a card's title is\n     * above its body. Blank and whitespace-only values are left out — a caller\n     * composing a sentence wants words, and an empty string is not one.\n     */\n    readonly words: readonly string[];\n    /** What this reading could not see. Empty when every type under it declared. */\n    readonly unread: readonly UnreadCopy[];\n    /** What it was told to read and could not. Empty when every declared copy prop held a string. */\n    readonly unspoken: readonly UnspokenCopy[];\n};",
               "truncated": false,
               "summary": ""
             },
