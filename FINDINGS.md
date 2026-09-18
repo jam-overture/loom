@@ -23748,8 +23748,24 @@ end-to-end example to read from, not to copy code out of.
 
 ## 2026-09-13 — a copy prop whose value is not a string vanishes from both halves of `copyIn`'s answer
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
-— found while writing lesson 24, which teaches this seam and prints the case
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-42-a-word-it-could-not-say`** — the declared half, which
+is the half that was silent. A declared copy prop holding a value that is not a
+string is now reported as `unspoken`, per node, beside the props nobody spoke
+for; the value is still never coerced.
+[0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)
+takes the third-field shape the finding offered and says why `unread` was not
+widened and why `UnreadCopy` did not gain a reason.
+**The undeclared half was decided rather than built, and against the finding.**
+`unread.props` goes on naming string-valued props only: `copy.test.ts` already
+pins that a `loom.divider` holding `weight: 2` reports nothing, and with 0 of 96
+primitives declaring copy every reading in the repository takes that branch
+today — so widening it would put a numeric setting from every layout primitive
+in the library into a list a reader is shown as words a change might take away.
+The asymmetry is the record's title: a declaration is what makes a non-string
+value a missing word. On the undeclared side the node is named already, which
+is what makes the two unequal. Say so if you disagree; it is one line either
+way and the argument is in 0169's alternatives.
 
 [0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) makes
 `copyIn` report what it could not classify rather than under-reporting it, and it
@@ -24634,8 +24650,19 @@ supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
 ## 2026-09-15 — the capture half has no mouth: nothing in the deployment receives a batch, so step 4's counters can never be anything but empty
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— found by building step 4 against it
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed — both pieces landed, and this entry outlived them.** The endpoint is
+`apps/loom/app/api/reader-signals/route.ts`, built by `framework-37-the-mouth`
+(#312) with
+[0161](decisions/0161-a-public-page-writes-to-one-application-endpoint-and-is-counted-by-a-key-that-outlives-nothing.md)
+answering the four questions this entry raised about its shape — off unless
+`LOOM_SIGNAL_INTAKE=on`, rate-limited and size-capped. The rollup runner is
+`apps/loom/scripts/signals-collect.ts`, from `framework-35`. The two sibling
+entries of 14 September were marked closed at the time and this one was not,
+because it was written against the same gap a day later and nobody came back to
+it. `grep -rn "ingestReaderSignals" apps/` has three matches today. Marked
+closed on 18 September by the framework lane, which built both halves and owes
+the correction.
 
 Step 3 of [`docs/signals.md`](docs/signals.md) landed on `main` in #295:
 `ingestReaderSignals`, a `ReaderSignalJournal` and a `ReaderTallyStore` with two
@@ -25976,3 +26003,86 @@ the opening note, and losing the preview.
 
 Worth resolving by deleting or dating the earlier section, which is the sort of
 edit only the file's owner should make.
+
+---
+
+## 2026-09-18 — the figure a reviewer cannot see is now reported, and the card that would show it reads two fields of three
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— nothing is broken, and the card is one field behind the seam it reads
+
+[0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md) gave
+`copyIn` a third answer. `NodeCopy` now returns `words`, `unread` and
+`unspoken`, and the three say different things:
+
+| field | what it means |
+| --- | --- |
+| `words` | what the node says |
+| `unread` | nobody has said whether these props are words |
+| `unspoken` | somebody said they are words, and what is in them is not one |
+
+`(portal)/_lib/proposal-effect.ts` reads the first two. `wordsIn` walks
+`read.unread` into `UnreadablePart`, grouped by type, and `read.unspoken` goes
+nowhere — so a proposal deleting a `loom.stat` whose `value` holds `3400` is
+still described to a reviewer with that figure missing from the words line and
+nothing saying so. **That is the state before this record rather than a
+regression from it**, and it is why this is a finding and not a defect: the card
+was correct about everything it could see, and the seam has just widened what it
+can see.
+
+**The grouping is the part worth deciding rather than copying.** `unread` is
+grouped by **type** on purpose, and the module comment says why: *declare `copy`
+on `loom.stat`* is the one thing a maintainer does about it, and three entries
+saying it is the same fact printed three times. `unspoken` does not work that
+way. The declaration already exists, so the remedy is not a declaration — it is
+a formatted string, or a note on the card — and it is **per node**: one stat with
+an unformatted figure is a different fact from six of them. A second
+`byType` loop would be the wrong shape wearing the right one.
+
+**Today it is unreachable through a validated tree** — `loom.stat`'s schema
+requires strings — and the two callers 0122 was filed for are exactly where props
+have not been through a schema: a queue row about a proposal, and a preview of a
+node nobody has approved. Which is the screen this is filed against.
+
+No primitive declares `copy` yet (0 of 96, `Loom primitives`' standing finding of
+10 September), so every reading on the deployment today still goes down the
+`unread` branch and this changes nothing on screen until the first declaration
+lands. It is worth doing before then rather than after.
+
+---
+
+## 2026-09-18 — lesson 24 teaches a seam with two answers, and it has three as of today
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
+— **no transcript breaks**, which is why this is a paragraph rather than a red
+build
+
+You filed the finding this closes, on 13 September, while writing this lesson —
+so the lesson is upstream of the change rather than behind it. What moved:
+`NodeCopy` has a third field, `unspoken`, for a declared copy prop holding
+something that is not a string
+([0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)).
+
+**Nothing in the lesson stops working.** `transcripts.test.ts` re-runs exercise
+G's fenced block and its `report` helper prints `words` and `unread` by name
+rather than the whole reading, so every printed line is the line it was. That is
+the lesson's own design doing its job, and it is why this is filed rather than
+fixed in a framework branch.
+
+Three places the prose is now one field short, in the order they appear:
+
+- **The `// →` comment** around line 246, which shows the shape of an answer as
+  `{ words: […], unread: [] }`. It is a comment rather than a transcript, so
+  nothing checks it.
+- **The file table** at line 366 names `copyIn`, `NodeCopy`, `UnreadCopy` and
+  `CopyDeclarations`. `UnspokenCopy` is the fifth export of that module now.
+- **"Read `copyIn` before the exercises"**, which says the two branches worth
+  stopping on are `declared === undefined` and the other. There are three, and
+  the third is the one this lesson's own finding was about.
+
+**The lesson may well be better for it rather than merely longer.** Its subject
+is the difference between *no words* and *I cannot tell you*, and `unspoken` is a
+third thing again — *I was told, and I still cannot tell you* — which is the case
+that shows why the distinction is worth a field rather than a convention. The
+same shape as lesson 25's second act, and offered the same way: your lesson,
+a reader's opinion.
