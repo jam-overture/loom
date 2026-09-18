@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { runtimeWordsIn } from "../_test/plain-language"
 import { screenName } from "./screen-names"
 
 import {
@@ -16,9 +17,12 @@ import {
   answerOutcomes,
   inQueueOrder,
   sweepIsPartial,
+  unreadableIn,
+  unreadablePage,
   waitingChange as describeWaiting,
   waitingSummary,
   type Sweep,
+  type UnreadablePage,
 } from "./waiting"
 
 /**
@@ -195,10 +199,13 @@ describe("inQueueOrder", () => {
 })
 
 /** Every page reached, every page read. What a healthy deployment looks like. */
-const SWEPT: Sweep = { unreadable: 0, complete: true }
+const SWEPT: Sweep = { unreadable: [], complete: true }
+
+const unreadable = (treeId: string, detail = "the pool is gone"): UnreadablePage =>
+  unreadablePage(treeId, { code: "unavailable", detail })
 
 /** Reached everything, and one page refused to answer. */
-const UNREADABLE_ONE: Sweep = { unreadable: 1, complete: true }
+const UNREADABLE_ONE: Sweep = { unreadable: [unreadable("t_1")], complete: true }
 
 describe("waitingSummary", () => {
   it("says nothing is waiting rather than saying zero", () => {
@@ -233,11 +240,14 @@ describe("waitingSummary", () => {
    */
   it("admits a page it could not check rather than reporting a total as complete", () => {
     expect(waitingSummary([], UNREADABLE_ONE)).toBe(
-      "Nothing is waiting for you. One page couldn't be checked."
+      "Nothing is waiting for you. One page couldn't be checked, and it is named below."
     )
-    expect(waitingSummary([waitingChange(heldFixture())], { unreadable: 2, complete: true })).toBe(
-      "1 change is waiting for your answer. 2 pages couldn't be checked."
-    )
+    expect(
+      waitingSummary([waitingChange(heldFixture())], {
+        unreadable: [unreadable("t_1"), unreadable("t_2")],
+        complete: true,
+      })
+    ).toBe("1 change is waiting for your answer. 2 pages couldn't be checked, and they are named below.")
   })
 
   /**
@@ -247,7 +257,7 @@ describe("waitingSummary", () => {
    */
   it("reads as one sentence, spaces and full stops included", () => {
     expect(waitingSummary([waitingChange(heldFixture())], UNREADABLE_ONE)).toBe(
-      "1 change is waiting for your answer. One page couldn't be checked."
+      "1 change is waiting for your answer. One page couldn't be checked, and it is named below."
     )
   })
 
@@ -262,15 +272,20 @@ describe("waitingSummary", () => {
    * the two precisely because nothing failed.
    */
   it("admits pages it never reached, not only ones it could not read", () => {
-    expect(waitingSummary([], { unreadable: 0, complete: false })).toBe(
+    expect(waitingSummary([], { unreadable: [], complete: false })).toBe(
       "Nothing is waiting for you. This deployment has more pages than this screen checks."
     )
   })
 
   /** Both caveats at once, still one sentence a person could read out loud. */
   it("says both when both are true, in the order they matter", () => {
-    expect(waitingSummary([waitingChange(heldFixture())], { unreadable: 1, complete: false })).toBe(
-      "1 change is waiting for your answer. One page couldn't be checked. This deployment has more pages than this screen checks."
+    expect(
+      waitingSummary([waitingChange(heldFixture())], {
+        unreadable: [unreadable("t_1")],
+        complete: false,
+      })
+    ).toBe(
+      "1 change is waiting for your answer. One page couldn't be checked, and it is named below. This deployment has more pages than this screen checks."
     )
   })
 
@@ -297,6 +312,114 @@ describe("sweepIsPartial", () => {
   })
 
   it("is true when a page was never reached, though nothing failed", () => {
-    expect(sweepIsPartial({ unreadable: 0, complete: false })).toBe(true)
+    expect(sweepIsPartial({ unreadable: [], complete: false })).toBe(true)
+  })
+})
+
+/**
+ * The row that replaced a number.
+ *
+ * What these pin is the whole of why it exists: a reader meeting a page that
+ * would not answer gets a sentence they can read, a place they can go, and the
+ * store's own account of it one click down — where before they got a count and
+ * an instruction they could not follow.
+ */
+describe("unreadablePage", () => {
+  it("names the page it is about, so the row can be looked up and followed", () => {
+    const page = unreadablePage("t_7", { code: "unavailable", detail: "the pool is gone" })
+
+    expect(page.treeId).toBe("t_7")
+    expect(page.href).toBe("/portal/pages/t_7")
+  })
+
+  /**
+   * The rule the whole surface is being rebuilt under, on the one row a reader
+   * meets when something is already wrong. `describeHoldError`'s own sentence
+   * says "the holding store is unavailable", which is the account and not the
+   * news.
+   */
+  it("says why in a person's words and keeps the store's own account beside it", () => {
+    const page = unreadablePage("t_7", { code: "unavailable", detail: "the pool is gone" })
+
+    expect(page.why).toBe(
+      "Loom couldn't read what's waiting on this page. Nothing has been lost and nothing has been decided — asking a page what is waiting on it only reads it."
+    )
+    expect(runtimeWordsIn(page.why)).toEqual([])
+    expect(page.technical).toBe("the holding store is unavailable: the pool is gone")
+  })
+
+  /**
+   * A silence about a page is the one thing this row exists to stop, so every
+   * code the store can answer has a sentence rather than a fallback. Two of the
+   * three cannot arise from asking a page what is waiting on it; they are
+   * written anyway, because the day one of them does arrive is the day nobody
+   * would find out which.
+   */
+  it.each(["unavailable", "not-held", "already-held"] as const)(
+    "has a plain sentence for %s rather than a headed silence",
+    (code) => {
+      const page =
+        code === "unavailable"
+          ? unreadablePage("t_7", { code, detail: "gone" })
+          : unreadablePage("t_7", { code, proposalId: proposalIdSchema.parse("p_9") })
+
+      expect(page.why.length).toBeGreaterThan(20)
+      expect(runtimeWordsIn(page.why)).toEqual([])
+    }
+  )
+})
+
+/**
+ * The pairing, tested because the file that calls it cannot be.
+ *
+ * `/portal`'s fan-out is one hold read per listed page, in listing order, and
+ * everything this unit shows a reader depends on that alignment holding. An
+ * index that slips by one names the wrong page in a warning — which is a worse
+ * failure than the count it replaced, and one nothing on the drawn screen could
+ * tell apart from the truth.
+ */
+describe("unreadableIn", () => {
+  const listed = [{ treeId: "t_1" }, { treeId: "t_2" }, { treeId: "t_3" }]
+  const read = { ok: true } as const
+  const failed = { ok: false, error: { code: "unavailable", detail: "gone" } } as const
+
+  it("is empty when every page answered", () => {
+    expect(unreadableIn(listed, [read, read, read])).toEqual([])
+  })
+
+  /** The assertion the whole unit rests on: the row names its own page. */
+  it("names the page at the same position as the answer, not the first that failed", () => {
+    const found = unreadableIn(listed, [read, failed, read])
+
+    expect(found.map((page) => page.treeId)).toEqual(["t_2"])
+  })
+
+  it("keeps every failure rather than the first", () => {
+    const found = unreadableIn(listed, [failed, read, failed])
+
+    expect(found.map((page) => page.treeId)).toEqual(["t_1", "t_3"])
+  })
+
+  it("carries each page's own error rather than one of them twice", () => {
+    const found = unreadableIn(listed, [
+      { ok: false, error: { code: "unavailable", detail: "first" } },
+      { ok: false, error: { code: "unavailable", detail: "second" } },
+      read,
+    ])
+
+    expect(found.map((page) => page.technical)).toEqual([
+      "the holding store is unavailable: first",
+      "the holding store is unavailable: second",
+    ])
+  })
+
+  /**
+   * An answer with no page beside it cannot be named, and a warning naming the
+   * wrong page is worse than one page fewer in a list that already says it is
+   * incomplete. It cannot arise from `trees.map`; it is dropped rather than
+   * guessed at so that it never can.
+   */
+  it("drops an answer it has no page for rather than naming the wrong one", () => {
+    expect(unreadableIn([{ treeId: "t_1" }], [read, failed])).toEqual([])
   })
 })
