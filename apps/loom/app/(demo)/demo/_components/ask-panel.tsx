@@ -116,11 +116,19 @@ export const AskPanel = ({
    * this panel carries none. A visitor holding two questions has two cards
    * offering an answer, which is right — each is the next step for its own ask.
    *
-   * The preset is not withdrawn — it drops into the list below, at the position
-   * the table gives it, so the four asks already there do not move under the
-   * visitor's cursor. Withdrawing it would narrow the demo at exactly the moment
-   * a visitor is exploring, which is the shape of this fix this lane argued
-   * against (`set-aside.ts`).
+   * **The preset itself is gone from the list too, and that is the page's call
+   * rather than this one's.** It used to drop back into the list at its table
+   * position, which offered a second press whose only outcome was a duplicate
+   * question — so `already-asked.ts` takes it out of `available` while its
+   * question is open, and the four asks already in the list stay exactly where
+   * they were. This panel cannot see that: whether an ask is waiting on an answer
+   * is a fact about the store, and everything here knows is which ids it was
+   * handed.
+   *
+   * What is *not* withdrawn is everything else. The other asks stay live and
+   * pressable while a question is open, because a stranger who wants to watch the
+   * page move twice should be allowed to — which is the shape of this fix this
+   * lane argued against (`set-aside.ts`), and it is still argued against.
    */
   const leading = waiting === undefined ? nominated : undefined
   const rest = offered.filter((preset) => preset.id !== leading?.id)
