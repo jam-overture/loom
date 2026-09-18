@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { parseReaderSignalBatch, READER_SIGNAL_KINDS } from "./signal.js"
+import {
+  DELEGATED_READER_SIGNAL_KINDS,
+  parseReaderSignalBatch,
+  READER_SIGNAL_KINDS,
+  readerSignalSchema,
+} from "./signal.js"
 
 const batch = (signals: readonly unknown[], extra: Record<string, unknown> = {}) => ({
   treeId: "t_1",
@@ -54,6 +59,60 @@ describe("parseReaderSignalBatch", () => {
     expect(
       parseReaderSignalBatch(batch([{ kind: "dwelled", nodeId: "n_1", type: "loom.section", ms: 0 }])).ok
     ).toBe(false)
+  })
+
+  const region = { nodeId: "n_9", type: "loom.section" }
+
+  it("reads the regions a press says it happened inside", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "activated", nodeId: "n_2", type: "loom.card", at, within: [region] }])
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.signals[0]).toMatchObject({ within: [region] })
+  })
+
+  it("tells an ancestry nobody walked for apart from one that found nothing", () => {
+    const absent = parseReaderSignalBatch(batch([{ kind: "activated", nodeId: "n_2", type: "loom.card", at }]))
+    const empty = parseReaderSignalBatch(
+      batch([{ kind: "activated", nodeId: "n_2", type: "loom.card", at, within: [] }])
+    )
+
+    expect(absent.ok && empty.ok).toBe(true)
+    if (absent.ok) expect(absent.value.signals[0]).not.toHaveProperty("within")
+    if (empty.ok) expect(empty.value.signals[0]).toMatchObject({ within: [] })
+  })
+
+  /** A region is a node and a type. Anything else riding along is content, and 0136 says no. */
+  it("refuses a region carrying more than an address", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([
+        { kind: "activated", nodeId: "n_2", type: "loom.card", at, within: [{ ...region, heading: "Pricing" }] },
+      ])
+    )
+
+    expect(parsed.ok).toBe(false)
+  })
+
+  it("refuses an ancestry on a kind that is observed rather than delegated", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at, within: [region] }])
+    )
+
+    expect(parsed.ok).toBe(false)
+  })
+
+  /**
+   * The list and the union, held against each other rather than kept in step by
+   * hand. A kind that gains an ancestry and is not named in `kinds.ts` fails
+   * here, which is the only place that could notice.
+   */
+  it("names exactly the kinds that carry an ancestry", () => {
+    const carrying = readerSignalSchema.options
+      .filter((option) => "within" in option.shape)
+      .map((option) => option.shape.kind.value)
+
+    expect([...carrying].sort()).toEqual([...DELEGATED_READER_SIGNAL_KINDS].sort())
   })
 
   it("says where a batch went wrong instead of throwing", () => {

@@ -8,6 +8,96 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **an instrument, not a defect**; the defect it would have caught is fixed
+in `primitives-38-the-page-points-at-itself`
+
+`compositions.test.ts` asserted this of every href in every band:
+
+```ts
+expect(href.startsWith("/")).toBe(true)
+```
+
+Its doc comment gives the reason and the reason is right: *"a live outbound link
+in it is a link this library chose on a host's behalf."* The rule does not
+implement that reason. It implements a **proxy** for it — *starts with a slash* —
+which excludes one destination the reason has no objection to and which the
+library had, four days earlier, gone to some trouble to allow: the bare fragment.
+
+The result was a **silent veto**. `linkUrlSchema` accepted `#pricing` from 14
+September; the catalogue could not write one; nothing said so, because nothing
+tried. A schema and a test disagreed for four days about what was legal, and the
+one that disagreed by being *narrower* is the one that wins without an error.
+
+**Why this is filed rather than only fixed.** The class is not "a test was wrong".
+It is **a test whose rule is a proxy for its stated reason, where the gap between
+them is a capability rather than a bug**. Those two failure modes look nothing
+alike:
+
+| | a test that is too loose | a test whose rule is narrower than its reason |
+| --- | --- | --- |
+| symptom | a defect ships | **a capability is unreachable** |
+| who notices | whoever the defect lands on | **nobody** — there is no failure |
+| how long it lasts | until the defect bites | until somebody tries the thing and reads the assertion |
+
+This lane has now hit the second one twice in two days from opposite directions:
+here, and the 17 September badge finding, where a declaration was correct in
+isolation and wrong in context. Both are *absences of a failure*, which is the
+category nothing in the repository instruments.
+
+**I do not have a proposal I believe in**, and would rather say so than invent
+one. A check that compared a test's assertion against the prose above it is a
+language model's job rather than a build step's, and the honest version of that
+is a reviewer reading the two together — which is what happened here, by
+accident, because I needed the fragment and went to find out why it was refused.
+
+**What is worth doing cheaply**: when a rule is a proxy for its reason, say so at
+the assertion. `startsWith("/")` did not say *this is a stand-in for reaches no
+other origin*; had it, the gap would have been visible to anyone reading it. The
+replacement in #329 names its own principle — *reaches this origin, or reaches
+none* — and is bounded by a second assertion about addresses rather than by
+narrowing the first. Offered, not asked for; nothing is blocked.
+
+---
+## 2026-09-18 — a screenshot cannot show a destination, which is a narrower cousin of the marquee limit
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit of the instrument, named so a reviewer knows what #329's picture
+is not telling them
+
+The 16 September entry below says a still photograph cannot show motion, and
+recommends doing nothing until a second band's subject is its motion. This run
+produced the adjacent case and it wants the same treatment.
+
+**The subject of `primitives-38` is where four links go.** A photograph of the
+nav bar after the fix is **pixel-identical** to one taken before it: four menu
+items reading *How it works, Features, Pricing, FAQ* in both, pointing at four
+sections in one and at four routes of a site that does not exist in the other.
+Navigation is the one property a screenshot has no access to, because the picture
+is the same on both sides of the click.
+
+So the weight in that run is carried by the assertion and not by the image, and
+the report says so. `reports/2026-09-18-primitives-the-page-points-at-itself.md`
+photographs the three *new bands*, whose subject really is how they look, and is
+explicit that the nav's correctness is proved by
+[0168](decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)'s test
+rather than by anything visible.
+
+**Recommendation: nothing, again, and for a sharper reason than last time.** The
+marquee entry's option 2 — a second shot at a pinned animation time — has no
+analogue here. A shot list can `click`, so a harness *could* photograph the page
+after following a fragment; what it would produce is a picture of the target
+band, which is a picture the sheet already contains. There is no image that
+demonstrates *this link arrives there*. The check is the demonstration, and that
+is a fact about screenshots rather than a gap in this one.
+
+Worth having written down because the two entries together now describe the
+shape of what this instrument cannot reach: **a photograph shows a state, and
+neither motion nor navigation is one.**
+
+---
 ## 2026-09-17 — a shot list can click and wait, and cannot photograph a state that lives in the browser before the page loads
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -23633,7 +23723,28 @@ one field, and it is the key — the actor is derived from it.
 
 ## 2026-09-12 — a link cannot point at a heading on the page it is already on
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-38-the-page-points-at-itself`** — but the schema half was
+closed on **#294, 14 September**, and this entry sat open for four days after it.
+The Status line is the finding's own channel and nobody moved it, which is worth
+recording because it is the cheapest possible failure and it still cost
+something: a run reading the queue on 18 September had to open `url.ts` to learn
+that the work was done.
+
+**What was still genuinely open, and is what #329 closes.** The fix landed in the
+schema and **nothing in the catalogue ever used it.** Thirty bands, nineteen
+anchors on the assembled page, and not one link pointing at any of them —
+`navBand` was still aimed at `/product`, `/pricing`, `/docs` and `/changelog`,
+four routes of a site that does not exist. It was not an oversight a reader could
+have caught: `compositions.test.ts` asserted `href.startsWith("/")` of every href
+in every band, so the catalogue was **structurally barred** from writing the
+fragment the maintainer had asked for and been given.
+
+So the shape worth keeping is *a fix is not finished when the schema accepts it*.
+The allowance and the demonstration are two pieces of work, and the second one
+had no owner. [0168](decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)
+is the second piece, and the walk `url.ts` asked for — *every fragment on the
+assembled page names an anchor that exists on it* — now runs on every build.
 
 `linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
 rejects everything else. A bare fragment is everything else:
@@ -23756,8 +23867,24 @@ end-to-end example to read from, not to copy code out of.
 
 ## 2026-09-13 — a copy prop whose value is not a string vanishes from both halves of `copyIn`'s answer
 
-**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:** open
-— found while writing lesson 24, which teaches this seam and prints the case
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-42-a-word-it-could-not-say`** — the declared half, which
+is the half that was silent. A declared copy prop holding a value that is not a
+string is now reported as `unspoken`, per node, beside the props nobody spoke
+for; the value is still never coerced.
+[0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)
+takes the third-field shape the finding offered and says why `unread` was not
+widened and why `UnreadCopy` did not gain a reason.
+**The undeclared half was decided rather than built, and against the finding.**
+`unread.props` goes on naming string-valued props only: `copy.test.ts` already
+pins that a `loom.divider` holding `weight: 2` reports nothing, and with 0 of 96
+primitives declaring copy every reading in the repository takes that branch
+today — so widening it would put a numeric setting from every layout primitive
+in the library into a list a reader is shown as words a change might take away.
+The asymmetry is the record's title: a declaration is what makes a non-string
+value a missing word. On the undeclared side the node is named already, which
+is what makes the two unequal. Say so if you disagree; it is one line either
+way and the argument is in 0169's alternatives.
 
 [0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) makes
 `copyIn` report what it could not classify rather than under-reporting it, and it
@@ -24642,8 +24769,19 @@ supersessions of 0136 or 0146, not judgement calls inside a pull request.
 
 ## 2026-09-15 — the capture half has no mouth: nothing in the deployment receives a batch, so step 4's counters can never be anything but empty
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— found by building step 4 against it
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed — both pieces landed, and this entry outlived them.** The endpoint is
+`apps/loom/app/api/reader-signals/route.ts`, built by `framework-37-the-mouth`
+(#312) with
+[0161](decisions/0161-a-public-page-writes-to-one-application-endpoint-and-is-counted-by-a-key-that-outlives-nothing.md)
+answering the four questions this entry raised about its shape — off unless
+`LOOM_SIGNAL_INTAKE=on`, rate-limited and size-capped. The rollup runner is
+`apps/loom/scripts/signals-collect.ts`, from `framework-35`. The two sibling
+entries of 14 September were marked closed at the time and this one was not,
+because it was written against the same gap a day later and nobody came back to
+it. `grep -rn "ingestReaderSignals" apps/` has three matches today. Marked
+closed on 18 September by the framework lane, which built both halves and owes
+the correction.
 
 Step 3 of [`docs/signals.md`](docs/signals.md) landed on `main` in #295:
 `ingestReaderSignals`, a `ReaderSignalJournal` and a `ReaderTallyStore` with two
@@ -25653,8 +25791,13 @@ yours.
 ## 2026-09-17 — a press is filed against the button, and `rollUp` has no way to say which band it was in
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — measured, not a defect in anything, and it makes one band of
-`/what-readers-do` unreproducible from real signals
+**closed** by `framework-41-the-region-it-happened-in` — shape 1, the signal
+carrying the band as well as the control, recorded as
+[0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md).
+A delegated signal now carries `within`, and the per-band figure is
+`ReaderTally.engaged` rather than a funnel. **A second finding below says what
+`/what-readers-do` can now compute, and what in its fixture is still a thing no
+browser sends.**
 
 Found by wiring this surface up to actually broadcast and then asking the
 resulting batch what it said. `count-readers.test.tsx` presses a
@@ -25755,7 +25898,17 @@ on. It is gated on the switch here, so this deployment's markup is byte-identica
 until somebody sets the variable.
 ## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-20-already-asked`** (17 September) — shape **(1)** taken, exactly as
+recommended: `_lib/already-asked.ts` joins the records to the holds the page can
+still answer and takes those presets out of `available`, so an ask whose question
+is already on screen is not offered a second time. Shape (2), folding the second
+ask onto the first, is not taken and is not filed again — with the press gone
+there is nothing to fold. One thing this did **not** close: two identical
+sentences typed into the free-text box would still hold twice, because the join
+runs through `presetId` and typed asks have none. That is the box, a model key
+and two deliberate presses, which is not the two-clicks-from-the-lead path this
+was filed for.
 
 Driven against a real `next build` at 1280×900, two presses of one button:
 
@@ -26098,3 +26251,277 @@ rather than a ratio, since what a reflowing document needs on a phone is a numbe
 of pixels and not a proportion of its width. A photograph has a shape; an
 application has a layout, which is the argument `adaptive` already makes, carried
 one step further.
+## 2026-09-18 — the figure a reviewer cannot see is now reported, and the card that would show it reads two fields of three
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— nothing is broken, and the card is one field behind the seam it reads
+
+[0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md) gave
+`copyIn` a third answer. `NodeCopy` now returns `words`, `unread` and
+`unspoken`, and the three say different things:
+
+| field | what it means |
+| --- | --- |
+| `words` | what the node says |
+| `unread` | nobody has said whether these props are words |
+| `unspoken` | somebody said they are words, and what is in them is not one |
+
+`(portal)/_lib/proposal-effect.ts` reads the first two. `wordsIn` walks
+`read.unread` into `UnreadablePart`, grouped by type, and `read.unspoken` goes
+nowhere — so a proposal deleting a `loom.stat` whose `value` holds `3400` is
+still described to a reviewer with that figure missing from the words line and
+nothing saying so. **That is the state before this record rather than a
+regression from it**, and it is why this is a finding and not a defect: the card
+was correct about everything it could see, and the seam has just widened what it
+can see.
+
+**The grouping is the part worth deciding rather than copying.** `unread` is
+grouped by **type** on purpose, and the module comment says why: *declare `copy`
+on `loom.stat`* is the one thing a maintainer does about it, and three entries
+saying it is the same fact printed three times. `unspoken` does not work that
+way. The declaration already exists, so the remedy is not a declaration — it is
+a formatted string, or a note on the card — and it is **per node**: one stat with
+an unformatted figure is a different fact from six of them. A second
+`byType` loop would be the wrong shape wearing the right one.
+
+**Today it is unreachable through a validated tree** — `loom.stat`'s schema
+requires strings — and the two callers 0122 was filed for are exactly where props
+have not been through a schema: a queue row about a proposal, and a preview of a
+node nobody has approved. Which is the screen this is filed against.
+
+No primitive declares `copy` yet (0 of 96, `Loom primitives`' standing finding of
+10 September), so every reading on the deployment today still goes down the
+`unread` branch and this changes nothing on screen until the first declaration
+lands. It is worth doing before then rather than after.
+
+---
+
+## 2026-09-18 — lesson 24 teaches a seam with two answers, and it has three as of today
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:** open
+— **no transcript breaks**, which is why this is a paragraph rather than a red
+build
+
+You filed the finding this closes, on 13 September, while writing this lesson —
+so the lesson is upstream of the change rather than behind it. What moved:
+`NodeCopy` has a third field, `unspoken`, for a declared copy prop holding
+something that is not a string
+([0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)).
+
+**Nothing in the lesson stops working.** `transcripts.test.ts` re-runs exercise
+G's fenced block and its `report` helper prints `words` and `unread` by name
+rather than the whole reading, so every printed line is the line it was. That is
+the lesson's own design doing its job, and it is why this is filed rather than
+fixed in a framework branch.
+
+Three places the prose is now one field short, in the order they appear:
+
+- **The `// →` comment** around line 246, which shows the shape of an answer as
+  `{ words: […], unread: [] }`. It is a comment rather than a transcript, so
+  nothing checks it.
+- **The file table** at line 366 names `copyIn`, `NodeCopy`, `UnreadCopy` and
+  `CopyDeclarations`. `UnspokenCopy` is the fifth export of that module now.
+- **"Read `copyIn` before the exercises"**, which says the two branches worth
+  stopping on are `declared === undefined` and the other. There are three, and
+  the third is the one this lesson's own finding was about.
+
+**The lesson may well be better for it rather than merely longer.** Its subject
+is the difference between *no words* and *I cannot tell you*, and `unspoken` is a
+third thing again — *I was told, and I still cannot tell you* — which is the case
+that shows why the distinction is worth a field rather than a convention. The
+same shape as lesson 25's second act, and offered the same way: your lesson,
+a reader's opinion.
+## 2026-09-17 — the band is on the signal now, and `/what-readers-do` can stop minting a press no browser sends
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
+`Loom portal` for the second half · **Status:** open — the half in the framework
+is done and green on `main`; what remains is one fixture and one figure, both in
+your lane
+
+Closing your 17 September finding. Shape 1 was taken —
+[0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
+— so this is the recipe rather than an answer you have to go and find.
+
+**What a batch says now.** An `activated` or a `disclosed` carries `within`: the
+addressed nodes it happened inside, nearest first, up to and including the root.
+Press a `loom.action` in a band and the delivery reads
+
+```
+signals: [{ kind: "activated", type: "loom.action", nodeId: "<the button>",
+            within: [{ nodeId: "<the band>", type: "loom.section" },
+                     { nodeId: "<the page>", type: "loom.page" }] }]
+```
+
+Nothing in `count-readers.tsx` changes to get it: the walk is on by default and
+`broadcastReaderSignals` was already doing it to find the node.
+
+**The two figures, and what each is now.**
+
+| what the page prints | what it should read |
+| --- | --- |
+| *157 seconds on screen, 5 used something in it*, per band | `dwellMs` and **`engaged`** on the band's own tally |
+| *Of the 10 readers who got as far as "…", 5 used something in it* | **`reached` and `engaged` on that same one row** — no `FunnelPair` |
+
+`engaged` is **distinct page views in which a reader used something strictly
+inside the node**, at any depth, counting presses and disclosures alike. It is a
+view counter like `views` and `reached`, so it is the one a rate may be taken of
+— which is what both of your sentences are. The second question needs no pair
+configured in advance any more, and a funnel is still the right shape for the
+*other* kind of question, where the two ends are different nodes.
+
+**What is still a fiction in the fixture, and it is the reason this is filed
+rather than just closed.** `visits.ts` mints `activated` against band ids. That
+was the only way to make the arithmetic demonstrate anything and it is a thing no
+browser will ever send — it is now *also* the wrong shape, because a real
+band-level number arrives as somebody else's `within`. The scripted visit that
+presses something should mint the press against a control and name the band in
+`within`; then the fixture and a real deployment produce the same tally through
+the same code, and the sentence beside it about the visits being made up stays
+true for the right reason.
+
+**Two things to know before you change it.**
+
+- **Absent is not empty.** A signal with no `within` is *nobody walked*; one with
+  `within: []` is *nothing addressed above it*. `rollUp` adds nothing for the
+  first, which is why a fixture that omits the field reports every band as zero
+  rather than as the page.
+- **`engaged` needs the view key**, exactly as `reached` does. An uncorrelated
+  batch contributes nothing to it, so a fixture batch without a `view` produces a
+  band row with a plausible `dwellMs` and a zero here.
+
+**For `Loom portal`:** `StoredTally` carries `engaged`, and the two fixtures in
+`(portal)/_lib/reading-view.test.ts` and `portal/readers/_components/
+page-reading.test.tsx` were given `engaged: 0` from this lane so the build would
+compile — a two-line diff in your lane, named here rather than left for you to
+find in a blame. Nothing on the reading view reads it yet. A per-node row that
+shows a band's time on screen beside four zeroes has a fifth number now, and it
+is the only one on that row that is ever about a band.
+
+---
+## 2026-09-17 — `page.tsx` is the second file in this lane a test cannot reach, and the defect matrix found it the same way it found the first
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+the same shape as the 14 September finding about `actions.ts`, and now with a
+second data point
+
+Every unit in this lane is checked by putting each defect back in turn and
+confirming the suite catches it. On `demo-20-already-asked`, five of six were
+caught. **The sixth was caught by nothing that is a test:**
+
+| defect restored | what fails |
+| --- | --- |
+| `stillToAsk` never withdraws anything | 6 tests |
+| it ignores whether the question can still be answered | 1 test |
+| it stops preserving the table's order | 7 tests |
+| the panel withdraws asks on its own instead of rendering what it is handed | 4 tests |
+| the hold check is dropped from the join | **the compiler** — `TS2345`, because `heldProposalId` is optional |
+| **`page.tsx` stops applying the filter at all** | **nothing — 440 passed** |
+
+Unwiring it is one edit: change `available={stillToAsk(availablePresets(…), records, openQuestions)}`
+back to `available={availablePresets(…)}`. The whole suite stays green. The only
+thing that complained was `TS6133`, an unused import — which is a stray line
+noticing itself, not the behaviour being checked, and it disappears the moment
+whoever made the edit also deletes the import.
+
+**Why it is the same finding as `actions.ts` and not a new class.** Both files
+sit on a boundary a `vitest` run cannot cross — one is `"use server"`, the other
+is an `async` Server Component that reads cookies and a store — so the lane tests
+the functions either one calls and never the file that calls them. Every reading
+this surface shows is computed in `page.tsx`: which holds are answerable, what
+the caution counts, which marks are drawn, and now which asks are offered. All of
+them are well tested as functions and none of them is tested as a *wiring*.
+
+**What it costs, concretely.** Every defect this lane has shipped a unit to fix
+would come back silently by deleting one argument in `page.tsx`, with a green
+suite and a passing build.
+
+**The shape that would fix it** is not a mock of `cookies` and `next/cache`. It
+is one exported function — call it `whatTheRailShows(tree, records, held)` —
+holding the arithmetic `page.tsx` currently does inline, so a test can call the
+same function the page calls rather than a copy of it. `page.tsx` would be the
+seven lines of JSX left over. That is a refactor with its own argument and its
+own risk of moving something while moving everything, so it is filed rather than
+folded into this unit.
+
+**Recommendation:** take it as its own unit, and take it before the next reading
+lands in that file rather than after.
+
+---
+## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil again.** What decided this unit was not a look at a reference
+gallery but a count: the rail saying *“2 questions are still waiting on you”* over
+a page carrying one amber ring. The fix removes a button and adds no markup, and
+the only visual judgement in it — that the four asks left behind must not move
+under the visitor's cursor — is settled by comparing two screenshots of this
+repository's own page.
+## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found by looking at a screenshot, and inside the type system it cannot happen
+
+`ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
+on a hold's disposition, and there is no fallback. Where the code is one of the
+nine the record knows, it answers a sentence. Where it is anything else it
+answers `undefined`, and `WaitingCard` draws its yellow *Why it stopped* panel
+with a heading in it and nothing underneath — on the one line of the card that
+explains why a person is being asked to decide something at all.
+
+**How it was found, which is the part worth keeping.** This run's first fixture
+used two codes that do not exist — `irreversible-change` for `irreversible`, and
+`stakes-above-threshold` for `stakes-above-ceiling`. Two of three cards
+photographed with an empty panel. No test caught it and none could have: every
+test in this lane types its fixture, so a wrong code is a compile error in a
+test and a silent blank on a screen.
+
+**Why it is not merely a fixture bug.** A hold read out of `loom_holds` is
+parsed from JSON written by whatever runtime wrote it. A deployment whose
+database was written by an older or newer runtime — a code retired, a code added
+— hands this screen a string the portal has never seen, and the failure is a
+heading over a silence rather than anything a reader could act on or an operator
+could notice. `/portal/pages/[treeId]` reads the same table through the same
+function.
+
+**What would close it:** one fallback, said the way this lane says the others —
+naming what Loom cannot tell the reader rather than rounding it to nothing, with
+the code itself in the technical record beside it. It is the same shape as
+`unreadableSentence` on the review queue, and the same argument: a silence about
+a reason is not the same news as no reason.
+
+---
+## 2026-09-17 — the front door's queue has been photographed populated, which is the second of the three screens 13 September named
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe, filed against the standing findings of 13, 15 and 16 September
+
+`/portal`'s review queue was photographed with four held proposals in it today,
+by the recipe filed on 15 and 16 September and with nothing new required: a
+`--import` preload builds a `memoryHoldStore()`, `hold`s the proposals into it
+and assigns it to `globalThis[Symbol.for("loom.portal.holds")]` before the
+application's own module memoises one; the script signs in by filling
+`input[name="key"]` and waiting on **leaving** `/portal/sign-in`.
+
+Two things to add to it, both cheap and both cost this run an attempt:
+
+- **A fixture's `disposition.reason.code` must be one of the nine the runtime
+  defines** — `within-policy`, `confidence-below-floor`,
+  `stakes-at-refusal-floor`, `irreversible`, `discards-later-work`,
+  `redirected-submission`, `repointed-binding`, `stakes-above-ceiling`,
+  `confidence-below-minimum`. Anything else photographs as a silence, which is
+  the finding directly above.
+- **A fixture's `baseRevision` must match the served tree's revision**, which is
+  `0` on a freshly seeded portal. A mismatch is not an error: it is correctly
+  read as a stale proposal, so every card in the picture carries *"This was
+  worked out on an older version of this page"* and the photograph is of the
+  wrong state rather than of a broken one.
+
+**Still not the answer to 13 September.** It photographs a state; it does not
+make one reachable. A person evaluating Loom still cannot click to a populated
+review queue, on the front door or on a page. `/portal/checkup` is the third of
+the three and the only one nobody has photographed at all.

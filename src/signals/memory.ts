@@ -105,6 +105,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       ...tally,
       views: (existing?.views ?? 0) + tally.views,
       reached: (existing?.reached ?? 0) + tally.reached,
+      engaged: (existing?.engaged ?? 0) + tally.engaged,
       dwellMs: (existing?.dwellMs ?? 0) + tally.dwellMs,
       activations: (existing?.activations ?? 0) + tally.activations,
       opens: (existing?.opens ?? 0) + tally.opens,

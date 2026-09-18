@@ -31,6 +31,27 @@ import type { Composition } from "./composition.js"
  * composition that arrives already too wide teaches the wrong thing about the
  * primitive it is demonstrating, and adding the fifth is one operation.
  *
+ * ## Where the four go, which is the thing that was wrong
+ *
+ * They pointed at `/product`, `/pricing`, `/docs` and `/changelog`: four routes
+ * of a site that does not exist. The catalogue assembles **one page**, every
+ * band on it carries an `anchor`, and until now **not one link anywhere in the
+ * catalogue pointed at any of them** — nineteen marked destinations and nothing
+ * marking a way to them. `anchor.ts` says in its own header which primitives
+ * carry one and why: *"the bands a page's own navigation points at, and nothing
+ * else."* This is that navigation, and it was pointing off the page.
+ *
+ * The four named here are parts of `PAGE_SEQUENCE`, so on the assembled page
+ * each one resolves by construction, and `compositions.test.ts` holds that
+ * rather than leaving it to a reader to notice
+ * ([0168](../../../decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)).
+ *
+ * **A multi-page site is four `configure`s**, one per link, which is the
+ * cheapest edit the delta model has — and it is the direction that is cheap to
+ * go. The reverse is not: an author who wanted same-page navigation from the
+ * old band had to know that a bare fragment was legal at all, which it was not
+ * until 14 September and which nothing here demonstrated afterwards.
+ *
  * ## `sticky`, and the one thing to check before changing it
  *
  * The bar is `position: "sticky"`, which is what a product site does. It is
@@ -40,15 +61,20 @@ import type { Composition } from "./composition.js"
  * line of the page. Nothing here can know which, so the band ships the common
  * case and says so.
  */
-const MENU = ["Product", "Pricing", "Docs", "Changelog"] as const
+const MENU = [
+  { text: "How it works", href: "#how-it-works" },
+  { text: "Features", href: "#features" },
+  { text: "Pricing", href: "#pricing" },
+  { text: "FAQ", href: "#faq" },
+] as const
 
 export const navBand: Composition = {
   id: "nav",
   part: "nav",
   label: "Navigation bar",
-  promise: "A sticky bar across the top: a wordmark, four menu links, and one action.",
+  promise: "A sticky bar across the top: a wordmark, four links into this page, and one action.",
   rationale:
-    "A header is a loom.nav with a loom.logo in its brand slot, loom.link children as the menu, and a loom.action in its actions slot. Each link is a node, so the menu can be reordered or extended without touching the bar.",
+    "A header is a loom.nav with a loom.logo in its brand slot, loom.link children as the menu, and a loom.action in its actions slot. Each link is a node, so the menu can be reordered or extended without touching the bar, and each menu item names a band of this page rather than a route of a site that may not have one.",
   uses: ["loom.nav", "loom.logo", "loom.link", "loom.action"],
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
@@ -56,13 +82,13 @@ export const navBand: Composition = {
       props: { position: "sticky", tone: "surface", align: "start" },
       children: [
         buildSlot(ids, "brand", [
-          buildElement(ids, { type: "loom.logo", props: { name: "Overture", href: "/" } }),
+          buildElement(ids, { type: "loom.logo", props: { name: "Overture", href: "#top" } }),
         ]),
         ...MENU.map((item) =>
           buildElement(ids, {
             type: "loom.link",
-            props: { href: `/${item.toLowerCase()}` },
-            children: [buildText(ids, item)],
+            props: { href: item.href },
+            children: [buildText(ids, item.text)],
           })
         ),
         buildSlot(ids, "actions", [
