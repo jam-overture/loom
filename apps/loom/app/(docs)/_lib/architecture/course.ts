@@ -14,6 +14,13 @@ import { plainText, readCourseFile, repositoryHref } from "./source"
  * the right trade against one shared parser across a lane boundary — the source
  * of truth is the README, not either reader of it, and neither surface can
  * break the other by changing what it wants from the row.
+ *
+ * **Where a lesson's link goes changed on 18 September.** It used to go to the
+ * markdown file on GitHub, because there was nowhere else for it to go. The
+ * course is now a set of pages in this same application, so a reader who wants
+ * the reasoning stays on the site they are reading. The file is still named —
+ * as `source`, for the checks that are about what is on disk — and it is no
+ * longer what a reader is handed.
  */
 
 /** `| [01](01-why-a-runtime.md) | Title | What it covers |` */
@@ -27,10 +34,27 @@ export type CourseLesson = {
   readonly title: string
   /** One line on what the lesson covers, from the syllabus' own third column. */
   readonly about: string
-  /** The file in `lessons/`, and where to read it. Absent while it is unwritten. */
+  /** The file in `lessons/`. Absent while the lesson is unwritten. */
   readonly file?: string
+  /** The lesson's page in this application. Absent while the lesson is unwritten. */
   readonly href?: string
+  /** The markdown that page is rendered from, in the repository. */
+  readonly source?: string
 }
+
+/**
+ * Where a lesson is read, which is a page here.
+ *
+ * The lessons surface generates one route per *written* lesson and turns
+ * `dynamicParams` off, so an address built for an unwritten one is a 404 rather
+ * than an empty page. That is why nothing in this module ever calls this
+ * without a file in hand: the two conditions are the same condition, and the
+ * one place they are joined is `parseSyllabus` below.
+ *
+ * The number is padded to two digits because that is the slug the route was
+ * built with, and `/lessons/7` is not the same address as `/lessons/07`.
+ */
+export const lessonHref = (number: number): string => `/lessons/${String(number).padStart(2, "0")}`
 
 export const parseSyllabus = (markdown: string): readonly CourseLesson[] => {
   const lessons: CourseLesson[] = []
@@ -44,12 +68,15 @@ export const parseSyllabus = (markdown: string): readonly CourseLesson[] => {
       written[3] !== undefined &&
       written[4] !== undefined
     ) {
+      const number = Number(written[1])
+
       lessons.push({
-        number: Number(written[1]),
+        number,
         title: plainText(written[3]),
         about: plainText(written[4]),
         file: written[2],
-        href: repositoryHref("lessons", written[2]),
+        href: lessonHref(number),
+        source: repositoryHref("lessons", written[2]),
       })
       continue
     }

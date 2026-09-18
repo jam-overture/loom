@@ -1,3 +1,4 @@
+import { OffSiteLink } from "./off-site-link"
 import {
   alternativeTally,
   unsettledAlternatives,
@@ -17,6 +18,10 @@ import { ARCHITECTURE_COSTS, type ArchitectureCost } from "@/app/(docs)/_lib/arc
  * A record's number is not shown, for the reason the rest of this section
  * withholds it — four digits are a footnote to a document the reader has not
  * opened, and the ruling's title is a thing they can decide about.
+ *
+ * Every link to a ruling leaves this site for the repository, and carries the
+ * mark that says so. The links under *what you do instead* do not: those are
+ * pages here, and the difference is the whole reason the mark exists.
  */
 
 const Cost = ({ cost }: { readonly cost: ArchitectureCost }) => (
@@ -49,12 +54,12 @@ const Cost = ({ cost }: { readonly cost: ArchitectureCost }) => (
     <div className="border-edge bg-surface-sunken mt-4 rounded-lg border px-4 py-3">
       <p className="text-ink-faint text-xs font-semibold tracking-wide uppercase">The ruling</p>
       <p className="mt-1 text-sm">
-        <a
+        <OffSiteLink
           href={cost.record.href}
           className="text-accent-strong font-medium underline underline-offset-2"
         >
           {cost.record.title}
-        </a>
+        </OffSiteLink>
         {cost.record.standing === "in force" ? null : (
           <span className="text-ink-faint"> — {cost.record.standing}</span>
         )}
@@ -97,12 +102,12 @@ const StillOpen = ({ alternative }: { readonly alternative: ConsideredAlternativ
       <p className="text-ink-muted mt-1 text-sm leading-relaxed italic">“{alternative.note}”</p>
     )}
     <p className="mt-1 text-sm">
-      <a
+      <OffSiteLink
         href={alternative.href}
         className="text-accent-strong font-medium underline underline-offset-2"
       >
         {alternative.recordTitle}
-      </a>
+      </OffSiteLink>
     </p>
   </li>
 )

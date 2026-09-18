@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { AlternativesLeftOpen, ArchitectureCosts } from "./architecture-costs"
 import { ArchitectureIdeas } from "./architecture-ideas"
 import { DecisionRecords } from "./decision-records"
+import { OFF_SITE_MARK } from "./off-site-link"
 import {
   alternativeTally,
   unsettledAlternatives,
@@ -71,7 +72,7 @@ describe("the eight ideas, rendered", () => {
     }
   })
 
-  it("links every written lesson it names at the file that holds it", () => {
+  it("links every written lesson it names at the page that holds it", () => {
     render(<ArchitectureIdeas />)
 
     for (const idea of ARCHITECTURE_IDEAS) {
@@ -82,6 +83,26 @@ describe("the eight ideas, rendered", () => {
       })
 
       expect(link.getAttribute("href")).toBe(idea.lesson.href)
+      expect(link.getAttribute("href")).toMatch(/^\/lessons\//)
+    }
+  })
+
+  /**
+   * The two doors go to two kinds of place, and a reader is owed the difference
+   * before they click rather than after. The mark is `aria-hidden`, so what is
+   * asserted here is what a sighted reader sees; what a screen reader is told is
+   * the sentence the page's own prose carries above this block.
+   */
+  it("marks the door that leaves this site, and leaves the one that does not unmarked", () => {
+    render(<ArchitectureIdeas />)
+
+    for (const idea of ARCHITECTURE_IDEAS) {
+      const section = screen.getByRole("region", { name: idea.title })
+      const marked = within(section)
+        .getAllByRole("link")
+        .filter((link) => (link.textContent ?? "").includes(OFF_SITE_MARK))
+
+      expect(marked.map((link) => link.getAttribute("href")), idea.id).toEqual([idea.record.href])
     }
   })
 
@@ -89,6 +110,22 @@ describe("the eight ideas, rendered", () => {
     render(<ArchitectureIdeas />)
 
     expect(screen.getByRole("link", { name: "start it here" }).getAttribute("href")).toBe("/lessons")
+  })
+
+  /**
+   * `CourseLesson.source` names the markdown each lesson is rendered from, and
+   * no reader is ever handed it. That is the lessons surface's reason and not
+   * this section's to overturn: the file is the one place a reader can also see
+   * the printed answers, which is most of what that surface's gates are for. A
+   * second "or just read the file" link under a door would be a kindness that
+   * quietly disables the course.
+   */
+  it("offers no reader a lesson's markdown, only its page", () => {
+    render(<ArchitectureIdeas />)
+
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.getAttribute("href") ?? "").not.toMatch(/github\.com\/.*\/lessons\//)
+    }
   })
 })
 
@@ -126,6 +163,21 @@ describe("the records index, rendered", () => {
     expect(
       screen.getByRole("link", { name: first?.title ?? "" }).getAttribute("href")
     ).toBe(first?.href)
+  })
+
+  /**
+   * One row per record, all of them leaving the site, said once above the table
+   * and marked at each row. The sentence is what a screen reader hears; saying it
+   * per row instead would be correct and unusable.
+   */
+  it("says once that the whole table leaves, and marks every row", () => {
+    render(<DecisionRecords />)
+
+    expect(screen.getByText(/opens that record’s file in the repository/)).toBeTruthy()
+
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.textContent ?? "", link.getAttribute("href") ?? "").toContain(OFF_SITE_MARK)
+    }
   })
 })
 
@@ -177,6 +229,23 @@ describe("the eight costs, rendered", () => {
 
     for (const link of screen.getAllByRole("link")) {
       expect(link.textContent ?? "", link.getAttribute("href") ?? "").not.toMatch(/\b\d{4}\b/)
+    }
+  })
+
+  /**
+   * Both kinds of link are on this page — the ruling, which is a file in the
+   * repository, and *shows it happening*, which is a page here — so it is the
+   * one place where getting the mark wrong is visible as an inconsistency
+   * rather than only as a surprise.
+   */
+  it("marks the rulings and not the pages of this site", () => {
+    render(<ArchitectureCosts />)
+
+    for (const link of screen.getAllByRole("link")) {
+      const href = link.getAttribute("href") ?? ""
+      const marked = (link.textContent ?? "").includes(OFF_SITE_MARK)
+
+      expect(marked, href).toBe(href.startsWith("http"))
     }
   })
 

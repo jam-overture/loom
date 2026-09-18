@@ -6,7 +6,7 @@ import {
   parseAlternatives,
   unsettledAlternatives,
 } from "./alternatives"
-import { COURSE, courseLesson, parseSyllabus } from "./course"
+import { COURSE, courseLesson, lessonHref, parseSyllabus } from "./course"
 import { ARCHITECTURE_COSTS } from "./costs"
 import { ARCHITECTURE_IDEAS } from "./ideas"
 import {
@@ -157,10 +157,67 @@ describe("the course, read off its syllabus", () => {
         title: "Why a runtime",
         about: "The thesis, and what Loom trades away.",
         file: "01-why-a-runtime.md",
-        href: "https://github.com/jam-overture/loom/blob/main/lessons/01-why-a-runtime.md",
+        href: "/lessons/01",
+        source: "https://github.com/jam-overture/loom/blob/main/lessons/01-why-a-runtime.md",
       },
       { number: 13, title: "Refusal and repair", about: "One attempt, both halves recorded." },
     ])
+  })
+})
+
+/**
+ * Where a lesson's link goes, which changed on 18 September.
+ *
+ * The course used to be readable only as markdown in the repository, so that is
+ * where this section sent a reader: out of the documentation, into a file, to
+ * read the argument in a tab with none of the course around it. `lessons/` grew
+ * a route on this same deployment, and these are the checks that the section
+ * followed it — and, more importantly, that it cannot half-follow it, which is
+ * the state that would put a plausible link in front of a reader and a 404
+ * behind it.
+ */
+describe("a lesson is a page on this site", () => {
+  it("builds the address the route was generated with, padded", () => {
+    expect(lessonHref(1)).toBe("/lessons/01")
+    expect(lessonHref(9)).toBe("/lessons/09")
+    expect(lessonHref(26)).toBe("/lessons/26")
+  })
+
+  it("sends every written lesson to its own page here, and nowhere else", () => {
+    const written = COURSE.filter((lesson) => lesson.file !== undefined)
+
+    expect(written.length).toBeGreaterThan(0)
+
+    for (const lesson of written) {
+      expect(lesson.href, `lesson ${lesson.number}`).toBe(lessonHref(lesson.number))
+      expect(lesson.href, `lesson ${lesson.number}`).not.toContain("github.com")
+    }
+  })
+
+  /**
+   * The file has not stopped existing; it has stopped being what a reader is
+   * handed. Keeping it under its own name is what lets the check above it —
+   * *points at a file that is really there* — go on being a check about disk.
+   */
+  it("still names the markdown it is rendered from, as the source rather than the link", () => {
+    for (const lesson of COURSE) {
+      if (lesson.file === undefined) {
+        expect(lesson.source, `lesson ${lesson.number}`).toBeUndefined()
+        continue
+      }
+
+      expect(lesson.source, `lesson ${lesson.number}`).toBe(
+        `https://github.com/jam-overture/loom/blob/main/lessons/${lesson.file}`
+      )
+    }
+  })
+
+  it("gives an unwritten lesson no address at all, because that route is not generated", () => {
+    const unwritten = COURSE.filter((lesson) => lesson.file === undefined)
+
+    for (const lesson of unwritten) {
+      expect(lesson.href, `lesson ${lesson.number}`).toBeUndefined()
+    }
   })
 })
 
@@ -171,6 +228,23 @@ describe("the eight ideas", () => {
     for (const idea of ARCHITECTURE_IDEAS) {
       expect(idea.lesson.number, idea.id).toBeGreaterThan(0)
       expect(idea.record.href, idea.id).toContain("/decisions/")
+    }
+  })
+
+  /**
+   * The asymmetry the page now admits to in prose, asserted so the prose cannot
+   * quietly stop being true: one door stays on this deployment and one leaves
+   * for the repository. If a record ever grows a route here, this is the test
+   * that says the sentence about the mark has to be rewritten.
+   */
+  it("keeps one door on this site and one in the repository", () => {
+    for (const idea of ARCHITECTURE_IDEAS) {
+      expect(idea.record.href, idea.id).toMatch(/^https:\/\/github\.com\//)
+
+      /** An idea may name a lesson nobody has written; it may not link one. */
+      if (idea.lesson.href === undefined) continue
+
+      expect(idea.lesson.href, idea.id).toMatch(/^\/lessons\//)
     }
   })
 
