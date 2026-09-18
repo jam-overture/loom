@@ -8,6 +8,96 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
+open — **an instrument, not a defect**; the defect it would have caught is fixed
+in `primitives-38-the-page-points-at-itself`
+
+`compositions.test.ts` asserted this of every href in every band:
+
+```ts
+expect(href.startsWith("/")).toBe(true)
+```
+
+Its doc comment gives the reason and the reason is right: *"a live outbound link
+in it is a link this library chose on a host's behalf."* The rule does not
+implement that reason. It implements a **proxy** for it — *starts with a slash* —
+which excludes one destination the reason has no objection to and which the
+library had, four days earlier, gone to some trouble to allow: the bare fragment.
+
+The result was a **silent veto**. `linkUrlSchema` accepted `#pricing` from 14
+September; the catalogue could not write one; nothing said so, because nothing
+tried. A schema and a test disagreed for four days about what was legal, and the
+one that disagreed by being *narrower* is the one that wins without an error.
+
+**Why this is filed rather than only fixed.** The class is not "a test was wrong".
+It is **a test whose rule is a proxy for its stated reason, where the gap between
+them is a capability rather than a bug**. Those two failure modes look nothing
+alike:
+
+| | a test that is too loose | a test whose rule is narrower than its reason |
+| --- | --- | --- |
+| symptom | a defect ships | **a capability is unreachable** |
+| who notices | whoever the defect lands on | **nobody** — there is no failure |
+| how long it lasts | until the defect bites | until somebody tries the thing and reads the assertion |
+
+This lane has now hit the second one twice in two days from opposite directions:
+here, and the 17 September badge finding, where a declaration was correct in
+isolation and wrong in context. Both are *absences of a failure*, which is the
+category nothing in the repository instruments.
+
+**I do not have a proposal I believe in**, and would rather say so than invent
+one. A check that compared a test's assertion against the prose above it is a
+language model's job rather than a build step's, and the honest version of that
+is a reviewer reading the two together — which is what happened here, by
+accident, because I needed the fragment and went to find out why it was refused.
+
+**What is worth doing cheaply**: when a rule is a proxy for its reason, say so at
+the assertion. `startsWith("/")` did not say *this is a stand-in for reaches no
+other origin*; had it, the gap would have been visible to anyone reading it. The
+replacement in #329 names its own principle — *reaches this origin, or reaches
+none* — and is bounded by a second assertion about addresses rather than by
+narrowing the first. Offered, not asked for; nothing is blocked.
+
+---
+## 2026-09-18 — a screenshot cannot show a destination, which is a narrower cousin of the marquee limit
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a limit of the instrument, named so a reviewer knows what #329's picture
+is not telling them
+
+The 16 September entry below says a still photograph cannot show motion, and
+recommends doing nothing until a second band's subject is its motion. This run
+produced the adjacent case and it wants the same treatment.
+
+**The subject of `primitives-38` is where four links go.** A photograph of the
+nav bar after the fix is **pixel-identical** to one taken before it: four menu
+items reading *How it works, Features, Pricing, FAQ* in both, pointing at four
+sections in one and at four routes of a site that does not exist in the other.
+Navigation is the one property a screenshot has no access to, because the picture
+is the same on both sides of the click.
+
+So the weight in that run is carried by the assertion and not by the image, and
+the report says so. `reports/2026-09-18-primitives-the-page-points-at-itself.md`
+photographs the three *new bands*, whose subject really is how they look, and is
+explicit that the nav's correctness is proved by
+[0168](decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)'s test
+rather than by anything visible.
+
+**Recommendation: nothing, again, and for a sharper reason than last time.** The
+marquee entry's option 2 — a second shot at a pinned animation time — has no
+analogue here. A shot list can `click`, so a harness *could* photograph the page
+after following a fragment; what it would produce is a picture of the target
+band, which is a picture the sheet already contains. There is no image that
+demonstrates *this link arrives there*. The check is the demonstration, and that
+is a fact about screenshots rather than a gap in this one.
+
+Worth having written down because the two entries together now describe the
+shape of what this instrument cannot reach: **a photograph shows a state, and
+neither motion nor navigation is one.**
+
+---
 ## 2026-09-17 — a shot list can click and wait, and cannot photograph a state that lives in the browser before the page loads
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -23625,7 +23715,28 @@ one field, and it is the key — the actor is derived from it.
 
 ## 2026-09-12 — a link cannot point at a heading on the page it is already on
 
-**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:** open
+**Filed by:** `@jonathanbravecredit` · **Owned by:** `Loom primitives` · **Status:**
+**closed by `primitives-38-the-page-points-at-itself`** — but the schema half was
+closed on **#294, 14 September**, and this entry sat open for four days after it.
+The Status line is the finding's own channel and nobody moved it, which is worth
+recording because it is the cheapest possible failure and it still cost
+something: a run reading the queue on 18 September had to open `url.ts` to learn
+that the work was done.
+
+**What was still genuinely open, and is what #329 closes.** The fix landed in the
+schema and **nothing in the catalogue ever used it.** Thirty bands, nineteen
+anchors on the assembled page, and not one link pointing at any of them —
+`navBand` was still aimed at `/product`, `/pricing`, `/docs` and `/changelog`,
+four routes of a site that does not exist. It was not an oversight a reader could
+have caught: `compositions.test.ts` asserted `href.startsWith("/")` of every href
+in every band, so the catalogue was **structurally barred** from writing the
+fragment the maintainer had asked for and been given.
+
+So the shape worth keeping is *a fix is not finished when the schema accepts it*.
+The allowance and the demonstration are two pieces of work, and the second one
+had no owner. [0168](decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md)
+is the second piece, and the walk `url.ts` asked for — *every fragment on the
+assembled page names an anchor that exists on it* — now runs on every build.
 
 `linkUrlSchema` accepts an absolute URL or a path beginning with `/`, and
 rejects everything else. A bare fragment is everything else:

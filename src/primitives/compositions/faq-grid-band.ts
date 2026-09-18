@@ -51,6 +51,20 @@ import type { Composition } from "./composition.js"
  * The exchange is fair only because nothing here is hidden, so there is no state
  * for a reader to need told about.
  *
+ * ## The answer is body text and not small print
+ *
+ * The first photograph had it at `size: "small"`, which is what the other card
+ * grids in this catalogue use and is wrong here. A `loom.heading` couples its
+ * level to its size on purpose — *"its level sets both the document outline and
+ * the size"* — so the question is step 6 at 32px and cannot be made smaller
+ * without lying about the outline. Against a 13px answer that is a ratio of
+ * nearly three, and the card read as a question with a footnote under it.
+ *
+ * The answer is the content here. In `integrations-grid` the small size is
+ * right because the thing above it is a 14px wordmark and the proportion holds;
+ * the rule is about the pair rather than about cards, which is why the two
+ * bands built in the same run differ on it.
+ *
  * ## Six, not five
  *
  * `faqBand` ships five because a column of five is a shape. A grid wants a
@@ -128,7 +142,7 @@ export const faqGridBand: Composition = {
                 }),
                 buildElement(ids, {
                   type: "loom.prose",
-                  props: { tone: "muted", size: "small" },
+                  props: { tone: "muted" },
                   children: [buildText(ids, entry.answer)],
                 }),
               ],
