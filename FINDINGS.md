@@ -8,6 +8,80 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-18 — a shot list cannot reach inside a frame, and the surface most worth photographing is now framed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**a gap, not a defect**, and the sibling of the 17 September entry about a state
+the browser held before the page loaded
+
+`tools/screenshot/plan.ts` takes a `do` list of `click` and `wait`, and both are
+resolved against the **top document**. Playwright's selector engine pierces open
+shadow roots and does not pierce a browsing context, so a shot list can
+photograph a page containing a frame and cannot press anything inside it.
+
+That was a limit nobody met until §4d landed on 18 September and the front door
+began **containing** `/demo` rather than pointing at it (0056). The
+demonstration's most-seen state is now a frame on the landing page, and this
+run's whole subject was *what a control inside that frame does* — which needed
+`page.frameLocator(...)`, so the four pictures in
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-*` were taken by a
+thirty-line Playwright script in a scratch directory rather than by `pnpm shoot`.
+That is the second lane in two days to keep its own launcher, which is the
+arrangement [0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to stop being normal.
+
+**It is smaller than the 17 September entry and it has no posture problem.** A
+step could carry the frame it applies to — `{ "click": "…", "in": "iframe" }`,
+or a `frame` field on the shot resolved once and applied to every step — and
+either is a `frameLocator` call in `../specimen/capture.ts` and one Zod field
+here. Unlike an `initScript` it runs nothing it is given: a selector is already
+what a `click` step is, and the new field is another selector.
+
+**What a lane cannot work around and this would fix**: `waitFor` has the same
+limit, so a framed page's readiness is currently guessed at with a `wait`. That
+is the part that makes a shot list of a framed surface flaky rather than merely
+verbose.
+
+Nothing is blocked. The pictures got taken. `tools/` is yours and so is the call.
+
+---
+## 2026-09-18 — every state the demonstration shows inside a frame is still computed in the one file a test cannot reach
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**the third data point on the 17 September entry**, kept there rather than filed
+as a new class, and narrowed by one
+
+The matrix for `demo-21-a-door-that-opens-into-the-box`, run against a commit:
+
+| defect restored | what fails |
+| --- | --- |
+| `isFramed` drops the absent-`top` guard | 1 test |
+| `Wordmark` never withdraws | 2 tests |
+| `ReadTheDocs` never withdraws | 1 test |
+| the hook answers the client's question on the server too | 1 test |
+| **`DemoBar` inlines a link beside the `Wordmark`** | **1 test** |
+| **`page.tsx` renders the raw link instead of `ReadTheDocs`** | **nothing — 454 passed** |
+
+**The fifth row is the new half and it is the encouraging one.** The same
+wiring defect, in a component rather than in the page, is caught by one render:
+the bar is an ordinary component, so a test can assert *the bar has no door out*
+rather than *the wordmark has no door out*, and the difference between those two
+sentences is exactly what the 17 September entry says is missing. Where a lane
+can put a reading in a component it can test the wiring for free.
+
+**The sixth row is the same one, unchanged.** `page.tsx` is an `async` Server
+Component reading cookies and a store, so no vitest run crosses it, and
+unwiring `ReadTheDocs` leaves 454 green with one `TS6133` for an unused import —
+a stray line noticing itself, gone the moment the same edit deletes the import.
+
+The recommendation is unchanged and now overdue: `whatTheRailShows(tree, records, held)`,
+holding the arithmetic `page.tsx` does inline, so a test can call the function
+the page calls. **Recommended as this lane's next unit.** Seven readings now sit
+in that file and this unit added the eighth — a component the page chooses to
+render is not arithmetic, but it is one more thing a deleted line would take
+away silently.
+
+---
 ## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -26263,8 +26337,39 @@ is for.
 
 ## 2026-09-18 — a framed page's own wordmark navigates the frame, so the front door can contain a copy of itself
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open —
-measured, cosmetic, and not blocking anything
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** **closed
+by `demo-21-a-door-that-opens-into-the-box`** — the recommended shape, taken as
+recommended, and widened by one link
+
+**Closing note, `Loom demo`, 18 September.** Reproduced first, in Chromium
+against the built application, exactly as filed: click the wordmark inside the
+frame and the top page does not move, the frame loads `/`, and the front door
+renders inside its own embed. The picture is
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.png` and it has
+two identical navigation bars and two *Sign in* buttons in it.
+
+**Taken as recommended.** `window.self !== window.top`, read by the bar, which
+renders the mark as plain text rather than as a link when it is framed. Not a
+query parameter, for the reason the filing gives and which is the better one:
+a third party who frames the demonstration is owed the same behaviour as the
+host that ships it, and a parameter makes the chrome a function of who linked.
+
+**Widened by one link, and this is the only thing the filing did not cover.**
+Measured the same way: the foot of the rail links to `/docs`, and inside the
+frame that loads the **whole documentation site into the box** — sidebar,
+search field and all, under a caption still reading *it belongs to a clinic that
+does not exist*
+(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png`). The
+filing's own argument reaches it: `allow-top-navigation` is withheld and so is
+`allow-popups`, so there is no target this anchor can use, and the demonstration
+has exactly two links that leave it. Fixing one of two identical defects is the
+shape this lane has filed about twice, so both are withdrawn.
+
+**What the frame keeps.** Everything else: the mark, the words, the instrument
+panel, and the demonstration itself — measured working inside the box after the
+withdrawal, ring, Gate language, *Apply this change* and all
+(`…-working.png`). The mark's markup is byte-identical either way; only the door
+is gone.
 
 The front door now frames `/demo` (§4d, 0056). Measured in Chromium against the
 built application, with the top page at `/`:
