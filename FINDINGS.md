@@ -25747,7 +25747,17 @@ on. It is gated on the switch here, so this deployment's markup is byte-identica
 until somebody sets the variable.
 ## 2026-09-16 — the demo will hold the same question twice, and nothing says the second one is a copy
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-20-already-asked`** (17 September) — shape **(1)** taken, exactly as
+recommended: `_lib/already-asked.ts` joins the records to the holds the page can
+still answer and takes those presets out of `available`, so an ask whose question
+is already on screen is not offered a second time. Shape (2), folding the second
+ask onto the first, is not taken and is not filed again — with the press gone
+there is nothing to fold. One thing this did **not** close: two identical
+sentences typed into the free-text box would still hold twice, because the join
+runs through `presetId` and typed asks have none. That is the box, a model key
+and two deliberate presses, which is not the two-clicks-from-the-lead path this
+was filed for.
 
 Driven against a real `next build` at 1280×900, two presses of one button:
 
@@ -25978,6 +25988,69 @@ Worth resolving by deleting or dating the earlier section, which is the sort of
 edit only the file's owner should make.
 
 ---
+## 2026-09-17 — `page.tsx` is the second file in this lane a test cannot reach, and the defect matrix found it the same way it found the first
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+the same shape as the 14 September finding about `actions.ts`, and now with a
+second data point
+
+Every unit in this lane is checked by putting each defect back in turn and
+confirming the suite catches it. On `demo-20-already-asked`, five of six were
+caught. **The sixth was caught by nothing that is a test:**
+
+| defect restored | what fails |
+| --- | --- |
+| `stillToAsk` never withdraws anything | 6 tests |
+| it ignores whether the question can still be answered | 1 test |
+| it stops preserving the table's order | 7 tests |
+| the panel withdraws asks on its own instead of rendering what it is handed | 4 tests |
+| the hold check is dropped from the join | **the compiler** — `TS2345`, because `heldProposalId` is optional |
+| **`page.tsx` stops applying the filter at all** | **nothing — 440 passed** |
+
+Unwiring it is one edit: change `available={stillToAsk(availablePresets(…), records, openQuestions)}`
+back to `available={availablePresets(…)}`. The whole suite stays green. The only
+thing that complained was `TS6133`, an unused import — which is a stray line
+noticing itself, not the behaviour being checked, and it disappears the moment
+whoever made the edit also deletes the import.
+
+**Why it is the same finding as `actions.ts` and not a new class.** Both files
+sit on a boundary a `vitest` run cannot cross — one is `"use server"`, the other
+is an `async` Server Component that reads cookies and a store — so the lane tests
+the functions either one calls and never the file that calls them. Every reading
+this surface shows is computed in `page.tsx`: which holds are answerable, what
+the caution counts, which marks are drawn, and now which asks are offered. All of
+them are well tested as functions and none of them is tested as a *wiring*.
+
+**What it costs, concretely.** Every defect this lane has shipped a unit to fix
+would come back silently by deleting one argument in `page.tsx`, with a green
+suite and a passing build.
+
+**The shape that would fix it** is not a mock of `cookies` and `next/cache`. It
+is one exported function — call it `whatTheRailShows(tree, records, held)` —
+holding the arithmetic `page.tsx` currently does inline, so a test can call the
+same function the page calls rather than a copy of it. `page.tsx` would be the
+seven lines of JSX left over. That is a refactor with its own argument and its
+own risk of moving something while moving everything, so it is filed rather than
+folded into this unit.
+
+**Recommendation:** take it as its own unit, and take it before the next reading
+lands in that file rather than after.
+
+---
+## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil again.** What decided this unit was not a look at a reference
+gallery but a count: the rail saying *“2 questions are still waiting on you”* over
+a page carrying one amber ring. The fix removes a button and adds no markup, and
+the only visual judgement in it — that the four asks left behind must not move
+under the visitor's cursor — is settled by comparing two screenshots of this
+repository's own page.
 ## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —

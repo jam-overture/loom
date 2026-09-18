@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { DOCS } from "@/app/(marketing)/_lib/site"
 
+import { stillToAsk } from "@/app/(demo)/_lib/already-asked"
 import { partInQuestion } from "@/app/(demo)/_lib/in-question"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { markedPage } from "@/app/(demo)/_lib/marked"
@@ -172,6 +173,18 @@ const DemoPage = async () => {
   const answerable = held.filter((one) => movedOn(one.baseRevision, tree.revision) === undefined)
 
   /**
+   * The questions a visitor could still answer, as the ids the two readings below
+   * join on.
+   *
+   * One set, built once, because those two readings are halves of one claim: the
+   * caution counts the open questions, and the panel withdraws the buttons that
+   * make them. Computed separately they could disagree, and the way they would
+   * disagree is the defect this pair was built for — the rail saying *2 questions
+   * are still waiting on you* over a page carrying one mark.
+   */
+  const openQuestions = new Set(answerable.map((one) => one.proposalId))
+
+  /**
    * The question the visitor already has open, for the panel that is about to
    * offer them four ways to lose it.
    *
@@ -180,7 +193,7 @@ const DemoPage = async () => {
    * *live* is the store plus the revision — which is the same list the three
    * readings above are computed for, and the same reason they are.
    */
-  const waiting = setAside(records, new Set(answerable.map((one) => one.proposalId)))
+  const waiting = setAside(records, openQuestions)
 
   const effects = new Map<string, ProposalEffect>(
     answerable.map((one) => [
@@ -368,9 +381,28 @@ const DemoPage = async () => {
             </p>
           </header>
 
+          {/*
+            * The asks, twice filtered — and the two filters are different
+            * questions, which is why neither can do the other's job.
+            *
+            * `availablePresets` asks the **tree** whether a preset has anything
+            * to do, so the panel never offers a press whose only outcome is
+            * nothing. `stillToAsk` asks the **store** whether the visitor is
+            * already waiting on an answer to that same ask, which the tree
+            * cannot know: a held proposal is offered rather than applied and
+            * lives beside the tree rather than in it (0021), so while the
+            * removal is only held the stat grid is still there and `trim` can
+            * still plan.
+            * Two presses therefore bought a duplicate question, word for word,
+            * each with its own **Apply this change**, and answering either killed
+            * the other.
+            *
+            * Both are resolved here because only this component holds the tree
+            * and the store at once.
+            */}
           <AskPanel
             revision={tree.revision}
-            available={availablePresets(tree, randomIdFactory)}
+            available={stillToAsk(availablePresets(tree, randomIdFactory), records, openQuestions)}
             modelConfigured={isDemoModelConfigured}
             {...(waiting === undefined ? {} : { waiting })}
           />
