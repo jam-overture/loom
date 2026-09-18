@@ -6,7 +6,8 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
-import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
+import { askHref, mechanismHref, type SiteThemeName } from "../site"
+import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -458,6 +459,15 @@ const protectionNotice = (): string => {
  * hoping nobody notices. A visitor who has just watched the sequence run is the
  * likeliest person on the site to want a turn at it, and this is the one moment
  * on the front door where that is true.
+ *
+ * **Which is why, as of 18 September, it no longer sends them away.** That page
+ * is now the band directly below this one, framed — §4d's *embeds the
+ * demonstration rather than describing it*, buildable at last because 0135
+ * grants a same-origin frame the `allow-forms` its controls need. The sentence
+ * is unchanged in what it admits and changed in where it points: down the page
+ * rather than off it, keeping whatever the visitor has already asked for, which
+ * a link that rebuilt the address from scratch would throw away at the worst
+ * possible moment.
  */
 const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly LoomNode[] => [
   stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
@@ -469,13 +479,21 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
      */
     prose(
       ids,
-      "These five are prepared, so the whole sequence runs here without an AI in the way. To ask for something in your own words, there is a page for that.",
+      "These five are prepared, so the whole sequence runs here without an AI in the way. To ask for something in your own words, the next band down is a page you can type into.",
       { tone: "muted", size: "small", measured: true }
     ),
     buildElement(ids, {
       type: "loom.action",
-      props: { href: surfaceHref(context.origin, DEMO), variant: "quiet" },
-      children: [buildText(ids, "Ask it for something else")],
+      props: {
+        href: `${askHref(context.origin, {
+          theme: context.theme,
+          ...(context.ask === undefined
+            ? {}
+            : { ask: context.ask, approve: context.approve === true }),
+        })}#${YOUR_TURN_ANCHOR}`,
+        variant: "quiet",
+      },
+      children: [buildText(ids, "Take a turn")],
     }),
   ]),
 ]

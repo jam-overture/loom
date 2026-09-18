@@ -12611,7 +12611,15 @@ element from every primitive that places a control.
 ## 2026-09-01 — nothing renders `loom.embed`, so nothing wires `origins`, and the first surface that tries will think it is broken
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`, `Loom docs`,
-`Loom lessons`, `Loom demo` · **Status:** open — a trap set, not a defect
+`Loom lessons`, `Loom demo` · **Status:** **closed for `Loom marketing`** by
+`marketing-29-embedding-the-demo` on 18 September, and **still open for the other
+three**. The trap was sprung exactly as written — the first render was the grey
+box, and the fix was the three lines printed below. What it cost beyond those
+three lines is in this lane's 18 September entry at the foot of this file; the
+short version is that the origin has to reach the render from the same place the
+tree got it, and that `frame-same-origin` is a diagnostic rather than a fault, so
+a page test asserting an empty diagnostics list goes red on a render that did
+nothing wrong.
 
 As of this run `loom.embed` declares `frames: ["src"]` and renders the seam's
 verdict rather than the tree's URL
@@ -25976,3 +25984,117 @@ the opening note, and losing the preview.
 
 Worth resolving by deleting or dating the earlier section, which is the sort of
 edit only the file's owner should make.
+
+---
+
+## 2026-09-18 — §4d's *embeds the demonstration* is built, so the `loom.embed` trap is sprung and survived
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closes the 1 September entry** *nothing renders `loom.embed`, so nothing wires
+`origins`, and the first surface that tries will think it is broken*, for this
+lane
+
+That entry was filed as a trap rather than a defect: the first surface to frame
+anything would get a grey box reading *"This content cannot be shown here."*, no
+failing check, and a `frame-refused` line in the diagnostics that nobody is
+looking at. It is now the first surface, and the trap behaved exactly as
+described — the first render showed the grey box, and the fix was the three lines
+that entry printed.
+
+**What it cost, for the three lanes the entry still names.** Roughly an hour, and
+almost none of it was the registry. The registry is `_lib/frames.ts` and is
+nineteen lines. The time went on the two things the entry could not have known:
+
+- **The origin has to reach the render from the same place the tree got it.**
+  This site builds absolute URLs from a `context.origin`, and the render was
+  consulting `siteOrigin()` for the allowlist — so every page test, which renders
+  a tree built for `https://loom.example`, refused the site's own frame. It is a
+  signature change (`renderTree(page, { addressed, origin })`) rather than a
+  lookup, and it is the shape any surface with a per-deployment origin will need.
+- **`frame-same-origin` is a diagnostic and is not a fault.** Every page test on
+  this surface asserted `diagnostics` is empty, which was the same sentence as
+  *nothing the runtime could not honour* right up until the site framed
+  something. Fifteen tests went red on a render that had done nothing wrong.
+  `unhonoured` in `_lib/frames.ts` is the split, and the disclosure is now
+  *required* rather than tolerated — `frames.test.ts` asserts the front door
+  emits exactly one, naming the node and the origin.
+
+Neither is a defect anywhere. Both cost a run to find, which is what this entry
+is for.
+
+---
+
+## 2026-09-18 — a framed page's own wordmark navigates the frame, so the front door can contain a copy of itself
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open —
+measured, cosmetic, and not blocking anything
+
+The front door now frames `/demo` (§4d, 0056). Measured in Chromium against the
+built application, with the top page at `/`:
+
+```
+click the demo's wordmark, inside the frame
+→ top url:  http://localhost:3000/          (unchanged — allow-top-navigation is withheld)
+→ frames:   http://localhost:3000/          ← the front door, inside the frame
+            http://localhost:3000/demo      ← and its own embed, inside that
+```
+
+`DemoBar` links its wordmark to `HOME.path`, which was right when the only way to
+meet that bar was to open `/demo` directly, and is the thing a framed document
+has no good answer for. The sandbox behaves correctly — the top-level page does
+not move, which is the grant that matters — so what a visitor gets is the front
+door rendered inside a box, one click deep, with a working back button.
+
+**Not this lane's to fix, and worth saying why.** The frame's `src` is mine and
+the bar inside it is yours; there is nothing I can pass that would change it.
+`target="_top"` is not the answer either — `allow-top-navigation` is withheld
+from every frame including this one, so the browser would block it and the
+wordmark would become the silently-dead button the whole demonstration exists to
+argue against.
+
+**Recommended shape**, entirely yours to accept or replace: the bar reads
+`window.self !== window.top` and renders the wordmark as plain text rather than a
+link when it is framed, with no other change. It needs no coordination with this
+lane, it is correct for any host that frames the demonstration rather than only
+for this one, and it degrades to today's behaviour if the check is unavailable.
+A query parameter from the embedding page would work too and is worse: it makes
+the demonstration's chrome a function of who linked to it.
+
+---
+
+## 2026-09-18 — `adaptive`'s narrow shape leaves a framed application's first control below the fold of the box
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — a measurement on the band `adaptive` was built for, not a request to
+change the default
+
+`aspect: "adaptive"` closed the 4 September entry *"`loom.embed` has one aspect
+ratio at every viewport, and a phone is not a laptop"*, and it is the right shape:
+the band it was built for now ships, which it could not have with any of the
+three fixed ones. This is the follow-up measurement that entry's author would
+want, taken on the shipping band against the built application.
+
+| viewport | frame | the demonstration's first control, inside the frame |
+| --- | --- | --- |
+| 1440 | 1078 × 673 | **470px in** — in view, nothing to scroll |
+| 1280 | 1078 × 673 | **470px in** — in view |
+| 390 | 348 × 465 | **778px in** — 313px below the fold of the box |
+
+So on a laptop `adaptive` is exactly right, and on a phone a visitor meets the
+framed application's bar, its two opening paragraphs, and no control at all
+without scrolling inside a 465px box. That is better than `square` (which showed
+the same and had 115px less room) and it is not enough.
+
+**Nothing is blocked and no default should move on this entry alone.** The band
+ships, and what this lane did about it is the part that is unambiguously ours:
+the *Open it full size* link is now **above** the frame rather than below it, so
+the reader who cannot use the box meets the way out before the box rather than
+behind 465px of it.
+
+**Worth considering when a second surface frames something**, because the number
+is only obtainable by framing an application and this is the first one: a
+narrow-end ratio taller than 3/4 — or, better, the narrow end being a *height*
+rather than a ratio, since what a reflowing document needs on a phone is a number
+of pixels and not a proportion of its width. A photograph has a shape; an
+application has a layout, which is the argument `adaptive` already makes, carried
+one step further.

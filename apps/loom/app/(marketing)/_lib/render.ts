@@ -9,6 +9,7 @@ import { weighEachAsker, type WeighedRequest } from "./adapt/askers"
 import { roundTripsOn, type RoundTrip } from "./adapt/round-trip"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
+import { siteFrameOrigins } from "./frames"
 import { piecesIn } from "./measure"
 import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
@@ -38,6 +39,7 @@ import {
   WHEN_IT_GOES_WRONG,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
+  siteOrigin,
   type SiteRoute,
 } from "./site"
 
@@ -320,13 +322,39 @@ export const pageTreeFor = async (
  * render both pages — the one that is counting and the one that is not — and a
  * caller cannot get a page whose markup and whose words disagree.
  */
-export const renderTree = (page: LoomTree, addressed = readersCountedHere()): RenderOutput =>
-  renderLoomTree(page, {
+export type SiteRenderOptions = {
+  /** Whether the markup carries the addresses a reader signal names. */
+  readonly addressed?: boolean
+  /**
+   * The origin this page is being served from, which is the one origin it
+   * frames.
+   *
+   * It is here rather than read from the environment inside, because the tree
+   * already carries absolute URLs built from the origin its *builder* was given
+   * — so a render that consulted `siteOrigin()` for the allowlist while the tree
+   * was built for somewhere else would refuse the site's own frame and say the
+   * content cannot be shown. Two readings of one fact is one reading too many;
+   * the caller has it, so the caller passes it.
+   */
+  readonly origin?: string
+}
+
+export const renderTree = (page: LoomTree, options: SiteRenderOptions = {}): RenderOutput => {
+  const origins = siteFrameOrigins(options.origin ?? siteOrigin())
+
+  return renderLoomTree(page, {
     resolver: siteRegistry,
     validator: siteRegistry,
     themes: siteThemes,
-    addressed,
+    addressed: options.addressed ?? readersCountedHere(),
+    /**
+     * Omitted rather than passed as `undefined` when the origin could not be
+     * registered, so a render with no allowlist is the same object shape the
+     * seam has always been handed by a deployment that frames nothing.
+     */
+    ...(origins === undefined ? {} : { origins }),
   })
+}
 
 /**
  * The page, with the one fact about the deployment that the page is allowed to
@@ -344,5 +372,8 @@ export const renderSitePage = async (
 ): Promise<RenderOutput> => {
   const counting = context.counting ?? readersCountedHere()
 
-  return renderTree(await pageTreeFor(route, { ...context, counting }), counting)
+  return renderTree(await pageTreeFor(route, { ...context, counting }), {
+    addressed: counting,
+    origin: context.origin,
+  })
 }
