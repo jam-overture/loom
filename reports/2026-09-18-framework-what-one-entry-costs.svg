@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1200" height="800" fill="#fbfaf8"/>
+
+  <text x="64" y="66" font-size="27" font-weight="650" fill="#1c1917">What one interpretation request is made of, and which half is anybody's to guard</text>
+  <text x="64" y="94" font-size="15.5" fill="#57534e">Measured on main, 18 September 2026 — starter registry (96 primitives), starter themes (21 palettes, 20 packs, 10 presets), a small tree.</text>
+
+  <!-- Panel A -->
+  <text x="64" y="150" font-size="13" font-weight="700" fill="#78716c" letter-spacing="0.09em">ONE REQUEST, BLOCK BY BLOCK — 25,802 CHARACTERS</text>
+
+  <g>
+    <rect x="64" y="166" width="121.6" height="48" fill="#a8a29e"/>
+    <rect x="185.6" y="166" width="265.8" height="48" fill="#6b8f9c"/>
+    <rect x="451.4" y="166" width="721.9" height="48" fill="#b4562f"/>
+    <rect x="1173.3" y="166" width="4.9" height="48" fill="#44403c"/>
+    <rect x="64" y="166" width="1114.2" height="48" fill="none" stroke="#e7e5e4"/>
+  </g>
+
+  <g font-size="14.5">
+    <text x="70" y="196" fill="#ffffff" font-weight="600">system</text>
+    <text x="192" y="196" fill="#ffffff" font-weight="600">themes</text>
+    <text x="458" y="196" fill="#ffffff" font-weight="600">primitives</text>
+  </g>
+
+  <g font-size="13.5" fill="#57534e">
+    <text x="64" y="238">2,816 · constant</text>
+    <text x="212" y="238">6,155 · <tspan fill="#166534" font-weight="650">guarded under 8,000</tspan></text>
+    <text x="451.4" y="238">16,718 — 65% of the request before the tree arrives · <tspan fill="#b4562f" font-weight="650">nothing was looking at it</tspan></text>
+    <text x="1178.2" y="238" text-anchor="end">113 · tree + request</text>
+  </g>
+
+  <line x1="64" y1="278" x2="1136" y2="278" stroke="#e7e5e4"/>
+
+  <!-- Panel B -->
+  <text x="64" y="320" font-size="13" font-weight="700" fill="#78716c" letter-spacing="0.09em">THE PRIMITIVES BLOCK HAS TWO TERMS, AND THEY ARE NOT THE SAME KIND OF NUMBER</text>
+
+  <g>
+    <rect x="64" y="340" width="522" height="164" fill="#ffffff" stroke="#e7e5e4"/>
+    <text x="88" y="376" font-size="17" font-weight="650" fill="#1c1917">how many entries are registered</text>
+    <text x="88" y="412" font-size="38" font-weight="700" fill="#b4562f">96</text>
+    <text x="164" y="412" font-size="15" fill="#57534e">today · 250 is the target · 43,067 characters there</text>
+    <text x="88" y="446" font-size="14.5" fill="#57534e">Grows because the library grows, and it is meant to.</text>
+    <text x="88" y="468" font-size="14.5" fill="#57534e">Whether it is too much depends on the model a deployment sends to.</text>
+    <text x="88" y="490" font-size="14.5" font-weight="650" fill="#1c1917">A deployment's choice. Deliberately no ceiling.</text>
+  </g>
+
+  <g>
+    <rect x="614" y="340" width="522" height="164" fill="#ffffff" stroke="#e7e5e4"/>
+    <text x="638" y="376" font-size="17" font-weight="650" fill="#1c1917">what one entry costs</text>
+    <text x="638" y="412" font-size="38" font-weight="700" fill="#166534">171</text>
+    <text x="714" y="412" font-size="15" fill="#57534e">characters · from 88 (loom.table-row) to 282 (loom.halo)</text>
+    <text x="638" y="446" font-size="14.5" fill="#57534e">Does not move when the library grows. Moves when a description</text>
+    <text x="638" y="468" font-size="14.5" fill="#57534e">outgrows its one line, or a primitive declares more than a model needs.</text>
+    <text x="638" y="490" font-size="14.5" font-weight="650" fill="#166534">This package's. Guarded under 200, from today.</text>
+  </g>
+
+  <!-- Panel C -->
+  <text x="64" y="566" font-size="13" font-weight="700" fill="#78716c" letter-spacing="0.09em">AND A DEPLOYMENT PAYS FOR THE SLICE IT REGISTERED — selectPrimitives(STARTER_PRIMITIVES, […])</text>
+
+  <g>
+    <g font-size="13.5" fill="#57534e" text-anchor="end">
+      <text x="152" y="600">8 primitives</text>
+      <text x="152" y="632">12</text>
+      <text x="152" y="664">24</text>
+      <text x="152" y="696">40</text>
+      <text x="152" y="728">96 — the whole library</text>
+    </g>
+    <g fill="#b4562f">
+      <rect x="168" y="588" width="86" height="16"/>
+      <rect x="168" y="620" width="124" height="16"/>
+      <rect x="168" y="652" width="250" height="16"/>
+      <rect x="168" y="684" width="400" height="16"/>
+      <rect x="168" y="716" width="900" height="16"/>
+    </g>
+    <g font-size="13.5" fill="#44403c">
+      <text x="266" y="601">1,598 characters</text>
+      <text x="304" y="633">2,300</text>
+      <text x="430" y="665">4,650</text>
+      <text x="580" y="697">7,442</text>
+      <text x="1080" y="729">16,718</text>
+    </g>
+  </g>
+
+  <text x="64" y="772" font-size="13.5" fill="#78716c">A name the library does not carry is refused rather than filtered away, which is the one thing the hand-written filter it replaces could not do.</text>
+</svg>

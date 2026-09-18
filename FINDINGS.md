@@ -1092,8 +1092,35 @@ mattered was one layer down from where this lane stopped looking.
 ## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — **raised by the maintainer**, 13 September, as the thing to figure out
-before the library grows further
+**closed by `framework-43-what-one-entry-costs`**, with one of the three pieces
+declined and re-filed. Recorded as
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md).
+
+- **Piece 1, the ceiling — built, and deliberately not where this entry put it.**
+  A ceiling on the *block* would fire on exactly the growth the library is being
+  grown for, in five lanes that did not cause it, and would be raised without
+  being read. The guard is on `perEntry` instead: under 200 characters against
+  today's 171, a number that does not move when the library grows and does move
+  when an entry gets dearer. A second guard holds the instruction around the
+  list under 500.
+- **Piece 2, the inverse of `additional` — built**, as `selectPrimitives(entries,
+  types)` in `@loom/runtime/sdk`. It takes entries rather than reaching into
+  `src/primitives/`, so it slices any library, and it **refuses** a name the
+  library does not carry — naming every one, not the first — which the
+  hand-filter it replaces could not.
+- **Piece 3, the role vocabulary — declined here and filed for your lane** (see
+  the entry of 18 September below). The members would be declared on 96
+  primitives in `src/primitives/`, which is yours; a vocabulary landed on one
+  side of that boundary and declared on nobody's answers `[]` to every question.
+
+`measureCatalogue` is the new instrument: the block, each entry, and the mean,
+taken from the block that is actually sent. Measured today on `main` — 96
+entries, 16,718 characters, 171 per entry, against 6,155 for themes.
+
+Original status below.
+
+**Status:** open — **raised by the maintainer**, 13 September, as the thing to
+figure out before the library grows further
 
 The maintainer's target is 250 primitives by 19 September, with the instruction
 that *"if increasing the number of primitives is producing a scaling issue with
@@ -18542,6 +18569,17 @@ onto its branch instead*.
 ## 2026-09-07 — a change nobody answered for three days is already dead, and the queue it is sitting in cannot tell
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — `src/write/liveness.ts` is the recommended helper and
+has been on `main` since #282 landed, built by the run reported in
+`reports/2026-09-07-framework-the-queue-that-could-not-tell.md`. `holdLiveness`
+makes the one comparison in the direction `confirmHeld` makes it, `markHolds`
+marks a page of them, and `markHoldsFromStore` reads the heads and never fails.
+The status was never updated, which is why this and the 11 September entry below
+both read as open on a run four days later. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
 **Status:** open — documented on the page as it actually behaves, not worked
 around
 
@@ -19060,6 +19098,15 @@ nothing behind it will object.
 ## 2026-09-11 — a review queue still cannot tell a dead change from a live one, and now a published page tells hosts to write the comparison themselves
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — the helper landed in `src/write/liveness.ts`, so the
+three lines this entry says *Answering a held change* prints as the thing a host
+has to write are the thing a host no longer has to write. **That page is now the
+rewrite this entry predicted, and it is `Loom docs`' to make.** Closed on
+18 September by `framework-43-what-one-entry-costs`, which changed no code for
+it.
+
+Original status below.
+
 **Status:** open — a second data point on the 7 September entry, unchanged in
 substance
 
@@ -22356,8 +22403,19 @@ The brief's *second* problem — *"it is clunky"* — is live, and is what every
 on #220 has been.
 ## 2026-09-01 — a hold store has no deployment-wide read, so the portal's headline screen costs one query per page
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— worked around on the surface, said out loud on screen, not fixed
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed** — `HoldStore.waiting(request?)` is on `main`, in the shape this entry
+asked for: bounded, cursored by `(heldAt, proposalId)`, in `compareHolds` order,
+in both implementations and under the contract suite. Built by the run reported
+in `reports/2026-09-06-framework-the-queue-and-the-blind-spot.md` and landed with
+#282. The badge beside *Waiting on you* this entry says is worth adding the day
+this is taken is `Loom portal`'s, and the day has come. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
+**Status:** open — worked around on the surface, said out loud on screen, not
+fixed
 
 `HoldStore` offers `hold`, `get`, `forTree` and `release`. `forTree` is the only
 listing, and its comment says why: *"scoped by tree because that is the only
@@ -26112,9 +26170,18 @@ review queue.
 ---
 ## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— not a defect and nothing is blocked; a run has to pick one and this run
-explains which
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-43-what-one-entry-costs`** — dated rather than deleted,
+which is what this entry recommends. The earlier section now opens with a note
+saying it is superseded by the later one, that the later one is current, and why
+it is kept: the symptom it describes is real, and a run that follows it by
+reaching for the address in its opening note gets the account that does not
+deploy. Neither section's words were changed.
+
+Original status below.
+
+**Status:** open — not a defect and nothing is blocked; a run has to pick one and
+this run explains which
 
 The file has two sections about the same thing and they contradict each other.
 
@@ -26609,3 +26676,76 @@ Two things to add to it, both cheap and both cost this run an attempt:
 make one reachable. A person evaluating Loom still cannot click to a populated
 review queue, on the front door or on a page. `/portal/checkup` is the third of
 the three and the only one nobody has photographed at all.
+
+---
+
+## 2026-09-18 — a deployment can now register a slice by name, and cannot ask for one by kind
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is blocked; this is the third piece of your 13 September entry,
+built around rather than guessed at
+
+Your entry of 13 September proposed three pieces and said the third was the one
+with a design question in it. Two are built and recorded in
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md):
+a guard on what one catalogue entry costs, and `selectPrimitives(entries, types)`
+— the inverse of `additional`, which takes the entries a deployment names and
+refuses a name the library does not carry.
+
+**Selecting is by name, which means reading the library.** A host wanting sixty
+of ninety-six has to know which sixty. Your third piece is the answer — a role
+per part a primitive plays, `band`, `item`, `leaf`, `wrapper`, `control`, so a
+registry can be asked for a coherent slice — and it is filed for you rather than
+built here for one reason:
+
+**The vocabulary is one lane's and the declarations are another's.** Widening
+`PrimitiveRole` is a five-line change in `src/role.ts`, which is this lane's. The
+declarations are `role: "band"` on ninety-six entries in `src/primitives/`, which
+is yours. Landing the vocabulary alone gives every consumer a registry that
+answers `[]` to every question about it, for as long as the declarations take —
+and 0114 set the bar for widening the vocabulary at *a consumer that cannot
+answer its question from the registry*, which is a bar about consumers, not about
+how many members a type has.
+
+So: **if you want it, say so and this lane lands the vocabulary in one run, ahead
+of your declarations.** What would make it worth landing, and what this lane
+cannot judge from outside `src/primitives/`:
+
+- whether five members partition the library, or whether a third of it is
+  genuinely two of them at once — a `loom.split` is a band and a wrapper;
+- whether the member a selecting host actually wants is the part a primitive
+  plays or the *job* it does (a pricing table and a stat grid are both `band`
+  and nobody registers one to get the other).
+
+A wrong answer here is expensive in the direction 0114 warned about: a closed
+vocabulary declared 96 times is not cheap to change.
+
+Not urgent. Nothing needs it before 250 entries; a host that wants a slice today
+names it.
+
+---
+
+## 2026-09-18 — the README says the starter library ships ten, and it ships ninety-six
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — a stale sentence, not a defect, and the table under it is the part that
+matters
+
+`README.md`, under **The starter primitives**:
+
+> `@loom/runtime/primitives` ships ten, ported from the Hermes predecessor and
+> chosen to cover the primitive contract rather than the catalogue
+
+Measured on `main` today: `STARTER_PRIMITIVES` has **96 entries**. The ten-row
+table beneath the sentence lists the original ten and nothing since.
+
+Found while writing the section next to it, which is why this is filed rather
+than fixed: the sentence and the table are both claims about your library, and
+the honest replacement is a judgment about what a reader of the README needs —
+ninety-six rows is not it, and *"ships ninety-six, ten of which are listed here"*
+is a table that will be wrong again in a week. A count computed by a test, or a
+pointer to `docs/primitive-gap-inventory.md`, are both better than a number
+somebody retypes.
+
+The neighbouring section, **Registering primitives**, is this lane's and is
+current as of today.
