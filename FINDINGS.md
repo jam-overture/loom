@@ -26051,3 +26051,67 @@ a page carrying one amber ring. The fix removes a button and adds no markup, and
 the only visual judgement in it — that the four asks left behind must not move
 under the visitor's cursor — is settled by comparing two screenshots of this
 repository's own page.
+## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+found by looking at a screenshot, and inside the type system it cannot happen
+
+`ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
+on a hold's disposition, and there is no fallback. Where the code is one of the
+nine the record knows, it answers a sentence. Where it is anything else it
+answers `undefined`, and `WaitingCard` draws its yellow *Why it stopped* panel
+with a heading in it and nothing underneath — on the one line of the card that
+explains why a person is being asked to decide something at all.
+
+**How it was found, which is the part worth keeping.** This run's first fixture
+used two codes that do not exist — `irreversible-change` for `irreversible`, and
+`stakes-above-threshold` for `stakes-above-ceiling`. Two of three cards
+photographed with an empty panel. No test caught it and none could have: every
+test in this lane types its fixture, so a wrong code is a compile error in a
+test and a silent blank on a screen.
+
+**Why it is not merely a fixture bug.** A hold read out of `loom_holds` is
+parsed from JSON written by whatever runtime wrote it. A deployment whose
+database was written by an older or newer runtime — a code retired, a code added
+— hands this screen a string the portal has never seen, and the failure is a
+heading over a silence rather than anything a reader could act on or an operator
+could notice. `/portal/pages/[treeId]` reads the same table through the same
+function.
+
+**What would close it:** one fallback, said the way this lane says the others —
+naming what Loom cannot tell the reader rather than rounding it to nothing, with
+the code itself in the technical record beside it. It is the same shape as
+`unreadableSentence` on the review queue, and the same argument: a silence about
+a reason is not the same news as no reason.
+
+---
+## 2026-09-17 — the front door's queue has been photographed populated, which is the second of the three screens 13 September named
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a recipe, filed against the standing findings of 13, 15 and 16 September
+
+`/portal`'s review queue was photographed with four held proposals in it today,
+by the recipe filed on 15 and 16 September and with nothing new required: a
+`--import` preload builds a `memoryHoldStore()`, `hold`s the proposals into it
+and assigns it to `globalThis[Symbol.for("loom.portal.holds")]` before the
+application's own module memoises one; the script signs in by filling
+`input[name="key"]` and waiting on **leaving** `/portal/sign-in`.
+
+Two things to add to it, both cheap and both cost this run an attempt:
+
+- **A fixture's `disposition.reason.code` must be one of the nine the runtime
+  defines** — `within-policy`, `confidence-below-floor`,
+  `stakes-at-refusal-floor`, `irreversible`, `discards-later-work`,
+  `redirected-submission`, `repointed-binding`, `stakes-above-ceiling`,
+  `confidence-below-minimum`. Anything else photographs as a silence, which is
+  the finding directly above.
+- **A fixture's `baseRevision` must match the served tree's revision**, which is
+  `0` on a freshly seeded portal. A mismatch is not an error: it is correctly
+  read as a stale proposal, so every card in the picture carries *"This was
+  worked out on an older version of this page"* and the photograph is of the
+  wrong state rather than of a broken one.
+
+**Still not the answer to 13 September.** It photographs a state; it does not
+make one reachable. A person evaluating Loom still cannot click to a populated
+review queue, on the front door or on a page. `/portal/checkup` is the third of
+the three and the only one nobody has photographed at all.
