@@ -4,6 +4,9 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-42-a-word-it-could-not-say`
 **Section:** §2 — Composition Runtime, in the authoring SDK's copy seam
+**Pull request:** [#330](https://github.com/jam-overture/loom/pull/330) ·
+**Preview:** https://loom-git-framework-42-a-word-eec2de-jpizzolato36-6341s-projects.vercel.app
+— there is nothing to look at for this change; it is a runtime seam with no surface.
 
 ![the same node, read on each branch](2026-09-18-framework-a-word-it-could-not-say.png)
 
