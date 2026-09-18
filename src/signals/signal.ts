@@ -30,7 +30,7 @@ import { viewKeyPattern } from "./view.js"
  * means exactly one thing forever (0136).
  */
 
-export { READER_SIGNAL_KINDS } from "./kinds.js"
+export { DELEGATED_READER_SIGNAL_KINDS, READER_SIGNAL_KINDS } from "./kinds.js"
 
 export const readerSignalKindSchema = z.enum(READER_SIGNAL_KINDS)
 
@@ -58,19 +58,63 @@ const addressSchema = {
 }
 
 /**
+ * One addressed node, as a signal names it.
+ *
+ * The same pair `addressSchema` spreads, as a schema of its own, because an
+ * ancestry is a list of them.
+ */
+export const signalAddressSchema = z.object(addressSchema).strict()
+
+/**
+ * The addressed nodes a delegated signal happened inside, nearest first.
+ *
+ * A reader presses a button, and the button is an addressed node — so the node
+ * an `activated` is filed against is the control, never the band the control is
+ * in. Without this a deployment can report *which button was pressed* and can
+ * never report *how many readers used something in the pricing section*, because
+ * no signal a browser sends carries the section.
+ *
+ * **It is ancestry, not content.** Node ids and primitive types, which the tree
+ * at this revision already holds. A signal still says nothing about the reader
+ * and nothing about what the page shows.
+ *
+ * **Optional, and absent is not empty.** A batch synthesised on a server, one
+ * replayed from a fixture, and one from a sender that was asked not to walk all
+ * have nothing to say here; a signal against a node at the root of the page has
+ * an empty ancestry and says so. A consumer that treats the two the same is
+ * treating *we did not look* as *there was nothing above it*.
+ */
+const withinSchema = z.array(signalAddressSchema).readonly()
+
+/**
  * The four kinds.
  *
  * `viewed` fires once per node for the life of the page. `dwelled` is time on
  * screen accumulated since the previous batch, so summing a node's `dwelled` over
  * every batch is its total. `activated` is a reader using a link, button or field
- * inside the node — the node named is the nearest addressed one, because a
- * control is rarely a node of its own. `disclosed` is a region opened or closed.
+ * inside the node — the node named is the nearest addressed one, which in the
+ * starter library is usually the control itself. `disclosed` is a region opened
+ * or closed.
+ *
+ * Those last two are `DELEGATED_READER_SIGNAL_KINDS`: what a reader aimed at is
+ * a control, and the region it sits in is a question nothing else can answer
+ * afterwards, so they carry `within` and the other two do not.
  */
 export const readerSignalSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("viewed"), ...addressSchema, at: instantSchema }).strict(),
   z.object({ kind: z.literal("dwelled"), ...addressSchema, ms: z.number().int().positive() }).strict(),
-  z.object({ kind: z.literal("activated"), ...addressSchema, at: instantSchema }).strict(),
-  z.object({ kind: z.literal("disclosed"), ...addressSchema, open: z.boolean(), at: instantSchema }).strict(),
+  z
+    .object({ kind: z.literal("activated"), ...addressSchema, at: instantSchema, within: withinSchema.optional() })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("disclosed"),
+      ...addressSchema,
+      open: z.boolean(),
+      at: instantSchema,
+      within: withinSchema.optional(),
+    })
+    .strict(),
 ])
 
 export type ReaderSignal = z.infer<typeof readerSignalSchema>

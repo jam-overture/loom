@@ -44,6 +44,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     type text NOT NULL,
     views bigint NOT NULL,
     reached bigint NOT NULL,
+    engaged bigint NOT NULL DEFAULT 0,
     dwell_ms bigint NOT NULL,
     activations bigint NOT NULL,
     opens bigint NOT NULL,
@@ -51,6 +52,12 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     updated_at timestamptz NOT NULL,
     PRIMARY KEY (tree_id, revision, node_id)
   )`,
+  /**
+   * For a deployment whose tallies table predates the counter regions are
+   * reported by. Additive and defaulted, so existing rows read as *nobody was
+   * measured doing anything in here*, which is what was true of them.
+   */
+  `ALTER TABLE loom_reader_tallies ADD COLUMN IF NOT EXISTS engaged bigint NOT NULL DEFAULT 0`,
   `ALTER TABLE loom_reader_tallies ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_funnels (
     tree_id text NOT NULL,
