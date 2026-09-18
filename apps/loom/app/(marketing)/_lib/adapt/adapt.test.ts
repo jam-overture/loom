@@ -15,6 +15,7 @@ import {
 import { ASKS, askById, readAskId, type AskId } from "./asks"
 import { RECORD_VOCABULARY } from "./record"
 import { FRONT_DOOR_POLICY, PROTECTED_IN_PLAIN_WORDS, protectedInPlainWords, runAsk } from "./run"
+import { unhonoured } from "../frames"
 
 /**
  * The band where the front door stops describing itself and does it.
@@ -203,7 +204,9 @@ describe("the address is the whole of the state", () => {
   it.each(ASKS)("$id survives a change of palette", async (ask) => {
     const run = await askRunFor(contextFor(ask.id, true))
     const markup = renderToStaticMarkup(
-      renderTree(run === undefined ? treeFor(HOME, contextFor(ask.id, true)) : run.page).element
+      renderTree(run === undefined ? treeFor(HOME, contextFor(ask.id, true)) : run.page, {
+        origin: ORIGIN,
+      }).element
     )
 
     for (const palette of SITE_THEME_NAMES.filter((name) => name !== THEME)) {
@@ -245,7 +248,7 @@ describe("the page a choice leaves behind", () => {
       const run = await askRunFor({ ...context, theme })
       const page = run === undefined ? treeFor(HOME, { ...context, theme }) : run.page
 
-      expect(renderTree(page).diagnostics).toEqual([])
+      expect(unhonoured(renderTree(page, { origin: ORIGIN }).diagnostics)).toEqual([])
     }
   })
 
@@ -262,7 +265,7 @@ describe("the page a choice leaves behind", () => {
   it.each(states)("%s still has exactly one first-level heading", async (_name, context) => {
     const run = await askRunFor(context)
     const page = run === undefined ? treeFor(HOME, context) : run.page
-    const markup = renderToStaticMarkup(renderTree(page).element)
+    const markup = renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
 
     expect([...markup.matchAll(/<h1\b/g)]).toHaveLength(1)
   })
