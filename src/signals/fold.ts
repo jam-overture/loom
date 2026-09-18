@@ -41,14 +41,39 @@ export type ReaderReadings = {
   readonly dwellMs: Readonly<Record<NodeId, number>>
   /** Nodes that came into view at all. `viewed` fires once per node per page view. */
   readonly reached: Readonly<Record<NodeId, true>>
-  /** Links, buttons and fields used inside the node. */
+  /**
+   * Times the node itself was used — a link followed, a button pressed, a field
+   * filled.
+   *
+   * It is the node the signal names, which is the nearest addressed element to
+   * what a reader aimed at. In the starter library that is the control, so a
+   * band's count here is zero however busy the band was; `engagements` is the
+   * number that is about the band.
+   */
   readonly activations: Readonly<Record<NodeId, number>>
   readonly opens: Readonly<Record<NodeId, number>>
   readonly closes: Readonly<Record<NodeId, number>>
   /**
+   * Times a reader used something *inside* the node — pressed, followed, filled,
+   * opened or closed, at any depth.
+   *
+   * The regions' number. Read off the ancestry a delegated signal carries, so a
+   * batch whose senders did not walk contributes nothing rather than a guess.
+   * Strictly inside, so a control's own use is in `activations` and never here,
+   * and a subtree total is the addition.
+   *
+   * Occurrences rather than readers, because a fold is one page view: *how many
+   * of the people reading this used something in the band* is a question about
+   * many views, and it is `ReaderTally.engaged`.
+   */
+  readonly engagements: Readonly<Record<NodeId, number>>
+  /**
    * What each node is, as its signals reported it. Kept because a consumer
    * holding only readings would otherwise have to go back to the tree to render
    * a row, and the signals already say.
+   *
+   * A region named only as somewhere a press happened inside is in here too, so
+   * it gets a row rather than being a number with no name.
    */
   readonly types: Readonly<Record<NodeId, PrimitiveType>>
   readonly batches: number
@@ -61,6 +86,7 @@ export const EMPTY_READINGS: ReaderReadings = {
   activations: {},
   opens: {},
   closes: {},
+  engagements: {},
   types: {},
   batches: 0,
   signals: 0,
@@ -72,19 +98,34 @@ const bumped = (
   by: number
 ): Readonly<Record<NodeId, number>> => ({ ...counts, [nodeId]: (counts[nodeId] ?? 0) + by })
 
+/**
+ * The regions a delegated signal says it happened inside, and their types, which
+ * a reading knows exactly as it knows the node's own.
+ */
+const withinOf = (signal: ReaderSignal): readonly { nodeId: NodeId; type: PrimitiveType }[] =>
+  (signal.kind === "activated" || signal.kind === "disclosed") && signal.within !== undefined
+    ? signal.within
+    : []
+
 /** Every node a signal mentions is one this reading now knows the type of. */
 const foldSignal = (readings: ReaderReadings, signal: ReaderSignal): ReaderReadings => {
   const { nodeId } = signal
+  const within = withinOf(signal)
 
   return {
     ...readings,
+    engagements: within.reduce((counts, region) => bumped(counts, region.nodeId, 1), readings.engagements),
     dwellMs: signal.kind === "dwelled" ? bumped(readings.dwellMs, nodeId, signal.ms) : readings.dwellMs,
     reached: signal.kind === "viewed" ? { ...readings.reached, [nodeId]: true } : readings.reached,
     activations:
       signal.kind === "activated" ? bumped(readings.activations, nodeId, 1) : readings.activations,
     opens: signal.kind === "disclosed" && signal.open ? bumped(readings.opens, nodeId, 1) : readings.opens,
     closes: signal.kind === "disclosed" && !signal.open ? bumped(readings.closes, nodeId, 1) : readings.closes,
-    types: { ...readings.types, [nodeId]: signal.type },
+    types: {
+      ...readings.types,
+      ...Object.fromEntries(within.map((region) => [region.nodeId, region.type])),
+      [nodeId]: signal.type,
+    },
   }
 }
 
@@ -115,6 +156,8 @@ export type NodeReading = {
   readonly activations: number
   readonly opens: number
   readonly closes: number
+  /** Times a reader used something inside it, at any depth. */
+  readonly engagements: number
 }
 
 /**
@@ -138,6 +181,7 @@ export const nodeReadingsOf = (readings: ReaderReadings): readonly NodeReading[]
         activations: readings.activations[nodeId] ?? 0,
         opens: readings.opens[nodeId] ?? 0,
         closes: readings.closes[nodeId] ?? 0,
+        engagements: readings.engagements[nodeId] ?? 0,
       }
     })
     .sort((first, second) => second.dwellMs - first.dwellMs)

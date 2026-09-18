@@ -161,6 +161,56 @@ export const nameFor = async (reader: TreeReader, treeId: TreeId): Promise<PageN
 }
 
 /**
+ * The pages themselves, for a screen that wants more out of them than a name.
+ *
+ * `namesOf` below has always done this read and then thrown the tree away, and
+ * for a fortnight that was the whole of what a listing needed. It is not any
+ * more: the front door's queue says what a waiting change would do to its page,
+ * and that reading takes the page (`waiting-effect.ts`). A second read per row
+ * to get back a tree this function already had would be a fan-out added for
+ * nothing.
+ *
+ * **Only the reads that succeeded are in the map.** That is the difference from
+ * `namesOf`, which answers for every id asked about because a row must list
+ * whether or not it can be named. A tree is not a thing there is a stand-in
+ * for: a caller either has the page or does not, and one that cannot tell the
+ * two apart would describe a change against a page it never read.
+ */
+export const headsOf = async (
+  reader: TreeReader,
+  treeIds: readonly TreeId[]
+): Promise<ReadonlyMap<string, LoomTree>> => {
+  const read = await Promise.all(
+    treeIds.map(async (treeId) => [treeId, await reader.head(treeId)] as const)
+  )
+
+  return new Map(
+    read.flatMap(([treeId, head]) => (head.ok ? [[treeId, head.value] as const] : []))
+  )
+}
+
+/**
+ * Names for pages already read, without reading them again.
+ *
+ * Pure, and the reason `namesOf` is now two lines: a caller that needs both the
+ * trees and their names pays for one fan-out, and a caller that needs only the
+ * names is unchanged. The fallback is the one `nameFor` uses for a failed read,
+ * which is what a missing entry here means.
+ */
+export const namesIn = (
+  treeIds: readonly TreeId[],
+  heads: ReadonlyMap<string, LoomTree>
+): ReadonlyMap<string, PageName> => {
+  const head = (treeId: TreeId): PageName => {
+    const tree = heads.get(treeId)
+
+    return tree === undefined ? unnamed(treeId) : pageNameOf(tree)
+  }
+
+  return new Map(treeIds.map((treeId) => [treeId, head(treeId)] as const))
+}
+
+/**
  * Names for a listed page of trees, one bounded read each.
  *
  * The same trade every list in this portal already makes: `/portal/pages` reads
@@ -177,13 +227,7 @@ export const nameFor = async (reader: TreeReader, treeId: TreeId): Promise<PageN
 export const namesOf = async (
   reader: TreeReader,
   treeIds: readonly TreeId[]
-): Promise<ReadonlyMap<string, PageName>> => {
-  const named = await Promise.all(
-    treeIds.map(async (treeId) => [treeId, await nameFor(reader, treeId)] as const)
-  )
-
-  return new Map(named)
-}
+): Promise<ReadonlyMap<string, PageName>> => namesIn(treeIds, await headsOf(reader, treeIds))
 
 /**
  * The name for one id out of a map, for a caller that cannot prove the id is in

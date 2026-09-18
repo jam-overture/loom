@@ -7,3 +7,17 @@
  */
 
 export const READER_SIGNAL_KINDS = ["viewed", "dwelled", "activated", "disclosed"] as const
+
+/**
+ * The kinds whose node is not the thing a reader aimed at.
+ *
+ * A reader presses a button and opens a disclosure; both are addressed nodes of
+ * their own, so the node such a signal is filed against is the control rather
+ * than the region the control is in. `viewed` and `dwelled` have no such gap —
+ * they are observed on the addressed element itself — which is why these two
+ * carry an ancestry and the other two do not.
+ *
+ * Here rather than in `signal.ts` so the broadcaster can know which signals it
+ * must walk for without loading the schema library (0136).
+ */
+export const DELEGATED_READER_SIGNAL_KINDS = ["activated", "disclosed"] as const
