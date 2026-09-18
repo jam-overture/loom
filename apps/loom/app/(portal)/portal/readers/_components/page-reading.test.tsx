@@ -24,7 +24,9 @@ const names: ReadonlyMap<string, PartName> = new Map([
 const tally = (
   nodeId: string,
   revision: number,
-  counts: Partial<Pick<StoredTally, "views" | "reached" | "dwellMs" | "activations" | "opens" | "closes">>,
+  counts: Partial<
+    Pick<StoredTally, "views" | "reached" | "engaged" | "dwellMs" | "activations" | "opens" | "closes">
+  >,
   type = "loom.card"
 ): StoredTally => ({
   treeId,
@@ -33,6 +35,7 @@ const tally = (
   type: primitiveTypeSchema.parse(type),
   views: counts.views ?? 0,
   reached: counts.reached ?? 0,
+  engaged: counts.engaged ?? 0,
   dwellMs: counts.dwellMs ?? 0,
   activations: counts.activations ?? 0,
   opens: counts.opens ?? 0,

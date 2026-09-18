@@ -70,7 +70,8 @@ const changeThenUndo = async (
   return { base, page: back.page, undone: back.record.landed }
 }
 
-const markupOf = (page: LoomTree): string => renderToStaticMarkup(renderTree(page).element)
+const markupOf = (page: LoomTree): string =>
+  renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
 
 /**
  * Every address the page offers, off the tree rather than out of the markup.

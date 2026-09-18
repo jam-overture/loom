@@ -15,6 +15,7 @@
  */
 export const BAND = {
   seeItHappen: "See it happen",
+  inYourOwnWords: "Your turn",
   problems: "What this is for",
   facts: "Where it is today",
   asData: "How this page is put together",

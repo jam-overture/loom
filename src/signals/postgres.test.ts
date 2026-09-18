@@ -49,6 +49,7 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   type: primitiveType("loom.section"),
   views: 1,
   reached: 1,
+  engaged: 0,
   dwellMs: 500,
   activations: 0,
   opens: 0,

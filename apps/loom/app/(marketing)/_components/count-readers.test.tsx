@@ -109,7 +109,9 @@ afterEach(() => {
   document.documentElement.removeAttribute(COUNTING_ATTRIBUTE)
 })
 
-const page = () => treeFor(HOME, { origin: "https://loom.test", theme: "editorial" })
+const ORIGIN = "https://loom.test"
+
+const page = () => treeFor(HOME, { origin: ORIGIN, theme: "editorial" })
 
 /**
  * The front door as a browser gets it, with the component that counts it beside
@@ -117,7 +119,7 @@ const page = () => treeFor(HOME, { origin: "https://loom.test", theme: "editoria
  * that draws nothing.
  */
 const site = (options: { readonly addressed: boolean; readonly send: (batch: ReaderSignalBatch) => void }) => {
-  const rendered = renderTree(page(), options.addressed)
+  const rendered = renderTree(page(), { addressed: options.addressed, origin: ORIGIN })
 
   return render(
     <>

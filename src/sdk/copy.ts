@@ -50,7 +50,38 @@ export type CopyDeclarations = {
 export type UnreadCopy = {
   readonly nodeId: NodeId
   readonly type: PrimitiveType
-  /** Its string-valued props, in the order the node carries them. */
+  /**
+   * Its string-valued props, in the order the node carries them.
+   *
+   * String-valued, and that is a decision rather than an accident (0169). Where
+   * nothing has been declared, a value that is not a string is not a candidate
+   * word at all: a `loom.divider` holding `weight: 2` would otherwise be
+   * reported as a part whose words a reader might lose, and every layout
+   * primitive in the library would join it. The opposite call is made on the
+   * declared side, and a declaration is the whole of the difference.
+   */
+  readonly props: readonly string[]
+}
+
+/**
+ * A prop a type declared as copy, holding something this reading will not turn
+ * into a word.
+ *
+ * `loom.stat` renders `3400` as *3,400*, and the component owns that
+ * formatting — so the reading declines to guess it, which is right and used to
+ * be the end of the matter. It was also silent: the figure left `words` and
+ * arrived nowhere else, on the one seam whose return type exists so that a
+ * missing word is never mistaken for an absent one.
+ *
+ * This is the other half of `unread`, and the two say different things. `unread`
+ * is *nobody has told me whether these are words*. This is *somebody told me
+ * these are words, and what is in them is not one*. A caller that has neither
+ * has read everything the node says.
+ */
+export type UnspokenCopy = {
+  readonly nodeId: NodeId
+  readonly type: PrimitiveType
+  /** The declared copy props holding a non-string value, in declaration order. */
   readonly props: readonly string[]
 }
 
@@ -64,25 +95,63 @@ export type NodeCopy = {
   readonly words: readonly string[]
   /** What this reading could not see. Empty when every type under it declared. */
   readonly unread: readonly UnreadCopy[]
+  /** What it was told to read and could not. Empty when every declared copy prop held a string. */
+  readonly unspoken: readonly UnspokenCopy[]
 }
 
 const NO_WORDS: NodeCopy = Object.freeze({
   words: Object.freeze([]),
   unread: Object.freeze([]),
+  unspoken: Object.freeze([]),
 })
 
 const isWord = (value: unknown): value is string =>
   typeof value === "string" && value.trim() !== ""
 
 /**
- * A declared copy prop whose value is not a string is skipped, and deliberately
- * not coerced. `loom.stat` renders `3400` as *3,400*, and the component owns
- * that formatting — the runtime knows the number and not the separator, so
+ * What a type's declaration is worth on one node: the words it found, and the
+ * props it was sent to and came back from empty-handed.
+ *
+ * A value that is not a string is still not coerced. `loom.stat` renders `3400`
+ * as *3,400*, the component owns that separator and the runtime does not, so
  * `String(value)` would put a figure on a reviewer's screen that the page does
- * not show. A missing word is a gap; a wrong one is a lie.
+ * not show. A missing word is a gap; a wrong one is a lie. What changed is that
+ * the gap is now handed back rather than dropped.
+ *
+ * Three cases and only one of them is unspoken:
+ *
+ * - **Not set.** Nothing to report — a `caption` nobody wrote is not a word
+ *   this reading lost. Own keys only, so a type that declares a prop named after
+ *   something on `Object.prototype` reports nothing rather than the prototype's.
+ * - **A string, blank or whitespace-only.** Also nothing: the page really does
+ *   show nothing there, so the absence is the truth rather than a gap in it.
+ * - **Set, and not a string.** A word is owed and cannot be given, which is the
+ *   case this reports.
  */
-const declaredWords = (props: Readonly<Record<string, unknown>>, declared: readonly string[]): string[] =>
-  declared.map((name) => props[name]).filter(isWord)
+const readDeclared = (
+  props: Readonly<Record<string, unknown>>,
+  declared: readonly string[]
+): { readonly words: readonly string[]; readonly unspoken: readonly string[] } => {
+  const words: string[] = []
+  const unspoken: string[] = []
+
+  for (const name of declared) {
+    if (!Object.hasOwn(props, name)) continue
+
+    const value = props[name]
+
+    if (value === undefined) continue
+
+    if (typeof value === "string") {
+      if (isWord(value)) words.push(value)
+      continue
+    }
+
+    unspoken.push(name)
+  }
+
+  return { words, unspoken }
+}
 
 const stringProps = (props: Readonly<Record<string, unknown>>): readonly string[] =>
   Object.keys(props).filter((name) => isWord(props[name]))
@@ -98,6 +167,7 @@ const stringProps = (props: Readonly<Record<string, unknown>>): readonly string[
 export const copyIn = (node: LoomNode, declarations: CopyDeclarations): NodeCopy => {
   const words: string[] = []
   const unread: UnreadCopy[] = []
+  const unspoken: UnspokenCopy[] = []
 
   const read = (current: LoomNode): void => {
     if (current.kind === "text") {
@@ -114,7 +184,12 @@ export const copyIn = (node: LoomNode, declarations: CopyDeclarations): NodeCopy
 
         if (props.length > 0) unread.push({ nodeId: current.id, type: current.type, props })
       } else {
-        words.push(...declaredWords(current.props, declared))
+        const read = readDeclared(current.props, declared)
+
+        words.push(...read.words)
+
+        if (read.unspoken.length > 0)
+          unspoken.push({ nodeId: current.id, type: current.type, props: read.unspoken })
       }
     }
 
@@ -123,7 +198,11 @@ export const copyIn = (node: LoomNode, declarations: CopyDeclarations): NodeCopy
 
   read(node)
 
-  return words.length === 0 && unread.length === 0
+  return words.length === 0 && unread.length === 0 && unspoken.length === 0
     ? NO_WORDS
-    : { words: Object.freeze(words), unread: Object.freeze(unread) }
+    : {
+        words: Object.freeze(words),
+        unread: Object.freeze(unread),
+        unspoken: Object.freeze(unspoken),
+      }
 }

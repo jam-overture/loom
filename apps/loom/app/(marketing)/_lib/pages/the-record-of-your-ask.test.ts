@@ -48,7 +48,7 @@ const treeOf = async (route: typeof HOME, address: Address = {}): Promise<LoomNo
 
 const markupOf = async (route: typeof HOME, address: Address = {}): Promise<string> =>
   renderToStaticMarkup(
-    renderTree(await pageTreeFor(route, context(address))).element
+    renderTree(await pageTreeFor(route, context(address)), { origin: ORIGIN }).element
   ).replaceAll("&#x27;", "'")
 
 const elementsOf = (node: LoomNode): readonly ElementNode[] =>

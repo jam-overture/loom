@@ -199,18 +199,52 @@ describe("the ask panel, while a question is waiting", () => {
   })
 
   /**
-   * The lead steps into the list rather than out of the panel. Withdrawing an
-   * ask would narrow the demo at exactly the moment a visitor is exploring,
-   * which is the shape of this fix the lane argued against — the other asks
-   * really do work, and a stranger who wants to see the page move twice is
-   * allowed to.
+   * **The panel offers what it is handed, and nothing it is handed is disabled.**
+   * That is the whole of its contract about the list, and it is asserted here with
+   * every preset in `available` because it must not quietly narrow the demo on its
+   * own: the other asks really do work while a question is open, and a stranger
+   * who wants to see the page move twice is allowed to.
+   *
+   * Which ids reach it is the page's call. `already-asked.ts` takes out the one
+   * whose question is already on screen — a fact about the store, which this
+   * component cannot see — and the test below is the panel's half of that.
    */
-  it("still offers every ask, the demoted lead included", () => {
+  it("offers every ask it is handed, none of them disabled", () => {
     open()
 
     for (const preset of DEMO_PRESETS) {
       expect(screen.getByRole("button", { name: new RegExp(preset.label, "i") })).toBeTruthy()
       expect(screen.getByRole("button", { name: new RegExp(preset.label, "i") }).hasAttribute("disabled")).toBe(false)
+    }
+  })
+
+  /**
+   * The list a visitor sees after the first press, assembled the way the page
+   * assembles it: the lead's question is open, so the page has already taken the
+   * lead out of `available`.
+   *
+   * The panel then has no primary and four secondary asks — which is the list that
+   * was on screen *before* the press, unmoved. Before this, the lead dropped back
+   * in at its table position and pushed the last ask down under the visitor's
+   * cursor.
+   */
+  it("shows the list unchanged by the press when the page has withdrawn the lead", () => {
+    const { container } = render(
+      <AskPanel
+        revision={3}
+        available={ALL.filter((id) => id !== DEMO_LEADING_PRESET)}
+        modelConfigured={true}
+        waiting={WAITING}
+      />
+    )
+
+    expect(container.querySelector(".bg-affirm")).toBeNull()
+    expect(
+      screen.queryByRole("button", { name: new RegExp(labelOf(DEMO_LEADING_PRESET), "i") })
+    ).toBeNull()
+
+    for (const preset of DEMO_PRESETS.filter((one) => one.id !== DEMO_LEADING_PRESET)) {
+      expect(screen.getByRole("button", { name: new RegExp(preset.label, "i") })).toBeTruthy()
     }
   })
 
