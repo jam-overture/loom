@@ -16,10 +16,18 @@ import {
   answerOutcomes,
   inQueueOrder,
   sweepIsPartial,
-  waitingChange,
+  waitingChange as describeWaiting,
   waitingSummary,
   type Sweep,
 } from "./waiting"
+
+/**
+ * Every test in this file is about a field the hold itself carries, so none of
+ * them supplies a reading of the page. `undefined` is the honest argument for
+ * that — it is what the front door passes when a page could not be read — and
+ * `waiting-effect.test.ts` is where the reading is tested.
+ */
+const waitingChange = (held: HeldProposal) => describeWaiting(held, undefined)
 
 const treeId = treeIdSchema.parse("t_1")
 const otherTreeId = treeIdSchema.parse("t_2")

@@ -10,7 +10,8 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnattendedCard } from "@/app/(portal)/_components/unattended-card"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
+import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
+import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
@@ -21,6 +22,7 @@ import {
   waitingChange,
   waitingSummary,
 } from "@/app/(portal)/_lib/waiting"
+import { triageAgainst } from "@/app/(portal)/_lib/waiting-effect"
 import { holdsAreDurable, portalHolds } from "@/app/(portal)/_lib/write"
 
 /**
@@ -116,9 +118,7 @@ const PortalHome = async () => {
     trees.map(async (listing) => await portalHolds.forTree(listing.treeId))
   )
 
-  const changes = inQueueOrder(
-    perPage.flatMap((holds) => (holds.ok ? holds.value.map(waitingChange) : []))
-  )
+  const held = perPage.flatMap((holds) => (holds.ok ? holds.value : []))
 
   /**
    * The other half: what Loom went ahead with on its own.
@@ -154,7 +154,43 @@ const PortalHome = async () => {
     ]),
   ]
 
-  const names = await namesOf(portalStore, named)
+  /**
+   * The pages themselves, read once and used twice.
+   *
+   * This read is not new — naming a page has always meant reading its head and
+   * taking the leading heading off it — and until now the tree was dropped on
+   * the floor immediately afterwards. The queue's account of what a change
+   * would do is read against exactly that tree (`waiting-effect.ts`), so
+   * keeping it is the whole cost of the sentences below: no second fan-out, no
+   * extra query, and a hold whose page is in this set is described against the
+   * revision the reader would land on if they followed the link.
+   *
+   * A page that would not read is absent from the map rather than standing in
+   * for itself, and both consumers have an answer for that: the name falls back
+   * to untitled beside the id, and the card says it could not read the page
+   * instead of showing a change with no steps.
+   */
+  const heads = await headsOf(portalStore, named)
+  const names = namesIn(named, heads)
+
+  /**
+   * Each waiting change, described against the page it is waiting on.
+   *
+   * Ordered after the reading rather than before it, because the order is by
+   * how long something has waited and nothing about the reading changes it.
+   * The registry is this deployment's, for the reason the page screen gives:
+   * which of a part's settings a reader reads is declared by whoever wrote the
+   * component, so the only honest answer available here is the one the
+   * primitives this host registered gave.
+   */
+  const changes = inQueueOrder(
+    held.map((hold) =>
+      waitingChange(
+        hold,
+        triageAgainst(heads.get(hold.treeId), hold.proposal.delta, portalRegistry)
+      )
+    )
+  )
 
   /*
    * What this screen did *not* look at, carried beside what it found.

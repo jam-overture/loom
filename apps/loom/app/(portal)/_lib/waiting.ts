@@ -2,6 +2,7 @@ import type { Disposition } from "@loom/runtime"
 import type { HeldProposal } from "@loom/runtime/write"
 
 import { screenName } from "./screen-names"
+import type { WaitingTriage } from "./waiting-effect"
 import { plainMoment } from "./when"
 import {
   ASK_ORIGINS,
@@ -29,9 +30,14 @@ import {
  *    string on a hold that was typed by a human, and it is what tells two
  *    waiting changes apart at a glance far better than a proposal id does.
  * 2. **Why has it stopped?** The rule the Gate cited, in a person's words.
- * 3. **What happens if I say yes, and what happens if I say no?** See
+ * 3. **What would it actually do?** See `waiting-effect.ts`. This was the
+ *    question the front door could not answer, and it is the one that decides
+ *    which of three waiting changes a person opens first — a queue that cannot
+ *    tell "rewords a heading" from "deletes the pricing section" has sorted
+ *    nothing for anybody.
+ * 4. **What happens if I say yes, and what happens if I say no?** See
  *    `answerOutcomes` — this is the half the portal has never said out loud.
- * 4. **Where do I go to answer it?**
+ * 5. **Where do I go to answer it?**
  *
  * It is pure and takes a hold, so the assembly is testable without a store,
  * and so the home screen and the page screen cannot drift into describing the
@@ -114,11 +120,25 @@ export type WaitingChange = {
   /** The AI's own grade of itself, as a clause. */
   readonly confidence: string
   readonly answers: AnswerOutcomes
+  /**
+   * What it would do to the page, read against the page as it is now.
+   *
+   * `undefined` when that page could not be read, which is a state the card
+   * says out loud rather than rendering as a change with no steps in it. It is
+   * an argument rather than something read here for the reason every other
+   * field of this module is pure: a queue row is one of several drawn from one
+   * fan-out, and a function that reached for a store per row would turn one
+   * listing into one read per waiting change.
+   */
+  readonly effect: WaitingTriage | undefined
   /** Where the change can actually be answered. */
   readonly href: string
 }
 
-export const waitingChange = (held: HeldProposal): WaitingChange => ({
+export const waitingChange = (
+  held: HeldProposal,
+  effect: WaitingTriage | undefined
+): WaitingChange => ({
   proposalId: held.proposalId,
   treeId: held.treeId,
   asked: held.intent.utterance,
@@ -131,6 +151,7 @@ export const waitingChange = (held: HeldProposal): WaitingChange => ({
   stakes: STAKES[held.disposition.stakes],
   confidence: confidenceWord(held.disposition.confidence),
   answers: answerOutcomes(held.disposition),
+  effect,
   href: `/portal/pages/${held.treeId}`,
 })
 
