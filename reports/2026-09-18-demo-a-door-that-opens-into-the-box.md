@@ -3,11 +3,13 @@
 **Routine:** `Loom demo` · **Branch:** `demo-21-a-door-that-opens-into-the-box` ·
 **18 September 2026**
 
-**Deployed preview:** _(added to the pull request; this environment cannot open
-`vercel.app` — the standing 19 August egress finding)_
-`/demo` is unchanged at its own address. What this run is about is the **other**
-address it now appears at: scroll the front door to **Your turn** and look at
-the demonstration inside the frame.
+**Deployed preview:**
+https://loom-git-demo-21-a-door-that-6f5662-jpizzolato36-6341s-projects.vercel.app
+— public, no sign-in. `/demo` is unchanged at its own address; what this run is
+about is the **other** address it now appears at. Open **`/`**, scroll to
+**Your turn**, and click the small `● Loom` at the top left *inside* the frame.
+(Not opened from this environment — `vercel.app` is not on the sandbox's egress
+allowlist; the standing 19 August finding.)
 
 The twenty-first run of this lane. It takes the finding `Loom marketing` filed
 yesterday, takes the shape that finding recommended, and adds the one link the
