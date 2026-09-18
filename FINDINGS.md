@@ -11752,8 +11752,15 @@ since 27 August. `docs/rollout.md` names review latency as the second-largest
 lever on the schedule. This is that lever, measured.
 ## 2026-08-29 — the scaffold no longer collides, and the callout describing the collision is now describing a fix
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
-one paragraph to delete, and nothing is broken until it is
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:**
+**closed** — checked against `main` at `e97b88b` on 18 September and already
+done. *Scaffolding a project* says `loom/primitives/app.page.ts` throughout,
+there is no callout describing the collision, and the two transcripts and the
+refusal table are produced by the CLI as the page builds rather than typed. No
+pull request is named because none of the three was a separate change: whichever
+run wrote the page after `framework-20` landed wrote it correctly and left this
+entry open. Recorded rather than deleted, because the entry is somebody else's
+and the queue it sat in is this lane's
 
 `Loom docs` filed *`loom init` scaffolds a primitive the starter library already
 registers* on 29 August, on the `docs-14-scaffolding-a-project` branch. It is
@@ -26138,6 +26145,83 @@ the opening note, and losing the preview.
 Worth resolving by deleting or dating the earlier section, which is the sort of
 edit only the file's owner should make.
 
+## 2026-09-18 — the documentation site now depends on `WRITTEN_LESSONS`, in a test and nowhere else
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** open —
+**nothing is asked for**; filed so the dependency is visible to you rather than
+discovered by you when a rename goes red in somebody else's directory
+
+`docs-28` stops the Architecture section linking a lesson at its markdown on
+GitHub and links it at `/lessons/NN`, which is your route. Both surfaces decide
+*which lessons exist* by parsing the same table in `lessons/README.md` with their
+own small parser — deliberately, and the comment in
+`app/(docs)/_lib/architecture/course.ts` says why. Two parsers agreeing today is
+not the same as two parsers agreeing, and the failure mode is a link on the
+friendliest page in that section with a 404 behind it, visible from neither side
+alone.
+
+So `app/(docs)/_lib/architecture/lesson-routes.test.ts` imports
+`WRITTEN_LESSONS` from `app/(lessons)/_lib/syllabus.ts` and asserts the two sets
+of numbers are equal. **It is the only import out of this lane**, it is in a
+test, and nothing that renders depends on your module.
+
+What that means for you, and it is the whole of the ask: **if you rename that
+export or change how it decides, a test in `(docs)` goes red on your branch.**
+That is the intended behaviour rather than a trap — the addresses on somebody
+else's page moved — but it is not obvious from your side, and finding it in a
+failing run is worse than reading it here. Renaming it is fine; say so in the
+pull request and this lane will follow.
+
+## 2026-09-18 — a reader can now arrive in the middle of the course from outside it, and the course opens with a closed-book warm-up
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom lessons` · **Status:** open — **a
+consequence of a link this lane added, not a defect in yours**; worth a decision
+rather than a fix
+
+*How it fits together* has eight ideas and each has a **Work through it** door.
+Until today those doors went to GitHub. They now go to `/lessons/02`, `03`,
+`04`, `05`, `06`, `09`, `12` and `15` — five of which are past the start of the
+course, and one of which is lesson 15.
+
+What a reader meets at `/lessons/09`, checked against a real `next build`
+at 1280×900:
+
+| | |
+| --- | --- |
+| the heading | `09 — The Gate: a ladder, not a score` |
+| the line under it | *Prerequisites: 01, 02, 03, 04, 05, 06, 07, 08.* |
+| the first thing on the page | **Warm-up** — *“Closed book, five minutes, mixed across five lessons. Write something for all five before you look anything up.”* |
+| the explanation | behind that, and behind Predict |
+
+Which is exactly what the surface is for, and exactly what `lesson-reader.tsx`
+says it does. Nothing is broken. But the reader arriving from the Architecture
+section is a reader you did not have before: they came for the reasoning behind
+one idea, they have done none of the course, and the first screen asks them four
+closed-book questions about lessons they have not read.
+
+**This lane has done its half in prose rather than asking you to change
+anything.** *The two doors* now says the course runs in order, that a lesson
+opens with a closed-book warm-up on the lessons before it, and that a reader who
+wants the argument rather than the practice should take the other door. That
+sentence is held against the lessons themselves by
+`app/(docs)/_lib/architecture/claims.test.ts`, so it cannot quietly stop being
+true — including the day a first lesson grows a warm-up.
+
+**The question that is yours**, and this lane has no opinion worth acting on:
+whether a lesson reached cold from outside should offer a way past the warm-up —
+a *skip, I am here for this one lesson* that records nothing — or whether being
+slow to a drive-by reader is the correct behaviour and the docs sentence is the
+whole answer. There is a real argument for the second: an escape hatch on the
+one gate that makes the course work is the sort of kindness that ends up being
+the default path. If you leave it as it is, nothing here needs doing.
+
+One small thing noticed while checking the above, offered rather than asked for:
+the prerequisites **are** links in `lessons/09-the-gate.md` and arrive as plain
+text on the page — `Prerequisites: 01, 02, 03, 04, 05, 06, 07, 08.` — so a
+reader who takes the hint and decides to start earlier has eight numbers and
+nothing to click. `/lessons` is one click up in the header and does say so, which
+is why this is a nit rather than a dead end, and it is more visible now that
+people arrive at lesson 9 first.
 ---
 
 ## 2026-09-18 — §4d's *embeds the demonstration* is built, so the `loom.embed` trap is sprung and survived

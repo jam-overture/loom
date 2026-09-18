@@ -1,3 +1,4 @@
+import { OffSiteLink, OFF_SITE_MARK } from "./off-site-link"
 import { DECISION_RECORDS, recordTally } from "@/app/(docs)/_lib/architecture/records"
 
 /**
@@ -13,6 +14,10 @@ import { DECISION_RECORDS, recordTally } from "@/app/(docs)/_lib/architecture/re
  * only say what `pnpm decisions:index` says. The count above it is counted for
  * the same reason: a written total is wrong the first time somebody supersedes
  * something.
+ *
+ * **Every row leaves this site**, and the line above the table says so once
+ * rather than every row of it saying so again to a screen reader. The rows carry
+ * the mark; the sentence carries the meaning.
  */
 
 const Standing = ({ status }: { readonly status: string }) => (
@@ -28,6 +33,12 @@ export const DecisionRecords = () => {
         <strong className="text-ink font-semibold">{tally.total} records.</strong>{" "}
         {tally["in force"]} in force, {tally["partly superseded"]} superseded in part,{" "}
         {tally.superseded} replaced outright, {tally.proposed} proposed and waiting on a person.
+      </p>
+
+      <p className="text-ink-faint mt-2 text-sm">
+        Every title below opens that record’s file in the repository, marked{" "}
+        <span className="text-ink-faint">{OFF_SITE_MARK}</span>. They are working notes rather than
+        pages of this site, and they read like it.
       </p>
 
       <div className="border-edge mt-4 overflow-x-auto rounded-lg border">
@@ -46,7 +57,7 @@ export const DecisionRecords = () => {
               <tr key={record.id} className="border-edge border-b last:border-b-0">
                 <td className="text-ink-faint px-3 py-2 align-top font-mono text-xs">{record.id}</td>
                 <td className="px-3 py-2 align-top">
-                  <a
+                  <OffSiteLink
                     href={record.href}
                     className={`underline underline-offset-2 ${
                       record.standing === "superseded"
@@ -55,7 +66,7 @@ export const DecisionRecords = () => {
                     }`}
                   >
                     {record.title}
-                  </a>
+                  </OffSiteLink>
                 </td>
                 <td className="px-3 py-2 align-top">
                   <Standing status={record.status} />

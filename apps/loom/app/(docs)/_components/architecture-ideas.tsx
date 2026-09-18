@@ -1,3 +1,4 @@
+import { OffSiteLink } from "./off-site-link"
 import { COURSE_HREF } from "@/app/(docs)/_lib/architecture/course"
 import { ARCHITECTURE_IDEAS, type ArchitectureIdea } from "@/app/(docs)/_lib/architecture/ideas"
 
@@ -15,6 +16,11 @@ import { ARCHITECTURE_IDEAS, type ArchitectureIdea } from "@/app/(docs)/_lib/arc
  * and never the record's number. A reader who has not opened `decisions/` has
  * no use for four digits, and the one page in this section where numbers are
  * the subject says what they are before it shows any.
+ *
+ * **The two doors no longer go to the same kind of place**, and the difference
+ * is now on the page rather than only in the URL. *Work through it* is a page on
+ * this deployment; *the ruling* is a file in the repository, and carries the
+ * mark that says so.
  */
 
 const Door = ({
@@ -22,27 +28,40 @@ const Door = ({
   title,
   href,
   note,
+  leaves = false,
 }: {
   readonly label: string
   readonly title: string
   readonly href?: string
   readonly note?: string
-}) => (
-  <div className="min-w-0 flex-1">
-    <p className="text-ink-faint text-xs font-semibold tracking-wide uppercase">{label}</p>
-    {href === undefined ? (
-      <p className="text-ink-faint mt-1 text-sm">
-        {title} <span className="italic">— {note}</span>
-      </p>
-    ) : (
-      <p className="mt-1 text-sm">
-        <a href={href} className="text-accent-strong font-medium underline underline-offset-2">
-          {title}
-        </a>
-      </p>
-    )}
-  </div>
-)
+  /** Whether following it takes the reader off this site. */
+  readonly leaves?: boolean
+}) => {
+  const style = "text-accent-strong font-medium underline underline-offset-2"
+
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="text-ink-faint text-xs font-semibold tracking-wide uppercase">{label}</p>
+      {href === undefined ? (
+        <p className="text-ink-faint mt-1 text-sm">
+          {title} <span className="italic">— {note}</span>
+        </p>
+      ) : (
+        <p className="mt-1 text-sm">
+          {leaves ? (
+            <OffSiteLink href={href} className={style}>
+              {title}
+            </OffSiteLink>
+          ) : (
+            <a href={href} className={style}>
+              {title}
+            </a>
+          )}
+        </p>
+      )}
+    </div>
+  )
+}
 
 const Idea = ({ idea }: { readonly idea: ArchitectureIdea }) => (
   <section aria-labelledby={idea.id} className="border-edge border-t pt-6 first:border-t-0 first:pt-0">
@@ -60,7 +79,7 @@ const Idea = ({ idea }: { readonly idea: ArchitectureIdea }) => (
           ? { note: "not written yet" }
           : { href: idea.lesson.href })}
       />
-      <Door label="The ruling" title={idea.record.title} href={idea.record.href} />
+      <Door label="The ruling" title={idea.record.title} href={idea.record.href} leaves />
     </div>
   </section>
 )

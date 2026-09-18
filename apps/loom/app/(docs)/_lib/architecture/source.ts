@@ -64,12 +64,20 @@ export const repositoryFileExists = (...segments: readonly string[]): boolean =>
 const BLOB = "https://github.com/jam-overture/loom/blob/main"
 
 /**
- * A link to a file in the repository.
+ * A link to a file in the repository, which is a link off this site.
  *
- * Neither the course nor the records are rendered as pages anywhere in this
- * application yet, so a pointer to one is a pointer to the file — the same
- * choice the lessons surface made, and better than a link into a page that does
- * not exist. When either grows a route, this is the one function that changes.
+ * This used to be where *both* halves of the section sent a reader, because
+ * neither the course nor the records were rendered as pages anywhere in this
+ * application. The course now is: `lessons/` grew a route on this same
+ * deployment, so `course.ts` builds an address here instead and calls this only
+ * for a lesson's `source`, which no reader is handed.
+ *
+ * **The records have no route and this is still where they go.** That is not an
+ * oversight waiting on a run. A decision record is a working note written on the
+ * day of the ruling, in the repository's own idiom, and the section's whole
+ * argument is that it is a trail rather than a second documentation site. What
+ * is owed to a reader is that a link which leaves says it leaves — which is what
+ * the components do with it — rather than that every file becomes a page.
  */
 export const repositoryHref = (...segments: readonly string[]): string =>
   `${BLOB}/${segments.join("/")}`
