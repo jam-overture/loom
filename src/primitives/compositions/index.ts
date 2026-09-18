@@ -5,16 +5,19 @@ import { bentoBand } from "./bento-band.js"
 import { changelogBand } from "./changelog-band.js"
 import { comparisonBand } from "./comparison-band.js"
 import { contactBand } from "./contact-band.js"
+import { contactDetailsBand } from "./contact-details-band.js"
 import { credentialsBand } from "./credentials-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
+import { faqGridBand } from "./faq-grid-band.js"
 import { featuresBand } from "./features-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
 import { heroBand } from "./hero-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
+import { integrationsGridBand } from "./integrations-grid-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
 import { navBand } from "./nav-band.js"
@@ -42,16 +45,19 @@ export {
   changelogBand,
   comparisonBand,
   contactBand,
+  contactDetailsBand,
   credentialsBand,
   ctaBand,
   ctaSignupBand,
   faqBand,
+  faqGridBand,
   featuresBand,
   featuresAlternatingBand,
   footerBand,
   heroBand,
   heroSplitBand,
   integrationsBand,
+  integrationsGridBand,
   metricsBand,
   metricsChartBand,
   navBand,
@@ -121,6 +127,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   stepsBand,
   stepsCardsBand,
   integrationsBand,
+  integrationsGridBand,
   metricsBand,
   metricsChartBand,
   pricingBand,
@@ -133,7 +140,9 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   articlesBand,
   changelogBand,
   faqBand,
+  faqGridBand,
   contactBand,
+  contactDetailsBand,
   ctaBand,
   ctaSignupBand,
   footerBand,
