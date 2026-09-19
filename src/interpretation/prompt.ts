@@ -1,12 +1,23 @@
 import type { PrimitiveCatalogue } from "../catalogue.js"
+import type { DataCatalogue } from "../data/catalogue.js"
+import type { FrameCatalogue } from "../frame/catalogue.js"
 import type { PrimitiveType } from "../primitive-type.js"
-import { THEME_PROP_KEY } from "../render/theme.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../reserved-props.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
+import type { SubmissionCatalogue } from "../submit/catalogue.js"
 import type { ThemeCatalogue } from "../theme/registry.js"
 import type { LoomTree } from "../tree/tree.js"
 
-import { renderCatalogue, renderDelta, renderThemeCatalogue, renderTree } from "./render.js"
+import {
+  renderCatalogue,
+  renderDelta,
+  renderFrameCatalogue,
+  renderSourceCatalogue,
+  renderSubmissionCatalogue,
+  renderThemeCatalogue,
+  renderTree,
+} from "./render.js"
 
 /**
  * Prompt assembly, kept pure so the exact bytes sent to a model are a value a
@@ -97,6 +108,149 @@ To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an 
 }
 
 /**
+ * The data block: what this deployment can be asked about, and the one
+ * instruction that stops the answer being a guess.
+ *
+ * 0058 put the reason in the record — *"a source a model was never told about is
+ * one it can only guess at"* — and `dataCatalogue` has projected exactly that
+ * since, for a prompt that never carried it. A model asked to put somebody's
+ * services on a page had no way to know `catalogue.services` exists, so the only
+ * reachable answers were a binding it invented, refused at the seam as
+ * `no-such-source`, or no binding at all.
+ *
+ * The closing paragraph says three things because the seam refuses on three
+ * different grounds, and only one of them is visible in the list: an unregistered
+ * source is refused, a param the source did not declare is refused, and a binding
+ * *name* nothing reads is accepted and then read by nobody. The third is the one
+ * worth the sentence — it is the only one of the three that fails silently, and
+ * a name is not something the catalogue can enumerate, because it belongs to the
+ * primitive rather than to the source.
+ */
+const dataBlock = (sources: DataCatalogue | undefined): string =>
+  sources === undefined || sources.length === 0
+    ? ""
+    : `Data this deployment can answer questions about. A node asks under the reserved prop "${DATA_PROP_KEY}", which maps a binding name to a registered source and the params to ask it with. A param marked with "?" is optional; every other listed param is required.
+
+${renderSourceCatalogue(sources)}
+
+A binding is written {"${DATA_PROP_KEY}":{"<binding name>":{"source":"<id>","params":{…}}}}, and "params" may be left out when the source declares none. Use only source ids from the list above — one that is not on it is refused and the node renders without data. Do not invent a binding name: the name is how the primitive reading the answer finds it, so repoint or re-param a name already on the node rather than adding one of your own.
+
+`
+
+/**
+ * The submission block: where a form may post, and nowhere else.
+ *
+ * Thinner than the data block because the seam is thinner (0065). A binding carries
+ * params because a read genuinely varies; a write does not, so the whole of what
+ * a model may say here is one registered id. The closing paragraph spends its
+ * length on the two things the declaration schema is strict about — the single
+ * `to` key, and the address that is not in the tree — because a model that
+ * writes `{"to":…,"action":…}` is refused outright rather than having the extra
+ * key stripped.
+ */
+const submissionBlock = (endpoints: SubmissionCatalogue | undefined): string =>
+  endpoints === undefined || endpoints.length === 0
+    ? ""
+    : `Where this deployment will accept a form submission. A node says where it posts under the reserved prop "${SUBMIT_PROP_KEY}".
+
+${renderSubmissionCatalogue(endpoints)}
+
+To point a form at one, configure the node and set "${SUBMIT_PROP_KEY}" to {"to":"<id>"}. Use only ids from the list above. "to" is the only key the declaration accepts, and an address never appears in the tree — the deployment resolves the id to one after the choice is made.
+
+`
+
+/**
+ * The framing block, and the sentence that keeps it from being read as the other
+ * two.
+ *
+ * `frameCatalogue`'s own comment makes the distinction and it has to survive into
+ * the prompt: an endpoint catalogue is the whole of what a model may name,
+ * because an address never appears in a tree, and this one is not, because a
+ * frame's URL does. Which video belongs on the page is a content decision the
+ * model is supposed to make. What it cannot do is pick a host, and a model shown
+ * a list with no word about which kind of list it is would reasonably read these
+ * as the only values it may write.
+ */
+const framingBlock = (origins: FrameCatalogue | undefined): string =>
+  origins === undefined || origins.length === 0
+    ? ""
+    : `Whose documents this deployment will put inside a frame.
+
+${renderFrameCatalogue(origins)}
+
+Those are origins rather than addresses. The URL of a framed document is an ordinary prop and it is yours to choose, but its scheme, host and port must match one of the lines above, or the primitive renders a refusal where the document would have been.
+
+`
+
+/**
+ * Everything a deployment can offer a model, in one value.
+ *
+ * Five projections rather than five parameters, and the reason is the shape the
+ * fifth one would have had: `buildUserMessage(intent, tree, undefined,
+ * undefined, sources)` is a call nobody can read and a call site that silently
+ * means something else if an argument is inserted. Each field is independently
+ * optional because a deployment genuinely may wire any subset — §2 shipped with
+ * none of them, and a site with a library and no data registry is the ordinary
+ * case rather than a half-configured one.
+ *
+ * Every field is a *projection* rather than a registry: what reaches a model is
+ * what `catalogueOf`, `dataCatalogue`, `submissionCatalogue`, `frameCatalogue`
+ * and `ThemeRegistry.catalogue` chose to publish, which is how a registry keeps
+ * internals — an adapter's connection, an endpoint's address — out of a prompt
+ * by construction rather than by remembering to.
+ *
+ * The keys are the names a host already writes on `ModelInterpreterConfig`,
+ * which composes this type rather than restating it. A second spelling of the
+ * same five things would buy prettier block names — `sources` over
+ * `dataCatalogue` — at the price of a mapping function between two shapes that
+ * must stay in step, and that function is the thing a sixth vocabulary would be
+ * forgotten in.
+ */
+export type PromptVocabularies = {
+  /**
+   * What this deployment can build with. Absent means the model is told only
+   * what the tree shows, which is what §2 shipped with; a host that has a §4
+   * registry projects it with `catalogueOf` and the model stops guessing at
+   * primitive names it has no way to know.
+   */
+  readonly catalogue?: PrimitiveCatalogue
+  /**
+   * What this deployment may be themed with. Absent means the model is shown no
+   * theme vocabulary and cannot re-theme anything: the ids in the tree are the
+   * only ones it knows, so "make it warmer" has nowhere to go but an invented
+   * id that fails to resolve. A host with a §4b theme registry passes
+   * `themes.catalogue()`.
+   */
+  readonly themeCatalogue?: ThemeCatalogue
+  /**
+   * What this deployment can be asked about. Absent means the model is told
+   * nothing about the data seam, so the only bindings it can propose are ones
+   * it invented — refused at the seam as `no-such-source`, which is the right
+   * refusal for a guess nobody gave it the information to avoid (0058). A host
+   * with a source registry passes `dataCatalogue(registry)`.
+   */
+  readonly dataCatalogue?: DataCatalogue
+  /**
+   * Where this deployment will accept a submission. Absent means the model
+   * cannot point a form anywhere, which is the safe default rather than a gap:
+   * `loom:submit` names a registered endpoint and nothing else leaves the tree
+   * (0065). A host with an endpoint registry passes
+   * `submissionCatalogue(registry)`.
+   */
+  readonly submissionCatalogue?: SubmissionCatalogue
+  /**
+   * Whose documents this deployment will frame. Absent means the model is not
+   * told, and a frame it proposes renders a refusal unless it happened to name
+   * a registered origin. Unlike the four above this one narrows a value the
+   * model still chooses, because which video belongs on a page is a content
+   * decision and the URL stays in the tree (0095).
+   */
+  readonly frameCatalogue?: FrameCatalogue
+}
+
+const NO_VOCABULARIES: PromptVocabularies = Object.freeze({})
+
+/**
  * The message in its parts, so that assembling it and measuring it read from
  * the same place. A measurement that rebuilt the blocks itself would be a
  * second assembly to keep in step, and the first thing to go stale.
@@ -104,6 +258,9 @@ To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an 
 type UserMessageParts = {
   readonly primitives: string
   readonly themes: string
+  readonly sources: string
+  readonly endpoints: string
+  readonly frames: string
   readonly tree: string
   readonly request: string
 }
@@ -111,30 +268,40 @@ type UserMessageParts = {
 const userMessageParts = (
   intent: EditIntent,
   tree: LoomTree,
-  catalogue: PrimitiveCatalogue | undefined,
-  themes: ThemeCatalogue | undefined
+  vocabularies: PromptVocabularies
 ): UserMessageParts => {
   const scopeLine = intent.scopeNodeId
     ? `\nConfine the change to the subtree rooted at ${intent.scopeNodeId}, marked "<- scope" above.`
     : ""
 
   return {
-    primitives: catalogueBlock(catalogue),
-    themes: themeBlock(themes),
+    primitives: catalogueBlock(vocabularies.catalogue),
+    themes: themeBlock(vocabularies.themeCatalogue),
+    sources: dataBlock(vocabularies.dataCatalogue),
+    endpoints: submissionBlock(vocabularies.submissionCatalogue),
+    frames: framingBlock(vocabularies.frameCatalogue),
     tree: `Current tree:\n\n${renderTree(tree, intent.scopeNodeId)}\n\n`,
     request: `Request (${intent.origin}): ${intent.utterance}${scopeLine}`,
   }
 }
 
+/**
+ * The five vocabulary blocks lead, then the tree, then the sentence somebody
+ * typed.
+ *
+ * The order is by how often a part changes, least often first, so that the
+ * longest stable prefix sits where a provider's cache can hold it: a deployment
+ * registers once and asks many times, the tree changes with every accepted
+ * change, and the request is different every time by definition.
+ */
 export const buildUserMessage = (
   intent: EditIntent,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue,
-  themes?: ThemeCatalogue
+  vocabularies: PromptVocabularies = NO_VOCABULARIES
 ): string => {
-  const parts = userMessageParts(intent, tree, catalogue, themes)
+  const parts = userMessageParts(intent, tree, vocabularies)
 
-  return `${parts.primitives}${parts.themes}${parts.tree}${parts.request}`
+  return `${parts.primitives}${parts.themes}${parts.sources}${parts.endpoints}${parts.frames}${parts.tree}${parts.request}`
 }
 
 /**
@@ -161,9 +328,12 @@ export type PromptMeasurement = {
   readonly system: number
   readonly primitives: number
   readonly themes: number
+  readonly sources: number
+  readonly endpoints: number
+  readonly frames: number
   readonly tree: number
   readonly request: number
-  /** The sum of the five, and what actually goes over the wire. */
+  /** The sum of the eight, and what actually goes over the wire. */
   readonly total: number
 }
 
@@ -178,15 +348,17 @@ export type PromptMeasurement = {
 export const measurePrompt = (
   intent: EditIntent,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue,
-  themes?: ThemeCatalogue
+  vocabularies: PromptVocabularies = NO_VOCABULARIES
 ): PromptMeasurement => {
-  const parts = userMessageParts(intent, tree, catalogue, themes)
+  const parts = userMessageParts(intent, tree, vocabularies)
 
   const measured = {
     system: INTERPRETER_SYSTEM_PROMPT.length,
     primitives: parts.primitives.length,
     themes: parts.themes.length,
+    sources: parts.sources.length,
+    endpoints: parts.endpoints.length,
+    frames: parts.frames.length,
     tree: parts.tree.length,
     request: parts.request.length,
   }
@@ -285,10 +457,9 @@ type RepairMessageParts = {
 const repairMessageParts = (
   request: RepairRequest,
   tree: LoomTree,
-  catalogue: PrimitiveCatalogue | undefined,
-  themes: ThemeCatalogue | undefined
+  vocabularies: PromptVocabularies
 ): RepairMessageParts => ({
-  proposal: buildUserMessage(request.intent, tree, catalogue, themes),
+  proposal: buildUserMessage(request.intent, tree, vocabularies),
   refused: `
 
 You proposed this, and it was refused:
@@ -307,10 +478,9 @@ Propose a more conservative way to satisfy the same request, or say "not-underst
 export const buildRepairMessage = (
   request: RepairRequest,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue,
-  themes?: ThemeCatalogue
+  vocabularies: PromptVocabularies = NO_VOCABULARIES
 ): string => {
-  const parts = repairMessageParts(request, tree, catalogue, themes)
+  const parts = repairMessageParts(request, tree, vocabularies)
 
   return `${parts.proposal}${parts.refused}${parts.objection}${parts.instruction}`
 }
@@ -353,11 +523,10 @@ export type RepairMeasurement = {
 export const measureRepairPrompt = (
   request: RepairRequest,
   tree: LoomTree,
-  catalogue?: PrimitiveCatalogue,
-  themes?: ThemeCatalogue
+  vocabularies: PromptVocabularies = NO_VOCABULARIES
 ): RepairMeasurement => {
-  const parts = repairMessageParts(request, tree, catalogue, themes)
-  const proposal = measurePrompt(request.intent, tree, catalogue, themes)
+  const parts = repairMessageParts(request, tree, vocabularies)
+  const proposal = measurePrompt(request.intent, tree, vocabularies)
 
   const measured = {
     refused: parts.refused.length,

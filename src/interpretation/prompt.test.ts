@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest"
+import { z } from "zod"
 
 import type { PrimitiveCatalogue } from "../catalogue.js"
+import { createDataRegistry, defineSource, type SourceEntry } from "../data/adapter.js"
+import { dataCatalogue } from "../data/catalogue.js"
+import { frameCatalogue } from "../frame/catalogue.js"
+import { createFrameOriginRegistry } from "../frame/origin.js"
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, type NodeId } from "../ids.js"
 import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "../primitives/index.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../reserved-props.js"
+import { ok } from "../result.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { createPrimitiveRegistry } from "../sdk/registry.js"
 import { selectPrimitives } from "../sdk/selection.js"
-import { THEME_PROP_KEY } from "../render/theme.js"
+import { submissionCatalogue } from "../submit/catalogue.js"
+import { createEndpointRegistry, defineEndpoint, type EndpointEntry } from "../submit/endpoint.js"
 import { createThemeRegistry } from "../theme/registry.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
 import { testRegistry } from "../testing/definitions.js"
@@ -66,7 +74,7 @@ describe("the catalogue block", () => {
   })
 
   it("leads the message, ahead of the tree and the request", () => {
-    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, catalogue)
+    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, { catalogue })
 
     expect(message.indexOf("Primitives this deployment has registered")).toBeLessThan(
       message.indexOf("Current tree:")
@@ -75,14 +83,14 @@ describe("the catalogue block", () => {
   })
 
   it("tells the model that a type outside the list will not render", () => {
-    const message = buildUserMessage(intentFor("add a buy button"), sampleTree().tree, catalogue)
+    const message = buildUserMessage(intentFor("add a buy button"), sampleTree().tree, { catalogue })
 
     expect(message).toContain("Insert only primitives from that list")
   })
 
   /** An empty registry is not a list of nothing; it is nothing to say. */
   it("is absent for an empty catalogue rather than an empty heading", () => {
-    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, [])
+    const message = buildUserMessage(intentFor("add a footer note"), sampleTree().tree, { catalogue: [] })
 
     expect(message.startsWith("Current tree:")).toBe(true)
   })
@@ -112,7 +120,7 @@ describe("the catalogue block", () => {
       },
     }
 
-    expect(buildRepairMessage(request, tree, catalogue)).toContain("Primitives this deployment has registered")
+    expect(buildRepairMessage(request, tree, { catalogue })).toContain("Primitives this deployment has registered")
   })
 })
 
@@ -121,13 +129,13 @@ describe("the theme block", () => {
   const catalogue = catalogueOf(testRegistry())
 
   it("is absent when the host wired no theme registry", () => {
-    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue)
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, { catalogue })
 
     expect(message).not.toContain("Themes this deployment has registered")
   })
 
   it("lists every registered id with the sentence its author wrote", () => {
-    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, { catalogue, themeCatalogue: themes })
 
     for (const palette of themes.palettes) expect(message).toContain(`- ${palette.id} — ${palette.name}.`)
     for (const pack of themes.fontPacks) expect(message).toContain(`- ${pack.id} —`)
@@ -140,7 +148,7 @@ describe("the theme block", () => {
    * theme is the one key no primitive declares.
    */
   it("says where a theme lives and that all three ids travel together", () => {
-    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, { catalogue, themeCatalogue: themes })
 
     expect(message).toContain(THEME_PROP_KEY)
     expect(message).toContain("Give all three every time")
@@ -148,13 +156,13 @@ describe("the theme block", () => {
   })
 
   it("shows the palette hex to nobody", () => {
-    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, { catalogue, themeCatalogue: themes })
 
     expect(message).not.toMatch(/#[0-9a-fA-F]{6}\b/)
   })
 
   it("sits between the primitives and the tree, where a cache can hold it", () => {
-    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, catalogue, themes)
+    const message = buildUserMessage(intentFor("make it warmer"), sampleTree().tree, { catalogue, themeCatalogue: themes })
 
     expect(message.indexOf("Primitives this deployment has registered")).toBeLessThan(
       message.indexOf("Themes this deployment has registered")
@@ -189,9 +197,284 @@ describe("the theme block", () => {
       },
     }
 
-    expect(buildRepairMessage(request, tree, catalogue, themes)).toContain(
+    expect(buildRepairMessage(request, tree, { catalogue, themeCatalogue: themes })).toContain(
       "Themes this deployment has registered"
     )
+  })
+})
+
+/**
+ * Three projections built for a model and never shown to one (0172).
+ *
+ * Each fixture goes through its real registry and its real projection rather
+ * than a hand-written catalogue literal, because the gap these tests close was
+ * exactly a projection nothing called: a literal would pass whether or not
+ * `dataCatalogue` still produces what the block renders.
+ */
+const sourcesOf = (...entries: readonly SourceEntry[]) => {
+  const registry = createDataRegistry(entries)
+  if (!registry.ok) throw new Error(`test registry refused: ${registry.error.code}`)
+
+  return dataCatalogue(registry.value)
+}
+
+const servicesSource = defineSource({
+  id: "catalogue.services",
+  description: "The services this profile offers, newest first",
+  params: z.object({ limit: z.number().int().positive(), since: z.string().optional() }),
+  answers: z.object({ items: z.array(z.string()) }),
+  adapter: { fetch: () => Promise.resolve(ok({ items: [] })) },
+})
+
+const endpointsOf = (...entries: readonly EndpointEntry[]) => {
+  const registry = createEndpointRegistry(entries)
+  if (!registry.ok) throw new Error(`test registry refused: ${registry.error.code}`)
+
+  return submissionCatalogue(registry.value)
+}
+
+const enquiryEndpoint = defineEndpoint({
+  id: "contact.enquiry",
+  description: "Receives a contact enquiry",
+  endpoint: {
+    target: () => Promise.resolve(ok({ action: "/api/enquiry", method: "post" as const, fields: [] })),
+  },
+})
+
+const originsOf = (...definitions: readonly { origin: string; description: string }[]) => {
+  const registry = createFrameOriginRegistry(definitions)
+  if (!registry.ok) throw new Error(`test registry refused: ${registry.error.code}`)
+
+  return frameCatalogue(registry.value)
+}
+
+describe("the data block", () => {
+  const catalogue = catalogueOf(testRegistry())
+  const dataCatalogueValue = sourcesOf(servicesSource)
+
+  it("is absent when the host wired no source registry", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, { catalogue })
+
+    expect(message).not.toContain("Data this deployment can answer questions about")
+  })
+
+  it("is absent for an empty registry rather than an empty heading", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
+      catalogue,
+      dataCatalogue: sourcesOf(),
+    })
+
+    expect(message).not.toContain("Data this deployment can answer questions about")
+  })
+
+  it("names each source, its line, and the params it declares", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
+      dataCatalogue: dataCatalogueValue,
+    })
+
+    expect(message).toContain(
+      "- catalogue.services — The services this profile offers, newest first. params: limit, since?"
+    )
+  })
+
+  /**
+   * The vocabulary without the instruction is decoration, for the reason the
+   * theme block already gives: every other rule in the prompt says to set only
+   * props a primitive declares, and this is a key no primitive declares.
+   */
+  it("says where a binding lives and what shape it is", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
+      dataCatalogue: dataCatalogueValue,
+    })
+
+    expect(message).toContain(DATA_PROP_KEY)
+    expect(message).toContain(`{"${DATA_PROP_KEY}":{"<binding name>":{"source":"<id>","params":{…}}}}`)
+  })
+
+  /**
+   * The one refusal in this seam that is silent. An unregistered source is
+   * refused as `no-such-source` and a bad param is refused by the source's own
+   * schema; a binding *name* nothing reads resolves cleanly and is then read by
+   * nobody, and the catalogue cannot enumerate the legal names because they
+   * belong to the primitive rather than to the source.
+   */
+  it("tells the model not to invent a binding name", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
+      dataCatalogue: dataCatalogueValue,
+    })
+
+    expect(message).toContain("Do not invent a binding name")
+  })
+
+  it("reaches a repair, so a revision is bound by the same sources", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("show my services")
+
+    const request: RepairRequest = {
+      intent,
+      refused: buildProposal(sequentialIdFactory("r"), {
+        intentId: intent.intentId,
+        delta: {
+          deltaId: deltaIdSchema.parse("d_r3"),
+          treeId: tree.treeId,
+          baseRevision: tree.revision,
+          operations: [{ op: "remove", nodeId: nodeIdSchema.parse("n_4") }],
+        },
+      }),
+      disposition: {
+        kind: "rejected",
+        reason: { code: "stakes-at-refusal-floor", detail: "destroys a protected primitive" },
+        stakes: "critical",
+        reversible: true,
+        confidence: 0.9,
+        policyId: "default",
+      },
+    }
+
+    expect(buildRepairMessage(request, tree, { dataCatalogue: dataCatalogueValue })).toContain(
+      "Data this deployment can answer questions about"
+    )
+  })
+})
+
+describe("the submission block", () => {
+  const endpoints = endpointsOf(enquiryEndpoint)
+
+  it("is absent when the host registered no endpoint", () => {
+    const message = buildUserMessage(intentFor("add a contact form"), sampleTree().tree, {})
+
+    expect(message).not.toContain("Where this deployment will accept a form submission")
+  })
+
+  it("names each endpoint and its line", () => {
+    const message = buildUserMessage(intentFor("add a contact form"), sampleTree().tree, {
+      submissionCatalogue: endpoints,
+    })
+
+    expect(message).toContain("- contact.enquiry — Receives a contact enquiry.")
+  })
+
+  it("says the declaration takes one key, and that an address is not in the tree", () => {
+    const message = buildUserMessage(intentFor("add a contact form"), sampleTree().tree, {
+      submissionCatalogue: endpoints,
+    })
+
+    expect(message).toContain(`set "${SUBMIT_PROP_KEY}" to {"to":"<id>"}`)
+    expect(message).toContain("an address never appears in the tree")
+  })
+
+  /**
+   * 0065's whole argument, held at the one place it could leak: the projection
+   * carries no address, so neither can the block built from it.
+   */
+  it("shows the endpoint's address to nobody", () => {
+    const message = buildUserMessage(intentFor("add a contact form"), sampleTree().tree, {
+      submissionCatalogue: endpoints,
+    })
+
+    expect(message).not.toContain("/api/enquiry")
+  })
+})
+
+describe("the framing block", () => {
+  const origins = originsOf(
+    { origin: "https://player.vimeo.com", description: "Vimeo player embeds" },
+    { origin: "https://app.example", description: "our own product tour" }
+  )
+
+  it("is absent when the host registered no framable origin", () => {
+    const message = buildUserMessage(intentFor("add the product video"), sampleTree().tree, {})
+
+    expect(message).not.toContain("Whose documents this deployment will put inside a frame")
+  })
+
+  it("names each origin and its line", () => {
+    const message = buildUserMessage(intentFor("add the product video"), sampleTree().tree, {
+      frameCatalogue: origins,
+    })
+
+    expect(message).toContain("- https://player.vimeo.com — Vimeo player embeds.")
+    expect(message).toContain("- https://app.example — our own product tour.")
+  })
+
+  /**
+   * The distinction `frameCatalogue`'s own comment turns on. A model shown a
+   * list with no word about which kind of list it is would read these as the
+   * only values it may write, and stop choosing the video — which is the one
+   * decision in this seam that is the model's to make.
+   */
+  it("says the list is origins rather than the addresses themselves", () => {
+    const message = buildUserMessage(intentFor("add the product video"), sampleTree().tree, {
+      frameCatalogue: origins,
+    })
+
+    expect(message).toContain("Those are origins rather than addresses")
+    expect(message).toContain("renders a refusal")
+  })
+})
+
+describe("the order of the blocks", () => {
+  const everything = {
+    catalogue: catalogueOf(testRegistry()),
+    themeCatalogue: createThemeRegistry().catalogue(),
+    dataCatalogue: sourcesOf(servicesSource),
+    submissionCatalogue: endpointsOf(enquiryEndpoint),
+    frameCatalogue: originsOf({ origin: "https://player.vimeo.com", description: "Vimeo" }),
+  }
+
+  /**
+   * Least-often-changed first, so the longest stable prefix of the request is
+   * the part a provider's cache can hold. A deployment registers once and asks
+   * many times; the tree changes with every accepted change; the sentence is
+   * different every time by definition.
+   */
+  it("puts all five vocabularies ahead of the tree, and the tree ahead of the request", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, everything)
+
+    const positions = [
+      "Primitives this deployment has registered",
+      "Themes this deployment has registered",
+      "Data this deployment can answer questions about",
+      "Where this deployment will accept a form submission",
+      "Whose documents this deployment will put inside a frame",
+      "Current tree:",
+      "Request (user-instruction):",
+    ].map((heading) => message.indexOf(heading))
+
+    expect(positions).toEqual([...positions].sort((left, right) => left - right))
+    expect(positions.every((position) => position >= 0)).toBe(true)
+  })
+
+  it("measures each block as the part that was sent, and they add up", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("show my services")
+    const measured = measurePrompt(intent, tree, everything)
+
+    expect(measured.total).toBe(
+      INTERPRETER_SYSTEM_PROMPT.length + buildUserMessage(intent, tree, everything).length
+    )
+    expect(
+      measured.system +
+        measured.primitives +
+        measured.themes +
+        measured.sources +
+        measured.endpoints +
+        measured.frames +
+        measured.tree +
+        measured.request
+    ).toBe(measured.total)
+  })
+
+  /**
+   * A deployment that wired nothing pays for nothing. The three new blocks are
+   * absent rather than empty, so the request is byte-identical to what §2 sent.
+   */
+  it("costs a deployment that wired none of them nothing at all", () => {
+    const { tree } = sampleTree()
+    const intent = intentFor("show my services")
+    const measured = measurePrompt(intent, tree)
+
+    expect([measured.sources, measured.endpoints, measured.frames]).toEqual([0, 0, 0])
   })
 })
 
@@ -337,9 +620,9 @@ describe("measureRepairPrompt", () => {
     const themes = createThemeRegistry().catalogue()
     const catalogue = starterCatalogue()
 
-    const measured = measureRepairPrompt(request, tree, catalogue, themes)
+    const measured = measureRepairPrompt(request, tree, { catalogue, themeCatalogue: themes })
     const sent =
-      INTERPRETER_SYSTEM_PROMPT.length + buildRepairMessage(request, tree, catalogue, themes).length
+      INTERPRETER_SYSTEM_PROMPT.length + buildRepairMessage(request, tree, { catalogue, themeCatalogue: themes }).length
 
     expect(measured.total).toBe(sent)
     expect(
@@ -357,9 +640,9 @@ describe("measureRepairPrompt", () => {
     const request = refusalOf(tree, ids.card, false)
     const catalogue = starterCatalogue()
 
-    const measured = measureRepairPrompt(request, tree, catalogue)
+    const measured = measureRepairPrompt(request, tree, { catalogue })
 
-    expect(measured.proposal).toEqual(measurePrompt(request.intent, tree, catalogue))
+    expect(measured.proposal).toEqual(measurePrompt(request.intent, tree, { catalogue }))
     expect(measured.episode).toBe(measured.proposal.total + measured.total)
   })
 
@@ -393,8 +676,7 @@ describe("measureRepairPrompt", () => {
       measureRepairPrompt(
         refusalOf(page.tree, page.targetId, scoped),
         page.tree,
-        starterCatalogue(),
-        createThemeRegistry().catalogue()
+        { catalogue: starterCatalogue(), themeCatalogue: createThemeRegistry().catalogue() }
       )
 
     const small = pageOf(5)
@@ -444,9 +726,9 @@ describe("measurePrompt", () => {
     const themes = createThemeRegistry().catalogue()
     const catalogue = starterCatalogue()
 
-    const measured = measurePrompt(intent, tree, catalogue, themes)
+    const measured = measurePrompt(intent, tree, { catalogue, themeCatalogue: themes })
     const sent =
-      INTERPRETER_SYSTEM_PROMPT.length + buildUserMessage(intent, tree, catalogue, themes).length
+      INTERPRETER_SYSTEM_PROMPT.length + buildUserMessage(intent, tree, { catalogue, themeCatalogue: themes }).length
 
     expect(measured.total).toBe(sent)
     expect(
@@ -483,8 +765,7 @@ describe("measurePrompt", () => {
     const measured = measurePrompt(
       intentFor("make the body quieter"),
       tree,
-      starterCatalogue(),
-      createThemeRegistry().catalogue()
+      { catalogue: starterCatalogue(), themeCatalogue: createThemeRegistry().catalogue() }
     )
 
     expect(
@@ -505,8 +786,7 @@ describe("measurePrompt", () => {
     const measured = measurePrompt(
       intentFor("make the body quieter"),
       tree,
-      starterCatalogue(),
-      createThemeRegistry().catalogue()
+      { catalogue: starterCatalogue(), themeCatalogue: createThemeRegistry().catalogue() }
     )
 
     expect(
@@ -545,7 +825,10 @@ describe("measurePrompt", () => {
       const base = intentFor("soften this section")
       const intent = scoped ? { ...base, scopeNodeId: page.targetId } : base
 
-      return measurePrompt(intent, page.tree, starterCatalogue(), createThemeRegistry().catalogue())
+      return measurePrompt(intent, page.tree, {
+        catalogue: starterCatalogue(),
+        themeCatalogue: createThemeRegistry().catalogue(),
+      })
     }
 
     const small = pageOf(5)
@@ -587,7 +870,7 @@ describe("measureCatalogue", () => {
     const catalogue = starter()
 
     expect(measureCatalogue(catalogue).characters).toBe(
-      measurePrompt(intentFor("make the body quieter"), tree, catalogue).primitives
+      measurePrompt(intentFor("make the body quieter"), tree, { catalogue }).primitives
     )
   })
 

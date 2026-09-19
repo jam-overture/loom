@@ -65,7 +65,10 @@ describe("the request the documentation prints", () => {
       utterance: DOCS_PROMPT_UTTERANCE,
       observedAt: "2026-01-01T00:00:00.000Z",
     }
-    const expected = measurePrompt(intent, tree, catalogueOf(docsRegistry), docsThemes.catalogue())
+    const expected = measurePrompt(intent, tree, {
+      catalogue: catalogueOf(docsRegistry),
+      themeCatalogue: docsThemes.catalogue(),
+    })
     const { blocks, measurement } = docsModelRequest(EXAMPLE)
 
     expect(measurement).toEqual(expected)

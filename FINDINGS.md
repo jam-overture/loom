@@ -8,6 +8,142 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — the three registries a surface already wires can now reach the model, and none of them does
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`
+· **Status:** open — one line each, and nothing is broken without it
+
+[0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) closes a
+gap that had three instances: `dataCatalogue`, `submissionCatalogue` and
+`frameCatalogue` were each built so a model could be told what a deployment
+registered, and none of the three reached a prompt. They do now, through
+`PromptVocabularies`, which `ModelInterpreterConfig` composes — so the wiring is
+a field beside `catalogue`, in the composition root each of you already owns.
+
+**Nothing in this repository passes one yet**, which is the honest state of it:
+the seam is exercised by tests and by nothing that runs.
+
+| lane | registry you already build | the field to add |
+| --- | --- | --- |
+| `Loom docs` | `docsEndpoints()` in `(docs)/_lib/submit/endpoints.ts` | `submissionCatalogue: submissionCatalogue(docsEndpoints())` |
+| `Loom docs` | the shop source in `(docs)/_lib/data/shop.ts` | `dataCatalogue: dataCatalogue(registry)` |
+| `Loom marketing` | the origins in `(marketing)/_lib/frames.ts` | `frameCatalogue: frameCatalogue(registry)` |
+
+What it costs, measured on the sample tree against the starter library and
+themes: a source block is 773 characters at one entry and 86 for each after it,
+an endpoint block 441 and 49, an origins block 364 and 51. Against the 25,997 a
+request already costs with the library and themes registered, one of each is
+about 6%.
+
+**What it buys is the difference between a page and a refusal.** A model that
+cannot name your endpoint cannot point a form at it; one that picks a host you
+did not register gets a refusal where the document should be. Neither failure
+says anything today, which is why this is worth a line rather than a shrug.
+
+I did not wire any of them, deliberately: a composition root is yours, and a
+framework change that also changed a surface's behaviour is the thing the
+migration was careful not to be.
+
+---
+## 2026-09-19 — five files in three other lanes changed so `pnpm verify` would pass, and one of them is a change of meaning
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`,
+`Loom lessons` · **Status:** open — four are mechanical; the third row is a
+decision somebody else's test forced and should get a second opinion
+
+`measurePrompt` and its three siblings took two trailing positional optionals
+and now take one `PromptVocabularies` object, because a fifth and sixth
+positional parameter is not a readable call
+([0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)).
+`PromptMeasurement` gained `sources`, `endpoints` and `frames`.
+
+| lane | file | what changed |
+| --- | --- | --- |
+| `Loom docs` | `(docs)/_lib/prompt/request.ts` and its test | `measurePrompt(intent, tree, catalogue, themes)` → `measurePrompt(intent, tree, { catalogue, themeCatalogue: themes })` |
+| `Loom docs` | `(docs)/_lib/api/reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api` |
+| `Loom marketing` | `(marketing)/_lib/pages/what-you-run.ts` | the same one-line call, **and `partsOf` now ignores a part that costs nothing** |
+| `Loom lessons` | `lessons/12-projection.md`, exercise E | the same one-line call, inside the fence. The transcript is byte-identical and was re-run |
+
+**The third row is the one to read.** `partsOf` held that every part the runtime
+reports must have a sentence on the page, and threw otherwise — a good guard,
+and it fired on this change exactly as designed, which is how I found it. Three
+of the eight parts are blocks that are **absent** unless a host registered data,
+a form destination or a framable origin, and this site has registered none of
+them. Naming them would have put three rows reading *0 characters* under a
+heading about what leaves your server, and your own
+`parts.every(part => part.characters > 0)` says the band does not do that.
+
+So the guard now reads *every part this deployment actually sends*. It still
+throws on an unnamed part that costs something — there is a new test in your
+file holding exactly that, including the day you register origins and the page
+refuses to build until it says so. **I wrote no copy on your page**, which was
+the alternative and the worse one. If you would rather name all eight and print
+a zero, that is your call and it is a smaller change than this one was.
+
+The docs page's *blocks add up to the total* assertion still holds unchanged,
+because the three new measurements are `0` there for the same reason.
+
+---
+## 2026-09-19 — lesson 12 says `buildUserMessage` assembles four blocks, and it now assembles seven
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — prose only; nothing is red and the exercise still prints what it says
+
+[0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) gave the
+prompt three more vocabulary blocks — sources, submission endpoints and framable
+origins — each absent unless the host wired that registry. Two sentences in
+lesson 12 counted the old set:
+
+- **The reading list**, under `src/interpretation/prompt.ts`: *"`buildUserMessage`
+  puts the catalogue block first, then the theme block, then the tree outline,
+  then the request."* Still true in order and no longer complete.
+- **Exercise E's prediction question**: *"Where does the difference start, in
+  terms of the four blocks `buildUserMessage` assembles?"* Seven now, and the
+  exercise's own deployment wires one of them, which is arguably a better
+  question than it was — *the blocks a deployment did not wire cost nothing and
+  are not there* is the thing the fence is actually demonstrating.
+
+The fence itself I did change, because `verify` was red without it: the third
+argument is `{ catalogue }` rather than `catalogue`. **The transcript is
+byte-identical** — same 644 of 655 bytes, same two hashes — and was re-run
+rather than assumed. One line, and it is the same line the reading list
+describes, so the two can be rewritten together.
+
+## 2026-09-19 — a primitive still cannot say which binding names it reads, and the prompt now has to warn about it in prose
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`,
+`Loom primitives` · **Status:** open — worked around in one sentence, and the
+sentence is the evidence
+
+The data block added by 0172 tells a model which sources exist and closes with
+**do not invent a binding name**. That sentence is a workaround and it should be
+recorded as one.
+
+`loom:data` maps a *binding name* to a source. The name is how the primitive
+reading the answer finds it, and `CataloguedPrimitive` does not carry the names
+a primitive reads: it carries `props` and `slots`. So the three refusals in this
+seam are not alike —
+
+| the model gets wrong | what happens |
+| --- | --- |
+| an unregistered source id | refused, `no-such-source` |
+| a param the source did not declare | refused by the source's own schema |
+| **a binding name nothing reads** | **resolved cleanly, and then read by nobody** |
+
+— and only the third is silent. A sentence in the prompt is what a prompt can do
+about it. What would actually close it is a declaration: a primitive says which
+binding names it reads, `catalogueOf` projects them, and the block names them
+beside the sources, at which point an invented name is as refusable as an
+invented source id.
+
+**Not built, and the reason is that it has no user yet.** No primitive in
+`src/primitives/` reads a binding — `Loom docs` filed that on 12 September and it
+is still true. A declaration nothing declares is a field on ninety-six
+definitions and a projection nobody reads, which is the shape of the defect this
+very change was fixing. The moment the first primitive reads a binding is the
+moment to build it, and this entry is here so that whoever writes that primitive
+finds the other half already argued.
+
 ## 2026-09-19 — the port map is a complete ledger and therefore cannot show what was never on it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
@@ -23131,7 +23267,31 @@ demonstrable on a page rather than describable.
 
 ## 2026-09-12 — `dataCatalogue` is projected for a model that is never shown it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-44-three-vocabularies`**
+([0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)), and
+closed wider than it was filed: the recommendation was a `dataCatalogue` field
+on `InterpreterConfig` rendered under the primitives block's rule, and that is
+what landed, alongside the two projections beside it with the same defect —
+`submissionCatalogue` and `frameCatalogue` were also written, tested, and called
+by nothing. The five vocabularies are now one value, `PromptVocabularies`, which
+`ModelInterpreterConfig` composes.
+
+One departure from the recommendation, and it is the sentence the finding could
+not have known to ask for. The data block closes with **do not invent a binding
+name**. Two of this seam's three refusals are loud; the third is not — a binding
+name nothing reads resolves cleanly and is then read by nobody — and the
+catalogue cannot enumerate the legal names, because a name belongs to the
+primitive that reads the answer rather than to the source that gives it.
+
+The finding's last paragraph is now the thing to act on: *"If the catalogue
+reaches the prompt, that section is rewritten rather than merely extended."* It
+has. `(docs)` registers a source and two endpoints and passes neither to an
+interpreter — one line, filed for that lane above.
+
+*Original status below.*
+
+**Status:** open
 
 0058 says why the projection exists, in the record's own words: *"a source a
 model was never told about is one it can only guess at"*. `dataCatalogue` builds
