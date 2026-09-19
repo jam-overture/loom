@@ -1,6 +1,7 @@
 import type { PrimitiveCatalogue } from "../catalogue.js"
 import type { DataCatalogue } from "../data/catalogue.js"
 import type { FrameCatalogue } from "../frame/catalogue.js"
+import type { PrimitiveType } from "../primitive-type.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../reserved-props.js"
 import type { EditIntent } from "../runtime/intent.js"
 import type { RepairRequest } from "../runtime/interpreter.js"
@@ -365,6 +366,75 @@ export const measurePrompt = (
   return {
     ...measured,
     total: Object.values(measured).reduce((sum, part) => sum + part, 0),
+  }
+}
+
+/**
+ * What one registered primitive costs on every request that names it.
+ *
+ * The line the model is shown, and the newline that ends it. Measured through
+ * `renderCatalogue` rather than by counting the fields, for the reason
+ * `UserMessageParts` exists one function up: a second way of working out what a
+ * catalogue entry looks like is a second thing to keep in step, and the first to
+ * go stale.
+ */
+export type CataloguedCost = {
+  readonly type: PrimitiveType
+  readonly characters: number
+}
+
+/**
+ * What a deployment's vocabulary costs, whole and per entry.
+ *
+ * `measurePrompt` answers which block a request is made of. This answers the
+ * question a host asks next, which is what to do about it — and the two numbers
+ * pull in opposite directions on purpose.
+ *
+ * `characters` grows with the library, and is meant to: a deployment that
+ * registers twice as much is telling a model about twice as much, and no ceiling
+ * belonging to this package can know whether that is too much for the one that
+ * deployment sends to. `perEntry` does not grow with the library, and a drift in
+ * it is the framework getting more expensive rather than a host choosing to
+ * spend more. It is the half worth guarding, and the half nothing was watching.
+ *
+ * The whole block is a little more than the sum of its entries: the list is
+ * wrapped in the instruction that makes it usable, without which a model is
+ * shown a vocabulary and not told it may only use that one.
+ */
+export type CatalogueCost = {
+  readonly entries: number
+  /** The block as sent, the instruction around the list included. */
+  readonly characters: number
+  /** The mean cost of one entry, rounded. `0` for a catalogue with no entries. */
+  readonly perEntry: number
+  /** What each entry costs, in catalogue order. */
+  readonly byType: readonly CataloguedCost[]
+}
+
+/**
+ * Measures a vocabulary without sending it.
+ *
+ * The intended caller is a host deciding what to register, holding the answer
+ * against what it is prepared to spend — which is a judgment about the model it
+ * sends to and the latency it will accept, and therefore a deployment's to make
+ * rather than this package's to enforce.
+ *
+ * An empty catalogue costs nothing, because a request that has no vocabulary to
+ * offer omits the block entirely rather than sending an empty heading.
+ */
+export const measureCatalogue = (catalogue: PrimitiveCatalogue): CatalogueCost => {
+  const byType = catalogue.map((primitive) => ({
+    type: primitive.type,
+    characters: renderCatalogue([primitive]).length + 1,
+  }))
+
+  const listed = byType.reduce((sum, entry) => sum + entry.characters, 0)
+
+  return {
+    entries: catalogue.length,
+    characters: catalogueBlock(catalogue).length,
+    perEntry: catalogue.length === 0 ? 0 : Math.round(listed / catalogue.length),
+    byType,
   }
 }
 

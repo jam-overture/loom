@@ -504,6 +504,7 @@ export * from "./layout.js"
  */
 export type { Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./compositions/index.js"
 export {
+  CATALOGUE_TYPES,
   COMPOSITION_INTERPRETER,
   COMPOSITION_PARTS,
   compositionById,

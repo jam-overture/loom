@@ -127,6 +127,53 @@ this lane's to work around — and working around them individually, with a
 `<details>` here and a CSS-only tab strip there, is how a library ends up with
 nine different answers to one question.
 
+## The reach of the catalogue over the vocabulary — measured 19 September
+
+**A second axis this document did not have, and it changes the recommendation
+below rather than adding to it.** Everything above counts what the *library*
+is missing. This counts what the *catalogue* can reach, which is a different
+question with a worse answer.
+
+| | on `main`, 19 Sep | after `primitives-39` |
+| --- | --- | --- |
+| primitives registered | 96 | 96 |
+| primitive types some band builds | **52** | **63** |
+| registered and unreachable by dropping in a band | **44 (46%)** | **33** |
+| bands · page parts | 30 · 19 | 34 · 21 |
+
+`CATALOGUE_TYPES` in `src/primitives/compositions/index.ts` is the exported
+measurement, so this table is one `filter` from any registry rather than a
+number somebody re-derives. **It is deliberately not a ceiling** — a primitive
+is registered before a band uses it, so a test demanding the two lists agree
+would fire on the ordinary order of work.
+
+### Forty-four is the misleading number; nineteen is the real one
+
+| | count | verdict |
+| --- | --- | --- |
+| needs an asset — `media`, `embed`, `before-after`, `carousel`, `overlay` | 5 | **not work.** The catalogue ships no image source at all, by test |
+| not a landing page — `book`, `event`, `listing`, `product`, `offering`, `recording` + grids, `message`/`message-list` | 16 | **wants a second page sequence**, not a band on this one |
+| a state, not a band — `empty-state`, `waiting-state`, `link-pager` | 3 | belongs to a bound region (0058) |
+| structural — `page` | 1 | it is the root |
+| **genuinely missing** | **19** | **eleven closed on 19 Sep**; eight left |
+
+The eight left, in priority order: `table`/`table-row`/`table-cell` (a
+specification band), `halo`/`backdrop`/`reveal` (the treatments that make a
+page pop — not a band, a pass over the bands that exist), `divider`, `spec`,
+`pin`.
+
+### Why this was invisible for a month
+
+The queue has been sourced from `docs/hermes-port-map.md`, which is a complete
+ledger of Hermes — and a ledger tells you what is left of the thing it lists
+and nothing about what was never on it. Hermes' users are creators, so no
+Hermes block is developer-product shaped, so `loom.code`, `loom.code-span` and
+`loom.kbd` sat registered and unreachable while the catalogue could not draw
+the landing page of the product that owns it.
+
+**The instrument, for whoever picks this up: measure the catalogue against the
+registry, not the registry against Hermes.**
+
 ## Tier C — things that look missing and are not
 
 Checked so the next run does not re-propose them. Each is covered, and the
@@ -184,11 +231,18 @@ that consumer. Filed for `Loom daily build`.
 
 ## The arithmetic to 250
 
-| | today | by 2026-09-19 |
-| --- | --- | --- |
-| primitives | 92 | **~110** — Tier A now, Tier B if the behaviour vocabulary opens |
-| starting compositions | 9 | **~140** |
-| **droppable things** | **101** | **250** |
+| | 13 Sep | planned for 19 Sep | **actual, 19 Sep** |
+| --- | --- | --- | --- |
+| primitives | 92 | ~110 — Tier A now, Tier B if the behaviour vocabulary opens | **96** (Tier A closed; Tier B never opened) |
+| starting compositions | 9 | ~140 | **34** |
+| **droppable things** | **101** | **250** | **130** |
+
+**The second row missed by a wide margin and the reason is worth recording
+rather than apologising for.** Compositions grew 9 → 34 in six days, which is
+four a day against a plan that needed twenty-two a day. Nothing was blocked;
+the bands were simply built at the quality bar the brief also sets, and a band
+is a day's argument rather than an hour's typing. A run that hit 140 would
+have hit it with bands nobody photographed.
 
 250 is reachable this week **and every one of them is real** — provided the
 second row does the work. That is also the row that matches what 21st.dev's

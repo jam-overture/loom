@@ -241,7 +241,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
 | [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
 | [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, and what shape an answer needs in order to say it; and why replacing a correct guess with an authoritative source is a regression until the authority has been told. |
-| [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; and why a test that restates the value it is testing is a second copy with a tick beside it. |
+| [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; why a test that restates the value it is testing is a second copy with a tick beside it — and what was still wrong after the repository read this lesson and fixed the list. |
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 
 Parts I to IV are the system, and the [review
@@ -297,6 +297,16 @@ question it answered yes produce the same output, which is none. So Part V's
 seams are no longer only about facts somebody else owns: this one is a fact
 nobody owns, and the remedy is not a declaration but a *place to put a claim
 where getting it wrong is an event*.
+
+The lesson then got its second half from the repository rather than from its
+author. Written on 15 September against a list nothing checked, it was read by
+the runtime lane, and the list was fixed two days later with the strongest
+mechanism the lesson describes. The fault the list was found by **survived the
+fix** — a level a scale cannot place still ranks beneath the bottom of it,
+because the fault was never in the list. So the lesson now ends somewhere more
+useful than it began: a check is bounded by the population of values that pass
+through the place it runs, and *a remedy that closes the route you found the
+fault by is not a remedy for the fault*.
 
 Lesson 26 is the third kind, and it is the one the first eight make look
 impossible: a fact that **two** parties own, both of them inside Loom, both

@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import type { PrimitiveCatalogue } from "../catalogue.js"
 import { createDataRegistry, defineSource, type SourceEntry } from "../data/adapter.js"
 import { dataCatalogue } from "../data/catalogue.js"
 import { frameCatalogue } from "../frame/catalogue.js"
 import { createFrameOriginRegistry } from "../frame/origin.js"
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, type NodeId } from "../ids.js"
-import { createStarterPrimitiveRegistry } from "../primitives/index.js"
+import { createStarterPrimitiveRegistry, STARTER_PRIMITIVES } from "../primitives/index.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../reserved-props.js"
 import { ok } from "../result.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { createPrimitiveRegistry } from "../sdk/registry.js"
+import { selectPrimitives } from "../sdk/selection.js"
 import { submissionCatalogue } from "../submit/catalogue.js"
 import { createEndpointRegistry, defineEndpoint, type EndpointEntry } from "../submit/endpoint.js"
 import { createThemeRegistry } from "../theme/registry.js"
@@ -24,6 +27,7 @@ import {
   buildRepairMessage,
   buildUserMessage,
   hashPrompt,
+  measureCatalogue,
   measurePrompt,
   measureRepairPrompt,
   INTERPRETER_SYSTEM_PROMPT,
@@ -835,5 +839,110 @@ describe("measurePrompt", () => {
       measure(large, true).tree - measure(small, true).tree,
       "a scoped request has started growing with the page again, which is the cost 0083 exists to remove"
     ).toBeLessThan(20)
+  })
+})
+
+describe("measureCatalogue", () => {
+  const starterEntries = () => STARTER_PRIMITIVES
+
+  const catalogueOfTypes = (types: readonly string[]): PrimitiveCatalogue => {
+    const selected = selectPrimitives(starterEntries(), types)
+    if (!selected.ok) throw new Error("expected the selection to be honoured")
+
+    const registry = createPrimitiveRegistry(selected.value)
+    if (!registry.ok) throw new Error("the sliced registry did not build")
+
+    return catalogueOf(registry.value)
+  }
+
+  const starter = () => {
+    const registry = createStarterPrimitiveRegistry()
+    if (!registry.ok) throw new Error("the starter registry did not build")
+
+    return catalogueOf(registry.value)
+  }
+
+  const listed = (cost: ReturnType<typeof measureCatalogue>) =>
+    cost.byType.reduce((sum, entry) => sum + entry.characters, 0)
+
+  it("measures the block that is actually sent", () => {
+    const { tree } = sampleTree()
+    const catalogue = starter()
+
+    expect(measureCatalogue(catalogue).characters).toBe(
+      measurePrompt(intentFor("make the body quieter"), tree, { catalogue }).primitives
+    )
+  })
+
+  it("charges nothing for a vocabulary with nothing in it", () => {
+    expect(measureCatalogue([])).toEqual({ entries: 0, characters: 0, perEntry: 0, byType: [] })
+  })
+
+  it("names every entry, in the catalogue's order", () => {
+    const catalogue = starter()
+
+    expect(measureCatalogue(catalogue).byType.map((entry) => entry.type)).toEqual(
+      catalogue.map((primitive) => primitive.type)
+    )
+  })
+
+  /**
+   * The instruction around the list is the only thing the block costs beyond its
+   * entries, and it is small and fixed. A block whose prose had grown into the
+   * hundreds would be a cost every deployment pays whatever it registers, which
+   * is the one part of this number that is this package's to answer for.
+   */
+  it("costs a little more than its entries, and the little is the instruction", () => {
+    const cost = measureCatalogue(starter())
+    const prose = cost.characters - listed(cost)
+
+    expect(prose).toBeGreaterThan(0)
+    expect(
+      prose,
+      "the instruction wrapped around the catalogue has grown; it is paid on every request by every deployment, whatever it registered"
+    ).toBeLessThan(500)
+  })
+
+  /**
+   * The ceiling that survives a library that is meant to grow.
+   *
+   * A ceiling on the whole block would fire on exactly the growth the starter
+   * library is being grown for, and firing would mean a red build for every
+   * surface — so it would be raised without being read, which is what a ceiling
+   * nobody believes is worth. What must not move is the price of one entry: the
+   * block grows with the library by design and with this number by accident.
+   *
+   * 200 is roughly 17% above the 171 characters the ninety-six starter entries
+   * average. When it fires the answer is that a description has grown past the
+   * one line it is meant to be, or that a primitive declares more props than a
+   * model needs shown, or that the figure moves and the reason is written down.
+   */
+  it("keeps one registered primitive at about what one costs today", () => {
+    expect(
+      measureCatalogue(starter()).perEntry,
+      "a catalogue entry now costs a model noticeably more than it did; the block is meant to grow with the library and not with the price of a line"
+    ).toBeLessThan(200)
+  })
+
+  /**
+   * The answer to the block having no ceiling, which is that the ceiling is a
+   * deployment's to set and this is how it is kept: a library is a set to choose
+   * from, and a host that chooses pays for what it chose.
+   */
+  it("charges a deployment for the slice it registered rather than the library it chose from", () => {
+    const whole = measureCatalogue(starter())
+    const twelve = starterEntries()
+      .slice(0, 12)
+      .map((entry) => entry.type)
+    const slice = measureCatalogue(catalogueOfTypes(twelve))
+
+    expect(slice.entries).toBe(12)
+    expect(whole.entries).toBeGreaterThan(50)
+    expect(slice.characters).toBeLessThan(whole.characters / 4)
+    expect(listed(slice)).toBe(
+      whole.byType
+        .filter((entry) => twelve.includes(entry.type))
+        .reduce((sum, entry) => sum + entry.characters, 0)
+    )
   })
 })
