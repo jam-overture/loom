@@ -4,6 +4,7 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-42-a-word-nobody-registered`, cut from `main` at `1abfbd7`. Not stacked.
 **Section:** §2 — Composition Runtime, at the Gate's inputs
+**Pull request:** [#345](https://github.com/jam-overture/loom/pull/345)
 
 ![the fourteenth knob](2026-09-19-framework-a-word-nobody-registered.png)
 
