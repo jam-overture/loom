@@ -90,6 +90,78 @@ ways to have no word*, names the divider as the counterexample, and says
 *non-blank string-valued* in the four places it describes `unread`. Filed rather
 than fixed because `src/sdk/copy.ts` is yours and a lessons branch that edits it
 is a lessons branch nobody can review.
+## 2026-09-18 — a shot list cannot reach inside a frame, and the surface most worth photographing is now framed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**a gap, not a defect**, and the sibling of the 17 September entry about a state
+the browser held before the page loaded
+
+`tools/screenshot/plan.ts` takes a `do` list of `click` and `wait`, and both are
+resolved against the **top document**. Playwright's selector engine pierces open
+shadow roots and does not pierce a browsing context, so a shot list can
+photograph a page containing a frame and cannot press anything inside it.
+
+That was a limit nobody met until §4d landed on 18 September and the front door
+began **containing** `/demo` rather than pointing at it (0056). The
+demonstration's most-seen state is now a frame on the landing page, and this
+run's whole subject was *what a control inside that frame does* — which needed
+`page.frameLocator(...)`, so the four pictures in
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-*` were taken by a
+thirty-line Playwright script in a scratch directory rather than by `pnpm shoot`.
+That is the second lane in two days to keep its own launcher, which is the
+arrangement [0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to stop being normal.
+
+**It is smaller than the 17 September entry and it has no posture problem.** A
+step could carry the frame it applies to — `{ "click": "…", "in": "iframe" }`,
+or a `frame` field on the shot resolved once and applied to every step — and
+either is a `frameLocator` call in `../specimen/capture.ts` and one Zod field
+here. Unlike an `initScript` it runs nothing it is given: a selector is already
+what a `click` step is, and the new field is another selector.
+
+**What a lane cannot work around and this would fix**: `waitFor` has the same
+limit, so a framed page's readiness is currently guessed at with a `wait`. That
+is the part that makes a shot list of a framed surface flaky rather than merely
+verbose.
+
+Nothing is blocked. The pictures got taken. `tools/` is yours and so is the call.
+
+---
+## 2026-09-18 — every state the demonstration shows inside a frame is still computed in the one file a test cannot reach
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**the third data point on the 17 September entry**, kept there rather than filed
+as a new class, and narrowed by one
+
+The matrix for `demo-21-a-door-that-opens-into-the-box`, run against a commit:
+
+| defect restored | what fails |
+| --- | --- |
+| `isFramed` drops the absent-`top` guard | 1 test |
+| `Wordmark` never withdraws | 2 tests |
+| `ReadTheDocs` never withdraws | 1 test |
+| the hook answers the client's question on the server too | 1 test |
+| **`DemoBar` inlines a link beside the `Wordmark`** | **1 test** |
+| **`page.tsx` renders the raw link instead of `ReadTheDocs`** | **nothing — 454 passed** |
+
+**The fifth row is the new half and it is the encouraging one.** The same
+wiring defect, in a component rather than in the page, is caught by one render:
+the bar is an ordinary component, so a test can assert *the bar has no door out*
+rather than *the wordmark has no door out*, and the difference between those two
+sentences is exactly what the 17 September entry says is missing. Where a lane
+can put a reading in a component it can test the wiring for free.
+
+**The sixth row is the same one, unchanged.** `page.tsx` is an `async` Server
+Component reading cookies and a store, so no vitest run crosses it, and
+unwiring `ReadTheDocs` leaves 454 green with one `TS6133` for an unused import —
+a stray line noticing itself, gone the moment the same edit deletes the import.
+
+The recommendation is unchanged and now overdue: `whatTheRailShows(tree, records, held)`,
+holding the arithmetic `page.tsx` does inline, so a test can call the function
+the page calls. **Recommended as this lane's next unit.** Seven readings now sit
+in that file and this unit added the eighth — a component the page chooses to
+render is not arithmetic, but it is one more thing a deleted line would take
+away silently.
 
 ---
 ## 2026-09-18 — lesson 25 is off the values your fix changes; land 0166's decision 3 whenever you like
@@ -1242,8 +1314,35 @@ mattered was one layer down from where this lane stopped looking.
 ## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — **raised by the maintainer**, 13 September, as the thing to figure out
-before the library grows further
+**closed by `framework-43-what-one-entry-costs`**, with one of the three pieces
+declined and re-filed. Recorded as
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md).
+
+- **Piece 1, the ceiling — built, and deliberately not where this entry put it.**
+  A ceiling on the *block* would fire on exactly the growth the library is being
+  grown for, in five lanes that did not cause it, and would be raised without
+  being read. The guard is on `perEntry` instead: under 200 characters against
+  today's 171, a number that does not move when the library grows and does move
+  when an entry gets dearer. A second guard holds the instruction around the
+  list under 500.
+- **Piece 2, the inverse of `additional` — built**, as `selectPrimitives(entries,
+  types)` in `@loom/runtime/sdk`. It takes entries rather than reaching into
+  `src/primitives/`, so it slices any library, and it **refuses** a name the
+  library does not carry — naming every one, not the first — which the
+  hand-filter it replaces could not.
+- **Piece 3, the role vocabulary — declined here and filed for your lane** (see
+  the entry of 18 September below). The members would be declared on 96
+  primitives in `src/primitives/`, which is yours; a vocabulary landed on one
+  side of that boundary and declared on nobody's answers `[]` to every question.
+
+`measureCatalogue` is the new instrument: the block, each entry, and the mean,
+taken from the block that is actually sent. Measured today on `main` — 96
+entries, 16,718 characters, 171 per entry, against 6,155 for themes.
+
+Original status below.
+
+**Status:** open — **raised by the maintainer**, 13 September, as the thing to
+figure out before the library grows further
 
 The maintainer's target is 250 primitives by 19 September, with the instruction
 that *"if increasing the number of primitives is producing a scaling issue with
@@ -18692,6 +18791,17 @@ onto its branch instead*.
 ## 2026-09-07 — a change nobody answered for three days is already dead, and the queue it is sitting in cannot tell
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — `src/write/liveness.ts` is the recommended helper and
+has been on `main` since #282 landed, built by the run reported in
+`reports/2026-09-07-framework-the-queue-that-could-not-tell.md`. `holdLiveness`
+makes the one comparison in the direction `confirmHeld` makes it, `markHolds`
+marks a page of them, and `markHoldsFromStore` reads the heads and never fails.
+The status was never updated, which is why this and the 11 September entry below
+both read as open on a run four days later. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
 **Status:** open — documented on the page as it actually behaves, not worked
 around
 
@@ -19210,6 +19320,15 @@ nothing behind it will object.
 ## 2026-09-11 — a review queue still cannot tell a dead change from a live one, and now a published page tells hosts to write the comparison themselves
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — the helper landed in `src/write/liveness.ts`, so the
+three lines this entry says *Answering a held change* prints as the thing a host
+has to write are the thing a host no longer has to write. **That page is now the
+rewrite this entry predicted, and it is `Loom docs`' to make.** Closed on
+18 September by `framework-43-what-one-entry-costs`, which changed no code for
+it.
+
+Original status below.
+
 **Status:** open — a second data point on the 7 September entry, unchanged in
 substance
 
@@ -22506,8 +22625,19 @@ The brief's *second* problem — *"it is clunky"* — is live, and is what every
 on #220 has been.
 ## 2026-09-01 — a hold store has no deployment-wide read, so the portal's headline screen costs one query per page
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— worked around on the surface, said out loud on screen, not fixed
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed** — `HoldStore.waiting(request?)` is on `main`, in the shape this entry
+asked for: bounded, cursored by `(heldAt, proposalId)`, in `compareHolds` order,
+in both implementations and under the contract suite. Built by the run reported
+in `reports/2026-09-06-framework-the-queue-and-the-blind-spot.md` and landed with
+#282. The badge beside *Waiting on you* this entry says is worth adding the day
+this is taken is `Loom portal`'s, and the day has come. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
+**Status:** open — worked around on the surface, said out loud on screen, not
+fixed
 
 `HoldStore` offers `hold`, `get`, `forTree` and `release`. `forTree` is the only
 listing, and its comment says why: *"scoped by tree because that is the only
@@ -26262,9 +26392,18 @@ review queue.
 ---
 ## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— not a defect and nothing is blocked; a run has to pick one and this run
-explains which
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-43-what-one-entry-costs`** — dated rather than deleted,
+which is what this entry recommends. The earlier section now opens with a note
+saying it is superseded by the later one, that the later one is current, and why
+it is kept: the symptom it describes is real, and a run that follows it by
+reaching for the address in its opening note gets the account that does not
+deploy. Neither section's words were changed.
+
+Original status below.
+
+**Status:** open — not a defect and nothing is blocked; a run has to pick one and
+this run explains which
 
 The file has two sections about the same thing and they contradict each other.
 
@@ -26413,8 +26552,39 @@ is for.
 
 ## 2026-09-18 — a framed page's own wordmark navigates the frame, so the front door can contain a copy of itself
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open —
-measured, cosmetic, and not blocking anything
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** **closed
+by `demo-21-a-door-that-opens-into-the-box`** — the recommended shape, taken as
+recommended, and widened by one link
+
+**Closing note, `Loom demo`, 18 September.** Reproduced first, in Chromium
+against the built application, exactly as filed: click the wordmark inside the
+frame and the top page does not move, the frame loads `/`, and the front door
+renders inside its own embed. The picture is
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.png` and it has
+two identical navigation bars and two *Sign in* buttons in it.
+
+**Taken as recommended.** `window.self !== window.top`, read by the bar, which
+renders the mark as plain text rather than as a link when it is framed. Not a
+query parameter, for the reason the filing gives and which is the better one:
+a third party who frames the demonstration is owed the same behaviour as the
+host that ships it, and a parameter makes the chrome a function of who linked.
+
+**Widened by one link, and this is the only thing the filing did not cover.**
+Measured the same way: the foot of the rail links to `/docs`, and inside the
+frame that loads the **whole documentation site into the box** — sidebar,
+search field and all, under a caption still reading *it belongs to a clinic that
+does not exist*
+(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png`). The
+filing's own argument reaches it: `allow-top-navigation` is withheld and so is
+`allow-popups`, so there is no target this anchor can use, and the demonstration
+has exactly two links that leave it. Fixing one of two identical defects is the
+shape this lane has filed about twice, so both are withdrawn.
+
+**What the frame keeps.** Everything else: the mark, the words, the instrument
+panel, and the demonstration itself — measured working inside the box after the
+withdrawal, ring, Gate language, *Apply this change* and all
+(`…-working.png`). The mark's markup is byte-identical either way; only the door
+is gone.
 
 The front door now frames `/demo` (§4d, 0056). Measured in Chromium against the
 built application, with the top page at `/`:
@@ -26697,8 +26867,10 @@ under the visitor's cursor — is settled by comparing two screenshots of this
 repository's own page.
 ## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found by looking at a screenshot, and inside the type system it cannot happen
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**corrected 18 September — the path this describes does not exist.** The
+screenshot was real and the conclusion drawn from it was wrong. See the
+correction appended at the foot of this entry.
 
 `ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
 on a hold's disposition, and there is no fallback. Where the code is one of the
@@ -26759,3 +26931,178 @@ Two things to add to it, both cheap and both cost this run an attempt:
 make one reachable. A person evaluating Loom still cannot click to a populated
 review queue, on the front door or on a page. `/portal/checkup` is the third of
 the three and the only one nobody has photographed at all.
+
+---
+
+## 2026-09-18 — a deployment can now register a slice by name, and cannot ask for one by kind
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is blocked; this is the third piece of your 13 September entry,
+built around rather than guessed at
+
+Your entry of 13 September proposed three pieces and said the third was the one
+with a design question in it. Two are built and recorded in
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md):
+a guard on what one catalogue entry costs, and `selectPrimitives(entries, types)`
+— the inverse of `additional`, which takes the entries a deployment names and
+refuses a name the library does not carry.
+
+**Selecting is by name, which means reading the library.** A host wanting sixty
+of ninety-six has to know which sixty. Your third piece is the answer — a role
+per part a primitive plays, `band`, `item`, `leaf`, `wrapper`, `control`, so a
+registry can be asked for a coherent slice — and it is filed for you rather than
+built here for one reason:
+
+**The vocabulary is one lane's and the declarations are another's.** Widening
+`PrimitiveRole` is a five-line change in `src/role.ts`, which is this lane's. The
+declarations are `role: "band"` on ninety-six entries in `src/primitives/`, which
+is yours. Landing the vocabulary alone gives every consumer a registry that
+answers `[]` to every question about it, for as long as the declarations take —
+and 0114 set the bar for widening the vocabulary at *a consumer that cannot
+answer its question from the registry*, which is a bar about consumers, not about
+how many members a type has.
+
+So: **if you want it, say so and this lane lands the vocabulary in one run, ahead
+of your declarations.** What would make it worth landing, and what this lane
+cannot judge from outside `src/primitives/`:
+
+- whether five members partition the library, or whether a third of it is
+  genuinely two of them at once — a `loom.split` is a band and a wrapper;
+- whether the member a selecting host actually wants is the part a primitive
+  plays or the *job* it does (a pricing table and a stat grid are both `band`
+  and nobody registers one to get the other).
+
+A wrong answer here is expensive in the direction 0114 warned about: a closed
+vocabulary declared 96 times is not cheap to change.
+
+Not urgent. Nothing needs it before 250 entries; a host that wants a slice today
+names it.
+
+---
+
+## 2026-09-18 — the README says the starter library ships ten, and it ships ninety-six
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — a stale sentence, not a defect, and the table under it is the part that
+matters
+
+`README.md`, under **The starter primitives**:
+
+> `@loom/runtime/primitives` ships ten, ported from the Hermes predecessor and
+> chosen to cover the primitive contract rather than the catalogue
+
+Measured on `main` today: `STARTER_PRIMITIVES` has **96 entries**. The ten-row
+table beneath the sentence lists the original ten and nothing since.
+
+Found while writing the section next to it, which is why this is filed rather
+than fixed: the sentence and the table are both claims about your library, and
+the honest replacement is a judgment about what a reader of the README needs —
+ninety-six rows is not it, and *"ships ninety-six, ten of which are listed here"*
+is a table that will be wrong again in a week. A count computed by a test, or a
+pointer to `docs/primitive-gap-inventory.md`, are both better than a number
+somebody retypes.
+
+The neighbouring section, **Registering primitives**, is this lane's and is
+current as of today.
+## 2026-09-18 — correction: an unknown reason code cannot reach `ruleSentence`, because the hold never parses
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** this
+lane's 17 September entry, *"a disposition reason code the portal has never
+heard of draws a headed, empty box"* · **Status:** the original finding is
+**closed as wrong**; what it was reaching for is filed as the two entries below
+
+The 17 September entry said an unknown `disposition.reason.code` reaches
+`ruleSentence`, returns `undefined`, and draws a headed, empty *Why it stopped*
+panel — and that this is reachable "across a `DATABASE_URL` written by an older
+runtime", because a hold is "parsed from JSON written by whatever runtime wrote
+it".
+
+**The first half of that is true and the second half is not.** `loom_holds` is
+read through `postgresHoldStore`'s `toHeld`, which calls `parseHeldProposal`,
+which is `heldProposalSchema.safeParse` — and `heldProposalSchema.disposition`
+is `dispositionSchema`, whose `reason.code` is `dispositionReasonCodeSchema`, a
+`z.enum`. A code the deployment has never heard of **fails the parse**. It never
+reaches the lookup, and `ruleSentence`'s missing fallback is unreachable by the
+route the finding named.
+
+**What the screenshot actually showed** was a hand-written fixture in a preload
+using two invented codes, which is exactly what the entry said it was. The
+mistake was in the reasoning about the production path, not in the observation.
+
+**Why this is written out rather than deleted.** The entry was right about the
+*shape* of the failure — a screen going quiet on the one line explaining why a
+person is being asked to decide something — and looking for it one layer up is
+what found the two real findings below. A wrong finding that produced a right
+unit is worth keeping legible; deleting it would leave the next run to
+rediscover the Zod parse from scratch.
+
+**What would make `ruleSentence`'s fallback reachable, and therefore right.** If
+the framework answers the finding below by *skipping* an unreadable hold rather
+than failing the listing, a hold with an unknown code becomes a hold the portal
+holds and cannot fully read, and the lookup is on the path again. Until then a
+fallback would be a sentence no reader can reach.
+
+---
+## 2026-09-18 — `HoldError` cannot tell a store that did not answer from a hold this deployment cannot read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — a framework gap, said out loud on the portal's front door meanwhile
+
+`HoldError` is `not-held | already-held | unavailable`, and `unavailable` is
+`{ code, detail }` where `detail` is a free string. Two failures arrive through
+it that want **opposite next moves** from the person reading the screen:
+
+| what happened | what the reader should do |
+| --- | --- |
+| the database did not answer | wait, and try again in a moment |
+| a stored hold did not parse (`parseHeldProposal`) | go and look — something is wrong with the data, and waiting will not fix it |
+
+The portal cannot tell them apart. `/portal` fans out one `forTree` per listed
+page and now names every page whose read failed (18 September), with a plain
+sentence that deliberately **does not say what went wrong** — because the only
+honest sentence available covers both, and guessing at one would send a reader
+to wait out a problem that does not resolve, or to investigate a blip.
+
+**What would close it:** a distinguishable code on `HoldError`, or a structured
+`unavailable` that separates a transport failure from a parse failure. The
+portal already has the shape ready for it: `unreadableQueue` in
+`_lib/vocabulary.ts` is a total `Record` over `HoldError["code"]`, so a new code
+is a compile error in this lane rather than a silence on a screen.
+
+**Not the portal's to fix** (0018): the portal consumes the store through
+`@loom/runtime/write` and does not get to say what an error is.
+
+---
+## 2026-09-18 — one hold a deployment cannot parse removes a whole page from the review queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — the behaviour is deliberate and documented; the consequence is the
+finding
+
+`postgresHoldStore.parseAll` fails the whole listing on the first row that does
+not parse, and its comment gives the reason:
+
+> *"One unreadable row fails the whole listing rather than being skipped. A queue
+> that quietly omits a change nobody can parse is a queue that says nothing is
+> waiting when something is — and the reviewer has no way to find out
+> otherwise."*
+
+That argument is right, and it was written about a queue that could not report
+the failure. The consequence it buys is now visible: **one hold written by a
+runtime this deployment is older than takes that page's entire queue off the
+front door**, and every other change waiting on that page goes unmentioned with
+it. A new `DispositionReasonCode`, a new field on a judgment, a schema widened
+in either direction — any of those makes a deployment mid-rollout stop listing
+some of its own pages.
+
+**Why it is filed rather than argued against.** The alternative — skip the row,
+count it, report it — is now a *readable* alternative in a way it was not when
+`parseAll` was written, because the portal's sweep names what it could not read.
+That changes the trade and it is the framework's to weigh, not this lane's: the
+same argument that makes it possible on `/portal` says nothing about the callers
+that are not a screen.
+
+**It interacts with the two findings above.** Skipping rather than failing makes
+`ruleSentence`'s missing fallback reachable, which is the correction directly
+above; and it is a second reason `HoldError` wants a code that distinguishes a
+parse failure, which is the finding directly above that.

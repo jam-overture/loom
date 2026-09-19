@@ -970,6 +970,27 @@
               "summary": "Measures a request without sending it."
             },
             {
+              "name": "CataloguedCost",
+              "kind": "type",
+              "signature": "type CataloguedCost = {\n    readonly type: PrimitiveType;\n    readonly characters: number;\n};",
+              "truncated": false,
+              "summary": "What one registered primitive costs on every request that names it."
+            },
+            {
+              "name": "CatalogueCost",
+              "kind": "type",
+              "signature": "type CatalogueCost = {\n    readonly entries: number;\n    /** The block as sent, the instruction around the list included. */\n    readonly characters: number;\n    /** The mean cost of one entry, rounded. `0` for a catalogue with no entries. */\n    readonly perEntry: number;\n    /** What each entry costs, in catalogue order. */\n    readonly byType: readonly CataloguedCost[];\n};",
+              "truncated": false,
+              "summary": "What a deployment's vocabulary costs, whole and per entry."
+            },
+            {
+              "name": "measureCatalogue",
+              "kind": "function",
+              "signature": "const measureCatalogue: (catalogue: PrimitiveCatalogue) => CatalogueCost",
+              "truncated": false,
+              "summary": "Measures a vocabulary without sending it."
+            },
+            {
               "name": "buildRepairMessage",
               "kind": "function",
               "signature": "const buildRepairMessage: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => string",
@@ -5742,6 +5763,34 @@
               "signature": "const createPrimitiveRegistry: (entries: readonly PrimitiveEntry[]) => Result<PrimitiveRegistry, RegistryError>",
               "truncated": false,
               "summary": "Builds a registry, or refuses. A duplicate type is refused rather than resolved last-wins: two registrations for one identifier means a tree's meaning depends on module evaluation order, which is not a thing anyone should have to debug from a rendered page."
+            }
+          ]
+        },
+        {
+          "module": "sdk/selection",
+          "title": "Selection",
+          "summary": "Taking part of a primitive library rather than all of it.",
+          "symbols": [
+            {
+              "name": "SelectionError",
+              "kind": "type",
+              "signature": "type SelectionError = {\n    readonly code: \"unregistered-types\";\n    readonly types: readonly string[];\n};",
+              "truncated": false,
+              "summary": "Every name the library does not carry, not just the first."
+            },
+            {
+              "name": "describeSelectionError",
+              "kind": "function",
+              "signature": "const describeSelectionError: (error: SelectionError) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "selectPrimitives",
+              "kind": "function",
+              "signature": "const selectPrimitives: (entries: readonly PrimitiveEntry[], types: readonly string[]) => Result<readonly PrimitiveEntry[], SelectionError>",
+              "truncated": false,
+              "summary": "The entries a deployment chose, in the library's own order."
             }
           ]
         },

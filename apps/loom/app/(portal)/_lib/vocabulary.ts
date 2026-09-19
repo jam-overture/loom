@@ -1,4 +1,4 @@
-import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
+import type { HoldError, RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 import type {
   DispositionKind,
   DispositionReasonCode,
@@ -745,3 +745,38 @@ export const pointingWords = (addressing: Addressing): PlainWord => {
       }
   }
 }
+
+/**
+ * A page whose waiting changes could not be read, in a person's words.
+ *
+ * The front door asks every page it lists what is waiting on it, and a page
+ * that answers an error is the one case where this screen's whole claim — *this
+ * is where you find out whether anything needs you* — stops being true without
+ * looking any different. It was counted (`Sweep.unreadable`) and never said,
+ * and the sentence a reader got was *"One page couldn't be checked."*
+ *
+ * Total over the store's own error codes, so a code added to the runtime fails
+ * the build here rather than reaching a reader as a silence. Two of the three
+ * cannot arise from asking a page what is waiting on it — they are answers to
+ * *this one proposal*, not to a listing — and they are written out anyway
+ * rather than defaulted, because the cost of writing a sentence that never
+ * renders is one sentence, and the cost of a fallback is that the day one of
+ * them does arrive nobody finds out which.
+ *
+ * None of them says what went wrong, and that is not modesty. `HoldError` has
+ * one code for every reason a read fails, so *the database did not answer* and
+ * *this deployment cannot read something the change record holds* arrive here
+ * as the same `unavailable`, and they want opposite next moves — wait, or go
+ * and look. Filed as a framework finding on 18 September. Until the two can be
+ * told apart, the honest sentence is the one that does not guess, and the
+ * store's own account of it goes in the technical record beside it.
+ */
+const UNREADABLE_QUEUES: Readonly<Record<HoldError["code"], string>> = {
+  unavailable:
+    "Loom couldn't read what's waiting on this page. Nothing has been lost and nothing has been decided — asking a page what is waiting on it only reads it.",
+  "not-held":
+    "The change this page was asked about is no longer waiting. Somebody may have answered it already.",
+  "already-held": "Loom was asked to hold a change on this page that it is already holding.",
+}
+
+export const unreadableQueue = (code: HoldError["code"]): string => UNREADABLE_QUEUES[code]
