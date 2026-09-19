@@ -6,6 +6,8 @@ import { homePageTree } from "../pages/home"
 import { DEFAULT_THEME } from "../site"
 
 import {
+  BAND_QUESTION,
+  bandSentence,
   frontDoorReadings,
   funnelSentence,
   FUNNEL_QUESTIONS,
@@ -188,10 +190,24 @@ describe("the readings", () => {
    * and a question about any other pair is a different band of the page.
    */
   it("asks about the band that offers a change, and about the foot of the page", () => {
-    expect(FUNNEL_QUESTIONS).toEqual([
-      { from: "See it happen", to: "See it happen", did: "used something in it" },
-      { from: "See it happen", to: "Keep going", did: "got as far as it" },
-    ])
+    expect(FUNNEL_QUESTIONS).toEqual([{ from: "See it happen", to: "Keep going" }])
+    expect(BAND_QUESTION).toBe("See it happen")
+  })
+
+  /**
+   * The rule the funnel lost a question to, asserted rather than only written
+   * down: a pair may not name the same band twice.
+   *
+   * Both ends of a funnel are a node a signal names, and a reader never names a
+   * band — they press a button inside it. So *reached this band, then used
+   * something in it* as a pair answers zero on any deployment, and answered a
+   * number here only because the fixture minted a press against the band. It is
+   * `BAND_QUESTION` now, off that band's own row.
+   */
+  it("never asks a funnel about one band twice", () => {
+    for (const question of FUNNEL_QUESTIONS) {
+      expect(question.from).not.toBe(question.to)
+    }
   })
 
   /** Each question's denominator is the bar for the band it names. */
@@ -206,19 +222,57 @@ describe("the readings", () => {
     }
   )
 
-  it("answers the two questions off the same visits the bars are drawn from", () => {
+  it("answers both questions off the same visits the bars are drawn from", () => {
     const readings = frontDoorReadings(page())
     const bandNamed = (name: string) => readings.bands.find((band) => band.band === name)
 
-    const [used, readOn] = readings.funnels
+    const [readOn] = readings.funnels
 
-    expect(used?.reached).toBe(bandNamed("See it happen")?.reached)
-    expect(used?.converted).toBe(bandNamed("See it happen")?.pressed)
+    expect(readOn?.reached).toBe(bandNamed("See it happen")?.reached)
     expect(readOn?.converted).toBe(bandNamed("Keep going")?.reached)
+  })
+
+  /**
+   * The band question is **two columns of one row** and nothing else, which is
+   * the property that makes it different from the funnel beside it on the page.
+   * If it ever stopped agreeing with the table above it, the page would be
+   * printing two numbers for one fact.
+   */
+  it("answers the band question off that band's own row and nowhere else", () => {
+    const readings = frontDoorReadings(page())
+    const row = readings.bands.find((band) => band.band === BAND_QUESTION)
+
+    expect(row).toBeDefined()
+    expect(readings.inOneBand).toEqual({
+      band: row!.band,
+      reached: row!.reached,
+      engaged: row!.engaged,
+    })
+  })
+
+  /**
+   * A reader who used something in a band reached it first, so the second figure
+   * can never exceed the first. Asserted because it is the pair the page prints
+   * largest, and because `engaged` and `reached` come from different halves of
+   * the rollup — one from ancestry, one from the band's own signals.
+   */
+  it("never reports more readers using a band than reaching it", () => {
+    for (const band of frontDoorReadings(page()).bands) {
+      expect(band.engaged).toBeLessThanOrEqual(band.reached)
+    }
+  })
+
+  /**
+   * At least one band has to have a number here, or the page prints a column of
+   * zeroes and the whole argument about what a region can report is unevidenced.
+   * It is the assertion that fails if `within` is ever dropped from the fixture.
+   */
+  it("reports at least one band a reader used something in", () => {
+    expect(frontDoorReadings(page()).bands.some((band) => band.engaged > 0)).toBe(true)
   })
 })
 
-describe("a funnel's sentence", () => {
+describe("a question's sentence", () => {
   const readings = frontDoorReadings(page())
 
   it.each(FUNNEL_QUESTIONS.map((question, index) => [question, index] as const))(
@@ -232,14 +286,23 @@ describe("a funnel's sentence", () => {
       expect(sentence).toContain(String(answer!.reached))
       expect(sentence).toContain(String(answer!.converted))
       expect(sentence).toContain(question.from)
+      expect(sentence).toContain(question.to)
     }
   )
 
+  it("carries both numbers and the band for the question a row answers", () => {
+    const sentence = bandSentence(readings.inOneBand)
+
+    expect(sentence).toContain(String(readings.inOneBand.reached))
+    expect(sentence).toContain(String(readings.inOneBand.engaged))
+    expect(sentence).toContain(readings.inOneBand.band)
+  })
+
   /**
-   * Never a rate. It is the rule the portal's own screen was built to — two of
-   * two and two hundred of two hundred are the same rate and different news —
-   * and the second question on this page answers *one of two*, which as a
-   * percentage would be the most flattering figure on the site.
+   * Never a rate, for either shape. It is the rule the portal's own screen was
+   * built to — two of two and two hundred of two hundred are the same rate and
+   * different news — and the smallest figure on this page as a percentage would
+   * be the most confident-looking number on the site.
    */
   it.each(FUNNEL_QUESTIONS.map((question, index) => [index, question] as const))(
     "says nothing as a percentage for question %i",
@@ -249,4 +312,82 @@ describe("a funnel's sentence", () => {
       expect(funnelSentence(FUNNEL_QUESTIONS[index]!, answer!)).not.toContain("%")
     }
   )
+
+  it("says nothing as a percentage for the question a row answers", () => {
+    expect(bandSentence(readings.inOneBand)).not.toContain("%")
+  })
+})
+
+/**
+ * The half of this fixture that a browser has to agree with.
+ *
+ * Every assertion above is about arithmetic. These are about **shape**: whether
+ * the batches this file mints are batches a real page could have sent. Until
+ * 19 September they were not — a press was filed against the band, which is a
+ * node no reader can aim at — and nothing caught it, because the arithmetic over
+ * a wrong shape is perfectly consistent arithmetic.
+ */
+describe("what a press is filed against", () => {
+  const bandIds = () => new Set(bandsOf(page()).map((band) => band.id))
+
+  const delegated = () =>
+    scriptedBatches(page()).flatMap((batch) =>
+      batch.signals.filter(
+        (signal): signal is Extract<typeof signal, { kind: "activated" | "disclosed" }> =>
+          signal.kind === "activated" || signal.kind === "disclosed"
+      )
+    )
+
+  it("is never a band, because a band is not a thing anybody can aim at", () => {
+    const bands = bandIds()
+
+    expect(delegated()).not.toHaveLength(0)
+    for (const signal of delegated()) {
+      expect(bands.has(signal.nodeId)).toBe(false)
+    }
+  })
+
+  /**
+   * Absent is *nobody walked* and empty is *nothing addressed above it*, and the
+   * two produce different tallies: a fixture that omitted the field would report
+   * every band as zero rather than as the region the press happened in.
+   */
+  it("always says which regions it happened inside", () => {
+    for (const signal of delegated()) {
+      expect(signal.within).toBeDefined()
+      expect(signal.within!.length).toBeGreaterThan(0)
+    }
+  })
+
+  /** Nearest first, ending at the page, with the band somewhere in between. */
+  it("names a band and the page itself, in that order", () => {
+    const bands = bandIds()
+    const root = page().root.id
+
+    for (const signal of delegated()) {
+      const within = signal.within ?? []
+      const band = within.findIndex((address) => bands.has(address.nodeId))
+      const at = within.findIndex((address) => address.nodeId === root)
+
+      expect(band).toBeGreaterThanOrEqual(0)
+      expect(at).toBe(within.length - 1)
+      expect(band).toBeLessThan(at)
+    }
+  })
+
+  /**
+   * The consequence, stated as the number the page stopped printing: a band's
+   * own press and open counts are zero and always will be. It is asserted so
+   * that a caption reaching for either again is a red test rather than a column
+   * of zeroes on a live page.
+   */
+  it("leaves every band's own press and open count at zero", () => {
+    const bands = bandIds()
+
+    for (const tally of frontDoorReadings(page()).rollup.tallies) {
+      if (!bands.has(tally.nodeId)) continue
+      expect(tally.activations).toBe(0)
+      expect(tally.opens).toBe(0)
+    }
+  })
 })

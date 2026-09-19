@@ -26937,9 +26937,12 @@ a reader's opinion.
 ## 2026-09-17 — the band is on the signal now, and `/what-readers-do` can stop minting a press no browser sends
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
-`Loom portal` for the second half · **Status:** open — the half in the framework
-is done and green on `main`; what remains is one fixture and one figure, both in
-your lane
+`Loom portal` for the second half · **Status:** the marketing half **closed** by
+`marketing-30-where-a-press-lands` — the fixture mints against a control with
+`within`, and both figures now read `engaged`. **The `Loom portal` half is still
+open**: `StoredTally.engaged` is on the reading view's rows and nothing on that
+screen reads it, so a band's line there still shows time on screen beside
+numbers that are structurally zero
 
 Closing your 17 September finding. Shape 1 was taken —
 [0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
@@ -27132,6 +27135,101 @@ review queue, on the front door or on a page. `/portal/checkup` is the third of
 the three and the only one nobody has photographed at all.
 
 ---
+## 2026-09-19 — a registry can say which primitives a reader presses, and cannot say which ones a reader opens
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — one string in `(marketing)/_lib/readers/aim.ts`, and it is the only part
+of that module that is written down rather than asked
+
+Building the readers page's fixture needed one categorical question answered of
+each node of a page: **is this a thing a reader aims at, and if so, do they press
+it or open it?** The first half is answerable and the answer is good:
+
+```ts
+interactiveTypesFor(siteRegistry)          // what each primitive declared
+isInteractiveWith(when, node.props)        // …against the props this node has
+```
+
+`loom.card` is a link when the tree gave it an `href` and scenery when it did
+not, and the registry says exactly that — so nothing in my lane had to write a
+list of type strings that would be right for this deployment and wrong for every
+other. That is `interactive` doing precisely the job 0054 and `PrimitiveRole`
+describe, and it is worth saying out loud because the second half is the
+counter-example.
+
+**Nothing says a reader can open this.** Two primitives on this site's front door
+disclose a region, and they are discoverable by different means or not at all:
+
+| | how it discloses | what the registry answers |
+| --- | --- | --- |
+| `loom.nav` | declares `behaviours: ["disclose"]` | **yes** — and the registry *requires* it to also declare `interactive`, so it is discoverable twice over |
+| `loom.faq` | a native `<details>`/`<summary>` | **nothing.** No `interactive`, no behaviour, no role |
+
+So a host asking its registry *which of my primitives can a reader open* is told
+about its **menu** and misses the **questions**, which is the only thing on the
+page anybody actually opens. The broadcaster has the same problem and solves it
+in the DOM rather than in the registry — it watches `details` elements directly,
+beside the `DISCLOSED_ATTRIBUTE` path that serves the declared kind — which is
+correct for a browser and no help at all to anything reasoning about a tree.
+
+**Why this is filed rather than worked around quietly.** The workaround is three
+words long and it is exactly the shape the role vocabulary exists to end:
+
+```ts
+export const UNDECLARED_DISCLOSING_TYPES: readonly string[] = ["loom.faq"]
+```
+
+It is bounded below rather than trusted — `discloseTargetIn` throws when a band a
+scripted reader opened holds nothing that opens, so the day the questions band
+stops being built this way is a failed build rather than a silent zero. But it is
+a list in a marketing surface asserting a fact about a primitive, and the next
+surface that needs the same fact will write its own copy of it.
+
+**The fix is small and there are two shapes of it**, and I have no standing to
+pick between them:
+
+1. **`loom.faq` uses the `disclose` behaviour** rather than a native `details`.
+   It then declares `interactive` because the registry makes it, and the question
+   is answerable with nothing added anywhere. The cost is real and recorded in
+   that primitive's own header: `details` puts the open state in the browser,
+   where it belongs, and works before hydration. Taking that away to gain a
+   declaration would be a bad trade.
+2. **A second `PrimitiveRole` member, or a sibling of `interactive`,** saying
+   *this renders a region a reader opens* — declared by `loom.faq` without
+   changing one line of what it renders. This is the one I would take, and it is
+   the second consumer #336 asked for: a categorical question a consumer could
+   not answer from the registry, written down as a finding.
+
+The third option — leaving it — is fine for now and is what shipped. The list is
+one entry and the guard under it is real.
+
+---
+## 2026-09-19 — `within`'s own type is not exported, so everything assembling one re-declares the pair
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — two lines, and the smallest finding I have filed
+
+`@loom/runtime/signals` exports `signalAddressSchema`, which is the shape of a
+member of `within`, and does not export a type for it. `SignalAddress` is
+declared in `signals/ledger.ts`, and `ledger.js` is not in that entry point's
+barrel — every other module of the directory is.
+
+So anything that builds a delegated signal outside the browser — a fixture, a
+test, a server synthesising a batch — writes this again:
+
+```ts
+type Address = { readonly nodeId: NodeId; readonly type: PrimitiveType }
+```
+
+`(marketing)/_lib/readers/aim.ts` has it as `Aim` and `visits.ts` had it as the
+return of `addressOf` before that, which is two copies in one directory. It is
+not wrong and nothing fails; it is the seam saying *assemble this yourself* about
+a pair it already names.
+
+Either `export * from "./ledger.js"` in the barrel, or
+`export type SignalAddress = z.infer<typeof signalAddressSchema>` beside the
+schema. The second is smaller and keeps the ledger's other exports internal,
+which may be why they are not in the barrel.
 
 ## 2026-09-18 — a deployment can now register a slice by name, and cannot ask for one by kind
 
