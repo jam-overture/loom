@@ -574,6 +574,32 @@ instead of guessing at type names.
 reports which ones would be invisible to the portal. It is a function a host runs
 in a test or a build step — registration itself never calls a primitive.
 
+### Registering part of a library
+
+A primitive library is a set to choose from, not a set every deployment ships.
+`selectPrimitives` takes the entries you want and refuses a name the library does
+not carry — which a `filter` would not, and a deployment that quietly lost a
+primitive finds out when a page fails to draw:
+
+```ts
+import { createPrimitiveRegistry, describeSelectionError, selectPrimitives } from "@loom/runtime/sdk"
+import { STARTER_PRIMITIVES } from "@loom/runtime/primitives"
+
+const chosen = selectPrimitives(STARTER_PRIMITIVES, ["loom.page", "loom.section", "loom.prose"])
+if (!chosen.ok) throw new Error(describeSelectionError(chosen.error))
+
+const registry = createPrimitiveRegistry(chosen.value)
+```
+
+Why it is worth choosing: every registered primitive is a line in every
+interpretation request. `measureCatalogue(catalogueOf(registry))` says what a
+vocabulary costs, whole and per entry, measured from the block that is actually
+sent — so *what did registering more cost* is a number rather than a feeling
+([0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md)).
+There is no ceiling on how much a deployment may register, deliberately: how much
+attention a model should spend on a vocabulary depends on the model and on the
+latency you will accept, and both are yours.
+
 ## The starter primitives
 
 A deployment does not have to start from an empty registry. `@loom/runtime/primitives`
