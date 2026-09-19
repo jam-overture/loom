@@ -2,7 +2,12 @@ import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
 import { describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "../copy"
-import { frontDoorReadings, FUNNEL_QUESTIONS, funnelSentence } from "../readers/visits"
+import {
+  bandSentence,
+  frontDoorReadings,
+  FUNNEL_QUESTIONS,
+  funnelSentence,
+} from "../readers/visits"
 import { treeFor } from "../render"
 import {
   DEFAULT_THEME,
@@ -138,6 +143,34 @@ describe("the bars", () => {
     }
   })
 
+  /**
+   * A band's line says how many readers used something under it, and that is the
+   * figure `engaged` carries. It used to be the band's own press count, which is
+   * a number no deployment produces.
+   */
+  it("says how many readers used something in a band, from the band's own row", () => {
+    const text = words()
+    const used = readings().bands.filter((band) => band.engaged > 0)
+
+    expect(used).not.toHaveLength(0)
+    for (const band of used) {
+      expect(text).toContain(`${band.engaged} used something in it`)
+    }
+  })
+
+  /**
+   * The split that had to go, asserted as an absence.
+   *
+   * *N opened something* was a band's own `opens`, and a band's `opens` is zero
+   * on every real deployment — so a page printing it was printing a number only
+   * this fixture could produce. A caption reaching for the split again is a red
+   * test here rather than a column of zeroes on a live page.
+   */
+  it("never splits a band's line into presses and opens", () => {
+    expect(words()).not.toContain("opened something,")
+    expect(words()).not.toContain("opened something.")
+  })
+
   it("says the visits are made up and this deployment counts nobody", () => {
     const text = words().toLowerCase()
 
@@ -191,6 +224,28 @@ describe("the funnel", () => {
       expect(text).toContain(`${answer!.converted} of ${answer!.reached}`)
       expect(text).toContain(funnelSentence(question, answer!))
     }
+  })
+
+  /**
+   * The second shape, which is the one that needs nothing arranged in advance.
+   * It is printed beside the funnel rather than instead of it, because the whole
+   * point of the band is that the two are different: one is a column of a row
+   * anybody already has, and the other had to be asked for before the readers
+   * arrived.
+   */
+  it("prints the question a band answers about itself, beside the funnel", () => {
+    const text = words()
+    const answer = readings().inOneBand
+
+    expect(text).toContain(`${answer.engaged} of ${answer.reached}`)
+    expect(text).toContain(bandSentence(answer))
+  })
+
+  it("says which of the two had to be asked for before anybody arrived", () => {
+    const text = words().toLowerCase()
+
+    expect(text).toContain("had to be asked for in advance")
+    expect(text).toContain("before anybody arrived")
   })
 
   /**

@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest"
+import { z } from "zod"
 
+import { createDataRegistry, defineSource } from "../data/adapter.js"
+import { dataCatalogue } from "../data/catalogue.js"
+import { frameCatalogue } from "../frame/catalogue.js"
+import { createFrameOriginRegistry } from "../frame/origin.js"
 import { nodeIdSchema, sequentialIdFactory } from "../ids.js"
-import { err, type Result } from "../result.js"
+import { err, ok, type Result } from "../result.js"
 import { gate } from "../runtime/gate.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { submissionCatalogue } from "../submit/catalogue.js"
+import { createEndpointRegistry, defineEndpoint } from "../submit/endpoint.js"
 import { createThemeRegistry } from "../theme/registry.js"
 import { fixedPolicy } from "../runtime/policy-source.js"
 import { defaultGatePolicy } from "../runtime/policy.js"
@@ -136,6 +143,65 @@ describe("modelInterpreter — request assembly", () => {
 
     expect(client.requests[0]?.userMessage).toContain("Themes this deployment has registered")
     expect(client.requests[0]?.userMessage).toContain("- editorial —")
+  })
+
+  /**
+   * The three seams whose projections existed before anything sent them (0172).
+   * Held in one test rather than three because the defect was one defect: a
+   * vocabulary a host wired reaching the model is the whole of what each of
+   * them has to do, and three copies of this would go stale together.
+   */
+  it("tells the model what it may read, post to, and frame, when those registries are configured", async () => {
+    const sources = createDataRegistry([
+      defineSource({
+        id: "catalogue.services",
+        description: "The services this profile offers, newest first",
+        params: z.object({ limit: z.number().int().positive() }),
+        answers: z.object({ items: z.array(z.string()) }),
+        adapter: { fetch: () => Promise.resolve(ok({ items: [] })) },
+      }),
+    ])
+    const endpoints = createEndpointRegistry([
+      defineEndpoint({
+        id: "contact.enquiry",
+        description: "Receives a contact enquiry",
+        endpoint: {
+          target: () =>
+            Promise.resolve(ok({ action: "/api/enquiry", method: "post" as const, fields: [] })),
+        },
+      }),
+    ])
+    const origins = createFrameOriginRegistry([
+      { origin: "https://player.vimeo.com", description: "Vimeo player embeds" },
+    ])
+
+    if (!sources.ok || !endpoints.ok || !origins.ok) throw new Error("a test registry refused")
+
+    const { tree } = sampleTree()
+    const idFactory = sequentialIdFactory("x")
+    const client = scriptedModelClient(INSERT_NOTE_REPLY)
+    const interpreter = modelInterpreter({
+      client,
+      idFactory,
+      clock: fixedClock(),
+      dataCatalogue: dataCatalogue(sources.value),
+      submissionCatalogue: submissionCatalogue(endpoints.value),
+      frameCatalogue: frameCatalogue(origins.value),
+    })
+
+    await interpreter.interpret(
+      buildIntent(idFactory, { treeId: tree.treeId, baseRevision: tree.revision }),
+      tree
+    )
+
+    const sent = client.requests[0]?.userMessage
+
+    expect(sent).toContain("- catalogue.services — The services this profile offers")
+    expect(sent).toContain("- contact.enquiry — Receives a contact enquiry.")
+    expect(sent).toContain("- https://player.vimeo.com — Vimeo player embeds.")
+
+    /** 0065's line, held where it would actually leak. */
+    expect(sent).not.toContain("/api/enquiry")
   })
 
   it("honours an overridden model and effort", async () => {

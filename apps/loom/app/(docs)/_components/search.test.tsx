@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
+  SEARCH_NAMES_PATH,
   SEARCH_PROSE_PATH,
   type SearchIndex,
 } from "@/app/(docs)/_lib/search/model"
@@ -70,15 +71,27 @@ const index: SearchIndex = {
 const fetchMock = vi.fn()
 
 /**
- * The index as it really travels: three files, with the words in the second and
- * the code in the third.
+ * The index as it really travels: **four files**, and only the first is waited
+ * for.
  *
  * Served apart here rather than whole, because a mock that handed the component
  * a complete index however it asked would be testing a fetch the site does not
  * make — and the interesting moments are the ones in between, where the box
- * works and one of the two cheapest ranking bands does not answer yet.
+ * works and one of the three later files does not answer yet.
+ *
+ * The names file is the one that carries **rows** rather than text, and it is
+ * written here the way the site writes it: an entry point and the names under
+ * it, with no address anywhere. The component rebuilds the addresses, which is
+ * the point of the shape and is therefore the thing worth exercising through a
+ * fixture rather than asserting about the builder.
  */
-const withoutText = { entries: index.entries.map((entry) => ({ ...entry, body: "", code: "" })) }
+const contents = {
+  entries: index.entries
+    .filter((entry) => entry.kind !== "export")
+    .map((entry) => ({ ...entry, body: "", code: "" })),
+}
+
+const names = { entryPoints: [{ specifier: "@loom/runtime", names: ["evaluateGate"] }] }
 
 const prose = {
   bodies: index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body]),
@@ -89,10 +102,11 @@ const code = {
 }
 
 const serve = (path: string): unknown => {
+  if (path === SEARCH_NAMES_PATH) return names
   if (path === SEARCH_PROSE_PATH) return prose
   if (path === SEARCH_CODE_PATH) return code
 
-  return withoutText
+  return contents
 }
 
 beforeEach(() => {
@@ -137,8 +151,9 @@ describe("the search box", () => {
     await open()
     await type("gate")
 
-    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock).toHaveBeenCalledTimes(4)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_INDEX_PATH)
+    expect(fetchMock).toHaveBeenCalledWith(SEARCH_NAMES_PATH)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_PROSE_PATH)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_CODE_PATH)
   })
@@ -215,8 +230,106 @@ describe("what a reader sees after typing", () => {
     await open()
     await type("kubernetes")
 
-    expect(screen.getByText(/the words in them are still loading/i)).toBeTruthy()
+    expect(screen.getByText(/the words on them are still loading/i)).toBeTruthy()
     expect(screen.queryByText(/the words in them .* are searched/i)).toBeNull()
+  })
+
+  /**
+   * The names, which are the one later file a reader can *see* is missing.
+   *
+   * The other two rank rows that are already in the list. This one brings the
+   * rows — a thousand of them — so in the moment before it lands a reader who
+   * types an export name gets nothing at all rather than a worse ordering.
+   *
+   * That is the whole reason the names left the first file on 19 September: the
+   * first file was 78% published names by size, it grew whenever any lane in the
+   * repository exported something, and a reader waiting for it was waiting for
+   * a payload this surface neither writes nor can see coming. What it costs is
+   * this interval, and what these three tests are is the argument that the
+   * interval is honest.
+   */
+  it("finds a published name once the names have landed, at an address it built itself", async () => {
+    render(<Search />)
+
+    await open()
+    await type("evaluateGate")
+
+    const result = await waitFor(() => screen.getByRole("option"))
+
+    expect(result.textContent).toContain("evaluateGate")
+    /*
+     * The href is not in the file the component was sent — `names` carries an
+     * entry point and a name and no address anywhere. This is the assertion
+     * that the address it rebuilt is the one the reference page really serves;
+     * a scheme that changed on one side and not the other would be a search box
+     * where every export result 404s, with nothing red to show for it.
+     */
+    expect(result.querySelector("a")?.getAttribute("href")).toBe(
+      "/docs/api-reference/runtime#s-evaluateGate"
+    )
+  })
+
+  it("answers by page while the names are still on their way", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_NAMES_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    expect(screen.getByRole("listbox").textContent).toContain("What the Gate decides")
+  })
+
+  it("does not claim to have searched the names until it has", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_NAMES_PATH
+        ? new Promise(() => undefined)
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("evaluateGate")
+
+    /*
+     * The worst of the four states to be wrong about. A reader who typed a name
+     * they read in a stack trace, got nothing, and was told every published
+     * name had been searched would conclude the site has never heard of it.
+     */
+    expect(screen.getByText(/the published names are still loading/i)).toBeTruthy()
+    expect(screen.queryByText(/every published name are searched/i)).toBeNull()
+  })
+
+  /**
+   * Three of the four missing at once, in one sentence a person would say.
+   *
+   * Worth a test because the alternative shape — a sentence per combination —
+   * is what a list like this turns into the moment nobody is checking, and
+   * because the join is the only English in the component that has to be built
+   * rather than written.
+   */
+  it("names all three of the files still in flight, in one sentence", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === SEARCH_INDEX_PATH
+        ? Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+        : new Promise(() => undefined)
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("kubernetes")
+
+    expect(
+      screen.getByText(
+        /the published names, the words on them and the code blocks on them are still loading/i
+      )
+    ).toBeTruthy()
   })
 
   /**
@@ -422,7 +535,7 @@ describe("moving through the results", () => {
     await type("applyDelta")
 
     expect(screen.queryByRole("listbox")).toBeNull()
-    expect(screen.getByText(/the code in them is still loading/i)).toBeTruthy()
+    expect(screen.getByText(/the code blocks on them are still loading/i)).toBeTruthy()
   })
 
   /**

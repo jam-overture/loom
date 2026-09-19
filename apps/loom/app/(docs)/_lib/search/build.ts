@@ -1,10 +1,17 @@
-import { apiAnchorFor, apiSlugFor } from "../api/model"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageCode } from "./code"
 import { readPageHeadings } from "./headings"
-import type { SearchCode, SearchEntry, SearchIndex, SearchProse, TravellingIndex } from "./model"
+import {
+  namesToEntries,
+  type SearchCode,
+  type SearchEntry,
+  type SearchIndex,
+  type SearchNames,
+  type SearchProse,
+  type TravellingIndex,
+} from "./model"
 import { readPageProse } from "./prose"
 
 /**
@@ -104,31 +111,38 @@ const headingEntries = (): readonly SearchEntry[] =>
   )
 
 /**
+ * The runtime's surface, as the entry points that publish it and the names
+ * under each.
+ *
+ * Nobody waits for this, which is the whole point of it being separate. It is
+ * also the cheapest of the four files to carry a thousand of anything, because
+ * what is written down is a name and not an address: `namesToEntries` rebuilds
+ * the address in the browser from the same two functions the reference pages
+ * use, so the scheme is stated once and the file is 20 KB instead of 138.
+ */
+export const searchNames = (): SearchNames => ({
+  entryPoints: apiEntries.map((entry) => ({
+    specifier: entry.specifier,
+    names: entry.groups.flatMap((group) => group.symbols.map((symbol) => symbol.name)),
+  })),
+})
+
+/**
  * Every published export, by name, and deliberately without its summary.
  *
  * A name is what somebody searches for — they have read `planReverts` in a
  * stack trace or in a colleague's branch and want the page it is on. The
- * summary is what they want *once they are there*, and there are seven hundred
- * and fifty of them; carrying all of that into the browser to improve the
- * ranking of a query that already matches on the name would cost every reader
- * of the site for the benefit of almost none of them. The import specifier goes
- * in `context` instead, so `store` narrows a name that appears in two entry
- * points.
+ * summary is what they want *once they are there*, and there are a thousand of
+ * them; carrying all of that into the browser to improve the ranking of a query
+ * that already matches on the name would cost every reader of the site for the
+ * benefit of almost none of them. The import specifier goes in `context`
+ * instead, so `store` narrows a name that appears in two entry points.
+ *
+ * Assembled by expanding `searchNames()` rather than by walking the reference a
+ * second time, so that the entries this file builds and the ones a browser
+ * builds out of the names file are the same entries by construction.
  */
-const exportEntries = (): readonly SearchEntry[] =>
-  apiEntries.flatMap((entry) =>
-    entry.groups.flatMap((group) =>
-      group.symbols.map((symbol) => ({
-        href: `/docs/api-reference/${apiSlugFor(entry.specifier)}#${apiAnchorFor(symbol.name)}`,
-        title: symbol.name,
-        context: entry.specifier,
-        kind: "export" as const,
-        summary: "",
-        body: "",
-        code: "",
-      }))
-    )
-  )
+const exportEntries = (): readonly SearchEntry[] => namesToEntries(searchNames())
 
 const allEntries = (): readonly SearchEntry[] => [
   ...pageEntries(),
@@ -148,28 +162,41 @@ export const buildSearchIndex = (): SearchIndex => ({
 })
 
 /**
- * The part a reader waits for: everything but the words and the blocks.
+ * The part a reader waits for: **the site's own table of contents**, and
+ * nothing else.
  *
- * What arrives in the browser is still a `SearchIndex` — one whose two cheapest
- * ranking bands are simply not answering yet. A reader who types before the
- * other two files land gets the same results, ranked by title, section and
- * summary, and each band turns on underneath them without the list flickering.
+ * Its pages and the headings on them — 206 entries, and every one of them is
+ * something this surface wrote. What arrives in the browser is still a
+ * `SearchIndex`, one whose three cheapest bands are simply not answering yet: a
+ * reader who types before the other files land gets pages and sections, ranked
+ * by title, section and summary, and each band turns on underneath them without
+ * the list flickering.
  *
- * The two fields are **left out** rather than emptied, and so is a summary
- * nobody wrote. They were emptied until 14 September, when the raw cap below
- * failed at 200,286 bytes against 200,000 — of which 38,156 were the three
- * fields saying, 1,172 times, that they had nothing in them. `parseSearchIndex`
- * fills an absent field with the empty string on the way in, which is the
- * tolerance `code` already had, so nothing downstream can tell the difference.
+ * **The runtime's published names left this file on 19 September** and are
+ * fetched beside the words and the code. They were 78% of it raw and 60% of it
+ * compressed, they grow when
+ * any lane in the repository exports something, and they had taken the payload
+ * to 96% of its compressed budget — so the number guarding what a reader waits
+ * for had stopped being a number about this site at all. `SEARCH_NAMES_PATH`
+ * carries the argument; `build.test.ts` carries what each file now costs.
+ *
+ * The text fields are **left out** rather than emptied, and so is a summary
+ * nobody wrote. They were emptied until 14 September, when the raw cap failed
+ * at 200,286 bytes against 200,000 — of which 38,156 were the three fields
+ * saying, 1,172 times, that they had nothing in them. `parseSearchIndex` fills
+ * an absent field with the empty string on the way in, which is the tolerance
+ * `code` already had, so nothing downstream can tell the difference.
  */
-export const searchIndexWithoutText = (): TravellingIndex => ({
-  entries: buildSearchIndex().entries.map((entry) => ({
-    href: entry.href,
-    title: entry.title,
-    context: entry.context,
-    kind: entry.kind,
-    ...(entry.summary === "" ? {} : { summary: entry.summary }),
-  })),
+export const searchContents = (): TravellingIndex => ({
+  entries: buildSearchIndex()
+    .entries.filter((entry) => entry.kind !== "export")
+    .map((entry) => ({
+      href: entry.href,
+      title: entry.title,
+      context: entry.context,
+      kind: entry.kind,
+      ...(entry.summary === "" ? {} : { summary: entry.summary }),
+    })),
 })
 
 /** The words nobody waits for, keyed by the entry they sit under. */
