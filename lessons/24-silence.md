@@ -4,9 +4,10 @@
 knowable by exactly one party, and name the four places a consumer would look
 for them and why each fails; say what a reading owes a caller about the party
 that has not spoken yet, give the shape an answer needs in order to say it, and
-name what goes wrong in the one direction nobody checks; explain why a
-declaration is trusted about what it leaves out but never about what it leaves
-unsaid; say why a misspelled declaration is refused at registration rather than
+name what goes wrong in the one direction nobody checks; say how many fields
+that shape has, what decides the number, and why the smallest available fix to it
+was the wrong one; explain why a declaration is trusted about what it leaves out
+but never about what it leaves unsaid; say why a misspelled declaration is refused at registration rather than
 read as an absence; derive why a closed vocabulary should ship with one member in
 it and state the bar for a second; explain why a fact about a primitive and a fact
 about a tree are kept in different places even when one consumer wants both; and
@@ -90,6 +91,12 @@ somebody could make to this repository this afternoon.
    answer — the actual type the function returns — and be specific, because the
    whole of this lesson is in the difference between two shapes that both look
    reasonable.
+
+   Then one more, kept separate from the rest of your answer: **your shape has
+   some number of fields in it. Write down the rule you used to decide how
+   many.** What would have to be true for a reading like this to need another
+   one? A rule you could apply to a seam you have not seen — not a description of
+   the one you have just drawn.
 
 3. A second declaration, unrelated: *what part this primitive plays*, so a host
    can ask the registry "which of these is a heading?" rather than hard-coding a
@@ -243,13 +250,20 @@ words; it returns the words **and what it could not classify**:
 
 ```ts
 copyIn(node, registry)
-// → { words: ["3,400", "appointments", "last year"], unread: [] }
+// → { words: ["3,400", "appointments", "last year"], unread: [], unspoken: [] }
 ```
 
 `unread` names the node, its type, and the string-valued props nobody has spoken
 for. A consumer reading a node whose type declared nothing gets no words and a
 list saying exactly why — so it *knows it is under-reporting* instead of quietly
 doing it.
+
+There is a third field in that answer and this section is not going to explain
+it. It is in neither record above; it was not in the seam when this lesson was
+first written; and it is in almost nobody's answer to Predict 2. Before you
+scroll — **what else could a reading like this one fail at, on a node whose type
+has already spoken?** Four sections down is where it came from, and where it came
+from is the better half of the story.
 
 You have met this shape before. Lesson 15's conformance probe answers three ways
 rather than two, and
@@ -283,8 +297,133 @@ The principle is worth saying in general, because it decides the next case too:
 **a missing word is a gap and a wrong one is a lie**, and this seam exists
 because somebody is approving a change against what it says.
 
-Exercise C runs that case, and it is where this lesson's own finding is. Hold the
-principle in mind while you predict it.
+Now hold that beside the rule one section up — *a declaration is trusted about
+its exclusions* — and notice the two are about the same node. The next section is
+what happened when they met.
+
+### Three ways to have no word, and only one of them is a gap
+
+Two rules, each argued for above, each right on its own.
+
+- A declared copy prop holding something that is not a string is **skipped**,
+  because the runtime knows the number and not the separator.
+- `unread` carries only types that declared **nothing**, because a declaration is
+  believed about what it leaves out.
+
+Compose them on one node — a stat that has declared `value` as copy and holds the
+number `3400`:
+
+```
+  value: 3400, declared
+    words:  ["appointments"]
+    unread: none
+```
+
+The figure is gone, and `unread: none` is not silence — it is a positive claim,
+and a caller is entitled to read it as *`words` is complete*. Here it was false.
+**So the one reading built to stop a missing word being invisible made this one
+invisible**, on the seam whose entire return shape exists for that and nothing
+else.
+
+One precision while you are in here, because this lesson is about exactly this
+kind of sentence. An empty `unread` does **not** say *every type under this node
+declared*. That is how the record states it, and it is one clause too strong: a
+type that has declared nothing and holds no candidate word — a divider carrying
+`weight: 2`, and nothing else — comes back with an empty `unread` as well. What an
+empty `unread` says is the narrower thing, which is also the thing a caller needs:
+**no node under here was left holding a word this reading could not classify.**
+That is the claim the case above broke, and it is the one to be able to state.
+
+Sit with that for a moment before the fix, because it is the more useful half.
+The seam had been wrong since the day it shipped. Every test it had was green —
+including the one for this exact case, which asserted `words` and nothing else,
+so the silence was pinned in rather than overlooked. And what found it was a
+worked example: this lesson's exercise C, printing the case in front of somebody
+who had just spent four sections arguing that a reading has to be able to say *I
+cannot tell you*. It was filed on 13 September and closed on 18 September by
+[0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md).
+
+**The fix is a third field**, `unspoken`: the declared copy props on a node that
+hold something which is not a string, named per node, in declaration order.
+Nothing is coerced — what changed is that the gap is handed back instead of
+dropped. Three cases on the declared side, and only the third is one:
+
+| the prop | the reading |
+| --- | --- |
+| not set | nothing — a `caption` nobody wrote is not a word this reading lost |
+| a blank or whitespace-only string | nothing — the page shows nothing there, so the reading and the page agree |
+| set, and not a string | **`unspoken`** — a word is owed and cannot be given |
+
+### Why a third field rather than a third meaning
+
+The one-line version of that fix is to put the prop name in `unread`. No new
+type, no new field, the node gets named, and every caller already handling
+`unread` picks it up for nothing. It was rejected, and the reason is the most
+portable thing in this section.
+
+`unread` means **nobody has told me whether these are words.** The new case means
+**somebody told me these are words, and what is in them is not one.** Those are
+not two flavours of one thing — and the test for that is not how similar they
+sound, it is what a caller *does*:
+
+- The remedy for `unread` is a declaration, and it is **per type**. The portal
+  groups that list by type for exactly this reason: *declare `copy` on
+  `loom.stat`* is one action that fixes every stat on every page.
+- The remedy for the new case is a formatted string, or a note on the card, and
+  it is **per node**. There is nothing to declare. The declaration already exists
+  and is already correct.
+
+Two lists that are grouped differently and acted on differently are two lists.
+Folding them would make one field mean two things — which is this seam's own
+complaint about defaults, one level up — and it would quietly change what an
+empty `unread` asserts to a caller that ships today. So:
+
+> **A reading needs one field per distinct thing it can fail at — and "distinct"
+> is decided by whether the caller would do something different about it, not by
+> whether the two failures feel alike.**
+
+That is the rule Predict 2 asked you for. Check yours against it rather than
+against the field count, because the two commonest answers — *one field per
+failure* and *one field with a reason on each entry* — are each wrong in a way
+the other one is not.
+
+### The same value, on the other side, is not a missing word
+
+One asymmetry survived the fix, and it looks like the identical hole from the
+other direction until you ask who has been told what.
+
+`UnreadCopy.props` names only a node's **non-blank string-valued** props — the
+blank rule is the same on both sides, and only the non-string rule differs. So a
+`loom.divider` holding `weight: 2`, from a type that has declared nothing,
+reports nothing about `weight` — a number sitting where a word could go, which is
+precisely the case we have just given a field to. Widening it would be symmetric.
+It was considered and rejected: where nothing has been declared, a non-string
+value is not a candidate word at all, and every layout primitive in the library
+would arrive on a reviewer's screen as words a change might be taking away.
+
+The difference is not in the value, and it is worth working out rather than
+taking, because the short version of it is wrong. The short version says *on the
+undeclared side the node is already named in `unread`, so the caller knows not to
+trust `words` for it* — which is true of a divider holding `weight: 2` **and** a
+non-blank string, and false of one holding `weight: 2` and nothing else. That node
+is in no list at all.
+
+It does not need to be. Take the two cases apart:
+
+- **An undeclared node with at least one candidate word.** It is named in
+  `unread`, the caller is told not to trust `words` for it, and `weight` is
+  covered by that whether or not it is listed.
+- **An undeclared node with no candidate word at all** — only numbers, only
+  blanks. It is in no list, and `words` really is complete for it: a value nobody
+  has claimed is a word is a setting, and a setting is not missing from a sentence
+  about the page.
+
+In neither case is the caller told something false. On the declared side it was:
+a word was owed, `words` did not have it, and no list said so. That is the
+record's title, and it is the sentence to keep:
+
+> **A declaration is what makes a non-string value a missing word.** Absent one,
+> it is a setting.
 
 ### A misspelling is refused rather than read as silence
 
@@ -363,19 +502,24 @@ render seam, and what exercise F finds here.
 
 | What | Where |
 | --- | --- |
-| `copyIn`, `NodeCopy`, `UnreadCopy`, `CopyDeclarations` | `src/sdk/copy.ts` |
+| `copyIn`, `NodeCopy`, `UnreadCopy`, `UnspokenCopy`, `CopyDeclarations` | `src/sdk/copy.ts` |
+| The three cases on the declared side | `readDeclared` in `src/sdk/copy.ts`, and one test each in `src/sdk/copy.test.ts` |
 | `copy` and `role` on a definition | `src/sdk/definition.ts` |
 | `copyFor`, `typesWithRole`, `undeclared-copy-prop`, `unknown-role` | `src/sdk/registry.ts` |
 | The vocabulary, and the sentence a host shows an author | `src/role.ts` |
 | The reading that only sees text children | `textOf` in `src/tree/navigation.ts` |
 | The queue row this is all about | `textIn` in `apps/loom/app/(portal)/_lib/proposal-effect.ts` |
-| The records | [0122](../decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md), [0114](../decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md) |
+| The records | [0122](../decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md), [0114](../decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md), [0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md) |
 | Why the copy is in props at all | [0052](../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md) |
 
-Read `copyIn` before the exercises. It is thirty lines, and the two branches worth
-stopping on are next to each other: `declared === undefined` pushes to `unread`,
-and every other case pushes to `words`. Everything this lesson is about is the
-choice of which branch a case falls into.
+Read `copyIn` before the exercises, and read `readDeclared` underneath it.
+Between them there are **three** branches worth stopping on, and everything this
+lesson is about is which one a case falls into: `declared === undefined` pushes to
+`unread`; a declared prop holding a string pushes to `words`; a declared prop
+holding anything else pushes to `unspoken`. There is a fourth case that pushes
+nowhere — a declared prop that is not set at all — and working out why that one is
+not a gap is the quickest way to check you have the distinction rather than the
+field names.
 
 One line to notice while you are there. `CopyDeclarations` is a two-line
 structural type — one method, `copyFor` — rather than the registry itself. A
@@ -389,8 +533,10 @@ node without building three registries.
 ## Try it
 
 Seven exercises. **Predict every output in writing, then run.** Exercise C is
-where the principle two sections up gets tested against the implementation, and
-exercise G is Predict 4 executed — commit to your answer before you run it.
+where the three cases get tested against the implementation — including one page
+that reaches two of them at once, by two different routes, with two different
+remedies — and exercise G is Predict 4 executed; commit to your answer before you
+run it.
 
 Put each snippet into `src/scratch.test.ts` and run
 
@@ -399,7 +545,13 @@ pnpm vitest run src/scratch.test.ts
 ```
 
 The shared preamble for all seven. Two primitives with identical schemas, one of
-which has said which of its props are words:
+which has said which of its props are words.
+
+One line in it to read rather than skim: `report` prints **all three fields of
+the reading, always, including when they are empty.** A helper that printed the
+words and left the gaps off the bottom would be committing this lesson's own
+failure inside this lesson's own fixture — and you would never catch it, because
+what it hides is exactly the thing that prints nothing.
 
 ```ts
 import { createElement } from "react"
@@ -463,17 +615,18 @@ const starter = (() => {
   return built.value
 })()
 
-/** A reading, printed as the words it found and the gaps it is admitting to. */
+/** Where a node and its props go, for either of the two lists that name them. */
+const listed = (entries: readonly { nodeId: string; type: string; props: readonly string[] }[]): string =>
+  entries.length === 0
+    ? "none"
+    : entries.map((one) => `${one.nodeId} (${one.type}) ${JSON.stringify(one.props)}`).join(" | ")
+
+/** A reading, printed as the words it found and both of the gaps it is admitting to. */
 const report = (label: string, reading: NodeCopy) => {
   console.log(`  ${label}`)
-  console.log(`    words:  ${JSON.stringify(reading.words)}`)
-  console.log(
-    `    unread: ${
-      reading.unread.length === 0
-        ? "none"
-        : reading.unread.map((one) => `${one.nodeId} (${one.type}) ${JSON.stringify(one.props)}`).join(" | ")
-    }`
-  )
+  console.log(`    words:    ${JSON.stringify(reading.words)}`)
+  console.log(`    unread:   ${listed(reading.unread)}`)
+  console.log(`    unspoken: ${listed(reading.unspoken)}`)
 }
 
 /** One stat node, with whatever props the exercise gives it. */
@@ -515,25 +668,32 @@ The output:
 
 ```
   nobody has said
-    words:  []
-    unread: n_1 (demo.stat) ["value","label","caption","align"]
+    words:    []
+    unread:   n_1 (demo.stat) ["value","label","caption","align"]
+    unspoken: none
   copy: value, label, caption
-    words:  ["3,400","appointments","last year"]
-    unread: none
+    words:    ["3,400","appointments","last year"]
+    unread:   none
+    unspoken: none
   copy: []
-    words:  []
-    unread: none
+    words:    []
+    unread:   none
+    unspoken: none
 ```
 
-The first and third lines have the same `words` and mean opposite things, which
-is the entire lesson in six lines of output. A consumer looking only at `words`
-cannot tell them apart. A consumer looking at both fields can, and there is no
-third field it needs.
+The first and third readings have the same `words` and mean opposite things,
+which is the entire lesson in twelve lines of output. A consumer looking only at
+`words` cannot tell them apart; a consumer that also reads `unread` can.
+
+`unspoken` is `none` three times, and that is the right answer three times: every
+prop here holds a string, so there is nothing anybody was told to read and could
+not. A field that says nothing in the exercise introducing the seam is a field
+doing its job — exercise C is where it speaks.
 
 Two details in the first reading are decisions rather than accidents.
 
-**`align` is in the list.** `unread` reports *every string-valued prop* on a node
-whose type said nothing, not a guess at which ones are probably copy. Guessing
+**`align` is in the list.** `unread` reports *every non-blank string-valued prop*
+on a node whose type said nothing, not a guess at which ones are probably copy. Guessing
 which of the four are words is the thing nobody outside the component can do —
 that is what the whole seam is for — so the report does not start doing it at the
 last moment. It names what it could not classify, and `align` is genuinely one of
@@ -596,11 +756,13 @@ The output:
   textOf, either grid: "" ""
   pieces, either grid: 3
   three stats that declared
-    words:  ["3,400","appointments","96%","seen on time","11","clinicians"]
-    unread: none
+    words:    ["3,400","appointments","96%","seen on time","11","clinicians"]
+    unread:   none
+    unspoken: none
   three stats that have not
-    words:  []
-    unread: n_1 (demo.quiet-stat) ["value","label"] | n_2 (demo.quiet-stat) ["value","label"] | n_3 (demo.quiet-stat) ["value","label"]
+    words:    []
+    unread:   n_1 (demo.quiet-stat) ["value","label"] | n_2 (demo.quiet-stat) ["value","label"] | n_3 (demo.quiet-stat) ["value","label"]
+    unspoken: none
 ```
 
 `""` and `3` are the queue row from the top of this lesson, reproduced in two
@@ -617,15 +779,19 @@ were silent.
 
 ### Exercise C — a value that is not a string
 
-Two nodes with a *number* where a word goes, one type declared and one not, plus a
-caption that is three spaces. Predict `words` and `unread` for all three. The
-principle from The idea says a missing word is a gap and a wrong one is a lie —
-predict what the seam does with a value it cannot read, and **write down whether
-you expect it to be reported.**
+Four readings. The first three put a *number* where a word goes — once on a type
+that declared, once on a type that has not — and then a caption that is three
+spaces. The fourth puts a declared node that cannot say its figure over a child
+whose type has said nothing at all.
+
+Predict all three fields for all four. The principle from The idea says a missing
+word is a gap and a wrong one is a lie, so predict what the seam does with a value
+it cannot read — and **be specific about which list it says so in, and about which
+node that list names.** For the fourth reading, predict the two node ids as well.
 
 ```ts
 describe("C", () => {
-  it("skips a declared prop whose value is not a string, and says nothing about it", () => {
+  it("hands back a declared prop whose value it will not turn into a word", () => {
     const declared = registryOf([speaking])
 
     report(
@@ -640,6 +806,15 @@ describe("C", () => {
       "caption: \"   \", declared",
       copyIn(stat("demo.stat", { value: "3,400", label: "appointments", caption: "   " }), declared)
     )
+
+    const ids = sequentialIdFactory()
+    const both = buildElement(ids, {
+      type: "demo.stat",
+      props: { value: 3400, label: "appointments" } as unknown as JsonObject,
+      children: [buildElement(ids, { type: "demo.quiet-stat", props: { value: "96%", label: "seen on time" } })],
+    })
+
+    report("one declared figure it cannot say, over one type nobody spoke for", copyIn(both, declared))
   })
 })
 ```
@@ -648,49 +823,92 @@ The output:
 
 ```
   value: 3400, declared
-    words:  ["appointments"]
-    unread: none
+    words:    ["appointments"]
+    unread:   none
+    unspoken: n_1 (demo.stat) ["value"]
 ```
 
 ```
   value: 3400, nobody said
-    words:  []
-    unread: n_1 (demo.quiet-stat) ["label"]
+    words:    []
+    unread:   n_1 (demo.quiet-stat) ["label"]
+    unspoken: none
   caption: "   ", declared
-    words:  ["3,400","appointments"]
-    unread: none
+    words:    ["3,400","appointments"]
+    unread:   none
+    unspoken: none
+  one declared figure it cannot say, over one type nobody spoke for
+    words:    ["appointments"]
+    unread:   n_1 (demo.quiet-stat) ["value","label"]
+    unspoken: n_2 (demo.stat) ["value"]
 ```
 
-The figure is gone, and **`unread` is empty.**
+The figure is gone from `words`, and it is **not** gone from the reading.
 
-Work through why, because every step is something this lesson has defended.
-`value` is declared, so the node does not go in `unread` — `unread` is for types
-that said *nothing*, and this one spoke. The declared value is not a string, so it
-is skipped rather than coerced — coercing would print `3400` where the page shows
-*3,400*, which is the lie. Both rules are right. Their composition is a reading
-that could not read something and **does not say so**, which is the one thing the
-shape of this answer exists to prevent.
+Work through the first one, because every step is something this lesson has
+defended. `value` is declared, so the node does not go in `unread` — that list is
+for types which said *nothing*, and this one spoke. The declared value is not a
+string, so it is not coerced — coercing would print `3400` where the page shows
+*3,400*, which is the lie. Both of those rules are exactly what they always were.
+The third line is what changed on 18 September: the prop is named, on its node, in
+a list that exists to carry it. A caller that reads all three fields now knows a
+word is owed and missing, which is the promise the shape was built to make and
+did not keep for this case.
 
-The second line shows it is not a quirk of declaring: with nobody having said,
-`unread` names `["label"]` and not `value`, because the reading only lists
-*string-valued* props. The number is invisible from both directions.
+The second reading shows it is the **declaration** doing the work rather than the
+number. With nobody having said, `unread` names `["label"]` and not `value` — that
+list carries non-blank string-valued props only — and `unspoken` is empty,
+because nothing was told to read anything. Same node, same number, and the reading reports it or
+does not depending entirely on whether somebody declared. That is the record's
+title, printed.
 
-How reachable is it? `loom.stat`'s schema requires strings, so a validated tree
-cannot hold that node. But the callers this seam was built for are reading **a
-proposal nobody has approved** and a queue row about one — which is exactly where
-props have not been through a schema yet, and exactly the argument lesson 23's
-`resolveAnchor` makes when it answers `42` and `null` with readings instead of
-throwing.
+The third reading is the machinery declining to invent a gap. `"   "` is not a
+word, does not become one, and is not reported as a word that went missing —
+because the page really does show nothing there, so the reading and the page
+agree. It is the case people most often get wrong in the other direction after
+learning about `unspoken`.
 
-The third line is the same machinery doing the right thing: `"   "` is not a word
-and does not become one. Nothing is lost there, because there was nothing to
-lose.
+The fourth is the one to check your predictions against hardest, and it has three
+things in it.
 
-This is filed rather than fixed — a lessons change that also changes behaviour is
-a lessons change nobody can review. What the fix is, is genuinely open: `unread`
-currently means *nobody has said*, and widening it to also mean *said, and I could
-not read it* would make one field mean two things, which is this lesson's own
-complaint. The report says so and leaves the shape to the lane that owns the seam.
+**Both lists are populated, and they name different nodes.** `n_2` is the parent:
+declared, and holding one prop it was told to read and cannot. `n_1` is the child:
+a type nobody has spoken for. Three words are missing from that page's reading, by
+two different routes, and the two routes have different remedies — *declare `copy`
+on `demo.quiet-stat`* fixes one of them and does nothing at all for the other.
+That is the argument from The idea arriving as output rather than as prose.
+
+**`words` has one entry.** The parent's `label` is in it. The child's `"96%"` and
+`"seen on time"` are real words on a real page, and they are not in `words` and
+never were, because the child's type has not declared and `copyIn` will not guess.
+Look at how little of that page's copy `words` actually holds — and then at how
+completely the other two fields account for the rest. A caller that reads one
+field sees a page with one word on it and no reason to doubt that.
+
+**The child is `n_1` and the parent is `n_2`.** Children are built before the
+parent that takes them, so the ancestor is minted last. Lesson 23's exercise C and
+exercise F below say the same thing; if it still surprises you, write it in
+Reflect rather than nodding at it.
+
+How reachable is any of this? `loom.stat`'s schema requires strings, so a
+validated tree cannot hold that node. But the callers this seam was built for are
+reading **a proposal nobody has approved** and a queue row about one — which is
+exactly where props have not been through a schema yet, and exactly the argument
+lesson 23's `resolveAnchor` makes when it answers `42` and `null` with readings
+instead of throwing.
+
+Last, what this exercise used to say, because it is worth more than what it says
+now. Until 18 September the third line of the first reading read `unread: none`
+and the paragraph under it ended *this is filed rather than fixed* — a lessons
+change that also changes behaviour is a lessons change nobody can review, so the
+gap was written up and handed to the lane that owns the seam. That cost five days
+and bought a record which rejected the one-line version of the fix on exactly the
+grounds this lesson spends four sections building.
+
+**Writing the worked example is what found it.** Nothing else was going to:
+`copy.test.ts` had a test for this precise case, and it asserted `words` and
+nothing else, so the silence was pinned in rather than overlooked. A green suite
+and a printed transcript disagreed, and the transcript was right.
 
 ### Exercise D — the order words come back in
 
@@ -719,8 +937,9 @@ The output:
 
 ```
   a node with props, a text child and a child node
-    words:  ["Our clinic","since 1998","Open six days a week","3,400","appointments"]
-    unread: none
+    words:    ["Our clinic","since 1998","Open six days a week","3,400","appointments"]
+    unread:   none
+    unspoken: none
 ```
 
 Reading order, with one rule that is not obvious and is stated in the source: **an
@@ -835,8 +1054,9 @@ The output:
   copyFor("loom.stat"):      undefined
   textOf(metrics band):      ""
   copyIn(metrics band, starter registry)
-    words:  []
-    unread: n_6 (loom.section) ["tone","width"] | n_5 (loom.stat-grid) ["columns","align"] | n_1 (loom.stat) ["value","label"] | n_2 (loom.stat) ["value","label"] | n_3 (loom.stat) ["value","label"] | n_4 (loom.stat) ["value","label"]
+    words:    []
+    unread:   n_6 (loom.section) ["tone","width"] | n_5 (loom.stat-grid) ["columns","align"] | n_1 (loom.stat) ["value","label"] | n_2 (loom.stat) ["value","label"] | n_3 (loom.stat) ["value","label"] | n_4 (loom.stat) ["value","label"]
+    unspoken: none
 ```
 
 Zero and zero. `loom.heading` is registered and does not declare that it is a
@@ -848,6 +1068,11 @@ any of this existed. `unread` has six entries naming every node and every prop
 involved. **The reading is exactly as ignorant as it was and is now saying so**,
 and that difference is the only thing this seam bought on the day it landed. It is
 also, on today's `main`, the entire thing it has bought.
+
+`unspoken` is empty, and on this library it is empty for every tree there is:
+with nothing declaring `copy`, no node ever reaches the branch that fills it. The
+third field is a promise kept against a day that has not arrived — which is the
+two zeroes above it, said once more, one level along.
 
 Two smaller things in that transcript are worth a second look.
 
@@ -949,7 +1174,7 @@ particular nastiness that the guess was right and the authority is merely empty.
 
 ## It could have been otherwise
 
-Six from the records, and one that is not in any record.
+Eight from the records, and one that is not in any record.
 
 **Rendering the node and reading the markup back.** The finding that started it
 raised this itself — *it may well be that rendering is the answer* — and
@@ -974,6 +1199,21 @@ list can grow into a map later without a consumer changing what it asks.
 two. Rejected because it would make a pure tree function depend on a deployment's
 registry: `tree/` knows nothing about `sdk/`, and the direction of that arrow is
 worth more than the saved export.
+
+**Naming the unreadable prop in `unread`.** The smallest possible fix to the gap
+exercise C used to print, and the one this lesson's own finding named and rejected
+in the same breath. Rejected because it makes one field mean *nobody has said* and
+*said, and I could not read it* — a field that means two things being what this
+seam exists to complain about — and because it silently changes what an empty
+`unread` asserts to a caller that ships today. `(portal)` is one such caller.
+
+**Giving `UnreadCopy` a reason, so one list carries both.** More faithful to the
+idea that both are *the reading fell short here*, and it is one list to iterate
+rather than two to remember. Rejected on the grouping a caller actually does:
+`unread` is grouped by **type**, because a declaration is what answers it, and the
+other case is per **node** and answered by a formatted string. Two lists grouped
+differently and acted on differently are two lists — and this is the rejection to
+be able to reproduce, because it is the one whose reasoning transfers.
 
 **A free-form `role: string`.** Every consumer would match on a string again, one
 level further from the type, and two hosts would spell the same part `heading` and
@@ -1004,8 +1244,8 @@ and `tone: "surface"` would appear as words on a clinic's deletion notice.
 
 ## Explain it back
 
-Two things to write in your own words. Do not look at the earlier sections while
-you write. Then compare.
+Three things to write in your own words. Do not look at the earlier sections
+while you write. Then compare.
 
 1. **Explain to a colleague who has just proposed "if a primitive hasn't declared
    `copy`, treat it as having no copy" why that is the original bug.** They push
@@ -1022,6 +1262,15 @@ you write. Then compare.
    that neither of them appears in the catalogue. Then name the one property both
    declarations have that nothing in lesson 15 predicts, and say what it costs.
 
+3. **A colleague proposes the smallest possible fix** for the figure that used to
+   vanish: put the prop name in `unread`. One field, no new type, the node gets
+   named, every existing caller picks it up for free. Argue them out of it
+   **without using the word `unspoken`** — say what a caller *does* about each of
+   the two lists and why those are different actions, and say what an empty
+   `unread` stops being able to promise on the day their version lands. Then say
+   what it would take for their answer to be the right one, because there is a
+   version of this seam where it is.
+
 Predict, before writing (2): the property neither lesson predicts is not that the
 declarations are optional. If that is your answer, you have found the part that is
 most visible rather than the part that is new.
@@ -1030,24 +1279,26 @@ most visible rather than the part that is new.
 
 ## Self-check
 
-Seven questions. For each: **rate your confidence 1–5 before you write your
+Eight questions. For each: **rate your confidence 1–5 before you write your
 answer, then check.**
 
 1. Name the four places a consumer could look for "which of this node's props are
    words", and give the reason each one fails. For the one that would actually
    work, say precisely which callers it fails for and why.
 2. State the difference between `copy: []` and no `copy`, then give the shape of
-   the answer that keeps them apart. Say what a consumer that reads only `words`
+   the answer that keeps them apart. Name every field of that shape and say which
+   distinction each one exists for. Say what a consumer that reads only `words`
    is unable to tell, and name the seam elsewhere in this course that makes the
    same bargain for a different measurement.
 3. A primitive declares `copy: ["headline"]` and also holds `backdrop`. Say what
    `unread` reports about `backdrop` and why, then state the general rule about
    what a declaration is trusted for — and the consequence for adoption if the
    rule went the other way.
-4. A declared copy prop holds the number `3400`. Say what the reading returns,
-   what it reports, and why both of the two rules that produce that outcome are
-   individually correct. Then say which caller can actually hit it, and what it
-   would cost to name it — including what would go wrong with the obvious fix.
+4. A declared copy prop holds the number `3400`. Say what each of the three
+   fields holds, and why both of the two rules producing that outcome are
+   individually correct — then say what the composition of two correct rules did
+   for the whole of this seam's first three weeks, and what kept it invisible to a
+   green test suite. Name the caller that can reach it at all.
 5. Why is an unknown `role` refused at registration rather than ignored? Give the
    failure it prevents in one sentence, and name two other refusals in the
    registry that exist for the same shape of reason.
@@ -1058,10 +1309,17 @@ answer, then check.**
    what it costs — and use the starter library's two zeroes to explain why this
    particular kind of seam cannot fail loudly and what a course, a review or a
    test would have to do instead to notice it.
+8. A `loom.divider` that has declared nothing holds `weight: 2`; a `demo.stat`
+   that has declared `value` holds `value: 3400`. One of those numbers is
+   reported and one is not. Say which, say why that is not one hole seen from two
+   directions, and give the one-sentence rule that decides it — then say what a
+   caller has in hand, in each case, telling it not to trust `words`.
 
 Question 4 is this lesson's question. Question 2 is where a half-answer reads as
-a full one: if yours does not name the *shape of the return value*, you have
-described the distinction without saying how anybody gets to use it.
+a full one: if yours does not name the *shape of the return value*, field by
+field, you have described the distinction without saying how anybody gets to use
+it — and if it names two fields, you have given the answer this lesson itself had
+until its own exercise corrected it.
 
 ---
 
@@ -1076,6 +1334,15 @@ Write for two minutes, then move on.
 - Predict 2 is the lesson. If your answer had one list in it, write the sentence
   that would have made you add the second — not the rule, the *habit*. Something
   like: *when a function can fail to know, its answer has to be able to say so.*
+- Predict 2's last part asked for the rule you used to decide **how many fields**.
+  Get it out and hold it against the one in *Why a third field rather than a third
+  meaning*. Most rules written here are about the failures — one field per thing
+  that can go wrong, or one field with a reason attached to each entry. The rule
+  that holds is about the *caller*: two failures are one field when whoever reads
+  the answer would do the same thing about both. Write down which of the three you
+  had. Then find a result type in your own code with a `reason` string on it, and
+  decide honestly whether its reasons are acted on differently or merely logged
+  differently.
 - Predict 3: how many members did you give the vocabulary? Almost everybody gives
   it three or four, because they are easy to think of and all plausible. Write
   down what would have to happen for a member you invented to turn out wrong,
@@ -1101,6 +1368,16 @@ lesson is that lesson's registry answering a new kind of question, and heavy on 
 because the two findings are the same finding twice: a seam that is correct,
 tested, and declared by nobody.
 
+**What changed on 18 September, if you worked through this lesson before then.**
+Do not reread it. Three things are new and they are the same thing three times:
+*Three ways to have no word* and the two sections under it, exercise C (four
+readings now, and a different transcript — predict it fresh), and a ninth
+question in Set AC, which asks the new idea cold. The seam this lesson teaches gained a third field,
+`unspoken`, because exercise C printed a case where two correct rules composed
+into the exact silence the lesson spends four sections arguing against. The
+lesson found it; [0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)
+closed it; and the closing is a better subject than the seam was.
+
 Part V now has seven lessons, and the shapes have stopped agreeing in a useful
 way. The first four are a name in the tree and a document in a registry, resolved
 before the walk. Lesson 22 had no document — a predicate over a pair. Lesson 23
@@ -1112,3 +1389,12 @@ already has.
 So the question to carry into an eighth seam is neither lesson 22's nor lesson
 23's. It is this: **when your system cannot answer, what does it return — and who
 would notice if it started returning that when it could?**
+
+This lesson has since answered the second half of its own question, and the answer
+is worth carrying too. Nobody noticed. The seam returned *there are none* where it
+meant *I cannot tell you* from the day it shipped, every test was green, the one
+test for the exact case asserted the one field that looked right — and what caught
+it was writing the example out and reading what it printed. A shape that can say
+*I don't know* is not the same thing as a shape that *does*, and the difference
+between them is invisible to everything except a case that reaches it and somebody
+looking at the output.

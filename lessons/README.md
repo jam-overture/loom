@@ -240,7 +240,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
 | [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
 | [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
-| [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, and what shape an answer needs in order to say it; and why replacing a correct guess with an authoritative source is a regression until the authority has been told. |
+| [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, what shape an answer needs in order to say it and what decides how many fields that shape has; why replacing a correct guess with an authoritative source is a regression until the authority has been told — and what it meant that the seam built to stop a missing word going silent did exactly that, in a case its own lesson printed. |
 | [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; why a test that restates the value it is testing is a second copy with a tick beside it — and what was still wrong after the repository read this lesson and fixed the list. |
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 
@@ -286,6 +286,28 @@ cannot see enough" and onto a second axis — a checker that sees everything and
 cannot interpret it. It also moves the design question off the declaration
 itself and onto **the party that has not made one yet**, which on the day a seam
 ships is every party there is.
+
+Lesson 24 then got a second half from the repository, in the same way lesson 25
+did and for a sharper reason. Its exercise C printed a reading in which two rules
+this lesson had just spent four sections defending — *never coerce a value the
+component owns the formatting of*, and *a declaration is believed about what it
+leaves out* — composed into a figure that left `words` and arrived nowhere, under
+an `unread: none` that positively asserts there is nothing more to say. The one
+seam in the repository whose return shape exists to stop a missing word going
+silent was doing it. The lesson filed that on 13 September and
+[0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)
+closed it on 18 September with a third field, `unspoken`, having rejected the
+one-line version that would have folded it into the list already there.
+
+So the lesson now teaches something it could not have taught when it was written:
+not that an answer should be able to say *I cannot tell you*, which is where it
+started, but **how many ways an answer needs to be able to say it** — one field
+per thing a reading can fail at, where "distinct" is settled by whether the
+caller would do a different thing about it, not by whether the two failures
+sound alike. The rest of the story is the part worth keeping: the seam had been
+wrong since the day it shipped, its test suite was green, the test for this exact
+case asserted the one field that looked right, and what found it was writing the
+worked example out and reading what it printed.
 
 Lesson 25 turns that question on the checker every one of the first seven took
 for granted, which is the compiler — and finds a third axis. It sees everything,

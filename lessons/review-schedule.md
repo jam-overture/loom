@@ -1153,10 +1153,11 @@ and the comparison is where the general rule is.
    two, and state what each one refuses to round off. Then give the rule all
    three are instances of, in one sentence that mentions neither copy nor
    contrast. *(15, 24)*
-4. A declared copy prop holds the number `3400`. Say what comes back, what is
-   reported, and why each of the two rules producing that outcome is individually
-   correct. Then name the caller that can reach it, and say why the obvious fix
-   would make one field mean two things. *(05, 24)*
+4. A declared copy prop holds the number `3400`. Say what each field of the
+   reading holds, and why each of the two rules producing that outcome is
+   individually correct. Then name the caller that can reach it, and say what
+   those two correct rules composed into for the whole of this seam's first three
+   weeks — and what kept a green test suite from saying so. *(05, 24)*
 5. A primitive declares that it is a heading; only a tree can say which heading
    leads. Say why those two facts are kept in different places, name the
    consumers the separation serves, and give the argument against deriving the
@@ -1175,11 +1176,19 @@ and the comparison is where the general rule is.
    Say what the two have in common, why neither can fail loudly, and what would
    have to exist to notice either — given that no test in either lane is going to
    say anything. *(22, 23, 24)*
+9. The gap in question 4 was closed by a third field rather than by naming the
+   prop in the list that already existed, which was one line shorter and named
+   the node just as well. Give the test that decides between those two designs
+   — in a form you could apply to a result type in a system that has nothing to
+   do with copy — and then say what the one-line version would have silently
+   changed for a caller that was already shipping. *(15, 24)*
 
 Question 2 is the point of the set. Question 4 is where a confident half-answer
 is most likely: if yours says the seam is wrong, reread what each rule is
-protecting — the interesting version says both are right and the composition is
-not.
+protecting — the interesting version says both are right and the composition was
+not. Question 9 is the one that transfers: an answer naming the two fields has
+described the fix, and an answer naming what a caller *does* about each has
+retrieved the rule.
 
 ---
 

@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — what an empty `unread` asserts is one clause narrower than 0169 says, and the narrower claim is the one that holds
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — **nothing is broken and no behaviour should change.** Two sentences are
+one clause too strong, and one of them is the sentence your record uses to
+explain why the bug it closed was a bug
+
+Closing your 18 September entry on lesson 24, which is landed: the lesson now
+teaches `unspoken` and exercise C prints it. Writing that section meant stating,
+precisely, what a caller may conclude from an empty `unread` — and the statement
+in front of me did not survive being run.
+
+[0169](decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md) says
+`unread: none` is *"a positive claim that every type under this node declared"*.
+It is not. Two nodes, neither of whose types declared anything, against
+`{ copyFor: () => undefined }`:
+
+```
+  divider, only non-string props   { weight: 2, inset: true }
+    words: [] unread: 0 unspoken: 0
+  quiet, one blank string prop     { label: "   " }
+    words: [] unread: 0 unspoken: 0
+```
+
+Both come back `NO_WORDS`. Neither type declared. So an empty `unread` is
+reached by a node that has declared nothing, and the claim as written is false
+for it.
+
+**The claim that is true is the narrower one, and it is the one that matters:**
+*no node under here was left holding a word this reading could not classify* —
+which is exactly `words` is complete, which is exactly what a caller needs, and
+which is exactly what the case 0169 closed had broken. Nothing about the record's
+decision changes. The argument gets sturdier, because the true claim is the one
+the bug falsified, and the too-strong one is falsifiable by a divider.
+
+**The second sentence is in the source and is the same shape.**
+`UnreadCopy.props` is documented as *"Its string-valued props, in the order the
+node carries them"*, and `stringProps` filters with `isWord`, so a blank or
+whitespace-only string is left out:
+
+```
+  { value: "3,400", label: "   ", weight: 2, flag: true }, nobody declared
+    unread: n_1 (demo.quiet) ["value"]
+```
+
+`label` is a string-valued prop and is not named. The behaviour is right and is
+the same blank rule the declared side applies, one paragraph down, deliberately —
+it is only the doc line that reads as though the filter were `typeof === "string"`.
+
+**There is a third sentence of the same shape, and it is the one that carries
+decision 3.** The record argues the asymmetry with *"on the undeclared side the
+**node is already named**, so a caller knows not to trust `words` for it"*. True
+of a node holding `weight: 2` **and** a non-blank string; false of one holding
+`weight: 2` and nothing else, which is in no list at all — and `loom.divider` is
+the example the record itself reaches for.
+
+The conclusion survives and the argument needs one more case. An undeclared node
+with at least one candidate word is named, and its non-string props are covered
+by that. An undeclared node with **no** candidate word is named nowhere and does
+not need to be: `words` is genuinely complete for it, because a value nobody has
+claimed is a word is a setting. In neither case is the caller told something
+false — which is the whole difference from the declared side, where a word was
+owed, `words` did not have it, and no list said so.
+
+**Why this is worth two words to you rather than nothing.** Decision 3 of your
+record is *the undeclared side keeps its string filter, and the reason is written
+down*, and it turns on what the two sides do differently. As written, they differ
+in two places — blanks and non-strings — and only one of those differences is
+intended. Saying *non-blank string-valued* makes it one rule with one deliberate
+asymmetry, which is the form the record's own title takes: **a declaration is what
+makes a non-string value a missing word.**
+
+Nothing to fix in code. Two doc lines, whenever you are next in the file, plus
+the sentence in 0169 if an Accepted record is amendable in this repository — if
+it is not, this entry is the amendment and the lesson states the narrow claim and
+says the record states it too strongly, which is where it is today.
+
+**In the lesson.** `lessons/24-silence.md` now states the narrow claim in *Three
+ways to have no word*, names the divider as the counterexample, and says
+*non-blank string-valued* in the four places it describes `unread`. Filed rather
+than fixed because `src/sdk/copy.ts` is yours and a lessons branch that edits it
+is a lessons branch nobody can review.
 ## 2026-09-19 — the three registries a surface already wires can now reach the model, and none of them does
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`
