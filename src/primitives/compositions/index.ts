@@ -1,8 +1,11 @@
 import type { Composition, CompositionPart } from "./composition.js"
 import { COMPOSITION_PARTS } from "./composition.js"
 import { articlesBand } from "./articles-band.js"
+import { bannerBand } from "./banner-band.js"
 import { bentoBand } from "./bento-band.js"
 import { changelogBand } from "./changelog-band.js"
+import { codeBand } from "./code-band.js"
+import { codeSessionBand } from "./code-session-band.js"
 import { comparisonBand } from "./comparison-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
@@ -24,6 +27,7 @@ import { navBand } from "./nav-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
+import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
@@ -41,8 +45,11 @@ export {
 
 export {
   articlesBand,
+  bannerBand,
   bentoBand,
   changelogBand,
+  codeBand,
+  codeSessionBand,
   comparisonBand,
   contactBand,
   contactDetailsBand,
@@ -64,6 +71,7 @@ export {
   pricingBand,
   pricingMatrixBand,
   proofBand,
+  proofFacesBand,
   proofStoryBand,
   stepsBand,
   stepsCardsBand,
@@ -116,16 +124,20 @@ export {
  * subtree the other does not.
  */
 export const STARTER_COMPOSITIONS: readonly Composition[] = [
+  bannerBand,
   navBand,
   heroBand,
   heroSplitBand,
   proofBand,
+  proofFacesBand,
   proofStoryBand,
   featuresBand,
   featuresAlternatingBand,
   bentoBand,
   stepsBand,
   stepsCardsBand,
+  codeBand,
+  codeSessionBand,
   integrationsBand,
   integrationsGridBand,
   metricsBand,
@@ -147,6 +159,40 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   ctaSignupBand,
   footerBand,
 ]
+
+/**
+ * Every primitive type some band in the phrasebook builds, sorted.
+ *
+ * ## Why a library needs to be able to answer this about itself
+ *
+ * On 19 September this was measured for the first time and the answer was
+ * **fifty-two of ninety-six**. Forty-four registered primitives — tested,
+ * documented, described in every interpretation request a deployment sends —
+ * could not be reached by dropping in a band, because no band used them.
+ *
+ * That is not a defect and this is deliberately **not a ceiling**. A primitive
+ * is registered before a band uses it, always, so a test demanding the two
+ * lists match would fire on the ordinary order of work. `Loom daily build`
+ * made the same argument on 18 September about a character budget over the
+ * primitives block and declined to write one for the same reason: a ceiling
+ * that fires on exactly the growth the library is being grown for turns into
+ * a number somebody raises without reading. The record is on an open branch
+ * at the time of writing and is not cited here for that reason.
+ *
+ * What it is instead is **the measurement made reproducible**. The number
+ * above came from a script in a scratch directory, and a number arrived at
+ * that way is a number the next run re-derives or trusts. Exported, the gap
+ * is one `filter` from any registry, and a run can say which way it moved
+ * rather than what it is.
+ *
+ * It is the union of the bands' own `uses` rather than a second walk of their
+ * subtrees, because `uses` is already held against the subtree by
+ * `compositions.test.ts` in both directions — a second derivation here would
+ * be a second thing to keep in step.
+ */
+export const CATALOGUE_TYPES: readonly string[] = [
+  ...new Set(STARTER_COMPOSITIONS.flatMap((composition) => composition.uses)),
+].sort()
 
 /**
  * The band with this id, or `undefined`.

@@ -8,6 +8,127 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — the port map is a complete ledger and therefore cannot show what was never on it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — **a defect in an instrument, not in anybody's judgement**; eleven of the
+primitives it hid shipped in `primitives-39`
+
+`docs/hermes-port-map.md` has sourced this lane's queue for a month and it is
+good at its job: seventy Hermes blocks, a verdict each, a number left that is a
+fact rather than a feeling. Three August runs read its empty tables as *the
+range is finished*, which is recorded there already.
+
+**This is the sharper version of that and it is not about emptiness.** A ledger
+of Hermes tells you what is left of Hermes. It is structurally incapable of
+telling you about a thing Hermes never had, and the port map's completeness is
+exactly what makes it read as though it could.
+
+Measured on `main` on 19 September, for the first time:
+
+| | |
+| --- | --- |
+| primitives registered | 96 |
+| primitive types some band in the catalogue builds | **52** |
+| registered, priced into every request, unreachable by dropping in a band | **44** |
+
+Among the forty-four: `loom.code`, `loom.code-span`, `loom.kbd`. **The
+catalogue could not draw the landing page of the product that owns it**, and no
+instrument in the repository could say so, because the queue was being read off
+a list of things a *creator-site* builder needed.
+
+**Why this is filed rather than only fixed.** The class is *a complete ledger
+of the wrong population*, and its failure mode is the one this lane has now hit
+three times from three directions: **an absence of a failure.** Nothing was red,
+nothing was missing from the port map, and every run that consulted it got a
+correct answer to a question that had stopped being the right one.
+
+**The remedy, and it is cheap.** Measure the catalogue against the **registry**,
+not the registry against Hermes. `CATALOGUE_TYPES` is exported for that now, so
+the gap is one `filter`. Deliberately **not** a test: a primitive is registered
+before a band uses it, so a check demanding the two lists agree fires on the
+ordinary order of work — the same reasoning `Loom daily build` used on
+18 September to decline a character budget over the primitives block, and the
+same reason a ceiling nobody believes gets raised without being read.
+
+Classified in `docs/primitive-gap-inventory.md`: forty-four is the misleading
+number and **nineteen** is the real one, the rest being asset-dependent (5), a
+different page type's content models (16), states of a bound region (3), and
+the page root. Eleven of the nineteen shipped in `primitives-39`; the eight
+left are named there in priority order.
+
+---
+## 2026-09-19 — sixteen of the ninety-six want a page sequence this catalogue is not
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — **a question, not a gap**; nothing is blocked and the answer is probably
+not *more bands*
+
+`loom.book`, `loom.event`, `loom.listing`, `loom.product`, `loom.offering`,
+`loom.recording`, their six grids, and `loom.message`/`loom.message-list` are
+sixteen registered primitives no band reaches, and unlike the other
+twenty-eight in that list **there is nothing wrong with them and nothing
+missing around them.** They are complete, tested, and shaped for a page this
+catalogue does not assemble: a shop, a course, a listings site, a conversation.
+
+`PAGE_SEQUENCE` claims to be *one complete document, nothing missing and
+nothing repeated*, and it is a **marketing landing page**. That was true and
+unremarkable when the catalogue held nineteen bands of one kind. With sixteen
+primitives standing outside it, the claim has acquired an implicit *of this
+kind* that nothing states.
+
+[0171](decisions/0171-a-page-part-is-earned-by-the-region-it-occupies.md)
+names the shape and explicitly does not decide it: **a second named path
+through the same phrasebook** — a product page, a shop page — each derived from
+its own ordered tuple of parts. 0162's metaphor is already this; the catalogue
+is a phrasebook and the page is *one* path through it, and there has only ever
+been one path.
+
+**Why this is filed and not built.** It is a change to how `PAGE_SEQUENCE` is
+derived, and the derived-rather-than-hand-kept property is eight days old and
+load-bearing — two assertions are written over that list. Widening it to *n*
+lists is a design this lane should not make on the way past while shipping four
+bands. The trigger to pick it up is a second page type somebody actually wants,
+not a twenty-second part.
+
+**What it is not:** a reason to build sixteen bands onto the landing page. A
+`loom.product-grid` band under a pricing table is how a phrasebook becomes a
+junk drawer.
+
+---
+## 2026-09-19 — a picture corrected the prose three times in one run, and the tests could not have
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a note on where this lane's assurance actually comes from, recorded
+because the ratio is now hard to ignore
+
+Three defects in `primitives-39` were found by looking at a screenshot. All
+three passed every test, rendered under both palettes with no diagnostics, and
+were argued for in prose in the module header before the photograph was taken:
+
+| | what the reasoning said | what the picture said |
+| --- | --- | --- |
+| `code`'s split ratio | *the left column is sentences and deserves the room* | the source panel's first line cut mid-identifier — **prose reflows and a listing does not** |
+| `code`'s source panel | the primitive's `wrap: false` default is right | at 390 the split has collapsed and no ratio helps; unwrapped, every line ends behind a gesture |
+| `proof-faces` | one row of three | at 1280 the sentence is stranded at the far right and the band reads as three unrelated items |
+
+This is the third consecutive run where the camera corrected the author. #329
+had the `faq-grid` type ratio; #321 had a band losing half its width.
+
+**No proposal, and that is deliberate.** The obvious one — assert something
+about layout — is the thing the 17 September finding already covers and cannot
+have: the harness photographs and cannot assert, and what these three have in
+common is that **the rendered page was valid**. There is no assertion that
+distinguishes a stranded sentence from a deliberate one.
+
+What is worth saying, to whoever writes the next band: **the module header is
+where this lane's reasoning goes, and a header written before the photograph is
+a hypothesis.** All three of the above were confidently argued in prose that had
+to be rewritten afterwards. Writing the argument first is still right — it is
+what makes the error visible when the picture disagrees — but it should be read
+as a claim awaiting a shot rather than as the finding.
+
+---
 ## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**

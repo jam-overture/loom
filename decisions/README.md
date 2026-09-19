@@ -253,3 +253,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0167](0167-a-delegated-signal-names-the-regions-it-happened-inside.md) | A delegated signal names the regions it happened inside, and a region is counted in views rather than in presses | Accepted | §6 |
 | [0168](0168-a-band-links-into-the-page-it-is-assembled-into.md) | A band links into the page it is assembled into, and the page is where that is checked | Accepted | §4b |
 | [0169](0169-a-declaration-is-what-makes-a-value-a-missing-word.md) | A declaration is what makes a value a missing word | Accepted | §2 (the authoring SDK's copy seam) |
+| 0170 | *No record on this branch* | — | — |
+| [0171](0171-a-page-part-is-earned-by-the-region-it-occupies.md) | A page part is earned by the region it occupies, not by the content it holds | Accepted | §4b |
