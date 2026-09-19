@@ -67,12 +67,37 @@ eleven of them. The remaining eight are named at the end.
 
 **This is deliberately not turned into a ceiling.** A test demanding that every
 registered primitive be reachable would fire on the ordinary order of work — a
-primitive is registered before a band uses it, always. `Loom daily build` made
-the same argument yesterday about a character budget over the primitives block
-and declined to write one, and that reasoning transfers exactly. What landed
-instead is `CATALOGUE_TYPES`, an export that makes the measurement one `filter`
-from any registry, so the next run can say **which way it moved** rather than
-re-deriving it in a scratch directory the way this one did.
+primitive is registered before a band uses it, always.
+[0170](../decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md)
+declined a character budget over the primitives block for exactly that reason
+on the same day, and the reasoning transfers without a change of a word. What
+landed instead is `CATALOGUE_TYPES`, an export that makes the measurement one
+`filter` from any registry, so the next run can say **which way it moved**
+rather than re-deriving it in a scratch directory the way this one did.
+
+### What #336 landing the same day turned this into
+
+0170's other half is `selectPrimitives(entries, types)`: a deployment registers
+a **slice** of the starter library, because the library is a set to choose from
+rather than a set everybody ships. That function needs a list of types and has
+no opinion about which. `CATALOGUE_TYPES` is the list a host wanting the
+phrasebook should hand it, and the pairing measures well:
+
+| | entries | characters per interpretation request |
+| --- | --- | --- |
+| the whole starter library | 96 | **16,718** |
+| `selectPrimitives(STARTER_PRIMITIVES, CATALOGUE_TYPES)` | **63** | **10,432** |
+
+**38% off every request, losing nothing the catalogue could reach anyway** —
+and the call cannot hit 0170's `unregistered-types` refusal, because the
+assertion above would have gone red first.
+
+Neither lane could have written that alone, and it sharpens *why measure reach*
+past a tidiness argument: the 33 unreachable entries are not merely surface
+nobody can use, they are surface **every deployment pays for on every
+request**. It is also the concrete form of this report's closing argument — a
+ninety-seventh primitive costs 171 characters forever, and a band that makes
+eleven existing ones reachable costs nothing.
 
 ## The rule that had to be written first
 
@@ -220,12 +245,14 @@ see above.
   `git checkout HEAD -- <file>`, with `git status` clean after each.
 - No literal colour anywhere in the diff; every value is a token or a length.
 - **One citation defect caught by a test rather than by me.** The
-  `CATALOGUE_TYPES` header cited `0170` for the ceiling argument. 0170 is
-  claimed by #336, which is **open**, so the link resolves to nothing on this
-  branch — `tools/decisions/decisions.test.ts` named the file and the number.
-  The argument is now attributed in prose without a link, which is the correct
-  way to lean on a record that has not merged. Second time in three runs a
-  citation to a record that is not on `main` has been the thing a test caught.
+  `CATALOGUE_TYPES` header cited `0170` for the ceiling argument while #336 was
+  still **open**, so the link resolved to nothing on this branch and
+  `tools/decisions/decisions.test.ts` named the file and the number. Second
+  time in three runs a citation to a record not yet on `main` has been the
+  thing a test caught. **#336 merged later the same day**, the base was brought
+  in, and the citation is live now — which is the happier ending and does not
+  change the lesson: the branch was correct at the moment it was pushed, and
+  the check is what made that true rather than lucky.
 - **A model identifier nearly shipped into the repository.** The session
   transcript in `code-session` printed `authored by claude-opus-5` as
   illustrative output. It is `authored by a model` now. Worth recording because

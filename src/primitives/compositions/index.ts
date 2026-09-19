@@ -172,12 +172,34 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
  *
  * That is not a defect and this is deliberately **not a ceiling**. A primitive
  * is registered before a band uses it, always, so a test demanding the two
- * lists match would fire on the ordinary order of work. `Loom daily build`
- * made the same argument on 18 September about a character budget over the
- * primitives block and declined to write one for the same reason: a ceiling
- * that fires on exactly the growth the library is being grown for turns into
- * a number somebody raises without reading. The record is on an open branch
- * at the time of writing and is not cited here for that reason.
+ * lists match would fire on the ordinary order of work —
+ * [0170](../../../decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md)
+ * declined a character budget over the primitives block for exactly that
+ * reason on the same day this was written: *a ceiling that fires on the growth
+ * we asked for* becomes a number somebody raises without reading.
+ *
+ * ## What it is for, which 0170 landing the same day made concrete
+ *
+ * 0170's other half is `selectPrimitives(entries, types)` — a deployment
+ * registers a **slice** of the starter library rather than all of it, because
+ * the library is a set to choose from. That function needs a list of types and
+ * says nothing about which list; this is the one a host wanting the catalogue
+ * should pass:
+ *
+ * ```ts
+ * selectPrimitives(STARTER_PRIMITIVES, CATALOGUE_TYPES)
+ * ```
+ *
+ * is **the smallest registry that can build every band in the phrasebook**,
+ * and it cannot refuse, because `compositions.test.ts` asserts every member of
+ * this list is registered. Measured against 0170's own instrument on
+ * 19 September: **63 entries and 10,432 characters, against 96 and 16,718 —
+ * 38% off every interpretation request, with nothing lost that the catalogue
+ * could reach anyway.**
+ *
+ * Neither lane could have written that line alone, and it is the practical
+ * answer to *why measure reach at all*: the gap is not only unreachable
+ * surface, it is surface a deployment is paying for on every request.
  *
  * What it is instead is **the measurement made reproducible**. The number
  * above came from a script in a scratch directory, and a number arrived at
