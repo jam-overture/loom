@@ -164,13 +164,34 @@ describe("the thing a reader pressed", () => {
   })
 
   /**
-   * A band that is itself a control does not answer for the press inside it.
+   * A band that is itself a control still answers with what is inside it.
    *
-   * The front door's menu is a `loom.nav`, which is interactive — so a walk that
-   * started at the band rather than inside it would file every press in the bar
-   * against the bar, and the ancestry would lose the region entirely.
+   * A whole band can be a link — a `loom.card` with an `href` is one — and a
+   * walk that started *at* the band rather than inside it would answer with the
+   * band. The press would then be filed against the region it happened in, the
+   * ancestry would lose that region entirely, and every number on the page would
+   * be back to the shape this module exists to stop.
    */
-  it("never answers with the band, even when the band is itself a control", () => {
+  it("never answers with the band, even when the band is itself a link", () => {
+    const page = pageOf((ids) =>
+      buildElement(ids, {
+        type: "loom.card",
+        props: { href: "https://loom.example/docs" },
+        children: [action(ids, "Read the docs", "https://loom.example/docs")],
+      })
+    )
+    const band = page.root.children[0]
+
+    expect(band?.kind).toBe("element")
+    const aim = pressTargetIn(page, band!.id, "A band that is a link")
+
+    expect(aim.at.type).toBe("loom.action")
+    expect(aim.at.nodeId).not.toBe(band!.id)
+    expect(aim.within.map((address) => address.nodeId)).toEqual([band!.id, page.root.id])
+  })
+
+  /** The front door's own case: the menu is a bar a reader opens, not one they press. */
+  it("takes a press in the menu to something inside the menu", () => {
     const page = frontDoor()
     const band = bandNamed(page, "The menu")
     const aim = pressTargetIn(page, band.id, band.name)
