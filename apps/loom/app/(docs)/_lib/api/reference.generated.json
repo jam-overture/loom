@@ -4953,6 +4953,13 @@
               "summary": "Every band on offer — the phrasebook, not the page."
             },
             {
+              "name": "CATALOGUE_TYPES",
+              "kind": "value",
+              "signature": "const CATALOGUE_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "Every primitive type some band in the phrasebook builds, sorted."
+            },
+            {
               "name": "compositionById",
               "kind": "function",
               "signature": "const compositionById: (id: string) => Composition | undefined",
@@ -4983,7 +4990,7 @@
             {
               "name": "COMPOSITION_PARTS",
               "kind": "value",
-              "signature": "const COMPOSITION_PARTS: readonly [\"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"integrations\", \"metrics\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
+              "signature": "const COMPOSITION_PARTS: readonly [\"banner\", \"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"code\", \"integrations\", \"metrics\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
               "truncated": false,
               "summary": "The bands a page is made of, in the order a page uses them."
             },

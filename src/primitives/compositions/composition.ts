@@ -33,14 +33,39 @@ import type { InsertOperation, TreeOperation } from "../../tree/delta.js"
  *
  * The order is the whole of the extra information this carries, and it is the
  * part somebody who has not assembled a landing page before does not know.
+ *
+ * ## What may be added here, settled on 19 September
+ *
+ * This tuple was closed at nineteen from the day it was written, and three
+ * consecutive runs named the closure as the thing stopping a band from landing
+ * without opening it — which was the right caution and the wrong resting
+ * place. A vocabulary that cannot grow decides in advance what a page is
+ * allowed to be, and the catalogue had reached the point where the parts it
+ * could not name were ordinary: a strip above the navigation, a band that
+ * shows code.
+ *
+ * [0171](../../../decisions/0171-a-page-part-is-earned-by-the-region-it-occupies.md)
+ * states the bar, and it is deliberately not *is this content different*. It
+ * is **the region**: a part earns a place when there is somewhere on a page it
+ * goes that nothing already in the tuple occupies, and the test that it is a
+ * region rather than a taste is that the two cannot stand in for each other.
+ * A candidate another part could be swapped in for is a design of that part
+ * (0162), and belongs in the catalogue without touching this list.
+ *
+ * Adding a member here is not free and the cost is the thing to weigh: every
+ * part is a band on the canonical page, so the document {@link PAGE_SEQUENCE}
+ * assembles gets one longer, and a part with no canonical design is a red
+ * build rather than a page with a hole in it.
  */
 export const COMPOSITION_PARTS = [
+  "banner",
   "nav",
   "hero",
   "proof",
   "features",
   "bento",
   "steps",
+  "code",
   "integrations",
   "metrics",
   "pricing",
