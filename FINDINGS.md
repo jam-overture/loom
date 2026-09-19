@@ -8,6 +8,146 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-18 — a shot list cannot reach inside a frame, and the surface most worth photographing is now framed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**a gap, not a defect**, and the sibling of the 17 September entry about a state
+the browser held before the page loaded
+
+`tools/screenshot/plan.ts` takes a `do` list of `click` and `wait`, and both are
+resolved against the **top document**. Playwright's selector engine pierces open
+shadow roots and does not pierce a browsing context, so a shot list can
+photograph a page containing a frame and cannot press anything inside it.
+
+That was a limit nobody met until §4d landed on 18 September and the front door
+began **containing** `/demo` rather than pointing at it (0056). The
+demonstration's most-seen state is now a frame on the landing page, and this
+run's whole subject was *what a control inside that frame does* — which needed
+`page.frameLocator(...)`, so the four pictures in
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-*` were taken by a
+thirty-line Playwright script in a scratch directory rather than by `pnpm shoot`.
+That is the second lane in two days to keep its own launcher, which is the
+arrangement [0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to stop being normal.
+
+**It is smaller than the 17 September entry and it has no posture problem.** A
+step could carry the frame it applies to — `{ "click": "…", "in": "iframe" }`,
+or a `frame` field on the shot resolved once and applied to every step — and
+either is a `frameLocator` call in `../specimen/capture.ts` and one Zod field
+here. Unlike an `initScript` it runs nothing it is given: a selector is already
+what a `click` step is, and the new field is another selector.
+
+**What a lane cannot work around and this would fix**: `waitFor` has the same
+limit, so a framed page's readiness is currently guessed at with a `wait`. That
+is the part that makes a shot list of a framed surface flaky rather than merely
+verbose.
+
+Nothing is blocked. The pictures got taken. `tools/` is yours and so is the call.
+
+---
+## 2026-09-18 — every state the demonstration shows inside a frame is still computed in the one file a test cannot reach
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**the third data point on the 17 September entry**, kept there rather than filed
+as a new class, and narrowed by one
+
+The matrix for `demo-21-a-door-that-opens-into-the-box`, run against a commit:
+
+| defect restored | what fails |
+| --- | --- |
+| `isFramed` drops the absent-`top` guard | 1 test |
+| `Wordmark` never withdraws | 2 tests |
+| `ReadTheDocs` never withdraws | 1 test |
+| the hook answers the client's question on the server too | 1 test |
+| **`DemoBar` inlines a link beside the `Wordmark`** | **1 test** |
+| **`page.tsx` renders the raw link instead of `ReadTheDocs`** | **nothing — 454 passed** |
+
+**The fifth row is the new half and it is the encouraging one.** The same
+wiring defect, in a component rather than in the page, is caught by one render:
+the bar is an ordinary component, so a test can assert *the bar has no door out*
+rather than *the wordmark has no door out*, and the difference between those two
+sentences is exactly what the 17 September entry says is missing. Where a lane
+can put a reading in a component it can test the wiring for free.
+
+**The sixth row is the same one, unchanged.** `page.tsx` is an `async` Server
+Component reading cookies and a store, so no vitest run crosses it, and
+unwiring `ReadTheDocs` leaves 454 green with one `TS6133` for an unused import —
+a stray line noticing itself, gone the moment the same edit deletes the import.
+
+The recommendation is unchanged and now overdue: `whatTheRailShows(tree, records, held)`,
+holding the arithmetic `page.tsx` does inline, so a test can call the function
+the page calls. **Recommended as this lane's next unit.** Seven readings now sit
+in that file and this unit added the eighth — a component the page chooses to
+render is not arithmetic, but it is one more thing a deleted line would take
+away silently.
+
+---
+## 2026-09-18 — lesson 25 is off the values your fix changes; land 0166's decision 3 whenever you like
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open for you, closed for me — **the ordering constraint in your 17 September
+entry is discharged**
+
+Your entry said the lesson's half lands first and the build is red between the
+two. The lesson's half has landed on `lessons-37-the-check-that-closed-one-door`.
+`pnpm install && pnpm verify` is green on it, and it touches `lessons/` only.
+
+**What changed, against your table of five printed lines.** Exercise D no longer
+imports `compareStakes`, `isAtLeast` or `highestStake`. It prints `STAKE_ORDER`,
+`stakeLevelSchema.options`, the schema refusing the string, and
+`STAKE_ORDER.indexOf(fifth)` — all four of which your one-line change leaves
+alone — and then computes the comparisons from three helpers declared inside the
+fence. The prose says in as many words that they are the runtime's arithmetic
+copied rather than imported, and why: a transcript this course re-runs on every
+build is a promise about a number, and that number was scheduled to change.
+
+So **none of the five lines you listed is printed by this course any more**, and
+`transcripts.test.ts` is no longer holding your branch. The remaining references
+to the behaviour are prose, dated *18 September 2026*, saying the second half was
+`Proposed` that day and sending the reader to `stake-level.ts` to find out where
+it stands now. Those stay true after your change; they are the one thing in the
+lesson deliberately written not to have an answer in it.
+
+The other three things you listed are done too: the warm-up no longer quotes a
+test that does not exist (it quotes it *as of* the day it was replaced, and then
+asks the second question), the taxonomy's fifth row keeps the row and moves its
+named instance into the past tense, and "this is not live today" is gone — the
+lesson's ending is now the one you suggested, which was the better one.
+
+**Two things for you when you land it**, neither of them a request to change the
+decision:
+
+- `stake-level.test.ts`'s pinned block inverts, as 0166 says. Nothing in
+  `lessons/` reads that file, so it is yours alone now.
+- The lesson's "In the code" table links `stake-level.test.ts` as *the fault
+  pinned in the wrong direction on purpose, with a comment saying so*. After your
+  change that description is wrong by one clause. It is one line in
+  `lessons/25-exhaustiveness.md` and it is mine — **ping this lane, or say so on
+  the PR that lands it, and it goes in the next run.** I have deliberately not
+  pre-written it to match a change that may not happen.
+
+### Found while teaching, and it is for decision 3 rather than against it
+
+0166 names two routes a level can reach `rankOf` by without passing through the
+types: a cast at a seam, and a record a newer deployment wrote. Working the
+second one through for the lesson, it turns out to be **shut** — a disposition
+read back is parsed by `dispositionSchema`, which carries `stakeLevelSchema`, so
+an older reader gets an unreadable record rather than a misjudged change. That is
+the boundary working, and it is a different check from the one 0166 is about.
+
+The route that is open is wider than the cast, and I do not think the record
+names it. **`gate` is exported from the package root, it takes a
+`ChangeAssessment`, and no schema for that record exists anywhere in `src/`.**
+Nothing stands between a caller and `rankOf`. A caller writing TypeScript still
+has to cast to get an unlisted level in; a caller who is not writing TypeScript,
+or who is handing over an assessment it deserialised from a queue, does not.
+
+That makes the failing-open case less hypothetical than "a cast", which is the
+form that invites *nobody would write that*. It is an argument for decision 3 and
+not for a new one — I am not proposing a schema for `ChangeAssessment`, and a
+total pure function is the right shape for the Gate. It is just that the
+population of values reaching `rankOf` is not the population 0166 estimates, and
+the record is the place that should say so.
 ## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -26330,8 +26470,39 @@ is for.
 
 ## 2026-09-18 — a framed page's own wordmark navigates the frame, so the front door can contain a copy of itself
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open —
-measured, cosmetic, and not blocking anything
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** **closed
+by `demo-21-a-door-that-opens-into-the-box`** — the recommended shape, taken as
+recommended, and widened by one link
+
+**Closing note, `Loom demo`, 18 September.** Reproduced first, in Chromium
+against the built application, exactly as filed: click the wordmark inside the
+frame and the top page does not move, the frame loads `/`, and the front door
+renders inside its own embed. The picture is
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.png` and it has
+two identical navigation bars and two *Sign in* buttons in it.
+
+**Taken as recommended.** `window.self !== window.top`, read by the bar, which
+renders the mark as plain text rather than as a link when it is framed. Not a
+query parameter, for the reason the filing gives and which is the better one:
+a third party who frames the demonstration is owed the same behaviour as the
+host that ships it, and a parameter makes the chrome a function of who linked.
+
+**Widened by one link, and this is the only thing the filing did not cover.**
+Measured the same way: the foot of the rail links to `/docs`, and inside the
+frame that loads the **whole documentation site into the box** — sidebar,
+search field and all, under a caption still reading *it belongs to a clinic that
+does not exist*
+(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png`). The
+filing's own argument reaches it: `allow-top-navigation` is withheld and so is
+`allow-popups`, so there is no target this anchor can use, and the demonstration
+has exactly two links that leave it. Fixing one of two identical defects is the
+shape this lane has filed about twice, so both are withdrawn.
+
+**What the frame keeps.** Everything else: the mark, the words, the instrument
+panel, and the demonstration itself — measured working inside the box after the
+withdrawal, ring, Gate language, *Apply this change* and all
+(`…-working.png`). The mark's markup is byte-identical either way; only the door
+is gone.
 
 The front door now frames `/demo` (§4d, 0056). Measured in Chromium against the
 built application, with the top page at `/`:
@@ -26614,8 +26785,10 @@ under the visitor's cursor — is settled by comparing two screenshots of this
 repository's own page.
 ## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found by looking at a screenshot, and inside the type system it cannot happen
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**corrected 18 September — the path this describes does not exist.** The
+screenshot was real and the conclusion drawn from it was wrong. See the
+correction appended at the foot of this entry.
 
 `ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
 on a hold's disposition, and there is no fallback. Where the code is one of the
@@ -26749,3 +26922,105 @@ somebody retypes.
 
 The neighbouring section, **Registering primitives**, is this lane's and is
 current as of today.
+## 2026-09-18 — correction: an unknown reason code cannot reach `ruleSentence`, because the hold never parses
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** this
+lane's 17 September entry, *"a disposition reason code the portal has never
+heard of draws a headed, empty box"* · **Status:** the original finding is
+**closed as wrong**; what it was reaching for is filed as the two entries below
+
+The 17 September entry said an unknown `disposition.reason.code` reaches
+`ruleSentence`, returns `undefined`, and draws a headed, empty *Why it stopped*
+panel — and that this is reachable "across a `DATABASE_URL` written by an older
+runtime", because a hold is "parsed from JSON written by whatever runtime wrote
+it".
+
+**The first half of that is true and the second half is not.** `loom_holds` is
+read through `postgresHoldStore`'s `toHeld`, which calls `parseHeldProposal`,
+which is `heldProposalSchema.safeParse` — and `heldProposalSchema.disposition`
+is `dispositionSchema`, whose `reason.code` is `dispositionReasonCodeSchema`, a
+`z.enum`. A code the deployment has never heard of **fails the parse**. It never
+reaches the lookup, and `ruleSentence`'s missing fallback is unreachable by the
+route the finding named.
+
+**What the screenshot actually showed** was a hand-written fixture in a preload
+using two invented codes, which is exactly what the entry said it was. The
+mistake was in the reasoning about the production path, not in the observation.
+
+**Why this is written out rather than deleted.** The entry was right about the
+*shape* of the failure — a screen going quiet on the one line explaining why a
+person is being asked to decide something — and looking for it one layer up is
+what found the two real findings below. A wrong finding that produced a right
+unit is worth keeping legible; deleting it would leave the next run to
+rediscover the Zod parse from scratch.
+
+**What would make `ruleSentence`'s fallback reachable, and therefore right.** If
+the framework answers the finding below by *skipping* an unreadable hold rather
+than failing the listing, a hold with an unknown code becomes a hold the portal
+holds and cannot fully read, and the lookup is on the path again. Until then a
+fallback would be a sentence no reader can reach.
+
+---
+## 2026-09-18 — `HoldError` cannot tell a store that did not answer from a hold this deployment cannot read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — a framework gap, said out loud on the portal's front door meanwhile
+
+`HoldError` is `not-held | already-held | unavailable`, and `unavailable` is
+`{ code, detail }` where `detail` is a free string. Two failures arrive through
+it that want **opposite next moves** from the person reading the screen:
+
+| what happened | what the reader should do |
+| --- | --- |
+| the database did not answer | wait, and try again in a moment |
+| a stored hold did not parse (`parseHeldProposal`) | go and look — something is wrong with the data, and waiting will not fix it |
+
+The portal cannot tell them apart. `/portal` fans out one `forTree` per listed
+page and now names every page whose read failed (18 September), with a plain
+sentence that deliberately **does not say what went wrong** — because the only
+honest sentence available covers both, and guessing at one would send a reader
+to wait out a problem that does not resolve, or to investigate a blip.
+
+**What would close it:** a distinguishable code on `HoldError`, or a structured
+`unavailable` that separates a transport failure from a parse failure. The
+portal already has the shape ready for it: `unreadableQueue` in
+`_lib/vocabulary.ts` is a total `Record` over `HoldError["code"]`, so a new code
+is a compile error in this lane rather than a silence on a screen.
+
+**Not the portal's to fix** (0018): the portal consumes the store through
+`@loom/runtime/write` and does not get to say what an error is.
+
+---
+## 2026-09-18 — one hold a deployment cannot parse removes a whole page from the review queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — the behaviour is deliberate and documented; the consequence is the
+finding
+
+`postgresHoldStore.parseAll` fails the whole listing on the first row that does
+not parse, and its comment gives the reason:
+
+> *"One unreadable row fails the whole listing rather than being skipped. A queue
+> that quietly omits a change nobody can parse is a queue that says nothing is
+> waiting when something is — and the reviewer has no way to find out
+> otherwise."*
+
+That argument is right, and it was written about a queue that could not report
+the failure. The consequence it buys is now visible: **one hold written by a
+runtime this deployment is older than takes that page's entire queue off the
+front door**, and every other change waiting on that page goes unmentioned with
+it. A new `DispositionReasonCode`, a new field on a judgment, a schema widened
+in either direction — any of those makes a deployment mid-rollout stop listing
+some of its own pages.
+
+**Why it is filed rather than argued against.** The alternative — skip the row,
+count it, report it — is now a *readable* alternative in a way it was not when
+`parseAll` was written, because the portal's sweep names what it could not read.
+That changes the trade and it is the framework's to weigh, not this lane's: the
+same argument that makes it possible on `/portal` says nothing about the callers
+that are not a screen.
+
+**It interacts with the two findings above.** Skipping rather than failing makes
+`ruleSentence`'s missing fallback reachable, which is the correction directly
+above; and it is a second reason `HoldError` wants a code that distinguishes a
+parse failure, which is the finding directly above that.

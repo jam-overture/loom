@@ -1,5 +1,5 @@
 import type { Disposition } from "@loom/runtime"
-import type { HeldProposal } from "@loom/runtime/write"
+import { describeHoldError, type HeldProposal, type HoldError } from "@loom/runtime/write"
 
 import { screenName } from "./screen-names"
 import type { WaitingTriage } from "./waiting-effect"
@@ -9,6 +9,7 @@ import {
   confidenceWord,
   ruleSentence,
   STAKES,
+  unreadableQueue,
   type PlainState,
   type PlainWord,
 } from "./vocabulary"
@@ -175,12 +176,80 @@ export const inQueueOrder = (changes: readonly WaitingChange[]): readonly Waitin
  * being true, and neither of them looks like a failure — both render as the same
  * confident, empty *"Nothing is waiting for you."*
  */
+/**
+ * A page this screen asked and could not get an answer out of.
+ *
+ * It was a number. `Sweep.unreadable` counted the pages whose holds came back an
+ * error and threw away which ones they were — so the screen said *"One page
+ * couldn't be checked."* over a notice whose one piece of advice was **"open the
+ * page you are worried about"**, to a reader with no way to know which page that
+ * was. The front door holds the answer at the moment it forms the count: the
+ * fan-out is one read per listed page, in listing order, so the failure and the
+ * page it belongs to are side by side and one of them was being dropped.
+ *
+ * That is the misreading this surface is being rebuilt against, in its purest
+ * form — information the screen already had, removed to make the screen
+ * simpler. Naming the pages costs no read that was not already made.
+ *
+ * The name is not here. A page is named by reading its head, the front door
+ * already does that for every page it lists, and a row holding its own copy of
+ * the name would be a second source for a string this portal keeps in one
+ * (`page-name.ts`). So a row carries the id it can be looked up by, and the
+ * screen pairs it with the name it already has in hand.
+ */
+export type UnreadablePage = {
+  readonly treeId: string
+  /** Why nothing can be said about this page, in a person's words. */
+  readonly why: string
+  /** The store's own account of the same failure. */
+  readonly technical: string
+  /** Where a reader can go and look for themselves, which is the only move there is. */
+  readonly href: string
+}
+
+export const unreadablePage = (treeId: string, error: HoldError): UnreadablePage => ({
+  treeId,
+  why: unreadableQueue(error.code),
+  technical: describeHoldError(error),
+  href: `/portal/pages/${treeId}`,
+})
+
+/**
+ * The pages a fan-out could not get an answer out of, paired back up with the
+ * pages they were about.
+ *
+ * Here rather than inline on the front door, and that is not tidiness. This
+ * lane filed a finding on 17 September saying `page.tsx` is a file no test can
+ * reach — it is an `async` Server Component that reads cookies and a store, so
+ * every reading it computes is tested as a function and never as a *wiring*,
+ * and a defect restored by deleting one argument in it leaves the whole suite
+ * green. A zip written in that file would be one more of those, and it is the
+ * half of this unit most likely to go wrong quietly: an index that slips by one
+ * names the wrong page in a warning, which is worse than the count it replaced.
+ *
+ * So the pairing is a function, and the alignment it depends on is an argument
+ * rather than an assumption. A result with no page beside it is dropped rather
+ * than guessed at: naming the wrong page is a worse failure than the count this
+ * replaced, and a screen cannot tell the two apart once it is drawn.
+ */
+export const unreadableIn = <Page extends { readonly treeId: string }>(
+  pages: readonly Page[],
+  answers: readonly { readonly ok: boolean; readonly error?: HoldError }[]
+): readonly UnreadablePage[] =>
+  answers.flatMap((answer, index) => {
+    const page = pages[index]
+
+    return answer.ok || page === undefined || answer.error === undefined
+      ? []
+      : [unreadablePage(page.treeId, answer.error)]
+  })
+
 export type Sweep = {
   /**
-   * Pages whose holds came back an error. Counted, never folded into the total:
-   * a page whose holds could not be read is not a page with none.
+   * The pages whose holds came back an error. Never folded into the total: a
+   * page whose holds could not be read is not a page with none.
    */
-  readonly unreadable: number
+  readonly unreadable: readonly UnreadablePage[]
   /**
    * Whether the sweep reached every page, or stopped at the first listing page.
    *
@@ -216,10 +285,11 @@ export type Sweep = {
  */
 export const waitingSummary = (changes: readonly WaitingChange[], sweep: Sweep): string => {
   const pages = new Set(changes.map((change) => change.treeId)).size
+  const unreadable = sweep.unreadable.length
   const unread =
-    sweep.unreadable === 0
+    unreadable === 0
       ? ""
-      : ` ${sweep.unreadable === 1 ? "One page" : `${sweep.unreadable} pages`} couldn't be checked.`
+      : ` ${unreadable === 1 ? "One page" : `${unreadable} pages`} couldn't be checked, and ${unreadable === 1 ? "it is named" : "they are named"} below.`
   const unreached = sweep.complete
     ? ""
     : " This deployment has more pages than this screen checks."
@@ -239,4 +309,5 @@ export const waitingSummary = (changes: readonly WaitingChange[], sweep: Sweep):
  * a screen that remembers to check one of them and forgets the other is exactly
  * the defect this pair exists to prevent.
  */
-export const sweepIsPartial = (sweep: Sweep): boolean => sweep.unreadable > 0 || !sweep.complete
+export const sweepIsPartial = (sweep: Sweep): boolean =>
+  sweep.unreadable.length > 0 || !sweep.complete

@@ -1,8 +1,5 @@
 import { randomIdFactory } from "@loom/runtime"
 import { renderLoomTree } from "@loom/runtime/react"
-import Link from "next/link"
-
-import { DOCS } from "@/app/(marketing)/_lib/site"
 
 import { stillToAsk } from "@/app/(demo)/_lib/already-asked"
 import { partInQuestion } from "@/app/(demo)/_lib/in-question"
@@ -25,6 +22,7 @@ import { BackToTheRecord } from "./_components/back-to-the-record"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
 import { PartInQuestionView } from "./_components/part-in-question"
+import { ReadTheDocs } from "./_components/read-the-docs"
 import { TheRecord, type HeldReading } from "./_components/the-record"
 import { WhatHappens } from "./_components/what-happens"
 
@@ -461,17 +459,17 @@ const DemoPage = async () => {
             * queue behind a sign-in (0019), and sending somebody who has just
             * been told "no account, nothing kept" to a sign-in page is the
             * dead end the front door was filed for last week.
+            *
+            * It is a component rather than a link written here because it is
+            * now the second of the demonstration's two doors out, and both of
+            * them close when the demonstration is inside somebody else's page:
+            * the frame's sandbox permits no navigation but the frame's own, so
+            * the only thing this link can reach in a box is the box.
+            * `read-the-docs.tsx` argues the trade and `_lib/framed.ts` has the
+            * browser behaviour behind it.
             */}
           <footer className="border-edge-subtle text-ink-muted mt-auto flex flex-col gap-3 border-t pt-4 text-2xs">
-            <Link
-              href={DOCS.path}
-              className="text-ink-secondary hover:text-ink group inline-flex items-center gap-1.5 text-xs transition-colors"
-            >
-              Want this on a page of your own? Read the docs
-              <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </Link>
+            <ReadTheDocs />
             <p>
               Your copy of this page lives in memory for as long as you are here, and belongs to
               nobody else. No account, no sign-in, nothing kept.

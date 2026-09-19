@@ -1,6 +1,4 @@
-import Link from "next/link"
-
-import { HOME } from "@/app/(marketing)/_lib/site"
+import { Wordmark } from "./wordmark"
 
 /**
  * The one line above everything, and it exists because of what used to be
@@ -33,17 +31,17 @@ import { HOME } from "@/app/(marketing)/_lib/site"
  * and it was the skip link, while the front door now offers `/demo` from six
  * places. The wordmark is the convention every visitor already has, so that is
  * what it becomes.
+ *
+ * **And it is a `Wordmark` rather than a link written here**, because the
+ * third of those three things is the one that stops being true in a box. The
+ * front door now frames this demonstration, and a link home from inside that
+ * frame goes home *into the frame*. The mark keeps saying whose page this is
+ * and stops being a door; the argument is in `wordmark.tsx` and the browser
+ * behaviour behind it is in `_lib/framed.ts`.
  */
 export const DemoBar = ({ revision, policyId }: { readonly revision: number; readonly policyId: string }) => (
   <header className="border-edge-subtle bg-surface-topbar flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-2.5 lg:px-5">
-    <Link
-      href={HOME.path}
-      className="hover:text-ink-secondary flex items-center gap-2 transition-colors"
-      aria-label="Loom — back to the front page"
-    >
-      <span aria-hidden="true" className="bg-accent h-3.5 w-3.5 rounded-sm" />
-      <span className="text-md tracking-tight">Loom</span>
-    </Link>
+    <Wordmark />
 
     <p className="text-ink-secondary min-w-0 text-xs">
       Someone else’s page.{" "}
