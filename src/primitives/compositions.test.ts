@@ -267,15 +267,20 @@ describe("the starter compositions", () => {
    * **This is deliberately not a ceiling**, and the distinction is the whole
    * reason it is written this way. A primitive is registered before a band
    * uses it, so a test demanding that every registered type be reachable would
-   * fire on the ordinary order of work — the same argument `Loom daily build`
-   * made on 18 September about a character budget over the primitives block,
-   * one list over. What is asserted is only that the exported number
+   * fire on the ordinary order of work — 0170's argument about a character
+   * budget over the primitives block, one list over. What is asserted is only that the exported number
    * is the one the catalogue actually has: that {@link CATALOGUE_TYPES} is the
    * union of the bands' own `uses` and nothing else, so the gap a run reports
    * is derived from the same strings the rot check holds against the subtrees.
    *
    * Measured on 19 September: 52 of 96, and the 44 are in that run's report
    * classified by *why*, which is the part a number cannot carry.
+   *
+   * The second assertion is what makes this list safe to hand to 0170's
+   * `selectPrimitives`: a host taking `selectPrimitives(STARTER_PRIMITIVES,
+   * CATALOGUE_TYPES)` gets the smallest registry that can build every band,
+   * and that call can never hit the `unregistered-types` refusal because this
+   * test would have gone red first.
    */
   it("reaches exactly the types its bands declare, and every one is registered", () => {
     const declared = new Set(STARTER_COMPOSITIONS.flatMap((composition) => composition.uses))
