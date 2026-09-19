@@ -895,9 +895,9 @@
             {
               "name": "ModelInterpreterConfig",
               "kind": "type",
-              "signature": "type ModelInterpreterConfig = {\n    readonly client: ModelClient;\n    readonly idFactory: IdFactory;\n    readonly clock: Clock;\n    readonly model?: string;\n    readonly maxTokens?: number;\n    readonly effort?: ModelEffort;\n    /**\n     * How long to wait for a reply before reporting that there was not one.\n     * Defaults to `DEFAULT_INTERPRETER_CEILING_MS`; there is no way to wait\n     * forever, deliberately.\n     */\n    readonly ceilingMs?: number;\n    readonly draftDepth?: number;\n    /**\n     * What this deployment can build with. Absent means the model is told only\n     * what the tree shows, which is what §2 shipped with; a host that has a §4\n     * registry projects it with `catalogueOf` and the model stops guessing at\n     * primitive names it has no way to know.\n     */\n    readonly catalogue?: PrimitiveCatalogue;\n    /**\n     * What this deployment may be themed with. Absent means the model is shown no\n     * theme vocabulary and cannot re-theme anything: the ids in the tree are the\n     * only ones it knows, so \"make it warmer\" has nowhere to go but an invented\n     * id that fails to resolve. A host with a §4b theme registry passes\n     * `themes.catalogue()`.\n     */\n    readonly themeCatalogue?: ThemeCatalogue;\n};",
+              "signature": "type ModelInterpreterConfig = PromptVocabularies & {\n    readonly client: ModelClient;\n    readonly idFactory: IdFactory;\n    readonly clock: Clock;\n    readonly model?: string;\n    readonly maxTokens?: number;\n    readonly effort?: ModelEffort;\n    /**\n     * How long to wait for a reply before reporting that there was not one.\n     * Defaults to `DEFAULT_INTERPRETER_CEILING_MS`; there is no way to wait\n     * forever, deliberately.\n     */\n    readonly ceilingMs?: number;\n    readonly draftDepth?: number;\n};",
               "truncated": false,
-              "summary": ""
+              "summary": "Everything wired once per deployment: how to reach a model, and what to tell it about this deployment. The second half is `PromptVocabularies`, composed rather than restated so that a vocabulary added there reaches a host's wiring and the prompt in the same change."
             },
             {
               "name": "modelInterpreter",
@@ -949,30 +949,37 @@
               "summary": ""
             },
             {
+              "name": "PromptVocabularies",
+              "kind": "type",
+              "signature": "type PromptVocabularies = {\n    /**\n     * What this deployment can build with. Absent means the model is told only\n     * what the tree shows, which is what §2 shipped with; a host that has a §4\n     * registry projects it with `catalogueOf` and the model stops guessing at\n     * primitive names it has no way to know.\n     */\n    readonly catalogue?: PrimitiveCatalogue;\n    /**\n     * What this deployment may be themed with. Absent means the model is shown no\n     * theme vocabulary and cannot re-theme anything: the ids in the tree are the\n     * only ones it knows, so \"make it warmer\" has nowhere to go but an invented\n     * id that fails to resolve. A host with a §4b theme registry passes\n     * `themes.catalogue()`.\n     */\n    readonly themeCatalogue?: ThemeCatalogue;\n    /**\n     * What this deployment can be asked about. Absent means the model is told\n     * nothing about the data seam, so the only bindings it can propose are ones\n     * it invented — refused at the seam as `no-such-source`, which is the right\n     * refusal for a guess nobody gave it the information to avoid. A host\n     * with a source registry passes `dataCatalogue(registry)`.\n     */\n    readonly dataCatalogue?: DataCatalogue;\n    /**\n     * Where this deployment will accept a submission. Absent means the model\n     * cannot point a form anywhere, which is the safe default rather than a gap:\n     * `loom:submit` names a registered endpoint and nothing else leaves the tree\n     *. A host with an endpoint registry passes\n     * `submissionCatalogue(registry)`.\n     */\n    readonly submissionCatalogue?: SubmissionCatalogue;\n    /**\n     * Whose documents this deployment will frame. Absent means the model is not\n     * told, and a frame it proposes renders a refusal unless it happened to name\n     * a registered origin. Unlike the four above this one narrows a value the\n     * model still chooses, because which video belongs on a page is a content\n     * decision and the URL stays in the tree.\n     */\n    readonly frameCatalogue?: FrameCatalogue;\n};",
+              "truncated": false,
+              "summary": "Everything a deployment can offer a model, in one value."
+            },
+            {
               "name": "buildUserMessage",
               "kind": "function",
-              "signature": "const buildUserMessage: (intent: EditIntent, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => string",
+              "signature": "const buildUserMessage: (intent: EditIntent, tree: LoomTree, vocabularies?: PromptVocabularies) => string",
               "truncated": false,
-              "summary": ""
+              "summary": "The five vocabulary blocks lead, then the tree, then the sentence somebody typed."
             },
             {
               "name": "PromptMeasurement",
               "kind": "type",
-              "signature": "type PromptMeasurement = {\n    readonly system: number;\n    readonly primitives: number;\n    readonly themes: number;\n    readonly tree: number;\n    readonly request: number;\n    /** The sum of the five, and what actually goes over the wire. */\n    readonly total: number;\n};",
+              "signature": "type PromptMeasurement = {\n    readonly system: number;\n    readonly primitives: number;\n    readonly themes: number;\n    readonly sources: number;\n    readonly endpoints: number;\n    readonly frames: number;\n    readonly tree: number;\n    readonly request: number;\n    /** The sum of the eight, and what actually goes over the wire. */\n    readonly total: number;\n};",
               "truncated": false,
               "summary": "What one proposal request costs, block by block, in characters."
             },
             {
               "name": "measurePrompt",
               "kind": "function",
-              "signature": "const measurePrompt: (intent: EditIntent, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => PromptMeasurement",
+              "signature": "const measurePrompt: (intent: EditIntent, tree: LoomTree, vocabularies?: PromptVocabularies) => PromptMeasurement",
               "truncated": false,
               "summary": "Measures a request without sending it."
             },
             {
               "name": "buildRepairMessage",
               "kind": "function",
-              "signature": "const buildRepairMessage: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => string",
+              "signature": "const buildRepairMessage: (request: RepairRequest, tree: LoomTree, vocabularies?: PromptVocabularies) => string",
               "truncated": false,
               "summary": ""
             },
@@ -986,7 +993,7 @@
             {
               "name": "measureRepairPrompt",
               "kind": "function",
-              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, catalogue?: PrimitiveCatalogue, themes?: ThemeCatalogue) => RepairMeasurement",
+              "signature": "const measureRepairPrompt: (request: RepairRequest, tree: LoomTree, vocabularies?: PromptVocabularies) => RepairMeasurement",
               "truncated": false,
               "summary": "Measures a repair without sending it, on the same terms as `measurePrompt`."
             },
@@ -1024,6 +1031,27 @@
               "signature": "const renderThemeCatalogue: (catalogue: ThemeCatalogue) => string",
               "truncated": false,
               "summary": "The theme vocabulary as the model sees it — three lists of ids with the sentence their author wrote about each."
+            },
+            {
+              "name": "renderSourceCatalogue",
+              "kind": "function",
+              "signature": "const renderSourceCatalogue: (catalogue: DataCatalogue) => string",
+              "truncated": false,
+              "summary": "The sources as the model sees it — one line per registered source, with the params it declares written the way a primitive's props are."
+            },
+            {
+              "name": "renderSubmissionCatalogue",
+              "kind": "function",
+              "signature": "const renderSubmissionCatalogue: (catalogue: SubmissionCatalogue) => string",
+              "truncated": false,
+              "summary": "The endpoints as the model sees it — an id and a line, and deliberately nothing else."
+            },
+            {
+              "name": "renderFrameCatalogue",
+              "kind": "function",
+              "signature": "const renderFrameCatalogue: (catalogue: FrameCatalogue) => string",
+              "truncated": false,
+              "summary": "The framable origins as the model sees it — scheme, host and port, and the sentence whoever runs the deployment wrote about each."
             },
             {
               "name": "renderDelta",

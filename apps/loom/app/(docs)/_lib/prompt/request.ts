@@ -135,7 +135,7 @@ export const docsModelRequest = (exampleId: string): DocsModelRequest => {
   const catalogue = catalogueOf(docsRegistry)
   const themes = docsThemes.catalogue()
   const intent = promptIntent(tree)
-  const measurement = measurePrompt(intent, tree, catalogue, themes)
+  const measurement = measurePrompt(intent, tree, { catalogue, themeCatalogue: themes })
   const themeIds =
     themes.palettes.length + themes.fontPacks.length + themes.stylePresets.length
 

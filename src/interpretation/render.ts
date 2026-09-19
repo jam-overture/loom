@@ -1,4 +1,7 @@
-import type { CataloguedPrimitive, PrimitiveCatalogue } from "../catalogue.js"
+import type { CataloguedPrimitive, CataloguedProp, PrimitiveCatalogue } from "../catalogue.js"
+import type { DataCatalogue } from "../data/catalogue.js"
+import type { FrameCatalogue } from "../frame/catalogue.js"
+import type { SubmissionCatalogue } from "../submit/catalogue.js"
 import type { ThemeCatalogue, ThemeCatalogueEntry } from "../theme/registry.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
@@ -127,14 +130,32 @@ export const renderTree = (tree: LoomTree, scopeNodeId?: NodeId): string => {
   return [`tree ${tree.treeId} revision ${tree.revision}`, ...body].join("\n")
 }
 
-const renderCataloguedProps = (primitive: CataloguedPrimitive): string => {
-  if (primitive.props === undefined) return " props: not declared"
-  if (primitive.props.length === 0) return " props: none"
+/**
+ * Declared fields, as a catalogue line writes them.
+ *
+ * Shared by primitives and sources because the two projections answer the same
+ * three-way question in the same shape — a list, an empty list, or `undefined`
+ * meaning the schema could not be enumerated — and a second copy of the
+ * `not declared` / `none` distinction is a second chance to collapse it.
+ *
+ * The label is a parameter rather than a constant because the two are not the
+ * same word to a reader: a primitive takes props and a source takes params, and
+ * telling a model a source has `props` invites it to set them on the node.
+ */
+const renderDeclaredFields = (
+  label: string,
+  fields: readonly CataloguedProp[] | undefined
+): string => {
+  if (fields === undefined) return ` ${label}: not declared`
+  if (fields.length === 0) return ` ${label}: none`
 
-  const rendered = primitive.props.map((prop) => (prop.required ? prop.name : `${prop.name}?`))
+  const rendered = fields.map((field) => (field.required ? field.name : `${field.name}?`))
 
-  return ` props: ${rendered.join(", ")}`
+  return ` ${label}: ${rendered.join(", ")}`
 }
+
+const renderCataloguedProps = (primitive: CataloguedPrimitive): string =>
+  renderDeclaredFields("props", primitive.props)
 
 const renderCataloguedSlots = (primitive: CataloguedPrimitive): string =>
   primitive.slots.length === 0 ? "" : ` slots: ${primitive.slots.join(", ")}`
@@ -197,6 +218,50 @@ export const renderThemeCatalogue = (catalogue: ThemeCatalogue): string =>
     ...renderThemeGroup("Font packs", catalogue.fontPacks),
     ...renderThemeGroup("Style presets", catalogue.stylePresets),
   ].join("\n")
+
+/**
+ * The sources as the model sees it — one line per registered source, with the
+ * params it declares written the way a primitive's props are.
+ *
+ * Registration order, like the primitive catalogue and for the same reason: the
+ * deployment's own ordering is what the model reads first, and sorting here
+ * would silently overrule a host that put its most-used source at the top.
+ */
+export const renderSourceCatalogue = (catalogue: DataCatalogue): string =>
+  catalogue
+    .map(
+      (source) =>
+        `- ${source.id} — ${renderCataloguedDescription(source.description)}${renderDeclaredFields("params", source.params)}`
+    )
+    .join("\n")
+
+/**
+ * The endpoints as the model sees it — an id and a line, and deliberately
+ * nothing else.
+ *
+ * `submissionCatalogue` is thin because there is nothing else a model may
+ * supply (0065): where a form posts to, whether it posts or gets, and what it
+ * carries are resolved after the choice is made. Rendering anything more here
+ * would be putting an address in front of a model that must never name one.
+ */
+export const renderSubmissionCatalogue = (catalogue: SubmissionCatalogue): string =>
+  catalogue
+    .map((endpoint) => `- ${endpoint.id} — ${renderCataloguedDescription(endpoint.description)}`)
+    .join("\n")
+
+/**
+ * The framable origins as the model sees it — scheme, host and port, and the
+ * sentence whoever runs the deployment wrote about each.
+ *
+ * Unlike the two above, this list is not the set of values a model may write.
+ * A frame's URL is a content decision and stays in the tree (0095); what the
+ * list constrains is the origin that URL must be on. So the line is an origin
+ * rather than an address, and the block below says which of the two it is.
+ */
+export const renderFrameCatalogue = (catalogue: FrameCatalogue): string =>
+  catalogue
+    .map((entry) => `- ${entry.origin} — ${renderCataloguedDescription(entry.description)}`)
+    .join("\n")
 
 const renderPropKeys = (label: string, keys: readonly string[]): string =>
   keys.length === 0 ? "" : ` ${label} ${keys.join(", ")}`

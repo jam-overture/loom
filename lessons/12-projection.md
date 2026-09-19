@@ -517,8 +517,8 @@ describe("E", () => {
       { type: "loom.note", description: "A small piece of ancillary text", props: [], slots: [] },
     ]
 
-    const a = buildUserMessage({ origin: "chat", utterance: "add a footer note" }, tree, catalogue)
-    const b = buildUserMessage({ origin: "chat", utterance: "add a header note" }, tree, catalogue)
+    const a = buildUserMessage({ origin: "chat", utterance: "add a footer note" }, tree, { catalogue })
+    const b = buildUserMessage({ origin: "chat", utterance: "add a header note" }, tree, { catalogue })
 
     let i = 0
     while (i < a.length && i < b.length && a[i] === b[i]) i++

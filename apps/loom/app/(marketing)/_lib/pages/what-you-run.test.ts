@@ -171,6 +171,26 @@ describe("what leaves, measured", () => {
     )
   })
 
+  /**
+   * The line 0172 drew, held here so it is a decision rather than a side effect.
+   *
+   * Three of the eight parts the runtime reports are blocks that are absent
+   * from the request unless a host registered data, a form destination or a
+   * framable origin. This site registered none of them, so they cost nothing
+   * and the band says nothing about them — and the guard above still fires the
+   * moment one of them starts costing something.
+   */
+  it("says nothing about a part this site does not send, and still catches one it does", () => {
+    const measurement = WHAT_LEAVES.measure(context)
+
+    expect([measurement.sources, measurement.endpoints, measurement.frames]).toEqual([0, 0, 0])
+    expect(partsOf(measurement).map((part) => part.key)).not.toContain("sources")
+
+    expect(() =>
+      partsOf({ ...measurement, sources: 773 })
+    ).toThrow(/unnamed: sources/)
+  })
+
   it("refuses to build a band naming something that is not sent", () => {
     const { themes: _dropped, ...without } = WHAT_LEAVES.measure(context)
 
