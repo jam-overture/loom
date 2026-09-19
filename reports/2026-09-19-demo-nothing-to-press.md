@@ -3,7 +3,9 @@
 **Routine:** `Loom demo` · **Branch:** `demo-22-nothing-to-press-on-the-first-screen` ·
 **19 September 2026**
 
-**Deployed preview:** added to the pull request when Vercel reports it. Open
+**Deployed preview:**
+https://loom-git-demo-22-nothing-to-c27b3e-jpizzolato36-6341s-projects.vercel.app
+— public, no sign-in. Open
 **`/demo`** and make the window narrow — under 1024px the layout stacks, and
 that is the whole of what this run changed. Better still, open **`/`** on a
 phone and look at the demonstration in the band under **Your turn**. (Not opened
