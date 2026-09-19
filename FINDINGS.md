@@ -26320,7 +26320,30 @@ has never once been executable, and the lane has not been held back by it.
 
 ## 2026-09-17 — the write path has no registry, so a proposal may insert a word nobody registered and the log keeps it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** the
+**first** experiment is **closed** by `framework-42-a-word-nobody-registered`,
+recorded as
+[0173](decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md).
+A host that declares `registeredPrimitiveTypes` — `registeredTypesFor(registry)`
+in the SDK — gets a delta that inserts `app.nonesuch` refused at `critical`,
+with the type and the node in the refusal's own sentence, and the repairer is
+offered one chance to name a primitive that exists. A host that declares nothing
+is unchanged, so **both of this page's experiments still end `committed` and
+`quickstart.test.ts` is untouched** — the page's claim about what is true of an
+undeclared deployment stays true and stays checked.
+
+**The second experiment is not closed and cannot close this way.** Props against
+a declared schema needs the *schemas*, and a policy is a Zod-parsed,
+fingerprinted, serialisable value that holds names and not functions. The entry
+appended at the bottom of this file on 19 September says what is left and what it
+would cost. The ruling this entry asked for is in 0173 under *Alternatives
+considered*: the `validator` seam is the right shape for the props half and was
+not built, because a sixth `CompositionOutcome` kind breaks an exhaustive
+`switch` or a `Record<CompositionOutcomeKind, …>` in all four surfaces at once,
+and because a validator's refusal cannot reach the repairer without widening
+`RepairRequest`. **Original status below.**
+
+**Status:** open —
 documented on `/docs/getting-started/quickstart` as what is true; not a defect
 anybody has to fix today, and possibly the right design
 
@@ -27563,3 +27586,56 @@ that are not a screen.
 `ruleSentence`'s missing fallback reachable, which is the correction directly
 above; and it is a second reason `HoldError` wants a code that distinguishes a
 parse failure, which is the finding directly above that.
+
+---
+
+## 2026-09-19 — the write path can refuse a word nobody registered and not props no schema accepts, and the gap is a policy's shape
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — the half `framework-42` could not reach, named here so the next run does
+not rediscover the wall
+
+[0173](decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md)
+closed the first of the two defects `Loom docs` found by running the quickstart
+on 17 September. A delta that inserts `app.nonesuch` is now refusable. A delta
+that inserts a `loom.text` carrying two hundred characters against a schema whose
+maximum is a hundred and sixty is **not**, and still ends `committed`, and still
+draws a node stripped of its props.
+
+**Why the same route does not reach it.** Host vocabulary reaches the Gate
+through `GatePolicy` (0064), and a policy is parsed by Zod, digested by
+`policyFingerprintOf`, and written into every disposition. It can hold a list of
+type names. It cannot hold a hundred prop schemas, and the two shallower shapes
+that would fit are both worse than nothing:
+
+| what a policy could carry | what it catches | what it still misses |
+| --- | --- | --- |
+| type names (**shipped**) | an invented primitive | every prop |
+| catalogue-shaped: prop names + required | a missing required prop, an invented key | `max(160)`, `.email()`, every refinement, every cross-field rule |
+| a serialised schema language | most of it | it is the second schema language `catalogue.ts` refused to maintain, and it drifts from Zod the first day somebody writes a `.refine()` |
+
+**So the props half needs a function, which means a seam and not a knob**, and
+that is the `validator` on `CompositionRuntime` the 17 September entry proposed.
+0173 declined to build it and said why under *Alternatives considered*, and both
+reasons are costs rather than objections:
+
+- a sixth `CompositionOutcome` kind is a compile error in every exhaustive
+  `switch` and every `Record<CompositionOutcomeKind, …>` across `(portal)`,
+  `(docs)`, `(marketing)` and `(demo)` — several files, four lanes, one red
+  build until all of them land;
+- `RepairRequest` carries a `Disposition`, and a validation failure has none, so
+  a refusal from a validator reaches no repairer until that type widens — which
+  breaks every repairer a host has written.
+
+**What this lane thinks, offered rather than decided.** The second cost is the
+one that matters: *these props do not satisfy the schema* is as repairable as
+*that type does not exist*, and a seam that cannot be repaired from is a seam
+that turns a model's near-miss into a dead end. If the props half is built, the
+outcome and the repair request want designing together, and that is a unit of
+its own rather than a rider on something else.
+
+**Nothing is blocked.** The render seam still reports `invalid-props` and the
+node still draws without its props, which is the bargain 0008 makes and is not
+new. What is worth knowing is that after 0173 the two experiments on that
+quickstart page no longer fail the same way for the same reason, and the page
+says so.

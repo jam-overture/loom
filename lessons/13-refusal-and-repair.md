@@ -564,7 +564,7 @@ Propose a more conservative way to satisfy the same request, or say "not-underst
   "reversible": true,
   "confidence": 0.9,
   "policyId": "strict",
-  "policyFingerprint": "71ff452d:4a4030b86d65a438"
+  "policyFingerprint": "b22582aa:1d7136abcac79bfd"
 }
 ```
 
@@ -846,8 +846,8 @@ Predict 3 was about.
 The output:
 
 ```
-{"proposalId":"p_h2","removed":["n_5"],"removedNodeCount":3,"stakes":"medium","verdict":"rejected","reason":"stakes-at-refusal-floor","judgedBy":"71ff452d:4a4030b86d65a438","repairRequested":true}
-{"proposalId":"p_h1","repairOf":"p_h2","removed":["n_3"],"removedNodeCount":1,"stakes":"low","verdict":"accepted","reason":"within-policy","judgedBy":"71ff452d:4a4030b86d65a438","repairRequested":false,"committedRevision":1}
+{"proposalId":"p_h2","removed":["n_5"],"removedNodeCount":3,"stakes":"medium","verdict":"rejected","reason":"stakes-at-refusal-floor","judgedBy":"b22582aa:1d7136abcac79bfd","repairRequested":true}
+{"proposalId":"p_h1","repairOf":"p_h2","removed":["n_3"],"removedNodeCount":1,"stakes":"low","verdict":"accepted","reason":"within-policy","judgedBy":"b22582aa:1d7136abcac79bfd","repairRequested":false,"committedRevision":1}
 resolution: {"kind":"committed","proposalId":"p_h1","revision":1}
 tally: {"episodes":1,"proposals":2,"held":0,"repairs":1,"byResolution":{"committed":1,"refused":0,"awaiting-answer":0,"discarded":0,"not-interpreted":0,"not-writable":0,"failed":0,"open":0}}
 
