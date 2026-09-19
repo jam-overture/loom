@@ -13,12 +13,15 @@ import { READER_SIGNAL_KINDS, type ReaderSignalKind } from "@loom/runtime/signal
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
+  bandSentence,
   frontDoorReadings,
   funnelSentence,
   FUNNEL_QUESTIONS,
   SCRIPTED_VISITS,
+  type BandAnswer,
   type BandReading,
   type FrontDoorReadings,
+  type FunnelQuestion,
 } from "../readers/visits"
 import {
   DOCS,
@@ -193,16 +196,23 @@ const whatIsCounted = (ids: IdFactory): LoomNode =>
 /**
  * What else happened in the band, when anything did.
  *
- * Time on screen is always worth saying; a band nobody pressed or opened says
- * nothing about pressing or opening rather than saying zero. The reasoning is
- * the one the readings module records for leaving a silent band out of the list
- * altogether: a zero invites a reader to wonder which kind of nothing it is.
+ * Time on screen is always worth saying; a band nobody used anything in says
+ * nothing about using rather than saying zero. The reasoning is the one the
+ * readings module records for leaving a silent band out of the list altogether:
+ * a zero invites a reader to wonder which kind of nothing it is.
+ *
+ * **One number and not two.** Until this run it read *five used something in it,
+ * three opened something*, and both figures were a fiction of the fixture: a
+ * reader presses a button, not a band, so a band's own press and open counts are
+ * zero on every deployment there will ever be. What a region can report is how
+ * many readers did something under it, which is one count of readers and cannot
+ * be split by what they did — so the page says one thing it means rather than
+ * two things it does not.
  */
 const captionFor = (reading: BandReading): string => {
   const parts = [
     `${reading.seconds} seconds on screen in total`,
-    ...(reading.pressed > 0 ? [`${reading.pressed} used something in it`] : []),
-    ...(reading.opened > 0 ? [`${reading.opened} opened something`] : []),
+    ...(reading.engaged > 0 ? [`${reading.engaged} used something in it`] : []),
   ]
 
   return `${parts.join(", ")}.`
@@ -277,7 +287,12 @@ const theReadings = (ids: IdFactory, readings: FrontDoorReadings, context: PageC
       ]),
       prose(
         ids,
-        "Every bar is one band of the front page, in the order you meet them. Nothing above says who any of the twelve were, which pages they had been on, or what they typed — none of that was collected, so none of it can be reported.",
+        "Every bar is one band of the front page, in the order you meet them. Where a bar says somebody used something in a band, it does not say what: a reader presses a button, and the button is the only thing that knows which button it was. The band knows how many readers did something under it, and that is the number here.",
+        { measured: true }
+      ),
+      prose(
+        ids,
+        "Nothing above says who any of the twelve were, which pages they had been on, or what they typed — none of that was collected, so none of it can be reported.",
         { measured: true, tone: "muted" }
       ),
       stack(ids, { direction: "row", gap: "snug", wrap: true, align: "center" }, [
@@ -292,21 +307,17 @@ const theReadings = (ids: IdFactory, readings: FrontDoorReadings, context: PageC
   )
 
 /**
- * A funnel's own heading, kept to the eighty characters `loom.stat` allows.
+ * A question's own heading, kept to the eighty characters `loom.stat` allows.
  *
  * It names the band a reader had to reach and what they then did, which is the
  * whole of what the question is — and never a rate, because the figure above it
  * is *five of ten* and a label reading *50%* beside it would be two numbers for
  * one fact with the flattering one in larger type.
  */
-const labelFor = (question: {
-  readonly from: string
-  readonly to: string
-  readonly did: string
-}): string =>
-  question.from === question.to
-    ? `Got as far as “${question.from}”, then used it`
-    : `Got as far as “${question.from}”, then read on`
+const labelFor = (question: FunnelQuestion): string =>
+  `Got as far as “${question.from}”, then read on`
+
+const bandLabelFor = (answer: BandAnswer): string => `Got as far as “${answer.band}”, then used it`
 
 /**
  * The question totals cannot answer, and the reason it needs its own band.
@@ -316,6 +327,14 @@ const labelFor = (question: {
  * whether the band works. That gap is the whole reason a page view carries a
  * key at all, and the key is the most privacy-sensitive thing in the design —
  * so the band that shows what it buys is also the band that says what it is.
+ *
+ * **The two figures are two different shapes and the band now says so.** The
+ * first comes off one band's own row and could be asked of any band of any page,
+ * about readers who came and went last month. The second joins two bands, and
+ * joining two bands is something a deployment has to have said it wanted
+ * *before* the readers arrived. That distinction was invisible while both were
+ * drawn as funnels, and it is the one a reader deciding what to measure needs
+ * most: one of these is free and retrospective, and the other is neither.
  */
 const theFunnel = (ids: IdFactory, readings: FrontDoorReadings): LoomNode =>
   section(
@@ -331,35 +350,50 @@ const theFunnel = (ids: IdFactory, readings: FrontDoorReadings): LoomNode =>
       buildElement(ids, {
         type: "loom.stat-grid",
         props: { columns: "two", align: "start" },
-        children: readings.funnels.map((answer, index) => {
-          const question = FUNNEL_QUESTIONS[index]
-
-          if (question === undefined) {
-            throw new Error("loom: the readings answered a question this page did not ask")
-          }
-
-          return buildElement(ids, {
+        children: [
+          buildElement(ids, {
             type: "loom.stat",
             props: {
-              value: `${answer.converted} of ${answer.reached}`,
-              label: labelFor(question),
-              caption: funnelSentence(question, answer),
+              value: `${readings.inOneBand.engaged} of ${readings.inOneBand.reached}`,
+              label: bandLabelFor(readings.inOneBand),
+              caption: bandSentence(readings.inOneBand),
             },
-          })
-        }),
+          }),
+          ...readings.funnels.map((answer, index) => {
+            const question = FUNNEL_QUESTIONS[index]
+
+            if (question === undefined) {
+              throw new Error("loom: the readings answered a question this page did not ask")
+            }
+
+            return buildElement(ids, {
+              type: "loom.stat",
+              props: {
+                value: `${answer.converted} of ${answer.reached}`,
+                label: labelFor(question),
+                caption: funnelSentence(question, answer),
+              },
+            })
+          }),
+        ],
       }),
       buildElement(ids, {
         type: "loom.callout",
-        props: { tone: "accent", title: "The joining up lasts one visit and is thrown away" },
+        props: { tone: "accent", title: "One of those two had to be asked for in advance" },
         children: [
           prose(
             ids,
-            "To answer that question, the batches of one visit are tagged with the same random number. It is made up in the reader's browser, it is not a cookie, it is not stored there, it does not survive a reload, and it is discarded once the counts are worked out. It is never derived from anything about the reader or their device, so there is nothing in it to trace back.",
+            "The first figure is a column of that band's own line in the table above, so it can be asked of any part of any page, at any time, including about readers who came and went months ago. The second joins two different bands, and joining two bands is something your deployment has to have been told to watch for before anybody arrived. Nothing here can go back and join them afterwards, because what would have made that possible was thrown away.",
             { measured: true }
           ),
           prose(
             ids,
-            "That is also why the second figure above is two and not a percentage. Two readers reached the foot of the page and one of them pressed something: as a rate that is fifty per cent, which would be the most flattering and least honest number on this page.",
+            "What gets thrown away is this: the batches of one visit are tagged with the same random number, so the parts of one reading can be added up. It is made up in the reader's browser, it is not a cookie, it is not stored there, it does not survive a reload, and it is discarded once the counts are worked out. It is never derived from anything about the reader or their device, so there is nothing in it to trace back.",
+            { measured: true }
+          ),
+          prose(
+            ids,
+            "Both figures are counts rather than percentages, and that is a rule rather than a preference. Two of two and two hundred of two hundred are the same rate and different news, and a page arguing for honest measurement is the last place to print the flattering half of one.",
             { measured: true, tone: "muted" }
           ),
         ],

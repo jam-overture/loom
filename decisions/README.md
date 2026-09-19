@@ -253,3 +253,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0167](0167-a-delegated-signal-names-the-regions-it-happened-inside.md) | A delegated signal names the regions it happened inside, and a region is counted in views rather than in presses | Accepted | §6 |
 | [0168](0168-a-band-links-into-the-page-it-is-assembled-into.md) | A band links into the page it is assembled into, and the page is where that is checked | Accepted | §4b |
 | [0169](0169-a-declaration-is-what-makes-a-value-a-missing-word.md) | A declaration is what makes a value a missing word | Accepted | §2 (the authoring SDK's copy seam) |
+| [0170](0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md) | A library is a set to choose from, and a vocabulary is priced per entry | Accepted | §4, measured through the §2 interpretation prompt |
+| [0171](0171-a-page-part-is-earned-by-the-region-it-occupies.md) | A page part is earned by the region it occupies, not by the content it holds | Accepted | §4b |
+| [0172](0172-what-a-deployment-offers-a-model-is-one-value.md) | What a deployment can offer a model is one value, and three more vocabularies go in it | Accepted | §2 (interpretation), reaching §4d, §5 and §6 |

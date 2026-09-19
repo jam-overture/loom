@@ -72,13 +72,21 @@ describe("the front door's reading order", () => {
   })
 
   /**
-   * A page whose holds could not be read is counted and said, never dropped.
-   * This screen's whole claim is that it is where you find out whether anything
+   * A page whose holds could not be read is named and said, never dropped. This
+   * screen's whole claim is that it is where you find out whether anything
    * needs you, and a silent under-report is the one failure that breaks it.
+   *
+   * The guard used to look for `!holds.ok` — the failure being *noticed*, inline
+   * in this file — and that is no longer where it happens. The pairing of a
+   * failed read with the page it was about is `unreadableIn`, in `_lib`, where a
+   * test can call the same function this screen calls rather than a copy of it
+   * (the 17 September finding about this file). So what is guarded here is the
+   * wiring that a source read can actually see: this screen asks for the pairing
+   * and hands the result to the component that names the pages.
    */
-  it("counts a page it could not check", () => {
-    expect(source).toContain("unreadable")
-    expect(source).toContain("!holds.ok")
+  it("names the pages it could not check rather than counting them", () => {
+    expect(source).toContain("unreadableIn(trees, perPage)")
+    expect(source).toContain("<UnreadablePages")
   })
 
   /**

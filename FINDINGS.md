@@ -8,6 +8,403 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — the three registries a surface already wires can now reach the model, and none of them does
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`
+· **Status:** open — one line each, and nothing is broken without it
+
+[0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) closes a
+gap that had three instances: `dataCatalogue`, `submissionCatalogue` and
+`frameCatalogue` were each built so a model could be told what a deployment
+registered, and none of the three reached a prompt. They do now, through
+`PromptVocabularies`, which `ModelInterpreterConfig` composes — so the wiring is
+a field beside `catalogue`, in the composition root each of you already owns.
+
+**Nothing in this repository passes one yet**, which is the honest state of it:
+the seam is exercised by tests and by nothing that runs.
+
+| lane | registry you already build | the field to add |
+| --- | --- | --- |
+| `Loom docs` | `docsEndpoints()` in `(docs)/_lib/submit/endpoints.ts` | `submissionCatalogue: submissionCatalogue(docsEndpoints())` |
+| `Loom docs` | the shop source in `(docs)/_lib/data/shop.ts` | `dataCatalogue: dataCatalogue(registry)` |
+| `Loom marketing` | the origins in `(marketing)/_lib/frames.ts` | `frameCatalogue: frameCatalogue(registry)` |
+
+What it costs, measured on the sample tree against the starter library and
+themes: a source block is 773 characters at one entry and 86 for each after it,
+an endpoint block 441 and 49, an origins block 364 and 51. Against the 25,997 a
+request already costs with the library and themes registered, one of each is
+about 6%.
+
+**What it buys is the difference between a page and a refusal.** A model that
+cannot name your endpoint cannot point a form at it; one that picks a host you
+did not register gets a refusal where the document should be. Neither failure
+says anything today, which is why this is worth a line rather than a shrug.
+
+I did not wire any of them, deliberately: a composition root is yours, and a
+framework change that also changed a surface's behaviour is the thing the
+migration was careful not to be.
+
+---
+## 2026-09-19 — five files in three other lanes changed so `pnpm verify` would pass, and one of them is a change of meaning
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`,
+`Loom lessons` · **Status:** open — four are mechanical; the third row is a
+decision somebody else's test forced and should get a second opinion
+
+`measurePrompt` and its three siblings took two trailing positional optionals
+and now take one `PromptVocabularies` object, because a fifth and sixth
+positional parameter is not a readable call
+([0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)).
+`PromptMeasurement` gained `sources`, `endpoints` and `frames`.
+
+| lane | file | what changed |
+| --- | --- | --- |
+| `Loom docs` | `(docs)/_lib/prompt/request.ts` and its test | `measurePrompt(intent, tree, catalogue, themes)` → `measurePrompt(intent, tree, { catalogue, themeCatalogue: themes })` |
+| `Loom docs` | `(docs)/_lib/api/reference.generated.json` | regenerated with `pnpm --filter @loom/app docs:api` |
+| `Loom marketing` | `(marketing)/_lib/pages/what-you-run.ts` | the same one-line call, **and `partsOf` now ignores a part that costs nothing** |
+| `Loom lessons` | `lessons/12-projection.md`, exercise E | the same one-line call, inside the fence. The transcript is byte-identical and was re-run |
+
+**The third row is the one to read.** `partsOf` held that every part the runtime
+reports must have a sentence on the page, and threw otherwise — a good guard,
+and it fired on this change exactly as designed, which is how I found it. Three
+of the eight parts are blocks that are **absent** unless a host registered data,
+a form destination or a framable origin, and this site has registered none of
+them. Naming them would have put three rows reading *0 characters* under a
+heading about what leaves your server, and your own
+`parts.every(part => part.characters > 0)` says the band does not do that.
+
+So the guard now reads *every part this deployment actually sends*. It still
+throws on an unnamed part that costs something — there is a new test in your
+file holding exactly that, including the day you register origins and the page
+refuses to build until it says so. **I wrote no copy on your page**, which was
+the alternative and the worse one. If you would rather name all eight and print
+a zero, that is your call and it is a smaller change than this one was.
+
+The docs page's *blocks add up to the total* assertion still holds unchanged,
+because the three new measurements are `0` there for the same reason.
+
+---
+## 2026-09-19 — lesson 12 says `buildUserMessage` assembles four blocks, and it now assembles seven
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — prose only; nothing is red and the exercise still prints what it says
+
+[0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) gave the
+prompt three more vocabulary blocks — sources, submission endpoints and framable
+origins — each absent unless the host wired that registry. Two sentences in
+lesson 12 counted the old set:
+
+- **The reading list**, under `src/interpretation/prompt.ts`: *"`buildUserMessage`
+  puts the catalogue block first, then the theme block, then the tree outline,
+  then the request."* Still true in order and no longer complete.
+- **Exercise E's prediction question**: *"Where does the difference start, in
+  terms of the four blocks `buildUserMessage` assembles?"* Seven now, and the
+  exercise's own deployment wires one of them, which is arguably a better
+  question than it was — *the blocks a deployment did not wire cost nothing and
+  are not there* is the thing the fence is actually demonstrating.
+
+The fence itself I did change, because `verify` was red without it: the third
+argument is `{ catalogue }` rather than `catalogue`. **The transcript is
+byte-identical** — same 644 of 655 bytes, same two hashes — and was re-run
+rather than assumed. One line, and it is the same line the reading list
+describes, so the two can be rewritten together.
+
+## 2026-09-19 — a primitive still cannot say which binding names it reads, and the prompt now has to warn about it in prose
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`,
+`Loom primitives` · **Status:** open — worked around in one sentence, and the
+sentence is the evidence
+
+The data block added by 0172 tells a model which sources exist and closes with
+**do not invent a binding name**. That sentence is a workaround and it should be
+recorded as one.
+
+`loom:data` maps a *binding name* to a source. The name is how the primitive
+reading the answer finds it, and `CataloguedPrimitive` does not carry the names
+a primitive reads: it carries `props` and `slots`. So the three refusals in this
+seam are not alike —
+
+| the model gets wrong | what happens |
+| --- | --- |
+| an unregistered source id | refused, `no-such-source` |
+| a param the source did not declare | refused by the source's own schema |
+| **a binding name nothing reads** | **resolved cleanly, and then read by nobody** |
+
+— and only the third is silent. A sentence in the prompt is what a prompt can do
+about it. What would actually close it is a declaration: a primitive says which
+binding names it reads, `catalogueOf` projects them, and the block names them
+beside the sources, at which point an invented name is as refusable as an
+invented source id.
+
+**Not built, and the reason is that it has no user yet.** No primitive in
+`src/primitives/` reads a binding — `Loom docs` filed that on 12 September and it
+is still true. A declaration nothing declares is a field on ninety-six
+definitions and a projection nobody reads, which is the shape of the defect this
+very change was fixing. The moment the first primitive reads a binding is the
+moment to build it, and this entry is here so that whoever writes that primitive
+finds the other half already argued.
+
+## 2026-09-19 — the port map is a complete ledger and therefore cannot show what was never on it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — **a defect in an instrument, not in anybody's judgement**; eleven of the
+primitives it hid shipped in `primitives-39`
+
+`docs/hermes-port-map.md` has sourced this lane's queue for a month and it is
+good at its job: seventy Hermes blocks, a verdict each, a number left that is a
+fact rather than a feeling. Three August runs read its empty tables as *the
+range is finished*, which is recorded there already.
+
+**This is the sharper version of that and it is not about emptiness.** A ledger
+of Hermes tells you what is left of Hermes. It is structurally incapable of
+telling you about a thing Hermes never had, and the port map's completeness is
+exactly what makes it read as though it could.
+
+Measured on `main` on 19 September, for the first time:
+
+| | |
+| --- | --- |
+| primitives registered | 96 |
+| primitive types some band in the catalogue builds | **52** |
+| registered, priced into every request, unreachable by dropping in a band | **44** |
+
+Among the forty-four: `loom.code`, `loom.code-span`, `loom.kbd`. **The
+catalogue could not draw the landing page of the product that owns it**, and no
+instrument in the repository could say so, because the queue was being read off
+a list of things a *creator-site* builder needed.
+
+**Why this is filed rather than only fixed.** The class is *a complete ledger
+of the wrong population*, and its failure mode is the one this lane has now hit
+three times from three directions: **an absence of a failure.** Nothing was red,
+nothing was missing from the port map, and every run that consulted it got a
+correct answer to a question that had stopped being the right one.
+
+**The remedy, and it is cheap.** Measure the catalogue against the **registry**,
+not the registry against Hermes. `CATALOGUE_TYPES` is exported for that now, so
+the gap is one `filter`. Deliberately **not** a test: a primitive is registered
+before a band uses it, so a check demanding the two lists agree fires on the
+ordinary order of work — the same reasoning `Loom daily build` used on
+18 September to decline a character budget over the primitives block, and the
+same reason a ceiling nobody believes gets raised without being read.
+
+Classified in `docs/primitive-gap-inventory.md`: forty-four is the misleading
+number and **nineteen** is the real one, the rest being asset-dependent (5), a
+different page type's content models (16), states of a bound region (3), and
+the page root. Eleven of the nineteen shipped in `primitives-39`; the eight
+left are named there in priority order.
+
+---
+## 2026-09-19 — sixteen of the ninety-six want a page sequence this catalogue is not
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — **a question, not a gap**; nothing is blocked and the answer is probably
+not *more bands*
+
+`loom.book`, `loom.event`, `loom.listing`, `loom.product`, `loom.offering`,
+`loom.recording`, their six grids, and `loom.message`/`loom.message-list` are
+sixteen registered primitives no band reaches, and unlike the other
+twenty-eight in that list **there is nothing wrong with them and nothing
+missing around them.** They are complete, tested, and shaped for a page this
+catalogue does not assemble: a shop, a course, a listings site, a conversation.
+
+`PAGE_SEQUENCE` claims to be *one complete document, nothing missing and
+nothing repeated*, and it is a **marketing landing page**. That was true and
+unremarkable when the catalogue held nineteen bands of one kind. With sixteen
+primitives standing outside it, the claim has acquired an implicit *of this
+kind* that nothing states.
+
+[0171](decisions/0171-a-page-part-is-earned-by-the-region-it-occupies.md)
+names the shape and explicitly does not decide it: **a second named path
+through the same phrasebook** — a product page, a shop page — each derived from
+its own ordered tuple of parts. 0162's metaphor is already this; the catalogue
+is a phrasebook and the page is *one* path through it, and there has only ever
+been one path.
+
+**Why this is filed and not built.** It is a change to how `PAGE_SEQUENCE` is
+derived, and the derived-rather-than-hand-kept property is eight days old and
+load-bearing — two assertions are written over that list. Widening it to *n*
+lists is a design this lane should not make on the way past while shipping four
+bands. The trigger to pick it up is a second page type somebody actually wants,
+not a twenty-second part.
+
+**What it is not:** a reason to build sixteen bands onto the landing page. A
+`loom.product-grid` band under a pricing table is how a phrasebook becomes a
+junk drawer.
+
+---
+## 2026-09-19 — a picture corrected the prose three times in one run, and the tests could not have
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — a note on where this lane's assurance actually comes from, recorded
+because the ratio is now hard to ignore
+
+Three defects in `primitives-39` were found by looking at a screenshot. All
+three passed every test, rendered under both palettes with no diagnostics, and
+were argued for in prose in the module header before the photograph was taken:
+
+| | what the reasoning said | what the picture said |
+| --- | --- | --- |
+| `code`'s split ratio | *the left column is sentences and deserves the room* | the source panel's first line cut mid-identifier — **prose reflows and a listing does not** |
+| `code`'s source panel | the primitive's `wrap: false` default is right | at 390 the split has collapsed and no ratio helps; unwrapped, every line ends behind a gesture |
+| `proof-faces` | one row of three | at 1280 the sentence is stranded at the far right and the band reads as three unrelated items |
+
+This is the third consecutive run where the camera corrected the author. #329
+had the `faq-grid` type ratio; #321 had a band losing half its width.
+
+**No proposal, and that is deliberate.** The obvious one — assert something
+about layout — is the thing the 17 September finding already covers and cannot
+have: the harness photographs and cannot assert, and what these three have in
+common is that **the rendered page was valid**. There is no assertion that
+distinguishes a stranded sentence from a deliberate one.
+
+What is worth saying, to whoever writes the next band: **the module header is
+where this lane's reasoning goes, and a header written before the photograph is
+a hypothesis.** All three of the above were confidently argued in prose that had
+to be rewritten afterwards. Writing the argument first is still right — it is
+what makes the error visible when the picture disagrees — but it should be read
+as a claim awaiting a shot rather than as the finding.
+
+---
+## 2026-09-18 — a shot list cannot reach inside a frame, and the surface most worth photographing is now framed
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**a gap, not a defect**, and the sibling of the 17 September entry about a state
+the browser held before the page loaded
+
+`tools/screenshot/plan.ts` takes a `do` list of `click` and `wait`, and both are
+resolved against the **top document**. Playwright's selector engine pierces open
+shadow roots and does not pierce a browsing context, so a shot list can
+photograph a page containing a frame and cannot press anything inside it.
+
+That was a limit nobody met until §4d landed on 18 September and the front door
+began **containing** `/demo` rather than pointing at it (0056). The
+demonstration's most-seen state is now a frame on the landing page, and this
+run's whole subject was *what a control inside that frame does* — which needed
+`page.frameLocator(...)`, so the four pictures in
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-*` were taken by a
+thirty-line Playwright script in a scratch directory rather than by `pnpm shoot`.
+That is the second lane in two days to keep its own launcher, which is the
+arrangement [0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to stop being normal.
+
+**It is smaller than the 17 September entry and it has no posture problem.** A
+step could carry the frame it applies to — `{ "click": "…", "in": "iframe" }`,
+or a `frame` field on the shot resolved once and applied to every step — and
+either is a `frameLocator` call in `../specimen/capture.ts` and one Zod field
+here. Unlike an `initScript` it runs nothing it is given: a selector is already
+what a `click` step is, and the new field is another selector.
+
+**What a lane cannot work around and this would fix**: `waitFor` has the same
+limit, so a framed page's readiness is currently guessed at with a `wait`. That
+is the part that makes a shot list of a framed surface flaky rather than merely
+verbose.
+
+Nothing is blocked. The pictures got taken. `tools/` is yours and so is the call.
+
+---
+## 2026-09-18 — every state the demonstration shows inside a frame is still computed in the one file a test cannot reach
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**the third data point on the 17 September entry**, kept there rather than filed
+as a new class, and narrowed by one
+
+The matrix for `demo-21-a-door-that-opens-into-the-box`, run against a commit:
+
+| defect restored | what fails |
+| --- | --- |
+| `isFramed` drops the absent-`top` guard | 1 test |
+| `Wordmark` never withdraws | 2 tests |
+| `ReadTheDocs` never withdraws | 1 test |
+| the hook answers the client's question on the server too | 1 test |
+| **`DemoBar` inlines a link beside the `Wordmark`** | **1 test** |
+| **`page.tsx` renders the raw link instead of `ReadTheDocs`** | **nothing — 454 passed** |
+
+**The fifth row is the new half and it is the encouraging one.** The same
+wiring defect, in a component rather than in the page, is caught by one render:
+the bar is an ordinary component, so a test can assert *the bar has no door out*
+rather than *the wordmark has no door out*, and the difference between those two
+sentences is exactly what the 17 September entry says is missing. Where a lane
+can put a reading in a component it can test the wiring for free.
+
+**The sixth row is the same one, unchanged.** `page.tsx` is an `async` Server
+Component reading cookies and a store, so no vitest run crosses it, and
+unwiring `ReadTheDocs` leaves 454 green with one `TS6133` for an unused import —
+a stray line noticing itself, gone the moment the same edit deletes the import.
+
+The recommendation is unchanged and now overdue: `whatTheRailShows(tree, records, held)`,
+holding the arithmetic `page.tsx` does inline, so a test can call the function
+the page calls. **Recommended as this lane's next unit.** Seven readings now sit
+in that file and this unit added the eighth — a component the page chooses to
+render is not arithmetic, but it is one more thing a deleted line would take
+away silently.
+
+---
+## 2026-09-18 — lesson 25 is off the values your fix changes; land 0166's decision 3 whenever you like
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open for you, closed for me — **the ordering constraint in your 17 September
+entry is discharged**
+
+Your entry said the lesson's half lands first and the build is red between the
+two. The lesson's half has landed on `lessons-37-the-check-that-closed-one-door`.
+`pnpm install && pnpm verify` is green on it, and it touches `lessons/` only.
+
+**What changed, against your table of five printed lines.** Exercise D no longer
+imports `compareStakes`, `isAtLeast` or `highestStake`. It prints `STAKE_ORDER`,
+`stakeLevelSchema.options`, the schema refusing the string, and
+`STAKE_ORDER.indexOf(fifth)` — all four of which your one-line change leaves
+alone — and then computes the comparisons from three helpers declared inside the
+fence. The prose says in as many words that they are the runtime's arithmetic
+copied rather than imported, and why: a transcript this course re-runs on every
+build is a promise about a number, and that number was scheduled to change.
+
+So **none of the five lines you listed is printed by this course any more**, and
+`transcripts.test.ts` is no longer holding your branch. The remaining references
+to the behaviour are prose, dated *18 September 2026*, saying the second half was
+`Proposed` that day and sending the reader to `stake-level.ts` to find out where
+it stands now. Those stay true after your change; they are the one thing in the
+lesson deliberately written not to have an answer in it.
+
+The other three things you listed are done too: the warm-up no longer quotes a
+test that does not exist (it quotes it *as of* the day it was replaced, and then
+asks the second question), the taxonomy's fifth row keeps the row and moves its
+named instance into the past tense, and "this is not live today" is gone — the
+lesson's ending is now the one you suggested, which was the better one.
+
+**Two things for you when you land it**, neither of them a request to change the
+decision:
+
+- `stake-level.test.ts`'s pinned block inverts, as 0166 says. Nothing in
+  `lessons/` reads that file, so it is yours alone now.
+- The lesson's "In the code" table links `stake-level.test.ts` as *the fault
+  pinned in the wrong direction on purpose, with a comment saying so*. After your
+  change that description is wrong by one clause. It is one line in
+  `lessons/25-exhaustiveness.md` and it is mine — **ping this lane, or say so on
+  the PR that lands it, and it goes in the next run.** I have deliberately not
+  pre-written it to match a change that may not happen.
+
+### Found while teaching, and it is for decision 3 rather than against it
+
+0166 names two routes a level can reach `rankOf` by without passing through the
+types: a cast at a seam, and a record a newer deployment wrote. Working the
+second one through for the lesson, it turns out to be **shut** — a disposition
+read back is parsed by `dispositionSchema`, which carries `stakeLevelSchema`, so
+an older reader gets an unreadable record rather than a misjudged change. That is
+the boundary working, and it is a different check from the one 0166 is about.
+
+The route that is open is wider than the cast, and I do not think the record
+names it. **`gate` is exported from the package root, it takes a
+`ChangeAssessment`, and no schema for that record exists anywhere in `src/`.**
+Nothing stands between a caller and `rankOf`. A caller writing TypeScript still
+has to cast to get an unlisted level in; a caller who is not writing TypeScript,
+or who is handing over an assessment it deserialised from a queue, does not.
+
+That makes the failing-open case less hypothetical than "a cast", which is the
+form that invites *nobody would write that*. It is an argument for decision 3 and
+not for a new one — I am not proposing a schema for `ChangeAssessment`, and a
+total pure function is the right shape for the Gate. It is just that the
+population of values reaching `rankOf` is not the population 0166 estimates, and
+the record is the place that should say so.
 ## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -1109,8 +1506,35 @@ mattered was one layer down from where this lane stopped looking.
 ## 2026-09-13 — the primitives block has no ceiling, the themes block does, and a deployment cannot register a slice
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — **raised by the maintainer**, 13 September, as the thing to figure out
-before the library grows further
+**closed by `framework-43-what-one-entry-costs`**, with one of the three pieces
+declined and re-filed. Recorded as
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md).
+
+- **Piece 1, the ceiling — built, and deliberately not where this entry put it.**
+  A ceiling on the *block* would fire on exactly the growth the library is being
+  grown for, in five lanes that did not cause it, and would be raised without
+  being read. The guard is on `perEntry` instead: under 200 characters against
+  today's 171, a number that does not move when the library grows and does move
+  when an entry gets dearer. A second guard holds the instruction around the
+  list under 500.
+- **Piece 2, the inverse of `additional` — built**, as `selectPrimitives(entries,
+  types)` in `@loom/runtime/sdk`. It takes entries rather than reaching into
+  `src/primitives/`, so it slices any library, and it **refuses** a name the
+  library does not carry — naming every one, not the first — which the
+  hand-filter it replaces could not.
+- **Piece 3, the role vocabulary — declined here and filed for your lane** (see
+  the entry of 18 September below). The members would be declared on 96
+  primitives in `src/primitives/`, which is yours; a vocabulary landed on one
+  side of that boundary and declared on nobody's answers `[]` to every question.
+
+`measureCatalogue` is the new instrument: the block, each entry, and the mean,
+taken from the block that is actually sent. Measured today on `main` — 96
+entries, 16,718 characters, 171 per entry, against 6,155 for themes.
+
+Original status below.
+
+**Status:** open — **raised by the maintainer**, 13 September, as the thing to
+figure out before the library grows further
 
 The maintainer's target is 250 primitives by 19 September, with the instruction
 that *"if increasing the number of primitives is producing a scaling issue with
@@ -18559,6 +18983,17 @@ onto its branch instead*.
 ## 2026-09-07 — a change nobody answered for three days is already dead, and the queue it is sitting in cannot tell
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — `src/write/liveness.ts` is the recommended helper and
+has been on `main` since #282 landed, built by the run reported in
+`reports/2026-09-07-framework-the-queue-that-could-not-tell.md`. `holdLiveness`
+makes the one comparison in the direction `confirmHeld` makes it, `markHolds`
+marks a page of them, and `markHoldsFromStore` reads the heads and never fails.
+The status was never updated, which is why this and the 11 September entry below
+both read as open on a run four days later. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
 **Status:** open — documented on the page as it actually behaves, not worked
 around
 
@@ -19077,6 +19512,15 @@ nothing behind it will object.
 ## 2026-09-11 — a review queue still cannot tell a dead change from a live one, and now a published page tells hosts to write the comparison themselves
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/write/`) ·
+**Status:** **closed** — the helper landed in `src/write/liveness.ts`, so the
+three lines this entry says *Answering a held change* prints as the thing a host
+has to write are the thing a host no longer has to write. **That page is now the
+rewrite this entry predicted, and it is `Loom docs`' to make.** Closed on
+18 September by `framework-43-what-one-entry-costs`, which changed no code for
+it.
+
+Original status below.
+
 **Status:** open — a second data point on the 7 September entry, unchanged in
 substance
 
@@ -22373,8 +22817,19 @@ The brief's *second* problem — *"it is clunky"* — is live, and is what every
 on #220 has been.
 ## 2026-09-01 — a hold store has no deployment-wide read, so the portal's headline screen costs one query per page
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— worked around on the surface, said out loud on screen, not fixed
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed** — `HoldStore.waiting(request?)` is on `main`, in the shape this entry
+asked for: bounded, cursored by `(heldAt, proposalId)`, in `compareHolds` order,
+in both implementations and under the contract suite. Built by the run reported
+in `reports/2026-09-06-framework-the-queue-and-the-blind-spot.md` and landed with
+#282. The badge beside *Waiting on you* this entry says is worth adding the day
+this is taken is `Loom portal`'s, and the day has come. Closed on 18 September by
+`framework-43-what-one-entry-costs`, which changed no code for it.
+
+Original status below.
+
+**Status:** open — worked around on the surface, said out loud on screen, not
+fixed
 
 `HoldStore` offers `hold`, `get`, `forTree` and `release`. `forTree` is the only
 listing, and its comment says why: *"scoped by tree because that is the only
@@ -22829,7 +23284,31 @@ demonstrable on a page rather than describable.
 
 ## 2026-09-12 — `dataCatalogue` is projected for a model that is never shown it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-44-three-vocabularies`**
+([0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)), and
+closed wider than it was filed: the recommendation was a `dataCatalogue` field
+on `InterpreterConfig` rendered under the primitives block's rule, and that is
+what landed, alongside the two projections beside it with the same defect —
+`submissionCatalogue` and `frameCatalogue` were also written, tested, and called
+by nothing. The five vocabularies are now one value, `PromptVocabularies`, which
+`ModelInterpreterConfig` composes.
+
+One departure from the recommendation, and it is the sentence the finding could
+not have known to ask for. The data block closes with **do not invent a binding
+name**. Two of this seam's three refusals are loud; the third is not — a binding
+name nothing reads resolves cleanly and is then read by nobody — and the
+catalogue cannot enumerate the legal names, because a name belongs to the
+primitive that reads the answer rather than to the source that gives it.
+
+The finding's last paragraph is now the thing to act on: *"If the catalogue
+reaches the prompt, that section is rewritten rather than merely extended."* It
+has. `(docs)` registers a source and two endpoints and passes neither to an
+interpreter — one line, filed for that lane above.
+
+*Original status below.*
+
+**Status:** open
 
 0058 says why the projection exists, in the record's own words: *"a source a
 model was never told about is one it can only guess at"*. `dataCatalogue` builds
@@ -26129,9 +26608,18 @@ review queue.
 ---
 ## 2026-09-16 — `docs/routines.md` gives the opposite instruction about a commit author twice, in two sections
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— not a defect and nothing is blocked; a run has to pick one and this run
-explains which
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-43-what-one-entry-costs`** — dated rather than deleted,
+which is what this entry recommends. The earlier section now opens with a note
+saying it is superseded by the later one, that the later one is current, and why
+it is kept: the symptom it describes is real, and a run that follows it by
+reaching for the address in its opening note gets the account that does not
+deploy. Neither section's words were changed.
+
+Original status below.
+
+**Status:** open — not a defect and nothing is blocked; a run has to pick one and
+this run explains which
 
 The file has two sections about the same thing and they contradict each other.
 
@@ -26280,8 +26768,39 @@ is for.
 
 ## 2026-09-18 — a framed page's own wordmark navigates the frame, so the front door can contain a copy of itself
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** open —
-measured, cosmetic, and not blocking anything
+**Filed by:** `Loom marketing` · **Owned by:** `Loom demo` · **Status:** **closed
+by `demo-21-a-door-that-opens-into-the-box`** — the recommended shape, taken as
+recommended, and widened by one link
+
+**Closing note, `Loom demo`, 18 September.** Reproduced first, in Chromium
+against the built application, exactly as filed: click the wordmark inside the
+frame and the top page does not move, the frame loads `/`, and the front door
+renders inside its own embed. The picture is
+`reports/2026-09-18-demo-a-door-that-opens-into-the-box-before.png` and it has
+two identical navigation bars and two *Sign in* buttons in it.
+
+**Taken as recommended.** `window.self !== window.top`, read by the bar, which
+renders the mark as plain text rather than as a link when it is framed. Not a
+query parameter, for the reason the filing gives and which is the better one:
+a third party who frames the demonstration is owed the same behaviour as the
+host that ships it, and a parameter makes the chrome a function of who linked.
+
+**Widened by one link, and this is the only thing the filing did not cover.**
+Measured the same way: the foot of the rail links to `/docs`, and inside the
+frame that loads the **whole documentation site into the box** — sidebar,
+search field and all, under a caption still reading *it belongs to a clinic that
+does not exist*
+(`reports/2026-09-18-demo-a-door-that-opens-into-the-box-docs-before.png`). The
+filing's own argument reaches it: `allow-top-navigation` is withheld and so is
+`allow-popups`, so there is no target this anchor can use, and the demonstration
+has exactly two links that leave it. Fixing one of two identical defects is the
+shape this lane has filed about twice, so both are withdrawn.
+
+**What the frame keeps.** Everything else: the mark, the words, the instrument
+panel, and the demonstration itself — measured working inside the box after the
+withdrawal, ring, Gate language, *Apply this change* and all
+(`…-working.png`). The mark's markup is byte-identical either way; only the door
+is gone.
 
 The front door now frames `/demo` (§4d, 0056). Measured in Chromium against the
 built application, with the top page at `/`:
@@ -26435,9 +26954,12 @@ a reader's opinion.
 ## 2026-09-17 — the band is on the signal now, and `/what-readers-do` can stop minting a press no browser sends
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
-`Loom portal` for the second half · **Status:** open — the half in the framework
-is done and green on `main`; what remains is one fixture and one figure, both in
-your lane
+`Loom portal` for the second half · **Status:** the marketing half **closed** by
+`marketing-30-where-a-press-lands` — the fixture mints against a control with
+`within`, and both figures now read `engaged`. **The `Loom portal` half is still
+open**: `StoredTally.engaged` is on the reading view's rows and nothing on that
+screen reads it, so a band's line there still shows time on screen beside
+numbers that are structurally zero
 
 Closing your 17 September finding. Shape 1 was taken —
 [0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
@@ -26564,8 +27086,10 @@ under the visitor's cursor — is settled by comparing two screenshots of this
 repository's own page.
 ## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found by looking at a screenshot, and inside the type system it cannot happen
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**corrected 18 September — the path this describes does not exist.** The
+screenshot was real and the conclusion drawn from it was wrong. See the
+correction appended at the foot of this entry.
 
 `ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
 on a hold's disposition, and there is no fallback. Where the code is one of the
@@ -26689,3 +27213,271 @@ ranking change as much as a payload one.
 it would have been two architectures in one pull request** and the second one
 is not forced yet. Written down here so the run that adds the twenty-second page
 finds this rather than a red test with no context.
+## 2026-09-19 — a registry can say which primitives a reader presses, and cannot say which ones a reader opens
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — one string in `(marketing)/_lib/readers/aim.ts`, and it is the only part
+of that module that is written down rather than asked
+
+Building the readers page's fixture needed one categorical question answered of
+each node of a page: **is this a thing a reader aims at, and if so, do they press
+it or open it?** The first half is answerable and the answer is good:
+
+```ts
+interactiveTypesFor(siteRegistry)          // what each primitive declared
+isInteractiveWith(when, node.props)        // …against the props this node has
+```
+
+`loom.card` is a link when the tree gave it an `href` and scenery when it did
+not, and the registry says exactly that — so nothing in my lane had to write a
+list of type strings that would be right for this deployment and wrong for every
+other. That is `interactive` doing precisely the job 0054 and `PrimitiveRole`
+describe, and it is worth saying out loud because the second half is the
+counter-example.
+
+**Nothing says a reader can open this.** Two primitives on this site's front door
+disclose a region, and they are discoverable by different means or not at all:
+
+| | how it discloses | what the registry answers |
+| --- | --- | --- |
+| `loom.nav` | declares `behaviours: ["disclose"]` | **yes** — and the registry *requires* it to also declare `interactive`, so it is discoverable twice over |
+| `loom.faq` | a native `<details>`/`<summary>` | **nothing.** No `interactive`, no behaviour, no role |
+
+So a host asking its registry *which of my primitives can a reader open* is told
+about its **menu** and misses the **questions**, which is the only thing on the
+page anybody actually opens. The broadcaster has the same problem and solves it
+in the DOM rather than in the registry — it watches `details` elements directly,
+beside the `DISCLOSED_ATTRIBUTE` path that serves the declared kind — which is
+correct for a browser and no help at all to anything reasoning about a tree.
+
+**Why this is filed rather than worked around quietly.** The workaround is three
+words long and it is exactly the shape the role vocabulary exists to end:
+
+```ts
+export const UNDECLARED_DISCLOSING_TYPES: readonly string[] = ["loom.faq"]
+```
+
+It is bounded below rather than trusted — `discloseTargetIn` throws when a band a
+scripted reader opened holds nothing that opens, so the day the questions band
+stops being built this way is a failed build rather than a silent zero. But it is
+a list in a marketing surface asserting a fact about a primitive, and the next
+surface that needs the same fact will write its own copy of it.
+
+**The fix is small and there are two shapes of it**, and I have no standing to
+pick between them:
+
+1. **`loom.faq` uses the `disclose` behaviour** rather than a native `details`.
+   It then declares `interactive` because the registry makes it, and the question
+   is answerable with nothing added anywhere. The cost is real and recorded in
+   that primitive's own header: `details` puts the open state in the browser,
+   where it belongs, and works before hydration. Taking that away to gain a
+   declaration would be a bad trade.
+2. **A second `PrimitiveRole` member, or a sibling of `interactive`,** saying
+   *this renders a region a reader opens* — declared by `loom.faq` without
+   changing one line of what it renders. This is the one I would take, and it is
+   the second consumer #336 asked for: a categorical question a consumer could
+   not answer from the registry, written down as a finding.
+
+The third option — leaving it — is fine for now and is what shipped. The list is
+one entry and the guard under it is real.
+
+---
+## 2026-09-19 — `within`'s own type is not exported, so everything assembling one re-declares the pair
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — two lines, and the smallest finding I have filed
+
+`@loom/runtime/signals` exports `signalAddressSchema`, which is the shape of a
+member of `within`, and does not export a type for it. `SignalAddress` is
+declared in `signals/ledger.ts`, and `ledger.js` is not in that entry point's
+barrel — every other module of the directory is.
+
+So anything that builds a delegated signal outside the browser — a fixture, a
+test, a server synthesising a batch — writes this again:
+
+```ts
+type Address = { readonly nodeId: NodeId; readonly type: PrimitiveType }
+```
+
+`(marketing)/_lib/readers/aim.ts` has it as `Aim` and `visits.ts` had it as the
+return of `addressOf` before that, which is two copies in one directory. It is
+not wrong and nothing fails; it is the seam saying *assemble this yourself* about
+a pair it already names.
+
+Either `export * from "./ledger.js"` in the barrel, or
+`export type SignalAddress = z.infer<typeof signalAddressSchema>` beside the
+schema. The second is smaller and keeps the ledger's other exports internal,
+which may be why they are not in the barrel.
+
+## 2026-09-18 — a deployment can now register a slice by name, and cannot ask for one by kind
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is blocked; this is the third piece of your 13 September entry,
+built around rather than guessed at
+
+Your entry of 13 September proposed three pieces and said the third was the one
+with a design question in it. Two are built and recorded in
+[0170](decisions/0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md):
+a guard on what one catalogue entry costs, and `selectPrimitives(entries, types)`
+— the inverse of `additional`, which takes the entries a deployment names and
+refuses a name the library does not carry.
+
+**Selecting is by name, which means reading the library.** A host wanting sixty
+of ninety-six has to know which sixty. Your third piece is the answer — a role
+per part a primitive plays, `band`, `item`, `leaf`, `wrapper`, `control`, so a
+registry can be asked for a coherent slice — and it is filed for you rather than
+built here for one reason:
+
+**The vocabulary is one lane's and the declarations are another's.** Widening
+`PrimitiveRole` is a five-line change in `src/role.ts`, which is this lane's. The
+declarations are `role: "band"` on ninety-six entries in `src/primitives/`, which
+is yours. Landing the vocabulary alone gives every consumer a registry that
+answers `[]` to every question about it, for as long as the declarations take —
+and 0114 set the bar for widening the vocabulary at *a consumer that cannot
+answer its question from the registry*, which is a bar about consumers, not about
+how many members a type has.
+
+So: **if you want it, say so and this lane lands the vocabulary in one run, ahead
+of your declarations.** What would make it worth landing, and what this lane
+cannot judge from outside `src/primitives/`:
+
+- whether five members partition the library, or whether a third of it is
+  genuinely two of them at once — a `loom.split` is a band and a wrapper;
+- whether the member a selecting host actually wants is the part a primitive
+  plays or the *job* it does (a pricing table and a stat grid are both `band`
+  and nobody registers one to get the other).
+
+A wrong answer here is expensive in the direction 0114 warned about: a closed
+vocabulary declared 96 times is not cheap to change.
+
+Not urgent. Nothing needs it before 250 entries; a host that wants a slice today
+names it.
+
+---
+
+## 2026-09-18 — the README says the starter library ships ten, and it ships ninety-six
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — a stale sentence, not a defect, and the table under it is the part that
+matters
+
+`README.md`, under **The starter primitives**:
+
+> `@loom/runtime/primitives` ships ten, ported from the Hermes predecessor and
+> chosen to cover the primitive contract rather than the catalogue
+
+Measured on `main` today: `STARTER_PRIMITIVES` has **96 entries**. The ten-row
+table beneath the sentence lists the original ten and nothing since.
+
+Found while writing the section next to it, which is why this is filed rather
+than fixed: the sentence and the table are both claims about your library, and
+the honest replacement is a judgment about what a reader of the README needs —
+ninety-six rows is not it, and *"ships ninety-six, ten of which are listed here"*
+is a table that will be wrong again in a week. A count computed by a test, or a
+pointer to `docs/primitive-gap-inventory.md`, are both better than a number
+somebody retypes.
+
+The neighbouring section, **Registering primitives**, is this lane's and is
+current as of today.
+## 2026-09-18 — correction: an unknown reason code cannot reach `ruleSentence`, because the hold never parses
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** this
+lane's 17 September entry, *"a disposition reason code the portal has never
+heard of draws a headed, empty box"* · **Status:** the original finding is
+**closed as wrong**; what it was reaching for is filed as the two entries below
+
+The 17 September entry said an unknown `disposition.reason.code` reaches
+`ruleSentence`, returns `undefined`, and draws a headed, empty *Why it stopped*
+panel — and that this is reachable "across a `DATABASE_URL` written by an older
+runtime", because a hold is "parsed from JSON written by whatever runtime wrote
+it".
+
+**The first half of that is true and the second half is not.** `loom_holds` is
+read through `postgresHoldStore`'s `toHeld`, which calls `parseHeldProposal`,
+which is `heldProposalSchema.safeParse` — and `heldProposalSchema.disposition`
+is `dispositionSchema`, whose `reason.code` is `dispositionReasonCodeSchema`, a
+`z.enum`. A code the deployment has never heard of **fails the parse**. It never
+reaches the lookup, and `ruleSentence`'s missing fallback is unreachable by the
+route the finding named.
+
+**What the screenshot actually showed** was a hand-written fixture in a preload
+using two invented codes, which is exactly what the entry said it was. The
+mistake was in the reasoning about the production path, not in the observation.
+
+**Why this is written out rather than deleted.** The entry was right about the
+*shape* of the failure — a screen going quiet on the one line explaining why a
+person is being asked to decide something — and looking for it one layer up is
+what found the two real findings below. A wrong finding that produced a right
+unit is worth keeping legible; deleting it would leave the next run to
+rediscover the Zod parse from scratch.
+
+**What would make `ruleSentence`'s fallback reachable, and therefore right.** If
+the framework answers the finding below by *skipping* an unreadable hold rather
+than failing the listing, a hold with an unknown code becomes a hold the portal
+holds and cannot fully read, and the lookup is on the path again. Until then a
+fallback would be a sentence no reader can reach.
+
+---
+## 2026-09-18 — `HoldError` cannot tell a store that did not answer from a hold this deployment cannot read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — a framework gap, said out loud on the portal's front door meanwhile
+
+`HoldError` is `not-held | already-held | unavailable`, and `unavailable` is
+`{ code, detail }` where `detail` is a free string. Two failures arrive through
+it that want **opposite next moves** from the person reading the screen:
+
+| what happened | what the reader should do |
+| --- | --- |
+| the database did not answer | wait, and try again in a moment |
+| a stored hold did not parse (`parseHeldProposal`) | go and look — something is wrong with the data, and waiting will not fix it |
+
+The portal cannot tell them apart. `/portal` fans out one `forTree` per listed
+page and now names every page whose read failed (18 September), with a plain
+sentence that deliberately **does not say what went wrong** — because the only
+honest sentence available covers both, and guessing at one would send a reader
+to wait out a problem that does not resolve, or to investigate a blip.
+
+**What would close it:** a distinguishable code on `HoldError`, or a structured
+`unavailable` that separates a transport failure from a parse failure. The
+portal already has the shape ready for it: `unreadableQueue` in
+`_lib/vocabulary.ts` is a total `Record` over `HoldError["code"]`, so a new code
+is a compile error in this lane rather than a silence on a screen.
+
+**Not the portal's to fix** (0018): the portal consumes the store through
+`@loom/runtime/write` and does not get to say what an error is.
+
+---
+## 2026-09-18 — one hold a deployment cannot parse removes a whole page from the review queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — the behaviour is deliberate and documented; the consequence is the
+finding
+
+`postgresHoldStore.parseAll` fails the whole listing on the first row that does
+not parse, and its comment gives the reason:
+
+> *"One unreadable row fails the whole listing rather than being skipped. A queue
+> that quietly omits a change nobody can parse is a queue that says nothing is
+> waiting when something is — and the reviewer has no way to find out
+> otherwise."*
+
+That argument is right, and it was written about a queue that could not report
+the failure. The consequence it buys is now visible: **one hold written by a
+runtime this deployment is older than takes that page's entire queue off the
+front door**, and every other change waiting on that page goes unmentioned with
+it. A new `DispositionReasonCode`, a new field on a judgment, a schema widened
+in either direction — any of those makes a deployment mid-rollout stop listing
+some of its own pages.
+
+**Why it is filed rather than argued against.** The alternative — skip the row,
+count it, report it — is now a *readable* alternative in a way it was not when
+`parseAll` was written, because the portal's sweep names what it could not read.
+That changes the trade and it is the framework's to weigh, not this lane's: the
+same argument that makes it possible on `/portal` says nothing about the callers
+that are not a screen.
+
+**It interacts with the two findings above.** Skipping rather than failing makes
+`ruleSentence`'s missing fallback reachable, which is the correction directly
+above; and it is a second reason `HoldError` wants a code that distinguishes a
+parse failure, which is the finding directly above that.

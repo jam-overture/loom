@@ -12,11 +12,12 @@ import { PALETTE_SLOTS } from "../theme/theme.js"
 import { applyDelta } from "../tree/apply.js"
 import { buildElement } from "../tree/builders.js"
 import { treeDeltaSchema } from "../tree/delta.js"
-import type { LoomNode } from "../tree/node.js"
+import type { ElementNode, LoomNode } from "../tree/node.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
 import { createStarterPrimitiveRegistry } from "./index.js"
 import {
+  CATALOGUE_TYPES,
   COMPOSITION_INTERPRETER,
   COMPOSITION_PARTS,
   compositionById,
@@ -156,8 +157,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers thirty bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(30)
+  it("offers thirty-four bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(34)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -256,6 +257,63 @@ describe("the starter compositions", () => {
       const built = new Set<string>(typesIn(composition.build(sequentialIdFactory())))
 
       expect([...built].sort()).toEqual([...composition.uses].sort())
+    }
+  })
+
+  /**
+   * The reach of the phrasebook over the vocabulary, made a checked artifact
+   * rather than a number in a report.
+   *
+   * **This is deliberately not a ceiling**, and the distinction is the whole
+   * reason it is written this way. A primitive is registered before a band
+   * uses it, so a test demanding that every registered type be reachable would
+   * fire on the ordinary order of work — the same argument `Loom daily build`
+   * made on 18 September about a character budget over the primitives block,
+   * one list over. What is asserted is only that the exported number
+   * is the one the catalogue actually has: that {@link CATALOGUE_TYPES} is the
+   * union of the bands' own `uses` and nothing else, so the gap a run reports
+   * is derived from the same strings the rot check holds against the subtrees.
+   *
+   * Measured on 19 September: 52 of 96, and the 44 are in that run's report
+   * classified by *why*, which is the part a number cannot carry.
+   */
+  it("reaches exactly the types its bands declare, and every one is registered", () => {
+    const declared = new Set(STARTER_COMPOSITIONS.flatMap((composition) => composition.uses))
+    const registered = new Set<string>(registry.primitives.map((primitive) => primitive.type))
+
+    expect(CATALOGUE_TYPES).toEqual([...declared].sort())
+    for (const type of CATALOGUE_TYPES) expect(registered.has(type), `${type} is not registered`).toBe(true)
+    expect(CATALOGUE_TYPES.length).toBeLessThanOrEqual(registered.size)
+  })
+
+  /**
+   * A code panel with nothing in it renders clean, and is a box of air.
+   *
+   * The same shape as the plotted-figure check below and found the same way:
+   * `loom.code` takes its snippet as a **child** rather than as a prop, so a
+   * band that puts the code in a prop by mistake, or builds the panel and
+   * forgets the text, satisfies every schema, produces no diagnostic and draws
+   * a titled empty surface. Rendering is total (0008); nothing is refused.
+   *
+   * It is asserted over the catalogue rather than over the two bands that ship
+   * a panel today, because the failure belongs to the primitive's shape and
+   * will outlive both of them.
+   */
+  it("gives every code panel something to print", () => {
+    const panelsIn = (node: LoomNode): readonly ElementNode[] =>
+      node.kind === "text"
+        ? []
+        : [...(node.kind === "element" && node.type === "loom.code" ? [node] : []), ...node.children.flatMap(panelsIn)]
+
+    for (const composition of STARTER_COMPOSITIONS) {
+      for (const panel of panelsIn(composition.build(sequentialIdFactory()))) {
+        const printed = panel.children
+          .flatMap((child) => (child.kind === "text" ? [child.value] : []))
+          .join("")
+          .trim()
+
+        expect(printed.length, `a code panel in ${composition.id} would print nothing`).toBeGreaterThan(0)
+      }
     }
   })
 
@@ -766,6 +824,53 @@ describe("what a band puts on a page", () => {
     const levels = PAGE_SEQUENCE.flatMap((composition) => levelsIn(composition.build(ids)))
 
     expect(levels.filter((level) => level === 1)).toHaveLength(1)
+  })
+
+  /**
+   * The other half of the outline, and the half a new part can break.
+   *
+   * One level-one heading says the page has a single document title. It says
+   * nothing about the run of headings under it, and a reader navigating by
+   * heading — which is how a screen reader user reads a landing page they did
+   * not write — is served by the *steps* between them: a level-2 followed by a
+   * level-4 tells them a level-3 section exists and they have missed it.
+   *
+   * This was worth adding on the day the page vocabulary opened (0171). Every
+   * band written before today happened to open at level 2 because every band
+   * before today began with a `loom.section` and the convention travelled with
+   * the copy; a part whose region is *above* the navigation has no such
+   * convention to inherit, and the most natural mistake in writing one is to
+   * give the strip a heading. `banner` carries none, deliberately, and the
+   * reasoning is in its module — but the reason it is *safe* to carry none is
+   * this assertion rather than that paragraph.
+   *
+   * Descending is unconstrained on purpose: a level-4 back to a level-2 is a
+   * section ending, which is ordinary. Only the climb can skip.
+   */
+  it("never skips a heading level on the way down the page", () => {
+    const levelsIn = (node: LoomNode): readonly number[] => {
+      if (node.kind === "text") return []
+      const here =
+        node.kind === "element" && node.type === "loom.heading" && typeof node.props["level"] === "number"
+          ? [node.props["level"] as number]
+          : []
+
+      return [...here, ...node.children.flatMap(levelsIn)]
+    }
+
+    const ids = sequentialIdFactory()
+    const levels = PAGE_SEQUENCE.flatMap((composition) => levelsIn(composition.build(ids)))
+
+    expect(levels.length).toBeGreaterThan(0)
+    expect(levels[0]).toBe(1)
+
+    let previous = levels[0] as number
+    for (const [index, level] of levels.entries()) {
+      expect(level, `heading ${index} on the page jumps from level ${previous} to level ${level}`).toBeLessThanOrEqual(
+        previous + 1
+      )
+      previous = level
+    }
   })
 
   /**

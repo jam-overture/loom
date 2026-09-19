@@ -1,4 +1,3 @@
-import type { PrimitiveCatalogue } from "../catalogue.js"
 import { ceilingOf, describeCeiling, withCeiling } from "../deadline.js"
 import type { IdFactory } from "../ids.js"
 import { assertNever, err, ok, type Result } from "../result.js"
@@ -11,14 +10,19 @@ import type {
   RepairRequest,
 } from "../runtime/interpreter.js"
 import type { ProposedChange } from "../runtime/proposal.js"
-import type { ThemeCatalogue } from "../theme/registry.js"
 import { parseDelta, type TreeDelta } from "../tree/delta.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import type { ModelClient, ModelClientError, ModelCompletion, ModelEffort } from "./client.js"
 import { interpretationReplySchema, type InterpretationReply } from "./draft.js"
 import { materializeDelta } from "./materialize.js"
-import { buildRepairMessage, buildUserMessage, hashPrompt, INTERPRETER_SYSTEM_PROMPT } from "./prompt.js"
+import {
+  buildRepairMessage,
+  buildUserMessage,
+  hashPrompt,
+  INTERPRETER_SYSTEM_PROMPT,
+  type PromptVocabularies,
+} from "./prompt.js"
 import { DEFAULT_DRAFT_DEPTH, interpretationReplyJsonSchema } from "./schema.js"
 
 /**
@@ -53,7 +57,13 @@ export const DEFAULT_EFFORT: ModelEffort = "high"
  */
 export const DEFAULT_INTERPRETER_CEILING_MS = 180_000
 
-export type ModelInterpreterConfig = {
+/**
+ * Everything wired once per deployment: how to reach a model, and what to tell
+ * it about this deployment. The second half is `PromptVocabularies`, composed
+ * rather than restated so that a vocabulary added there reaches a host's wiring
+ * and the prompt in the same change (0172).
+ */
+export type ModelInterpreterConfig = PromptVocabularies & {
   readonly client: ModelClient
   readonly idFactory: IdFactory
   readonly clock: Clock
@@ -67,21 +77,6 @@ export type ModelInterpreterConfig = {
    */
   readonly ceilingMs?: number
   readonly draftDepth?: number
-  /**
-   * What this deployment can build with. Absent means the model is told only
-   * what the tree shows, which is what §2 shipped with; a host that has a §4
-   * registry projects it with `catalogueOf` and the model stops guessing at
-   * primitive names it has no way to know.
-   */
-  readonly catalogue?: PrimitiveCatalogue
-  /**
-   * What this deployment may be themed with. Absent means the model is shown no
-   * theme vocabulary and cannot re-theme anything: the ids in the tree are the
-   * only ones it knows, so "make it warmer" has nowhere to go but an invented
-   * id that fails to resolve. A host with a §4b theme registry passes
-   * `themes.catalogue()`.
-   */
-  readonly themeCatalogue?: ThemeCatalogue
 }
 
 const fromClientError = (error: ModelClientError): InterpretationError => {
@@ -228,12 +223,8 @@ export const modelInterpreter = (
   config: ModelInterpreterConfig
 ): ChangeInterpreter & ChangeRepairer => ({
   interpret: (intent: EditIntent, tree: LoomTree) =>
-    propose(config, intent, buildUserMessage(intent, tree, config.catalogue, config.themeCatalogue)),
+    propose(config, intent, buildUserMessage(intent, tree, config)),
 
   repair: (request: RepairRequest, tree: LoomTree) =>
-    propose(
-      config,
-      request.intent,
-      buildRepairMessage(request, tree, config.catalogue, config.themeCatalogue)
-    ),
+    propose(config, request.intent, buildRepairMessage(request, tree, config)),
 })
