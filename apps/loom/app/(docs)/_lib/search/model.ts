@@ -1,3 +1,5 @@
+import { apiAnchorFor, apiSlugFor } from "../api/model"
+
 /**
  * What the site knows how to find, as data.
  *
@@ -20,9 +22,17 @@
  * in a block they were invited to copy, stops being told the site has never
  * heard of it.
  *
- * **Three kinds of thing findable, three files.** The entries arrive first
- * because nothing can be answered without them; the words and the code follow,
- * separately, and each turns on one more band of the ranking when it lands.
+ * **Three kinds of thing findable, four files.** What a reader waits for is the
+ * site's own table of contents — its pages and the headings on them. The
+ * runtime's published names, the words and the code follow, separately, and
+ * each turns on one more band of the search underneath the box as it lands.
+ *
+ * The names are the odd one of the three that follow, because they bring
+ * *entries* rather than fill a field on one. That is the split this file was
+ * missing: a page is added when somebody writes one, and a name is published
+ * when somebody in another part of the repository exports something — two
+ * different things growing at two different speeds, in one payload, under one
+ * number that could only ever be a number about both.
  */
 
 export type SearchKind = "page" | "heading" | "export"
@@ -111,20 +121,21 @@ export const SEARCH_INDEX_PATH = "/docs/search-index"
  * index rather than raise the number.
  *
  * The split is along the line the two halves already grow on. What a reader
- * needs to type the first letter is the table of contents and the runtime's
- * surface: 998 entries, **14.6 KB compressed**, and it grows when a page is
- * added or an export is published. The words under them are **35 KB**, and they
- * grow every time anybody writes a paragraph. So the box opens on the first,
- * which is the part that answers by title, section and summary — the top three
- * bands of the ranking — and the prose lands a moment later and turns on the
- * fourth.
+ * needs to type the first letter is the site's table of contents: 206 entries,
+ * **7.4 KB compressed**, and it grows when somebody writes a page. The words
+ * under them are **53 KB**, and they grow every time anybody writes a
+ * paragraph. So the box opens on the first, which is the part that answers by
+ * title, section and summary — the top three bands of the ranking — and the
+ * prose lands a moment later and turns on the fourth.
+ *
+ * The runtime's published names were on the near side of this split until 19
+ * September and are now a file of their own; `SEARCH_NAMES_PATH` says why.
  *
  * A reader on a slow connection therefore gets a working search box rather than
  * a spinner, and the half that grows fastest is the half nothing waits for.
  */
 export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
 
-/** How many results the dialog shows. Beyond this a reader types more instead. */
 /**
  * Where the browser asks for the code, which arrives with the words and is
  * read after them.
@@ -142,6 +153,23 @@ export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
  * told nobody which.
  */
 export const SEARCH_CODE_PATH = "/docs/search-index/code"
+
+/**
+ * Where the browser asks for the runtime's published names.
+ *
+ * **The fourth file, and the one that made the first one honest.** Until this
+ * existed, the file a reader waited for carried the site's 206 pages and
+ * headings *and* the runtime's 1,067 published names — and 78% of it was the
+ * names, 60% of it compressed. So the payload a reader sat in front of grew every time any lane in
+ * the repository exported a function, which is a thing this surface does not do
+ * and cannot see coming. It had reached 96% of its compressed budget that way,
+ * with about sixty exports of room left for the whole repository.
+ *
+ * Splitting it is the remedy the budget's own comment has prescribed since the
+ * prose was split off — *the run that hits it should split the index rather
+ * than raise the number* — applied along the line these entries really grow on.
+ */
+export const SEARCH_NAMES_PATH = "/docs/search-index/names"
 
 /** How many results the dialog shows. Beyond this a reader types more instead. */
 export const SEARCH_RESULT_LIMIT = 10
@@ -272,3 +300,75 @@ export const withCode = (index: SearchIndex, code: SearchCode): SearchIndex => {
   return { entries: index.entries.map((entry) => ({ ...entry, code: blocks.get(entry.href) ?? entry.code })) }
 }
 
+
+/**
+ * The runtime's published surface, as the entry points that publish it.
+ *
+ * **An address is not written down here, it is built.** An export's page is
+ * decided by its entry point and its place on that page by its name, so an
+ * entry point and a list of names is everything there is to know — and the two
+ * functions that turn those into an address are the same two the reference
+ * pages use. Writing the address out per name instead cost 138 KB where this
+ * costs 20, because it was `/docs/api-reference/runtime#s-` written down a
+ * thousand times; and a file carrying its own copy of an address scheme is a
+ * second place for that scheme to be true.
+ */
+export type SearchNames = {
+  readonly entryPoints: readonly {
+    /** The import specifier, as a reader would type it. */
+    readonly specifier: string
+    /** Every name that entry point publishes, in the order the reference lists them. */
+    readonly names: readonly string[]
+  }[]
+}
+
+const isEntryPoint = (value: unknown): value is { specifier: string; names: string[] } =>
+  isRecord(value) &&
+  typeof value.specifier === "string" &&
+  Array.isArray(value.names) &&
+  value.names.every((name) => typeof name === "string")
+
+export const parseSearchNames = (value: unknown): SearchNames => {
+  if (!isRecord(value) || !Array.isArray(value.entryPoints)) {
+    throw new Error("loom: the search names have no entry points")
+  }
+
+  return { entryPoints: value.entryPoints.filter(isEntryPoint) }
+}
+
+/**
+ * A name, as the entry a result is shown from.
+ *
+ * Exported and used by the builder as well as by the browser, deliberately: the
+ * server's idea of what an export's entry looks like and the browser's idea of
+ * it have to be the same idea, and the cheapest way to guarantee that is for
+ * there to be only one. A second copy here would drift the first time an anchor
+ * scheme changed, and the symptom would be a search box whose every export
+ * result 404s — which nothing at build time would notice, because a link in an
+ * index is just a string.
+ */
+export const namesToEntries = (names: SearchNames): readonly SearchEntry[] =>
+  names.entryPoints.flatMap((entryPoint) =>
+    entryPoint.names.map((name) => ({
+      href: `/docs/api-reference/${apiSlugFor(entryPoint.specifier)}#${apiAnchorFor(name)}`,
+      title: name,
+      context: entryPoint.specifier,
+      kind: "export" as const,
+      summary: "",
+      body: "",
+      code: "",
+    }))
+  )
+
+/**
+ * The table of contents and the names, put together.
+ *
+ * The one fold of the four that **adds rows** rather than filling a field on
+ * one, which is why it is the one whose absence a reader can see: before it
+ * lands, a search for `planReverts` finds the pages that mention it and not the
+ * reference page that defines it. The box says so in as many words rather than
+ * implying the site has never heard of the name.
+ */
+export const withNames = (index: SearchIndex, names: SearchNames): SearchIndex => ({
+  entries: [...index.entries, ...namesToEntries(names)],
+})
