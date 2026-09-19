@@ -14,7 +14,7 @@ import { bandsOf } from "../outline"
 import { homePageTree } from "../pages/home"
 import { DEFAULT_THEME } from "../site"
 
-import { discloseTargetIn, DISCLOSING_TYPES, pressTargetIn } from "./aim"
+import { discloseTargetIn, pressTargetIn, UNDECLARED_DISCLOSING_TYPES } from "./aim"
 
 /**
  * Where a press lands, held against the page it is about and against pages built
@@ -129,7 +129,54 @@ describe("the thing a reader pressed", () => {
     const band = bandNamed(page, "Questions")
 
     expect(() => pressTargetIn(page, band.id, band.name)).toThrow(/pressed something/)
-    expect(DISCLOSING_TYPES).toContain(discloseTargetIn(page, band.id, band.name).at.type)
+    expect(UNDECLARED_DISCLOSING_TYPES).toContain(discloseTargetIn(page, band.id, band.name).at.type)
+  })
+
+  /**
+   * The same rule where the registry is the one answering.
+   *
+   * `loom.nav` renders a disclose control and says so, which the registry
+   * requires it to also declare interactive — so it is a target by every test
+   * this module runs except the one that matters. A browser files opening it as
+   * `disclosed` and never as `activated`, and so does this: the press goes to the
+   * link inside it.
+   */
+  it("passes over a control that opens a region, and takes the link inside it", () => {
+    const page = pageOf((ids) =>
+      section(ids, { eyebrow: "The bar" }, "The menu", [
+        buildElement(ids, {
+          type: "loom.nav",
+          props: { tone: "surface" },
+          children: [
+            buildElement(ids, {
+              type: "loom.link",
+              props: { href: "https://loom.example/docs", label: "Docs" },
+              children: [],
+            }),
+          ],
+        }),
+      ])
+    )
+    const band = bandNamed(page, "The bar")
+
+    expect(discloseTargetIn(page, band.id, band.name).at.type).toBe("loom.nav")
+    expect(pressTargetIn(page, band.id, band.name).at.type).toBe("loom.link")
+  })
+
+  /**
+   * A band that is itself a control does not answer for the press inside it.
+   *
+   * The front door's menu is a `loom.nav`, which is interactive — so a walk that
+   * started at the band rather than inside it would file every press in the bar
+   * against the bar, and the ancestry would lose the region entirely.
+   */
+  it("never answers with the band, even when the band is itself a control", () => {
+    const page = frontDoor()
+    const band = bandNamed(page, "The menu")
+    const aim = pressTargetIn(page, band.id, band.name)
+
+    expect(aim.at.nodeId).not.toBe(band.id)
+    expect(aim.within.map((address) => address.nodeId)).toEqual([band.id, page.root.id])
   })
 
   /**

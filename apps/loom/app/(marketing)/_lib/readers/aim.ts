@@ -110,24 +110,35 @@ const isTarget = (node: ElementNode): boolean => {
 }
 
 /**
- * The types on this site whose region a reader opens and closes.
+ * The types that disclose without declaring it, which is a list of exactly one
+ * and should be a list of none.
  *
- * **This one is written down, and it should not have to be.** A primitive can
- * declare that it renders a press target and `loom.action` and `loom.card` both
- * do; nothing in a registry says *a reader can open this*. The one primitive
- * that carries the site's disclosures is `loom.faq`, which is a native
- * `details` and so declares neither `interactive` nor the `disclose` behaviour —
- * a host asking its registry which of its primitives a reader can open is told
- * `loom.nav`, and misses the only one anybody actually opens.
+ * A primitive that renders a **disclose control** says so — the registry refuses
+ * the declaration otherwise — so *which of my primitives can a reader open* is
+ * answerable of `loom.nav` and of anything else built that way. It is not
+ * answerable of `loom.faq`, which is a native `details` and declares neither the
+ * behaviour nor `interactive`. So a host asking its registry that question is
+ * told about its menu and misses the only thing on the page anybody actually
+ * opens, which is the questions.
  *
- * Filed for `Loom primitives`. Until it is answerable it is one string with a
- * guard under it: `discloseTargetIn` throws when a band named as opened holds
- * none of these, so the day the front door's questions band stops being built
- * this way is a failed build rather than a silent zero.
+ * Filed for `Loom primitives`. Until it is answerable this is one string, and it
+ * is bounded below rather than trusted: `discloseTargetIn` throws when a band
+ * named as opened holds nothing that opens, so the day the questions band stops
+ * being built this way is a failed build rather than a silent zero.
  */
-export const DISCLOSING_TYPES: readonly string[] = ["loom.faq"]
+export const UNDECLARED_DISCLOSING_TYPES: readonly string[] = ["loom.faq"]
 
-const isDisclosure = (node: ElementNode): boolean => DISCLOSING_TYPES.includes(node.type)
+/**
+ * A control a reader opens rather than presses.
+ *
+ * The broadcaster keeps these out of `activated` — a disclose control reports as
+ * `disclosed` and nothing else — so a press target that was one would be minting
+ * the wrong kind against the right node. Most of the answer is the registry's;
+ * the rest is the list above.
+ */
+const isDisclosure = (node: ElementNode): boolean =>
+  UNDECLARED_DISCLOSING_TYPES.includes(node.type) ||
+  siteRegistry.behavioursFor(node.type).includes("disclose")
 
 const bandIn = (page: LoomTree, bandId: string): ElementNode => {
   const found = page.root.children.find(
