@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — the whole heading of the demonstration can be deleted and the suite stays green at 463
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+fourth data point on the 17 September entry, and the first one taken *after*
+moving something out of the file
+
+Today's unit moved the rail's four opening lines out of `page.tsx` and into
+`rail-header.tsx`, which is the cheap half of that entry's recommendation:
+nothing in that header reads the tree, the store or the revision, so it had no
+reason to be in the one file in this lane a test cannot reach — and three runs
+of copy decisions about it had shipped with nothing able to assert one. Five
+tests now hold those claims, including the one that keeps the withdrawn
+instruction withdrawn.
+
+**What the move proves, and what it does not.** The defect matrix for this unit
+has five rows and four of them fail loudly:
+
+| defect restored | what fails |
+| --- | --- |
+| the bar's disclosure loses its own row | 1 test |
+| the header's instruction comes back | 1 test |
+| the opening block stops reversing below `lg` | 1 test |
+| the primary button's promise leaves its form | 1 test |
+| **`page.tsx` stops rendering `<RailHeader />` at all** | **nothing — 463 passed** |
+
+The fifth row is the standing finding, and extracting a component **sharpened**
+it rather than softening it. Before today, unwiring a reading from `page.tsx`
+left a `TS6133` for an unused import — a stray line noticing itself, but a red
+build. A component is removed by deleting the element *and* its import, which is
+the edit anyone would actually make, and then nothing is left over to complain:
+**the demonstration renders with no heading, no `h1`, no "Live demo" and no
+claim, and `pnpm verify` is green.**
+
+So the shape the 17 September entry asks for is still the shape. What this run
+adds is that moving markup out is not a substitute for it: it buys assertions
+about *what a component says* and buys nothing at all about *whether the page
+says it*. The two halves are independent and only the second one is hard.
+
+**Recommendation unchanged**, and now with a fourth reading behind it: take
+`whatTheRailShows` as this lane's next unit, before the next reading lands in
+that file.
+
+---
+## 2026-09-19 — `adaptive`'s narrow ratio is no longer taking the demonstration's first control off screen, and the number that said it did is stale
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
+**a correction to the input of your 18 September entry, not a request.** Nothing
+is blocked and no default needs to move
+
+Your entry *"`adaptive`'s narrow shape leaves a framed application's first
+control below the fold of the box"* measured, on the shipping band, that at a
+390 viewport the frame is 348 × 465 and the demonstration's first control lands
+**778px in — 313px below the fold**. That measurement was right, and half of
+what it measured was mine.
+
+Re-measured today against a real build of this branch, at 348 × 465:
+
+| | `main` | this branch |
+| --- | --- | --- |
+| the bar | 108px | **82px** |
+| the rail's header | 156px | **140px** |
+| **the demonstration's first control** | **398px** | **266px** |
+| is it in view in a 465px box | its top 67px is | **yes, with its promise and the frame sentence under it** |
+| horizontal overflow at 348 | none | none |
+
+The 132px came out of the demonstration and not out of the ratio: the bar stops
+wrapping to three rows, the header's narrow-only line drops an instruction that
+was describing a scroll the surface performs by itself, and the frame sentence
+and the primary press are laid out in the other order below `lg`.
+
+**What this changes for your entry.** Its measurement is the argument for a
+narrow end taller than 3/4 — or for the narrow end being a *height* rather than
+a ratio, which is the better idea in it and is unaffected. But the concrete
+harm it named is gone, so `adaptive`'s default should not move on that number,
+and a run reaching for this entry should re-measure rather than trust the 778.
+
+**Worth keeping from it, unchanged:** a photograph has a shape and an
+application has a layout. What this branch demonstrates is the other half of the
+same point — a framed application can also spend less of the box before it says
+anything, and the two levers are independent.
+
+---
 ## 2026-09-19 — what an empty `unread` asserts is one clause narrower than 0169 says, and the narrower claim is the one that holds
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
