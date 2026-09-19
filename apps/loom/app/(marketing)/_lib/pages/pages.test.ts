@@ -9,6 +9,8 @@ import { ASKS } from "../adapt/asks"
 import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
+import { unhonoured } from "../frames"
+import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
@@ -45,7 +47,7 @@ const ORIGIN = "https://loom.example"
 const THEMES: readonly SiteThemeName[] = SITE_THEME_NAMES
 
 const rendered = (route: SiteRoute, theme: SiteThemeName) =>
-  renderTree(treeFor(route, { origin: ORIGIN, theme }))
+  renderTree(treeFor(route, { origin: ORIGIN, theme }), { origin: ORIGIN })
 
 const markupOf = (route: SiteRoute, theme: SiteThemeName): string =>
   renderToStaticMarkup(rendered(route, theme).element)
@@ -142,7 +144,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
 
   describe.each(THEMES)("wearing %s", (theme) => {
     it("renders with nothing the runtime could not honour", () => {
-      expect(rendered(route, theme).diagnostics).toEqual([])
+      expect(unhonoured(rendered(route, theme).diagnostics)).toEqual([])
     })
 
     it("resolves the theme its root names", () => {
@@ -361,9 +363,45 @@ describe("the way to the demonstration", () => {
     expect(hrefsIn(hero)).toContain(DEMO_HREF)
   })
 
+  /**
+   * The band that demonstrates points at the band that *is* the demonstration,
+   * and this asserts the two halves of that separately.
+   *
+   * It used to point at `/demo`, and the site pointing at the demonstration is
+   * exactly what §4d says it should stop doing. So the link is now a fragment on
+   * this same page, and a fragment link is the one shape that can be wrong while
+   * looking perfectly right: a band renamed on one side leaves a control that
+   * silently does nothing, and nothing else on the page would say so. Checking
+   * that some band *holds* the anchor is therefore the assertion that matters,
+   * not that the href was spelled.
+   */
   it("is offered by the band that demonstrates, which is where the typing is missing", () => {
     const band = bandOf(HOME, (found) => found.props["eyebrow"] === BAND.seeItHappen)
 
+    expect(hrefsIn(band).some((href) => href.endsWith(`#${YOUR_TURN_ANCHOR}`))).toBe(true)
+  })
+
+  it("lands on a band that is actually there to be landed on", () => {
+    const held = bandWith(
+      treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }).root,
+      (found) => found.props["anchor"] === YOUR_TURN_ANCHOR
+    )
+
+    expect(held).toHaveLength(1)
+  })
+
+  /**
+   * And the demonstration itself is on the page rather than linked from it —
+   * §4d's *embeds the demonstration rather than describing it*, which is the
+   * reason the demonstration is public at all (0056). The frame's `src` is the
+   * demonstration's own address, so the band is not a second copy of anything.
+   */
+  it("is framed by the band below it, rather than pointed at", () => {
+    const band = bandOf(HOME, (found) => found.props["eyebrow"] === BAND.inYourOwnWords)
+    const frames = bandWith(band, (found) => found.type === "loom.embed")
+
+    expect(frames).toHaveLength(1)
+    expect(frames[0]?.props["src"]).toBe(DEMO_HREF)
     expect(hrefsIn(band)).toContain(DEMO_HREF)
   })
 
@@ -549,7 +587,7 @@ describe("the band that says what this is for", () => {
  */
 describe("the record on the mechanism page", () => {
   const served = async (theme: SiteThemeName) =>
-    renderTree(await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme }))
+    renderTree(await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme }), { origin: ORIGIN })
 
   it("is on the page the route serves, whether or not the builder was given one", async () => {
     const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
@@ -588,7 +626,7 @@ describe("the record on the mechanism page", () => {
 
   describe.each(THEMES)("wearing %s", (theme) => {
     it("renders with nothing the runtime could not honour", async () => {
-      expect((await served(theme)).diagnostics).toEqual([])
+      expect(unhonoured((await served(theme)).diagnostics)).toEqual([])
     })
 
     it("names no colour of its own, anywhere below the root", async () => {

@@ -147,7 +147,17 @@ describe("broadcastReaderSignals", () => {
     broadcast?.flush()
 
     expect(batches.flatMap((batch) => batch.signals)).toEqual([
-      { kind: "disclosed", nodeId: "n_4", type: "loom.faq", open: true, at: 1_000 },
+      {
+        kind: "disclosed",
+        nodeId: "n_4",
+        type: "loom.faq",
+        open: true,
+        at: 1_000,
+        within: [
+          { nodeId: "n_2", type: "loom.section" },
+          { nodeId: "n_1", type: "loom.page" },
+        ],
+      },
     ])
   })
 
@@ -484,6 +494,127 @@ describe("broadcastReaderSignals", () => {
     broadcast?.flush()
 
     expect(kindsIn(batches)).toEqual(["activated:n_9"])
+  })
+
+  /**
+   * The half of a press that no consumer can reconstruct afterwards. A rollup
+   * reading a batch a week later has the node and the revision; which region the
+   * node was in is a fact about the page at the moment of the press, and only
+   * the browser that saw it can say.
+   */
+  describe("the regions a signal happened inside", () => {
+    const withinOf = (batches: readonly ReaderSignalBatch[]) =>
+      batches.flatMap((batch) => batch.signals).flatMap((signal) => ("within" in signal ? [signal.within] : []))
+
+    it("names every addressed ancestor, nearest first, up to and including the root", () => {
+      const batches = start()
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(withinOf(batches)).toEqual([
+        [
+          { nodeId: "n_2", type: "loom.section" },
+          { nodeId: "n_1", type: "loom.page" },
+        ],
+      ])
+    })
+
+    /**
+     * Off is a different answer from *nothing above it*, so the field is absent
+     * rather than empty — a consumer that saw `[]` would read a press at the top
+     * of the page.
+     */
+    it("says nothing at all when the host turned the walk off", () => {
+      const batches = start({ within: false })
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      const [signal] = batches.flatMap((batch) => batch.signals)
+      expect(signal).not.toHaveProperty("within")
+      expect(parseReaderSignalBatch(batches[0]).ok).toBe(true)
+    })
+
+    it("reports an empty ancestry for a press in the root itself, which is a claim and not a shrug", () => {
+      root.querySelector("#link-text")?.closest("section")?.replaceWith(
+        Object.assign(document.createElement("a"), { href: "/kit", id: "bare" })
+      )
+      const batches = start()
+
+      ;(document.getElementById("bare") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(withinOf(batches)).toEqual([[]])
+    })
+
+    /**
+     * `types` says which signals are sent. It does not narrow what a signal that
+     * is sent may say about where it was — a host asking only about cards still
+     * learns which section the card was in, because that is the question the
+     * ancestry exists to answer.
+     */
+    it("is not filtered by the types the host asked for", () => {
+      const batches = start({ types: { activated: ["loom.card"] } })
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["activated:n_3"])
+      expect(withinOf(batches)).toEqual([
+        [
+          { nodeId: "n_2", type: "loom.section" },
+          { nodeId: "n_1", type: "loom.page" },
+        ],
+      ])
+    })
+
+    /** An element carrying a node id with no readable type is markup to distrust, not a ceiling. */
+    it("steps over an ancestor whose address cannot be read", () => {
+      byId("n_2").removeAttribute("data-loom-type")
+      const batches = start()
+
+      ;(document.getElementById("link-text") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(withinOf(batches)).toEqual([[{ nodeId: "n_1", type: "loom.page" }]])
+    })
+
+    /**
+     * The band this press is in is the node the signal is already filed against,
+     * so the ancestry above it is what is left to say. It is the case that shows
+     * the two are different questions: the walk starts above the node, never at
+     * it, and a region is never credited with what happened to itself.
+     */
+    it("walks for a band that arrived after the broadcast started", async () => {
+      const batches = start()
+      appendBand("n_9")
+      await settle()
+
+      ;(document.getElementById("n_9-link") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["activated:n_9"])
+      expect(withinOf(batches)).toEqual([[{ nodeId: "n_1", type: "loom.page" }]])
+    })
+
+    it("walks for a disclosure the same way it walks for a press", () => {
+      const batches = start()
+      const menu = document.getElementById("menu") as HTMLElement
+
+      menu.setAttribute("data-loom-disclosed", "true")
+
+      return Promise.resolve().then(() => {
+        broadcast?.flush()
+
+        expect(withinOf(batches)).toEqual([
+          [
+            { nodeId: "n_2", type: "loom.section" },
+            { nodeId: "n_1", type: "loom.page" },
+          ],
+        ])
+      })
+    })
   })
 
   it("reads a page the render seam addressed", () => {

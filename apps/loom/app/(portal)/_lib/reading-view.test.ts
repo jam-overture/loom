@@ -35,6 +35,7 @@ const tally = (
   type: primitiveTypeSchema.parse(counts.type ?? "loom.card"),
   views: counts.views ?? 0,
   reached: counts.reached ?? 0,
+  engaged: counts.engaged ?? 0,
   dwellMs: counts.dwellMs ?? 0,
   activations: counts.activations ?? 0,
   opens: counts.opens ?? 0,

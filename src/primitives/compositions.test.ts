@@ -109,6 +109,17 @@ const typesIn = (node: LoomNode): readonly string[] => {
  * fourth is given one, and an anchor is the only prop in the library that a
  * node writes straight into the document as an `id`.
  */
+/**
+ * Every `href` in a subtree. Shared by the two tests below because they are two
+ * halves of one property — what a link points at, and whether it is there.
+ */
+const hrefsIn = (node: LoomNode): readonly string[] => {
+  if (node.kind === "text") return []
+  const here = node.kind === "element" && typeof node.props["href"] === "string" ? [node.props["href"]] : []
+
+  return [...here, ...node.children.flatMap(hrefsIn)]
+}
+
 const anchorsIn = (node: LoomNode): readonly string[] => {
   if (node.kind === "text") return []
   const anchor = node.kind === "element" ? (node.props as Record<string, unknown>)["anchor"] : undefined
@@ -145,8 +156,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers twenty-seven bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(27)
+  it("offers thirty bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(30)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -614,19 +625,97 @@ describe("what a band puts on a page", () => {
    * rather than a stylistic one: a starting composition is content a page may
    * publish before anyone re-reads it, and a live outbound link in it is a link
    * this library chose on a host's behalf.
+   *
+   * **The rule was `startsWith("/")` and that was wrong by one destination**,
+   * which is the thing this run found. `linkUrlSchema` gained the bare fragment
+   * on 14 September, closing a finding the maintainer filed from
+   * `prototypes/ski-apparel`: a page with a bar across the top could mark every
+   * one of its sections and link to none of them. The schema was fixed and
+   * **this assertion then forbade the catalogue from using it** — silently, and
+   * for four days, because nothing in the catalogue had tried.
+   *
+   * A fragment is not an exception being carved out of the reason above. It is
+   * the *strongest* case of it: a path reaches this origin, and `#pricing`
+   * reaches no origin at all — it is the one href that provably cannot leave
+   * the document. The test now says what it always meant.
    */
-  it("points every link and every action at this site", () => {
-    const hrefsIn = (node: LoomNode): readonly string[] => {
-      if (node.kind === "text") return []
-      const here = node.kind === "element" && typeof node.props["href"] === "string" ? [node.props["href"]] : []
-
-      return [...here, ...node.children.flatMap(hrefsIn)]
-    }
+  it("points every link and every action at this page, this site, or the reader's own client", () => {
+    const reachesNoOrigin = (href: string): boolean =>
+      href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")
 
     for (const composition of STARTER_COMPOSITIONS) {
       for (const href of hrefsIn(composition.build(sequentialIdFactory()))) {
-        expect(href.startsWith("/")).toBe(true)
+        expect(href.startsWith("/") || reachesNoOrigin(href), `${composition.id} links to ${href}`).toBe(true)
       }
+    }
+  })
+
+  /**
+   * And the rule that keeps the line above from widening into nothing.
+   *
+   * `mailto:` and `tel:` are allowed because they reach no origin, which is
+   * true of the *scheme* and says nothing about the address. An address is
+   * still a destination this library chose on a host's behalf, and a real one
+   * would have the catalogue handing strangers somebody's inbox.
+   *
+   * So every address the catalogue ships sits in a **reserved** namespace that
+   * provably resolves nowhere: `.example` for mail (RFC 2606) and the UK's
+   * reserved `+44 113 496 0000` drama range for telephone. It is the same
+   * mechanism `url.ts` uses one layer down for `https://loom.invalid`, and the
+   * same reason — *"a value that somehow escaped into a real request would fail
+   * rather than reach a host someone owns"* — with the added property that a
+   * reader can see it is a placeholder without being told.
+   */
+  it("addresses every mail and telephone link to a reserved placeholder", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      for (const href of hrefsIn(composition.build(sequentialIdFactory()))) {
+        if (href.startsWith("mailto:")) {
+          expect(href.endsWith(".example"), `${composition.id} mails a real domain: ${href}`).toBe(true)
+        }
+
+        if (href.startsWith("tel:")) {
+          expect(href.startsWith("tel:+44113496"), `${composition.id} dials a real number: ${href}`).toBe(true)
+        }
+      }
+    }
+  })
+
+  /**
+   * And the half a per-node schema is structurally unable to check.
+   *
+   * `url.ts` says so in the header of the fragment it accepts, and names the
+   * owner rather than faking it:
+   *
+   * > **It does not check that the anchor exists.** That is the same fact about
+   * > a tree rather than about a node that `anchor.ts` records for uniqueness,
+   * > and it belongs to whatever walks the whole tree. A schema that pretended
+   * > to enforce it would be enforcing nothing.
+   *
+   * The assembled page is a tree this lane owns, so this is that walk — the
+   * same argument, and the same place, as the anchor-uniqueness test above.
+   * Together they are a pair: that one refuses two bands answering to one name,
+   * this one refuses a name nothing answers to. A page can fail either while
+   * passing the other, and both failures are equally silent — a fragment
+   * naming nothing scrolls nowhere, reports nothing and renders perfectly.
+   *
+   * It is [0168](../../decisions/0168-a-band-links-into-the-page-it-is-assembled-into.md),
+   * and it is deliberately made of `PAGE_SEQUENCE` and not of `STARTER_COMPOSITIONS`.
+   * A band in isolation may legitimately name an anchor it does not itself
+   * carry — that is what a nav bar *is* — so the property is about the page, in
+   * exactly the sense 0162 made load-bearing. Checking it per band would demand
+   * that every band be its own page, which would rule out navigation entirely.
+   */
+  it("gives every fragment on the assembled page a band that answers to it", () => {
+    const ids = sequentialIdFactory()
+    const bands = PAGE_SEQUENCE.map((composition) => composition.build(ids))
+
+    const anchors = new Set(bands.flatMap(anchorsIn))
+    const fragments = bands.flatMap(hrefsIn).filter((href) => href.startsWith("#"))
+
+    expect(fragments.length, "no band on the page links into it").toBeGreaterThan(0)
+
+    for (const fragment of fragments) {
+      expect(anchors.has(fragment.slice(1)), `${fragment} names no band on this page`).toBe(true)
     }
   })
 

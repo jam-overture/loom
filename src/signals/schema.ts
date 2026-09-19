@@ -67,6 +67,12 @@ export const loomReaderTallies = pgTable(
     type: text("type").notNull(),
     views: bigint("views", { mode: "number" }).notNull(),
     reached: bigint("reached", { mode: "number" }).notNull(),
+    /**
+     * Added after the other counters, so it carries a default the others do not
+     * need: a deployment that created this table before the column existed has
+     * rows that predate the question, and `0` is the honest answer for them.
+     */
+    engaged: bigint("engaged", { mode: "number" }).notNull().default(0),
     dwellMs: bigint("dwell_ms", { mode: "number" }).notNull(),
     activations: bigint("activations", { mode: "number" }).notNull(),
     opens: bigint("opens", { mode: "number" }).notNull(),

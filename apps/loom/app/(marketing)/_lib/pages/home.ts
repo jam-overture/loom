@@ -18,6 +18,7 @@ import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
 import { asDataBand } from "./as-data"
+import { inYourOwnWordsBand } from "./in-your-own-words"
 import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
@@ -688,6 +689,24 @@ export const homePageTree = (context: PageContext): LoomTree => {
           ...(context.record === undefined ? {} : { record: context.record }),
           ...(context.undone === undefined ? {} : { undone: context.undone }),
         }),
+        /**
+         * The same claim with the training wheels off, directly under the band
+         * that has been apologising for them since 22 August.
+         *
+         * The band above runs five requests written in advance, because a text
+         * box on the most-loaded page the project has is a model call for every
+         * visitor. This one is the demonstration itself, framed — §4d's
+         * *embeds the demonstration rather than describing it*, which is the
+         * reason the demonstration is public at all (0056). It was built and
+         * withdrawn on 4 September over a sandbox that had no `allow-forms`;
+         * 0135 settled that on 12 September and this is the rebuild.
+         *
+         * Here rather than lower down because the likeliest person on this site
+         * to want a turn is the one who has just watched the sequence run, and
+         * because the frame loads lazily — a visitor who never scrolls this far
+         * never fetches it.
+         */
+        inYourOwnWordsBand(ids, { origin: context.origin, theme: context.theme }),
         problems(ids),
         /**
          * A rule rather than the diamond this band wants: `loom.divider`'s

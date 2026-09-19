@@ -53,6 +53,31 @@ export const activated = (name: string): ReaderSignal => ({
   at: 1_100,
 })
 
+/**
+ * A press, and the regions it happened inside — nearest first, which is the
+ * order a broadcaster walks in.
+ *
+ * Spelled out rather than spread onto `activated`, because the ancestry is the
+ * thing under test and a helper that hid it would let a test pass while the
+ * field was absent.
+ */
+export const activatedIn = (name: string, ...regions: readonly string[]): ReaderSignal => ({
+  kind: "activated",
+  nodeId: nodeId(name),
+  type: primitiveType("loom.button"),
+  at: 1_100,
+  within: regions.map((region) => ({ nodeId: nodeId(region), type: primitiveType("loom.section") })),
+})
+
+export const disclosedIn = (name: string, open: boolean, ...regions: readonly string[]): ReaderSignal => ({
+  kind: "disclosed",
+  nodeId: nodeId(name),
+  type: primitiveType("loom.faq"),
+  open,
+  at: 1_200,
+  within: regions.map((region) => ({ nodeId: nodeId(region), type: primitiveType("loom.section") })),
+})
+
 export const dwelled = (name: string, ms: number): ReaderSignal => ({
   kind: "dwelled",
   nodeId: nodeId(name),
@@ -67,6 +92,7 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   type: primitiveType("loom.section"),
   views: 1,
   reached: 1,
+  engaged: 0,
   dwellMs: 500,
   activations: 0,
   opens: 0,
@@ -319,6 +345,23 @@ export const describeReaderTallyStoreContract = (
       const [row] = unwrap(await store.tallies())
 
       expect(row).toMatchObject({ dwellMs: 750, activations: 3, views: 2, updatedAt: LATER })
+    })
+
+    /**
+     * The counter regions are reported by, held to the same rule as the rest.
+     * It is a view count, so adding windows over-counts a reader whose visit
+     * straddled a boundary — the same bound that already applies to `views` and
+     * `reached` (0147), and the reason a store must add rather than replace all
+     * the same.
+     */
+    it("adds the engaged views of a second window to the first", async () => {
+      const store = await make()
+      await store.apply({ tallies: [tally({ engaged: 2 })], funnels: [] }, AT)
+      await store.apply({ tallies: [tally({ engaged: 3 })], funnels: [] }, LATER)
+
+      const [row] = unwrap(await store.tallies())
+
+      expect(row).toMatchObject({ engaged: 5, updatedAt: LATER })
     })
 
     it("keeps revisions of the same node apart", async () => {

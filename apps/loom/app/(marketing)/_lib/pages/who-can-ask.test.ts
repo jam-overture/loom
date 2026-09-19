@@ -36,6 +36,7 @@ import {
 } from "../site"
 import { uses, wordsOf } from "../words"
 import { COMPARISON_ANCHOR, MARK, readingOf } from "./who-can-ask"
+import { unhonoured } from "../frames"
 
 /**
  * The page that shows the one input to a verdict which is not about the change.
@@ -442,7 +443,7 @@ describe("the page as it is served", () => {
   })
 
   it("renders with nothing the runtime could not honour", async () => {
-    expect(renderTree(await served()).diagnostics).toEqual([])
+    expect(unhonoured(renderTree(await served(), { origin: ORIGIN }).diagnostics)).toEqual([])
   })
 
   it.each(SITE_THEME_NAMES)("names no colour of its own under %s", async (theme) => {

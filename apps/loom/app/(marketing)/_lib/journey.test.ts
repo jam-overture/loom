@@ -27,7 +27,8 @@ const ORIGIN = "https://loom.example"
 
 const markupOf = async (route: SiteRoute): Promise<string> =>
   renderToStaticMarkup(
-    renderTree(await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })).element
+    renderTree(await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }), { origin: ORIGIN })
+      .element
   ).replaceAll("&#x27;", "'")
 
 /**

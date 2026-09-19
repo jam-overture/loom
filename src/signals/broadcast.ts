@@ -37,6 +37,13 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  * disclose control stamps. No primitive is instrumented, so no primitive can
  * forget to be.
  *
+ * **A press says which regions it was in.** A reader aims at a button, and a
+ * button is an addressed node of its own, so the node an `activated` names is
+ * the control rather than the band. The addressed elements above it go on the
+ * signal as `within`, read off the walk this was already doing — because which
+ * region a node sat in is a fact about the page at the moment of the press, and
+ * nothing downstream can recover it afterwards.
+ *
  * **It keeps up with a page that changes.** Nodes that arrive after it started
  * are watched and nodes that leave stop counting, so a band behind a Suspense
  * boundary, a list that grows, and every region a proposal has just changed are
@@ -145,6 +152,17 @@ export type ReaderSignalOptions = {
    * `IntersectionObserver` when absent; a test passes its own.
    */
   readonly observeVisibility?: ObserveVisibility
+  /**
+   * Whether a delegated signal carries the addressed nodes it happened inside.
+   * On when absent.
+   *
+   * `activated` and `disclosed` are filed against the control a reader aimed
+   * at, which is an addressed node of its own — so without the ancestry a
+   * deployment can report which button was pressed and never which region it
+   * was in. Off is for a host that reports on controls only and would rather
+   * not carry the walk in every batch.
+   */
+  readonly within?: boolean
   /** The clock. `Date.now` when absent. */
   readonly now?: () => number
   /**
@@ -236,6 +254,35 @@ const nearestAddressed = (root: Element, element: Element): Element | undefined 
   return found !== null && root.contains(found) ? found : undefined
 }
 
+/**
+ * The addressed elements above `element`, nearest first, stopping at the root.
+ *
+ * The same walk `nearestAddressed` already does, continued instead of stopped —
+ * so a press knows the card, the band and the page it was in rather than only
+ * the button, and nothing has to consult the tree afterwards to find out. The
+ * root itself is included when it is addressed, because a page whose root is a
+ * node is a region like any other.
+ *
+ * An element the walk cannot read an address off is skipped rather than ending
+ * the ancestry: `LOOM_NODE_ATTRIBUTE` without a readable type is markup this
+ * broadcaster does not trust, not a ceiling on what is above it.
+ */
+const ancestryOf = (root: Element, element: Element): readonly SignalAddress[] => {
+  const found: SignalAddress[] = []
+
+  for (
+    let above = element.parentElement;
+    above !== null && root.contains(above);
+    above = above.parentElement
+  ) {
+    const address = addressOf(above)
+    if (address !== undefined) found.push(address)
+    if (above === root) break
+  }
+
+  return found
+}
+
 /** A sink observes; it does not get a vote (0042). Neither a throw nor a rejection reaches the page. */
 const deliverSafely = (send: ReaderSignalOptions["send"], batch: ReaderSignalBatch): void => {
   if (send === undefined) return
@@ -285,12 +332,31 @@ export const broadcastReaderSignals = (
   const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
 
-  const record = (kind: ReaderSignalKind, signal: (address: SignalAddress) => ReaderSignal) =>
+  const walks = options.within ?? true
+
+  /**
+   * What a delegated signal says about where it happened, as the fragment its
+   * factory spreads.
+   *
+   * An empty object rather than `within: []` when the host turned the walk off,
+   * because an empty ancestry is a claim — *this node has no addressed
+   * ancestor* — and a broadcaster that was told not to look has not made it.
+   */
+  const ancestry = (target: Element): { readonly within?: readonly SignalAddress[] } =>
+    walks ? { within: ancestryOf(root, target) } : {}
+
+  const record = (
+    kind: ReaderSignalKind,
+    signal: (address: SignalAddress, within: { readonly within?: readonly SignalAddress[] }) => ReaderSignal
+  ) =>
     (element: Element): void => {
       const target = nearestAddressed(root, element)
-      const address = target === undefined ? undefined : addressOf(target)
+      if (target === undefined) return
+
+      const address = addressOf(target)
       if (address === undefined || !wants(kind, address.type)) return
-      ledger.noted(signal(address))
+
+      ledger.noted(signal(address, ancestry(target)))
     }
 
   const flush = (): void => {
@@ -405,7 +471,12 @@ export const broadcastReaderSignals = (
           }
         })
 
-  const onActivated = record("activated", (address) => ({ kind: "activated", ...address, at: now() }))
+  const onActivated = record("activated", (address, within) => ({
+    kind: "activated",
+    ...address,
+    at: now(),
+    ...within,
+  }))
 
   const onClick = (event: Event): void => {
     const control = event.target instanceof Element ? event.target.closest(TARGET_SELECTOR) : null
@@ -433,7 +504,13 @@ export const broadcastReaderSignals = (
     if (!(details instanceof HTMLDetailsElement)) return
     if (lastOpen.get(details) === details.open) return
     lastOpen.set(details, details.open)
-    record("disclosed", (address) => ({ kind: "disclosed", ...address, open: details.open, at: now() }))(details)
+    record("disclosed", (address, within) => ({
+      kind: "disclosed",
+      ...address,
+      open: details.open,
+      at: now(),
+      ...within,
+    }))(details)
   }
 
   const disclosures = new MutationObserver((mutations) => {
@@ -442,9 +519,13 @@ export const broadcastReaderSignals = (
       const open = mutation.target.getAttribute(DISCLOSED_ATTRIBUTE)
       const settled = open === "true" || open === "false"
       if (!settled || mutation.oldValue === null || mutation.oldValue === open) continue
-      record("disclosed", (address) => ({ kind: "disclosed", ...address, open: open === "true", at: now() }))(
-        mutation.target
-      )
+      record("disclosed", (address, within) => ({
+        kind: "disclosed",
+        ...address,
+        open: open === "true",
+        at: now(),
+        ...within,
+      }))(mutation.target)
     }
   })
 

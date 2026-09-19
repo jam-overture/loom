@@ -22,6 +22,7 @@ import {
 import { uses, wordsOf } from "../words"
 
 import { RECORD_BAND } from "./the-record"
+import { unhonoured } from "../frames"
 
 /**
  * The record page, in every state a visitor can reach it in.
@@ -66,11 +67,13 @@ const pageFor = async (changes: string, theme: SiteThemeName = DEFAULT_THEME): P
   pageTreeFor(THE_RECORD, { origin: ORIGIN, theme, changes: tokensOf(changes) })
 
 const markupFor = async (changes: string, theme: SiteThemeName = DEFAULT_THEME): Promise<string> =>
-  renderToStaticMarkup(renderTree(await pageFor(changes, theme)).element)
+  renderToStaticMarkup(renderTree(await pageFor(changes, theme), { origin: ORIGIN }).element)
 
 describe.each(Object.entries(STATES))("the record page, with %s", (_state, changes) => {
   it.each(SITE_THEME_NAMES)("renders in %s with nothing the runtime could not honour", async (theme) => {
-    expect(renderTree(await pageFor(changes, theme)).diagnostics).toEqual([])
+    expect(
+      unhonoured(renderTree(await pageFor(changes, theme), { origin: ORIGIN }).diagnostics)
+    ).toEqual([])
   })
 
   it("has exactly one first-level heading", async () => {
