@@ -4,6 +4,11 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-44-three-vocabularies`
 **Section:** §2 — Composition Runtime, at the interpretation seam; reaching §4d, §5 and §6
+**Pull request:** [#338](https://github.com/jam-overture/loom/pull/338) ·
+**Preview:** https://loom-git-framework-44-three-481666-jpizzolato36-6341s-projects.vercel.app
+— there is nothing to look at for this change beyond the figure below; it is a
+runtime seam whose only surface is the string sent to a model, and no page in
+the repository wires one of the three registries into an interpreter yet.
 
 ![five projections, two of which were sending](2026-09-19-framework-three-vocabularies.png)
 
@@ -214,6 +219,16 @@ instrument working: `(marketing)`'s parts guard (above), `(docs)`' generated API
 reference (regenerated with `pnpm --filter @loom/app docs:api`), and
 `(lessons)`' transcript recogniser, which noticed exercise E's fence had stopped
 compiling before any human could have.
+
+**One post-push failure, and it was mine rather than the code's.** The first
+push produced no Vercel preview: *"Git author jpizzo must have access to the
+project"*. The commit was authored from the session's own note giving the
+maintainer's email for identifying the user, which is precisely the trap
+`docs/routines.md` records under **Commit identity** and which seven runs hit
+before it was written down. Amended to
+`jonathanbravecredit <60827135+…@users.noreply.github.com>`, force-pushed to this
+branch, and the preview built. Eighth time; the rule is written and I did not
+read it until the status came back red.
 
 The live API smoke test ran and passed against a real model, so the assembled
 request is one a provider accepts.
