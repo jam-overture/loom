@@ -8,6 +8,7 @@ import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnattendedCard } from "@/app/(portal)/_components/unattended-card"
+import { UnreadablePages } from "@/app/(portal)/_components/unreadable-pages"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
@@ -19,6 +20,7 @@ import { unattendedIn, unattendedSummary } from "@/app/(portal)/_lib/unattended"
 import {
   inQueueOrder,
   sweepIsPartial,
+  unreadableIn,
   waitingChange,
   waitingSummary,
 } from "@/app/(portal)/_lib/waiting"
@@ -201,7 +203,20 @@ const PortalHome = async () => {
    * waiting" is an answer about the deployment or about part of it.
    */
   const sweep = {
-    unreadable: perPage.filter((holds) => !holds.ok).length,
+    /*
+     * The pages that could not be asked, named rather than counted.
+     *
+     * `perPage` is `trees.map`, so index `i` of one is the page at index `i` of
+     * the other — which is what makes this a pairing and not a second read. The
+     * count this used to be threw that alignment away at the moment it was
+     * free, and the notice below spent a fortnight telling readers to open a
+     * page it could have named.
+     *
+     * Paired by `unreadableIn` rather than here, because this file is one a
+     * test cannot reach and an off-by-one in it would name the wrong page in a
+     * warning without anything failing.
+     */
+    unreadable: unreadableIn(trees, perPage),
     complete: cursor === null,
   }
 
@@ -270,30 +285,61 @@ const PortalHome = async () => {
          */}
         {sweepIsPartial(sweep) && (
           <StateNotice tone="notice" title="This screen hasn't checked everything.">
-            {/*
-             * No link out of this paragraph, deliberately. The one thing to do
-             * about a partial sweep is to open the page you are worried about,
-             * and "Your pages →" is already in the strip at the foot of this
-             * screen — the caught-up state shipped that same destination twice,
-             * six lines apart, and it read as a mistake rather than as emphasis.
-             * A second copy of it inside a warning would read worse.
-             */}
             <p>
               What is listed below really is waiting for you. What is <em>not</em> listed is not a
-              promise that nothing else is — so if a page you are expecting is missing here, open it
-              from your pages and look at it directly rather than taking this screen&rsquo;s word
-              for it.
+              promise that nothing else is.
             </p>
+            {/*
+             * Two different gaps, said separately and only when each is real.
+             *
+             * They were one sentence, and it could only be written about the
+             * vaguer of the two: a page that could not be read is a specific
+             * page and one this screen has in hand, and a page beyond the
+             * listing's bound is a page nobody here can name. Merging them cost
+             * the first one its name — the reader was told to go and find a page
+             * the screen already knew.
+             */}
+            {sweep.unreadable.length > 0 && (
+              <>
+                <p>
+                  {sweep.unreadable.length === 1
+                    ? "One of your pages couldn't tell this screen what's waiting on it. It is named below — open it and look at it directly rather than taking this screen's word for it."
+                    : "Some of your pages couldn't tell this screen what's waiting on them. They are named below — open one and look at it directly rather than taking this screen's word for it."}
+                </p>
+                {/*
+                 * The pages themselves, on the surface of the warning that is
+                 * about them. Above the disclosure, because which page is
+                 * identity rather than technical detail — the 22 August rule —
+                 * and because the one move this notice asks for is impossible
+                 * without it.
+                 */}
+                <UnreadablePages pages={sweep.unreadable} names={names} />
+              </>
+            )}
+            {/*
+             * No link out of this one, deliberately. A page this screen never
+             * reached cannot be named, so the only destination is the list of
+             * every page — and "Your pages →" is already in the strip at the
+             * foot of this screen. The caught-up state shipped that same
+             * destination twice, six lines apart, and it read as a mistake
+             * rather than as emphasis.
+             */}
+            {!sweep.complete && (
+              <p>
+                This deployment also has more pages than this screen checks, so a page you are
+                expecting may simply not have been reached. Open it from your pages.
+              </p>
+            )}
             <TechnicalDetail summary="Why a queue over every page has a limit">
               <p>
                 Changes waiting for an answer are kept per page, and there is no way to ask for all
                 of them at once — so this screen lists your pages and then asks each one in turn. A
                 listing comes back a page at a time by design, and a page whose read fails is
-                counted rather than skipped.
+                named rather than skipped.
               </p>
               <p>
-                {sweep.unreadable > 0
-                  ? `${sweep.unreadable} of the pages this screen reached could not be read.`
+                {sweep.unreadable.length > 0
+                  ? `${sweep.unreadable.length} of the pages this screen reached could not be read.`
                   : "Every page this screen reached was read successfully."}{" "}
                 {sweep.complete
                   ? "It reached all of them."

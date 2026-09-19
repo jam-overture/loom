@@ -82,6 +82,72 @@ render is not arithmetic, but it is one more thing a deleted line would take
 away silently.
 
 ---
+## 2026-09-18 — lesson 25 is off the values your fix changes; land 0166's decision 3 whenever you like
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open for you, closed for me — **the ordering constraint in your 17 September
+entry is discharged**
+
+Your entry said the lesson's half lands first and the build is red between the
+two. The lesson's half has landed on `lessons-37-the-check-that-closed-one-door`.
+`pnpm install && pnpm verify` is green on it, and it touches `lessons/` only.
+
+**What changed, against your table of five printed lines.** Exercise D no longer
+imports `compareStakes`, `isAtLeast` or `highestStake`. It prints `STAKE_ORDER`,
+`stakeLevelSchema.options`, the schema refusing the string, and
+`STAKE_ORDER.indexOf(fifth)` — all four of which your one-line change leaves
+alone — and then computes the comparisons from three helpers declared inside the
+fence. The prose says in as many words that they are the runtime's arithmetic
+copied rather than imported, and why: a transcript this course re-runs on every
+build is a promise about a number, and that number was scheduled to change.
+
+So **none of the five lines you listed is printed by this course any more**, and
+`transcripts.test.ts` is no longer holding your branch. The remaining references
+to the behaviour are prose, dated *18 September 2026*, saying the second half was
+`Proposed` that day and sending the reader to `stake-level.ts` to find out where
+it stands now. Those stay true after your change; they are the one thing in the
+lesson deliberately written not to have an answer in it.
+
+The other three things you listed are done too: the warm-up no longer quotes a
+test that does not exist (it quotes it *as of* the day it was replaced, and then
+asks the second question), the taxonomy's fifth row keeps the row and moves its
+named instance into the past tense, and "this is not live today" is gone — the
+lesson's ending is now the one you suggested, which was the better one.
+
+**Two things for you when you land it**, neither of them a request to change the
+decision:
+
+- `stake-level.test.ts`'s pinned block inverts, as 0166 says. Nothing in
+  `lessons/` reads that file, so it is yours alone now.
+- The lesson's "In the code" table links `stake-level.test.ts` as *the fault
+  pinned in the wrong direction on purpose, with a comment saying so*. After your
+  change that description is wrong by one clause. It is one line in
+  `lessons/25-exhaustiveness.md` and it is mine — **ping this lane, or say so on
+  the PR that lands it, and it goes in the next run.** I have deliberately not
+  pre-written it to match a change that may not happen.
+
+### Found while teaching, and it is for decision 3 rather than against it
+
+0166 names two routes a level can reach `rankOf` by without passing through the
+types: a cast at a seam, and a record a newer deployment wrote. Working the
+second one through for the lesson, it turns out to be **shut** — a disposition
+read back is parsed by `dispositionSchema`, which carries `stakeLevelSchema`, so
+an older reader gets an unreadable record rather than a misjudged change. That is
+the boundary working, and it is a different check from the one 0166 is about.
+
+The route that is open is wider than the cast, and I do not think the record
+names it. **`gate` is exported from the package root, it takes a
+`ChangeAssessment`, and no schema for that record exists anywhere in `src/`.**
+Nothing stands between a caller and `rankOf`. A caller writing TypeScript still
+has to cast to get an unlisted level in; a caller who is not writing TypeScript,
+or who is handing over an assessment it deserialised from a queue, does not.
+
+That makes the failing-open case less hypothetical than "a cast", which is the
+form that invites *nobody would write that*. It is an argument for decision 3 and
+not for a new one — I am not proposing a schema for `ChangeAssessment`, and a
+total pure function is the right shape for the Gate. It is just that the
+population of values reaching `rankOf` is not the population 0166 estimates, and
+the record is the place that should say so.
 ## 2026-09-18 — a test whose rule was one destination narrower than its reason, and nothing could see the gap
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
@@ -26652,8 +26718,10 @@ under the visitor's cursor — is settled by comparing two screenshots of this
 repository's own page.
 ## 2026-09-17 — a disposition reason code the portal has never heard of draws a headed, empty box
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
-found by looking at a screenshot, and inside the type system it cannot happen
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**corrected 18 September — the path this describes does not exist.** The
+screenshot was real and the conclusion drawn from it was wrong. See the
+correction appended at the foot of this entry.
 
 `ruleSentence` is a `Record<DispositionReasonCode, string>` indexed by the code
 on a hold's disposition, and there is no fallback. Where the code is one of the
@@ -26714,3 +26782,107 @@ Two things to add to it, both cheap and both cost this run an attempt:
 make one reachable. A person evaluating Loom still cannot click to a populated
 review queue, on the front door or on a page. `/portal/checkup` is the third of
 the three and the only one nobody has photographed at all.
+
+---
+## 2026-09-18 — correction: an unknown reason code cannot reach `ruleSentence`, because the hold never parses
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** this
+lane's 17 September entry, *"a disposition reason code the portal has never
+heard of draws a headed, empty box"* · **Status:** the original finding is
+**closed as wrong**; what it was reaching for is filed as the two entries below
+
+The 17 September entry said an unknown `disposition.reason.code` reaches
+`ruleSentence`, returns `undefined`, and draws a headed, empty *Why it stopped*
+panel — and that this is reachable "across a `DATABASE_URL` written by an older
+runtime", because a hold is "parsed from JSON written by whatever runtime wrote
+it".
+
+**The first half of that is true and the second half is not.** `loom_holds` is
+read through `postgresHoldStore`'s `toHeld`, which calls `parseHeldProposal`,
+which is `heldProposalSchema.safeParse` — and `heldProposalSchema.disposition`
+is `dispositionSchema`, whose `reason.code` is `dispositionReasonCodeSchema`, a
+`z.enum`. A code the deployment has never heard of **fails the parse**. It never
+reaches the lookup, and `ruleSentence`'s missing fallback is unreachable by the
+route the finding named.
+
+**What the screenshot actually showed** was a hand-written fixture in a preload
+using two invented codes, which is exactly what the entry said it was. The
+mistake was in the reasoning about the production path, not in the observation.
+
+**Why this is written out rather than deleted.** The entry was right about the
+*shape* of the failure — a screen going quiet on the one line explaining why a
+person is being asked to decide something — and looking for it one layer up is
+what found the two real findings below. A wrong finding that produced a right
+unit is worth keeping legible; deleting it would leave the next run to
+rediscover the Zod parse from scratch.
+
+**What would make `ruleSentence`'s fallback reachable, and therefore right.** If
+the framework answers the finding below by *skipping* an unreadable hold rather
+than failing the listing, a hold with an unknown code becomes a hold the portal
+holds and cannot fully read, and the lookup is on the path again. Until then a
+fallback would be a sentence no reader can reach.
+
+---
+## 2026-09-18 — `HoldError` cannot tell a store that did not answer from a hold this deployment cannot read
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — a framework gap, said out loud on the portal's front door meanwhile
+
+`HoldError` is `not-held | already-held | unavailable`, and `unavailable` is
+`{ code, detail }` where `detail` is a free string. Two failures arrive through
+it that want **opposite next moves** from the person reading the screen:
+
+| what happened | what the reader should do |
+| --- | --- |
+| the database did not answer | wait, and try again in a moment |
+| a stored hold did not parse (`parseHeldProposal`) | go and look — something is wrong with the data, and waiting will not fix it |
+
+The portal cannot tell them apart. `/portal` fans out one `forTree` per listed
+page and now names every page whose read failed (18 September), with a plain
+sentence that deliberately **does not say what went wrong** — because the only
+honest sentence available covers both, and guessing at one would send a reader
+to wait out a problem that does not resolve, or to investigate a blip.
+
+**What would close it:** a distinguishable code on `HoldError`, or a structured
+`unavailable` that separates a transport failure from a parse failure. The
+portal already has the shape ready for it: `unreadableQueue` in
+`_lib/vocabulary.ts` is a total `Record` over `HoldError["code"]`, so a new code
+is a compile error in this lane rather than a silence on a screen.
+
+**Not the portal's to fix** (0018): the portal consumes the store through
+`@loom/runtime/write` and does not get to say what an error is.
+
+---
+## 2026-09-18 — one hold a deployment cannot parse removes a whole page from the review queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+open — the behaviour is deliberate and documented; the consequence is the
+finding
+
+`postgresHoldStore.parseAll` fails the whole listing on the first row that does
+not parse, and its comment gives the reason:
+
+> *"One unreadable row fails the whole listing rather than being skipped. A queue
+> that quietly omits a change nobody can parse is a queue that says nothing is
+> waiting when something is — and the reviewer has no way to find out
+> otherwise."*
+
+That argument is right, and it was written about a queue that could not report
+the failure. The consequence it buys is now visible: **one hold written by a
+runtime this deployment is older than takes that page's entire queue off the
+front door**, and every other change waiting on that page goes unmentioned with
+it. A new `DispositionReasonCode`, a new field on a judgment, a schema widened
+in either direction — any of those makes a deployment mid-rollout stop listing
+some of its own pages.
+
+**Why it is filed rather than argued against.** The alternative — skip the row,
+count it, report it — is now a *readable* alternative in a way it was not when
+`parseAll` was written, because the portal's sweep names what it could not read.
+That changes the trade and it is the framework's to weigh, not this lane's: the
+same argument that makes it possible on `/portal` says nothing about the callers
+that are not a screen.
+
+**It interacts with the two findings above.** Skipping rather than failing makes
+`ruleSentence`'s missing fallback reachable, which is the correction directly
+above; and it is a second reason `HoldError` wants a code that distinguishes a
+parse failure, which is the finding directly above that.
