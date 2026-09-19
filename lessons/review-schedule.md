@@ -1187,8 +1187,8 @@ not.
 
 Interleaved with 03, 05, 09, 15, 16, 18 and 24. Heavy on 18, because that lesson
 and this one are the same defect met from its two sides; and heavy on 09, because
-the consequence the lesson's fourth exercise prints is a rung of the ladder going
-silent while behaving exactly as designed.
+the consequence the lesson's fourth exercise computes is a rung of the ladder
+going silent while behaving exactly as designed.
 
 1. Name the three questions you can ask about a closed set. Say which one a
    compiler answers, give the reason it cannot answer the second in terms of what
@@ -1207,9 +1207,9 @@ silent while behaving exactly as designed.
    a test against a second hand-written copy; a `Record<Union, true>` in a test
    file. *(25)*
 5. Trace `STAKE_ORDER.indexOf(level)` returning `-1` through `compareStakes`,
-   `isAtLeast` and `highestStake`, and say what the Gate does with a change
-   carrying that level — naming the two rungs involved and what each returns, and
-   why `null` from a rung is not the same as a rung deciding. *(09, 25)*
+   `isAtLeast` and `highestStake`, and say what that arithmetic makes of a change
+   carrying such a level — naming the two rungs involved and what each returns,
+   and why `null` from a rung is not the same as a rung deciding. *(09, 25)*
 6. Nothing in the runtime throws, and every refusal is a member of a closed set.
    Say what that buys an audit trail, then say which of this lesson's three
    questions the audit trail depends on being true and which of them anything
@@ -1222,9 +1222,15 @@ silent while behaving exactly as designed.
    Say why that list exists at all given that the number is not expected to
    change, what checks it today, and what would have to be true for the check to
    be worth less than it looks. *(03, 25)*
+9. `STAKE_ORDER` is now checked at its declaration, by the compiler, in the file
+   it is written in — which is the strongest mechanism this lesson has. Name the
+   route to that `-1` the check closed, name one route it did not, say why no
+   check of that kind could have closed it, and then give the general rule in one
+   sentence. *(25)*
 
-Question 4 is the point of the set — it is the one that transfers to code that
-has nothing to do with Loom. Question 3 is where a confident half-answer is most
+Questions 4 and 9 are the point of the set — between them they are what
+transfers to code that has nothing to do with Loom, and 9 is the one where the
+tidy answer is the wrong one. Question 3 is where a confident half-answer is most
 likely: an answer that gives the two numbers and not the asymmetry underneath
 them has memorised the result rather than the rule.
 
