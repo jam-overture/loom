@@ -8,9 +8,11 @@ annotation and a `satisfies` clause both fail at it; explain why a type and a
 schema describing one shape must have one of them derived from the other, and say
 which direction of drift is loud and which is silent and precisely why; read a
 completeness check and judge how strong it is by asking what its second source is
-— including the case where the second source is a third copy; and say what it
+— including the case where the second source is a third copy; say what it
 costs a project that the strongest check in its repository and the weakest one
-both look, at the call site, like a list of strings.
+both look, at the call site, like a list of strings; and name the door a
+completeness check closes and the two it cannot, using a fault in this runtime
+that survived being fixed.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md),
@@ -72,8 +74,10 @@ have not retrieved.
 
 ## Predict
 
-**In writing, before reading on.** Four questions. Question 3 is the one to rate
-your confidence on, and it is the lesson.
+**In writing, before reading on.** Four questions, the last of them in two
+halves. Question 3 is one of the two to rate your confidence on, and it is the
+lesson; question 4's second half is the other, and it is what the lesson turned
+out to be about once the repository read it.
 
 1. Persistence can refuse five ways; the type is a union of five string literals.
    The documentation site has to show a host a table with a row per way. **Write
@@ -102,7 +106,7 @@ your confidence on, and it is the lesson.
    many errors?** Write both numbers, **rate your confidence 1–5**, and write one
    sentence saying why the two numbers are what you say they are.
 
-4. A test in this repository reads, in full:
+4. Until 17 September 2026 a test in this repository read, in full:
 
    ```ts
    expect(STAKE_ORDER).toEqual(["low", "medium", "high", "critical"])
@@ -113,7 +117,14 @@ your confidence on, and it is the lesson.
    a change to this repository that would break the test, and a change that would
    not break it and should.
 
-Do not read on until all four are written. Question 3's two numbers are the pair
+   Then the half that is this lesson's second act, and the one to rate. That
+   test is gone, and `STAKE_ORDER` is now checked by the strongest mechanism
+   this lesson has to offer: the compiler, at the declaration, in the file the
+   list is written in. **Name a value that can still reach the Gate's stake
+   arithmetic carrying a level that array does not contain — or say that none
+   can.** Rate your confidence 1–5.
+
+Do not read on until all four are written, the last of them twice. Question 3's two numbers are the pair
 to leave exactly as you wrote them: the interesting result is not getting one of
 them wrong, it is having expected them to be the same kind of number.
 
@@ -409,29 +420,111 @@ predict before you run it:
 | nothing at all | **nothing** | **nothing** |
 
 The fifth row is the one to sit with, because it is the row that looks like the
-fourth. `stake-level.test.ts` asserts that `STAKE_ORDER` equals
-`["low", "medium", "high", "critical"]` — a green test, in the right file, named
-after the right thing. It compares a copy with a copy. Add a fifth level to
-`stakeLevelSchema` and the test goes on passing, because the test was never
+fourth. Until 17 September 2026 `stake-level.test.ts` asserted that `STAKE_ORDER`
+equals `["low", "medium", "high", "critical"]` — a green test, in the right file,
+named after the right thing. It compared a copy with a copy. Add a fifth level to
+`stakeLevelSchema` and the test went on passing, because the test was never
 looking at the schema. **A test that restates the value it is testing is not a
 check; it is a second copy with a tick beside it.**
 
-And the consequence is not cosmetic, which exercise D is for. `rankOf` is
-`STAKE_ORDER.indexOf(level)`, and `indexOf` answers `-1` for a level the array does
-not contain. A level that is not in the list does not rank above `critical` and
-does not rank below `low`: it ranks *beneath the bottom*, at -1, and every
-comparison in the Gate is built on that number. `isAtLeast(fifth, "critical")` is
-false, so `rejectAtRefusalFloor` returns `null` and says nothing.
-`isAbove(fifth, ceiling)` is false, so `confirmAboveCeiling` says nothing.
-`highestStake` folds with `isAbove` from a `"low"` seed, so a factor at the new
-level is not even carried out of the analysis. The most severe change the system
-can describe would be applied without being mentioned.
+That is in the past tense because this lesson was written down and the runtime
+lane read it. `STAKE_ORDER` now goes through `everyMemberOf`, and the test that
+sat beside it is held against `stakeLevelSchema.options` instead of against a
+third copy — so the list is in row 2 and row 4 at once, which is the strongest
+pairing anything in this repository has. Bottom of the table to the top, in a
+diff of four lines.
 
-This is not live today — `stakeLevelSchema` has four members and refuses a fifth
-at the boundary, which is exercise D's last line and is the reason this is a
-lesson rather than an incident. It is one line of schema away, and the line that
-would introduce it is the line somebody writes when they are adding a feature and
-thinking about something else entirely.
+Which would be a tidy place to stop, and is the wrong place to stop, because the
+thing the fifth row was an example *of* is still there. That is the next section
+and it is the more useful half.
+
+### What a completeness check closes, and what it leaves
+
+Follow the consequence all the way down first, because it is not cosmetic.
+`rankOf` is `STAKE_ORDER.indexOf(level)`, and `indexOf` answers `-1` for a level
+the array does not contain. A level that is not in the list does not rank above
+`critical` and does not rank below `low`: it ranks *beneath the bottom*, at -1,
+and every comparison in the Gate is built on that number.
+`isAtLeast(level, "critical")` is false, so `rejectAtRefusalFloor` returns `null`
+and says nothing. `isAbove(level, ceiling)` is false, so `confirmAboveCeiling`
+says nothing. `highestStake` folds with `isAbove` from a `"low"` seed, so a factor
+at the new level is not even carried out of the analysis.
+
+Measured end to end on this checkout on 18 September 2026, under
+`defaultGatePolicy`, whose `refusalFloor` is `critical`:
+
+| the stakes level on the assessment | what the Gate decides |
+| --- | --- |
+| `critical` | **rejected** — `stakes-at-refusal-floor` |
+| a level the order cannot place | **accepted** — `within-policy` |
+
+The most severe change the system can describe is applied without being
+mentioned, by seven rungs each behaving exactly as written.
+
+Now ask what the completeness check did about that.
+
+**It closed one door.** The route the finding was written about — somebody adds a
+fifth member to `stakeLevelSchema` while thinking about a feature, every `switch`
+in the runtime demands to be updated and gets updated, and `STAKE_ORDER` is the
+one thing that does not complain because it is a value — is now an arity error in
+`stake-level.ts`, which is the file that would be wrong. That is what row 2 buys
+and it is worth having.
+
+It is also the whole of what row 2 *can* buy, and the reason is written in the
+row's own description: **the compiler, at the declaration.** A check at a
+declaration protects values that arrive by being declared. At least two routes do
+not:
+
+- **A cast at a seam.** `"catastrophic" as StakeLevel` compiles, today, in this
+  repository, and exercise D does exactly that. A cast is not a bad habit somebody
+  will grow out of; it is what gets written at the edge of a system where a value
+  was checked by something other than the compiler. And it is not the only door of
+  its kind: `gate` is exported from the package root, it takes a
+  `ChangeAssessment`, and there is no schema for that record anywhere — so a host
+  that computes its own stakes, or hands over an assessment it deserialised, meets
+  `rankOf` with nothing between them. A caller writing TypeScript still has to
+  cast; a caller who is not, or who parsed the thing off a queue, does not.
+- **Two copies of the scale in two processes.** A disposition carries its stakes
+  level and is stored to be read back a year later (lesson 16). Widen the scale,
+  deploy the writer, and the reader is a process compiled against four levels
+  meeting a record that names five. This door is shut, and it is worth being
+  precise about what shut it: `dispositionSchema` refuses a level
+  `stakeLevelSchema` does not know, so what the reader gets is not a misjudged
+  change but an unreadable record — lesson 26's `unreadable`, arriving where a
+  reading has to say which nothing it is. A *different* check shut it. Not this
+  one, and not one in the same file.
+
+So the fault survived being fixed. Not because the fix was wrong — it is the best
+available answer to the question it was asked, and the question was *how does this
+list go stale*. The fault was never in the list. It is `indexOf` answering a number
+that means **not here** on a scale where every number means **how bad**, and a
+completeness check has no opinion about that whatsoever.
+
+**The general version, which is the thing to carry out of this lesson into code
+that has nothing to do with Loom:** a check is bounded by the population of values
+that pass through the place it runs, and that population is almost never *every
+value that reaches this function*. When you add a check, write down which door you
+just closed and how many doors there are — because **a remedy that closes the
+route you happened to find the fault by is not a remedy for the fault.**
+
+Closing the rest of it costs one line: `rankOf` answering `STAKE_ORDER.length`
+rather than `-1`, so a level the scale cannot place ranks above every level it
+can, and is refused where `critical` is refused.
+[0166](../decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md)
+records that as **Proposed**, and the reason it is not `Accepted` is this lesson.
+The course compiles every Try it section and runs it against `src/` on every
+build, so a transcript here is a promise about what the runtime prints — and
+exercise D used to make that promise about five numbers the fix changes, which
+turned a one-line runtime fix into a red build for four surfaces. So the exercise
+below has been taken off those five numbers on purpose, and says so where it does
+it.
+
+Everything this lesson says about that arithmetic is therefore dated rather than
+current: the table above was measured on 18 September 2026 and the line was
+`Proposed` that day. What the lesson will not do is tell you where it stands
+now. **Go and read [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts)
+and the block at the bottom of its test.** Thirty seconds, and it is the only
+question in this lesson whose answer is not in this lesson.
 
 ### The third question, which nothing answers
 
@@ -489,23 +582,28 @@ it was asked — and is asked a narrower question than the one in your head.
 | Nine ways a command refuses | [`src/cli/plan.ts`](../src/cli/plan.ts) |
 | The policy's knobs, stated once and derived | [`src/runtime/policy.ts`](../src/runtime/policy.ts) |
 | The ranking that `indexOf` is built on | [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts) |
+| The fault pinned in the wrong direction on purpose, with a comment saying so | [`src/runtime/stake-level.test.ts`](../src/runtime/stake-level.test.ts) |
 | A completeness check written as a `Record` in a test | [`src/runtime/pipeline.test.ts`](../src/runtime/pipeline.test.ts) |
 | A list that is a schema's own options | [`src/theme/theme.ts`](../src/theme/theme.ts) |
-| The record | [`0132`](../decisions/0132-a-type-that-mirrors-a-schema-is-derived-from-it.md) |
+| The records | [`0132`](../decisions/0132-a-type-that-mirrors-a-schema-is-derived-from-it.md), [`0166`](../decisions/0166-a-level-the-scale-cannot-place-is-the-heaviest-one.md) |
 
-The two rules a reader of this runtime can carry away and apply on Monday:
+The three rules a reader of this runtime can carry away and apply on Monday:
 
 - **If the union has a schema, publish `schema.options` and stop.**
 - **If it does not, the list is a claim, and a claim goes through
   `everyMemberOf` so that making it wrong is a build failure rather than a habit.**
+- **Then say out loud which values your check does not see**, because that
+  sentence is the difference between having fixed the fault and having closed the
+  door you came in through.
 
 ---
 
 ## Try it
 
 Six exercises. **Predict every output in writing, then run.** Exercises C and D
-are the ones this lesson is really about, and D's last two lines are where a
-confident prediction is most likely to be confidently wrong.
+are the ones this lesson is really about. C is where a confident prediction is
+most likely to be confidently wrong, and it is wrong in a way the printout will
+not tell you about.
 
 Put each snippet into `src/scratch.test.ts` and run
 
@@ -522,14 +620,7 @@ import { everyMemberOf } from "./closed-set.js"
 import { sequentialIdFactory, type ProposalId, type TreeId } from "./ids.js"
 import { COMPOSITION_OUTCOME_KINDS } from "./runtime/pipeline.js"
 import { defaultGatePolicy, gatePolicySchema } from "./runtime/policy.js"
-import {
-  compareStakes,
-  highestStake,
-  isAtLeast,
-  STAKE_ORDER,
-  stakeLevelSchema,
-  type StakeLevel,
-} from "./runtime/stake-level.js"
+import { STAKE_ORDER, stakeLevelSchema, type StakeLevel } from "./runtime/stake-level.js"
 import {
   describeStoreError,
   memoryTreeStore,
@@ -742,29 +833,39 @@ everything available to contradict it, which is the least informative true
 sentence in this lesson. What the exercise is actually measuring is the third
 column, and the third column is about *what could go wrong tomorrow*.
 
-Three rows say **agrees with the schema** and they are not equally safe. The
-first two are checked by a real test in the runtime — `delta.test.ts` and
-`event.test.ts` each recompute the list from `schema.options` and assert.
-`STAKE_ORDER` looks identical here and has no such test: the comparison you are
-reading was made by this exercise, for the first time, just now.
+Three rows say **agrees with the schema** and they are not equally safe.
+`TREE_OPERATIONS` and `TELEMETRY_EVENT_TYPES` are bare literals with a real test
+behind them — `delta.test.ts` and `event.test.ts` each recompute the list from
+`schema.options` and assert, which is row 4. `STAKE_ORDER` prints the same line
+and is not in the same row: it is checked at its declaration *and* tested against
+the schema, rows 2 and 4 together.
 
 Three rows say **no schema to ask**, and they are the ones where the answer comes
-from how the list was written rather than from anything you can print.
-`STORE_ERROR_CODES` goes through `everyMemberOf`, so its check ran at compile
-time and left no trace here. `COMPOSITION_OUTCOME_KINDS` is held against an
-exhaustive `Record` in its test file, which is a compile-time check standing in a
-run-time place. `UNJUDGED_REASONS` has neither, and looks from this output
-exactly like the other two.
+from how the list was written rather than from anything you can print. Two of
+them — `STORE_ERROR_CODES` and `UNJUDGED_REASONS` — go through `everyMemberOf`,
+so their check ran at compile time and left no trace here.
+`COMPOSITION_OUTCOME_KINDS` is held against an exhaustive `Record` in its test
+file, which is a compile-time check standing in a run-time place. Three lines,
+identical in every column, two mechanisms.
 
-That is the lesson's hardest practical point, printed: **three different strengths
-of guarantee, and from the outside they are the same three strings.**
+That is the lesson's hardest practical point, printed: **the strength of a
+completeness check is invisible in its output.**
+
+And this exercise can now prove that rather than assert it, which is worth more
+than the point itself. On 15 September, when this lesson was written, two of these
+seven rows were unchecked by anything: `STAKE_ORDER` was row 5, a test against a
+third hand-written copy, and `UNJUDGED_REASONS` was row 6, nothing at all. Both
+were fixed on 17 September. **Neither of the two lines they print changed.** Run
+the exercise on either checkout and the output is the same seven lines — before
+and after a fix to two of them, with no way to tell from here which two.
 
 ### Exercise D — the rank of a level nobody listed
 
-`STAKE_ORDER` is the array every stake comparison in the Gate is built on. This
-exercise asks it about a level that is not in it. Predict every line. For the last
-three, write down what you think each one *should* be before you write what you
-think it *will* be, and notice if those differ.
+`STAKE_ORDER` is the array every stake comparison in the Gate is built on, and
+since 17 September it is checked at its declaration. This exercise hands it a
+level it does not name. Predict every line. For the last four, write down what you
+think each one *should* be before you write what you think it *will* be, and
+notice if those differ.
 
 ```ts
 describe("D", () => {
@@ -774,13 +875,19 @@ describe("D", () => {
 
     const fifth = "catastrophic" as StakeLevel
 
+    console.log("the schema refuses the string:", !stakeLevelSchema.safeParse("catastrophic").success)
     console.log("indexOf:", STAKE_ORDER.indexOf(fifth))
-    console.log("compareStakes(fifth, critical):", compareStakes(fifth, "critical"))
-    console.log("compareStakes(fifth, low):", compareStakes(fifth, "low"))
-    console.log("isAtLeast(fifth, critical):", isAtLeast(fifth, "critical"))
-    console.log("isAtLeast(fifth, low):", isAtLeast(fifth, "low"))
-    console.log("highestStake([low, fifth]):", highestStake(["low", fifth]))
-    console.log("today, the schema refuses it:", !stakeLevelSchema.safeParse("catastrophic").success)
+
+    const rankOf = (level: StakeLevel): number => STAKE_ORDER.indexOf(level)
+    const compare = (left: StakeLevel, right: StakeLevel): number => rankOf(left) - rankOf(right)
+    const highest = (levels: readonly StakeLevel[]): StakeLevel =>
+      levels.reduce<StakeLevel>((top, level) => (compare(level, top) > 0 ? level : top), "low")
+
+    console.log("compare(fifth, critical):", compare(fifth, "critical"))
+    console.log("compare(fifth, low):", compare(fifth, "low"))
+    console.log("at least critical:", compare(fifth, "critical") >= 0)
+    console.log("at least low:", compare(fifth, "low") >= 0)
+    console.log("highest([low, fifth]):", highest(["low", fifth]))
   })
 })
 ```
@@ -788,38 +895,54 @@ describe("D", () => {
 ```
 the order:  ["low","medium","high","critical"]
 the schema: ["low","medium","high","critical"]
+the schema refuses the string: true
 indexOf: -1
-compareStakes(fifth, critical): -4
-compareStakes(fifth, low): -1
-isAtLeast(fifth, critical): false
-isAtLeast(fifth, low): false
-highestStake([low, fifth]): low
-today, the schema refuses it: true
+compare(fifth, critical): -4
+compare(fifth, low): -1
+at least critical: false
+at least low: false
+highest([low, fifth]): low
 ```
 
-The cast is standing in for a day, not for a mistake. Nobody writes
-`"catastrophic" as StakeLevel`; what somebody writes is a fifth member into
-`stakeLevelSchema`, because the four-level scale turned out to need a rung above
-`critical`, and the type widens by itself and every `switch` in the runtime
-demands to be updated and gets updated. `STAKE_ORDER` is the one thing that does
-not complain, because it is a value.
+**Those three helpers are `stake-level.ts`'s own arithmetic, copied into the
+exercise rather than imported.** It is the only place in this course where a
+lesson reimplements the thing it is teaching, and it is deliberate: the list they
+rank against is the live one, and the runtime's copy of the arithmetic is one
+line from changing. A transcript this course re-runs on every build is a promise
+about a number, and these are the only numbers in the course nobody is in a
+position to promise. The section above says which line, and where to go and read
+whether it has been written yet.
 
-`isAtLeast(fifth, "low")` is `false` is the line to stare at. A level meant to be
-the most severe the system has is, by the only arithmetic the Gate has, below the
-least severe. `rejectAtRefusalFloor` asks `isAtLeast(level, refusalFloor)` and
-returns `null` when the answer is false — `null` being a rung with nothing to say,
-from lesson 09. `confirmAboveCeiling` asks `isAbove` and gets the same silence. The
-one change nobody wanted applied without asking would be applied without asking,
-and the ladder would be behaving exactly as designed while it happened.
+`at least low: false` is the line to stare at. A level meant to be the most severe
+the system has is, by this arithmetic, below the least severe. Trace it up lesson
+09's ladder: `rejectAtRefusalFloor` asks `isAtLeast(level, refusalFloor)` and
+returns `null` when the answer is false — `null` being a rung with nothing to say.
+`confirmAboveCeiling` asks `isAbove` and gets the same silence. Two rungs decline,
+the ladder runs out, and the change comes out `accepted / within-policy` — which
+is the pair in the table two sections up, measured rather than reasoned. The one
+change
+nobody wanted applied without asking is applied without asking, and every rung
+behaved exactly as designed while it happened.
 
-`highestStake` is worse in a quieter way: it folds from a `"low"` seed using
-`isAbove`, so the new level never wins and never reaches the Gate at all. The
-verdict would not be wrong about a critical change. It would be right about a
-change it had never been told the severity of.
+The fold is worse in a quieter way. `highest` seeds at `"low"` and keeps a level
+only when it compares *above* the incumbent, so the new level never wins and never
+leaves the analysis. The verdict would not be wrong about a critical change; it
+would be right about a change whose severity it was never told.
 
-The last line is why this is a lesson rather than an incident report. The schema
-refuses `"catastrophic"` today, so nothing can get in at the boundary, and this
-whole paragraph is a description of one line of future source.
+And now the cast, which is the objection to this whole exercise and is worth
+answering rather than waving at. Nobody writes `"catastrophic" as StakeLevel` on
+purpose. Until 17 September it did not need defending, because it stood in for
+something nobody would have to write: a fifth member added to `stakeLevelSchema`
+by somebody thinking about a feature, after which the type widens by itself, every
+`switch` in the runtime demands to be updated and gets updated, and `STAKE_ORDER`
+is the one thing that does not complain because it is a value.
+
+That is the door `everyMemberOf` shut. What the cast stands in for now is
+narrower and does not go away: a level that reached this arithmetic having been
+checked by something other than the compiler, which the section above lists the
+open routes to. The schema still refuses the string at the boundary — that is the
+third line of the transcript, and it is why this is a lesson rather than an
+incident report — but a boundary only checks what crosses it.
 
 ### Exercise E — the third question
 
@@ -1060,8 +1183,10 @@ answer, then check.**
 5. `STAKE_ORDER.indexOf(level)` returns `-1` for a level that is not listed. Trace
    that `-1` through `compareStakes`, `isAtLeast` and `highestStake`, and say what
    the Gate does about a change carrying that level — naming the two rungs
-   involved and what each returns. Then say why the whole scenario is currently
-   impossible and what one line would make it possible.
+   involved and what each returns. Then: `STAKE_ORDER` is now checked at its
+   declaration by the strongest mechanism in this lesson. Say which route to that
+   `-1` the check closed, name one it did not, and say why no check of that kind
+   could have.
 6. Why is publishing `schema.options` stronger than any check in this lesson,
    rather than merely more convenient? Answer in terms of statements rather than
    in terms of Zod, and then say what stops `StoreErrorCode` from being published
@@ -1071,8 +1196,10 @@ answer, then check.**
    Then say what this has in common with the thing lesson 24 said about `copy` and
    `role` being read by nothing in the runtime.
 
-Question 4 is this lesson's question. Question 3 is where a half-answer reads as
-a full one: if yours does not distinguish *the value has more than the type
+Question 4 is this lesson's question and question 5 is its second act — if your
+answer to 5 is *the check closed it, there is no route left*, you have given the
+answer the fix looked like it gave, which is the one worth having been wrong
+about. Question 3 is where a half-answer reads as a full one: if yours does not distinguish *the value has more than the type
 requires* from *the value has less*, you have described the outcome without saying
 what produces it.
 
@@ -1091,10 +1218,15 @@ Write for two minutes, then move on.
   numbers that differ by a little. Write down what you would have had to already
   know to give `0` and `73` — and note that the knowledge required is not about
   Zod, or about this repository, or about any library.
-- Predict 4 asked what the `STAKE_ORDER` test protects against. If your answer was
-  "the order of the levels", you are right and that is the interesting part: it
-  protects the thing in its name and nothing about the thing its name implies.
-  Write down one test you have written that is that shape.
+- Predict 4's first half asked what the old `STAKE_ORDER` test protects against.
+  If your answer was "the order of the levels", you are right and that is the
+  interesting part: it protects the thing in its name and nothing about the thing
+  its name implies. Write down one test you have written that is that shape.
+- Predict 4's second half, and your confidence. If you answered that nothing can
+  reach the arithmetic any more, write down what you were reasoning from — most
+  likely *the check is at compile time, so it covers everything the compiler
+  covers*, which is true and is not the same sentence. Then write down the last
+  check you added to something you own, and which door it closed.
 - Now go and look. Open a repository you work on and find an exported list that
   claims to be every member of something — an array of statuses, a map of
   handlers, a switch in a reducer beside a list of action names. Work out which
@@ -1115,6 +1247,14 @@ Interleaved with 03, 05, 09, 15, 16, 18 and 24 — heavy on 18, because that les
 and this one are the same defect met from two sides, and heavy on 09, because the
 consequence in exercise D is a rung of the ladder falling silent.
 
+One thing to carry that is not in the set, because it happened to this lesson
+rather than in it. It was written on 15 September against a repository where
+`STAKE_ORDER` was checked by nothing at all. Writing that down was enough to get
+it fixed two days later, which is why half of this lesson is in the past tense.
+It is not the first time an exercise here has changed the thing it was about —
+lesson 15's did, and [0090](../decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md) moved three days after it. What is worth keeping is
+not that the defect got fixed. It is what was still standing once it had been.
+
 Part V now has eight lessons. Seven of them found a fact the runtime could not
 check because it belonged to somebody else — a host's registry, a deployment's
 theme, another document's anchors, a component author who had not spoken yet. This
@@ -1132,3 +1272,8 @@ file rather than about the shape of the data.
 So the question for a ninth seam is neither lesson 23's nor lesson 24's. It is:
 **which of the things this system relies on are claims nobody ever states, and
 what would it take for stating one to be cheaper than not?**
+
+And beside it, from the second act, one that is not about seams at all and is the
+likelier of the two to be useful on Monday: **for each check you rely on, which
+values pass through the place it runs — and which reach the same code without
+going anywhere near it?**
