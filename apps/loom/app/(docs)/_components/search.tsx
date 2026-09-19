@@ -7,16 +7,20 @@ import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
 import {
   parseSearchCode,
   parseSearchIndex,
+  parseSearchNames,
   parseSearchProse,
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
+  SEARCH_NAMES_PATH,
   SEARCH_PROSE_PATH,
   SEARCH_RESULT_LIMIT,
   withCode,
+  withNames,
   withProse,
   type SearchCode,
   type SearchIndex,
   type SearchKind,
+  type SearchNames,
   type SearchProse,
 } from "@/app/(docs)/_lib/search/model"
 
@@ -160,6 +164,7 @@ export const Search = () => {
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
   const [index, setIndex] = useState<SearchIndex | undefined>(undefined)
+  const [names, setNames] = useState<SearchNames | undefined>(undefined)
   const [prose, setProse] = useState<SearchProse | undefined>(undefined)
   const [code, setCode] = useState<SearchCode | undefined>(undefined)
   const [loading, setLoading] = useState<Loading>("idle")
@@ -201,14 +206,18 @@ export const Search = () => {
    * does nothing after the first, so re-opening the dialog is free and a failed
    * fetch stays failed rather than retrying on every keystroke.
    *
-   * **Three files leave together and only one is waited for.** The index is
-   * what the box needs to answer anything at all; the words under each entry
-   * and the code beside them are the two cheapest bands of the ranking and
-   * several times the size, so all three are asked for at the same moment and
-   * each is merged whenever it turns up. A reader typing in between gets the
-   * same results in the same order, without the bands that have not landed —
-   * and if either never arrives the box carries on as it did before the site
-   * indexed that half at all, rather than failing.
+   * **Four files leave together and only one is waited for.** The first is the
+   * site's own table of contents, which is what the box needs to answer
+   * anything at all. The runtime's published names, the words under each entry
+   * and the code beside them are asked for at the same moment and each is
+   * merged whenever it turns up. A reader typing in between gets the same
+   * results in the same order, without the bands that have not landed — and if
+   * one never arrives the box carries on as it did before the site indexed that
+   * part at all, rather than failing.
+   *
+   * The names are the one whose absence a reader could mistake for an answer,
+   * because they bring rows rather than rank the ones already there. That is
+   * what the sentence under *nothing on the site says this* is for.
    */
   useEffect(() => {
     if (!open || loading !== "idle") return
@@ -227,6 +236,10 @@ export const Search = () => {
       })
       .catch(() => setLoading("failed"))
 
+    void read(SEARCH_NAMES_PATH)
+      .then((body: unknown) => setNames(parseSearchNames(body)))
+      .catch(() => undefined)
+
     void read(SEARCH_PROSE_PATH)
       .then((body: unknown) => setProse(parseSearchProse(body)))
       .catch(() => undefined)
@@ -241,16 +254,19 @@ export const Search = () => {
   }, [open])
 
   /**
-   * The three files, folded together in the order they are ranked.
+   * The four files, folded together in the order they are ranked.
    *
    * Each fold is skipped while its file is missing rather than waited for, so
-   * the box is searchable the moment the entries land and gains a band as each
-   * of the other two arrives.
+   * the box is searchable the moment the contents land and gains a band as each
+   * of the other three arrives. The names go first because the other two fold
+   * words and blocks *onto* entries, and a name that has not arrived yet is not
+   * an entry to fold anything onto.
    */
   const searchable =
     index === undefined
       ? undefined
       : [
+          (found: SearchIndex) => (names === undefined ? found : withNames(found, names)),
           (found: SearchIndex) => (prose === undefined ? found : withProse(found, prose)),
           (found: SearchIndex) => (code === undefined ? found : withCode(found, code)),
         ].reduce((found, fold) => fold(found), index)
@@ -260,15 +276,26 @@ export const Search = () => {
   /**
    * What has not landed, in the words the empty state uses.
    *
-   * Read off the two optional files rather than tracked as a fourth state,
+   * Read off the three optional files rather than tracked as another state,
    * because the honest sentence is a list of what is missing and that is
-   * exactly what these two are. Built here so the claim under *nothing on the
+   * exactly what these three are. Built here so the claim under *nothing on the
    * site says this* can never drift from what was really searched.
+   *
+   * Every phrase is plural so that one verb serves any number of them, which is
+   * the sort of thing that matters here: the alternative is three sentences and
+   * a rule for choosing between them, for a message shown for a second.
    */
   const pending: readonly string[] = [
-    ...(prose === undefined ? ["the words in them are"] : []),
-    ...(code === undefined ? ["the code in them is"] : []),
+    ...(names === undefined ? ["the published names"] : []),
+    ...(prose === undefined ? ["the words on them"] : []),
+    ...(code === undefined ? ["the code blocks on them"] : []),
   ]
+
+  /** `a`, `a and b`, `a, b and c` — the join an English sentence wants. */
+  const listOf = (parts: readonly string[]): string =>
+    parts.length < 2
+      ? (parts[0] ?? "")
+      : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
 
   const go = (href: string): void => {
     close()
@@ -397,18 +424,26 @@ export const Search = () => {
                  * way to know the box had never read them.
                  */}
                 {/*
-                 * And it says less when it has looked at less. The words and the
-                 * code blocks arrive in two more files, so for the moment before
+                 * And it says less when it has looked at less. Three of the four
+                 * files arrive after this box opens, so for the moment before
                  * they land the claim above is narrower than it will be — and
                  * saying otherwise would be the exact overclaim the sentence was
-                 * written to end. The last clause used to read "code blocks are
-                 * not", which was true and is the thing this file stopped being
-                 * able to say.
+                 * written to end.
+                 *
+                 * **The published names moved from the first clause to this
+                 * list on 19 September**, when they moved out of the file the
+                 * box waits for. Until then they were always there by the time
+                 * anybody could read this, so the sentence could name them among
+                 * the things it had searched. It cannot any more, and a sentence
+                 * claiming to have searched a thousand names that are still in
+                 * flight is the worst of the three states to be wrong about: a
+                 * reader who types an export name and is told the site has never
+                 * heard of it will believe it.
                  */}
                 <p className="text-ink-faint mt-1 text-xs">
                   {pending.length === 0
                     ? "Every page, every section, the words in them, the code in them and every published name are searched."
-                    : `Every page, every section and every published name are searched. ${pending.join(" and ")} still loading.`}
+                    : `Every page and every section are searched — ${listOf(pending)} are still loading.`}
                 </p>
               </div>
             )}

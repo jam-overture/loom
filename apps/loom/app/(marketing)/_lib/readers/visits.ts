@@ -13,6 +13,8 @@ import {
 
 import { bandsOf, type Band } from "../outline"
 
+import { discloseTargetIn, pressTargetIn, type Aimed } from "./aim"
+
 /**
  * Twelve visits to the front door, and what the machinery makes of them.
  *
@@ -72,7 +74,16 @@ export type ScriptedVisit = {
    * it would be a fixture no page could produce.
    */
   readonly stayed?: Readonly<Record<string, number>>
-  /** Bands in which they used a link, a button or a field. */
+  /**
+   * Bands in which they used a link, a button or a field.
+   *
+   * The **band** is named here and the **control** is not, because a band is
+   * what a fixture can be checked by eye against and `the third action inside
+   * the fourth band` is not. Which node the press is actually filed against is
+   * worked out from the page by `pressTargetIn`, so the two halves stay
+   * together: this says what a reader did, and the page says where doing it
+   * lands.
+   */
   readonly pressed?: readonly string[]
   /** Bands in which they opened something that had been closed. */
   readonly opened?: readonly string[]
@@ -146,33 +157,54 @@ export const SCRIPTED_VISITS: readonly ScriptedVisit[] = [
 ]
 
 /**
- * A question about two bands of one page, which is the only shape a funnel is
- * allowed to have here (0146).
+ * A question about **two different bands** of one page, which is the only shape
+ * a funnel is left with (0146, 0167).
  *
- * `did` is two words rather than the machinery's kind because it is printed:
- * a question is read by whoever is deciding what to change, and *used something
- * in it* is what `activated` means to them.
+ * It used to have a second shape — *of the readers who got as far as this band,
+ * how many used something in it* — and that one was wrong in a way nothing could
+ * see. A funnel end is the node a signal names, and a reader never names a band:
+ * they press a button inside it. So a pair asking for `activated` on a band
+ * answers **zero** on any real deployment, and answered a number here only
+ * because the fixture was minting a press no browser sends.
+ *
+ * The question was worth asking and is asked still — it is `BAND_QUESTION`
+ * below, off the band's own row, and it needs no pair named in advance.
  */
 export type FunnelQuestion = {
   /** The band they had to reach for the question to be about them. */
   readonly from: string
-  /** The band the second thing happened in. The same band is a fair question. */
+  /** The band they then had to reach. A different band, for the reason above. */
   readonly to: string
-  readonly did: "used something in it" | "got as far as it"
 }
 
 /**
- * The two this page asks.
+ * The one this page asks as a funnel.
  *
- * The first is the one the front door actually cares about — of the readers who
- * reached the band that lets you ask for a change, how many asked. The second
- * is deliberately across **two different bands**, because a funnel whose ends
- * are the same band would let a reader think that is all one can ask.
+ * Of the readers who reached the band that offers a change, how many carried on
+ * to the links at the foot of the page. Both ends are `viewed` on a band, which
+ * is the only end a band can honestly be — and it is a real question the totals
+ * cannot answer, because *nine reached the first and two reached the second*
+ * does not say whether the two are among the nine.
  */
 export const FUNNEL_QUESTIONS: readonly FunnelQuestion[] = [
-  { from: "See it happen", to: "See it happen", did: "used something in it" },
-  { from: "See it happen", to: "Keep going", did: "got as far as it" },
+  { from: "See it happen", to: "Keep going" },
 ]
+
+/**
+ * The question a band answers about itself: of the readers who got this far, how
+ * many used something in it.
+ *
+ * **It is one band name and no pair**, and that is the whole point of it. A
+ * funnel has to be configured before the readers arrive — somebody names two
+ * nodes, the deployment starts correlating, and a question nobody thought of in
+ * advance cannot be asked about last week. This one is a column of the band's
+ * own row, so it is answerable of every band of every page, always, with nothing
+ * set up.
+ *
+ * The band named is the one the front door actually cares about: the one that
+ * lets a visitor ask for a change.
+ */
+export const BAND_QUESTION = "See it happen"
 
 /**
  * A band of the page by the name a reader would call it, or a build that stops.
@@ -225,6 +257,16 @@ const viewKeyFor = (visit: number): ReturnType<typeof mintViewKey> =>
  * order they would have happened in, because nothing downstream reads the order
  * — `rollUp` counts occurrences and distinct views — and a fixture that implied
  * otherwise would be making a claim this shape cannot carry.
+ *
+ * **`viewed` and `dwelled` are about the band; `activated` and `disclosed` are
+ * not.** The first two are filed against the band itself, because coming into
+ * view and being on screen are things that happen to a region. The other two are
+ * filed against the control the reader aimed at, with the band and the page
+ * arriving as `within` — which is what a browser sends and, until this run, was
+ * not what this fixture produced. The difference is not cosmetic: a band's
+ * `activations` is zero on every real deployment there will ever be, so a
+ * fixture minting presses against bands was demonstrating arithmetic over input
+ * the real thing cannot make.
  */
 const batchFor = (page: LoomTree, visit: ScriptedVisit, index: number): ReaderSignalBatch => {
   const bands = bandsOf(page)
@@ -243,18 +285,20 @@ const batchFor = (page: LoomTree, visit: ScriptedVisit, index: number): ReaderSi
     ms: (visit.stayed?.[band.name] ?? PASSED_THROUGH_SECONDS) * 1000,
   }))
 
-  const activated: readonly ReaderSignal[] = (visit.pressed ?? []).map((name) => ({
-    kind: "activated",
-    ...addressOf(bandNamed(bands, name)),
-    at: index,
-  }))
+  const aimedAt = (name: string, find: (page: LoomTree, id: string, band: string) => Aimed): Aimed =>
+    find(page, bandNamed(bands, name).id, name)
 
-  const disclosed: readonly ReaderSignal[] = (visit.opened ?? []).map((name) => ({
-    kind: "disclosed",
-    ...addressOf(bandNamed(bands, name)),
-    open: true,
-    at: index,
-  }))
+  const activated: readonly ReaderSignal[] = (visit.pressed ?? []).map((name) => {
+    const aim = aimedAt(name, pressTargetIn)
+
+    return { kind: "activated", ...aim.at, within: aim.within, at: index }
+  })
+
+  const disclosed: readonly ReaderSignal[] = (visit.opened ?? []).map((name) => {
+    const aim = aimedAt(name, discloseTargetIn)
+
+    return { kind: "disclosed", ...aim.at, within: aim.within, open: true, at: index }
+  })
 
   return {
     treeId: page.treeId,
@@ -269,16 +313,16 @@ const batchFor = (page: LoomTree, visit: ScriptedVisit, index: number): ReaderSi
 export const scriptedBatches = (page: LoomTree): readonly ReaderSignalBatch[] =>
   SCRIPTED_VISITS.map((visit, index) => batchFor(page, visit, index))
 
-/** What a question's second half is, as the kind a signal of it would carry. */
-const kindOf = (question: FunnelQuestion): "activated" | "viewed" =>
-  question.did === "used something in it" ? "activated" : "viewed"
-
+/**
+ * The pairs, both ends `viewed`, for the reason on `FunnelQuestion`: a band is
+ * reached, never pressed.
+ */
 const pairsFor = (page: LoomTree): readonly FunnelPair[] => {
   const bands = bandsOf(page)
 
   return FUNNEL_QUESTIONS.map((question) => ({
     from: { nodeId: bandNamed(bands, question.from).id as NodeId, kind: "viewed" },
-    to: { nodeId: bandNamed(bands, question.to).id as NodeId, kind: kindOf(question) },
+    to: { nodeId: bandNamed(bands, question.to).id as NodeId, kind: "viewed" },
   }))
 }
 
@@ -297,8 +341,33 @@ export type BandReading = {
   readonly views: number
   /** Time on screen, summed across every view. Seconds, rounded. */
   readonly seconds: number
-  readonly pressed: number
-  readonly opened: number
+  /**
+   * Page views whose reader used something inside this band — pressed a link or
+   * a button, opened a question — at any depth.
+   *
+   * **One number rather than a press count beside an open count**, and that is a
+   * property of what a region can honestly report rather than a simplification.
+   * A band's own `activations` and `opens` are zero, permanently, because a band
+   * is not the thing anybody aimed at; what it can say is *how many readers did
+   * something under it*, which is `engaged` and is a count of views rather than
+   * of occurrences. The press-or-open distinction survives on the control's own
+   * row, where the reader actually pointed.
+   */
+  readonly engaged: number
+}
+
+/**
+ * *Of the readers who got this far, how many used something in it* — answered
+ * from one band's row.
+ *
+ * Two numbers off the same line of the same table, which is what makes it
+ * different from the funnel beside it on the page: nothing had to be named in
+ * advance for this to be answerable.
+ */
+export type BandAnswer = {
+  readonly band: string
+  readonly reached: number
+  readonly engaged: number
 }
 
 export type FrontDoorReadings = {
@@ -306,6 +375,8 @@ export type FrontDoorReadings = {
   readonly views: number
   /** Bands in the order a reader meets them, which is the order they are printed in. */
   readonly bands: readonly BandReading[]
+  /** `BAND_QUESTION`, answered off that band's own row. */
+  readonly inOneBand: BandAnswer
   /** The funnel questions, answered. */
   readonly funnels: readonly FunnelAnswer[]
   /** What the page's own arithmetic was run over, for the tests. */
@@ -342,13 +413,26 @@ export const frontDoorReadings = (page: LoomTree): FrontDoorReadings => {
             reached: tally.reached,
             views: rollup.views,
             seconds: Math.round(tally.dwellMs / 1000),
-            pressed: tally.activations,
-            opened: tally.opens,
+            engaged: tally.engaged,
           },
         ]
   })
 
-  return { views: rollup.views, bands, funnels: rollup.funnels, rollup }
+  const asked = bands.find((reading) => reading.band === BAND_QUESTION)
+
+  if (asked === undefined) {
+    throw new Error(
+      `loom: this page asks what readers did in “${BAND_QUESTION}”, and the front door has no such band in its readings`
+    )
+  }
+
+  return {
+    views: rollup.views,
+    bands,
+    inOneBand: { band: asked.band, reached: asked.reached, engaged: asked.engaged },
+    funnels: rollup.funnels,
+    rollup,
+  }
 }
 
 /**
@@ -361,6 +445,11 @@ export const frontDoorReadings = (page: LoomTree): FrontDoorReadings => {
  * number is allowed to flatter.
  */
 export const funnelSentence = (question: FunnelQuestion, answer: FunnelAnswer): string =>
-  question.did === "used something in it"
-    ? `Of the ${answer.reached} readers who got as far as “${question.from}”, ${answer.converted} used something in it.`
-    : `Of the ${answer.reached} readers who got as far as “${question.from}”, ${answer.converted} read on to “${question.to}”.`
+  `Of the ${answer.reached} readers who got as far as “${question.from}”, ${answer.converted} read on to “${question.to}”.`
+
+/**
+ * The band question as the sentence the page prints, under the same rule: both
+ * numbers, never a rate.
+ */
+export const bandSentence = (answer: BandAnswer): string =>
+  `Of the ${answer.reached} readers who got as far as “${answer.band}”, ${answer.engaged} used something in it.`

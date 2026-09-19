@@ -2,12 +2,13 @@ import { gzipSync } from "node:zlib"
 
 import { describe, expect, it } from "vitest"
 
+import { apiSlugFor } from "../api/model"
 import { apiEntries } from "../api/reference"
 import { docsHref, docsOrder, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex, searchCode, searchIndexWithoutText, searchProse } from "./build"
+import { buildSearchIndex, searchCode, searchContents, searchNames, searchProse } from "./build"
 import { readPageHeadings } from "./headings"
-import { parseSearchIndex, withCode, withProse } from "./model"
+import { namesToEntries, parseSearchIndex, parseSearchNames, withCode, withNames, withProse } from "./model"
 
 /**
  * The index, held against the site it claims to describe.
@@ -35,7 +36,10 @@ const index = buildSearchIndex()
  * the builder's own object would have gone on passing on the day the file
  * stopped carrying a field.
  */
-const arrived = () => parseSearchIndex(JSON.parse(JSON.stringify(searchIndexWithoutText())))
+const arrived = () => parseSearchIndex(JSON.parse(JSON.stringify(searchContents())))
+
+/** The names file the same way: serialised, sent, parsed. */
+const arrivedNames = () => parseSearchNames(JSON.parse(JSON.stringify(searchNames())))
 
 const hrefs = new Set(docsOrder.map((entry) => entry.href))
 
@@ -158,7 +162,7 @@ describe("what the index contains", () => {
    * payload back in the first fetch, which nothing else here would notice.
    */
   it("keeps the words out of the half that ships first", () => {
-    for (const entry of searchIndexWithoutText().entries) {
+    for (const entry of searchContents().entries) {
       expect(entry.body, entry.href).toBeUndefined()
       expect(entry.code, entry.href).toBeUndefined()
     }
@@ -173,7 +177,7 @@ describe("what the index contains", () => {
    * the whole entry would pass every other test here.
    */
   it("writes down no field that would arrive empty", () => {
-    const written = JSON.stringify(searchIndexWithoutText())
+    const written = JSON.stringify(searchContents())
 
     expect(written).not.toContain('"body"')
     expect(written).not.toContain('"code"')
@@ -185,68 +189,80 @@ describe("what the index contains", () => {
    * the number is asserted rather than assumed, and a change that doubles it
    * has to be a change somebody decided to make.
    *
-   * **Indexing the prose was that change**, and this is where its price is
-   * recorded. Measured the day it landed, with the 13 written pages of the time:
+   * **Indexing the prose was the first such change**, and the file has been
+   * split twice since, both times for the same reason and along the same kind
+   * of line: *these two things grow at different speeds, for different reasons,
+   * and one number over both is a number that tells nobody which.*
    *
-   * | | Uncompressed | gzip |
-   * | --- | --- | --- |
-   * | Titles, headings and 801 names | 143 KB | 12.1 KB |
-   * | With the prose under each of them | 191 KB | 30.5 KB |
+   * | | Uncompressed | gzip | grows when |
+   * | --- | --- | --- | --- |
+   * | Contents — 206 pages and headings | 38.8 KB | **7.4 KB** | somebody writes a page here |
+   * | Names — 1,067 published exports | 20.2 KB | 6.1 KB | any lane exports something |
+   * | Prose | 168.6 KB | 53.6 KB | anybody writes a paragraph |
+   * | Code | 22.3 KB | 6.2 KB | anybody adds a block |
    *
-   * The compressed figure is the one that leaves the server, which is why it is
-   * asserted first: prose repeats itself and compresses about four times better
-   * than a table of unique identifiers, so the honest cost of finding a sentence
-   * is **18 KB, once, for a reader who opened the box** — not the 47 KB the raw
-   * number suggests. Both are capped, because a payload that stopped
-   * compressing would be a change worth noticing too.
+   * **Only the first row is waited for.** That is what every one of these
+   * numbers is ultimately about, and it is why they are four caps rather than
+   * one: a reader who opens the box and types waits for 7.4 KB, and the other
+   * three land underneath the results as they arrive.
    *
-   * The headroom is deliberate and finite: five more pages fit under it, fifty
-   * do not, and the run that hits it should split the index rather than raise
-   * the number.
+   * ### Why the names had to leave
    *
-   * **Four pages arrived at once and hit it**, at 46.7 KB against the 48. So the
-   * index was split rather than the number raised, and what is capped now is
-   * each file separately — which is the only way the caps stay meaningful,
-   * because the files grow at different speeds and for different reasons.
+   * They were in the first file until 19 September, and they were **78% of it
+   * raw, 60% of it compressed**. So the payload a reader sat in front of grew every time any lane in
+   * this repository exported a function — which this surface does not do, does
+   * not decide, and cannot see coming. It had reached **19,281 bytes against a
+   * 20,000-byte cap: 719 bytes of headroom, about sixty more exports for the
+   * whole repository**, and two lanes had already filed it. The framework lane
+   * raised the raw ceiling from outside this lane in September to keep
+   * `pnpm verify` green for four surfaces, and said in the finding that the
+   * compressed cap was the one that would fire next. It was.
    *
-   * **The raw cap on the first file failed next**, at 200,286 against 200,000,
-   * on the run that added a twenty-first page. Neither split nor raised: 38,156
-   * of those bytes were `summary`, `body` and `code` saying they were empty,
-   * 1,172 times over, and a field that carries nothing is not a payload anybody
-   * decided to send. They are left out now and filled back in on arrival, which
-   * took the file to about 162 KB. The **compressed** cap is the one to watch
-   * from here — it is at 91% of 20 KB and 84% of the entries are published
-   * names, so the lane that grows it is not this one.
+   * The remedy was written in this comment long before it was needed — *the run
+   * that hits it should split the index rather than raise the number* — and
+   * nothing about it is new except which line to split along.
    *
-   * **Indexing the code was the third file**, and it is the cheap one: 13.4 KB
-   * raw and **3.9 KB compressed** over 39 entries, about a ninth of what the
-   * words cost. The reason is worth recording, because it is the opposite of
-   * what a glance at the site suggests — the blocks are the same handful of
-   * imports and calls written out again and again, and repetition is what
-   * compresses. The expensive half of a search index is prose, which is why the
-   * prose is the half that had to be split off and why the code could simply be
-   * added.
+   * ### And why the names file is small
+   *
+   * 1,067 names cost 20 KB here and cost 138 KB in the file they left, because
+   * what is written down is **a name and not an address**. An export's address
+   * is its entry point and its own name put through two functions; those two
+   * functions are the ones the reference pages use, they run in a browser, and
+   * `namesToEntries` rebuilds every address on arrival. The 118 KB that went
+   * away was `/docs/api-reference/runtime#s-` written out a thousand times.
+   *
+   * ### Which cap is whose
+   *
+   * The **contents** cap is this lane's in both directions: it moves when this
+   * surface writes a page, and this surface is the one that would raise it.
+   *
+   * The **names** cap is this lane's number about somebody else's growth, and
+   * that is the shape three findings in one day called out as the problem. So
+   * it is two numbers rather than one. The per-name figure is the one this lane
+   * can defend and the one a regression would show up in — a summary creeping
+   * back in, an anchor scheme getting longer — and it does not move when the
+   * runtime publishes more. The total is a **shard trigger and nothing else**:
+   * when it fires, this file is already grouped by entry point and the browser
+   * already knows which entry point a reader is looking at, so the answer is to
+   * serve them per entry point rather than to take the number up again.
    */
   it("stays small enough to send", () => {
-    const entries = JSON.stringify(searchIndexWithoutText())
+    const contents = JSON.stringify(searchContents())
+    const names = JSON.stringify(searchNames())
     const prose = JSON.stringify(searchProse())
     const code = JSON.stringify(searchCode())
 
-    // What a reader waits for: the table of contents and the runtime's surface.
-    // It grows when a page is added or an export is published, which is slowly.
-    //
-    // The raw ceiling was 200,000 and `main` sat at 198,470 — 0.8% of headroom,
-    // so the next subsystem published was always going to be the one that hit
-    // it, and on 14 September the reader-signal store was. Raised to 240,000 by
-    // the framework lane rather than by this one, which is recorded as a finding
-    // for its owner along with the number to reconsider it against.
-    //
-    // The gzip ceiling is deliberately unchanged. It is the one that measures
-    // what a reader actually downloads, this file's own comment above explains
-    // why the two diverge, and it is the one with real headroom left: the same
-    // change took it from 17,863 to 18,408 of 20,000.
-    expect(gzipSync(entries).length).toBeLessThan(20_000)
-    expect(entries.length).toBeLessThan(240_000)
+    // What a reader waits for, and now the only thing they wait for: this
+    // site's own pages and the headings on them. It grows when somebody writes
+    // a page here, which is this lane, slowly, and visibly.
+    expect(gzipSync(contents).length).toBeLessThan(12_000)
+    expect(contents.length).toBeLessThan(60_000)
+
+    // The runtime's surface. Nobody waits for it, and the count is nobody's
+    // here to hold down — see the comment above for why this is two numbers.
+    expect(names.length / namesToEntries(searchNames()).length).toBeLessThan(24)
+    expect(gzipSync(names).length).toBeLessThan(12_000)
+    expect(names.length).toBeLessThan(40_000)
 
     // What nobody waits for. It grows every time anybody writes a paragraph, so
     // it has the room — and the day it runs out, it shards by section rather
@@ -264,6 +280,62 @@ describe("what the index contains", () => {
   })
 
   /**
+   * The split, as the property it was made for.
+   *
+   * Everything above is a number, and a number can be satisfied by a smaller
+   * site as easily as by a correct split. This is the claim underneath them:
+   * **the file a reader waits for contains nothing that another lane's work can
+   * grow.** A builder that quietly put the names back would pass every cap here
+   * for months and fail this on the first run.
+   */
+  it("keeps the runtime's surface out of the file a reader waits for", () => {
+    for (const entry of searchContents().entries) {
+      expect(entry.kind, entry.href).not.toBe("export")
+    }
+
+    expect(searchContents().entries.length).toBeGreaterThan(100)
+  })
+
+  /**
+   * And the names file writes down no address at all.
+   *
+   * The 118 KB this saves is the whole argument for the shape, so it is worth a
+   * test rather than a comment: a run that "simplified" this file back into a
+   * list of entries would take the payload straight back up, and every other
+   * test here would still pass.
+   */
+  it("writes down names rather than addresses", () => {
+    expect(JSON.stringify(searchNames())).not.toContain("/docs/api-reference/")
+  })
+
+  /**
+   * The addresses it does not write down are still the right ones.
+   *
+   * This is the failure the whole file is built to prevent, arriving by a new
+   * route: the browser now *computes* every export result's href, so an anchor
+   * scheme that changed on the reference pages and not here would be a search
+   * box where a thousand results 404. Held against the reference itself rather
+   * than against the builder's own output.
+   */
+  it("rebuilds an address a reference page really serves", () => {
+    const published = new Set(
+      apiEntries.flatMap((entry) =>
+        entry.groups.flatMap((group) =>
+          group.symbols.map((symbol) => `/docs/api-reference/${apiSlugFor(entry.specifier)}#s-${symbol.name}`)
+        )
+      )
+    )
+
+    const rebuilt = namesToEntries(arrivedNames())
+
+    expect(rebuilt.length).toBe(published.size)
+
+    for (const entry of rebuilt) {
+      expect(published.has(entry.href), entry.href).toBe(true)
+    }
+  })
+
+  /**
    * The two halves are one index or they are nothing.
    *
    * The prose travels keyed by `href`, so an entry whose href the prose file
@@ -273,15 +345,25 @@ describe("what the index contains", () => {
    * `buildSearchIndex` said in the first place.
    */
   it("comes apart and goes back together without losing a word or a line", () => {
-    expect(withCode(withProse(arrived(), searchProse()), searchCode())).toEqual(index)
+    expect(withCode(withProse(withNames(arrived(), arrivedNames()), searchProse()), searchCode())).toEqual(
+      index
+    )
   })
 
   /**
-   * And in either order, because they arrive in whichever order the network
-   * hands them over.
+   * And in any order, because they arrive in whichever order the network hands
+   * them over.
+   *
+   * The names last is the interesting one and the reason this is not just
+   * symmetry: the other two fold text **onto** entries, so folding them before
+   * the rows they belong to exist is exactly the ordering that could quietly
+   * drop a band. It cannot here — a published name has neither prose nor code —
+   * and that is a claim worth holding rather than a thing to remember.
    */
-  it("does not mind which of the two lands first", () => {
-    expect(withProse(withCode(arrived(), searchCode()), searchProse())).toEqual(index)
+  it("does not mind which of the four lands first", () => {
+    expect(withNames(withProse(withCode(arrived(), searchCode()), searchProse()), arrivedNames())).toEqual(
+      index
+    )
   })
 
   it("keys the words and the code by an href that names exactly one entry", () => {
