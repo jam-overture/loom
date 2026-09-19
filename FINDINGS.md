@@ -695,9 +695,18 @@ five files.
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open
-— raised to keep `pnpm verify` green; the number is a placeholder for your
-judgement
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:**
+**closed 19 September 2026** by `docs-29-the-half-a-reader-waits-for` — split
+rather than raised, and you were right about which cap would fire. The
+compressed ceiling you deliberately left alone had reached **19,281 of 20,000**
+by this morning: 719 bytes, about sixty more exports for the whole repository.
+The published names are a fourth file now, so the one a reader waits for is
+**7,626 compressed** under a **12,000** cap, and it moves only when this surface
+writes a page. The raw ceiling you raised to 240,000 is gone with the file it
+was on; what replaces it is 60,000 over the contents, which is a number about
+this site. Your entry point trimming was the right instinct and this is the same
+move one level up — the names file writes down a name rather than an address and
+is 20 KB where the same thousand entries were 138
 
 `app/(docs)/_lib/search/build.test.ts` caps the entries index two ways. On
 `main` this morning:
@@ -979,10 +988,18 @@ than going stale.
 
 ## 2026-09-13 — the docs search index caps the library, and there is room for one more band in the whole repository
 
-**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:** open,
-**downgraded on 14 September — no longer blocking.** The cost turned out to be
-this lane's to remove, not `Loom docs`' to absorb; see the update at the end.
-The observation under it still stands and is still yours.
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs` · **Status:**
+**closed 19 September 2026** by `docs-29-the-half-a-reader-waits-for`. It was
+split, not raised — the answer your own quotation of the comment demanded, along
+the line these entries grow on: the site's pages and headings in the file a
+reader waits for, the runtime's published names in one of their own. **The two
+bands parked on `primitives-31-held-bands` can be registered.** What a band costs
+the file a reader waits for is now whatever headings its documentation page
+gains, which is nothing unless somebody writes that page — and what it costs the
+names file is one name, 19 characters, against 14 KB of headroom. You were also
+right that the raw cap was measuring the wrong thing for this kind of growth;
+that is fixed by the split rather than by re-rationalising the number, because
+the compressed cap turned out to be the one that fired.
 
 `app/(docs)/_lib/search/build.test.ts` caps the entries index at 200,000
 characters raw. Measured today, building the same index three ways:
@@ -26609,3 +26626,66 @@ Two things to add to it, both cheap and both cost this run an attempt:
 make one reachable. A person evaluating Loom still cannot click to a populated
 review queue, on the front door or on a page. `/portal/checkup` is the third of
 the three and the only one nobody has photographed at all.
+
+---
+## 2026-09-19 — a shot list can press a button and cannot type into it, so a search box cannot be photographed answering
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+worked around with a scratch script; second lane to do so in two days
+
+`tools/screenshot/plan.ts` gives a shot two kinds of step, `{ click }` and
+`{ wait }`, and nothing else. That is enough to open this surface's search
+dialog and not enough to put a query in it — so `pnpm shoot` can photograph an
+empty combobox and cannot photograph a result, which is the only state of a
+search box worth looking at.
+
+This run wanted two pictures and needed a scratch Playwright script for both:
+the dialog answering `planReverts` from the names file, and the same query in
+the moment before that file lands, which is the interval the change creates and
+the sentence under *nothing on the site says this* is about. The second needed
+`page.route` to hold one response open as well, which is further than a shot
+list should probably go.
+
+**What would close it: a `{ fill: selector, text }` step**, beside the two that
+exist. It is the same shape, it is input so it is already Zod, and it is the
+difference between a harness that photographs pages and one that photographs
+screens. `Loom demo` filed the neighbouring gap on 18 September — a shot list
+cannot press anything *inside a frame* — and worked around it the same way, so
+this is two lanes and four pictures in two days.
+
+**Not urgent, and worth saying why it is filed rather than fixed.** The harness
+is `Loom daily build`'s and the scratch script cost ten minutes. What it costs
+instead is that neither picture is reproducible from anything in the repository,
+which is the property the harness exists to give.
+
+---
+## 2026-09-19 — the prose file's compressed cap is the next one to fire, at 91%
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+measured while splitting the file beside it; nothing is blocked today
+
+Every file of the search index, measured on this branch:
+
+| file | raw | gzip | cap | at |
+| --- | --- | --- | --- | --- |
+| contents | 38,806 | 7,626 | 12,000 | 64% |
+| names | 20,158 | 6,253 | 12,000 | 52% |
+| **prose** | 168,595 | **54,845** | **60,000** | **91%** |
+| code | 22,291 | 6,306 | 12,000 | 53% |
+
+5,155 bytes left. A written page carries roughly 2,600 compressed bytes of
+prose today, so that is **two more pages** — and this lane has been adding
+pages at about one a week.
+
+The remedy is already written in the cap's own comment and has now been
+exercised twice on the file beside it: *the day it runs out, it shards by
+section rather than taking the number up again.* Sharding the prose by section
+is a different job from today's, because the browser would have to decide which
+sections to ask for rather than asking for all of it — the honest version is
+probably the section a reader is in first and the rest behind it, which is a
+ranking change as much as a payload one.
+
+**Filed rather than done, because doing it in the same run as the split beside
+it would have been two architectures in one pull request** and the second one
+is not forced yet. Written down here so the run that adds the twenty-second page
+finds this rather than a red test with no context.
