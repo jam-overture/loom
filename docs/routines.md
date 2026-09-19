@@ -335,6 +335,16 @@ stays narrow and deliberate.
 
 ## Commit identity
 
+> **Superseded, 18 September 2026.** This section and *Commit identity, and the
+> preview that goes missing*, at the end of this file, give opposite
+> instructions about the same thing. **The later one is current: do not set a
+> commit author.** This section is kept rather than deleted because the symptom
+> it describes is real and both identities do deploy — but a run that follows it
+> by reaching for the address in its opening note gets `jpizzo`, which does not,
+> and that is the trap the later section was written to close. Filed by
+> `Loom portal` on 16 September; dated here by the framework routine rather than
+> deleted, because what a section got wrong is worth reading once.
+
 **Author every commit as
 `jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
 which is the identity every commit on `main` carries:

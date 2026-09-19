@@ -1,16 +1,26 @@
 import { describe, expect, it } from "vitest"
 
+import { frameOriginSchema } from "../frame/origin.js"
 import { deltaIdSchema, nodeIdSchema, sequentialIdFactory, treeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { catalogueOf } from "../sdk/catalogue.js"
+import { endpointIdSchema } from "../submit/endpoint.js"
+import { sourceIdSchema } from "../data/source.js"
 import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import { createTree } from "../tree/tree.js"
 
-import { renderCatalogue, renderDelta, renderTree } from "./render.js"
+import {
+  renderCatalogue,
+  renderDelta,
+  renderFrameCatalogue,
+  renderSourceCatalogue,
+  renderSubmissionCatalogue,
+  renderTree,
+} from "./render.js"
 
 describe("renderTree", () => {
   it("renders the whole tree as an indented outline with ids first", () => {
@@ -308,5 +318,60 @@ describe("renderCatalogue", () => {
     for (const line of renderCatalogue(catalogueOf(registry.value)).split("\n")) {
       expect(line).not.toMatch(/[.!?][.!?]/)
     }
+  })
+})
+
+describe("renderSourceCatalogue", () => {
+  const source = (params: readonly { name: string; required: boolean }[] | undefined) => [
+    {
+      id: sourceIdSchema.parse("catalogue.services"),
+      description: "The services this profile offers, newest first",
+      params,
+    },
+  ]
+
+  it("gives one line per source, its description finished, and the params it takes", () => {
+    expect(
+      renderSourceCatalogue(source([{ name: "limit", required: true }, { name: "since", required: false }]))
+    ).toBe("- catalogue.services — The services this profile offers, newest first. params: limit, since?")
+  })
+
+  /**
+   * `params` rather than `props`, because the two are not the same word to a
+   * model: telling it a source has props invites it to set them on the node.
+   */
+  it("calls a source's fields params", () => {
+    expect(renderSourceCatalogue(source([]))).toContain("params: none")
+    expect(renderSourceCatalogue(source([]))).not.toContain("props")
+  })
+
+  it("distinguishes params it cannot enumerate from params that do not exist", () => {
+    expect(renderSourceCatalogue(source(undefined))).toContain("params: not declared")
+  })
+})
+
+describe("renderSubmissionCatalogue", () => {
+  it("gives an id and a line, and nothing that could be an address", () => {
+    expect(
+      renderSubmissionCatalogue([
+        {
+          id: endpointIdSchema.parse("contact.enquiry"),
+          description: "Receives a contact enquiry",
+        },
+      ])
+    ).toBe("- contact.enquiry — Receives a contact enquiry.")
+  })
+})
+
+describe("renderFrameCatalogue", () => {
+  it("gives the origin and the line whoever runs the deployment wrote", () => {
+    expect(
+      renderFrameCatalogue([
+        {
+          origin: frameOriginSchema.parse("https://player.vimeo.com"),
+          description: "Vimeo player embeds",
+        },
+      ])
+    ).toBe("- https://player.vimeo.com — Vimeo player embeds.")
   })
 })

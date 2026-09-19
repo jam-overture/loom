@@ -186,7 +186,10 @@ const measured = (context: PageContext): PromptMeasurement => {
     observedAt: systemClock.now(),
   }
 
-  return measurePrompt(intent, page, catalogueOf(siteRegistry), siteThemes.catalogue())
+  return measurePrompt(intent, page, {
+    catalogue: catalogueOf(siteRegistry),
+    themeCatalogue: siteThemes.catalogue(),
+  })
 }
 
 /**
@@ -206,7 +209,24 @@ export const partsOf = (
   const reported = Object.keys(measurement).filter((key) => key !== "total")
   const described = LEAVING.map((part) => String(part.key))
 
-  const missing = reported.filter((key) => !described.includes(key))
+  /**
+   * A part this deployment does not send is not a part the page owes a
+   * sentence, and `0172` is why the distinction had to be drawn. The runtime
+   * now reports eight parts; three of them are blocks that are **absent** from
+   * the request unless a host has registered data, a form destination or a
+   * framable origin, and this site has registered none of the three. Naming
+   * them anyway would put three rows reading *0 characters* under a heading
+   * that says what leaves your server.
+   *
+   * The guard is not weakened by it, which is the part worth checking. It still
+   * fires on anything actually sent that nobody has written a sentence for — so
+   * the day this site registers one of the three, the page refuses to build
+   * until it says so, which is the same alarm one step later and at the moment
+   * it becomes true.
+   */
+  const sent = reported.filter((key) => measurement[key as keyof PromptMeasurement] > 0)
+
+  const missing = sent.filter((key) => !described.includes(key))
   const stale = described.filter((key) => !reported.includes(key))
 
   if (missing.length > 0 || stale.length > 0) {
@@ -215,7 +235,10 @@ export const partsOf = (
     )
   }
 
-  return LEAVING.map((part) => ({ ...part, characters: measurement[part.key] }))
+  return LEAVING.filter((part) => measurement[part.key] > 0).map((part) => ({
+    ...part,
+    characters: measurement[part.key],
+  }))
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
