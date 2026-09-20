@@ -44,13 +44,21 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  *
  * ## What it cannot do, stated rather than half-done
  *
- * **The cascade inside a band is not here.** Six tiles arriving one after
- * another is the effect a wall of cards wants, and it needs the *arranger* to
- * stagger its own children — this primitive's children are whatever it wraps,
- * which is usually one grid. A `stagger` prop here would have staggered that
- * single grid against nothing. What does work today, and is what the specimen
- * shows, is a reveal around each cell: every cell then arrives on its own
- * timeline, so a grid comes in by row. Filed as a finding rather than faked.
+ * **The cascade inside a band is not here, and it does not need to be.** Six
+ * tiles arriving one after another is the effect a wall of cards wants, and a
+ * `stagger` prop here could not give it: this primitive's children are whatever
+ * it wraps, which for a band is one grid, and staggering a single grid against
+ * nothing is staggering nothing. What works instead is **a reveal around each
+ * cell** — every cell then has a view timeline of its own and arrives when it
+ * personally enters the scrollport, so a grid comes in by row with no ordering
+ * declared anywhere and none to keep in step when a tile is inserted.
+ *
+ * That was written as a workaround and it is the better mechanism. A declared
+ * stagger is a list of delays that go wrong the moment the reader's window is a
+ * different shape; a per-cell timeline is the reader's own scroll position
+ * answering the question. `featuresBand` is the catalogue's use of it, under
+ * [0174](../../decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md),
+ * and it is what made the stretch note on the root below necessary.
  *
  * ## Nothing here can hide a band, and that is a property rather than a hope
  *
@@ -111,6 +119,28 @@ export const loomReveal = definePrimitive({
         ]
           .filter((name) => name !== undefined)
           .join(" "),
+        /**
+         * **A wrapper has to be transparent to stretching**, and this is
+         * `loom.halo`'s paragraph of the same name arriving at its second
+         * wrapper rather than a new argument. Six tiles in a `loom.feature-grid`
+         * are stretched to the tallest of them; a tile is a grid item and fills
+         * its cell, and the moment a reveal is between them the tile is a block
+         * in a taller box instead — so a card row that lined up yesterday has
+         * ragged bottoms today, on whichever cards happen to be short.
+         *
+         * `display: grid` passes the stretch on to the child, and `height: 100%`
+         * takes it from a parent that hands height down rather than stretching
+         * its items. Against a parent with no definite height both are inert,
+         * which is every reveal that is not in a stretched row — including every
+         * reveal around a whole band, which is what this primitive was written
+         * for and what it kept doing correctly while this was missing.
+         *
+         * Nothing could have caught it. A reveal around a band has one child at
+         * full width, so the defect needs a reveal *inside* an arranger to
+         * appear at all, and until this catalogue put one there no tree in the
+         * repository had one.
+         */
+        style: { display: "grid", height: "100%" },
       },
       libraryStylesheet(),
       children

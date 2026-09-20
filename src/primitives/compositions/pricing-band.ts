@@ -8,20 +8,22 @@ import type { Composition } from "./composition.js"
  * Three plans, their perks, their buttons — and the composition that pays for
  * the whole argument.
  *
- * A pricing band is forty-two nodes. Every one of them is decomposed for a
+ * A pricing band is forty-four nodes. Every one of them is decomposed for a
  * reason 0052 gives and every one of them was, until this file existed,
- * forty-two operations to put on a page. It is the band the granularity
+ * forty-four operations to put on a page. It is the band the granularity
  * doc's promise was written about, so it is worth walking once.
  *
  * ```
- * section                       one band
- *   slot heading                the title and its lead
- *   tier-table                  the arrangement
- *     tier ×3                   name, price, period, note — fixed fields
- *       slot badge              "Most popular", on one tier only
- *       perk-list               what the plan includes
- *         perk-list-item ×5     one claim each
- *       slot action             the button, pinned to the foot
+ * backdrop                      atmosphere in the space between the cards
+ *   section                     one band
+ *     slot heading              the title and its lead
+ *     tier-table                the arrangement
+ *       halo                    the light, round the one plan being sold
+ *       tier ×3                 name, price, period, note — fixed fields
+ *         slot badge            "Most popular", on one tier only
+ *         perk-list             what the plan includes
+ *           perk-list-item ×5   one claim each
+ *         slot action           the button, pinned to the foot
  * ```
  *
  * ## The badge is the clearest thing in the catalogue
@@ -164,18 +166,96 @@ const tierNode = (ids: IdFactory, plan: Plan): ElementNode => {
   })
 }
 
+/**
+ * The tier the page is selling, with the light on it.
+ *
+ * `loom.halo` was written on 13 September and the gap it names in its own
+ * opening paragraph is **this band**:
+ *
+ * > A pricing band draws three tiers that are typographically identical; the
+ * > one a page is actually selling is marked by nothing at all. A page could
+ * > say "Most popular" in a `loom.badge` and the words were the whole of it.
+ *
+ * It stayed true for a week after the primitive shipped, because a primitive
+ * entering the library and a band picking it up are two pieces of work and only
+ * the first had an owner. `loom.tier-table` had even reserved the room — its
+ * `paddingBlock` carries a comment about *a featured tier's ring* drawn outside
+ * the border box — so the band was the only piece missing.
+ *
+ * **`ring` rather than `glow` or `trace`.** A glow is carried by chroma alone
+ * and `editorial`'s two accent slots are both a muted slate, so the tier a page
+ * is selling would be marked by nothing under half the palettes that ship. A
+ * rim stands four pixels off the card's own edge, which reads as geometry in
+ * greyscale; the primitive argues this at length under `RIM_OFFSET` and this
+ * band is where that argument gets spent — the first photographs of it show two
+ * hairlines with a strip of the page's ground between them under `editorial`,
+ * which is the whole claim. `trace` puts travelling light on a card a reader is
+ * trying to read prices off, which is motion competing with the content rather
+ * than pointing at it.
+ *
+ * **`corners: "lg"` because `loom.tier` draws itself at `radius("lg")`**, and a
+ * rim cannot read a child's props (0008). A square rim round a rounded card is
+ * a mistake at four corners, and it is the kind that looks deliberate in a diff
+ * and wrong in a photograph.
+ *
+ * ## The light and the ribbon are two nodes and that is the point
+ *
+ * They start on the same tier and nothing makes them stay there. The halo draws
+ * the eye and the badge says why — and because both are nodes, moving the
+ * emphasis to Enterprise is two `move`s rather than a `configure` nobody
+ * predicted. `compositions.test.ts` asserts they *ship* in agreement, which is
+ * a claim about this band rather than a rule about trees: a page that lights
+ * one plan and labels another is a page that meant something by it.
+ */
+const litTier = (ids: IdFactory, plan: Plan): ElementNode =>
+  buildElement(ids, {
+    type: "loom.halo",
+    props: { light: "ring", corners: "lg" },
+    children: [tierNode(ids, plan)],
+  })
+
+/**
+ * ## The atmosphere is the band's root, which is the one place a treatment may be
+ *
+ * [0174](../../../decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md)
+ * says a treatment adds to a band's ground and never replaces it, and a
+ * `loom.backdrop` **behind** an opaque ground paints nothing a reader sees — so
+ * the rule ordinarily puts one inside whatever paints the band. This section
+ * paints nothing: it takes no `tone`, so the page's own canvas is the ground
+ * and there is none to lose. That is why the backdrop may be the root here and
+ * may not be on `metrics` or `cta`, which both carry one.
+ *
+ * **The space between the cards is the whole of what makes it visible.** Three
+ * `loom.tier` cards are opaque, and the atmosphere is read in the gutters, the
+ * margins and the band's own padding. That is not a happy accident, it is the
+ * condition: the first attempt at this put the paint behind the four figures of
+ * the metrics band, which is the shortest composition in the catalogue, and a
+ * paint in a 170-pixel strip is invisible under `editorial` and a grey smear
+ * under `bold`. Nothing failed and no test could have — a backdrop renders
+ * exactly as well in a strip as in a band. It is filed.
+ */
+const litBand = (ids: IdFactory, band: ElementNode): ElementNode =>
+  buildElement(ids, {
+    type: "loom.backdrop",
+    props: { paint: "aurora" },
+    children: [band],
+  })
+
 export const pricingBand: Composition = {
   id: "pricing",
   part: "pricing",
   label: "Pricing",
-  promise: "Three plans side by side, each with its perks and its button, and one marked as the popular one.",
+  promise:
+    "Three plans side by side on a band of drifting light, each with its perks and its button, and one of them lit and labelled as the popular one.",
   rationale:
-    "A pricing band is a loom.tier-table holding one loom.tier per plan, each with a loom.perk-list of what it includes and its call to action in the action region. The 'Most popular' ribbon is a loom.badge node rather than a flag, so moving it to another plan is one move.",
+    "A pricing band is a loom.tier-table holding one loom.tier per plan, each with a loom.perk-list of what it includes and its call to action in the action region. The 'Most popular' ribbon is a loom.badge node and the light on that plan is a loom.halo around it, so moving the emphasis to another plan moves nodes rather than setting flags, and the atmosphere behind the band is a loom.backdrop that comes off with one remove.",
   uses: [
+    "loom.backdrop",
     "loom.section",
     "loom.heading",
     "loom.prose",
     "loom.tier-table",
+    "loom.halo",
     "loom.tier",
     "loom.badge",
     "loom.perk-list",
@@ -183,27 +263,32 @@ export const pricingBand: Composition = {
     "loom.action",
   ],
   build: (ids: IdFactory): ElementNode =>
-    buildElement(ids, {
-      type: "loom.section",
-      props: { eyebrow: "Pricing", width: "wide", anchor: "pricing" },
-      children: [
-        buildSlot(ids, "heading", [
+    litBand(
+      ids,
+      buildElement(ids, {
+        type: "loom.section",
+        props: { eyebrow: "Pricing", width: "wide", anchor: "pricing" },
+        children: [
+          buildSlot(ids, "heading", [
+            buildElement(ids, {
+              type: "loom.heading",
+              props: { level: 2, balance: true },
+              children: [buildText(ids, "Priced per person, and nothing per seat you are not using")],
+            }),
+            buildElement(ids, {
+              type: "loom.prose",
+              props: { tone: "muted", measured: true },
+              children: [
+                buildText(ids, "Every plan includes the whole product. What changes is how many of you there are."),
+              ],
+            }),
+          ]),
           buildElement(ids, {
-            type: "loom.heading",
-            props: { level: 2, balance: true },
-            children: [buildText(ids, "Priced per person, and nothing per seat you are not using")],
+            type: "loom.tier-table",
+            props: { columns: "three", density: "loose" },
+            children: PLANS.map((plan) => (plan.featured ? litTier(ids, plan) : tierNode(ids, plan))),
           }),
-          buildElement(ids, {
-            type: "loom.prose",
-            props: { tone: "muted", measured: true },
-            children: [buildText(ids, "Every plan includes the whole product. What changes is how many of you there are.")],
-          }),
-        ]),
-        buildElement(ids, {
-          type: "loom.tier-table",
-          props: { columns: "three", density: "loose" },
-          children: PLANS.map((plan) => tierNode(ids, plan)),
-        }),
-      ],
-    }),
+        ],
+      })
+    ),
 }

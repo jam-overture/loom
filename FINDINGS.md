@@ -8,6 +8,108 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken, no band ships one, and this is the next run's input
+rather than anybody's blocker
+
+Found by putting a backdrop behind the four figures of `metricsBand` and
+photographing it, which is the whole of the evidence and is why the band went
+back to what it was.
+
+The metrics band is the shortest composition in the catalogue: a full-width
+strip about **170 pixels** tall. All five paints were shot in it, under both
+starter palettes, at 1280 and 390:
+
+| paint | `editorial` | `bold` |
+| --- | --- | --- |
+| `grid` | nothing at all | nothing at all |
+| `dots` | a dotted texture over the numbers, legible but noisy | faint, and it reads as speckle rather than as a lattice |
+| `spotlight` | **a grey smear across the figures** | a warm band of light — the one near-miss |
+| `aurora` | **a grey blob beside "4 min"** | nothing at all |
+| `rays` | **a grey starburst that reads as an artifact** | visible, and it reads as a rendering fault in a strip |
+
+Two different failures and they have the same cause. The **ruled** paints mask
+themselves with `radial-gradient(ellipse at 50% 50%, black 0%, transparent
+72%)`, which is fully opaque only at the centre point, so in a short box there
+is no region left where a 1px `border-subtle` line survives the mask. The
+**glow** paints are `min(46rem, 100%)` fields under a `closest-side` mask: in a
+short box the shorter side is the height, so the field is small and the colour
+concentrates — which is exactly what `backdrop.ts` already warns about in its
+`AURORA_OPACITY` comment, *"spread out it reads as atmosphere; concentrated it
+reads as dirt"*, arriving from the band's height rather than from the palette's
+chroma.
+
+**Nothing failed and nothing could have.** `pnpm verify` was green with the
+backdrop in place; it renders as well in a strip as in a band, produces no
+diagnostic, and passes every palette assertion. The only instrument that sees it
+is a photograph.
+
+**Why this is filed rather than fixed.** `backdrop.ts` states a rule it reached
+the same way — *a paint is brightest at the middle of its band and reaches
+nothing at every edge*, written on 11 September after short bands produced
+visible defects — and that rule is what makes these paints safe at *any* height
+and useless at a small one. Changing it is a design decision about the whole
+paint vocabulary, not a tweak to one band, and it wants its own run and its own
+contact sheet. What a next run needs to decide, in this order:
+
+- whether a mask should be sized by the **longer** side rather than the shorter,
+  so a wide short band gets a wide soft field instead of a small concentrated
+  one;
+- whether the ruled paints' `72%` reach should depend on the box at all, given
+  that a blueprint has no reason to fade in a band that is all edge;
+- or whether the honest answer is that **atmosphere requires area** and the
+  vocabulary should say so, leaving a short band to the treatments that do not
+  need it.
+
+The third is the cheapest and may be right.
+[0174](decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md)
+already carries the consequence as a rule for the catalogue — a backdrop needs
+space between the band's objects to be seen in — so nothing is waiting on this.
+
+---
+## 2026-09-20 — no catalogue entry can put one atmosphere behind several bands
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — and it is the first thing in this lane whose fix would be an escalation,
+which is why it is written down before anybody reaches for it
+
+`loom.backdrop`'s own header names the use a page actually wants and this
+catalogue cannot express:
+
+> It also puts atmosphere where a page actually wants it, which is rarely around
+> exactly one band: a backdrop can hold three sections at once so the light runs
+> behind all of them, and **no prop on a band can express that**.
+
+No *composition* can express it either, and for a structural reason rather than
+an oversight. A `Composition` is a pure function to **one** `ElementNode` and
+`planComposition` emits **one** `insert` under one parent
+([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md),
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)).
+A band that wanted to light itself and the two bands after it would have to
+reach nodes it did not build, which is a `move` of somebody else's subtree — and
+a catalogue that emitted one would be the parallel channel into the tree this
+lane's brief forbids by name.
+
+`pricingBand` is as far as the rule and the shape together reach: it is rooted
+in a `loom.backdrop` because its section paints no ground of its own, so the
+atmosphere holds that band and stops at its edge.
+
+**What it would take, and why none of it is obviously right.** A page-level
+member of the catalogue — *the light behind the middle of the page* — is a
+second kind of entry with a second insertion rule, and the moment one exists the
+phrasebook has two shapes in it. That is `COMPOSITION_PARTS`'s question one
+level up and 0171's bar does not reach it, because what is being added is not a
+part. **Anything here is `ARCHITECTURAL — needs review`**: it changes what a
+catalogue entry *is*, which is the one thing 0120 settled.
+
+Not urgent and not blocking. A page that wants it inserts a `loom.backdrop` by
+hand or has a model propose one, and that node is judged by the ordinary rules
+like any other — the catalogue declining to ship one is not the library refusing
+one.
+
+---
 ## 2026-09-19 — what an empty `unread` asserts is one clause narrower than 0169 says, and the narrower claim is the one that holds
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
