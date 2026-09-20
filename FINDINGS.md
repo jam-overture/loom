@@ -8,6 +8,85 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-20 — `main` in a fresh session clone is fifty-one commits behind `origin/main`, and the procedure says to branch off it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+caught here by one `grep`, and it would have reverted three weeks of four lanes'
+work inside a pull request that looked like a nine-file diff
+
+Step 3 of the procedure in `docs/routines.md`, and of every routine brief, says
+**branch off `main`**. In this session that is a rewind.
+
+```
+$ git log --oneline -1           # the checkout the session opens in
+0aa38ef Lessons: 27, the fact a sibling holds …  (#350)
+
+$ git log --oneline -1 main      # the ref the procedure names
+f62b9bc Lessons: 18 repaired …                    (#299)
+```
+
+`main` and `origin/main` both pointed at **f62b9bc**, fifty-one commits behind
+the tree the session was actually opened on. `git checkout -b demo-23 main`
+succeeds, says nothing, and lands you on a three-week-old working tree — this run
+noticed only because the files it had read minutes earlier came back without the
+components another run added on 19 September.
+
+**What it would have cost if it had not been noticed.** Every commit between the
+two is a change by another lane. A branch cut from the stale ref carries all of
+them as deletions, and a pull request against `main` would therefore propose
+reverting three weeks of four lanes' work — while reading, in the diff view, as
+whatever small unit the run actually wrote. `pnpm verify` would be green, because
+the old tree was green when it was `main`.
+
+**What this run did instead**, and it is two commands rather than one:
+
+```bash
+git fetch origin main
+git checkout -B <branch> origin/main
+```
+
+`origin/main` after an explicit fetch is the only ref in the repository that is
+known current. `main` is whatever the clone was left holding.
+
+**Recommend** a paragraph in `docs/routines.md` beside *Reading the merge gate*,
+which is the other entry about a thing a **run** does rather than a thing the
+repository contains — and the same shape of trap, in that nothing fails and the
+output looks right. Filed for the framework routine because `docs/routines.md` is
+its file; the briefs say `main` too, so the maintainer may want the sentence in
+both places.
+
+---
+## 2026-09-20 — a change that structurally reverses the one before it is still described as an arrival
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-23-back-the-way-it-came`, and not reachable from any button
+this surface currently offers
+
+`put-back.ts` reads a change as putting something back when its **settings** are
+the exact reverse of the last change's. That covers the two toggles a visitor can
+press, and it is the whole of what the 14 September finding asked for.
+
+It does not cover the structural mirror of the same thing: an `insert` that puts
+back exactly what the last change `remove`d, asked for as an ordinary change
+rather than through **Put it back**. The record for that reads *“Something new
+went onto the page”* over content the visitor watched come off it — which is the
+defect `restoringOperation` was written for, reached the one way its provenance
+check cannot see.
+
+**Not reachable today**, which is why it is filed rather than built. The five
+presets offer one removal and one insert and they are about different parts of
+the page, so nothing in the panel can produce it; free text and a model key can,
+and a sixth preset would. Both are things that will exist.
+
+**The shape that would close it** is the same comparison one level up: the
+inverse of the last change's delta is already on its record
+(`reversibility.inverseOperations`), and it is there as *strings*. Comparing
+operations rather than their descriptions needs the delta itself frozen on the
+record beside `settingsMoved`, which is a bigger field for a smaller case — so
+the recommendation is to wait until something can actually produce it, and to
+take the whole delta rather than a second special case when it does.
+
+---
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
@@ -1265,8 +1344,31 @@ There is also a third option nobody has to choose between: make `rankOf` refuse
 to answer `-1`.
 ## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
-honest limit of the unit that landed beside it
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-23-back-the-way-it-came`** (20 September) — shape **(2)** taken, and taken
+further than the entry expected.
+
+The recommendation was a new sentence saying *which press this was*. What landed
+writes no new sentence at all: the demo already had a whole vocabulary for a
+change that puts something back — *“The whole page went back to how it looked”*
+on the card, *“Changed back”* on the mark — and it was reachable only by pressing
+**Put it back**, because `restoring` was read off provenance (`isUndo`).
+`_lib/put-back.ts` computes the other way of getting there, and
+`putsSomethingBack` joins the two so the card, the mark and the *would* sentence
+cannot disagree.
+
+**Shape (1) is untouched and still `Loom primitives`'.** Naming the values —
+*“the top band went from the soft wash to the flat panel”* — remains the truest
+answer and remains a registry question. This closes the *direction*, not the
+vocabulary: a stranger is now told the page went back, and still not what it went
+back to.
+
+**And one limit was found while building, narrower than the entry's (3).** The
+reading is refused when anything moved the page in between. Press the palette,
+then the band, then the palette again and the card says what it said before —
+because *“the whole page went back to how it looked”* over a page still carrying
+a repainted band is a sentence a stranger can see is false. Asserted both ways,
+in `put-back.test.ts` and over the write path in `pipeline.test.ts`.
 
 `demo-17-what-the-record-did` gives a landed card the sentence it never had:
 what the change did to the page, in the words on the page. For an insert, a

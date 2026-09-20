@@ -100,6 +100,31 @@ export const isUndo = (record: ChangeRecord): boolean =>
   record.interpretation?.interpreter === REVERT_INTERPRETER
 
 /**
+ * Whether this change put something back, however the visitor got there.
+ *
+ * **Two ways, and a reader cannot tell them apart — which is the argument for
+ * one predicate.** One is the undo above: the control said *Put it back*, and
+ * the runtime stamped the provenance to say so. The other is a second press of a
+ * toggle: nobody asked for an undo, the settings simply went back where the last
+ * change moved them from, and `put-back.ts` is what notices. Both leave a page
+ * that looks the way it looked before, and the surface has exactly one
+ * vocabulary for that — *“The whole page went back to how it looked”* on the
+ * card, *“Changed back”* on the mark.
+ *
+ * So the join is here, next to `isUndo`, rather than in each of the three places
+ * that were already reading `isUndo`. The rule this file has followed since it
+ * was written is that a claim made in three places is read from one: a mark
+ * saying the band is new over a card saying it went back would be the same
+ * defect that put `isUndo` here in the first place, reached from the other side.
+ *
+ * It is a fact about the record rather than about the list, so it takes no
+ * history: `wentBack` was frozen when the ask was made, against the history as
+ * it stood then.
+ */
+export const putsSomethingBack = (record: ChangeRecord): boolean =>
+  isUndo(record) || record.wentBack === true
+
+/**
  * The line at the top of the card, and which control it quotes.
  *
  * An undo is quoted by the words on the button that raised it, not by the
