@@ -1,10 +1,21 @@
+import type { ElementNode, LoomNode } from "@loom/runtime"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { JOURNEY, ordinal, PLAIN_WORDS, PLAIN_WORDS_LABEL, spell, spellCapitalised, STEPS } from "./journey"
+import {
+  JOURNEY,
+  ordinal,
+  PLAIN_WORDS,
+  PLAIN_WORDS_GLOSSED,
+  PLAIN_WORDS_LABEL,
+  spell,
+  spellCapitalised,
+  STEPS,
+} from "./journey"
 import { GLOSSARY } from "./pages/how-it-works"
 import { pageTreeFor, renderTree, trailFor } from "./render"
 import { HOME, HOW_IT_WORKS, DEFAULT_THEME, type SiteRoute } from "./site"
+import { wordsOf } from "./words"
 
 /**
  * The site says one number about itself.
@@ -192,5 +203,136 @@ describe("spelling a count", () => {
     expect(ordinal(1)).toBe("first")
     expect(ordinal(5)).toBe("fifth")
     expect(ordinal(6)).toBe("sixth")
+  })
+})
+
+/**
+ * The band of plain words, which is four `loom.feature`s as of 20 September.
+ *
+ * It was a `loom.logo-cloud` of four `loom.logo`s until then — the primitive
+ * for *the companies who use us*, holding a vocabulary instead of a customer
+ * list. Nothing was wrong with the words and nothing here could see what was:
+ * the band photographed as an empty strip, and four verbs with no object are
+ * four words a stranger has not been told anything by.
+ *
+ * What the assertions below hold is the thing that is easy to lose again, and
+ * it is not the primitive. It is that **a line under a word has to say
+ * something the sentence two hundred pixels above it does not already say.**
+ * The first draft of *Record* failed it — *who asked, what moved, and which of
+ * your rules let it through*, against a hero promising *a record of who asked,
+ * what moved, and how to put it back* — and it failed it in the way that is
+ * hardest to catch by reading, because both sentences are true and each is
+ * good on its own.
+ */
+describe("the four plain words, and the line each one carries", () => {
+  const findByType = (node: LoomNode, type: string): ElementNode | undefined =>
+    node.kind === "element" && node.type === type
+      ? node
+      : node.kind === "text"
+        ? undefined
+        : node.children.reduce<ElementNode | undefined>(
+            (found, child) => found ?? findByType(child, type),
+            undefined
+          )
+
+  /** Words alone: what two sentences share is not their punctuation. */
+  const runsOf = (text: string, length: number): readonly string[] => {
+    const words = text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((word) => word !== "")
+
+    return words
+      .slice(0, Math.max(0, words.length - length + 1))
+      .map((_, at) => words.slice(at, at + length).join(" "))
+  }
+
+  const homeTree = async () => pageTreeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+
+  it("gives every word a line, and renders both", async () => {
+    const markup = await markupOf(HOME)
+
+    expect(PLAIN_WORDS_GLOSSED).toHaveLength(PLAIN_WORDS.length)
+
+    for (const { word, line } of PLAIN_WORDS_GLOSSED) {
+      expect(line.length).toBeGreaterThan(40)
+      expect(markup).toContain(`>${word}<`)
+      expect(markup).toContain(line)
+    }
+  })
+
+  /**
+   * The one the first draft failed.
+   *
+   * Five words is long enough that an ordinary shared phrase — *your rules*,
+   * *the page* — passes, and short enough that a clause carried over from the
+   * hero does not.
+   */
+  it("never repeats a five-word run of the band above it", async () => {
+    const hero = findByType((await homeTree()).root, "loom.hero")
+
+    expect(hero).toBeDefined()
+
+    /**
+     * `wordsOf` rather than a walk written here: it reads prose *props* as well
+     * as text nodes, so the hero's eyebrow counts as the band above — and the
+     * walk this test first carried read `node.text` on a node whose field is
+     * `value`, which no assertion about a gloss would ever have caught. The
+     * floor under the count below is why it was caught at all.
+     */
+    const above = wordsOf(hero as LoomNode)
+    const aboveRuns = new Set(runsOf(above, 5))
+
+    expect(aboveRuns.size).toBeGreaterThan(20)
+
+    for (const { word, line } of PLAIN_WORDS_GLOSSED) {
+      const repeated = runsOf(line, 5).filter((run) => aboveRuns.has(run))
+
+      expect({ word, repeated }).toEqual({ word, repeated: [] })
+    }
+  })
+
+  /**
+   * The band's own rule, one layer below the label the test above this file
+   * already holds: a line may not smuggle back the step count the label was
+   * made to stop claiming.
+   */
+  it("numbers nothing, and calls nothing a step", () => {
+    const counts = ["two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+
+    for (const { word, line } of PLAIN_WORDS_GLOSSED) {
+      const said = line.toLowerCase()
+
+      expect({ word, step: said.includes("step") }).toEqual({ word, step: false })
+      expect({ word, digits: /\d/.test(line) }).toEqual({ word, digits: false })
+
+      for (const count of counts) {
+        expect({ word, count, said: new RegExp(`\\b${count}\\b`).test(said) }).toEqual({
+          word,
+          count,
+          said: false,
+        })
+      }
+    }
+  })
+
+  /**
+   * Plain rather than card, and it is a judgement about the page rather than
+   * about the band: the mosaic further down is the front door's one wall of
+   * cards, and a second one directly under the hero makes the first screen and
+   * a half read as a specification sheet.
+   */
+  it("is laid out plainly, so it does not become the page's second card grid", async () => {
+    const grid = findByType((await homeTree()).root, "loom.feature-grid")
+
+    expect(grid).toBeDefined()
+    expect((grid as ElementNode).children).toHaveLength(PLAIN_WORDS.length)
+
+    for (const child of (grid as ElementNode).children) {
+      expect(child.kind).toBe("element")
+      expect((child as ElementNode).type).toBe("loom.feature")
+      expect((child as ElementNode).props["surface"]).toBe("plain")
+    }
   })
 })

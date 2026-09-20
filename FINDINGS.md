@@ -27563,3 +27563,131 @@ that are not a screen.
 `ruleSentence`'s missing fallback reachable, which is the correction directly
 above; and it is a second reason `HoldError` wants a code that distinguishes a
 parse failure, which is the finding directly above that.
+
+---
+## 2026-09-20 — every hero on this site paints its backdrop on top of its own headline, and the fix is one line the sibling primitive already carries
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — visible on all ten pages of the marketing site and on the demonstration's
+own page, and invisible to every assertion in the repository
+
+`loom.hero`'s painted backdrops are drawn **over** the heading, the copy and the
+actions rather than behind them. Under `bold` the grid's 1px lines cross an 88px
+headline and read as a strikethrough through *components,* and *Loom creates*;
+they also cross the yellow primary button. Under `minimal` the same lines are
+faint enough to look like a rendering artifact rather than a decision.
+
+It is not a subtle stacking question. It is the one CSS rule everybody meets
+once:
+
+```ts
+// backdrop.ts — every paint
+{ position: "absolute", inset: "0", pointerEvents: "none" }   // and no z-index
+
+// loom.hero.ts — the text column beside them
+createElement("div", { style: { /* …no position, so `static` */ } }, …)
+```
+
+A positioned element with `z-index: auto` paints **above** non-positioned
+in-flow content whatever the DOM order, so the layers win. `isolation: isolate`
+on the section does not help — it bounds the stacking context, it does not order
+what is inside it.
+
+**The sibling primitive gets this right and says why**, which is what makes this
+an omission rather than a difference of opinion:
+
+```ts
+// loom.backdrop.ts:140
+createElement("div", { style: { position: "relative", zIndex: 1 } }, children)
+```
+
+…under a comment reading *"stops being enough the moment a child positions
+itself"*. `loom.hero` composes the same `backdropLayers()` and has no such
+wrapper.
+
+**Why nothing caught it, which is the part worth keeping.** `pointerEvents:
+"none"` means the layers are transparent to hit-testing: `elementFromPoint` over
+a struck-through glyph still answers `H1`, every click still lands, every
+assertion about markup, colour, order and width passes, and the palette tests
+are green. The only instrument that sees it is a photograph — the same
+conclusion `Loom primitives` reached on 19 September about the backdrop paints
+on a short band.
+
+**Blast radius.** Every hero this repository composes uses a painted backdrop:
+all ten `(marketing)` pages use `grid`, and `(demo)`'s clinic page uses `aurora`.
+The front door is the worst case because its headline is the largest type on the
+site.
+
+One thing to decide rather than assume: the `grid` paint is the only one whose
+artifact reads as *damage* rather than as atmosphere, because it is made of hard
+1px lines. Fixing the layering fixes all five at once, so this is not an argument
+for withdrawing a paint.
+
+This lane is not working around it. Swapping the front door to an unpainted
+backdrop would hide one page's symptom and leave the other ten, and the fix is
+one line in a file this lane may not open.
+
+---
+## 2026-09-20 — the front door's first screen has nothing to press on it, and the reason is that a headline and a paragraph share one measure
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — measured in Chromium against `next start` on `main` at `1abfbd7`,
+three palettes, and it cannot be fixed from a composition
+
+`loom.hero` caps its text column at `TEXT_MEASURE = "44rem"`, one constant
+covering the heading slot and the prose beneath it. **A measure written as a
+length is a measure only at one font size.** 44rem is a good measure for body
+text; applied to a headline it is this:
+
+| palette | headline | what 44rem gives it |
+| --- | --- | --- |
+| `minimal` | 72px | **four lines of 10, 11, 12 and 12 characters** |
+| `bold` | 88px | four lines of 10, 11, 12, 12 |
+| `editorial` | 72px | three lines of 10, 16, 20 |
+
+The maintainer's line is 48 characters. It is being set ten characters to a
+line, in a 704px column inside a 1280px page. The primitive's own comment
+defends the constant against the opposite failure — *"a headline set across 68
+characters reads as a paragraph"* — which is right, and 10 is as far past the
+other end.
+
+**What it costs, which is the reason this is filed rather than noted.** The
+front door's two actions are the only thing on the first screen a visitor can
+act on, and they are not on it:
+
+| | first control at | 1280×900 | 1366×768 |
+| --- | --- | --- | --- |
+| `minimal` | top 857, bottom 923 | **sliced by the fold** | **89px below it** |
+| `bold` | top 912 | **entirely below the fold** | below it |
+| `editorial` | top 746 | visible | **below it** |
+
+At 390×844 the first control is at 1078, 234px below the fold. 1366×768 is the
+commonest laptop screen there is.
+
+**What a headline measure would buy**, measured by lifting the cap on the
+heading's own ancestors and leaving the prose at 44rem:
+
+| heading measure | `minimal` | `bold` |
+| --- | --- | --- |
+| 44rem (today) | 4 lines, control at 857 | 4 lines, at 912 |
+| 52rem | 3 lines, at 775 | 3 lines, at 811 |
+| **58rem or wider** | **2 lines, at 692** | 3 lines, at 811 |
+
+Two suggestions, both yours to weigh:
+
+- **A separate measure for the heading slot.** The numbers above are the whole
+  argument; 58rem is where the front door's headline stops breaking mid-phrase.
+  A measure in `ch` would be the principled version — it is the unit that means
+  *characters* — and it is a bigger change, because `ch` resolves against the
+  element's own font and every palette sets a different one.
+- **`stature` should govern the block padding, not only `minHeight`.** Today
+  `tall` sets `minHeight: 78vh` and nothing else. On this page the content is
+  880px against a 702px floor, so **`stature: "tall"` is a no-op on the front
+  door** — the composition asks for a tall hero and the height it gets comes
+  entirely from `paddingBlock: space(8)` and the copy. A `stature` that moved the
+  padding would give a composition the lever it currently only appears to have.
+
+Filed rather than worked around because both levers are in `src/primitives/`.
+What this lane can reach — the copy's length, the prose size, the action scale —
+buys at most 80px of the 150–250 needed, and would spend the site's core promise
+to do it.
