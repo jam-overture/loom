@@ -14,7 +14,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
 import { SIGN_IN_LABEL, siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
-import { PLAIN_WORDS, PLAIN_WORDS_LABEL } from "../journey"
+import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
 import { asDataBand } from "./as-data"
@@ -186,14 +186,53 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
  * cheapest possible way to lose somebody. The words were right; the noun was
  * not. `journey.ts` owns both lists now and `journey.test.ts` holds this band
  * to naming neither a step nor a number of its own.
+ *
+ * **And each word says something, as of 20 September.** The words survived that
+ * run and their rendering did not: four muted nouns in a `loom.logo-cloud`, the
+ * primitive for *the companies who use us*, photographing as an empty strip
+ * between the tallest band on the site and the one it exists to introduce. The
+ * reasoning is in `PLAIN_WORDS_GLOSSED`, including why the line under each word
+ * may not restate the paragraph two hundred pixels above it.
+ *
+ * `density: "tight"` and `surface: "plain"` are the two props that keep this a
+ * band rather than a wall: the mosaic of four cards further down is the page's
+ * one card grid, and a second one directly under the hero would make the first
+ * screen and a half read as a specification sheet.
  */
 const vocabulary = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
-    type: "loom.logo-cloud",
-    props: { label: PLAIN_WORDS_LABEL, align: "center" },
-    children: PLAIN_WORDS.map((name) =>
-      buildElement(ids, { type: "loom.logo", props: { name } })
-    ),
+    type: "loom.section",
+    /**
+     * A band with an eyebrow and no heading, which is what this one is.
+     *
+     * The label was a centred `label` prop while the band was a
+     * `loom.logo-cloud`, and a stacked paragraph for about an hour after that.
+     * Both were wrong for the same reason and the suite said so twice: a band
+     * of this page is a `loom.section`, and everything that reads this page as
+     * a page — `outline.ts` naming the bands a visitor meets, `BAND_TYPES`
+     * deciding what a reader signal counts, `asks.ts` finding the band a
+     * request is about — finds a band by its eyebrow or its label and finds
+     * nothing on a bare stack. The row of words had been the one band of the
+     * site's most-read page that was none of those things.
+     *
+     * So it is a section now, with no heading slot: the words *are* the
+     * headings. `loom.section` renders that case on purpose (its `heading ===
+     * undefined` branch), and the eyebrow is the same counted string it always
+     * was rather than a second copy in `bands.ts`.
+     */
+    props: { width: "wide", eyebrow: PLAIN_WORDS_LABEL },
+    children: [
+      buildElement(ids, {
+        type: "loom.feature-grid",
+        props: { columns: "four", density: "tight" },
+        children: PLAIN_WORDS_GLOSSED.map(({ word, line }) =>
+          buildElement(ids, {
+            type: "loom.feature",
+            props: { title: word, body: line, surface: "plain" },
+          })
+        ),
+      }),
+    ],
   })
 
 /**
