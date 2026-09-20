@@ -4,7 +4,15 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-45-a-control-somebody-else-can-close`
 **Section:** §4h — the behaviour seam
-**Pull request:** #TBD · **Preview:** #TBD
+**Pull request:** [#353](https://github.com/jam-overture/loom/pull/353) ·
+**Preview:** https://loom-git-framework-45-a-cont-3081f5-jpizzolato36-6341s-projects.vercel.app
+— deployment **Ready** on `818ad03`, the branch's only commit at the time of
+writing. Published unverified: `*.vercel.app` is off this sandbox's egress
+allowlist and the proxy refuses the tunnel, the same standing 19 August limit
+#349, #350, #351 and #352 all cite. **There is nothing new on it to look at** —
+nothing places either control yet, deliberately, because `src/primitives/` is
+another lane's. The four pictures below were taken against a locally served,
+hydrated page instead, and the harness pressed the buttons.
 
 ![the panel open, with the cross inside it](2026-09-20-framework-a-control-somebody-else-can-close-open.png)
 
