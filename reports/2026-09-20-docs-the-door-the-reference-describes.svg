@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" role="img" aria-labelledby="t d">
+  <title id="t">Two files from one compiler, and the question each instrument asks</title>
+  <desc id="d">The runtime source compiles to a declarations file and a JavaScript file. The API reference is generated from the declarations; a reader imports the JavaScript. extract.test.ts asks whether the page is what the generator produces. offered.test.ts asks whether the door hands back what the page says.</desc>
+
+  <style>
+    :root { color-scheme: light dark; }
+    .bg   { fill: #ffffff; }
+    .ink  { fill: #14151a; }
+    .mute { fill: #5d6570; }
+    .box  { fill: #ffffff; stroke: #d3d7dd; }
+    .fill { fill: #f4f5f7; stroke: #d3d7dd; }
+    .panel{ fill: #f7f8f9; stroke: #d3d7dd; }
+    .arrow{ fill: #b6bcc5; }
+    .line { stroke: #b6bcc5; }
+    .newf { fill: #147a55; }
+    .new  { stroke: #147a55; }
+    .newbox { fill: #e9f6f0; stroke: #147a55; }
+    .disc { fill: #ffffff; stroke: #5d6570; }
+    .discink { fill: #5d6570; }
+    @media (prefers-color-scheme: dark) {
+      .bg   { fill: #0e0f12; }
+      .ink  { fill: #eceef1; }
+      .mute { fill: #98a0ab; }
+      .box  { fill: #15171b; stroke: #333840; }
+      .fill { fill: #1b1e23; stroke: #333840; }
+      .panel{ fill: #16181c; stroke: #333840; }
+      .arrow{ fill: #4a515b; }
+      .line { stroke: #4a515b; }
+      .newf { fill: #4ade80; }
+      .new  { stroke: #4ade80; }
+      .newbox { fill: #12261c; stroke: #4ade80; }
+      .disc { fill: #0e0f12; stroke: #98a0ab; }
+      .discink { fill: #98a0ab; }
+    }
+    text { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+    .h  { font-size: 25px; font-weight: 700; }
+    .sub{ font-size: 15px; }
+    .lb { font-size: 16px; font-weight: 600; }
+    .sm { font-size: 13.5px; }
+    .q  { font-size: 15.5px; font-weight: 700; }
+    .num{ font-size: 13px; font-weight: 700; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1200" height="640"/>
+
+  <text class="ink h" x="40" y="46">Two files, one compiler — and the question each instrument asks</text>
+  <text class="mute sub" x="40" y="72">The reference is read from the declarations. A reader imports the JavaScript. Nothing held those two against each other.</text>
+
+  <!-- source -->
+  <rect class="box" x="40" y="228" width="196" height="74" rx="8"/>
+  <text class="ink mono lb" x="58" y="260">src/sdk/</text>
+  <text class="ink mono lb" x="58" y="284">catalogue.ts</text>
+
+  <!-- split -->
+  <path class="line" d="M236 265 L300 265 L300 175 L366 175" fill="none" stroke-width="1.6"/>
+  <path class="line" d="M236 265 L300 265 L300 355 L366 355" fill="none" stroke-width="1.6"/>
+  <path class="arrow" d="M362 169 L376 175 L362 181 Z"/>
+  <path class="arrow" d="M362 349 L376 355 L362 361 Z"/>
+  <text class="mute sm mono" x="252" y="254">tsc</text>
+
+  <!-- declarations lane -->
+  <rect class="fill" x="380" y="142" width="230" height="66" rx="8"/>
+  <text class="ink mono lb" x="398" y="172">dist/…/catalogue.d.ts</text>
+  <text class="mute sm" x="398" y="194">what a type-checker sees</text>
+
+  <!-- module lane -->
+  <rect class="fill" x="380" y="322" width="230" height="66" rx="8"/>
+  <text class="ink mono lb" x="398" y="352">dist/…/catalogue.js</text>
+  <text class="mute sm" x="398" y="374">what a program sees</text>
+
+  <!-- generator -->
+  <path class="line" d="M610 175 L660 175" stroke-width="1.6"/>
+  <path class="arrow" d="M656 169 L670 175 L656 181 Z"/>
+  <rect class="box" x="672" y="142" width="152" height="66" rx="8"/>
+  <text class="ink lb" x="690" y="172">the generator</text>
+  <text class="mute sm mono" x="690" y="194">docs:api</text>
+
+  <!-- page -->
+  <path class="line" d="M824 175 L884 175" stroke-width="1.6"/>
+  <path class="arrow" d="M880 169 L894 175 L880 181 Z"/>
+  <rect class="box" x="896" y="142" width="264" height="66" rx="8"/>
+  <text class="ink lb" x="914" y="170">the page a reader reads</text>
+  <text class="mute sm mono" x="914" y="192">/docs/api-reference/sdk</text>
+
+  <!-- door -->
+  <path class="line" d="M610 355 L884 355" stroke-width="1.6"/>
+  <path class="arrow" d="M880 349 L894 355 L880 361 Z"/>
+  <rect class="box" x="896" y="322" width="264" height="66" rx="8"/>
+  <text class="ink lb" x="914" y="350">the door a reader imports</text>
+  <text class="mute sm mono" x="914" y="372">@loom/runtime/sdk</text>
+
+  <!-- marker 1: generator to page -->
+  <path class="line" d="M748 208 L748 240 L1004 240 L1004 208" fill="none" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <circle class="disc" cx="876" cy="240" r="13" stroke-width="1.4"/>
+  <text class="discink num" x="876" y="245" text-anchor="middle">1</text>
+
+  <!-- marker 2: page to door -->
+  <path class="new" d="M1028 214 L1028 316" stroke-width="2.2"/>
+  <path class="newf" d="M1022 222 L1028 208 L1034 222 Z"/>
+  <path class="newf" d="M1022 308 L1028 322 L1034 308 Z"/>
+  <circle class="newbox" cx="1028" cy="265" r="13" stroke-width="1.6"/>
+  <text class="newf num" x="1028" y="270" text-anchor="middle">2</text>
+
+  <!-- panel 1 -->
+  <rect class="panel" x="40" y="430" width="552" height="172" rx="10"/>
+  <circle class="disc" cx="72" cy="462" r="12" stroke-width="1.4"/>
+  <text class="discink num" x="72" y="467" text-anchor="middle">1</text>
+  <text class="mute q" x="94" y="467"><tspan class="mono">extract.test.ts</tspan></text>
+  <text class="ink sm" x="64" y="500">Is the page what the generator produces right now?</text>
+  <text class="mute sm" x="64" y="524">The right question about staleness, and no question at all about</text>
+  <text class="mute sm" x="64" y="544">truth: the generator produced the file, so it matches. It was green</text>
+  <text class="mute sm" x="64" y="564">on 12 September — all 28 of it — with two functions on the page</text>
+  <text class="mute sm" x="64" y="584">that the module does not carry.</text>
+
+  <!-- panel 2 -->
+  <rect class="newbox" x="608" y="430" width="552" height="172" rx="10"/>
+  <circle class="newbox" cx="640" cy="462" r="12" stroke-width="1.6"/>
+  <text class="newf num" x="640" y="467" text-anchor="middle">2</text>
+  <text class="newf q" x="662" y="467"><tspan class="mono">offered.test.ts</tspan></text>
+  <text class="ink sm" x="632" y="500">Does the door hand back what the page says it does?</text>
+  <text class="ink sm" x="632" y="524">All 16 entry points are imported and held against the pages that</text>
+  <text class="ink sm" x="632" y="544">describe them — 1,081 exports, inside every <tspan class="mono">pnpm verify</tspan>. It is</text>
+  <text class="ink sm" x="632" y="564">the only question that sees a declarations file and a module</text>
+  <text class="ink sm" x="632" y="584">disagree, which is what <tspan class="mono">export type *</tspan> made them do.</text>
+</svg>

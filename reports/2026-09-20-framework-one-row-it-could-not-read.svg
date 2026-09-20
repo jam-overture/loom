@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 660" width="920" height="660" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="920" height="660" fill="#fbfaf8"/>
+
+  <text x="32" y="38" font-size="19" font-weight="650" fill="#1c1917">One hold from a later build, and the four it was taking down with it</text>
+  <text x="32" y="60" font-size="13.5" fill="#57534e">Five changes wait on one page. The third was written by a runtime this deployment is older than, so its judgment will not</text>
+  <text x="32" y="78" font-size="13.5" fill="#57534e">parse. What the reviewer is shown, before and after.</text>
+
+  <!-- ─────────── BEFORE ─────────── -->
+  <text x="32" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">BEFORE — THE LISTING FAILS ON THE FIRST BAD ROW</text>
+
+  <rect x="32" y="136" width="400" height="216" rx="6" fill="#ffffff" stroke="#e7e5e4"/>
+  <rect x="32" y="136" width="400" height="34" rx="6" fill="#fdf4f3"/>
+  <rect x="32" y="162" width="400" height="8" fill="#fdf4f3"/>
+  <line x1="32" y1="170" x2="432" y2="170" stroke="#e7e5e4"/>
+  <circle cx="50" cy="153" r="4.5" fill="#b91c1c"/>
+  <text x="63" y="158" font-size="12.5" fill="#7f1d1d">One page couldn’t be checked.</text>
+
+  <text x="48" y="196" font-size="12.5" fill="#a8a29e">p_1c4e  ·  set the title</text>
+  <text x="48" y="222" font-size="12.5" fill="#a8a29e">p_2b7a  ·  add a services band</text>
+  <text x="48" y="248" font-size="12.5" fill="#a8a29e">p_3f2a  ·  ?</text>
+  <text x="48" y="274" font-size="12.5" fill="#a8a29e">p_4d19  ·  change the hero image</text>
+  <text x="48" y="300" font-size="12.5" fill="#a8a29e">p_5e88  ·  trim the footer</text>
+
+  <line x1="32" y1="318" x2="432" y2="318" stroke="#e7e5e4"/>
+  <text x="48" y="338" font-size="12.5" font-weight="650" fill="#7f1d1d">0 of 5 answerable</text>
+  <text x="182" y="338" font-size="12" fill="#a8a29e">— an error, not a page</text>
+
+  <text x="32" y="378" font-size="12.5" fill="#57534e">The four that parsed are in the answer the store</text>
+  <text x="32" y="396" font-size="12.5" fill="#57534e">threw away. `unavailable` is the only word the</text>
+  <text x="32" y="414" font-size="12.5" fill="#57534e">portal has for it, and it also means <tspan font-style="italic">the database</tspan></text>
+  <text x="32" y="432" font-size="12.5" fill="#57534e"><tspan font-style="italic">did not answer</tspan> — so the screen cannot say</text>
+  <text x="32" y="450" font-size="12.5" fill="#57534e">whether to wait or to go and look.</text>
+
+  <!-- arrow -->
+  <path d="M452 244 L 484 244" stroke="#78716c" stroke-width="1.5" fill="none"/>
+  <path d="M478 238 L 486 244 L 478 250 Z" fill="#78716c"/>
+  <text x="452" y="228" font-size="11" font-weight="650" fill="#78716c" letter-spacing="0.04em">0175</text>
+
+  <!-- ─────────── AFTER ─────────── -->
+  <text x="504" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">AFTER — IT SKIPS THE ROW, NAMES IT, AND PAGES PAST</text>
+
+  <rect x="504" y="136" width="384" height="216" rx="6" fill="#ffffff" stroke="#e7e5e4"/>
+
+  <text x="520" y="170" font-size="12.5" fill="#1c1917">p_1c4e  ·  set the title</text>
+  <text x="520" y="196" font-size="12.5" fill="#1c1917">p_2b7a  ·  add a services band</text>
+
+  <rect x="512" y="206" width="368" height="42" rx="4" fill="#fffbeb"/>
+  <text x="520" y="224" font-size="12.5" fill="#78350f">p_3f2a  ·  couldn’t be read</text>
+  <text x="520" y="240" font-size="11" fill="#92400e">held 12:00 · disposition · waiting will not clear it</text>
+
+  <text x="520" y="274" font-size="12.5" fill="#1c1917">p_4d19  ·  change the hero image</text>
+  <text x="520" y="300" font-size="12.5" fill="#1c1917">p_5e88  ·  trim the footer</text>
+
+  <line x1="504" y1="318" x2="888" y2="318" stroke="#e7e5e4"/>
+  <text x="520" y="338" font-size="12.5" font-weight="650" fill="#166534">4 of 5 answerable</text>
+  <text x="655" y="338" font-size="12" fill="#78716c">— 1 named where it sat</text>
+
+  <text x="504" y="378" font-size="12.5" fill="#57534e">`HoldListing` is `{ held, unreadable }`. An unreadable</text>
+  <text x="504" y="396" font-size="12.5" fill="#57534e">row is a position and a reason, so it sorts in place</text>
+  <text x="504" y="414" font-size="12.5" fill="#57534e">and names the field that disagreed. `unreadable` is</text>
+  <text x="504" y="432" font-size="12.5" fill="#57534e">now its own code, distinct from `unavailable`: one is</text>
+  <text x="504" y="450" font-size="12.5" fill="#57534e">waited out, the other is looked at.</text>
+
+  <!-- ─────────── PAGING STRIP ─────────── -->
+  <line x1="32" y1="486" x2="888" y2="486" stroke="#e7e5e4"/>
+  <text x="32" y="516" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">THE PART SKIPPING WOULD HAVE BROKEN — WHERE A PAGE RESUMES FROM</text>
+
+  <text x="32" y="546" font-size="12.5" fill="#57534e">A cursor taken from the last <tspan font-style="italic">hold that parsed</tspan> resumes in front of the row it skipped, and reports it again forever. A page</text>
+  <text x="32" y="564" font-size="12.5" fill="#57534e">whose rows were <tspan font-style="italic">all</tspan> unreadable would have no last hold at all — cursor `null`, and everything after it off the queue.</text>
+
+  <rect x="32" y="582" width="256" height="46" rx="5" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="46" y="601" font-size="11.5" fill="#1c1917">page 1 · limit 1 · read p_1c4e</text>
+  <text x="46" y="619" font-size="11" fill="#78716c">cursor → 09:00 p_1c4e</text>
+
+  <rect x="332" y="582" width="256" height="46" rx="5" fill="#fffbeb" stroke="#fde68a"/>
+  <text x="346" y="601" font-size="11.5" fill="#78350f">page 2 · read p_3f2a · nothing held</text>
+  <text x="346" y="619" font-size="11" fill="#92400e">cursor → 09:01 p_3f2a — from the row</text>
+
+  <rect x="632" y="582" width="256" height="46" rx="5" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="646" y="601" font-size="11.5" fill="#1c1917">page 3 · read p_5e88</text>
+  <text x="646" y="619" font-size="11" fill="#78716c">cursor → null · every hold seen once</text>
+
+  <path d="M292 605 L 326 605" stroke="#78716c" stroke-width="1.2" fill="none"/>
+  <path d="M320 600 L 328 605 L 320 610 Z" fill="#78716c"/>
+  <path d="M592 605 L 626 605" stroke="#78716c" stroke-width="1.2" fill="none"/>
+  <path d="M620 600 L 628 605 L 620 610 Z" fill="#78716c"/>
+</svg>

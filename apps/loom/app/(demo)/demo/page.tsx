@@ -85,7 +85,7 @@ const DemoPage = async () => {
    * produce a confident and wrong "before".
    */
   const holds = session === undefined ? undefined : await session.holds.forTree(tree.treeId)
-  const held = holds?.ok ? holds.value : []
+  const held = holds?.ok ? holds.value.held : []
 
   /**
    * The holds the page has moved past, by the record they belong to.
@@ -255,7 +255,7 @@ const DemoPage = async () => {
    * an element, which is the boundary working as intended rather than around it.
    */
   const parts = new Map<string, React.ReactNode>(
-    (holds?.ok ? holds.value : []).flatMap((held) => {
+    (holds?.ok ? holds.value.held : []).flatMap((held) => {
       const part = partInQuestion(tree, held.proposal.delta)
 
       return part === undefined

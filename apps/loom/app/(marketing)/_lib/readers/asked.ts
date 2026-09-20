@@ -26,16 +26,20 @@ import type { ReaderSignalTypes } from "@loom/runtime/signals/broadcast"
 /**
  * The bands: what a reader travels through on the way down a page.
  *
- * The opening, the sections under it, and the row of four plain words on the
- * front door — which is what the counters are interesting about, because *how
- * far down did people get* is a question about bands.
+ * The opening and the sections under it, which is what the counters are
+ * interesting about, because *how far down did people get* is a question about
+ * bands.
  *
- * **The third one was found by the test rather than by writing this list**, and
- * it is the reason the test exists: the row of words is a `loom.logo-cloud`
- * standing at the top level of the front door, so it is one of the nine bars
- * `/what-readers-do` prints and a band a reader scrolls through like any other.
- * Left out, it would have been the one band of the site's most-read page that
- * nothing counted, and nothing would have said so.
+ * **There was a third, and the test that found it is the reason it is gone.**
+ * The row of four plain words on the front door was a `loom.logo-cloud`
+ * standing at the top level of the page, so this list had to name that type to
+ * count a band a reader scrolls through like any other — found by the test
+ * rather than by writing the list, because nothing else would have said so. On
+ * 20 September that row became an ordinary `loom.section` with an eyebrow and
+ * no heading, for reasons that had nothing to do with counting, and the entry
+ * stopped being reachable the same day. Two types covering every band of every
+ * page is the shape this list should have; the third was a band wearing the
+ * wrong primitive, and the list was carrying the cost of it.
  *
  * **The menu and the foot of the page are deliberately not here**, and the
  * menu is the one that matters: the bar is `position: sticky`, so it is on
@@ -46,7 +50,7 @@ import type { ReaderSignalTypes } from "@loom/runtime/signals/broadcast"
  * where the page stops rather than something a reader chose to reach, and
  * *they got to the bottom* is already what the last section's own reading says.
  */
-export const BAND_TYPES = ["loom.hero", "loom.section", "loom.logo-cloud"] as const
+export const BAND_TYPES = ["loom.hero", "loom.section"] as const
 
 /**
  * The things a reader aims at: this site's buttons, its links, and its

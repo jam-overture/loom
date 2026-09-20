@@ -232,14 +232,37 @@ export const describeHoldStoreContract = (
       const listed = await store.forTree(mine.treeId)
       if (!listed.ok) throw new Error("expected a listing")
 
-      expect(listed.value.map((entry) => entry.proposalId)).toEqual([mine.proposalId])
+      expect(listed.value.held.map((entry) => entry.proposalId)).toEqual([mine.proposalId])
+    })
+
+    /**
+     * The half of the listing every implementation has to answer even when it
+     * has nothing to say. A store that omitted the field — or left it
+     * `undefined` when all was well — would make every caller check whether it
+     * was handed a listing or an older one, which is the branch the shape
+     * exists to remove.
+     */
+    it("reports nothing unreadable when every row parses, in both listings", async () => {
+      const store = await makeStore()
+      const held = heldProposalFixture()
+      await store.hold(held)
+
+      const listed = await store.forTree(held.treeId)
+      const page = await store.waiting()
+      if (!listed.ok || !page.ok) throw new Error("expected both listings")
+
+      expect(listed.value.unreadable).toEqual([])
+      expect(page.value.unreadable).toEqual([])
     })
 
     it("lists a tree with nothing held as empty rather than as missing", async () => {
       const store = await makeStore()
       const { tree } = sampleTree()
 
-      expect(await store.forTree(tree.treeId)).toEqual({ ok: true, value: [] })
+      expect(await store.forTree(tree.treeId)).toEqual({
+        ok: true,
+        value: { held: [], unreadable: [] },
+      })
     })
 
     /** Oldest first, because the oldest hold is the one closest to going stale. */
@@ -254,7 +277,7 @@ export const describeHoldStoreContract = (
       const listed = await store.forTree(later.treeId)
       if (!listed.ok) throw new Error("expected a listing")
 
-      expect(listed.value.map((entry) => entry.heldAt)).toEqual([earlier.heldAt, later.heldAt])
+      expect(listed.value.held.map((entry) => entry.heldAt)).toEqual([earlier.heldAt, later.heldAt])
     })
 
     /**
@@ -278,7 +301,7 @@ export const describeHoldStoreContract = (
       const page = await store.waiting()
       if (!listed.ok || !page.ok) throw new Error("expected both listings")
 
-      expect(listed.value.map((entry) => entry.proposalId)).toEqual([
+      expect(listed.value.held.map((entry) => entry.proposalId)).toEqual([
         earlier.proposalId,
         later.proposalId,
       ])
@@ -317,7 +340,10 @@ export const describeHoldStoreContract = (
     it("reports an empty deployment as an empty page rather than as a failure", async () => {
       const store = await makeStore()
 
-      expect(await store.waiting()).toEqual({ ok: true, value: { held: [], cursor: null } })
+      expect(await store.waiting()).toEqual({
+        ok: true,
+        value: { held: [], unreadable: [], cursor: null },
+      })
     })
 
     /**
@@ -396,7 +422,10 @@ export const describeHoldStoreContract = (
       await store.hold(held)
       await store.release(held.proposalId)
 
-      expect(await store.waiting()).toEqual({ ok: true, value: { held: [], cursor: null } })
+      expect(await store.waiting()).toEqual({
+        ok: true,
+        value: { held: [], unreadable: [], cursor: null },
+      })
     })
 
     it("drops a released proposal from the listing", async () => {
@@ -410,7 +439,7 @@ export const describeHoldStoreContract = (
       const listed = await store.forTree(first.treeId)
       if (!listed.ok) throw new Error("expected a listing")
 
-      expect(listed.value.map((entry) => entry.proposalId)).toEqual([second.proposalId])
+      expect(listed.value.held.map((entry) => entry.proposalId)).toEqual([second.proposalId])
     })
   })
 }

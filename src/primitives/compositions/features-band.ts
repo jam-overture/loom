@@ -38,6 +38,37 @@ import type { Composition } from "./composition.js"
  * `loom.feature`'s `icon` is a single character by design — an icon set is a
  * registry rather than a prop. These are the ones that read at tile size in
  * both starter palettes and carry no brand.
+ *
+ * ## The tiles arrive one row at a time, and nothing here declares an order
+ *
+ * Each tile is inside a `loom.reveal`, which is the first use of that primitive
+ * anywhere in the catalogue and the reason it was written
+ * ([0174](../../../decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md)).
+ * A reveal around the *grid* would fade six tiles in together, which is one
+ * thing happening; a reveal around *each tile* gives every tile a view timeline
+ * of its own, so the second row arrives when the second row is reached. On a
+ * phone, where the same six tiles are one column, they arrive one at a time —
+ * the same markup, a different cascade, and nothing measured a viewport to get
+ * it (0008).
+ *
+ * **This band earns it and most bands do not.** A cascade says *these are
+ * peers, and here they come*; a band whose children are not peers has no
+ * sequence to stagger, and a treatment on every band is a treatment that says
+ * nothing. Six interchangeable tiles is the case 0174's first clause is about.
+ *
+ * **What it costs is six wrapper nodes, and what it buys is that they are
+ * nodes.** A tile that should not move is one `remove` — of the reveal, not of
+ * the tile — which is the same bargain the rest of this catalogue makes and the
+ * reason a `stagger` prop on the grid would have been worse than a node each.
+ * It is also six nodes against the grammar budget
+ * ([0014](../../../decisions/0014-the-reply-schema-must-fit-a-grammar-budget.md)),
+ * which is the honest cost and is why this is not done to every grid band in
+ * the catalogue.
+ *
+ * `loom.reveal` gained a line the day this shipped: a wrapper between a grid
+ * and its cell has to be transparent to stretching or the row's short cards end
+ * above its tall ones. Nothing had put a reveal inside an arranger before, so
+ * nothing had found it.
  */
 const FEATURES = [
   { icon: "◆", title: "One source of truth", body: "Every change lands in one place, with the reason it was made attached to it." },
@@ -52,10 +83,10 @@ export const featuresBand: Composition = {
   id: "features",
   part: "features",
   label: "Feature grid",
-  promise: "A titled band with a lead sentence over six feature tiles that wrap to the width.",
+  promise: "A titled band with a lead sentence over six feature tiles that wrap to the width and arrive row by row as the reader reaches them.",
   rationale:
-    "A feature band is a loom.section carrying the title in its heading slot and a loom.feature-grid holding one loom.feature per claim. Each tile is a node, so a feature can be added, dropped or reordered on its own.",
-  uses: ["loom.section", "loom.heading", "loom.prose", "loom.feature-grid", "loom.feature"],
+    "A feature band is a loom.section carrying the title in its heading slot and a loom.feature-grid holding one loom.feature per claim, each inside a loom.reveal so it arrives as the reader scrolls to it. Each tile is a node, so a feature can be added, dropped or reordered on its own, and a tile that should not move is one node removed.",
+  uses: ["loom.section", "loom.heading", "loom.prose", "loom.feature-grid", "loom.reveal", "loom.feature"],
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
       type: "loom.section",
@@ -78,8 +109,14 @@ export const featuresBand: Composition = {
           props: { columns: "three", density: "loose" },
           children: FEATURES.map((feature) =>
             buildElement(ids, {
-              type: "loom.feature",
-              props: { icon: feature.icon, title: feature.title, body: feature.body, surface: "card" },
+              type: "loom.reveal",
+              props: { motion: "rise" },
+              children: [
+                buildElement(ids, {
+                  type: "loom.feature",
+                  props: { icon: feature.icon, title: feature.title, body: feature.body, surface: "card" },
+                }),
+              ],
             })
           ),
         }),

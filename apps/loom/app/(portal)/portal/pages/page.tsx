@@ -90,7 +90,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         page: nameFrom(names, listing.treeId),
         treeId: listing.treeId,
         revision: listing.revision,
-        waiting: holds.ok ? holds.value.length : null,
+        waiting: holds.ok ? holds.value.held.length : null,
       }
     })
   )

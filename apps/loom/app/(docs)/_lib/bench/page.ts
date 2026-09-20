@@ -286,7 +286,7 @@ export const openBench = async (namespace: string): Promise<Bench> => {
         throw new Error(`loom: the review queue could not be read — ${describeHoldError(queue.error)}`)
       }
 
-      return queue.value
+      return queue.value.held
     },
   }
 }
