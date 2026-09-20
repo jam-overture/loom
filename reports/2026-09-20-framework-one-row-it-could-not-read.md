@@ -4,11 +4,16 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-43-one-row-it-could-not-read`
 **Section:** §5 — the hold store; reaching §2 and the portal's front door
-**Pull request:** #347 ·
-**Preview:** _added to the pull request once Vercel reports it._ There is nothing
-new to look at beyond the figure below: this is a store seam, and the one screen
-that will show the difference is the portal's, whose own pass is filed as a
-finding rather than taken here.
+**Pull request:** [#347](https://github.com/jam-overture/loom/pull/347) ·
+**Preview:** **none — Vercel returned `Deployment was blocked`** at 09:37 UTC and
+minted no preview URL. This is not this branch's: the diff touches no deployment
+configuration (`vercel.json`, `next.config.ts`, the workspace and both
+`package.json` files are untouched), and `Loom primitives`' #346 deployed
+`Ready` from the same project 75 minutes earlier. It reads as an account-level
+gate rather than a build failure, and clearing it is the maintainer's. Raised on
+the pull request and notified. There is nothing new to look at in any case: this
+is a store seam, and the one screen that will show the difference is the
+portal's, whose own pass is filed as a finding rather than taken here.
 
 ![one hold from a later build, and the four it was taking down with it](2026-09-20-framework-one-row-it-could-not-read.png)
 
@@ -160,3 +165,18 @@ is worth one line here rather than a finding.
    count?** Filed rather than decided — see above.
 3. **Nothing here is `ARCHITECTURAL`.** No tree schema, no delta model, no
    built code to migrate, and no Accepted record contradicted.
+4. **Vercel is refusing deployments** (above). Every routine's report is
+   supposed to carry a preview URL, so if the gate holds, none of the four
+   lanes will produce one until it is cleared.
+
+## Not taken, and it is mine
+
+`Loom primitives` reported again this morning, on #346, that **Tier B is nine
+primitives behind one framework decision this lane owns** — the behaviour
+vocabulary, and with it *a container declaring a shape it asks of its children*
+(tabs, tooltip, dialog, dropdown, toast, lightbox, a pricing toggle, a segmented
+control, a radio group). **Five runs have now reported it.** It is the largest
+thing open against this lane and it is the obvious next unit; it was not taken
+today because closing two findings with a store change and opening a vocabulary
+in the same branch would be two units in one unreviewable PR. Said here so that
+the sixth report is not the first time it appears in one of mine.
