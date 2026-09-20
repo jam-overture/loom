@@ -7,33 +7,40 @@ import {
   dwellEach,
   highlightsOf,
   outOfVisits,
+  pageUse,
   plainDuration,
   reachShifts,
+  unplacedUse,
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
+import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
 
 /**
  * One page, and what people did on it.
  *
- * ## Four sentences, not a dashboard
+ * ## A handful of sentences, not a dashboard
  *
- * The counters hold nine numbers per part and a page has dozens of parts, which
+ * The counters hold ten numbers per part and a page has dozens of parts, which
  * is several hundred figures — and a screen that renders them is the portal's
  * original defect in a new place: everything at one altitude, and the reader
  * left to work out which of it matters. Vercel does not open a project on a
  * table of every request.
  *
- * So the surface is four sentences, each naming one part in a person's words:
- * the part fewest people got to, where they stayed longest, what was clicked
- * most, what was opened most. Every other number is one click down in
+ * So the surface is a short list, each line naming one part in a person's
+ * words: the part fewest people got to, where they stayed longest, how many
+ * visits did anything at all and which part saw the most of it, what was
+ * clicked most, what was opened most. Every other number is one click down in
  * `PartCounters`, in full, including the ones these sentences rounded.
  *
- * The first of the four is the one worth having. *Fewest people got to the
- * footer* is a fact about a page that its author cannot get from anywhere else
- * and can act on this afternoon.
+ * Two of them are the ones worth having. *Fewest people got to the footer* is a
+ * fact about a page that its author cannot get from anywhere else and can act
+ * on this afternoon; *twelve of the forty visits used something in the pricing
+ * band* is the same kind of fact about a **region**, which is the half this
+ * card could not say at all until the counter that is about a region was read.
+ * `WhatWasUsed` carries that argument.
  *
  * ## Why a sentence can be absent
  *
@@ -54,6 +61,16 @@ export const PageReadingCard = ({
   const previous = reading.revisions[1]
   const highlights = highlightsOf(newest)
   const shifts = previous === undefined ? [] : reachShifts(previous, newest)
+
+  /*
+   * Read here rather than inside the list, so the card holds one answer to
+   * "did anybody use this page" and cannot draw the sentence and its caveat at
+   * the same time. `unplacedUse` is undefined whenever `pageUse` is not, and
+   * the pair is the only reason a reader can tell an unused page from an
+   * unreported one.
+   */
+  const use = pageUse(newest)
+  const unplaced = unplacedUse(newest)
 
   return (
     <section className="border-edge-subtle flex flex-col gap-4 rounded-md border p-4">
@@ -92,6 +109,8 @@ export const PageReadingCard = ({
           </li>
         )}
 
+        {use !== undefined && <WhatWasUsed use={use} views={newest.views} />}
+
         {highlights.mostClicked === undefined && highlights.mostOpened === undefined ? (
           <li className="text-ink-muted">
             Nobody clicked or opened anything. Readers are looking at this page rather than
@@ -117,6 +136,8 @@ export const PageReadingCard = ({
             )}
           </>
         )}
+
+        {unplaced !== undefined && <UnplacedUseNote unplaced={unplaced} />}
       </ul>
 
       {shifts.length > 0 && previous !== undefined && (

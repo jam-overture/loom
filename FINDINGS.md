@@ -27120,10 +27120,12 @@ a reader's opinion.
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
 `Loom portal` for the second half · **Status:** the marketing half **closed** by
 `marketing-30-where-a-press-lands` — the fixture mints against a control with
-`within`, and both figures now read `engaged`. **The `Loom portal` half is still
-open**: `StoredTally.engaged` is on the reading view's rows and nothing on that
-screen reads it, so a band's line there still shows time on screen beside
-numbers that are structurally zero
+`within`, and both figures now read `engaged`. **The `Loom portal` half is
+closed too**, by `portal-31-the-part-nobody-uses` (19 September):
+`PartReading.engaged` is carried through `revisionReadings`, `pageUse` says how
+many visits did anything and which part saw the most of it, `unplacedUse` tells
+a sender that does not walk from readers who did nothing, and the per-part
+column is in the counter table
 
 Closing your 17 September finding. Shape 1 was taken —
 [0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
@@ -27645,3 +27647,73 @@ that are not a screen.
 `ruleSentence`'s missing fallback reachable, which is the correction directly
 above; and it is a second reason `HoldError` wants a code that distinguishes a
 parse failure, which is the finding directly above that.
+
+## 2026-09-19 — a shot list still cannot sign in, and `pkill` has a third way to miss the server it is aiming at
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` for the first
+half, `Loom portal` for the second · **Status:** open — the fourth picture of
+this portal taken by a private script, and a correction to this lane's own
+11 September entry
+
+**The harness half is unchanged and is re-filed only as a count.** The
+14 September entry says `pnpm shoot` cannot photograph this surface because a
+shot list is addresses and a session is not one. This run needed a private
+Playwright script again, for the same two reasons and with nothing new
+required. `Loom docs` filed the neighbouring gap on 19 September — a shot list
+can press a button and cannot type into one — so that is two lanes asking for
+input steps in a shot list within a day of each other, and this lane's ask is
+the smaller of the two: **a `signIn` step, or any way to run a script before the
+first `goto`.**
+
+**The correction is this lane's own and cost this run a picture it believed.**
+The 11 September entry says `pkill -f "next start"` kills the invoking shell,
+and recommends a kill by pid from `ps`. That is right and it is not enough:
+
+```
+$ ps -eo pid,args | grep "[n]ext start"    # matches the launcher
+$ ps -eo pid,args | grep "[n]ext-server"   # matches the process holding the port
+```
+
+`next start` execs a worker whose command line is `next-server (v16.2.12)`,
+which the launcher's own pattern does not match. So a kill by pid over
+`next start` reports success, leaves the worker holding 3210, and the restart
+fails with `EADDRINUSE` — **into a log nobody reads, because the shot script
+that follows it connects happily to the old server**. This run photographed a
+fixture it had already fixed and only noticed because the number it had changed
+had not changed.
+
+**What to match instead:** `grep -E "[n]ext-server|[n]ext start"`, and read the
+restarted server's log for `Ready` before shooting rather than for a `200` from
+the port — a `200` is exactly what the stale server returns.
+
+---
+## 2026-09-19 — no primitive declares `copy`, and the first populated picture of `/portal/readers` shows what that costs a reader
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— evidence for the standing finding of 10 September, not a second one
+
+`Loom primitives` has an open finding that 0 of 96 registered primitives declare
+`copy`. This is what it looks like on a screen, in a photograph rather than in
+an argument. Two lines of today's report:
+
+> the action `n_pricing5` was clicked 14 times — more than anything else here.
+>
+> The part that saw the most of that was the section “Pick a plan” `n_pricing7`
+> — 17 of the 36 visits that got that far used something in it.
+
+The second names its part by **what it says**. The first cannot, because a
+`loom.action`'s words live in its `label` prop and nothing has declared that
+prop to be words — so `namesInTree` finds no text under the node and the portal
+falls back to `the ${nounOf(type)}`.
+
+The fallback is working exactly as designed and the sentence is not wrong. What
+it is, is **unusable**: a pricing page with two buttons on it produces *the
+action* twice, and the reader cannot tell which of them was pressed fourteen
+times without going to the id. Every sentence in this portal that names a part
+has this failure mode, and a control is the one kind of node a reader is most
+likely to be asked about — because a control is what a press lands on.
+
+`loom.action`, `loom.button` and `loom.link` are the three where it costs the
+most and they are one declaration each. Named here rather than re-filed because
+the finding and its remedy already exist; what was missing was a picture of the
+cost.
