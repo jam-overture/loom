@@ -40,10 +40,30 @@ import { Wordmark } from "./wordmark"
  * behaviour behind it is in `_lib/framed.ts`.
  */
 export const DemoBar = ({ revision, policyId }: { readonly revision: number; readonly policyId: string }) => (
-  <header className="border-edge-subtle bg-surface-topbar flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-2.5 lg:px-5">
+  <header className="border-edge-subtle bg-surface-topbar flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1.5 border-b px-4 py-2.5 lg:gap-y-2 lg:px-5">
     <Wordmark />
 
-    <p className="text-ink-secondary min-w-0 text-xs">
+    {/*
+      * Three things on one line on a wide screen, and on a narrow one three
+      * things on **two** lines rather than three.
+      *
+      * Measured at 348px — this demonstration inside the front door's embed on
+      * a phone — the bar wrapped once per child and stood 108px tall, against
+      * 44px wide: the mark on its own line, this sentence on the next, and a
+      * two-word instrument reading `revision 0` alone on a third. That is 23%
+      * of a 465px box spent on chrome before the demonstration has said
+      * anything, on the one screen where the first control was already below
+      * the fold.
+      *
+      * So the sentence is the child that takes its own row (`basis-full`) and
+      * it takes the second one (`order-last`), which puts the mark and the
+      * instrument on the first — they are short, they are the two ends of the
+      * bar at every other width, and neither wraps. **Order and not markup:**
+      * the document still reads mark, sentence, instrument, so what a screen
+      * reader meets is unchanged and the disclosure still comes before the
+      * numbers rather than after them.
+      */}
+    <p className="text-ink-secondary order-last min-w-0 basis-full text-xs lg:order-none lg:basis-auto">
       Someone else’s page.{" "}
       <span className="text-ink-muted">
         A physiotherapy clinic that doesn’t exist — but the page is real and really changes.

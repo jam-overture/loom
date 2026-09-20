@@ -1035,13 +1035,13 @@ describe("F", () => {
 ```
 
 ```
-knobs the schema declares: 13
-keys on the parsed default: 13
+knobs the schema declares: 14
+keys on the parsed default: 14
 the same names in the same order: true
 the last three: ["confidenceFloor","autoApplyCeiling","refusalFloor"]
 ```
 
-Thirteen, agreeing, which is what you would expect and proves less than it looks.
+Fourteen, agreeing, which is what you would expect and proves less than it looks.
 Both numbers come from the same schema — one from its shape and one from a value
 it produced — so this pair would agree no matter how far a *type* above them had
 drifted. The exercise is here to make that concrete: **this is what a passing

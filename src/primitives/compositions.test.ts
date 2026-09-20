@@ -517,13 +517,22 @@ describe("what a band renders", () => {
      * A count rather than a shape, and it is the cheap half of the diagnostics
      * assertion above: a band whose nodes were dropped renders clean if the
      * dropped node was the only invalid one and nothing referenced it. The
-     * pricing band is the one worth counting — thirty-eight nodes is the number
-     * the doc comment claims, and a claim in a doc comment nobody checks is how
-     * a comment starts lying.
+     * pricing band is the one worth counting — its doc comment opens by naming
+     * the figure, and a claim in a doc comment nobody checks is how a comment
+     * starts lying.
+     *
+     * **Forty-four since 20 September**, where it was forty-two. Two nodes,
+     * both treatments, both under
+     * [0174](../../decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md):
+     * a `loom.halo` round the plan the band is selling, and a `loom.backdrop`
+     * holding the whole band. One node each for a treatment that would
+     * otherwise have been a prop on every schema that can be one of several is
+     * the wrapper argument of 0110 and 0130 paying off where it is easiest to
+     * count.
      */
     const pricing = compositionById("pricing")
     expect(pricing).toBeDefined()
-    expect(nodesIn((pricing as Composition).build(sequentialIdFactory()))).toBe(42)
+    expect(nodesIn((pricing as Composition).build(sequentialIdFactory()))).toBe(44)
   })
 })
 
@@ -928,5 +937,171 @@ describe("what a band is not", () => {
     const used = new Set<string>(STARTER_COMPOSITIONS.flatMap((composition) => composition.uses))
 
     expect([...used].filter((type) => !registered.has(type))).toEqual([])
+  })
+})
+
+/**
+ * What [0174](../../decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md)
+ * holds the catalogue to.
+ *
+ * Three treatment primitives shipped between 6 and 13 September and no band
+ * used any of them until 20 September, so nothing here existed to be kept
+ * honest before. What is checked is the half of the rule a test can reach: the
+ * refusal in its second clause, the agreement the pricing band claims in prose,
+ * and the rendering consequence the first real use uncovered.
+ *
+ * The rule's first clause — *the band's own content has already made this
+ * distinction* — is deliberately **not** asserted. It is a judgment about copy
+ * and a test that tried would either be a restatement of the three bands that
+ * pass it today, which is a list rather than a check, or a guess at what counts
+ * as a named exception, which is the rule re-decided by whoever writes the
+ * regex. The record is where that clause is enforced, and a reviewer is the
+ * thing enforcing it.
+ */
+describe("the treatments a band wears", () => {
+  const TREATMENTS = ["loom.reveal", "loom.backdrop", "loom.halo"] as const
+
+  /**
+   * A treatment outside a band may not be outside the band's own ground, which
+   * is 0174's *add, never replace* clause in the form a test can hold.
+   *
+   * `loom.section`'s tones are opaque. A backdrop wrapping a section that takes
+   * one paints behind it and a reader sees **nothing at all** — and the fix
+   * that suggests itself is to drop the tone, which trades a ground every
+   * palette can draw for a paint only some of them can. `metrics` and `cta` are
+   * the two bands that would lose most by it; both take a tone and neither may
+   * be wrapped.
+   *
+   * A band on the page's own canvas has no ground to lose, so `pricing` may be
+   * wrapped and is. The distinction is the whole of the clause, and it is worth
+   * a test rather than a sentence because both versions are one line, both
+   * render clean, and the broken one is invisible under whichever palette you
+   * happened to open.
+   */
+  it("puts no treatment outside a ground the band paints for itself", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      const root = composition.build(sequentialIdFactory())
+
+      if (!(TREATMENTS as readonly string[]).includes(root.type)) continue
+
+      for (const wrapped of root.children) {
+        const tone = wrapped.kind === "element" ? wrapped.props["tone"] : undefined
+
+        expect(
+          tone,
+          `${composition.id} wraps a ${wrapped.kind === "element" ? wrapped.type : wrapped.kind} that paints its own ground in a ${root.type}, which will draw nothing behind it`
+        ).toBeUndefined()
+      }
+    }
+  })
+
+  /**
+   * The pricing band ships its light and its ribbon on the same plan.
+   *
+   * **A claim about this band, not a rule about trees.** `loom.halo` is
+   * emphatic that the two are independent on purpose — *a halo draws the eye; a
+   * badge says why* — so a page that lights one tier and labels another is
+   * expressing something, and no schema should stop it. What a *starting*
+   * composition may not do is arrive already disagreeing with itself, which is
+   * the state this band would reach if somebody moved the badge to Enterprise
+   * and left the ring on Team. Nothing else would notice: both trees are valid,
+   * both render clean under both palettes, and the defect is a sentence about a
+   * plan pointing at the plan beside it.
+   */
+  it("lights the pricing tier that carries the ribbon", () => {
+    const band = compositionById("pricing")
+
+    expect(band).toBeDefined()
+    if (band === undefined) return
+
+    const root = band.build(sequentialIdFactory())
+
+    const tiersIn = (node: LoomNode): readonly ElementNode[] =>
+      node.kind === "text"
+        ? []
+        : [...(node.kind === "element" && node.type === "loom.tier" ? [node] : []), ...node.children.flatMap(tiersIn)]
+
+    const halosIn = (node: LoomNode): readonly ElementNode[] =>
+      node.kind === "text"
+        ? []
+        : [...(node.kind === "element" && node.type === "loom.halo" ? [node] : []), ...node.children.flatMap(halosIn)]
+
+    const halos = halosIn(root)
+    const badged = tiersIn(root).filter((tier) =>
+      tier.children.some((child) => child.kind === "slot" && child.name === "badge" && child.children.length > 0)
+    )
+
+    expect(halos, "the pricing band should light exactly one plan").toHaveLength(1)
+    expect(badged, "the pricing band should label exactly one plan").toHaveLength(1)
+
+    const lit = halos.flatMap(tiersIn)
+
+    expect(lit).toHaveLength(1)
+    expect(lit[0]?.id, "the lit plan and the labelled plan are different plans").toBe(badged[0]?.id)
+  })
+
+  /**
+   * A treatment between an arranger and its cell is transparent to stretching.
+   *
+   * `loom.feature-grid` stretches its cells to the tallest in the row so the
+   * cards' bottoms line up. A wrapper in between is the grid item now, and
+   * unless it passes the stretch on, every tile whose text is shorter than the
+   * tallest ends above the box it is in — ragged bottoms on some cards and not
+   * others, which reads as a rendering fault rather than as a design.
+   *
+   * `loom.halo` had worked this out and written it down; `loom.reveal` had not,
+   * because until `featuresBand` no tree in this repository had ever put a
+   * reveal inside an arranger. Asserted on the markup rather than on the module
+   * because it is a fact about what the browser is handed, and because the
+   * failure it catches is a style quietly dropped rather than a prop renamed.
+   */
+  it("passes a grid's stretch through every treatment the catalogue puts in a cell", () => {
+    const band = compositionById("features")
+
+    expect(band).toBeDefined()
+    if (band === undefined) return
+
+    const ids = sequentialIdFactory()
+    const { markup, diagnostics } = render(pageOf(EDITORIAL, [band.build(ids)], ids))
+    const cells = [...treeMarkup(markup).matchAll(/<div[^>]*class="[^"]*loom-reveal[^"]*"[^>]*>/g)].map(
+      (match) => match[0]
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(cells.length, "the features band should reveal each of its six tiles").toBe(6)
+
+    for (const cell of cells) {
+      expect(cell, "a revealed grid cell that does not stretch leaves its card short of the row").toContain(
+        "display:grid"
+      )
+      expect(cell).toContain("height:100%")
+    }
+  })
+
+  /**
+   * Every treatment the catalogue builds is a type it declares it uses.
+   *
+   * `uses` is already held against the subtree in both directions by the tests
+   * above, so this adds nothing for the ninety-three primitives it covers. It
+   * is written for the three it does not: a treatment is the one kind of node a
+   * band can gain in a one-line edit to a `children` array, with no new import,
+   * no new constant and nothing in the diff that looks like a new primitive —
+   * which is exactly the edit that leaves `uses` behind, and `CATALOGUE_TYPES`
+   * is derived from `uses`.
+   */
+  it("declares every treatment it builds, so the catalogue's slice can draw it", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      const built = new Set(typesIn(composition.build(sequentialIdFactory())))
+
+      for (const treatment of TREATMENTS) {
+        if (!built.has(treatment)) continue
+
+        expect(
+          composition.uses,
+          `${composition.id} builds a ${treatment} it does not declare, so a deployment taking CATALOGUE_TYPES cannot draw it`
+        ).toContain(treatment)
+        expect(CATALOGUE_TYPES).toContain(treatment)
+      }
+    }
   })
 })

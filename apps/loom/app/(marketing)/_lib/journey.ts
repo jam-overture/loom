@@ -171,7 +171,66 @@ export const ordinal = (position: number): string =>
  * So the words stay, the label stops claiming a step count, and
  * `journey.test.ts` holds the front door to it.
  */
-export const PLAIN_WORDS: readonly string[] = ["Ask", "Check", "Record", "Undo"]
+export type PlainWord = {
+  /** The word itself, which is the whole point: a stranger already knows it. */
+  readonly word: string
+  /**
+   * The one line that makes the word mean something here rather than anywhere.
+   *
+   * **Each line is the fact the hero's paragraph does not already carry.** That
+   * constraint is what took the band from four grey nouns to a band worth its
+   * place, and it is easy to lose: the sentence above this band says *ask in
+   * your own words · checked against your rules · a record of who asked, what
+   * moved and how to put it back*, which is these four words in a row. A gloss
+   * restating it would be the same claim printed twice, one screen apart, and
+   * every line below was written by asking what a competitor could not say
+   * under this word.
+   *
+   * So *Ask* says who may, *Check* says whose rules, *Record* says what the
+   * record is made of, and *Undo* says when the reversal is worked out. None of
+   * those four is in the paragraph above.
+   */
+  readonly line: string
+}
+
+/**
+ * The four words, each with the line that earns it.
+ *
+ * They were rendered as a `loom.logo-cloud` until 20 September — four bare
+ * nouns in muted grey under a small label, which is the primitive for *the
+ * companies who use us* holding a vocabulary instead. It photographed as an
+ * empty strip, and a stranger meeting *Ask · Check · Record · Undo* with no
+ * object to any of the four verbs has been told nothing.
+ *
+ * `loom.feature` is the one that was built for this — a title and a sentence,
+ * with `surface: "plain"` for exactly the case where the band is not a wall of
+ * cards. **`loom.milestone-row` is the tempting one and it is the wrong one**:
+ * it numbers its entries and draws a connector between them, which would put a
+ * *fourth step* on the first screen one click above a page headed *Five steps,
+ * every time, in the same order* — the defect the paragraph above this was
+ * written to close, redrawn in a primitive rather than said in a label.
+ */
+export const PLAIN_WORDS_GLOSSED: readonly PlainWord[] = [
+  {
+    word: "Ask",
+    line: "Not only you. A colleague, a visitor, or the page itself reacting to something it saw — and you say in advance how far each of them may go.",
+  },
+  {
+    word: "Check",
+    line: "Against rules you wrote down before anybody asked, so the answer is the same whether or not somebody is watching.",
+  },
+  {
+    word: "Record",
+    line: "Not a list of code changes. A sentence naming the rule that let it through — written whether it landed or not.",
+  },
+  {
+    word: "Undo",
+    line: "Worked out at the moment the change is made and kept beside it, rather than reconstructed from the page afterwards.",
+  },
+]
+
+/** The words alone, for the places that need the vocabulary and not the gloss. */
+export const PLAIN_WORDS: readonly string[] = PLAIN_WORDS_GLOSSED.map(({ word }) => word)
 
 /** What the front door calls them, counted off the list rather than typed. */
 export const PLAIN_WORDS_LABEL = `Every change, in ${spell(PLAIN_WORDS.length)} words`

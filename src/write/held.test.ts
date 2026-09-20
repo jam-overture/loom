@@ -60,14 +60,19 @@ describe("parseHeldProposal", () => {
     expect(parsed.value.disposition.policyId).toBe("unattributed")
   })
 
+  /**
+   * `unreadable` and not `unavailable`: a row that did not parse is a fact the
+   * store established, and it will not be different in a minute. The two codes
+   * exist to be told apart here, at the one boundary that knows which happened.
+   */
   it("refuses a hold whose proposal is not one, and says where it looked", () => {
     const held = heldProposalFixture()
 
     const parsed = parseHeldProposal({ ...held, proposal: { rationale: "nothing else" } })
     if (parsed.ok) throw new Error("expected the hold to be refused")
 
-    expect(parsed.error.code).toBe("unavailable")
-    if (parsed.error.code !== "unavailable") throw new Error("expected an unavailable")
+    expect(parsed.error.code).toBe("unreadable")
+    if (parsed.error.code !== "unreadable") throw new Error("expected an unreadable")
     expect(parsed.error.detail).toContain("proposal")
   })
 
@@ -78,11 +83,20 @@ describe("parseHeldProposal", () => {
 })
 
 describe("describeHoldError", () => {
-  const everyError: readonly HoldError[] = [
-    { code: "not-held", proposalId: "p_1" as ProposalId },
-    { code: "already-held", proposalId: "p_1" as ProposalId },
-    { code: "unavailable", detail: "connection reset" },
-  ]
+  /**
+   * Keyed by code rather than listed, so a fifth member of the union is a
+   * compile error here. The list this replaced could not tell the difference
+   * between covering the union and containing three distinct things, and a
+   * fourth code was added without it noticing.
+   */
+  const oneOfEach: { readonly [Code in HoldError["code"]]: HoldError & { readonly code: Code } } = {
+    "not-held": { code: "not-held", proposalId: "p_1" as ProposalId },
+    "already-held": { code: "already-held", proposalId: "p_1" as ProposalId },
+    unavailable: { code: "unavailable", detail: "connection reset" },
+    unreadable: { code: "unreadable", detail: "a stored hold did not parse: disposition" },
+  }
+
+  const everyError: readonly HoldError[] = Object.values(oneOfEach)
 
   it("produces a non-empty message for every code", () => {
     for (const error of everyError) {
@@ -92,6 +106,18 @@ describe("describeHoldError", () => {
 
   it("covers the whole union", () => {
     expect(new Set(everyError.map((error) => error.code)).size).toBe(everyError.length)
+  })
+
+  /**
+   * The two a reader has to act on differently say different things, which is
+   * the whole point of having both: a message that read the same for either
+   * would put the distinction in the type and leave it out of the sentence the
+   * person actually sees.
+   */
+  it("does not describe a store that did not answer the way it describes a row it cannot read", () => {
+    expect(describeHoldError(oneOfEach.unavailable)).not.toBe(
+      describeHoldError(oneOfEach.unreadable)
+    )
   })
 })
 

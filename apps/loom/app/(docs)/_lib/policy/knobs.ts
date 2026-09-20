@@ -4,9 +4,9 @@ import { defaultGatePolicy, type GatePolicy } from "@loom/runtime"
  * Every knob a Gate policy has, with the sentence a reader needs about it.
  *
  * The page this feeds is the one where a deployment decides what AI may do to
- * its pages, and the tempting way to write it is a table of thirteen rows. It
+ * its pages, and the tempting way to write it is a table of fourteen rows. It
  * would be right today and would quietly stop being right the first time the
- * runtime grew a fourteenth knob — a page describing thirteen of fourteen, with
+ * runtime grew a fifteenth knob — a page describing fourteen of fifteen, with
  * nothing anywhere to say which one is missing.
  *
  * So the rows are a **`Record<keyof GatePolicy, Knob>`**. A field added to the
@@ -89,7 +89,7 @@ export type Knob = {
 }
 
 /**
- * Keyed by field, which is the whole point: a fourteenth knob is a type error
+ * Keyed by field, which is the whole point: a fifteenth knob is a type error
  * here rather than a row nobody notices is missing.
  */
 const KNOBS: Record<keyof GatePolicy, Knob> = {
@@ -124,6 +124,12 @@ const KNOBS: Record<keyof GatePolicy, Knob> = {
     plain: "Which of your primitives render a thing the reader aims at — a link, a button.",
     yourMove:
       "Do not write this one. interactiveTypesFor(registry) reads what each primitive already declared about itself, so the day somebody gives another component a link the policy knows. A hand-typed copy is wrong the first time the library moves, and nothing says so.",
+  },
+  registeredPrimitiveTypes: {
+    group: "vocabulary",
+    plain: "Every primitive your deployment can actually draw.",
+    yourMove:
+      "Do not write this one either. registeredTypesFor(registry) reads the same list the renderer resolves against, so the two cannot disagree. Declaring it turns a proposal naming a primitive you do not have into a refusal the model can act on, instead of a revision that renders a hole; leave it out and you keep the older behaviour, where the change lands and the page reports it at render.",
   },
 
   autoApplyCeiling: {
@@ -182,7 +188,7 @@ const KNOBS: Record<keyof GatePolicy, Knob> = {
 /**
  * Reading order, which is not the type's order and could not be.
  *
- * A reader meets the name first, then the four fields they have to write
+ * A reader meets the name first, then the five fields they have to write
  * themselves, then the two groups that ship with answers — so the page opens
  * with the work and ends with the reassurance, rather than the other way round.
  * `knobs.test.ts` holds this list against the record, so a knob added to one and
@@ -194,6 +200,7 @@ export const KNOB_ORDER: readonly (keyof GatePolicy)[] = [
   "protectedPropKeys",
   "outOfTreeEffectTypes",
   "interactiveTypes",
+  "registeredPrimitiveTypes",
   "autoApplyCeiling",
   "refusalFloor",
   "minimumConfidence",
