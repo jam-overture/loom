@@ -1295,6 +1295,60 @@ what makes them the same rule has recognised it rather than retrieved it.
 
 ---
 
+## Set AF — two days after lesson 27
+
+Interleaved with 02, 04, 08, 14, 21, 22, 24 and 25. Heavy on 14, because lesson
+27 is a story about one clause of 0008 and reads as a complaint if that clause is
+fuzzy; and heavy on 25, because the lesson's fifth exercise is that lesson's
+subject found somewhere it did not look.
+
+1. Name the field on `LoomPrimitiveProps` that stops a container reading its own
+   children, and say what it holds. Then say why putting the children's props
+   beside it would not be a fix — the answer is about which *direction* the
+   number has to travel, and it is not the direction you just fixed. *(14, 27)*
+2. A colleague proposes a `values` array prop on the chart, which makes the
+   maximum computable inside one render function. Name the rule that forbids it,
+   list what the fifth month loses, and then state the general rule about what
+   earns its own node and what stays a prop. *(02, 27)*
+3. State, in one sentence and without mentioning CSS, what you take on when you
+   move a computation to a different machine. Then give the data model this
+   particular machine offers, and derive from it two ordinary chart features that
+   cannot be built. *(27)*
+4. The record's title says the browser does the arithmetic. Say which arithmetic
+   it does and which arithmetic nothing does — then give the reason the second is
+   not a shortfall, in terms of what kind of thing a ceiling is, and say what a
+   reader loses across a page when a chart picks its own. *(27)*
+5. The clamp is in a stylesheet rather than in a schema or at the Gate. Give the
+   argument in terms of what each failure costs a reader, name the lesson whose
+   two-axis habit that is, and say what changes when you apply that habit to a
+   rendering rather than to a change. *(08, 27)*
+6. Exercise D produced four correct figures, four invisible bars, and three
+   instruments saying yes. Say where the defect is — it is not a bug in any of
+   the files involved — and then say what a check that caught it would be bounded by,
+   using the rule about the population a check actually runs over. *(25, 27)*
+7. A stat whose magnitude is `0` and a stat with no magnitude render differently
+   and look identical. Say where the distinction survives and where it dies,
+   state what a reading owes a caller about *no* versus *nobody has said*, and
+   then say which of the two this is and which it is not. *(24, 27)*
+8. Six stats built before their container come out as `n_1`–`n_6`, the chart is
+   `n_7` and the page is `n_8`. Say what an id tells you about position, what it
+   is for instead, and what breaks if identity is derived from where a node sits.
+   *(04, 27)*
+9. Lesson 21 asked where to check a property belonging to no single party; lesson
+   22 answered a fault belonging to two nodes with a predicate over a pair.
+   Lesson 27's fact also lives between things and got neither answer. Say what is
+   different about it, and give the distinction between a fact somebody has to
+   **check** and a fact somebody has to **deliver** — naming one thing each needs
+   that the other does not. *(21, 22, 27)*
+
+Question 4 is the point of the set. Question 9 is where a confident half-answer
+is most likely: an answer that names the difference and stops has done the easy
+half, because what transfers is what *follows* from it. Question 6 is the one
+where the tidy answer — *the default is wrong* — is the symptom rather than the
+defect.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1340,3 +1394,4 @@ renders this file rather than restating it.
 | AC | 2 days after L24 | | |
 | AD | 2 days after L25 | | |
 | AE | 2 days after L26 | | |
+| AF | 2 days after L27 | | |

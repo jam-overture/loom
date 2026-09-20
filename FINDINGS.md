@@ -27717,3 +27717,121 @@ likely to be asked about — because a control is what a press lands on.
 most and they are one declaration each. Named here rather than re-filed because
 the finding and its remedy already exist; what was missing was a picture of the
 cost.
+
+---
+## 2026-09-20 — a chart's ceiling is argued to be the author's and is implemented as a default, and the default is the one value that hides the failure
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:**
+open — found by writing lesson 27's exercise D and running it, not by reading
+the record
+
+[0150](decisions/0150-a-container-that-must-aggregate-publishes-a-custom-property-and-the-browser-does-the-arithmetic.md)
+argues, and `loom.stat-chart.ts`'s header repeats, that the ceiling being
+authored is a feature rather than a shortfall:
+
+> An author who plots revenue states the ceiling, and stating it is a real
+> editorial choice rather than a chore.
+
+**Nobody is required to.** `max` is `z.number().finite().positive().optional()`,
+the component reads `given.max ?? 100`, and the catalogue line a model is given
+says `props: max?, plot?`. The argument is about what an author must do; the
+schema makes it something an author may skip.
+
+The default is right for exactly one kind of series — a percentage, whose
+ceiling is not a matter of opinion — and silently wrong for every other. Four
+quarters of revenue in millions, plotted with no `max`, measured against every
+instrument in this repository:
+
+```
+  render diagnostics: 0
+  the chart's own props: {"outcome":"valid"}
+    Q1 {"outcome":"valid"}
+    Q2 {"outcome":"valid"}
+    Q3 {"outcome":"valid"}
+    Q4 {"outcome":"valid"}
+  the container carries: --loom-chart-max:100
+  analysis ok? true
+  stakes: medium  gate: accepted
+
+  and what the page will draw:
+    Q1  $0.8M    0.8%  [························]
+    Q2  $1.2M    1.2%  [························]
+    Q3  $1.9M    1.9%  [························]
+    Q4  $3.4M    3.4%  [#·······················]
+```
+
+Four correct figures at full size, over four bars that are for practical
+purposes absent. The render returns no diagnostic, every prop is valid, and the
+Gate accepts the insert at `medium` stakes — correctly, because nothing about
+adding nodes to a page is consequential. There is no instrument here that is
+failing; there is no instrument here that is looking.
+
+**What this lane is not asking for.** Not a heuristic. A diagnostic that fires
+when every plotted magnitude falls below some fraction of the ceiling would be a
+check bounded by a threshold nobody can defend, and lesson 25's rule applies to
+it: a remedy that closes the route you found the fault by is not a remedy for
+the fault.
+
+**The remedy the record's own argument implies is a required `max`.** It costs
+the stored trees that hold a percentage chart and it costs a model one more
+thing to get right, and it closes the case completely: you cannot plot anything
+without saying what you are plotting it against. `metrics-chart-band` already
+states `max: 100` explicitly and its header already says *"a band that plots
+revenue has to think about this"* — so the catalogue is written as though the
+prop were required, and only the schema disagrees. Weigh that against a failure
+that is silent, ships, and is visible only to somebody looking at the page.
+
+Filed rather than fixed: `src/primitives/` is `Loom primitives`' lane, and a
+lessons branch that changes behaviour is a lessons branch nobody can review.
+
+---
+## 2026-09-20 — 0150's supporting material has two loose clauses: two `var()` fallbacks that cannot fire, and an argument citing a behaviour no surface performs
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives` · **Status:**
+open — neither changes behaviour, and the decision they support is right
+
+Both were found working through `loom.stat-chart` for lesson 27. The conclusion
+0150 reaches survives both; what is loose is the support under it.
+
+**1. Neither fallback in the chart's rule is reachable.** The rule is
+
+```
+.loom-stat-chart > .loom-stat-plotted::before {
+  height: calc(var(--loom-chart-plot) * min(1, max(0, var(--loom-stat-magnitude, 0) / var(--loom-chart-max, 100))));
+}
+```
+
+`var(--loom-chart-max, 100)` needs a `.loom-stat-chart` that published no
+ceiling, and `loom.stat-chart` sets `given.max ?? 100` unconditionally — a chart
+handed no props at all still carries one, which was rendered and checked.
+`var(--loom-stat-magnitude, 0)` needs a `.loom-stat-plotted` carrying no
+magnitude, and the class and the custom property are set in the same ternary in
+`loom.stat`, so a stat has both or neither and the selector does not match the
+neither case.
+
+The third property in the same rule, `--loom-chart-plot`, has no fallback and is
+exactly as reachable as the other two, which is the sign that these were written
+out of habit rather than to a rule. The cost is small and real: `100` is now
+written in two files, only one copy can ever be read, and nothing holds them
+together — so a change to the schema's default leaves a stylesheet that says
+something else and no test that can notice. Either drop both fallbacks, or keep
+them and say in a comment that they are unreachable and why.
+
+**2. The argument against React context cites something no surface does.**
+0150's *Alternatives considered*, and `loom.stat-chart.ts`'s header, both reject
+context on the grounds that it breaks rendering a node on its own — *"which the
+portal does when it previews one"*, in the present tense.
+
+The portal does not. `(portal)/portal/pages/[treeId]` renders the whole tree and
+decorates the selected node in the DOM (`preview-surface.tsx`); there is no
+single-node render anywhere in `apps/loom`. `renderLoomExcerpt` is published by
+the runtime, was added on 14 September, and is called by **no surface in this
+repository** — only by its own tests.
+
+The decision is still right, and this lane's lesson defends it: the property
+0008 protects belongs to the published runtime rather than to this repository's
+portal, `renderLoomExcerpt` is exactly the caller context would break, and it
+exists. What is wrong is only the citation — an argument resting on a behaviour
+nothing performs is the weakest available support for a correct conclusion,
+because the day somebody checks it, it does not check out. Naming
+`renderLoomExcerpt` instead of the portal costs two words and is true.
