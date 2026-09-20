@@ -243,6 +243,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, what shape an answer needs in order to say it and what decides how many fields that shape has; why replacing a correct guess with an authoritative source is a regression until the authority has been told — and what it meant that the seam built to stop a missing word going silent did exactly that, in a case its own lesson printed. |
 | [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; why a test that restates the value it is testing is a second copy with a tick beside it — and what was still wrong after the repository read this lesson and fixed the list. |
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
+| [27](27-scale.md) | Scale: the fact a sibling holds and a renderer may not reach | Why a container cannot read its own children and what the obvious way round it spends; what you inherit when you hand a computation to a different machine, and which ordinary chart features that machine's data model forbids; why the number the whole design was built to deliver is computed by nobody and is not supposed to be — and what it costs that a record's argument for authoring it is implemented as an optional prop with a default. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -341,6 +342,33 @@ changes and live ones indistinguishably. Nothing needs declaring here. The remed
 is a *function*, and the design question moves to who is allowed to hold two
 stores next to each other — and what they are obliged to say when they could only
 reach one of them.
+
+Lesson 27 is the one that breaks the family resemblance, and it is why Part V is
+worth continuing past a system that is whole. Every seam above is a fact that
+lives somewhere Loom cannot reach. This one is six numbers in one array, one
+level below the node that needs them, in the same render, in front of the same
+reader — and the container still cannot have it, because a render is a total pure
+projection of **one node** (0008) and a container receives its children already
+drawn. Nothing is missing, nothing is undeclared, nobody else owns anything. The
+obstacle is a promise the system made about itself.
+
+So the remedy is not to reach further. It is to hand the work to a **different
+machine** — the browser's layout engine, which is allowed to look at more than
+one box — and then to live inside that machine's data model, which carries a
+scalar that every child inherits identically and therefore forbids a rank, an
+index, or *draw the tallest one differently*. That is the general thing to take:
+a constraint you chose is still a constraint, and the cost of keeping it gets
+paid somewhere you did not pick.
+
+And then the turn the lesson is really for. After all of that, **the number the
+chart actually needed is computed by nobody**, because where an axis stops is an
+argument the author is making rather than a measurement anyone can take. Deciding
+*can this be worked out* and deciding *should it be* come apart here, and a
+default is what you get when the second question is never asked out loud: the
+record argues that stating the ceiling is a feature, the schema says `max?`, and
+exercise D plots four quarters of revenue against the percentage ceiling nobody
+set — four correct figures over four invisible bars, with the render, the
+validator and the Gate all saying yes.
 
 ## Pacing
 

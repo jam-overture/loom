@@ -54,8 +54,11 @@ const TRY_IT = "Try it"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 95 since lesson 26 (liveness), which added six — one per exercise, every one
- * of them a whole transcript in a single block. It was 89 after lesson 25
+ * 102 since lesson 27 (scale), which added seven — one per exercise, every one
+ * of them a whole transcript in a single block, and two of them carrying a line
+ * of CSS read out of the library's own stylesheet rather than computed. It was
+ * 95 after lesson 26 (liveness), which added six on the same terms; 89 after
+ * lesson 25
  * (exhaustiveness), which added six, with its two compiler diagnostics and its
  * pair of type-check counts fenced as `text` rather than plain, because no
  * program in this course prints them; 83 after lesson 18 was repaired on
@@ -65,7 +68,7 @@ const TRY_IT = "Try it"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 95
+const RECOGNISED_TRANSCRIPTS = 102
 
 /** Printable, so that a byte a markdown file cannot hold compares as the space it is written as. */
 const printable = (line: string): string =>
