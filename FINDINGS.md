@@ -23755,7 +23755,33 @@ can receive a credential.
 
 ## 2026-09-12 — the reference generator resolves `export type *` by walking the target, and publishes its values as functions the door does not offer
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:** open —
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs` · **Status:**
+**closed by `docs-30-the-door-the-reference-describes`** — the second remedy,
+which is the one this entry said was worth having. `_lib/api/offered.ts` imports
+every published entry point and holds what it hands back against the page that
+describes it; `offered.test.ts` runs that over all sixteen doors inside
+`pnpm verify`.
+
+**The first remedy was deliberately not taken, and the generator still
+mis-resolves a `type` star.** Reading the modifier correctly would have fixed
+that one morning and nothing else — a value the build drops, a subpath whose
+conditions point at the wrong file, a re-export of a deleted module all still
+produce a confident page. Opening the door catches the class. So the day
+somebody writes `export type *` in `src/` they get a red test naming the symbol
+and the door, rather than a false page; the workaround in `src/sdk/catalogue.ts`
+is now held up by something rather than by memory.
+
+**The defect was restored to prove it.** `export type *` was put back, the
+runtime rebuilt and `pnpm --filter @loom/app docs:api` re-run: the page regained
+`catalogueFields` and `closedChoices` as functions, the new test went red with
+*"importing catalogueFields from @loom/runtime/sdk gives nothing"*, and
+**`extract.test.ts` passed all 28** — which is this entry's argument, measured.
+Both files were then restored from byte-for-byte copies; `git diff main -- src/`
+is empty.
+
+Original status below.
+
+**Status:** open —
 worked around in `src/` today; the generator itself is untouched
 
 Found closing the 8 September entry asking for `@loom/runtime/sdk` to carry the
@@ -27791,6 +27817,66 @@ above; and it is a second reason `HoldError` wants a code that distinguishes a
 parse failure, which is the finding directly above that.
 
 ---
+## 2026-09-20 — an entry point's own opening paragraph reaches no page, and the door that needs it most is the one that will not open without it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+found opening all sixteen doors; nothing is wrong on the site today, and one
+page is missing the sentence a reader needs before their import will run
+
+Every published entry point is a barrel. The reference groups a page by the
+module that **declares** each symbol, and a barrel declares nothing — so a
+barrel forms no group, and `ApiEntry` has no summary field for one to live in
+either. The consequence is general: **the paragraph an entry point opens with
+is dropped, on every page, for all sixteen doors.**
+
+For fifteen of them that costs a reader little, because a barrel that only
+re-exports has little to say that its modules do not say better. For one it
+costs the reader the thing they need first.
+
+`src/testing/contracts.ts` opens by saying what the suites are for, and four
+paragraphs later says this:
+
+> **These import `vitest`, and that is why they are not in `index.js`.** […]
+> `vitest` is therefore an optional peer dependency: present for anyone
+> importing this module, absent and unmissed for everyone importing the other
+> one.
+
+None of that reaches `/docs/api-reference/testing-contracts`. The page carries
+four module paragraphs — *One suite, run against every `HoldStore`* and its
+three siblings — and says nothing anywhere about a test runner.
+
+What a reader gets for that silence, measured today by importing the door from
+a plain Node script:
+
+```
+Error: Vitest failed to access its internal state.
+```
+
+That is the correct behaviour and it is a bad first encounter with it. The door
+is honest in `src/`, the page is honest about the four modules, and the one
+sentence that would have told somebody why their script died is homeless
+between them.
+
+**Two shapes of fix, and the second is the one I would take.**
+
+1. **Give `ApiEntry` a summary** read from the barrel, rendered above the groups.
+   Truthful and general, and it puts a paragraph at the top of fifteen pages
+   that mostly repeats what is already under it.
+2. **Let a module's paragraph be more than its first**, where the module marks
+   it. `firstParagraph` exists for a good reason — a reference is a place a
+   reader lands mid-question and six paragraphs of reasoning belong in the
+   source. But *you cannot import this without `vitest`* is not reasoning about
+   a decision; it is a precondition on the import. A convention the generator
+   could read — a bolded lead, which is what that paragraph already is — would
+   carry preconditions and leave arguments where they are.
+
+**Filed rather than done, because the second shape is a change to what the
+reference is allowed to lift**, and this run's whole subject was the reference
+telling the truth about what a door offers. Deciding in the same branch what
+else it may say about one would be two architectures in one pull request.
+
+**Not a finding for `Loom daily build`.** The sentence in `src/` is already
+written and already correct. Nothing in another lane is wrong.
 ## 2026-09-20 — every hero on this site paints its backdrop on top of its own headline, and the fix is one line the sibling primitive already carries
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
