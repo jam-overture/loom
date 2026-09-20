@@ -28371,15 +28371,33 @@ corruption, on every image and every link. So do this lane's. The corruption is
 invisible to the lane that wrote the body, because the text sent was correct —
 it has to be read back from the API to be seen, and nobody has.
 
-**Two workarounds, measured today on #351.**
+**The trigger, narrowed by four measurements on #351.** The first reading —
+*markdown is corrupted, HTML survives* — was wrong, and worth correcting
+because the wrong remedy still breaks. Rewriting the same body four times and
+reading it back each time gives this:
 
-| | |
-| --- | --- |
-| `<img src="…" />` and `<a href="…">` | survives the rewrite intact — HTML attributes are not touched |
-| markdown `[…](…)` and `![…](…)` | corrupted every time |
+| link | text | outcome |
+| --- | --- | --- |
+| `[a caption](url)` markdown | anything | **corrupted** |
+| `<a href="…">the queue</a>` | prose | survives |
+| `<a href="…">0175</a>` | a number | survives |
+| `<a href="…">reports/2026-09-20-….md</a>` | **a file path** | **corrupted** |
+| `<a href="…"><b>reports/….md</b></a>` | a file path | **corrupted** |
 
-So the remedy is: **write image and link markup as HTML in a pull request body,
-never as markdown.**
+The `<a>` that broke was escaped *and* backticked — `&lt;/a&gt;` inside a code
+span — which is not a markdown-syntax rewrite at all. **Something is detecting
+text that looks like a repository file path and wrapping it in backticks**, and
+when that text sits inside an anchor it takes the anchor's markup with it. The
+markdown `[…](…)` cases all had a path or a URL in a position that matched.
+
+So the remedy is two rules, not one:
+
+1. **Write links and images as HTML** — `<a href>`, `<img src>`.
+2. **Never put a file path in the link text.** Use prose: *the full write-up*,
+   *the queue*, *every disclosure open*. A path belongs in a code span of its
+   own, outside the anchor.
+
+Both are needed. Either alone still produces a broken line.
 
 **A second, independent reason the pictures would not have shown anyway.** This
 repository is private, so `raw.githubusercontent.com` answers `404` to an
@@ -28388,10 +28406,11 @@ body through camo, which does not carry the reader's session. A private repo's
 images cannot be hotlinked into a PR body at all, by either syntax.
 
 **What actually reaches a reader**, and what this lane will do from now on:
-the preview deployment, plus links to the report in-branch, where GitHub renders
-the images relative to a file the signed-in maintainer is authorised to read.
-The `reports/` markdown has always done this correctly; only the PR bodies were
-broken.
+the preview deployment, plus a prose-titled link to the report in-branch, where
+GitHub renders the images relative to a file the signed-in maintainer is
+authorised to read. The `reports/` markdown has always done this correctly —
+its image references are relative paths, which is why they were never
+affected. Only the PR bodies were broken.
 
 **Owned here rather than passed on** because the remedy is a convention every
 lane can adopt today and needs no tooling. It is worth `docs/routines.md`

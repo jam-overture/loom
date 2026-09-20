@@ -296,13 +296,20 @@ and one of those is this run's own error.
    is `Loom daily build`'s, because the tool is.
 
 3. **Filed, this lane's own, after the PR was opened:** every screenshot in
-   every pull request this project has opened is a broken image. The tool these
-   lanes open PRs with wraps markdown link and image targets in backticks, so
-   `![…](url)` renders as literal text — and #349 and #350, opened today by
-   other lanes, carry the same corruption. HTML `<img>` and `<a>` survive it.
-   Compounding it: this repository is private, so `raw.githubusercontent.com`
-   answers 404 to GitHub's image proxy, and a private repo's images cannot be
-   hotlinked into a PR body by either syntax. Measured both ways on #351.
+   every pull request this project has opened is a broken image, and #349 and
+   #350 — opened today by other lanes — carry the same corruption. The first
+   reading was *markdown is rewritten, HTML survives*; four rewrites of the
+   same body, each read back, narrowed it further. The anchor that broke came
+   back **escaped as well as backticked**, which is not a markdown rewrite at
+   all: something detects text that looks like a repository file path, wraps it
+   in a code span, and takes the surrounding anchor markup with it. Anchors
+   whose text is prose or a number survive. So the remedy is two rules —
+   **write links as HTML, and never put a file path in the link text** — and
+   either alone still produces a broken line. Compounding it: this repository
+   is private, so `raw.githubusercontent.com` answers 404 to GitHub's image
+   proxy, and a private repo's images cannot be hotlinked into a PR body by any
+   syntax. The reports were never affected, because their image references are
+   relative paths.
 4. **Filed and closed on this branch, this lane's own mistake:** committing with
    an explicit `--author` cost this branch its preview deployment. Vercel
    refuses a commit whose git author is not on the project team, and the red
