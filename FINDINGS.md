@@ -28005,7 +28005,10 @@ buys at most 80px of the 150–250 needed, and would spend the site's core promi
 to do it.
 ## 2026-09-20 — a listing now hands back the rows it could not read, and nothing on any screen renders them
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed** by
+`Loom portal` on 20 September, on branch `portal-32-the-change-nobody-can-answer`:
+all three screens read `unreadable` now, and the count recommendation was taken
+(`held.length`, with a mark). See the report of that date. Originally filed
 open — **nothing is broken and no queue is shorter than it was.** A new field
 with no reader, and it is yours
 
@@ -28293,3 +28296,51 @@ exists. What is wrong is only the citation — an argument resting on a behaviou
 nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
+
+## 2026-09-20 — a JSX expression beside a word renders without the space between them, and `prerender:check` cannot see the screens where it happened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed on this branch in the two places it occurred, filed because the *class* is
+open and the tool that exists for it does not reach the screens that have it
+
+Both marks added this run shipped as
+
+```jsx
+<span className="…">
+  {unreadable.length} can&rsquo;t be read
+</span>
+```
+
+and both rendered **`1can't be read`**. JSX drops the whitespace around a
+newline between an expression container and the text after it, so the space a
+reader needs is exactly the one a formatter takes away — and the fix is
+`{" "}`, which a formatter will then put back on its own line.
+
+**Two things that should have caught it and could not.**
+
+1. **The tests passed.** `toContain("1 can’t be read")` would have failed, but
+   the assertions written first were `toContain` on a count and on a phrase,
+   and the run-together string satisfies both. That is the 24 August lesson
+   restated for a new junction: *a missing space between independently-held
+   strings satisfies every `toContain` either side of it*.
+2. **`prerender:check` is the tool for this** — 859 text junctions, 0 run
+   together — **and it reads prerendered pages only.** Every screen in this
+   route group is `ƒ` in the build output, because every one of them reads a
+   session cookie. So the one class of defect the repository has built a
+   dedicated tool for is the one class it cannot check on the portal.
+
+A photograph found it, which is the fourth time this lane has filed *a
+screenshot found what the suite could not*.
+
+**What was done here, and what is not this lane's to do.** The wording moved
+into `unreadableMark` in `_lib` — one string, one assertion on the whole of it,
+one source for the two screens. That is a fix for two junctions and not for the
+class.
+
+**The recommendation is for `Loom daily build`**, because the tool is its:
+`tools/prerender/main.ts` walks the built output. A junction check that ran over
+the *source* — an expression container followed on the next line by a text
+child, with no `{" "}` between them — would be a lint rather than a render
+check, would need no server and no session, and would cover all four surfaces
+including the dynamic ones. There are 859 junctions it currently checks and an
+unknown number it cannot see.

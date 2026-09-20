@@ -2,6 +2,7 @@ import type { Disposition } from "@loom/runtime"
 import { describeHoldError, type HeldProposal, type HoldError } from "@loom/runtime/write"
 
 import { screenName } from "./screen-names"
+import { unreadableClause, type UnreadableChange } from "./unreadable-change"
 import type { WaitingTriage } from "./waiting-effect"
 import { plainMoment } from "./when"
 import {
@@ -157,15 +158,21 @@ export const waitingChange = (
 })
 
 /**
- * Oldest first.
+ * Where a change sits in the queue.
  *
  * A queue is ordered by how long something has waited, not by which page it
  * happens to sit on — the whole reason this screen exists is that the page a
  * change belongs to is the thing a reviewer should not have to think about
- * first. Ties keep the order the store returned, which is stable.
+ * first.
+ *
+ * The sort itself moved to `unreadable-change.ts` on 20 September, because a
+ * queue has two kinds of row in it now and they go in one order. This is the
+ * half that is about a `WaitingChange`: what instant it is filed under. Passed
+ * to `inQueueOrder` rather than assumed by it, so the page screen — whose rows
+ * are shaped differently and just as correctly — can use the same ordering
+ * without this module's type.
  */
-export const inQueueOrder = (changes: readonly WaitingChange[]): readonly WaitingChange[] =>
-  [...changes].sort((left, right) => (left.sinceIso < right.sinceIso ? -1 : left.sinceIso > right.sinceIso ? 1 : 0))
+export const waitingSince = (change: WaitingChange): string => change.sinceIso
 
 /**
  * How much of the deployment this queue actually managed to look at.
@@ -283,19 +290,50 @@ export type Sweep = {
  * be a number a reader has no way to distrust — so the count says what was
  * found, and the sentences after it say what was not looked at.
  */
-export const waitingSummary = (changes: readonly WaitingChange[], sweep: Sweep): string => {
+export const waitingSummary = (
+  changes: readonly WaitingChange[],
+  /**
+   * The rows in this same queue that nobody can answer.
+   *
+   * A third argument rather than a field on `Sweep`, and the distinction is the
+   * one this whole unit turns on. `Sweep` is *what this screen did not manage
+   * to look at* — pages it could not ask, pages it never reached — and both of
+   * its members make `sweepIsPartial` true, which raises a notice telling the
+   * reader to go and open the page themselves. These are the opposite: the page
+   * answered, the queue is known, and the row is **on this screen**, in the
+   * list, in its place in time. Telling a reader to go and look at it would
+   * send them to a screen that fails on the same row.
+   */
+  unreadable: readonly UnreadableChange[],
+  sweep: Sweep
+): string => {
   const pages = new Set(changes.map((change) => change.treeId)).size
-  const unreadable = sweep.unreadable.length
+  const unchecked = sweep.unreadable.length
   const unread =
-    unreadable === 0
+    unchecked === 0
       ? ""
-      : ` ${unreadable === 1 ? "One page" : `${unreadable} pages`} couldn't be checked, and ${unreadable === 1 ? "it is named" : "they are named"} below.`
+      : ` ${unchecked === 1 ? "One page" : `${unchecked} pages`} couldn't be checked, and ${unchecked === 1 ? "it is named" : "they are named"} below.`
   const unreached = sweep.complete
     ? ""
     : " This deployment has more pages than this screen checks."
-  const gap = `${unread}${unreached}`
+  const stuck = unreadableClause(unreadable, changes.length)
+  const gap = `${stuck}${unread}${unreached}`
 
-  if (changes.length === 0) return `Nothing is waiting for you.${gap}`
+  /*
+   * Two different empty queues, and only one of them is good news.
+   *
+   * "Nothing is waiting for you." over a queue holding a row nobody can read is
+   * the exact failure this surface is being rebuilt against — a confident,
+   * cheerful sentence that is false, with the thing that makes it false sitting
+   * three lines below it. The second wording keeps the reassurance that is
+   * still true (there is nothing here for *you* to do) and drops the part that
+   * is not.
+   */
+  if (changes.length === 0) {
+    return unreadable.length === 0
+      ? `Nothing is waiting for you.${gap}`
+      : `Nothing is waiting that you can answer.${gap}`
+  }
 
   const count = `${changes.length} ${changes.length === 1 ? "change is" : "changes are"} waiting for your answer`
 
