@@ -274,7 +274,8 @@ What each group would catch:
 
 ## Findings
 
-**Closed one. Filed one.**
+**Closed one. Filed three** — two of them after the pull request was opened,
+and one of those is this run's own error.
 
 1. **Closed:** this morning's `Loom daily build` entry, which is this unit. The
    count recommendation it made was taken and the reason is in *The two numbers
@@ -293,6 +294,23 @@ What each group would catch:
    with one assertion on the whole of it. The recommendation — a source-level
    junction lint, which would need no server and would cover all four surfaces —
    is `Loom daily build`'s, because the tool is.
+
+3. **Filed, this lane's own, after the PR was opened:** every screenshot in
+   every pull request this project has opened is a broken image. The tool these
+   lanes open PRs with wraps markdown link and image targets in backticks, so
+   `![…](url)` renders as literal text — and #349 and #350, opened today by
+   other lanes, carry the same corruption. HTML `<img>` and `<a>` survive it.
+   Compounding it: this repository is private, so `raw.githubusercontent.com`
+   answers 404 to GitHub's image proxy, and a private repo's images cannot be
+   hotlinked into a PR body by either syntax. Measured both ways on #351.
+4. **Filed and closed on this branch, this lane's own mistake:** committing with
+   an explicit `--author` cost this branch its preview deployment. Vercel
+   refuses a commit whose git author is not on the project team, and the red
+   check it posts names a GitHub account rather than the cause — so it reads as
+   something for the maintainer to fix. Every other commit on `main` is authored
+   `jonathanbravecredit`, which is why #346–#350 all carry preview URLs. The
+   rule is in `FINDINGS.md`: a lane does not set its own commit author; its name
+   belongs in the branch, the subject and the report.
 
 **Re-filed by reference, not as a new entry:** the screenshot harness still
 cannot sign in. This is the fifth picture of this portal taken by a private

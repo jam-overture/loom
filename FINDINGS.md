@@ -28344,3 +28344,87 @@ child, with no `{" "}` between them — would be a lint rather than a render
 check, would need no server and no session, and would cover all four surfaces
 including the dynamic ones. There are 859 junctions it currently checks and an
 unknown number it cannot see.
+
+## 2026-09-20 — every screenshot in every pull request this project has opened is a broken image, and the cause is outside the repository
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a process defect rather than a code one, and it defeats the one instruction
+every surface lane is given about pull requests
+
+**The brief for this lane says the maintainer judges the portal by eye and that
+a PR must carry a screenshot.** Three other lanes have the same instruction.
+None of it has been arriving.
+
+The tool these lanes open pull requests with rewrites markdown link and image
+targets, wrapping the URL in a pair of backticks:
+
+```
+![a caption](``https://raw.githubusercontent.com/…/shot.png``)
+```
+
+GitHub renders that as literal text. **Not a broken image with a placeholder —
+no image at all**, and a line of backticked URL where the picture should be.
+
+**It is not this run's mistake and not new.** Read back the stored bodies of
+#349 and #350, both opened today by other lanes: both carry the same
+corruption, on every image and every link. So do this lane's. The corruption is
+invisible to the lane that wrote the body, because the text sent was correct —
+it has to be read back from the API to be seen, and nobody has.
+
+**Two workarounds, measured today on #351.**
+
+| | |
+| --- | --- |
+| `<img src="…" />` and `<a href="…">` | survives the rewrite intact — HTML attributes are not touched |
+| markdown `[…](…)` and `![…](…)` | corrupted every time |
+
+So the remedy is: **write image and link markup as HTML in a pull request body,
+never as markdown.**
+
+**A second, independent reason the pictures would not have shown anyway.** This
+repository is private, so `raw.githubusercontent.com` answers `404` to an
+unauthenticated fetch — measured, both URLs — and GitHub proxies images in a PR
+body through camo, which does not carry the reader's session. A private repo's
+images cannot be hotlinked into a PR body at all, by either syntax.
+
+**What actually reaches a reader**, and what this lane will do from now on:
+the preview deployment, plus links to the report in-branch, where GitHub renders
+the images relative to a file the signed-in maintainer is authorised to read.
+The `reports/` markdown has always done this correctly; only the PR bodies were
+broken.
+
+**Owned here rather than passed on** because the remedy is a convention every
+lane can adopt today and needs no tooling. It is worth `docs/routines.md`
+carrying one line about it, which is `Loom daily build`'s file — named here
+rather than filed separately.
+
+## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by this branch — this lane's own mistake, recorded because the error message
+points away from it
+
+This run committed with an explicit author, `Loom portal <…@gmail.com>`, on the
+reasoning that a lane's commits should say which lane made them. Vercel refused
+to deploy the branch:
+
+```
+Git author jpizzo must have access to the project on Vercel to create deployments.
+```
+
+The commit status goes **red on the pull request**, and the message names a
+GitHub account and a Vercel team — so it reads as an access problem for the
+maintainer to fix. It is not. **Every other commit on `main` is authored
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
+which is the identity the Vercel project accepts, and #346 through #350 all
+carry preview URLs because of it.
+
+The cost is precisely the thing this lane's brief asks for: *open the PR with
+the deployed preview URL, because this surface exists to be looked at.* A lane
+that renames its author silently loses that and gets a red check that blames
+somebody else.
+
+**Rule, for any lane:** do not set `--author` on a commit. The repository's
+configured identity is the one the deployment pipeline trusts, and a lane's name
+belongs in the branch name, the commit subject and the report — all three of
+which already carry it.
