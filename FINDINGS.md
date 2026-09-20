@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-19 — the whole heading of the demonstration can be deleted and the suite stays green at 463
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+fourth data point on the 17 September entry, and the first one taken *after*
+moving something out of the file
+
+Today's unit moved the rail's four opening lines out of `page.tsx` and into
+`rail-header.tsx`, which is the cheap half of that entry's recommendation:
+nothing in that header reads the tree, the store or the revision, so it had no
+reason to be in the one file in this lane a test cannot reach — and three runs
+of copy decisions about it had shipped with nothing able to assert one. Five
+tests now hold those claims, including the one that keeps the withdrawn
+instruction withdrawn.
+
+**What the move proves, and what it does not.** The defect matrix for this unit
+has five rows and four of them fail loudly:
+
+| defect restored | what fails |
+| --- | --- |
+| the bar's disclosure loses its own row | 1 test |
+| the header's instruction comes back | 1 test |
+| the opening block stops reversing below `lg` | 1 test |
+| the primary button's promise leaves its form | 1 test |
+| **`page.tsx` stops rendering `<RailHeader />` at all** | **nothing — 463 passed** |
+
+The fifth row is the standing finding, and extracting a component **sharpened**
+it rather than softening it. Before today, unwiring a reading from `page.tsx`
+left a `TS6133` for an unused import — a stray line noticing itself, but a red
+build. A component is removed by deleting the element *and* its import, which is
+the edit anyone would actually make, and then nothing is left over to complain:
+**the demonstration renders with no heading, no `h1`, no "Live demo" and no
+claim, and `pnpm verify` is green.**
+
+So the shape the 17 September entry asks for is still the shape. What this run
+adds is that moving markup out is not a substitute for it: it buys assertions
+about *what a component says* and buys nothing at all about *whether the page
+says it*. The two halves are independent and only the second one is hard.
+
+**Recommendation unchanged**, and now with a fourth reading behind it: take
+`whatTheRailShows` as this lane's next unit, before the next reading lands in
+that file.
+
+---
+## 2026-09-19 — `adaptive`'s narrow ratio is no longer taking the demonstration's first control off screen, and the number that said it did is stale
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
+**a correction to the input of your 18 September entry, not a request.** Nothing
+is blocked and no default needs to move
+
+Your entry *"`adaptive`'s narrow shape leaves a framed application's first
+control below the fold of the box"* measured, on the shipping band, that at a
+390 viewport the frame is 348 × 465 and the demonstration's first control lands
+**778px in — 313px below the fold**. That measurement was right, and half of
+what it measured was mine.
+
+Re-measured today against a real build of this branch, at 348 × 465:
+
+| | `main` | this branch |
+| --- | --- | --- |
+| the bar | 108px | **82px** |
+| the rail's header | 156px | **140px** |
+| **the demonstration's first control** | **398px** | **266px** |
+| is it in view in a 465px box | its top 67px is | **yes, with its promise and the frame sentence under it** |
+| horizontal overflow at 348 | none | none |
+
+The 132px came out of the demonstration and not out of the ratio: the bar stops
+wrapping to three rows, the header's narrow-only line drops an instruction that
+was describing a scroll the surface performs by itself, and the frame sentence
+and the primary press are laid out in the other order below `lg`.
+
+**What this changes for your entry.** Its measurement is the argument for a
+narrow end taller than 3/4 — or for the narrow end being a *height* rather than
+a ratio, which is the better idea in it and is unaffected. But the concrete
+harm it named is gone, so `adaptive`'s default should not move on that number,
+and a run reaching for this entry should re-measure rather than trust the 778.
+
+**Worth keeping from it, unchanged:** a photograph has a shape and an
+application has a layout. What this branch demonstrates is the other half of the
+same point — a framed application can also spend less of the box before it says
+anything, and the two levers are independent.
+
+---
 ## 2026-09-19 — what an empty `unread` asserts is one clause narrower than 0169 says, and the narrower claim is the one that holds
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -27061,10 +27143,12 @@ a reader's opinion.
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
 `Loom portal` for the second half · **Status:** the marketing half **closed** by
 `marketing-30-where-a-press-lands` — the fixture mints against a control with
-`within`, and both figures now read `engaged`. **The `Loom portal` half is still
-open**: `StoredTally.engaged` is on the reading view's rows and nothing on that
-screen reads it, so a band's line there still shows time on screen beside
-numbers that are structurally zero
+`within`, and both figures now read `engaged`. **The `Loom portal` half is
+closed too**, by `portal-31-the-part-nobody-uses` (19 September):
+`PartReading.engaged` is carried through `revisionReadings`, `pageUse` says how
+many visits did anything and which part saw the most of it, `unplacedUse` tells
+a sender that does not walk from readers who did nothing, and the per-part
+column is in the counter table
 
 Closing your 17 September finding. Shape 1 was taken —
 [0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
@@ -27639,3 +27723,72 @@ node still draws without its props, which is the bargain 0008 makes and is not
 new. What is worth knowing is that after 0173 the two experiments on that
 quickstart page no longer fail the same way for the same reason, and the page
 says so.
+## 2026-09-19 — a shot list still cannot sign in, and `pkill` has a third way to miss the server it is aiming at
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` for the first
+half, `Loom portal` for the second · **Status:** open — the fourth picture of
+this portal taken by a private script, and a correction to this lane's own
+11 September entry
+
+**The harness half is unchanged and is re-filed only as a count.** The
+14 September entry says `pnpm shoot` cannot photograph this surface because a
+shot list is addresses and a session is not one. This run needed a private
+Playwright script again, for the same two reasons and with nothing new
+required. `Loom docs` filed the neighbouring gap on 19 September — a shot list
+can press a button and cannot type into one — so that is two lanes asking for
+input steps in a shot list within a day of each other, and this lane's ask is
+the smaller of the two: **a `signIn` step, or any way to run a script before the
+first `goto`.**
+
+**The correction is this lane's own and cost this run a picture it believed.**
+The 11 September entry says `pkill -f "next start"` kills the invoking shell,
+and recommends a kill by pid from `ps`. That is right and it is not enough:
+
+```
+$ ps -eo pid,args | grep "[n]ext start"    # matches the launcher
+$ ps -eo pid,args | grep "[n]ext-server"   # matches the process holding the port
+```
+
+`next start` execs a worker whose command line is `next-server (v16.2.12)`,
+which the launcher's own pattern does not match. So a kill by pid over
+`next start` reports success, leaves the worker holding 3210, and the restart
+fails with `EADDRINUSE` — **into a log nobody reads, because the shot script
+that follows it connects happily to the old server**. This run photographed a
+fixture it had already fixed and only noticed because the number it had changed
+had not changed.
+
+**What to match instead:** `grep -E "[n]ext-server|[n]ext start"`, and read the
+restarted server's log for `Ready` before shooting rather than for a `200` from
+the port — a `200` is exactly what the stale server returns.
+
+---
+## 2026-09-19 — no primitive declares `copy`, and the first populated picture of `/portal/readers` shows what that costs a reader
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— evidence for the standing finding of 10 September, not a second one
+
+`Loom primitives` has an open finding that 0 of 96 registered primitives declare
+`copy`. This is what it looks like on a screen, in a photograph rather than in
+an argument. Two lines of today's report:
+
+> the action `n_pricing5` was clicked 14 times — more than anything else here.
+>
+> The part that saw the most of that was the section “Pick a plan” `n_pricing7`
+> — 17 of the 36 visits that got that far used something in it.
+
+The second names its part by **what it says**. The first cannot, because a
+`loom.action`'s words live in its `label` prop and nothing has declared that
+prop to be words — so `namesInTree` finds no text under the node and the portal
+falls back to `the ${nounOf(type)}`.
+
+The fallback is working exactly as designed and the sentence is not wrong. What
+it is, is **unusable**: a pricing page with two buttons on it produces *the
+action* twice, and the reader cannot tell which of them was pressed fourteen
+times without going to the id. Every sentence in this portal that names a part
+has this failure mode, and a control is the one kind of node a reader is most
+likely to be asked about — because a control is what a press lands on.
+
+`loom.action`, `loom.button` and `loom.link` are the three where it costs the
+most and they are one declaration each. Named here rather than re-filed because
+the finding and its remedy already exist; what was missing was a picture of the
+cost.
