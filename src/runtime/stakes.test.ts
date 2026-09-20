@@ -23,6 +23,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   relocatedPrimitiveTypes: [],
   configuredPropKeys: [],
   nestedTargets: [],
+  unknownPrimitives: [],
   redirectedSubmissions: [],
   repointedBindings: [],
   shallowestAffectedDepth: 5,
@@ -320,6 +321,37 @@ describe("assessStakes on a nested target", () => {
 
   it("says nothing about a change that nests none", () => {
     expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "nested-target")).toBeUndefined()
+  })
+})
+
+describe("assessStakes on a node nothing can draw", () => {
+  const unknown = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_new${index}`),
+      type: primitiveTypeSchema.parse(`app.nonesuch${index}`),
+    }))
+
+  it("is critical, which under the default floor is a refusal rather than a question", () => {
+    const assessment = stakesOf(analysisOf({ unknownPrimitives: unknown(1) }), defaultGatePolicy)
+
+    expect(assessment.level).toBe("critical")
+    expect(stakeFactor(assessment, "unknown-primitive")?.detail).toBe(
+      "adds a node no primitive is registered for, so it draws nothing: app.nonesuch0 at n_new0"
+    )
+  })
+
+  it("names every node, because a repairer rewrites types and not a count", () => {
+    const assessment = stakesOf(analysisOf({ unknownPrimitives: unknown(2) }), defaultGatePolicy)
+
+    expect(stakeFactor(assessment, "unknown-primitive")?.detail).toBe(
+      "adds 2 nodes no primitive is registered for, so they draw nothing: app.nonesuch0 at n_new0; app.nonesuch1 at n_new1"
+    )
+  })
+
+  it("says nothing about a change that adds none", () => {
+    expect(
+      stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "unknown-primitive")
+    ).toBeUndefined()
   })
 })
 

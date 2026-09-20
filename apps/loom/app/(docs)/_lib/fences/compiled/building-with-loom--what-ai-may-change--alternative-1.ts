@@ -1,5 +1,5 @@
 /*
- * The block at page.mdx:122 of /docs/building-with-loom/what-ai-may-change, read on its own.
+ * The block at page.mdx:124 of /docs/building-with-loom/what-ai-may-change, read on its own.
  *
  * It does the same job as the block above it, a different way, so it is a
  * program of its own rather than a continuation of the page's.
@@ -11,16 +11,17 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { interactiveTypesFor } from "@loom/runtime/sdk"
+import { interactiveTypesFor, registeredTypesFor } from "@loom/runtime/sdk"
 import { gatePolicySchema } from "@loom/runtime"
 
 import { registry } from "../context/building-with-loom--what-ai-may-change"
 
-// page.mdx:122 — the same job as the block above, done differently
+// page.mdx:124 — the same job as the block above, done differently
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
   protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
   interactiveTypes: interactiveTypesFor(registry),
+  registeredPrimitiveTypes: registeredTypesFor(registry),
 })
 
-export { interactiveTypesFor, gatePolicySchema }
+export { interactiveTypesFor, registeredTypesFor, gatePolicySchema }

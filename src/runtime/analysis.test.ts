@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
+import { primitiveTypeSchema } from "../primitive-type.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import {
   boundTree,
@@ -17,6 +18,7 @@ import { createTree } from "../tree/tree.js"
 
 import { analyzeDelta } from "./analysis.js"
 import { interactivePredicateFor, nestedTargetsIn } from "./nesting.js"
+import { primitiveVocabularyFor, type PrimitiveVocabulary } from "./vocabulary.js"
 
 const spare = sequentialIdFactory("an")
 
@@ -221,6 +223,7 @@ const isTarget = interactivePredicateFor({
   "loom.card": { whenProps: ["href"] },
   "loom.action": "always",
 })
+
 
 const analyzeWithTargets = (build: (ids: SampleTree["ids"]) => TreeOperation[]) => {
   const { tree, ids } = sampleTree()
@@ -545,5 +548,112 @@ describe("analyzeDelta on a change of what is asked for", () => {
     ])
 
     expect(analysis.repointedBindings).toEqual([])
+  })
+})
+
+const drawable: PrimitiveVocabulary = primitiveVocabularyFor(
+  ["loom.page", "loom.header", "loom.card", "loom.footer", "loom.banner"].map((type) =>
+    primitiveTypeSchema.parse(type)
+  )
+)
+
+const analyzeAgainstLibrary = (build: (ids: SampleTree["ids"]) => TreeOperation[]) => {
+  const { tree, ids } = sampleTree()
+  const result = analyzeDelta(tree, deltaOf(tree.treeId, build(ids)), undefined, drawable)
+  if (!result.ok) throw new Error(result.error.code)
+
+  return { analysis: result.value, ids }
+}
+
+describe("analyzeDelta unknown primitives", () => {
+  it("reports none when the host declares no vocabulary", () => {
+    const { analysis } = analyze((ids) => [
+      {
+        op: "insert",
+        parentId: ids.page,
+        index: 0,
+        node: buildElement(spare, { type: "app.nonesuch" }),
+      },
+    ])
+
+    expect(analysis.unknownPrimitives).toEqual([])
+  })
+
+  it("names a node whose type the declared library does not hold", () => {
+    const invented = buildElement(spare, { type: "app.nonesuch" })
+
+    const { analysis } = analyzeAgainstLibrary((ids) => [
+      { op: "insert", parentId: ids.page, index: 0, node: invented },
+    ])
+
+    expect(analysis.unknownPrimitives).toEqual([
+      { nodeId: invented.id, type: primitiveTypeSchema.parse("app.nonesuch") },
+    ])
+  })
+
+  it("says nothing about an insert the library can draw", () => {
+    const { analysis } = analyzeAgainstLibrary((ids) => [
+      {
+        op: "insert",
+        parentId: ids.page,
+        index: 0,
+        node: buildElement(spare, {
+          type: "loom.banner",
+          children: [buildText(spare, "Sale")],
+        }),
+      },
+    ])
+
+    expect(analysis.unknownPrimitives).toEqual([])
+  })
+
+  /**
+   * The measurement that keeps the check from punishing a change for the tree it
+   * found. A page may already hold a primitive a later deployment withdrew — that
+   * is exactly why the renderer reports instead of throwing — and moving,
+   * reconfiguring or removing such a node introduces no hole that was not there.
+   */
+  it("does not answer for a node the tree already held", () => {
+    const { tree, ids } = sampleTree()
+
+    const moved = analyzeDelta(
+      tree,
+      deltaOf(tree.treeId, [
+        { op: "move", nodeId: ids.card, parentId: ids.page, index: 0 },
+        { op: "configure", nodeId: ids.card, set: { variant: "filled" }, unset: [] },
+        { op: "remove", nodeId: ids.footer },
+      ]),
+      undefined,
+      primitiveVocabularyFor([primitiveTypeSchema.parse("loom.nothing-here")])
+    )
+    if (!moved.ok) throw new Error(moved.error.code)
+
+    expect(moved.value.unknownPrimitives).toEqual([])
+  })
+
+  it("reaches a node buried inside an inserted subtree", () => {
+    const buried = buildElement(spare, { type: "app.buried" })
+    const banner = buildElement(spare, { type: "loom.banner", children: [buried] })
+
+    const { analysis } = analyzeAgainstLibrary((ids) => [
+      { op: "insert", parentId: ids.page, index: 0, node: banner },
+    ])
+
+    expect(analysis.unknownPrimitives.map((unknown) => unknown.nodeId)).toEqual([buried.id])
+  })
+
+  it("collects across every insert in a delta", () => {
+    const first = buildElement(spare, { type: "app.one" })
+    const second = buildElement(spare, { type: "app.two" })
+
+    const { analysis } = analyzeAgainstLibrary((ids) => [
+      { op: "insert", parentId: ids.page, index: 0, node: first },
+      { op: "insert", parentId: ids.page, index: 1, node: second },
+    ])
+
+    expect(analysis.unknownPrimitives.map((unknown) => unknown.type)).toEqual([
+      primitiveTypeSchema.parse("app.one"),
+      primitiveTypeSchema.parse("app.two"),
+    ])
   })
 })

@@ -61,7 +61,11 @@ const fieldsWritten = (): readonly string[] =>
   )
 
 /** Written-out numbers, because the page is prose and prose spells them. */
-const WORDS: Readonly<Record<number, string>> = { 12: "twelve", 13: "thirteen" }
+const WORDS: Readonly<Record<number, string>> = {
+  12: "twelve",
+  13: "thirteen",
+  14: "fourteen",
+}
 
 const wordFor = (value: number): string => {
   const word = WORDS[value]
@@ -135,7 +139,7 @@ describe("what the page says about the settings", () => {
 
   /**
    * The sentence about the type catching a missing row names both numbers, so a
-   * fourteenth knob would leave the page arguing from arithmetic that no longer
+   * fifteenth knob would leave the page arguing from arithmetic that no longer
    * works. Derived here rather than spelled, because that is the whole claim.
    */
   it("keeps its own arithmetic true", () => {

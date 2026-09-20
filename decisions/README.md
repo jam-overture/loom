@@ -256,3 +256,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0170](0170-a-library-is-a-set-to-choose-from-and-a-vocabulary-is-priced-per-entry.md) | A library is a set to choose from, and a vocabulary is priced per entry | Accepted | §4, measured through the §2 interpretation prompt |
 | [0171](0171-a-page-part-is-earned-by-the-region-it-occupies.md) | A page part is earned by the region it occupies, not by the content it holds | Accepted | §4b |
 | [0172](0172-what-a-deployment-offers-a-model-is-one-value.md) | What a deployment can offer a model is one value, and three more vocabularies go in it | Accepted | §2 (interpretation), reaching §4d, §5 and §6 |
+| [0173](0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md) | A change may not add a node the deployment cannot draw | Accepted | §2 |
