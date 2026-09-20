@@ -245,6 +245,25 @@ describe("whether a change put the last one back", () => {
   })
 
   /**
+   * And the same thing from the other side, which is the case only counting both
+   * lists catches: the change before this one moved two settings, and this one
+   * reverses one of them. Every move it made is a perfect reverse, and the page
+   * is still carrying the other half of what came before.
+   */
+  it("is not going back when it reverses only part of what came before", () => {
+    const tree = demoPageTree()
+    const earlier: readonly SettingMove[] = [
+      { nodeId: tree.root.id, key: "demo.a", from: "was", to: "is" },
+      { nodeId: tree.root.id, key: "demo.b", from: "was", to: "is" },
+    ]
+    const moves: readonly SettingMove[] = [
+      { nodeId: tree.root.id, key: "demo.a", from: "is", to: "was" },
+    ]
+
+    expect(reversesTheLastChange(moves, earlier)).toBe(false)
+  })
+
+  /**
    * A prop that was never there and a prop holding `null` are two different
    * facts, and `null` is a value `JsonValue` allows — so a change clearing one
    * must not read as the reverse of a change setting the other.

@@ -1455,6 +1455,22 @@ the `"use server"` boundary. Left for the next run rather than folded into this
 one, because it is a refactor with its own argument and this unit was already
 five files.
 
+**Second data point, 20 September, `demo-23-back-the-way-it-came`.** The file now
+carries a third decision of its own: **which earlier asks a change is compared
+against**. `assessedAgainst` hands `session.records` in, and deleting that one
+line leaves the suite at **37 files, 490 tests, green** — with the demo's second
+press silently back to printing the first press's sentence, which is the defect
+this whole run was opened to fix. It is the same shape as the `restoring` line
+above and it was added for the same reason: the fact is the caller's own
+knowledge about its own request, and the caller is the one file nothing can call.
+
+`assessedAgainst` is itself the named function this entry asked for — the
+decisions are out of the statement and into something with a name — and that
+turns out not to be the half that matters. It is still on the wrong side of
+`"use server"`, so no test calls it; `pipeline.test.ts` passes the same three
+arguments in its own copy of the call. Moving it into `_lib/` is a two-line move
+and it is what this entry has meant since it was filed.
+
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
@@ -27485,6 +27501,25 @@ folded into this unit.
 
 **Recommendation:** take it as its own unit, and take it before the next reading
 lands in that file rather than after.
+
+**Fifth data point, 20 September, `demo-23-back-the-way-it-came`.** The eighth
+reading moved into `page.tsx` today — which control's answer decides whether the
+page's marks say *back* — and it is unwired by changing one word:
+
+```
+restoring: putsSomethingBack(one.record)   →   restoring: false
+```
+
+**37 files, 490 tests, all green.** No `TS6133` this time either, because the
+import is still used four lines further down. The mark on the band goes from
+*Changed back* to *Just changed* on a press the card beside it still describes as
+having put the page back — which is the two halves of one claim disagreeing, and
+is the exact defect `putsSomethingBack` exists to make impossible. Photographed
+both ways in this run's report; caught by nothing.
+
+The recommendation is unchanged and is now four runs old. `whatTheRailShows` is
+still the shape, and the argument for taking it *before* the next reading lands
+is a reading weaker than it was: this run added the eighth.
 
 ---
 ## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
