@@ -547,7 +547,7 @@ describe("a second ask held while the first is still waiting", () => {
     const found = await session.holds.forTree(head.treeId)
     if (!found.ok) throw new Error(`no holds: ${found.error.code}`)
 
-    return { head, held: found.value }
+    return { head, held: found.value.held }
   }
 
   it("goes dead the moment the first one is answered, and the surface can tell", async () => {

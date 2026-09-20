@@ -27710,7 +27710,15 @@ fallback would be a sentence no reader can reach.
 ## 2026-09-18 — `HoldError` cannot tell a store that did not answer from a hold this deployment cannot read
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
-open — a framework gap, said out loud on the portal's front door meanwhile
+**closed by `framework-43-one-row-it-could-not-read`** (20 September) — the
+code you asked for, with the name you suggested. `HoldError` is now `not-held |
+already-held | unavailable | unreadable`: `unavailable` is a store that did not
+answer, `unreadable` is a store that answered with something this build cannot
+parse. `parseHeldProposal` returns the second. `unreadableQueue` failed to
+compile, exactly as you predicted it would, and this branch filled in the fourth
+sentence — *waiting will not clear it, this needs somebody to look* — and
+deleted the note explaining why the other three could not say that. Recorded in
+[0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md).
 
 `HoldError` is `not-held | already-held | unavailable`, and `unavailable` is
 `{ code, detail }` where `detail` is a free string. Two failures arrive through
@@ -27740,8 +27748,19 @@ is a compile error in this lane rather than a silence on a screen.
 ## 2026-09-18 — one hold a deployment cannot parse removes a whole page from the review queue
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
-open — the behaviour is deliberate and documented; the consequence is the
-finding
+**closed by `framework-43-one-row-it-could-not-read`** (20 September) — you
+weighed it right and the trade went your way. A listing now skips the row it
+cannot read, names it (`HoldListing.unreadable`, a position and the field that
+disagreed) and pages past it, so one hold from a later build costs one hold
+rather than that page's whole queue. **One thing your account did not have:**
+skipping is only safe if the cursor comes from the last *row* of the window
+rather than the last hold that parsed — otherwise a page ending in unreadable
+rows resumes in front of them forever, and a page of nothing but unreadable rows
+returns a `null` cursor and drops everything after it, which is your finding
+moved one page along. A listing still fails outright on a row whose own
+`(heldAt, proposalId)` will not parse, because there is no cursor that steps
+over it. Both are tested against PGlite. Recorded in
+[0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md).
 
 `postgresHoldStore.parseAll` fails the whole listing on the first row that does
 not parse, and its comment gives the reason:
@@ -27772,6 +27791,58 @@ above; and it is a second reason `HoldError` wants a code that distinguishes a
 parse failure, which is the finding directly above that.
 
 ---
+## 2026-09-20 — a listing now hands back the rows it could not read, and nothing on any screen renders them
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+open — **nothing is broken and no queue is shorter than it was.** A new field
+with no reader, and it is yours
+
+Closing your two 18 September entries meant giving both listings a second half.
+`HoldStore.forTree` and `waiting` now answer a `HoldListing` — `{ held,
+unreadable }` — where an `UnreadableHold` is a `HoldPosition` and a reason:
+
+```
+  { proposalId: "p_3f2a…", heldAt: "2026-07-30T12:00:00.000Z",
+    detail: "the holding store returned something this build cannot read: a stored hold did not parse: disposition" }
+```
+
+It sorts in `compareHolds` order with the holds that parsed, so a queue can
+render it in place rather than re-joining two lists.
+
+**Three screens read `forTree` and all three take `.held` and drop the rest.**
+That is this branch's edit and it is the smallest one that compiles — it is not
+a judgement about what the screens should show:
+
+| file | what it does now |
+| --- | --- |
+| `(portal)/portal/page.tsx` | `holds.value.held` into the front door's fan-out |
+| `(portal)/portal/pages/page.tsx` | `holds.value.held.length` as each page's *waiting* count |
+| `(portal)/portal/pages/[treeId]/page.tsx` | `holds.value.held` into the change list |
+
+**The one that would mislead a reviewer is the middle one.** *Waiting* is a
+count on the pages index, and a page with four answerable changes and one row
+from a later build now reads **4**. Before this change it read nothing at all,
+so it is not a regression — but it is the first time the number can be
+confidently short, and a count is a claim.
+
+**What you already have that this fits into.** `unreadableQueue` gained its
+fourth sentence on this branch (`unreadable`: *waiting will not clear it — this
+needs somebody to look*), and `Sweep.unreadable` already counts pages whose read
+failed. This is the row-level version of the same fact, one layer in: not *this
+page could not be checked* but *this page was checked and one change on it could
+not be read, here is which*.
+
+**A recommendation, not a requirement.** The count is the part worth a decision
+— whether *waiting* means *answerable* (4, with a mark) or *in the queue* (5,
+with a mark). I would show `held.length` and mark the row, because a reviewer
+acts on what they can answer; but it is a sentence on your screen and the
+framework has no view. Nothing else needs doing: a surface that ignores
+`unreadable` is exactly as correct as it was yesterday, and better off, because
+the four changes it can show are no longer taken off the queue by the fifth.
+
+Recorded in
+[0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md),
+consequence 4.
 
 ## 2026-09-19 — the write path can refuse a word nobody registered and not props no schema accepts, and the gap is a policy's shape
 

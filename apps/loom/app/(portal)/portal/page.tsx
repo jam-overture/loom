@@ -120,7 +120,7 @@ const PortalHome = async () => {
     trees.map(async (listing) => await portalHolds.forTree(listing.treeId))
   )
 
-  const held = perPage.flatMap((holds) => (holds.ok ? holds.value : []))
+  const held = perPage.flatMap((holds) => (holds.ok ? holds.value.held : []))
 
   /**
    * The other half: what Loom went ahead with on its own.
