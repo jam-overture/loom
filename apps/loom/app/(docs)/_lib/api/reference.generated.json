@@ -6614,7 +6614,7 @@
             {
               "name": "HoldError",
               "kind": "type",
-              "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n}\n/**\n * The store did not answer. Nothing is known about what it holds, and the\n * same call a moment later may well succeed.\n */\n | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n}\n/**\n * The store answered, and something it returned is not a hold this build can\n * read.\n *\n * Separate from `unavailable` because the two want opposite next moves from\n * whoever is reading the screen: a store that did not answer is waited out,\n * and a row that did not parse is gone and looked at. A reader told only\n * \"unavailable\" either waits out a problem that does not resolve or\n * investigates a blip, and the store is the only party that knows which.\n */\n | {\n    readonly code: \"unreadable\";\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6661,6 +6661,13 @@
               "summary": "Reads a cursor back into the position it names, or says it cannot."
             },
             {
+              "name": "holdPosition",
+              "kind": "function",
+              "signature": "const holdPosition: (row: {\n    readonly heldAt: string;\n    readonly proposalId: string;\n}) => HoldPosition | undefined",
+              "truncated": false,
+              "summary": "The two columns a page is ordered by, checked, or nothing."
+            },
+            {
               "name": "DEFAULT_HOLD_LIMIT",
               "kind": "value",
               "signature": "const DEFAULT_HOLD_LIMIT = 25",
@@ -6689,16 +6696,30 @@
               "summary": ""
             },
             {
+              "name": "UnreadableHold",
+              "kind": "type",
+              "signature": "type UnreadableHold = HoldPosition & {\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": "A row the listing could place and could not read."
+            },
+            {
+              "name": "HoldListing",
+              "kind": "type",
+              "signature": "type HoldListing = {\n    readonly held: readonly HeldProposal[];\n    readonly unreadable: readonly UnreadableHold[];\n};",
+              "truncated": false,
+              "summary": "What a listing found, and what it could not read while finding it."
+            },
+            {
               "name": "HoldPage",
               "kind": "type",
-              "signature": "type HoldPage = {\n    readonly held: readonly HeldProposal[];\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
+              "signature": "type HoldPage = HoldListing & {\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "HoldStore",
               "kind": "interface",
-              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
+              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<HoldListing, HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
               "truncated": false,
               "summary": "`release` is a take, not a read: it removes and returns in one step, which is what makes answering a proposal exactly once a property of the store rather than a rule every caller has to remember. Confirming and discarding both go through it, so two confirmations racing cannot both apply the same delta."
             },
