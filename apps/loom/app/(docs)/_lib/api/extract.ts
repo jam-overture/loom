@@ -45,11 +45,27 @@ export const GENERATED_FILE = join(here, "reference.generated.json")
 export const serializeReference = (reference: ApiReference): string =>
   `${JSON.stringify(reference, null, 2)}\n`
 
-type ExportsMap = Readonly<Record<string, { readonly types?: string }>>
+type ExportsMap = Readonly<Record<string, { readonly types?: string; readonly default?: string }>>
 
 export type PublishedEntry = {
   readonly specifier: string
   readonly types: string
+  /**
+   * The JavaScript behind the same door, where the door has any.
+   *
+   * The declarations say what a consumer's *type-checker* sees. This is what
+   * their *program* sees, and they are two files that can disagree. Nothing in
+   * the reference is read from here — it is read from `types`, which is right,
+   * because the reference describes a surface and not an implementation. It is
+   * carried so that something can hold the two against each other, which is
+   * `offered.ts`.
+   *
+   * `undefined` when the subpath publishes declarations and no implementation.
+   * That is a door with nothing behind it, and it is a fault rather than a
+   * shape to design around — so it is left as the absence it is and named
+   * where the two files are compared.
+   */
+  readonly runtime: string | undefined
 }
 
 /**
@@ -73,7 +89,13 @@ export const publishedEntries = (root: string = packageRoot): readonly Published
 
     if (types === undefined) return []
 
-    return [{ specifier: subpath === "." ? name : `${name}${subpath.slice(1)}`, types }]
+    return [
+      {
+        specifier: subpath === "." ? name : `${name}${subpath.slice(1)}`,
+        types,
+        runtime: condition.default,
+      },
+    ]
   })
 }
 
