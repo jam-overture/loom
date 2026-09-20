@@ -5,15 +5,41 @@
 **Branch:** `framework-43-one-row-it-could-not-read`
 **Section:** §5 — the hold store; reaching §2 and the portal's front door
 **Pull request:** [#347](https://github.com/jam-overture/loom/pull/347) ·
-**Preview:** **none — Vercel returned `Deployment was blocked`** at 09:37 UTC and
-minted no preview URL. This is not this branch's: the diff touches no deployment
-configuration (`vercel.json`, `next.config.ts`, the workspace and both
-`package.json` files are untouched), and `Loom primitives`' #346 deployed
-`Ready` from the same project 75 minutes earlier. It reads as an account-level
-gate rather than a build failure, and clearing it is the maintainer's. Raised on
-the pull request and notified. There is nothing new to look at in any case: this
-is a store seam, and the one screen that will show the difference is the
-portal's, whose own pass is filed as a finding rather than taken here.
+**Preview:** minted by the third commit, after the first two failed to deploy
+for the reason below. There is nothing new to look at in any case: this is a
+store seam, and the one screen that will show the difference is the portal's,
+whose own pass is filed as a finding rather than taken here.
+
+## The trap this lane documented and then walked into
+
+The first two commits on this branch were authored
+`jonathanbravecredit <jpizzolato36@gmail.com>`, because that is the address in
+this session's opening note. **That address resolves to the GitHub account
+`jpizzo`, which is not a member of the Vercel team**, so Vercel refused the
+deployment: *"Git author jpizzo must have access to the project on Vercel to
+create deployments."* No preview URL was minted.
+
+`docs/routines.md` says not to do that, in a section this lane wrote: **do not
+set a commit author — use whatever the session is configured with**, which is
+`Claude <noreply@anthropic.com>`. Every pull request that has produced a preview
+is authored that way, #344, #345 and #346 included. The finding behind that
+section (*`docs/routines.md` gives the opposite instruction about a commit author
+twice*, 16 September, closed by this lane on 17 September) names the failure mode
+exactly: *"what costs a run is reading the first section, setting the author to
+the maintainer's address from the opening note, and losing the preview."*
+
+Fixed forward rather than by rewriting history: Vercel deploys the head commit,
+so the correctly-authored commit carrying this correction is the one it builds.
+The two mis-authored commits stay in the branch's history, which is the honest
+record of it and costs nothing.
+
+**My first reading of this was wrong and is recorded as wrong rather than
+quietly replaced.** Vercel's opening status said only `Deployment was blocked`;
+#346 had deployed from the same project 75 minutes earlier and the diff touches
+no deployment configuration, so I concluded an account-level cap, said so on the
+pull request, and sent a notification recommending the maintainer check the
+project's usage. That was a false alarm. The second status named the real cause,
+which was mine.
 
 ![one hold from a later build, and the four it was taking down with it](2026-09-20-framework-one-row-it-could-not-read.png)
 
@@ -165,9 +191,15 @@ is worth one line here rather than a finding.
    count?** Filed rather than decided — see above.
 3. **Nothing here is `ARCHITECTURAL`.** No tree schema, no delta model, no
    built code to migrate, and no Accepted record contradicted.
-4. **Vercel is refusing deployments** (above). Every routine's report is
-   supposed to carry a preview URL, so if the gate holds, none of the four
-   lanes will produce one until it is cleared.
+4. **The author trap is dated in `docs/routines.md` and still fires.** The
+   superseded section was kept rather than deleted, with a note on top — this
+   lane's own call, made on 17 September, reasoning that the symptom it
+   describes is real. Three days later a run read the opening note, set the
+   author from it, and lost the preview anyway. Dating it did not work, and
+   deleting the superseded section is the obvious next move. **Not taken here:**
+   `docs/routines.md` is governance, one line of it would not belong in this
+   diff, and it is worth the maintainer's word before a routine deletes part of
+   the file that governs routines.
 
 ## Not taken, and it is mine
 
