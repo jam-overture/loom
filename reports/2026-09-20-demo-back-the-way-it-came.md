@@ -3,10 +3,13 @@
 **Routine:** `Loom demo` · **Branch:** `demo-23-back-the-way-it-came` ·
 **20 September 2026**
 
-**Deployed preview:** on the pull request. Open **`/demo`** — it is public, no
-sign-in — and press **Re-theme the whole page** twice. (Not opened from this
-environment: `vercel.app` is not on the sandbox's egress allowlist, the standing
-19 August finding.)
+**Deployed preview:**
+https://loom-git-demo-23-back-the-wa-6786eb-jpizzolato36-6341s-projects.vercel.app
+— public, no sign-in. Open **`/demo`** and press **Re-theme the whole page**
+twice; the card that appears at the top of *the record* is the whole of this run.
+(Not opened from this environment — `vercel.app` is not on the sandbox's egress
+allowlist, the standing 19 August finding. Everything below was driven against a
+local production build instead.)
 
 The twenty-third run of this lane, and the first one in five about the *record*
 rather than about the screen the record sits on.
