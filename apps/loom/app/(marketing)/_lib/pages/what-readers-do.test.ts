@@ -14,6 +14,7 @@ import {
   HOME,
   PUTTING_IT_BACK,
   SITE_ROUTES,
+  WHAT_CAN_HAPPEN,
   WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
@@ -55,13 +56,14 @@ describe("the page about what readers do", () => {
    * on. Still an exact list, so a seventh still fails here and still has to be
    * argued for.
    */
-  it("is kept off the bar deliberately, and is one of the six pages that are", () => {
+  it("is kept off the bar deliberately, and is one of the seven pages that are", () => {
     expect(WHAT_READERS_DO.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
       WHAT_READERS_DO,
+      WHAT_CAN_HAPPEN,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

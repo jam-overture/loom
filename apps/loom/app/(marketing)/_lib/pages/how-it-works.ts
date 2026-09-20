@@ -22,6 +22,7 @@ import {
   surfaceHref,
 } from "../site"
 
+import { asDataBand } from "./as-data"
 import type { PageContext } from "./home"
 
 /**
@@ -525,6 +526,17 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
         journey(ids),
         weighed(ids),
         record(ids),
+        /**
+         * The page showing itself as data, moved here from the front door on
+         * 20 September.
+         *
+         * It belongs to this page's argument better than it ever belonged to
+         * the landing page's: everything above it describes what a change is
+         * written *against*, and this is that thing, printed. On the front door
+         * it was the third demonstration in a row on a page the maintainer
+         * called too busy.
+         */
+        asDataBand(ids),
         /**
          * The record, and — unless the record *is* one — the refusal beside it.
          *

@@ -222,26 +222,37 @@ export const WHAT_YOU_RUN: SiteRoute = {
  * copy — so this page keeps one, and holds it to the original in both
  * directions instead of letting the two drift.
  *
- * **It is `inMenu: true`, and the entry above is how it got there.** A seventh
- * page carried by a bar already at the eight items #166 asked about would be
- * the flagged problem made worse; *Home* leaving the bar is what makes room,
- * and the count is unchanged. What the bar cannot yet do — hold these seven
- * under two or three grouped headings, the way the reference site does — needs
- * a menu that opens, and nothing in the library has one. Filed for
- * `Loom primitives` rather than worked around here.
+ * **It was `When it goes wrong`, in the bar, until 20 September.** The
+ * maintainer's words on it: *"I don't like the menu option. That gives it the
+ * wrong message."* He is right and the reason is worth keeping, because the
+ * page is unchanged and good: a bar is read before anything explains it, so the
+ * six words a visitor meets before they know what Loom is are the whole of what
+ * those six words can mean. **Four of the five endings are the product working,
+ * not failing** — a refusal is the rules doing their job — and a label promising
+ * *wrong* on the way in teaches a stranger to read all five as damage.
+ *
+ * So it says what the page says instead. `What can happen` is the same
+ * neutrality the rest of this site's labels already have — *What you run*, *What
+ * readers do*, *Who can ask* — and it is a promise the page keeps: five
+ * endings, four of which leave the page exactly as it was.
+ *
+ * **And it is out of the bar**, which is the other half of the same note: the
+ * bar carried six links and the maintainer's word for the site was *busy*. The
+ * guarantee `inMenu` has carried since 8 September is unchanged — what the bar
+ * leaves out, the footer's map carries, marked as the page the reader is on.
  */
-export const WHEN_IT_GOES_WRONG: SiteRoute = {
-  path: "/when-it-goes-wrong",
-  label: "When it goes wrong",
+export const WHAT_CAN_HAPPEN: SiteRoute = {
+  path: "/what-can-happen",
+  label: "What can happen",
   /**
    * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
    * only the half of a title that is exactly the wordmark, so the name inside a
    * clause prints twice on the card.
    */
-  title: "When it goes wrong — the four endings that leave your page exactly as it was",
+  title: "What can happen — the five ways a request can end, and the four that leave your page exactly as it was",
   description:
     "A request to change your page can end five ways, and only one of them changes anything. Here is what each of the other four is, what your page looks like afterwards, and what is written down either way.",
-  inMenu: true,
+  inMenu: false,
 }
 
 /**
@@ -447,7 +458,7 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
   THE_RECORD,
   PUTTING_IT_BACK,
   WHAT_READERS_DO,
-  WHEN_IT_GOES_WRONG,
+  WHAT_CAN_HAPPEN,
   WHAT_YOU_RUN,
   YOUR_COMPONENTS,
 ]

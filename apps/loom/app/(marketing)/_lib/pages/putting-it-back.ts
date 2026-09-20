@@ -20,7 +20,7 @@ import {
   SITE_THEMES,
   THE_RECORD,
   THE_RULES,
-  WHEN_IT_GOES_WRONG,
+  WHAT_CAN_HAPPEN,
 } from "../site"
 
 import type { PageContext } from "./home"
@@ -308,7 +308,7 @@ const stoppedOnTheWayBack = (
           action(
             ids,
             "What happens when one stops you",
-            internalHref(context.origin, WHEN_IT_GOES_WRONG.path, context.theme),
+            internalHref(context.origin, WHAT_CAN_HAPPEN.path, context.theme),
             { variant: "secondary", scale: "medium" }
           ),
         ]),

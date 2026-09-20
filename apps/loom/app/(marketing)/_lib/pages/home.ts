@@ -17,7 +17,6 @@ import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
-import { asDataBand } from "./as-data"
 import { inYourOwnWordsBand } from "./in-your-own-words"
 import { seeItHappenBand } from "./see-it-happen"
 import {
@@ -31,7 +30,6 @@ import {
   LESSONS,
   PORTAL,
   PRODUCT_SURFACES,
-  REPOSITORY_URL,
   SITE_THEMES,
   surfaceHref,
   WHAT_YOU_RUN,
@@ -149,10 +147,11 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
          * that promise to a source tree is answering "can I try it?" with "here
          * is the code", which is the wrong answer to a question nobody asked.
          *
-         * Nothing is lost by moving it: the repository is still the closing
-         * band's second action, a card in the facts band, and a named group in
-         * the footer. It is reachable three ways from this page and none of
-         * them is the first screen.
+         * Nothing is lost by moving it: the repository is still a card in the
+         * facts band and a named group in the footer. It is reachable two ways
+         * from this page and neither of them is the first screen. (It was
+         * three until the closing band was taken off the page on 20 September;
+         * the argument is unchanged and the count is not.)
          */
         action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), {
           variant: "secondary",
@@ -563,8 +562,8 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * wrong once the demo made it four: five cards in a grid that wraps at four
  * leaves one card alone on a second row, and the odd one out would have been the
  * only card in the band that is not a page of this product. The repository is
- * still offered twice on this page — the facts band and the closing band — and a
- * third time in the footer's map, so nothing was taken away from a reader.
+ * still offered on this page in the facts band, and again in the footer's map, so
+ * nothing was taken away from a reader.
  *
  * The band is now exactly `PRODUCT_SURFACES`, which is what makes the throw
  * below the whole of its contract rather than half of it.
@@ -623,42 +622,6 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
     }),
   ])
 
-/**
- * The last word, and it used to end on a sentence that was not true.
- *
- * *"None of it was written by hand"* stood here from 19 August until this run.
- * What it meant is that no band of this page is written out as a web page,
- * which is true and is now a band of its own further up. What it **said**, to
- * somebody who has never heard of any of this, is that nobody wrote the words —
- * and every word on this site was written by a person. It was also false in the
- * one way a reader could catch: the button directly beside it says *Read the
- * source*, and the source is a file with that sentence typed into it.
- *
- * The clause that replaces it is the same reassurance said accurately, and it
- * is the answer to the first problem the page named an hour of reading ago: a
- * tool that generates components hands you work rather than taking it away.
- */
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
-    prose(
-      ids,
-      "The menu, the questions, this sentence — every one of them is a piece the AI could be asked to move, and none of it is code you would have to read afterwards.",
-      { tone: "muted", align: "center", measured: true }
-    ),
-    stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
-      action(
-        ids,
-        "See how a change travels",
-        internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
-        { variant: "primary", scale: "large" }
-      ),
-      action(ids, "Read the source", REPOSITORY_URL, {
-        variant: "secondary",
-        scale: "large",
-        external: true,
-      }),
-    ]),
-  ], { align: "center" })
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
@@ -755,22 +718,25 @@ export const homePageTree = (context: PageContext): LoomTree => {
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids, context),
-        /**
-         * The claim the facts band makes about the repository, made about this
-         * page. *Not one of these numbers was typed from memory* is directly
-         * above it, and the same argument applied to the page itself is the one
-         * thing this surface can show that a description of it cannot.
-         *
-         * After the numbers rather than before them because a reader who has
-         * not yet been told the site is checkable has no reason to care how it
-         * is put together, and before the questions because *"can the AI write
-         * code into my page?"* is easier to believe from somebody who has just
-         * seen what a change is actually written against.
-         */
-        asDataBand(ids),
         questions(ids),
+        /**
+         * The last band before the foot of the page, and the only one that
+         * offers a way onward.
+         *
+         * **The closing band that used to follow it is gone, 20 September.**
+         * The maintainer read the front door and said it was too busy, and
+         * this is the clearest thing that made it so: two consecutive bands
+         * whose entire job was *go here next*, the second of them offering
+         * *See how a change travels* — which is the hero's own primary action,
+         * already on the first screen — and *Read the source*, which the facts
+         * band above and the footer below both already carry.
+         *
+         * A reader who has reached the bottom of this page is offered the four
+         * surfaces once, in the band built for it, and then the footer's map.
+         * Nothing became unreachable: the repository is still a card in the
+         * facts band and a named group in the footer.
+         */
         waysIn(ids, context),
-        closing(ids, context),
         siteFooter(ids, chrome),
       ],
     }),

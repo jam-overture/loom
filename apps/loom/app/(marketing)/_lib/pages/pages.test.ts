@@ -425,8 +425,20 @@ describe("the way to the demonstration", () => {
     }
   )
 
+  /**
+   * **A band, not merely something accent-toned.** This read *the first node
+   * whose tone is accent* until 20 September, which was the closing band only
+   * for as long as the mechanism page held exactly one such node. The band that
+   * shows the page as data moved onto this page that day, carrying an
+   * accent-toned callout inside it, and the assertion quietly started reading
+   * the callout — which has no links in it, so the failure at least was loud.
+   * A closing band is a `loom.section`, and saying so is what the test meant.
+   */
   it("closes the mechanism page, for the reader who has read all five steps", () => {
-    const closing = bandOf(HOW_IT_WORKS, (found) => found.props["tone"] === "accent")
+    const closing = bandOf(
+      HOW_IT_WORKS,
+      (found) => found.type === "loom.section" && found.props["tone"] === "accent"
+    )
 
     expect(hrefsIn(closing)).toContain(DEMO_HREF)
   })
@@ -605,6 +617,14 @@ describe("the record on the mechanism page", () => {
    * Six for the run and one for the refusal. Counted rather than looked for,
    * because a stage the page stopped printing would otherwise show up as a
    * slightly shorter page and nothing else.
+   *
+   * **Counted inside the record bands rather than over the whole page**, as of
+   * 20 September. It was every `loom.code` on the route, which was the same
+   * number for as long as the record was the only thing on this page printing
+   * one — and the band that shows the page as data moved here that day and
+   * prints one of its own. Two bands' panels summed into one total is a count
+   * that goes wrong in both directions: a stage dropped here and a panel added
+   * anywhere else would have cancelled out silently.
    */
   it("prints one panel per line of the run, and one for the refusal", async () => {
     const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
@@ -612,7 +632,15 @@ describe("the record on the mechanism page", () => {
       (node.kind === "element" && node.type === "loom.code" ? 1 : 0) +
       (node.kind === "text" ? 0 : node.children.reduce((total, child) => total + count(child), 0))
 
-    expect(count(tree.root)).toBe(7)
+    const recordBands = tree.root.children.filter(
+      (child) =>
+        child.kind === "element" &&
+        (child.props["eyebrow"] === "The record itself" ||
+          child.props["eyebrow"] === "And when the answer is no")
+    )
+
+    expect(recordBands).toHaveLength(2)
+    expect(recordBands.reduce((total, band) => total + count(band), 0)).toBe(7)
   })
 
   it("is a record of the page this site publishes, not of a fixture", async () => {

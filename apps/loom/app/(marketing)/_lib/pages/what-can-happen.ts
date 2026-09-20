@@ -23,7 +23,7 @@ import {
   surfaceHref,
   THE_RECORD,
   THE_RULES,
-  WHEN_IT_GOES_WRONG,
+  WHAT_CAN_HAPPEN,
 } from "../site"
 
 import type { PageContext } from "./home"
@@ -156,7 +156,7 @@ export const endingsOf = (): readonly Ending[] =>
     const ending = ENDINGS.find((one) => one.kind === kind)
 
     if (ending === undefined) {
-      throw new Error(`loom: a request can end as ${kind} and ${WHEN_IT_GOES_WRONG.path} does not say so`)
+      throw new Error(`loom: a request can end as ${kind} and ${WHAT_CAN_HAPPEN.path} does not say so`)
     }
 
     return ending
@@ -266,7 +266,7 @@ const hero = (ids: IdFactory, context: WrongContext): LoomNode =>
         action(
           ids,
           "See one refused, here",
-          internalHref(context.origin, `${WHEN_IT_GOES_WRONG.path}#${REFUSAL_ANCHOR}`, context.theme),
+          internalHref(context.origin, `${WHAT_CAN_HAPPEN.path}#${REFUSAL_ANCHOR}`, context.theme),
           { variant: "primary", scale: "large" }
         ),
         action(ids, "What you decide in advance", internalHref(context.origin, THE_RULES.path, context.theme), {
@@ -556,12 +556,12 @@ const closing = (ids: IdFactory, context: WrongContext): LoomNode =>
     { align: "center" }
   )
 
-export const whenItGoesWrongPageTree = (context: WrongContext): LoomTree => {
+export const whatCanHappenPageTree = (context: WrongContext): LoomTree => {
   const ids = sequentialIdFactory("wrong")
   const chrome: ChromeContext = {
     origin: context.origin,
     theme: context.theme,
-    current: WHEN_IT_GOES_WRONG,
+    current: WHAT_CAN_HAPPEN,
     counting: context.counting === true,
   }
 

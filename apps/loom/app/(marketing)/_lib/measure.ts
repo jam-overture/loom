@@ -7,7 +7,7 @@ import type { LoomNode } from "@loom/runtime"
  * print is a measurement that has to be taken one way, or the two bands
  * eventually disagree about a number a reader can compare across a click.
  *
- * `piecesIn` lived in `pages/when-it-goes-wrong.ts` until the round-trip band
+ * `piecesIn` lived in `pages/what-can-happen.ts` until the round-trip band
  * needed it too, and a page module importing another page module is the wrong
  * direction — pages read this layer, they do not read each other. It is the
  * move `NOT_A_RULE` made on 13 September, for the same reason and on the second

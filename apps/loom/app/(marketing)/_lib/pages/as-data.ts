@@ -6,7 +6,6 @@ import {
   type LoomNode,
 } from "@loom/runtime"
 
-import { BAND } from "../bands"
 import { prose, section } from "../nodes"
 
 /**
@@ -88,12 +87,25 @@ const panel = (ids: IdFactory, node: LoomNode): LoomNode =>
     children: [buildText(ids, asJson(node))],
   })
 
+/**
+ * The eyebrow, spelled here rather than in `bands.ts`.
+ *
+ * `bands.ts` is *what each band of the front door is called*, and this band is
+ * not on the front door any more — the maintainer read it on 20 September and
+ * said the page was too busy, and three separate demonstrations stacked down
+ * one landing page is most of what made it so. It sits on the mechanism page
+ * now, which is where a reader who wants the proof has already gone looking for
+ * it, and where the page around it is about the machinery rather than about the
+ * pitch. Nothing about the band changed.
+ */
+export const AS_DATA_EYEBROW = "How this page is put together"
+
 export const asDataBand = (ids: IdFactory): LoomNode => {
   const shown = specimen(ids)
 
   return section(
     ids,
-    { tone: "canvas", width: "wide", eyebrow: BAND.asData },
+    { tone: "canvas", width: "wide", eyebrow: AS_DATA_EYEBROW },
     "The same thing, twice",
     [
       prose(

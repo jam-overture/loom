@@ -1,8 +1,8 @@
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
-import { readThemeName, siteOrigin, WHEN_IT_GOES_WRONG } from "@/app/(marketing)/_lib/site"
+import { readThemeName, siteOrigin, WHAT_CAN_HAPPEN } from "@/app/(marketing)/_lib/site"
 
-export const generateMetadata = routeMetadata(WHEN_IT_GOES_WRONG)
+export const generateMetadata = routeMetadata(WHAT_CAN_HAPPEN)
 
 /**
  * The page that says what happens the other four times.
@@ -15,7 +15,7 @@ export const generateMetadata = routeMetadata(WHEN_IT_GOES_WRONG)
  */
 const WhenItGoesWrongPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
   const params = await searchParams
-  const rendered = await renderSitePage(WHEN_IT_GOES_WRONG, {
+  const rendered = await renderSitePage(WHAT_CAN_HAPPEN, {
     origin: siteOrigin(),
     theme: readThemeName(params["theme"]),
   })

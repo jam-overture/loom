@@ -7,13 +7,14 @@ import {
   DEFAULT_THEME,
   HOME,
   PUTTING_IT_BACK,
-  internalHref,
   SITE_ROUTES,
-  WHAT_READERS_DO,
   SITE_THEME_NAMES,
+  WHAT_CAN_HAPPEN,
+  WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
+  internalHref,
 } from "../site"
 import { uses, wordsOf } from "../words"
 
@@ -303,13 +304,14 @@ describe("its place in the navigation", () => {
    * and still open. The list stays exact so a sixth fails here and has to be
    * argued for.
    */
-  it("is off the bar deliberately, with four other pages", () => {
+  it("is off the bar deliberately, with five other pages", () => {
     expect(WHAT_YOU_RUN.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
       WHAT_READERS_DO,
+      WHAT_CAN_HAPPEN,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

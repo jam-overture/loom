@@ -32,7 +32,7 @@ import {
   SITE_THEMES,
   THE_RECORD,
   THE_RULES,
-  WHEN_IT_GOES_WRONG,
+  WHAT_CAN_HAPPEN,
   WHO_CAN_ASK,
 } from "../site"
 
@@ -423,7 +423,7 @@ const cannotBuy = (
         action(
           ids,
           "What happens when one is stopped",
-          internalHref(context.origin, WHEN_IT_GOES_WRONG.path, context.theme),
+          internalHref(context.origin, WHAT_CAN_HAPPEN.path, context.theme),
           { variant: "secondary", scale: "medium" }
         ),
       ]),

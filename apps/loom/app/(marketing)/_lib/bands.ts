@@ -18,7 +18,6 @@ export const BAND = {
   inYourOwnWords: "Your turn",
   problems: "What this is for",
   facts: "Where it is today",
-  asData: "How this page is put together",
   questions: "Questions",
   waysIn: "Keep going",
 } as const

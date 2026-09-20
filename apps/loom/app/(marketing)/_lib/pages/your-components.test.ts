@@ -10,12 +10,13 @@ import {
   DEFAULT_THEME,
   HOME,
   PUTTING_IT_BACK,
-  internalHref,
   SITE_ROUTES,
+  WHAT_CAN_HAPPEN,
   WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
+  internalHref,
 } from "../site"
 import { uses, wordsOf } from "../words"
 
@@ -63,13 +64,14 @@ describe("the page about your own components", () => {
    * off it, and on 14 September `/putting-it-back`. Still an exact list, so a
    * sixth still fails here and still has to be argued for.
    */
-  it("is kept off the bar deliberately, and is one of the five pages that are", () => {
+  it("is kept off the bar deliberately, and is one of the six pages that are", () => {
     expect(YOUR_COMPONENTS.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
       WHAT_READERS_DO,
+      WHAT_CAN_HAPPEN,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

@@ -10,8 +10,9 @@ import {
   HOME,
   PUTTING_IT_BACK,
   SITE_ROUTES,
-  WHAT_READERS_DO,
   THE_RECORD,
+  WHAT_CAN_HAPPEN,
+  WHAT_READERS_DO,
   WHAT_YOU_RUN,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
@@ -264,13 +265,14 @@ describe("the page itself", () => {
    * pages are now off the bar, which is worse than four of eight and is the
    * number the 12 September finding asked to be told. The list stays exact.
    */
-  it("is off the bar, with four other pages", () => {
+  it("is off the bar, with five other pages", () => {
     expect(PUTTING_IT_BACK.inMenu).toBe(false)
     expect(SITE_ROUTES.filter((route) => !route.inMenu)).toEqual([
       HOME,
       WHO_CAN_ASK,
       PUTTING_IT_BACK,
       WHAT_READERS_DO,
+      WHAT_CAN_HAPPEN,
       WHAT_YOU_RUN,
       YOUR_COMPONENTS,
     ])

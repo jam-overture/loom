@@ -4,14 +4,12 @@ import { fileURLToPath } from "node:url"
 import type { ElementNode, LoomNode } from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
-import { ASKS } from "../adapt/asks"
-import { BAND } from "../bands"
 import { outlineOf } from "../outline"
-import { askRunFor, treeFor } from "../render"
-import { DEFAULT_THEME, HOME } from "../site"
+import { treeFor } from "../render"
+import { DEFAULT_THEME, HOME, HOW_IT_WORKS } from "../site"
 import { wordsOf } from "../words"
 
-import { asJson } from "./as-data"
+import { AS_DATA_EYEBROW } from "./as-data"
 
 /**
  * The band that prints a piece of this page, held to printing *this* page.
@@ -26,6 +24,18 @@ import { asJson } from "./as-data"
 
 const ORIGIN = "https://loom.example"
 
+/**
+ * The mechanism page, which is where this band lives as of 20 September.
+ *
+ * It was the front door's until the maintainer read that page and said it was
+ * too busy. Nothing about the band changed and nothing here asserts less about
+ * it — what went are the five assertions that re-checked the panel after each
+ * of the front door's prepared requests, because the page it now stands on is
+ * not one any of them rearranges. The guarantee those five protected is
+ * identity, and identity is still checked below on the page as served.
+ */
+const host = () => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
+
 const home = () => treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
 
 const elementsOf = (node: LoomNode): readonly ElementNode[] => [
@@ -35,17 +45,17 @@ const elementsOf = (node: LoomNode): readonly ElementNode[] => [
 
 const onlyOne = <T,>(found: readonly T[], what: string): T => {
   if (found.length !== 1) {
-    throw new Error(`loom: the front door holds ${found.length} ${what}, expected exactly one`)
+    throw new Error(`loom: the page holds ${found.length} ${what}, expected exactly one`)
   }
 
   return found[0] as T
 }
 
 /** The band, found by the one label of it that is stable and visible. */
-const bandOf = (page = home()): ElementNode =>
+const bandOf = (page = host()): ElementNode =>
   onlyOne(
-    elementsOf(page.root).filter((element) => element.props["eyebrow"] === BAND.asData),
-    `bands labelled "${BAND.asData}"`
+    elementsOf(page.root).filter((element) => element.props["eyebrow"] === AS_DATA_EYEBROW),
+    `bands labelled "${AS_DATA_EYEBROW}"`
   )
 
 /**
@@ -57,7 +67,7 @@ const bandOf = (page = home()): ElementNode =>
  * thing while every assertion below went on passing — which is the one failure
  * this file exists to catch.
  */
-const specimenOf = (page = home()): ElementNode => {
+const specimenOf = (page = host()): ElementNode => {
   const split = onlyOne(
     elementsOf(bandOf(page)).filter((element) => element.type === "loom.split"),
     "splits in that band"
@@ -75,12 +85,8 @@ const specimenOf = (page = home()): ElementNode => {
   return first
 }
 
-/** A piece with every id taken out of it, so two pages can be compared by content. */
-const withoutIds = (node: LoomNode): unknown =>
-  JSON.parse(asJson(node), (key, value) => (key === "id" ? undefined : value))
-
 /** What the panel prints, as text. */
-const printedOf = (page = home()): string => {
+const printedOf = (page = host()): string => {
   const panel = onlyOne(
     elementsOf(bandOf(page)).filter((element) => element.type === "loom.code"),
     "panels in that band"
@@ -106,7 +112,7 @@ describe("the page printed beside itself", () => {
    * piece that is standing next to it, id and all.
    */
   it("prints the piece that is in the band, rather than a copy of it", () => {
-    const page = home()
+    const page = host()
 
     expect(JSON.parse(printedOf(page))).toEqual(JSON.parse(JSON.stringify(specimenOf(page))))
   })
@@ -117,49 +123,8 @@ describe("the page printed beside itself", () => {
     expect(printed.children?.length).toBeGreaterThan(0)
   })
 
-  /**
-   * The panel prints the page it is standing on, and the front door has six of
-   * those: the one a stranger arrives at, and the one each choice leaves behind.
-   * A request that reconfigured or removed what the panel prints would leave it
-   * quietly describing a page that is no longer on the screen — on the one band
-   * whose entire claim is that it cannot.
-   *
-   * So every choice is run against the real page and both halves are checked on
-   * what comes back. This is the assertion that makes the band safe to add a
-   * sixth choice beside.
-   */
-  it.each(ASKS.map((ask) => ask.id))("still prints its own box after %s", async (id) => {
-    const run = await askRunFor({ origin: ORIGIN, theme: DEFAULT_THEME, ask: id })
-
-    if (run === undefined) throw new Error(`loom: ${id} ran nothing`)
-
-    expect(JSON.parse(printedOf(run.page))).toEqual(
-      JSON.parse(JSON.stringify(specimenOf(run.page)))
-    )
-  })
-
-  /**
-   * And the box itself says the same thing it said on arrival.
-   *
-   * **Ids are compared out**, and the reason is worth writing down rather than
-   * hiding in a helper: the front door puts the answer above the opening band
-   * for a visitor who has asked for something, so every piece built after it is
-   * built one step later and carries a different id. That is a fact about two
-   * different published pages rather than about anything a request did — each
-   * page's ids are internally consistent, which is the property the assertion
-   * above checks. What must not move is the box's settings and its words.
-   */
-  it.each(ASKS.map((ask) => ask.id))("leaves the box saying the same thing after %s", async (id) => {
-    const arrival = withoutIds(specimenOf())
-    const run = await askRunFor({ origin: ORIGIN, theme: DEFAULT_THEME, ask: id })
-
-    if (run === undefined) throw new Error(`loom: ${id} ran nothing`)
-
-    expect(withoutIds(specimenOf(run.page))).toEqual(arrival)
-  })
-
   it("is a band of the page rather than something inside another one, so the record lists it", () => {
-    expect(outlineOf(home())).toContain(BAND.asData)
+    expect(outlineOf(host())).toContain(AS_DATA_EYEBROW)
   })
 })
 

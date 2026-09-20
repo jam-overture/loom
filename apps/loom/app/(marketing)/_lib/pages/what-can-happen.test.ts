@@ -21,7 +21,7 @@ import { describe, expect, it } from "vitest"
 import { askById, askInterpreter, ASKS, type Ask } from "../adapt/asks"
 import { FRONT_DOOR_POLICY, protectedInPlainWords, runAsk } from "../adapt/run"
 import { pageTreeFor, refusalFor, treeFor } from "../render"
-import { DEFAULT_THEME, HOME, SITE_ROUTES, WHEN_IT_GOES_WRONG } from "../site"
+import { DEFAULT_THEME, HOME, SITE_ROUTES, WHAT_CAN_HAPPEN } from "../site"
 import { RESERVED_VOCABULARY } from "../copy"
 import { piecesIn } from "../measure"
 import { uses, wordsOf } from "../words"
@@ -32,7 +32,7 @@ import {
   endingsOf,
   inWords,
   REFUSAL_ANCHOR,
-} from "./when-it-goes-wrong"
+} from "./what-can-happen"
 
 /**
  * The page whose entire argument is a claim about code, held to that code.
@@ -53,7 +53,7 @@ const ORIGIN = "https://loom.example"
 const CONTEXT = { origin: ORIGIN, theme: DEFAULT_THEME }
 
 const pageWords = async (): Promise<string> =>
-  wordsOf((await pageTreeFor(WHEN_IT_GOES_WRONG, CONTEXT)).root)
+  wordsOf((await pageTreeFor(WHAT_CAN_HAPPEN, CONTEXT)).root)
 
 const frontDoor = (): LoomTree => treeFor(HOME, CONTEXT)
 
@@ -177,7 +177,7 @@ describe("the five endings", () => {
    * to 369px inside a 284px wrapper, two come to 284 with nothing to scroll.
    */
   it("keeps the endings to two columns, so the answer is never the one off the edge", async () => {
-    const tree = await pageTreeFor(WHEN_IT_GOES_WRONG, CONTEXT)
+    const tree = await pageTreeFor(WHAT_CAN_HAPPEN, CONTEXT)
     const rows = tablesIn(tree.root)
       .filter((table) => table.props["caption"] === "The five ways a request to change a page can end")
       .flatMap((table) =>
@@ -357,23 +357,40 @@ describe("the refusal the page prints", () => {
 })
 
 describe("the page itself", () => {
-  it("is reachable, in the bar, and in the footer's map", () => {
-    expect(SITE_ROUTES).toContain(WHEN_IT_GOES_WRONG)
-    expect(WHEN_IT_GOES_WRONG.inMenu).toBe(true)
+  /**
+   * **Off the bar as of 20 September, and reachable exactly as the other six
+   * off-bar pages are.** The maintainer read the bar and said two things: that
+   * the site was too busy, and that this page's menu label gave the wrong
+   * message. The label is answered in `site.ts`; this is the other half.
+   *
+   * What `inMenu: false` has guaranteed since 8 September is unchanged and is
+   * asserted here rather than assumed: the footer's map carries every route,
+   * so a page off the bar is never a page off the site.
+   */
+  it("is reachable and in the footer's map, and is no longer in the bar", () => {
+    expect(SITE_ROUTES).toContain(WHAT_CAN_HAPPEN)
+    expect(WHAT_CAN_HAPPEN.inMenu).toBe(false)
+  })
+
+  /** Its label says what the page says, rather than promising a stranger failure. */
+  it("is not named for the ending nobody wants", () => {
+    expect(WHAT_CAN_HAPPEN.label).toBe("What can happen")
+    expect(WHAT_CAN_HAPPEN.label.toLowerCase()).not.toContain("wrong")
+    expect(WHAT_CAN_HAPPEN.path).not.toContain("wrong")
   })
 
   /**
-   * The bar did not grow to carry it. `HOME` came off to make room, which keeps
-   * the count at the eight the maintainer asked about on #166 rather than
-   * taking it to nine — and the exact list is asserted so that a ninth has to
-   * be argued for here rather than arriving as a side effect.
+   * The bar gave an item back. The exact list is asserted so that a page
+   * arriving on or leaving the bar has to be argued for here rather than
+   * happening as a side effect.
    */
-  it("did not cost the bar an item", () => {
+  it("gave the bar back an item", () => {
     expect(SITE_ROUTES.filter((route) => !route.inMenu).map((route) => route.path)).toEqual([
       "/",
       "/who-can-ask",
       "/putting-it-back",
       "/what-readers-do",
+      "/what-can-happen",
       "/what-you-run",
       "/your-components",
     ])
@@ -422,7 +439,7 @@ describe("the page itself", () => {
   })
 
   it("builds without a refusal to print, rather than failing to render", () => {
-    expect(() => treeFor(WHEN_IT_GOES_WRONG, CONTEXT)).not.toThrow()
+    expect(() => treeFor(WHAT_CAN_HAPPEN, CONTEXT)).not.toThrow()
   })
 
   /**
@@ -451,23 +468,23 @@ describe("the page itself", () => {
    * the half that would genuinely break in silence.
    */
   it("links to its own refusal band the way it links to anything else", () => {
-    const hrefs = hrefsIn(treeFor(WHEN_IT_GOES_WRONG, CONTEXT).root)
+    const hrefs = hrefsIn(treeFor(WHAT_CAN_HAPPEN, CONTEXT).root)
 
     expect(hrefs).toContain(
-      `${ORIGIN}${WHEN_IT_GOES_WRONG.path}?theme=${DEFAULT_THEME}#${REFUSAL_ANCHOR}`
+      `${ORIGIN}${WHAT_CAN_HAPPEN.path}?theme=${DEFAULT_THEME}#${REFUSAL_ANCHOR}`
     )
   })
 
   it("carries the reader's own palette on that link", () => {
-    const bold = treeFor(WHEN_IT_GOES_WRONG, { origin: ORIGIN, theme: "bold" as const })
+    const bold = treeFor(WHAT_CAN_HAPPEN, { origin: ORIGIN, theme: "bold" as const })
 
     expect(hrefsIn(bold.root)).toContain(
-      `${ORIGIN}${WHEN_IT_GOES_WRONG.path}?theme=bold#${REFUSAL_ANCHOR}`
+      `${ORIGIN}${WHAT_CAN_HAPPEN.path}?theme=bold#${REFUSAL_ANCHOR}`
     )
   })
 
   it("gives the band the name the link points at", () => {
-    const anchors = anchorsIn(treeFor(WHEN_IT_GOES_WRONG, CONTEXT).root)
+    const anchors = anchorsIn(treeFor(WHAT_CAN_HAPPEN, CONTEXT).root)
 
     expect(anchors).toContain(REFUSAL_ANCHOR)
   })

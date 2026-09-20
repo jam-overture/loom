@@ -20,10 +20,10 @@ import { whatReadersDoPageTree } from "./pages/what-readers-do"
 import { whatYouRunPageTree } from "./pages/what-you-run"
 import {
   DEMONSTRATED_ASK,
-  whenItGoesWrongPageTree,
+  whatCanHappenPageTree,
   type RefusalContext,
   type RefusedRun,
-} from "./pages/when-it-goes-wrong"
+} from "./pages/what-can-happen"
 import { whoCanAskPageTree, type AskersContext } from "./pages/who-can-ask"
 import { yourComponentsPageTree } from "./pages/your-components"
 import { readersCountedHere } from "./readers/counting"
@@ -36,7 +36,7 @@ import {
   THE_RULES,
   WHAT_READERS_DO,
   WHAT_YOU_RUN,
-  WHEN_IT_GOES_WRONG,
+  WHAT_CAN_HAPPEN,
   WHO_CAN_ASK,
   YOUR_COMPONENTS,
   siteOrigin,
@@ -74,7 +74,7 @@ export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, Page
   [HOW_IT_WORKS.path, howItWorksPageTree],
   [THE_RULES.path, theRulesPageTree],
   [THE_RECORD.path, theRecordPageTree],
-  [WHEN_IT_GOES_WRONG.path, whenItGoesWrongPageTree],
+  [WHAT_CAN_HAPPEN.path, whatCanHappenPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
   [WHO_CAN_ASK.path, whoCanAskPageTree],
   [PUTTING_IT_BACK.path, puttingItBackPageTree],
@@ -268,7 +268,7 @@ export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
-  if (route.path === WHEN_IT_GOES_WRONG.path) {
+  if (route.path === WHAT_CAN_HAPPEN.path) {
     const refusal = await refusalFor(context)
 
     return treeFor(route, refusal === undefined ? context : { ...context, refusal })
