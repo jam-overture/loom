@@ -5,8 +5,9 @@
 **Branch:** `framework-43-one-row-it-could-not-read`
 **Section:** §5 — the hold store; reaching §2 and the portal's front door
 **Pull request:** [#347](https://github.com/jam-overture/loom/pull/347) ·
-**Preview:** minted by the third commit, after the first two failed to deploy
-for the reason below. There is nothing new to look at in any case: this is a
+**Preview:** https://loom-git-framework-43-one-ro-1b4607-jpizzolato36-6341s-projects.vercel.app
+— minted by the third commit, after the first two failed to deploy for the
+reason below. There is nothing new to look at in any case: this is a
 store seam, and the one screen that will show the difference is the portal's,
 whose own pass is filed as a finding rather than taken here.
 
