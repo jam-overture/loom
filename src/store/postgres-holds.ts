@@ -3,13 +3,18 @@ import { asc, eq, sql } from "drizzle-orm"
 import { err, ok, type Result } from "../result.js"
 import {
   clampHoldLimit,
+  describeHoldError,
   holdCursor,
   holdCursorPosition,
+  holdPosition,
   parseHeldProposal,
   type HeldProposal,
   type HoldError,
+  type HoldListing,
   type HoldPage,
+  type HoldPosition,
   type HoldStore,
+  type UnreadableHold,
 } from "../write/held.js"
 
 import type { LoomDatabase } from "./database.js"
@@ -57,23 +62,57 @@ const toHeld = (row: typeof loomHolds.$inferSelect): Result<HeldProposal, HoldEr
 const HOLD_ORDER = [asc(loomHolds.heldAt), asc(loomHolds.proposalId)] as const
 
 /**
- * One unreadable row fails the whole listing rather than being skipped. A queue
- * that quietly omits a change nobody can parse is a queue that says nothing is
- * waiting when something is — and the reviewer has no way to find out otherwise.
+ * Splits a page of rows into the holds it read and the rows it could not.
+ *
+ * The rule is 0175's and it turns on the two columns the index orders by. A row
+ * whose position parses can always be named and always be paged past, so it is
+ * skipped and reported: the change it was hiding is one row, and every other
+ * change against that page stays on the queue where a reviewer can answer it.
+ *
+ * A row whose *position* does not parse is a different fault and fails the
+ * whole listing. Skipping it would mean minting a cursor from something that is
+ * not a position — a value the next request cannot read, which starts it again
+ * at the beginning and pages forever. There is no honest way to step over a row
+ * the ordering cannot place, so the listing says so instead.
  */
 const parseAll = (
   rows: readonly (typeof loomHolds.$inferSelect)[]
-): Result<readonly HeldProposal[], HoldError> => {
+): Result<HoldListing, HoldError> => {
   const held: HeldProposal[] = []
+  const unreadable: UnreadableHold[] = []
 
   for (const row of rows) {
-    const parsed = toHeld(row)
-    if (!parsed.ok) return parsed
+    const position = holdPosition(row)
+    if (position === undefined)
+      return err<HoldError>({
+        code: "unreadable",
+        detail: `a stored hold could not be placed in the queue: ${row.proposalId} held at ${row.heldAt}`,
+      })
 
-    held.push(parsed.value)
+    const parsed = toHeld(row)
+    if (parsed.ok) held.push(parsed.value)
+    else unreadable.push({ ...position, detail: describeHoldError(parsed.error) })
   }
 
-  return ok(held)
+  return ok<HoldListing>({ held, unreadable })
+}
+
+/**
+ * The position a page resumes from: the last row the window read, readable or
+ * not.
+ *
+ * Taking it from the last *parsed* hold is the bug that skipping would
+ * otherwise introduce, and it is worse than the behaviour it replaces. A page
+ * whose final rows were all unreadable would resume before them and report them
+ * again forever; a page whose rows were *all* unreadable would have no last
+ * hold at all, so the cursor would come back `null` and every hold after them
+ * would drop off the queue — the whole fault this change exists to remove,
+ * moved one page along.
+ */
+const pageEnd = (rows: readonly (typeof loomHolds.$inferSelect)[]): HoldPosition | undefined => {
+  const last = rows.at(-1)
+
+  return last === undefined ? undefined : holdPosition(last)
 }
 
 export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
@@ -152,13 +191,14 @@ export const postgresHoldStore = (db: LoomDatabase): HoldStore => ({
         /** One extra row answers "is there another page" without a count. */
         .limit(limit + 1)
 
-      const parsed = parseAll(rows.slice(0, limit))
+      const inPage = rows.slice(0, limit)
+      const parsed = parseAll(inPage)
       if (!parsed.ok) return parsed
 
-      const last = parsed.value.at(-1)
+      const last = pageEnd(inPage)
 
       return ok<HoldPage>({
-        held: parsed.value,
+        ...parsed.value,
         cursor: rows.length > limit && last !== undefined ? holdCursor(last) : null,
       })
     } catch (cause) {

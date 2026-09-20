@@ -88,6 +88,7 @@ const project = (policy: GatePolicy): PolicyProjection => ({
   outOfTreeEffectTypes: set(policy.outOfTreeEffectTypes),
   protectedPropKeys: set(policy.protectedPropKeys),
   interactiveTypes: map(interactiveEntries(policy.interactiveTypes)),
+  registeredPrimitiveTypes: set(policy.registeredPrimitiveTypes),
   removalThresholds: struct({
     medium: atom(policy.removalThresholds.medium),
     high: atom(policy.removalThresholds.high),

@@ -16,6 +16,12 @@ import {
 } from "./nesting.js"
 import { redirectedSubmissionsBetween, type RedirectedSubmission } from "./redirection.js"
 import { repointedBindingsBetween, type RepointedBinding } from "./repointing.js"
+import {
+  EVERY_TYPE_REGISTERED,
+  unknownPrimitivesIn,
+  type PrimitiveVocabulary,
+  type UnknownPrimitive,
+} from "./vocabulary.js"
 
 /**
  * Facts about what a delta does, extracted before anyone judges it.
@@ -25,10 +31,11 @@ import { repointedBindingsBetween, type RepointedBinding } from "./repointing.js
  * live downstream, which means the Gate's rules can change without touching
  * how a change is measured.
  *
- * One fact needs vocabulary to state, and that is not the same as needing
- * judgment. "This node renders a target" is a property of the host's primitives
- * that no amount of looking at the tree recovers, so it arrives as a predicate;
- * what it is worth is still decided downstream.
+ * Two facts need vocabulary to state, and that is not the same as needing
+ * judgment. "This node renders a target" and "this deployment has no primitive
+ * for that type" are both properties of the host's primitives that no amount of
+ * looking at the tree recovers, so they arrive as predicates; what either is
+ * worth is still decided downstream.
  */
 
 export type ChangeAnalysis = {
@@ -86,6 +93,21 @@ export type ChangeAnalysis = {
    */
   readonly nestedTargets: readonly NestedTarget[]
   /**
+   * Nodes this change would add that the deployment has no primitive for, so
+   * the page it produces has a hole where each one is.
+   *
+   * Measured on the operations rather than on the resulting tree, unlike
+   * `nestedTargets`, and the difference is the point. A tree may already name a
+   * primitive a later deployment rolled back — that is exactly why the renderer
+   * reports instead of throwing (0050) — and a change is answerable for the
+   * holes it introduces, not for the ones it found. Only `insert` can introduce
+   * one: `move` carries nodes the tree already had, and `configure` cannot
+   * change a type.
+   *
+   * Empty for every host that declares no vocabulary, which is the default.
+   */
+  readonly unknownPrimitives: readonly UnknownPrimitive[]
+  /**
    * Forms this change points somewhere else — a node that posted to one
    * registered endpoint before and posts to another after.
    *
@@ -138,6 +160,7 @@ type Tally = {
   readonly removedTypes: Set<PrimitiveType>
   readonly relocatedTypes: Set<PrimitiveType>
   readonly propKeys: Set<string>
+  readonly unknown: UnknownPrimitive[]
 }
 
 const emptyTally = (): Tally => ({
@@ -152,6 +175,7 @@ const emptyTally = (): Tally => ({
   removedTypes: new Set(),
   relocatedTypes: new Set(),
   propKeys: new Set(),
+  unknown: [],
 })
 
 const noteDepth = (tally: Tally, depth: number | null): void => {
@@ -166,7 +190,8 @@ const noteSubtree = (tally: Tally, node: LoomNode): void => {
 const tallyOperation = (
   tally: Tally,
   root: LoomNode,
-  operation: TreeOperation
+  operation: TreeOperation,
+  isRegistered: PrimitiveVocabulary
 ): Result<Tally, TreeError> => {
   switch (operation.op) {
     case "insert": {
@@ -175,6 +200,7 @@ const tallyOperation = (
 
       tally.inserted += nodeCount(operation.node)
       noteSubtree(tally, operation.node)
+      tally.unknown.push(...unknownPrimitivesIn(operation.node, isRegistered))
       noteDepth(tally, parentDepth + 1)
 
       return ok(tally)
@@ -256,17 +282,24 @@ const introducedNestedTargets = (
  * Walks the delta forward so each operation is measured against the tree it
  * actually observes — an operation may target a node an earlier operation in
  * the same delta inserted.
+ *
+ * The two vocabularies are separate trailing parameters rather than one record,
+ * which is not the shape `StakeInput` argues for. This function is published and
+ * a lesson calls it by hand, so collecting them would be a breaking change to
+ * teach nothing; what keeps the pair from being forgotten is that `assessChange`
+ * is the only caller that reads a policy, and it passes both in one expression.
  */
 export const analyzeDelta = (
   tree: LoomTree,
   delta: TreeDelta,
-  isInteractive: InteractivePredicate = NOTHING_INTERACTIVE
+  isInteractive: InteractivePredicate = NOTHING_INTERACTIVE,
+  isRegistered: PrimitiveVocabulary = EVERY_TYPE_REGISTERED
 ): Result<ChangeAnalysis, TreeError> => {
   const tally = emptyTally()
   let state: LoomNode = tree.root
 
   for (const operation of delta.operations) {
-    const tallied = tallyOperation(tally, state, operation)
+    const tallied = tallyOperation(tally, state, operation, isRegistered)
     if (!tallied.ok) return tallied
 
     const advanced = applyOperation(state, operation)
@@ -288,6 +321,7 @@ export const analyzeDelta = (
     relocatedPrimitiveTypes: Array.from(tally.relocatedTypes),
     configuredPropKeys: Array.from(tally.propKeys),
     nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
+    unknownPrimitives: tally.unknown,
     redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
     repointedBindings: repointedBindingsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,

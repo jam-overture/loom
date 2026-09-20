@@ -22,7 +22,7 @@ const page = await store.head(treeId)
 
 const rows =
   waiting.ok && page.ok
-    ? waiting.value.map((hold) => ({
+    ? waiting.value.held.map((hold) => ({
         hold,
         stillAnswerable: hold.baseRevision === page.value.revision,
       }))

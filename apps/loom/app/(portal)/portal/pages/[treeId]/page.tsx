@@ -116,7 +116,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
    * would show them a "before" that is not on their screen, which is a worse
    * failure than showing none.
    */
-  const changes = (holds.ok ? holds.value : []).map((held) => ({
+  const changes = (holds.ok ? holds.value.held : []).map((held) => ({
     held,
     /**
      * The registry is the third half of the reading, and it is this
