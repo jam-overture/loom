@@ -31,7 +31,7 @@ describe("defaultGatePolicy", () => {
   })
 
   /**
-   * A `Record<keyof GatePolicy, true>` is the compile-time half: a fourteenth
+   * A `Record<keyof GatePolicy, true>` is the compile-time half: a fifteenth
    * field added to the schema reaches `keyof GatePolicy` by derivation, and this
    * object then fails to compile until it is named here too. Before the
    * derivation the added field never reached the type at all, so nothing in
@@ -44,6 +44,7 @@ describe("defaultGatePolicy", () => {
       outOfTreeEffectTypes: true,
       protectedPropKeys: true,
       interactiveTypes: true,
+      registeredPrimitiveTypes: true,
       removalThresholds: true,
       breadthThreshold: true,
       shallowDepthThreshold: true,
@@ -123,7 +124,7 @@ describe("gatePolicySchema — policyId", () => {
 
 /**
  * The record below has to name every knob or this file does not compile, and
- * the assertion carries that across to the schema — so a fourteenth field
+ * the assertion carries that across to the schema — so a fifteenth field
  * reaches `keyof GatePolicy`, this test and every consumer keyed on the type in
  * one step, rather than reaching the schema alone and being silently dropped by
  * the rest.
@@ -139,6 +140,7 @@ const everyKnob: Readonly<Record<keyof GatePolicy, true>> = {
   outOfTreeEffectTypes: true,
   protectedPropKeys: true,
   interactiveTypes: true,
+  registeredPrimitiveTypes: true,
   removalThresholds: true,
   breadthThreshold: true,
   shallowDepthThreshold: true,

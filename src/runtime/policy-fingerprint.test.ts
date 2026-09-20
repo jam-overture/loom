@@ -36,6 +36,7 @@ describe("policyFingerprintOf", () => {
       { protectedPrimitiveTypes: ["commerce.checkout"] },
       { outOfTreeEffectTypes: ["commerce.checkout"] },
       { protectedPropKeys: ["href"] },
+      { registeredPrimitiveTypes: ["loom.card"] },
       { removalThresholds: { medium: 4, high: 12 } },
       { removalThresholds: { medium: 3, high: 13 } },
       { breadthThreshold: 9 },
@@ -141,6 +142,25 @@ describe("policyFingerprintOf over the interactive vocabulary", () => {
     const other = policyWith({
       interactiveTypes: { "loom.action": "always", "loom.card": { whenProps: ["onSelect", "href"] } },
     })
+
+    expect(policyFingerprintOf(one)).toBe(policyFingerprintOf(other))
+  })
+})
+
+describe("policyFingerprintOf over the declared library", () => {
+  it("calls declaring one an edit, because it changes what the Gate refuses", () => {
+    const before = policyWith({ policyId: "library" })
+    const after = policyWith({ policyId: "library", registeredPrimitiveTypes: ["loom.card"] })
+
+    expect(rulesetContinuityOf([policyFingerprintOf(before), policyFingerprintOf(after)])).toBe(
+      "changed"
+    )
+  })
+
+  /** A list is a membership test, so neither order nor a repeat reaches a decision. */
+  it("reads the same library written in another order as unchanged", () => {
+    const one = policyWith({ registeredPrimitiveTypes: ["loom.card", "loom.page"] })
+    const other = policyWith({ registeredPrimitiveTypes: ["loom.page", "loom.card", "loom.page"] })
 
     expect(policyFingerprintOf(one)).toBe(policyFingerprintOf(other))
   })

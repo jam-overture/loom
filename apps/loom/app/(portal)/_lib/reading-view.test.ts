@@ -7,14 +7,17 @@ import type { PartName } from "./part-name"
 import {
   dwellEach,
   highlightsOf,
+  outOfReaders,
   outOfVisits,
   pageReadings,
+  pageUse,
   plainDuration,
   plainShift,
   rateOf,
   reachShifts,
   revisionReadings,
   shiftOf,
+  unplacedUse,
   type RevisionReading,
 } from "./reading-view"
 
@@ -319,5 +322,197 @@ describe("saying a measurement out loud", () => {
     expect(outOfVisits(3, 40)).toBe("3 of the 40 visits")
     expect(outOfVisits(1, 1)).toBe("1 of the 1 visit")
     expect(outOfVisits(2, 2)).not.toContain("%")
+  })
+})
+
+/**
+ * The counter that is about a region.
+ *
+ * A press lands on a button, so `activations` on a band is zero however busy
+ * the band was, and until this was read a section's row on this screen was time
+ * on screen beside three permanent zeroes. Every case below is about one of the
+ * two ways a screen can lie with it: by dividing by a denominator that is not
+ * one, or by reading a silence as a nobody.
+ */
+describe("what readers used, rather than what they saw", () => {
+  it("carries each part's own use through the grouping", () => {
+    const reading = readingOf([tally("n_band", { views: 4, reached: 4, engaged: 3 })])
+
+    expect(reading.parts[0]!.engaged).toBe(3)
+  })
+
+  /**
+   * A view that used something inside a part is a page view, and a region is
+   * credited with it without being credited with a `views` of its own. Two
+   * readers who each pressed a different button, whose senders reported nothing
+   * else, are two page views that the old floor read as one.
+   */
+  it("raises the page-view floor to take in a view that only ever used something", () => {
+    const reading = readingOf([
+      tally("n_one", { views: 1, reached: 1 }),
+      tally("n_two", { views: 1, reached: 1 }),
+      tally("n_page", { engaged: 2 }),
+    ])
+
+    expect(reading.views).toBe(2)
+  })
+
+  it("never reports a page-view floor below the uses it is the denominator of", () => {
+    const reading = readingOf([tally("n_page", { views: 0, reached: 0, engaged: 9 })])
+
+    expect(reading.views).toBeGreaterThanOrEqual(pageUse(reading)!.whole)
+  })
+})
+
+describe("the page as a whole, and the part that saw the most of it", () => {
+  /**
+   * A delegated signal names every region it happened inside, up to and
+   * including the root — so the largest use on a revision is not an estimate of
+   * anything. It is the views in which somebody used something, anywhere.
+   */
+  it("reads the whole page's use off the largest one, which is the root's", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
+      tally("n_band", { views: 40, reached: 18, engaged: 12 }),
+      tally("n_buy", { views: 40, reached: 18, activations: 14 }),
+    ])
+
+    expect(pageUse(reading)!.whole).toBe(20)
+  })
+
+  it("names the most-used part that is not simply the page itself", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
+      tally("n_band", { views: 40, reached: 18, engaged: 12 }),
+      tally("n_foot", { views: 40, reached: 6, engaged: 2 }),
+    ])
+
+    expect(pageUse(reading)!.region!.part.nodeId).toBe("n_band")
+    expect(pageUse(reading)!.region!.used).toBe(12)
+    expect(pageUse(reading)!.region!.outOf).toBe(18)
+  })
+
+  /**
+   * A part whose use is indistinguishable from the whole page's is not news
+   * about a part. One band that everybody who did anything did it in is the
+   * page, said twice.
+   */
+  it("names no region when every part that was used was used by every view the page was", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 9, reached: 9, engaged: 4 }),
+      tally("n_band", { views: 9, reached: 9, engaged: 4 }),
+    ])
+
+    expect(pageUse(reading)!.whole).toBe(4)
+    expect(pageUse(reading)!.region).toBeUndefined()
+  })
+
+  /**
+   * Ranked on the count rather than on the share. A share would put a band
+   * reached once and used once above everything else on the page, which is the
+   * small-sample confidence this module refuses everywhere else.
+   */
+  it("ranks a region on how many visits used it, not on the share of its own readers", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 40, reached: 40, engaged: 20 }),
+      tally("n_tiny", { views: 40, reached: 1, engaged: 1 }),
+      tally("n_band", { views: 40, reached: 30, engaged: 12 }),
+    ])
+
+    expect(pageUse(reading)!.region!.part.nodeId).toBe("n_band")
+  })
+
+  it("breaks a tie on reach and then on id, so the same counters name the same part twice", () => {
+    const tallies = [
+      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
+      tally("n_b", { views: 9, reached: 4, engaged: 3 }),
+      tally("n_a", { views: 9, reached: 4, engaged: 3 }),
+    ]
+
+    expect(pageUse(readingOf(tallies))!.region!.part.nodeId).toBe("n_a")
+    expect(pageUse(readingOf([...tallies].reverse()))!.region!.part.nodeId).toBe("n_a")
+  })
+
+  it("offers no denominator for a region nobody reported on screen", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
+      tally("n_band", { engaged: 4 }),
+    ])
+
+    expect(pageUse(reading)!.region!.used).toBe(4)
+    expect(pageUse(reading)!.region!.outOf).toBeUndefined()
+  })
+
+  it("offers no denominator for a region used by more views than reported seeing it", () => {
+    const reading = readingOf([
+      tally("n_page", { views: 9, reached: 9, engaged: 5 }),
+      tally("n_band", { views: 9, reached: 2, engaged: 4 }),
+    ])
+
+    expect(pageUse(reading)!.region!.outOf).toBeUndefined()
+  })
+
+  it("has nothing to say about a page nobody used", () => {
+    const reading = readingOf([tally("n_hero", { views: 9, reached: 9, dwellMs: 900 })])
+
+    expect(pageUse(reading)).toBeUndefined()
+  })
+})
+
+describe("presses that arrived with nowhere to put them", () => {
+  it("adds up the clicks and openings no part heard about", () => {
+    const reading = readingOf([
+      tally("n_buy", { views: 6, reached: 5, activations: 7 }),
+      tally("n_terms", { views: 6, reached: 4, opens: 2, closes: 1 }),
+    ])
+
+    expect(unplacedUse(reading)).toEqual({ uses: 10 })
+  })
+
+  /**
+   * Every region up to the root is credited, so one placed press anywhere makes
+   * this impossible. A zero is then the readers rather than the sender.
+   */
+  it("says nothing when a single press was placed", () => {
+    const reading = readingOf([
+      tally("n_page", { engaged: 1 }),
+      tally("n_buy", { views: 6, reached: 5, activations: 7 }),
+    ])
+
+    expect(unplacedUse(reading)).toBeUndefined()
+  })
+
+  it("says nothing about a page nobody used, which is not the same news", () => {
+    const reading = readingOf([tally("n_hero", { views: 6, reached: 6, dwellMs: 600 })])
+
+    expect(unplacedUse(reading)).toBeUndefined()
+  })
+
+  it("is never both this and a use of the page, on any reading", () => {
+    for (const reading of [
+      readingOf([tally("n_buy", { views: 2, reached: 2, activations: 1 })]),
+      readingOf([tally("n_page", { views: 2, reached: 2, engaged: 1 })]),
+      readingOf([tally("n_hero", { views: 2, reached: 2 })]),
+    ]) {
+      expect([pageUse(reading), unplacedUse(reading)].filter(Boolean).length).toBeLessThan(2)
+    }
+  })
+})
+
+describe("a count against the visits that got that far", () => {
+  it("names the population it is measured against", () => {
+    expect(outOfReaders(5, 12)).toBe("5 of the 12 visits that got that far")
+  })
+
+  it("counts one visit as a visit", () => {
+    expect(outOfReaders(1, 1)).toBe("1 of the 1 visit that got that far")
+  })
+
+  /**
+   * The same numerator against two populations is opposite news, which is why
+   * this is a second sentence rather than a second argument.
+   */
+  it("is never confused with a count against every visit", () => {
+    expect(outOfReaders(5, 12)).not.toBe(outOfVisits(5, 12))
   })
 })

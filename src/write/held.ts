@@ -71,7 +71,22 @@ export type HoldError =
   /** Nothing under this id: never held, already answered, or expired. */
   | { readonly code: "not-held"; readonly proposalId: ProposalId }
   | { readonly code: "already-held"; readonly proposalId: ProposalId }
+  /**
+   * The store did not answer. Nothing is known about what it holds, and the
+   * same call a moment later may well succeed.
+   */
   | { readonly code: "unavailable"; readonly detail: string }
+  /**
+   * The store answered, and something it returned is not a hold this build can
+   * read.
+   *
+   * Separate from `unavailable` because the two want opposite next moves from
+   * whoever is reading the screen: a store that did not answer is waited out,
+   * and a row that did not parse is gone and looked at. A reader told only
+   * "unavailable" either waits out a problem that does not resolve or
+   * investigates a blip, and the store is the only party that knows which.
+   */
+  | { readonly code: "unreadable"; readonly detail: string }
 
 export const describeHoldError = (error: HoldError): string => {
   switch (error.code) {
@@ -81,6 +96,8 @@ export const describeHoldError = (error: HoldError): string => {
       return `${error.proposalId} is already held`
     case "unavailable":
       return `the holding store is unavailable: ${error.detail}`
+    case "unreadable":
+      return `the holding store returned something this build cannot read: ${error.detail}`
   }
 }
 
@@ -100,7 +117,7 @@ export const parseHeldProposal = (row: unknown): Result<HeldProposal, HoldError>
   return parsed.success
     ? ok(parsed.data as HeldProposal)
     : err<HoldError>({
-        code: "unavailable",
+        code: "unreadable",
         detail: `a stored hold did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
       })
 }
@@ -162,8 +179,28 @@ export const holdCursorPosition = (cursor: string | undefined): HoldPosition | u
   const separator = cursor.indexOf(CURSOR_SEPARATOR)
   if (separator === -1) return undefined
 
-  const heldAt = heldAtSchema.safeParse(cursor.slice(0, separator))
-  const proposalId = proposalIdSchema.safeParse(cursor.slice(separator + 1))
+  return holdPosition({
+    heldAt: cursor.slice(0, separator),
+    proposalId: cursor.slice(separator + 1),
+  })
+}
+
+/**
+ * The two columns a page is ordered by, checked, or nothing.
+ *
+ * Separate from reading a whole hold because it is a strictly smaller question
+ * and it is the one a listing cannot proceed without. A backend that skips the
+ * rows it could not read still has to page past them, and it can only do that
+ * if it can position them — so the position is parsed first and on its own,
+ * and a row that has one is a row the queue can always name and always get
+ * beyond, whatever its payload turned out to be.
+ */
+export const holdPosition = (row: {
+  readonly heldAt: string
+  readonly proposalId: string
+}): HoldPosition | undefined => {
+  const heldAt = heldAtSchema.safeParse(row.heldAt)
+  const proposalId = proposalIdSchema.safeParse(row.proposalId)
 
   return heldAt.success && proposalId.success
     ? { heldAt: heldAt.data, proposalId: proposalId.data }
@@ -194,8 +231,38 @@ export type HoldListRequest = {
   readonly limit?: number
 }
 
-export type HoldPage = {
+/**
+ * A row the listing could place and could not read.
+ *
+ * It is a `HoldPosition` and a reason, which is everything a reviewer needs to
+ * go and look: the position is the row's primary key and the instant beside it,
+ * so it names the row in the table, and it sorts in `compareHolds` order
+ * alongside the holds that did parse.
+ *
+ * `detail` is the same sentence `parseHeldProposal` would have failed with. It
+ * says which field disagreed, which is the difference between a reviewer
+ * knowing a rollout is mid-flight and a reviewer knowing only that something is
+ * wrong.
+ */
+export type UnreadableHold = HoldPosition & {
+  readonly detail: string
+}
+
+/**
+ * What a listing found, and what it could not read while finding it.
+ *
+ * Both halves, for the reason 0138 gives for `MarkedHolds`: a caller that must
+ * render every row needs the ones that worked and the ones that did not in one
+ * answer, in one order, rather than an error standing in for a page. A listing
+ * over an empty store and a listing over a store whose every row is from a
+ * later build are different facts, and only this shape can tell them apart.
+ */
+export type HoldListing = {
   readonly held: readonly HeldProposal[]
+  readonly unreadable: readonly UnreadableHold[]
+}
+
+export type HoldPage = HoldListing & {
   /** `null` when this was the last page. */
   readonly cursor: string | null
 }
@@ -216,11 +283,17 @@ export type HoldPage = {
  * reads and still cannot be complete. Neither widens what a handle can see —
  * both are the holds this handle could already reach one tree at a time, which
  * is why 0020 permits the second.
+ *
+ * Both answer with a `HoldListing` rather than an array, and the rule they keep
+ * is 0175's: a row the implementation could place and could not read is
+ * skipped, named under `unreadable` and paged past. A listing fails outright
+ * only when it cannot place a row at all, because that is the one case where
+ * skipping would take everything after it off the queue in silence.
  */
 export interface HoldStore {
   readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>
   readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>
-  readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>
+  readonly forTree: (treeId: TreeId) => Promise<Result<HoldListing, HoldError>>
   readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>
   readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>
 }
@@ -253,11 +326,19 @@ export const memoryHoldStore = (): HoldStore => {
 
     forTree: (treeId) =>
       Promise.resolve(
-        ok(
-          Array.from(held.values())
+        ok<HoldListing>({
+          held: Array.from(held.values())
             .filter((proposal) => proposal.treeId === treeId)
-            .sort(compareHolds)
-        )
+            .sort(compareHolds),
+          /**
+           * Always empty, and not because this implementation is careless: it
+           * holds parsed values rather than rows, so there is no such thing
+           * here as a hold it cannot read. The field is present so that a
+           * caller written against the contract reads the same shape from both
+           * stores and never branches on which one it was handed.
+           */
+          unreadable: [],
+        })
       ),
 
     waiting: (request) => {
@@ -274,6 +355,7 @@ export const memoryHoldStore = (): HoldStore => {
       return Promise.resolve(
         ok<HoldPage>({
           held: page,
+          unreadable: [],
           cursor: last !== undefined && remaining.length > page.length ? holdCursor(last) : null,
         })
       )

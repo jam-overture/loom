@@ -54,7 +54,13 @@ import { askForChange } from "../actions"
  */
 
 /**
- * What is true of every button below, said once, before any of them is pressed.
+ * What is true of every button on this panel, said once, and always on the
+ * same screen as the press it is about.
+ *
+ * *Above* them on a wide screen and *under* the primary one on a narrow screen,
+ * which the block that renders it argues at length. What is invariant, and what
+ * every reason below is actually about, is that a visitor has met this sentence
+ * before they have scrolled anywhere.
  *
  * This is the line that makes the primary control legible, and it had to be
  * added the moment the lead became a change the Gate holds
@@ -135,28 +141,66 @@ export const AskPanel = ({
 
   return (
     <div id="ask" className="flex flex-col gap-4">
-      <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
+      {/*
+        * The opening block: what every ask meets, and the one press this
+        * surface invites. **It is read in one order and laid out in two**, and
+        * the reversal is narrow-widths-only.
+        *
+        * On a wide screen the sentence is above the button and nothing here
+        * moves. On a narrow one the button is above the sentence, because of
+        * what was measured on the arrival screen: at 348 × 465 — the size of
+        * this demonstration inside the front door's embed on a phone — the
+        * first control sat 398px down, so a visitor met a bar, a heading and
+        * three paragraphs and 67px of a green button, with the page all of it
+        * is about 1,360px below. A box of prose with nothing to press is the
+        * clunk this lane exists to remove, and it is the one screen where
+        * every word is competing for the same 465 pixels.
+        *
+        * **Flex order rather than a second copy of the sentence**, and the
+        * distinction is the whole reason this is safe: `flex-col-reverse`
+        * moves the boxes and not the document, so the sentence still precedes
+        * the form in the markup. A screen reader, a crawler and
+        * `ask-panel.test.tsx`'s *before offering anything to press* all meet it
+        * first exactly as they did. What changes is where a sighted visitor's
+        * eye lands, and on a narrow screen it now lands on the button with the
+        * promise and this sentence directly under it — which is the same three
+        * facts in the same 200 pixels, rather than three facts and no button.
+        *
+        * The sentence stays on the first screen either way. That is the
+        * property the placement was chosen for — the lead is a change the Gate
+        * *holds*, so the first press moves nothing, and a stranger who was not
+        * told that has watched a button do nothing — and it is unchanged: at
+        * 348 × 465 the button, its promise and this sentence are all above the
+        * fold together, which is more than was true of any of them before.
+        */}
+      <div className="flex flex-col-reverse gap-4 lg:flex-col">
+        <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
 
-      {leading && (
-        <form action={submit} className="flex flex-col gap-1.5">
-          <input type="hidden" name="baseRevision" value={revision} />
-          <input type="hidden" name="presetId" value={leading.id} />
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-4 py-3 text-md font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            {pending ? "Asking…" : leading.label}
-          </button>
-          {/*
-            * Under the button rather than inside it. What the button says is the
-            * ask; what this says is the consequence, and a visitor deciding
-            * whether to press something wants both without the button becoming
-            * a paragraph.
-            */}
-          <p className="text-ink-muted text-xs">{leading.promise}</p>
-        </form>
-      )}
+        {leading && (
+          <form action={submit} className="flex flex-col gap-1.5">
+            <input type="hidden" name="baseRevision" value={revision} />
+            <input type="hidden" name="presetId" value={leading.id} />
+            <button
+              type="submit"
+              disabled={pending}
+              className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-4 py-3 text-md font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {pending ? "Asking…" : leading.label}
+            </button>
+            {/*
+              * Under the button rather than inside it, at every width. What the
+              * button says is the ask; what this says is the consequence, and a
+              * visitor deciding whether to press something wants both without
+              * the button becoming a paragraph.
+              *
+              * It travels *inside* the form, which is what keeps the reversal
+              * above honest: the promise is a fact about this button and it
+              * stays welded to it rather than being reordered away from it.
+              */}
+            <p className="text-ink-muted text-xs">{leading.promise}</p>
+          </form>
+        )}
+      </div>
 
       {/*
         * What the next press would cost, above everything it is true of — and

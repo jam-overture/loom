@@ -1420,14 +1420,14 @@
             {
               "name": "ChangeAnalysis",
               "kind": "type",
-              "signature": "type ChangeAnalysis = {\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    /** Nodes a move operation named. The subtree each carried is counted separately. */\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    /**\n     * Nodes a move carried, the node it named included. A move is the one\n     * operation whose reach is larger than the node it names, and measuring it\n     * that way is what makes the analysis independent of how the delta was\n     * phrased: relocating a slot and relocating the card inside it are the same\n     * physical change described two ways.\n     */\n    readonly relocatedNodeCount: number;\n    /** Nodes directly touched. A move counts the node, not the subtree riding along. */\n    readonly affectedNodeIds: readonly NodeId[];\n    /**\n     * Types this delta created, destroyed, or reconfigured. A move contributes\n     * nothing here whichever node it names — a relocated node is not rewritten,\n     * and `relocatedPrimitiveTypes` is where it is reported instead.\n     */\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types carried by a move, in the whole subtree rather than at its root. A\n     * protected primitive travelling across the page is a fact the Gate has to\n     * see, and it is not the same fact as one being rewritten.\n     */\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types destroyed outright, a subset of the touched types. Destroying a\n     * primitive is a strictly bigger deal than reconfiguring one, so stakes need\n     * to tell the two apart.\n     */\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n    /**\n     * Targets this change leaves inside another target, which is a control the\n     * reader cannot use. Sometimes because the markup is invalid and a browser\n     * drops the inner link; sometimes because the enclosing node covers itself\n     * with an overlay and the click never arrives. Same damage either way,\n     * and only the outer node's own declaration distinguishes it.\n     *\n     * Measured on the resulting tree rather than on the operations, because every\n     * operation kind can produce it and only one of them looks like it does:\n     * `insert` and `move` put a target somewhere, and `configure` breaks every\n     * link already inside a card by giving the card an `href`. Positions the tree\n     * already had are excluded, so a change is answerable for the breakage it\n     * introduces and not for the breakage it inherited.\n     *\n     * Empty for every host that declares no interactive vocabulary, which is the\n     * default.\n     */\n    readonly nestedTargets: readonly NestedTarget[];\n    /**\n     * Forms this change points somewhere else — a node that posted to one\n     * registered endpoint before and posts to another after.\n     *\n     * Measured on both trees, like `nestedTargets`, and unlike it needs no host\n     * vocabulary: `loom:submit` is the runtime's own key. A node that gains or\n     * loses a destination is not here; `redirection.ts` says why.\n     */\n    readonly redirectedSubmissions: readonly RedirectedSubmission[];\n    /**\n     * Bindings this change points somewhere else — a node that asked one question\n     * under a name before and asks a different one under that name after.\n     *\n     * The other end of the pipe from `redirectedSubmissions`, measured the same\n     * way and needing host vocabulary just as little: `loom:data` is the runtime's\n     * own key. A node that gains or loses a binding is not here; `repointing.ts`\n     * says why, and why a params change counts where a submission has no params\n     * to move.\n     */\n    readonly repointedBindings: readonly RepointedBinding[];\n    /**\n     * Distance from the root of the shallowest touched position, where the root\n     * is 0. A change near the root restructures the page; a change deep in a leaf\n     * usually does not.\n     */\n    readonly shallowestAffectedDepth: number;\n};",
+              "signature": "type ChangeAnalysis = {\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    /** Nodes a move operation named. The subtree each carried is counted separately. */\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    /**\n     * Nodes a move carried, the node it named included. A move is the one\n     * operation whose reach is larger than the node it names, and measuring it\n     * that way is what makes the analysis independent of how the delta was\n     * phrased: relocating a slot and relocating the card inside it are the same\n     * physical change described two ways.\n     */\n    readonly relocatedNodeCount: number;\n    /** Nodes directly touched. A move counts the node, not the subtree riding along. */\n    readonly affectedNodeIds: readonly NodeId[];\n    /**\n     * Types this delta created, destroyed, or reconfigured. A move contributes\n     * nothing here whichever node it names — a relocated node is not rewritten,\n     * and `relocatedPrimitiveTypes` is where it is reported instead.\n     */\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types carried by a move, in the whole subtree rather than at its root. A\n     * protected primitive travelling across the page is a fact the Gate has to\n     * see, and it is not the same fact as one being rewritten.\n     */\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types destroyed outright, a subset of the touched types. Destroying a\n     * primitive is a strictly bigger deal than reconfiguring one, so stakes need\n     * to tell the two apart.\n     */\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n    /**\n     * Targets this change leaves inside another target, which is a control the\n     * reader cannot use. Sometimes because the markup is invalid and a browser\n     * drops the inner link; sometimes because the enclosing node covers itself\n     * with an overlay and the click never arrives. Same damage either way,\n     * and only the outer node's own declaration distinguishes it.\n     *\n     * Measured on the resulting tree rather than on the operations, because every\n     * operation kind can produce it and only one of them looks like it does:\n     * `insert` and `move` put a target somewhere, and `configure` breaks every\n     * link already inside a card by giving the card an `href`. Positions the tree\n     * already had are excluded, so a change is answerable for the breakage it\n     * introduces and not for the breakage it inherited.\n     *\n     * Empty for every host that declares no interactive vocabulary, which is the\n     * default.\n     */\n    readonly nestedTargets: readonly NestedTarget[];\n    /**\n     * Nodes this change would add that the deployment has no primitive for, so\n     * the page it produces has a hole where each one is.\n     *\n     * Measured on the operations rather than on the resulting tree, unlike\n     * `nestedTargets`, and the difference is the point. A tree may already name a\n     * primitive a later deployment rolled back — that is exactly why the renderer\n     * reports instead of throwing — and a change is answerable for the\n     * holes it introduces, not for the ones it found. Only `insert` can introduce\n     * one: `move` carries nodes the tree already had, and `configure` cannot\n     * change a type.\n     *\n     * Empty for every host that declares no vocabulary, which is the default.\n     */\n    readonly unknownPrimitives: readonly UnknownPrimitive[];\n    /**\n     * Forms this change points somewhere else — a node that posted to one\n     * registered endpoint before and posts to another after.\n     *\n     * Measured on both trees, like `nestedTargets`, and unlike it needs no host\n     * vocabulary: `loom:submit` is the runtime's own key. A node that gains or\n     * loses a destination is not here; `redirection.ts` says why.\n     */\n    readonly redirectedSubmissions: readonly RedirectedSubmission[];\n    /**\n     * Bindings this change points somewhere else — a node that asked one question\n     * under a name before and asks a different one under that name after.\n     *\n     * The other end of the pipe from `redirectedSubmissions`, measured the same\n     * way and needing host vocabulary just as little: `loom:data` is the runtime's\n     * own key. A node that gains or loses a binding is not here; `repointing.ts`\n     * says why, and why a params change counts where a submission has no params\n     * to move.\n     */\n    readonly repointedBindings: readonly RepointedBinding[];\n    /**\n     * Distance from the root of the shallowest touched position, where the root\n     * is 0. A change near the root restructures the page; a change deep in a leaf\n     * usually does not.\n     */\n    readonly shallowestAffectedDepth: number;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "analyzeDelta",
               "kind": "function",
-              "signature": "const analyzeDelta: (tree: LoomTree, delta: TreeDelta, isInteractive?: InteractivePredicate) => Result<ChangeAnalysis, TreeError>",
+              "signature": "const analyzeDelta: (tree: LoomTree, delta: TreeDelta, isInteractive?: InteractivePredicate, isRegistered?: PrimitiveVocabulary) => Result<ChangeAnalysis, TreeError>",
               "truncated": false,
               "summary": "Walks the delta forward so each operation is measured against the tree it actually observes — an operation may target a node an earlier operation in the same delta inserted."
             }
@@ -2099,7 +2099,7 @@
             {
               "name": "StakeFactorCode",
               "kind": "type",
-              "signature": "type StakeFactorCode = \"protected-type-removed\" | \"protected-type-touched\" | \"protected-type-relocated\" | \"protected-prop-configured\" | \"large-removal\" | \"broad-change\" | \"shallow-structural-change\" | \"discards-later-work\" | \"nested-target\" | \"redirected-submission\" | \"repointed-binding\";",
+              "signature": "type StakeFactorCode = \"protected-type-removed\" | \"protected-type-touched\" | \"protected-type-relocated\" | \"protected-prop-configured\" | \"large-removal\" | \"broad-change\" | \"shallow-structural-change\" | \"discards-later-work\" | \"nested-target\" | \"unknown-primitive\" | \"redirected-submission\" | \"repointed-binding\";",
               "truncated": false,
               "summary": ""
             },
@@ -2137,6 +2137,55 @@
               "signature": "const stakeFactor: (stakes: StakeAssessment, code: StakeFactorCode) => StakeFactor | undefined",
               "truncated": false,
               "summary": "The factor with this code, for a caller that needs the reason and not the level."
+            }
+          ]
+        },
+        {
+          "module": "runtime/vocabulary",
+          "title": "Vocabulary",
+          "summary": "What a deployment's primitives are, as far as the write path is concerned.",
+          "symbols": [
+            {
+              "name": "PrimitiveVocabulary",
+              "kind": "type",
+              "signature": "type PrimitiveVocabulary = (type: PrimitiveType) => boolean;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "EVERY_TYPE_REGISTERED",
+              "kind": "value",
+              "signature": "const EVERY_TYPE_REGISTERED: PrimitiveVocabulary",
+              "truncated": false,
+              "summary": "What a host that has declared no vocabulary gets, which is today's behaviour."
+            },
+            {
+              "name": "primitiveVocabularyFor",
+              "kind": "function",
+              "signature": "const primitiveVocabularyFor: (types: readonly PrimitiveType[]) => PrimitiveVocabulary",
+              "truncated": false,
+              "summary": "The vocabulary a list of registered types describes."
+            },
+            {
+              "name": "UnknownPrimitive",
+              "kind": "type",
+              "signature": "type UnknownPrimitive = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n};",
+              "truncated": false,
+              "summary": "A node a change would add whose type this deployment cannot draw."
+            },
+            {
+              "name": "unknownPrimitivesIn",
+              "kind": "function",
+              "signature": "const unknownPrimitivesIn: (node: LoomNode, isRegistered: PrimitiveVocabulary) => readonly UnknownPrimitive[]",
+              "truncated": false,
+              "summary": "Every element in a subtree whose type the vocabulary does not hold, in document order."
+            },
+            {
+              "name": "describeUnknownPrimitive",
+              "kind": "function",
+              "signature": "const describeUnknownPrimitive: (unknown: UnknownPrimitive) => string",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -5891,6 +5940,20 @@
               "summary": "What a dictionary covers, and where it has drifted from the library."
             }
           ]
+        },
+        {
+          "module": "sdk/vocabulary",
+          "title": "Vocabulary",
+          "summary": "How a library tells the Gate which primitives exist at all.",
+          "symbols": [
+            {
+              "name": "registeredTypesFor",
+              "kind": "function",
+              "signature": "const registeredTypesFor: (registry: PrimitiveRegistry) => readonly PrimitiveType[]",
+              "truncated": false,
+              "summary": "Every type a registry can draw, in the shape a Gate policy takes."
+            }
+          ]
         }
       ]
     },
@@ -6614,7 +6677,7 @@
             {
               "name": "HoldError",
               "kind": "type",
-              "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n};",
+              "signature": "type HoldError = \n/** Nothing under this id: never held, already answered, or expired. */\n{\n    readonly code: \"not-held\";\n    readonly proposalId: ProposalId;\n} | {\n    readonly code: \"already-held\";\n    readonly proposalId: ProposalId;\n}\n/**\n * The store did not answer. Nothing is known about what it holds, and the\n * same call a moment later may well succeed.\n */\n | {\n    readonly code: \"unavailable\";\n    readonly detail: string;\n}\n/**\n * The store answered, and something it returned is not a hold this build can\n * read.\n *\n * Separate from `unavailable` because the two want opposite next moves from\n * whoever is reading the screen: a store that did not answer is waited out,\n * and a row that did not parse is gone and looked at. A reader told only\n * \"unavailable\" either waits out a problem that does not resolve or\n * investigates a blip, and the store is the only party that knows which.\n */\n | {\n    readonly code: \"unreadable\";\n    readonly detail: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6661,6 +6724,13 @@
               "summary": "Reads a cursor back into the position it names, or says it cannot."
             },
             {
+              "name": "holdPosition",
+              "kind": "function",
+              "signature": "const holdPosition: (row: {\n    readonly heldAt: string;\n    readonly proposalId: string;\n}) => HoldPosition | undefined",
+              "truncated": false,
+              "summary": "The two columns a page is ordered by, checked, or nothing."
+            },
+            {
               "name": "DEFAULT_HOLD_LIMIT",
               "kind": "value",
               "signature": "const DEFAULT_HOLD_LIMIT = 25",
@@ -6689,16 +6759,30 @@
               "summary": ""
             },
             {
+              "name": "UnreadableHold",
+              "kind": "type",
+              "signature": "type UnreadableHold = HoldPosition & {\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": "A row the listing could place and could not read."
+            },
+            {
+              "name": "HoldListing",
+              "kind": "type",
+              "signature": "type HoldListing = {\n    readonly held: readonly HeldProposal[];\n    readonly unreadable: readonly UnreadableHold[];\n};",
+              "truncated": false,
+              "summary": "What a listing found, and what it could not read while finding it."
+            },
+            {
               "name": "HoldPage",
               "kind": "type",
-              "signature": "type HoldPage = {\n    readonly held: readonly HeldProposal[];\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
+              "signature": "type HoldPage = HoldListing & {\n    /** `null` when this was the last page. */\n    readonly cursor: string | null;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "HoldStore",
               "kind": "interface",
-              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<readonly HeldProposal[], HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
+              "signature": "interface HoldStore {\n    readonly hold: (held: HeldProposal) => Promise<Result<HeldProposal, HoldError>>;\n    readonly get: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n    readonly forTree: (treeId: TreeId) => Promise<Result<HoldListing, HoldError>>;\n    readonly waiting: (request?: HoldListRequest) => Promise<Result<HoldPage, HoldError>>;\n    readonly release: (proposalId: ProposalId) => Promise<Result<HeldProposal, HoldError>>;\n}",
               "truncated": false,
               "summary": "`release` is a take, not a read: it removes and returns in one step, which is what makes answering a proposal exactly once a property of the store rather than a rule every caller has to remember. Confirming and discarding both go through it, so two confirmations racing cannot both apply the same delta."
             },

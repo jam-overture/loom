@@ -391,8 +391,16 @@ export const LIBRARY_CLASS = {
   messageDot: "loom-message-dot",
   /**
    * A `loom.reveal`: a band that arrives as the reader scrolls to it, its two
-   * variants, the cascade over its own children, and the still rendering it
-   * takes while somebody is editing the page.
+   * variants, and the still rendering it takes while somebody is editing the
+   * page.
+   *
+   * **There is no cascade rule here and the header used to say there was.**
+   * Three classes are declared below and a fourth was described; nothing
+   * emitted it and nothing could, because a cascade over a reveal's own
+   * children would have to reach through the arranger it wraps to find the
+   * cells. The effect is real and is got the other way round — a reveal around
+   * each cell, each with a view timeline of its own — which `loom.reveal` now
+   * explains and `featuresBand` uses. Corrected rather than built.
    *
    * Every rule that sets the starting `opacity: 0` is inside
    * `@supports (animation-timeline: view())`, so a browser that cannot run the

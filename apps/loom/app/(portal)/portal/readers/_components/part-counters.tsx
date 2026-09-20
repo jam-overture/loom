@@ -5,10 +5,11 @@ import { dwellEach, type RevisionReading } from "@/app/(portal)/_lib/reading-vie
  * Every counter the rollup keeps, one click down.
  *
  * Nothing on the surface of this screen is deleted to make room for plain
- * language; it is moved here. The sentences above name four parts out of
- * however many a page has, and a reader who wants the other forty — or the
- * registered type, or the id, or the raw milliseconds the wording rounded — is
- * one disclosure away from all of it.
+ * language; it is moved here. The sentences above name a handful of parts out
+ * of however many a page has, and a reader who wants the other forty — or the
+ * registered type, or the id, or the raw milliseconds the wording rounded, or
+ * which of their sections readers actually used — is one disclosure away from
+ * all of it.
  *
  * The registered type is on the surface of *this table* and nowhere else on the
  * screen, which is the arrangement `/portal/checkup` settled on 13 September:
@@ -28,7 +29,20 @@ export const PartCounters = ({ reading }: { readonly reading: RevisionReading })
       One row per part of revision {reading.revision}. <span className="font-mono">seen</span> is
       the page views that reported the part scrolled into sight;{" "}
       <span className="font-mono">heard from</span> is the page views that said anything about it
-      at all, which is the denominator every sentence above is measured against.
+      at all, which is the denominator every sentence above is measured against;{" "}
+      <span className="font-mono">used inside</span> is the page views in which a reader used
+      something under it, at any depth.
+    </p>
+
+    <p>
+      That last column is the only one on the row that is ever about a region.{" "}
+      <span className="font-mono">clicks</span> is filed against the node the reader aimed at, and
+      every control in the starter library is an addressed node of its own — so a band&rsquo;s
+      clicks are zero however busy the band was. It is{" "}
+      <span className="font-mono">ReaderTally.engaged</span>, read off the{" "}
+      <span className="font-mono">within</span> ancestry a delegated signal carries, and strictly
+      inside: a button&rsquo;s own use is in <span className="font-mono">clicks</span> and never
+      here, so a subtree total is the addition rather than a double count.
     </p>
 
     <div className="overflow-x-auto">
@@ -40,6 +54,7 @@ export const PartCounters = ({ reading }: { readonly reading: RevisionReading })
             <th className="pb-1 pr-4 text-right font-normal">seen</th>
             <th className="pb-1 pr-4 text-right font-normal">heard from</th>
             <th className="pb-1 pr-4 text-right font-normal">of those</th>
+            <th className="pb-1 pr-4 text-right font-normal">used inside</th>
             <th className="pb-1 pr-4 text-right font-normal">dwell each</th>
             <th className="pb-1 pr-4 text-right font-normal">clicks</th>
             <th className="pb-1 pr-4 text-right font-normal">opened</th>
@@ -59,6 +74,7 @@ export const PartCounters = ({ reading }: { readonly reading: RevisionReading })
               <td className="py-1 pr-4 text-right font-mono">
                 {part.views === 0 ? "—" : `${Math.round((part.reached / part.views) * 100)}%`}
               </td>
+              <td className="py-1 pr-4 text-right font-mono">{part.engaged}</td>
               <td className="py-1 pr-4 text-right font-mono">
                 {part.reached === 0 ? "—" : `${Math.round(dwellEach(part))}ms`}
               </td>
@@ -76,6 +92,14 @@ export const PartCounters = ({ reading }: { readonly reading: RevisionReading })
       the same as a reader declining to. A heading is never opened because a
       heading cannot be opened, and an empty cell says only that no signal
       arrived.
+    </p>
+
+    <p>
+      <span className="font-mono">used inside</span> can be larger than{" "}
+      <span className="font-mono">seen</span> on the same row, and that is not an error. A region
+      is credited by what happened under it and by nothing else, so a band nobody reported
+      scrolling into sight, whose button somebody pressed, has a use and no measured reach. The
+      sentences above never divide one by the other in that case; they say so instead.
     </p>
   </TechnicalDetail>
 )

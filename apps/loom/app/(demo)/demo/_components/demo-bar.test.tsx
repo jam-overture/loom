@@ -48,4 +48,46 @@ describe("the demo bar", () => {
 
     expect(screen.getByText("revision").parentElement?.textContent).toContain("4")
   })
+
+  /**
+   * **Two rows on a narrow screen, not three**, and the measurement is why it
+   * is a test rather than a look.
+   *
+   * At 348px — this demonstration inside the front door's embed on a phone —
+   * the bar wrapped once per child and stood 108px against 44px wide: the mark
+   * alone on a line, the disclosure on the next, and `revision 0` alone on a
+   * third. That is 23% of a 465px box spent on chrome, on the one screen where
+   * the first control was already below the fold.
+   *
+   * The sentence is the child that takes its own row, because it is the only
+   * one of the three that wraps. Losing either class puts the third row back
+   * and nothing else would notice.
+   */
+  it("gives the disclosure its own row below the mark, on a narrow screen only", () => {
+    render(<DemoBar revision={0} policyId="demo" />)
+
+    const said = screen.getByText(/Someone else’s page/i)
+
+    expect(said.className).toContain("basis-full")
+    expect(said.className).toContain("order-last")
+    expect(said.className).toContain("lg:basis-auto")
+    expect(said.className).toContain("lg:order-none")
+  })
+
+  /**
+   * The row it is moved to is a *visual* one. The bar still reads mark,
+   * disclosure, instrument in the document, so a screen reader meets "a
+   * physiotherapy clinic that doesn't exist" before the numbers rather than
+   * after them — which is the order the disclosure was put first for.
+   */
+  it("keeps the disclosure ahead of the instrument in the document", () => {
+    render(<DemoBar revision={0} policyId="demo" />)
+
+    const said = screen.getByText(/Someone else’s page/i)
+    const instrument = screen.getByText("revision")
+
+    expect(
+      said.compareDocumentPosition(instrument) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
 })

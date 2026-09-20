@@ -763,13 +763,13 @@ export const pointingWords = (addressing: Addressing): PlainWord => {
  * renders is one sentence, and the cost of a fallback is that the day one of
  * them does arrive nobody finds out which.
  *
- * None of them says what went wrong, and that is not modesty. `HoldError` has
- * one code for every reason a read fails, so *the database did not answer* and
- * *this deployment cannot read something the change record holds* arrive here
- * as the same `unavailable`, and they want opposite next moves — wait, or go
- * and look. Filed as a framework finding on 18 September. Until the two can be
- * told apart, the honest sentence is the one that does not guess, and the
- * store's own account of it goes in the technical record beside it.
+ * `unavailable` said both of the two things a reader has to act on
+ * differently — *the database did not answer* and *this deployment cannot read
+ * something the change record holds* — so the sentence it carries is the one
+ * that does not guess. 0175 split the second out as `unreadable`, and that one
+ * can say what it means: waiting will not fix it, and somebody has to look.
+ * The store's own account of either still goes in the technical record beside
+ * it.
  */
 const UNREADABLE_QUEUES: Readonly<Record<HoldError["code"], string>> = {
   unavailable:
@@ -777,6 +777,8 @@ const UNREADABLE_QUEUES: Readonly<Record<HoldError["code"], string>> = {
   "not-held":
     "The change this page was asked about is no longer waiting. Somebody may have answered it already.",
   "already-held": "Loom was asked to hold a change on this page that it is already holding.",
+  unreadable:
+    "Loom read this page's waiting changes and couldn't make sense of one of them. Nothing has been lost, and waiting will not clear it — this needs somebody to look.",
 }
 
 export const unreadableQueue = (code: HoldError["code"]): string => UNREADABLE_QUEUES[code]

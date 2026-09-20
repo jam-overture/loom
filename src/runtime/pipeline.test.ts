@@ -776,3 +776,106 @@ describe("COMPOSITION_OUTCOME_KINDS", () => {
     expect(new Set(COMPOSITION_OUTCOME_KINDS).size).toBe(COMPOSITION_OUTCOME_KINDS.length)
   })
 })
+
+/**
+ * The defect `Loom docs` found by running the quickstart rather than reading it
+ * (17 September): a delta naming a primitive nobody registered reached
+ * `committed`, because nothing between the interpreter and the store had the
+ * means to ask whether the type exists. Both halves are held here — the one that
+ * has not changed, and the one that now can.
+ */
+describe("composeChange on a delta that names a primitive nobody registered", () => {
+  const inventing = (ids: SampleTree["ids"]): TreeOperation[] => [
+    {
+      op: "insert",
+      parentId: ids.page,
+      index: 0,
+      node: buildElement(spare, { type: "app.nonesuch" }),
+    },
+  ]
+
+  const library = ["loom.page", "loom.header", "loom.card", "loom.footer"]
+
+  it("applies it when the host has declared no library, which is what it always did", async () => {
+    const { runtime, tree } = harnessFor({ build: inventing })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("applied")
+  })
+
+  it("refuses it when the host has declared one", async () => {
+    const { runtime, tree } = harnessFor({
+      build: inventing,
+      policy: gatePolicySchema.parse({ registeredPrimitiveTypes: library }),
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.reason.code).toBe("stakes-at-refusal-floor")
+    expect(outcome.disposition.reason.detail).toContain("app.nonesuch")
+    expect(outcome.assessment.analysis.unknownPrimitives).toHaveLength(1)
+  })
+
+  /**
+   * Which is the reason a refusal is the useful disposition and not merely the
+   * severe one. *That type does not exist* is the most actionable thing a model
+   * can be told, and only a refusal reaches the repairer at all.
+   */
+  it("gives the repairer the chance to name one that exists", async () => {
+    const base = harnessFor({
+      build: inventing,
+      policy: gatePolicySchema.parse({ registeredPrimitiveTypes: library }),
+    })
+    const repaired = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: base.tree.treeId,
+        baseRevision: base.tree.revision,
+        operations: [
+          {
+            op: "insert",
+            parentId: base.ids.page,
+            index: 0,
+            node: buildElement(spare, { type: "loom.card" }),
+          },
+        ],
+      },
+      rationale: "a primitive this deployment has",
+      confidence: 0.95,
+      origin: "developer",
+    })
+    const repairer = scriptedRepairer(ok(repaired))
+
+    const outcome = await composeChange(
+      { ...base.runtime, repairer },
+      base.tree,
+      intentFor(base.tree)
+    )
+
+    expect(repairer.requests[0]?.disposition.reason.detail).toContain("app.nonesuch")
+    expect(outcome.kind).toBe("applied")
+  })
+
+  /** A host that declared a library still keeps everything already in its trees. */
+  it("says nothing about a change that only rearranges what the tree already holds", async () => {
+    const { runtime, tree, ids } = harnessFor({
+      build: (fixture) => [
+        { op: "move", nodeId: fixture.card, parentId: fixture.page, index: 0 },
+      ],
+      policy: gatePolicySchema.parse({
+        registeredPrimitiveTypes: ["loom.page"],
+        autoApplyCeiling: { developer: "critical" },
+      }),
+      origin: "developer",
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "applied") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.assessment.analysis.unknownPrimitives).toEqual([])
+    expect(findNode(outcome.tree.root, ids.card)).toBeTruthy()
+  })
+})

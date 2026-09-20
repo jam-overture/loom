@@ -54,6 +54,22 @@ export const gatePolicySchema = z.object({
    * shape alone.
    */
   interactiveTypes: interactiveTypesSchema.default({}),
+  /**
+   * Every primitive this deployment can draw. A change that would insert a node
+   * of any other type puts a hole on the page, so the Gate refuses it rather
+   * than letting the log keep a revision nothing can render (0173).
+   *
+   * Host vocabulary like the lists above, and like them the host does not have
+   * to write it: `registeredTypesFor(registry)` in the SDK reads it off the
+   * registry the renderer already resolves against, so the two cannot drift.
+   *
+   * **Empty means undeclared, not empty.** A host that leaves this out is not
+   * claiming a library of nothing; it is declining to say, and gets exactly
+   * today's behaviour — an unrenderable insert is appended and reported at
+   * render. The asymmetry with an allowlist is deliberate and is the only way a
+   * default can be both additive and safe.
+   */
+  registeredPrimitiveTypes: z.array(primitiveTypeSchema).readonly().default([]),
 
   removalThresholds: z
     .object({
@@ -100,7 +116,7 @@ export const gatePolicySchema = z.object({
  * `keyof GatePolicy` never heard about it. Every consumer keyed on the type —
  * and two lanes now key documentation off it — silently omitted the new field.
  *
- * Deriving it makes the drift impossible rather than tested. The three
+ * Deriving it makes the drift impossible rather than tested. The four
  * host-vocabulary lists carry `.readonly()` in the schema so that the inferred
  * type keeps the `readonly` arrays callers already pass, which is the one place
  * `z.infer` and the old mirror disagreed.

@@ -4,6 +4,7 @@ import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import { describeRedirectedSubmission } from "./redirection.js"
 import { describeRepointedBinding } from "./repointing.js"
+import { describeUnknownPrimitive } from "./vocabulary.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -33,6 +34,7 @@ export type StakeFactorCode =
   | "shallow-structural-change"
   | "discards-later-work"
   | "nested-target"
+  | "unknown-primitive"
   | "redirected-submission"
   | "repointed-binding"
 
@@ -240,6 +242,50 @@ const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
 }
 
 /**
+ * A node the deployment cannot draw, as damage.
+ *
+ * `critical`, which under the default refusal floor means refused, and the
+ * comparison with `nested-target` above is the argument: this is the other
+ * factor that measures a change which is wrong however it was meant. Every
+ * other one measures a change that might be right. A part of the page that no
+ * code can render is not a part of the page — the renderer omits it and says so
+ * (0050), and it says so to nobody, on every request, for as long as the
+ * revision is current.
+ *
+ * Refusal is the useful disposition here and not merely the severe one, for the
+ * reason `nested-target` gives and more sharply. A refused proposal is the one a
+ * repairer gets to try again, and *this type does not exist* is the single most
+ * actionable thing a model can be told: the catalogue it was given already lists
+ * what does. Confirmation would put an invented word to a person who can only
+ * answer no.
+ *
+ * **What keeps a rollback undoable** is where this is measured rather than how
+ * severely it is judged. A tree may legitimately name a primitive a later
+ * deployment withdrew, and only what a change *introduces* is counted, so an
+ * ordinary edit to a page that already holds one is untouched. Restoring such a
+ * node — an undo of the removal that took it out — is the case this does refuse,
+ * and refusing it is the honest answer: the primitive has to come back before
+ * the page can.
+ *
+ * A host that disagrees does not need a knob. It declares no vocabulary and this
+ * never fires, which is today's behaviour and the default (0002).
+ */
+const unknownPrimitive = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { unknownPrimitives } = analysis
+  if (unknownPrimitives.length === 0) return null
+
+  const one = unknownPrimitives.length === 1
+
+  return {
+    code: "unknown-primitive",
+    level: "critical",
+    detail: `adds ${one ? "a node" : `${unknownPrimitives.length} nodes`} no primitive is registered for, so ${
+      one ? "it draws" : "they draw"
+    } nothing: ${unknownPrimitives.map(describeUnknownPrimitive).join("; ")}`,
+  }
+}
+
+/**
  * A form pointed somewhere else, as damage.
  *
  * `high` rather than `critical`, and the comparison with `nested-target` above
@@ -314,6 +360,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   shallowStructuralChange,
   discardsLaterWork,
   nestedTarget,
+  unknownPrimitive,
   redirectedSubmission,
   repointedBinding,
 ]

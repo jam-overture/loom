@@ -9,6 +9,7 @@ import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 import { assessReversibility, type Reversibility } from "./reversibility.js"
 import { assessStakes, type StakeAssessment } from "./stakes.js"
+import { primitiveVocabularyFor } from "./vocabulary.js"
 
 /**
  * Everything the Gate is allowed to look at, gathered in one pass. Assembling
@@ -21,10 +22,11 @@ import { assessStakes, type StakeAssessment } from "./stakes.js"
  *
  * This is also where a proposal's own declaration about what it writes over is
  * folded into the damage estimate (0035), so the Gate keeps seeing two axes and
- * a policy rather than growing a third input. The policy's interactive
- * vocabulary reaches the analysis the same way and for the same reason (0064):
- * the fact needs a host's primitives to state, and one seam should hold
- * everything the Gate's inputs are assembled from.
+ * a policy rather than growing a third input. The policy's vocabulary — which
+ * primitives are targets, and which exist at all — reaches the analysis the
+ * same way and for the same reason (0064, 0173): the facts need a host's
+ * primitives to state, and one seam should hold everything the Gate's inputs
+ * are assembled from.
  */
 
 export type ChangeAssessment = {
@@ -41,7 +43,12 @@ export const assessChange = (
   inverseDeltaId: DeltaId
 ): Result<ChangeAssessment, TreeError> =>
   flatMapResult(
-    analyzeDelta(tree, proposal.delta, interactivePredicateFor(policy.interactiveTypes)),
+    analyzeDelta(
+      tree,
+      proposal.delta,
+      interactivePredicateFor(policy.interactiveTypes),
+      primitiveVocabularyFor(policy.registeredPrimitiveTypes)
+    ),
     (analysis) =>
       mapResult(
         assessReversibility(tree, proposal.delta, analysis, policy, inverseDeltaId),
