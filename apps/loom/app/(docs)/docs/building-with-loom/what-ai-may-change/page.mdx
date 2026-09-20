@@ -101,37 +101,41 @@ never a higher one.
 
 ## The whole of a policy
 
-Thirteen settings, and you have now met three of them. Here is all of it — what
+Fourteen settings, and you have now met three of them. Here is all of it — what
 each one is, what you do about it, and what you get if you say nothing.
 
 Every default below is read out of the runtime as this page is built, so the
 number you see is the number in your build. The list itself is the policy's own
 type: a setting added to the runtime and not to this page stops the site
-compiling, rather than quietly leaving you a page that describes twelve of
-thirteen.
+compiling, rather than quietly leaving you a page that describes thirteen of
+fourteen.
 
 <PolicyKnobs />
 
-## The one list you should not write by hand
+## The two lists you should not write by hand
 
-`interactiveTypes` is the exception in that table, and it is worth saying twice.
-It answers "which of my primitives render a thing the reader aims at?" — a link,
-a button — and every primitive already declared that about itself when it was
-defined.
+`interactiveTypes` and `registeredPrimitiveTypes` are the exceptions in that
+table, and both are worth saying twice. The first answers "which of my
+primitives render a thing the reader aims at?" — a link, a button — and every
+primitive already declared that about itself when it was defined. The second
+answers "which of them do I have at all?", which is the registry, written down
+a second time.
 
 ```ts alternative
-import { interactiveTypesFor } from "@loom/runtime/sdk"
+import { interactiveTypesFor, registeredTypesFor } from "@loom/runtime/sdk"
 
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
   protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
   interactiveTypes: interactiveTypesFor(registry),
+  registeredPrimitiveTypes: registeredTypesFor(registry),
 })
 ```
 
-A hand-typed copy of that map is wrong the first day somebody gives another
-component an `href`, and nothing anywhere would say so. Read it off the registry
-instead, and it cannot drift.
+A hand-typed copy of either is wrong the first day somebody gives another
+component an `href`, or adds a primitive and forgets the policy — and nothing
+anywhere would say so. Read both off the registry instead, and they cannot
+drift.
 
 ## A name is a claim about contents
 

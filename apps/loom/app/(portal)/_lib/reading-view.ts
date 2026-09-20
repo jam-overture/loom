@@ -8,14 +8,19 @@ import { nounOf, type PartName } from "./part-name"
  *
  * ## What the counters actually are
  *
- * A `StoredTally` is one part of one revision of one page, with six numbers on
- * it. Five of them are plain counts — dwell, clicks, opens, closes — and the
- * two that matter most are not counts of *events* at all:
+ * A `StoredTally` is one part of one revision of one page, with seven numbers
+ * on it. Four of them are plain counts of *events* — dwell, clicks, opens,
+ * closes — and the three that matter most are counts of *page views*:
  *
  * - **`views`** is how many distinct page views said anything about this part.
  * - **`reached`** is how many of those page views actually *saw* it.
+ * - **`engaged`** is how many used something **inside** it.
  *
- * Both are correlated inside one page view by the opaque key of
+ * The third is the only one that is ever about a region, and it is the reason
+ * this module was one counter short of describing a section at all: a press
+ * lands on a button, so a band's clicks are zero however busy the band was.
+ *
+ * All three are correlated inside one page view by the opaque key of
  * [0146](../../../../../decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md),
  * which never persists and never identifies anybody. That is what makes "3 of
  * 40 visits" answerable without there being any such thing as a visitor here.
@@ -46,6 +51,26 @@ export type PartReading = {
   readonly name: PartName
   readonly views: number
   readonly reached: number
+  /**
+   * Page views in which a reader used something *inside* this part — pressed,
+   * followed, filled, opened or closed, at any depth.
+   *
+   * The only counter on the row that is ever about a region. A press lands on a
+   * button, so a band's `activations` is zero however busy the band was, and
+   * until this was read a section's line on this screen was time on screen
+   * beside four permanent zeroes.
+   *
+   * Strictly inside, so a control's own use is in `activations` and never here.
+   * It is a count of views rather than of presses, which is what makes it the
+   * one usage number a share may be taken of.
+   *
+   * **It can exceed `reached`, and that is not a fault.** A region is credited
+   * by what happened under it, and nothing credits it with having been on
+   * screen — so a band nobody reported seeing, whose button somebody pressed,
+   * has `reached` of 0 here and a use of 1. Every reading below that would
+   * divide the two checks for it rather than printing a share above 100.
+   */
+  readonly engaged: number
   readonly dwellMs: number
   readonly activations: number
   readonly opens: number
@@ -65,13 +90,21 @@ export type RevisionReading = {
   readonly revision: number
   /**
    * The closest thing these counters hold to a page-view count: the most page
-   * views any single part was mentioned by.
+   * views any single part was mentioned by, or used inside.
    *
    * It is a floor rather than a measurement, and the disclosure says so. A part
    * at the top of a page is mentioned by essentially every view that broadcast
    * anything, so in practice the floor is tight — but a page whose every part
    * is behind a disclosure would report fewer views than it had, and a number
    * presented as exact would be a claim this data cannot make.
+   *
+   * **Engagement raises the floor, and has to.** A view that used something
+   * inside a part is a page view, and a region is credited with it without
+   * being credited with a `views` of its own — so two readers who each pressed
+   * a different button, and whose senders reported nothing else, are two page
+   * views that the old floor read as one. Every share this module prints is
+   * measured against this number, and a denominator below its own numerator is
+   * the one arithmetic error a screen cannot explain away.
    */
   readonly views: number
   /** Ordered by how many people saw each part, most first. */
@@ -134,6 +167,7 @@ export const revisionReadings = (
       name: partName(tally.nodeId, tally.type, names),
       views: tally.views,
       reached: tally.reached,
+      engaged: tally.engaged,
       dwellMs: tally.dwellMs,
       activations: tally.activations,
       opens: tally.opens,
@@ -152,7 +186,7 @@ export const revisionReadings = (
       return {
         treeId,
         revision,
-        views: parts.reduce((most, part) => Math.max(most, part.views), 0),
+        views: parts.reduce((most, part) => Math.max(most, part.views, part.engaged), 0),
         parts: [...parts].sort(byReach),
       }
     })
@@ -242,6 +276,119 @@ const withKey = <K extends string>(
   key: K,
   part: PartReading | undefined
 ): Partial<Record<K, PartReading>> => (part === undefined ? {} : ({ [key]: part } as Record<K, PartReading>))
+
+/**
+ * A part, and the views that used something inside it.
+ *
+ * The denominator is optional and that is the whole of the type's design. A
+ * region is credited with a view because of what happened *under* it, and
+ * nothing credits it with having been on screen — so `reached` is a denominator
+ * for this count only when it is one, and a part whose use outran its measured
+ * reach says so in words instead of printing a share above a hundred.
+ */
+export type UseReading = {
+  readonly part: PartReading
+  /** Page views in which a reader used something inside the part. */
+  readonly used: number
+  /**
+   * Page views that got as far as it, when that is a number this count can
+   * honestly be read against. Absent when nothing reported the part on screen,
+   * or reported it on fewer views than used something in it.
+   */
+  readonly outOf?: number
+}
+
+const useReading = (part: PartReading): UseReading => ({
+  part,
+  used: part.engaged,
+  ...(part.reached > 0 && part.engaged <= part.reached ? { outOf: part.reached } : {}),
+})
+
+/**
+ * What readers did on the page, rather than to any one part of it.
+ *
+ * ## Why the whole page is a number this data can give exactly
+ *
+ * A delegated signal names every addressed region it happened inside, *up to
+ * and including the root*. So the largest `engaged` on a revision is the root's,
+ * and it is not an estimate of anything: it is the page views in which a reader
+ * used something, anywhere on the page. Every other part's engagement is a
+ * subset of it.
+ *
+ * That is the sentence this screen had no way to say. `activations`, `opens`
+ * and `closes` are per-part event counts — *this button was pressed nine times*
+ * — and nine presses may be one enthusiastic reader. *Twelve of the forty
+ * visits did something* is a different claim and the one an author is actually
+ * asking for.
+ *
+ * ## And why the region below it is the more interesting half
+ *
+ * The root always wins, so naming the most-engaged part would name the page
+ * every time. `region` is therefore the most-used part the measurement can tell
+ * *apart* from the page as a whole — the best-engaged part strictly below the
+ * maximum. A part whose engagement is indistinguishable from the whole page's
+ * is not news about a part.
+ *
+ * Ranked on the count rather than on the share, deliberately. A share would put
+ * a band reached once and used once above everything else on the page, which is
+ * the small-sample confidence this module refuses everywhere else.
+ */
+export type PageUse = {
+  /** Page views in which a reader used something anywhere on the page. */
+  readonly whole: number
+  /** The most-used part that is not simply the page itself. */
+  readonly region?: UseReading
+}
+
+const byUse = (left: PartReading, right: PartReading): number =>
+  right.engaged - left.engaged ||
+  right.reached - left.reached ||
+  left.nodeId.localeCompare(right.nodeId)
+
+export const pageUse = (reading: RevisionReading): PageUse | undefined => {
+  const whole = reading.parts.reduce((most, part) => Math.max(most, part.engaged), 0)
+  if (whole === 0) return undefined
+
+  const inner = [...reading.parts].filter((part) => part.engaged > 0 && part.engaged < whole)
+  const best = inner.sort(byUse)[0]
+
+  return { whole, ...(best === undefined ? {} : { region: useReading(best) }) }
+}
+
+/**
+ * Presses this screen was told about and cannot place.
+ *
+ * A batch whose delegated signals carry no ancestry adds nothing to any
+ * region's count — *"absent is not empty"*, as the framework lane put it when it
+ * built the counter. The symptom is a screen where every section reports time
+ * on screen and nothing else, which reads as *nobody uses my sections* and
+ * means *nothing told us where anything happened*.
+ *
+ * The two are told apart by a signature this module can see without asking
+ * anybody: something on this page **was** used, and not one part of it heard
+ * about any of it. Since every region up to the root is credited, one placed
+ * press anywhere makes this impossible — so a zero here is the sender, not the
+ * readers.
+ *
+ * Absent when there is nothing to explain: no use at all is the honest empty
+ * result the screen already has a sentence for, and a single placed use means
+ * the walk is working.
+ */
+export type UnplacedUse = {
+  /** Clicks, opens and closes reported on this revision, added up. */
+  readonly uses: number
+}
+
+export const unplacedUse = (reading: RevisionReading): UnplacedUse | undefined => {
+  if (reading.parts.some((part) => part.engaged > 0)) return undefined
+
+  const uses = reading.parts.reduce(
+    (total, part) => total + part.activations + part.opens + part.closes,
+    0
+  )
+
+  return uses === 0 ? undefined : { uses }
+}
 
 /**
  * What changed for readers when the page changed.
@@ -347,6 +494,19 @@ export const plainDuration = (ms: number): string => {
  */
 export const outOfVisits = (count: number, views: number): string =>
   `${count} of the ${views} ${views === 1 ? "visit" : "visits"}`
+
+/**
+ * The same count, against the visits that got as far as the part it is about.
+ *
+ * A separate sentence rather than a second argument to the one above, because
+ * the denominator is a different population and a reader has to be told which.
+ * *5 of the 40 visits* and *5 of the 12 visits that got that far* are the same
+ * numerator and opposite news, and a screen that printed the first where it
+ * meant the second would be reporting a section as ignored when four fifths of
+ * the people who saw it used it.
+ */
+export const outOfReaders = (count: number, reached: number): string =>
+  `${count} of the ${reached} ${reached === 1 ? "visit" : "visits"} that got that far`
 
 /**
  * A change in reach, as a person would read it.

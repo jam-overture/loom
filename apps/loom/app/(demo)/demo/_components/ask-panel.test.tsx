@@ -69,6 +69,48 @@ describe("the ask panel", () => {
     expect(container.textContent).toContain("it writes down what it did")
   })
 
+  /**
+   * **The other half of the sentence above, and it is about the screen rather
+   * than the document.**
+   *
+   * The assertion before this one says the frame sentence precedes the press in
+   * the markup, and that is still exactly true — a screen reader, a crawler and
+   * that test all meet it first. What it never said, and could not, is where a
+   * sighted visitor's eye lands, and on the arrival screen that was the whole
+   * problem: measured at 348 × 465, the first control sat 398px down, so a
+   * visitor inside the front door's embed on a phone met a bar, a heading and
+   * three paragraphs and 67px of a green button.
+   *
+   * So the opening block lays the same two children out in the other order
+   * below `lg`. `flex-col-reverse` moves boxes and not the document, which is
+   * what lets both properties be true at once — and it is asserted here because
+   * a `flex-col` typed by habit would silently put the wall of prose back.
+   */
+  it("puts the press above the sentence on a narrow screen, and below it on a wide one", () => {
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+
+    const opening = screen.getByText(/won’t make without asking you/i).parentElement
+
+    expect(opening?.className).toContain("flex-col-reverse")
+    expect(opening?.className).toContain("lg:flex-col")
+  })
+
+  /**
+   * What the reversal must never separate. The promise is a fact about *this*
+   * button — "the appointments, the years and the waiting time come off the
+   * page" — so it travels inside the form rather than beside it, and stays
+   * under the button it is about at both widths.
+   */
+  it("keeps each button's promise welded to the button", () => {
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+
+    const lead = DEMO_PRESETS.find((preset) => preset.id === DEMO_LEADING_PRESET)!
+    const promise = screen.getByText(lead.promise)
+    const primary = screen.getAllByRole("button")[0]
+
+    expect(promise.closest("form")).toBe(primary!.closest("form"))
+  })
+
   it("tells a visitor what pressing each one will do to the page", () => {
     render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
 

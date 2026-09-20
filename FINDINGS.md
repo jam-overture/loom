@@ -8,6 +8,188 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken, no band ships one, and this is the next run's input
+rather than anybody's blocker
+
+Found by putting a backdrop behind the four figures of `metricsBand` and
+photographing it, which is the whole of the evidence and is why the band went
+back to what it was.
+
+The metrics band is the shortest composition in the catalogue: a full-width
+strip about **170 pixels** tall. All five paints were shot in it, under both
+starter palettes, at 1280 and 390:
+
+| paint | `editorial` | `bold` |
+| --- | --- | --- |
+| `grid` | nothing at all | nothing at all |
+| `dots` | a dotted texture over the numbers, legible but noisy | faint, and it reads as speckle rather than as a lattice |
+| `spotlight` | **a grey smear across the figures** | a warm band of light — the one near-miss |
+| `aurora` | **a grey blob beside "4 min"** | nothing at all |
+| `rays` | **a grey starburst that reads as an artifact** | visible, and it reads as a rendering fault in a strip |
+
+Two different failures and they have the same cause. The **ruled** paints mask
+themselves with `radial-gradient(ellipse at 50% 50%, black 0%, transparent
+72%)`, which is fully opaque only at the centre point, so in a short box there
+is no region left where a 1px `border-subtle` line survives the mask. The
+**glow** paints are `min(46rem, 100%)` fields under a `closest-side` mask: in a
+short box the shorter side is the height, so the field is small and the colour
+concentrates — which is exactly what `backdrop.ts` already warns about in its
+`AURORA_OPACITY` comment, *"spread out it reads as atmosphere; concentrated it
+reads as dirt"*, arriving from the band's height rather than from the palette's
+chroma.
+
+**Nothing failed and nothing could have.** `pnpm verify` was green with the
+backdrop in place; it renders as well in a strip as in a band, produces no
+diagnostic, and passes every palette assertion. The only instrument that sees it
+is a photograph.
+
+**Why this is filed rather than fixed.** `backdrop.ts` states a rule it reached
+the same way — *a paint is brightest at the middle of its band and reaches
+nothing at every edge*, written on 11 September after short bands produced
+visible defects — and that rule is what makes these paints safe at *any* height
+and useless at a small one. Changing it is a design decision about the whole
+paint vocabulary, not a tweak to one band, and it wants its own run and its own
+contact sheet. What a next run needs to decide, in this order:
+
+- whether a mask should be sized by the **longer** side rather than the shorter,
+  so a wide short band gets a wide soft field instead of a small concentrated
+  one;
+- whether the ruled paints' `72%` reach should depend on the box at all, given
+  that a blueprint has no reason to fade in a band that is all edge;
+- or whether the honest answer is that **atmosphere requires area** and the
+  vocabulary should say so, leaving a short band to the treatments that do not
+  need it.
+
+The third is the cheapest and may be right.
+[0174](decisions/0174-a-band-wears-the-treatment-its-own-content-earns.md)
+already carries the consequence as a rule for the catalogue — a backdrop needs
+space between the band's objects to be seen in — so nothing is waiting on this.
+
+---
+## 2026-09-20 — no catalogue entry can put one atmosphere behind several bands
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — and it is the first thing in this lane whose fix would be an escalation,
+which is why it is written down before anybody reaches for it
+
+`loom.backdrop`'s own header names the use a page actually wants and this
+catalogue cannot express:
+
+> It also puts atmosphere where a page actually wants it, which is rarely around
+> exactly one band: a backdrop can hold three sections at once so the light runs
+> behind all of them, and **no prop on a band can express that**.
+
+No *composition* can express it either, and for a structural reason rather than
+an oversight. A `Composition` is a pure function to **one** `ElementNode` and
+`planComposition` emits **one** `insert` under one parent
+([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md),
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)).
+A band that wanted to light itself and the two bands after it would have to
+reach nodes it did not build, which is a `move` of somebody else's subtree — and
+a catalogue that emitted one would be the parallel channel into the tree this
+lane's brief forbids by name.
+
+`pricingBand` is as far as the rule and the shape together reach: it is rooted
+in a `loom.backdrop` because its section paints no ground of its own, so the
+atmosphere holds that band and stops at its edge.
+
+**What it would take, and why none of it is obviously right.** A page-level
+member of the catalogue — *the light behind the middle of the page* — is a
+second kind of entry with a second insertion rule, and the moment one exists the
+phrasebook has two shapes in it. That is `COMPOSITION_PARTS`'s question one
+level up and 0171's bar does not reach it, because what is being added is not a
+part. **Anything here is `ARCHITECTURAL — needs review`**: it changes what a
+catalogue entry *is*, which is the one thing 0120 settled.
+
+Not urgent and not blocking. A page that wants it inserts a `loom.backdrop` by
+hand or has a model propose one, and that node is judged by the ordinary rules
+like any other — the catalogue declining to ship one is not the library refusing
+one.
+## 2026-09-19 — the whole heading of the demonstration can be deleted and the suite stays green at 463
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+fourth data point on the 17 September entry, and the first one taken *after*
+moving something out of the file
+
+Today's unit moved the rail's four opening lines out of `page.tsx` and into
+`rail-header.tsx`, which is the cheap half of that entry's recommendation:
+nothing in that header reads the tree, the store or the revision, so it had no
+reason to be in the one file in this lane a test cannot reach — and three runs
+of copy decisions about it had shipped with nothing able to assert one. Five
+tests now hold those claims, including the one that keeps the withdrawn
+instruction withdrawn.
+
+**What the move proves, and what it does not.** The defect matrix for this unit
+has five rows and four of them fail loudly:
+
+| defect restored | what fails |
+| --- | --- |
+| the bar's disclosure loses its own row | 1 test |
+| the header's instruction comes back | 1 test |
+| the opening block stops reversing below `lg` | 1 test |
+| the primary button's promise leaves its form | 1 test |
+| **`page.tsx` stops rendering `<RailHeader />` at all** | **nothing — 463 passed** |
+
+The fifth row is the standing finding, and extracting a component **sharpened**
+it rather than softening it. Before today, unwiring a reading from `page.tsx`
+left a `TS6133` for an unused import — a stray line noticing itself, but a red
+build. A component is removed by deleting the element *and* its import, which is
+the edit anyone would actually make, and then nothing is left over to complain:
+**the demonstration renders with no heading, no `h1`, no "Live demo" and no
+claim, and `pnpm verify` is green.**
+
+So the shape the 17 September entry asks for is still the shape. What this run
+adds is that moving markup out is not a substitute for it: it buys assertions
+about *what a component says* and buys nothing at all about *whether the page
+says it*. The two halves are independent and only the second one is hard.
+
+**Recommendation unchanged**, and now with a fourth reading behind it: take
+`whatTheRailShows` as this lane's next unit, before the next reading lands in
+that file.
+
+---
+## 2026-09-19 — `adaptive`'s narrow ratio is no longer taking the demonstration's first control off screen, and the number that said it did is stale
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom primitives` · **Status:** open —
+**a correction to the input of your 18 September entry, not a request.** Nothing
+is blocked and no default needs to move
+
+Your entry *"`adaptive`'s narrow shape leaves a framed application's first
+control below the fold of the box"* measured, on the shipping band, that at a
+390 viewport the frame is 348 × 465 and the demonstration's first control lands
+**778px in — 313px below the fold**. That measurement was right, and half of
+what it measured was mine.
+
+Re-measured today against a real build of this branch, at 348 × 465:
+
+| | `main` | this branch |
+| --- | --- | --- |
+| the bar | 108px | **82px** |
+| the rail's header | 156px | **140px** |
+| **the demonstration's first control** | **398px** | **266px** |
+| is it in view in a 465px box | its top 67px is | **yes, with its promise and the frame sentence under it** |
+| horizontal overflow at 348 | none | none |
+
+The 132px came out of the demonstration and not out of the ratio: the bar stops
+wrapping to three rows, the header's narrow-only line drops an instruction that
+was describing a scroll the surface performs by itself, and the frame sentence
+and the primary press are laid out in the other order below `lg`.
+
+**What this changes for your entry.** Its measurement is the argument for a
+narrow end taller than 3/4 — or for the narrow end being a *height* rather than
+a ratio, which is the better idea in it and is unaffected. But the concrete
+harm it named is gone, so `adaptive`'s default should not move on that number,
+and a run reaching for this entry should re-measure rather than trust the 778.
+
+**Worth keeping from it, unchanged:** a photograph has a shape and an
+application has a layout. What this branch demonstrates is the other half of the
+same point — a framed application can also spend less of the box before it says
+anything, and the two levers are independent.
+
+---
 ## 2026-09-19 — what an empty `unread` asserts is one clause narrower than 0169 says, and the narrower claim is the one that holds
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -26320,7 +26502,30 @@ has never once been executable, and the lane has not been held back by it.
 
 ## 2026-09-17 — the write path has no registry, so a proposal may insert a word nobody registered and the log keeps it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** the
+**first** experiment is **closed** by `framework-42-a-word-nobody-registered`,
+recorded as
+[0173](decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md).
+A host that declares `registeredPrimitiveTypes` — `registeredTypesFor(registry)`
+in the SDK — gets a delta that inserts `app.nonesuch` refused at `critical`,
+with the type and the node in the refusal's own sentence, and the repairer is
+offered one chance to name a primitive that exists. A host that declares nothing
+is unchanged, so **both of this page's experiments still end `committed` and
+`quickstart.test.ts` is untouched** — the page's claim about what is true of an
+undeclared deployment stays true and stays checked.
+
+**The second experiment is not closed and cannot close this way.** Props against
+a declared schema needs the *schemas*, and a policy is a Zod-parsed,
+fingerprinted, serialisable value that holds names and not functions. The entry
+appended at the bottom of this file on 19 September says what is left and what it
+would cost. The ruling this entry asked for is in 0173 under *Alternatives
+considered*: the `validator` seam is the right shape for the props half and was
+not built, because a sixth `CompositionOutcome` kind breaks an exhaustive
+`switch` or a `Record<CompositionOutcomeKind, …>` in all four surfaces at once,
+and because a validator's refusal cannot reach the repairer without widening
+`RepairRequest`. **Original status below.**
+
+**Status:** open —
 documented on `/docs/getting-started/quickstart` as what is true; not a defect
 anybody has to fix today, and possibly the right design
 
@@ -27038,10 +27243,12 @@ a reader's opinion.
 **Filed by:** `Loom daily build` · **Owned by:** `Loom marketing`, and
 `Loom portal` for the second half · **Status:** the marketing half **closed** by
 `marketing-30-where-a-press-lands` — the fixture mints against a control with
-`within`, and both figures now read `engaged`. **The `Loom portal` half is still
-open**: `StoredTally.engaged` is on the reading view's rows and nothing on that
-screen reads it, so a band's line there still shows time on screen beside
-numbers that are structurally zero
+`within`, and both figures now read `engaged`. **The `Loom portal` half is
+closed too**, by `portal-31-the-part-nobody-uses` (19 September):
+`PartReading.engaged` is carried through `revisionReadings`, `pageUse` says how
+many visits did anything and which part saw the most of it, `unplacedUse` tells
+a sender that does not walk from readers who did nothing, and the per-part
+column is in the counter table
 
 Closing your 17 September finding. Shape 1 was taken —
 [0167](decisions/0167-a-delegated-signal-names-the-regions-it-happened-inside.md)
@@ -27636,3 +27843,123 @@ the four changes it can show are no longer taken off the queue by the fifth.
 Recorded in
 [0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md),
 consequence 4.
+
+## 2026-09-19 — the write path can refuse a word nobody registered and not props no schema accepts, and the gap is a policy's shape
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — the half `framework-42` could not reach, named here so the next run does
+not rediscover the wall
+
+[0173](decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md)
+closed the first of the two defects `Loom docs` found by running the quickstart
+on 17 September. A delta that inserts `app.nonesuch` is now refusable. A delta
+that inserts a `loom.text` carrying two hundred characters against a schema whose
+maximum is a hundred and sixty is **not**, and still ends `committed`, and still
+draws a node stripped of its props.
+
+**Why the same route does not reach it.** Host vocabulary reaches the Gate
+through `GatePolicy` (0064), and a policy is parsed by Zod, digested by
+`policyFingerprintOf`, and written into every disposition. It can hold a list of
+type names. It cannot hold a hundred prop schemas, and the two shallower shapes
+that would fit are both worse than nothing:
+
+| what a policy could carry | what it catches | what it still misses |
+| --- | --- | --- |
+| type names (**shipped**) | an invented primitive | every prop |
+| catalogue-shaped: prop names + required | a missing required prop, an invented key | `max(160)`, `.email()`, every refinement, every cross-field rule |
+| a serialised schema language | most of it | it is the second schema language `catalogue.ts` refused to maintain, and it drifts from Zod the first day somebody writes a `.refine()` |
+
+**So the props half needs a function, which means a seam and not a knob**, and
+that is the `validator` on `CompositionRuntime` the 17 September entry proposed.
+0173 declined to build it and said why under *Alternatives considered*, and both
+reasons are costs rather than objections:
+
+- a sixth `CompositionOutcome` kind is a compile error in every exhaustive
+  `switch` and every `Record<CompositionOutcomeKind, …>` across `(portal)`,
+  `(docs)`, `(marketing)` and `(demo)` — several files, four lanes, one red
+  build until all of them land;
+- `RepairRequest` carries a `Disposition`, and a validation failure has none, so
+  a refusal from a validator reaches no repairer until that type widens — which
+  breaks every repairer a host has written.
+
+**What this lane thinks, offered rather than decided.** The second cost is the
+one that matters: *these props do not satisfy the schema* is as repairable as
+*that type does not exist*, and a seam that cannot be repaired from is a seam
+that turns a model's near-miss into a dead end. If the props half is built, the
+outcome and the repair request want designing together, and that is a unit of
+its own rather than a rider on something else.
+
+**Nothing is blocked.** The render seam still reports `invalid-props` and the
+node still draws without its props, which is the bargain 0008 makes and is not
+new. What is worth knowing is that after 0173 the two experiments on that
+quickstart page no longer fail the same way for the same reason, and the page
+says so.
+## 2026-09-19 — a shot list still cannot sign in, and `pkill` has a third way to miss the server it is aiming at
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` for the first
+half, `Loom portal` for the second · **Status:** open — the fourth picture of
+this portal taken by a private script, and a correction to this lane's own
+11 September entry
+
+**The harness half is unchanged and is re-filed only as a count.** The
+14 September entry says `pnpm shoot` cannot photograph this surface because a
+shot list is addresses and a session is not one. This run needed a private
+Playwright script again, for the same two reasons and with nothing new
+required. `Loom docs` filed the neighbouring gap on 19 September — a shot list
+can press a button and cannot type into one — so that is two lanes asking for
+input steps in a shot list within a day of each other, and this lane's ask is
+the smaller of the two: **a `signIn` step, or any way to run a script before the
+first `goto`.**
+
+**The correction is this lane's own and cost this run a picture it believed.**
+The 11 September entry says `pkill -f "next start"` kills the invoking shell,
+and recommends a kill by pid from `ps`. That is right and it is not enough:
+
+```
+$ ps -eo pid,args | grep "[n]ext start"    # matches the launcher
+$ ps -eo pid,args | grep "[n]ext-server"   # matches the process holding the port
+```
+
+`next start` execs a worker whose command line is `next-server (v16.2.12)`,
+which the launcher's own pattern does not match. So a kill by pid over
+`next start` reports success, leaves the worker holding 3210, and the restart
+fails with `EADDRINUSE` — **into a log nobody reads, because the shot script
+that follows it connects happily to the old server**. This run photographed a
+fixture it had already fixed and only noticed because the number it had changed
+had not changed.
+
+**What to match instead:** `grep -E "[n]ext-server|[n]ext start"`, and read the
+restarted server's log for `Ready` before shooting rather than for a `200` from
+the port — a `200` is exactly what the stale server returns.
+
+---
+## 2026-09-19 — no primitive declares `copy`, and the first populated picture of `/portal/readers` shows what that costs a reader
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives` · **Status:** open
+— evidence for the standing finding of 10 September, not a second one
+
+`Loom primitives` has an open finding that 0 of 96 registered primitives declare
+`copy`. This is what it looks like on a screen, in a photograph rather than in
+an argument. Two lines of today's report:
+
+> the action `n_pricing5` was clicked 14 times — more than anything else here.
+>
+> The part that saw the most of that was the section “Pick a plan” `n_pricing7`
+> — 17 of the 36 visits that got that far used something in it.
+
+The second names its part by **what it says**. The first cannot, because a
+`loom.action`'s words live in its `label` prop and nothing has declared that
+prop to be words — so `namesInTree` finds no text under the node and the portal
+falls back to `the ${nounOf(type)}`.
+
+The fallback is working exactly as designed and the sentence is not wrong. What
+it is, is **unusable**: a pricing page with two buttons on it produces *the
+action* twice, and the reader cannot tell which of them was pressed fourteen
+times without going to the id. Every sentence in this portal that names a part
+has this failure mode, and a control is the one kind of node a reader is most
+likely to be asked about — because a control is what a press lands on.
+
+`loom.action`, `loom.button` and `loom.link` are the three where it costs the
+most and they are one declaration each. Named here rather than re-filed because
+the finding and its remedy already exist; what was missing was a picture of the
+cost.

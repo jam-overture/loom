@@ -15,7 +15,9 @@ const treeId = treeIdSchema.parse("t_seed1")
 const page: PageName = { name: "Autumn arrivals", treeId, derived: true }
 
 const names: ReadonlyMap<string, PartName> = new Map([
+  ["n_page", { name: "the page “Autumn arrivals”", nodeId: "n_page" }],
   ["n_hero", { name: "the card “Autumn arrivals”", nodeId: "n_hero" }],
+  ["n_band", { name: "the section “Pick a plan”", nodeId: "n_band" }],
   ["n_buy", { name: "the buy button “Order now”", nodeId: "n_buy" }],
   ["n_foot", { name: "the footer “Built with Loom”", nodeId: "n_foot" }],
   ["n_terms", { name: "the details “Delivery and returns”", nodeId: "n_terms" }],
@@ -61,8 +63,17 @@ const sinceTheChange = (container: HTMLElement): string => {
   return heading?.closest("section")?.querySelector("ul")?.textContent ?? ""
 }
 
+/**
+ * A page whose senders walk, which is the default and is what makes a region
+ * reportable at all. `n_page` and `n_band` are here because a press on
+ * `n_buy` is credited to every addressed region it happened inside, up to the
+ * root — so the two of them have a use and no clicks of their own, and the
+ * button has clicks and no use.
+ */
 const BUSY: readonly StoredTally[] = [
+  tally("n_page", 2, { views: 40, reached: 40, engaged: 20 }, "loom.page"),
   tally("n_hero", 2, { views: 40, reached: 40, dwellMs: 40_000 }),
+  tally("n_band", 2, { views: 40, reached: 18, engaged: 12 }, "loom.section"),
   tally("n_terms", 2, { views: 40, reached: 22, dwellMs: 22_000, opens: 9, closes: 4 }, "loom.details"),
   tally("n_buy", 2, { views: 40, reached: 18, dwellMs: 90_000, activations: 14 }, "acme.buy-button"),
   tally("n_foot", 2, { views: 40, reached: 3, dwellMs: 900 }, "loom.footer"),
@@ -181,6 +192,126 @@ describe("PageReadingCard", () => {
       .join(" ")
 
     expect(disclosed).toContain("5000ms")
+  })
+
+  /**
+   * The sentence this card could not say. Every other usage figure on it is an
+   * event count against one part — *fourteen presses* may be one enthusiastic
+   * reader — and *twenty of the forty visits did something* is the claim an
+   * author is actually asking for.
+   */
+  it("says how many visits did anything at all, against the visits it heard from", () => {
+    const { container } = cardFor(BUSY)
+
+    expect(container.textContent).toContain("20 of the 40 visits did something on this page")
+  })
+
+  /**
+   * The root is an ancestor of everything, so the most-used part is the page
+   * every time. The one worth naming is the most-used part the measurement can
+   * tell *apart* from the page as a whole.
+   */
+  it("names the part that saw the most of it rather than naming the whole page", () => {
+    const { container } = cardFor(BUSY)
+
+    expect(container.textContent).toContain("The part that saw the most of that was")
+    expect(container.textContent).toContain("the section “Pick a plan”")
+    expect(container.textContent).not.toContain("the page “Autumn arrivals” — 20")
+  })
+
+  it("measures a region's use against the visits that got as far as it", () => {
+    const { container } = cardFor(BUSY)
+
+    expect(container.textContent).toContain("12 of the 18 visits that got that far")
+  })
+
+  /**
+   * A region is credited by what happened under it and by nothing else, so a
+   * band nobody reported seeing, whose button somebody pressed, has a use and
+   * no measured reach. Printing a share of it would be a number above a
+   * hundred.
+   */
+  it("says there is no denominator rather than dividing by a reach nobody reported", () => {
+    const { container } = cardFor([
+      tally("n_page", 1, { views: 9, reached: 9, engaged: 5 }, "loom.page"),
+      tally("n_band", 1, { engaged: 4 }, "loom.section"),
+      tally("n_buy", 1, { views: 9, reached: 4, activations: 4 }, "acme.buy-button"),
+    ])
+
+    expect(container.textContent).toContain("something in it was used on 4 visits")
+    expect(container.textContent).toContain("Nothing reported whether it was ever on screen")
+    expect(container.textContent).not.toMatch(/4 of the 0 visits/u)
+  })
+
+  /**
+   * *Nobody uses my sections* and *nothing told us where anything happened* are
+   * opposite news and arrive as the same column of zeroes. A reader who cannot
+   * tell them apart goes looking for a fault in their page that is not there.
+   */
+  it("says so when presses arrived with nothing saying where they happened", () => {
+    const { container } = cardFor([
+      tally("n_hero", 1, { views: 6, reached: 6 }),
+      tally("n_buy", 1, { views: 6, reached: 5, activations: 7 }, "acme.buy-button"),
+      tally("n_terms", 1, { views: 6, reached: 4, opens: 2, closes: 1 }, "loom.details"),
+    ])
+
+    expect(container.textContent).toContain("10 clicks and openings were reported on this page")
+    expect(container.textContent).toContain("not one of them said which part of the page")
+    expect(container.textContent).toContain("That is the pages reporting back, not your readers")
+  })
+
+  it("counts one unplaced press as a click rather than as 1 clicks", () => {
+    const { container } = cardFor([
+      tally("n_buy", 1, { views: 2, reached: 2, activations: 1 }, "acme.buy-button"),
+    ])
+
+    expect(container.textContent).toContain("1 click or opening was reported")
+  })
+
+  it("does not say it when one press was placed, because one placed press means the walk works", () => {
+    const { container } = cardFor([
+      tally("n_page", 1, { views: 6, reached: 6, engaged: 1 }, "loom.page"),
+      tally("n_buy", 1, { views: 6, reached: 5, activations: 7 }, "acme.buy-button"),
+    ])
+
+    expect(container.textContent).not.toContain("clicks and openings were reported on this page")
+    expect(container.textContent).toContain("1 of the 6 visits did something on this page")
+  })
+
+  it("does not say it on a page nobody used, which already has its own sentence", () => {
+    const { container } = cardFor([
+      tally("n_hero", 1, { views: 6, reached: 6 }),
+      tally("n_foot", 1, { views: 6, reached: 2 }, "loom.footer"),
+    ])
+
+    expect(container.textContent).toContain("Nobody clicked or opened anything")
+    expect(container.textContent).not.toContain("reported on this page")
+  })
+
+  /** The name of the thing to fix, where the person who can fix it will look. */
+  it("keeps what an unplaced press is missing one click down, and never further", () => {
+    const { container } = cardFor([
+      tally("n_buy", 1, { views: 6, reached: 5, activations: 7 }, "acme.buy-button"),
+    ])
+
+    const disclosed = [...container.querySelectorAll("details")]
+      .map((details) => details.textContent ?? "")
+      .join(" ")
+
+    expect(disclosed).toContain("within")
+    expect(disclosed).toContain("broadcastReaderSignals")
+
+    for (const details of container.querySelectorAll("details")) details.remove()
+
+    expect(container.textContent).not.toContain("broadcastReaderSignals")
+  })
+
+  it("keeps every part's own use one click down, beside the counters it belongs with", () => {
+    const { container } = cardFor(BUSY)
+    const table = container.querySelector("details table")
+
+    expect(table?.textContent).toContain("used inside")
+    expect([...(table?.querySelectorAll("tbody tr") ?? [])].map((row) => row.textContent)).toHaveLength(6)
   })
 
   it("leads to the page it is about", () => {

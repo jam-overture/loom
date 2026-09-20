@@ -22,6 +22,7 @@ import { BackToTheRecord } from "./_components/back-to-the-record"
 import { ChangeSpotlight } from "./_components/change-spotlight"
 import { DemoBar } from "./_components/demo-bar"
 import { PartInQuestionView } from "./_components/part-in-question"
+import { RailHeader } from "./_components/rail-header"
 import { ReadTheDocs } from "./_components/read-the-docs"
 import { TheRecord, type HeldReading } from "./_components/the-record"
 import { WhatHappens } from "./_components/what-happens"
@@ -330,54 +331,17 @@ const DemoPage = async () => {
             * visual weight, so the sentence that says what this surface is for
             * was the least prominent sentence on the screen.
             */}
-          <header className="flex flex-col gap-2">
-            <p className="text-accent text-2xs tracking-wide uppercase">Live demo</p>
-            {/*
-              * "Ask *that* page", not "ask this page to change itself".
-              *
-              * The old heading was written when the specimen was Loom's own
-              * marketing page, so "this page" and "itself" had one referent and
-              * the sentence read. The specimen is now a clinic's page and the
-              * rail is Loom's, which makes "this page" the one question a
-              * stranger must never have to ask. The heading points instead.
-              */}
-            <h1 className="text-2xl leading-tight tracking-tight text-balance">
-              Ask that page for a change.
-            </h1>
-            {/*
-              * Whose page, and what it is. Nothing else.
-              *
-              * It used to carry a third clause — *"and every rewrite arrives
-              * with a record of what was asked, what Loom decided, and how to
-              * put it back"* — which is the demo's whole claim and was in the
-              * wrong place twice over. It was abstract, describing a record
-              * rather than being one, which is the failure `WhatHappens` was
-              * written to fix in the empty state; and it was four inches above
-              * the button, so a stranger read it before it could mean anything
-              * and had forgotten it by the time a card appeared.
-              *
-              * The claim now sits directly above the controls (`AskPanel`),
-              * where it is about to become true.
-              *
-              * The first clause went for a different reason: *"It belongs to a
-              * clinic that doesn't exist"* is what the bar says forty pixels
-              * above, in almost the same words. What is left is the half the
-              * bar does not cover and a stranger can otherwise get wrong — that
-              * the thing on the stage is data rather than a picture of a page.
-              */}
-            <p className="text-ink-secondary text-sm">
-              It isn’t a picture. It’s data, and an AI can rewrite it.
-            </p>
-            {/*
-              * "That page" is only pointing at something on a wide screen. On a
-              * phone the page is underneath, and a visitor who presses a button
-              * without knowing that watches nothing happen — the one failure
-              * this whole surface exists to avoid.
-              */}
-            <p className="text-ink-muted text-xs lg:hidden">
-              It’s the page below. Press something, then look for the mark Loom leaves on it.
-            </p>
-          </header>
+          {/*
+            * The claim, at the size of a claim — and a component rather than
+            * four paragraphs written here.
+            *
+            * Nothing in it reads the tree, the store or the revision, so it was
+            * the largest piece of this page's markup with no reason to be in
+            * the one file in this lane a test cannot reach. `rail-header.tsx`
+            * carries the copy decisions and `rail-header.test.tsx` now asserts
+            * them.
+            */}
+          <RailHeader />
 
           {/*
             * The asks, twice filtered — and the two filters are different
