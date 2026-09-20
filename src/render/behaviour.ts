@@ -5,9 +5,11 @@ import type { PrimitiveType } from "../primitive-type.js"
 import { AdjustControl } from "./behaviour-adjust.js"
 import { CopyControl } from "./behaviour-copy.js"
 import { DiscloseControl } from "./behaviour-disclose.js"
+import { DismissControl, PresentControl } from "./behaviour-present.js"
 import type { PrimitiveText } from "./text.js"
 
 export { DISCLOSED_ATTRIBUTE } from "./disclosed.js"
+export { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./presented.js"
 
 /**
  * The behaviour seam: the things a primitive *does* that its props cannot carry.
@@ -74,6 +76,17 @@ export { DISCLOSED_ATTRIBUTE } from "./disclosed.js"
  * [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
  * records why the third could not be the second.
  *
+ * `present` and `dismiss` are the fourth and fifth, and they are the first
+ * *pair*: a third axis, which is whether a control is answerable to another one.
+ * Every member before them is complete on its own, and an overlay is the case
+ * where that stops being possible — a dialog is closed by a cross inside the
+ * panel as well as by the trigger that opened it, and a click handler is a
+ * function whichever button it is on. So `dismiss` is meaningless without
+ * `present`, which is a fourth thing the registry checks at registration, and
+ * the two agree through the DOM rather than through the seam. `presented.ts`
+ * carries why, and [0176](../../decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+ * records what was rejected.
+ *
  * What a control hands back is not the same question as what a primitive may say
  * about it, and the second one lives in `control.ts`: the class every control
  * carries, and the custom property that decides whether it is displayed. Both
@@ -81,7 +94,7 @@ export { DISCLOSED_ATTRIBUTE } from "./disclosed.js"
  * beat.
  */
 
-export const BEHAVIOUR_NAMES = ["copy", "disclose", "adjust"] as const
+export const BEHAVIOUR_NAMES = ["copy", "disclose", "adjust", "present", "dismiss"] as const
 
 export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
 
@@ -165,6 +178,18 @@ type Behaviour = {
    * renders nothing, and the first of those is a question of when, not if.
    */
   readonly rendersControl: boolean
+  /**
+   * Another member of the vocabulary this one does nothing without.
+   *
+   * `undefined` for every behaviour that is complete on its own, which is four
+   * of the five. It exists for `dismiss`, whose control asks the nearest
+   * presentation above it to close: declared without `present`, it renders a
+   * button that dispatches an event nothing is listening for, on a region
+   * nothing opens. That is a dead control rather than a wrong one, so it is
+   * refused at registration rather than reported by the audit — the same
+   * judgement the seam already makes about a control with no accessible name.
+   */
+  readonly requires?: BehaviourName
   readonly build: (content: string, text: PrimitiveText<string>) => ReactNode
 }
 
@@ -224,6 +249,47 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
     build: (_content, text) =>
       createElement(AdjustControl, {
         label: text.adjust ?? "",
+      }),
+  },
+  /**
+   * The fourth member, and the first whose state something other than its own
+   * button can change.
+   *
+   * It is `disclose` for a region that is not the button's sibling. The state
+   * goes on the element the primitive placed the trigger in, so a descendant
+   * selector reaches a panel, a menu or a frame laid out anywhere inside that
+   * box; Escape and a press outside that box close it, because an overlay a
+   * reader cannot get out of is the failure every one of these primitives is
+   * judged on. See {@link PRESENTED_ATTRIBUTE}.
+   */
+  present: {
+    description:
+      "A control that opens a region the primitive lays out inside it and closes again on Escape, on a press outside, or on a dismiss control within it.",
+    text: ["present"],
+    rendersControl: true,
+    build: (_content, text) =>
+      createElement(PresentControl, {
+        label: text.present ?? "",
+      }),
+  },
+  /**
+   * The fifth, and the only one that is not complete on its own.
+   *
+   * It publishes nothing and reads nothing. Pressed, it asks the nearest
+   * presentation above it to close, and that is the whole of it — see
+   * {@link DISMISS_EVENT} for why a bubbling event rather than a shared store,
+   * and `behaviour-present.ts` for why this is the one control whose name is
+   * not rendered as text.
+   */
+  dismiss: {
+    description:
+      "A cross inside a presented region that closes it, for the overlay whose own scrim fills the page and cannot be pressed past.",
+    text: ["dismiss"],
+    rendersControl: true,
+    requires: "present",
+    build: (_content, text) =>
+      createElement(DismissControl, {
+        label: text.dismiss ?? "",
       }),
   },
 }

@@ -28293,3 +28293,141 @@ exists. What is wrong is only the citation — an argument resting on a behaviou
 nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
+
+---
+
+## 2026-09-20 — the presentation pair is open and nothing in the library places either control
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — four of Tier B's nine are unblocked as of this entry, and none is built
+
+`present` and `dismiss` are in the behaviour vocabulary as of
+`framework-45-a-control-somebody-else-can-close`
+([0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)).
+**Nothing declares either**, which is the same split 0131 made when
+`--loom-accent-strong-chroma` shipped with no paint reading it: the seam is this
+lane's and the primitives are yours.
+
+What is now buildable, and was not: **dialog, dropdown, lightbox, tooltip.** A
+dialog built on `disclose` today is a box a reader can open and cannot close —
+Escape does nothing, a press on the page behind does nothing, and a cross inside
+the panel is a second control the seam had no way to let agree with the first.
+
+The two things to read before placing them, both of which are contracts rather
+than advice:
+
+- **The state is on the element you place the trigger in**, not on the trigger,
+  so the rule is a descendant selector: `[data-loom-presented="false"] .panel
+  { display: none }`. It must **hide** on `"false"` and never **reveal** on
+  `"true"` — neither control renders until scripting has proved itself, so a
+  page without it has no attribute and must be left showing the region.
+- **Put the cross inside the element the trigger was placed in.** The pair
+  agrees through a bubbling event, so a cross outside that subtree is a button
+  that does nothing, and the seam cannot see your layout well enough to say so.
+  Same class of mistake as a disclosure whose region is not its button's
+  sibling.
+
+Focus trapping, `inert` and a scroll lock are **not** in the seam and are not
+coming: they are facts about the region and the page around it. A modal needs
+them and they are yours.
+
+**One thing worth settling before a dialog rather than after it.** Its scrim is
+the third consumer of `bg-overlay` — after `loom.pin` (4 September) and
+`loom.listing`'s flags (8 September), both still open against this lane. Two
+instances was the threshold that entry named for acting; three with a scrim is
+the strongest case the slot has had, and a dialog that paints its scrim out of
+something else is a fourth workaround. Say so on the run that reaches for it and
+this lane will take the theme half.
+
+---
+
+## 2026-09-20 — a container cannot read a label off its own child, so the one-of-*n* half of Tier B cannot be a behaviour
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **`ARCHITECTURAL — needs review`**, and nothing is blocked
+that was not blocked yesterday
+
+Sorting Tier B's nine by what they actually need gives three groups, not one.
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+closes the first — an overlay that something other than its opener can close —
+and this is the second: **tabs, segmented control, pricing toggle, radio group.**
+The third is a toast, which appears on an event nobody pressed and is a separate
+question again.
+
+A `select` member of the behaviour vocabulary is the obvious answer and cannot be
+written, for a reason that is three existing decisions rather than a difficulty:
+
+- A tab strip's labels are content a model writes, so they are **child nodes**
+  (0052) and not a `tabs: string[]` prop.
+- A render is a **pure function of one node** (0008), and a container receives
+  its children as one rendered `ReactNode` — so it cannot read a prop off one.
+- Primitives render as Server Components and carry no `"use client"`, so React
+  context is not available either, and `cloneElement` reaches elements the render
+  seam owns rather than the child primitive's.
+
+So a control that renders *n* labelled buttons cannot learn what to put on them.
+The 14 September entry *a container cannot tell its child which element to be*
+is the same wall from the other side, and its shape 2 — **a declared shape a
+container may ask of its children** — is what closes both. That is a change to
+what a node is and what a container may know about its subtree, which is the
+tree schema, which is why this is filed rather than proposed: writing a
+`Proposed` record for a design this run has not worked out would be a record in
+name only.
+
+**What this lane recommends, and it is a question rather than a plan.** Shape 2
+is worth it if the answer is *one* mechanism serving tabs, segmented controls,
+radio groups and the pricing toggle. It is not worth it for a pricing toggle
+alone, and the 14 September entry's shape 1 — a second primitive, `loom.choice`,
+with `radio` as a field type beside it — remains the cheap answer to the
+narrowest case and needs no framework decision at all.
+
+**Nothing is blocked meanwhile.** A form that needs one choice of several uses a
+`select`, which is registered and works. Five of Tier B's nine stay closed:
+these four and the toast.
+
+---
+
+## 2026-09-20 — no behaviour control can appear in a specimen, so the seam that builds them is the one thing `pnpm specimen` cannot photograph
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around with a scratch bundle, and this lane is the third to write
+one in four days
+
+A specimen page is `renderToStaticMarkup` with no dev server and no hydration.
+`plan.ts` says so in as many words — *"there is no script in it to press"* — and
+that is right for the subject the harness was built for. The consequence nobody
+had had to hit yet: **every control in the behaviour vocabulary renders `null`
+until an effect proves scripting runs.** So a specimen of a primitive that takes
+`copy`, `disclose`, `adjust`, `present` or `dismiss` photographs the page
+*without* the control, correctly, and there is no flag that changes it.
+
+Five members in, nothing in this repository has ever photographed one.
+
+**What this run did instead**, because the picture was the whole point of a pair
+of controls that close each other: bundled `behaviour-present.ts` with the
+`esbuild` already in the store, served the bundle beside a hand-written page on
+`127.0.0.1`, and pointed `pnpm shoot` at it with `do: [{ click }]` steps. That
+works, takes about fifteen minutes, and is the third private screenshot script
+this repository has grown since the harness was folded into one on 8 September —
+the exact thing [0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+exists to stop.
+
+**Half of the fix is already built and unreachable.** `renderSpecimen` takes an
+`additionalPrimitives` list and nothing can pass one: it is not on the
+`Specimen` type, so the CLI always calls it with `[]`. Without that, a run
+photographing a *seam* has to add a primitive to `src/primitives/` to have
+anything to photograph, which is another lane's directory. Four lines, and this
+run wrote and then reverted them, because they buy nothing until the other half
+exists.
+
+**The other half is hydration**, and it is the real decision: serving a bundle
+means a build step inside the harness, which is what `renderToStaticMarkup` was
+chosen to avoid. Three shapes, smallest first — (1) hydrate only when the
+specimen asks, so every existing one stays static and costs nothing; (2) a
+second entry point, `pnpm specimen --live`; (3) leave it, and tell lanes to use
+`pnpm shoot` against their own served page, which is what the portal and the
+demo already do and what a framework seam has no page for.
+
+Recommended (1). Nothing is blocked — a scratch bundle works and this run's four
+pictures came out of one — but the next lane to want a photograph of a control
+will write the fourth script.

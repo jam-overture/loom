@@ -4353,7 +4353,7 @@
             {
               "name": "BEHAVIOUR_NAMES",
               "kind": "value",
-              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\"]",
+              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\", \"present\", \"dismiss\"]",
               "truncated": false,
               "summary": ""
             },
@@ -4671,6 +4671,27 @@
               "signature": "const inlineThemeVariables: (element: ReactNode, variables: ThemeVariables) => InlinedProjection",
               "truncated": false,
               "summary": "The projection, with every theme reference in an inline style replaced by what the mounted theme says it is."
+            }
+          ]
+        },
+        {
+          "module": "render/presented",
+          "title": "Presented",
+          "summary": "The present contract's one name, in a module with nothing else in it.",
+          "symbols": [
+            {
+              "name": "PRESENTED_ATTRIBUTE",
+              "kind": "value",
+              "signature": "const PRESENTED_ATTRIBUTE = \"data-loom-presented\"",
+              "truncated": false,
+              "summary": "The attribute a presentation control stamps on **the element the primitive placed it in**: `\"true\"` while the region it opens is showing, `\"false\"` otherwise."
+            },
+            {
+              "name": "DISMISS_EVENT",
+              "kind": "value",
+              "signature": "const DISMISS_EVENT = \"loom:dismiss\"",
+              "truncated": false,
+              "summary": "The event a dismiss control dispatches to close the presentation it sits inside: bubbling, so the nearest presentation above it hears it and no other."
             }
           ]
         },
@@ -5823,7 +5844,7 @@
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "truncated": false,
               "summary": ""
             },

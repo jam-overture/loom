@@ -259,3 +259,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0173](0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md) | A change may not add a node the deployment cannot draw | Accepted | §2 |
 | [0174](0174-a-band-wears-the-treatment-its-own-content-earns.md) | A band wears the treatment its own content earns, and adds to its ground rather than replacing it | Accepted | §4b |
 | [0175](0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md) | A listing skips the row it cannot read and fails the one it cannot place, and a store that did not answer is a different word from a row that did not parse | Accepted | §5, reaching §2 and the portal's front door |
+| [0176](0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md) | A control may be answerable to another control, and the two agree through the DOM rather than through the seam | Accepted | §4h — the behaviour seam |
