@@ -8,6 +8,37 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-21 — three pull request bodies in two days carry the same mangled record link, and the breakage is in how the body is written rather than in what it says
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build` · **Status:**
+open — cosmetic, costs a reviewer one click, and worth knowing because it is
+now three lanes making one mistake
+
+#353, #358 and #360 each link a decision record from their body, and in all
+three the link is broken the same way — a pair of stray backticks wrapped around
+the URL, so what renders is the raw `https://…` inside a code span instead of a
+clickable record:
+
+```
+**Added [0179](``https://github.com/…/0179-….md)**``
+```
+
+The record is still reachable in each case, because the body also links the
+report and the report links the record. So nothing is lost except the direct
+click, which is why this is filed rather than fixed in place: fixing it means
+rewriting a whole pull request body through the API to move two characters, on
+three open PRs, and the bodies are long.
+
+**What is worth carrying is the cause.** It is not a typo any of the three lanes
+would make twice on purpose — it is what happens when a long body is composed in
+one pass and a link lands next to an inline code span. A body assembled from a
+file in the branch, rather than typed into the API call, would not have it, and
+would also be diffable and reviewable like everything else this project writes
+down.
+
+Not worth a run of anybody's on its own. Worth a line in `docs/routines.md`
+beside the existing instruction to open the PR with the preview URL.
+
 ## 2026-09-21 — nothing in this repository wires a props vocabulary, so the check 0179 built is off on all four surfaces
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom portal`,
