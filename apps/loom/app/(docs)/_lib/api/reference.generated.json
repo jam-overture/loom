@@ -5067,7 +5067,7 @@
             {
               "name": "COMPOSITION_PARTS",
               "kind": "value",
-              "signature": "const COMPOSITION_PARTS: readonly [\"banner\", \"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"code\", \"integrations\", \"metrics\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
+              "signature": "const COMPOSITION_PARTS: readonly [\"banner\", \"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"code\", \"integrations\", \"metrics\", \"specs\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
               "truncated": false,
               "summary": "The bands a page is made of, in the order a page uses them."
             },
