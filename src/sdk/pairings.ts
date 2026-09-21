@@ -45,8 +45,10 @@ import type { PrimitiveRegistry, RegisteredPrimitive } from "./registry.js"
  * [0089](../../decisions/0089-the-text-ramp-is-held-to-four-grounds.md) makes
  * it, and `PALETTE_TEXT_GROUNDS` is where it is written down. Passing it in is
  * what keeps this function free of a rule it would otherwise have to guess:
- * derive everything, declare the four grounds, and a host with its own surfaces
- * declares its own.
+ * derive everything, declare the grounds, and a host with its own surfaces
+ * declares its own. There were four of them until `bg-overlay` joined on
+ * 21 September, which is why the list is a value rather than a number in a
+ * sentence.
  */
 
 /** Whether one primitive set both ends of a pairing, or only the ink. */

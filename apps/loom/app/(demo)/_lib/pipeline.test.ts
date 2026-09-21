@@ -10,7 +10,7 @@ import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
-import { askedLine } from "./undo"
+import { askedLine, isUndo, putsSomethingBack } from "./undo"
 
 /**
  * The demo, end to end, with nothing stubbed but the browser.
@@ -39,7 +39,17 @@ const headOf = async (session: DemoSession): Promise<LoomTree> => {
  */
 const SETTINGS = settingsOf(demoRegistry)
 
-const ask = async (session: DemoSession, presetId: string): Promise<ChangeRecord> => {
+const ask = async (
+  session: DemoSession,
+  presetId: string,
+  /**
+   * The asks already made, newest first, exactly as `actions.ts` hands them in
+   * from `session.records`. Defaulted to none, because all but one of the cases
+   * below are about a single ask and a history they never had would be a fixture
+   * pretending to be a session.
+   */
+  earlier: readonly ChangeRecord[] = []
+): Promise<ChangeRecord> => {
   const preset = presetById(presetId)
   if (!preset) throw new Error(`no preset ${presetId}`)
 
@@ -65,6 +75,7 @@ const ask = async (session: DemoSession, presetId: string): Promise<ChangeRecord
   const record = recordFromEvents(write.narrated(), undefined, {
     before: head,
     settings: SETTINGS,
+    earlier,
   })
   if (!record) throw new Error("the runtime narrated nothing")
 
@@ -610,5 +621,115 @@ describe("a second ask held while the first is still waiting", () => {
 
     /** Nothing moved: the page is still where the change that did land left it. */
     expect((await headOf(session)).revision).toBe(1)
+  })
+})
+
+/**
+ * The second press of a toggle, over the real write path.
+ *
+ * This is the defect the 14 September finding named and the reason `put-back.ts`
+ * exists: two presses of one button make opposite changes to the page, and until
+ * today produced two cards identical to the word. It is asserted here rather
+ * than only in `put-back.test.ts` because what has to be true is not that a
+ * comparison works — it is that **a visitor pressing the demo's own button twice
+ * is told what the second press did**, through interpretation, assessment, the
+ * Gate, application and the record, with nothing stubbed.
+ */
+describe("a toggle pressed twice", () => {
+  const CHANGED = "How the whole page looks changed. Not a word on it changed."
+  const WENT_BACK = "The whole page went back to how it looked. Not a word on it changed."
+
+  it("says the second press put the page back, in the words the undo already had", async () => {
+    const session = await sessionFor("toggle-twice")
+    const first = await ask(session, "palette")
+    const second = await ask(session, "palette", [first])
+
+    expect(first.outcome).toBe("applied")
+    expect(second.outcome).toBe("applied")
+
+    expect(first.wentBack).toBe(false)
+    expect(second.wentBack).toBe(true)
+
+    expect(first.did?.[0]?.sentence).toBe(CHANGED)
+    expect(second.did?.[0]?.sentence).toBe(WENT_BACK)
+  })
+
+  /**
+   * The mark on the page and the sentence on the card read the same fact through
+   * one predicate, which is the rule `undo.ts` has followed since it was written.
+   * A band ringed *“New”* over a card saying it went back is the defect that put
+   * `isUndo` there, reached from the other side.
+   */
+  it("tells the page's marks the same thing it tells the card", async () => {
+    const session = await sessionFor("toggle-marks")
+    const first = await ask(session, "backdrop")
+    const second = await ask(session, "backdrop", [first])
+
+    expect(putsSomethingBack(first)).toBe(false)
+    expect(putsSomethingBack(second)).toBe(true)
+    expect(isUndo(second)).toBe(false)
+  })
+
+  /**
+   * **The overclaim, refused over the real write path.** Press the palette, then
+   * the band, then the palette again: the third press does reverse the last
+   * thing done to the palette, and the page is still carrying a repainted band.
+   * *“The whole page went back to how it looked”* would be a sentence a stranger
+   * could see was false, so the card says what it said before instead.
+   */
+  it("says nothing about going back when something else moved the page in between", async () => {
+    const session = await sessionFor("toggle-interleaved")
+    const palette = await ask(session, "palette")
+    const backdrop = await ask(session, "backdrop", [palette])
+    const again = await ask(session, "palette", [backdrop, palette])
+
+    expect(backdrop.wentBack).toBe(false)
+    expect(again.wentBack).toBe(false)
+    expect(again.did?.[0]?.sentence).toBe(CHANGED)
+  })
+
+  /**
+   * And a change waiting on the visitor is not the change that came before, so a
+   * hold sitting in the rail cannot hide the press this one really reverses. The
+   * `band` ask is held by the Gate and moves nothing until it is answered.
+   */
+  it("steps over an ask that never reached the page", async () => {
+    const session = await sessionFor("toggle-over-a-hold")
+    const first = await ask(session, "palette")
+    const held = await ask(session, "band", [first])
+    const second = await ask(session, "palette", [held, first])
+
+    expect(held.outcome).toBe("awaiting-you")
+    expect(held.revision).toBeUndefined()
+    expect(second.wentBack).toBe(true)
+    expect(second.did?.[0]?.sentence).toBe(WENT_BACK)
+  })
+
+  /**
+   * And what the record carries to make the next press answerable. It is the one
+   * field on this record holding a prop's *value*: the technical half already
+   * says `configure <id>: <prop>` and stops there, which is why two presses
+   * printed one string twice.
+   */
+  it("keeps what it moved, so the press after it can be read at all", async () => {
+    const session = await sessionFor("toggle-frozen")
+    const first = await ask(session, "palette")
+
+    expect(first.settingsMoved).toHaveLength(1)
+    expect(first.settingsMoved?.[0]?.from).toBeDefined()
+    expect(first.settingsMoved?.[0]?.to).toBeDefined()
+    expect(first.settingsMoved?.[0]?.from).not.toEqual(first.settingsMoved?.[0]?.to)
+  })
+
+  /**
+   * A change that takes something off the page moves no setting, so it can never
+   * be read as having put one back — however many times it is asked for.
+   */
+  it("never reads a change that moves no setting as going back", async () => {
+    const session = await sessionFor("toggle-structural")
+    const trim = await ask(session, "trim")
+
+    expect(trim.settingsMoved).toEqual([])
+    expect(trim.wentBack).toBe(false)
   })
 })

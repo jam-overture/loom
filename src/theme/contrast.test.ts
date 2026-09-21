@@ -95,9 +95,10 @@ describe("auditPalette", () => {
     const audit = auditPalette(withSlots({ "fg-subtle": "#e8e8e8" }))
 
     /**
-     * `fg-subtle` reaches all four grounds; a pairing a primitive paints is
-     * declared `painted` even where a tree could also compose it, so the two
-     * lists partition the four rather than overlapping on them.
+     * `fg-subtle` reaches every ground the ramp is held to; a pairing a
+     * primitive paints is declared `painted` even where a tree could also
+     * compose it, so the two lists partition the five rather than overlapping
+     * on them.
      */
     expect(audit.failures.map((entry) => entry.pairing.background)).toEqual([
       "bg-surface",
@@ -106,6 +107,7 @@ describe("auditPalette", () => {
     expect(audit.composedFailures.map((entry) => entry.pairing.background).sort()).toEqual([
       "accent-subtle",
       "bg-canvas",
+      "bg-overlay",
     ])
     for (const failure of [...audit.failures, ...audit.composedFailures]) {
       expect(failure.ratio).toBeLessThan(TEXT_CONTRAST_MINIMUM)
@@ -140,6 +142,24 @@ describe("auditPalette", () => {
     )
   })
 
+  /**
+   * What the slot was worth before today, stated as a test. `bg-overlay` is the
+   * one surface in the ramp whose name invites the wrong value: *overlay* reads
+   * as a dark wash to anyone who has written a modal, and a host palette that
+   * fills it that way under a light page renders every `loom.overlay` as dark
+   * ink on a dark veil. `paletteSchema` sees a valid colour; before this row
+   * existed `auditPalette` measured the slot in no pairing at all and answered
+   * with an empty `failures`, which is what a clean palette answers with.
+   */
+  it("catches a host that reads bg-overlay as a dark wash, which nothing measured before", () => {
+    const audit = auditPalette(withSlots({ "bg-overlay": "#1a1a1a" }))
+
+    expect(audit.failures.map((entry) => entry.pairing.where)).toEqual([
+      "loom.overlay content over its scrim",
+    ])
+    expect(audit.failures[0]?.ratio).toBeLessThan(TEXT_CONTRAST_MINIMUM)
+  })
+
   it("tells a pairing it could not measure from one that failed", () => {
     const audit = auditPalette(withSlots({ "fg-muted": "hsl(0 0% 45%)" }))
 
@@ -148,6 +168,7 @@ describe("auditPalette", () => {
     expect(audit.unmeasured.map((entry) => entry.pairing.background).sort()).toEqual([
       "accent-subtle",
       "bg-canvas",
+      "bg-overlay",
       "bg-surface",
       "bg-surface-muted",
     ])

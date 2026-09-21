@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 import { screenName } from "./screen-names"
+import { unreadableChange } from "./unreadable-change"
 
 import {
   deltaIdSchema,
@@ -15,7 +16,6 @@ import type { HeldProposal } from "@loom/runtime/write"
 
 import {
   answerOutcomes,
-  inQueueOrder,
   sweepIsPartial,
   unreadableIn,
   unreadablePage,
@@ -166,37 +166,13 @@ describe("waitingChange", () => {
   })
 })
 
-describe("inQueueOrder", () => {
-  /**
-   * A queue is ordered by how long something has waited. Grouping by page would
-   * make the reader do the arithmetic this screen exists to do for them.
-   */
-  it("puts the longest wait first, whatever page it is on", () => {
-    const older = waitingChange(
-      heldFixture({
-        treeId: otherTreeId,
-        proposalId: proposalIdSchema.parse("p_0"),
-        heldAt: "2026-08-18T09:00:00.000Z",
-      })
-    )
-    const newer = waitingChange(heldFixture())
-
-    expect(inQueueOrder([newer, older]).map((change) => change.proposalId)).toEqual(["p_0", "p_1"])
+/** A row this build could place and could not read, on the page under test. */
+const stuck = (proposalId = "p_stuck", heldAt = "2026-08-19T09:00:00.000Z") =>
+  unreadableChange("t_1", {
+    proposalId: proposalIdSchema.parse(proposalId),
+    heldAt,
+    detail: "a stored hold did not parse: disposition",
   })
-
-  it("does not mutate what it is given", () => {
-    const changes = [
-      waitingChange(heldFixture()),
-      waitingChange(
-        heldFixture({ proposalId: proposalIdSchema.parse("p_0"), heldAt: "2026-08-18T09:00:00.000Z" })
-      ),
-    ]
-
-    inQueueOrder(changes)
-
-    expect(changes.map((change) => change.proposalId)).toEqual(["p_1", "p_0"])
-  })
-})
 
 /** Every page reached, every page read. What a healthy deployment looks like. */
 const SWEPT: Sweep = { unreadable: [], complete: true }
@@ -209,11 +185,11 @@ const UNREADABLE_ONE: Sweep = { unreadable: [unreadable("t_1")], complete: true 
 
 describe("waitingSummary", () => {
   it("says nothing is waiting rather than saying zero", () => {
-    expect(waitingSummary([], SWEPT)).toBe("Nothing is waiting for you.")
+    expect(waitingSummary([], [], SWEPT)).toBe("Nothing is waiting for you.")
   })
 
   it("counts one change as one", () => {
-    expect(waitingSummary([waitingChange(heldFixture())], SWEPT)).toBe(
+    expect(waitingSummary([waitingChange(heldFixture())], [], SWEPT)).toBe(
       "1 change is waiting for your answer."
     )
   })
@@ -225,10 +201,10 @@ describe("waitingSummary", () => {
       heldFixture({ treeId: otherTreeId, proposalId: proposalIdSchema.parse("p_2") })
     )
 
-    expect(waitingSummary([here, there], SWEPT)).toBe(
+    expect(waitingSummary([here, there], [], SWEPT)).toBe(
       "2 changes are waiting for your answer, across 2 pages."
     )
-    expect(waitingSummary([here, waitingChange(heldFixture())], SWEPT)).toBe(
+    expect(waitingSummary([here, waitingChange(heldFixture())], [], SWEPT)).toBe(
       "2 changes are waiting for your answer."
     )
   })
@@ -239,11 +215,11 @@ describe("waitingSummary", () => {
    * where you find out whether anything needs you.
    */
   it("admits a page it could not check rather than reporting a total as complete", () => {
-    expect(waitingSummary([], UNREADABLE_ONE)).toBe(
+    expect(waitingSummary([], [], UNREADABLE_ONE)).toBe(
       "Nothing is waiting for you. One page couldn't be checked, and it is named below."
     )
     expect(
-      waitingSummary([waitingChange(heldFixture())], {
+      waitingSummary([waitingChange(heldFixture())], [], {
         unreadable: [unreadable("t_1"), unreadable("t_2")],
         complete: true,
       })
@@ -256,7 +232,7 @@ describe("waitingSummary", () => {
    * every `toContain` either side of it.
    */
   it("reads as one sentence, spaces and full stops included", () => {
-    expect(waitingSummary([waitingChange(heldFixture())], UNREADABLE_ONE)).toBe(
+    expect(waitingSummary([waitingChange(heldFixture())], [], UNREADABLE_ONE)).toBe(
       "1 change is waiting for your answer. One page couldn't be checked, and it is named below."
     )
   })
@@ -272,7 +248,7 @@ describe("waitingSummary", () => {
    * the two precisely because nothing failed.
    */
   it("admits pages it never reached, not only ones it could not read", () => {
-    expect(waitingSummary([], { unreadable: [], complete: false })).toBe(
+    expect(waitingSummary([], [], { unreadable: [], complete: false })).toBe(
       "Nothing is waiting for you. This deployment has more pages than this screen checks."
     )
   })
@@ -280,7 +256,7 @@ describe("waitingSummary", () => {
   /** Both caveats at once, still one sentence a person could read out loud. */
   it("says both when both are true, in the order they matter", () => {
     expect(
-      waitingSummary([waitingChange(heldFixture())], {
+      waitingSummary([waitingChange(heldFixture())], [], {
         unreadable: [unreadable("t_1")],
         complete: false,
       })
@@ -291,8 +267,58 @@ describe("waitingSummary", () => {
 
   /** Neither caveat leaks into a sweep that has nothing to admit. */
   it("says nothing about coverage when it covered everything", () => {
-    expect(waitingSummary([waitingChange(heldFixture())], SWEPT)).toBe(
+    expect(waitingSummary([waitingChange(heldFixture())], [], SWEPT)).toBe(
       "1 change is waiting for your answer."
+    )
+  })
+
+  /**
+   * The third way this sentence can lie, and the one 0175 created.
+   *
+   * A listing now answers `{ held, unreadable }`. This screen counted the first
+   * half, which is right, and dropped the second, which meant the sentence over
+   * a queue with a stuck row in it was a count with no hint that the list below
+   * it held one more thing than the number said.
+   */
+  it("counts what can be answered and says separately what cannot", () => {
+    expect(waitingSummary([waitingChange(heldFixture())], [stuck()], SWEPT)).toBe(
+      "1 change is waiting for your answer. 1 more was found and couldn't be read; it's in the list below."
+    )
+    expect(
+      waitingSummary([waitingChange(heldFixture())], [stuck(), stuck("p_9")], SWEPT)
+    ).toBe(
+      "1 change is waiting for your answer. 2 more were found and couldn't be read; they're in the list below."
+    )
+  })
+
+  /**
+   * The sharpest instance of the confident empty state on this surface.
+   *
+   * "Nothing is waiting for you." is the sentence that sits three lines above a
+   * green box reading *You're all caught up.* Printing it over a queue holding
+   * a change nobody can read is not a nuance — it is the screen asserting the
+   * opposite of what is on it, with the counter-evidence directly below.
+   */
+  it("does not say nothing is waiting when something unanswerable is", () => {
+    expect(waitingSummary([], [stuck()], SWEPT)).toBe(
+      "Nothing is waiting that you can answer. 1 change was found and couldn't be read; it's in the list below."
+    )
+  })
+
+  /**
+   * An unreadable *row* is not an unreadable *page* and the sentence must carry
+   * both, in that order: the row is on this screen and the page is not.
+   */
+  it("keeps a stuck row and an unchecked page as separate sentences", () => {
+    expect(waitingSummary([waitingChange(heldFixture())], [stuck()], UNREADABLE_ONE)).toBe(
+      "1 change is waiting for your answer. 1 more was found and couldn't be read; it's in the list below. One page couldn't be checked, and it is named below."
+    )
+  })
+
+  /** Nothing about a stuck row leaks into a queue that has none. */
+  it("says nothing about unreadable rows when there are none", () => {
+    expect(waitingSummary([waitingChange(heldFixture())], [], UNREADABLE_ONE)).toBe(
+      "1 change is waiting for your answer. One page couldn't be checked, and it is named below."
     )
   })
 })
