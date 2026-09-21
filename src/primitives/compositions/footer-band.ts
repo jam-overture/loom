@@ -95,7 +95,7 @@ export const footerBand: Composition = {
           buildElement(ids, {
             type: "loom.heading",
             props: { level: 2 },
-            children: [buildText(ids, "Northwind")],
+            children: [buildText(ids, "Overture")],
           }),
           buildElement(ids, {
             type: "loom.prose",
@@ -120,7 +120,7 @@ export const footerBand: Composition = {
           buildElement(ids, {
             type: "loom.prose",
             props: { size: "small", tone: "muted" },
-            children: [buildText(ids, "© Northwind. All rights reserved.")],
+            children: [buildText(ids, "© Overture. All rights reserved.")],
           }),
           buildElement(ids, {
             type: "loom.link-list",

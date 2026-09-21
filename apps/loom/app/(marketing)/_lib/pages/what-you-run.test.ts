@@ -1,7 +1,15 @@
-import { measurePrompt, sequentialIdFactory, type PromptMeasurement } from "@loom/runtime"
+import {
+  buildUserMessage,
+  frameCatalogue,
+  measurePrompt,
+  sequentialIdFactory,
+  type FrameOriginRegistry,
+  type PromptMeasurement,
+} from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "../copy"
+import { OWN_ORIGIN_DESCRIPTION, siteFrameOrigins } from "../frames"
 import { treeFor } from "../render"
 import {
   DEFAULT_THEME,
@@ -17,7 +25,7 @@ import {
 } from "../site"
 import { uses, wordsOf } from "../words"
 
-import { PLACES, partsOf, WHAT_LEAVES } from "./what-you-run"
+import { bandsAgree, PLACES, partsOf, sentCriteria, WHAT_LEAVES } from "./what-you-run"
 
 /**
  * The page that says what the thing on a reader's own machine would be.
@@ -176,19 +184,151 @@ describe("what leaves, measured", () => {
    *
    * Three of the eight parts the runtime reports are blocks that are absent
    * from the request unless a host registered data, a form destination or a
-   * framable origin. This site registered none of them, so they cost nothing
-   * and the band says nothing about them — and the guard above still fires the
-   * moment one of them starts costing something.
+   * framable origin. **This site has one of the three**, and had it before the
+   * request was ever told: the front door frames the demonstration, so the
+   * origins list has had one entry since 12 September. The other two are still
+   * genuinely absent, the band still says nothing about them, and the guard
+   * still fires the moment either starts costing something.
    */
   it("says nothing about a part this site does not send, and still catches one it does", () => {
     const measurement = WHAT_LEAVES.measure(context)
 
-    expect([measurement.sources, measurement.endpoints, measurement.frames]).toEqual([0, 0, 0])
+    expect([measurement.sources, measurement.endpoints]).toEqual([0, 0])
     expect(partsOf(measurement).map((part) => part.key)).not.toContain("sources")
+    expect(partsOf(measurement).map((part) => part.key)).not.toContain("endpoints")
 
     expect(() =>
       partsOf({ ...measurement, sources: 773 })
     ).toThrow(/unnamed: sources/)
+  })
+
+  /**
+   * **The registry this site had and never handed over.**
+   *
+   * `frames.ts` registers exactly one origin — this deployment's own, so the
+   * front door may put the running demonstration inside itself — and until this
+   * branch the request measured on this page was not told. A model asked to
+   * change the front door could therefore propose a frame of any host it liked
+   * and get a refusal where the document should be, which is the gap 0172
+   * closed the seam for and left each surface to wire.
+   *
+   * Asserted on the built page rather than on the measurement, because the
+   * point is that the reader is told: the row has to be in the table with its
+   * own number in it.
+   */
+  it("counts the origins this deployment will frame, and prints them as a row", () => {
+    const measurement = WHAT_LEAVES.measure(context)
+    const part = partsOf(measurement).find((one) => one.key === "frames")
+
+    expect(measurement.frames).toBeGreaterThan(0)
+    expect(part).toBeDefined()
+    expect(words()).toContain(part?.what)
+    expect(words()).toContain(new Intl.NumberFormat("en-US").format(measurement.frames))
+  })
+
+  /**
+   * And what those characters are, which a count alone cannot say.
+   *
+   * The measurement is a number; this goes to the bytes. The block a model
+   * receives has to name the origin this site actually registered — if it named
+   * something else, or named nothing and cost 412 characters of preamble, every
+   * assertion above would still pass.
+   */
+  it("tells the model the origin it really registered", () => {
+    const page = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const message = buildUserMessage(
+      {
+        intentId: sequentialIdFactory("framed").intentId(),
+        treeId: page.treeId,
+        baseRevision: page.revision,
+        origin: "user-instruction",
+        actor: "a visitor",
+        utterance: "put a video here",
+        observedAt: "2026-09-21T00:00:00.000Z",
+      },
+      page,
+      { frameCatalogue: frameCatalogue(siteFrameOrigins(ORIGIN) as FrameOriginRegistry) }
+    )
+
+    expect(message).toContain(ORIGIN)
+    expect(message).toContain(OWN_ORIGIN_DESCRIPTION)
+  })
+
+  /**
+   * **The mutation that survived the first six, and what it was hiding.**
+   *
+   * The test above builds its own catalogue out of `frames.ts` and asserts the
+   * runtime prints the origin in it. That is a test of `frames.ts` and of the
+   * runtime, and it passes whatever the page passed to `measurePrompt` — so
+   * pointing the page's own catalogue at a host this site does not serve left
+   * all thirty-seven green. It is the failure this file's own header warns
+   * about, written by the person who wrote the header.
+   *
+   * A count cannot name an origin, so this pins the count to one: the origins
+   * block is one line carrying the address, so measuring the same page at a
+   * longer address has to cost exactly the extra characters of it. A block
+   * built from anything but `context.origin` does not move when the context
+   * does, and a block built from a hard-coded address does not move at all.
+   */
+  it("measures the origin this deployment actually serves from", () => {
+    const longer = `${ORIGIN}-by-eighteen-more`
+    const here = WHAT_LEAVES.measure(context)
+    const there = WHAT_LEAVES.measure({ origin: longer, theme: DEFAULT_THEME })
+
+    expect(there.frames - here.frames).toBe(longer.length - ORIGIN.length)
+  })
+
+  /**
+   * The two bands, held to each other.
+   *
+   * The comparison above opens by telling a reader to read down the last column
+   * to see the whole of what ever leaves, and the band below measures exactly
+   * that column. Nothing checked it, and the column was two rows short of the
+   * measurement beside it. Both directions, because under-reporting is the one
+   * that costs a reader's trust and over-reporting is merely wrong.
+   */
+  it("holds the comparison's last column to what the measurement says leaves", () => {
+    const shipped = partsOf(WHAT_LEAVES.measure(context))
+    const owned = shipped.flatMap((part) => (part.owned === undefined ? [] : [part.owned]))
+
+    expect(owned).toHaveLength(shipped.length - 1)
+    expect([...owned].sort()).toEqual([...sentCriteria()].sort())
+
+    for (const heading of owned) {
+      expect(words()).toContain(heading)
+    }
+  })
+
+  it("refuses to build when something leaves that the table above has no row for", () => {
+    const shipped = partsOf(WHAT_LEAVES.measure(context))
+
+    expect(() => bandsAgree(shipped, sentCriteria().filter((row) => row !== "Whose pages you let inside yours"))).toThrow(
+      /leaves with no row: Whose pages you let inside yours/
+    )
+  })
+
+  it("refuses to build when the table claims something leaves and nothing does", () => {
+    const shipped = partsOf(WHAT_LEAVES.measure(context))
+
+    expect(() => bandsAgree(shipped, [...sentCriteria(), "Your database"])).toThrow(
+      /row with nothing leaving: Your database/
+    )
+  })
+
+  /**
+   * The one part with no row, and why that is not an oversight.
+   *
+   * The standing instructions are the same words on every request on every
+   * site. Nothing in them is about the reader, so there is nothing of theirs
+   * for a row about where their things end up to be about — and a row saying so
+   * would be the page inventing a possession to reassure somebody about.
+   */
+  it("gives every part but the standing instructions a row", () => {
+    const shipped = partsOf(WHAT_LEAVES.measure(context))
+
+    expect(shipped.filter((part) => part.owned === undefined).map((part) => part.key)).toEqual([
+      "system",
+    ])
   })
 
   it("refuses to build a band naming something that is not sent", () => {

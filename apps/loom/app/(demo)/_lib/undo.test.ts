@@ -6,6 +6,8 @@ import type { ChangeRecord, InterpretationView } from "./record"
 import {
   appliedWords,
   askedLine,
+  isUndo,
+  putsSomethingBack,
   undoOf,
   undoOffer,
   UNDO_AGAIN_LABEL,
@@ -322,5 +324,46 @@ describe("what an undo's own card says", () => {
     for (const sentence of [words.label, words.meaning ?? "", words.waiting, words.spent]) {
       expect(sentence.toLowerCase()).not.toMatch(/\b(off|removed?|added?|back on)\b/)
     }
+  })
+})
+
+/**
+ * The two ways a change can put something back, and the one predicate that
+ * reads both.
+ *
+ * `isUndo` stays what it was — a fact about which control raised the ask, read
+ * off the runtime's own stamp. What is new beside it is a change nobody asked an
+ * undo of: the second press of a toggle, whose settings went back where the last
+ * change moved them from. Three places on this surface ask the same question,
+ * and this is the file that keeps them answering it the same way.
+ */
+describe("whether a change put something back", () => {
+  it("is true of an undo, because the control that raised it said so", () => {
+    expect(putsSomethingBack(UNDO)).toBe(true)
+  })
+
+  it("is false of an ordinary ask that moved the page somewhere new", () => {
+    expect(putsSomethingBack(PRESET)).toBe(false)
+  })
+
+  /**
+   * The case the undo could not cover. Nothing about this record's provenance
+   * says restoration — it is an ordinary preset, interpreted by the same
+   * interpreter as the press before it — and the page still went back.
+   */
+  it("is true of an ordinary ask whose settings went back", () => {
+    expect(putsSomethingBack({ ...PRESET, wentBack: true })).toBe(true)
+    expect(isUndo({ ...PRESET, wentBack: true })).toBe(false)
+  })
+
+  /**
+   * A record written before this reading existed, or by a caller that could not
+   * name the tree, carries no answer at all — and no answer is read as *no*,
+   * which is the safe direction: a card that does not mention the page went back
+   * is better than one claiming it did.
+   */
+  it("reads a record with nothing frozen on it as not having gone back", () => {
+    expect("wentBack" in PRESET).toBe(false)
+    expect(putsSomethingBack(PRESET)).toBe(false)
   })
 })

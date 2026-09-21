@@ -259,3 +259,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0173](0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md) | A change may not add a node the deployment cannot draw | Accepted | §2 |
 | [0174](0174-a-band-wears-the-treatment-its-own-content-earns.md) | A band wears the treatment its own content earns, and adds to its ground rather than replacing it | Accepted | §4b |
 | [0175](0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md) | A listing skips the row it cannot read and fails the one it cannot place, and a store that did not answer is a different word from a row that did not parse | Accepted | §5, reaching §2 and the portal's front door |
+| 0176 | *No record on this branch* | — | — |
+| [0177](0177-the-specification-is-a-page-part-and-it-sits-between-the-figure-and-the-price.md) | The specification is a page part, and it sits between the figure that persuades and the price | Accepted | §4b |
+| [0178](0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md) | A ground is not always an ancestor, and `bg-overlay` is the fifth ground the text ramp is held to | Accepted | §4b — the palette contrast bar and the derivation behind it |

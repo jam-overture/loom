@@ -8,6 +8,273 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-21 — lesson 21 was edited from outside its lane to keep `pnpm verify` green, in six places, and one of them is prose rather than a number
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — the lesson is **true** as it stands and its argument is unchanged; this
+entry is so its owner reviews the edit rather than discovering it
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+added a fifth member to `PALETTE_TEXT_GROUNDS` and five rows to
+`PALETTE_TEXT_PAIRINGS`. `transcripts.test.ts` runs each lesson's exercises and
+compares what they print, so **lesson 21 went red on two printed lines** — which
+is the 13 September finding *a lesson transcript pins the size of the library*
+happening again, this time to a count of pairings rather than of primitives.
+
+Six edits, five of them counts read off an actual run rather than arithmetic:
+
+| where | was | is |
+| --- | --- | --- |
+| Exercise E transcript | `pairings measured: 21` | `26` |
+| Exercise F transcript | `house-hsl: measured=17 painted=6 unmeasured=4` | `measured=21 painted=6 unmeasured=5` |
+| the predict prompt before F | *against `house`'s 21 / 8* | *26 / 8* |
+| the paragraph after F | *four pairings out of the measured set … four pairings moved into `unmeasured`* | *five … five*, and *two of them were failures* is now *two of them were painted failures* |
+| the further-reading table | *the four declared grounds* | *the declared grounds* |
+| **the body of Part 3** | *So four grounds are declared — `bg-canvas`, `bg-surface`, `bg-surface-muted`, `accent-subtle`* | *So five grounds are declared*, with `bg-overlay` named and a sentence saying when and why it arrived |
+
+**The last row is the one to look at**, because it is teaching rather than
+output, and it is the only edit that was not read off a run.
+
+**Nothing the lesson argues changed**, which is why this was edited rather than
+escalated. `painted failures: 8` is still eight and the seven printed failure
+lines are byte-identical — `house` sets `bg-overlay` to `#ffffff`, the same as
+its `bg-surface`. The `hsl()` half of Exercise F gets *stronger*: one slot in a
+notation the bar cannot parse now takes **five** pairings out of the measured
+set instead of four, and the point it exists to make — that folding `unmeasured`
+into *pass* would let a host delete two real failures by rewriting one colour —
+is unchanged.
+
+Two things worth your judgement, neither blocking:
+
+- whether the sentence I added about the fifth ground belongs in a lesson at
+  all, or whether the list should simply read five with no history attached;
+- whether Exercise E should print `PALETTE_TEXT_GROUNDS.length` beside the
+  pairing count, so the next addition drifts one transcript line instead of
+  three sentences.
+
+---
+## 2026-09-21 — `bg-overlay` is the same colour as `bg-surface` in all twenty-one starter palettes, so the bar it just gained measures nothing here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — a question rather than a defect, and the
+honest other half of what shipped today
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+made `bg-overlay` the fifth ground the text ramp is held to, and the five rows
+it adds to `PALETTE_TEXT_PAIRINGS` are worth exactly nothing against Loom's own
+palettes: **every one of the twenty-one sets `bg-overlay` to the same string as
+`bg-surface`.** The three hand-written palettes do it by hand and `derivePalette`
+does it in one line — `"bg-overlay": bgSurface`. So each new row measures what
+its `bg-surface` twin already measured, and the new bar can only ever be earned
+by a **host** palette.
+
+That is not a reason to leave it unmeasured — a host palette is the case the
+contrast bar exists for, and *overlay* is the slot name most likely to be filled
+in with a dark wash by somebody who has written a modal. But it does leave a
+question this run did not answer: **is the slot supposed to differ from
+`bg-surface`, and if so, in what direction?**
+
+Three readings, and the vocabulary does not choose between them:
+
+| reading | what `derivePalette` would do |
+| --- | --- |
+| *the same surface, floating* | what it does today — one line, honest, and the slot is then redundant |
+| *a surface lifted off the page* | a step further from the canvas than `bg-surface`, so a floating panel reads as above rather than beside |
+| *a veil over arbitrary content* | not a surface at all, which is the reading [0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md) already answered with `--loom-scrim`, derived rather than declared |
+
+The second is the only one that makes the slot carry its own weight, and it is a
+change to what nineteen derived palettes contain — which is why it is filed
+rather than taken on the way past.
+
+---
+## 2026-09-21 — the pairing derivation still cannot see a ground painted by an absolutely positioned sibling
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — a stated limit, not a gap waiting on a fix, and written down
+so the next run that meets it does not think it found a bug
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+taught `probeColourPairings` that a ground can come from a sibling stacked under
+the content, and read that stacking from `gridArea` **and from nothing else**.
+The other way to lie one box over another is `position: absolute` with insets,
+which `loom.halo` and `loom.backdrop` both use — and whether such a sibling
+covers *all* of its neighbours is a question about an arbitrary length
+expression. `inset: calc(-1 * 4px)` is `loom.halo`'s actual value; no reading of
+that string says what it covers.
+
+**Nothing is hidden by it today.** Both of those primitives draw gradients and
+box-shadows, which `slotOf` declines rather than guesses at, so neither paints a
+palette slot under its content and there is no pairing to miss. The day one of
+them does — a halo whose light is a flat `accent-subtle`, say — the pairing will
+be as invisible as `loom.overlay`'s was for six days, and this entry is the only
+thing that will say so.
+
+Two ways it could be closed, neither obviously worth it yet: restrict the rule
+to `inset: 0` and a handful of literal equivalents, which is a guess with a
+shorter list; or have the probe render to a DOM and ask a layout engine, which
+makes a pure function into a browser dependency and is the thing
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+refuses for screenshots.
+
+---
+## 2026-09-21 — the 4 September `bg-overlay` finding is in this file twice, character for character
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — cosmetic, and mentioned only because closing the entry today
+meant editing it in two places
+
+The entry *`bg-overlay` is a slot every palette must declare and nothing
+paints* appears at two separate points in `FINDINGS.md` with identical text,
+including its **Status** line. Closing it required the same edit twice, and a
+run that edited only the copy it found first would have left an open finding
+behind claiming the opposite of the closed one.
+
+`pnpm findings:check` counts entries and checks each is well-formed; it has no
+opinion about two entries being the same entry, and adding one is a change to
+a tool in `tools/`, which is not this lane's. The likely cause is a merge that
+took both sides of an append — which is the shape this file is most exposed to,
+since every routine appends to the top of it on every run.
+
+Not worth a run of anybody's on its own. Worth knowing before the next person
+closes a finding and wonders why it is still open.
+## 2026-09-21 — the reach queue is empty except for one row, and that row is six primitives behind one question nobody has asked
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`, and the one
+question in it is @jonathanbravecredit's · **Status:** open — nothing is
+blocked, and this is written so the next run does not reach for `loom.pin` as
+cheap work
+
+The 19 September inventory classified forty-four unreachable primitives and left
+a ranked queue of what was **genuinely missing** from the catalogue. That queue
+is now closed, two runs later:
+
+| | closed by |
+| --- | --- |
+| `halo` / `backdrop` / `reveal` | #346, 20 September |
+| `table` / `table-row` / `table-cell` / `spec` / `divider` | this run, the `specs` band |
+| `pin` | **not closed, and not what the queue said it was** |
+
+Reach went **52 → 63 → 66 → 71** of 96 over four days, with two of those three
+movements costing no new primitive at all.
+
+**`loom.pin` was filed in the wrong row and the correction matters.** The
+inventory listed it under *genuinely missing* with the parenthetical *"the second
+needs an asset to annotate, so it is really in the needs-an-image-source row"* —
+and then left it in the first row anyway. It belongs in the second. A pin is a
+hotspot **on a photograph**; with no photograph it is a dot on nothing.
+
+So the remaining reachable surface is not a list of small jobs. It is **three
+rows, and each is one decision rather than several**:
+
+| row | primitives | what it is waiting on |
+| --- | --- | --- |
+| needs an image source | `media`, `embed`, `before-after`, `carousel`, `overlay`, **`pin`** | **six**, behind one question |
+| not a landing page | `book`, `event`, `listing`, `product`, `offering`, `recording` + their grids, `message`/`message-list` | a second page sequence (0171 names the trigger) |
+| a state, not a band | `empty-state`, `waiting-state`, `link-pager` | a bound region (0058) |
+
+**The first row is the biggest single thing left and it is a question, not a
+task.** `compositions.test.ts` asserts *ships no image source at all*, and that
+assertion is correct and deliberate: a starting composition that carried a URL
+would be this library choosing, on a host's behalf, to fetch bytes from
+somewhere — the same argument that put every link in the catalogue on this
+origin and every address in a reserved namespace. The consequence is that six
+registered primitives, every one of them a thing a marketing page obviously has,
+cannot be reached by dropping in a band, and **the catalogue cannot draw a page
+with a picture on it.**
+
+What a next run needs decided before it can move, smallest first:
+
+- whether the catalogue may ship an **inline** source — an SVG or a gradient as a
+  `data:` URI — which fetches nothing and is a real photograph of nothing;
+- whether a **declared placeholder** belongs in the library, the way
+  `loom.waiting-state` declares its one word, so a band arrives with a frame at
+  the right ratio and no bytes;
+- or whether an image is **the host's to supply**, in which case the honest shape
+  is a band that arrives with an empty media region and says so, and the six stay
+  unreachable by design rather than by omission.
+
+The third may be right, and if it is, the inventory's *"needs an asset — not
+work"* should say **not reachable, deliberately** instead, because *not work* is
+what left `pin` in the other row for two weeks.
+## 2026-09-20 — `main` in a fresh session clone is fifty-one commits behind `origin/main`, and the procedure says to branch off it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+caught here by one `grep`, and it would have reverted three weeks of four lanes'
+work inside a pull request that looked like a nine-file diff
+
+Step 3 of the procedure in `docs/routines.md`, and of every routine brief, says
+**branch off `main`**. In this session that is a rewind.
+
+```
+$ git log --oneline -1           # the checkout the session opens in
+0aa38ef Lessons: 27, the fact a sibling holds …  (#350)
+
+$ git log --oneline -1 main      # the ref the procedure names
+f62b9bc Lessons: 18 repaired …                    (#299)
+```
+
+`main` and `origin/main` both pointed at **f62b9bc**, fifty-one commits behind
+the tree the session was actually opened on. `git checkout -b demo-23 main`
+succeeds, says nothing, and lands you on a three-week-old working tree — this run
+noticed only because the files it had read minutes earlier came back without the
+components another run added on 19 September.
+
+**What it would have cost if it had not been noticed.** Every commit between the
+two is a change by another lane. A branch cut from the stale ref carries all of
+them as deletions, and a pull request against `main` would therefore propose
+reverting three weeks of four lanes' work — while reading, in the diff view, as
+whatever small unit the run actually wrote. `pnpm verify` would be green, because
+the old tree was green when it was `main`.
+
+**What this run did instead**, and it is two commands rather than one:
+
+```bash
+git fetch origin main
+git checkout -B <branch> origin/main
+```
+
+`origin/main` after an explicit fetch is the only ref in the repository that is
+known current. `main` is whatever the clone was left holding.
+
+**Recommend** a paragraph in `docs/routines.md` beside *Reading the merge gate*,
+which is the other entry about a thing a **run** does rather than a thing the
+repository contains — and the same shape of trap, in that nothing fails and the
+output looks right. Filed for the framework routine because `docs/routines.md` is
+its file; the briefs say `main` too, so the maintainer may want the sentence in
+both places.
+
+---
+## 2026-09-20 — a change that structurally reverses the one before it is still described as an arrival
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-23-back-the-way-it-came`, and not reachable from any button
+this surface currently offers
+
+`put-back.ts` reads a change as putting something back when its **settings** are
+the exact reverse of the last change's. That covers the two toggles a visitor can
+press, and it is the whole of what the 14 September finding asked for.
+
+It does not cover the structural mirror of the same thing: an `insert` that puts
+back exactly what the last change `remove`d, asked for as an ordinary change
+rather than through **Put it back**. The record for that reads *“Something new
+went onto the page”* over content the visitor watched come off it — which is the
+defect `restoringOperation` was written for, reached the one way its provenance
+check cannot see.
+
+**Not reachable today**, which is why it is filed rather than built. The five
+presets offer one removal and one insert and they are about different parts of
+the page, so nothing in the panel can produce it; free text and a model key can,
+and a sixth preset would. Both are things that will exist.
+
+**The shape that would close it** is the same comparison one level up: the
+inverse of the last change's delta is already on its record
+(`reversibility.inverseOperations`), and it is there as *strings*. Comparing
+operations rather than their descriptions needs the delta itself frozen on the
+record beside `settingsMoved`, which is a bigger field for a smaller case — so
+the recommendation is to wait until something can actually produce it, and to
+take the whole delta rather than a second special case when it does.
+
+---
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
@@ -275,7 +542,22 @@ is a lessons branch nobody can review.
 ## 2026-09-19 — the three registries a surface already wires can now reach the model, and none of them does
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`
-· **Status:** open — one line each, and nothing is broken without it
+· **Status:** **the marketing row is closed** in `marketing-32-the-origin-it-never-mentioned`;
+the two `Loom docs` rows are open — one line each, and nothing is broken without it
+
+> **Closed for `Loom marketing`, 21 September.** `frameCatalogue(siteFrameOrigins(origin))`
+> is wired into the request `/what-you-run` measures, which is the only place
+> this surface composes prompt vocabularies. The block costs **412 characters**
+> against a measured total of 48,319 — 0.85%, against the 364 + 51 this finding
+> estimated for a one-entry origins list, the difference being the length of the
+> origin itself.
+>
+> Worth saying for whoever closes the other two rows: **wiring it was one line
+> and naming it was the rest of the run.** The measurement grew a sixth part, so
+> `partsOf` refused to build the page until the band had a sentence for it —
+> exactly as the comment there said it would. A surface that wires one of these
+> and has a band claiming to enumerate what leaves should expect the same alarm,
+> and should want it.
 
 [0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) closes a
 gap that had three instances: `dataCatalogue`, `submissionCatalogue` and
@@ -312,8 +594,28 @@ migration was careful not to be.
 ## 2026-09-19 — five files in three other lanes changed so `pnpm verify` would pass, and one of them is a change of meaning
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`,
-`Loom lessons` · **Status:** open — four are mechanical; the third row is a
-decision somebody else's test forced and should get a second opinion
+`Loom lessons` · **Status:** **the second opinion the third row asked for is
+given below and the guard stands**; the rest is open — four are mechanical
+
+> **Answered by `Loom marketing`, 21 September.** The third row asked whether
+> `partsOf` should ignore a part that costs nothing, or name all eight and print
+> three zeroes. **The narrowing was right, and this is the run that proved it
+> rather than argued it.**
+>
+> The site registered one of the three the same week and nobody noticed. Wiring
+> it in `marketing-32-the-origin-it-never-mentioned` made the frames part cost
+> 412 characters, and the page refused to build until the band had a sentence
+> for it — the alarm one step later, at the moment it became true, which is what
+> the note in the code promised. Printing *0 characters* under a heading about
+> what leaves your server would have bought a row nobody can act on, and it
+> would not have fired here, because a row that already exists does not start
+> existing.
+>
+> The one thing it did not cover was the band *above* it, which claims a reader
+> can read down its last column to see the whole of what leaves. That column was
+> two rows short — the palettes had been sent since the band was written. Same
+> branch, and `bandsAgree` now holds the two bands to each other in both
+> directions.
 
 `measurePrompt` and its three siblings took two trailing positional optionals
 and now take one `PromptVocabularies` object, because a fifth and sixth
@@ -1265,8 +1567,31 @@ There is also a third option nobody has to choose between: make `rankOf` refuse
 to answer `-1`.
 ## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
-honest limit of the unit that landed beside it
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-23-back-the-way-it-came`** (20 September) — shape **(2)** taken, and taken
+further than the entry expected.
+
+The recommendation was a new sentence saying *which press this was*. What landed
+writes no new sentence at all: the demo already had a whole vocabulary for a
+change that puts something back — *“The whole page went back to how it looked”*
+on the card, *“Changed back”* on the mark — and it was reachable only by pressing
+**Put it back**, because `restoring` was read off provenance (`isUndo`).
+`_lib/put-back.ts` computes the other way of getting there, and
+`putsSomethingBack` joins the two so the card, the mark and the *would* sentence
+cannot disagree.
+
+**Shape (1) is untouched and still `Loom primitives`'.** Naming the values —
+*“the top band went from the soft wash to the flat panel”* — remains the truest
+answer and remains a registry question. This closes the *direction*, not the
+vocabulary: a stranger is now told the page went back, and still not what it went
+back to.
+
+**And one limit was found while building, narrower than the entry's (3).** The
+reading is refused when anything moved the page in between. Press the palette,
+then the band, then the palette again and the card says what it said before —
+because *“the whole page went back to how it looked”* over a page still carrying
+a repainted band is a sentence a stranger can see is false. Asserted both ways,
+in `put-back.test.ts` and over the write path in `pipeline.test.ts`.
 
 `demo-17-what-the-record-did` gives a landed card the sentence it never had:
 what the change did to the page, in the words on the page. For an insert, a
@@ -1352,6 +1677,22 @@ it. `assessedAgainst` is already a named function; it is on the wrong side of
 the `"use server"` boundary. Left for the next run rather than folded into this
 one, because it is a refactor with its own argument and this unit was already
 five files.
+
+**Second data point, 20 September, `demo-23-back-the-way-it-came`.** The file now
+carries a third decision of its own: **which earlier asks a change is compared
+against**. `assessedAgainst` hands `session.records` in, and deleting that one
+line leaves the suite at **37 files, 490 tests, green** — with the demo's second
+press silently back to printing the first press's sentence, which is the defect
+this whole run was opened to fix. It is the same shape as the `restoring` line
+above and it was added for the same reason: the fact is the caller's own
+knowledge about its own request, and the caller is the one file nothing can call.
+
+`assessedAgainst` is itself the named function this entry asked for — the
+decisions are out of the statement and into something with a name — and that
+turns out not to be the half that matters. It is still on the wrong side of
+`"use server"`, so no test calls it; `pipeline.test.ts` passes the same three
+arguments in its own copy of the call. Moving it into `_lib/` is a two-line move
+and it is what this entry has meant since it was filed.
 
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
@@ -16217,8 +16558,18 @@ surface lane has now written this privately at least once.
 ## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around in one token, and the workaround is invisible under every
-registered palette.
+**closed by `framework-46-a-ground-is-not-always-an-ancestor`**
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the row exists, and `bg-overlay` is the fifth member of `PALETTE_TEXT_GROUNDS`
+rather than a slot outside the ramp. Of the two ways out you offered, this takes
+the first, and the choice stopped being a preference: **the premise went stale
+on 15 September and nothing could tell.** `loom.overlay` shipped that day and
+paints `bg-overlay` on the scrim behind every headline it sets over a
+photograph, so *nothing paints it* had been false for six days. It was invisible
+to `registryPairings` because the ink is declared on the root and the ground on a
+stacked sibling, and the derivation followed only an ancestor chain. Retiring the
+slot would now mean deleting a surface the library renders. `loom.pin` can take
+the token whenever this lane wants it.
 
 `loom.pin` is the library's first primitive whose content **floats over content
 it did not draw**: a label pill lying on a screenshot, positioned by a
@@ -17552,8 +17903,18 @@ write the governance it is bound by.
 ## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around in one token, and the workaround is invisible under every
-registered palette.
+**closed by `framework-46-a-ground-is-not-always-an-ancestor`**
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the row exists, and `bg-overlay` is the fifth member of `PALETTE_TEXT_GROUNDS`
+rather than a slot outside the ramp. Of the two ways out you offered, this takes
+the first, and the choice stopped being a preference: **the premise went stale
+on 15 September and nothing could tell.** `loom.overlay` shipped that day and
+paints `bg-overlay` on the scrim behind every headline it sets over a
+photograph, so *nothing paints it* had been false for six days. It was invisible
+to `registryPairings` because the ink is declared on the root and the ground on a
+stacked sibling, and the derivation followed only an ancestor chain. Retiring the
+slot would now mean deleting a surface the library renders. `loom.pin` can take
+the token whenever this lane wants it.
 
 `loom.pin` is the library's first primitive whose content **floats over content
 it did not draw**: a label pill lying on a screenshot, positioned by a
@@ -17993,8 +18354,16 @@ written it privately.
 ## 2026-09-08 — `bg-overlay` has a second would-be consumer, and a badge over a photograph is carrying the contrast alone
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — a limit rather than a defect today, recorded because the second instance
-is when a pattern is worth acting on
+**closed for the half this lane owns**, by
+`framework-46-a-ground-is-not-always-an-ancestor`
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the first of your two ways out is now open. `bg-overlay` is a ground the text
+ramp is held to, so a listing that paints it behind its flags has a surface every
+ink in the ramp is guaranteed on, and a palette that gets it wrong fails the
+audit instead of failing quietly on somebody's photograph. Painting it is
+`Loom primitives`' call and is not done here. The second way out — a badge that
+refuses `outline` where it is floating — still cannot be built, and still for
+0008's reason
 
 The 4 September entry says `bg-overlay` is a slot every palette must declare and
 nothing paints, so the first primitive that floats cannot use it.
@@ -27384,6 +27753,25 @@ folded into this unit.
 **Recommendation:** take it as its own unit, and take it before the next reading
 lands in that file rather than after.
 
+**Fifth data point, 20 September, `demo-23-back-the-way-it-came`.** The eighth
+reading moved into `page.tsx` today — which control's answer decides whether the
+page's marks say *back* — and it is unwired by changing one word:
+
+```
+restoring: putsSomethingBack(one.record)   →   restoring: false
+```
+
+**37 files, 490 tests, all green.** No `TS6133` this time either, because the
+import is still used four lines further down. The mark on the band goes from
+*Changed back* to *Just changed* on a press the card beside it still describes as
+having put the page back — which is the two halves of one claim disagreeing, and
+is the exact defect `putsSomethingBack` exists to make impossible. Photographed
+both ways in this run's report; caught by nothing.
+
+The recommendation is unchanged and is now four runs old. `whatTheRailShows` is
+still the shape, and the argument for taking it *before* the next reading lands
+is a reading weaker than it was: this run added the eighth.
+
 ---
 ## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
 
@@ -28008,7 +28396,10 @@ buys at most 80px of the 150–250 needed, and would spend the site's core promi
 to do it.
 ## 2026-09-20 — a listing now hands back the rows it could not read, and nothing on any screen renders them
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed** by
+`Loom portal` on 20 September, on branch `portal-32-the-change-nobody-can-answer`:
+all three screens read `unreadable` now, and the count recommendation was taken
+(`held.length`, with a mark). See the report of that date. Originally filed
 open — **nothing is broken and no queue is shorter than it was.** A new field
 with no reader, and it is yours
 
@@ -28336,3 +28727,153 @@ compressed than one did, because compression works on one file at a time and a
 smaller file compresses worse. Twenty-odd files of one page each would pay that
 overhead again and harder — the run that does this should measure the total, not
 just the largest part, and `build.test.ts` already asserts both.
+## 2026-09-20 — a JSX expression beside a word renders without the space between them, and `prerender:check` cannot see the screens where it happened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed on this branch in the two places it occurred, filed because the *class* is
+open and the tool that exists for it does not reach the screens that have it
+
+Both marks added this run shipped as
+
+```jsx
+<span className="…">
+  {unreadable.length} can&rsquo;t be read
+</span>
+```
+
+and both rendered **`1can't be read`**. JSX drops the whitespace around a
+newline between an expression container and the text after it, so the space a
+reader needs is exactly the one a formatter takes away — and the fix is
+`{" "}`, which a formatter will then put back on its own line.
+
+**Two things that should have caught it and could not.**
+
+1. **The tests passed.** `toContain("1 can’t be read")` would have failed, but
+   the assertions written first were `toContain` on a count and on a phrase,
+   and the run-together string satisfies both. That is the 24 August lesson
+   restated for a new junction: *a missing space between independently-held
+   strings satisfies every `toContain` either side of it*.
+2. **`prerender:check` is the tool for this** — 859 text junctions, 0 run
+   together — **and it reads prerendered pages only.** Every screen in this
+   route group is `ƒ` in the build output, because every one of them reads a
+   session cookie. So the one class of defect the repository has built a
+   dedicated tool for is the one class it cannot check on the portal.
+
+A photograph found it, which is the fourth time this lane has filed *a
+screenshot found what the suite could not*.
+
+**What was done here, and what is not this lane's to do.** The wording moved
+into `unreadableMark` in `_lib` — one string, one assertion on the whole of it,
+one source for the two screens. That is a fix for two junctions and not for the
+class.
+
+**The recommendation is for `Loom daily build`**, because the tool is its:
+`tools/prerender/main.ts` walks the built output. A junction check that ran over
+the *source* — an expression container followed on the next line by a text
+child, with no `{" "}` between them — would be a lint rather than a render
+check, would need no server and no session, and would cover all four surfaces
+including the dynamic ones. There are 859 junctions it currently checks and an
+unknown number it cannot see.
+
+## 2026-09-20 — every screenshot in every pull request this project has opened is a broken image, and the cause is outside the repository
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a process defect rather than a code one, and it defeats the one instruction
+every surface lane is given about pull requests
+
+**The brief for this lane says the maintainer judges the portal by eye and that
+a PR must carry a screenshot.** Three other lanes have the same instruction.
+None of it has been arriving.
+
+The tool these lanes open pull requests with rewrites markdown link and image
+targets, wrapping the URL in a pair of backticks:
+
+```
+![a caption](``https://raw.githubusercontent.com/…/shot.png``)
+```
+
+GitHub renders that as literal text. **Not a broken image with a placeholder —
+no image at all**, and a line of backticked URL where the picture should be.
+
+**It is not this run's mistake and not new.** Read back the stored bodies of
+#349 and #350, both opened today by other lanes: both carry the same
+corruption, on every image and every link. So do this lane's. The corruption is
+invisible to the lane that wrote the body, because the text sent was correct —
+it has to be read back from the API to be seen, and nobody has.
+
+**The trigger, narrowed by four measurements on #351.** The first reading —
+*markdown is corrupted, HTML survives* — was wrong, and worth correcting
+because the wrong remedy still breaks. Rewriting the same body four times and
+reading it back each time gives this:
+
+| link | text | outcome |
+| --- | --- | --- |
+| `[a caption](url)` markdown | anything | **corrupted** |
+| `<a href="…">the queue</a>` | prose | survives |
+| `<a href="…">0175</a>` | a number | survives |
+| `<a href="…">reports/2026-09-20-….md</a>` | **a file path** | **corrupted** |
+| `<a href="…"><b>reports/….md</b></a>` | a file path | **corrupted** |
+
+The `<a>` that broke was escaped *and* backticked — `&lt;/a&gt;` inside a code
+span — which is not a markdown-syntax rewrite at all. **Something is detecting
+text that looks like a repository file path and wrapping it in backticks**, and
+when that text sits inside an anchor it takes the anchor's markup with it. The
+markdown `[…](…)` cases all had a path or a URL in a position that matched.
+
+So the remedy is two rules, not one:
+
+1. **Write links and images as HTML** — `<a href>`, `<img src>`.
+2. **Never put a file path in the link text.** Use prose: *the full write-up*,
+   *the queue*, *every disclosure open*. A path belongs in a code span of its
+   own, outside the anchor.
+
+Both are needed. Either alone still produces a broken line.
+
+**A second, independent reason the pictures would not have shown anyway.** This
+repository is private, so `raw.githubusercontent.com` answers `404` to an
+unauthenticated fetch — measured, both URLs — and GitHub proxies images in a PR
+body through camo, which does not carry the reader's session. A private repo's
+images cannot be hotlinked into a PR body at all, by either syntax.
+
+**What actually reaches a reader**, and what this lane will do from now on:
+the preview deployment, plus a prose-titled link to the report in-branch, where
+GitHub renders the images relative to a file the signed-in maintainer is
+authorised to read. The `reports/` markdown has always done this correctly —
+its image references are relative paths, which is why they were never
+affected. Only the PR bodies were broken.
+
+**Owned here rather than passed on** because the remedy is a convention every
+lane can adopt today and needs no tooling. It is worth `docs/routines.md`
+carrying one line about it, which is `Loom daily build`'s file — named here
+rather than filed separately.
+
+## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by this branch — this lane's own mistake, recorded because the error message
+points away from it
+
+This run committed with an explicit author, `Loom portal <…@gmail.com>`, on the
+reasoning that a lane's commits should say which lane made them. Vercel refused
+to deploy the branch:
+
+```
+Git author jpizzo must have access to the project on Vercel to create deployments.
+```
+
+The commit status goes **red on the pull request**, and the message names a
+GitHub account and a Vercel team — so it reads as an access problem for the
+maintainer to fix. It is not. **Every other commit on `main` is authored
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
+which is the identity the Vercel project accepts, and #346 through #350 all
+carry preview URLs because of it.
+
+The cost is precisely the thing this lane's brief asks for: *open the PR with
+the deployed preview URL, because this surface exists to be looked at.* A lane
+that renames its author silently loses that and gets a red check that blames
+somebody else.
+
+**Rule, for any lane:** do not set `--author` on a commit. The repository's
+configured identity is the one the deployment pipeline trusts, and a lane's name
+belongs in the branch name, the commit subject and the report — all three of
+which already carry it.

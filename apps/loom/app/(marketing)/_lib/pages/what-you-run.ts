@@ -3,6 +3,7 @@ import {
   buildSlot,
   buildText,
   createTree,
+  frameCatalogue,
   measurePrompt,
   sequentialIdFactory,
   systemClock,
@@ -18,6 +19,7 @@ import { catalogueOf } from "@loom/runtime/sdk"
 import { askById } from "../adapt/asks"
 import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
+import { siteFrameOrigins } from "../frames"
 import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
 import { siteRegistry, siteThemes } from "../registry"
 import {
@@ -91,10 +93,26 @@ const MEASURED_ASK = "problem"
  * this is the same fact — *what leaves* — held by the one function that knows,
  * with the page reading it rather than restating it.
  */
-type LeavingPart = {
+export type LeavingPart = {
   readonly key: Exclude<keyof PromptMeasurement, "total">
   readonly what: string
   readonly detail: string
+  /**
+   * The row of the band above that this part is the last column of.
+   *
+   * The two bands are a pair — the comparison says where each thing a reader
+   * owns ends up, and this one measures the last column of it — and until this
+   * field existed that was a claim in a comment. The comparison's own opening
+   * line tells a reader to read *down the last column to see the whole of what
+   * ever leaves*, and the column was two rows short of the measurement beside
+   * it: no row for the palettes, and none for the origins. Both were sent.
+   *
+   * Absent for exactly one part, and the absence is the point. The standing
+   * instructions are the same words on every request on every site — nothing in
+   * them is about the reader, so there is nothing of theirs for a row to say
+   * where it ends up. `agreement` below holds every other part to a row.
+   */
+  readonly owned?: string
 }
 
 const LEAVING: readonly LeavingPart[] = [
@@ -109,23 +127,34 @@ const LEAVING: readonly LeavingPart[] = [
     what: "What you said about your pieces",
     detail:
       "The name of each one, the line you wrote about what it is for, and which of its settings may be changed. Not one line of what any of them is made of.",
+    owned: "What you said each piece is for",
   },
   {
     key: "themes",
     what: "The palettes your site offers",
     detail:
       "The names of the looks a page may be asked to wear, so that asking for the quieter one reaches something that exists.",
+    owned: "The looks you built for it to wear",
+  },
+  {
+    key: "frames",
+    what: "Whose pages you let inside yours",
+    detail:
+      "If one of your pages can show another page inside it — a video, a map, a booking form — this is the list of whose those are allowed to be. The names of the sites, and nothing that is on them.",
+    owned: "Whose pages you let inside yours",
   },
   {
     key: "tree",
     what: "The page as it currently stands",
     detail:
       "How the page is put together right now — and this is the honest part: the words a visitor can already read on it go too, because a request about the third paragraph cannot be answered by something that cannot see it.",
+    owned: "The pages themselves, and the words on them",
   },
   {
     key: "request",
     what: "What was asked for",
     detail: "The sentence somebody typed, exactly as they typed it.",
+    owned: "What a visitor typed into the box",
   },
 ]
 
@@ -186,9 +215,35 @@ const measured = (context: PageContext): PromptMeasurement => {
     observedAt: systemClock.now(),
   }
 
+  /**
+   * The third vocabulary this site has and had never handed over.
+   *
+   * `siteFrameOrigins` is the list of whose documents this deployment will put
+   * inside one of its pages, and it has had exactly one entry — its own origin,
+   * so the front door can frame the demonstration — since 12 September. A model
+   * asked to change this page was never told it existed, which is the gap
+   * [0172](../../../../../../decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)
+   * closed the seam for and left each surface to wire.
+   *
+   * It is the one vocabulary of the five that **narrows a value the model still
+   * chooses** rather than supplying the only values it may write: which document
+   * belongs on a page is a content decision and its URL stays in the tree, so
+   * this list is the difference between a model proposing a frame that renders
+   * and one proposing a frame that renders a refusal.
+   *
+   * **Absent rather than empty when there is no registry.** A mistyped origin
+   * yields no allowlist at all (`frames.ts` says why the page still renders),
+   * and a `frameCatalogue` of zero entries would be a vocabulary block the
+   * prompt drops anyway — so the spread says the same thing one step earlier,
+   * and the band below simply has one row fewer, which is exactly what it does
+   * for the two registries this site genuinely does not have.
+   */
+  const origins = siteFrameOrigins(context.origin)
+
   return measurePrompt(intent, page, {
     catalogue: catalogueOf(siteRegistry),
     themeCatalogue: siteThemes.catalogue(),
+    ...(origins === undefined ? {} : { frameCatalogue: frameCatalogue(origins) }),
   })
 }
 
@@ -235,10 +290,51 @@ export const partsOf = (
     )
   }
 
-  return LEAVING.filter((part) => measurement[part.key] > 0).map((part) => ({
+  const shipped = LEAVING.filter((part) => measurement[part.key] > 0)
+
+  bandsAgree(shipped)
+
+  return shipped.map((part) => ({
     ...part,
     characters: measurement[part.key],
   }))
+}
+
+/**
+ * The two bands, held to each other rather than to a comment saying they agree.
+ *
+ * `whereItLives` opens by telling a reader to read **down the last column to
+ * see the whole of what ever leaves**, and the band below it measures that
+ * column part by part. That is a promise about two lists, and nothing was
+ * checking it: the column was two rows short — no row for the palettes, none
+ * for the origins — while the measurement had been counting the palettes since
+ * the band was written.
+ *
+ * It is the same guard as the one above, one band further out, and it fires in
+ * the same two directions. A part that leaves and has no row is the comparison
+ * under-reporting, which is the failure that matters — a reader who checks the
+ * column and finds it short is entitled to distrust the rest of the page. A row
+ * claiming something leaves that no part accounts for is the comparison
+ * over-reporting, which is merely wrong.
+ *
+ * The standing instructions are the one part with no row and it is deliberate:
+ * they are the same words on every request on every site, so there is nothing
+ * of the reader's for a row about where their things end up to be about.
+ */
+export const bandsAgree = (
+  shipped: readonly LeavingPart[],
+  sent: readonly string[] = sentCriteria()
+): void => {
+  const owned = shipped.flatMap((part) => (part.owned === undefined ? [] : [part.owned]))
+
+  const unlisted = owned.filter((heading) => !sent.includes(heading))
+  const unaccounted = sent.filter((heading) => !owned.includes(heading))
+
+  if (unlisted.length > 0 || unaccounted.length > 0) {
+    throw new Error(
+      `loom: ${WHAT_YOU_RUN.path} measures what leaves and the table above it disagrees — leaves with no row: ${unlisted.join("; ") || "none"}; row with nothing leaving: ${unaccounted.join("; ") || "none"}`
+    )
+  }
 }
 
 const hero = (ids: IdFactory, context: PageContext): LoomNode =>
@@ -367,16 +463,59 @@ const subject = (ids: IdFactory, name: string): LoomNode =>
 const mark = (ids: IdFactory, verdict: "yes" | "no"): LoomNode =>
   buildElement(ids, { type: "loom.comparison", props: { mark: verdict } })
 
-const criterion = (
-  ids: IdFactory,
-  label: string,
-  marks: readonly ("yes" | "no")[],
-  note?: string
-): LoomNode =>
+export type Verdict = "yes" | "no"
+
+/** One row of the comparison: a thing a reader owns, and where it ends up. */
+type Criterion = {
+  readonly heading: string
+  /** One mark per column, in `PLACES` order. The last is *sent to the model*. */
+  readonly marks: readonly [Verdict, Verdict, Verdict]
+  readonly note?: string
+}
+
+/**
+ * The rows, declared rather than written into the band, so the band below can
+ * be held to them.
+ *
+ * **The fourth-from-last row is why the band is worth the space.** Every other
+ * row is reassuring and this one is not entirely: the page itself goes, and the
+ * words on the page are part of the page. Leaving that out would make the rest
+ * worth nothing, since a reader who discovered it later would be right to
+ * assume the others were shaded too.
+ *
+ * The three marked *sent* at the top are the three things a reader writes in
+ * their own code that do leave, and they sit together above the one that reads
+ * like them and does not: what you will and will not allow is weighed after the
+ * answer comes back, and is never part of the question.
+ */
+export const CRITERIA: readonly Criterion[] = [
+  { heading: "The code your pieces are made of", marks: ["yes", "no", "no"] },
+  { heading: "What you said each piece is for", marks: ["yes", "no", "yes"] },
+  { heading: "The looks you built for it to wear", marks: ["yes", "no", "yes"] },
+  {
+    heading: "Whose pages you let inside yours",
+    marks: ["yes", "no", "yes"],
+    note: "The names of the sites only. Which page you show inside yours stays in the page.",
+  },
+  {
+    heading: "What you will and will not allow",
+    marks: ["yes", "no", "no"],
+    note: "Weighed after the answer comes back, never sent with the question.",
+  },
+  { heading: "The pages themselves, and the words on them", marks: ["no", "yes", "yes"] },
+  { heading: "What changed, who asked, and which rule allowed it", marks: ["no", "yes", "no"] },
+  { heading: "What a visitor typed into the box", marks: ["no", "yes", "yes"] },
+]
+
+/** The rows whose last column says the thing leaves. */
+export const sentCriteria = (criteria: readonly Criterion[] = CRITERIA): readonly string[] =>
+  criteria.filter((row) => row.marks[row.marks.length - 1] === "yes").map((row) => row.heading)
+
+const criterion = (ids: IdFactory, row: Criterion): LoomNode =>
   buildElement(ids, {
     type: "loom.comparison-row",
-    props: { heading: label, ...(note === undefined ? {} : { note }) },
-    children: marks.map((verdict) => mark(ids, verdict)),
+    props: { heading: row.heading, ...(row.note === undefined ? {} : { note: row.note }) },
+    children: row.marks.map((verdict) => mark(ids, verdict)),
   })
 
 /**
@@ -389,11 +528,9 @@ const criterion = (
  * fourth row can be found by somebody arriving from either edge, including
  * somebody using a screen reader.
  *
- * **The fourth row is why the band is worth the space.** Every other row is
- * reassuring and this one is not entirely: the page itself goes, and the words
- * on the page are part of the page. Leaving that out would make the other five
- * rows worth nothing, since a reader who discovered it later would be right to
- * assume the rest was shaded too.
+ * The rows are `CRITERIA`, which is what lets `partsOf` hold this band's last
+ * column to the measured one below it rather than to a comment saying they
+ * agree.
  */
 const whereItLives = (ids: IdFactory): LoomNode =>
   section(
@@ -421,12 +558,7 @@ const whereItLives = (ids: IdFactory): LoomNode =>
               children: PLACES.map((place) => subject(ids, place)),
             }),
           ]),
-          criterion(ids, "The code your pieces are made of", ["yes", "no", "no"]),
-          criterion(ids, "What you said each piece is for", ["yes", "no", "yes"]),
-          criterion(ids, "What you will and will not allow", ["yes", "no", "no"], "Weighed after the answer comes back, never sent with the question."),
-          criterion(ids, "The pages themselves, and the words on them", ["no", "yes", "yes"]),
-          criterion(ids, "What changed, who asked, and which rule allowed it", ["no", "yes", "no"]),
-          criterion(ids, "What a visitor typed into the box", ["no", "yes", "yes"]),
+          ...CRITERIA.map((row) => criterion(ids, row)),
         ],
       }),
     ]
