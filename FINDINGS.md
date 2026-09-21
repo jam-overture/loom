@@ -26352,7 +26352,27 @@ the shape of rows.
 ## 2026-09-14 — the tallies lag the buffer by a window, and a screen that does not say so will look broken
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
-open — a property of step 4's input, not a defect
+**closed** by `portal-33-the-page-these-numbers-are-not-about` (21 September).
+Both things this entry named as available to say it with were taken.
+`StoredTally.updatedAt` is carried onto `RevisionReading.countedAt` — the newest
+rollup across a version's parts — and printed on the surface as *"Counted up to
+19 September 2026 at 14:05 UTC."*. The second half was taken further than the
+entry asked: rather than telling a revision with no row apart from a revision of
+zeroes, the screen now reads the **revision of the page being served** off a
+tree it was already fetching, and says which of four things is true —
+*current*, *behind* by n changes, *unread*, or *replaced*. The sentence the
+entry asked for is `standingNote`, and the one it did not ask for but is the
+reason a reader stops debugging is `standingAdvice`: *"Nothing is wrong and
+there is nothing to fix: readings are held for about an hour before they are
+counted."*
+
+The entry's diagnosis was exactly right and worth recording as having been so.
+The defect it predicted was on the deployment in the form it predicted: the card
+said *"40 visits to this page have reported back **since it was last changed**"*
+over counters gathered two changes before, and the comparison block below it was
+headed *"What the **last** change did to your readers"* about a pair of versions
+neither of which was live. Nothing threw, nothing was empty, every number was
+real. Only the screen could say it, and until this it did not.
 
 The entry above this morning listed what `ReaderTallyStore` offers step 4. One
 thing it could not list, because it had not been decided yet, is **when a number
@@ -28877,3 +28897,80 @@ somebody else.
 configured identity is the one the deployment pipeline trusts, and a lane's name
 belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
+
+---
+## 2026-09-21 — the before-and-after list compares the page against itself, and the row says "about the same" every time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+seen in a photograph of this branch, not a defect anybody has reported, and
+worth a decision rather than a patch
+
+`reachShifts` compares every part both versions heard about, and the **root** is
+one of them. So every comparison on `/portal/readers` carries a row for the page
+itself, and on all three pages in this branch's screenshot it reads the same way:
+
+> the page "Autumn arrivals" `n_autumn12` — about the same
+> 50 of the 50 visits before, then 40 of the 40 visits
+
+It is arithmetically correct and it is structurally uninformative. The root is
+reached by every page view that reports anything, by construction, so its rate
+is 100% on both sides of every change anybody will ever make — which means the
+row is *always* "about the same", on every page, forever. A list sorted by size
+of change therefore ends with a row that is guaranteed to be last and guaranteed
+to say nothing.
+
+**Why it is filed rather than fixed on this branch.** The unit was the gap
+between the counters and the page being served, and dropping rows from a
+comparison is a separate decision with a real argument on both sides:
+
+- **For dropping it:** the section's heading is *what the change did to your
+  readers*, and the page is not a part the change moved. `PartCounters` already
+  carries every row in full, one click down, so nothing is removed by leaving it
+  out of the **reading** — which is the shape this lane has taken four times
+  (`highlightsOf` names no part when there is nothing to name, and the full table
+  is underneath).
+- **Against dropping it:** the page's row is the **denominator** of every other
+  row, and a reader who cannot see *50 of 50, then 40 of 40* cannot see that the
+  two windows were different sizes — which is the whole argument
+  `since-the-change.tsx` makes for printing both counts rather than the rate.
+
+**The recommendation, for whoever takes it:** neither. Move the root out of the
+list and into the sentence above it, where it is the denominator rather than a
+competitor — *"Revision 4 against revision 3, over 50 visits then 40."* That
+keeps the fact, drops the row that can never say anything, and puts the number
+where a reader meets it before the list rather than after it.
+
+It affects only the comparison. The root's row in the highlights and in the
+counter table is a different question and is not this.
+
+---
+## 2026-09-21 — the portal has been photographed by a private script for the sixth consecutive run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed by reference**, not as new analysis
+
+The 14, 19 and 20 September entries stand unchanged and nothing about them has
+moved. This adds one number and one detail.
+
+The number: **six**. Every picture of this portal since 15 September has been
+taken by a Playwright script written inside the run and thrown away at the end
+of it, because `pnpm shoot` cannot sign in and every screen in this route group
+is behind a session.
+
+The detail is for whoever builds the step, because it is the one thing each run
+rediscovers and it is not the sign-in. Staging a **populated** portal means
+putting stores on `globalThis` before the server's route modules evaluate, and
+the only hook for that is `NODE_OPTIONS=--import`. Two things bite:
+
+- **Module resolution is relative to the preload file, not to the working
+  directory.** A preload written to a scratch directory cannot import
+  `@loom/runtime` at all, whatever the process was started from. It has to sit
+  inside the application, which for something that must not be committed means
+  somewhere already ignored.
+- **The preload runs twice** — once in the launching process and once in the
+  server — so it must be idempotent and must not assume it is the only copy.
+
+The ask is unchanged and is still the smaller of the two on the table: **a
+`signIn` step, or any way to run a script before the first `goto`.** The
+staging half is this lane's own and would be a recipe in `tools/screenshot/`
+rather than a capability, if a fifth lane ever needs it.
