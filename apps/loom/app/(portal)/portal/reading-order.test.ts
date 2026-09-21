@@ -90,6 +90,51 @@ describe("the front door's reading order", () => {
   })
 
   /**
+   * The row-level version of the same promise, added 20 September.
+   *
+   * 0175 split a listing into `{ held, unreadable }` — a page can now be read
+   * successfully and still have one change on it that this build cannot make
+   * sense of. This screen took `.held` and dropped the rest, so a change stuck
+   * in somebody's queue was not on any screen in the portal.
+   *
+   * Guarded at the source for the same reason the pairing above is: the fan-out
+   * lives in a file no test can reach, and a version of it that reaches for
+   * `.held` alone leaves the whole suite green.
+   */
+  it("keeps the changes it could not read rather than dropping them from the queue", () => {
+    expect(source).toContain("unreadableChangesIn(listing.treeId, holds.value)")
+    expect(source).toContain("<UnreadableChangeCard")
+  })
+
+  /**
+   * A row nobody can read still has a position in time, and the position is the
+   * only fact it carries. Merging the two kinds into one order is what puts a
+   * change stuck since July above four answerable ones — a list that sorted the
+   * unreadable rows into a group would have taken that away.
+   */
+  it("draws both kinds of row in one order rather than two lists", () => {
+    expect(source).toContain("inQueueOrder(changes, unreadableChanges, waitingSince)")
+    expect(source).toContain("rows.map(")
+  })
+
+  /**
+   * The confident empty state, in its sharpest form, guarded where it can only
+   * be reintroduced.
+   *
+   * `changes.length === 0` was right while a queue had one kind of row in it.
+   * Over a queue holding a change nobody can read it draws a green box headed
+   * **"You're all caught up."** — the screen asserting the opposite of what is
+   * on it, with the counter-evidence three lines below. The whole fix is the
+   * word `rows`, which is exactly the sort of thing a later edit puts back.
+   */
+  it("does not call a reader caught up over a queue with a stuck row in it", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup).toContain("rows.length === 0 ? (")
+    expect(markup).not.toContain("changes.length === 0 ? (")
+  })
+
+  /**
    * The other half of the same promise, and the half that shipped missing.
    *
    * A listing is bounded and hands back a cursor; this screen fans out from one
@@ -266,7 +311,15 @@ describe("what the first screenshot of it found", () => {
   it("does not say the queue is empty twice", () => {
     const markup = source.slice(source.indexOf("<h1"))
 
-    expect(markup).toContain("{changes.length > 0 && (")
-    expect(markup.indexOf("changes.length > 0")).toBeLessThan(markup.indexOf("waitingSummary"))
+    /*
+     * `rows` rather than `changes` since 20 September, and the guard's intent is
+     * unchanged: the summary is withheld exactly when the notice below it is
+     * going to say the same thing. What moved is which emptiness that is — a
+     * queue holding a change nobody can read draws no green box, so the summary
+     * must appear, and it is the one that says *nothing is waiting that you can
+     * answer*.
+     */
+    expect(markup).toContain("{rows.length > 0 && (")
+    expect(markup.indexOf("rows.length > 0")).toBeLessThan(markup.indexOf("waitingSummary"))
   })
 })

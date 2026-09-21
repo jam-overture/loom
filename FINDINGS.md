@@ -28005,7 +28005,10 @@ buys at most 80px of the 150–250 needed, and would spend the site's core promi
 to do it.
 ## 2026-09-20 — a listing now hands back the rows it could not read, and nothing on any screen renders them
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed** by
+`Loom portal` on 20 September, on branch `portal-32-the-change-nobody-can-answer`:
+all three screens read `unreadable` now, and the count recommendation was taken
+(`held.length`, with a mark). See the report of that date. Originally filed
 open — **nothing is broken and no queue is shorter than it was.** A new field
 with no reader, and it is yours
 
@@ -28293,3 +28296,154 @@ exists. What is wrong is only the citation — an argument resting on a behaviou
 nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
+
+## 2026-09-20 — a JSX expression beside a word renders without the space between them, and `prerender:check` cannot see the screens where it happened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed on this branch in the two places it occurred, filed because the *class* is
+open and the tool that exists for it does not reach the screens that have it
+
+Both marks added this run shipped as
+
+```jsx
+<span className="…">
+  {unreadable.length} can&rsquo;t be read
+</span>
+```
+
+and both rendered **`1can't be read`**. JSX drops the whitespace around a
+newline between an expression container and the text after it, so the space a
+reader needs is exactly the one a formatter takes away — and the fix is
+`{" "}`, which a formatter will then put back on its own line.
+
+**Two things that should have caught it and could not.**
+
+1. **The tests passed.** `toContain("1 can’t be read")` would have failed, but
+   the assertions written first were `toContain` on a count and on a phrase,
+   and the run-together string satisfies both. That is the 24 August lesson
+   restated for a new junction: *a missing space between independently-held
+   strings satisfies every `toContain` either side of it*.
+2. **`prerender:check` is the tool for this** — 859 text junctions, 0 run
+   together — **and it reads prerendered pages only.** Every screen in this
+   route group is `ƒ` in the build output, because every one of them reads a
+   session cookie. So the one class of defect the repository has built a
+   dedicated tool for is the one class it cannot check on the portal.
+
+A photograph found it, which is the fourth time this lane has filed *a
+screenshot found what the suite could not*.
+
+**What was done here, and what is not this lane's to do.** The wording moved
+into `unreadableMark` in `_lib` — one string, one assertion on the whole of it,
+one source for the two screens. That is a fix for two junctions and not for the
+class.
+
+**The recommendation is for `Loom daily build`**, because the tool is its:
+`tools/prerender/main.ts` walks the built output. A junction check that ran over
+the *source* — an expression container followed on the next line by a text
+child, with no `{" "}` between them — would be a lint rather than a render
+check, would need no server and no session, and would cover all four surfaces
+including the dynamic ones. There are 859 junctions it currently checks and an
+unknown number it cannot see.
+
+## 2026-09-20 — every screenshot in every pull request this project has opened is a broken image, and the cause is outside the repository
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a process defect rather than a code one, and it defeats the one instruction
+every surface lane is given about pull requests
+
+**The brief for this lane says the maintainer judges the portal by eye and that
+a PR must carry a screenshot.** Three other lanes have the same instruction.
+None of it has been arriving.
+
+The tool these lanes open pull requests with rewrites markdown link and image
+targets, wrapping the URL in a pair of backticks:
+
+```
+![a caption](``https://raw.githubusercontent.com/…/shot.png``)
+```
+
+GitHub renders that as literal text. **Not a broken image with a placeholder —
+no image at all**, and a line of backticked URL where the picture should be.
+
+**It is not this run's mistake and not new.** Read back the stored bodies of
+#349 and #350, both opened today by other lanes: both carry the same
+corruption, on every image and every link. So do this lane's. The corruption is
+invisible to the lane that wrote the body, because the text sent was correct —
+it has to be read back from the API to be seen, and nobody has.
+
+**The trigger, narrowed by four measurements on #351.** The first reading —
+*markdown is corrupted, HTML survives* — was wrong, and worth correcting
+because the wrong remedy still breaks. Rewriting the same body four times and
+reading it back each time gives this:
+
+| link | text | outcome |
+| --- | --- | --- |
+| `[a caption](url)` markdown | anything | **corrupted** |
+| `<a href="…">the queue</a>` | prose | survives |
+| `<a href="…">0175</a>` | a number | survives |
+| `<a href="…">reports/2026-09-20-….md</a>` | **a file path** | **corrupted** |
+| `<a href="…"><b>reports/….md</b></a>` | a file path | **corrupted** |
+
+The `<a>` that broke was escaped *and* backticked — `&lt;/a&gt;` inside a code
+span — which is not a markdown-syntax rewrite at all. **Something is detecting
+text that looks like a repository file path and wrapping it in backticks**, and
+when that text sits inside an anchor it takes the anchor's markup with it. The
+markdown `[…](…)` cases all had a path or a URL in a position that matched.
+
+So the remedy is two rules, not one:
+
+1. **Write links and images as HTML** — `<a href>`, `<img src>`.
+2. **Never put a file path in the link text.** Use prose: *the full write-up*,
+   *the queue*, *every disclosure open*. A path belongs in a code span of its
+   own, outside the anchor.
+
+Both are needed. Either alone still produces a broken line.
+
+**A second, independent reason the pictures would not have shown anyway.** This
+repository is private, so `raw.githubusercontent.com` answers `404` to an
+unauthenticated fetch — measured, both URLs — and GitHub proxies images in a PR
+body through camo, which does not carry the reader's session. A private repo's
+images cannot be hotlinked into a PR body at all, by either syntax.
+
+**What actually reaches a reader**, and what this lane will do from now on:
+the preview deployment, plus a prose-titled link to the report in-branch, where
+GitHub renders the images relative to a file the signed-in maintainer is
+authorised to read. The `reports/` markdown has always done this correctly —
+its image references are relative paths, which is why they were never
+affected. Only the PR bodies were broken.
+
+**Owned here rather than passed on** because the remedy is a convention every
+lane can adopt today and needs no tooling. It is worth `docs/routines.md`
+carrying one line about it, which is `Loom daily build`'s file — named here
+rather than filed separately.
+
+## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by this branch — this lane's own mistake, recorded because the error message
+points away from it
+
+This run committed with an explicit author, `Loom portal <…@gmail.com>`, on the
+reasoning that a lane's commits should say which lane made them. Vercel refused
+to deploy the branch:
+
+```
+Git author jpizzo must have access to the project on Vercel to create deployments.
+```
+
+The commit status goes **red on the pull request**, and the message names a
+GitHub account and a Vercel team — so it reads as an access problem for the
+maintainer to fix. It is not. **Every other commit on `main` is authored
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
+which is the identity the Vercel project accepts, and #346 through #350 all
+carry preview URLs because of it.
+
+The cost is precisely the thing this lane's brief asks for: *open the PR with
+the deployed preview URL, because this surface exists to be looked at.* A lane
+that renames its author silently loses that and gets a red check that blames
+somebody else.
+
+**Rule, for any lane:** do not set `--author` on a commit. The repository's
+configured identity is the one the deployment pipeline trusts, and a lane's name
+belongs in the branch name, the commit subject and the report — all three of
+which already carry it.
