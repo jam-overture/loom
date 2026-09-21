@@ -145,6 +145,18 @@ const idsIn = (node: LoomNode): readonly string[] => {
 
 const nodesIn = (node: LoomNode): number => idsIn(node).length
 
+/** Every element of one type in a subtree, in document order. */
+const elementsOfType = (node: LoomNode, type: string): readonly ElementNode[] => {
+  if (node.kind === "text") return []
+  const here: readonly ElementNode[] = node.kind === "element" && node.type === type ? [node] : []
+
+  return [...here, ...node.children.flatMap((child) => elementsOfType(child, type))]
+}
+
+/** Everything a subtree says, run together. */
+const wordsIn = (node: LoomNode): string =>
+  node.kind === "text" ? node.value : node.children.map(wordsIn).join(" ")
+
 const fixedClock: Clock = { now: () => "2026-09-09T00:00:00.000Z" }
 
 const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
@@ -157,8 +169,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers thirty-four bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(34)
+  it("offers thirty-five bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(35)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1101,6 +1113,163 @@ describe("the treatments a band wears", () => {
           `${composition.id} builds a ${treatment} it does not declare, so a deployment taking CATALOGUE_TYPES cannot draw it`
         ).toContain(treatment)
         expect(CATALOGUE_TYPES).toContain(treatment)
+      }
+    }
+  })
+})
+
+/**
+ * What a table has to be, and what a page has to call itself.
+ *
+ * Two properties with nothing in common except that both were found by
+ * assembling the page and reading it, and neither is visible in any one band's
+ * module.
+ */
+describe("what the assembled page says about itself", () => {
+  /**
+   * A heading region goes in a `<thead>`, and a `<thead>` holds rows.
+   *
+   * `comparisonBand`'s own comment records what the absence of this test looks
+   * like: column headings put into the `columns` slot as bare cells render
+   * every mark one column right of its heading, with the steered tint on the
+   * competitor instead of on the subject. It registers, it renders, it passes
+   * every palette assertion, and it is wrong — the class of defect that until
+   * now only a photograph caught.
+   *
+   * Written over both two-dimensional bands rather than over the one this run
+   * added, because the rule is about the region and not about the table: a
+   * `columns` slot is placed somewhere the flow of children does not go, and
+   * what goes there is whatever HTML puts inside a `<thead>`.
+   */
+  it("puts a row, not a bare cell, in every table's region of column headings", () => {
+    const HEADED = ["loom.table", "loom.comparison-table"] as const
+
+    for (const composition of STARTER_COMPOSITIONS) {
+      const root = composition.build(sequentialIdFactory())
+
+      for (const type of HEADED) {
+        for (const table of elementsOfType(root, type)) {
+          const columns = table.children.find((child) => child.kind === "slot" && child.name === "columns")
+
+          if (columns === undefined || columns.kind !== "slot") continue
+
+          for (const child of columns.children) {
+            expect(
+              child.kind === "element" && child.type.endsWith("-row"),
+              `${composition.id} puts a ${child.kind === "element" ? child.type : child.kind} straight into a ${type}'s columns region, where a thead needs a row`
+            ).toBe(true)
+          }
+        }
+      }
+    }
+  })
+
+  /**
+   * The page calls itself one thing from the bar at the top to the line at the
+   * bottom.
+   *
+   * On 20 September it called itself two. `navBand`'s wordmark, the mark in the
+   * middle of `integrationsBand`'s orbit and the steered column of
+   * `comparisonBand` all said **Overture**; `footerBand`'s wordmark and its
+   * copyright line said **Northwind** — and `proofBand` listed *Northwind*
+   * first among six customers, so the page also named itself as somebody it had
+   * sold to.
+   *
+   * Nothing could have caught it. Every band is correct read on its own, each
+   * renders clean under both palettes, and the two names are in two modules a
+   * thousand lines apart that no test had ever read together. It is the defect
+   * the phrasebook acquires by construction — bands are written one a day by
+   * runs with no memory of each other — and the only instrument that sees it is
+   * the assembled page, which is what this file already builds for the heading
+   * outline and the anchors.
+   *
+   * The wordmark is read off `loom.logo` in the navigation rather than declared
+   * here, so the assertion is about the two agreeing and never about which word
+   * they agree on. A deployment renaming the catalogue's placeholder changes one
+   * string and this test follows it.
+   *
+   * **It reads the footer's `brand` region and not the footer**, which is the
+   * correction a mutation run forced. Written against everything the band says,
+   * it passed with the wordmark put back to `Northwind`, because the copyright
+   * line under it still carried the other name — a test that goes green on the
+   * exact defect it was written for. A wordmark is one region and one string,
+   * so it is compared as one.
+   */
+  it("calls itself the same name in the bar at the top and the line at the bottom", () => {
+    const nav = compositionById("nav")
+    const footer = compositionById("footer")
+
+    expect(nav).toBeDefined()
+    expect(footer).toBeDefined()
+    if (nav === undefined || footer === undefined) return
+
+    const marks = elementsOfType(nav.build(sequentialIdFactory()), "loom.logo")
+
+    expect(marks).toHaveLength(1)
+
+    const site = marks[0]?.props["name"]
+
+    expect(typeof site).toBe("string")
+    if (typeof site !== "string") return
+
+    const brand = footer
+      .build(sequentialIdFactory())
+      .children.find((child) => child.kind === "slot" && child.name === "brand")
+
+    expect(brand?.kind).toBe("slot")
+    if (brand === undefined || brand.kind !== "slot") return
+
+    const wordmark = brand.children.find((child) => child.kind === "element" && child.type === "loom.heading")
+
+    expect(wordmark).toBeDefined()
+    if (wordmark === undefined) return
+
+    expect(wordsIn(wordmark)).toBe(site)
+
+    /**
+     * And the line under it, which is the other half of what the footer says
+     * the site is called. Asserted as containment because a copyright line is a
+     * sentence with the name in it rather than the name alone.
+     */
+    const note = footer
+      .build(sequentialIdFactory())
+      .children.find((child) => child.kind === "slot" && child.name === "note")
+
+    expect(note?.kind).toBe("slot")
+    if (note === undefined || note.kind !== "slot") return
+
+    expect(wordsIn(note)).toContain(site)
+  })
+
+  /**
+   * And it never puts its own name in a wall of other people's.
+   *
+   * The second half of the same defect and a separate assertion, because the
+   * two failed independently: fixing the footer's wordmark leaves the customer
+   * wall naming the site, and a reader who reaches that band is told the product
+   * is one of its own references.
+   *
+   * A `loom.logo-cloud` is the one container in the library whose children are
+   * *somebody else's* marks — the orbit's `mark` region is deliberately not one,
+   * because the thing in the middle of an integrations diagram is the product
+   * and is supposed to be.
+   */
+  it("names itself in no wall of customer logos", () => {
+    const nav = compositionById("nav")
+
+    expect(nav).toBeDefined()
+    if (nav === undefined) return
+
+    const site = elementsOfType(nav.build(sequentialIdFactory()), "loom.logo")[0]?.props["name"]
+
+    expect(typeof site).toBe("string")
+    if (typeof site !== "string") return
+
+    for (const composition of STARTER_COMPOSITIONS) {
+      for (const cloud of elementsOfType(composition.build(sequentialIdFactory()), "loom.logo-cloud")) {
+        for (const logo of elementsOfType(cloud, "loom.logo")) {
+          expect(logo.props["name"], `${composition.id} lists ${site} among its customers`).not.toBe(site)
+        }
       }
     }
   })

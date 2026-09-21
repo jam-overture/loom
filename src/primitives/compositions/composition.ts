@@ -56,6 +56,17 @@ import type { InsertOperation, TreeOperation } from "../../tree/delta.js"
  * part is a band on the canonical page, so the document {@link PAGE_SEQUENCE}
  * assembles gets one longer, and a part with no canonical design is a red
  * build rather than a page with a hole in it.
+ *
+ * `specs` is the twenty-second, admitted on 21 September by
+ * [0177](../../../decisions/0177-the-specification-is-a-page-part-and-it-sits-between-the-figure-and-the-price.md)
+ * and the first time 0171's test has been run by a routine that did not write
+ * it. Its region is the one between the figures that persuade and the price:
+ * `metrics` is four rounded numbers at display size, to be believed; `specs` is
+ * the same kind of fact unrounded, at reading size, to be checked. Neither can
+ * stand in for the other, which is why it is here rather than a design of one
+ * of them — and the record works the swap in all four directions, including
+ * the two against `comparison`, because that is the neighbour it looks most
+ * like from a distance.
  */
 export const COMPOSITION_PARTS = [
   "banner",
@@ -68,6 +79,7 @@ export const COMPOSITION_PARTS = [
   "code",
   "integrations",
   "metrics",
+  "specs",
   "pricing",
   "comparison",
   "testimonials",

@@ -252,3 +252,46 @@ describe("a record that came from one of the suggestions", () => {
     expect(record?.presetId).toBeUndefined()
   })
 })
+
+/**
+ * What a change moved, and whether that put the last one back, across the fold
+ * that answers a hold.
+ *
+ * The same shape as `undoes` and `did` above and it is carried for the same
+ * reason: a held change is assessed when it is asked for and answered later, so
+ * the only fold with the tree and the history in hand is the first one. A fold
+ * that dropped either of these would empty the reading at the exact press that
+ * makes it true — and worse, would leave the *next* ask with nothing to compare
+ * itself against, so a toggle pressed twice would go back to printing one
+ * sentence twice.
+ */
+describe("what a change moved", () => {
+  const moved = [{ nodeId: "n_1" as never, key: "backdrop", from: "aurora", to: "panel" }]
+
+  it("keeps the settings it moved when the answer is folded onto it", () => {
+    const asked: ChangeRecord = { ...askedAsUndo(), settingsMoved: moved, wentBack: true }
+    const answered = recordFromEvents(
+      [
+        envelope({ type: "hold-confirmed", proposalId: "p_1" as never, actor: "a demo visitor" }),
+        envelope({ type: "change-committed", proposalId: "p_1" as never, revision: 2 }),
+      ],
+      asked
+    )
+
+    expect(answered?.settingsMoved).toEqual(moved)
+    expect(answered?.wentBack).toBe(true)
+  })
+
+  /**
+   * And a record whose caller could not name the tree carries no answer at all,
+   * rather than a confident `false`. The two are read the same way by
+   * `putsSomethingBack`; they are different facts, and one of them is "nobody
+   * looked".
+   */
+  it("says nothing about either when there was no tree to read them against", () => {
+    const record = recordFromEvents([envelope({ type: "intent-received", intent: INTENT })])
+
+    expect(record?.settingsMoved).toBeUndefined()
+    expect(record?.wentBack).toBeUndefined()
+  })
+})

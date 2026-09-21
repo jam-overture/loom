@@ -67,7 +67,7 @@ import type { Composition } from "./composition.js"
  * Invented, and visibly so. A starting composition that shipped a real
  * company's name and a fabricated quote from a named employee would be a lie
  * this library put on a host's page for them, which is a different kind of
- * placeholder from `Northwind` in the footer. Every band in this catalogue that
+ * placeholder from `Overture` in the footer. Every band in this catalogue that
  * attributes words to a person uses a name that cannot be mistaken for one.
  */
 const RESULTS = [
