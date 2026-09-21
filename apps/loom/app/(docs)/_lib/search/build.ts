@@ -13,6 +13,7 @@ import {
   type TravellingIndex,
 } from "./model"
 import { readPageProse } from "./prose"
+import { docsSectionOfPath } from "./shards"
 
 /**
  * The index, assembled from what the site already knows.
@@ -199,11 +200,37 @@ export const searchContents = (): TravellingIndex => ({
     })),
 })
 
-/** The words nobody waits for, keyed by the entry they sit under. */
+/**
+ * The words nobody waits for, keyed by the entry they sit under — **all of
+ * them**.
+ *
+ * Nothing is served from this. What a browser asks for is one section of it at
+ * a time (`searchProseFor`), and this is the whole that those are cut from, so
+ * that the cut is a partition of one list rather than four walks over the site
+ * that could disagree about which words a reader can find. It is also what the
+ * caps are measured against: `build.test.ts` holds the sum of the parts against
+ * this, which is the only way to tell a split that costs what a split costs
+ * from one that has quietly started repeating itself.
+ */
 export const searchProse = (): SearchProse => ({
   bodies: buildSearchIndex()
     .entries.filter((entry) => entry.body !== "")
     .map((entry) => [entry.href, entry.body] as const),
+})
+
+/**
+ * The words of one section.
+ *
+ * A filter over the whole rather than a walk of its own, which is what makes
+ * the four files a partition: every body is in exactly one of them because
+ * every address has exactly one section, and `docsSectionOfPath` is the one
+ * function that says which — the same one the browser uses to decide what to
+ * ask for. A section nobody has written words under answers with an empty list
+ * rather than a 404, so the browser can ask for every section the table of
+ * contents mentions without holding a second idea of which of them are written.
+ */
+export const searchProseFor = (sectionSlug: string): SearchProse => ({
+  bodies: searchProse().bodies.filter(([href]) => docsSectionOfPath(href) === sectionSlug),
 })
 
 /** The blocks nobody waits for, keyed the same way. */
