@@ -1,7 +1,15 @@
 # §2: the props no schema accepts — the half 0173 could not reach
 
-**Date:** 2026-09-21 · **Lane:** `Loom framework` · **Branch:**
+**Date:** 2026-09-21 · **Lane:** `Loom framework` · **Pull request:**
+[#360](https://github.com/jam-overture/loom/pull/360) · **Branch:**
 `framework-46-the-props-no-schema-accepts` · **Section:** §2
+
+**Preview:** https://loom-git-framework-46-the-pr-a39946-jpizzolato36-6341s-projects.vercel.app
+— deployment **Ready**, commit status green. **There is nothing new on it to
+look at**, deliberately: no composition root in this repository wires a props
+vocabulary, so the check ships off and no screen changes. The diagram below is
+the visual for this unit. (Published unverified: `*.vercel.app` is off this
+sandbox's egress allowlist, the standing 19 August limit.)
 
 ![Where a props failure goes](2026-09-21-framework-the-props-no-schema-accepts.svg)
 
