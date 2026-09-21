@@ -3,10 +3,16 @@
 **Routine:** `Loom demo` · **Branch:** `demo-24-what-the-rail-shows` ·
 **21 September 2026**
 
-**Deployed preview:** _(added on the pull request)_ — public, no sign-in. Open
-**`/demo`** on a phone-width window, press **Take the numbers off**, then press
-**Re-theme the whole page**. The second card in the record is the whole of this
-run.
+**Pull request:** [#359](https://github.com/jam-overture/loom/pull/359) ·
+**Deployed preview:**
+https://loom-git-demo-24-what-the-ra-3ea673-jpizzolato36-6341s-projects.vercel.app
+— deployment **Ready**, public, no sign-in. Open **`/demo`** in a phone-width
+window, press **Take the numbers off**, then press **Re-theme the whole page**.
+The second card in the record is the whole of this run.
+
+(Published unverified: `*.vercel.app` is off this sandbox's egress allowlist, the
+standing 19 August limit. Everything below was driven against local `next build`
+outputs instead — `main`'s for the befores, this branch's for the rest.)
 
 The twenty-fourth run of this lane, and the first one about the *wiring* rather
 than about a reading or a screen.
