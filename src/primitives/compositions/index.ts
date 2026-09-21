@@ -29,6 +29,7 @@ import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
 import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
+import { specsBand } from "./specs-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
@@ -73,6 +74,7 @@ export {
   proofBand,
   proofFacesBand,
   proofStoryBand,
+  specsBand,
   stepsBand,
   stepsCardsBand,
   teamBand,
@@ -142,6 +144,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   integrationsGridBand,
   metricsBand,
   metricsChartBand,
+  specsBand,
   pricingBand,
   pricingMatrixBand,
   comparisonBand,

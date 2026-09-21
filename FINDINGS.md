@@ -8,6 +8,67 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-21 — the reach queue is empty except for one row, and that row is six primitives behind one question nobody has asked
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`, and the one
+question in it is @jonathanbravecredit's · **Status:** open — nothing is
+blocked, and this is written so the next run does not reach for `loom.pin` as
+cheap work
+
+The 19 September inventory classified forty-four unreachable primitives and left
+a ranked queue of what was **genuinely missing** from the catalogue. That queue
+is now closed, two runs later:
+
+| | closed by |
+| --- | --- |
+| `halo` / `backdrop` / `reveal` | #346, 20 September |
+| `table` / `table-row` / `table-cell` / `spec` / `divider` | this run, the `specs` band |
+| `pin` | **not closed, and not what the queue said it was** |
+
+Reach went **52 → 63 → 66 → 71** of 96 over four days, with two of those three
+movements costing no new primitive at all.
+
+**`loom.pin` was filed in the wrong row and the correction matters.** The
+inventory listed it under *genuinely missing* with the parenthetical *"the second
+needs an asset to annotate, so it is really in the needs-an-image-source row"* —
+and then left it in the first row anyway. It belongs in the second. A pin is a
+hotspot **on a photograph**; with no photograph it is a dot on nothing.
+
+So the remaining reachable surface is not a list of small jobs. It is **three
+rows, and each is one decision rather than several**:
+
+| row | primitives | what it is waiting on |
+| --- | --- | --- |
+| needs an image source | `media`, `embed`, `before-after`, `carousel`, `overlay`, **`pin`** | **six**, behind one question |
+| not a landing page | `book`, `event`, `listing`, `product`, `offering`, `recording` + their grids, `message`/`message-list` | a second page sequence (0171 names the trigger) |
+| a state, not a band | `empty-state`, `waiting-state`, `link-pager` | a bound region (0058) |
+
+**The first row is the biggest single thing left and it is a question, not a
+task.** `compositions.test.ts` asserts *ships no image source at all*, and that
+assertion is correct and deliberate: a starting composition that carried a URL
+would be this library choosing, on a host's behalf, to fetch bytes from
+somewhere — the same argument that put every link in the catalogue on this
+origin and every address in a reserved namespace. The consequence is that six
+registered primitives, every one of them a thing a marketing page obviously has,
+cannot be reached by dropping in a band, and **the catalogue cannot draw a page
+with a picture on it.**
+
+What a next run needs decided before it can move, smallest first:
+
+- whether the catalogue may ship an **inline** source — an SVG or a gradient as a
+  `data:` URI — which fetches nothing and is a real photograph of nothing;
+- whether a **declared placeholder** belongs in the library, the way
+  `loom.waiting-state` declares its one word, so a band arrives with a frame at
+  the right ratio and no bytes;
+- or whether an image is **the host's to supply**, in which case the honest shape
+  is a band that arrives with an empty media region and says so, and the six stay
+  unreachable by design rather than by omission.
+
+The third may be right, and if it is, the inventory's *"needs an asset — not
+work"* should say **not reachable, deliberately** instead, because *not work* is
+what left `pin` in the other row for two weeks.
+
+---
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
