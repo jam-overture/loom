@@ -255,6 +255,30 @@ describe("what leaves, measured", () => {
   })
 
   /**
+   * **The mutation that survived the first six, and what it was hiding.**
+   *
+   * The test above builds its own catalogue out of `frames.ts` and asserts the
+   * runtime prints the origin in it. That is a test of `frames.ts` and of the
+   * runtime, and it passes whatever the page passed to `measurePrompt` — so
+   * pointing the page's own catalogue at a host this site does not serve left
+   * all thirty-seven green. It is the failure this file's own header warns
+   * about, written by the person who wrote the header.
+   *
+   * A count cannot name an origin, so this pins the count to one: the origins
+   * block is one line carrying the address, so measuring the same page at a
+   * longer address has to cost exactly the extra characters of it. A block
+   * built from anything but `context.origin` does not move when the context
+   * does, and a block built from a hard-coded address does not move at all.
+   */
+  it("measures the origin this deployment actually serves from", () => {
+    const longer = `${ORIGIN}-by-eighteen-more`
+    const here = WHAT_LEAVES.measure(context)
+    const there = WHAT_LEAVES.measure({ origin: longer, theme: DEFAULT_THEME })
+
+    expect(there.frames - here.frames).toBe(longer.length - ORIGIN.length)
+  })
+
+  /**
    * The two bands, held to each other.
    *
    * The comparison above opens by telling a reader to read down the last column
