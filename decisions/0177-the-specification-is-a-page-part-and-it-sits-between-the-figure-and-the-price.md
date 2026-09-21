@@ -121,8 +121,9 @@ shaped member admitted so far, and it is the row to watch.
 
 **Five registered primitives become reachable by dropping in a band**:
 `loom.table`, `loom.table-row`, `loom.table-cell`, `loom.spec` and
-`loom.divider`. That is the largest single movement in `CATALOGUE_TYPES` since
-it was first measured, and it costs no new primitive and nothing per request.
+`loom.divider`. The measure has moved 52 → 63 → 66 → 71 over four days; this is
++5 from **one** band, against +11 from eleven, and it costs no new primitive and
+nothing per interpretation request.
 
 **A band may hold the same fact twice, at two registers, on purpose.** The run
 of `loom.spec` nodes above the table repeats the table's first four rows. That

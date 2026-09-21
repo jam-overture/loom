@@ -1,7 +1,12 @@
 # The numbers it could not print — a page part for the specification, and the day the page stopped calling itself two names
 
 **Routine:** `Loom primitives` · **Date:** 2026-09-21 · **Branch:**
-`primitives-41-the-numbers-it-could-not-print` · **Section:** §4b
+`primitives-41-the-numbers-it-could-not-print` · **Section:** §4b ·
+**Pull request:** [#354](https://github.com/jam-overture/loom/pull/354) ·
+**Preview:** https://loom-git-primitives-41-the-n-2e44a0-jpizzolato36-6341s-projects.vercel.app
+— deployment **Ready**. Published unverified: `*.vercel.app` is off this
+sandbox's egress allowlist, the standing 19 August limit. Everything below was
+driven against a local render and the specimen harness.
 
 ![The specification band under the metrics band, at 1280px, under bold](2026-09-21-primitives-the-numbers-it-could-not-print-bold-wide.png)
 
@@ -75,8 +80,12 @@ have.**
 | registered and unreachable by dropping in a band | 30 → **25** |
 
 The five: `loom.table`, `loom.table-row`, `loom.table-cell`, `loom.spec` and
-`loom.divider`. **That is the largest single movement in `CATALOGUE_TYPES` since
-it was first measured**, and it costs no new primitive and nothing per request.
+`loom.divider`, **from one band and at the cost of no new primitive and nothing
+per request.** For scale rather than for a superlative: `CATALOGUE_TYPES` has
+moved 52 → 63 → 66 → 71, so +11, +3, +5. The +11 is still the largest and it took
+eleven bands; the commit message on this branch calls this one *the largest
+single movement* and that is wrong — corrected here and in 0177 rather than
+force-pushed over.
 
 ### The band, in two registers
 
