@@ -408,9 +408,12 @@ children on `accent` and that `loom.page` puts them on `bg-canvas`. Nothing in
 either component says the first is a filled control that has already answered
 what colour its text is, while the second is a page surface where a child brings
 whichever ink it likes. **Both set an ink beside a ground and only one of them
-means it.** So four grounds are declared — `bg-canvas`, `bg-surface`,
-`bg-surface-muted`, `accent-subtle` — and a ground on that list is one where a
-palette owes the reader every ink in the ramp.
+means it.** So five grounds are declared — `bg-canvas`, `bg-surface`,
+`bg-surface-muted`, `accent-subtle`, `bg-overlay` — and a ground on that list is
+one where a palette owes the reader every ink in the ramp. There were four until
+21 September; the fifth arrived when the probe learned to follow a ground painted
+by a stacked sibling and found that `loom.overlay` had been writing on one all
+along.
 
 Get the shape of that argument, because it generalises past colour. A probe can
 observe what a component *does*. It cannot observe what the component *means* by
@@ -569,7 +572,7 @@ and ships a page nobody looked at.*
 | [`src/theme/apply.ts`](../src/theme/apply.ts) | `themeVariables`: a resolved theme flattened into the custom properties a stylesheet reads. Pure. |
 | [`src/render/theme.ts`](../src/render/theme.ts) | The seam: reserved-prop partition, the four resolution outcomes, and the argument for having no fallback. |
 | [`src/render/render.ts`](../src/render/render.ts) | Where it is mounted — once, from the root, before the walk — and where `theme-misplaced` is raised. |
-| [`src/theme/contrast.ts`](../src/theme/contrast.ts) | The bar: the four declared grounds, the pairings, `painted` versus `composed`, and `auditPalette`. |
+| [`src/theme/contrast.ts`](../src/theme/contrast.ts) | The bar: the declared grounds, the pairings, `painted` versus `composed`, and `auditPalette`. |
 | [`src/sdk/pairings.ts`](../src/sdk/pairings.ts) | `registryPairings`: what the components actually paint, probed rather than listed. |
 | [`src/theme/separation.ts`](../src/theme/separation.ts) | The other half: ΔE, the peers a reader must tell apart, and the borrowed threshold. |
 | [`src/theme/derive.ts`](../src/theme/derive.ts) | The build-time solver. Read the module comment for what it will not do for you. |
@@ -994,7 +997,7 @@ The output:
   the registry resolved it:  true
   it rendered:               true
   diagnostics:               []
-  pairings measured:         21
+  pairings measured:         26
   painted failures:          8
 house: fg-muted on bg-surface (loom.feature body) is 3.00:1, under 4.5:1
 house: fg-muted on bg-surface-muted (loom.form hint, loom.badge neutral) is 2.77:1, under 4.5:1
@@ -1070,7 +1073,7 @@ describe("F", () => {
 
 Predict: the three shipped palettes' painted counts, and then the last line —
 `house-hsl` differs from `house` in exactly one slot, so predict all three of its
-numbers against `house`'s 21 / 8.
+numbers against `house`'s 26 / 8.
 
 The output:
 
@@ -1086,7 +1089,7 @@ The output:
   hsl(210 20% 12%)   on #ffffff -> not measured
   rebeccapurple      on #ffffff -> not measured
   #1b1f2480          on #ffffff -> not measured
-  house-hsl: measured=17 painted=6 unmeasured=4
+  house-hsl: measured=21 painted=6 unmeasured=5
 ```
 
 `plum` and `carbon` ship with composed failures at 4.43 and 4.42 against a bar of
@@ -1097,9 +1100,9 @@ the panel or move the ink — and the alternative was an audit that stayed quiet
 about pairings it would have failed.
 
 The bottom half is the more useful half to have run. One slot written in `hsl()`
-takes four pairings out of the measured set, and **two of them were failures**:
-`house` had eight painted failures and `house-hsl` has six, with four pairings
-moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
+takes five pairings out of the measured set, and **two of them were painted
+failures**: `house` had eight painted failures and `house-hsl` has six, with five
+pairings moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
 "pass", a host could have made two real failures disappear by rewriting one
 colour in a different notation — which is exactly why it is a third answer.
 

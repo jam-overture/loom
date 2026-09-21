@@ -1,4 +1,4 @@
-import { isValidElement, type ReactNode } from "react"
+import { isValidElement, type ReactElement, type ReactNode } from "react"
 
 import type { ClosedChoice } from "../catalogue.js"
 import { NO_DATA } from "../data/resolution.js"
@@ -539,6 +539,25 @@ export const probeSubmissionPlacement = (
  * `pairings.ts`'s job because it needs the whole registry to know what the
  * grounds are.
  *
+ * ## A ground is not always an ancestor
+ *
+ * CSS inherits `color` down the tree and paints a background on whatever box
+ * is behind the glyphs, and those two are not the same walk. A run of text sits
+ * on the ground of the nearest box *behind* it, which is an ancestor only when
+ * nothing is stacked in between.
+ *
+ * `loom.overlay` is the case that proves it. It sets `fg-default` on its root
+ * and paints nothing there; a scrim child paints `bg-overlay` in grid cell
+ * `1 / 1` at `zIndex: 1`; the content sits in the same cell at `zIndex: 2` and
+ * sets no colour of its own. Every word of it renders in `fg-default` on
+ * `bg-overlay` — and read as an ancestor chain the two ends never meet, so the
+ * pairing was invisible here from the day the primitive shipped.
+ *
+ * So two things travel down: the ground in effect **and the ink in effect**,
+ * and a pairing is recorded wherever either changes under the other. Siblings
+ * that declare the same `gridArea` are one stack ordered by `zIndex`, and an
+ * element's ground is the nearest member below it that paints one.
+ *
  * ## What it does not see
  *
  * Only `children` is walked, matching `carriesDecoration`, so an element handed
@@ -548,6 +567,15 @@ export const probeSubmissionPlacement = (
  * primitive that composes a gradient or interpolates a variable into a longhand
  * answers nothing rather than a guess, for the reason `contrastRatio` declines
  * a colour it would have to parse.
+ *
+ * **Stacking is read from `gridArea` and from nothing else.** An absolutely
+ * positioned sibling also lies under its neighbours, and whether it lies under
+ * *all* of them is a question about an arbitrary length expression —
+ * `inset: calc(-1 * 4px)` is `loom.halo`'s, and no reading of that string says
+ * what it covers. A grid area is a name two elements either share or do not.
+ * Neither `loom.halo` nor `loom.backdrop` paints a palette slot under its
+ * content today (both draw gradients, which `slotOf` declines), so the narrow
+ * rule costs nothing real and the wide one would have been a guess.
  */
 
 export type ColourPairing = {
@@ -588,39 +616,161 @@ type Paint = {
   readonly childGrounds: PaletteSlot[]
 }
 
+/** What CSS has in effect at a point in the tree — both halves of a pairing. */
+type Effective = {
+  readonly ground: PaletteSlot | undefined
+  readonly ink: PaletteSlot | undefined
+}
+
+const NOTHING_IN_EFFECT: Effective = { ground: undefined, ink: undefined }
+
+const styleOf = (node: ReactElement): Readonly<Record<string, unknown>> | undefined => {
+  const style = (node.props as Readonly<Record<string, unknown>>)["style"]
+
+  return typeof style === "object" && style !== null ? (style as Readonly<Record<string, unknown>>) : undefined
+}
+
+/**
+ * React hands children as arbitrarily nested arrays; a stack is over one list of
+ * them. `null`, `undefined` and a boolean render nothing at all, and an element
+ * whose children are only those is as empty as one with none — which is the
+ * difference between a panel and a painted dot, so they are dropped here rather
+ * than counted.
+ */
+const flatten = (node: ReactNode): readonly ReactNode[] =>
+  Array.isArray(node)
+    ? (node as readonly ReactNode[]).flatMap(flatten)
+    : node === null || node === undefined || typeof node === "boolean" || node === ""
+      ? []
+      : [node]
+
+const gridAreaOf = (style: Readonly<Record<string, unknown>> | undefined): string | undefined => {
+  const area = style?.["gridArea"]
+
+  return typeof area === "string" ? area : undefined
+}
+
+/**
+ * `z-index: auto` and `z-index: 0` paint in the same order as each other, and
+ * source order breaks the tie in both cases — which is what the fallback to the
+ * element's position in the list is.
+ *
+ * React takes the property as a number or as a string, and `"2"` is the same
+ * layer as `2`; anything else is `auto` by another name.
+ */
+const depthOf = (style: Readonly<Record<string, unknown>> | undefined): number => {
+  const depth = style?.["zIndex"]
+
+  if (typeof depth === "number") return depth
+  if (typeof depth !== "string") return 0
+
+  const parsed = Number(depth.trim())
+
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+/**
+ * For each sibling that shares a grid cell with another, the ground painted by
+ * the nearest one stacked beneath it.
+ *
+ * *Nearest* rather than *any*: a scrim over a photograph over a card is three
+ * layers, and what the words on top actually sit on is the scrim. Taking the
+ * bottom of the stack would name a ground the reader never sees through.
+ */
+const stackedGrounds = (siblings: readonly ReactNode[]): ReadonlyMap<ReactNode, PaletteSlot> => {
+  const members = siblings.flatMap((node, order) => {
+    if (!isValidElement(node)) return []
+
+    const style = styleOf(node)
+    const area = gridAreaOf(style)
+
+    return area === undefined
+      ? []
+      : [{ node: node as ReactNode, area, order, depth: depthOf(style), ground: style === undefined ? undefined : groundOf(style) }]
+  })
+
+  const under = new Map<ReactNode, PaletteSlot>()
+
+  for (const cell of new Set(members.map((member) => member.area))) {
+    const stack = members
+      .filter((member) => member.area === cell)
+      .sort((a, b) => a.depth - b.depth || a.order - b.order)
+
+    for (const [index, member] of stack.entries()) {
+      for (let below = index - 1; below >= 0; below -= 1) {
+        const ground = stack[below]?.ground
+
+        if (ground !== undefined) {
+          under.set(member.node, ground)
+          break
+        }
+      }
+    }
+  }
+
+  return under
+}
+
 const collectPaint = (
   node: ReactNode,
-  ground: PaletteSlot | undefined,
+  effective: Effective,
+  stacked: PaletteSlot | undefined,
   markers: ReadonlySet<string>,
   into: Paint
 ): void => {
-  if (Array.isArray(node)) {
-    for (const child of node as readonly ReactNode[]) collectPaint(child, ground, markers, into)
-
-    return
-  }
-
   if (typeof node === "string") {
-    if (markers.has(node) && ground !== undefined) into.childGrounds.push(ground)
+    if (markers.has(node) && effective.ground !== undefined) into.childGrounds.push(effective.ground)
 
     return
   }
 
   if (!isValidElement(node)) return
 
-  const props: Readonly<Record<string, unknown>> = node.props as Readonly<Record<string, unknown>>
-  const style = props["style"]
-  const own = typeof style === "object" && style !== null ? (style as Readonly<Record<string, unknown>>) : undefined
+  const own = styleOf(node)
+  const painted = own === undefined ? undefined : groundOf(own)
+  const declared = own === undefined ? undefined : slotOf(own["color"])
 
-  const below = own === undefined ? ground : (groundOf(own) ?? ground)
-  const ink = own === undefined ? undefined : slotOf(own["color"])
+  const ground = painted ?? stacked ?? effective.ground
+  const ink = declared ?? effective.ink
 
-  if (ink !== undefined) {
-    if (below === undefined) into.floating.push(ink)
-    else into.painted.push({ foreground: ink, background: below })
+  const children = flatten((node.props as Readonly<Record<string, unknown>>)["children"] as ReactNode)
+
+  /**
+   * Either half arriving under the other makes the pair, which is why an ink
+   * declared here and a ground introduced here are both triggers. An element
+   * that changes neither repeats its parent's pairing and is not recorded
+   * again.
+   *
+   * **A ground only answers for an inherited ink if something can be written on
+   * it.** `loom.frame` draws its camera notch as an empty `span` filled with
+   * `fg-default`, and `loom.message` its typing dots with `fg-muted`: an ink
+   * slot used as a shape, inside a card that set `fg-default` above it. Counting
+   * those gave `fg-muted on fg-muted` — 1.00:1 in every palette ever written,
+   * for a pair no reader will ever meet, which is precisely the row
+   * `PALETTE_TEXT_PAIRINGS` refuses to carry. An element with no children is a
+   * shape and not a surface. An ink *declared* here is recorded either way,
+   * because that is the claim the component itself made.
+   */
+  const surface = declared !== undefined || children.length > 0
+
+  if (ink !== undefined && ground !== undefined && surface && (declared !== undefined || ground !== effective.ground)) {
+    into.painted.push({ foreground: ink, background: ground })
   }
 
-  collectPaint(props["children"] as ReactNode, below, markers, into)
+  if (declared !== undefined && ground === undefined) into.floating.push(declared)
+
+  collectChildren(children, { ground, ink }, markers, into)
+}
+
+const collectChildren = (
+  siblings: readonly ReactNode[],
+  effective: Effective,
+  markers: ReadonlySet<string>,
+  into: Paint
+): void => {
+  const under = stackedGrounds(siblings)
+
+  for (const child of siblings) collectPaint(child, effective, under.get(child), markers, into)
 }
 
 const uniqueSlots = (slots: readonly PaletteSlot[]): readonly PaletteSlot[] => [...new Set(slots)].sort()
@@ -675,7 +825,7 @@ export const probeColourPairings = (
   if (answered.length === 0) return threwThroughout(failuresIn(attempts))
 
   const into: Paint = { painted: [], floating: [], childGrounds: [] }
-  for (const node of answered) collectPaint(node, undefined, markers, into)
+  for (const node of answered) collectChildren(flatten(node), NOTHING_IN_EFFECT, markers, into)
 
   return {
     outcome: "probed",
