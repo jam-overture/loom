@@ -27888,8 +27888,11 @@ which is the property the harness exists to give.
 ---
 ## 2026-09-19 — the prose file's compressed cap is the next one to fire, at 91%
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
-measured while splitting the file beside it; nothing is blocked today
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed**
+— by its own remedy, on #357, 21 September. The words are one file per section,
+the reader's own is asked for first and the rest follow behind it. The cap it
+was about is gone; in its place are a per-section cap and a bill, with separate
+remedies. The 91% measured below was 91.5% by the morning it was done
 
 Every file of the search index, measured on this branch:
 
@@ -28685,6 +28688,45 @@ nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
 
+## 2026-09-21 — the words of *The runtime* are 56% of the site's, so the cap that just replaced one number is already uneven
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+measured on #357 the moment the split was made; nothing is blocked today
+
+Sharding the search prose by section replaced one 60 KB cap with a cap per
+section and a bill. What it did not do, and could not, is make the sections the
+same size:
+
+| section | pages | raw | gzip | against the 40 KB cap |
+| --- | --- | --- | --- | --- |
+| **The runtime** | 11 | 99.0 KB | **32.6 KB** | **81%** |
+| Building with Loom | 5 | 31.5 KB | 11.4 KB | 28% |
+| Getting started | 7 | 31.1 KB | 11.1 KB | 28% |
+| Architecture | 3 | 8.8 KB | 3.4 KB | 9% |
+| API reference | generated | 13 bytes | 44 bytes | — |
+
+So the split bought this lane roughly **twenty more pages in any section except
+one, and about three in the one it is most likely to write in.** That is a real
+improvement on two pages anywhere, and it is not the same improvement everywhere,
+which is worth writing down rather than discovering.
+
+**The next line is already named and does not need deciding again**: one file
+per page within a section. The browser knows which page a reader is on for
+exactly the reason it knows which section — `docsSectionOfPath` has the page
+slug in its hand and throws it away — and the route is already a dynamic segment
+with `generateStaticParams`, so it is a second segment rather than a new idea.
+
+**Filed rather than done**, because it is not forced: the cap it would relieve
+is at 81% and this lane writes about a page a week. Doing it in the same run as
+the split would have been the second architecture in one pull request that the
+19 September entry declined for the same reason, and the honest trigger for it
+is the red test, which now exists and says what to do.
+
+**One thing to know before taking it.** The five files already cost 5.9% more
+compressed than one did, because compression works on one file at a time and a
+smaller file compresses worse. Twenty-odd files of one page each would pay that
+overhead again and harder — the run that does this should measure the total, not
+just the largest part, and `build.test.ts` already asserts both.
 ## 2026-09-20 — a JSX expression beside a word renders without the space between them, and `prerender:check` cannot see the screens where it happened
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —

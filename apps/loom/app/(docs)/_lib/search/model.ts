@@ -112,29 +112,35 @@ export type TravellingIndex = {
 export const SEARCH_INDEX_PATH = "/docs/search-index"
 
 /**
- * Where the browser asks for the words, which arrive second and separately.
+ * Where the browser asks for the words of **one section**, which arrive second,
+ * separately, and the reader's own section first.
  *
- * **The index is two files, and it had to become two.** Indexing the prose put
- * the site's words in the same payload as its table of contents, and four pages
- * arriving at once took the whole thing to 46.7 KB compressed against a 48 KB
- * cap — with the cap's own comment saying the run that hit it should split the
- * index rather than raise the number.
+ * **The index is four files, and it had to become four.** Indexing the prose
+ * put the site's words in the same payload as its table of contents, and four
+ * pages arriving at once took the whole thing to 46.7 KB compressed against a
+ * 48 KB cap — with the cap's own comment saying the run that hit it should
+ * split the index rather than raise the number. The runtime's published names
+ * left on 19 September for the same reason; `SEARCH_NAMES_PATH` says why.
  *
- * The split is along the line the two halves already grow on. What a reader
- * needs to type the first letter is the site's table of contents: 206 entries,
+ * The split is along the line the halves already grow on. What a reader needs
+ * to type the first letter is the site's table of contents: 206 entries,
  * **7.4 KB compressed**, and it grows when somebody writes a page. The words
- * under them are **53 KB**, and they grow every time anybody writes a
+ * under them are **54 KB**, and they grow every time anybody writes a
  * paragraph. So the box opens on the first, which is the part that answers by
  * title, section and summary — the top three bands of the ranking — and the
  * prose lands a moment later and turns on the fourth.
  *
- * The runtime's published names were on the near side of this split until 19
- * September and are now a file of their own; `SEARCH_NAMES_PATH` says why.
+ * **The words themselves are now one file per section**, as of 21 September,
+ * because 54 KB under a 60 KB cap was two written pages of headroom for the
+ * whole site. A section is the line they grow on: somebody writes a page and
+ * one section's file moves. The reader's own section is asked for first and the
+ * rest follow behind it, so the band most likely to answer them turns on
+ * first — `shards.ts` carries that argument and what it does not buy.
  *
  * A reader on a slow connection therefore gets a working search box rather than
  * a spinner, and the half that grows fastest is the half nothing waits for.
  */
-export const SEARCH_PROSE_PATH = "/docs/search-index/prose"
+export const searchProsePath = (sectionSlug: string): string => `/docs/search-index/prose/${sectionSlug}`
 
 /**
  * Where the browser asks for the code, which arrives with the words and is

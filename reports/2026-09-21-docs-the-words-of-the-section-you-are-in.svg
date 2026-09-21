@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #ffffff; }
+    .ink { fill: #111418; }
+    .muted { fill: #5b6570; }
+    .faint { fill: #8a939d; }
+    .rule { stroke: #dfe3e8; stroke-width: 1; }
+    .waited { fill: #1f6f4a; }
+    .waited-bar { fill: #2e8b5e; }
+    .later-bar { fill: #b9c2cb; }
+    .own-bar { fill: #4a7fd6; }
+    .cap { stroke: #d24b4b; stroke-width: 1.5; stroke-dasharray: 4 3; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0e1114; }
+      .ink { fill: #e8ecf0; }
+      .muted { fill: #9aa4ae; }
+      .faint { fill: #6e7882; }
+      .rule { stroke: #272d34; }
+      .waited { fill: #5fd39b; }
+      .waited-bar { fill: #3fae7c; }
+      .later-bar { fill: #3a434c; }
+      .own-bar { fill: #5b8fe0; }
+      .cap { stroke: #e06a6a; }
+    }
+  </style>
+  <rect class="bg" width="900" height="560"/>
+
+  <text class="ink" x="40" y="46" font-size="20" font-weight="700">What the search box downloads, and in what order</text>
+  <text class="muted" x="40" y="70" font-size="13">Measured on a production build, 21 September 2026. Bars are compressed bytes, to scale.</text>
+
+  <line class="rule" x1="40" y1="88" x2="860" y2="88"/>
+
+  <!-- BEFORE -->
+  <text class="faint" x="40" y="116" font-size="11" letter-spacing="1.2">BEFORE</text>
+  <text class="ink" x="40" y="146" font-size="13" font-weight="600">The words were one file</text>
+
+  <rect class="waited-bar" x="40" y="162" width="61" height="22" rx="3"/>
+  <text class="waited" x="109" y="178" font-size="12" font-weight="600">7.5 KB</text>
+  <text class="muted" x="164" y="178" font-size="12">contents — the only thing a reader waits for</text>
+
+  <rect class="later-bar" x="40" y="192" width="448" height="22" rx="3"/>
+  <text class="ink" x="542" y="208" font-size="12" font-weight="600">54.9 KB</text>
+  <text class="muted" x="598" y="208" font-size="12">every section's words</text>
+
+  <line class="cap" x1="530" y1="186" x2="530" y2="220"/>
+  <text class="faint" x="536" y="234" font-size="11">cap 60 KB — 91% used, about two more written pages</text>
+
+  <line class="rule" x1="40" y1="262" x2="860" y2="262"/>
+
+  <!-- AFTER -->
+  <text class="faint" x="40" y="290" font-size="11" letter-spacing="1.2">AFTER</text>
+  <text class="ink" x="40" y="320" font-size="13" font-weight="600">One file per section, and the reader's own goes first</text>
+  <text class="muted" x="40" y="340" font-size="12">A reader standing in <tspan font-style="italic">The runtime</tspan>, searching the runtime:</text>
+
+  <rect class="waited-bar" x="40" y="354" width="61" height="20" rx="3"/>
+  <text class="waited" x="109" y="369" font-size="12" font-weight="600">7.5 KB</text>
+  <text class="muted" x="164" y="369" font-size="12">contents — still the only thing waited for</text>
+
+  <rect class="own-bar" x="40" y="380" width="266" height="20" rx="3"/>
+  <text class="ink" x="378" y="395" font-size="12" font-weight="600">32.5 KB</text>
+  <text class="muted" x="434" y="395" font-size="12">the runtime's words — asked for at +145ms, alone</text>
+
+  <rect class="later-bar" x="40" y="406" width="90" height="20" rx="3"/>
+  <rect class="later-bar" x="134" y="406" width="93" height="20" rx="3"/>
+  <rect class="later-bar" x="231" y="406" width="28" height="20" rx="3"/>
+  <rect class="later-bar" x="263" y="406" width="4" height="20" rx="2"/>
+  <text class="ink" x="378" y="421" font-size="12" font-weight="600">25.7 KB</text>
+  <text class="muted" x="434" y="421" font-size="12">the other four, at +217ms — behind it, not beside it</text>
+
+  <line class="cap" x1="366" y1="348" x2="366" y2="432"/>
+  <text class="faint" x="372" y="446" font-size="11">cap 40 KB per section — the largest is at 81%</text>
+
+  <line class="rule" x1="40" y1="470" x2="860" y2="470"/>
+
+  <text class="muted" x="40" y="496" font-size="12">Total goes <tspan class="ink" font-weight="600">up</tspan> by 5.9% — 58.2 KB against 54.9 — because compression works on one file at a time.</text>
+  <text class="muted" x="40" y="516" font-size="12">That is what buys the ordering, and it is asserted rather than assumed.</text>
+  <text class="faint" x="40" y="540" font-size="11">Fourth row, left to right: Getting started, Building with Loom, Architecture, and the 13-byte sliver that is API reference.</text>
+</svg>

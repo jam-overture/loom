@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
@@ -12,8 +12,8 @@ import {
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
   SEARCH_NAMES_PATH,
-  SEARCH_PROSE_PATH,
   SEARCH_RESULT_LIMIT,
+  searchProsePath,
   withCode,
   withNames,
   withProse,
@@ -23,6 +23,7 @@ import {
   type SearchNames,
   type SearchProse,
 } from "@/app/(docs)/_lib/search/model"
+import { docsSectionOfPath, proseSectionsIn } from "@/app/(docs)/_lib/search/shards"
 
 /**
  * The search box, and the dialog behind it.
@@ -58,6 +59,12 @@ const KIND_LABEL: Readonly<Record<SearchKind, string>> = {
 type Loading = "idle" | "loading" | "ready" | "failed"
 
 const OPTION_ID = (position: number): string => `loom-search-result-${position}`
+
+/** A static file, or a rejection carrying the status a reader will never see. */
+const readJson = (path: string): Promise<unknown> =>
+  fetch(path).then((response) =>
+    response.ok ? response.json() : Promise.reject(new Error(String(response.status)))
+  )
 
 const Results = ({
   hits,
@@ -159,13 +166,16 @@ const Results = ({
 
 export const Search = () => {
   const router = useRouter()
+  const pathname = usePathname()
 
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
   const [index, setIndex] = useState<SearchIndex | undefined>(undefined)
   const [names, setNames] = useState<SearchNames | undefined>(undefined)
-  const [prose, setProse] = useState<SearchProse | undefined>(undefined)
+  const [prose, setProse] = useState<readonly SearchProse[]>([])
+  const [asked, setAsked] = useState<readonly string[]>([])
+  const [ownSettled, setOwnSettled] = useState(false)
   const [code, setCode] = useState<SearchCode | undefined>(undefined)
   const [loading, setLoading] = useState<Loading>("idle")
 
@@ -200,14 +210,30 @@ export const Search = () => {
   }, [])
 
   /**
+   * The words of one section, merged whenever they turn up.
+   *
+   * Kept as a list of parts rather than one merged object because merging is
+   * what `withProse` is for and doing it twice would be two answers to the same
+   * question. A part that never arrives is a section whose sentences cannot be
+   * found; nothing else about the box changes.
+   */
+  const readProse = useCallback((section: string): Promise<void> => {
+    setAsked((sections) => (sections.includes(section) ? sections : [...sections, section]))
+
+    return readJson(searchProsePath(section))
+      .then((body: unknown) => setProse((parts) => [...parts, parseSearchProse(body)]))
+      .catch(() => undefined)
+  }, [])
+
+  /**
    * The index, fetched once and only once it is wanted.
    *
    * `idle` is the state that makes that true: the effect runs on every open and
    * does nothing after the first, so re-opening the dialog is free and a failed
    * fetch stays failed rather than retrying on every keystroke.
    *
-   * **Four files leave together and only one is waited for.** The first is the
-   * site's own table of contents, which is what the box needs to answer
+   * **Four kinds of file leave together and only one is waited for.** The first
+   * is the site's own table of contents, which is what the box needs to answer
    * anything at all. The runtime's published names, the words under each entry
    * and the code beside them are asked for at the same moment and each is
    * merged whenever it turns up. A reader typing in between gets the same
@@ -218,56 +244,93 @@ export const Search = () => {
    * The names are the one whose absence a reader could mistake for an answer,
    * because they bring rows rather than rank the ones already there. That is
    * what the sentence under *nothing on the site says this* is for.
+   *
+   * **The words are the one that is now several files, and the reader's own
+   * section goes first.** It is asked for here, off the address bar alone,
+   * without waiting for the table of contents — a reader searching from *The
+   * runtime* is usually searching the runtime, and the file that answers them
+   * should not be queued behind four others. A reader standing somewhere with
+   * no section of its own has nothing to put first, and the effect below sends
+   * for the lot in reading order instead.
    */
   useEffect(() => {
     if (!open || loading !== "idle") return
 
     setLoading("loading")
 
-    const read = (path: string): Promise<unknown> =>
-      fetch(path).then((response) =>
-        response.ok ? response.json() : Promise.reject(new Error(String(response.status)))
-      )
-
-    void read(SEARCH_INDEX_PATH)
+    void readJson(SEARCH_INDEX_PATH)
       .then((body: unknown) => {
         setIndex(parseSearchIndex(body))
         setLoading("ready")
       })
       .catch(() => setLoading("failed"))
 
-    void read(SEARCH_NAMES_PATH)
+    void readJson(SEARCH_NAMES_PATH)
       .then((body: unknown) => setNames(parseSearchNames(body)))
       .catch(() => undefined)
 
-    void read(SEARCH_PROSE_PATH)
-      .then((body: unknown) => setProse(parseSearchProse(body)))
-      .catch(() => undefined)
-
-    void read(SEARCH_CODE_PATH)
+    void readJson(SEARCH_CODE_PATH)
       .then((body: unknown) => setCode(parseSearchCode(body)))
       .catch(() => undefined)
-  }, [open, loading])
+
+    const here = docsSectionOfPath(pathname)
+
+    if (here === undefined) {
+      setOwnSettled(true)
+
+      return
+    }
+
+    void readProse(here).finally(() => setOwnSettled(true))
+  }, [open, loading, pathname, readProse])
+
+  /**
+   * The rest of the site's words, **behind** the reader's own section rather
+   * than beside it.
+   *
+   * Waiting on the first one to settle is the whole of the ordering: four
+   * parallel requests share a connection and arrive together, so asking for the
+   * reader's section first and the rest after it lands is the difference
+   * between a promise about ordering and an ordering. `settled` rather than
+   * `arrived`, because a section whose file 404s must not hold the other three
+   * hostage.
+   *
+   * Which sections exist is read off the table of contents, so this waits on
+   * that too — see `proseSectionsIn` for why it is not read from `nav.ts`, and
+   * for why the ones left have no order worth choosing between.
+   */
+  useEffect(() => {
+    if (!open || index === undefined || !ownSettled) return
+
+    for (const section of proseSectionsIn(index).filter((section) => !asked.includes(section))) {
+      void readProse(section)
+    }
+  }, [open, index, ownSettled, asked, readProse])
 
   useEffect(() => {
     if (open) field.current?.focus()
   }, [open])
 
   /**
-   * The four files, folded together in the order they are ranked.
+   * The files, folded together in the order they are ranked.
    *
    * Each fold is skipped while its file is missing rather than waited for, so
    * the box is searchable the moment the contents land and gains a band as each
-   * of the other three arrives. The names go first because the other two fold
-   * words and blocks *onto* entries, and a name that has not arrived yet is not
-   * an entry to fold anything onto.
+   * of the others arrives. The names go first because the other two fold words
+   * and blocks *onto* entries, and a name that has not arrived yet is not an
+   * entry to fold anything onto.
+   *
+   * The words are several files and fold one after another, which needs no
+   * special case: each carries the bodies of one section and no two carry the
+   * same address, so folding none of them, one of them or all of them are the
+   * same operation done a different number of times.
    */
   const searchable =
     index === undefined
       ? undefined
       : [
           (found: SearchIndex) => (names === undefined ? found : withNames(found, names)),
-          (found: SearchIndex) => (prose === undefined ? found : withProse(found, prose)),
+          (found: SearchIndex) => prose.reduce((so_far, part) => withProse(so_far, part), found),
           (found: SearchIndex) => (code === undefined ? found : withCode(found, code)),
         ].reduce((found, fold) => fold(found), index)
 
@@ -276,10 +339,16 @@ export const Search = () => {
   /**
    * What has not landed, in the words the empty state uses.
    *
-   * Read off the three optional files rather than tracked as another state,
-   * because the honest sentence is a list of what is missing and that is
-   * exactly what these three are. Built here so the claim under *nothing on the
-   * site says this* can never drift from what was really searched.
+   * Read off the later files rather than tracked as another state, because the
+   * honest sentence is a list of what is missing and that is exactly what they
+   * are. Built here so the claim under *nothing on the site says this* can
+   * never drift from what was really searched.
+   *
+   * **The words count as missing until every section has answered**, even
+   * though the reader's own section usually answered first. That is an
+   * under-claim rather than an over-claim, and deliberately: the sentence above
+   * it is about the whole site, so a box that has read one section of four has
+   * not read what that sentence says it has.
    *
    * Every phrase is plural so that one verb serves any number of them, which is
    * the sort of thing that matters here: the alternative is three sentences and
@@ -287,7 +356,7 @@ export const Search = () => {
    */
   const pending: readonly string[] = [
     ...(names === undefined ? ["the published names"] : []),
-    ...(prose === undefined ? ["the words on them"] : []),
+    ...(index !== undefined && prose.length >= proseSectionsIn(index).length ? [] : ["the words on them"]),
     ...(code === undefined ? ["the code blocks on them"] : []),
   ]
 
