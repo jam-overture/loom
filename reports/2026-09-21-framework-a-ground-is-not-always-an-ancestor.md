@@ -4,7 +4,13 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-46-a-ground-is-not-always-an-ancestor`
 **Section:** §4b — the palette contrast bar and the derivation behind it
-**Pull request:** #TBD · **Preview:** TBD
+**Pull request:** [#355](https://github.com/jam-overture/loom/pull/355) ·
+**Preview:** https://loom-git-framework-46-a-grou-aaad51-jpizzolato36-6341s-projects.vercel.app
+— published unverified: `*.vercel.app` is off this sandbox's egress allowlist,
+the standing 19 August limit #349–#354 all cite. **There is nothing new on it to
+look at** in any case: this is the contrast derivation and a palette ground, and
+no page renders differently. The picture below is a diagram rather than a
+screenshot, and it is the whole of the argument.
 
 ![the two walks: the ancestor chain the probe followed, and the stack the page renders](2026-09-21-framework-a-ground-is-not-always-an-ancestor.png)
 
