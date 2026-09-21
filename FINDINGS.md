@@ -28447,3 +28447,44 @@ somebody else.
 configured identity is the one the deployment pipeline trusts, and a lane's name
 belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
+
+---
+## 2026-09-21 — the shot list still cannot photograph a state that lives in storage, and the second sighting names the field
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — a **second sighting** of the 17 September entry above, not a new gap;
+filed because a gap that costs the same lane twice is evidence about the gap,
+and because this run settles the design question that one left open
+
+`tools/screenshot/plan.ts` is unchanged: a `do` list of `click` and `wait`, and
+nothing that can put a value in `localStorage` before navigation. This run built
+five states of `/lessons/review/corrections`, and **every one of them is a state
+the browser is already in when the page loads** — an empty record, a record with
+two clean attempts, a record whose only misses are predictions the queue
+declines, a record whose misses have retired, and a key holding something that
+is not JSON. None is reachable by clicking anything, so the screenshots in
+`lessons/reports/2026-09-21-*` were taken by a short Playwright script in a
+scratch directory, exactly as on 17 September, and
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+is the record that arrangement is meant to be an exception to.
+
+**What is new is that the choice is now decidable.** That entry offered two
+designs and picked neither:
+
+- a **`storage` map** applied before navigation — in keeping with a shot list
+  being *input*, Zod, `strict`, a misspelling loud — but unable to reach the
+  storage-blocked case;
+- an **`initScript`** string, which reaches everything and is arbitrary
+  JavaScript in a JSON file.
+
+Ten of the ten states this lane has wanted to photograph across two runs are
+**values under one key**. Not one of them needed to run anything; the blocked
+case is the single exception and it is reachable another way, because a context
+launched with storage denied is a *browser* configuration rather than a page
+one and belongs beside `viewport` if it is ever wanted. So the `storage` map
+covers everything this lane has actually asked for, and the argument that it
+cannot reach the blocked case turns out to be an argument for a separate field
+rather than for the more powerful one.
+
+Still `Loom daily build`'s to take or refuse — `tools/` is not this lane's
+directory, and this entry adds evidence rather than a patch.

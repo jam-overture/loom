@@ -7,6 +7,7 @@ import {
   browserStore,
   openRecord,
   RECORD_KEY,
+  recordWillKeep,
   type RecordState,
   type RecordStore,
 } from "../_lib/reading"
@@ -245,7 +246,7 @@ const useOwnProgress = (active: boolean): ProgressStore => {
     progressRef.current = next
     setProgress(next)
 
-    if (!held.writable || held.wouldOverwrite) {
+    if (!recordWillKeep(held)) {
       setSaving("lost")
 
       return

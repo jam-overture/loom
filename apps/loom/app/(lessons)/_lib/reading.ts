@@ -214,6 +214,20 @@ export const recordIsKnown = (reading: RecordReading): boolean => reading.kind !
 export const recordHasHistory = (reading: RecordReading): boolean =>
   reading.kind === "read" && !isEmptyRecord(reading.progress)
 
+/**
+ * Whether what the reader does next will still be here tomorrow.
+ *
+ * Two different facts say no and they arrive from opposite directions — a
+ * browser that will not take a write at all, and a browser that would take one
+ * on top of a value nobody could read — and the answer to *will this be kept*
+ * is the same for both. It lives here rather than inline because the store
+ * already asks it before every write and a page is now entitled to ask it
+ * before the reader spends ten minutes, and two spellings of one condition
+ * across one surface is how those two come apart.
+ */
+export const recordWillKeep = (state: RecordState): boolean =>
+  state.writable && !state.wouldOverwrite
+
 /** The browser's own storage, as the three functions above. */
 export const browserStore = (): RecordStore => ({
   read: (key) => window.localStorage.getItem(key),

@@ -176,6 +176,33 @@ you spend the ten minutes rather than after, and a stored value that could not
 be read is handed back to you and **not written over**, because it is the only
 copy and the page is in no position to decide it is worthless.
 
+**The queue of questions that come back was the last one still answering as
+though it had looked.** That read was wired into the review queue and the
+syllabus index and not into the corrections sitting, which went on telling a
+reader whose record is on another machine that *nothing has come back* — and
+telling everybody else the same thing with an **or** in the middle of it:
+*either you have not missed anything yet, or everything you missed has been got
+three times running.* An **or** in a sentence about your own record is the page
+declining to go and read it. It reads it now, and the four answers are four
+different things to do next: nothing has been answered here yet, so this queue
+is downstream of the sets and the lessons and has not been given anything to be
+wrong about; you have answered some and missed none of them; some misses are
+being **held back on purpose**, because a prediction you rated 2 and got wrong
+is the exercise working rather than a gap and is not a debt; or some questions
+have been got three times running and left the queue, which is the only way out
+of it. Where the page could not look at all, it says that instead — which is a
+sentence about the browser and not about you.
+
+One further thing is said on that page and nowhere else, because it is only
+true there. A set worked in a browser that will not store anything still
+happened: you retrieved seven things closed-book, and retrieval is what works
+whether or not anybody writes it down. A correction buys a **gap** — the
+question goes away for a day, then a week, then a month — and a gap nobody
+recorded does not start, so five answered in that browser are the same five due
+again tomorrow at the same count. That is the one arrangement where this course
+asks for ten minutes and returns nothing at all, and it is now said before the
+first question rather than discovered after the fifth.
+
 ## The one-paragraph version
 
 Read this *after* lesson 01, not before — it is a summary, and summaries are

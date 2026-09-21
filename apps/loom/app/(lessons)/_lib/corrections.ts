@@ -234,6 +234,32 @@ const order = (a: PendingCorrection, b: PendingCorrection): number => {
 }
 
 /**
+ * The same walk, with the retired ones still in it.
+ *
+ * `correctionQueue` drops them because a retired question is not work, and for
+ * every caller that hands the reader something to do that is the right list.
+ * But an empty queue has more than one cause, and *this* is the list that says
+ * which: a reader who has retired eleven questions and a reader who has never
+ * been asked one both get nothing from the function above, and the difference
+ * between them is the difference between a queue that has finished and a queue
+ * that has never started.
+ *
+ * Retired entries carry `dueOn` as the day of their last clean retrieval rather
+ * than a future date, and sort to the end of a mixed list, and neither matters
+ * to anybody yet — the only thing read off them is that there are some.
+ */
+export const everyCorrection = (progress: Progress, today: string): readonly PendingCorrection[] =>
+  Object.entries(progress.sets)
+    .flatMap(([set, record]) =>
+      record.attempts
+        .filter((attempt) => comesBack(set, attempt))
+        .map((attempt) =>
+          pendingFor(set, attempt.question, attempt.confidence, attempt.grade, attempt.on, progress, today)
+        )
+    )
+    .sort(order)
+
+/**
  * Every question the reader has missed and not yet retired, with when it next
  * comes round.
  *
@@ -249,16 +275,7 @@ const order = (a: PendingCorrection, b: PendingCorrection): number => {
  * questions were waiting and shown none.
  */
 export const correctionQueue = (progress: Progress, today: string): readonly PendingCorrection[] =>
-  Object.entries(progress.sets)
-    .flatMap(([set, record]) =>
-      record.attempts
-        .filter((attempt) => comesBack(set, attempt))
-        .map((attempt) =>
-          pendingFor(set, attempt.question, attempt.confidence, attempt.grade, attempt.on, progress, today)
-        )
-    )
-    .filter((correction) => correction.status !== "retired")
-    .sort(order)
+  everyCorrection(progress, today).filter((correction) => correction.status !== "retired")
 
 /**
  * The queue, minus questions the course no longer contains.
@@ -278,6 +295,102 @@ export const knownOnly = (
   keys: ReadonlySet<string>
 ): readonly PendingCorrection[] =>
   queue.filter((correction) => keys.has(keyOf(correction.set, correction.question)))
+
+/**
+ * Why there is nothing to re-answer, for a reader who has been told there is
+ * nothing to re-answer.
+ *
+ * *Nothing has come back* was one sentence over several situations, and it
+ * named two of them in a disjunction — *either you have not missed anything
+ * yet, or everything you missed has been got three times running.* An **or** in
+ * a sentence about the reader's own record is the author saying they did not
+ * look, and the record was sitting right there: it knows which. This is lesson
+ * 24's rule turned on the page that reports it, and the second time this
+ * surface has needed it — the review queue's *no set is due today* was the
+ * first, one floor up.
+ *
+ * The four readings are four different things to do next, which is the test
+ * that says they are four rather than one:
+ *
+ * | reading | what the reader should do |
+ * | --- | --- |
+ * | `unanswered` | work a set or a lesson — this queue is downstream of both |
+ * | `unmissed` | nothing; the queue is empty because you have been right |
+ * | `held-back` | nothing, and know that a guess you called a guess is not a debt |
+ * | `retired` | nothing, and this is what the queue finishing looks like |
+ *
+ * `held-back` is the one worth having. A reader who missed three Predict
+ * questions and rated them 2 has three misses in the record and an empty
+ * corrections queue, and being told *you have not missed anything* by a page
+ * that can see all three reads as the page being broken. It is not: `comesBack`
+ * declines them on purpose, because a prediction you knew you were guessing at
+ * is the exercise working rather than a gap. Saying so is cheaper than having
+ * the reader work it out, and it teaches the rule.
+ *
+ * The storage reading is deliberately **not** a fifth arm. Whether the record
+ * could be read at all is a fact about the browser rather than about the
+ * course, it is settled before this function is reached, and folding it in
+ * would put the one question this module cannot answer inside the value that
+ * claims to answer them.
+ */
+export type QuietQueue =
+  /** No question the course still holds has been graded here. */
+  | { readonly kind: "unanswered" }
+  /** Questions have been answered and none of them was missed. */
+  | { readonly kind: "unmissed"; readonly answered: number }
+  /** Misses the queue declines to return: predictions the reader was unsure of. */
+  | { readonly kind: "held-back"; readonly count: number }
+  /** Misses that have been got three times running. */
+  | { readonly kind: "retired"; readonly count: number }
+
+/**
+ * Every graded attempt whose question the course still contains, with the slug
+ * it was recorded under.
+ *
+ * Filtered by the same keys as the queue, and that is the whole reason it is a
+ * function rather than a `reduce` over `progress.sets`. A miss on a question
+ * that has since been renumbered is dropped from the queue — it has to be,
+ * because nothing can render it — and a count of "questions you have answered"
+ * that still included it would have the page reasoning about a history it
+ * cannot point at. Every number on this page counts the same things or none of
+ * them mean anything.
+ */
+const gradedIn = (
+  progress: Progress,
+  keys: ReadonlySet<string>
+): readonly (readonly [string, Attempt])[] =>
+  Object.entries(progress.sets).flatMap(([set, record]) =>
+    record.attempts
+      .filter((attempt) => keys.has(keyOf(set, attempt.question)))
+      .map((attempt) => [set, attempt] as const)
+  )
+
+export const whyNothingComesBack = (
+  progress: Progress,
+  keys: ReadonlySet<string>,
+  today: string
+): QuietQueue => {
+  const retired = knownOnly(everyCorrection(progress, today), keys).filter(
+    (correction) => correction.status === "retired"
+  ).length
+
+  if (retired > 0) return { kind: "retired", count: retired }
+
+  const graded = gradedIn(progress, keys)
+
+  /**
+   * Counted from the record rather than from a `PendingCorrection`, because
+   * these never become one: `comesBack` refuses them at the door, which is
+   * exactly why the reader cannot see for themselves why they are not here.
+   */
+  const heldBack = graded.filter(
+    ([set, attempt]) => attempt.grade !== "got-it" && !comesBack(set, attempt)
+  ).length
+
+  if (heldBack > 0) return { kind: "held-back", count: heldBack }
+
+  return graded.length > 0 ? { kind: "unmissed", answered: graded.length } : { kind: "unanswered" }
+}
 
 export const dueCorrections = (
   queue: readonly PendingCorrection[]

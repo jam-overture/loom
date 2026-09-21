@@ -7,10 +7,12 @@ import {
   correctionQueue,
   correctionSitting,
   dueCorrections,
+  everyCorrection,
   keyOf,
   knownOnly,
   nextCorrection,
   wasConfident,
+  whyNothingComesBack,
 } from "./corrections"
 import {
   EMPTY_PROGRESS,
@@ -282,5 +284,109 @@ describe("the questions the course no longer contains", () => {
 
     expect(queue).toHaveLength(2)
     expect(knownOnly(queue, new Set(["set-d#7"])).map((each) => each.set)).toEqual(["set-d"])
+  })
+})
+
+/**
+ * What an empty queue is evidence of.
+ *
+ * *Nothing has come back. Either you have not missed anything yet, or
+ * everything you missed has been got three times running.* One sentence, an
+ * **or** in the middle of it, and a record two lines away that knows which. The
+ * four cases below are four different things for the reader to do next, which
+ * is the only test that says they are four things rather than one.
+ */
+describe("why there is nothing to re-answer", () => {
+  const KEYS = new Set(["set-d#7", "set-c#2", "lesson-04-predict#1", "lesson-04-self-check#2"])
+
+  it("says the record is empty rather than that the reader is up to date", () => {
+    expect(whyNothingComesBack(EMPTY_PROGRESS, KEYS, "2026-03-05")).toEqual({ kind: "unanswered" })
+  })
+
+  it("says so of a reader who has marked lessons and answered nothing", () => {
+    const read = readProgress({ lessons: { "4": "2026-03-01" }, sets: {} })
+
+    expect(whyNothingComesBack(read, KEYS, "2026-03-05")).toEqual({ kind: "unanswered" })
+  })
+
+  it("counts what was answered, for a reader who has missed none of it", () => {
+    const clean = missed(
+      missed(EMPTY_PROGRESS, "set-d", 7, 4, "2026-03-01", "got-it"),
+      "set-c",
+      2,
+      5,
+      "2026-03-01",
+      "got-it"
+    )
+
+    expect(whyNothingComesBack(clean, KEYS, "2026-03-05")).toEqual({ kind: "unmissed", answered: 2 })
+  })
+
+  /**
+   * The arm worth having. Three misses in the record, an empty queue, and a
+   * page that said *you have not missed anything* — which reads as the page
+   * being broken, because the reader can see the three. They are declined on
+   * purpose: a prediction you rated 2 and got wrong is the exercise working.
+   */
+  it("says a quiet queue is holding back the predictions it declines", () => {
+    const guessed = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 2, "2026-03-01")
+
+    expect(whyNothingComesBack(guessed, KEYS, "2026-03-05")).toEqual({ kind: "held-back", count: 1 })
+  })
+
+  it("does not call a confident wrong prediction held back, because it is in the queue", () => {
+    const believed = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 5, "2026-03-01")
+
+    expect(correctionQueue(believed, "2026-03-05")).toHaveLength(1)
+    expect(whyNothingComesBack(believed, KEYS, "2026-03-05")).toEqual({ kind: "unmissed", answered: 1 })
+  })
+
+  /** Three clean retrievals across a month, which is the only way out. */
+  it("says a question that has been got three times running has left the queue", () => {
+    const retired = corrected(
+      corrected(corrected(oneMiss, "set-d", 7, "got-it", "2026-03-02"), "set-d", 7, "got-it", "2026-03-09"),
+      "set-d",
+      7,
+      "got-it",
+      "2026-04-09"
+    )
+
+    expect(correctionQueue(retired, "2026-05-01")).toHaveLength(0)
+    expect(whyNothingComesBack(retired, KEYS, "2026-05-01")).toEqual({ kind: "retired", count: 1 })
+  })
+
+  /**
+   * Every number on this page counts the same things. A miss on a question the
+   * course has since renumbered is dropped from the queue because nothing can
+   * render it, and a count of *questions you have answered* that still included
+   * it would have the page reasoning about a history it cannot point at.
+   */
+  it("counts nothing the course no longer contains", () => {
+    const orphan = missed(EMPTY_PROGRESS, "set-z", 40, 5, "2026-03-01")
+
+    expect(whyNothingComesBack(orphan, KEYS, "2026-03-05")).toEqual({ kind: "unanswered" })
+  })
+})
+
+describe("the walk that keeps the retired ones", () => {
+  const retired = corrected(
+    corrected(corrected(oneMiss, "set-d", 7, "got-it", "2026-03-02"), "set-d", 7, "got-it", "2026-03-09"),
+    "set-d",
+    7,
+    "got-it",
+    "2026-04-09"
+  )
+
+  it("holds what the queue drops, which is how an empty queue gets a cause", () => {
+    expect(correctionQueue(retired, "2026-05-01")).toHaveLength(0)
+    expect(everyCorrection(retired, "2026-05-01").map((each) => each.status)).toEqual(["retired"])
+  })
+
+  it("is the same list as the queue once the retired ones are gone", () => {
+    const live = missed(retired, "set-c", 2, 4, "2026-04-20")
+
+    expect(everyCorrection(live, "2026-05-01").filter((each) => each.status !== "retired")).toEqual(
+      correctionQueue(live, "2026-05-01")
+    )
   })
 })

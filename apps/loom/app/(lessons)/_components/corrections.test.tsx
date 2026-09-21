@@ -2,8 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { Corrections, CorrectionsPanel, type CorrectionQuestion } from "./corrections"
-import { ClockProvider } from "./store"
+import { ClockProvider, ProgressProvider, RecordStoreProvider } from "./store"
 import type { Correction, Grade, Progress } from "../_lib/progress"
+import { RECORD_KEY, type RecordStore } from "../_lib/reading"
 
 /**
  * The sitting made of other sittings' failures.
@@ -47,6 +48,19 @@ const QUESTIONS: readonly CorrectionQuestion[] = [
     label: "Lesson 04 Self-check",
     number: 3,
     body: <p>What does an id promise, and what does it refuse to promise?</p>,
+    checkIn: [],
+  },
+  /**
+   * A Predict question, which the sitting renders like any other and the queue
+   * admits only when the reader was sure. It is here because the page now has
+   * something to say about the ones it declines, and a count of them taken
+   * against a course that does not contain them would be a count of nothing.
+   */
+  {
+    set: "lesson-04-predict",
+    label: "Lesson 04 Predict",
+    number: 1,
+    body: <p>What breaks if an id is reused after the node holding it is removed?</p>,
     checkIn: [],
   },
 ]
@@ -114,6 +128,44 @@ const panel = () =>
     <ClockProvider clock={() => TODAY}>
       <CorrectionsPanel keys={KEYS} />
     </ClockProvider>
+  )
+
+/**
+ * The browser misbehaving, arranged — the same three-function fake the notice
+ * uses, for the same reason: a store that throws on read is a real Safari with
+ * site data off, and it is unreachable from a real `localStorage` in a test.
+ */
+const fake = (
+  held: Readonly<Record<string, string>> = {},
+  faults: { readonly read?: boolean; readonly write?: boolean } = {}
+): (() => RecordStore) => {
+  const written = new Map(Object.entries(held))
+
+  return () => ({
+    read: (key) => {
+      if (faults.read === true) throw new Error("SecurityError")
+
+      return written.get(key) ?? null
+    },
+    write: (key, value) => {
+      if (faults.write === true) throw new Error("QuotaExceededError")
+      written.set(key, value)
+    },
+    drop: (key) => {
+      written.delete(key)
+    },
+  })
+}
+
+const sittingWith = (build: () => RecordStore) =>
+  render(
+    <RecordStoreProvider store={build}>
+      <ClockProvider clock={() => TODAY}>
+        <ProgressProvider>
+          <Corrections questions={QUESTIONS} />
+        </ProgressProvider>
+      </ClockProvider>
+    </RecordStoreProvider>
   )
 
 describe("a corrections sitting", () => {
@@ -336,5 +388,132 @@ describe("a lesson's own question, come back", () => {
     const { container } = panel()
 
     expect(container.textContent ?? "").not.toContain("to re-answer")
+  })
+})
+
+/**
+ * The four sentences that used to be one.
+ *
+ * *Nothing has come back. Either you have not missed anything yet, or
+ * everything you missed has been got three times running.* True of a reader who
+ * has done eleven sets and true of a reader who has never opened one, and its
+ * own **or** admits that the author did not go and look. Two of the four cases
+ * are not about the course at all: a record on another machine and a record
+ * nobody could read both arrive here as an empty `Progress`, and both were told
+ * they had missed nothing — which is a page reporting a fact about the reader
+ * it is in no position to know.
+ */
+describe("an empty corrections queue, asked why", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("tells a reader who has answered nothing that this queue is downstream of the sets", () => {
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("because nothing has been answered here")
+    expect(container.textContent).toContain("not saying you are on top of the course")
+    expect(container.textContent).not.toContain("three times running")
+  })
+
+  it("tells a reader who has missed nothing that the emptiness is a result", () => {
+    seed([
+      { set: "set-d", question: 7, confidence: 4, grade: "got-it" },
+      { set: "set-c", question: 2, confidence: 4, grade: "got-it" },
+    ])
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("answered 2 questions here and got every one of them")
+    expect(container.textContent).not.toContain("nothing has been answered here")
+  })
+
+  /**
+   * Three misses the reader can see and an empty queue. Being told *you have
+   * not missed anything* by a page looking at all three reads as the page being
+   * broken; it is not, and saying which rule declined them teaches the rule.
+   */
+  it("says which misses it is declining, rather than claiming there were none", () => {
+    seed([{ set: "lesson-04-predict", question: 1, confidence: 2 }])
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("1 miss in your record is being held back on purpose")
+    expect(container.textContent).toContain("you said you did not know")
+    expect(container.textContent).not.toContain("got every one of them")
+  })
+
+  it("tells a reader whose questions have retired what that looks like", () => {
+    seed(
+      [{ set: "set-d", question: 7, confidence: 5 }],
+      [
+        { set: "set-d", question: 7, confidence: 3, answer: "x", grade: "got-it", on: "2020-01-02" },
+        { set: "set-d", question: 7, confidence: 3, answer: "x", grade: "got-it", on: "2020-01-09" },
+        { set: "set-d", question: 7, confidence: 3, answer: "x", grade: "got-it", on: "2020-02-09" },
+      ]
+    )
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("has been got three times running")
+    expect(container.textContent).toContain("Missing one again puts it back at the beginning")
+  })
+})
+
+/**
+ * The two cases where the page is not measuring anything.
+ *
+ * A record on another machine and a record that could not be read both produce
+ * an empty queue, and an empty queue used to produce a sentence about what the
+ * reader had and had not missed. The review queue stopped doing this one floor
+ * up on 17 September; this page kept doing it for four more runs.
+ */
+describe("an empty corrections queue with nothing to compute from", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it("does not tell a reader it could not look at that they have missed nothing", () => {
+    const { container } = sittingWith(fake({}, { read: true }))
+
+    expect(container.textContent).toContain("that is not a finding")
+    expect(container.textContent).toContain("it could not look")
+    expect(container.textContent).not.toContain("nothing has been answered here")
+    expect(container.textContent).not.toContain("got every one of them")
+  })
+
+  it("says a stranded record is stranded rather than absent", () => {
+    const { container } = sittingWith(fake({ [RECORD_KEY]: "{oh dear" }))
+
+    expect(container.textContent).toContain("could not be read")
+    expect(container.textContent).toContain("nothing is being written over it until you say so")
+  })
+
+  it("points a reader with no record here at the one they may have elsewhere", () => {
+    const { container } = sittingWith(fake({}, { read: true }))
+
+    expect(container.textContent).toContain("working through the course somewhere else")
+  })
+
+  /**
+   * The one page where a lost write costs the whole exercise. A set that is not
+   * stored still happened — the retrieval is the thing that works. A correction
+   * buys a *gap*, and a gap nobody wrote down does not start, so five answered
+   * here are five due again tomorrow at the same count.
+   */
+  it("warns before the sitting, not after, when nothing will be kept", () => {
+    const store = fake(
+      { [RECORD_KEY]: JSON.stringify({ lessons: {}, sets: { "set-d": { attempts: [{ question: 7, confidence: 5, answer: "", grade: "missed", on: LONG_AGO }], completedOn: LONG_AGO } }, predictions: {}, corrections: [] }) },
+      { write: true }
+    )
+    const { container } = sittingWith(store)
+
+    expect(screen.getByText(/A delta removes a card/)).toBeTruthy()
+    expect(container.textContent).toContain("Nothing you answer here is being stored")
+    expect(container.textContent).toContain("come back tomorrow at the count they are at now")
+  })
+
+  it("says nothing about storage when the record reads and writes", () => {
+    seed([{ set: "set-d", question: 7, confidence: 5 }])
+    const { container } = sitting()
+
+    expect(container.textContent).not.toContain("Nothing you answer here is being stored")
   })
 })
