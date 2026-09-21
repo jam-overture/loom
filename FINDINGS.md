@@ -542,7 +542,22 @@ is a lessons branch nobody can review.
 ## 2026-09-19 — the three registries a surface already wires can now reach the model, and none of them does
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`
-· **Status:** open — one line each, and nothing is broken without it
+· **Status:** **the marketing row is closed** in `marketing-32-the-origin-it-never-mentioned`;
+the two `Loom docs` rows are open — one line each, and nothing is broken without it
+
+> **Closed for `Loom marketing`, 21 September.** `frameCatalogue(siteFrameOrigins(origin))`
+> is wired into the request `/what-you-run` measures, which is the only place
+> this surface composes prompt vocabularies. The block costs **412 characters**
+> against a measured total of 48,319 — 0.85%, against the 364 + 51 this finding
+> estimated for a one-entry origins list, the difference being the length of the
+> origin itself.
+>
+> Worth saying for whoever closes the other two rows: **wiring it was one line
+> and naming it was the rest of the run.** The measurement grew a sixth part, so
+> `partsOf` refused to build the page until the band had a sentence for it —
+> exactly as the comment there said it would. A surface that wires one of these
+> and has a band claiming to enumerate what leaves should expect the same alarm,
+> and should want it.
 
 [0172](decisions/0172-what-a-deployment-offers-a-model-is-one-value.md) closes a
 gap that had three instances: `dataCatalogue`, `submissionCatalogue` and
@@ -579,8 +594,28 @@ migration was careful not to be.
 ## 2026-09-19 — five files in three other lanes changed so `pnpm verify` would pass, and one of them is a change of meaning
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`, `Loom marketing`,
-`Loom lessons` · **Status:** open — four are mechanical; the third row is a
-decision somebody else's test forced and should get a second opinion
+`Loom lessons` · **Status:** **the second opinion the third row asked for is
+given below and the guard stands**; the rest is open — four are mechanical
+
+> **Answered by `Loom marketing`, 21 September.** The third row asked whether
+> `partsOf` should ignore a part that costs nothing, or name all eight and print
+> three zeroes. **The narrowing was right, and this is the run that proved it
+> rather than argued it.**
+>
+> The site registered one of the three the same week and nobody noticed. Wiring
+> it in `marketing-32-the-origin-it-never-mentioned` made the frames part cost
+> 412 characters, and the page refused to build until the band had a sentence
+> for it — the alarm one step later, at the moment it became true, which is what
+> the note in the code promised. Printing *0 characters* under a heading about
+> what leaves your server would have bought a row nobody can act on, and it
+> would not have fired here, because a row that already exists does not start
+> existing.
+>
+> The one thing it did not cover was the band *above* it, which claims a reader
+> can read down its last column to see the whole of what leaves. That column was
+> two rows short — the palettes had been sent since the band was written. Same
+> branch, and `bandsAgree` now holds the two bands to each other in both
+> directions.
 
 `measurePrompt` and its three siblings took two trailing positional optionals
 and now take one `PromptVocabularies` object, because a fifth and sixth
