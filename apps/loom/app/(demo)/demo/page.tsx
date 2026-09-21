@@ -13,7 +13,7 @@ import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { setAside } from "@/app/(demo)/_lib/set-aside"
 import { spotlightsAcross, spotlitChanges } from "@/app/(demo)/_lib/spotlight"
-import { isUndo } from "@/app/(demo)/_lib/undo"
+import { putsSomethingBack } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
@@ -117,11 +117,13 @@ const DemoPage = async () => {
    * an applied one describes the tree that is there now, so the same resolution
    * serves both and neither can point at a node that no longer exists.
    *
-   * `isUndo` travels with each, because a mark reading "New — just added" over a
-   * band the visitor has just watched come *back* is the one claim this surface
-   * exists to make, said backwards. The delta cannot supply it — an undo's
-   * operations are ordinary inserts and removes (0032) — so the record's own
-   * provenance does.
+   * `putsSomethingBack` travels with each, because a mark reading "New — just
+   * added" over a band the visitor has just watched come *back* is the one claim
+   * this surface exists to make, said backwards. The delta cannot supply it — an
+   * undo's operations are ordinary inserts and removes (0032) — so the record
+   * does, from its provenance when a control asked for the undo and from its
+   * frozen settings when a second press of a toggle simply went back
+   * (`put-back.ts`).
    *
    * And the holds the page has moved past travel with them too, which is why
    * this had to move below them: a mark in the waiting colour over a change that
@@ -140,7 +142,7 @@ const DemoPage = async () => {
     spotlit.map((one) => ({
       touched: one.record.touched,
       tone: one.tone,
-      restoring: isUndo(one.record),
+      restoring: putsSomethingBack(one.record),
     }))
   )
   const spots = drawn.flat()
@@ -230,11 +232,17 @@ const DemoPage = async () => {
    * holds the first, `session.ts` writes the second — and this page is the one
    * place both are in hand. A hold with no record of its own is described as an
    * ordinary change, which is the safe reading: it is what the delta says.
+   *
+   * The same predicate the marks are drawn from, and it has to be: this is the
+   * sentence saying what the change *would* do and that one is the sentence
+   * saying what it *did*, about one change. A hold described as an ordinary
+   * change and then applied as a restoration would be the record contradicting
+   * itself across one press.
    */
   const restoring = (proposalId: string): boolean => {
     const record = records.find((one) => one.heldProposalId === proposalId)
 
-    return record !== undefined && isUndo(record)
+    return record !== undefined && putsSomethingBack(record)
   }
 
   const plains = new Map<string, readonly PlainChange[]>(

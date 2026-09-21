@@ -67,6 +67,83 @@ What a next run needs decided before it can move, smallest first:
 The third may be right, and if it is, the inventory's *"needs an asset — not
 work"* should say **not reachable, deliberately** instead, because *not work* is
 what left `pin` in the other row for two weeks.
+## 2026-09-20 — `main` in a fresh session clone is fifty-one commits behind `origin/main`, and the procedure says to branch off it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+caught here by one `grep`, and it would have reverted three weeks of four lanes'
+work inside a pull request that looked like a nine-file diff
+
+Step 3 of the procedure in `docs/routines.md`, and of every routine brief, says
+**branch off `main`**. In this session that is a rewind.
+
+```
+$ git log --oneline -1           # the checkout the session opens in
+0aa38ef Lessons: 27, the fact a sibling holds …  (#350)
+
+$ git log --oneline -1 main      # the ref the procedure names
+f62b9bc Lessons: 18 repaired …                    (#299)
+```
+
+`main` and `origin/main` both pointed at **f62b9bc**, fifty-one commits behind
+the tree the session was actually opened on. `git checkout -b demo-23 main`
+succeeds, says nothing, and lands you on a three-week-old working tree — this run
+noticed only because the files it had read minutes earlier came back without the
+components another run added on 19 September.
+
+**What it would have cost if it had not been noticed.** Every commit between the
+two is a change by another lane. A branch cut from the stale ref carries all of
+them as deletions, and a pull request against `main` would therefore propose
+reverting three weeks of four lanes' work — while reading, in the diff view, as
+whatever small unit the run actually wrote. `pnpm verify` would be green, because
+the old tree was green when it was `main`.
+
+**What this run did instead**, and it is two commands rather than one:
+
+```bash
+git fetch origin main
+git checkout -B <branch> origin/main
+```
+
+`origin/main` after an explicit fetch is the only ref in the repository that is
+known current. `main` is whatever the clone was left holding.
+
+**Recommend** a paragraph in `docs/routines.md` beside *Reading the merge gate*,
+which is the other entry about a thing a **run** does rather than a thing the
+repository contains — and the same shape of trap, in that nothing fails and the
+output looks right. Filed for the framework routine because `docs/routines.md` is
+its file; the briefs say `main` too, so the maintainer may want the sentence in
+both places.
+
+---
+## 2026-09-20 — a change that structurally reverses the one before it is still described as an arrival
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-23-back-the-way-it-came`, and not reachable from any button
+this surface currently offers
+
+`put-back.ts` reads a change as putting something back when its **settings** are
+the exact reverse of the last change's. That covers the two toggles a visitor can
+press, and it is the whole of what the 14 September finding asked for.
+
+It does not cover the structural mirror of the same thing: an `insert` that puts
+back exactly what the last change `remove`d, asked for as an ordinary change
+rather than through **Put it back**. The record for that reads *“Something new
+went onto the page”* over content the visitor watched come off it — which is the
+defect `restoringOperation` was written for, reached the one way its provenance
+check cannot see.
+
+**Not reachable today**, which is why it is filed rather than built. The five
+presets offer one removal and one insert and they are about different parts of
+the page, so nothing in the panel can produce it; free text and a model key can,
+and a sixth preset would. Both are things that will exist.
+
+**The shape that would close it** is the same comparison one level up: the
+inverse of the last change's delta is already on its record
+(`reversibility.inverseOperations`), and it is there as *strings*. Comparing
+operations rather than their descriptions needs the delta itself frozen on the
+record beside `settingsMoved`, which is a bigger field for a smaller case — so
+the recommendation is to wait until something can actually produce it, and to
+take the whole delta rather than a second special case when it does.
 
 ---
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
@@ -1326,8 +1403,31 @@ There is also a third option nobody has to choose between: make `rankOf` refuse
 to answer `-1`.
 ## 2026-09-14 — a change that only configures says what kind of change it was and never which way it went
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
-honest limit of the unit that landed beside it
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-23-back-the-way-it-came`** (20 September) — shape **(2)** taken, and taken
+further than the entry expected.
+
+The recommendation was a new sentence saying *which press this was*. What landed
+writes no new sentence at all: the demo already had a whole vocabulary for a
+change that puts something back — *“The whole page went back to how it looked”*
+on the card, *“Changed back”* on the mark — and it was reachable only by pressing
+**Put it back**, because `restoring` was read off provenance (`isUndo`).
+`_lib/put-back.ts` computes the other way of getting there, and
+`putsSomethingBack` joins the two so the card, the mark and the *would* sentence
+cannot disagree.
+
+**Shape (1) is untouched and still `Loom primitives`'.** Naming the values —
+*“the top band went from the soft wash to the flat panel”* — remains the truest
+answer and remains a registry question. This closes the *direction*, not the
+vocabulary: a stranger is now told the page went back, and still not what it went
+back to.
+
+**And one limit was found while building, narrower than the entry's (3).** The
+reading is refused when anything moved the page in between. Press the palette,
+then the band, then the palette again and the card says what it said before —
+because *“the whole page went back to how it looked”* over a page still carrying
+a repainted band is a sentence a stranger can see is false. Asserted both ways,
+in `put-back.test.ts` and over the write path in `pipeline.test.ts`.
 
 `demo-17-what-the-record-did` gives a landed card the sentence it never had:
 what the change did to the page, in the words on the page. For an insert, a
@@ -1413,6 +1513,22 @@ it. `assessedAgainst` is already a named function; it is on the wrong side of
 the `"use server"` boundary. Left for the next run rather than folded into this
 one, because it is a refactor with its own argument and this unit was already
 five files.
+
+**Second data point, 20 September, `demo-23-back-the-way-it-came`.** The file now
+carries a third decision of its own: **which earlier asks a change is compared
+against**. `assessedAgainst` hands `session.records` in, and deleting that one
+line leaves the suite at **37 files, 490 tests, green** — with the demo's second
+press silently back to printing the first press's sentence, which is the defect
+this whole run was opened to fix. It is the same shape as the `restoring` line
+above and it was added for the same reason: the fact is the caller's own
+knowledge about its own request, and the caller is the one file nothing can call.
+
+`assessedAgainst` is itself the named function this entry asked for — the
+decisions are out of the statement and into something with a name — and that
+turns out not to be the half that matters. It is still on the wrong side of
+`"use server"`, so no test calls it; `pipeline.test.ts` passes the same three
+arguments in its own copy of the call. Moving it into `_lib/` is a two-line move
+and it is what this entry has meant since it was filed.
 
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
@@ -27445,6 +27561,25 @@ folded into this unit.
 **Recommendation:** take it as its own unit, and take it before the next reading
 lands in that file rather than after.
 
+**Fifth data point, 20 September, `demo-23-back-the-way-it-came`.** The eighth
+reading moved into `page.tsx` today — which control's answer decides whether the
+page's marks say *back* — and it is unwired by changing one word:
+
+```
+restoring: putsSomethingBack(one.record)   →   restoring: false
+```
+
+**37 files, 490 tests, all green.** No `TS6133` this time either, because the
+import is still used four lines further down. The mark on the band goes from
+*Changed back* to *Just changed* on a press the card beside it still describes as
+having put the page back — which is the two halves of one claim disagreeing, and
+is the exact defect `putsSomethingBack` exists to make impossible. Photographed
+both ways in this run's report; caught by nothing.
+
+The recommendation is unchanged and is now four runs old. `whatTheRailShows` is
+still the shape, and the argument for taking it *before* the next reading lands
+is a reading weaker than it was: this run added the eighth.
+
 ---
 ## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
 
@@ -28066,7 +28201,10 @@ buys at most 80px of the 150–250 needed, and would spend the site's core promi
 to do it.
 ## 2026-09-20 — a listing now hands back the rows it could not read, and nothing on any screen renders them
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** **closed** by
+`Loom portal` on 20 September, on branch `portal-32-the-change-nobody-can-answer`:
+all three screens read `unreadable` now, and the count recommendation was taken
+(`held.length`, with a mark). See the report of that date. Originally filed
 open — **nothing is broken and no queue is shorter than it was.** A new field
 with no reader, and it is yours
 
@@ -28354,3 +28492,154 @@ exists. What is wrong is only the citation — an argument resting on a behaviou
 nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
+
+## 2026-09-20 — a JSX expression beside a word renders without the space between them, and `prerender:check` cannot see the screens where it happened
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+fixed on this branch in the two places it occurred, filed because the *class* is
+open and the tool that exists for it does not reach the screens that have it
+
+Both marks added this run shipped as
+
+```jsx
+<span className="…">
+  {unreadable.length} can&rsquo;t be read
+</span>
+```
+
+and both rendered **`1can't be read`**. JSX drops the whitespace around a
+newline between an expression container and the text after it, so the space a
+reader needs is exactly the one a formatter takes away — and the fix is
+`{" "}`, which a formatter will then put back on its own line.
+
+**Two things that should have caught it and could not.**
+
+1. **The tests passed.** `toContain("1 can’t be read")` would have failed, but
+   the assertions written first were `toContain` on a count and on a phrase,
+   and the run-together string satisfies both. That is the 24 August lesson
+   restated for a new junction: *a missing space between independently-held
+   strings satisfies every `toContain` either side of it*.
+2. **`prerender:check` is the tool for this** — 859 text junctions, 0 run
+   together — **and it reads prerendered pages only.** Every screen in this
+   route group is `ƒ` in the build output, because every one of them reads a
+   session cookie. So the one class of defect the repository has built a
+   dedicated tool for is the one class it cannot check on the portal.
+
+A photograph found it, which is the fourth time this lane has filed *a
+screenshot found what the suite could not*.
+
+**What was done here, and what is not this lane's to do.** The wording moved
+into `unreadableMark` in `_lib` — one string, one assertion on the whole of it,
+one source for the two screens. That is a fix for two junctions and not for the
+class.
+
+**The recommendation is for `Loom daily build`**, because the tool is its:
+`tools/prerender/main.ts` walks the built output. A junction check that ran over
+the *source* — an expression container followed on the next line by a text
+child, with no `{" "}` between them — would be a lint rather than a render
+check, would need no server and no session, and would cover all four surfaces
+including the dynamic ones. There are 859 junctions it currently checks and an
+unknown number it cannot see.
+
+## 2026-09-20 — every screenshot in every pull request this project has opened is a broken image, and the cause is outside the repository
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+a process defect rather than a code one, and it defeats the one instruction
+every surface lane is given about pull requests
+
+**The brief for this lane says the maintainer judges the portal by eye and that
+a PR must carry a screenshot.** Three other lanes have the same instruction.
+None of it has been arriving.
+
+The tool these lanes open pull requests with rewrites markdown link and image
+targets, wrapping the URL in a pair of backticks:
+
+```
+![a caption](``https://raw.githubusercontent.com/…/shot.png``)
+```
+
+GitHub renders that as literal text. **Not a broken image with a placeholder —
+no image at all**, and a line of backticked URL where the picture should be.
+
+**It is not this run's mistake and not new.** Read back the stored bodies of
+#349 and #350, both opened today by other lanes: both carry the same
+corruption, on every image and every link. So do this lane's. The corruption is
+invisible to the lane that wrote the body, because the text sent was correct —
+it has to be read back from the API to be seen, and nobody has.
+
+**The trigger, narrowed by four measurements on #351.** The first reading —
+*markdown is corrupted, HTML survives* — was wrong, and worth correcting
+because the wrong remedy still breaks. Rewriting the same body four times and
+reading it back each time gives this:
+
+| link | text | outcome |
+| --- | --- | --- |
+| `[a caption](url)` markdown | anything | **corrupted** |
+| `<a href="…">the queue</a>` | prose | survives |
+| `<a href="…">0175</a>` | a number | survives |
+| `<a href="…">reports/2026-09-20-….md</a>` | **a file path** | **corrupted** |
+| `<a href="…"><b>reports/….md</b></a>` | a file path | **corrupted** |
+
+The `<a>` that broke was escaped *and* backticked — `&lt;/a&gt;` inside a code
+span — which is not a markdown-syntax rewrite at all. **Something is detecting
+text that looks like a repository file path and wrapping it in backticks**, and
+when that text sits inside an anchor it takes the anchor's markup with it. The
+markdown `[…](…)` cases all had a path or a URL in a position that matched.
+
+So the remedy is two rules, not one:
+
+1. **Write links and images as HTML** — `<a href>`, `<img src>`.
+2. **Never put a file path in the link text.** Use prose: *the full write-up*,
+   *the queue*, *every disclosure open*. A path belongs in a code span of its
+   own, outside the anchor.
+
+Both are needed. Either alone still produces a broken line.
+
+**A second, independent reason the pictures would not have shown anyway.** This
+repository is private, so `raw.githubusercontent.com` answers `404` to an
+unauthenticated fetch — measured, both URLs — and GitHub proxies images in a PR
+body through camo, which does not carry the reader's session. A private repo's
+images cannot be hotlinked into a PR body at all, by either syntax.
+
+**What actually reaches a reader**, and what this lane will do from now on:
+the preview deployment, plus a prose-titled link to the report in-branch, where
+GitHub renders the images relative to a file the signed-in maintainer is
+authorised to read. The `reports/` markdown has always done this correctly —
+its image references are relative paths, which is why they were never
+affected. Only the PR bodies were broken.
+
+**Owned here rather than passed on** because the remedy is a convention every
+lane can adopt today and needs no tooling. It is worth `docs/routines.md`
+carrying one line about it, which is `Loom daily build`'s file — named here
+rather than filed separately.
+
+## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
+by this branch — this lane's own mistake, recorded because the error message
+points away from it
+
+This run committed with an explicit author, `Loom portal <…@gmail.com>`, on the
+reasoning that a lane's commits should say which lane made them. Vercel refused
+to deploy the branch:
+
+```
+Git author jpizzo must have access to the project on Vercel to create deployments.
+```
+
+The commit status goes **red on the pull request**, and the message names a
+GitHub account and a Vercel team — so it reads as an access problem for the
+maintainer to fix. It is not. **Every other commit on `main` is authored
+`jonathanbravecredit <60827135+jonathanbravecredit@users.noreply.github.com>`**,
+which is the identity the Vercel project accepts, and #346 through #350 all
+carry preview URLs because of it.
+
+The cost is precisely the thing this lane's brief asks for: *open the PR with
+the deployed preview URL, because this surface exists to be looked at.* A lane
+that renames its author silently loses that and gets a red check that blames
+somebody else.
+
+**Rule, for any lane:** do not set `--author` on a commit. The repository's
+configured identity is the one the deployment pipeline trusts, and a lane's name
+belongs in the branch name, the commit subject and the report — all three of
+which already carry it.
