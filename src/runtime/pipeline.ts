@@ -14,6 +14,7 @@ import { narrator } from "./narration.js"
 import type { PolicySource } from "./policy-source.js"
 import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
+import type { PropsVocabulary } from "./vocabulary.js"
 
 /**
  * The composition runtime: EditIntent → ProposedChange → Gate → Disposition →
@@ -43,6 +44,19 @@ export type CompositionRuntime = {
    * counter that could drift.
    */
   readonly repairer?: ChangeRepairer
+  /**
+   * What this deployment's primitives accept, checked before a delta is judged.
+   * Optional, and absent by default: a runtime handed none cannot check props,
+   * so "this deployment refuses AI-authored props its own schemas reject" is a
+   * visible choice at the composition root rather than a property of whichever
+   * interpreter happened to be wired in (0179).
+   *
+   * Deliberately the same shape as the renderer's `PropsValidator`, so a host
+   * with a registry hands the same object to both seams and the two cannot
+   * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK
+   * is how one is obtained without hand-keeping it.
+   */
+  readonly propsVocabulary?: PropsVocabulary
 }
 
 export type CompositionOutcome =
@@ -189,7 +203,13 @@ const judgeProposal = (
   const emit = emitter(runtime, tree)
   emit({ type: "change-proposed", proposal })
 
-  const assessed = assessChange(tree, proposal, policy, runtime.idFactory.deltaId())
+  const assessed = assessChange(
+    tree,
+    proposal,
+    policy,
+    runtime.idFactory.deltaId(),
+    runtime.propsVocabulary
+  )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
 
@@ -333,7 +353,13 @@ export const confirmChange = (
   const policy = runtime.policySource.resolve({ tree, intent })
   emit({ type: "policy-resolved", intentId: intent.intentId, policy })
 
-  const assessed = assessChange(tree, proposal, policy, runtime.idFactory.deltaId())
+  const assessed = assessChange(
+    tree,
+    proposal,
+    policy,
+    runtime.idFactory.deltaId(),
+    runtime.propsVocabulary
+  )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
 

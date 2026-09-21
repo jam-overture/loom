@@ -1,4 +1,5 @@
 import type { PrimitiveType } from "../primitive-type.js"
+import type { PropsVocabulary } from "../runtime/vocabulary.js"
 
 import type { PrimitiveRegistry } from "./registry.js"
 
@@ -25,3 +26,21 @@ import type { PrimitiveRegistry } from "./registry.js"
  */
 export const registeredTypesFor = (registry: PrimitiveRegistry): readonly PrimitiveType[] =>
   registry.primitives.map((primitive) => primitive.type)
+
+/**
+ * What a registry's primitives accept, in the shape the write path takes.
+ *
+ * `PrimitiveRegistry` already satisfies `PropsValidator` — the renderer is
+ * handed the registry itself — so this is a one-line adapter and that is the
+ * point of it. A host that writes the closure by hand can write a different
+ * one, and a deployment whose Gate and whose renderer disagree about which
+ * props are acceptable has a hole that no test of either seam alone finds.
+ *
+ * Wiring it is still the host's explicit call, for the reason
+ * `registeredTypesFor` gives one layer up: a runtime handed none checks
+ * nothing, which is the behaviour every deployment had before 0179.
+ */
+export const propsVocabularyFor =
+  (registry: PrimitiveRegistry): PropsVocabulary =>
+  (type, props) =>
+    registry.validateProps(type, props)

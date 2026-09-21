@@ -30,6 +30,7 @@ import {
 import { fixedPolicy, type PolicyContext, type PolicySource } from "./policy-source.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
+import type { PropsVocabulary } from "./vocabulary.js"
 
 const spare = sequentialIdFactory("pipe")
 
@@ -49,6 +50,7 @@ const harnessFor = (options: {
   readonly confidence?: number
   /** For the containment tests: a sink that refuses some of what it is handed. */
   readonly sink?: CollectingEventSink
+  readonly propsVocabulary?: PropsVocabulary
 }): Harness => {
   const { tree, ids } = sampleTree()
 
@@ -76,6 +78,7 @@ const harnessFor = (options: {
       events,
       clock: fixedClock(),
       idFactory: spare,
+      ...(options.propsVocabulary ? { propsVocabulary: options.propsVocabulary } : {}),
     },
     events,
     tree,
@@ -877,5 +880,174 @@ describe("composeChange on a delta that names a primitive nobody registered", ()
 
     expect(outcome.assessment.analysis.unknownPrimitives).toEqual([])
     expect(findNode(outcome.tree.root, ids.card)).toBeTruthy()
+  })
+})
+
+/**
+ * The write path against a deployment that has declared what its primitives
+ * accept. `loom.card` takes two variants here; everything else is undeclared,
+ * which is the state most of a real registry is in on the day it is wired.
+ */
+const acceptsVariants: PropsVocabulary = (type, props) =>
+  type !== "loom.card"
+    ? { outcome: "undeclared" }
+    : props.variant === "outlined" || props.variant === "filled"
+      ? { outcome: "valid" }
+      : {
+          outcome: "invalid",
+          issues: [{ path: "variant", message: `received ${String(props.variant)}` }],
+        }
+
+/** The change the docs' quickstart makes: a prop the declaring schema will not take. */
+const overlongProp = (ids: SampleTree["ids"]): TreeOperation[] => [
+  { op: "configure", nodeId: ids.card, set: { variant: "invented" }, unset: [] },
+]
+
+describe("composeChange against a declared props vocabulary", () => {
+  /**
+   * The behaviour every deployment had before 0179, asserted rather than
+   * assumed: an unwired runtime must be bit-for-bit what it was, because that
+   * is the only thing that makes this an additive change.
+   */
+  it("commits a change no schema was consulted about when none is wired", async () => {
+    const { runtime, tree } = harnessFor({ build: overlongProp })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+
+    expect(outcome.kind).toBe("applied")
+  })
+
+  it("refuses a change that would leave a node its own primitive will not draw", async () => {
+    const { runtime, tree } = harnessFor({ build: overlongProp, propsVocabulary: acceptsVariants })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.reason.code).toBe("stakes-at-refusal-floor")
+    expect(outcome.assessment.stakes.factors.map((factor) => factor.code)).toContain("invalid-props")
+  })
+
+  it("leaves the tree where it was, so no reader is served the hole", async () => {
+    const { runtime, tree, ids } = harnessFor({
+      build: overlongProp,
+      propsVocabulary: acceptsVariants,
+    })
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    const card = findNode(tree.root, ids.card)
+    expect(card?.kind === "element" && card.props.variant).toBe("outlined")
+  })
+
+  it("says which prop and why, rather than that something was wrong", async () => {
+    const { runtime, tree, ids } = harnessFor({
+      build: overlongProp,
+      propsVocabulary: acceptsVariants,
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.assessment.analysis.invalidProps).toEqual([
+      {
+        nodeId: ids.card,
+        type: "loom.card",
+        issues: [{ path: "variant", message: "received invented" }],
+      },
+    ])
+  })
+
+  it("lets through a change the declared schema accepts", async () => {
+    const { runtime, tree } = harnessFor({
+      build: (ids) => [{ op: "configure", nodeId: ids.card, set: { variant: "filled" }, unset: [] }],
+      propsVocabulary: acceptsVariants,
+    })
+
+    expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("applied")
+  })
+
+  /**
+   * The property the whole shape was chosen for. A validation failure arrives
+   * as an ordinary refusal, so it carries a `Disposition`, so a repairer is
+   * offered it and can answer — which is exactly what a sixth outcome kind
+   * would have cost (0179). Without this, a model's near-miss is a dead end.
+   */
+  it("offers the refusal to a repairer, which can answer it", async () => {
+    const { tree, ids, runtime: base } = harnessFor({
+      build: overlongProp,
+      propsVocabulary: acceptsVariants,
+    })
+
+    const mended = buildProposal(spare, {
+      intentId: spare.intentId(),
+      delta: {
+        deltaId: spare.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations: [{ op: "configure", nodeId: ids.card, set: { variant: "filled" }, unset: [] }],
+      },
+    })
+
+    const repairer = scriptedRepairer(ok(mended))
+    const outcome = await composeChange({ ...base, repairer }, tree, intentFor(tree))
+
+    expect(repairer.requests).toHaveLength(1)
+    expect(repairer.requests[0]?.disposition.kind).toBe("rejected")
+    expect(outcome.kind).toBe("applied")
+  })
+
+  /**
+   * A repairer that is told *which* prop and *what the schema said* has enough
+   * to work with; one told only "rejected" does not. The detail is on the
+   * disposition's own sentence, which is what a repairer reads.
+   */
+  it("hands the repairer the prop and the schema's own words", async () => {
+    const { tree, runtime: base } = harnessFor({
+      build: overlongProp,
+      propsVocabulary: acceptsVariants,
+    })
+
+    const repairer = scriptedRepairer(err({ code: "not-understood", detail: "unused" }))
+    await composeChange({ ...base, repairer }, tree, intentFor(tree))
+
+    expect(repairer.requests[0]?.disposition.reason.detail).toContain("variant: received invented")
+  })
+
+  /**
+   * A page can already hold a node a later schema refuses, and an ordinary edit
+   * to it must not be refused for damage the change did not do. The same
+   * measurement `nestedTargets` makes, and the case that would make this
+   * feature unusable on any deployment that tightened a schema.
+   */
+  it("does not refuse an edit to a page that was already carrying a refused node", async () => {
+    const { runtime, tree } = harnessFor({
+      build: (ids) => [{ op: "configure", nodeId: ids.body, set: { value: "Rewritten" }, unset: [] }],
+      propsVocabulary: (type, props) =>
+        type === "loom.card" && props.variant === "outlined"
+          ? { outcome: "invalid", issues: [{ path: "variant", message: "no longer offered" }] }
+          : { outcome: "undeclared" },
+    })
+
+    expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("applied")
+  })
+})
+
+describe("confirmChange against a declared props vocabulary", () => {
+  /**
+   * The confirmation path recomputes the assessment rather than trusting the
+   * one captured at proposal time, and it has to recompute it the same way. A
+   * vocabulary threaded into one call site and not the other would let a held
+   * change land carrying exactly what the first look refused.
+   */
+  it("refuses a held change the schema will not take, even with a person saying yes", () => {
+    const { runtime, tree, proposal } = harnessFor({
+      build: overlongProp,
+      propsVocabulary: acceptsVariants,
+    })
+
+    const outcome = confirmChange(runtime, tree, proposal, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.assessment.stakes.factors.map((factor) => factor.code)).toContain("invalid-props")
   })
 })
