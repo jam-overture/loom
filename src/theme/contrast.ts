@@ -45,6 +45,24 @@ export const PALETTE_TEXT_GROUNDS: readonly PaletteSlot[] = [
   "bg-surface",
   "bg-surface-muted",
   "accent-subtle",
+  /**
+   * The fifth, and the one that had to be found rather than chosen. This list
+   * was settled when nothing in the library painted `bg-overlay` at all, and
+   * the record settling it provided for exactly this case (0089): a new ground
+   * turning up in `groundsOutsideTheRamp` means either a primitive is painting
+   * somewhere unconsidered or this list has fallen behind the library.
+   * `loom.overlay` shipped on 15 September and puts arbitrary children on its
+   * scrim, so the second is what happened — six days of it, seen by nobody,
+   * because the derivation could not follow a ground painted by a stacked
+   * sibling until today.
+   *
+   * It is on this list rather than beside `accent` because the primitive has
+   * *not* answered the ink. `loom.action` fills `accent` and writes
+   * `fg-on-accent` on it, and holding a palette to `fg-muted` there is a bar no
+   * palette can pass. An overlay sets `fg-default` at its root and then takes
+   * whatever a model puts inside it, the way a card does.
+   */
+  "bg-overlay",
 ]
 
 /**
@@ -127,6 +145,20 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
    * note row and a `loom.tier` note are ordinary small text — so a threshold of
    * 3:1 would be a bar chosen to fit the colours rather than the reader.
    */
+  /**
+   * Painted across a stack rather than down a chain: `loom.overlay` sets the ink
+   * on its root, paints `bg-overlay` on a scrim in grid cell `1 / 1`, and lays
+   * the words over it in the same cell one layer up. Read as an ancestor chain
+   * the two ends never meet, which is why this row was missing for the six days
+   * between the primitive shipping and the probe learning to see a sibling.
+   *
+   * `painted` and not `composed`: both ends are the primitive's own and no
+   * container can change either. The scrim is drawn at 0.78 or 0.92 opacity over
+   * a ground the author supplied, so clearing this is necessary and not
+   * sufficient — an unreadable photograph is `loom.overlay`'s own standing
+   * finding and not a thing a palette can answer.
+   */
+  { foreground: "fg-default", background: "bg-overlay", basis: "painted", where: "loom.overlay content over its scrim" },
   { foreground: "fg-subtle", background: "bg-surface", basis: "painted", where: "loom.footer note row" },
   { foreground: "fg-subtle", background: "bg-surface-muted", basis: "painted", where: "loom.perk excluded marker" },
 
@@ -143,6 +175,18 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
   { foreground: "accent", background: "bg-surface-muted", basis: "composed", where: "loom.faq marker inside a muted well" },
   { foreground: "accent-strong", background: "bg-canvas", basis: "composed", where: "loom.field validation message" },
   { foreground: "accent-strong", background: "bg-surface-muted", basis: "composed", where: "loom.field inside a muted well" },
+  /**
+   * The overlay's content is whatever a model put in it, so every ink that
+   * floats lands here the way it lands on a card. Under all twenty-one starter
+   * palettes `bg-overlay` holds the same value as `bg-surface`, so these four
+   * measure what their `bg-surface` rows already measure — which is the point:
+   * a host is free to give the slot its own value, and until now nothing would
+   * have read it.
+   */
+  { foreground: "fg-muted", background: "bg-overlay", basis: "composed", where: "loom.prose tone muted over a photograph" },
+  { foreground: "fg-subtle", background: "bg-overlay", basis: "composed", where: "loom.footer note inside an overlay" },
+  { foreground: "accent", background: "bg-overlay", basis: "composed", where: "loom.section eyebrow over a photograph" },
+  { foreground: "accent-strong", background: "bg-overlay", basis: "composed", where: "loom.field validation message inside an overlay" },
   /**
    * The two the library does not clear. Both are an ink placed on the tinted
    * panel, both are reachable in an ordinary tree — a perk list inside a

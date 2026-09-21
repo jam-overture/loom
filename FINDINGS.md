@@ -8,6 +8,137 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-21 — lesson 21 was edited from outside its lane to keep `pnpm verify` green, in six places, and one of them is prose rather than a number
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — the lesson is **true** as it stands and its argument is unchanged; this
+entry is so its owner reviews the edit rather than discovering it
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+added a fifth member to `PALETTE_TEXT_GROUNDS` and five rows to
+`PALETTE_TEXT_PAIRINGS`. `transcripts.test.ts` runs each lesson's exercises and
+compares what they print, so **lesson 21 went red on two printed lines** — which
+is the 13 September finding *a lesson transcript pins the size of the library*
+happening again, this time to a count of pairings rather than of primitives.
+
+Six edits, five of them counts read off an actual run rather than arithmetic:
+
+| where | was | is |
+| --- | --- | --- |
+| Exercise E transcript | `pairings measured: 21` | `26` |
+| Exercise F transcript | `house-hsl: measured=17 painted=6 unmeasured=4` | `measured=21 painted=6 unmeasured=5` |
+| the predict prompt before F | *against `house`'s 21 / 8* | *26 / 8* |
+| the paragraph after F | *four pairings out of the measured set … four pairings moved into `unmeasured`* | *five … five*, and *two of them were failures* is now *two of them were painted failures* |
+| the further-reading table | *the four declared grounds* | *the declared grounds* |
+| **the body of Part 3** | *So four grounds are declared — `bg-canvas`, `bg-surface`, `bg-surface-muted`, `accent-subtle`* | *So five grounds are declared*, with `bg-overlay` named and a sentence saying when and why it arrived |
+
+**The last row is the one to look at**, because it is teaching rather than
+output, and it is the only edit that was not read off a run.
+
+**Nothing the lesson argues changed**, which is why this was edited rather than
+escalated. `painted failures: 8` is still eight and the seven printed failure
+lines are byte-identical — `house` sets `bg-overlay` to `#ffffff`, the same as
+its `bg-surface`. The `hsl()` half of Exercise F gets *stronger*: one slot in a
+notation the bar cannot parse now takes **five** pairings out of the measured
+set instead of four, and the point it exists to make — that folding `unmeasured`
+into *pass* would let a host delete two real failures by rewriting one colour —
+is unchanged.
+
+Two things worth your judgement, neither blocking:
+
+- whether the sentence I added about the fifth ground belongs in a lesson at
+  all, or whether the list should simply read five with no history attached;
+- whether Exercise E should print `PALETTE_TEXT_GROUNDS.length` beside the
+  pairing count, so the next addition drifts one transcript line instead of
+  three sentences.
+
+---
+## 2026-09-21 — `bg-overlay` is the same colour as `bg-surface` in all twenty-one starter palettes, so the bar it just gained measures nothing here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — a question rather than a defect, and the
+honest other half of what shipped today
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+made `bg-overlay` the fifth ground the text ramp is held to, and the five rows
+it adds to `PALETTE_TEXT_PAIRINGS` are worth exactly nothing against Loom's own
+palettes: **every one of the twenty-one sets `bg-overlay` to the same string as
+`bg-surface`.** The three hand-written palettes do it by hand and `derivePalette`
+does it in one line — `"bg-overlay": bgSurface`. So each new row measures what
+its `bg-surface` twin already measured, and the new bar can only ever be earned
+by a **host** palette.
+
+That is not a reason to leave it unmeasured — a host palette is the case the
+contrast bar exists for, and *overlay* is the slot name most likely to be filled
+in with a dark wash by somebody who has written a modal. But it does leave a
+question this run did not answer: **is the slot supposed to differ from
+`bg-surface`, and if so, in what direction?**
+
+Three readings, and the vocabulary does not choose between them:
+
+| reading | what `derivePalette` would do |
+| --- | --- |
+| *the same surface, floating* | what it does today — one line, honest, and the slot is then redundant |
+| *a surface lifted off the page* | a step further from the canvas than `bg-surface`, so a floating panel reads as above rather than beside |
+| *a veil over arbitrary content* | not a surface at all, which is the reading [0131](decisions/0131-what-a-palette-cannot-say-about-itself-is-measured-from-it.md) already answered with `--loom-scrim`, derived rather than declared |
+
+The second is the only one that makes the slot carry its own weight, and it is a
+change to what nineteen derived palettes contain — which is why it is filed
+rather than taken on the way past.
+
+---
+## 2026-09-21 — the pairing derivation still cannot see a ground painted by an absolutely positioned sibling
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — a stated limit, not a gap waiting on a fix, and written down
+so the next run that meets it does not think it found a bug
+
+[0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md)
+taught `probeColourPairings` that a ground can come from a sibling stacked under
+the content, and read that stacking from `gridArea` **and from nothing else**.
+The other way to lie one box over another is `position: absolute` with insets,
+which `loom.halo` and `loom.backdrop` both use — and whether such a sibling
+covers *all* of its neighbours is a question about an arbitrary length
+expression. `inset: calc(-1 * 4px)` is `loom.halo`'s actual value; no reading of
+that string says what it covers.
+
+**Nothing is hidden by it today.** Both of those primitives draw gradients and
+box-shadows, which `slotOf` declines rather than guesses at, so neither paints a
+palette slot under its content and there is no pairing to miss. The day one of
+them does — a halo whose light is a flat `accent-subtle`, say — the pairing will
+be as invisible as `loom.overlay`'s was for six days, and this entry is the only
+thing that will say so.
+
+Two ways it could be closed, neither obviously worth it yet: restrict the rule
+to `inset: 0` and a handful of literal equivalents, which is a guess with a
+shorter list; or have the probe render to a DOM and ask a layout engine, which
+makes a pure function into a browser dependency and is the thing
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+refuses for screenshots.
+
+---
+## 2026-09-21 — the 4 September `bg-overlay` finding is in this file twice, character for character
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — cosmetic, and mentioned only because closing the entry today
+meant editing it in two places
+
+The entry *`bg-overlay` is a slot every palette must declare and nothing
+paints* appears at two separate points in `FINDINGS.md` with identical text,
+including its **Status** line. Closing it required the same edit twice, and a
+run that edited only the copy it found first would have left an open finding
+behind claiming the opposite of the closed one.
+
+`pnpm findings:check` counts entries and checks each is well-formed; it has no
+opinion about two entries being the same entry, and adding one is a change to
+a tool in `tools/`, which is not this lane's. The likely cause is a merge that
+took both sides of an append — which is the shape this file is most exposed to,
+since every routine appends to the top of it on every run.
+
+Not worth a run of anybody's on its own. Worth knowing before the next person
+closes a finding and wonders why it is still open.
+
+---
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
@@ -16217,8 +16348,18 @@ surface lane has now written this privately at least once.
 ## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around in one token, and the workaround is invisible under every
-registered palette.
+**closed by `framework-46-a-ground-is-not-always-an-ancestor`**
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the row exists, and `bg-overlay` is the fifth member of `PALETTE_TEXT_GROUNDS`
+rather than a slot outside the ramp. Of the two ways out you offered, this takes
+the first, and the choice stopped being a preference: **the premise went stale
+on 15 September and nothing could tell.** `loom.overlay` shipped that day and
+paints `bg-overlay` on the scrim behind every headline it sets over a
+photograph, so *nothing paints it* had been false for six days. It was invisible
+to `registryPairings` because the ink is declared on the root and the ground on a
+stacked sibling, and the derivation followed only an ancestor chain. Retiring the
+slot would now mean deleting a surface the library renders. `loom.pin` can take
+the token whenever this lane wants it.
 
 `loom.pin` is the library's first primitive whose content **floats over content
 it did not draw**: a label pill lying on a screenshot, positioned by a
@@ -17552,8 +17693,18 @@ write the governance it is bound by.
 ## 2026-09-04 — `bg-overlay` is a slot every palette must declare and nothing paints, so the first primitive that floats cannot use it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around in one token, and the workaround is invisible under every
-registered palette.
+**closed by `framework-46-a-ground-is-not-always-an-ancestor`**
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the row exists, and `bg-overlay` is the fifth member of `PALETTE_TEXT_GROUNDS`
+rather than a slot outside the ramp. Of the two ways out you offered, this takes
+the first, and the choice stopped being a preference: **the premise went stale
+on 15 September and nothing could tell.** `loom.overlay` shipped that day and
+paints `bg-overlay` on the scrim behind every headline it sets over a
+photograph, so *nothing paints it* had been false for six days. It was invisible
+to `registryPairings` because the ink is declared on the root and the ground on a
+stacked sibling, and the derivation followed only an ancestor chain. Retiring the
+slot would now mean deleting a surface the library renders. `loom.pin` can take
+the token whenever this lane wants it.
 
 `loom.pin` is the library's first primitive whose content **floats over content
 it did not draw**: a label pill lying on a screenshot, positioned by a
@@ -17993,8 +18144,16 @@ written it privately.
 ## 2026-09-08 — `bg-overlay` has a second would-be consumer, and a badge over a photograph is carrying the contrast alone
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` · **Status:**
-open — a limit rather than a defect today, recorded because the second instance
-is when a pattern is worth acting on
+**closed for the half this lane owns**, by
+`framework-46-a-ground-is-not-always-an-ancestor`
+([0178](decisions/0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md))
+— the first of your two ways out is now open. `bg-overlay` is a ground the text
+ramp is held to, so a listing that paints it behind its flags has a surface every
+ink in the ramp is guaranteed on, and a palette that gets it wrong fails the
+audit instead of failing quietly on somebody's photograph. Painting it is
+`Loom primitives`' call and is not done here. The second way out — a badge that
+refuses `outline` where it is floating — still cannot be built, and still for
+0008's reason
 
 The 4 September entry says `bg-overlay` is a slot every palette must declare and
 nothing paints, so the first primitive that floats cannot use it.
