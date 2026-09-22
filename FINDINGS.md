@@ -58,8 +58,12 @@ through — and that is not something a routine can see from inside.
 ---
 ## 2026-09-22 — the binding-name declaration is built and nothing declares one yet
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
-open — the other half of a seam that is finished on this side, and small
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** **withdrawn from `Loom primitives` and taken back by this lane** on
+22 September, once #361 merged and the question below could be answered by
+reading the code instead of guessing at it. **Do not declare `reads` on
+`loom.feed` or `loom.tally`** — see the answer at the foot of this entry. There
+is nothing here for the primitives lane to do.
 
 [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
 gives a primitive a `reads` declaration: the binding names it looks its answers
@@ -88,6 +92,83 @@ chose, since the binding name is a prop on the node rather than fixed by the
 primitive. If that is right, `reads` cannot describe it and the honest
 declaration is to leave it out — and this lane should hear that, because it
 would mean the seam is built for a shape the first two consumers do not have.
+
+---
+
+### The answer, read off the merged code the same day
+
+**It was right, and it is the unwelcome answer.** Both primitives read under a
+name the tree chose:
+
+```ts
+loom.feed:  loom.data[given.binding ?? "entries"]
+loom.tally: loom.data[given.binding ?? "value"]
+```
+
+`binding` is an **optional prop** on each, with a default. `loom.feed`'s own
+comment gives the reason and it is a good one — 0058 made the answer a map
+because the multi-binding case is normal, and a primitive that read whichever
+entry came first would work until somebody added a second binding beside it.
+
+So a **static list** of names cannot describe either of them, and the honest
+declaration for both is to leave `reads` out. **The seam shipped on #362 is
+correct and has no consumer among the two primitives that triggered it.** It is
+still worth what it cost — `reads: []` is a real, checkable claim for the
+ninety-odd primitives that read nothing, and the prompt clause and the
+`data-unread` diagnostic are both live — but the headline claim to make about
+#362 is narrower than the one I made, and the correction is this lane's to carry
+rather than the primitives lane's to discover.
+
+**What closes it properly is a second form of the declaration, filed below as
+its own entry and owned here.**
+
+---
+## 2026-09-22 — `reads` is a static list and the only two primitives that read a binding take the name from a prop, so neither can declare one
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — the gap #362 left, found the same day by reading the code rather than by
+waiting for a run to hit it
+
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
+gives a primitive `reads`: a fixed list of the binding names it looks its
+answers up under. `loom.feed` and `loom.tally` — the only two primitives that
+read a binding at all — take the name from an **optional prop** with a default,
+so there is no fixed list for either to declare.
+
+| primitive | what it reads | a static `reads` can say |
+| --- | --- | --- |
+| `loom.feed` | `loom.data[binding ?? "entries"]` | nothing honest |
+| `loom.tally` | `loom.data[binding ?? "value"]` | nothing honest |
+
+**Neither should declare one**, and the entry above says so. What is missing is
+a second form: *this primitive reads one binding, under whichever name this prop
+names, defaulting to that one.* Something like
+`reads: { fromProp: "binding", default: "entries" }`.
+
+It is worth building rather than shrugging at, because everything downstream
+works better with it than without, and all of it is already there:
+
+- **the walk can still check.** It has the node's props in hand at
+  `reportUnreadBindings`; the legal set becomes *the value of that prop, or the
+  default* — one name rather than a list, and a `loom:data` carrying two entries
+  on a `loom.feed` is then exactly the defect `data-unread` exists to name.
+- **the model can still be told.** ` reads: the name given by "binding"
+  (default entries)` is one clause and is more useful than the silence it gets
+  today.
+- **the registry can still refuse it**, the same way it refuses a `frames` or
+  `copy` declaration naming a prop the schema does not declare — and here the
+  named prop must exist *and* the default must be a binding name.
+
+**Not built on #362 deliberately.** That PR is green and reviewable and closes
+what it says it closes; a second declaration form is a decision that wants its
+own record and its own argument about whether two forms are better than one
+general form. The alternative worth weighing first: replace the list with the
+prop-named form entirely, since a primitive with fixed names could declare a
+prop-less variant of it — one mechanism rather than two, which is the question
+0181's decision 1 did not have to answer because it had only seen one shape.
+
+**This lane's next unit, unless a maintainer comment outranks it**, alongside
+the refusal half now that 0179 has landed on `main` with #360.
 
 ---
 ## 2026-09-22 — a binding name nothing reads is reported and still not refused, and the route that would refuse it is on an unmerged branch
