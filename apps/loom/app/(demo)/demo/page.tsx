@@ -1,21 +1,12 @@
 import { randomIdFactory } from "@loom/runtime"
 import { renderLoomTree } from "@loom/runtime/react"
 
-import { stillToAsk } from "@/app/(demo)/_lib/already-asked"
-import { partInQuestion } from "@/app/(demo)/_lib/in-question"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
-import { markedPage } from "@/app/(demo)/_lib/marked"
-import { movedOn, type MovedNote } from "@/app/(demo)/_lib/moved"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
-import { plainChange, settingsOf, type PlainChange } from "@/app/(demo)/_lib/plain-change"
-import { availablePresets } from "@/app/(demo)/_lib/presets"
+import { whatTheRailShows } from "@/app/(demo)/_lib/rail"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
-import { setAside } from "@/app/(demo)/_lib/set-aside"
-import { spotlightsAcross, spotlitChanges } from "@/app/(demo)/_lib/spotlight"
-import { putsSomethingBack } from "@/app/(demo)/_lib/undo"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
-import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
 import { AskPanel } from "./_components/ask-panel"
 import { BackToTheRecord } from "./_components/back-to-the-record"
@@ -24,7 +15,7 @@ import { DemoBar } from "./_components/demo-bar"
 import { PartInQuestionView } from "./_components/part-in-question"
 import { RailHeader } from "./_components/rail-header"
 import { ReadTheDocs } from "./_components/read-the-docs"
-import { TheRecord, type HeldReading } from "./_components/the-record"
+import { TheRecord } from "./_components/the-record"
 import { WhatHappens } from "./_components/what-happens"
 
 /**
@@ -46,6 +37,18 @@ import { WhatHappens } from "./_components/what-happens"
  * which words were Loom's. Now the rail is unmistakably the instrument and the
  * stage is unmistakably the thing being operated on, and the tree keeps its own
  * theme untouched, which it must: a visitor can re-theme it with one click.
+ *
+ * **What is left in this file is the three things only this file can do**, and
+ * that is the whole shape of it now: fetch what the request has (the cookie,
+ * the session, the head and the holds), render what needs the registry (the
+ * tree on the stage, and the part of it a question is about), and lay the two
+ * halves out. Every *reading* — which asks are still worth offering, which
+ * holds can still be answered, what the caution counts, which marks the page
+ * carries and which of them the rail may claim, whether a mark says *back* —
+ * is `_lib/rail.ts`'s, because this file is an `async` Server Component and no
+ * `vitest` run can reach one. Eight readings lived here and five of them could
+ * be unwired by deleting a single argument with the whole suite green; the
+ * finding that counted them is closed by that move rather than by this comment.
  */
 const DemoPage = async () => {
   const visitorId = await readVisitorId()
@@ -77,236 +80,39 @@ const DemoPage = async () => {
   const records = session?.records ?? []
 
   /**
-   * What each waiting proposal would replace, read against the tree on the
-   * stage.
+   * What the store is still holding for this visitor, which is the one input
+   * the rail's readings cannot be worked out without.
    *
-   * Only the held ones. A record whose change already applied describes a tree
-   * that no longer exists, so resolving its delta against the current one would
-   * produce a confident and wrong "before".
+   * A held proposal is offered rather than applied and lives beside the tree
+   * rather than in it (0021), so nothing about the tree on the stage says a
+   * question is open against it.
    */
   const holds = session === undefined ? undefined : await session.holds.forTree(tree.treeId)
-  const held = holds?.ok ? holds.value.held : []
 
   /**
-   * The holds the page has moved past, by the record they belong to.
+   * And the whole rail, in one call.
    *
-   * A visitor may hold two changes at once — five buttons and nothing telling
-   * them to answer one at a time — and answering either moves the revision,
-   * which kills the other where it stands. `HeldProposal.baseRevision` is the
-   * runtime's field for noticing, put there in its own words *"so a reader can
-   * tell a hold is stale without parsing the delta"*, and this is the reader.
-   *
-   * Computed once, here, because it decides three separate things that must not
-   * be allowed to disagree: whether the page is marked for this change, whether
-   * the rail scrolls to it, and what its card says and offers.
+   * The preview is the one reading that cannot be finished here: rendering a
+   * `LoomTree` needs the registry, and the registry is not something to drag
+   * across a client boundary. So the part is chosen there and rendered here,
+   * through a callback — which is the boundary working as intended rather than
+   * around it, and is what lets a test assert the same map this page builds
+   * rather than a copy of it.
    */
-  const movedNotes = new Map<string, MovedNote>(
-    held.flatMap((one) => {
-      const note = movedOn(one.baseRevision, tree.revision)
-      const record = records.find((each) => each.heldProposalId === one.proposalId)
-
-      return note === undefined || record === undefined ? [] : [[record.recordId, note] as const]
-    })
-  )
-
-  /**
-   * The changes the page is currently about, and where to mark each of them.
-   *
-   * Read against the tree on the stage rather than against the record's own
-   * account of itself: a held proposal describes nodes that are still there, and
-   * an applied one describes the tree that is there now, so the same resolution
-   * serves both and neither can point at a node that no longer exists.
-   *
-   * `putsSomethingBack` travels with each, because a mark reading "New — just
-   * added" over a band the visitor has just watched come *back* is the one claim
-   * this surface exists to make, said backwards. The delta cannot supply it — an
-   * undo's operations are ordinary inserts and removes (0032) — so the record
-   * does, from its provenance when a control asked for the undo and from its
-   * frozen settings when a second press of a toggle simply went back
-   * (`put-back.ts`).
-   *
-   * And the holds the page has moved past travel with them too, which is why
-   * this had to move below them: a mark in the waiting colour over a change that
-   * can never happen is the same failure in the other direction.
-   *
-   * **Plural, and the whole page's marks are drawn in one call.** Two open
-   * questions used to draw one mark between them, and the newest silently won
-   * it. `spotlightsAcross` spends the page's budget in rounds so that every
-   * question gets marked before any question gets marked twice — which is a
-   * property of the *page*, and so is not something a loop over one change at a
-   * time could have.
-   */
-  const spotlit = spotlitChanges(records, tree, new Set(movedNotes.keys()))
-  const drawn = spotlightsAcross(
+  const rail = whatTheRailShows({
     tree,
-    spotlit.map((one) => ({
-      touched: one.record.touched,
-      tone: one.tone,
-      restoring: putsSomethingBack(one.record),
-    }))
-  )
-  const spots = drawn.flat()
-
-  /**
-   * What the rail says about those marks, and which card wears which words.
-   *
-   * Built from the marks that were actually drawn rather than from the changes
-   * that asked for them: a change can be worth marking and draw nothing — the
-   * re-theme configures the page root, and a ring around the whole stage points
-   * at nothing — and a rail promising a mark the page is not carrying is the
-   * same defect this fixes, pointed the other way.
-   */
-  const marked = markedPage(
-    spotlit.map((one, index) => ({ recordId: one.record.recordId, spots: drawn[index] ?? [] }))
-  )
-
-  /**
-   * Both readings are computed for a hold that can still land, and neither for
-   * one the page has moved past.
-   *
-   * Not a tidying: `describeProposalEffect` and `plainChange` both resolve a
-   * delta against the tree in front of them, and a dead hold's delta was planned
-   * against a tree that is gone. What they would return is a confident account of
-   * a change that cannot happen, printed above the words saying it cannot. The
-   * record itself loses nothing — the delta, the inverse and the whole weighing
-   * are on the card's disclosure, off the record rather than off the tree.
-   */
-  const answerable = held.filter((one) => movedOn(one.baseRevision, tree.revision) === undefined)
-
-  /**
-   * The questions a visitor could still answer, as the ids the two readings below
-   * join on.
-   *
-   * One set, built once, because those two readings are halves of one claim: the
-   * caution counts the open questions, and the panel withdraws the buttons that
-   * make them. Computed separately they could disagree, and the way they would
-   * disagree is the defect this pair was built for — the rail saying *2 questions
-   * are still waiting on you* over a page carrying one mark.
-   */
-  const openQuestions = new Set(answerable.map((one) => one.proposalId))
-
-  /**
-   * The question the visitor already has open, for the panel that is about to
-   * offer them four ways to lose it.
-   *
-   * Computed from `answerable` rather than from the records, because a record
-   * keeps the `heldProposalId` it was written with and what makes a question
-   * *live* is the store plus the revision — which is the same list the three
-   * readings above are computed for, and the same reason they are.
-   */
-  const waiting = setAside(records, openQuestions)
-
-  const effects = new Map<string, ProposalEffect>(
-    answerable.map((one) => [
-      one.proposalId,
-      /**
-       * The registry is the third half of the reading: which of a part's
-       * settings a reader reads is declared by whoever wrote the component, so
-       * the words a deletion takes away can only be read against the primitives
-       * this surface registered.
-       */
-      describeProposalEffect(tree, one.proposal.delta, demoRegistry),
-    ])
-  )
-
-  /**
-   * And the same proposals in the words on the page.
-   *
-   * Two readings of one delta, both computed here, because the card shows one
-   * of them unasked and the other one click down — the plain half above the two
-   * buttons, the review tool's half inside the disclosure. Which is which is
-   * `record-card`'s to place; that both exist is this page's, because the tree
-   * and the held delta are only in hand together here.
-   *
-   * The settings are read from the registry once per render rather than per
-   * proposal: which props are a closed choice is a fact about the registry, and
-   * it cannot change between two cards on one page.
-   */
-  const settings = settingsOf(demoRegistry)
-
-  /**
-   * Whether the change waiting on this proposal is one putting something back.
-   *
-   * The join is here rather than in `plainChange` because a held proposal and
-   * the record of the ask that raised it are two different things — the store
-   * holds the first, `session.ts` writes the second — and this page is the one
-   * place both are in hand. A hold with no record of its own is described as an
-   * ordinary change, which is the safe reading: it is what the delta says.
-   *
-   * The same predicate the marks are drawn from, and it has to be: this is the
-   * sentence saying what the change *would* do and that one is the sentence
-   * saying what it *did*, about one change. A hold described as an ordinary
-   * change and then applied as a restoration would be the record contradicting
-   * itself across one press.
-   */
-  const restoring = (proposalId: string): boolean => {
-    const record = records.find((one) => one.heldProposalId === proposalId)
-
-    return record !== undefined && putsSomethingBack(record)
-  }
-
-  const plains = new Map<string, readonly PlainChange[]>(
-    answerable.map((one) => [
-      one.proposalId,
-      plainChange(tree, one.proposal.delta, settings, restoring(one.proposalId)),
-    ])
-  )
-
-  /**
-   * And the part of the page each waiting proposal is about, rendered.
-   *
-   * The same two conditions as the effect above and for the same reason — a
-   * change that has already landed describes a tree that is gone — plus one of
-   * this one's own: it is built here, in a Server Component, because rendering a
-   * `LoomTree` needs the registry and the registry is not something to drag
-   * across a client boundary. The card is a client component and receives it as
-   * an element, which is the boundary working as intended rather than around it.
-   */
-  const parts = new Map<string, React.ReactNode>(
-    (holds?.ok ? holds.value.held : []).flatMap((held) => {
-      const part = partInQuestion(tree, held.proposal.delta)
-
-      return part === undefined
-        ? []
-        : [[held.proposalId, <PartInQuestionView key={held.proposalId} part={part} {...(rendered.theme ? { theme: rendered.theme } : {})} />] as const]
-    })
-  )
-
-  /**
-   * The four readings of a waiting change, gathered by the record they belong
-   * to, which is the key the list renders by.
-   *
-   * A map rather than a function the list calls, because the list is a component
-   * now (`TheRecord`) and this is the whole of what it cannot work out for
-   * itself: three of these need the held proposal, which lives in the store, and
-   * the fourth needs the revision that proposal was judged against.
-   *
-   * Absent rather than `undefined` inside each entry: the card's props are
-   * optional, not nullable.
-   */
-  const heldReadings = new Map<string, HeldReading>(
-    records.flatMap((record) => {
-      const id = record.heldProposalId
-      if (id === undefined) return []
-
-      const effect = effects.get(id)
-      const part = parts.get(id)
-      const plain = plains.get(id)
-      const moved = movedNotes.get(record.recordId)
-
-      return [
-        [
-          record.recordId,
-          {
-            ...(effect === undefined ? {} : { effect }),
-            ...(part === undefined ? {} : { inQuestion: part }),
-            ...(plain === undefined ? {} : { plain }),
-            ...(moved === undefined ? {} : { moved }),
-          },
-        ] as const,
-      ]
-    })
-  )
+    records,
+    held: holds?.ok ? holds.value.held : [],
+    registry: demoRegistry,
+    ids: randomIdFactory,
+    showPart: (part, proposalId) => (
+      <PartInQuestionView
+        key={proposalId}
+        part={part}
+        {...(rendered.theme ? { theme: rendered.theme } : {})}
+      />
+    ),
+  })
 
   return (
     /* On a wide screen the demo is one viewport: the bar is fixed, and the
@@ -332,14 +138,6 @@ const DemoPage = async () => {
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <aside className="border-edge bg-surface-page order-1 flex w-full shrink-0 flex-col gap-6 border-b p-5 lg:order-2 lg:w-[27rem] lg:overflow-y-auto lg:border-b-0 lg:border-l">
           {/*
-            * The claim, at the size of a claim.
-            *
-            * The old rail's heading was "ask this page to change" at 18px — set
-            * smaller than the specimen page's body copy, in a rail with no
-            * visual weight, so the sentence that says what this surface is for
-            * was the least prominent sentence on the screen.
-            */}
-          {/*
             * The claim, at the size of a claim — and a component rather than
             * four paragraphs written here.
             *
@@ -351,30 +149,11 @@ const DemoPage = async () => {
             */}
           <RailHeader />
 
-          {/*
-            * The asks, twice filtered — and the two filters are different
-            * questions, which is why neither can do the other's job.
-            *
-            * `availablePresets` asks the **tree** whether a preset has anything
-            * to do, so the panel never offers a press whose only outcome is
-            * nothing. `stillToAsk` asks the **store** whether the visitor is
-            * already waiting on an answer to that same ask, which the tree
-            * cannot know: a held proposal is offered rather than applied and
-            * lives beside the tree rather than in it (0021), so while the
-            * removal is only held the stat grid is still there and `trim` can
-            * still plan.
-            * Two presses therefore bought a duplicate question, word for word,
-            * each with its own **Apply this change**, and answering either killed
-            * the other.
-            *
-            * Both are resolved here because only this component holds the tree
-            * and the store at once.
-            */}
           <AskPanel
             revision={tree.revision}
-            available={stillToAsk(availablePresets(tree, randomIdFactory), records, openQuestions)}
+            available={rail.available}
             modelConfigured={isDemoModelConfigured}
-            {...(waiting === undefined ? {} : { waiting })}
+            {...(rail.waiting === undefined ? {} : { waiting: rail.waiting })}
           />
 
           {rendered.diagnostics.length > 0 && (
@@ -399,8 +178,8 @@ const DemoPage = async () => {
             */}
           <TheRecord
             records={records}
-            marked={marked}
-            held={heldReadings}
+            marked={rail.marked}
+            held={rail.readings}
             revision={tree.revision}
           />
 
@@ -455,15 +234,7 @@ const DemoPage = async () => {
           * that is carrying a registered theme of its own (0050).
           */}
         <div className="loom-stage order-2 min-w-0 flex-1 lg:order-1 lg:overflow-y-auto">
-          <ChangeSpotlight
-            spots={spots}
-            /*
-             * The newest marked change, which is the one the visitor has just
-             * asked about — so a second ask scrolls the stage to *its* mark
-             * rather than sitting still because an older question is still open.
-             */
-            token={`${tree.revision}:${spotlit[0]?.record.recordId ?? ""}`}
-          />
+          <ChangeSpotlight spots={rail.spots} token={rail.spotlightToken} />
           {rendered.element}
         </div>
       </div>
@@ -485,8 +256,8 @@ const DemoPage = async () => {
         * change over an applied one, which is the right preference here too: a
         * question the visitor has not answered outranks a receipt.
         */}
-      {spotlit[0] && (
-        <BackToTheRecord recordId={spotlit[0].record.recordId} tone={spotlit[0].tone} />
+      {rail.about && (
+        <BackToTheRecord recordId={rail.about.record.recordId} tone={rail.about.tone} />
       )}
     </div>
   )

@@ -15,6 +15,7 @@ import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
 import { faqGridBand } from "./faq-grid-band.js"
 import { featuresBand } from "./features-band.js"
+import { feedBand } from "./feed-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
 import { heroBand } from "./hero-band.js"
@@ -61,6 +62,7 @@ export {
   faqGridBand,
   featuresBand,
   featuresAlternatingBand,
+  feedBand,
   footerBand,
   heroBand,
   heroSplitBand,
@@ -153,6 +155,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   credentialsBand,
   teamBand,
   articlesBand,
+  feedBand,
   changelogBand,
   faqBand,
   faqGridBand,

@@ -107,6 +107,21 @@ export type RevisionReading = {
    * the one arithmetic error a screen cannot explain away.
    */
   readonly views: number
+  /**
+   * The most recent moment any part of this version took a rollup.
+   *
+   * Counting and forgetting are one operation
+   * ([0158](../../../../../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)),
+   * so a batch becomes a counter only once it has been held for the collection
+   * window — an hour by default. A reader who is on the page right now is in
+   * the buffer and in no tally, and will be in one after the next run past
+   * their window.
+   *
+   * That means every number on this screen is *as of* a moment, and the moment
+   * is never now. Saying which one is the difference between a figure a person
+   * can act on and a figure they have to guess the age of.
+   */
+  readonly countedAt: string
   /** Ordered by how many people saw each part, most first. */
   readonly parts: readonly PartReading[]
 }
@@ -156,10 +171,22 @@ export const revisionReadings = (
 ): readonly RevisionReading[] => {
   const grouped = new Map<string, PartReading[]>()
   const keys = new Map<string, { readonly treeId: TreeId; readonly revision: number }>()
+  /*
+   * The newest rollup across the version's parts, not the oldest and not one
+   * part's. Parts of one version are counted in the same run, so in practice
+   * they agree — but a part added between two runs has an earlier moment than
+   * its neighbours, and reporting that one would age the whole screen by a
+   * window for no reason. ISO-8601 UTC to the millisecond compares correctly
+   * as a string, which is why this is a comparison and not a parse.
+   */
+  const counted = new Map<string, string>()
 
   for (const tally of tallies) {
     const key = `${tally.treeId}\u0000${tally.revision}`
     keys.set(key, { treeId: tally.treeId, revision: tally.revision })
+
+    const seen = counted.get(key)
+    if (seen === undefined || tally.updatedAt > seen) counted.set(key, tally.updatedAt)
 
     const reading: PartReading = {
       nodeId: tally.nodeId,
@@ -186,6 +213,7 @@ export const revisionReadings = (
       return {
         treeId,
         revision,
+        countedAt: counted.get(key)!,
         views: parts.reduce((most, part) => Math.max(most, part.views, part.engaged), 0),
         parts: [...parts].sort(byReach),
       }
@@ -212,6 +240,158 @@ export const pageReadings = (readings: readonly RevisionReading[]): readonly Pag
   }
 
   return [...grouped.entries()].map(([treeId, revisions]) => ({ treeId, revisions }))
+}
+
+/**
+ * Whether these counters are about the page you are serving right now.
+ *
+ * ## The question, and why nothing else on this screen asks it
+ *
+ * Counters are kept per version, and a version is only counted once its
+ * batches have been held for the collection window. So the moment somebody
+ * makes a change — which is the exact moment they come here to see what it did
+ * — the page they are serving has **no row at all**, and the newest thing this
+ * screen can find is the version before it.
+ *
+ * Read naively that is indistinguishable from a working screen: real numbers,
+ * a real version, everything populated. The reader concludes their change
+ * broke the measurement, or worse, reads the old version's figures as the new
+ * version's. `Loom daily build` filed exactly this on 14 September — *"a screen
+ * that does not say so will look broken"* — and the answer has to be the
+ * screen's, because there is nothing wrong with the numbers.
+ *
+ * ## Where the answer comes from
+ *
+ * The page being served, which this screen already reads and already throws
+ * away: `readers/page.tsx` fetches each tree to name its parts and keeps only
+ * the names. A tree carries its revision, so the comparison costs no read at
+ * all — it is one field of something already in hand.
+ *
+ * ## Why three answers and not a boolean
+ *
+ * ## Why four answers and not a boolean
+ *
+ * A read of the page can fail, and a screen that reported a failed read as
+ * *these numbers are current* would be making the confident claim this whole
+ * module exists to refuse. `unread` is a real state and it is said out loud.
+ *
+ * `replaced` should not happen: a revision only ever climbs, so a page older
+ * than its own counters means something put a different page at this id. It is
+ * a case of its own rather than folded into `unread` because the two send a
+ * reader to opposite places — *try again* against *somebody replaced this* —
+ * and because falling through to `current` would print *these are the numbers
+ * for the version you are serving* over numbers about a page that is gone.
+ */
+export type CountingStanding =
+  /** The newest counted version is the page being served. */
+  | { readonly kind: "current"; readonly counted: number }
+  /** The page has been changed since the newest counted version. */
+  | {
+      readonly kind: "behind"
+      readonly counted: number
+      readonly live: number
+      /** How many changes have landed since the newest counted version. */
+      readonly changes: number
+    }
+  /** The page itself could not be read, so nothing can be said either way. */
+  | { readonly kind: "unread"; readonly counted: number }
+  /** The page being served is older than its own counters. */
+  | { readonly kind: "replaced"; readonly counted: number; readonly live: number }
+
+/**
+ * `live` is the revision of the page being served, or `undefined` when the read
+ * of it did not come back.
+ */
+export const countingStanding = (
+  reading: PageReading,
+  live: number | undefined
+): CountingStanding => {
+  const counted = reading.revisions[0]!.revision
+
+  if (live === undefined) return { kind: "unread", counted }
+  if (live === counted) return { kind: "current", counted }
+  if (live < counted) return { kind: "replaced", counted, live }
+
+  return { kind: "behind", counted, live, changes: live - counted }
+}
+
+/**
+ * How many changes, as somebody would say it rather than as a counter.
+ *
+ * *Once* and *twice* rather than *1 times* and *2 times*, which is the same
+ * plural care `outOfVisits` takes and for the same reason: a screen that says
+ * *1 times* reads as a screen nobody looked at.
+ */
+const timesChanged = (changes: number): string =>
+  changes === 1 ? "once" : changes === 2 ? "twice" : `${changes} times`
+
+/**
+ * The first sentence of a page's card: how much was heard, and what it was
+ * heard about.
+ *
+ * The version is part of the sentence rather than a decoration on it, because
+ * the sentence is only true of one version. *"…have reported back since it was
+ * last changed"* is a claim that the counted version **is** the current one,
+ * and on a page changed ten minutes ago it is false — the visits reported back
+ * before the last change, not since it.
+ *
+ * That is the whole defect this reading exists for. It is a string rather than
+ * markup for the second reason too: an expression sitting next to a word in JSX
+ * loses the space between them, which this lane has now shipped twice.
+ */
+export const visitsHeard = (reading: RevisionReading, standing: CountingStanding): string => {
+  const visits = reading.views === 1 ? "One visit" : `${reading.views} visits`
+  const verb = reading.views === 1 ? "has" : "have"
+
+  return standing.kind === "current"
+    ? `${visits} to this page ${verb} reported back since it was last changed. That is revision ${reading.revision}.`
+    : `${visits} ${verb} reported back on revision ${reading.revision} of this page.`
+}
+
+/**
+ * Whether the reader is looking at the page they think they are, in one
+ * sentence that is never absent.
+ *
+ * `current` says so out loud rather than saying nothing. Silence would be
+ * indistinguishable from the three states that are not it, which is the whole
+ * failure being fixed — and it is the sentence a reader who has *not* just made
+ * a change needs, because it is the one that tells them the numbers are live.
+ */
+export const standingNote = (standing: CountingStanding): string => {
+  switch (standing.kind) {
+    case "current":
+      return "These are the numbers for the version you are serving right now."
+    case "behind":
+      return `You have changed this page ${timesChanged(standing.changes)} since then, and nothing has been counted for revision ${standing.live} yet.`
+    case "unread":
+      return "We couldn’t read the page itself just now, so we can’t tell you whether this is the version you are serving."
+    case "replaced":
+      return `The page being served is revision ${standing.live}, which is older than these numbers — something has put a different page at this address.`
+  }
+}
+
+/**
+ * What to do about it, which for the common case is nothing — and saying so is
+ * the answer rather than the absence of one.
+ *
+ * A person who has just made a change and found nothing about it will go
+ * looking for a fault in their page. There is none: counting a window of
+ * readings and forgetting it are one operation
+ * ([0158](../../../../../decisions/0158-counting-a-window-of-reader-signals-and-forgetting-it-are-one-operation.md)),
+ * so a reading is held for the collection window before it becomes a counter.
+ * The wait is the design, and a reader told that will wait instead of debugging.
+ */
+export const standingAdvice = (standing: CountingStanding): string | undefined => {
+  switch (standing.kind) {
+    case "behind":
+      return "Nothing is wrong and there is nothing to fix: readings are held for about an hour before they are counted, so a change you have just made takes a while to show up here."
+    case "unread":
+      return "The counters were read and the page was not, so what is here is still true — try again in a moment to find out which version it is about."
+    case "replaced":
+      return "Nothing has been lost. These counters stay exactly as they are, and the page being served now will start counting under its own version."
+    case "current":
+      return undefined
+  }
 }
 
 /**
@@ -455,6 +635,66 @@ export const reachShifts = (
       (left, right) =>
         Math.abs(shiftOf(right)) - Math.abs(shiftOf(left)) || left.nodeId.localeCompare(right.nodeId)
     )
+}
+
+/**
+ * What this page can honestly be told about before and after — always
+ * something.
+ *
+ * ## Why this is a reading rather than a length check
+ *
+ * The card's own rule is that an absent sentence is a lie: *"a page whose
+ * sections silently disappear when their number is zero leaves a reader unable
+ * to tell Loom looked and there was nothing from Loom did not look."* The one
+ * section that broke it was the comparison — the measurement this product
+ * exists for — which was drawn under `shifts.length > 0` and otherwise was not
+ * on the screen at all.
+ *
+ * Three different facts were arriving as that one blank: a page nobody has
+ * changed yet, a change that replaced every part it could have been compared
+ * on, and — the one the reader is most likely to meet — a change so recent
+ * that nothing has been counted for it. A reader met all three as silence, and
+ * silence is the reading they are least able to act on.
+ *
+ * So this returns a fact in every case and the union has no empty arm. A
+ * section that cannot disappear is a section a later edit cannot quietly
+ * delete.
+ *
+ * ## What it does not answer
+ *
+ * Whether the newer of the two versions is the page being served. That is
+ * `countingStanding`, it is one fact, and it is said once — beside the counts
+ * it qualifies rather than inside the comparison, which would be the same
+ * sentence in two places disagreeing the first time one of them was edited.
+ */
+export type Comparison =
+  /** Two counted versions, with parts both of them heard about. */
+  | {
+      readonly kind: "shifts"
+      readonly shifts: readonly ReachShift[]
+      readonly before: number
+      readonly after: number
+    }
+  /**
+   * Two counted versions and not one part in common — so the change replaced
+   * everything anybody reported on, and there is nothing to compare rather
+   * than nothing that moved. The two are opposite news.
+   */
+  | { readonly kind: "nothing-shared"; readonly before: number; readonly after: number }
+  /** One counted version. Nothing has been compared because nothing came before. */
+  | { readonly kind: "first"; readonly counted: number }
+
+export const comparisonOf = (reading: PageReading): Comparison => {
+  const newest = reading.revisions[0]!
+  const previous = reading.revisions[1]
+
+  if (previous === undefined) return { kind: "first", counted: newest.revision }
+
+  const shifts = reachShifts(previous, newest)
+
+  return shifts.length === 0
+    ? { kind: "nothing-shared", before: previous.revision, after: newest.revision }
+    : { kind: "shifts", shifts, before: previous.revision, after: newest.revision }
 }
 
 /**
