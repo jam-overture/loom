@@ -8,6 +8,233 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-22 — three lesson transcripts were edited from outside their lane to keep `pnpm verify` green, and a fourth edit was avoided by *not* shipping a declaration
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:**
+open — the lessons are **true** as they stand and nothing they argue changed;
+this entry is so their owner reviews the edit rather than discovering it, and so
+the second half is somebody's decision rather than mine by default
+
+This is the 21 September entry from `Loom daily build` happening again, to three
+more lessons and for the reason that entry predicted: **a lesson transcript pins
+the size of the library**, and this run moved it from 96 to 98.
+
+Three edits, each one number, each read off an actual run rather than
+arithmetic:
+
+| where | was | is |
+| --- | --- | --- |
+| `lessons/22-reach.md`, Exercise A | `primitives registered: 96` | `98` |
+| `lessons/23-anchors.md`, Exercise E | `primitives registered: 96` | `98` |
+| `lessons/24-silence.md`, Exercise F | `primitives registered:     96` | `98` |
+
+**No prose moved, and two of the three lessons were written so it would not have
+to.** Lesson 22 says *"Twelve, out of whatever the line above it printed"* and
+lesson 24 opens Exercise F with *"A whole library — the first line will say how
+big"*. That phrasing is the fix for this whole class of drift, it was clearly
+deliberate, and it worked: the only thing that went stale is the number itself.
+Lesson 23's line is not cited by the paragraph under it.
+
+**The second half is the one that wants your judgement, because it changed what
+shipped.**
+
+`definePrimitive` takes an optional `copy`, and 0122 is explicit that *leaving it
+out and declaring it empty are different answers*. Both primitives this run
+built had a right answer available — `loom.feed` reads none of its props as
+words, `loom.tally` reads two — so both were written declaring it, and both
+declarations were **backed out before the pull request**.
+
+The reason was this, in lesson 24's Exercise F:
+
+```
+  declaring copy:            0
+```
+
+followed by three paragraphs whose argument rests on that zero — *"Zero and
+zero"*, *"with nothing declaring `copy`, no node ever reaches the branch that
+fills it"*, *"a promise kept against a day that has not arrived"*. Shipping two
+declarations would have printed `2`, and keeping the lesson honest would have
+meant an outside lane rewriting the teaching rather than a count.
+
+The declarations were dropped **on their own merits as well**, and that is the
+part to check rather than take on trust: two primitives out of ninety-eight
+declaring `copy` is a registry that answers a consumer with a picture of a
+library that mostly *declines* to say, which is worse than one that has not been
+asked. The 19 September finding — *no primitive declares `copy`, and the first
+populated picture of `/portal/readers` shows what that costs a reader* — is
+still open and still wants one pass over the whole library, which is a run and
+not a side effect. `loom.feed` carries a comment saying exactly this, so the
+next person to reach for it finds the reasoning rather than the omission.
+
+**What is worth your judgement:** whether a lesson's transcript should ever be
+able to make a library decision for a different lane. It did not here — the two
+reasons agreed — and the next time they disagree, the lesson wins by default
+unless somebody says otherwise. The 21 September entry raised the same shape and
+recommended printing `PALETTE_TEXT_GROUNDS.length` beside a count so drift costs
+one line; the generalisation this run suggests is stronger: **an exercise that
+prints a library-wide total should say, in its own prose, that the total is
+whatever it is** — which is what lessons 22 and 24 already do, and is why they
+cost one line each today.
+
+---
+## 2026-09-22 — `loom.waiting-state` draws a state this runtime is never in, so a bound region cannot reach it and the reach inventory's third row is wrong
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — nothing is broken, the primitive is correct, and this is a correction to
+a queue rather than a defect
+
+The 21 September inventory left three rows of unreachable primitives and
+classified the third as *a state, not a band* — `empty-state`, `waiting-state`,
+`link-pager` — waiting on **a bound region**. A bound region shipped today
+(`loom.feed`, `loom.tally`, 0180) and it moves one of the three:
+`loom.empty-state` is now reachable. It does not move `loom.waiting-state`, and
+the reason is not that nobody got to it.
+
+**Nothing in a Loom page ever waits.**
+[0058](decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md)
+resolves every binding *before* the walk, precisely so that rendering can stay a
+synchronous pure function. By the time any component runs, each of its answers
+is `ready` or `unavailable`; there is no third status and there cannot be one
+without giving up the property that record was written to protect. A skeleton
+drawn from a binding would be a picture of a state this runtime is never in, and
+one that never resolves, because no second render is coming.
+
+So `loom.waiting-state` is **not** a bound-region primitive. It is the right
+primitive for a region a *host* fills on the client — a React island, a
+streamed Server Component boundary, a lane's own screen — and nothing in this
+library can place it, because nothing in this library is a client component.
+
+Three consequences for whoever next reads the inventory:
+
+- the third row is two primitives, not three: `empty-state` (now reached) and
+  `link-pager` (still a real gap, and a different one — a pager over a bound
+  list needs params from a request, which the tree cannot express);
+- `loom.waiting-state` should move to a fourth row, *reachable only from a host
+  surface*, beside nothing else currently — which is worth knowing before
+  somebody spends a run trying to place it;
+- **and the honest reading is that the library over-built on 14 September.**
+  0156 shipped the pair together on the argument that 0058's two answers must
+  not collapse. That argument is right about `empty` and `unavailable`, and
+  `loom.empty-state`'s own `cause` prop is where it landed. The waiting state
+  was the half nothing asked for.
+
+Not a reason to remove it. It is correct, it is tested, it costs a deployment
+one catalogue entry, and the day a host wants a streamed region it is there. It
+is a reason to stop counting it as work.
+
+---
+## 2026-09-22 — the SDK cannot describe a primitive that reads an answer, in two halves: the catalogue cannot say which binding it wants, and the audit cannot probe a region it places only when one fails
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/sdk/`)
+· **Status:** open — both were built around rather than blocked on, and the
+build-around is visible in the shipped primitives
+
+`loom.feed` and `loom.tally` are the first primitives in the library to read
+`loom.data`, and they met two gaps in `definePrimitive` on the way. They are one
+entry because they are the same absence: **a registration cannot say that this
+primitive is bound.**
+
+**The first half 0058 predicted, word for word.** Its last consequence says the
+authoring half is *"a primitive declaring which binding names it reads, so the
+catalogue can tell a model that `loom.services` wants a `services` binding"*,
+and that it *"changes `definePrimitive`"*. It has not changed. So what a model
+reads in the catalogue is that `loom.feed` takes a `binding` prop that is a
+camelCase string — and nothing that says the string has to match a key in the
+same node's `loom:data`, or that a node with a `binding` and no `loom:data` will
+draw its empty region for ever.
+
+Built around with a default: `binding` is optional and falls back to `entries`
+on the feed and `value` on the tally, which is what a node binding one thing
+will call it. That makes the common case work by accident rather than by being
+told, which is the shape of thing that is fine until the first model gets it
+wrong.
+
+**The second half is new and is the sharper one.** `auditRegistry` probes each
+primitive across the closed choices in its props and reports any slot nothing
+ever places (`unplacedSlots`). The probe cannot supply an answer — it builds
+props, not a `DataResolution` — so **a region a primitive places only when a
+source failed is a region the audit correctly reads as dropped content**, and
+`library.test.ts` asserts that list empty.
+
+The consequence is a real constraint on the shape of every bound primitive, and
+0180 writes it down as one: *a bound primitive may declare only the regions it
+places without an answer.* `loom.feed` therefore has one slot — `empty`, which
+is what it places when it was never asked — and its two failure sentences are
+declared text (0060) rather than regions a tree fills. That is a defensible
+design on its own and it was not chosen: it is what the probe permits.
+
+What would close it, smallest first: a probe that can be handed answers the way
+it is handed props; or a way for a registration to say *this slot is placed on a
+condition the probe cannot reach*, which is weaker and would quietly excuse the
+genuine defect the list exists to catch.
+
+---
+## 2026-09-22 — a specimen cannot be handed data, so no bound primitive can be photographed in the state it exists for
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`) ·
+**Status:** open — worked around for this run by serving a page and using the
+harness's other entry point, which is the ninth private screenshot script this
+repository's lanes have written and the reason the harness exists
+
+`tools/specimen/render.ts` renders a specimen with `resolver`, `validator`,
+`themes` and `submissions`, and no `data`. So a `loom.feed` in a specimen can
+only ever be one that asked nothing: **the four states that matter — rows, an
+answer of none, a source that did not answer, and an answer of the wrong shape —
+are all unreachable**, as is every state of `loom.tally`.
+
+This is the same gap `endpoints` was added to close one seam over, and that
+field's own comment describes today's failure exactly:
+
+> Without it a `loom.form` can never name a destination the render can resolve,
+> so it correctly draws the state it draws when nobody said where to post … That
+> is the form being right and the photograph being useless.
+
+**The shape of the fix is already written**, in that comment and in `endpoints`
+itself: a specimen declares the *answers*, not the sources — a
+`Record<SourceId, JsonValue>` run through `defineSource` so an invented one is
+refused exactly as a host's would be, and so a photograph never depends on a
+network. Roughly fifteen lines beside the fifteen `endpoints` already costs.
+
+**How this run's photographs were taken**, so the next lane does not rediscover
+it: render the trees with a real `DataResolution` into `specimenDocument`, write
+one file per palette, serve the directory, and point `pnpm shoot` at it. It
+works, it is nine lines, and it is precisely the private script `docs/routines.md`
+says six lanes wrote nine times before the harness existed. Filed rather than
+built because `tools/` is not this lane's.
+
+---
+## 2026-09-22 — a primitive cannot raise a render diagnostic, so what a bound region silently dropped can only reach a reader or nobody
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/`) · **Status:** open — small, and it decided one visible sentence
+in `loom.feed`
+
+[0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md)
+says a listing skips the row it cannot read **and names it**. `loom.feed` does
+skip and does say so — *"Some entries could not be shown."*, drawn on the page
+— and the sentence carries no count, deliberately, because a number there is a
+plural this library cannot form in every language it may be served in.
+
+The count is not useless, though. It is useful to exactly one person, and it is
+not the reader: the author whose source started returning a column under a new
+name wants to know that eleven of twelve rows stopped reading. Every other
+finding of that kind in the render walk is a **diagnostic** — `data-unavailable`,
+`data-misdeclared`, `props-invalid` — collected by the walk and surfaced to
+whoever is looking at diagnostics rather than at the page.
+
+A component cannot collect one. `LoomRenderContext` carries `slots`, `data`,
+`text`, `behaviours`, `submit`, `frames` and `anchor`, and nothing that reaches
+`context.collect`. So a primitive that knows something an author needs has two
+choices — say it to the reader, or say it to nobody.
+
+Not obviously worth a seam on its own; worth knowing that it is now costing
+something real, and that the first primitive to hit it is unlikely to be the
+last. A read-only `report` on the context, restricted to a diagnostic code the
+runtime already knows, would be the smallest thing that could work — and the
+reason to think twice is that it lets a registered component write into the
+walk's output, which nothing outside the runtime does today.
+
+---
 ## 2026-09-21 — three pull request bodies in two days carry the same mangled record link, and the breakage is in how the body is written rather than in what it says
 
 **Filed by:** `Loom framework` · **Owned by:** `Loom daily build` · **Status:**
