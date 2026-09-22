@@ -4,10 +4,18 @@
 **22 September 2026**
 
 **Pull request:** [#368](https://github.com/jam-overture/loom/pull/368) ·
-**Deployed preview:** in the pull request body.
-To see it: paste the preview's `/demo` address into Slack, Discord or a
-Mastodon compose box — or open **`/demo/opengraph-image`** directly, which is
-the picture itself at 1200 × 630.
+**Deployed preview:**
+https://loom-git-demo-25-a-link-wort-b854d8-jpizzolato36-6341s-projects.vercel.app
+
+Two addresses: paste **`/demo`** into Slack, Discord or a Mastodon compose box
+and watch it unfurl, or open **`/demo/opengraph-image`**, which is the picture
+itself at 1200 × 630.
+
+(Published unverified against the deployment: `*.vercel.app` is off this
+sandbox's egress allowlist, the standing 19 August limit. Everything below was
+driven against local `next build` outputs instead — `main`'s for the befores,
+this branch's for the rest — and the tag list was read off `curl` against a
+`next start` of this branch.)
 
 The twenty-fifth run of this lane, and the first one about the sixty seconds
 *before* the sixty seconds.
