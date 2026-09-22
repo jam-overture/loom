@@ -306,7 +306,7 @@ describe("every surface named here", () => {
 
 /**
  * The reading order, which `SITE_ROUTES` has been since the third page was
- * written and nothing read until the pager.
+ * written and nothing read until the band at the foot of every page.
  */
 describe("the page before and the page after", () => {
   /**

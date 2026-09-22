@@ -28894,7 +28894,7 @@ neither, and the two reasons are separate.
 
 ### One — `spread` gives the whole slack to the part that is empty
 
-The three parts and how the width is divided (`loom.link-pager.ts:108–140`):
+The three parts and how the width is divided (`loom.link-pager.ts:109–139`):
 
 | part | `flex` |
 | --- | --- |
@@ -28934,8 +28934,8 @@ put a `loom.card` in each region — a bordered panel with the direction above t
 page name, which is the shape at the foot of every documentation page.
 
 **It rendered as two vertical 1px lines.** `loom.card` sets
-`container-type: inline-size` (`loom.card.ts`, for the container queries its
-interior uses). Inline-size containment makes an element's inline size
+`container-type: inline-size` (`loom.card.ts:156`, for the container queries
+its interior uses). Inline-size containment makes an element's inline size
 independent of its contents, so a card whose parent hands it no width computes
 to **zero**. The pager's end regions are `flex: 0 0 auto` — their width comes
 from their contents — so card and region each wait for the other and both
