@@ -9,7 +9,9 @@ comments on this lane's work to address and nothing of this lane's to push onto.
 
 Visuals — a production build of this commit, in a signed-in browser, against a
 staged deployment of four pages. **The red verdict on the first of them is the
-first photograph this project has of a failing checkup.**
+first photograph this project has of a failing checkup.** The links below are
+relative and resolve in the repository; the pull request links to the same files
+on `github.com` rather than embedding them, for the reason in finding 4 below.
 
 | | |
 | --- | --- |
@@ -265,7 +267,7 @@ What each group would catch:
 
 ## Findings
 
-**Filed two. Closed half of one.**
+**Filed three. Closed half of one. Corrected one of this lane's own.**
 
 1. **Half-closed:** the 13 September entry — *the portal's three most important
    screens cannot be photographed*. The photography half is done and the
@@ -284,6 +286,19 @@ What each group would catch:
    that takes it.
 3. **Re-filed by reference:** the screenshot harness still cannot sign in,
    seventh consecutive run. The 14, 19, 20 and 21 September entries stand.
+4. **Filed, correcting an entry of this lane's own:** the 20 September finding
+   says every screenshot in every pull request is broken because the PR tool
+   wraps URLs in backticks. It is right that none has ever arrived and wrong
+   about why. This run posted #367's body and read it back through the API:
+   **no backtick was added to any URL.** The images were invisible anyway, and
+   the reason is that this repository is **private** — GitHub proxies a PR
+   body's images anonymously, so `raw.githubusercontent.com` returns 404 for
+   everybody including the maintainer, in markdown or in HTML, with or without
+   escaping. #367 links to the blob pages instead, which is the one form a
+   signed-in reader can open. What is worth keeping from the 20 September entry
+   is its method rather than its conclusion: it is the run that established you
+   have to read a body back from the API to see what it says, and this
+   correction exists because that instruction was followed.
 
 ## What I did not do
 

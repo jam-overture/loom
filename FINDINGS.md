@@ -29943,3 +29943,58 @@ Both readings are defensible and the argument belongs in the run that takes it.
 **The recommendation:** pressable rows first, in store order within each group,
 which is the same shape `inWorstFirstOrder` already has and would make one rule
 serve both lists. It is a `sort` and a test; the wording needs nothing.
+
+---
+## 2026-09-22 — the screenshots in every pull request are broken, and the cause named on 20 September is not the cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** the
+20 September entry *"every screenshot in every pull request this project has
+opened is a broken image, and the cause is outside the repository"* ·
+**Status:** open, with a workaround taken on #367 and the real remedy named
+
+The 20 September entry is right that no screenshot has ever arrived and wrong
+about why. It says the tool these lanes open pull requests with rewrites
+markdown image targets, wrapping the URL in a pair of backticks. **That is not
+happening.**
+
+**Measured, on #367.** The body was posted through the GitHub MCP
+`create_pull_request` tool and then read back through `pull_request_read`. Every
+URL came back byte-for-byte as it was sent — no backticks, on any link or any
+image, in markdown or in an `<img>` tag. Whatever produced the corruption the
+20 September run read back on #349, #350 and #351, this path does not.
+
+**The images were still invisible, and the reason is one line.** *This
+repository is private.* GitHub does not serve a PR body's images from their
+source: it proxies them, anonymously, through camo. An anonymous fetch of
+`https://raw.githubusercontent.com/jam-overture/loom/<branch>/reports/<shot>.png`
+returns **404**, which is what five of them returned when this run checked from
+the sandbox before posting a second body. So:
+
+- **`raw.githubusercontent.com` can never work here**, in markdown or in HTML,
+  with or without backticks, for any branch, for any reader including the
+  maintainer. It is not a formatting problem and no escaping fixes it.
+- A **link** to the blob page does work, because that is a `github.com` page
+  the reader is signed in to. It costs a click, and it is what #367 uses.
+- The one form that embeds is a **GitHub user-attachment** — the asset you get
+  from dragging a file into a comment box, served from `user-images` /
+  `github.com/user-attachments` with its own signed URL. No routine has one,
+  because getting one means uploading through an endpoint none of these tools
+  expose.
+
+**What this means for the four surface lanes**, all of which are told a PR must
+carry a screenshot: **link, do not embed**, until somebody finds an upload path.
+A link a maintainer can click beats an image nobody can see, and it is one line
+of difference in the body.
+
+**The recommendation, for whoever owns the PR tooling.** If an upload path to
+GitHub's attachment store can be reached from a routine, that closes this for
+every lane at once and is worth more than any wording. If it cannot, the honest
+alternative is to stop promising an image in the brief and promise a link and
+the deployed preview instead — which is the thing a maintainer judging by eye
+actually wants, and the one channel that has been working all along.
+
+**What is worth keeping from the 20 September entry** is its method rather than
+its conclusion: it is the run that established you have to *read the body back
+from the API* to see what a PR actually says, because the text sent is not
+evidence of the text stored. This entry exists because that instruction was
+followed.
