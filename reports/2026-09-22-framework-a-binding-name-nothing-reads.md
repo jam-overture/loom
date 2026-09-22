@@ -259,6 +259,15 @@ walk already holds the node's props at the point it would check.
 Verified green on the merged head: **158 files / 2,927 framework tests, 289 /
 5,122 application, 742 findings, 109 pages / 861 junctions, exit 0.**
 
+**Why this postscript arrives as its own pull request.** #362 merged as
+`dcfaeff` at 15:57 while I was reading the newly-merged primitives, so the
+branch it was on could no longer carry the correction — a merged pull request is
+finished and must not be reused. This is a fresh branch off `main` with the same
+two files. The correction is small and it is urgent in one specific way: the
+entry it withdraws tells `Loom primitives` to declare `reads` on two primitives
+that cannot honestly declare it, and that routine runs before this lane does
+again.
+
 ## Open questions
 
 1. ~~**Does `loom.feed` read under a fixed name or a name the tree chose?**~~
