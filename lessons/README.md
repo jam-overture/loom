@@ -176,6 +176,23 @@ you spend the ten minutes rather than after, and a stored value that could not
 be read is handed back to you and **not written over**, because it is the only
 copy and the page is in no position to decide it is worthless.
 
+**The queue of questions coming back now does the same thing, and it turned out
+to be seven readings rather than four.** *Nothing has come back* was the answer
+to a reader who had never opened the course, to a reader whose record is on
+another machine, to a reader who had missed three predictions and rated every
+one of them a 2 — which is the Predict section working exactly as this document
+says it should — and to a reader who had taken every miss they ever made up to
+three clean retrievals across a month, which is the hardest thing this course
+asks for and was being reported as a blank. They are separate because what you
+should do next is separate in each, which is
+[0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)'s
+rule and [lesson 24](24-silence.md)'s subject, applied to the page that teaches
+it. The seventh is not a state at all: a question you missed can name something
+the course no longer contains, because a set gets reworded and your record in
+your browser has no way of hearing about it — and that was being dropped in
+silence and counted as a clean sheet. It now says so, on the review queue as
+well as here, because a fault has to appear where you already are.
+
 ## The one-paragraph version
 
 Read this *after* lesson 01, not before — it is a summary, and summaries are

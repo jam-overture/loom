@@ -11,6 +11,7 @@ import {
   knownOnly,
   nextCorrection,
   wasConfident,
+  whyNothingIsDue,
 } from "./corrections"
 import {
   EMPTY_PROGRESS,
@@ -282,5 +283,115 @@ describe("the questions the course no longer contains", () => {
 
     expect(queue).toHaveLength(2)
     expect(knownOnly(queue, new Set(["set-d#7"])).map((each) => each.set)).toEqual(["set-d"])
+  })
+})
+
+/**
+ * Why the queue is empty, which is the question this file could answer all
+ * along and nothing asked it.
+ *
+ * Each of these is a reader with an empty corrections queue, and no two of them
+ * should be told the same thing. The test that matters most is the last pair:
+ * `unreadable` and `nothing-answered` produce identical `Progress` values — the
+ * empty one — and are the two readings furthest apart in what they mean.
+ */
+describe("why there is nothing to re-answer", () => {
+  const ALL = new Set(["set-d#7", "set-c#2", "lesson-04-self-check#2", "lesson-04-predict#1"])
+
+  it("says nothing at all when something is due, so no reason can be drawn over work", () => {
+    expect(whyNothingIsDue(oneMiss, "2026-03-05", ALL, true)).toBeUndefined()
+  })
+
+  it("refuses to read anything into an empty record nobody could read", () => {
+    expect(whyNothingIsDue(EMPTY_PROGRESS, "2026-03-05", ALL, false)).toEqual({
+      kind: "unreadable",
+    })
+  })
+
+  it("tells the blank slate apart from it, on the same record", () => {
+    expect(whyNothingIsDue(EMPTY_PROGRESS, "2026-03-05", ALL, true)).toEqual({
+      kind: "nothing-answered",
+    })
+  })
+
+  it("counts what is waiting, not only the next one", () => {
+    const today = missed(
+      missed(EMPTY_PROGRESS, "set-d", 7, 5, "2026-03-04"),
+      "set-c",
+      2,
+      3,
+      "2026-03-04"
+    )
+
+    expect(whyNothingIsDue(today, "2026-03-04", ALL, true)).toMatchObject({
+      kind: "upcoming",
+      waiting: 2,
+    })
+  })
+
+  /**
+   * The reading that reports a fault. `knownOnly` has dropped these since it was
+   * written and the page said *nothing has come back*, which is the sentence a
+   * reader with a clean sheet gets.
+   */
+  it("says a miss is waiting on a question the course no longer contains", () => {
+    expect(whyNothingIsDue(oneMiss, "2026-03-05", new Set(["set-c#2"]), true)).toEqual({
+      kind: "lost",
+      lost: 1,
+    })
+  })
+
+  it("prefers the fault to the achievement when a reader has both", () => {
+    const retired = corrected(
+      corrected(corrected(oneMiss, "set-d", 7, "got-it", "2026-03-02"), "set-d", 7, "got-it", "2026-03-09"),
+      "set-d",
+      7,
+      "got-it",
+      "2026-04-08"
+    )
+    const andLost = missed(retired, "set-z", 40, 5, "2026-03-01")
+
+    expect(whyNothingIsDue(andLost, "2026-05-01", ALL, true)).toEqual({ kind: "lost", lost: 1 })
+  })
+
+  it("keeps the retired ones, which is the only evidence the queue worked", () => {
+    const retired = corrected(
+      corrected(corrected(oneMiss, "set-d", 7, "got-it", "2026-03-02"), "set-d", 7, "got-it", "2026-03-09"),
+      "set-d",
+      7,
+      "got-it",
+      "2026-04-08"
+    )
+
+    expect(correctionQueue(retired, "2026-05-01")).toHaveLength(0)
+    expect(whyNothingIsDue(retired, "2026-05-01", ALL, true)).toEqual({ kind: "retired", retired: 1 })
+  })
+
+  /**
+   * A reader who rated three predictions 2 and missed all three has an empty
+   * queue *because the Predict section worked*. Telling them they have missed
+   * nothing would be the page taking credit for the one thing the course asks
+   * them to do badly on purpose.
+   */
+  it("separates a prediction missed on purpose from a clean sheet", () => {
+    const unsure = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 2, "2026-03-01")
+
+    expect(correctionQueue(unsure, "2026-03-05")).toHaveLength(0)
+    expect(whyNothingIsDue(unsure, "2026-03-05", ALL, true)).toEqual({
+      kind: "by-design",
+      predictions: 1,
+    })
+  })
+
+  it("calls a clean sheet a clean sheet, and counts what it is made of", () => {
+    const got = missed(EMPTY_PROGRESS, "set-d", 7, 3, "2026-03-01", "got-it")
+
+    expect(whyNothingIsDue(got, "2026-03-05", ALL, true)).toEqual({ kind: "no-misses", graded: 1 })
+  })
+
+  it("treats a half-remembered answer as a miss rather than as a clean sheet", () => {
+    const partly = missed(EMPTY_PROGRESS, "lesson-04-predict", 1, 2, "2026-03-01", "partly")
+
+    expect(whyNothingIsDue(partly, "2026-03-05", ALL, true)).toMatchObject({ kind: "by-design" })
   })
 })

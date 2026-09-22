@@ -13,9 +13,12 @@ import {
   knownOnly,
   nextCorrection,
   wasConfident,
+  whyNothingIsDue,
   type PendingCorrection,
+  type Quiet,
 } from "../_lib/corrections"
 import { withCorrection, type Confidence, type Grade } from "../_lib/progress"
+import { recordIsKnown } from "../_lib/reading"
 import type { CheckPointer } from "../_lib/links"
 import { Answer } from "./answer"
 import * as style from "./style"
@@ -92,12 +95,114 @@ const nextGapText = (done: number): string => {
   return `back in ${days(gap)}${done === 0 ? "" : `, ${done} of ${CORRECTION_GAPS.length} clean`}`
 }
 
+/**
+ * The empty queue, saying which empty queue it is.
+ *
+ * One paragraph per reading, and no paragraph shared between two of them. The
+ * temptation when writing these was to fold `retired`, `by-design` and
+ * `no-misses` together — all three are a reader who has nothing to do and did
+ * nothing wrong — and the three sentences below are different because the next
+ * move is different in each: come back in a month and see whether it held; go
+ * on with the course; and, for the third, notice that a run of questions
+ * answered and none missed is either a reader who knows the material or a
+ * reader grading themselves kindly, and that this page cannot tell those apart
+ * either.
+ */
+const Quietly = ({ quiet }: { readonly quiet: Quiet | undefined }) => {
+  if (quiet === undefined) return undefined
+
+  if (quiet.kind === "unreadable") {
+    return (
+      <p style={style.note}>
+        <strong style={{ color: style.ink }}>
+          This page cannot tell you whether anything has come back.
+        </strong>{" "}
+        Your record could not be read in this browser — the note above says which way — so the
+        queue is empty because there is nothing to compute from, and not because you are up to
+        date. Nothing is being written over while that is true.
+      </p>
+    )
+  }
+
+  if (quiet.kind === "upcoming") {
+    return (
+      <p style={style.note}>
+        Nothing is due today.{" "}
+        {`${
+          quiet.waiting === 1 ? "The one you have in hand" : `The next of your ${quiet.waiting}`
+        } comes back in ${days(quiet.next.inDays ?? 0)}, on ${quiet.next.dueOn}. Doing it early is doing it while you still remember it, which measures nothing.`}
+      </p>
+    )
+  }
+
+  if (quiet.kind === "lost") {
+    return (
+      <p style={style.note}>
+        <strong style={{ color: style.ink }}>
+          {quiet.lost} question{quiet.lost === 1 ? "" : "s"} you missed{" "}
+          {quiet.lost === 1 ? "is" : "are"} still waiting, and the course no longer contains{" "}
+          {quiet.lost === 1 ? "it" : "them"}.
+        </strong>{" "}
+        A question renumbered or rewritten since you were asked leaves a key pointing at nothing,
+        and your browser has no way of hearing about that. It stays in your record and stops being
+        counted. Nothing here can bring it back, and the honest thing is to say so rather than to
+        tell you that you are clear.
+      </p>
+    )
+  }
+
+  if (quiet.kind === "retired") {
+    return (
+      <p style={style.note}>
+        Nothing has come back, and that one is a result:{" "}
+        <strong style={{ color: style.ink }}>
+          {quiet.retired} question{quiet.retired === 1 ? "" : "s"}
+        </strong>{" "}
+        you missed {quiet.retired === 1 ? "has been" : "have each been"} got three times running,
+        across a month. That is the only way out of this queue.
+      </p>
+    )
+  }
+
+  if (quiet.kind === "by-design") {
+    return (
+      <p style={style.note}>
+        Nothing has come back. You have missed {quiet.predictions} prediction
+        {quiet.predictions === 1 ? "" : "s"}, and a prediction you rated 1 to 3 does not come back
+        — you said you did not know, and you did not know, which is the Predict section working
+        rather than a gap in what you know. A prediction you were <em>sure</em> about and wrong
+        about would be here, because that is a belief rather than a gap.
+      </p>
+    )
+  }
+
+  if (quiet.kind === "no-misses") {
+    return (
+      <p style={style.note}>
+        Nothing has come back: {quiet.graded} questions answered here and none of them missed.
+        Worth one moment of suspicion — this queue is built entirely out of a grade you gave
+        yourself, and a long run of clean sheets is either the course landing or the grading being
+        kind. This page cannot tell those two apart, and you can.
+      </p>
+    )
+  }
+
+  return (
+    <p style={style.note}>
+      Nothing has come back, because nothing has been answered here yet. This queue is built out of
+      questions you got wrong — in a review set, or in a lesson&rsquo;s own Warm-up, Predict or
+      Self-check — so it stays empty until one of those has been answered and graded. It is not a
+      queue you fill in; it is one that fills itself, from the parts of the course that go badly.
+    </p>
+  )
+}
+
 export const Corrections = ({
   questions,
 }: {
   readonly questions: readonly CorrectionQuestion[]
 }) => {
-  const { progress, ready, today, update } = useProgress()
+  const { progress, ready, today, update, record } = useProgress()
   const [answered, setAnswered] = useState<readonly AnsweredNote[]>([])
 
   if (!ready) {
@@ -140,7 +245,7 @@ export const Corrections = ({
   const current = sitting[0]
   const question = current === undefined ? undefined : known.get(keyOf(current.set, current.question))
 
-  const record = (
+  const recordAnswer = (
     correction: PendingCorrection,
     attempt: { readonly confidence: Confidence; readonly answer: string; readonly grade: Grade }
   ): void => {
@@ -169,7 +274,17 @@ export const Corrections = ({
     ])
   }
 
-  const upcoming = nextCorrection(queue)
+  /**
+   * Why there is nothing to offer, computed whether or not there is — the
+   * function returns `undefined` when something is due, which is the guard
+   * against drawing one of these paragraphs over a queue that has work in it.
+   *
+   * It is given the same filtered key set as the sitting, so the two cannot
+   * disagree about what the course contains, and the reading rather than the
+   * progress, because an empty record nobody could read is the one case where
+   * every sentence below would be a fabrication.
+   */
+  const quiet = whyNothingIsDue(progress, today, new Set(known.keys()), recordIsKnown(record.reading))
 
   return (
     <div style={style.column(5)}>
@@ -185,7 +300,15 @@ export const Corrections = ({
       ) : undefined}
 
       {current !== undefined && question !== undefined ? (
-        <Answer
+        <>
+          {record.writable ? undefined : (
+            <p style={style.note}>
+              This browser is not keeping your record, so answering these will not move them along:
+              a question retires on three clean retrievals across a month, and none of the three
+              can be written down. The retrieval is still worth doing. The ladder will not move.
+            </p>
+          )}
+          <Answer
           key={keyOf(current.set, current.question)}
           question={answered.length + 1}
           total={total}
@@ -199,18 +322,13 @@ export const Corrections = ({
              * from the queue entry, which is the thing that knows which
              * question this is.
              */
-            onRecord: (attempt) => record(current, attempt),
+            onRecord: (attempt) => recordAnswer(current, attempt),
           }}
-        />
+          />
+        </>
       ) : (
         <section style={{ ...style.panel, ...style.column(3) }} aria-label="Corrections">
-          {queue.length === 0 ? (
-            <p style={style.note}>
-              Nothing has come back. Either you have not missed anything yet, or everything you
-              missed has been got three times running — which is the only other way out of this
-              queue.
-            </p>
-          ) : answered.length > 0 ? (
+          {answered.length > 0 ? (
             <p style={style.note}>
               That is today&rsquo;s corrections done.{" "}
               {due.length > 0
@@ -218,12 +336,7 @@ export const Corrections = ({
                 : "The ones you got are not finished. They come back in a week, and again a month after that."}
             </p>
           ) : (
-            <p style={style.note}>
-              Nothing is due today.{" "}
-              {upcoming === undefined
-                ? "Everything you have missed has been answered again since."
-                : `The next one comes back in ${days(upcoming.inDays ?? 0)}, on ${upcoming.dueOn}. Doing it early is doing it while you still remember it, which measures nothing.`}
-            </p>
+            <Quietly quiet={quiet} />
           )}
 
           <Link href="/lessons/review" style={{ color: style.highlight }}>
@@ -246,14 +359,47 @@ export const Corrections = ({
  * that is not there when you click through costs more than the panel is worth.
  */
 export const CorrectionsPanel = ({ keys }: { readonly keys: readonly string[] }) => {
-  const { progress, ready, today } = useProgress()
+  const { progress, ready, today, record } = useProgress()
 
   if (!ready) return undefined
 
   const queue = knownOnly(correctionQueue(progress, today), new Set(keys))
   const due = dueCorrections(queue)
 
-  if (queue.length === 0) return undefined
+  /**
+   * An empty queue is almost always nothing to say, and this panel goes on
+   * saying nothing about it: a reader who has missed nothing does not need a
+   * box telling them so every time they open the review queue, and the three
+   * readings that mean *you have done the work* belong on the corrections page,
+   * where somebody has gone looking.
+   *
+   * One of the seven is different in kind and is why this branch exists at all.
+   * `lost` is not a state, it is a fault — misses are waiting and the questions
+   * they name are gone — and the place a fault has to appear is the page the
+   * reader is on, not the one they would have to already suspect something to
+   * visit. It replaced a `return undefined` that hid exactly this.
+   */
+  if (queue.length === 0) {
+    const quiet = whyNothingIsDue(progress, today, new Set(keys), recordIsKnown(record.reading))
+
+    if (quiet?.kind !== "lost") return undefined
+
+    return (
+      <section style={{ ...style.panel, ...style.column(3) }}>
+        <h2 style={style.label}>Coming back</h2>
+        <p style={style.note}>
+          {quiet.lost} question{quiet.lost === 1 ? "" : "s"} you missed{" "}
+          {quiet.lost === 1 ? "is" : "are"} waiting and {quiet.lost === 1 ? "names" : "name"} a
+          question this course no longer contains — renumbered or rewritten since you were asked.{" "}
+          {quiet.lost === 1 ? "It cannot" : "They cannot"} be brought back, and your record keeps{" "}
+          {quiet.lost === 1 ? "it" : "them"}.
+        </p>
+        <Link href="/lessons/review/corrections" style={{ color: style.highlight }}>
+          What happened to them
+        </Link>
+      </section>
+    )
+  }
 
   const sure = due.filter(wasConfident).length
   const upcoming = nextCorrection(queue)
