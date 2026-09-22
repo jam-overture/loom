@@ -6,7 +6,7 @@ import { primitiveTypeSchema } from "../primitive-type.js"
 import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { catalogueOf } from "../sdk/catalogue.js"
 import { endpointIdSchema } from "../submit/endpoint.js"
-import { sourceIdSchema } from "../data/source.js"
+import { bindingNameSchema, sourceIdSchema } from "../data/source.js"
 import { testRegistry } from "../testing/definitions.js"
 import { sampleTree } from "../testing/fixtures.js"
 import { buildElement, buildText } from "../tree/builders.js"
@@ -260,10 +260,48 @@ describe("renderCatalogue", () => {
         description: "one shape or another",
         props: undefined,
         slots: [],
+        reads: undefined,
       },
     ])
 
     expect(rendered).toContain("props: not declared")
+  })
+
+  /**
+   * The three-way answer, written as two clauses and a silence. Absence is the
+   * common case and writing it out would cost every proposal ninety-eight lines
+   * to say nothing; the data block teaches the reading instead (0181).
+   */
+  it("names the bindings a primitive reads, says when it reads none, and is silent when nobody said", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.feed"),
+        description: "A list of entries.",
+        props: [],
+        slots: [],
+        reads: [bindingNameSchema.parse("entries")],
+      },
+      {
+        type: primitiveTypeSchema.parse("loom.rule"),
+        description: "A line.",
+        props: [],
+        slots: [],
+        reads: [],
+      },
+      {
+        type: primitiveTypeSchema.parse("loom.panel"),
+        description: "A panel.",
+        props: [],
+        slots: [],
+        reads: undefined,
+      },
+    ])
+
+    expect(rendered.split("\n")).toEqual([
+      "- loom.feed — A list of entries. props: none reads: entries",
+      "- loom.rule — A line. props: none reads: none",
+      "- loom.panel — A panel. props: none",
+    ])
   })
 
   it("does not end a line in two full stops when its author wrote one", () => {
@@ -273,6 +311,7 @@ describe("renderCatalogue", () => {
         description: "The root of a page. Stacks its children in one column.",
         props: [],
         slots: [],
+        reads: undefined,
       },
     ])
 
@@ -288,6 +327,7 @@ describe("renderCatalogue", () => {
         description: "Have you tried the other one?",
         props: [],
         slots: [],
+        reads: undefined,
       },
     ])
 
@@ -301,6 +341,7 @@ describe("renderCatalogue", () => {
         description: "A banner",
         props: [],
         slots: [],
+        reads: undefined,
       },
     ])
 

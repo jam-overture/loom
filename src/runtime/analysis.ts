@@ -18,8 +18,12 @@ import { redirectedSubmissionsBetween, type RedirectedSubmission } from "./redir
 import { repointedBindingsBetween, type RepointedBinding } from "./repointing.js"
 import {
   EVERY_TYPE_REGISTERED,
+  EVERY_TYPE_UNDECLARED,
+  invalidPropsIn,
   unknownPrimitivesIn,
+  type InvalidProps,
   type PrimitiveVocabulary,
+  type PropsVocabulary,
   type UnknownPrimitive,
 } from "./vocabulary.js"
 
@@ -107,6 +111,20 @@ export type ChangeAnalysis = {
    * Empty for every host that declares no vocabulary, which is the default.
    */
   readonly unknownPrimitives: readonly UnknownPrimitive[]
+  /**
+   * Nodes this change would leave carrying props the primitive declaring their
+   * type refuses, so the page it produces has a hole where each one is — the
+   * same hole `unknownPrimitives` describes, one question further down.
+   *
+   * Measured on both trees, like `nestedTargets`, and unlike `unknownPrimitives`:
+   * props are the one thing two operations in a delta can argue about, so only
+   * the tree at the end says what a reader will actually be served.
+   * `introducedInvalidProps` says why, and what a node already failing before
+   * the change counts as.
+   *
+   * Empty for every host that wires no props vocabulary, which is the default.
+   */
+  readonly invalidProps: readonly InvalidProps[]
   /**
    * Forms this change points somewhere else — a node that posted to one
    * registered endpoint before and posts to another after.
@@ -279,21 +297,61 @@ const introducedNestedTargets = (
 }
 
 /**
+ * The nodes this delta is answerable for leaving unrenderable: the ones whose
+ * props fail in the tree it produces, less the ones already failing in the tree
+ * it started from.
+ *
+ * Measured on the two trees rather than on the operations, unlike
+ * `unknownPrimitives`, and the difference is forced by what a prop is. A type
+ * is fixed when a node is inserted and nothing can change it, so an `insert` is
+ * the only operation that can introduce an unknown one. Props are not: a delta
+ * may insert a node and configure it, or configure a node another operation in
+ * the same delta put there, and only the tree at the end says what the page
+ * will actually carry. Measuring the operations would refuse a delta that broke
+ * a node and then fixed it in the next breath.
+ *
+ * Keyed by node id alone, so a node that was already failing and fails
+ * differently afterwards counts as inherited. That is deliberate: the page has
+ * a hole at that node either way, the change did not put it there, and counting
+ * it would refuse the half-repair that is the likeliest way anybody digs such a
+ * node back out.
+ *
+ * The before-walk is skipped when the result has none, which is the ordinary
+ * case and — with `EVERY_TYPE_UNDECLARED` — the only case on a deployment that
+ * has wired nothing.
+ */
+const introducedInvalidProps = (
+  before: LoomNode,
+  after: LoomNode,
+  checkProps: PropsVocabulary
+): readonly InvalidProps[] => {
+  const produced = invalidPropsIn(after, checkProps)
+  if (produced.length === 0) return produced
+
+  const inherited = new Set(invalidPropsIn(before, checkProps).map((invalid) => invalid.nodeId))
+
+  return produced.filter((invalid) => !inherited.has(invalid.nodeId))
+}
+
+/**
  * Walks the delta forward so each operation is measured against the tree it
  * actually observes — an operation may target a node an earlier operation in
  * the same delta inserted.
  *
- * The two vocabularies are separate trailing parameters rather than one record,
- * which is not the shape `StakeInput` argues for. This function is published and
- * a lesson calls it by hand, so collecting them would be a breaking change to
- * teach nothing; what keeps the pair from being forgotten is that `assessChange`
- * is the only caller that reads a policy, and it passes both in one expression.
+ * The three vocabularies are separate trailing parameters rather than one
+ * record, which is not the shape `StakeInput` argues for. This function is
+ * published and a lesson calls it by hand, so collecting them would be a
+ * breaking change to teach nothing, and a third one arriving is the second time
+ * that has been true; what keeps them from being forgotten is that
+ * `assessChange` is the only caller that assembles them, and it passes all
+ * three in one expression.
  */
 export const analyzeDelta = (
   tree: LoomTree,
   delta: TreeDelta,
   isInteractive: InteractivePredicate = NOTHING_INTERACTIVE,
-  isRegistered: PrimitiveVocabulary = EVERY_TYPE_REGISTERED
+  isRegistered: PrimitiveVocabulary = EVERY_TYPE_REGISTERED,
+  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED
 ): Result<ChangeAnalysis, TreeError> => {
   const tally = emptyTally()
   let state: LoomNode = tree.root
@@ -322,6 +380,7 @@ export const analyzeDelta = (
     configuredPropKeys: Array.from(tally.propKeys),
     nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
     unknownPrimitives: tally.unknown,
+    invalidProps: introducedInvalidProps(tree.root, state, checkProps),
     redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
     repointedBindings: repointedBindingsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,

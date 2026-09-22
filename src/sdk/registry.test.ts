@@ -322,3 +322,58 @@ describe("registering a primitive that says what a reader reads", () => {
     expect(built.value.copyFor(type("loom.stat"))).toEqual(["value"])
   })
 })
+
+describe("registering a primitive that says which bindings it reads", () => {
+  const feed = (reads: readonly string[] | undefined) =>
+    definePrimitive({
+      type: "loom.feed",
+      description: "A list of entries a source answered with",
+      props: z.object({}),
+      ...(reads ? { reads } : {}),
+      component: () => null,
+    })
+
+  it("carries the declared names through to the registration", () => {
+    const built = createPrimitiveRegistry([feed(["entries", "summary"])])
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.primitives[0]?.reads).toEqual(["entries", "summary"])
+    expect(built.value.bindingsReadBy(type("loom.feed"))).toEqual(["entries", "summary"])
+  })
+
+  /**
+   * The misdeclaration that fails in the worst direction. A name no tree could
+   * write matches no binding, so the primitive would report every binding it
+   * was ever handed rather than none.
+   */
+  it("refuses a name a tree could not write", () => {
+    const built = createPrimitiveRegistry([feed(["entries", "Not A Name"])])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toEqual({
+      code: "invalid-binding-name",
+      type: "loom.feed",
+      name: "Not A Name",
+    })
+    expect(describeRegistryError(built.error)).toContain("camelCase")
+  })
+
+  /** The same bargain `copy` makes, one seam along, and the one 0181 rests on. */
+  it("keeps an empty declaration apart from no declaration at all", () => {
+    const declared = createPrimitiveRegistry([feed([])])
+    const silent = createPrimitiveRegistry([feed(undefined)])
+
+    expect(declared.ok && declared.value.primitives[0]?.reads).toEqual([])
+    expect(silent.ok && silent.value.primitives[0]?.reads).toBeUndefined()
+  })
+
+  it("answers undefined for a type it does not hold", () => {
+    const built = createPrimitiveRegistry([feed(["entries"])])
+
+    expect(built.ok && built.value.bindingsReadBy(type("loom.nowhere"))).toBeUndefined()
+  })
+})

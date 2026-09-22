@@ -161,6 +161,29 @@ const renderCataloguedSlots = (primitive: CataloguedPrimitive): string =>
   primitive.slots.length === 0 ? "" : ` slots: ${primitive.slots.join(", ")}`
 
 /**
+ * The binding names a primitive reads, where its author has said.
+ *
+ * The three-way distinction `renderDeclaredFields` spells out is kept, and
+ * spelled differently: a declared list and a declared `none` are written, and
+ * *nobody has said* is written by saying nothing. That is the opposite of what
+ * props do, and the difference is which answer is the common one. Every
+ * primitive declares a props schema, so `props: not declared` is the rare line
+ * and is worth its words; `reads` is absent on every primitive whose author has
+ * not thought about data, which today is nearly all of them, and a catalogue
+ * carrying `reads: not declared` on ninety-six consecutive lines would spend
+ * real tokens on every proposal to tell a model nothing at all.
+ *
+ * The distinction survives because absence of the clause *is* the third
+ * answer — the model is told in the data block how to read it.
+ */
+const renderCataloguedReads = (primitive: CataloguedPrimitive): string => {
+  if (primitive.reads === undefined) return ""
+  if (primitive.reads.length === 0) return " reads: none"
+
+  return ` reads: ${primitive.reads.join(", ")}`
+}
+
+/**
  * A description ends its own sentence, and the renderer finishes one that does
  * not.
  *
@@ -192,7 +215,7 @@ export const renderCatalogue = (catalogue: PrimitiveCatalogue): string =>
   catalogue
     .map(
       (primitive) =>
-        `- ${primitive.type} — ${renderCataloguedDescription(primitive.description)}${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}`
+        `- ${primitive.type} — ${renderCataloguedDescription(primitive.description)}${renderCataloguedProps(primitive)}${renderCataloguedSlots(primitive)}${renderCataloguedReads(primitive)}`
     )
     .join("\n")
 

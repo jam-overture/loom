@@ -17,7 +17,7 @@ import { EXCEPTIONS_SPELLED } from "../adapt/answers"
 import { ASKERS, ceilingOf } from "../adapt/askers"
 import { BECAUSE, WEIGHT } from "../adapt/record"
 import { FRONT_DOOR_POLICY, protectedInPlainWords } from "../adapt/run"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { spellCapitalised } from "../journey"
 import { action, cell, columns, heading, link, prose, row, section, stack } from "../nodes"
 import {
@@ -549,6 +549,7 @@ export const theRulesPageTree = (context: PageContext): LoomTree => {
         proof(ids, context),
         asked(ids),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

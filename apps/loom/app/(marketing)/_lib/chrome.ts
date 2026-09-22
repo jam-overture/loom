@@ -11,6 +11,7 @@ import {
   otherThemes,
   PORTAL,
   PRODUCT_SURFACES,
+  readingNeighbours,
   REPOSITORY_URL,
   SITE_ROUTES,
   SITE_THEMES,
@@ -296,3 +297,159 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
       ]),
     ],
   })
+
+/**
+ * What the two ends of the band are called, and what the band calls itself.
+ *
+ * Exported for the same reason as the two labels above: three files assert
+ * them, and a string spelled in three places is a string that gets re-worded in
+ * one of them.
+ *
+ * The two directions are the shortest plain words that say *which way*. The
+ * alternative was an arrow glyph, and an arrow is a picture of a direction
+ * rather than a word for it — it is not announced, it is not translated, and on
+ * the one site whose whole argument is that it can always say what is going on
+ * it would be the only navigation on the page a reader has to infer.
+ *
+ * The eyebrow is *What to read next* rather than *Keep reading*, because the
+ * front door already carries **Keep going** on the band that offers the four
+ * surfaces, and two bands one screen apart whose labels are near-synonyms are
+ * two bands a reader reads as one.
+ */
+export const BEFORE_LABEL = "Before this"
+export const NEXT_LABEL = "Next"
+export const READ_NEXT_EYEBROW = "What to read next"
+
+/**
+ * One end of the band: which way it goes, and the page it goes to.
+ *
+ * The whole card is the link, so nothing inside it may be one: `loom.card`
+ * renders an anchor when it is given an `href`, and the Gate refuses an anchor
+ * inside an anchor. Both lines are therefore prose — which is right anyway,
+ * because neither of them is separately clickable.
+ */
+const wayOn = (
+  ids: IdFactory,
+  label: string,
+  destination: string,
+  href: string,
+  blurb?: string
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.card",
+    props: { href, tone: "outline" },
+    children: [
+      prose(ids, label, { size: "small", tone: "muted" }),
+      prose(ids, destination),
+      /**
+       * Only the hand-off carries one, and the asymmetry is the point: every
+       * other card names a page of an argument the reader is in the middle of,
+       * and this one names a different surface. A reader who has read all nine
+       * and meets a card saying *Docs* has been handed a fourth navigation link;
+       * the same card saying what is behind the door has been handed the next
+       * thing to do.
+       */
+      ...(blurb === undefined ? [] : [prose(ids, blurb, { size: "small", tone: "muted" })]),
+    ],
+  })
+
+/**
+ * The band that walks a reader along the site's own argument.
+ *
+ * It is chrome rather than a page's own band, and that is the whole of why it
+ * is worth building: *every page says which page comes next* is a guarantee
+ * only if it has no exceptions, and nine of the ten pages were already pointing
+ * onward by hand at whichever page their author had in mind. Those hand-picked
+ * links are good — they are made in the middle of an argument, where the reason
+ * for going somewhere is fresh — and they are not a sequence. `/how-it-works`
+ * had none at all, and two pages were the destination of nobody's.
+ *
+ * So this takes nothing away from a page. It adds the one link a page cannot
+ * make for itself, because *what comes next* is a fact about the site's order
+ * rather than about the page: `readingNeighbours` reads it off `SITE_ROUTES`,
+ * and neither this function nor any page builder knows which page it is.
+ *
+ * **It is a grid of cards and it was meant to be `loom.link-pager`**, which is
+ * the primitive written for exactly this and is the one thing in the starter
+ * library this site still does not use. Two things stopped it, both measured
+ * against `next start` and both filed for `Loom primitives` on 22 September:
+ * its two end regions are `flex: 0 0 auto` and all the slack goes to the region
+ * holding the numbers — which a prev/next pair does not have — so at 1280 the
+ * two ends sit at the band's edges with 900px of nothing between them; and
+ * `loom.card` carries `container-type: inline-size`, so a card put in an end
+ * region has no width to take and renders as a 1px line. Neither is a fix a
+ * composition may make.
+ *
+ * What is left is the shape the front door's own *Keep going* band already
+ * proves: a grid gives each card a definite track to fill, so the two of them
+ * share the column and read as two destinations rather than as two captions
+ * that have come adrift. The one thing genuinely lost is the navigation
+ * landmark the pager announces itself as; the cards still read as *Before this,
+ * How it works*, which is the fact a reader needs and the landmark was only
+ * going to label.
+ */
+export const siteReadingBand = (
+  ids: IdFactory,
+  context: ChromeContext
+): readonly LoomNode[] => {
+  const { before, after, onward } = readingNeighbours(context.current)
+
+  /**
+   * **Nothing on the front door**, which is the one page with no page before
+   * it. The guarantee this band exists for is that a reader in the middle of an
+   * argument is told where they came from and where they go next, and the front
+   * door is not in the middle of one — it is the way in. It also already
+   * carries the two strongest onward offers on the site, one screen apart: the
+   * *Keep going* band's four destination cards, and a closing band whose
+   * primary action is this very page. A third, headed *What to read next* and
+   * holding one card spanning the whole column, is the same invitation made a
+   * third time and made worst.
+   *
+   * Nothing becomes unreachable by it. `/how-it-works` is offered by
+   * `/the-rules`' own *Before this* card, and the front door by
+   * `/how-it-works`' — `chrome.test.ts` holds every page of the site to being
+   * offered by some page's band, and that is this band's whole contract.
+   *
+   * It is `before` rather than a path compared against `HOME`, so the rule is
+   * read off the reading order like everything else here: whatever is first is
+   * the page with nothing to come back from.
+   */
+  if (before === undefined) return []
+
+  const cards: readonly LoomNode[] = [
+    wayOn(ids, BEFORE_LABEL, before.label, internalHref(context.origin, before.path, context.theme)),
+    ...(after === undefined
+      ? []
+      : [
+          wayOn(
+            ids,
+            NEXT_LABEL,
+            after.label,
+            internalHref(context.origin, after.path, context.theme)
+          ),
+        ]),
+    /**
+     * The palette is not carried through this one, and `surfaceHref` is why: a
+     * surface that does not read `?theme=bold` would be handed a parameter that
+     * means nothing and looks like it means something. The same rule the
+     * footer's map and the front door's band already follow.
+     */
+    ...(onward === undefined
+      ? []
+      : [wayOn(ids, NEXT_LABEL, onward.label, surfaceHref(context.origin, onward), onward.blurb)]),
+  ]
+
+  return [
+    buildElement(ids, {
+      type: "loom.section",
+      props: { width: "wide", eyebrow: READ_NEXT_EYEBROW },
+      children: [
+        buildElement(ids, {
+          type: "loom.grid",
+          props: { columns: "two", gap: "snug" },
+          children: [...cards],
+        }),
+      ],
+    }),
+  ]
+}
