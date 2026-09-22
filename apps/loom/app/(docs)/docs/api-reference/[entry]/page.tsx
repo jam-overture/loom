@@ -49,7 +49,17 @@ const ApiReferencePage = async ({ params }: PageParams) => {
 
   return (
     <>
-      <h1 className="font-mono text-3xl! sm:text-4xl!">{listed.page.heading ?? listed.page.title}</h1>
+      {/*
+       * `break-words`, because the heading is an import specifier and a phone
+       * is 390 pixels wide. `@loom/runtime/testing/contracts` is one unbroken
+       * word to a line-breaker — CSS offers no break after a slash — so the
+       * four longest doors pushed the whole document to 559 pixels and every
+       * page on them scrolled sideways. Found by photographing the page at
+       * phone width, which is the only instrument that reports it.
+       */}
+      <h1 className="font-mono text-3xl! break-words sm:text-4xl!">
+        {listed.page.heading ?? listed.page.title}
+      </h1>
 
       <p className="text-lg">{listed.page.summary}</p>
 

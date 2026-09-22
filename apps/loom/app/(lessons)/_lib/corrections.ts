@@ -1,4 +1,4 @@
-import { CONFIDENT } from "./calibration"
+import { calibrationOf, CONFIDENT } from "./calibration"
 import {
   correctionsFor,
   type Attempt,
@@ -249,6 +249,20 @@ const order = (a: PendingCorrection, b: PendingCorrection): number => {
  * questions were waiting and shown none.
  */
 export const correctionQueue = (progress: Progress, today: string): readonly PendingCorrection[] =>
+  everyMiss(progress, today).filter((correction) => correction.status !== "retired")
+
+/**
+ * The same walk, with the retired ones still in it.
+ *
+ * `correctionQueue` drops them because nothing downstream has to offer them.
+ * They are kept here because *how the queue came to be empty* is a different
+ * question from *what is in it*, and a question this surface answered wrongly
+ * for as long as the retired ones were thrown away at the only place they could
+ * be counted. Three clean retrievals across a month is the course working, and
+ * a page that cannot tell it apart from a reader who has answered nothing has
+ * lost the only evidence it had.
+ */
+export const everyMiss = (progress: Progress, today: string): readonly PendingCorrection[] =>
   Object.entries(progress.sets)
     .flatMap(([set, record]) =>
       record.attempts
@@ -257,7 +271,6 @@ export const correctionQueue = (progress: Progress, today: string): readonly Pen
           pendingFor(set, attempt.question, attempt.confidence, attempt.grade, attempt.on, progress, today)
         )
     )
-    .filter((correction) => correction.status !== "retired")
     .sort(order)
 
 /**
@@ -305,3 +318,112 @@ export const nextCorrection = (
   [...queue]
     .filter((correction) => correction.status === "upcoming")
     .sort((a, b) => (a.inDays ?? 0) - (b.inDays ?? 0))[0]
+
+/**
+ * Why there is nothing to re-answer, which is seven different facts and used to
+ * be one sentence.
+ *
+ * This is lesson 24's rule turned on the page that teaches it. *Nothing has come
+ * back* was true of a reader who had never opened the course, of a reader whose
+ * record is on their other machine, and of a reader who had worked every miss in
+ * it up to three clean retrievals — and the page said the same thing to all
+ * three, in the same tone, with the evidence that separates them already in
+ * hand. The sentence about storage was fixed for the review queue and the index
+ * on 17 September; this queue kept it for another five days, one page along.
+ *
+ * The rule the shape follows is 0169's, which
+ * [lesson 24](../../../../../lessons/24-silence.md) got its second half from:
+ * **one reading per thing the reader would do differently about it.** Not per
+ * thing that sounds different. A reader who has missed nothing and a reader
+ * whose misses have all retired both have an empty queue and both did it by
+ * working; they are one reading if you are counting sentences and two if you are
+ * counting what the reader should now do, because the second has a month of
+ * evidence behind them and the first has none yet.
+ *
+ * The order is precedence, not importance, and each clause is only reached
+ * because the ones above it are false:
+ *
+ * - `unreadable` — the record could not be read, so every reading below is
+ *   about `EMPTY_PROGRESS` rather than about the reader. It goes first for the
+ *   same reason the notice exists: an empty record that nobody could read is
+ *   not evidence of anything.
+ * - `upcoming` — there is work, and it is not today's. The one case that was
+ *   already being told apart.
+ * - `lost` — misses are waiting and the course no longer contains the questions
+ *   they name. `knownOnly` has always dropped these and nothing has ever said
+ *   so, which makes this the one reading here that reports a fault rather than
+ *   a state.
+ * - `retired` — every miss got three times running. The course worked.
+ * - `by-design` — the only things missed were predictions the reader said they
+ *   were unsure about, which is the Predict section doing exactly what the
+ *   README says it is for. Nothing is wrong and nothing is owed.
+ * - `no-misses` — questions answered, none of them missed.
+ * - `nothing-answered` — the record is legible and holds no graded question at
+ *   all. The true blank slate, and the only reading of the seven that used to
+ *   be stated correctly.
+ *
+ * `undefined` when something *is* due, so that a caller cannot draw one of
+ * these over a queue that has work in it.
+ */
+export type Quiet =
+  | { readonly kind: "unreadable" }
+  | {
+      readonly kind: "upcoming"
+      readonly next: PendingCorrection
+      /** Everything in hand, not just the next one: the ladder, at a glance. */
+      readonly waiting: number
+    }
+  | { readonly kind: "lost"; readonly lost: number }
+  | { readonly kind: "retired"; readonly retired: number }
+  | { readonly kind: "by-design"; readonly predictions: number }
+  | { readonly kind: "no-misses"; readonly graded: number }
+  | { readonly kind: "nothing-answered" }
+
+export const whyNothingIsDue = (
+  progress: Progress,
+  today: string,
+  keys: ReadonlySet<string>,
+  /** Whether the record is evidence about the reader — `recordIsKnown`. */
+  known: boolean
+): Quiet | undefined => {
+  if (!known) return { kind: "unreadable" }
+
+  const all = everyMiss(progress, today)
+  const queue = knownOnly(
+    all.filter((correction) => correction.status !== "retired"),
+    keys
+  )
+
+  if (dueCorrections(queue).length > 0) return undefined
+
+  const next = nextCorrection(queue)
+
+  if (next !== undefined) return { kind: "upcoming", next, waiting: queue.length }
+
+  /**
+   * Pending misses that no longer name a question in the course. Counted before
+   * the retired ones are considered, because a reader whose queue has both is
+   * owed the fault rather than the achievement.
+   */
+  const lost = all.filter((correction) => correction.status !== "retired").length
+
+  if (lost > 0) return { kind: "lost", lost }
+
+  const retired = all.filter((correction) => correction.status === "retired").length
+
+  if (retired > 0) return { kind: "retired", retired }
+
+  const { attempts, right } = calibrationOf(progress)
+  const missed = attempts - right
+
+  /**
+   * Every miss in the record failed `comesBack`, and there is exactly one way
+   * that happens: a prediction rated below 4. Being wrong there is the
+   * mechanism the course is built on, so the queue is empty because the reader
+   * did the exercise properly.
+   */
+  if (missed > 0) return { kind: "by-design", predictions: missed }
+  if (attempts > 0) return { kind: "no-misses", graded: attempts }
+
+  return { kind: "nothing-answered" }
+}

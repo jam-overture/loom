@@ -28869,9 +28869,9 @@ parse failure, which is the finding directly above that.
 ---
 ## 2026-09-20 — an entry point's own opening paragraph reaches no page, and the door that needs it most is the one that will not open without it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
-found opening all sixteen doors; nothing is wrong on the site today, and one
-page is missing the sentence a reader needs before their import will run
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+this branch — the reader's half is shipped and measured; the prose half was
+declined on the evidence, which is written at the foot of this entry
 
 Every published entry point is a barrel. The reference groups a page by the
 module that **declares** each symbol, and a barrel declares nothing — so a
@@ -28927,6 +28927,43 @@ else it may say about one would be two architectures in one pull request.
 
 **Not a finding for `Loom daily build`.** The sentence in `src/` is already
 written and already correct. Nothing in another lane is wrong.
+
+**Closed, 22 September, and neither of the two shapes was taken.** The reader
+on the end of this finding got a stack trace, and what they needed was the
+fact, not the paragraph that describes it. So the fact is **measured from the
+built package**: every entry-point page now opens with the packages that door
+loads, read by following its JavaScript's imports and keeping the ones
+`package.json` asks a host to bring. `/docs/api-reference/testing-contracts`
+says `vitest ^3.0.5` and `pnpm add`, above everything else on the page.
+
+Measuring beat lifting on the very door this finding is about. The prose says
+`vitest`; the walk says `vitest` **and `drizzle-orm`**, which that comment
+mentions only in a closing aside about `rowSecurityOn` that no reader would
+take as an install instruction. A page that had lifted the paragraph would have
+been one package short.
+
+**Shape 1 — an entry summary — was declined on a measurement rather than on
+taste**, and this is the number the original entry was missing. Fifteen of the
+sixteen doors open with a paragraph that restates the hand-written line already
+at the top of the page: `@loom/runtime/react` opens *"Turning a tree into React
+elements"* under a summary that already says *"Rendering: a tree to React
+elements, theme mounting, addressing, render diagnostics."* Six of them would
+also have printed it twice on one page, because their own module forms a group
+and the group already carries it. The sixteenth, `@loom/runtime/signals/postgres`,
+opens with *"The Drizzle tables are **not** re-exported, unlike the journal's"*,
+which is an excellent sentence and a poor page summary.
+
+**Shape 2 — a bolded lead as a marked precondition — was declined on the same
+kind of evidence.** A bolded lead is not a precondition convention in this
+repository; it is how the runtime's authors start a paragraph. Reading every
+door's opening comment: `@loom/runtime/primitives` alone has **eighteen** of
+them, the registration log of a library in three layers. Lifting bolded leads
+would have put that on a reference page.
+
+**What is left is one door and it is filed on its own**, below: the paragraph
+on `@loom/runtime/signals` warning which door to import in a browser bundle is
+a precondition of a different kind — about weight, not about what is installed
+— and the band measured here cannot carry it.
 ## 2026-09-20 — every hero on this site paints its backdrop on top of its own headline, and the fix is one line the sibling primitive already carries
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
@@ -29569,6 +29606,51 @@ configured identity is the one the deployment pipeline trusts, and a lane's name
 belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
 
+## 2026-09-22 — a door whose own comment says *use the other door in a browser*, and the page that cannot say it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+nothing is broken; a reader following the reference into a browser bundle ships
+about 60 KB they did not need to
+
+Every entry-point page now carries what its door **loads** that a host has to
+install, measured from the built package. That instrument answers *will my
+import run*. It cannot answer *should I be importing this one at all*, and one
+door says so in its own words:
+
+> **In a browser bundle, import the broadcaster from `@loom/runtime/signals/broadcast`
+> instead.** This entry also carries the schemas, and a bundler cannot leave the
+> schema library out once it is imported — about 60 KB of it.
+
+That paragraph is in `src/signals/index.ts`. `@loom/runtime/signals` and
+`@loom/runtime/signals/broadcast` both have pages, and neither page mentions the
+other. The reader this costs is the one who finds `signals` first, which is the
+likelier of the two: it is the shorter specifier and it is the one the rail
+lists first.
+
+**It is not the same fact as the band.** `zod` is a dependency rather than a
+peer, so nobody has to install it and the band is right to say nothing about it.
+The cost is that it is *bundled*, and a door that is a strict subset of another
+is the cheap way to avoid it.
+
+**What would measure it**, in the shape this lane now has the parts for: the
+walk in `_lib/api/requires.ts` already collects every package a door reaches,
+and the doors are already compared with one another nowhere. A door B whose
+reached-package set is a strict subset of door A's, and whose exports are a
+subset of A's, is a narrower door — and *narrower door exists* is a fact about
+the package rather than an opinion about bundles.
+
+Measured against the generated file today, **exactly one pair qualifies**:
+`@loom/runtime/signals/broadcast` reaches no package at all where
+`@loom/runtime/signals` reaches `zod`, and its fourteen exports are all
+fourteen of that door's ninety-one. The pair that shows why the exports half
+of the rule is needed is `telemetry` and `telemetry/postgres`: one reaches a
+subset of the other's packages and **neither one's exports are a subset of the
+other's**, so they are two doors to two different places rather than a wide one
+and a narrow one. A rule that looked only at packages would have sent a reader
+from the journal to the Postgres journal and lost them sixty exports.
+
+**Not filed for `Loom daily build`.** The paragraph in `src/` is correct and
+well placed; what is missing is a page that reads it.
 ---
 ## 2026-09-22 — `loom.link-pager` cannot be a previous/next pair: the ends may not take the width, and a card put in one renders as a 1px line
 

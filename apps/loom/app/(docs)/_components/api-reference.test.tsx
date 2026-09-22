@@ -18,6 +18,7 @@ const entry: ApiEntry = {
   specifier: "@loom/runtime/react",
   slug: "react",
   types: "./dist/render/index.d.ts",
+  requires: [{ package: "react", range: "^19.0.0", optional: true, reach: "loaded" }],
   groups: [
     {
       module: "render/addressing",
@@ -204,6 +205,104 @@ describe("the way back into the prose", () => {
 
     expect(band.textContent).toContain("No written page names any of this import's exports yet")
     expect(band.querySelector("a")).toBeNull()
+  })
+})
+
+describe("what to install before the import will run", () => {
+  const needing = (requires: ApiEntry["requires"]): ApiEntry => ({ ...entry, requires })
+
+  const band = () => screen.getByRole("region", { name: "What to install before this import will run" })
+
+  it("names the package, the range and the command that installs it", () => {
+    render(<ApiEntryReference entry={entry} prose={noProse} />)
+
+    expect(band().textContent).toContain("react")
+    expect(band().textContent).toContain("^19.0.0")
+    expect(band().textContent).toContain("pnpm add react")
+  })
+
+  it("says that the import itself fails without what it loads", () => {
+    render(<ApiEntryReference entry={entry} prose={noProse} />)
+
+    expect(band().textContent).toContain("Install this first")
+    expect(band().textContent).toContain("the import itself fails")
+  })
+
+  it("says the opposite about a package only the types name", () => {
+    render(
+      <ApiEntryReference
+        entry={needing([
+          { package: "@anthropic-ai/sdk", range: "^0.115.0", optional: true, reach: "declared" },
+        ])}
+        prose={noProse}
+      />
+    )
+
+    expect(band().textContent).toContain("Your program runs without this one")
+    expect(band().textContent).toContain("@anthropic-ai/sdk")
+
+    /** Nothing here is loaded, so there is nothing to tell a reader to install first. */
+    expect(band().textContent).not.toContain("Install this first")
+    expect(band().querySelector("pre")).toBeNull()
+  })
+
+  it("keeps the two apart when a door has one of each", () => {
+    render(
+      <ApiEntryReference
+        entry={needing([
+          { package: "@anthropic-ai/sdk", range: "^0.115.0", optional: true, reach: "declared" },
+          { package: "vitest", range: "^3.0.5", optional: true, reach: "loaded" },
+        ])}
+        prose={noProse}
+      />
+    )
+
+    const text = band().textContent ?? ""
+
+    expect(text).toContain("pnpm add vitest")
+    expect(text.indexOf("Install this first")).toBeLessThan(text.indexOf("Your program runs without"))
+  })
+
+  it("installs both at once when two have to be installed", () => {
+    render(
+      <ApiEntryReference
+        entry={needing([
+          { package: "drizzle-orm", range: "^0.45.2", optional: true, reach: "loaded" },
+          { package: "vitest", range: "^3.0.5", optional: true, reach: "loaded" },
+        ])}
+        prose={noProse}
+      />
+    )
+
+    expect(band().querySelector("pre")?.textContent).toBe("pnpm add drizzle-orm vitest")
+    expect(band().textContent).toContain("Install these first")
+  })
+
+  it("says a door needs nothing rather than showing a reader an empty band", () => {
+    render(<ApiEntryReference entry={needing([])} prose={noProse} />)
+
+    expect(band().textContent).toContain("Nothing to install first")
+    expect(band().querySelectorAll("li")).toHaveLength(0)
+  })
+
+  it("comes before the prose and the list of names, because it can stop a reader", () => {
+    const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
+    const text = container.textContent ?? ""
+
+    expect(text.indexOf("Install this first")).toBeLessThan(text.indexOf("No written page names"))
+    expect(text.indexOf("Install this first")).toBeLessThan(text.indexOf("On this page"))
+  })
+
+  it("says whether a package is one the host may do without", () => {
+    render(
+      <ApiEntryReference
+        entry={needing([{ package: "react", range: "^19.0.0", optional: false, reach: "loaded" }])}
+        prose={noProse}
+      />
+    )
+
+    expect(band().textContent).toContain("peer dependency")
+    expect(band().textContent).not.toContain("optional peer dependency")
   })
 })
 

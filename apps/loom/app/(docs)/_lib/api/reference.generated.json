@@ -4,6 +4,7 @@
       "specifier": "@loom/runtime",
       "slug": "runtime",
       "types": "./dist/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "catalogue",
@@ -4253,6 +4254,14 @@
       "specifier": "@loom/runtime/anthropic",
       "slug": "anthropic",
       "types": "./dist/interpretation/anthropic.d.ts",
+      "requires": [
+        {
+          "package": "@anthropic-ai/sdk",
+          "range": "^0.115.0",
+          "optional": true,
+          "reach": "declared"
+        }
+      ],
       "groups": [
         {
           "module": "interpretation/anthropic",
@@ -4281,6 +4290,14 @@
       "specifier": "@loom/runtime/react",
       "slug": "react",
       "types": "./dist/render/index.d.ts",
+      "requires": [
+        {
+          "package": "react",
+          "range": "^19.0.0",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "render/addressing",
@@ -5058,6 +5075,14 @@
       "specifier": "@loom/runtime/primitives",
       "slug": "primitives",
       "types": "./dist/primitives/index.d.ts",
+      "requires": [
+        {
+          "package": "react",
+          "range": "^19.0.0",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "primitives",
@@ -5492,6 +5517,14 @@
       "specifier": "@loom/runtime/sdk",
       "slug": "sdk",
       "types": "./dist/sdk/index.d.ts",
+      "requires": [
+        {
+          "package": "react",
+          "range": "^19.0.0",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "catalogue",
@@ -6031,6 +6064,7 @@
       "specifier": "@loom/runtime/cli",
       "slug": "cli",
       "types": "./dist/cli/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "cli/args",
@@ -6248,6 +6282,7 @@
       "specifier": "@loom/runtime/store",
       "slug": "store",
       "types": "./dist/store/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "store/attribution",
@@ -6654,6 +6689,7 @@
       "specifier": "@loom/runtime/write",
       "slug": "write",
       "types": "./dist/write/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "write/commit",
@@ -6990,6 +7026,14 @@
       "specifier": "@loom/runtime/postgres",
       "slug": "postgres",
       "types": "./dist/store/postgres.d.ts",
+      "requires": [
+        {
+          "package": "drizzle-orm",
+          "range": "^0.45.2",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "store/database",
@@ -7102,6 +7146,7 @@
       "specifier": "@loom/runtime/signals",
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7837,6 +7882,7 @@
       "specifier": "@loom/runtime/signals/broadcast",
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7956,6 +8002,14 @@
       "specifier": "@loom/runtime/signals/postgres",
       "slug": "signals-postgres",
       "types": "./dist/signals/postgres.d.ts",
+      "requires": [
+        {
+          "package": "drizzle-orm",
+          "range": "^0.45.2",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "signals/migrate",
@@ -8005,6 +8059,7 @@
       "specifier": "@loom/runtime/telemetry",
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
+      "requires": [],
       "groups": [
         {
           "module": "telemetry/calibration",
@@ -8509,6 +8564,14 @@
       "specifier": "@loom/runtime/telemetry/postgres",
       "slug": "telemetry-postgres",
       "types": "./dist/telemetry/postgres.d.ts",
+      "requires": [
+        {
+          "package": "drizzle-orm",
+          "range": "^0.45.2",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "telemetry/migrate",
@@ -8565,6 +8628,14 @@
       "specifier": "@loom/runtime/testing",
       "slug": "testing",
       "types": "./dist/testing/index.d.ts",
+      "requires": [
+        {
+          "package": "react",
+          "range": "^19.0.0",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "testing/definitions",
@@ -8957,6 +9028,20 @@
       "specifier": "@loom/runtime/testing/contracts",
       "slug": "testing-contracts",
       "types": "./dist/testing/contracts.d.ts",
+      "requires": [
+        {
+          "package": "drizzle-orm",
+          "range": "^0.45.2",
+          "optional": true,
+          "reach": "loaded"
+        },
+        {
+          "package": "vitest",
+          "range": "^3.0.5",
+          "optional": true,
+          "reach": "loaded"
+        }
+      ],
       "groups": [
         {
           "module": "testing/hold-contract",
