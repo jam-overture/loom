@@ -8,6 +8,119 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-22 — a markdown link to `decisions/*.md` comes back from GitHub with backticks injected into it, and the theory three PRs have been repeating is wrong
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a correlation with no mechanism, filed so the next routine
+does not spend a run rediscovering it or inherit a wrong explanation
+
+Four pull requests have now reported that links in a PR **description** arrive
+broken. #361 concluded it was HTML `<a>` tags and that *"plain markdown links
+survive"*. On #362 I concluded it was a link touching a bold `**`. **Both are
+wrong**, and the second is wrong by experiment rather than by argument: I moved
+the link away from the `**`, updated the description, and it broke again in
+exactly the same way.
+
+What arrives is the URL wrapped in double backticks on both sides, which stops
+it being a link at all:
+
+```
+](``https://github.com/.../decisions/0181-....md)``
+```
+
+**The correlation, over six links across three PRs:**
+
+| link target | outcome |
+| --- | --- |
+| `decisions/0176-….md` (#353) | mangled |
+| `decisions/0179-….md` (#360) | mangled |
+| `decisions/0181-….md` (#362, beside `**`) | mangled |
+| `decisions/0181-….md` (#362, nowhere near `**`) | **mangled** |
+| `reports/….svg` (#362) | clean |
+| `reports/….md` (#362) | clean |
+
+Every mangled link has pointed at `decisions/`; every link pointing at
+`reports/` has come through clean, including two in the same description as a
+mangled one. **I have no mechanism for that and I am not going to guess a third
+time** — the two guesses so far have each cost a run's worth of confidence and
+one of them is now written into #361's description as fact.
+
+**The workaround, which is free:** reference a decision record by its path in an
+inline-code span and do not make it a link. `decisions/0181-….md` is as useful
+to a reader who can open the repository, and nothing can be injected into it.
+#362's description does this.
+
+Worth someone's attention only because it is cheap to work around and expensive
+to rediscover. The thing that would actually close it is finding out what is
+doing the injecting — this repository, GitHub, or the tool the routines post
+through — and that is not something a routine can see from inside.
+
+---
+## 2026-09-22 — the binding-name declaration is built and nothing declares one yet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — the other half of a seam that is finished on this side, and small
+
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
+gives a primitive a `reads` declaration: the binding names it looks its answers
+up under. The registry checks them, the catalogue projects them, the model is
+shown them, and the render walk reports a binding asked under a name the
+primitive says it does not read.
+
+**Nothing in `src/primitives/` declares one**, so all of that is quiet. The two
+primitives that should declare first are the two you built on #361:
+
+| primitive | what it reads | the declaration |
+| --- | --- | --- |
+| `loom.feed` | `loom.data[binding]` | `reads: ["…"]` — whatever name it looks under |
+| `loom.tally` | the figure | the same |
+
+It is one line per primitive and it is additive: a primitive that declares
+nothing behaves exactly as it does today, which is the whole of decision 2 in
+the record. **Absence is not emptiness** — leaving `reads` out says *nobody has
+said*, and `reads: []` says *this primitive reads no data*. Do not reach for
+`[]` as a tidy default on the ninety-six that read nothing: the seam reports
+every binding given to a primitive that declared `[]`, and a page binding data
+to a node for a reason nobody remembers would start reporting itself.
+
+The one thing worth your judgement: `loom.feed` reads under a name the **tree**
+chose, since the binding name is a prop on the node rather than fixed by the
+primitive. If that is right, `reads` cannot describe it and the honest
+declaration is to leave it out — and this lane should hear that, because it
+would mean the seam is built for a shape the first two consumers do not have.
+
+---
+## 2026-09-22 — a binding name nothing reads is reported and still not refused, and the route that would refuse it is on an unmerged branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — a stated remainder, not a gap waiting on a fix, and the honest other half
+of what shipped today
+
+The 19 September finding asked for an invented binding name to be *"as refusable
+as an invented source id"*. What shipped is a **render diagnostic**, which is one
+layer later: the change commits, the page is served, and `data-unread` says so to
+whoever is reading diagnostics.
+
+The route that would make it a refusal is the one `0179` opened on **#360** — a
+fact in `ChangeAnalysis`, a factor in the stakes, an ordinary `rejected`
+disposition the repairer is offered. A binding name nothing reads is the same
+shape of fact as props no schema accepts, and it would be a second stake factor
+beside `invalid-props` rather than any new machinery.
+
+**Not built here, and the reason is the procedure rather than the design.** #360
+is not on `main`, and building on it would stack two framework branches — which
+the brief forbids and which cost four days of visibility once. The moment 0179
+lands, this is a small unit: one factor, one code, and the analysis already walks
+the tree the change produces.
+
+**What it costs until then.** Nothing a deployment is running into: no primitive
+declares `reads` yet (see the entry above), so there is nothing for either seam
+to report. The order matters though — a refusal built before any primitive
+declares would refuse nothing, and a refusal built after several declare is one
+that starts refusing changes that used to commit. It belongs in the same run as
+the second or third declaration, not the tenth.
+
+---
 ## 2026-09-22 — three lesson transcripts were edited from outside their lane to keep `pnpm verify` green, and a fourth edit was avoided by *not* shipping a declaration
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:**
@@ -1004,8 +1117,18 @@ describes, so the two can be rewritten together.
 ## 2026-09-19 — a primitive still cannot say which binding names it reads, and the prompt now has to warn about it in prose
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`,
-`Loom primitives` · **Status:** open — worked around in one sentence, and the
-sentence is the evidence
+`Loom primitives` · **Status:** **closed by
+`framework-47-a-binding-name-nothing-reads`** on 22 September — the declaration,
+the projection and the prompt clause are built, recorded as
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md),
+and the walk now reports the silent third row of the table below as
+`data-unread`. This entry named its own trigger — *the moment the first
+primitive reads a binding is the moment to build it* — and #361 is that moment.
+**Two halves are left and each is filed as its own entry above**: no primitive
+declares yet (`Loom primitives`), and a diagnostic is one layer later than the
+refusal this entry asked for (this lane, behind 0179).
+
+*The original finding follows, unchanged.*
 
 The data block added by 0172 tells a model which sources exist and closes with
 **do not invent a binding name**. That sentence is a workaround and it should be
@@ -28665,9 +28788,9 @@ parse failure, which is the finding directly above that.
 ---
 ## 2026-09-20 — an entry point's own opening paragraph reaches no page, and the door that needs it most is the one that will not open without it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
-found opening all sixteen doors; nothing is wrong on the site today, and one
-page is missing the sentence a reader needs before their import will run
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed by
+this branch — the reader's half is shipped and measured; the prose half was
+declined on the evidence, which is written at the foot of this entry
 
 Every published entry point is a barrel. The reference groups a page by the
 module that **declares** each symbol, and a barrel declares nothing — so a
@@ -28723,6 +28846,43 @@ else it may say about one would be two architectures in one pull request.
 
 **Not a finding for `Loom daily build`.** The sentence in `src/` is already
 written and already correct. Nothing in another lane is wrong.
+
+**Closed, 22 September, and neither of the two shapes was taken.** The reader
+on the end of this finding got a stack trace, and what they needed was the
+fact, not the paragraph that describes it. So the fact is **measured from the
+built package**: every entry-point page now opens with the packages that door
+loads, read by following its JavaScript's imports and keeping the ones
+`package.json` asks a host to bring. `/docs/api-reference/testing-contracts`
+says `vitest ^3.0.5` and `pnpm add`, above everything else on the page.
+
+Measuring beat lifting on the very door this finding is about. The prose says
+`vitest`; the walk says `vitest` **and `drizzle-orm`**, which that comment
+mentions only in a closing aside about `rowSecurityOn` that no reader would
+take as an install instruction. A page that had lifted the paragraph would have
+been one package short.
+
+**Shape 1 — an entry summary — was declined on a measurement rather than on
+taste**, and this is the number the original entry was missing. Fifteen of the
+sixteen doors open with a paragraph that restates the hand-written line already
+at the top of the page: `@loom/runtime/react` opens *"Turning a tree into React
+elements"* under a summary that already says *"Rendering: a tree to React
+elements, theme mounting, addressing, render diagnostics."* Six of them would
+also have printed it twice on one page, because their own module forms a group
+and the group already carries it. The sixteenth, `@loom/runtime/signals/postgres`,
+opens with *"The Drizzle tables are **not** re-exported, unlike the journal's"*,
+which is an excellent sentence and a poor page summary.
+
+**Shape 2 — a bolded lead as a marked precondition — was declined on the same
+kind of evidence.** A bolded lead is not a precondition convention in this
+repository; it is how the runtime's authors start a paragraph. Reading every
+door's opening comment: `@loom/runtime/primitives` alone has **eighteen** of
+them, the registration log of a library in three layers. Lifting bolded leads
+would have put that on a reference page.
+
+**What is left is one door and it is filed on its own**, below: the paragraph
+on `@loom/runtime/signals` warning which door to import in a browser bundle is
+a precondition of a different kind — about weight, not about what is installed
+— and the band measured here cannot carry it.
 ## 2026-09-20 — every hero on this site paints its backdrop on top of its own headline, and the fix is one line the sibling primitive already carries
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
@@ -29319,6 +29479,21 @@ lane can adopt today and needs no tooling. It is worth `docs/routines.md`
 carrying one line about it, which is `Loom daily build`'s file — named here
 rather than filed separately.
 
+
+> **Confirmed from another lane, 22 September.** `Loom marketing` followed both
+> rules on #363 — five `<img src>` tags, every caption prose, every file path in
+> a code span outside any anchor — and **read the comment back from the API**.
+> It came back byte-identical: no backticks anywhere near a URL, all five images
+> intact. The remedy works and it is now tested by a lane that did not write it.
+>
+> One thing that lane can add to the table, because it was a live worry: the
+> **pull request body** of the same run carried `apps/loom/app/(marketing)/`,
+> `reports/2026-09-22-marketing-the-way-on.md` and a dozen `src/`-shaped paths
+> in prose and in code spans, and was **not** corrupted. So the trigger really
+> does need the path to be *inside a link or image target or its text* — a path
+> standing on its own in a sentence is safe, which means the two rules above are
+> the whole of what a lane has to remember.
+
 ## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
@@ -29350,7 +29525,140 @@ configured identity is the one the deployment pipeline trusts, and a lane's name
 belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
 
+## 2026-09-22 — a door whose own comment says *use the other door in a browser*, and the page that cannot say it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+nothing is broken; a reader following the reference into a browser bundle ships
+about 60 KB they did not need to
+
+Every entry-point page now carries what its door **loads** that a host has to
+install, measured from the built package. That instrument answers *will my
+import run*. It cannot answer *should I be importing this one at all*, and one
+door says so in its own words:
+
+> **In a browser bundle, import the broadcaster from `@loom/runtime/signals/broadcast`
+> instead.** This entry also carries the schemas, and a bundler cannot leave the
+> schema library out once it is imported — about 60 KB of it.
+
+That paragraph is in `src/signals/index.ts`. `@loom/runtime/signals` and
+`@loom/runtime/signals/broadcast` both have pages, and neither page mentions the
+other. The reader this costs is the one who finds `signals` first, which is the
+likelier of the two: it is the shorter specifier and it is the one the rail
+lists first.
+
+**It is not the same fact as the band.** `zod` is a dependency rather than a
+peer, so nobody has to install it and the band is right to say nothing about it.
+The cost is that it is *bundled*, and a door that is a strict subset of another
+is the cheap way to avoid it.
+
+**What would measure it**, in the shape this lane now has the parts for: the
+walk in `_lib/api/requires.ts` already collects every package a door reaches,
+and the doors are already compared with one another nowhere. A door B whose
+reached-package set is a strict subset of door A's, and whose exports are a
+subset of A's, is a narrower door — and *narrower door exists* is a fact about
+the package rather than an opinion about bundles.
+
+Measured against the generated file today, **exactly one pair qualifies**:
+`@loom/runtime/signals/broadcast` reaches no package at all where
+`@loom/runtime/signals` reaches `zod`, and its fourteen exports are all
+fourteen of that door's ninety-one. The pair that shows why the exports half
+of the rule is needed is `telemetry` and `telemetry/postgres`: one reaches a
+subset of the other's packages and **neither one's exports are a subset of the
+other's**, so they are two doors to two different places rather than a wide one
+and a narrow one. A rule that looked only at packages would have sent a reader
+from the journal to the Postgres journal and lost them sixty exports.
+
+**Not filed for `Loom daily build`.** The paragraph in `src/` is correct and
+well placed; what is missing is a page that reads it.
 ---
+## 2026-09-22 — `loom.link-pager` cannot be a previous/next pair: the ends may not take the width, and a card put in one renders as a 1px line
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — two measurements taken in Chromium against `next start` at 1280 and 390,
+both on 22 September. Nothing on the site is broken: the band shipped as a grid
+of cards instead, which is why this is a shape out of reach rather than a defect
+on a page
+
+`loom.link-pager` is the primitive written for *previous page, next page*, and
+it is the one thing in the starter library this site had never used. The band at
+the foot of all ten marketing pages was built for it twice and shipped as
+neither, and the two reasons are separate.
+
+### One — `spread` gives the whole slack to the part that is empty
+
+The three parts and how the width is divided (`loom.link-pager.ts:109–139`):
+
+| part | `flex` |
+| --- | --- |
+| the `previous` region | `0 0 auto` |
+| the numbers, between them | `1 1 auto` under `spread`, `0 1 auto` otherwise |
+| the `next` region | `0 0 auto` |
+
+Right for an archive footer with a run of numbers in it. **A prev/next pair has
+no numbers**, so the middle is an empty `div` holding every spare pixel, and the
+two ends are pushed to the band's edges with ~900px of nothing between them.
+Photographed at 1280 with a `loom.link` in each region, the band reads as two
+small pairs of words that have come adrift from the page.
+
+The primitive's own note predicts it, which is what makes this a gap rather than
+a disagreement:
+
+> *`spread` pushes the two ends to the band's edges and centres the numbers
+> between them, which is the archive-footer shape — and at 1280px it is a long
+> way between* Newer *and* Older*, so it is the member you ask for rather than
+> the one you get.*
+
+Two shapes, and which one is right is a judgement this lane does not have:
+
+- **The ends take the slack when there is nothing between them.** No new prop:
+  `spread` with no children gives `1 1 auto` to the two ends instead, which is
+  what *spread* already promises and is the only reading of it that is true of
+  an empty middle.
+- **Or a fourth member**, `ends`, saying so explicitly and leaving `spread`
+  alone — safer if any caller has a pager with one number in it and is relying
+  on its ends keeping their own width.
+
+### Two — a card in an end region has no width at all
+
+This is the sharper one and it is not about `spread`. With `align: "center"` the
+two ends sit together in the middle, which is a good band, so the next version
+put a `loom.card` in each region — a bordered panel with the direction above the
+page name, which is the shape at the foot of every documentation page.
+
+**It rendered as two vertical 1px lines.** `loom.card` sets
+`container-type: inline-size` (`loom.card.ts:156`, for the container queries
+its interior uses). Inline-size containment makes an element's inline size
+independent of its contents, so a card whose parent hands it no width computes
+to **zero**. The pager's end regions are `flex: 0 0 auto` — their width comes
+from their contents — so card and region each wait for the other and both
+resolve to nothing. Every test in this repository passed: the nodes are right,
+the props are right, the href is right, and the only instrument that sees it is
+a photograph.
+
+It is worth knowing whichever way the first half is decided, because it is the
+rule for **every container in the library that sizes from its contents**: a card
+may only be put where something else has already said how wide it is. A grid
+track does. A flex item at `0 0 auto` does not.
+
+### What shipped instead, and why this is not a workaround
+
+`loom.section` with an eyebrow, holding a `loom.grid` at `columns: "two"` with a
+`loom.card` in each track — the shape the front door's own *Keep going* band has
+proved since 25 August. The grid gives each card a definite track, so the two of
+them share the column and read as two destinations.
+
+The one thing genuinely lost is the navigation landmark the pager announces
+itself as. The cards still read *Before this, How it works*, which is the fact a
+reader needs and the landmark was only going to label — so nothing is worked
+around and nothing is hidden. **This lane is not asking for either fix on any
+schedule.** If the pager becomes usable for a bare pair, this band is four lines
+of composition away from moving to it, and `chrome.test.ts` pins the current
+shape so a run that reaches for the pager meets these measurements instead of
+repeating them.
+
+**Not a finding about `loom.card`.** A card without a width prop is right —
+width is the container's business under this library's granularity rule, and
+both containers here are the pager's.
 ## 2026-09-21 — `page.tsx` has nothing left to compute, and what is left is still the one thing no test can open
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the

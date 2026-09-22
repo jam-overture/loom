@@ -25,7 +25,7 @@ import {
 } from "../adapt/history"
 import { whatTheChoicesDo } from "../adapt/answers"
 import { protectedInPlainWords } from "../adapt/run"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
 import { outlineDiff, type OutlineRow } from "../outline"
 import {
@@ -611,6 +611,7 @@ export const theRecordPageTree = (context: RecordContext): LoomTree => {
         why(ids),
         questions(ids),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

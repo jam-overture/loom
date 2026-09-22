@@ -202,6 +202,7 @@ describe("what one reference page is told about the prose", () => {
     specifier: "@loom/runtime",
     slug: "runtime",
     types: "./dist/index.d.ts",
+    requires: [],
     groups: [
       {
         module: "tree/tree",

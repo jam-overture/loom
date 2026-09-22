@@ -6,6 +6,7 @@ import ts from "typescript"
 
 import { moduleTitle } from "./groups"
 import { apiSlugFor, type ApiEntry, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
+import { peersOf, requirementsFor, type Peers, type ReadFile } from "./requires"
 
 /**
  * The API reference, read off the package rather than written beside it.
@@ -75,11 +76,32 @@ export type PublishedEntry = {
  * publishes no declarations, so there is nothing to describe and pretending
  * otherwise would put an empty page in the rail.
  */
+/** The package's own manifest, read once and asked two different questions. */
+const manifestOf = (root: string): PackageManifest =>
+  JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as PackageManifest
+
+type PackageManifest = {
+  readonly name?: string
+  readonly exports?: ExportsMap
+  readonly peerDependencies?: Readonly<Record<string, string>>
+  readonly peerDependenciesMeta?: Readonly<Record<string, { readonly optional?: boolean }>>
+}
+
+/** What the package expects its host to install, for the band that says so. */
+export const publishedPeers = (root: string = packageRoot): Peers => peersOf(manifestOf(root))
+
+/**
+ * Reading a built file, for the walk that works out what a door loads.
+ *
+ * Absence is `undefined` rather than a throw, because one caller treats a
+ * missing file as a fault and the other treats it as an answer, and which of
+ * those it is is not this function's to decide.
+ */
+export const builtFileReader: ReadFile = (path: string): string | undefined =>
+  existsSync(path) ? readFileSync(path, "utf8") : undefined
+
 export const publishedEntries = (root: string = packageRoot): readonly PublishedEntry[] => {
-  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
-    readonly name?: string
-    readonly exports?: ExportsMap
-  }
+  const manifest = manifestOf(root)
 
   const name = manifest.name ?? ""
   const exports = manifest.exports ?? {}
@@ -390,6 +412,7 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
 
   const checker = program.getTypeChecker()
   const typesRoot = join(root, "dist")
+  const peers = publishedPeers(root)
 
   const built: ApiEntry[] = entries.map((entry) => {
     const file = program.getSourceFile(join(root, entry.types))
@@ -418,6 +441,7 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
       specifier: entry.specifier,
       slug: apiSlugFor(entry.specifier),
       types: entry.types,
+      requires: requirementsFor(entry, peers, builtFileReader, root),
       groups: groupSymbols(symbols, root),
     }
   })

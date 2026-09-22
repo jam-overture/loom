@@ -50,6 +50,10 @@ import type { PrimitiveRole } from "../role.js"
  *   queue or a search can say what a node says (0122). Optional, read by
  *   nothing in the runtime, and the one declaration where leaving it out and
  *   declaring it empty are different answers.
+ * - `reads` — which binding names it reads an answer under, so a model can be
+ *   told them and the walk can say when a tree asked under a name this
+ *   primitive never reads (0181). Optional, and the second declaration where
+ *   leaving it out and declaring it empty differ.
  */
 
 export type PrimitiveDefinition<
@@ -152,6 +156,29 @@ export type PrimitiveDefinition<
    * riding on it and the same silence when it happens.
    */
   readonly copy?: readonly string[]
+  /**
+   * The binding names this primitive reads an answer under — `["entries"]` on a
+   * feed, `[]` on everything that draws only what the tree wrote.
+   *
+   * A tree's `loom:data` maps a *name* to a source, and the name is how the
+   * primitive reading the answer finds it. Until this existed, the name
+   * was the one thing in that declaration nothing could check: an unregistered
+   * source is refused and a param the source did not declare is refused, but a
+   * name nothing reads resolves cleanly and is then read by nobody. Declaring
+   * the names is what lets something say so.
+   *
+   * Optional, and — like `copy`, and for the same reason — leaving it out and
+   * declaring it empty are different answers. `[]` says *this primitive reads
+   * no data*; absence says *nobody has said*, and the seam reports the second
+   * and trusts the first. A default would collapse them into a claim no author
+   * made, and the claim would be wrong for every bound primitive written before
+   * anyone thought to declare one.
+   *
+   * These are binding names and not prop names, so the registry checks them
+   * against the grammar rather than against the props schema — there is no
+   * second list here for them to drift out of agreement with.
+   */
+  readonly reads?: readonly string[]
   readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
@@ -196,6 +223,12 @@ export type PrimitiveEntry = {
    * two mean different things here and all the way out to `copyIn`.
    */
   readonly copy: readonly string[] | undefined
+  /**
+   * Declared binding names, still raw: the registry is what checks them.
+   * `undefined` is carried through rather than defaulted to `[]`, because the
+   * two mean different things here and all the way out to the render walk.
+   */
+  readonly reads: readonly string[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -260,6 +293,7 @@ export const definePrimitive = <
   behaviours: definition.behaviours ?? [],
   role: definition.role,
   copy: definition.copy,
+  reads: definition.reads,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

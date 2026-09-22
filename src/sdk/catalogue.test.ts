@@ -48,6 +48,40 @@ describe("catalogueOf", () => {
     expect(catalogueOf(registryOf([unenumerable]))[0]?.props).toBeUndefined()
   })
 
+  /**
+   * Three answers, and the projection carries all three. A consumer that
+   * flattened the third into an empty list would be making a claim the
+   * primitive's author did not.
+   */
+  it("carries what a primitive said about the bindings it reads, including having said nothing", () => {
+    const catalogue = catalogueOf(
+      registryOf([
+        definePrimitive({
+          type: "loom.feed",
+          description: "A list of entries",
+          props: z.object({}),
+          reads: ["entries"],
+          component: () => null,
+        }),
+        definePrimitive({
+          type: "loom.rule",
+          description: "A line",
+          props: z.object({}),
+          reads: [],
+          component: () => null,
+        }),
+        definePrimitive({
+          type: "loom.panel",
+          description: "A panel whose author has not said",
+          props: z.object({}),
+          component: () => null,
+        }),
+      ])
+    )
+
+    expect(catalogue.map((primitive) => primitive.reads)).toEqual([["entries"], [], undefined])
+  })
+
   it("holds nothing that cannot be serialised", () => {
     const catalogue = catalogueOf(registryOf(testDefinitions))
 

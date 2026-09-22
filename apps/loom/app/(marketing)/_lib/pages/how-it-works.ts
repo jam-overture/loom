@@ -11,7 +11,7 @@ import {
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
 import type { PaperTrail, TrailLine } from "../adapt/paper-trail"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { JOURNEY, ordinal, spell, spellCapitalised, STEPS, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
@@ -548,6 +548,7 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
             ]),
         questions(ids),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

@@ -23,7 +23,7 @@ import {
   type WeighedRequest,
 } from "../adapt/askers"
 import { BECAUSE, WEIGHT } from "../adapt/record"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { spell, spellCapitalised } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
@@ -484,6 +484,7 @@ export const whoCanAskPageTree = (context: AskersContext): LoomTree => {
           ? []
           : [comparison(ids, weighed), cannotBuy(ids, context, weighed)]),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

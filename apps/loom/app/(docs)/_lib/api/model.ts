@@ -33,6 +33,27 @@ export type ApiSymbol = {
   readonly summary: string
 }
 
+/**
+ * How a package a door needs is reached.
+ *
+ * `loaded` — the door's JavaScript imports it, so importing the door imports
+ * it. Absent, the import throws.
+ *
+ * `declared` — only the door's own declarations name it, as a type. The
+ * program runs without it; the type-checker asks for it.
+ */
+export type ApiRequirementReach = "loaded" | "declared"
+
+/** A package a reader has to install for themselves before a door will open. */
+export type ApiRequirement = {
+  readonly package: string
+  /** The version range this package asks for, exactly as `package.json` writes it. */
+  readonly range: string
+  /** Whether the package declares it optional, which every one of Loom's peers is. */
+  readonly optional: boolean
+  readonly reach: ApiRequirementReach
+}
+
 /** The exports that share one module inside an entry point. */
 export type ApiGroup = {
   /** The declaring module, relative to the package root: `tree/navigation`. */
@@ -57,6 +78,14 @@ export type ApiEntry = {
   readonly slug: string
   /** The declaration file the package's `exports` map points at, for provenance. */
   readonly types: string
+  /**
+   * The packages a reader must install themselves before this import will work.
+   *
+   * Measured from the built package rather than read off anybody's prose: what
+   * this door's JavaScript loads, and what its own declarations name. Empty for
+   * most doors, which is itself worth saying on a page.
+   */
+  readonly requires: readonly ApiRequirement[]
   readonly groups: readonly ApiGroup[]
 }
 

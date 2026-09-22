@@ -12,7 +12,13 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import type { AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
-import { SIGN_IN_LABEL, siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import {
+  SIGN_IN_LABEL,
+  siteFooter,
+  siteHeader,
+  siteReadingBand,
+  type ChromeContext,
+} from "../chrome"
 import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
@@ -771,6 +777,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
         questions(ids),
         waysIn(ids, context),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

@@ -7,6 +7,7 @@ import {
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
+  type ApiRequirement,
   type ApiSymbol,
 } from "@/app/(docs)/_lib/api/model"
 
@@ -178,6 +179,122 @@ const Group = ({
 )
 
 /**
+ * What has to be installed before the import at the top of this page will run.
+ *
+ * First on the page, above everything about what comes out of the door,
+ * because it is the only thing here that can stop a reader before they have
+ * started. A reader who pastes an import and gets a stack trace does not go
+ * looking for a paragraph further down; they conclude the package is broken.
+ *
+ * **Two strengths, and the difference is stated rather than implied.** A
+ * package the import *loads* is a package whose absence throws — that sentence
+ * is worth the plainest words the page has. A package only the *types* name
+ * costs a reader nothing at runtime and everything at their keyboard, and
+ * telling them the same thing about both would make the strong one mean less.
+ *
+ * **The band is there when there is nothing to install**, for the reason the
+ * band below it is there when no page names anything: a reader told that this
+ * import needs nothing stops wondering, and a reader shown no band at all
+ * cannot tell that from a site that never checked.
+ */
+const Requirement = ({ requirement }: { readonly requirement: ApiRequirement }) => (
+  <li className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+    <code className="code-chip font-mono text-sm">{requirement.package}</code>
+    <code className="text-ink-faint font-mono text-xs">{requirement.range}</code>
+    <span className="text-ink-faint text-xs">
+      {requirement.optional ? "optional peer dependency" : "peer dependency"}
+    </span>
+  </li>
+)
+
+const LoadedRequirements = ({
+  specifier,
+  loaded,
+}: {
+  readonly specifier: string
+  readonly loaded: readonly ApiRequirement[]
+}) => (
+  <>
+    <p className="text-ink text-sm">
+      <span className="font-semibold">Install {loaded.length === 1 ? "this" : "these"} first.</span>{" "}
+      <span className="text-ink-muted">
+        <code className="code-chip font-mono text-xs">{specifier}</code> loads{" "}
+        {loaded.length === 1 ? "it" : "them"} the moment the import runs. Without{" "}
+        {loaded.length === 1 ? "it" : "them"}, the import itself fails — before any of your own code
+        has run.
+      </span>
+    </p>
+
+    <ul className="mt-3 space-y-1">
+      {loaded.map((requirement) => (
+        <Requirement key={requirement.package} requirement={requirement} />
+      ))}
+    </ul>
+
+    <pre className="border-edge bg-code-surface text-code-ink mt-3 overflow-x-auto rounded-lg border p-3 font-mono text-[0.8125rem]">
+      {`pnpm add ${loaded.map((requirement) => requirement.package).join(" ")}`}
+    </pre>
+  </>
+)
+
+const DeclaredRequirements = ({
+  declared,
+  alone,
+}: {
+  readonly declared: readonly ApiRequirement[]
+  readonly alone: boolean
+}) => (
+  <div className={alone ? "" : "border-edge mt-4 border-t pt-4"}>
+    <p className="text-ink text-sm">
+      <span className="font-semibold">
+        Your program runs without {declared.length === 1 ? "this one" : "these"}. Your type-checker
+        will not.
+      </span>{" "}
+      <span className="text-ink-muted">
+        Nothing this import loads reaches{" "}
+        {declared.length === 1 ? "it" : "them"} — the mention is in the types, which are gone by the
+        time the code runs. Install {declared.length === 1 ? "it" : "them"} to write against this
+        import; skip {declared.length === 1 ? "it" : "them"} and the import still works.
+      </span>
+    </p>
+
+    <ul className="mt-3 space-y-1">
+      {declared.map((requirement) => (
+        <Requirement key={requirement.package} requirement={requirement} />
+      ))}
+    </ul>
+  </div>
+)
+
+const BeforeItWillRun = ({ entry }: { readonly entry: ApiEntry }) => {
+  const loaded = entry.requires.filter((requirement) => requirement.reach === "loaded")
+  const declared = entry.requires.filter((requirement) => requirement.reach === "declared")
+
+  return (
+    <section
+      aria-label="What to install before this import will run"
+      className="border-edge bg-surface-muted mt-8 rounded-lg border px-4 py-4"
+    >
+      {entry.requires.length === 0 ? (
+        <p className="text-ink text-sm">
+          <span className="font-semibold">Nothing to install first.</span>{" "}
+          <span className="text-ink-muted">
+            Everything this import loads arrives with{" "}
+            <code className="code-chip font-mono text-xs">@loom/runtime</code> itself.
+          </span>
+        </p>
+      ) : null}
+
+      {loaded.length === 0 ? null : <LoadedRequirements specifier={entry.specifier} loaded={loaded} />}
+
+      {declared.length === 0 ? null : (
+        <DeclaredRequirements declared={declared} alone={loaded.length === 0} />
+      )}
+    </section>
+  )
+}
+
+/**
  * The list of what is on the page, before the page starts.
  *
  * A reference is read by people who arrived looking for one name, and a rail
@@ -307,6 +424,8 @@ export const ApiEntryReference = ({
       <code className="code-chip font-mono text-xs">{entry.types}</code>, which is the declaration file this
       package publishes for <code className="code-chip font-mono text-xs">{entry.specifier}</code>.
     </p>
+
+    <BeforeItWillRun entry={entry} />
 
     <ProseFirst entry={entry} prose={prose} />
 

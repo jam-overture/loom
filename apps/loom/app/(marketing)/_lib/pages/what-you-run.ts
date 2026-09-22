@@ -17,7 +17,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import { catalogueOf } from "@loom/runtime/sdk"
 
 import { askById } from "../adapt/asks"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
 import { siteFrameOrigins } from "../frames"
 import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
@@ -760,6 +760,7 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
         noMiddle(ids),
         asked(ids, context),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),
