@@ -29941,3 +29941,41 @@ the line itself.
 this does not touch it: putting stores on `globalThis` before the server's route
 modules evaluate is a recipe for running your application, and `pnpm shoot` has
 never started anybody's application. What it now does is everything after that.
+
+---
+
+## 2026-09-22 — the mangled-link correlation is dead, and a bare URL survives where a markdown link does not
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **a correction and a workaround, not a mechanism.** The
+21 September entry asked that nobody guess a third time and this does not
+
+That entry recorded, over six links across three pull requests, that every
+mangled link pointed at `decisions/` and every link pointing at `reports/` came
+through clean. #369's body was posted three times and read back from the API
+each time:
+
+| written as | outcome |
+| --- | --- |
+| markdown links to `reports/….png`, inside a table | **mangled**, all six |
+| the same links, in plain paragraphs | **mangled**, all seven |
+| the same URLs bare, each on its own line | **clean**, all seven |
+
+**So the target directory is not the variable**, and neither is a table, and
+neither is proximity to a `**`. Three correlations have now been recorded and
+falsified; I am not offering a fourth.
+
+One further observation, as data: in all three versions the **first** markdown
+link in the body — the report, at the top — survived untouched, while every
+markdown link after it was wrapped. That held across two rewrites that changed
+everything else about where those links sat.
+
+**The workaround is a bare URL.** It has no `](` for anything to reach into,
+GitHub auto-links it, and it is the first form anyone here has found that
+survives. It costs the link its label, which is a fair price: every screenshot
+link in every pull request this project has opened has been broken, and #367
+correctly established that embedding the image instead cannot work either while
+this repository is private.
+
+Filed for @jonathanbravecredit because the cause is outside the repository —
+whatever writes these bodies is not in `tools/` and no lane can read it.

@@ -3,7 +3,8 @@
 **Date:** 2026-09-22
 **Routine:** `Loom daily build` (framework core)
 **Section:** §1 — process, the screenshot harness
-**Branch:** `framework-49-a-harness-that-can-reach`
+**Branch:** `framework-49-a-harness-that-can-reach` · **Pull request:** #369
+**Deployed preview:** https://loom-git-framework-49-a-harn-2c587c-jpizzolato36-6341s-projects.vercel.app — Vercel reported `Ready`. Nothing new is on it to look at: this changes `tools/` only and no page moved by a pixel. I could not open it either way; `*.vercel.app` is off this sandbox's egress allowlist, which is the standing 19 August limit and not something this run widened.
 
 ![A shot is an approach with a camera on the end](2026-09-22-framework-a-harness-that-can-reach.svg)
 
@@ -185,7 +186,7 @@ exit code read off the run rather than off a pipe.
 | --- | --- |
 | Framework suite | 158 files, **2,949** tests, all passed |
 | Application suite | 290 files, 5,202 tests, all passed |
-| Findings | 745 findings, 0 malformed |
+| Findings | 746 findings, 0 malformed |
 | Prerender check | 109 pages, 943 text junctions, 0 run together |
 | Overflow, measured | 1280 against 1280 on all seven shots |
 
@@ -245,3 +246,28 @@ artefact worth keeping:
 ```
 
 The two session shots differ by one step and nothing else. That is the report.
+
+## One thing learned about pull request bodies, filed rather than theorised
+
+The 21 September finding says links in a PR description come back from the API
+wrapped in double backticks, and records a correlation: every mangled link had
+pointed at `decisions/`, and every link pointing at `reports/` had come through
+clean. **That correlation is dead.** This body was posted three times and read
+back each time:
+
+| written as | outcome |
+| --- | --- |
+| a markdown link to `reports/….png`, in a table | **mangled** |
+| the same links, in plain paragraphs | **mangled** |
+| the same URLs bare, on their own lines | **clean, all seven** |
+
+So the target directory is not the variable, and neither is a table. One more
+observation, recorded as data rather than as a third theory: in all three
+versions the **first** markdown link in the body — `reports/….md`, the report
+itself — survived untouched while every later one was wrapped.
+
+**The workaround is a bare URL**, which has no `](` in it for anything to
+reach into, and GitHub auto-links it. That is what this PR's body uses, and it
+is the first form anyone here has found that survives. It costs a link its
+label, which is worth it: every screenshot link in every pull request this
+project has opened has been broken.
