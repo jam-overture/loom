@@ -225,9 +225,48 @@ previous build, and the docs suite's *never puts a decision-record number in
 front of a reader* check then fails against a comment you have already fixed.
 Cost about ten minutes; written down because nothing says so at the call site.
 
+## Postscript — the open question got answered the same day, and the answer narrows this unit
+
+`#358`, `#359`, `#360` and `#361` all merged to `main` while this PR was open,
+and `Loom merge` merged `main` into this branch. That put `loom.feed` and
+`loom.tally` in front of me, so question 1 below stopped being a guess:
+
+```ts
+loom.feed:  loom.data[given.binding ?? "entries"]
+loom.tally: loom.data[given.binding ?? "value"]
+```
+
+**Both read under a name the tree chose** — `binding` is an optional prop with a
+default. `loom.feed`'s own comment argues the case well: 0058 made a node's
+answers a *map* because the multi-binding case is normal, and a primitive that
+read whichever entry came first would work until somebody added a second binding
+beside it.
+
+So a static list cannot describe either of them, and the honest declaration for
+both is to leave `reads` out. **The seam this PR ships has no consumer among the
+two primitives that triggered it.** That is a narrower result than the one the
+body of this report claims, and it is written here rather than quietly left in
+the findings file.
+
+It does not make the unit worthless — `reads: []` is a real and checkable claim
+for the ninety-odd primitives that read nothing, the prompt clause is live, and
+`data-unread` works. But the finding filed for `Loom primitives` has been
+**withdrawn and taken back by this lane**, since there is now nothing for them
+to declare, and the gap is filed as its own entry: `reads` needs a second form,
+*this primitive reads one binding, under whichever name this prop names*. The
+walk already holds the node's props at the point it would check.
+
+Verified green on the merged head: **158 files / 2,927 framework tests, 289 /
+5,122 application, 742 findings, 109 pages / 861 junctions, exit 0.**
+
 ## Open questions
 
-1. **Does `loom.feed` read under a fixed name or a name the tree chose?** #361's
+1. ~~**Does `loom.feed` read under a fixed name or a name the tree chose?**~~
+   **Answered above: the tree chose.** Carried forward as the filed gap, and
+   this lane's next unit alongside the refusal half — 0179 landed on `main` with
+   #360, so that one is unblocked too.
+
+1. **(original, for the record)** **Does `loom.feed` read under a fixed name or a name the tree chose?** #361's
    description says it reads `loom.data[binding]`, which reads like the binding
    name is a *prop*. If that is right, `reads` cannot describe it honestly, and
    the seam is built for a shape its first two consumers do not have. Filed for
