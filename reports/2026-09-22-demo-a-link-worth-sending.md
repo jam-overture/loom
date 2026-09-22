@@ -3,7 +3,8 @@
 **Routine:** `Loom demo` · **Branch:** `demo-25-a-link-worth-sending` ·
 **22 September 2026**
 
-**Pull request:** #TBD · **Deployed preview:** in the pull request body.
+**Pull request:** [#368](https://github.com/jam-overture/loom/pull/368) ·
+**Deployed preview:** in the pull request body.
 To see it: paste the preview's `/demo` address into Slack, Discord or a
 Mastodon compose box — or open **`/demo/opengraph-image`** directly, which is
 the picture itself at 1200 × 630.
