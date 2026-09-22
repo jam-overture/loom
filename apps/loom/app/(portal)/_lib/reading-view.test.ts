@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@loom/runtime"
 import type { StoredTally } from "@loom/runtime/signals"
 
+import { runtimeWordsIn } from "../_test/plain-language"
 import type { PartName } from "./part-name"
 import {
+  comparisonOf,
+  countingStanding,
   dwellEach,
   highlightsOf,
   outOfReaders,
@@ -17,7 +20,12 @@ import {
   reachShifts,
   revisionReadings,
   shiftOf,
+  standingAdvice,
+  standingNote,
   unplacedUse,
+  visitsHeard,
+  type CountingStanding,
+  type PageReading,
   type RevisionReading,
 } from "./reading-view"
 
@@ -26,7 +34,7 @@ const other = treeIdSchema.parse("t_2")
 
 const tally = (
   nodeId: string,
-  counts: Partial<Omit<StoredTally, "treeId" | "revision" | "nodeId" | "type" | "updatedAt">> & {
+  counts: Partial<Omit<StoredTally, "treeId" | "revision" | "nodeId" | "type">> & {
     readonly revision?: number
     readonly type?: string
     readonly treeId?: typeof treeId
@@ -43,7 +51,7 @@ const tally = (
   activations: counts.activations ?? 0,
   opens: counts.opens ?? 0,
   closes: counts.closes ?? 0,
-  updatedAt: "2026-09-15T00:00:00.000Z",
+  updatedAt: counts.updatedAt ?? "2026-09-15T00:00:00.000Z",
 })
 
 const readingOf = (tallies: readonly StoredTally[], names?: ReadonlyMap<string, PartName>) =>
@@ -212,7 +220,13 @@ describe("the five things worth saying out loud", () => {
   })
 
   it("has nothing to say about a revision with no parts", () => {
-    const empty: RevisionReading = { treeId, revision: 1, views: 0, parts: [] }
+    const empty: RevisionReading = {
+      treeId,
+      revision: 1,
+      countedAt: "2026-09-15T00:00:00.000Z",
+      views: 0,
+      parts: [],
+    }
 
     expect(highlightsOf(empty)).toEqual({})
   })
@@ -514,5 +528,254 @@ describe("a count against the visits that got that far", () => {
    */
   it("is never confused with a count against every visit", () => {
     expect(outOfReaders(5, 12)).not.toBe(outOfVisits(5, 12))
+  })
+})
+
+describe("when these numbers were last added up", () => {
+  it("reports the newest rollup across a version's parts, not the oldest", () => {
+    const reading = readingOf([
+      tally("n_a", { views: 4, updatedAt: "2026-09-14T09:00:00.000Z" }),
+      tally("n_b", { views: 4, updatedAt: "2026-09-15T11:30:00.000Z" }),
+      tally("n_c", { views: 4, updatedAt: "2026-09-15T08:00:00.000Z" }),
+    ])
+
+    expect(reading.countedAt).toBe("2026-09-15T11:30:00.000Z")
+  })
+
+  /**
+   * Two versions of one page are counted in different runs, and a screen that
+   * reported one version's moment against the other would be aging or
+   * freshening a figure by a whole window.
+   */
+  it("keeps each version's moment to itself", () => {
+    const readings = revisionReadings([
+      tally("n_a", { revision: 1, views: 4, updatedAt: "2026-09-14T09:00:00.000Z" }),
+      tally("n_a", { revision: 2, views: 4, updatedAt: "2026-09-15T09:00:00.000Z" }),
+    ])
+
+    expect(readings.map((reading) => reading.countedAt)).toEqual([
+      "2026-09-15T09:00:00.000Z",
+      "2026-09-14T09:00:00.000Z",
+    ])
+  })
+
+  it("keeps each page's moment to itself when several arrive in one read", () => {
+    const readings = revisionReadings([
+      tally("n_a", { views: 4, updatedAt: "2026-09-14T09:00:00.000Z" }),
+      tally("n_a", { treeId: other, views: 4, updatedAt: "2026-09-15T09:00:00.000Z" }),
+    ])
+
+    expect(new Map(readings.map((reading) => [reading.treeId, reading.countedAt]))).toEqual(
+      new Map([
+        [treeId, "2026-09-14T09:00:00.000Z"],
+        [other, "2026-09-15T09:00:00.000Z"],
+      ])
+    )
+  })
+})
+
+describe("whether these numbers are about the page being served", () => {
+  const countedAt = (revisions: readonly number[]): PageReading => ({
+    treeId,
+    revisions: revisions.map((revision) => readingOf([tally("n_a", { revision, views: 4 })])),
+  })
+
+  it("says so when the newest counted version is the one being served", () => {
+    expect(countingStanding(countedAt([4]), 4)).toEqual({ kind: "current", counted: 4 })
+  })
+
+  /**
+   * The state of every page for as long as an hour after somebody works on it,
+   * and the one a reader is most likely to arrive in — they came here *because*
+   * they made the change.
+   */
+  it("says how far behind the counters are when the page has moved on", () => {
+    expect(countingStanding(countedAt([4]), 6)).toEqual({
+      kind: "behind",
+      counted: 4,
+      live: 6,
+      changes: 2,
+    })
+  })
+
+  /**
+   * A failed read of the page reported as "current" would be the confident
+   * claim this whole surface refuses to make. It is a state of its own.
+   */
+  it("refuses to call the counters current when the page could not be read", () => {
+    expect(countingStanding(countedAt([4]), undefined)).toEqual({ kind: "unread", counted: 4 })
+  })
+
+  /**
+   * A revision only climbs, so a page older than its own counters means
+   * something put a different page at this address. Falling through to
+   * `current` would print *these are the numbers for the version you are
+   * serving* over numbers about a page that is gone.
+   */
+  it("tells a replaced page apart from an unreadable one", () => {
+    expect(countingStanding(countedAt([4]), 1)).toEqual({ kind: "replaced", counted: 4, live: 1 })
+  })
+
+  it("asks about the newest counted version rather than the oldest", () => {
+    expect(countingStanding(countedAt([4, 3, 2]), 4)).toEqual({ kind: "current", counted: 4 })
+  })
+})
+
+describe("what can honestly be said about before and after", () => {
+  const pageOf = (tallies: readonly StoredTally[]): PageReading =>
+    pageReadings(revisionReadings(tallies))[0]!
+
+  const TWO = [
+    tally("n_kept", { revision: 1, views: 50, reached: 10 }),
+    tally("n_kept", { revision: 2, views: 40, reached: 32 }),
+  ]
+
+  it("compares the newest counted version against the one before it", () => {
+    const comparison = comparisonOf(pageOf(TWO))
+
+    expect(comparison.kind).toBe("shifts")
+    expect(comparison.kind === "shifts" && comparison.before).toBe(1)
+    expect(comparison.kind === "shifts" && comparison.after).toBe(2)
+    expect(comparison.kind === "shifts" && comparison.shifts).toHaveLength(1)
+  })
+
+  /**
+   * The failure this reading exists for: all three of these used to be an
+   * absent section, and a reader cannot tell three facts apart from one blank.
+   */
+  it("says there is nothing before it rather than nothing at all", () => {
+    expect(comparisonOf(pageOf([tally("n_a", { revision: 2, views: 4, reached: 4 })]))).toEqual({
+      kind: "first",
+      counted: 2,
+    })
+  })
+
+  it("tells a change that replaced every reported part apart from a change that moved nothing", () => {
+    const comparison = comparisonOf(
+      pageOf([
+        tally("n_gone", { revision: 1, views: 50, reached: 10 }),
+        tally("n_new", { revision: 2, views: 40, reached: 32 }),
+      ])
+    )
+
+    expect(comparison).toEqual({ kind: "nothing-shared", before: 1, after: 2 })
+  })
+
+  /**
+   * A part nobody reported on in one of the two versions is not comparable, and
+   * a version pair left with none of them is `nothing-shared` rather than an
+   * empty list of shifts — which is the arm that would have brought the silent
+   * section back.
+   */
+  it("never answers with an empty list of shifts", () => {
+    const comparison = comparisonOf(
+      pageOf([
+        tally("n_kept", { revision: 1, views: 0, reached: 0 }),
+        tally("n_kept", { revision: 2, views: 40, reached: 32 }),
+      ])
+    )
+
+    expect(comparison.kind).toBe("nothing-shared")
+  })
+})
+
+describe("saying which version these numbers are about, out loud", () => {
+  const reading = readingOf([tally("n_a", { revision: 2, views: 40, reached: 40 })])
+  const one = readingOf([tally("n_a", { revision: 2, views: 1, reached: 1 })])
+
+  const current: CountingStanding = { kind: "current", counted: 2 }
+  const behind: CountingStanding = { kind: "behind", counted: 2, live: 3, changes: 1 }
+  const twice: CountingStanding = { kind: "behind", counted: 2, live: 4, changes: 2 }
+  const thrice: CountingStanding = { kind: "behind", counted: 2, live: 5, changes: 3 }
+  const unread: CountingStanding = { kind: "unread", counted: 2 }
+  const replaced: CountingStanding = { kind: "replaced", counted: 2, live: 1 }
+
+  it("keeps the sentence it always had when the counters are the page being served", () => {
+    expect(visitsHeard(reading, current)).toBe(
+      "40 visits to this page have reported back since it was last changed. That is revision 2."
+    )
+  })
+
+  /**
+   * The defect, in the form it reached a reader: *since it was last changed* is
+   * a claim that the counted version is the current one, and on a page changed
+   * ten minutes ago the visits reported back **before** the last change.
+   */
+  it("stops claiming the visits arrived since the last change when they did not", () => {
+    expect(visitsHeard(reading, behind)).toBe(
+      "40 visits have reported back on revision 2 of this page."
+    )
+    expect(visitsHeard(reading, behind)).not.toContain("since it was last changed")
+  })
+
+  it("makes no claim either way when the page could not be read", () => {
+    expect(visitsHeard(reading, unread)).not.toContain("since it was last changed")
+  })
+
+  it("counts one visit as a visit rather than as 1 visits, in both forms", () => {
+    expect(visitsHeard(one, current)).toContain("One visit to this page has reported back")
+    expect(visitsHeard(one, behind)).toBe("One visit has reported back on revision 2 of this page.")
+  })
+
+  /**
+   * `current` says so rather than saying nothing. Silence is what the other
+   * three looked like until today, and it is also the sentence somebody wants
+   * when they have *not* just made a change: the one saying the screen is live.
+   */
+  it("has a sentence for every standing, including the good one", () => {
+    for (const standing of [current, behind, unread, replaced]) {
+      expect(standingNote(standing).length, standing.kind).toBeGreaterThan(0)
+    }
+  })
+
+  it("names the version that has nothing counted for it yet", () => {
+    expect(standingNote(behind)).toContain("nothing has been counted for revision 3 yet")
+  })
+
+  it("says how many changes have landed since, the way somebody would say it", () => {
+    expect(standingNote(behind)).toContain("changed this page once since then")
+    expect(standingNote(twice)).toContain("changed this page twice since then")
+    expect(standingNote(thrice)).toContain("changed this page 3 times since then")
+  })
+
+  it("says the page being served is older rather than calling it unreadable", () => {
+    expect(standingNote(replaced)).toContain("revision 1")
+    expect(standingNote(unread)).toContain("couldn’t read the page itself")
+  })
+
+  /**
+   * Every screen answers "what do I do now?", and for the common case the
+   * honest answer is *nothing, wait* — which has to be said, because a person
+   * who has just made a change and found nothing about it will go looking for a
+   * fault in their page instead.
+   */
+  it("tells a reader whose change is not counted yet that there is nothing to fix", () => {
+    expect(standingAdvice(behind)).toContain("nothing to fix")
+    expect(standingAdvice(behind)).toContain("about an hour")
+  })
+
+  it("has advice for every standing that is news, and none for the one that is not", () => {
+    expect(standingAdvice(current)).toBeUndefined()
+    for (const standing of [behind, unread, replaced]) {
+      expect(standingAdvice(standing), standing.kind).toBeDefined()
+    }
+  })
+
+  /**
+   * The plain-language rule, on every sentence this screen shows unasked.
+   *
+   * `revision` is exempted at the point of use rather than removed from the
+   * list. It is the portal's own word on every other screen — `/portal/history`
+   * numbers its rows *Revision 4* and `RevisionLink` addresses them — so a
+   * reader matching a number here against a row there needs the same label, and
+   * a blanket ban would have this rule enforcing an inconsistency. Nothing else
+   * from the runtime's vocabulary is allowed through.
+   */
+  it("says all of it without the runtime's vocabulary", () => {
+    for (const standing of [current, behind, unread, replaced]) {
+      const said = `${visitsHeard(reading, standing)} ${standingNote(standing)} ${standingAdvice(standing) ?? ""}`
+
+      expect(runtimeWordsIn(said, ["revision"]), said).toEqual([])
+    }
   })
 })
