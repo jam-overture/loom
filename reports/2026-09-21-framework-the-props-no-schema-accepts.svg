@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 620" width="1180" height="620" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1180" height="620" fill="#fbfbfa"/>
+
+  <text x="40" y="46" font-size="21" font-weight="700" fill="#17150f">Where a props failure goes</text>
+  <text x="40" y="70" font-size="14" fill="#5d574a">0173 weighed the seam on the left and named its cost. The one on the right is what shipped: the same check, routed so the refusal is an ordinary disposition.</text>
+
+  <!-- LEFT: rejected shape -->
+  <rect x="40" y="96" width="520" height="480" rx="10" fill="#ffffff" stroke="#e3ded1" stroke-width="1.5"/>
+  <rect x="40" y="96" width="520" height="34" rx="10" fill="#f3efe4"/>
+  <rect x="40" y="120" width="520" height="10" fill="#f3efe4"/>
+  <text x="60" y="119" font-size="13" font-weight="700" fill="#6b5c33">REJECTED — a validator seam and a sixth outcome</text>
+
+  <rect x="80" y="156" width="180" height="42" rx="7" fill="#f6f4ee" stroke="#d8d2c2"/>
+  <text x="170" y="182" font-size="13.5" text-anchor="middle" fill="#17150f">ProposedChange</text>
+
+  <path d="M170 198 L170 226" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="80" y="226" width="180" height="42" rx="7" fill="#fdf0ef" stroke="#e0b4ae"/>
+  <text x="170" y="252" font-size="13.5" text-anchor="middle" fill="#8f2f24">ChangeValidator</text>
+
+  <path d="M170 268 L170 296" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M260 247 L360 247 L360 178" stroke="#a9a190" stroke-width="1.6" fill="none" marker-end="url(#a)"/>
+  <text x="372" y="182" font-size="12" fill="#5d574a">passes</text>
+
+  <rect x="80" y="296" width="180" height="54" rx="7" fill="#fdf0ef" stroke="#e0b4ae"/>
+  <text x="170" y="317" font-size="13.5" text-anchor="middle" fill="#8f2f24">kind: "not-valid"</text>
+  <text x="170" y="336" font-size="11.5" text-anchor="middle" fill="#a6564a">a sixth CompositionOutcome</text>
+
+  <path d="M170 350 L170 386" stroke="#b5433a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#b)"/>
+
+  <rect x="80" y="386" width="440" height="52" rx="7" fill="#fbeceb" stroke="#e0b4ae"/>
+  <text x="300" y="408" font-size="13" text-anchor="middle" fill="#8f2f24">no Disposition — so RepairRequest must widen</text>
+  <text x="300" y="427" font-size="11.5" text-anchor="middle" fill="#a6564a">which breaks every repairer a host has written</text>
+
+  <rect x="80" y="454" width="440" height="52" rx="7" fill="#fbeceb" stroke="#e0b4ae"/>
+  <text x="300" y="476" font-size="13" text-anchor="middle" fill="#8f2f24">a sixth kind is a compile error in four surfaces</text>
+  <text x="300" y="495" font-size="11.5" text-anchor="middle" fill="#a6564a">every exhaustive switch, every Record&lt;CompositionOutcomeKind, …&gt;</text>
+
+  <text x="80" y="540" font-size="12.5" fill="#5d574a">The refusal that reaches no repairer turns a model's</text>
+  <text x="80" y="558" font-size="12.5" fill="#5d574a">near-miss into a dead end. That was the larger loss.</text>
+
+  <!-- RIGHT: shipped -->
+  <rect x="620" y="96" width="520" height="480" rx="10" fill="#ffffff" stroke="#cfd8c8" stroke-width="1.5"/>
+  <rect x="620" y="96" width="520" height="34" rx="10" fill="#eaf1e5"/>
+  <rect x="620" y="120" width="520" height="10" fill="#eaf1e5"/>
+  <text x="640" y="119" font-size="13" font-weight="700" fill="#39552c">SHIPPED — a fact, a factor, the Gate</text>
+
+  <rect x="660" y="156" width="180" height="42" rx="7" fill="#f6f4ee" stroke="#d8d2c2"/>
+  <text x="750" y="182" font-size="13.5" text-anchor="middle" fill="#17150f">ProposedChange</text>
+
+  <path d="M750 198 L750 226" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="660" y="226" width="180" height="42" rx="7" fill="#eef4ea" stroke="#b4c7a8"/>
+  <text x="750" y="252" font-size="13.5" text-anchor="middle" fill="#39552c">analyzeDelta</text>
+
+  <rect x="880" y="216" width="230" height="62" rx="7" fill="#f6f4ee" stroke="#d8d2c2" stroke-dasharray="4 3"/>
+  <text x="995" y="238" font-size="12" text-anchor="middle" fill="#5d574a">propsVocabulary?</text>
+  <text x="995" y="256" font-size="11" text-anchor="middle" fill="#8a8172">the renderer's own PropsValidator,</text>
+  <text x="995" y="270" font-size="11" text-anchor="middle" fill="#8a8172">off the same registry</text>
+  <path d="M880 247 L842 247" stroke="#a9a190" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#a)"/>
+
+  <path d="M750 268 L750 296" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="660" y="296" width="180" height="42" rx="7" fill="#eef4ea" stroke="#b4c7a8"/>
+  <text x="750" y="316" font-size="12.5" text-anchor="middle" fill="#39552c">analysis.invalidProps</text>
+  <text x="750" y="331" font-size="11" text-anchor="middle" fill="#6d8560">node · type · the schema's issues</text>
+
+  <path d="M750 338 L750 366" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="660" y="366" width="180" height="42" rx="7" fill="#eef4ea" stroke="#b4c7a8"/>
+  <text x="750" y="386" font-size="12.5" text-anchor="middle" fill="#39552c">invalid-props</text>
+  <text x="750" y="401" font-size="11" text-anchor="middle" fill="#6d8560">critical, like unknown-primitive</text>
+
+  <path d="M750 408 L750 436" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="660" y="436" width="180" height="42" rx="7" fill="#f6f4ee" stroke="#d8d2c2"/>
+  <text x="750" y="462" font-size="13.5" text-anchor="middle" fill="#17150f">the Gate</text>
+
+  <path d="M750 478 L750 506" stroke="#a9a190" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="660" y="506" width="180" height="42" rx="7" fill="#eef4ea" stroke="#b4c7a8"/>
+  <text x="750" y="532" font-size="13.5" text-anchor="middle" fill="#39552c">rejected + Disposition</text>
+
+  <path d="M840 527 L960 527 L960 388 L842 388" stroke="#5f7a4f" stroke-width="1.8" fill="none" marker-end="url(#c)"/>
+  <rect x="880" y="430" width="230" height="62" rx="7" fill="#eef4ea" stroke="#b4c7a8"/>
+  <text x="995" y="452" font-size="12.5" text-anchor="middle" fill="#39552c">the repairer, unchanged</text>
+  <text x="995" y="470" font-size="11" text-anchor="middle" fill="#6d8560">reads variant: received invented</text>
+  <text x="995" y="484" font-size="11" text-anchor="middle" fill="#6d8560">off reason.detail, and answers</text>
+
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#a9a190"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b5433a"/></marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5f7a4f"/></marker>
+  </defs>
+</svg>

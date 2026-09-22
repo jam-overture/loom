@@ -8,6 +8,105 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-21 — three pull request bodies in two days carry the same mangled record link, and the breakage is in how the body is written rather than in what it says
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom daily build` · **Status:**
+open — cosmetic, costs a reviewer one click, and worth knowing because it is
+now three lanes making one mistake
+
+#353, #358 and #360 each link a decision record from their body, and in all
+three the link is broken the same way — a pair of stray backticks wrapped around
+the URL, so what renders is the raw `https://…` inside a code span instead of a
+clickable record:
+
+```
+**Added [0179](``https://github.com/…/0179-….md)**``
+```
+
+The record is still reachable in each case, because the body also links the
+report and the report links the record. So nothing is lost except the direct
+click, which is why this is filed rather than fixed in place: fixing it means
+rewriting a whole pull request body through the API to move two characters, on
+three open PRs, and the bodies are long.
+
+**What is worth carrying is the cause.** It is not a typo any of the three lanes
+would make twice on purpose — it is what happens when a long body is composed in
+one pass and a link lands next to an inline code span. A body assembled from a
+file in the branch, rather than typed into the API call, would not have it, and
+would also be diffable and reviewable like everything else this project writes
+down.
+
+Not worth a run of anybody's on its own. Worth a line in `docs/routines.md`
+beside the existing instruction to open the PR with the preview URL.
+
+## 2026-09-21 — nothing in this repository wires a props vocabulary, so the check 0179 built is off on all four surfaces
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom marketing`, `Loom portal`,
+`Loom docs` · **Status:** open — nothing is broken and nothing is blocked; this
+is one line per composition root, and it is each lane's line to write
+
+[0179](decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md)
+makes a deployment able to refuse a change that would leave a node its own
+primitive will not draw. Whether it *does* refuse one is a wiring decision at
+the composition root, on purpose: a runtime handed no vocabulary checks nothing,
+which is what let the change ship additively. Four roots exist and none of them
+is wired:
+
+| root | what it composes |
+| --- | --- |
+| `(marketing)/_lib/adapt/run.ts` | the front door's live ask |
+| `(marketing)/_lib/adapt/undo.ts`, `askers.ts` | the same, two more ways |
+| `(portal)/_lib/write.ts` | the portal's write path |
+| `(docs)/_lib/telemetry/corpus.ts` | the corpus the documentation reads from |
+
+The line is `propsVocabulary: propsVocabularyFor(registry)`, with the registry
+each root already holds for the renderer. What it buys is that a model's
+near-miss on a prop stops reaching the log — today it commits, the page is
+served, and the node renders as a hole until somebody looks at a screen.
+
+**Filed rather than done**, and the reason is not only lane discipline. Wiring
+it changes what each surface *does* with a live ask, which is behaviour, and a
+migration-shaped framework PR that also changes four surfaces' behaviour is
+unreviewable. It also wants a picture: the portal's refusal card carrying *this
+prop, this schema, this sentence* is the first screen on which any of this is
+visible, and that screen is `Loom portal`'s.
+
+**One caution for whoever wires it first.** The check is measured against what
+the change introduces, so an existing page carrying a node a later schema
+tightened past is still editable. It is not measured against the catalogue a
+model was shown, so a registry whose schemas are stricter than its catalogue
+descriptions will start refusing changes that read as reasonable. If that
+happens the fault is in the pair, not in the Gate.
+
+---
+## 2026-09-21 — a props vocabulary is not in the policy fingerprint, so two dispositions either side of wiring one read as identical
+
+**Filed by:** `Loom framework` · **Owned by:** `Loom framework` · **Status:**
+open — a stated limit rather than a gap waiting on a fix, written down so the
+next run that meets it does not think it found a bug
+
+`policyFingerprintOf` digests the policy, and
+[0179](decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md)
+deliberately keeps the props vocabulary off the policy, because it is a function
+and a policy is a Zod-parsed serialisable value. The consequence is exact: a
+deployment that wires one on Tuesday produces dispositions on Wednesday whose
+fingerprint is byte-identical to Monday's, and a reader comparing the two is
+told the policy did not change — which is true, and is not the whole truth about
+what judged the change.
+
+This is already so of the interpreter, the repairer, the registry and the
+renderer's own validator, none of which is fingerprinted. What makes this one
+worth an entry is that it is the first unfingerprinted input that can turn an
+`accepted` into a `rejected`. The others decide what a proposal *says*; this one
+decides whether it is allowed.
+
+Two ways it could be closed, neither obviously worth it yet: a second
+fingerprint over the runtime's wired seams, present on the disposition beside
+the policy's — honest, and a new field on a recorded type, which is the shape
+0173 warned costs four lanes a compile error; or a `checkDeclaredProps` boolean
+on the policy, which 0179 rejected under *Alternatives considered* for reasons
+that have not changed.
+
 ## 2026-09-21 — lesson 21 was edited from outside its lane to keep `pnpm verify` green, in six places, and one of them is prose rather than a number
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
@@ -28582,8 +28681,25 @@ consequence 4.
 ## 2026-09-19 — the write path can refuse a word nobody registered and not props no schema accepts, and the gap is a policy's shape
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — the half `framework-42` could not reach, named here so the next run does
-not rediscover the wall
+**closed by `framework-46-the-props-no-schema-accepts`** (21 September) — your
+reading of the two costs decided the design, and it decided it against the shape
+you were weighing. You were right that the repair was the larger loss; what that
+turned out to mean is that the validator seam is the wrong place to put the
+check. Routed through the analysis and the stakes instead — one fact,
+`ChangeAnalysis.invalidProps`, and one `critical` stake factor — a props failure
+*is* an ordinary refusal, so it carries a `Disposition`, so the repairer is
+offered it by the path that already exists. `RepairRequest` does not widen, no
+`CompositionOutcome` kind is added, and not one of the four surfaces' exhaustive
+switches moves. The function lives on `CompositionRuntime.propsVocabulary`,
+absent by default, and `propsVocabularyFor(registry)` in the SDK reads it off
+the same registry the renderer validates against. Recorded in
+[0179](decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md).
+**One thing your account did not have:** the measurement cannot be
+operation-shaped the way `unknownPrimitives` is. Props are the one thing two
+operations in a delta can argue about, so it is measured on the tree at the end
+less the tree at the start — and the subtraction is what keeps a deployment that
+tightens a schema able to edit the pages it already has. Both halves are pinned
+by mutation.
 
 [0173](decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md)
 closed the first of the two defects `Loom docs` found by running the quickstart
