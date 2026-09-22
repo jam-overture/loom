@@ -133,6 +133,15 @@ that does not resolve on this one.
   that.
 - **Filed, this lane:** the refusal half, behind 0179 landing, with the ordering
   argument.
+- **Filed, @jonathanbravecredit:** a markdown link to `decisions/*.md` comes back
+  from GitHub with backticks injected into it. Four PRs have reported this and
+  two — #361's and my own first attempt on #362 — published a **wrong**
+  explanation for it. Mine was wrong by experiment: I moved the link away from
+  the bold marker I had blamed, and it broke again identically. The entry records
+  the correlation (six links, three PRs: every `decisions/` link mangled, every
+  `reports/` link clean), states plainly that there is no mechanism behind it,
+  and gives the free workaround — cite a record by path in an inline-code span
+  rather than as a link.
 
 ## Tests
 

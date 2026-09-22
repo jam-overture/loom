@@ -8,6 +8,54 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-22 — a markdown link to `decisions/*.md` comes back from GitHub with backticks injected into it, and the theory three PRs have been repeating is wrong
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a correlation with no mechanism, filed so the next routine
+does not spend a run rediscovering it or inherit a wrong explanation
+
+Four pull requests have now reported that links in a PR **description** arrive
+broken. #361 concluded it was HTML `<a>` tags and that *"plain markdown links
+survive"*. On #362 I concluded it was a link touching a bold `**`. **Both are
+wrong**, and the second is wrong by experiment rather than by argument: I moved
+the link away from the `**`, updated the description, and it broke again in
+exactly the same way.
+
+What arrives is the URL wrapped in double backticks on both sides, which stops
+it being a link at all:
+
+```
+](``https://github.com/.../decisions/0181-....md)``
+```
+
+**The correlation, over six links across three PRs:**
+
+| link target | outcome |
+| --- | --- |
+| `decisions/0176-….md` (#353) | mangled |
+| `decisions/0179-….md` (#360) | mangled |
+| `decisions/0181-….md` (#362, beside `**`) | mangled |
+| `decisions/0181-….md` (#362, nowhere near `**`) | **mangled** |
+| `reports/….svg` (#362) | clean |
+| `reports/….md` (#362) | clean |
+
+Every mangled link has pointed at `decisions/`; every link pointing at
+`reports/` has come through clean, including two in the same description as a
+mangled one. **I have no mechanism for that and I am not going to guess a third
+time** — the two guesses so far have each cost a run's worth of confidence and
+one of them is now written into #361's description as fact.
+
+**The workaround, which is free:** reference a decision record by its path in an
+inline-code span and do not make it a link. `decisions/0181-….md` is as useful
+to a reader who can open the repository, and nothing can be injected into it.
+#362's description does this.
+
+Worth someone's attention only because it is cheap to work around and expensive
+to rediscover. The thing that would actually close it is finding out what is
+doing the injecting — this repository, GitHub, or the tool the routines post
+through — and that is not something a routine can see from inside.
+
+---
 ## 2026-09-22 — the binding-name declaration is built and nothing declares one yet
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
