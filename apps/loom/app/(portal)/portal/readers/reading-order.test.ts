@@ -97,6 +97,40 @@ describe("the reader screen's reading order", () => {
     expect(source).toContain("signalsAreDurable")
   })
 
+  /**
+   * The wiring the whole of this screen's honesty now rests on, guarded at the
+   * source because no render of the card can see whether the page bothered to
+   * ask. The counters carry a version and so does the page being served; a
+   * screen holding only the first cannot know whether it is describing the page
+   * its reader is looking at, and for as long as an hour after every change it
+   * is not.
+   */
+  it("hands each card the version of the page actually being served", () => {
+    expect(source).toContain("live={served.revisions.get(")
+  })
+
+  /**
+   * A page whose read did not come back must be **missing** from the map rather
+   * than defaulted to a number. A zero or a fallback would make an unreadable
+   * page indistinguishable from a page at that revision, and the card would
+   * report a guess as a fact.
+   */
+  it("never invents a version for a page it could not read", () => {
+    expect(source).not.toContain("revisions.get(reading.treeId) ??")
+    expect(source).toContain("if (!head.ok)")
+  })
+
+  /**
+   * One fan-out over the pages, not two. It was `partNamesFor` and
+   * `pageNamesFor` over the same list, so every page was fetched twice per
+   * render to answer two halves of one read.
+   */
+  it("reads each page once for all three things it needs from it", () => {
+    expect(source).toContain("pagesServed")
+    expect(source).not.toContain("partNamesFor")
+    expect(source).not.toContain("pageNamesFor")
+  })
+
   it("never reverses a row or a column to place something", () => {
     expect(source).not.toContain("flex-row-reverse")
     expect(source).not.toContain("flex-col-reverse")
