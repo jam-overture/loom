@@ -14,7 +14,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import { askById, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
 import {
   DEMO,
@@ -581,6 +581,7 @@ export const whenItGoesWrongPageTree = (context: WrongContext): LoomTree => {
         refused(ids, context),
         landedAndWrong(ids, context),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

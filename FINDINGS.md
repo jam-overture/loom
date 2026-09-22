@@ -29442,6 +29442,21 @@ lane can adopt today and needs no tooling. It is worth `docs/routines.md`
 carrying one line about it, which is `Loom daily build`'s file — named here
 rather than filed separately.
 
+
+> **Confirmed from another lane, 22 September.** `Loom marketing` followed both
+> rules on #363 — five `<img src>` tags, every caption prose, every file path in
+> a code span outside any anchor — and **read the comment back from the API**.
+> It came back byte-identical: no backticks anywhere near a URL, all five images
+> intact. The remedy works and it is now tested by a lane that did not write it.
+>
+> One thing that lane can add to the table, because it was a live worry: the
+> **pull request body** of the same run carried `apps/loom/app/(marketing)/`,
+> `reports/2026-09-22-marketing-the-way-on.md` and a dozen `src/`-shaped paths
+> in prose and in code spans, and was **not** corrupted. So the trigger really
+> does need the path to be *inside a link or image target or its text* — a path
+> standing on its own in a sentence is safe, which means the two rules above are
+> the whole of what a lane has to remember.
+
 ## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
@@ -29474,6 +29489,94 @@ belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
 
 ---
+## 2026-09-22 — `loom.link-pager` cannot be a previous/next pair: the ends may not take the width, and a card put in one renders as a 1px line
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — two measurements taken in Chromium against `next start` at 1280 and 390,
+both on 22 September. Nothing on the site is broken: the band shipped as a grid
+of cards instead, which is why this is a shape out of reach rather than a defect
+on a page
+
+`loom.link-pager` is the primitive written for *previous page, next page*, and
+it is the one thing in the starter library this site had never used. The band at
+the foot of all ten marketing pages was built for it twice and shipped as
+neither, and the two reasons are separate.
+
+### One — `spread` gives the whole slack to the part that is empty
+
+The three parts and how the width is divided (`loom.link-pager.ts:109–139`):
+
+| part | `flex` |
+| --- | --- |
+| the `previous` region | `0 0 auto` |
+| the numbers, between them | `1 1 auto` under `spread`, `0 1 auto` otherwise |
+| the `next` region | `0 0 auto` |
+
+Right for an archive footer with a run of numbers in it. **A prev/next pair has
+no numbers**, so the middle is an empty `div` holding every spare pixel, and the
+two ends are pushed to the band's edges with ~900px of nothing between them.
+Photographed at 1280 with a `loom.link` in each region, the band reads as two
+small pairs of words that have come adrift from the page.
+
+The primitive's own note predicts it, which is what makes this a gap rather than
+a disagreement:
+
+> *`spread` pushes the two ends to the band's edges and centres the numbers
+> between them, which is the archive-footer shape — and at 1280px it is a long
+> way between* Newer *and* Older*, so it is the member you ask for rather than
+> the one you get.*
+
+Two shapes, and which one is right is a judgement this lane does not have:
+
+- **The ends take the slack when there is nothing between them.** No new prop:
+  `spread` with no children gives `1 1 auto` to the two ends instead, which is
+  what *spread* already promises and is the only reading of it that is true of
+  an empty middle.
+- **Or a fourth member**, `ends`, saying so explicitly and leaving `spread`
+  alone — safer if any caller has a pager with one number in it and is relying
+  on its ends keeping their own width.
+
+### Two — a card in an end region has no width at all
+
+This is the sharper one and it is not about `spread`. With `align: "center"` the
+two ends sit together in the middle, which is a good band, so the next version
+put a `loom.card` in each region — a bordered panel with the direction above the
+page name, which is the shape at the foot of every documentation page.
+
+**It rendered as two vertical 1px lines.** `loom.card` sets
+`container-type: inline-size` (`loom.card.ts:156`, for the container queries
+its interior uses). Inline-size containment makes an element's inline size
+independent of its contents, so a card whose parent hands it no width computes
+to **zero**. The pager's end regions are `flex: 0 0 auto` — their width comes
+from their contents — so card and region each wait for the other and both
+resolve to nothing. Every test in this repository passed: the nodes are right,
+the props are right, the href is right, and the only instrument that sees it is
+a photograph.
+
+It is worth knowing whichever way the first half is decided, because it is the
+rule for **every container in the library that sizes from its contents**: a card
+may only be put where something else has already said how wide it is. A grid
+track does. A flex item at `0 0 auto` does not.
+
+### What shipped instead, and why this is not a workaround
+
+`loom.section` with an eyebrow, holding a `loom.grid` at `columns: "two"` with a
+`loom.card` in each track — the shape the front door's own *Keep going* band has
+proved since 25 August. The grid gives each card a definite track, so the two of
+them share the column and read as two destinations.
+
+The one thing genuinely lost is the navigation landmark the pager announces
+itself as. The cards still read *Before this, How it works*, which is the fact a
+reader needs and the landmark was only going to label — so nothing is worked
+around and nothing is hidden. **This lane is not asking for either fix on any
+schedule.** If the pager becomes usable for a bare pair, this band is four lines
+of composition away from moving to it, and `chrome.test.ts` pins the current
+shape so a run that reaches for the pager meets these measurements instead of
+repeating them.
+
+**Not a finding about `loom.card`.** A card without a width prop is right —
+width is the container's business under this library's granularity rule, and
+both containers here are the pager's.
 ## 2026-09-21 — `page.tsx` has nothing left to compute, and what is left is still the one thing no test can open
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the

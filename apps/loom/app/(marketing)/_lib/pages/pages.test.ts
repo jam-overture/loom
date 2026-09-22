@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest"
 
 import { ASKS } from "../adapt/asks"
 import { BAND } from "../bands"
-import { PALETTE_SWITCHER_LABEL } from "../chrome"
+import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { unhonoured } from "../frames"
 import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
@@ -19,6 +19,7 @@ import {
   HOW_IT_WORKS,
   internalHref,
   PRODUCT_SURFACES,
+  readingNeighbours,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
@@ -202,6 +203,44 @@ describe.each(SITE_ROUTES)("$path", (route) => {
     /** The footer's groups are named, so a landmark menu reads three names. */
     for (const name of ["This site", "The product", "The project"]) {
       expect(body).toContain(`aria-label="${name}"`)
+    }
+  })
+
+  /**
+   * The band, on the page rather than in a function nobody called.
+   *
+   * `chrome.test.ts` asks whether the band offers the right two pages;
+   * this asks whether the builder put it on the page at all — which is the
+   * failure a band assembled correctly and wired into nine of ten builders
+   * would have, and the one nothing else here would see.
+   */
+  it("says which page comes next, on the page itself", () => {
+    const { before, after, onward } = readingNeighbours(route)
+    const markup = markupOf(route, DEFAULT_THEME)
+
+    /**
+     * The front door is the one page without the band, because it is the one
+     * page with nothing before it — `chrome.ts` has the reasoning and
+     * `chrome.test.ts` holds it to being exactly one page.
+     */
+    if (before === undefined) {
+      expect(markup).not.toContain(READ_NEXT_EYEBROW)
+      return
+    }
+
+    expect(markup).toContain(READ_NEXT_EYEBROW)
+
+    for (const neighbour of [before, after]) {
+      if (neighbour === undefined) continue
+
+      expect(markup).toContain(`href="${internalHref(ORIGIN, neighbour.path, DEFAULT_THEME)}"`)
+      expect(markup).toContain(`>${neighbour.label}<`)
+    }
+
+    if (onward !== undefined) {
+      expect(markup).toContain(`href="${surfaceHref(ORIGIN, onward)}"`)
+      /** The hand-off says what is behind the door, which no other card does. */
+      expect(markup).toContain(asRendered(onward.blurb))
     }
   })
 

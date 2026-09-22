@@ -18,7 +18,7 @@ import { catalogueOf } from "@loom/runtime/sdk"
  * published entry points, so nothing here is reaching inside anything (0018).
  */
 
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { FACTS } from "../copy"
 import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
 import { siteRegistry } from "../registry"
@@ -469,6 +469,7 @@ export const yourComponentsPageTree = (context: PageContext): LoomTree => {
         neverDoes(ids),
         asked(ids),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

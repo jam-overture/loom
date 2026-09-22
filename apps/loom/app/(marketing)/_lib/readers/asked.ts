@@ -67,8 +67,22 @@ export const BAND_TYPES = ["loom.hero", "loom.section"] as const
  * presses elsewhere — a type this list does not name is a press counted
  * nowhere, and *they went back to the front door* is the most ordinary thing a
  * reader can do here.
+ *
+ * **`loom.card` joined them on 22 September, with the band that says what to
+ * read next.** A card given an `href` renders an anchor and is registered
+ * `interactive` for it, so it is a control by the library's own definition —
+ * and it was the one such control this site rendered and did not ask about.
+ * Two bands are answerable now that were not: *did the reader go on to the next
+ * page of the argument*, which is the best question this site can ask about its
+ * own reading order, and *which of the four destinations on the front door did
+ * they take* — a card each, and every press on both was landing nowhere.
  */
-export const CONTROL_TYPES = ["loom.action", "loom.link", "loom.logo"] as const
+export const CONTROL_TYPES = [
+  "loom.action",
+  "loom.card",
+  "loom.link",
+  "loom.logo",
+] as const
 
 /**
  * The one thing on this site that opens: a question in a questions band.
