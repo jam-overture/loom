@@ -43,6 +43,7 @@ import {
   type SlotChildren,
 } from "./primitive.js"
 import type { PropsValidator } from "./props.js"
+import { isBindingReader, unreadBindings, type BindingReader } from "./reads.js"
 import {
   isTextResolver,
   NO_TEXT,
@@ -183,6 +184,8 @@ type RenderContext = {
   readonly origins: FrameOriginRegistry | undefined
   /** Absent for the same reason `behaviours` is: a plain map declares nothing. */
   readonly frames: FrameResolver | undefined
+  /** Absent for the same reason `frames` is: a plain map declares nothing. */
+  readonly reads: BindingReader | undefined
   readonly text: TextResolver | undefined
   /**
    * Absent when the resolver is not a registry, which is also the only way to
@@ -377,7 +380,41 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
     context.collect({ code: "data-unresolved", nodeId: node.id, resolution: "unrelated" })
   }
 
+  reportUnreadBindings(node, data, context)
+
   return data
+}
+
+/**
+ * A diagnostic for every name this node was answered under that its primitive
+ * says it does not read.
+ *
+ * Measured on the *answers* rather than on the declaration, and the difference
+ * matters in one direction only: a binding whose source could not answer is
+ * already reported as `data-unavailable`, and saying of the same name that
+ * nobody reads it either is two true things about one mistake, in the order
+ * they would be fixed. A malformed declaration reaches neither, because there
+ * are no names in it to be read.
+ *
+ * Silent unless the primitive has declared, which is the whole bargain: the
+ * reader answers `undefined` both for a primitive whose author has said nothing
+ * and for a type this registry does not hold, and neither is a primitive
+ * claiming it reads nothing.
+ */
+const reportUnreadBindings = (
+  node: ElementNode,
+  data: NodeData,
+  context: RenderContext
+): void => {
+  const declared = context.reads?.bindingsReadBy(node.type)
+  if (declared === undefined) return
+
+  const asked: string[] = []
+  for (const name in data) asked.push(name)
+
+  for (const name of unreadBindings(asked, declared)) {
+    context.collect({ code: "data-unread", nodeId: node.id, type: node.type, name })
+  }
 }
 
 /** Whether the resolution answered this node at all. Early-return rather than
@@ -816,6 +853,7 @@ const renderFrom = (
     submissions: options.submissions,
     origins: options.origins,
     frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
+    reads: isBindingReader(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     anchors: createAnchorLedger(),

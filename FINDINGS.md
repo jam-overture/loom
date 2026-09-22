@@ -8,6 +8,119 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-22 — a markdown link to `decisions/*.md` comes back from GitHub with backticks injected into it, and the theory three PRs have been repeating is wrong
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — a correlation with no mechanism, filed so the next routine
+does not spend a run rediscovering it or inherit a wrong explanation
+
+Four pull requests have now reported that links in a PR **description** arrive
+broken. #361 concluded it was HTML `<a>` tags and that *"plain markdown links
+survive"*. On #362 I concluded it was a link touching a bold `**`. **Both are
+wrong**, and the second is wrong by experiment rather than by argument: I moved
+the link away from the `**`, updated the description, and it broke again in
+exactly the same way.
+
+What arrives is the URL wrapped in double backticks on both sides, which stops
+it being a link at all:
+
+```
+](``https://github.com/.../decisions/0181-....md)``
+```
+
+**The correlation, over six links across three PRs:**
+
+| link target | outcome |
+| --- | --- |
+| `decisions/0176-….md` (#353) | mangled |
+| `decisions/0179-….md` (#360) | mangled |
+| `decisions/0181-….md` (#362, beside `**`) | mangled |
+| `decisions/0181-….md` (#362, nowhere near `**`) | **mangled** |
+| `reports/….svg` (#362) | clean |
+| `reports/….md` (#362) | clean |
+
+Every mangled link has pointed at `decisions/`; every link pointing at
+`reports/` has come through clean, including two in the same description as a
+mangled one. **I have no mechanism for that and I am not going to guess a third
+time** — the two guesses so far have each cost a run's worth of confidence and
+one of them is now written into #361's description as fact.
+
+**The workaround, which is free:** reference a decision record by its path in an
+inline-code span and do not make it a link. `decisions/0181-….md` is as useful
+to a reader who can open the repository, and nothing can be injected into it.
+#362's description does this.
+
+Worth someone's attention only because it is cheap to work around and expensive
+to rediscover. The thing that would actually close it is finding out what is
+doing the injecting — this repository, GitHub, or the tool the routines post
+through — and that is not something a routine can see from inside.
+
+---
+## 2026-09-22 — the binding-name declaration is built and nothing declares one yet
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — the other half of a seam that is finished on this side, and small
+
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
+gives a primitive a `reads` declaration: the binding names it looks its answers
+up under. The registry checks them, the catalogue projects them, the model is
+shown them, and the render walk reports a binding asked under a name the
+primitive says it does not read.
+
+**Nothing in `src/primitives/` declares one**, so all of that is quiet. The two
+primitives that should declare first are the two you built on #361:
+
+| primitive | what it reads | the declaration |
+| --- | --- | --- |
+| `loom.feed` | `loom.data[binding]` | `reads: ["…"]` — whatever name it looks under |
+| `loom.tally` | the figure | the same |
+
+It is one line per primitive and it is additive: a primitive that declares
+nothing behaves exactly as it does today, which is the whole of decision 2 in
+the record. **Absence is not emptiness** — leaving `reads` out says *nobody has
+said*, and `reads: []` says *this primitive reads no data*. Do not reach for
+`[]` as a tidy default on the ninety-six that read nothing: the seam reports
+every binding given to a primitive that declared `[]`, and a page binding data
+to a node for a reason nobody remembers would start reporting itself.
+
+The one thing worth your judgement: `loom.feed` reads under a name the **tree**
+chose, since the binding name is a prop on the node rather than fixed by the
+primitive. If that is right, `reads` cannot describe it and the honest
+declaration is to leave it out — and this lane should hear that, because it
+would mean the seam is built for a shape the first two consumers do not have.
+
+---
+## 2026-09-22 — a binding name nothing reads is reported and still not refused, and the route that would refuse it is on an unmerged branch
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — a stated remainder, not a gap waiting on a fix, and the honest other half
+of what shipped today
+
+The 19 September finding asked for an invented binding name to be *"as refusable
+as an invented source id"*. What shipped is a **render diagnostic**, which is one
+layer later: the change commits, the page is served, and `data-unread` says so to
+whoever is reading diagnostics.
+
+The route that would make it a refusal is the one `0179` opened on **#360** — a
+fact in `ChangeAnalysis`, a factor in the stakes, an ordinary `rejected`
+disposition the repairer is offered. A binding name nothing reads is the same
+shape of fact as props no schema accepts, and it would be a second stake factor
+beside `invalid-props` rather than any new machinery.
+
+**Not built here, and the reason is the procedure rather than the design.** #360
+is not on `main`, and building on it would stack two framework branches — which
+the brief forbids and which cost four days of visibility once. The moment 0179
+lands, this is a small unit: one factor, one code, and the analysis already walks
+the tree the change produces.
+
+**What it costs until then.** Nothing a deployment is running into: no primitive
+declares `reads` yet (see the entry above), so there is nothing for either seam
+to report. The order matters though — a refusal built before any primitive
+declares would refuse nothing, and a refusal built after several declare is one
+that starts refusing changes that used to commit. It belongs in the same run as
+the second or third declaration, not the tenth.
+
+---
 ## 2026-09-22 — three lesson transcripts were edited from outside their lane to keep `pnpm verify` green, and a fourth edit was avoided by *not* shipping a declaration
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons` · **Status:**
@@ -1004,8 +1117,18 @@ describes, so the two can be rewritten together.
 ## 2026-09-19 — a primitive still cannot say which binding names it reads, and the prompt now has to warn about it in prose
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`,
-`Loom primitives` · **Status:** open — worked around in one sentence, and the
-sentence is the evidence
+`Loom primitives` · **Status:** **closed by
+`framework-47-a-binding-name-nothing-reads`** on 22 September — the declaration,
+the projection and the prompt clause are built, recorded as
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md),
+and the walk now reports the silent third row of the table below as
+`data-unread`. This entry named its own trigger — *the moment the first
+primitive reads a binding is the moment to build it* — and #361 is that moment.
+**Two halves are left and each is filed as its own entry above**: no primitive
+declares yet (`Loom primitives`), and a diagnostic is one layer later than the
+refusal this entry asked for (this lane, behind 0179).
+
+*The original finding follows, unchanged.*
 
 The data block added by 0172 tells a model which sources exist and closes with
 **do not invent a binding name**. That sentence is a workaround and it should be
