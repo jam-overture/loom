@@ -29869,3 +29869,77 @@ The ask is unchanged and is still the smaller of the two on the table: **a
 `signIn` step, or any way to run a script before the first `goto`.** The
 staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
+
+---
+## 2026-09-22 — the red checkup has been photographed, and what it took says which half of the 13 September finding is actually open
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** the
+**photography half is closed**; the *reachable in the seeded portal* half stays
+open, unchanged, and is still above this lane's line
+
+The 13 September entry said the portal's three most important screens cannot be
+photographed because a healthy deployment never reaches their important state,
+and named one fix: a second seeded page, deliberately drifted, shipped in the
+demo deployment. That is still a product decision and this run did not take it.
+
+**What this run did instead, and why it closes half of it.** The sweep's red
+verdict was photographed on a real screen at a real URL, served by a production
+build of this commit, from a browser with a real session — by putting a
+*drifted store* on `globalThis` before the server's route modules evaluate,
+which is the same staging mechanism the 21 September run used for the reader
+counters. Four pages, three accepted changes appended through the store's own
+`append`, and one snapshot read that returns a tree the log does not produce.
+The pictures in this run's report are of the screen, not of a component stood up
+beside one.
+
+So the sentence that mattered in the finding — *"a picture that requires a
+paragraph explaining how it was taken is one the maintainer has to take on
+trust"* — is now a much smaller paragraph: the staging is one wrapper around
+`memoryTreeStore` and everything above it is the shipped code doing its own
+reads and its own render.
+
+**What is still open is the other claim, and it is the sharper one.** The red
+state remains unreachable *by any sequence of clicks in the deployed portal*.
+That matters for two audiences this lane cannot serve by taking a screenshot:
+anybody evaluating Loom, and the next run of this lane, which will have to build
+the staging again from this entry. The recommendation is unchanged and is the
+13 September one.
+
+**One thing to know before taking it, learned here.** A drift cannot be produced
+through the portal's own write path at all — `append` is one write over the log
+and the snapshot, by construction (`src/store/memory.ts`), which is exactly what
+0016 promises. So a deliberately drifted seed cannot be *created*; it has to be
+*stored that way*, which means the demo deployment would need a seed whose
+recorded starting shape is not the one its snapshot came from. That is a
+different and smaller change than it sounded like in September, and it is worth
+saying before somebody reaches for a sequence of proposals that cannot produce
+the state.
+
+---
+## 2026-09-22 — the one page you can check is the last row on the screen that offers to check it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+seen in a photograph of this branch, one component and one sort away, not taken
+because it is a different screen from the one this unit is about
+
+`/portal/checkup` lists the pages you might check in the order the store lists
+them, and a page this deployment has no starting shape for is listed as a
+dashed, unpressable row. On this branch's staged deployment that puts **three
+rows nobody can press above the one row somebody can** — see the landing
+screenshot in this run's report, where `Check this page →` is the last thing on
+the screen.
+
+The sweep added in this run sorts worst-first and argues for it in
+`inWorstFirstOrder`: *a reviewer opens this screen to find the row that matters,
+and store order buries it*. The chooser one route up has the same defect and did
+not get the same treatment, so the portal now sorts two lists of the same pages
+by two different rules.
+
+**Why it is filed rather than fixed.** The unit was the sweep, and the chooser's
+order is a claim about a different screen — one whose rows are *actions* rather
+than *results*, where "what can I do" may be a better sort than "what is wrong".
+Both readings are defensible and the argument belongs in the run that takes it.
+
+**The recommendation:** pressable rows first, in store order within each group,
+which is the same shape `inWorstFirstOrder` already has and would make one rule
+serve both lists. It is a `sort` and a test; the wording needs nothing.
