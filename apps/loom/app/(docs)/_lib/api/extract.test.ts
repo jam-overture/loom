@@ -11,6 +11,7 @@ import {
   GENERATED_FILE,
   packageRoot,
   publishedEntries,
+  publishedPeers,
   readerFacing,
   readerFacingSignature,
   serializeReference,
@@ -201,6 +202,80 @@ describe("the generated reference", () => {
   it("refuses a file that is not a reference", () => {
     expect(() => parseReference({ entries: [{ specifier: 1 }] })).toThrow(/not an entry point/)
     expect(() => parseReference({})).toThrow(/no entry points/)
+  })
+})
+
+describe("what the generated file says a door needs installed", () => {
+  it("names only packages this one asks its host to bring", () => {
+    if (!built) throw new Error(missingBuild)
+
+    const peers = publishedPeers()
+
+    for (const entry of apiEntries) {
+      for (const requirement of entry.requires) {
+        expect(peers[requirement.package], `${entry.specifier} needs ${requirement.package}`).toBeDefined()
+        expect(requirement.range).toBe(peers[requirement.package]?.range)
+      }
+    }
+  })
+
+  it("tells a reader of the contract suites that they load a test runner", () => {
+    const contracts = apiEntryAt("testing-contracts")
+
+    /**
+     * The finding this band was built for. Importing this door from a plain
+     * Node script fails with `Vitest failed to access its internal state`,
+     * which is correct behaviour and was documented nowhere a reader would
+     * look.
+     */
+    expect(contracts?.requires.find((requirement) => requirement.package === "vitest")).toEqual({
+      package: "vitest",
+      range: "^3.0.5",
+      optional: true,
+      reach: "loaded",
+    })
+  })
+
+  it("names the driver those suites reach as well, which no sentence anywhere does", () => {
+    const contracts = apiEntryAt("testing-contracts")
+
+    expect(contracts?.requires.map((requirement) => requirement.package)).toEqual(["drizzle-orm", "vitest"])
+  })
+
+  it("does not tell a reader of the adapter that it loads a vendor SDK, because it does not", () => {
+    const anthropic = apiEntryAt("anthropic")
+
+    expect(anthropic?.requires).toEqual([
+      { package: "@anthropic-ai/sdk", range: "^0.115.0", optional: true, reach: "declared" },
+    ])
+  })
+
+  it("says the root door needs nothing, which is what makes the rest worth reading", () => {
+    expect(apiEntryAt("runtime")?.requires).toEqual([])
+  })
+
+  it("refuses a reference whose requirement is reached in no way anybody knows", () => {
+    expect(() =>
+      parseReference({
+        entries: [
+          {
+            specifier: "@loom/runtime",
+            slug: "runtime",
+            types: "./dist/index.d.ts",
+            requires: [{ package: "vitest", range: "^3.0.5", optional: true, reach: "imagined" }],
+            groups: [],
+          },
+        ],
+      })
+    ).toThrow(/is reached by being imagined/)
+  })
+
+  it("refuses a reference that does not say what a door needs at all", () => {
+    expect(() =>
+      parseReference({
+        entries: [{ specifier: "@loom/runtime", slug: "runtime", types: "./dist/index.d.ts", groups: [] }],
+      })
+    ).toThrow(/does not say what it needs installed/)
   })
 })
 

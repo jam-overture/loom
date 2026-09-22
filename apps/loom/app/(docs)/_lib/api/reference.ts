@@ -1,5 +1,14 @@
 import generated from "./reference.generated.json"
-import { apiSlugFor, type ApiEntry, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
+import {
+  apiSlugFor,
+  type ApiEntry,
+  type ApiGroup,
+  type ApiKind,
+  type ApiReference,
+  type ApiRequirement,
+  type ApiRequirementReach,
+  type ApiSymbol,
+} from "./model"
 
 /**
  * The generated reference, as the pages read it.
@@ -55,8 +64,28 @@ const asGroup = (value: unknown, where: string): ApiGroup => {
   }
 }
 
+const REACHES: readonly ApiRequirementReach[] = ["loaded", "declared"]
+
+const asRequirement = (value: unknown, where: string): ApiRequirement => {
+  if (!isRecord(value)) throw new Error(`loom: ${where} is not a requirement`)
+
+  const reach = asString(value.reach, `${where}.reach`)
+
+  if (!REACHES.includes(reach as ApiRequirementReach)) {
+    throw new Error(`loom: ${where} is reached by being ${reach}, which is not how a package is reached`)
+  }
+
+  return {
+    package: asString(value.package, `${where}.package`),
+    range: asString(value.range, `${where}.range`),
+    optional: value.optional === true,
+    reach: reach as ApiRequirementReach,
+  }
+}
+
 const asEntry = (value: unknown, where: string): ApiEntry => {
   if (!isRecord(value) || !Array.isArray(value.groups)) throw new Error(`loom: ${where} is not an entry point`)
+  if (!Array.isArray(value.requires)) throw new Error(`loom: ${where} does not say what it needs installed`)
 
   const specifier = asString(value.specifier, `${where}.specifier`)
 
@@ -64,6 +93,7 @@ const asEntry = (value: unknown, where: string): ApiEntry => {
     specifier,
     slug: asString(value.slug, `${where}.slug`),
     types: asString(value.types, `${where}.types`),
+    requires: value.requires.map((requirement, index) => asRequirement(requirement, `${specifier} needs [${index}]`)),
     groups: value.groups.map((group, index) => asGroup(group, `${specifier}[${index}]`)),
   }
 }
