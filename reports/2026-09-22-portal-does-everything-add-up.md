@@ -310,6 +310,20 @@ it in this branch would have made the diff two screens instead of one.
 
 **I did not touch the chooser's order**, which is the finding above.
 
+**Nothing is scheduled and no pull request is subscribed to.** The harness
+subscribed this session to #367 automatically when the pull request was opened,
+and it was unsubscribed: three of the first five events it delivered were the
+Vercel bot editing its own comment, and a wake per bot edit is exactly the cost
+that scales with how long the maintainer is away. The pull request is green —
+`Deployment has completed` on the head commit — and there is nothing on it for
+this run to drive.
+
+**The staging is gone.** `apps/loom/node_modules/.shot/` held the preload, which
+had to sit inside the application for `@loom/runtime` to resolve; it and the
+Playwright script were deleted before this report was written, and nothing from
+either is in the diff. The recipe is in *How the pictures were taken* above, for
+the run that has to build it again.
+
 **I did not build a fifth standing for a page whose id the store lists but whose
 tree has since gone.** `checkOne` reports that as `could-not-be-read`, which is
 true and is the safest of the four — but it is a `not-found`, and a page that
