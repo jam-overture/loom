@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { MAX_WAIT_MS, type Shot } from "../specimen/capture.js"
+import { MAX_WAIT_MS, type Approach, type Shot } from "../specimen/capture.js"
 import { PHONE, WIDE, type SpecimenViewport } from "../specimen/specimen.js"
 
 /**
@@ -59,24 +59,54 @@ const viewportSchema = z.union([
  */
 const stepSchema = z.union([
   z.object({ click: z.string().min(1) }).strict(),
+  /** `text` may be empty: clearing a field is a state a screen can be in. */
+  z.object({ fill: z.string().min(1), text: z.string() }).strict(),
   z.object({ wait: z.number().int().positive().max(MAX_WAIT_MS) }).strict(),
+  z.object({ waitFor: z.string().min(1) }).strict(),
 ])
+
+/**
+ * An address and what is done at it — the shape a shot and its `before` share.
+ *
+ * Spread into both rather than extended, so the two cannot drift: a field
+ * added to an approach is a field a `before` has, which is the property that
+ * makes a sign-in expressible without the harness knowing the word.
+ */
+const approachShape = {
+  /** Appended to `baseUrl`, or a whole URL when there is no base. */
+  path: z.string().min(1),
+  /** A selector to wait for once the page is open. `Approach.waitFor` says why. */
+  waitFor: z.string().min(1).optional(),
+  /** The document this approach's selectors resolve against. `Approach.frame`. */
+  frame: z.string().min(1).optional(),
+  /** What to press, type and wait for, in order. `Approach.do` says why. */
+  do: z.array(stepSchema).default([]),
+}
+
+const approachSchema = z.object(approachShape).strict()
 
 export const shotSchema = z
   .object({
-    /** Appended to `baseUrl`, or a whole URL when there is no base. */
-    path: z.string().min(1),
+    ...approachShape,
     /** The file to write, relative to `outDir`. `.png` is added if it is missing. */
     out: z.string().min(1),
     viewport: viewportSchema.default("wide"),
-    /** A selector to wait for before the shutter. `Shot.waitFor` says why. */
-    waitFor: z.string().min(1).optional(),
-    /** What to press and how long to let it settle. `Shot.do` says why. */
-    do: z.array(stepSchema).default([]),
+    /**
+     * An approach made in this shot's own browser context, before its address
+     * is opened and never photographed. `Shot.before` says why it is per shot.
+     */
+    before: approachSchema.optional(),
     fullPage: z.boolean().default(false),
     /** A selector to photograph instead of the viewport. `CaptureTarget.clip`. */
     clip: z.string().min(1).optional(),
   })
+  /**
+   * Strict for the same reason each step is: a misspelled `frame` or `before`
+   * on a permissive object is dropped in silence, and what comes back is a
+   * correct picture of the wrong thing — which is the one failure this schema
+   * exists to make loud.
+   */
+  .strict()
   /**
    * Refused rather than resolved by precedence. The two mean opposite things —
    * *all of the page* and *this one element* — so a shot asking for both is a
@@ -130,6 +160,16 @@ const urlFor = (list: ShotList, path: string): string => {
 /** A shot's name is its file without the extension, which is what a report quotes. */
 const nameOf = (out: string): string => out.replace(/\.png$/, "")
 
+type PlannedApproach = z.infer<typeof approachSchema>
+
+/** One approach, with its address resolved the same way a shot's is. */
+const approachOf = (list: ShotList, approach: PlannedApproach): Approach => ({
+  url: urlFor(list, approach.path),
+  ...(approach.waitFor === undefined ? {} : { waitFor: approach.waitFor }),
+  ...(approach.frame === undefined ? {} : { frame: approach.frame }),
+  do: approach.do,
+})
+
 /**
  * `file` stays relative to the list's `outDir`, which the capture loop joins on.
  * Resolving it here as well is how a picture ends up two directories deep in a
@@ -137,12 +177,11 @@ const nameOf = (out: string): string => out.replace(/\.png$/, "")
  */
 export const planShots = (list: ShotList): readonly Shot[] =>
   list.shots.map((shot) => ({
+    ...approachOf(list, shot),
     name: nameOf(shot.out),
-    url: urlFor(list, shot.path),
     file: withExtension(shot.out),
     viewport: typeof shot.viewport === "string" ? VIEWPORTS[shot.viewport] : shot.viewport,
-    ...(shot.waitFor === undefined ? {} : { waitFor: shot.waitFor }),
-    do: shot.do,
+    ...(shot.before === undefined ? {} : { before: approachOf(list, shot.before) }),
     fullPage: shot.fullPage,
     ...(shot.clip === undefined ? {} : { clip: shot.clip }),
   }))

@@ -38,6 +38,7 @@ import {
   playwrightSearchPaths,
   type ChromiumLauncher,
   type ContextOptions,
+  type LaunchedLocator,
   type LaunchOptions,
 } from "./playwright.js"
 import { describeRenderError, renderSpecimen } from "./render.js"
@@ -242,7 +243,10 @@ describe("serving the pages", () => {
 })
 
 const describeTarget = (file: string, target: CaptureTarget): string => {
-  if (target.clip !== undefined) return `${file} (clipped to ${target.clip})`
+  if (target.clip !== undefined) {
+    const where = target.frame === undefined ? target.clip : `${target.clip} in ${target.frame}`
+    return `${file} (clipped to ${where})`
+  }
   return target.fullPage ? file : `${file} (viewport only)`
 }
 
@@ -266,12 +270,17 @@ const fakeBrowser = (
       opened += 1
 
       return {
-        goto: async (url, waitFor) => {
-          visited.push(waitFor === undefined ? url : `${url} after ${waitFor}`)
+        goto: async (url, waitFor, frame) => {
+          const after = waitFor === undefined ? "" : ` after ${waitFor}`
+          visited.push(`${url}${after}${frame === undefined ? "" : ` in ${frame}`}`)
         },
-        act: async (steps) => {
+        act: async (steps, frame) => {
+          const where = frame === undefined ? "" : ` in ${frame}`
           for (const step of steps) {
-            journal.push("click" in step ? `click ${step.click}` : `wait ${step.wait}`)
+            if ("click" in step) journal.push(`click ${step.click}${where}`)
+            else if ("fill" in step) journal.push(`fill ${step.fill}${where} "${step.text}"`)
+            else if ("waitFor" in step) journal.push(`waitFor ${step.waitFor}${where}`)
+            else journal.push(`wait ${step.wait}`)
           }
         },
         measure: async () => {
@@ -399,6 +408,104 @@ describe("taking the shots", () => {
     expect(journal).toEqual(["measure"])
   })
 
+  /**
+   * The ask behind this: six consecutive runs of one lane photographed a portal
+   * behind a session with a private Playwright script, because a shot has one
+   * address and a session is not one.
+   */
+  it("makes a shot's before approach in the same page, before the shot's own address", async () => {
+    const { browser, visited, journal, written } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({
+          url: "http://127.0.0.1:1234/portal/readers",
+          waitFor: "[data-readers]",
+          before: {
+            url: "http://127.0.0.1:1234/portal/sign-in",
+            waitFor: "form",
+            do: [
+              { fill: "#email", text: "reviewer@example.com" },
+              { click: "button[type=submit]" },
+              { waitFor: "[data-signed-in]" },
+            ],
+          },
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(visited).toEqual([
+      "http://127.0.0.1:1234/portal/sign-in after form",
+      "http://127.0.0.1:1234/portal/readers after [data-readers]",
+    ])
+    expect(journal).toEqual([
+      'fill #email "reviewer@example.com"',
+      "click button[type=submit]",
+      "waitFor [data-signed-in]",
+      "measure",
+    ])
+    /** One shot is one picture, whatever it had to do to get there. */
+    expect(written).toEqual(["reports/a-shot.png (viewport only)"])
+  })
+
+  it("opens one page for a shot with no before, and measures nothing twice", async () => {
+    const { browser, visited, journal } = fakeBrowser([])
+
+    await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(visited).toEqual(["http://127.0.0.1:1234/page"])
+    expect(journal).toEqual(["measure"])
+  })
+
+  /**
+   * One rule, no exceptions: the frame is the document this approach's
+   * selectors resolve against — the load's wait, every step, and the clip.
+   */
+  it("resolves the wait, the steps and the clip against the frame a shot names", async () => {
+    const { browser, visited, journal, written } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({
+          frame: "iframe#demo",
+          waitFor: "[data-stage]",
+          do: [{ click: "[data-yes]" }],
+          clip: "[data-rail]",
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(visited).toEqual(["http://127.0.0.1:1234/page after [data-stage] in iframe#demo"])
+    expect(journal).toEqual(["click [data-yes] in iframe#demo", "measure"])
+    expect(written).toEqual(["reports/a-shot.png (clipped to [data-rail] in iframe#demo)"])
+  })
+
+  it("keeps a before's frame to the before, and the shot's to the shot", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({
+          frame: "iframe#demo",
+          do: [{ click: "[data-yes]" }],
+          before: { url: "http://127.0.0.1:1234/setup", frame: "iframe#setup", do: [{ click: "[data-seed]" }] },
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual([
+      "click [data-seed] in iframe#setup",
+      "click [data-yes] in iframe#demo",
+      "measure",
+    ])
+  })
+
   it("points the shutter at one element when a shot clips", async () => {
     const { browser, written } = fakeBrowser([])
 
@@ -460,32 +567,58 @@ describe("the browser adapter", () => {
             newContext: async (contextOptions) => {
               contexts.push(contextOptions)
               return {
-                newPage: async () => ({
-                  goto: async (_url: string, options: { waitUntil: "load" }) => {
-                    waits.push(options.waitUntil)
-                  },
-                  waitForSelector: async (selector: string) => {
-                    selectors.push(selector)
-                  },
-                  evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
-                    journal.push(`evaluate ${body.name}`)
-                    return { scrollWidth: 390, innerWidth: 390 } as TValue
-                  },
-                  click: async (selector: string) => {
-                    journal.push(`click ${selector}`)
-                  },
-                  waitForTimeout: async (ms: number) => {
-                    journal.push(`wait ${ms}`)
-                  },
-                  locator: (selector: string) => ({
-                    screenshot: async (options: { path: string }) => {
-                      elementShots.push({ selector, path: options.path })
+                newPage: async () => {
+                  /**
+                   * Every selector the adapter resolves arrives here with the
+                   * frame it was resolved through, which is what lets a test
+                   * say *this press landed inside the frame* rather than only
+                   * that a press happened.
+                   */
+                  const locatorAt = (
+                    frame: string | undefined,
+                    selector: string,
+                    first = false
+                  ): LaunchedLocator => {
+                    const named = frame === undefined ? selector : `${selector} in ${frame}`
+                    const where = first ? `${named} (first)` : named
+                    return {
+                      first: () => locatorAt(frame, selector, true),
+                      click: async () => {
+                        journal.push(`click ${where}`)
+                      },
+                      fill: async (value: string) => {
+                        journal.push(`fill ${where} "${value}"`)
+                      },
+                      waitFor: async () => {
+                        journal.push(`waitFor ${where}`)
+                        selectors.push(where)
+                      },
+                      screenshot: async (options: { path: string }) => {
+                        elementShots.push({ selector: where, path: options.path })
+                      },
+                    }
+                  }
+
+                  return {
+                    goto: async (_url: string, options: { waitUntil: "load" }) => {
+                      waits.push(options.waitUntil)
                     },
-                  }),
-                  screenshot: async (options: { path: string; fullPage: boolean }) => {
-                    screenshots.push(options)
-                  },
-                }),
+                    evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
+                      journal.push(`evaluate ${body.name}`)
+                      return { scrollWidth: 390, innerWidth: 390 } as TValue
+                    },
+                    waitForTimeout: async (ms: number) => {
+                      journal.push(`wait ${ms}`)
+                    },
+                    locator: (selector: string) => locatorAt(undefined, selector),
+                    frameLocator: (frame: string) => ({
+                      locator: (selector: string) => locatorAt(frame, selector),
+                    }),
+                    screenshot: async (options: { path: string; fullPage: boolean }) => {
+                      screenshots.push(options)
+                    },
+                  }
+                },
                 close: async () => {},
               }
             },
@@ -551,7 +684,7 @@ describe("the browser adapter", () => {
     await page.goto("http://127.0.0.1:1/portal", "[data-signed-in]")
 
     expect(recorder.waits).toEqual(["load"])
-    expect(recorder.selectors).toEqual(["[data-signed-in]"])
+    expect(recorder.selectors).toEqual(["[data-signed-in] (first)"])
   })
 
   it("takes a viewport-sized shot when it is asked for one", async () => {
@@ -591,6 +724,124 @@ describe("the browser adapter", () => {
     await page.act([{ click: "[data-cta]" }])
 
     expect(recorder.journal).toEqual(["evaluate pinNavigation", "click [data-cta]"])
+  })
+
+  it("types into the field a step names, with the text it was given", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([
+      { fill: "#email", text: "reviewer@example.com" },
+      { fill: "#password", text: "" },
+      { click: "button[type=submit]" },
+    ])
+
+    expect(recorder.journal.slice(1)).toEqual([
+      'fill #email "reviewer@example.com"',
+      'fill #password ""',
+      "click button[type=submit]",
+    ])
+  })
+
+  /**
+   * A form driven by `useActionState` submits by fetch, so the press resolves
+   * before the cookie it sets exists. A duration is a guess about somebody
+   * else's server; the selector is the thing actually being waited for.
+   */
+  it("waits for a selector in the middle of a step list, not only after the load", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ click: "button[type=submit]" }, { waitFor: "[data-signed-in]" }])
+
+    expect(recorder.journal.slice(1)).toEqual([
+      "click button[type=submit]",
+      "waitFor [data-signed-in] (first)",
+    ])
+    expect(recorder.selectors).toEqual(["[data-signed-in] (first)"])
+  })
+
+  /**
+   * A locator is strict and `page.waitForSelector` was not, so moving the wait
+   * onto a locator quietly made *wait until the results appear* an error the
+   * moment two results appeared. This harness found it photographing a search
+   * box with two hits in it, which is the picture the step exists to take.
+   */
+  it("waits for the first match and presses only an unambiguous one", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ waitFor: "#results li" }, { click: "#results li:first-child" }])
+
+    expect(recorder.journal.slice(1)).toEqual([
+      "waitFor #results li (first)",
+      "click #results li:first-child",
+    ])
+  })
+
+  /**
+   * Playwright's selector engine pierces an open shadow root and does not
+   * pierce a browsing context, so the front door — which contains `/demo`
+   * rather than pointing at it — could be photographed and not touched.
+   */
+  it("resolves a step's selector inside the frame an approach names", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ click: "[data-yes]" }, { fill: "#note", text: "smaller" }], "iframe#demo")
+
+    expect(recorder.journal.slice(1)).toEqual([
+      "click [data-yes] in iframe#demo",
+      'fill #note in iframe#demo "smaller"',
+    ])
+  })
+
+  /**
+   * The half a lane cannot work around: without it a framed page's readiness is
+   * guessed at with a duration, which is what makes such a shot list flaky
+   * rather than merely verbose.
+   */
+  it("waits for the load's selector inside the frame too", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.goto("http://127.0.0.1:1/", "[data-stage]", "iframe#demo")
+
+    expect(recorder.selectors).toEqual(["[data-stage] in iframe#demo (first)"])
+  })
+
+  it("photographs an element inside the frame when the shot names one", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+    const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "d.png")
+
+    await page.capture(file, { fullPage: false, clip: "[data-rail]", frame: "iframe#demo" })
+
+    expect(recorder.elementShots).toEqual([{ selector: "[data-rail] in iframe#demo", path: file }])
+    expect(recorder.screenshots).toEqual([])
+  })
+
+  /**
+   * `fullPage` and the viewport shot have no frame equivalent, and that is the
+   * rule rather than an omission: a frame is not a page, and *all of the page*
+   * means the page.
+   */
+  it("still photographs the page itself when a framed shot is not clipped", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+    const file = join(await mkdtemp(join(tmpdir(), "loom-shot-")), "e.png")
+
+    await page.capture(file, { fullPage: true, frame: "iframe#demo" })
+
+    expect(recorder.screenshots).toEqual([{ path: file, fullPage: true }])
+    expect(recorder.elementShots).toEqual([])
   })
 
   it("photographs the element a clip names, and never the page as well", async () => {

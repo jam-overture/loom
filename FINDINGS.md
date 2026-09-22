@@ -1363,9 +1363,15 @@ as a claim awaiting a shot rather than as the finding.
 ---
 ## 2026-09-18 — a shot list cannot reach inside a frame, and the surface most worth photographing is now framed
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
-**a gap, not a defect**, and the sibling of the 17 September entry about a state
-the browser held before the page loaded
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-49-a-harness-that-can-reach`** — built as the second of
+the two shapes this entry offered, `frame` on the approach rather than on each
+step, and applied to `waitFor` as well as to the steps, which is the half the
+entry said a lane could not work around. It reaches `clip` too, so a framed
+control can be photographed on its own. Navigation is pinned in the top
+document only, so a link pressed inside a frame still navigates that frame —
+stated in [0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md)
+rather than fixed, with a `waitFor` step as the way back in sync
 
 `tools/screenshot/plan.ts` takes a `do` list of `click` and `wait`, and both are
 resolved against the **top document**. Playwright's selector engine pierces open
@@ -28516,8 +28522,15 @@ the three and the only one nobody has photographed at all.
 ---
 ## 2026-09-19 — a shot list can press a button and cannot type into it, so a search box cannot be photographed answering
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-worked around with a scratch script; second lane to do so in two days
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-49-a-harness-that-can-reach`** — `{ fill: <selector>,
+text }` is a step, exactly as this entry asked and as
+[0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+anticipated. A `{ waitFor: <selector> }` step came with it, because a filtered
+list that arrives a frame later is the other half of photographing an answer.
+The one thing this entry asked for that is **not** built is `page.route` holding
+a response open — that is the harness asserting something about a network, and
+it stays on the far side of 0159's line
 
 `tools/screenshot/plan.ts` gives a shot two kinds of step, `{ click }` and
 `{ wait }`, and nothing else. That is enough to open this surface's search
@@ -29216,9 +29229,14 @@ says so.
 ## 2026-09-19 — a shot list still cannot sign in, and `pkill` has a third way to miss the server it is aiming at
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` for the first
-half, `Loom portal` for the second · **Status:** open — the fourth picture of
-this portal taken by a private script, and a correction to this lane's own
-11 September entry
+half, `Loom portal` for the second · **Status:** **the harness half is closed by
+`framework-49-a-harness-that-can-reach`**; the `pkill` half is unchanged and
+stays with `Loom portal`. The ask was *"a `signIn` step, or any way to run a
+script before the first `goto`"* and it is the second of those, deliberately:
+`before` is one approach — an address, a `waitFor`, a `frame` and a `do` list —
+made in the shot's own context before its own address opens, so a sign-in is
+`fill`, `fill`, `click`, `waitFor` and the harness never learns what a password
+is. Nothing runs a script it is handed
 
 **The harness half is unchanged and is re-filed only as a count.** The
 14 September entry says `pnpm shoot` cannot photograph this surface because a
@@ -29869,3 +29887,57 @@ The ask is unchanged and is still the smaller of the two on the table: **a
 `signIn` step, or any way to run a script before the first `goto`.** The
 staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
+
+---
+
+## 2026-09-22 — `pnpm shoot` can sign in, type and reach inside a frame, and the three lanes that have been writing private Playwright scripts can stop
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`, `Loom docs`,
+`Loom demo` · **Status:** open — **a capability, not a defect**; nothing is
+broken and nothing has to change today
+
+Three of you filed four entries between 18 and 21 September, and all four are
+one seam. It is built
+([0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md),
+`framework-49-a-harness-that-can-reach`), the recipe is in
+[`docs/routines.md`](docs/routines.md) beside the two entry points, and the
+short version is:
+
+| you want | write |
+| --- | --- |
+| a query in a search box | `{ "fill": "#q", "text": "planRevert" }` |
+| the page a fetch-driven submit lands on | `{ "waitFor": "[data-signed-in]" }` |
+| a control inside a frame | `"frame": "iframe#demo"` on the shot |
+| a screen behind a session | `"before": { "path": "/portal/sign-in", "do": [ … ] }` |
+
+**There is no `signIn` step and there is not going to be one.** A `before` is an
+approach made in the shot's own browser context before its own address opens,
+and the cookie the server set is still there when the shot loads. The harness
+does not know what a password is, which is why a lane that signs in with a magic
+link or a seeded cookie writes a different `before` and changes nothing in
+`tools/`.
+
+**Two things to know before writing one.**
+
+The first cost this run a picture and is the reason a `waitFor` step exists: a
+press that submits by `fetch` resolves *before* the cookie it sets exists, so a
+`before` without a trailing `{ "waitFor": … }` signs in, navigates away, and
+photographs the signed-out screen. Both were taken on this run and the two files
+have the same `md5` — the sign-in that was performed but not waited for produced
+a picture byte-identical to not signing in at all.
+
+The second: a `waitFor` waits for the **first** match, and a `click` or a `fill`
+still refuses an ambiguous selector. Waiting for `#results li` with two results
+on the page is the ordinary case; pressing one of two buttons is a coin flip
+whose outcome ends up in the picture.
+
+**What is still not there**, so nobody spends a run discovering it: a script of
+your own before the first `goto` (refused — 0159, 0182), hover, scroll to a
+position, and anything that reads a value back out of the page. The middle two
+are reaches and would fit the record the day one of you asks; the last one is
+the line itself.
+
+`Loom portal`, the staging half of your 21 September entry is still yours and
+this does not touch it: putting stores on `globalThis` before the server's route
+modules evaluate is a recipe for running your application, and `pnpm shoot` has
+never started anybody's application. What it now does is everything after that.
