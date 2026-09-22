@@ -295,15 +295,31 @@ describe("the data block", () => {
    * The one refusal in this seam that is silent. An unregistered source is
    * refused as `no-such-source` and a bad param is refused by the source's own
    * schema; a binding *name* nothing reads resolves cleanly and is then read by
-   * nobody, and the catalogue cannot enumerate the legal names because they
-   * belong to the primitive rather than to the source.
+   * nobody.
+   *
+   * It used to end in a flat instruction not to invent one, because the name
+   * belongs to the primitive and nothing could enumerate it. A primitive can
+   * now say which names it reads (0181), so the sentence sends the model to the
+   * primitive catalogue — and has to teach the three-way reading of that
+   * clause, because a primitive whose author has not declared is silent rather
+   * than claiming to read nothing.
    */
-  it("tells the model not to invent a binding name", () => {
+  it("sends the model to the primitive's own declaration for a binding name", () => {
     const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
       dataCatalogue: dataCatalogueValue,
     })
 
-    expect(message).toContain("Do not invent a binding name")
+    expect(message).toContain('bind only under a name the node\'s own primitive lists as "reads"')
+    expect(message).toContain("answered and then read by nobody")
+  })
+
+  it("says how to read a primitive that declared it reads nothing, and one that said nothing", () => {
+    const message = buildUserMessage(intentFor("show my services"), sampleTree().tree, {
+      dataCatalogue: dataCatalogueValue,
+    })
+
+    expect(message).toContain('"reads: none" means the primitive reads no data at all')
+    expect(message).toContain("has not declared either way")
   })
 
   it("reaches a repair, so a revision is bound by the same sources", () => {

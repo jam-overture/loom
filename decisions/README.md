@@ -262,3 +262,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0176 | *No record on this branch* | — | — |
 | [0177](0177-the-specification-is-a-page-part-and-it-sits-between-the-figure-and-the-price.md) | The specification is a page part, and it sits between the figure that persuades and the price | Accepted | §4b |
 | [0178](0178-a-ground-is-not-always-an-ancestor-and-bg-overlay-is-the-fifth-ground-the-text-ramp-is-held-to.md) | A ground is not always an ancestor, and `bg-overlay` is the fifth ground the text ramp is held to | Accepted | §4b — the palette contrast bar and the derivation behind it |
+| 0179 | *No record on this branch* | — | — |
+| 0180 | *No record on this branch* | — | — |
+| [0181](0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md) | A primitive declares the binding names it reads, and saying nothing is not saying none | Accepted | §2, reaching the catalogue, the interpreter's prompt and the render walk |

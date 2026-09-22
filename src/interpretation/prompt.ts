@@ -119,12 +119,16 @@ To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an 
  * `no-such-source`, or no binding at all.
  *
  * The closing paragraph says three things because the seam refuses on three
- * different grounds, and only one of them is visible in the list: an unregistered
- * source is refused, a param the source did not declare is refused, and a binding
- * *name* nothing reads is accepted and then read by nobody. The third is the one
- * worth the sentence — it is the only one of the three that fails silently, and
- * a name is not something the catalogue can enumerate, because it belongs to the
- * primitive rather than to the source.
+ * different grounds, and only one of them is visible in *this* list: an
+ * unregistered source is refused, a param the source did not declare is refused,
+ * and a binding *name* nothing reads is accepted and then read by nobody.
+ *
+ * The third used to end in a flat instruction not to invent one, because a name
+ * belongs to the primitive rather than to the source and nothing could enumerate
+ * it. A primitive can now say which names it reads (0181), so the sentence names
+ * where to look instead — and has to teach the three-way reading of that clause,
+ * because a primitive whose author has not declared is silent rather than
+ * claiming to read nothing.
  */
 const dataBlock = (sources: DataCatalogue | undefined): string =>
   sources === undefined || sources.length === 0
@@ -133,7 +137,7 @@ const dataBlock = (sources: DataCatalogue | undefined): string =>
 
 ${renderSourceCatalogue(sources)}
 
-A binding is written {"${DATA_PROP_KEY}":{"<binding name>":{"source":"<id>","params":{…}}}}, and "params" may be left out when the source declares none. Use only source ids from the list above — one that is not on it is refused and the node renders without data. Do not invent a binding name: the name is how the primitive reading the answer finds it, so repoint or re-param a name already on the node rather than adding one of your own.
+A binding is written {"${DATA_PROP_KEY}":{"<binding name>":{"source":"<id>","params":{…}}}}, and "params" may be left out when the source declares none. Use only source ids from the list above — one that is not on it is refused and the node renders without data. The binding *name* is how the primitive reading the answer finds it, so it is not yours to choose: bind only under a name the node's own primitive lists as "reads" in the primitive catalogue. A name it does not read is answered and then read by nobody, and nothing on the page changes. "reads: none" means the primitive reads no data at all; a primitive whose line says nothing about reading has not declared either way, so on one of those repoint or re-param a name already on the node rather than adding one of your own.
 
 `
 
