@@ -33,6 +33,7 @@ import { loomEventGrid } from "./loom.event-grid.js"
 import { loomFaq } from "./loom.faq.js"
 import { loomFaqList } from "./loom.faq-list.js"
 import { loomFeature } from "./loom.feature.js"
+import { loomFeed } from "./loom.feed.js"
 import { loomFeatureGrid } from "./loom.feature-grid.js"
 import { loomField } from "./loom.field.js"
 import { loomFooter } from "./loom.footer.js"
@@ -91,6 +92,7 @@ import { loomSpec } from "./loom.spec.js"
 import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
+import { loomTally } from "./loom.tally.js"
 import { loomStatChart } from "./loom.stat-chart.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 import { loomTable } from "./loom.table.js"
@@ -407,6 +409,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomStatGrid,
   loomStatChart,
   loomStat,
+  loomTally,
   loomMeter,
   loomTierTable,
   loomTier,
@@ -453,6 +456,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomLinkList,
   loomLinkTrail,
   loomLinkPager,
+  loomFeed,
   loomEmptyState,
   loomWaitingState,
   loomHeading,
