@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { Corrections, CorrectionsPanel, type CorrectionQuestion } from "./corrections"
-import { ClockProvider } from "./store"
+import { ClockProvider, RecordStoreProvider } from "./store"
 import type { Correction, Grade, Progress } from "../_lib/progress"
 
 /**
@@ -271,13 +271,20 @@ describe("a corrections sitting", () => {
    * way of knowing a set was reworded or renumbered between the sitting and
    * today, and an empty panel with a confidence control under it is worse than
    * nothing at all.
+   *
+   * It is still dropped, and what changed is what is said about it. This test
+   * asserted *Nothing has come back* — the sentence a reader who has missed
+   * nothing gets — over a reader with a miss waiting that nothing can offer
+   * them. Dropping the question is right; reporting it as a clean sheet is the
+   * one reading of the seven that is a fault rather than a state.
    */
-  it("drops a question the schedule no longer contains", () => {
+  it("drops a question the schedule no longer contains, and says that is what happened", () => {
     seed([{ set: "set-z", question: 40, confidence: 5 }])
     const { container } = sitting()
 
     expect(screen.queryByRole("textbox")).toBeNull()
-    expect(container.textContent).toContain("Nothing has come back")
+    expect(container.textContent).toContain("the course no longer contains")
+    expect(container.textContent).not.toContain("Nothing has come back")
   })
 })
 
@@ -336,5 +343,97 @@ describe("a lesson's own question, come back", () => {
     const { container } = panel()
 
     expect(container.textContent ?? "").not.toContain("to re-answer")
+  })
+})
+
+/**
+ * The five sentences an empty queue used to be one of.
+ *
+ * These assert wording, which is unusual here and is the point: the fault was
+ * never in the arithmetic. The queue was empty in every one of these cases and
+ * correctly empty; what was wrong was that the page said the same thing about
+ * all of them, and the only way to hold that fixed is to assert that it no
+ * longer does.
+ */
+describe("an empty corrections queue, saying which one it is", () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  const unreadable = () =>
+    render(
+      <RecordStoreProvider
+        store={() => ({
+          read: () => {
+            throw new Error("SecurityError")
+          },
+          write: () => undefined,
+          drop: () => undefined,
+        })}
+      >
+        <ClockProvider clock={() => TODAY}>
+          <Corrections questions={QUESTIONS} />
+        </ClockProvider>
+      </RecordStoreProvider>
+    )
+
+  it("will not tell a reader whose record it could not read that they are up to date", () => {
+    const { container } = unreadable()
+
+    expect(container.textContent).toContain("cannot tell you whether anything has come back")
+    expect(container.textContent).not.toContain("Nothing has come back")
+  })
+
+  it("says the record is legible and empty when that is what it is", () => {
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("nothing has been answered here yet")
+  })
+
+  it("credits three clean retrievals rather than calling it nothing", () => {
+    const got = (on: string): Correction => ({
+      set: "set-d",
+      question: 7,
+      confidence: 3,
+      answer: "x",
+      grade: "got-it",
+      on,
+    })
+
+    seed(
+      [{ set: "set-d", question: 7, confidence: 5, on: "2026-06-01" }],
+      [got("2026-06-02"), got("2026-06-09"), got("2026-07-09")]
+    )
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("got three times running")
+  })
+
+  it("does not call a prediction missed on purpose a clean sheet", () => {
+    seed([{ set: "lesson-04-predict", question: 1, confidence: 2 }])
+    const { container } = sitting()
+
+    expect(container.textContent).toContain("does not come back")
+    expect(container.textContent).not.toContain("nothing has been answered here yet")
+  })
+
+  /**
+   * The one reading that is a fault, and therefore the one that has to appear
+   * where the reader already is. The panel returned nothing here, which is how
+   * a miss waiting on a question the course has lost stayed invisible on both
+   * pages at once.
+   */
+  it("says on the review queue that a waiting miss has lost its question", () => {
+    seed([{ set: "set-z", question: 40, confidence: 5 }])
+    const { container } = panel()
+
+    expect(container.textContent).toContain("no longer contains")
+    expect(container.textContent ?? "").not.toContain("to re-answer")
+  })
+
+  it("stays silent on the review queue about a reader who has missed nothing", () => {
+    const { container } = panel()
+
+    expect(container.textContent).toBe("")
   })
 })
