@@ -134,12 +134,87 @@ that does not resolve on this one.
 - **Filed, this lane:** the refusal half, behind 0179 landing, with the ordering
   argument.
 
+## Tests
+
+`pnpm install && pnpm verify` — **green, exit 0**, redirected to a file and the
+exit code read off the run rather than off a pipe.
+
+| | |
+| --- | --- |
+| Framework suite | 157 files, 2,873 tests |
+| Application suite | 287 files, 5,063 tests |
+| Findings | 727 findings, 0 malformed |
+| Prerender check | 109 pages, 859 text junctions, 0 run together |
+
+**16 new tests, in one new file plus four existing ones**, measured against
+`main` rather than estimated — the framework suite goes **156 files / 2,857
+tests → 157 / 2,873**, and the four touched files go 28→32, 5→6, 29→30, 53→54.
+Nothing failed and nothing was skipped.
+
+**One existing test was rewritten**: `tells the model not to invent a binding
+name` asserted the workaround sentence this unit exists to remove. It is
+replaced by two that assert what the sentence says instead, including the
+three-way reading of the new clause.
+
+### Every load-bearing property checked by putting its defect back
+
+| mutation | what fails |
+| --- | --- |
+| `unreadBindings` treats absence as emptiness | *reports nothing when nobody has declared* |
+| the walk reports against an undeclared primitive | **2 tests** — *says nothing about a primitive whose author has not declared*, and the plain-resolver case |
+| the catalogue line collapses `[]` into silence | *names the bindings a primitive reads, says when it reads none, and is silent when nobody said* |
+| the registry stops checking the grammar | *refuses a name a tree could not write* |
+| the unread check is skipped when the binding already failed | *is reported beside the unavailability of a binding that is both* |
+
+The second is the one that matters most, because it is the mutation a
+reasonable implementation would have shipped: `?? []` is the idiom, it reads as
+a tidy default, and it would have turned this seam on for all ninety-eight
+primitives at once.
+
+The last is the one my own first draft got wrong in the other direction. I
+originally wrote the unread check to run only when nothing else had been
+reported — which is defensible right up until you notice that the two
+diagnostics are about *different* mistakes on the same name, and suppressing one
+hides it exactly when a page is already misbehaving.
+
+## What went wrong in this run, and is worth writing down
+
+Midway through the mutation testing I ran `git checkout -- <file>` to undo a
+mutation on an **uncommitted** branch. That does not undo the mutation; it
+reverts the file to `HEAD`, which was `main` — so it silently discarded this
+run's work in three source files. The tests then failed in a way that looked
+like the mutation had worked, which is the part worth the paragraph: *a reverted
+feature and a mutated feature fail the same tests.*
+
+Recovered in full, and the lesson is mechanical rather than clever: **commit
+before mutating.** Every mutation above was re-run from the committed tree, and
+the matrix is that run and not the first one.
+
 ## Cross-lane files in this diff
 
-One: `apps/loom/app/(docs)/_lib/api/reference.generated.json`, regenerated with
+Three, all required by the compiler or the repository's own tooling.
+
+`apps/loom/app/(docs)/_lib/api/reference.generated.json`, regenerated with
 `pnpm --filter @loom/app docs:api`, because `src/render/reads.ts` puts new names
 on the package boundary. `docs/routines.md` names this as the one sanctioned
-crossing. `src/primitives/` was not opened.
+crossing.
+
+Two `(portal)` test fixtures — `_lib/piece-view.test.ts` and
+`portal/pieces/_components/piece-card.test.tsx` — each gain the line
+`reads: undefined,` in a `CataloguedPrimitive` literal. `reads` is required and
+nullable rather than optional, the way `props` already is, so a fixture that
+builds the shape by hand has to say which answer it means. One line each, no
+change of meaning, and filed here rather than silently.
+
+**`src/primitives/` was not opened.**
+
+### A note on the generated reference
+
+`pnpm --filter @loom/app docs:api` reads the **built** declaration files, not
+`src/`. Regenerating without `pnpm build` first produces a file that matches the
+previous build, and the docs suite's *never puts a decision-record number in
+front of a reader* check then fails against a comment you have already fixed.
+Cost about ten minutes; written down because nothing says so at the call site.
 
 ## Open questions
 
