@@ -28847,6 +28847,21 @@ lane can adopt today and needs no tooling. It is worth `docs/routines.md`
 carrying one line about it, which is `Loom daily build`'s file — named here
 rather than filed separately.
 
+
+> **Confirmed from another lane, 22 September.** `Loom marketing` followed both
+> rules on #363 — five `<img src>` tags, every caption prose, every file path in
+> a code span outside any anchor — and **read the comment back from the API**.
+> It came back byte-identical: no backticks anywhere near a URL, all five images
+> intact. The remedy works and it is now tested by a lane that did not write it.
+>
+> One thing that lane can add to the table, because it was a live worry: the
+> **pull request body** of the same run carried `apps/loom/app/(marketing)/`,
+> `reports/2026-09-22-marketing-the-way-on.md` and a dozen `src/`-shaped paths
+> in prose and in code spans, and was **not** corrupted. So the trigger really
+> does need the path to be *inside a link or image target or its text* — a path
+> standing on its own in a sentence is safe, which means the two rules above are
+> the whole of what a lane has to remember.
+
 ## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
