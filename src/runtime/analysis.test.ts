@@ -18,7 +18,11 @@ import { createTree } from "../tree/tree.js"
 
 import { analyzeDelta } from "./analysis.js"
 import { interactivePredicateFor, nestedTargetsIn } from "./nesting.js"
-import { primitiveVocabularyFor, type PrimitiveVocabulary } from "./vocabulary.js"
+import {
+  primitiveVocabularyFor,
+  type PrimitiveVocabulary,
+  type PropsVocabulary,
+} from "./vocabulary.js"
 
 const spare = sequentialIdFactory("an")
 
@@ -655,5 +659,172 @@ describe("analyzeDelta unknown primitives", () => {
       primitiveTypeSchema.parse("app.one"),
       primitiveTypeSchema.parse("app.two"),
     ])
+  })
+})
+
+/** The same stand-in schema `vocabulary.test.ts` uses: `loom.card` takes two variants. */
+const acceptsVariants: PropsVocabulary = (type, props) => {
+  if (type !== primitiveTypeSchema.parse("loom.card")) return { outcome: "undeclared" }
+
+  return props.variant === "outlined" || props.variant === "filled"
+    ? { outcome: "valid" }
+    : {
+        outcome: "invalid",
+        issues: [{ path: "variant", message: `received ${String(props.variant)}` }],
+      }
+}
+
+/** A page holding one card, so a test can start from one the schema already refuses. */
+const cardPage = (variant: string) => {
+  const factory = sequentialIdFactory("props")
+  const card = buildElement(factory, { type: "loom.card", props: { variant } })
+  const page = buildElement(factory, { type: "loom.page", children: [card] })
+
+  return { tree: createTree(page, factory), card: card.id, page: page.id }
+}
+
+const analyzeProps = (
+  start: ReturnType<typeof cardPage>,
+  operations: TreeOperation[],
+  checkProps: PropsVocabulary = acceptsVariants
+) => {
+  const result = analyzeDelta(
+    start.tree,
+    deltaOf(start.tree.treeId, operations),
+    undefined,
+    undefined,
+    checkProps
+  )
+  if (!result.ok) throw new Error(result.error.code)
+
+  return result.value
+}
+
+describe("analyzeDelta invalid props", () => {
+  it("reports none when the host wires no props vocabulary", () => {
+    const start = cardPage("outlined")
+    const analysis = analyzeDelta(
+      start.tree,
+      deltaOf(start.tree.treeId, [
+        { op: "configure", nodeId: start.card, set: { variant: "invented" }, unset: [] },
+      ])
+    )
+
+    expect(analysis.ok && analysis.value.invalidProps).toEqual([])
+  })
+
+  it("names an inserted node whose props the declaring primitive refuses", () => {
+    const start = cardPage("outlined")
+    const added = buildElement(spare, { type: "loom.card", props: { variant: "invented" } })
+
+    const analysis = analyzeProps(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(analysis.invalidProps).toEqual([
+      {
+        nodeId: added.id,
+        type: primitiveTypeSchema.parse("loom.card"),
+        issues: [{ path: "variant", message: "received invented" }],
+      },
+    ])
+  })
+
+  it("names a node a configure broke", () => {
+    const start = cardPage("outlined")
+
+    const analysis = analyzeProps(start, [
+      { op: "configure", nodeId: start.card, set: { variant: "invented" }, unset: [] },
+    ])
+
+    expect(analysis.invalidProps.map((invalid) => invalid.nodeId)).toEqual([start.card])
+  })
+
+  it("says nothing about a change that leaves the props acceptable", () => {
+    const start = cardPage("outlined")
+
+    const analysis = analyzeProps(start, [
+      { op: "configure", nodeId: start.card, set: { variant: "filled" }, unset: [] },
+    ])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  /**
+   * The inherited case. A page may already hold a node whose schema was
+   * tightened past it, and an edit elsewhere is not the change that broke it.
+   */
+  it("does not answer for a node that was already failing and was left alone", () => {
+    const start = cardPage("invented")
+
+    const analysis = analyzeProps(start, [
+      { op: "configure", nodeId: start.page, set: { title: "Home" }, unset: [] },
+    ])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  /**
+   * Keyed by node id, not by the issues, so a half-repair of an already-broken
+   * node is not itself a refusal. Counting it would mean the only way out of
+   * such a node is one change that fixes everything at once.
+   */
+  it("does not answer for a node that was already failing and still fails differently", () => {
+    const start = cardPage("invented")
+
+    const analysis = analyzeProps(start, [
+      { op: "configure", nodeId: start.card, set: { variant: "also-invented" }, unset: [] },
+    ])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  /**
+   * The case an operation-by-operation measurement gets wrong: the delta puts
+   * a bad node in and fixes it two operations later, and the page a reader is
+   * served is fine. Only the tree at the end can say so.
+   */
+  it("says nothing about a node a later operation in the same delta repaired", () => {
+    const start = cardPage("outlined")
+    const added = buildElement(spare, { type: "loom.card", props: { variant: "invented" } })
+
+    const analysis = analyzeProps(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+      { op: "configure", nodeId: added.id, set: { variant: "filled" }, unset: [] },
+    ])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  it("says nothing when a change removes the node that was failing", () => {
+    const start = cardPage("invented")
+
+    const analysis = analyzeProps(start, [{ op: "remove", nodeId: start.card }])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  it("says nothing when a change only relocates a node that was already failing", () => {
+    const start = cardPage("invented")
+    const slot = buildElement(spare, { type: "loom.footer" })
+
+    const analysis = analyzeProps(start, [
+      { op: "insert", parentId: start.page, index: 1, node: slot },
+      { op: "move", nodeId: start.card, parentId: slot.id, index: 0 },
+    ])
+
+    expect(analysis.invalidProps).toEqual([])
+  })
+
+  it("reaches a node buried inside an inserted subtree", () => {
+    const start = cardPage("outlined")
+    const buried = buildElement(spare, { type: "loom.card", props: { variant: "invented" } })
+    const banner = buildElement(spare, { type: "loom.banner", children: [buried] })
+
+    const analysis = analyzeProps(start, [
+      { op: "insert", parentId: start.page, index: 1, node: banner },
+    ])
+
+    expect(analysis.invalidProps.map((invalid) => invalid.nodeId)).toEqual([buried.id])
   })
 })

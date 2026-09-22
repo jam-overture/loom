@@ -1,5 +1,7 @@
 import type { NodeId } from "../ids.js"
+import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
+import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import { walkTree } from "../tree/navigation.js"
 import type { LoomNode } from "../tree/node.js"
 
@@ -79,3 +81,87 @@ export const unknownPrimitivesIn = (
 
 export const describeUnknownPrimitive = (unknown: UnknownPrimitive): string =>
   `${unknown.type} at ${unknown.nodeId}`
+
+/**
+ * What a deployment's primitives accept, as far as the write path is concerned.
+ *
+ * The type-name vocabulary above answers *can this be drawn at all*. This one
+ * answers the question directly beneath it: the type is registered, and does
+ * the node carry props the primitive declaring that type will accept? The
+ * render seam has always known — a node whose props fail its declared schema is
+ * omitted and reported as `invalid-props` (0009) — and nothing upstream shared
+ * the knowledge, so a delta carrying two hundred characters against a maximum
+ * of a hundred and sixty was appended to the log and found out about at the
+ * next render, by every reader rather than by the one who asked (0179).
+ *
+ * `PropsValidator`'s own verdict, rather than a boolean or a second vocabulary
+ * of failure. A predicate would throw away the issues, and a refusal that
+ * cannot say *which* prop and *why* is the one a repairer can do nothing with.
+ * Reusing the type also means the two seams cannot drift: what the renderer
+ * would decline to draw is, by construction, what the write path declines to
+ * write.
+ */
+
+export type PropsVocabulary = (type: PrimitiveType, props: JsonObject) => PropsVerdict
+
+/**
+ * What a host that has wired no props vocabulary gets, which is today's
+ * behaviour.
+ *
+ * `undeclared` rather than `valid`, and the distinction is not academic: the
+ * render seam already separates *these props are fine* from *nobody said what
+ * fine is*, and answering the first on a deployment that has declared nothing
+ * would be the runtime inventing a claim no schema made.
+ */
+export const EVERY_TYPE_UNDECLARED: PropsVocabulary = () => ({ outcome: "undeclared" })
+
+/** A node a change would leave carrying props its own primitive refuses. */
+export type InvalidProps = {
+  readonly nodeId: NodeId
+  readonly type: PrimitiveType
+  readonly issues: readonly PropsIssue[]
+}
+
+/**
+ * Every element in a subtree whose props its declaring primitive refuses, in
+ * document order.
+ *
+ * The whole subtree rather than its root, for the reason `unknownPrimitivesIn`
+ * gives: an inserted band carries its own children, and a node three levels
+ * down that will not draw is the same hole.
+ *
+ * Reserved props are not partitioned off first, unlike `renderElement`. A
+ * validator is handed what the node carries, and a schema that rejects a
+ * reserved key is a schema declaring something about a key the renderer never
+ * passes it — which is a fault in the declaration rather than in the change,
+ * and not one this seam is positioned to tell apart. `partitionReservedProps`
+ * lives behind the render boundary and importing it here would make the write
+ * path depend on the renderer's internals to answer a question about a tree.
+ */
+export const invalidPropsIn = (
+  node: LoomNode,
+  checkProps: PropsVocabulary
+): readonly InvalidProps[] =>
+  Array.from(walkTree(node)).flatMap((current) => {
+    if (current.kind !== "element") return []
+
+    const verdict = checkProps(current.type, current.props)
+
+    return verdict.outcome === "invalid"
+      ? [{ nodeId: current.id, type: current.type, issues: verdict.issues }]
+      : []
+  })
+
+/**
+ * A sentence naming the node, its type and what its schema said.
+ *
+ * The issue messages come from the declaring schema and can quote a rejected
+ * value, which `PropsIssue` warns about: this is content, and a consumer that
+ * puts it on a screen is putting a model's own words there. It is included
+ * anyway, because *this is too long* without *by how much, and which prop* is
+ * the refusal a repairer cannot act on.
+ */
+export const describeInvalidProps = (invalid: InvalidProps): string =>
+  `${invalid.type} at ${invalid.nodeId} (${invalid.issues
+    .map((issue) => `${issue.path}: ${issue.message}`)
+    .join("; ")})`

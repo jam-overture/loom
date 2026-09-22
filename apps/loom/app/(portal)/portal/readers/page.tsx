@@ -112,20 +112,27 @@ const ReadersPage = async ({
   const buffered = await portalReaderSignals.read({ direction: "older", limit: 1 })
   const arriving = buffered.ok ? buffered.value.batches.length > 0 : false
 
+  /*
+   * One read of each page the counters mention, serving three questions at
+   * once: what the page is called, what its parts are called, and — the one
+   * this screen used to throw away — which revision of it is being served.
+   *
+   * It used to be two fan-outs over the same list, `partNamesFor` and
+   * `pageNamesFor`, so every page in the deployment was fetched twice per
+   * render to answer two halves of the same read. One is both cheaper and the
+   * only way the third question is answerable for free.
+   */
+  const served = await pagesServed(counted.value.map((tally) => tally.treeId))
+
   const readings = pageReadings(
-    revisionReadings(
-      counted.value,
-      /*
-       * Names come from the pages being served, so a part still on the page is
-       * named by what it says rather than by what it is. One bounded read per
-       * page that has a reading — the same fan-out `namesOf` makes for a
-       * listing, over a list the counters have already bounded.
-       */
-      await partNamesFor(counted.value.map((tally) => tally.treeId))
-    )
+    /*
+     * Names come from the pages being served, so a part still on the page is
+     * named by what it says rather than by what it is.
+     */
+    revisionReadings(counted.value, served.partNames)
   )
 
-  const names = await pageNamesFor(readings.map((reading) => reading.treeId))
+  const names = served.names
 
   /**
    * The scoped screen names its page whether or not it has a reading, because a
@@ -204,6 +211,13 @@ const ReadersPage = async ({
             key={reading.treeId}
             reading={reading}
             page={names.get(reading.treeId) ?? unnamed(reading.treeId)}
+            /*
+             * Absent when the page itself could not be read, which the card
+             * says out loud rather than reporting as current. A screen that
+             * treated a failed read as "these numbers are live" would be making
+             * the one claim this surface refuses to make without evidence.
+             */
+            live={served.revisions.get(reading.treeId)}
           />
         ))
       )}
@@ -228,21 +242,6 @@ const ReadersPage = async ({
   )
 }
 
-/**
- * The name of every page that has a reading, one bounded read each.
- *
- * A failed read costs the name and nothing else — the card still lists, still
- * links, and still shows its id, which is the rule `page-name.ts` states for
- * every listing in this portal.
- */
-const pageNamesFor = async (treeIds: readonly TreeId[]): Promise<ReadonlyMap<string, PageName>> => {
-  const named = await Promise.all(
-    treeIds.map(async (treeId) => [treeId, await nameOnly(treeId)] as const)
-  )
-
-  return new Map(named)
-}
-
 const nameOnly = async (treeId: TreeId): Promise<PageName> => {
   const head = await portalStore.head(treeId)
 
@@ -250,27 +249,65 @@ const nameOnly = async (treeId: TreeId): Promise<PageName> => {
 }
 
 /**
- * Part names for every page the counters mention, from the page being served.
+ * Everything this screen needs from the pages themselves, one bounded read each.
  *
- * One read per distinct page rather than one per tally — a page with forty
+ * One read per **distinct** page rather than one per tally — a page with forty
  * counted parts is one tree, and reading it forty times would be a fan-out over
  * a list the counters did not bound.
  *
- * A part whose node has since been removed is not in the map and is named from
- * its registered type instead, which `reading-view.ts` does rather than this.
+ * ## The third answer, which used to be discarded
+ *
+ * A tree carries its revision. The counters also carry a revision, and the two
+ * are not the same number for as long as an hour after any change, because a
+ * reading is counted only once its collection window has passed. That gap is
+ * the difference between *what your last change did* and *what the change
+ * before it did*, and this screen was reading the tree, taking the names off
+ * it and dropping the one field that says which of those it was showing.
  */
-const partNamesFor = async (treeIds: readonly TreeId[]): Promise<ReadonlyMap<string, PartName>> => {
+type PagesServed = {
+  readonly names: ReadonlyMap<string, PageName>
+  readonly partNames: ReadonlyMap<string, PartName>
+  /**
+   * The revision each page is being served at. **A page missing from this map
+   * is one whose read did not come back**, which is a different fact from a
+   * page whose revision happens to match, and the card keeps them apart.
+   */
+  readonly revisions: ReadonlyMap<string, number>
+}
+
+const pagesServed = async (treeIds: readonly TreeId[]): Promise<PagesServed> => {
   const distinct = [...new Set(treeIds)]
-  const trees = await Promise.all(distinct.map((treeId) => portalStore.head(treeId)))
+  const heads = await Promise.all(
+    distinct.map(async (treeId) => [treeId, await portalStore.head(treeId)] as const)
+  )
 
-  const named = new Map<string, PartName>()
-  for (const tree of trees) {
-    if (!tree.ok) continue
+  const names = new Map<string, PageName>()
+  const partNames = new Map<string, PartName>()
+  const revisions = new Map<string, number>()
 
-    for (const [nodeId, name] of namesInTree(tree.value)) named.set(nodeId, name)
+  for (const [treeId, head] of heads) {
+    /*
+     * A failed read costs the name and nothing else — the card still lists,
+     * still links, and still shows its id, which is the rule `page-name.ts`
+     * states for every listing in this portal. It costs the revision too, and
+     * that one is said out loud rather than absorbed.
+     */
+    if (!head.ok) {
+      names.set(treeId, unnamed(treeId))
+      continue
+    }
+
+    names.set(treeId, pageNameOf(head.value))
+    revisions.set(treeId, head.value.revision)
+
+    /*
+     * A part whose node has since been removed is not in the map and is named
+     * from its registered type instead, which `reading-view.ts` does.
+     */
+    for (const [nodeId, name] of namesInTree(head.value)) partNames.set(nodeId, name)
   }
 
-  return named
+  return { names, partNames, revisions }
 }
 
 export default ReadersPage

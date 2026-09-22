@@ -1,8 +1,5 @@
-import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
-
 import type { MarkedPage } from "@/app/(demo)/_lib/marked"
-import type { MovedNote } from "@/app/(demo)/_lib/moved"
-import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
+import type { RailReading } from "@/app/(demo)/_lib/rail"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { reasoningFor } from "@/app/(demo)/_lib/reasoning"
 import { askedLine, undoOffer } from "@/app/(demo)/_lib/undo"
@@ -44,17 +41,19 @@ import { RecordCard } from "./record-card"
  * What a card cannot work out alone, when its change is still waiting on an
  * answer.
  *
- * The same four readings `page.tsx` computes per held proposal, keyed by the
+ * The readings `whatTheRailShows` computes per held proposal, keyed by the
  * record they belong to rather than by the proposal, because that is the key
  * this list has in hand. Absent entries are the common case: an applied change
- * describes a tree that is gone, so nothing here is computed for one.
+ * describes a tree that is gone, so nothing is computed for one.
+ *
+ * **An alias rather than a second declaration of the same four fields.** It was
+ * a second declaration until today, and a second declaration of a shape one
+ * function builds and one component consumes is a field that can be added at
+ * one end and silently ignored at the other. `rail.ts` is generic in the
+ * preview so that a test can hand in the part itself; here the preview is an
+ * element, which is what the part becomes once the page has rendered it.
  */
-export type HeldReading = {
-  readonly effect?: ProposalEffect
-  readonly inQuestion?: React.ReactNode
-  readonly plain?: readonly PlainChange[]
-  readonly moved?: MovedNote
-}
+export type HeldReading = RailReading<React.ReactNode>
 
 /**
  * The one record, if any, that has asked the visitor something and is still
