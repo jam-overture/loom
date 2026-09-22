@@ -45,10 +45,22 @@ const tally = (
   updatedAt: "2026-09-15T00:00:00.000Z",
 })
 
-const cardFor = (tallies: readonly StoredTally[]) =>
-  render(
-    <PageReadingCard reading={pageReadings(revisionReadings(tallies, names))[0]!} page={page} />
+/**
+ * `live` defaults to the newest counted version, which is the state of a page
+ * nobody has touched since it was last counted — and is what every assertion
+ * written before the card knew about the page being served was about.
+ */
+const cardFor = (tallies: readonly StoredTally[], live?: number) => {
+  const reading = pageReadings(revisionReadings(tallies, names))[0]!
+
+  return render(
+    <PageReadingCard
+      reading={reading}
+      page={page}
+      live={live ?? reading.revisions[0]!.revision}
+    />
   )
+}
 
 /**
  * The comparison block alone. Reading the whole card would find every part in
@@ -360,10 +372,39 @@ describe("what the last change did", () => {
     expect(disclosed).toContain("goes on filing under the revision they arrived on")
   })
 
-  it("says nothing about a change when there is only one version to go on", () => {
+  /**
+   * It used to say nothing at all, which is the defect. Three different facts
+   * arrived as one blank section — nothing has been changed yet, the change
+   * replaced everything, the change is too new to have been counted — and a
+   * reader cannot act on a blank.
+   */
+  it("says there is nothing before this version rather than dropping the section", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).not.toContain("What the last change did")
+    expect(container.textContent).toContain("What the last change did to your readers")
+    expect(container.textContent).toContain("Nobody has reported on an earlier version")
+    expect(container.textContent).toContain("Your next change to this page is what gives")
+  })
+
+  it("says why there is nothing to compare when the change replaced every reported part", () => {
+    const { container } = cardFor([
+      tally("n_hero", 1, { views: 50, reached: 10 }),
+      tally("n_terms", 2, { views: 40, reached: 32 }, "loom.details"),
+    ])
+
+    expect(container.textContent).toContain("not one part was reported on by both versions")
+    expect(container.textContent).toContain("different from nothing having moved")
+  })
+
+  /**
+   * *The last change* is a claim about the page being served. When the counters
+   * are behind it, the comparison is real and is about an earlier pair.
+   */
+  it("stops calling the comparison the last change when the counters are behind the page", () => {
+    const { container } = cardFor(TWO_REVISIONS, 5)
+
+    expect(container.textContent).toContain("What the last counted change did to your readers")
+    expect(container.textContent).toContain("up 60 points")
   })
 
   /**

@@ -10,6 +10,7 @@ import {
   type ZodTypeAny,
 } from "zod"
 
+import type { BindingName } from "./data/source.js"
 import type { PrimitiveType, SlotName } from "./primitive-type.js"
 
 /**
@@ -45,6 +46,19 @@ export type CataloguedPrimitive = {
    */
   readonly props: readonly CataloguedProp[] | undefined
   readonly slots: readonly SlotName[]
+  /**
+   * The binding names this primitive reads an answer under, name-sorted.
+   * `undefined` when its author has not said — which, like `props`, is not the
+   * same claim as "none" and is not rounded to one.
+   *
+   * It is the one field here that is about what the primitive *asks the
+   * deployment for* rather than about what a tree may write on it, and it is
+   * here because the name in a binding belongs to the primitive. A model is
+   * told which sources exist by the data catalogue; without this it was never
+   * told which names those answers may be filed under, so the only name it
+   * could write was one it had seen on the page already.
+   */
+  readonly reads: readonly BindingName[] | undefined
 }
 
 export type PrimitiveCatalogue = readonly CataloguedPrimitive[]

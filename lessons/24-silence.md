@@ -1047,7 +1047,7 @@ describe("F", () => {
 The output:
 
 ```
-  primitives registered:     96
+  primitives registered:     98
   declaring copy:            0
   declaring any role:        0
   typesWithRole("heading"):  []
