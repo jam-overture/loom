@@ -2,8 +2,12 @@
 
 **Routine:** `Loom primitives` · **Date:** 2026-09-22 · **Branch:**
 `primitives-42-the-first-primitive-that-reads-an-answer` · **Section:** §4b →
-§4e · **Pull request:** _filled in on the branch_ · **Preview:** _filled in on
-the branch_
+§4e · **Pull request:**
+[#361](https://github.com/jam-overture/loom/pull/361) · **Preview:**
+https://loom-git-primitives-42-the-f-f18b7e-jpizzolato36-6341s-projects.vercel.app
+— published unverified: `*.vercel.app` is off this sandbox's egress allowlist,
+the standing 19 August limit. Everything below was driven against a local render
+and the screenshot harness.
 
 ![loom.feed in five states and loom.tally in two, at 1280px, under bold](2026-09-22-primitives-the-first-answer-states-bold-wide.png)
 
