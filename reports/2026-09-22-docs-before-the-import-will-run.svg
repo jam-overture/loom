@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #ffffff; }
+    .ink { fill: #111418; }
+    .muted { fill: #5b6570; }
+    .faint { fill: #8a939d; }
+    .rule { stroke: #dfe3e8; stroke-width: 1; }
+    .box { fill: none; stroke: #dfe3e8; stroke-width: 1; }
+    .arrow { stroke: #8a939d; stroke-width: 1.5; fill: none; }
+    .loaded { fill: #b4402f; }
+    .loaded-chip { fill: #f6e3df; }
+    .declared { fill: #2f5fb4; }
+    .declared-chip { fill: #e0e8f6; }
+    .none { fill: #8a939d; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0e1114; }
+      .ink { fill: #e8ecf0; }
+      .muted { fill: #9aa4ae; }
+      .faint { fill: #6e7882; }
+      .rule { stroke: #272d34; }
+      .box { stroke: #272d34; }
+      .arrow { stroke: #6e7882; }
+      .loaded { fill: #f0907d; }
+      .loaded-chip { fill: #3a211c; }
+      .declared { fill: #8fb3f0; }
+      .declared-chip { fill: #1b2436; }
+      .none { fill: #6e7882; }
+    }
+  </style>
+  <rect class="bg" width="900" height="640"/>
+
+  <text class="ink" x="40" y="46" font-size="20" font-weight="700">What each door makes you install, and how it was found out</text>
+  <text class="muted" x="40" y="70" font-size="13">Measured from the built package on 22 September 2026 — read off the files, not lifted from anybody's prose.</text>
+  <line class="rule" x1="40" y1="88" x2="860" y2="88"/>
+
+  <!-- MECHANISM -->
+  <text class="faint" x="40" y="118" font-size="11" letter-spacing="1.2">TWO WALKS, TWO STRENGTHS</text>
+
+  <!-- loaded -->
+  <rect class="box" x="40" y="132" width="392" height="128" rx="6"/>
+  <text class="loaded" x="56" y="156" font-size="12" font-weight="700">LOADED — the import throws without it</text>
+  <text class="mono ink" x="56" y="182" font-size="11.5">dist/testing/contracts.js</text>
+  <path class="arrow" d="M 60 192 L 60 206 L 74 206"/>
+  <text class="muted" x="80" y="210" font-size="12">follow every import and re-export: 36 files</text>
+  <path class="arrow" d="M 60 216 L 60 230 L 74 230"/>
+  <rect class="loaded-chip" x="80" y="218" width="54" height="18" rx="3"/>
+  <text class="mono loaded" x="86" y="231" font-size="11">vitest</text>
+  <rect class="loaded-chip" x="140" y="218" width="82" height="18" rx="3"/>
+  <text class="mono loaded" x="146" y="231" font-size="11">drizzle-orm</text>
+  <text class="faint" x="230" y="231" font-size="11">kept: both are peer dependencies</text>
+
+  <!-- declared -->
+  <rect class="box" x="468" y="132" width="392" height="128" rx="6"/>
+  <text class="declared" x="484" y="156" font-size="12" font-weight="700">DECLARED — the program runs; the types do not</text>
+  <text class="mono ink" x="484" y="182" font-size="11.5">dist/interpretation/anthropic.d.ts</text>
+  <path class="arrow" d="M 488 192 L 488 206 L 502 206"/>
+  <text class="muted" x="508" y="210" font-size="12">read this one file and follow nothing: 1 file</text>
+  <path class="arrow" d="M 488 216 L 488 230 L 502 230"/>
+  <rect class="declared-chip" x="508" y="218" width="116" height="18" rx="3"/>
+  <text class="mono declared" x="514" y="231" font-size="11">@anthropic-ai/sdk</text>
+  <text class="faint" x="632" y="231" font-size="11">an import type, gone at runtime</text>
+
+  <text class="muted" x="40" y="284" font-size="12">Shallow on the right on purpose: a declaration graph followed all the way reaches react from the store, which is a fact about a type chain.</text>
+
+  <line class="rule" x1="40" y1="306" x2="860" y2="306"/>
+
+  <!-- RESULTS -->
+  <text class="faint" x="40" y="336" font-size="11" letter-spacing="1.2">ALL SIXTEEN DOORS · 666 BUILT FILES FOLLOWED</text>
+
+  <!-- column 1 -->
+  <text class="mono ink" x="40" y="368" font-size="11.5">@loom/runtime</text>
+  <text class="none" x="300" y="368" font-size="11">nothing</text>
+  <text class="mono ink" x="40" y="392" font-size="11.5">@loom/runtime/anthropic</text>
+  <rect class="declared-chip" x="300" y="380" width="116" height="16" rx="3"/>
+  <text class="mono declared" x="306" y="392" font-size="10.5">@anthropic-ai/sdk</text>
+  <text class="mono ink" x="40" y="416" font-size="11.5">@loom/runtime/react</text>
+  <rect class="loaded-chip" x="300" y="404" width="40" height="16" rx="3"/>
+  <text class="mono loaded" x="306" y="416" font-size="10.5">react</text>
+  <text class="mono ink" x="40" y="440" font-size="11.5">@loom/runtime/primitives</text>
+  <rect class="loaded-chip" x="300" y="428" width="40" height="16" rx="3"/>
+  <text class="mono loaded" x="306" y="440" font-size="10.5">react</text>
+  <text class="mono ink" x="40" y="464" font-size="11.5">@loom/runtime/sdk</text>
+  <rect class="loaded-chip" x="300" y="452" width="40" height="16" rx="3"/>
+  <text class="mono loaded" x="306" y="464" font-size="10.5">react</text>
+  <text class="mono ink" x="40" y="488" font-size="11.5">@loom/runtime/cli</text>
+  <text class="none" x="300" y="488" font-size="11">nothing</text>
+  <text class="mono ink" x="40" y="512" font-size="11.5">@loom/runtime/store</text>
+  <text class="none" x="300" y="512" font-size="11">nothing</text>
+  <text class="mono ink" x="40" y="536" font-size="11.5">@loom/runtime/write</text>
+  <text class="none" x="300" y="536" font-size="11">nothing</text>
+
+  <!-- column 2 -->
+  <text class="mono ink" x="468" y="368" font-size="11.5">@loom/runtime/postgres</text>
+  <rect class="loaded-chip" x="728" y="356" width="82" height="16" rx="3"/>
+  <text class="mono loaded" x="734" y="368" font-size="10.5">drizzle-orm</text>
+  <text class="mono ink" x="468" y="392" font-size="11.5">@loom/runtime/signals</text>
+  <text class="none" x="728" y="392" font-size="11">nothing</text>
+  <text class="mono ink" x="468" y="416" font-size="11.5">@loom/runtime/signals/broadcast</text>
+  <text class="none" x="728" y="416" font-size="11">nothing</text>
+  <text class="mono ink" x="468" y="440" font-size="11.5">@loom/runtime/signals/postgres</text>
+  <rect class="loaded-chip" x="728" y="428" width="82" height="16" rx="3"/>
+  <text class="mono loaded" x="734" y="440" font-size="10.5">drizzle-orm</text>
+  <text class="mono ink" x="468" y="464" font-size="11.5">@loom/runtime/telemetry</text>
+  <text class="none" x="728" y="464" font-size="11">nothing</text>
+  <text class="mono ink" x="468" y="488" font-size="11.5">@loom/runtime/telemetry/postgres</text>
+  <rect class="loaded-chip" x="728" y="476" width="82" height="16" rx="3"/>
+  <text class="mono loaded" x="734" y="488" font-size="10.5">drizzle-orm</text>
+  <text class="mono ink" x="468" y="512" font-size="11.5">@loom/runtime/testing</text>
+  <rect class="loaded-chip" x="728" y="500" width="40" height="16" rx="3"/>
+  <text class="mono loaded" x="734" y="512" font-size="10.5">react</text>
+  <text class="mono ink" x="468" y="536" font-size="11.5">@loom/runtime/testing/contracts</text>
+  <rect class="loaded-chip" x="728" y="524" width="82" height="16" rx="3"/>
+  <text class="mono loaded" x="734" y="536" font-size="10.5">drizzle-orm</text>
+  <rect class="loaded-chip" x="816" y="524" width="44" height="16" rx="3"/>
+  <text class="mono loaded" x="822" y="536" font-size="10.5">vitest</text>
+
+  <line class="rule" x1="40" y1="562" x2="860" y2="562"/>
+  <text class="ink" x="40" y="588" font-size="12.5" font-weight="600">The door this was built for is the last row.</text>
+  <text class="muted" x="40" y="608" font-size="12">Its own comment names vitest; the walk names drizzle-orm too, which that comment mentions only in a closing aside.</text>
+  <text class="muted" x="40" y="626" font-size="12">A page that had quoted the paragraph would have been one package short.</text>
+</svg>
