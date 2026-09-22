@@ -1793,6 +1793,26 @@ turns out not to be the half that matters. It is still on the wrong side of
 arguments in its own copy of the call. Moving it into `_lib/` is a two-line move
 and it is what this entry has meant since it was filed.
 
+**Third data point, 21 September, `demo-24-what-the-rail-shows`.** This entry's
+sibling — `page.tsx` — is closed today, and closing it made this one sharper
+rather than smaller. `rail.test.ts` drives real asks through the real write path,
+and to do that it had to write its own `assessedAgainst`: read the head before
+the write, hand in `session.records` as `earlier`, then stamp `askedWith(record,
+preset.id)` because nothing downstream can recover which button was pressed.
+
+That is now **the third copy of those decisions** in this repository —
+`actions.ts` has them, `pipeline.test.ts` has them, `rail.test.ts` has them — and
+the two copies in tests exist only because the original cannot be called. The
+first version of `rail.test.ts` omitted the `askedWith` stamp, and three of its
+assertions failed for a reason that had nothing to do with what they were
+testing: the rail withdraws an ask by `presetId`, and a record with no
+`presetId` is a record no button made. A test can rediscover that in ten
+minutes. A reader of `actions.ts` has nothing to rediscover it from.
+
+Unchanged recommendation, now with a companion to copy: move `assessedAgainst`
+into `_lib/` exactly as `whatTheRailShows` moved, and have `actions.ts` call it.
+Two lines.
+
 ---
 ## 2026-09-14 — the search index's raw ceiling was at 99.2% before anybody touched it, and I raised it from outside your lane
 
@@ -26451,7 +26471,27 @@ the shape of rows.
 ## 2026-09-14 — the tallies lag the buffer by a window, and a screen that does not say so will look broken
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:**
-open — a property of step 4's input, not a defect
+**closed** by `portal-33-the-page-these-numbers-are-not-about` (21 September).
+Both things this entry named as available to say it with were taken.
+`StoredTally.updatedAt` is carried onto `RevisionReading.countedAt` — the newest
+rollup across a version's parts — and printed on the surface as *"Counted up to
+19 September 2026 at 14:05 UTC."*. The second half was taken further than the
+entry asked: rather than telling a revision with no row apart from a revision of
+zeroes, the screen now reads the **revision of the page being served** off a
+tree it was already fetching, and says which of four things is true —
+*current*, *behind* by n changes, *unread*, or *replaced*. The sentence the
+entry asked for is `standingNote`, and the one it did not ask for but is the
+reason a reader stops debugging is `standingAdvice`: *"Nothing is wrong and
+there is nothing to fix: readings are held for about an hour before they are
+counted."*
+
+The entry's diagnosis was exactly right and worth recording as having been so.
+The defect it predicted was on the deployment in the form it predicted: the card
+said *"40 visits to this page have reported back **since it was last changed**"*
+over counters gathered two changes before, and the comparison block below it was
+headed *"What the **last** change did to your readers"* about a pair of versions
+neither of which was live. Nothing threw, nothing was empty, every number was
+real. Only the screen could say it, and until this it did not.
 
 The entry above this morning listed what `ReaderTallyStore` offers step 4. One
 thing it could not list, because it had not been decided yet, is **when a number
@@ -27806,9 +27846,10 @@ is the only one on that row that is ever about a band.
 ---
 ## 2026-09-17 — `page.tsx` is the second file in this lane a test cannot reach, and the defect matrix found it the same way it found the first
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
-the same shape as the 14 September finding about `actions.ts`, and now with a
-second data point
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-24-what-the-rail-shows`, 21 September** — `_lib/rail.ts` is
+`whatTheRailShows`, `rail.test.ts` is fifteen assertions over it, and all seven
+rows of the matrix below now go red. Closing note at the end of this entry
 
 Every unit in this lane is checked by putting each defect back in turn and
 confirming the suite catches it. On `demo-20-already-asked`, five of six were
@@ -27870,6 +27911,94 @@ both ways in this run's report; caught by nothing.
 The recommendation is unchanged and is now four runs old. `whatTheRailShows` is
 still the shape, and the argument for taking it *before* the next reading lands
 is a reading weaker than it was: this run added the eighth.
+
+**Closed, 21 September, `demo-24-what-the-rail-shows`.** Taken as its own unit
+on the fifth data point, with the name the finding gave it.
+
+`apps/loom/app/(demo)/_lib/rail.ts` exports `whatTheRailShows({ tree, records,
+held, registry, ids, showPart })`. It is pure — it touches no request, no cookie
+and no store — and it answers everything the rail is allowed to say. `page.tsx`
+keeps the three things only it can do: fetch what the request has, render what
+needs the registry, lay the two halves out. It went from 495 lines to 258 and
+from eight readings to none.
+
+The one piece that could not simply move is the preview, because a
+`PartInQuestion` has to be *rendered* and a registry does not cross a client
+boundary. So the function is **generic in the preview** and takes a `showPart`
+callback: the page hands in one that returns an element, a test hands in one
+that returns the part. Both get the same map out of the same code, which a
+parallel map for the caller to join would have given up — and it is what lets
+the test assert `showPart` was *not* called, which is how two of the rows below
+go red.
+
+**The matrix, now.** Each defect restored in turn against the commit, the whole
+lane suite run, the tree returned between rows:
+
+| defect restored | on `main` | here |
+| --- | --- | --- |
+| the panel stops withdrawing an ask already waiting on an answer | nothing — 440 passed | **3 tests** |
+| a hold the page has moved past is treated as answerable | nothing | **1 test** |
+| the caution counts every hold rather than every live one | nothing | **1 test** |
+| the rail claims a mark the page never drew | nothing | **1 test** |
+| a mark stops saying a change put something back | nothing — 490 passed | **1 test** |
+| the preview is computed for a change that can no longer happen | *shipped* | **1 test** |
+| the card stops being told the page moved on | nothing | **1 test** |
+
+The two rows in the middle were green on my own first pass at the test file, and
+that is worth recording rather than quietly fixing: both are invisible unless
+the fixture has a hold the page has *moved past* or two questions open at once,
+and my first six cases had neither. A wiring test is only as good as the states
+it puts the page in.
+
+**And the sixth row was not a hypothetical.** It shipped. See the entry
+immediately below, which this unit filed and closed in the same run.
+
+---
+## 2026-09-21 — the demo showed a rendered preview of a change that could never happen, above the sentence saying it could not
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-24-what-the-rail-shows`, 21 September**, in the unit that found it
+
+Found on the first day `page.tsx`'s readings were somewhere a test could reach,
+which is the whole argument for having moved them.
+
+**Two presses reach it.** *Take the numbers off* — the Gate holds it. Then
+*Re-theme the whole page* — that one lands on its own, so the revision moves and
+the first question dies where it stands. On the stacked layout, the card for the
+dead question read, in this order:
+
+> **Nothing changed**
+>
+> **“Take the numbers band off the page.”**
+>
+> The change no longer fits this page — something it referred to has moved or gone.
+>
+> **This is what would come off the page.**
+>
+> *[the appointments band, rendered, plainly still there]*
+>
+> You changed the page after asking for this. Loom weighed it against the page
+> as it was then, and won’t apply a decision to a page it hasn’t seen.
+
+One card, contradicting itself twice, at the most interesting moment this
+surface has — the moment the Gate's question is in front of a stranger. It is
+also the one layout the preview exists for: `globals.css` removes it on a wide
+screen, where the band is ringed on the stage instead, so nobody photographing
+the demo at 1280 has ever seen it.
+
+**`page.tsx` said it was already prevented.** The effect and the plain reading
+were both filtered to the holds that could still be answered, and the comment
+over the preview said it took *“the same two conditions as the effect above and
+for the same reason — a change that has already landed describes a tree that is
+gone.”* The code under it read `holds.value.held` and applied neither. The
+filter and the map it was supposed to guard were forty lines apart in a file no
+test could open.
+
+**The fix is the filter the comment already claimed**, and it is asserted from
+both sides in `rail.test.ts`: the reading is absent, *and* `showPart` was never
+called — because the part is still perfectly renderable, so an assertion about
+the map alone would pass on an implementation that rendered it and threw it
+away. Photographed before and after in this run's report.
 
 ---
 ## 2026-09-17 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a nineteenth time
@@ -28993,3 +29122,134 @@ somebody else.
 configured identity is the one the deployment pipeline trusts, and a lane's name
 belongs in the branch name, the commit subject and the report — all three of
 which already carry it.
+
+---
+## 2026-09-21 — `page.tsx` has nothing left to compute, and what is left is still the one thing no test can open
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of the unit that closed the 17 September entry, filed so the next
+run does not mistake that closure for more than it is
+
+`whatTheRailShows` took the eight readings out of `page.tsx`. What is left is
+258 lines of which about ten are wiring: seven props read straight off `rail`,
+one callback, and the layout. A test still cannot mount it.
+
+**What the move actually bought, stated precisely.** Every defect the matrix
+found was *deleting an argument from a call* — `stillToAsk(…)` back to
+`availablePresets(…)`, `restoring: putsSomethingBack(…)` to `restoring: false`.
+None of those edits exists in `page.tsx` any more, because there are no calls
+left in it to take an argument away from. What remains possible is
+**substituting a wrong value into a required prop** — `available={rail.available}`
+to `available={[]}` — and that is a different and smaller class: it does not
+type-check away to nothing, it is not a plausible accident of a merge, and it is
+visible in a seven-line diff rather than buried in four hundred.
+
+**What it did not buy**, and the next run should not assume otherwise:
+
+- A prop can still be handed the *wrong field* — `marked={rail.marked}` and
+  `held={rail.readings}` are both maps of strings to objects, and swapping two
+  props of compatible shape would compile. Nothing checks the joins across the
+  boundary.
+- `rendered.diagnostics` is still read and rendered in `page.tsx` and is not in
+  `RailView`. It is genuinely the render's rather than the rail's, so it was
+  left where it is — but it is a ninth reading by any other name, and if a tenth
+  arrives it should go in `rail.ts` rather than beside this one.
+
+**Recommendation: do not take this as a unit.** The remaining risk does not
+justify a second refactor, and a `page.tsx` with no arithmetic in it is the
+state the 17 September entry was asking for. What *is* worth doing is the rule
+this run would give its successor: **a new reading goes in `rail.ts` and arrives
+with the test that proves it is wired.** Eight readings landed in an untestable
+file one at a time, each of them defensible on its own, and that is how the
+first entry got to five data points.
+
+---
+## 2026-09-21 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a twenty-third time
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+re-verified in place against the standing entry, **not re-filed**
+
+Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
+everything a new one would.
+
+**The cost was nil, for the same reason as the twenty-second time and worth
+saying once more.** This unit moved no pixels by design: what it changed is
+which file an arithmetic lives in, and the one visible consequence — a preview
+that stops being drawn — is a *deletion*. A reference gallery has no opinion
+about what a card is allowed to claim, and that is the only judgement this run
+made about the screen.
+## 2026-09-21 — the before-and-after list compares the page against itself, and the row says "about the same" every time
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+seen in a photograph of this branch, not a defect anybody has reported, and
+worth a decision rather than a patch
+
+`reachShifts` compares every part both versions heard about, and the **root** is
+one of them. So every comparison on `/portal/readers` carries a row for the page
+itself, and on all three pages in this branch's screenshot it reads the same way:
+
+> the page "Autumn arrivals" `n_autumn12` — about the same
+> 50 of the 50 visits before, then 40 of the 40 visits
+
+It is arithmetically correct and it is structurally uninformative. The root is
+reached by every page view that reports anything, by construction, so its rate
+is 100% on both sides of every change anybody will ever make — which means the
+row is *always* "about the same", on every page, forever. A list sorted by size
+of change therefore ends with a row that is guaranteed to be last and guaranteed
+to say nothing.
+
+**Why it is filed rather than fixed on this branch.** The unit was the gap
+between the counters and the page being served, and dropping rows from a
+comparison is a separate decision with a real argument on both sides:
+
+- **For dropping it:** the section's heading is *what the change did to your
+  readers*, and the page is not a part the change moved. `PartCounters` already
+  carries every row in full, one click down, so nothing is removed by leaving it
+  out of the **reading** — which is the shape this lane has taken four times
+  (`highlightsOf` names no part when there is nothing to name, and the full table
+  is underneath).
+- **Against dropping it:** the page's row is the **denominator** of every other
+  row, and a reader who cannot see *50 of 50, then 40 of 40* cannot see that the
+  two windows were different sizes — which is the whole argument
+  `since-the-change.tsx` makes for printing both counts rather than the rate.
+
+**The recommendation, for whoever takes it:** neither. Move the root out of the
+list and into the sentence above it, where it is the denominator rather than a
+competitor — *"Revision 4 against revision 3, over 50 visits then 40."* That
+keeps the fact, drops the row that can never say anything, and puts the number
+where a reader meets it before the list rather than after it.
+
+It affects only the comparison. The root's row in the highlights and in the
+counter table is a different question and is not this.
+
+---
+## 2026-09-21 — the portal has been photographed by a private script for the sixth consecutive run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed by reference**, not as new analysis
+
+The 14, 19 and 20 September entries stand unchanged and nothing about them has
+moved. This adds one number and one detail.
+
+The number: **six**. Every picture of this portal since 15 September has been
+taken by a Playwright script written inside the run and thrown away at the end
+of it, because `pnpm shoot` cannot sign in and every screen in this route group
+is behind a session.
+
+The detail is for whoever builds the step, because it is the one thing each run
+rediscovers and it is not the sign-in. Staging a **populated** portal means
+putting stores on `globalThis` before the server's route modules evaluate, and
+the only hook for that is `NODE_OPTIONS=--import`. Two things bite:
+
+- **Module resolution is relative to the preload file, not to the working
+  directory.** A preload written to a scratch directory cannot import
+  `@loom/runtime` at all, whatever the process was started from. It has to sit
+  inside the application, which for something that must not be committed means
+  somewhere already ignored.
+- **The preload runs twice** — once in the launching process and once in the
+  server — so it must be idempotent and must not assume it is the only copy.
+
+The ask is unchanged and is still the smaller of the two on the table: **a
+`signIn` step, or any way to run a script before the first `goto`.** The
+staging half is this lane's own and would be a recipe in `tools/screenshot/`
+rather than a capability, if a fifth lane ever needs it.

@@ -4,16 +4,19 @@ import { PageName } from "@/app/(portal)/_components/page-name"
 import { PartName } from "@/app/(portal)/_components/part-name"
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import {
+  comparisonOf,
+  countingStanding,
   dwellEach,
   highlightsOf,
   outOfVisits,
   pageUse,
   plainDuration,
-  reachShifts,
   unplacedUse,
+  visitsHeard,
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
+import { CountedAgainst } from "./counted-against"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
 import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
@@ -49,18 +52,36 @@ import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
  * *Loom looked and there was nothing* from *Loom did not look*, which is the
  * distinction `StateNotice` exists for and the same one that made `settled` a
  * tone rather than an empty box.
+ *
+ * The comparison block was the one section still breaking that rule, and it was
+ * the most valuable one on the card. `SinceTheChange` is now drawn
+ * unconditionally and `Comparison` has no empty arm.
+ *
+ * ## Why the card is told which version is being served
+ *
+ * Because the sentence at the top of it is only true of one version. Counters
+ * are counted a window behind, so the newest counted version is not the page
+ * being served for as long as an hour after every change — and for that hour
+ * this card was saying *"…have reported back since it was last changed"* over
+ * figures gathered before the change. `live` is the revision of the page in the
+ * store and is `undefined` when that read did not come back; `countingStanding`
+ * turns the pair into the four things that can be true, and `CountedAgainst`
+ * says which out loud in every one of them.
  */
 export const PageReadingCard = ({
   reading,
   page,
+  live,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
+  /** The revision of the page being served, or `undefined` if it could not be read. */
+  readonly live: number | undefined
 }) => {
   const newest = reading.revisions[0]!
-  const previous = reading.revisions[1]
   const highlights = highlightsOf(newest)
-  const shifts = previous === undefined ? [] : reachShifts(previous, newest)
+  const standing = countingStanding(reading, live)
+  const comparison = comparisonOf(reading)
 
   /*
    * Read here rather than inside the list, so the card holds one answer to
@@ -78,13 +99,10 @@ export const PageReadingCard = ({
         <h2 className="text-base tracking-tight">
           <PageName page={page} layout="inline" />
         </h2>
-        <p className="text-ink-muted text-xs">
-          {newest.views === 1
-            ? "One visit to this page has reported back"
-            : `${newest.views} visits to this page have reported back`}{" "}
-          since it was last changed. That is revision {newest.revision}.
-        </p>
+        <p className="text-ink-muted text-xs">{visitsHeard(newest, standing)}</p>
       </header>
+
+      <CountedAgainst reading={newest} standing={standing} />
 
       <ul className="flex flex-col gap-2 text-xs">
         {highlights.fewestSaw === undefined ? (
@@ -140,9 +158,7 @@ export const PageReadingCard = ({
         {unplaced !== undefined && <UnplacedUseNote unplaced={unplaced} />}
       </ul>
 
-      {shifts.length > 0 && previous !== undefined && (
-        <SinceTheChange shifts={shifts} before={previous.revision} after={newest.revision} />
-      )}
+      <SinceTheChange comparison={comparison} standing={standing} />
 
       <PartCounters reading={newest} />
 
