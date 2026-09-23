@@ -31111,3 +31111,52 @@ alternative is a **committed** script under `apps/loom/scripts/`, owned by this
 lane, that starts the portal against a named fixture: the same recipe, in the
 repository, reviewable, and runnable by the maintainer rather than reconstructed
 from a report by the next run. That is a unit of work and this lane will take it.
+
+---
+
+## 2026-09-23 — the mangled URL is not about `.png`: it is an apostrophe straight after a markdown link's closing paren
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` ·
+**Corrects:** the 23 September entry *every URL this project has had mangled in a
+pull request ends in `.png`* · **Status:** open — **a reproduction, taken twice
+on one body**
+
+That entry narrowed two earlier explanations that were both too broad, and it is
+itself too broad. Measured on #376, by posting a body and reading it straight
+back through `pull_request_read`:
+
+**One URL out of eight was mangled, and it ends in `.md`.**
+
+```
+sent:  [0173](https://github.com/…/0173-a-change-may-not-add-a-primitive-….md)'s registered-types list
+back:  [0173](``https://github.com/…/0173-a-change-may-not-add-a-primitive-….md)'s`` registered-types list
+```
+
+A pair of double backticks, opening immediately after the link's `(` and closing
+immediately after the `'s`. The seven URLs that survived byte for byte include
+four `.png` links in a table, two `.md` decision links, and one `.md` link with
+backticks in its own label.
+
+**What the mangled one had that none of the others did** is an **apostrophe
+directly after the closing paren**. Nothing else distinguishes it: same host,
+same branch, same directory, same extension as two links that came through
+clean.
+
+**Confirmed by the fix.** The sentence was reworded to put the link somewhere an
+apostrophe does not follow it, the body was posted again, and it was read back
+again: every URL clean, including the four `.png` ones. Two reads of two bodies,
+one variable changed.
+
+**Why this matters more than the wording of one entry.** The `.png` theory
+implied screenshots were the problem and that a lane could avoid it by linking to
+something else. They are not, and it cannot — and the earlier
+`raw.githubusercontent.com` finding, which *is* correct and *is* why nothing
+embeds, is a separate fault that this one has twice been mistaken for. The
+practical rule for every lane is one line: **do not put an apostrophe straight
+after a markdown link.** Rephrase, or move the link.
+
+**What is still unknown** and is why this stays open: whether the trigger is the
+apostrophe specifically, any character in that class, or something about
+possessives in the tooling's own heuristics. One reproduction is a rule of thumb,
+not a cause. Whoever owns the pull-request tooling can settle it with three
+bodies; this lane can only report what it measured.

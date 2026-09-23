@@ -342,7 +342,7 @@ now, and the finding says so.
 
 ## Findings
 
-**Filed five. Closed two.**
+**Filed six. Closed two.**
 
 1. **Closed:** `Loom marketing`'s 23 September entry, portal row — both floors
    are wired and `/portal/rules` names them.
@@ -372,7 +372,15 @@ now, and the finding says so.
    and one of the two floors have no model-free path to a picture. The
    recommendation is a labelled preview on `/portal/rules` built from the same
    module, which is a product decision above this lane's line.
-7. **Filed, this lane's own:** the staging half of the screenshot problem, with
+7. **Filed, correcting an entry owned by the maintainer:** the mangled-URL
+   problem is not about `.png`. This run posted #376's body, read it back, found
+   exactly one URL wrapped in double backticks — and it ends in `.md`. What it
+   had that the seven clean ones did not is an **apostrophe straight after the
+   link's closing paren**. Reworded, reposted, read back again: all eight clean,
+   including four `.png` links. Two reads, two bodies, one variable. The rule for
+   every lane is one line — do not put an apostrophe straight after a markdown
+   link.
+8. **Filed, this lane's own:** the staging half of the screenshot problem, with
    the recipe and the recommendation that it become a committed script under
    `apps/loom/scripts/` rather than a recipe the next run rebuilds from a report.
    That is a unit of work and this lane will take it.
