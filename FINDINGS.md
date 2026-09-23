@@ -29869,3 +29869,158 @@ The ask is unchanged and is still the smaller of the two on the table: **a
 `signIn` step, or any way to run a script before the first `goto`.** The
 staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
+
+---
+## 2026-09-23 — twelve primitives were filed behind a decision nobody needed to make, and four of them only ever needed a band
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**corrects the 21 September inventory's second row in place.** Four of the
+twelve are reachable as of this run; the other eight are re-filed here with what
+they actually wait on, which in no case is a decision
+
+The 21 September entry closed the reach queue and left three rows, *each one
+decision rather than several*. Its second row read:
+
+> **not a landing page** — `book`, `event`, `listing`, `product`, `offering`,
+> `recording` + their grids, `message`/`message-list` — a second page sequence
+> (0171 names the trigger)
+
+0171 does name that trigger, so the row looked well-founded and sat for two
+days. It was wrong, and the way it was wrong is the same way the same row was
+wrong about `loom.pin` three days earlier: it reasoned about a band from **what
+it says** rather than from **where it goes**, which is the mistake 0171 exists
+to prevent.
+
+A shop, a studio, a podcast and an assistant have the *same* page sequence.
+Navigation, hero, proof, a body saying what the thing is, a band saying what it
+costs, the objections, a closing ask, a footer — in that order, on all four.
+What differs is the copy and the node types inside four of those bands, and a
+band differing from its siblings in the set of nodes it builds is the definition
+of a **design** (0162), not of a part and not of a sequence.
+[0183](decisions/0183-a-page-for-another-kind-of-business-is-the-same-sequence-with-different-nodes-in-it.md)
+records the rule and the test, and `COMPOSITION_PARTS` did not move.
+
+**What it cost.** Four primitives unreachable for a fortnight behind a question
+nobody was ever going to be asked, and two corrections to one inventory row in
+three days. The discipline worth taking from it: **before filing a row as
+waiting on somebody, check that each thing in it needs what the row says it
+needs.**
+
+**And a second claim in that row that was never checked.** The same twelve were
+also said, in the row above, to need an image source. **Every image field on all
+twelve is `.optional()`** — `loom.product.image`, `loom.listing.image`,
+`loom.recording.artwork`, `loom.message.avatar` — and `loom.offering` and
+`loom.event` have no image field at all. `loom.recording` goes further and draws
+its most important mark, the play mark, from an `href` with no artwork anywhere,
+which its own doc comment states. Four bands shipped this run with **no image
+source at all** and stay inside `compositions.test.ts`'s standing rule.
+
+**The eight that remain, with what each actually waits on:**
+
+| | waits on |
+| --- | --- |
+| `book`, `book-grid` | a run. A shelf is a design of `articles`, on the same argument as the episodes band |
+| `event`, `event-grid` | a run, **and one judgement**: the swap against `changelog` loses something in both directions, so a what's-on band may be the twenty-third part rather than a design. That is a 0171 question and it is the only one in this list |
+| `listing`, `listing-grid` | a run, and it is the one of the eight that would be *better* with photographs — see the separate entry below |
+| `message`, `message-list` | **closed.** `code-conversation` |
+
+---
+## 2026-09-23 — `loom.pin` is not behind an image source, it is behind a surface whose height is known
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — **a second correction to the same inventory row**, and the reason this
+run built a `loom.frame` band and put no pin on it
+
+The 21 September entry moved `loom.pin` out of the *genuinely missing* row and
+into the *needs an image source* row, with the reasoning:
+
+> A pin is a hotspot **on a photograph**; with no photograph it is a dot on
+> nothing.
+
+The first clause is not what the primitive says. `loom.pin` is *"a numbered mark
+placed at a point over a `loom.frame`'s surface"*, and a `loom.frame`'s surface
+is a **region the tree fills** — this run put a `loom.message-list` in one and
+the result is a product surface, drawn rather than photographed, that fetches
+nothing from anywhere. A pin over it would be a mark on a real interface, which
+is the best version of what a pin is for.
+
+**What actually stops it is geometry, and it is a smaller thing.** `x` and `y`
+are percentages of the surface's width and **height**. A transcript's height is
+whatever its words wrap to, so a mark aimed at the third turn at 1280px is aimed
+between two turns at 390px — and the primitive's legend rendering, which takes
+over when the frame is narrow, hides the drift at exactly the width where it is
+worst. Nothing fails, nothing is refused, and the mark is simply in the wrong
+place in a photograph nobody took.
+
+**So the ask is neither an image source nor a change to `loom.pin`.** It is a
+band whose surface has a **height the tree knows** — a fixed-ratio media region,
+a chart, a table with a known number of rows. The shortest route is a pin over a
+`loom.frame` holding a `loom.stat-chart` or a `loom.table`, both of which are
+already in the catalogue and neither of which reflows vertically with its own
+words. Filed rather than built because it is a band of its own and this run's
+unit was four.
+
+---
+## 2026-09-23 — a frame reserved a picture's shape for a picture that was not there, and a shelf of six read as six cards that failed to load
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**fixed in `loom.recording` this run and pinned by a test.** Filed for the
+second half, which is `loom.listing` and is *not* fixed
+
+`loom.recording` applied `aspect-ratio` to its frame unconditionally, including
+to the frames with nothing in them. In the **row** arrangement the art column is
+`11rem` wide and a square of that is a small mark nobody would question. In the
+**stacked** arrangement — which is every one of these cards on a phone — the art
+is the card's full width, so `aspect-ratio: 1 / 1` on a card with no cover is a
+350-pixel void with a play button floating in the middle of it. Six of them down
+a phone screen read as six cards that failed to load, and the page was 3,200
+pixels taller than it needed to be.
+
+**Nothing was wrong in the source and no test could have caught it.** The ratio
+was exactly the one the tree asked for, the mark was centred in it, and the band
+renders with no diagnostic at either width. It was found by photographing the
+first band in the catalogue to place a shelf of recordings with no artwork, and
+it is invisible at 1280px — the only width this lane routinely reads first.
+
+The rule, and it is general: **a ratio reserves the shape of a picture, so a
+frame with no picture in it does not get one.** With no picture there is no
+proportion to keep, only a mark to place and a runtime to put beside it, and
+both are the same height whatever the card is doing. Fixed as a fixed block
+size, checked by a test that asserts both renderings on one page.
+
+**This is the second defect in `loom.recording` found by rendering a record with
+no cover art** — the `border-strong` note in that file is the first, from a run
+that fixed the mark's visibility and did not look at the box it was sitting in.
+Two for two is worth saying plainly: **a card with no cover is the ordinary case
+for a page whose pictures are not ready, not an edge case**, and it should be in
+the fixture of every primitive that takes an optional image.
+
+**`loom.listing` has the same shape and was left alone.** Its media region is
+drawn unconditionally at `aspect-ratio: 4 / 3` with the image optional inside
+it, so a listing with no photograph is the same void. The difference is that the
+primitive **argues for it** — *"a band that moved its flags depending on whether
+a photograph was found would be two layouts nobody chose"* — and that argument
+is real for a mixed grid where some listings have photographs and some do not.
+It is not real for a grid where none does. Nothing in the catalogue places a
+`loom.listing` yet, so there is no photograph to decide it on, and changing a
+primitive on an argument rather than on a picture is what produced the defect
+above. **For whoever writes the listings band: take the picture first.**
+
+---
+## 2026-09-23 — `loom.tally` shipped with the band that would have reached it, and the band does not place one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+open — small, and the whole entry is two sentences of fact
+
+`loom.tally` was added on 22 September as *one figure that is read rather than
+written*, alongside `loom.feed` and the `articles-feed` band that reaches it.
+Nothing reaches `loom.tally`: the run that built it built one band, and that
+band places a feed.
+
+The shape is obvious and is named here so it is not rediscovered: a **second
+design of `metrics`** whose figures are `loom.tally` nodes rather than
+`loom.stat` nodes — *these numbers are live* — which differs from `metricsBand`
+in the set of nodes it builds and therefore clears 0162 without argument. The
+precedent for a band declaring a binding a host has not registered is
+`articles-feed`, which ships unbound deliberately (0180 §6) and draws a designed
+empty region rather than a hole.
