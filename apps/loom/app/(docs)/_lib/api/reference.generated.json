@@ -5,6 +5,8 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
+      "files": 91,
+      "narrower": [],
       "groups": [
         {
           "module": "catalogue",
@@ -4262,6 +4264,8 @@
           "reach": "declared"
         }
       ],
+      "files": 2,
+      "narrower": [],
       "groups": [
         {
           "module": "interpretation/anthropic",
@@ -4298,6 +4302,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 54,
+      "narrower": [],
       "groups": [
         {
           "module": "render/addressing",
@@ -5083,6 +5089,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 168,
+      "narrower": [],
       "groups": [
         {
           "module": "primitives",
@@ -5525,6 +5533,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 33,
+      "narrower": [],
       "groups": [
         {
           "module": "catalogue",
@@ -6065,6 +6075,8 @@
       "slug": "cli",
       "types": "./dist/cli/index.d.ts",
       "requires": [],
+      "files": 11,
+      "narrower": [],
       "groups": [
         {
           "module": "cli/args",
@@ -6283,6 +6295,8 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
+      "files": 26,
+      "narrower": [],
       "groups": [
         {
           "module": "store/attribution",
@@ -6690,6 +6704,8 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
+      "files": 52,
+      "narrower": [],
       "groups": [
         {
           "module": "write/commit",
@@ -7034,6 +7050,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 27,
+      "narrower": [],
       "groups": [
         {
           "module": "store/database",
@@ -7147,6 +7165,18 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
+      "files": 23,
+      "narrower": [
+        {
+          "specifier": "@loom/runtime/signals/broadcast",
+          "slug": "signals-broadcast",
+          "avoids": [
+            "zod"
+          ],
+          "shared": 14,
+          "files": 9
+        }
+      ],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7883,6 +7913,8 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
+      "files": 9,
+      "narrower": [],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -8010,6 +8042,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 12,
+      "narrower": [],
       "groups": [
         {
           "module": "signals/migrate",
@@ -8060,6 +8094,8 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
+      "files": 25,
+      "narrower": [],
       "groups": [
         {
           "module": "telemetry/calibration",
@@ -8572,6 +8608,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 21,
+      "narrower": [],
       "groups": [
         {
           "module": "telemetry/migrate",
@@ -8636,6 +8674,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 82,
+      "narrower": [],
       "groups": [
         {
           "module": "testing/definitions",
@@ -9042,6 +9082,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 36,
+      "narrower": [],
       "groups": [
         {
           "module": "testing/hold-contract",

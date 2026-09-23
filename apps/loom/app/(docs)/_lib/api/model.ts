@@ -54,6 +54,41 @@ export type ApiRequirement = {
   readonly reach: ApiRequirementReach
 }
 
+/**
+ * A door that opens onto part of what a wider door opens onto, and loads less
+ * to do it.
+ *
+ * The fact underneath is about **bundles rather than installs**. Everything in
+ * `ApiRequirement` answers *will my import run*; this answers the question a
+ * reader asks next, and which nothing on the site could answer before: *should
+ * I be importing this one at all*. A reader who wants the broadcaster and finds
+ * `@loom/runtime/signals` first — the shorter specifier, and the one the rail
+ * lists first — gets the schema library in their browser bundle along with it,
+ * and nothing they did was wrong.
+ *
+ * It is measured, not asserted. A door is narrower than another when its
+ * JavaScript loads a **strict subset** of the other's packages and every export
+ * it publishes is published by the other **with the same kind and the same
+ * declaration**. Both halves are load-bearing and the second is the one that is
+ * easy to leave out: two doors can each be a strict subset of the other's
+ * packages and still be two doors to two different places, which is what
+ * `@loom/runtime/telemetry` and `@loom/runtime/telemetry/postgres` are. A rule
+ * that compared only packages would send a reader from the journal to the
+ * Postgres journal and lose them sixty exports.
+ */
+export type ApiNarrowerDoor = {
+  /** Exactly as it is written in an import: `@loom/runtime/signals/broadcast`. */
+  readonly specifier: string
+  /** The last path segment of the page that documents it, so the band can link. */
+  readonly slug: string
+  /** Packages the wider door loads and this one does not, sorted. */
+  readonly avoids: readonly string[]
+  /** How many exports it publishes — all of which the wider door publishes too. */
+  readonly shared: number
+  /** Built files its JavaScript reaches, against the wider door's `files`. */
+  readonly files: number
+}
+
 /** The exports that share one module inside an entry point. */
 export type ApiGroup = {
   /** The declaring module, relative to the package root: `tree/navigation`. */
@@ -86,6 +121,23 @@ export type ApiEntry = {
    * most doors, which is itself worth saying on a page.
    */
   readonly requires: readonly ApiRequirement[]
+  /**
+   * How many of the package's own built files this door's JavaScript reaches.
+   *
+   * Reach rather than shipped bytes — a bundler drops what a program does not
+   * use — so it is an upper bound and the only honest scale this instrument
+   * has. It is here so that a narrower door can be compared against the door a
+   * reader is standing at.
+   */
+  readonly files: number
+  /**
+   * Other doors onto part of this one that load less, where there are any.
+   *
+   * Empty on fifteen of Loom's sixteen doors, and unlike `requires` a page says
+   * nothing when it is empty. See `NarrowerDoors` for why the two bands differ
+   * on that.
+   */
+  readonly narrower: readonly ApiNarrowerDoor[]
   readonly groups: readonly ApiGroup[]
 }
 

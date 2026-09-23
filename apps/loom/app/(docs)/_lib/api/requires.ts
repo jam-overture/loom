@@ -52,7 +52,8 @@ const isRelative = (specifier: string): boolean => specifier.startsWith(".")
 export type ReadFile = (path: string) => string | undefined
 
 /**
- * Every other package reached by following a file's imports.
+ * Everything a door's JavaScript reaches: the other packages, and how many of
+ * this package's own built files it goes through to get there.
  *
  * The walk is over the **built** files rather than `src/`, because the question
  * is what a consumer's program loads and that is what a consumer's program
@@ -64,18 +65,24 @@ export type ReadFile = (path: string) => string | undefined
  * incomplete, and the answer this function would otherwise give — *fewer
  * packages than the door really needs* — is the one shape of wrong that a
  * reader would act on.
+ *
+ * The file count is the same walk's other half, and it is carried because it is
+ * the only honest answer this instrument has to *how much smaller* one door is
+ * than another. It is reach and not shipped bytes: a bundler drops what a
+ * program does not use, so a door that reaches nine files may ship less than
+ * nine files' worth. It cannot ship more.
  */
-export const packagesReachedFrom = (start: string, read: ReadFile): ReadonlySet<string> => {
-  const seen = new Set<string>()
+export const reachFrom = (start: string, read: ReadFile): DoorReach => {
+  const files = new Set<string>()
   const packages = new Set<string>()
   const pending = [start]
 
   while (pending.length > 0) {
     const file = pending.pop() as string
 
-    if (seen.has(file)) continue
+    if (files.has(file)) continue
 
-    seen.add(file)
+    files.add(file)
 
     const text = read(file)
 
@@ -91,8 +98,20 @@ export const packagesReachedFrom = (start: string, read: ReadFile): ReadonlySet<
     }
   }
 
-  return packages
+  return { packages, files: files.size }
 }
+
+/** What one door's JavaScript reaches, in the two facts a page can use. */
+export type DoorReach = {
+  /** Every other package an import of this door executes an import of. */
+  readonly packages: ReadonlySet<string>
+  /** How many of this package's own built files that walk went through. */
+  readonly files: number
+}
+
+/** The packages alone, for the callers that have no use for the file count. */
+export const packagesReachedFrom = (start: string, read: ReadFile): ReadonlySet<string> =>
+  reachFrom(start, read).packages
 
 /** The packages a single file names directly, without following any of them. */
 export const packagesNamedIn = (file: string, read: ReadFile): ReadonlySet<string> => {
@@ -137,6 +156,19 @@ export const peersOf = (manifest: Manifest): Peers =>
   )
 
 /**
+ * What a door's JavaScript reaches, or nothing at all where it has none.
+ *
+ * A subpath can publish declarations and no implementation. That is a fault in
+ * the package rather than a shape to design around — it is named where the two
+ * files are compared — but it must not be an exception every caller writes for
+ * itself, so the absence is turned into an empty reach once, here.
+ */
+export const doorReach = (entry: PublishedEntry, read: ReadFile, root = ""): DoorReach =>
+  entry.runtime === undefined
+    ? { packages: new Set<string>(), files: 0 }
+    : reachFrom(join(root, entry.runtime), read)
+
+/**
  * What one door needs, in the two strengths a reader has to tell apart.
  *
  * **`loaded`** is the strong one and it is transitive: the door's JavaScript
@@ -160,17 +192,19 @@ export const peersOf = (manifest: Manifest): Peers =>
  *
  * A package on both lists is `loaded`: the stronger claim is the true one and
  * a reader does not need to be told twice.
+ *
+ * It takes the two sets rather than reading them, because the generator has
+ * both already — the same walk that answers this one also answers how much of
+ * the package a door reaches, for the band that compares two doors — and a
+ * function that read them again would be walking sixteen doors twice to print
+ * one number.
  */
 export const requirementsFor = (
-  entry: PublishedEntry,
   peers: Peers,
-  read: ReadFile,
-  root = ""
-): readonly ApiRequirement[] => {
-  const loaded = entry.runtime === undefined ? new Set<string>() : packagesReachedFrom(join(root, entry.runtime), read)
-  const declared = packagesNamedIn(join(root, entry.types), read)
-
-  return Object.entries(peers)
+  loaded: ReadonlySet<string>,
+  declared: ReadonlySet<string>
+): readonly ApiRequirement[] =>
+  Object.entries(peers)
     .flatMap(([name, peer]): readonly ApiRequirement[] => {
       if (loaded.has(name)) return [{ package: name, range: peer.range, optional: peer.optional, reach: "loaded" }]
       if (declared.has(name)) return [{ package: name, range: peer.range, optional: peer.optional, reach: "declared" }]
@@ -178,4 +212,3 @@ export const requirementsFor = (
       return []
     })
     .sort((a, b) => a.package.localeCompare(b.package))
-}

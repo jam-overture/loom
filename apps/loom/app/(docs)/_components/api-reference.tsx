@@ -7,6 +7,7 @@ import {
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
+  type ApiNarrowerDoor,
   type ApiRequirement,
   type ApiSymbol,
 } from "@/app/(docs)/_lib/api/model"
@@ -295,6 +296,81 @@ const BeforeItWillRun = ({ entry }: { readonly entry: ApiEntry }) => {
 }
 
 /**
+ * The door a reader should have gone through instead, where there is one.
+ *
+ * The band above this one answers *will my import run*. This answers the
+ * question a reader asks straight after, and which nothing on this site could
+ * answer before: *should I be importing this one at all*. A package with
+ * sixteen entry points can have two doors onto the same code, and a reader who
+ * takes the shorter specifier is not making a mistake they could have seen.
+ *
+ * **It says nothing when there is nothing to say, and that is a deliberate
+ * difference from the two bands around it.** Those announce an empty result —
+ * *nothing to install first*, *no written page names any of this* — because a
+ * reader arrives already wondering and deserves to know the site checked.
+ * Nobody arrives wondering whether a narrower door exists; they have not been
+ * told the idea yet. Printing *no narrower door* on the fifteen pages that have
+ * none would teach a reader a concept and withdraw it in the same sentence,
+ * fifteen times.
+ *
+ * **Only one direction.** The wide door's page carries it and the narrow one's
+ * does not. A reader standing at the narrow door already has the cheap import;
+ * telling them a wider one exists would be an invitation to pay for exports
+ * they have not asked for, which is the cost this band was written to stop.
+ */
+const NarrowerDoor = ({
+  door,
+  entry,
+}: {
+  readonly door: ApiNarrowerDoor
+  readonly entry: ApiEntry
+}) => (
+  <div className="mt-3 first:mt-0">
+    <p className="text-ink-muted text-sm leading-relaxed">
+      <Link
+        href={`/docs/api-reference/${door.slug}`}
+        className="text-ink font-mono text-xs underline underline-offset-2 hover:no-underline"
+      >
+        {door.specifier}
+      </Link>{" "}
+      publishes {door.shared} of the {apiSymbolCount(entry)} exports below — the same names, declared
+      the same way. It does not load{" "}
+      {door.avoids.map((name, index) => (
+        <span key={name}>
+          {index === 0 ? "" : index === door.avoids.length - 1 ? " or " : ", "}
+          <code className="code-chip font-mono text-xs">{name}</code>
+        </span>
+      ))}
+      , which this import does, and its JavaScript goes through {door.files} of the package's built
+      files where this one goes through {entry.files}.
+    </p>
+  </div>
+)
+
+const NarrowerDoors = ({ entry }: { readonly entry: ApiEntry }) =>
+  entry.narrower.length === 0 ? null : (
+    <section
+      aria-label="Narrower imports onto part of this one"
+      className="border-edge mt-8 rounded-lg border px-4 py-4"
+    >
+      <p className="text-ink text-sm font-semibold">
+        {entry.narrower.length === 1 ? "A narrower door opens" : "Narrower doors open"} onto part of
+        this one.
+      </p>
+
+      <p className="text-ink-muted mt-1 text-sm">
+        If that is all you came for, import it instead and your program never loads the rest.
+      </p>
+
+      <div className="mt-3">
+        {entry.narrower.map((door) => (
+          <NarrowerDoor key={door.specifier} door={door} entry={entry} />
+        ))}
+      </div>
+    </section>
+  )
+
+/**
  * The list of what is on the page, before the page starts.
  *
  * A reference is read by people who arrived looking for one name, and a rail
@@ -426,6 +502,8 @@ export const ApiEntryReference = ({
     </p>
 
     <BeforeItWillRun entry={entry} />
+
+    <NarrowerDoors entry={entry} />
 
     <ProseFirst entry={entry} prose={prose} />
 
