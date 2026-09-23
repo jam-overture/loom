@@ -400,6 +400,10 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
  * reader answers `undefined` both for a primitive whose author has said nothing
  * and for a type this registry does not hold, and neither is a primitive
  * claiming it reads nothing.
+ *
+ * The node's props go to the seam alongside the declaration, because a
+ * declaration may name the prop that names the binding rather than the binding
+ * (0184), and this walk is the only place holding both.
  */
 const reportUnreadBindings = (
   node: ElementNode,
@@ -412,7 +416,7 @@ const reportUnreadBindings = (
   const asked: string[] = []
   for (const name in data) asked.push(name)
 
-  for (const name of unreadBindings(asked, declared)) {
+  for (const name of unreadBindings(asked, declared, node.props)) {
     context.collect({ code: "data-unread", nodeId: node.id, type: node.type, name })
   }
 }

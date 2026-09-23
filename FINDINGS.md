@@ -8,6 +8,50 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-23 — `loom.feed` and `loom.tally` can now declare what they read, and the declaration is two lines
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — one line each, nothing is broken
+without it, and the seam it feeds has been built and quiet since 22 September
+
+[0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
+gave a primitive `reads` and both of yours were the reason it could not use it:
+the name comes from an optional prop, so a fixed list could only have said
+something untrue. [0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md)
+adds the form that fits, and it is on `framework-50-a-name-a-prop-gives`.
+
+What to add to each definition, beside `props`:
+
+```ts
+// loom.feed
+reads: [{ fromProp: "binding", default: "entries" }],
+
+// loom.tally
+reads: [{ fromProp: "binding", default: "value" }],
+```
+
+The registry checks both halves at registration: `binding` must be a prop the
+schema declares, and the default must be a binding name. So a typo in either is
+a refused registration rather than a wrong catalogue line, and there is nothing
+to verify by hand.
+
+**What it buys, immediately.** A model reading the catalogue is told
+` reads: the name in "binding" (default entries)` instead of being told that
+`binding` is a camelCase string and left to guess that it has to match a key in
+the node's own `loom:data`. And a tree that binds under `entires` on a
+`loom.feed` becomes a `data-unread` diagnostic rather than a feed that draws
+its empty region for ever.
+
+**What is waiting on it.** The refusal half — a binding name nothing reads made
+as refusable as an invented source id, at the write path rather than at the
+render — is the framework lane's next unit, and its own entry says it belongs
+in the same run as the second or third declaration rather than the tenth. These
+two are the first two. Nothing else blocks on them.
+
+**Not done here**, deliberately: `src/primitives/` is yours, and two words in
+two definitions is not a thing to reach across a lane boundary for.
+
+---
 ## 2026-09-22 — a markdown link to `decisions/*.md` comes back from GitHub with backticks injected into it, and the theory three PRs have been repeating is wrong
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
@@ -126,8 +170,23 @@ its own entry and owned here.**
 ## 2026-09-22 — `reads` is a static list and the only two primitives that read a binding take the name from a prop, so neither can declare one
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — the gap #362 left, found the same day by reading the code rather than by
-waiting for a run to hit it
+**closed** by `framework-50-a-name-a-prop-gives` — the second form is built,
+and it is the shape this entry asked for
+
+> **Closed, 23 September.** `reads` is now a list of *declarations* rather than
+> of names, and a declaration is a name or `{ fromProp, default }`. The three
+> downstream halves this entry said would work better with it all do:
+> the walk resolves the declaration against the node's own props before
+> comparing, the catalogue line writes ` reads: the name in "binding" (default
+> entries)`, and the registry refuses a `fromProp` the props schema does not
+> declare. [0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md)
+> records it, and answers the alternative this entry said to weigh first —
+> **one general form was rejected**, because it makes a primitive with one
+> fixed name pay for the rare case in every declaration, and the two shapes
+> converge on one resolved name before anything acts on them.
+>
+> **The declaring half is `Loom primitives`' and is filed for them below**, with
+> the two lines written out.
 
 [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
 gives a primitive `reads`: a fixed list of the binding names it looks its
