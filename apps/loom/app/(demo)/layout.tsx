@@ -1,6 +1,8 @@
 import { GeistSans } from "geist/font/sans"
 import type { Metadata, Viewport } from "next"
 
+import { demoShareMetadata } from "@/app/(demo)/_lib/share"
+
 import "./globals.css"
 
 /**
@@ -17,11 +19,16 @@ import "./globals.css"
  * record of it, which is the only claim this surface makes.
  */
 
-export const metadata: Metadata = {
-  title: "Change this page — Loom",
-  description:
-    "A live page you can ask an AI to change, with the record of what was asked, what was decided and how to put it back.",
-}
+/**
+ * What the document says about itself, **including to the people who never open
+ * it.** This used to be a title and a description and nothing else, so a link to
+ * the demo pasted into a channel arrived as a bare URL — on the one surface in
+ * this repository whose entire job is to be sent to a stranger, while all ten
+ * marketing pages, every one of them a page that links *here*, unfurled with a
+ * title, a description and a drawn card. `_lib/share.ts` says what is now
+ * carried and where each word comes from.
+ */
+export const metadata: Metadata = demoShareMetadata()
 
 export const viewport: Viewport = {
   width: "device-width",

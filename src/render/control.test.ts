@@ -24,6 +24,8 @@ describe("the class and the display property a control carries", () => {
       "loom-control loom-control-copy",
       "loom-control loom-control-disclose",
       "loom-control loom-control-adjust",
+      "loom-control loom-control-present",
+      "loom-control loom-control-dismiss",
     ])
   })
 
@@ -38,6 +40,8 @@ describe("the class and the display property a control carries", () => {
       "--loom-copy-display",
       "--loom-disclose-display",
       "--loom-adjust-display",
+      "--loom-present-display",
+      "--loom-dismiss-display",
     ])
     expect(CONTROL_DISPLAY_PROPERTY).toBe("--loom-control-display")
   })
