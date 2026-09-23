@@ -3,10 +3,11 @@
 **After this lesson you will be able to** name the three outcomes and say why
 there is no fourth, explain what "first match wins" buys and what it costs a
 person reading a year of records, give the argument behind each ordering in the
-ladder that carries one, state in one sentence the argument that two of the
+ladder that carries one, state in one sentence the argument that three of the
 rules share and that no stake level could replace, predict which reason a change
 trips when four rules are true at once, say what makes a rung of the ladder
-unreachable, and say what an executed walk of the ladder does not prove.
+unreachable, say what an executed walk of the ladder does not prove, and say what
+has to be true of a sentence before anything can check it.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md),
@@ -133,7 +134,7 @@ So the real question is not how to combine four inputs. It is:
 
 ## The idea
 
-> **The Gate is seven rules in a fixed order, plus a default. The first rule that
+> **The Gate is eight rules in a fixed order, plus a default. The first rule that
 > fires produces the whole verdict, and each rule's position in the list is
 > itself a decision somebody made.**
 
@@ -160,14 +161,19 @@ every rule in the system has to have an opinion about it.
 ### A rule is a predicate with a verdict already attached
 
 ```ts
-type GateRule = (assessment: ChangeAssessment, policy: GatePolicy) => Disposition | null
+type GateRule = {
+  readonly code: EscalationCode
+  readonly kind: Exclude<DispositionKind, "accepted">
+  readonly fires: (assessment: ChangeAssessment, policy: GatePolicy) => string | null
+}
 ```
 
-Read that signature closely, because it is doing more than it looks like.
+Read that type closely, because it is doing more than it looks like.
 
-A rule does not return `true` or `false`. It returns a complete disposition —
-kind, reason code, detail, the stakes and reversibility it saw, the policy that
-judged it — or `null`, meaning *I have no opinion about this change*.
+A rule does not answer `true` or `false`, and it does not assemble its verdict
+either. It **declares** the verdict — the code it stamps, the kind it produces —
+as two fields beside the predicate, and `fires` answers with the detail line
+when the rule applies and `null` when it has no opinion about this change.
 
 That is what makes first-match-wins expressible at all. If rules voted, the
 combination logic would have to live somewhere else and would be exactly the
@@ -177,15 +183,26 @@ four lines:
 
 ```ts
 for (const rule of ESCALATION_RULES) {
-  const escalation = rule(assessment, policy)
-  if (escalation) return escalation
+  const detail = rule.fires(assessment, policy)
+  if (detail !== null) return decide(assessment, policy, rule.kind, { code: rule.code, detail })
 }
 
 return accept(assessment, policy)
 ```
 
+Two consequences of declaring the verdict rather than returning it, and both
+come back later in this lesson. A rule **cannot stamp a code that is not its
+own** — `code` is fixed where the rung is written, so the only thing that varies
+from change to change is the sentence, which is exactly the distinction exercise
+G's rows 1 and 4 turn on. And because every rung's code and kind can be read
+without running anything, **the ladder can be read off the rules**: the array is
+not a list somebody keeps beside them, and `ESCALATION_LADDER` — the thing the
+rest of this repository counts when it wants to know how many rules there are —
+is one `map` over it. Keep that sentence; the last section of this lesson is
+about what it cost that these pages did not use it.
+
 The loop holds no policy of its own. Everything the Gate believes is in the
-order of one array and in the seven functions it names.
+order of one array and in the eight rules it names.
 
 ### The ladder, and which rungs carry an argument
 
@@ -215,21 +232,27 @@ email — is auto-applied by any rule that consults the ceiling first.
 
 **5. `confirmRedirectedSubmission`** — the assessment carries a
 `redirected-submission` stake factor: a form that posted to one of the host's
-registered endpoints now posts to another. Rungs 4 and 5 share one argument,
-they are the two rules in the ladder that a stake level could not have been, and
-they are the subject of their own section below.
+registered endpoints now posts to another.
 
-**6. `confirmAboveCeiling`** — stakes above `ceilingFor(policy, origin)`. The
+**6. `confirmRepointedBinding`** — the assessment carries a `repointed-binding`
+stake factor: a region that was showing one of the host's registered data
+sources now shows another, or asks the same source a different question. What a
+binding is properly belongs to [lesson 18](18-data.md), and nothing here depends
+on knowing it — what this lesson needs is the position. Rungs 4, 5 and 6 share
+one argument, they are the three rules in the ladder that a stake level could
+not have been, and they are the subject of their own section below.
+
+**7. `confirmAboveCeiling`** — stakes above `ceilingFor(policy, origin)`. The
 only rule in the system that reads who asked.
 
-**7. `confirmBelowMinimumConfidence`** — confidence under `minimumConfidence`
+**8. `confirmBelowMinimumConfidence`** — confidence under `minimumConfidence`
 (default 0.7). Last, so that when something about the *change* is also true, the
 change gets the wording. "This removes your checkout" is a better thing to show
 a person than "the model was 60% sure".
 
 Then the default: `accept`, with reason `within-policy`.
 
-Now notice what rungs 1 and 7 have in common. **The same input — one number,
+Now notice what rungs 1 and 8 have in common. **The same input — one number,
 `provenance.confidence` — is read by the first rule and by the last, and they are
 as far apart as the ladder allows.** Position is not a property of which input a
 rule reads. It is a property of what the rule *concludes*, and the two confidence
@@ -242,12 +265,13 @@ ladder that cannot express what this one expresses.
 
 ### What first-match-wins costs, stated plainly
 
-Exercise B relaxes one knob at a time and walks the whole ladder, seven verdicts
-from one change. Run it before reading on; the rest of this section is about one
-detail in its output that is easy to miss.
+Exercise B relaxes one knob at a time and prints seven verdicts from one change.
+Run it before reading on; the rest of this section is about one detail in its
+output that is easy to miss. Seven is not the ladder — it used to be, which is a
+story this lesson tells against itself further down.
 
 The interpreter's confidence is 0.5 on rows 2 through 6. The policy's minimum is
-0.7. So rule 7 was *true on five consecutive rows*, and named on exactly one of
+0.7. So rule 8 was *true on five consecutive rows*, and named on exactly one of
 them.
 
 That is not a bug — it is the design working. But it has a consequence, and it
@@ -275,10 +299,11 @@ would be lying to you about the most-used artefact in the system.
 
 ### The rules a level could not have been
 
-Rungs 4 and 5 are the ones to understand properly, because between them they are
-the clearest case in Loom of a decision that a *value* cannot express and a
+Rungs 4, 5 and 6 are the ones to understand properly, because between them they
+are the clearest case in Loom of a decision that a *value* cannot express and a
 *rule* can. Take rung 4 first; rung 5 is the same argument made a second time,
-which is what turns it from a special case into a shape.
+which is what turns it from a special case into a shape, and rung 6 is the same
+argument a third time, from a seam that did not exist when the shape was stated.
 
 Discarding work already in the log produces a stake factor at level `high`
 (lesson 08). Suppose you stop there — no rule, just the factor — and let the
@@ -358,7 +383,46 @@ than a moved one: nobody's expectation about where their message goes is being
 relocated, so escalating it would make the reviewer's sentence false half the
 time. Exercise G is both of those, and the second is the one people get wrong.
 
-### The rung that arrived after the ladder was written
+### And a third time, from the other end of the pipe
+
+On 16 September the same argument arrived again, and the record that made it is
+called *a binding is weighed like a destination*
+([0163](../decisions/0163-a-binding-is-weighed-like-a-destination.md)) — which
+is the repository saying out loud that this is not a new argument.
+
+A page can ask for data. Lesson 18 is where that seam is built properly; all
+this lesson needs is the shape of it: a node names one of the host's registered
+sources and the parameters to ask it with, and nothing else reaches the page.
+So a `configure` that moves a card from `catalogue.services` to `orders.mine`
+names two sources the host registered on purpose, authors no query, invents no
+data — and puts something different in front of the next stranger who loads the
+page. `repointing.ts` says of itself that it is `redirection.ts` with one word
+changed: rung 5 measures where a visitor's data **goes**, rung 6 measures which
+of the host's data **arrives**.
+
+Run the level argument over it and not a word moves. Not `critical`, because
+repointing a region is often exactly right — a page that starts showing this
+month's services rather than last month's is the system working. Not the
+ceiling, because the factor is `high` and `high` is *at* a developer's ceiling,
+and whose data a stranger sees must not depend on who asked for it to change.
+So: a rule, above the ceiling, below the floor. Third time, same three
+sentences.
+
+What the third instance adds is a wrinkle the first two do not have. A form's
+destination is one value, so it has moved or it has not. A binding is a source
+**and** the question asked of it, and either half can move on its own — which
+is why 0163's title has a second clause, and why exercise H's last row is the
+same source with different parameters and a different sentence beside it.
+
+And there is something worth pausing on before the next section, which is about
+this lesson being wrong. Two instances of a shape are a coincidence you can
+name. The third came a month later, out of a seam nobody had built when the
+shape was written down, and it landed in the same band for the same reasons with
+nothing re-decided and no existing verdict changed. That is the ladder's central
+claim about extension, paid out a third time. The design held. What did not hold
+is everything written *about* the design, including this page.
+
+### The rungs that arrived after the ladder was written
 
 0002 wrote down what it would cost to add a rule to this design, in one line of
 consequences: *adding a rule means choosing its position in the precedence order,
@@ -366,47 +430,101 @@ which is a visible decision rather than a weight nudge.*
 
 On 19 August that bill came due, and it is worth looking at what was actually
 paid. `redirection.ts` was new. `stakes.ts` gained a factor. `disposition.ts`
-gained a reason code. And `gate.ts` gained one function and **one line in the
+gained a reason code. And `gate.ts` gained one rule and **one line in the
 middle of an array** — `confirmRedirectedSubmission,` between
 `confirmDiscardsLaterWork` and `confirmAboveCeiling`. Not one existing rule
 changed. Not one existing verdict changed, except for changes that move a form.
 
+On 16 September it came due again and the receipt is the same one: `repointing.ts`
+was new, a factor, a reason code, and `confirmRepointedBinding,` one line lower
+in the same array. Nothing above it moved. Nothing below it was re-decided.
+
 Compare that with the decision table from *The problem*, which was at a hundred
-and ninety-two rows and would now be at three hundred and eighty-four — every one
-of the old rows needing a decision about what its twin says. That is the whole
-argument for the ladder, and it has now been paid out twice in a fortnight:
-`discards-later-work` on the 4th of August, `redirected-submission` on the 19th.
-Two new inputs, two new lines, nothing re-decided.
+and ninety-two rows, went to three hundred and eighty-four in August and would be
+at seven hundred and sixty-eight now — every one of the old rows needing a
+decision about what its twin says. That is the whole argument for the ladder, and
+it has now been paid out three times: `discards-later-work` on the 4th of August,
+`redirected-submission` on the 19th, `repointed-binding` on 16 September. Three
+new inputs, three new lines, nothing re-decided.
 
 But the position was still a decision, and the diff does not argue for it. Why
 fifth? Below rung 2, so a host that has declared this much damage refusable still
 gets a refusal — the floor stays sovereign, which is the same sentence rung 4
-gets. Above rung 6, or the whole thing is pointless. And after rung 4 rather than
+gets. Above rung 7, or the whole thing is pointless. And after rung 4 rather than
 before it, which is the one place there was a genuine choice and the one place
 nothing much turns on it: a change that both discards later work and moves a form
 is held either way, and the only question is which sentence the person is shown
 first. Exercise G's third row is that tie being broken, and it is broken by the
 array's order and by nothing else.
 
-**Now the part that cost something.** The ladder absorbed a rule in one line, and
-the prose about the ladder did not. This lesson said "six rules" for a week after
-there were seven, and gave every rung below the new one a number one too low;
-lesson 08 repeated the count once; and two review-set questions
-asked you to write the six rules from memory and then checked your recall against
-a list with a rung missing. Nothing connects an array in `src/` to a sentence in
-`lessons/`, and nothing ever will.
+**Now the part that cost something, twice.** The ladder absorbed a rule in one
+line, and the prose about the ladder did not. In August this lesson said "six
+rules" for a week after there were seven, gave every rung below the new one a
+number one too low, and sent you to a review set that checked your recall against
+a list with a rung missing.
 
-Notice what did *not* catch it. Every exercise in this lesson is executed before
-it is written down, and every printed output was correct the whole time — because
-the fixture they run against has no form in it, so rung 5 returns `null` on every
-row and never speaks. Exercise B walks the ladder from outside by removing one
-true thing at a time, and it walked past a rung without printing a wrong line.
-That generalises past this course:
+It then did it again, and the second time was worse. From 16 to 23 September this
+page said **seven** rules when the ladder had eight. Rungs 6 and 7 in the list
+above were each a number too low. *In the code* said eight reason codes when
+there were nine. The `GateRule` type printed a few screens up was a signature the
+runtime had stopped having on the same afternoon. A review-set question asked you
+to name the seven Gate rules in order. And lesson 25 opened its warm-up by
+stating the ladder's length, wrongly, in the sentence setting up the question —
+which is a retrieval prompt with the answer printed in it and the answer wrong.
+
+**What caught it everywhere else is worth knowing about, because it is not
+diligence.** After the August drift the repository gained
+`src/record-claims.test.ts`: a registry of sentences in `decisions/` that count a
+list in `src/`, each one held against the list. Two records count this ladder.
+On 16 September both of them said "seven", and both were corrected **in the same
+edit that added the rung**, because the suite was red until they were. The
+records are not right because somebody remembered. They are right because
+something compared two copies of one fact and refused to go green.
+
+Nothing did that for this directory, and the sentence that stood here said so —
+and then went one word too far:
+
+> ~~Nothing connects an array in `src/` to a sentence in `lessons/`, and nothing
+> ever will.~~
+
+The first clause was a fact. The second was a prediction, and it is wrong as of
+the repair you are reading: the course now carries its own registry, in
+`app/(lessons)/_lib/claims.test.ts`, holding counted phrases in these files
+against the lists in `src/` that settle them — *every* occurrence of each, not
+one registered sentence, because a count in a course is repeated across lessons
+and a review schedule rather than written once.
+
+Notice what could not have been used to avoid the whole problem, because this is
+the part people get backwards. `ESCALATION_LADDER` is published by `gate.ts` for
+exactly this reason, and its comment names a lesson among the things that would
+otherwise keep a copy. It is a real remedy and it was available in August — for
+anything that runs. **A sentence cannot import a number.** So the check runs in
+the other direction: the prose names a list it is counting, a test reads both,
+and the two have to agree. The general form, which is the second thing to carry
+out of this section:
+
+> **A claim is not checkable because it is true. It is checkable when there are
+> two copies of one fact and something compares them.** Everything in this
+> repository that has ever caught a stale number — a filename against a heading,
+> a link's label against the file it opens, a record's sentence against a list —
+> is that same shape.
+
+Notice, too, what did *not* catch either drift. Every exercise in this lesson is
+executed before it is written down, and every printed output was correct the
+whole time — because the fixture they run against has no form in it, so rung 5
+returns `null` on every row and never speaks. Exercise B walks the ladder from
+outside by removing one true thing at a time, and it walked past a rung without
+printing a wrong line. That generalises past this course:
 
 > **An executed example proves what it reached. It says nothing about what it
 > did not reach, and the second kind of claim is the one prose likes to make.**
 
-Which is why Exercise G exists, and why it is the exercise to do slowly.
+Which is why exercise G exists, and why it is the exercise to do slowly. And then
+read the sentence again, because the second drift is the same sentence one rung
+along: exercise G was written to reach the rung exercise B could not, and a month
+later there was a rung **G** could not reach — `boundTree` is not `formTree`, and
+nothing in this lesson had a binding in it. That is exercise H, and it exists for
+the same reason G does, written a month later by the same argument.
 
 ### Who asked, and where that stops mattering
 
@@ -429,7 +547,7 @@ rung 2 tests `isAtLeast`. So:
 
 > **Under every policy that can be written, a `critical` change is refused.** Not
 > "usually", not "by default" — there is no policy in which a critical change
-> reaches rung 6.
+> reaches rung 7.
 
 Which means the four ceiling values have three distinct behaviours: a ceiling of
 `critical` and a ceiling of `high` are the same policy, because the level that
@@ -448,13 +566,13 @@ under some policies the answer is no.
 Two knobs sit on the confidence scale: `confidenceFloor` (reject below) and
 `minimumConfidence` (confirm below). The schema validates each as a number
 between 0 and 1, and does not compare them. Set the floor at 0.9 and the minimum
-at 0.5, and rung 7 becomes unreachable: to fire it, a change would have to be at
+at 0.5, and rung 8 becomes unreachable: to fire it, a change would have to be at
 or above 0.9 and below 0.5.
 
 The same shape shows up on the stakes scale. Set `refusalFloor` to `medium` and
-give an origin a ceiling of `high`, and rung 6 can never fire for that origin —
+give an origin a ceiling of `high`, and rung 7 can never fire for that origin —
 anything above `high` is `critical` and is refused at rung 2, and anything at or
-above `medium` is refused there too, so the only levels that reach rung 6 are
+above `medium` is refused there too, so the only levels that reach rung 7 are
 below every ceiling.
 
 Exercise E runs both, and the result is stronger than "a rule goes quiet". The
@@ -499,12 +617,14 @@ spent its whole argument on, arriving here as something you can use.
 
 | What | Where |
 | --- | --- |
-| Seven rules, the order, and the loop | [`src/runtime/gate.ts`](../src/runtime/gate.ts) |
-| Three kinds, eight reason codes, and what a verdict carries | [`src/runtime/disposition.ts`](../src/runtime/disposition.ts) |
+| Eight rules, the order, and the loop | [`src/runtime/gate.ts`](../src/runtime/gate.ts) |
+| Three kinds, nine reason codes, and what a verdict carries | [`src/runtime/disposition.ts`](../src/runtime/disposition.ts) |
 | The ceilings, the floors, and `ceilingFor` | [`src/runtime/policy.ts`](../src/runtime/policy.ts) |
 | `isAbove` and `isAtLeast` — where strictness lives | [`src/runtime/stake-level.ts`](../src/runtime/stake-level.ts) |
 | What a policy contained, as one comparable string | [`src/runtime/policy-fingerprint.ts`](../src/runtime/policy-fingerprint.ts) |
 | The precedence tests — the specification of the order | [`src/runtime/gate.test.ts`](../src/runtime/gate.test.ts) |
+| Rungs 5 and 6, which are the same module with one word changed | [`src/runtime/redirection.ts`](../src/runtime/redirection.ts), [`src/runtime/repointing.ts`](../src/runtime/repointing.ts) |
+| Why the records counting this ladder are right, and this page was not | [`src/record-claims.test.ts`](../src/record-claims.test.ts) |
 
 ---
 
@@ -521,7 +641,7 @@ import { gate } from "./runtime/gate.js"
 import type { IntentOrigin } from "./runtime/intent.js"
 import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "./runtime/policy.js"
 import type { DiscardedWork, ProposedChange } from "./runtime/proposal.js"
-import { formTree, sampleTree } from "./testing/fixtures.js"
+import { boundTree, formTree, sampleTree } from "./testing/fixtures.js"
 import type { TreeDelta, TreeOperation } from "./tree/delta.js"
 
 const spare = sequentialIdFactory("x")
@@ -594,8 +714,11 @@ describe("A", () => {
 ```
 
 **B — the ladder, from outside.** One change, seven verdicts, each step relaxing
-exactly one thing. Predict all seven reason codes in order before running. This
-is the exercise of the lesson; give it ten minutes.
+exactly one thing. Predict all seven reason codes in order before running — and
+predict one more thing while you are there: the ladder plus its default can
+produce nine answers, and seven rows will print seven of them. Write down which
+two you expect to be missing, and why. This is the exercise of the lesson; give
+it ten minutes.
 
 ```ts
 describe("B", () => {
@@ -795,19 +918,20 @@ describe("F", () => {
 //     `gate.ts` would, and name the lesson-05 property it is an instance of.
 ```
 
-**G — the rung the ladder walk never reached.** Exercise B relaxed one true thing
-at a time and produced seven codes, and one rung stayed silent through all of it,
-because `sampleTree` has no form in it. This is the fixture that does. Six rows;
+**G — the first rung the ladder walk never reached.** Exercise B relaxed one true
+thing at a time and produced seven codes, and two rungs stayed silent through all
+of it — `sampleTree` has no form in it, and nothing in it asks for any data. This
+is the fixture with a form; exercise H is the one with a binding. Six rows;
 `detail` is printed this time, because on two of them it is the point.
 
 Predict all six before running, and give rows 5 and 6 more than a moment — one of
 them is the same change as row 1 and the other very nearly is.
 
-`formTree` is in the preamble's fixtures import already — `import { formTree,
-sampleTree } from "./testing/fixtures.js"` — and everything else here is the
-preamble's. It was not, when this lesson was written: this line used to say *add
-it*, which is an instruction a reader follows and a runner cannot — and the
-runner that executes these fences as one program was red on this lesson until
+`formTree` is in the preamble's fixtures import already — `import { boundTree,
+formTree, sampleTree } from "./testing/fixtures.js"` — and everything else here
+is the preamble's. It was not, when this lesson was written: this line used to
+say *add it*, which is an instruction a reader follows and a runner cannot — and
+the runner that executes these fences as one program was red on this lesson until
 somebody added the import here instead.
 
 ```ts
@@ -872,6 +996,81 @@ describe("G", () => {
 //     can make it true.
 ```
 
+**H — the rung exercise G could not reach either.** G exists because B walked
+past a rung. A month later the ladder grew again and **G** walked past the new
+one, for the same reason one step along: its fixture has a form in it and nothing
+in it asks for data. This is the fixture that does.
+
+Five rows. Rows 3 and 4 are G's rows 5 and 6 asked at the other end of the pipe —
+predict them from what G taught you rather than from the code below, and write
+down what you are assuming when you do. Row 5 is the one with something in it
+that has no counterpart in G at all.
+
+```ts
+describe("H", () => {
+  it("finds the second rung the ladder walk never reached", () => {
+    /** The shared helper is bound to `sampleTree`; this is it, on a page that reads. */
+    const onBound = (
+      label: string,
+      policy: GatePolicy,
+      build: (ids: ReturnType<typeof boundTree>["ids"]) => TreeOperation[],
+      ask: (ids: ReturnType<typeof boundTree>["ids"]) => Ask = () => ({})
+    ) => {
+      const { tree, ids } = boundTree()
+      const proposal = proposalOf(deltaOf(tree.treeId, build(ids)), ask(ids))
+
+      const assessed = assessChange(tree, proposal, policy, spare.deltaId())
+      if (!assessed.ok) throw new Error(assessed.error.code)
+
+      const disposition = gate(assessed.value, policy)
+
+      console.log(label, JSON.stringify({
+        stakes: disposition.stakes,
+        kind: disposition.kind,
+        reason: disposition.reason.code,
+        detail: disposition.reason.detail,
+      }))
+    }
+
+    const asks = (source: string, params: Record<string, unknown> = {}) => ({
+      items: { source, params },
+    })
+
+    const trusting = gatePolicySchema.parse({
+      policyId: "trusting",
+      autoApplyCeiling: {
+        developer: "critical", "user-instruction": "critical",
+        "system-signal": "critical", "scheduled-adaptation": "critical",
+      },
+    })
+
+    onBound("1 repointed, user asked:", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.bound, set: { "loom:data": asks("orders.mine") }, unset: [] },
+    ])
+    onBound("2 repointed, developer, no ceiling:", trusting, (ids) => [
+      { op: "configure", nodeId: ids.bound, set: { "loom:data": asks("orders.mine") }, unset: [] },
+    ], () => ({ origin: "developer" }))
+    onBound("3 the aside starts asking:", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.aside, set: { "loom:data": asks("orders.mine") }, unset: [] },
+    ])
+    onBound("4 repointed, and back:   ", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.bound, set: { "loom:data": asks("orders.mine") }, unset: [] },
+      { op: "configure", nodeId: ids.bound, set: { "loom:data": asks("catalogue.services") }, unset: [] },
+    ])
+    onBound("5 same source, new params:", defaultGatePolicy, (ids) => [
+      { op: "configure", nodeId: ids.bound, set: { "loom:data": asks("catalogue.services", { customer: "me" }) }, unset: [] },
+    ])
+  })
+})
+// Q8: rows 1 and 5 have the same code and two sentences that are not the same
+//     kind of sentence. Say what row 5's says and what it cannot say, and then
+//     say why that is the honest thing for it to print rather than a shortfall
+//     — the reason is about what the runtime is allowed to know. Then: you have
+//     now seen this exercise's argument three times, at rungs 4, 5 and 6. Name
+//     the fourth fact you would expect to arrive in this band, and say which of
+//     the two tests you can check from where you are sitting.
+```
+
 ---
 
 ## It could have been otherwise
@@ -880,7 +1079,8 @@ describe("G", () => {
 reach for, and the one *The problem* counts: thirty-two rows before confidence,
 ninety-six with it banded, one hundred and ninety-two once `discards` arrived in
 August, three hundred and eighty-four a fortnight later when a moved form
-destination arrived. The fatal property is not the size, it is that adding an
+destination arrived, seven hundred and sixty-eight in September when a repointed
+binding did. The fatal property is not the size, it is that adding an
 input obliges you to re-decide every row you already wrote — so in practice
 nobody does, and the table quietly stops describing the system.
 
@@ -914,8 +1114,8 @@ detour, and the detour hides the decision.
 
 **A severity number per rule, sorted at runtime.** The same idea with the
 ordering made explicit as data. Worse than a list, for a reason worth
-generalising: an array is reviewed as a whole, in one diff, in one screen. Seven
-numbers scattered across seven declarations are each reviewed alone, and nobody
+generalising: an array is reviewed as a whole, in one diff, in one screen. Eight
+numbers scattered across eight declarations are each reviewed alone, and nobody
 ever sees the order they add up to. 0002 puts this precisely — adding a rule
 means choosing its position, *which is a visible decision rather than a weight
 nudge*.
@@ -975,7 +1175,7 @@ Write your answer, rate your confidence 1–5, **then** reveal. The confidence
 rating is not decoration: the answers you are confident and wrong about are the
 ones that quietly break your model later.
 
-1. Name the seven rules in order. Then, for every ordering in the ladder that
+1. Name the eight rules in order. Then, for every ordering in the ladder that
    carries an argument, give that argument in one sentence — and where two rules
    share one argument, give it once and say why it covers both.
 
@@ -995,8 +1195,16 @@ ones that quietly break your model later.
 
 5. Exercise B removes one true thing at a time and prints a verdict for each,
    and every line it has ever printed has been correct. Say what it nevertheless
-   failed to show for a week, why running it more often would not have helped,
-   and what kind of claim an executed example cannot support.
+   failed to show — twice, a month apart — why running it more often would not
+   have helped either time, and what kind of claim an executed example cannot
+   support.
+
+6. Two decision records count this ladder. Both said "seven" on the morning of
+   16 September and both were right by that afternoon; this lesson said "seven"
+   for a week. Neither was written more carefully than the other. State the
+   difference in terms of **copies** rather than of care — and then say why
+   `ESCALATION_LADDER` being published by `gate.ts` does not, on its own, fix it
+   for a sentence.
 
 ---
 
@@ -1022,35 +1230,41 @@ ones that quietly break your model later.
   wrote for Self-check 3 about `discards-later-work` — it is the same answer to
   the same shape, and you have now rejected it twice.
 - Lesson 08 promised that this is where the ladder "gets an argument rather than
-  a mention". Which of the seven turned out to have the argument you did not
+  a mention". Which of the eight turned out to have the argument you did not
   expect?
-- This lesson said "six" for a week after there were seven, and the exercises
-  that would have caught it all passed. Before you file that as somebody's
-  sloppiness: say what you would put in place to catch the next one, then say
-  what that thing costs and who pays it.
+- This lesson said "six" for a week after there were seven, and then "seven" for
+  a week after there were eight, and the exercises that would have caught either
+  all passed. Before you file that as somebody's sloppiness: write down what you
+  would put in place to catch the third one — then read what was actually put in
+  place, and say what it costs, who pays it, and which of the wrong sentences in
+  this lesson it would still not have caught. (At least one of them it would
+  not.)
 
 ---
 
 ## Come back to this
 
 - **In 2 days:** Self-check 1 and 3, closed book.
-- **In 1 week:** Write the seven rules in order from memory, and beside each one
+- **In 1 week:** Write the eight rules in order from memory, and beside each one
   write the disposition kind it produces. Then say which rules could swap
   positions without changing any verdict — only the wording — and which could
   not.
 - **In 1 month:** Redo exercise B from memory: predict all seven reason codes,
   then say for each row which *other* rules were also true at the moment it was
-  decided — and name the one that was true on none of them and say how you know.
+  decided — and name the **two** that were true on none of them, say how you
+  know, and say what the two have in common.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
 
 ## Deeper
 
-- [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — the ladder, and why position beats weight. It records six rules, which is what the ladder had in July
+- [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — the ladder, and why position beats weight. Its count has been corrected twice and both corrections are noted at the top of it, which is worth reading beside this lesson's own two
 - [`decisions/0033`](../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md) — where the policy comes from, and why the verdict names it
 - [`decisions/0035`](../decisions/0035-discarded-work-is-a-stake-and-only-the-runtime-declares-it.md) — rung 4, the first rule a level could not have been
 - [`decisions/0071`](../decisions/0071-moving-a-forms-destination-is-a-stake-of-its-own.md) — rung 5, the second one, and the three ways the existing knob was wrong
+- [`decisions/0163`](../decisions/0163-a-binding-is-weighed-like-a-destination.md) — rung 6, the third, and the one place it is not a transcription of rung 5
+- [`src/record-claims.test.ts`](../src/record-claims.test.ts) — why those records are right, and it is not because somebody remembered
 - [`decisions/0048`](../decisions/0048-a-name-is-checked-by-a-fingerprint-beside-it.md) — the digest beside the name
 - [`src/runtime/gate.test.ts`](../src/runtime/gate.test.ts) — the `rule precedence` block is the order, written down as assertions
 - Next: [10 — The pipeline](10-the-pipeline.md)
@@ -1076,7 +1290,7 @@ Both boundaries land on the permissive side, because both rules test
 Exactly 0.3 is not below the floor, so it escapes the refusal and falls to the
 confirmation; exactly 0.7 is not below the minimum, so it is accepted.
 
-Rung 1 concludes *not worth a person's time*. Rung 6 concludes *worth a person's
+Rung 1 concludes *not worth a person's time*. Rung 8 concludes *worth a person's
 time*. Swapping them would not just reword the verdict — it would change the
 outcome for every change between the two thresholds, from a rejection to a
 confirmation, because each rule carries its own kind. That is the difference
@@ -1098,16 +1312,26 @@ Seven rows, seven reason codes, in ladder order and ending at the default.
 Nothing here reads `gate.ts`: the ladder is observable from outside, by removing
 one true thing at a time and watching what speaks next.
 
-Observable, but not *fully* — and this is the line that was wrong in this lesson
-for a week. Seven codes out of a ladder of seven rules plus a default is eight
-possible answers, so one is missing, and it is rung 5. `sampleTree` contains no
-`loom:submit` anywhere, so `redirectedSubmissionsBetween` finds no destinations
-in the tree before the change, returns an empty list on every row, and
-`confirmRedirectedSubmission` returns `null` seven times without ever being
-noticed. Exercise G is the row this exercise cannot produce.
+Observable, but not *fully* — and this is the line that has now been wrong in
+this lesson twice. Seven codes out of a ladder of eight rules plus a default is
+nine possible answers, so **two** are missing, and they are rungs 5 and 6.
+`sampleTree` contains no `loom:submit` anywhere, so
+`redirectedSubmissionsBetween` finds no destinations in the tree before the
+change and returns an empty list on every row; nothing in it carries a
+`loom:data` either, so `repointedBindingsBetween` has no question to compare and
+returns on its first line. Both rules answer `null` seven times without ever
+being noticed. Exercise G is the first row this exercise cannot produce, and
+exercise H is the second.
+
+What the two absences have in common is the part worth keeping, and it is not
+"the fixture is small". Both rungs measure a change **between two trees**, so
+both need something to have been there before: a form that already posted
+somewhere, a region that already read something. A fixture containing nothing of
+the kind does not make those rules fail. It makes them silent — which is a
+different thing, and from outside the two look identical.
 
 Row 6 is the answer to the question. Confidence was 0.5 on rows 2 through 6, and
-the policy's minimum is 0.7, so rung 7 was true on **five** rows and named on
+the policy's minimum is 0.7, so rung 8 was true on **five** rows and named on
 **one**. Something above it always had something to say.
 
 So: what would you report? Not the count of `confidence-below-minimum` in the
@@ -1177,7 +1401,7 @@ mode of the other direction is a change nobody saw.
 
 The last two rows: `refusalFloor` cannot exceed `critical`, since `critical` is
 the top of `STAKE_ORDER`, and rung 2 fires on `isAtLeast`. So a `critical`
-change is refused under **every** policy, and rung 6 never sees one. Which
+change is refused under **every** policy, and rung 7 never sees one. Which
 means `autoApplyCeiling` has three behaviourally distinct values, not four:
 `critical` and `high` differ only in what they say about critical changes, and
 critical changes never reach the rule that reads them.
@@ -1201,7 +1425,7 @@ floor medium, ceiling critical: {"stakes":"medium","reversible":true,"kind":"rej
 ```
 
 The policy parses — the first line is there so you cannot suspect an exception
-was swallowed — and rung 7 is gone. Firing it needs a confidence at or above 0.9
+was swallowed — and rung 8 is gone. Firing it needs a confidence at or above 0.9
 *and* below 0.5. Every paired row is identical, which is the stronger claim: the
 inverted policy is not merely missing a rung, it is **the same gate** as one with
 both knobs at 0.9. `minimumConfidence: 0.5` reads like a setting and is not one.
@@ -1209,7 +1433,7 @@ both knobs at 0.9. `minimumConfidence: 0.5` reads like a setting and is not one.
 The stakes half has the same shape and needs the extra row the comment asks for.
 All four ceilings refuse this `medium` change, because rung 2 fires first. Add a
 low-stakes change and all four accept it, because `low` is at or below every
-ceiling. The levels reaching rung 6 are those strictly below `medium`, and only
+ceiling. The levels reaching rung 7 are those strictly below `medium`, and only
 `low` qualifies, and `low` is under every ceiling — so no setting of
 `autoApplyCeiling` changes any verdict under this floor. The knob is inert for
 that origin, whatever it says.
@@ -1232,9 +1456,9 @@ looking. The cheapest honest thing is for the code to admit what it ignores.
 **Q6** One assessment, three judges:
 
 ```
-as it was judged:  {"kind":"accepted","reason":"within-policy","policyId":"storefront","policyFingerprint":"8deb064d:c90a420f3e617e10"}
-same name, edited: {"kind":"requires-confirmation","reason":"confidence-below-minimum","policyId":"storefront","policyFingerprint":"8deb064d:d1ee22c8ebc1db2f"}
-edited, renamed:   {"kind":"requires-confirmation","reason":"confidence-below-minimum","policyId":"storefront-v2","policyFingerprint":"8deb064d:d1ee22c8ebc1db2f"}
+as it was judged:  {"kind":"accepted","reason":"within-policy","policyId":"storefront","policyFingerprint":"b22582aa:a1ae662472a7ee8b"}
+same name, edited: {"kind":"requires-confirmation","reason":"confidence-below-minimum","policyId":"storefront","policyFingerprint":"b22582aa:d19d60f1e91846c8"}
+edited, renamed:   {"kind":"requires-confirmation","reason":"confidence-below-minimum","policyId":"storefront-v2","policyFingerprint":"b22582aa:d19d60f1e91846c8"}
 ```
 
 Rows 1 and 2 share a name and differ in fingerprint: **an edit that broke 0033's
@@ -1243,10 +1467,19 @@ a fingerprint: **a rename, which is not an edit**, and a reader comparing verdic
 across the two names can safely pool them. The two pairings are the two questions
 a reader of old records has, and neither field answers both.
 
-The shape half — `8deb064d` — is identical on all three, because all three are
+The shape half — `b22582aa` — is identical on all three, because all three are
 the same version of `GatePolicy` with the same knobs. It would change if Loom
 added a policy field, and then records from either side of the upgrade would read
 as *incomparable* rather than as "the host edited everything".
+
+**And it has.** This lesson printed `8deb064d` from the day it was written until
+20 September, when `GatePolicy` gained a field and every fingerprint in this
+repository moved — which is the paragraph above happening to the page that
+contains it. The three digests here were taken from a run on 23 September; if the
+ones you get differ again, read the shape halves first. If all three of yours
+agree with each other and disagree with these, nothing is wrong: a policy field
+arrived, and a fingerprint from before it is not comparable to one from after,
+which is exactly what the two halves were separated to let you say.
 
 What this proves that reading `gate.ts` cannot: one assessment was judged three
 times, minutes apart, with no tree, no clock, and no re-interpretation, and the
@@ -1311,3 +1544,52 @@ the tree after the change would have to name a different endpoint, and if it did
 it would not be row 6. Reading the operations instead would have caught it, and
 would also have escalated every no-op — which is the trade, stated as a rule of
 thumb: *measure the change where the change is, not where the request for it is.*
+
+**Q8** The rung exercise G could not reach either:
+
+```
+1 repointed, user asked: {"stakes":"high","kind":"requires-confirmation","reason":"repointed-binding","detail":"repoints a binding: n_bound1.items from catalogue.services to orders.mine"}
+2 repointed, developer, no ceiling: {"stakes":"high","kind":"requires-confirmation","reason":"repointed-binding","detail":"repoints a binding: n_bound1.items from catalogue.services to orders.mine"}
+3 the aside starts asking: {"stakes":"low","kind":"accepted","reason":"within-policy","detail":"reversible, within the stakes ceiling, and confidently interpreted"}
+4 repointed, and back:    {"stakes":"low","kind":"accepted","reason":"within-policy","detail":"reversible, within the stakes ceiling, and confidently interpreted"}
+5 same source, new params: {"stakes":"high","kind":"requires-confirmation","reason":"repointed-binding","detail":"repoints a binding: n_bound1.items asks catalogue.services for something else"}
+```
+
+Rows 1 to 4 are exercise G with one word changed, which is the point of running
+both: row 2 is the rule earning its position against the widest ceiling the type
+allows, row 3 is a region that asked nothing and now asks — nobody's expectation
+moved — and row 4 is the between-the-trees measurement, so a question moved and
+moved back is no question moved. If you predicted rows 3 and 4 from G rather than
+from the code, the assumption you were making is that the two seams share their
+inclusion rules, and `repointing.ts` says in as many words that they do.
+
+**Row 5 is where it stops being a transcription.** A submission names a
+destination and carries nothing else, so a destination has moved or it has not. A
+binding is a source **and** the question asked of it, and the second half moves on
+its own: same source, different parameters, and the sentence a reviewer is shown
+is *asks `catalogue.services` for something else*.
+
+Read that sentence for what it does not say. It does not say what is now being
+asked. That is not a gap somebody meant to fill in later — naming the difference
+would mean the runtime claiming to know what `{ customer: "me" }` means to a
+source the *host* registered, and the runtime knows the key `loom:data` and
+nothing whatever about the vocabulary on the other side of it. So it reports the
+one thing it can stand behind: the question is not the question that was there
+before.
+
+Which leaves a decision the module makes explicitly and is worth arguing with.
+The runtime cannot tell a parameter that **selects** data from one that merely
+**shapes** it — `{ "field": "bio" }` becoming `{ "field": "salary" }` and a
+`limit` going from 6 to 12 are the same shape of edit from here. It reads every
+ambiguous one as selection, so a widened `limit` costs somebody a confirmation
+they did not need. The other direction costs the salary field. That is lesson
+05's instinct — *when in doubt, fail toward asking* — arriving at the top of the
+ladder rather than the bottom of it, and it is the same call as row 5 of exercise
+D, where a forgotten origin gets the narrowest latitude rather than the widest.
+
+The last half of the question has no single answer, which is why it is worth
+writing down: whatever fourth fact you named, the two tests are *a level cannot
+express it* (check this one from where you are sitting — try the factor at `high`
+and at `critical` and say what each does to a developer) and *it is not the
+change's damage but the change's silence that matters* (this one you cannot check
+from a schema; it is an argument about what a person would want to be told).

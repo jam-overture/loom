@@ -55,7 +55,7 @@ before you look anything up.
 2. Nothing in the runtime throws. Say what `applyDelta` hands back instead, and
    then say why a *closed* set of error codes — rather than a message — is what
    makes an audit trail something you can query a year later. *(05, 16)*
-3. The Gate is seven rules in a fixed order. Say what a rule returns when it has
+3. The Gate is eight rules in a fixed order. Say what a rule answers when it has
    nothing to say about a change, and why the ladder stops at the first rule that
    speaks rather than collecting every rule's opinion. *(09)*
 4. `copy: []` and no `copy` at all are different answers. Give the shape of the
@@ -459,7 +459,7 @@ Measured end to end on this checkout on 18 September 2026, under
 | a level the order cannot place | **accepted** — `within-policy` |
 
 The most severe change the system can describe is applied without being
-mentioned, by seven rungs each behaving exactly as written.
+mentioned, by eight rungs each behaving exactly as written.
 
 Now ask what the completeness check did about that.
 
