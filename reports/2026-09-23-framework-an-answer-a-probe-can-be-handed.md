@@ -134,12 +134,16 @@ the design now rather than on what the instrument permitted.
 
 `pnpm install && pnpm verify` **green, exit 0** — read off the run rather than
 off a pipe (`VERIFY_EXIT=0`), on a tree with `apps/loom/.next` cleared first.
+Run twice: once on the unit, and again on `c50ba6d` after the ledger gained this
+run's third finding, so the numbers below are the head's rather than an earlier
+commit's. The ledger read 768 at the first gate and 769 at the second; nothing
+else moved.
 
 | suite | result |
 | --- | --- |
 | framework (`pnpm test`) | 159 files / **3,016** tests |
 | application (`@loom/app`) | 300 files / **5,392** tests |
-| findings ledger | 768 entries, 0 malformed |
+| findings ledger | 769 entries, 0 malformed |
 | prerender | 109 pages, 959 junctions, 0 run together |
 
 **Seventeen new tests**, framework 2,999 → 3,016. Nothing failed, nothing
