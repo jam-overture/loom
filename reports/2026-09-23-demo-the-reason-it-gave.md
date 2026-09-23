@@ -3,6 +3,15 @@
 **Routine:** `Loom demo` · **Branch:** `demo-26-the-reason-it-gave` ·
 **23 September 2026**
 
+**Pull request:** [#377](https://github.com/jam-overture/loom/pull/377) ·
+**Deployed preview:**
+https://loom-git-demo-26-the-reason-it-gave-jpizzolato36-6341s-projects.vercel.app
+
+(Published unverified against the deployment: `*.vercel.app` is off this
+sandbox's egress allowlist, the standing 19 August limit. Everything below was
+driven against local `next build` outputs instead — `main`'s for the before,
+this branch's for the after — with `pnpm shoot` against a `next start` of each.)
+
 The twenty-sixth run of this lane, and the first one to find a sentence on this
 surface that was not true of the thing it was about.
 
