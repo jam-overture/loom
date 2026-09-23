@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="960" height="620" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="960" height="620" fill="#fbfaf8"/>
+
+  <text x="32" y="38" font-size="19" font-weight="650" fill="#1c1917">Four nodes a feed can be, and what each declaration form says about them</text>
+  <text x="32" y="60" font-size="13.5" fill="#57534e">loom.feed reads loom.data[binding ?? "entries"]. A fixed list can only write the default, so it is right about half of</text>
+  <text x="32" y="78" font-size="13.5" fill="#57534e">these nodes — and the half it is wrong about includes the one that draws an empty region for ever.</text>
+
+  <!-- TABLE HEAD -->
+  <text x="52" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">THE NODE</text>
+  <text x="330" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">READS UNDER</text>
+  <text x="450" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">reads: ["entries"]</text>
+  <text x="700" y="122" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">reads: [{ fromProp, default }]</text>
+  <line x1="32" y1="132" x2="928" y2="132" stroke="#e7e5e4"/>
+
+  <!-- ROW 1 -->
+  <rect x="32" y="142" width="896" height="52" rx="6" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="164" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">no binding prop</text>
+  <text x="52" y="182" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#78716c">loom:data { entries: … }</text>
+  <text x="330" y="173" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">entries</text>
+  <text x="450" y="173" font-size="12.5" font-weight="600" fill="#166534">silent — correct</text>
+  <text x="700" y="173" font-size="12.5" font-weight="600" fill="#166534">silent — correct</text>
+
+  <!-- ROW 2 -->
+  <rect x="32" y="202" width="896" height="52" rx="6" fill="#fffbf5" stroke="#fed7aa"/>
+  <text x="52" y="224" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">binding="rows"</text>
+  <text x="52" y="242" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#78716c">loom:data { rows: … }</text>
+  <text x="330" y="233" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">rows</text>
+  <text x="450" y="233" font-size="12.5" font-weight="600" fill="#9a3412">data-unread "rows"</text>
+  <text x="450" y="249" font-size="11.5" fill="#9a3412">a page that works, reported</text>
+  <text x="700" y="233" font-size="12.5" font-weight="600" fill="#166534">silent — correct</text>
+
+  <!-- ROW 3 -->
+  <rect x="32" y="262" width="896" height="52" rx="6" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="52" y="284" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">binding="rows"</text>
+  <text x="52" y="302" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#78716c">loom:data { entries: … }</text>
+  <text x="330" y="293" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">rows</text>
+  <text x="450" y="293" font-size="12.5" font-weight="600" fill="#b91c1c">silent — missed</text>
+  <text x="450" y="309" font-size="11.5" fill="#b91c1c">empty region, round trip paid for</text>
+  <text x="700" y="293" font-size="12.5" font-weight="600" fill="#166534">data-unread "entries"</text>
+
+  <!-- ROW 4 -->
+  <rect x="32" y="322" width="896" height="52" rx="6" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="344" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">no binding prop</text>
+  <text x="52" y="362" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#78716c">loom:data { rows: … }</text>
+  <text x="330" y="353" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">entries</text>
+  <text x="450" y="353" font-size="12.5" font-weight="600" fill="#166534">data-unread "rows"</text>
+  <text x="700" y="353" font-size="12.5" font-weight="600" fill="#166534">data-unread "rows"</text>
+
+  <!-- SEPARATOR -->
+  <line x1="32" y1="404" x2="928" y2="404" stroke="#e7e5e4"/>
+
+  <!-- WHAT THE MODEL IS TOLD -->
+  <text x="52" y="432" font-size="11.5" font-weight="650" fill="#78716c" letter-spacing="0.06em">WHAT THE CATALOGUE LINE SAYS, WHICH IS ALL A MODEL EVER SEES</text>
+
+  <rect x="32" y="446" width="440" height="62" rx="6" fill="#ffffff" stroke="#e7e5e4"/>
+  <text x="52" y="468" font-size="12" fill="#78716c">before — a camelCase string, and guess the rest</text>
+  <text x="52" y="492" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">- loom.feed — A list of entries. props: binding?</text>
+
+  <rect x="488" y="446" width="440" height="62" rx="6" fill="#f6fdf8" stroke="#bbf7d0"/>
+  <text x="508" y="468" font-size="12" fill="#166534">after — the mechanism, in nine words</text>
+  <text x="508" y="492" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#292524">… reads: the name in "binding" (default entries)</text>
+
+  <!-- FOOTER -->
+  <text x="32" y="542" font-size="12.5" fill="#57534e">The registry refuses a fromProp the props schema does not declare, so the one half that IS a prop name cannot be renamed</text>
+  <text x="32" y="560" font-size="12.5" fill="#57534e">out from under the declaration — the same drift frames and copy are already held to. Record 0184; pnpm verify green.</text>
+  <text x="32" y="582" font-size="11.5" fill="#a8a29e">Loom framework · 23 September 2026 · §2, the data seam</text>
+</svg>

@@ -7,7 +7,7 @@ import { primitiveTypeSchema } from "../primitive-type.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { cardDefinition, registryOf, testDefinitions } from "../testing/definitions.js"
 
-import { definePrimitive, type PrimitiveEntry } from "./definition.js"
+import { definePrimitive, type PrimitiveDefinition, type PrimitiveEntry } from "./definition.js"
 import { createPrimitiveRegistry, describeRegistryError, type RegistryError } from "./registry.js"
 
 const type = (value: string) => primitiveTypeSchema.parse(value)
@@ -324,11 +324,11 @@ describe("registering a primitive that says what a reader reads", () => {
 })
 
 describe("registering a primitive that says which bindings it reads", () => {
-  const feed = (reads: readonly string[] | undefined) =>
+  const feed = (reads: PrimitiveDefinition["reads"]) =>
     definePrimitive({
       type: "loom.feed",
       description: "A list of entries a source answered with",
-      props: z.object({}),
+      props: z.object({ binding: z.string().optional() }),
       ...(reads ? { reads } : {}),
       component: () => null,
     })
@@ -375,5 +375,68 @@ describe("registering a primitive that says which bindings it reads", () => {
     const built = createPrimitiveRegistry([feed(["entries"])])
 
     expect(built.ok && built.value.bindingsReadBy(type("loom.nowhere"))).toBeUndefined()
+  })
+
+  it("carries a prop-named declaration through whole", () => {
+    const built = createPrimitiveRegistry([feed([{ fromProp: "binding", default: "entries" }])])
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.bindingsReadBy(type("loom.feed"))).toEqual([
+      { fromProp: "binding", default: "entries" },
+    ])
+  })
+
+  /**
+   * The check the first form never needed. A binding name is not a prop name,
+   * so nothing could be renamed out from under a list of names — the moment
+   * half a declaration *is* a prop name, it can be, and this is the same drift
+   * `frames` and `copy` are held to.
+   */
+  it("refuses a prop-named declaration whose prop the schema does not declare", () => {
+    const built = createPrimitiveRegistry([feed([{ fromProp: "under", default: "entries" }])])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toEqual({
+      code: "undeclared-reads-prop",
+      type: "loom.feed",
+      prop: "under",
+    })
+    expect(describeRegistryError(built.error)).toContain("read its default for ever")
+  })
+
+  it("refuses a default a tree could not write", () => {
+    const built = createPrimitiveRegistry([feed([{ fromProp: "binding", default: "Not A Name" }])])
+
+    expect(built.ok).toBe(false)
+    if (built.ok) return
+
+    expect(built.error).toEqual({
+      code: "invalid-binding-name",
+      type: "loom.feed",
+      name: "Not A Name",
+    })
+  })
+
+  /**
+   * A schema whose keys cannot be enumerated answers `undefined` rather than an
+   * empty list (0009), and refusing on the strength of a list that was never
+   * built would refuse the honest declaration along with the mistaken one.
+   */
+  it("allows a prop-named declaration on a schema whose props cannot be listed", () => {
+    const built = createPrimitiveRegistry([
+      definePrimitive({
+        type: "loom.either",
+        description: "A primitive whose props are a union of two shapes",
+        props: z.union([z.object({ binding: z.string() }), z.object({ rows: z.number() })]),
+        reads: [{ fromProp: "binding", default: "entries" }],
+        component: () => null,
+      }),
+    ])
+
+    expect(built.ok).toBe(true)
   })
 })
