@@ -6390,6 +6390,38 @@ describe("what you press play on, and where to turn up", () => {
     expect(cardWith("Office hours, recorded")).not.toContain("<img")
   })
 
+  it("reserves a picture's shape only where there is a picture, and a mark's height where there is not", () => {
+    /**
+     * `shape` was applied to every frame until 23 September, including the
+     * frames with nothing in them, and the defect only shows in the **stacked**
+     * arrangement: the art is the card's full width there, so `aspect-ratio:
+     * 1 / 1` on a card with no cover is a 350-pixel void with a play button
+     * floating in the middle of it. In the row arrangement the art column is
+     * `11rem` and the same mistake is a small square nobody would question,
+     * which is why it survived a fortnight and two screenshot runs.
+     *
+     * Found by `articles-episodes` — the first band in the catalogue to place a
+     * shelf of recordings with no artwork — on a phone, and invisible at 1280px.
+     *
+     * Asserted per card rather than over the whole markup, because both
+     * renderings are on this one page and a check over the document would pass
+     * on either of them being right.
+     */
+    const markup = splitStylesheet(render(datedPage(EDITORIAL)).markup).tree
+    const cardWith = (needle: string): string =>
+      markup.split("<article").find((part) => part.includes(needle)) ?? ""
+
+    const covered = cardWith("Building a page out of nothing")
+    const bare = cardWith("Office hours, recorded")
+
+    expect(covered).toContain("<img")
+    expect(covered).toMatch(/aspect-ratio:/)
+
+    expect(bare).not.toContain("<img")
+    expect(bare).not.toMatch(/aspect-ratio:/)
+    expect(bare).toMatch(/loom-recording-art[^>]*block-size:4\.75rem/)
+  })
+
   it("stretches a recording's title over the whole card and nothing over an event's", () => {
     /**
      * 0066 from both sides in one fixture. A recording is read — played — so
