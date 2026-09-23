@@ -50,14 +50,46 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
     return (
       <div className="flex max-w-3xl flex-col gap-6 p-8">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl tracking-tight">Does your page add up?</h1>
+          <h1 className="text-2xl tracking-tight">Does everything add up?</h1>
           <p className="text-ink-muted text-sm">
             Loom keeps a record of every change it has made to a page. A checkup replays that
             record from the beginning and compares the result with the page people are actually
             being served — so you can tell whether everything on it is accounted for.
           </p>
         </header>
-        <CheckupTreeChooser />
+
+        {/*
+         * The one obvious thing to do, and until this run there was not one.
+         *
+         * This screen used to open on a list of pages with an identical button
+         * on every row, which is a screen with as many primary actions as you
+         * have pages — which is to say none. The question somebody arrives with
+         * is not "which page shall I check"; it is "is anything wrong". So the
+         * press that answers the question they have is the one at the top, and
+         * picking a single page is what it degrades to.
+         *
+         * It is a link rather than a form because a sweep reads and writes
+         * nothing. The cost is real and is why it does not run on this screen —
+         * see the address it leads to — but it is a read, and a read a reviewer
+         * can send somebody.
+         */}
+        <div className="flex flex-col gap-2">
+          <Link
+            href="/portal/checkup/everything"
+            className="bg-affirm text-affirm-ink border-affirm-edge self-start rounded-md border px-3 py-1.5 no-underline"
+          >
+            Check every page →
+          </Link>
+          <p className="text-ink-muted text-xs">
+            One answer over every page Loom is looking after. It replays each page&rsquo;s whole
+            history, so it takes a moment.
+          </p>
+        </div>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-ink-secondary text-sm">Or check one page</h2>
+          <CheckupTreeChooser />
+        </section>
       </div>
     )
   }
@@ -156,6 +188,9 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
       <div className="flex gap-4">
         <Link href={`/portal/checkup?${scopeQuery}`} className="text-xs">
           Check again →
+        </Link>
+        <Link href="/portal/checkup/everything" className="text-xs">
+          Check every page →
         </Link>
       </div>
 

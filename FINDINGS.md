@@ -30006,3 +30006,132 @@ The ask is unchanged and is still the smaller of the two on the table: **a
 `signIn` step, or any way to run a script before the first `goto`.** The
 staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
+
+---
+## 2026-09-22 — the red checkup has been photographed, and what it took says which half of the 13 September finding is actually open
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** the
+**photography half is closed**; the *reachable in the seeded portal* half stays
+open, unchanged, and is still above this lane's line
+
+The 13 September entry said the portal's three most important screens cannot be
+photographed because a healthy deployment never reaches their important state,
+and named one fix: a second seeded page, deliberately drifted, shipped in the
+demo deployment. That is still a product decision and this run did not take it.
+
+**What this run did instead, and why it closes half of it.** The sweep's red
+verdict was photographed on a real screen at a real URL, served by a production
+build of this commit, from a browser with a real session — by putting a
+*drifted store* on `globalThis` before the server's route modules evaluate,
+which is the same staging mechanism the 21 September run used for the reader
+counters. Four pages, three accepted changes appended through the store's own
+`append`, and one snapshot read that returns a tree the log does not produce.
+The pictures in this run's report are of the screen, not of a component stood up
+beside one.
+
+So the sentence that mattered in the finding — *"a picture that requires a
+paragraph explaining how it was taken is one the maintainer has to take on
+trust"* — is now a much smaller paragraph: the staging is one wrapper around
+`memoryTreeStore` and everything above it is the shipped code doing its own
+reads and its own render.
+
+**What is still open is the other claim, and it is the sharper one.** The red
+state remains unreachable *by any sequence of clicks in the deployed portal*.
+That matters for two audiences this lane cannot serve by taking a screenshot:
+anybody evaluating Loom, and the next run of this lane, which will have to build
+the staging again from this entry. The recommendation is unchanged and is the
+13 September one.
+
+**One thing to know before taking it, learned here.** A drift cannot be produced
+through the portal's own write path at all — `append` is one write over the log
+and the snapshot, by construction (`src/store/memory.ts`), which is exactly what
+0016 promises. So a deliberately drifted seed cannot be *created*; it has to be
+*stored that way*, which means the demo deployment would need a seed whose
+recorded starting shape is not the one its snapshot came from. That is a
+different and smaller change than it sounded like in September, and it is worth
+saying before somebody reaches for a sequence of proposals that cannot produce
+the state.
+
+---
+## 2026-09-22 — the one page you can check is the last row on the screen that offers to check it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+seen in a photograph of this branch, one component and one sort away, not taken
+because it is a different screen from the one this unit is about
+
+`/portal/checkup` lists the pages you might check in the order the store lists
+them, and a page this deployment has no starting shape for is listed as a
+dashed, unpressable row. On this branch's staged deployment that puts **three
+rows nobody can press above the one row somebody can** — see the landing
+screenshot in this run's report, where `Check this page →` is the last thing on
+the screen.
+
+The sweep added in this run sorts worst-first and argues for it in
+`inWorstFirstOrder`: *a reviewer opens this screen to find the row that matters,
+and store order buries it*. The chooser one route up has the same defect and did
+not get the same treatment, so the portal now sorts two lists of the same pages
+by two different rules.
+
+**Why it is filed rather than fixed.** The unit was the sweep, and the chooser's
+order is a claim about a different screen — one whose rows are *actions* rather
+than *results*, where "what can I do" may be a better sort than "what is wrong".
+Both readings are defensible and the argument belongs in the run that takes it.
+
+**The recommendation:** pressable rows first, in store order within each group,
+which is the same shape `inWorstFirstOrder` already has and would make one rule
+serve both lists. It is a `sort` and a test; the wording needs nothing.
+
+---
+## 2026-09-22 — the screenshots in every pull request are broken, and the cause named on 20 September is not the cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** the
+20 September entry *"every screenshot in every pull request this project has
+opened is a broken image, and the cause is outside the repository"* ·
+**Status:** open, with a workaround taken on #367 and the real remedy named
+
+The 20 September entry is right that no screenshot has ever arrived and wrong
+about why. It says the tool these lanes open pull requests with rewrites
+markdown image targets, wrapping the URL in a pair of backticks. **That is not
+happening.**
+
+**Measured, on #367.** The body was posted through the GitHub MCP
+`create_pull_request` tool and then read back through `pull_request_read`. Every
+URL came back byte-for-byte as it was sent — no backticks, on any link or any
+image, in markdown or in an `<img>` tag. Whatever produced the corruption the
+20 September run read back on #349, #350 and #351, this path does not.
+
+**The images were still invisible, and the reason is one line.** *This
+repository is private.* GitHub does not serve a PR body's images from their
+source: it proxies them, anonymously, through camo. An anonymous fetch of
+`https://raw.githubusercontent.com/jam-overture/loom/<branch>/reports/<shot>.png`
+returns **404**, which is what five of them returned when this run checked from
+the sandbox before posting a second body. So:
+
+- **`raw.githubusercontent.com` can never work here**, in markdown or in HTML,
+  with or without backticks, for any branch, for any reader including the
+  maintainer. It is not a formatting problem and no escaping fixes it.
+- A **link** to the blob page does work, because that is a `github.com` page
+  the reader is signed in to. It costs a click, and it is what #367 uses.
+- The one form that embeds is a **GitHub user-attachment** — the asset you get
+  from dragging a file into a comment box, served from `user-images` /
+  `github.com/user-attachments` with its own signed URL. No routine has one,
+  because getting one means uploading through an endpoint none of these tools
+  expose.
+
+**What this means for the four surface lanes**, all of which are told a PR must
+carry a screenshot: **link, do not embed**, until somebody finds an upload path.
+A link a maintainer can click beats an image nobody can see, and it is one line
+of difference in the body.
+
+**The recommendation, for whoever owns the PR tooling.** If an upload path to
+GitHub's attachment store can be reached from a routine, that closes this for
+every lane at once and is worth more than any wording. If it cannot, the honest
+alternative is to stop promising an image in the brief and promise a link and
+the deployed preview instead — which is the thing a maintainer judging by eye
+actually wants, and the one channel that has been working all along.
+
+**What is worth keeping from the 20 September entry** is its method rather than
+its conclusion: it is the run that established you have to *read the body back
+from the API* to see what a PR actually says, because the text sent is not
+evidence of the text stored. This entry exists because that instruction was
+followed.
