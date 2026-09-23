@@ -30207,8 +30207,12 @@ test that says the words either side of it do not run together.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom portal`, `Loom docs` ·
 **Status:** **the marketing row is closed** by
-`marketing-34-three-things-no-request-gets-past`; the two rows for the other
-lanes are untouched and their owners' to take
+`marketing-34-three-things-no-request-gets-past`; **the portal row is closed** by
+`portal-35-what-it-objected-to`, which wires both and adds two rows to
+`/portal/rules` naming them, and which took the caution below seriously enough to
+file two findings of its own — the props floor is not in the policy fingerprint,
+and the two factor codes it raises do not survive into the record; the
+documentation row is untouched and its owner's to take
 
 Closing this lane's row on the 21 September entry *nothing in this repository
 wires a props vocabulary, so the check 0179 built is off on all four surfaces*.
@@ -30905,3 +30909,205 @@ Not decided here because the application's build configuration is the shell's
 and the cost lands on four surfaces, and because a mitigation that removes the
 symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
+
+---
+
+## 2026-09-23 — the portal's two floors are wired, and one of them is invisible to the fingerprint that exists to make a policy checkable
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— nothing is broken; the portal has wired both and says so on its own screen,
+which is the workaround rather than the fix
+
+Closing this lane's row on the 23 September entry *the props vocabulary is wired
+on the marketing site*: `portal-35-what-it-objected-to` wires both floors on the
+portal. Doing it surfaced an asymmetry the entry had not needed to name.
+
+**The two halves of one pair live in two different places.**
+
+| | where it is set | in the fingerprint? |
+| --- | --- | --- |
+| a change may not add a kind of part nothing here can draw ([0173](decisions/0173-a-change-may-not-add-a-primitive-the-deployment-cannot-draw.md)) | `GatePolicy.registeredPrimitiveTypes` | **yes** — `policy-fingerprint.ts` sets it |
+| a change may not leave a part carrying settings its own description refuses ([0179](decisions/0179-a-change-may-not-leave-a-node-carrying-props-its-primitive-refuses.md)) | `CompositionRuntime.propsVocabulary` | **no** — it is a function, not a field |
+
+So **two deployments whose policy fingerprints match can disagree about whether a
+part's own settings are checked before a change is written**, and nothing in the
+record can tell them apart. The fingerprint exists so that a disposition read
+back next year says what it was judged under
+([0088](decisions/0088-a-policy-is-resolved-per-request.md) and the record that
+added `policyFingerprint`), and this is a floor that can refuse a change and
+leave no trace of having been on.
+
+**Why the portal could not fix it.** The field would have to be on `GatePolicy`,
+which is `src/` and is a schema change — `ARCHITECTURAL` by this lane's brief and
+not this lane's to make. What the portal did instead is the honest local
+workaround: `settingsAreChecked` is derived from the one value the write path
+uses and handed to `/portal/rules` as a row, so a reader of that screen is told.
+A reader of a *stored disposition* still is not.
+
+**The shape a fix could take, for whoever takes it.** Not a boolean on the
+policy: the vocabulary is a predicate so that two registries compose, and a
+fingerprint cannot digest a closure. The smallest honest thing is a declared
+name for *which* vocabulary was in force — the same move `policyId` makes for the
+policy itself, and with the same honest stand-in for the unknown. A host that
+wires `propsVocabularyFor(registry)` would name its registry; a host that wires
+none would fingerprint as having none, which is a fact rather than a guess.
+
+---
+
+## 2026-09-23 — the two `critical` factors the floors raise are dropped by the telemetry summary, so a refused-because-undrawable change is indistinguishable from a refused-because-risky one in the record
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— found while building `portal-35-what-it-objected-to`; nothing is broken, and it
+is the reason that unit reads events rather than the journal
+
+`summariseAssessment` in `src/telemetry/event.ts` narrows a `ChangeAssessment`
+for the journal (0023, correctly — an event carries whole trees and a record must
+not). What survives includes `removedPrimitiveTypes`, with a comment saying
+exactly why:
+
+> *Bounded, non-identifying, a subset of the touched types, and the input to the
+> only `critical` stake factor. A corpus that cannot group by "the Gate saw this
+> type destroyed" cannot ask the question the factor exists for.*
+
+**There are three `critical` factors now.** 0173 and 0179 added
+`unknown-primitive` and `invalid-props`, both `critical`, and neither leaves
+anything in the summary. So:
+
+- **The journal cannot count them.** `/portal/rules` attributes a count to a rule
+  by the reason code the Gate recorded, and both of these are recorded as
+  `stakes-at-refusal-floor` like any other change that reaches the top of the
+  scale. *This project turned down four changes as too risky* and *this project
+  turned down four changes because the AI invented parts that do not exist here*
+  are the same row, and only the second is a thing an operator can act on.
+- **The same is true of `/portal/trust`.** Calibration groups by what the Gate
+  did; a model that is confidently inventing primitives is the single most
+  legible failure mode a catalogue has, and it is currently folded in with
+  changes that were simply large.
+
+**What the portal did instead**, so that the recommendation is concrete rather
+than a complaint: the write path tees the `change-assessed` event and reads
+`stakes.factors` off it within the request (`_lib/write.ts`). That works for the
+screen a person is looking at when the refusal happens and cannot work for
+anything read back later, which is most of what this portal shows.
+
+**The recommendation.** A bounded, non-identifying field of the same kind the
+comment above already argues for: the factor **codes**, which are a closed union
+of thirteen strings and carry no content. `stakeFactorCodes: StakeFactorCode[]`
+on `AssessmentSummary` would make every one of the thirteen groupable, close this
+and make `removedPrimitiveTypes`' special case unnecessary rather than wrong.
+
+---
+
+## 2026-09-23 — two surfaces now hold a plain-language table for `StakeFactorCode`, and the lane boundary is why
+
+**Filed by:** `Loom portal` · **Owned by:** unassigned — whoever owns shared
+ground between surfaces · **Status:** open, and **not urgent**: two tables that
+agree today
+
+`Loom marketing` wrote `RAISED_BY` in `app/(marketing)/_lib/adapt/record.ts` on
+23 September. `Loom portal` wrote `STAKE_FACTORS` in
+`app/(portal)/_lib/vocabulary.ts` on the same day. Both are
+`Record<StakeFactorCode, string>`, both say the same thirteen things, and neither
+can import the other: 0067 made a lane a route group, and a route group's `_lib`
+is that lane's.
+
+**This is the boundary working, not failing**, and it is worth writing down for
+that reason. The two registers genuinely differ — marketing says *piece*, the
+portal says *part*, and each is the word its own surface has taught a reader
+everywhere else. A shared table would force one of them to teach a stranger two
+names for one idea, which is the thing both lanes' vocabulary modules exist to
+prevent.
+
+**What is worth watching rather than fixing.** The failure mode is not
+divergence in wording, it is divergence in *meaning* — the day somebody decides
+`shallow-structural-change` should read as being about rearranging rather than
+about depth, on one surface. Both tables are total over the union, so a
+fourteenth factor is a compile error in both places; nothing silently goes
+missing. What has no guard is the two drifting apart in what they claim.
+
+If shared ground ever exists for this, the honest shape is not one table but one
+**list of the facts** with each surface's wording beside it, so that a reviewer
+can read the thirteen rows side by side and see a disagreement.
+
+---
+
+## 2026-09-23 — the refusal a person types their way into cannot be reached, or photographed, on a deployment with no model
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**half worked around** on `portal-35-what-it-objected-to`, and the half that is
+left is a product question
+
+`portal-35` rebuilt what a person is told when the Gate refuses a change. There
+are two controls in this portal that can produce a refusal:
+
+- **The prompt box** on `/portal/pages/[treeId]`, which needs a model to turn a
+  sentence into a change. With no `LOOM_ANTHROPIC_API_KEY` it renders a notice
+  instead of a form, so the panel under it is unreachable — by a reviewer, by a
+  screenshot, and by anybody evaluating this portal without credentials.
+- **Undo** on `/portal/history`, which computes its delta from the record and
+  needs no model at all.
+
+So the undo is the only refusal this lane can photograph, and it can only
+photograph *one* of the two floors: putting back a part whose kind this
+deployment no longer registers (`unknown-primitive`). **A refusal for a setting a
+part refuses (`invalid-props`) has no model-free path to it at all**, and neither
+does any of the other eleven factors.
+
+**What this run did about it.** The undo case was staged and photographed, and
+both are in `reports/2026-09-23-portal-what-it-objected-to.md` with the recipe.
+The unit's other states are covered by tests over `refusal.ts` and
+`change-reasoning.tsx` rather than by pictures.
+
+**And what the screenshot caught that the tests did not.** The first wording of
+`CANNOT_BE_DRAWN` read *"The AI asked for something this site has no way to
+draw"* — on a refused **undo**, where nothing was asked of a model and the
+inverse was computed from the record (0007, 0031). Twelve lines below it in the
+same file, `NO_CONFIDENCE_TO_JUDGE` exists to prevent precisely that attribution.
+Every test passed. The photograph did not.
+
+**The recommendation is not a demo mode.** A deployment that can fake a refusal
+is a deployment whose refusals cannot be trusted, which is the opposite of what
+this surface is for. The shape worth considering is narrower: a **preview** on
+`/portal/rules` — *here is what this screen would say if a change ran into this
+rule* — built from the same `refusal.ts` the real panel uses, reachable with no
+credentials, and labelled as an example rather than as something that happened.
+That is a screen this lane could build and is a design decision above its line,
+so it is filed rather than taken.
+
+---
+
+## 2026-09-23 — `pnpm shoot` signed a routine into the portal on the first attempt, and the staging half is still a private script
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **the
+sign-in half is closed**; the staging half is open and is this lane's
+
+The 22 September entry from `Loom daily build` told three lanes that `pnpm shoot`
+can sign in, type and reach inside a frame, and that the private Playwright
+scripts could stop. Measured here, on the portal, for the first time:
+
+**It works, and it worked first time.** Four signed-in screenshots on this run,
+through `before` with a `fill`, a `click` and a trailing `waitFor` — and the
+trailing wait is load-bearing exactly as that entry says. The selector the portal
+needs is `#key` (the access key is the whole credential, 0027) and the thing to
+wait for after the press is any link in the rail, because this portal has no
+`data-signed-in` marker. Both are worth knowing before writing the list; neither
+is a gap in the harness.
+
+**After seven consecutive runs of this lane filing a private-script finding, that
+one is closed.**
+
+**What is still this lane's**, as that entry predicted: `pnpm shoot` does not
+start your application, so a screen whose content is a stored log has to have the
+log put there first. This run did it with a preload on `NODE_OPTIONS --import`
+that builds a `memoryTreeStore()`, appends two revisions through the store's own
+`append`, and puts it on `globalThis[Symbol.for("loom.portal.store")]` before the
+route modules evaluate. It is in the report and it is not in the diff.
+
+**The recommendation is not to put staging in the harness.** `pnpm shoot`
+photographs an address something else is serving, and what that something serves
+is the caller's business — a harness that knew how to seed a Loom store would be
+a harness that only works for this repository's own application. The honest
+alternative is a **committed** script under `apps/loom/scripts/`, owned by this
+lane, that starts the portal against a named fixture: the same recipe, in the
+repository, reviewable, and runnable by the maintainer rather than reconstructed
+from a report by the next run. That is a unit of work and this lane will take it.

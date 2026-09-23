@@ -6,7 +6,7 @@ import { describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { portalPolicy } from "@/app/(portal)/_lib/policy"
+import { portalPolicy, settingsAreChecked } from "@/app/(portal)/_lib/policy"
 import {
   headlineOf,
   NO_RECORD,
@@ -54,7 +54,15 @@ import { RuleCard } from "./_components/rule-card"
 const RulesPage = async () => {
   await requireActor("/portal/rules")
 
-  const rules = rulesOf(portalPolicy)
+  /*
+   * The policy, and the one rule that is not in it.
+   *
+   * Both come from `_lib/policy.ts`, which is what keeps this screen's claim
+   * honest: it describes what the write path enforces because it reads the same
+   * module the write path is assembled from. See that module on why a floor that
+   * is a function rather than a field lives there anyway.
+   */
+  const rules = rulesOf(portalPolicy, { settingsAreChecked })
   const page = await portalTelemetry.read({ direction: "older" })
 
   /**

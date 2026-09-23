@@ -5,6 +5,7 @@ import type {
   IntentOrigin,
   LoomNode,
   NodeKind,
+  StakeFactorCode,
   StakeLevel,
 } from "@loom/runtime"
 import type {
@@ -371,6 +372,174 @@ export const STAKES: Readonly<Record<StakeLevel, PlainState>> = {
     technical: "critical",
     tone: "rejected",
   },
+}
+
+/**
+ * The thirteen things the Gate weighs, each as the clause a person reads.
+ *
+ * ## The half of a refusal that had never been translated
+ *
+ * This module already turned two of the runtime's three vocabularies into a
+ * person's words. `STAKES` says what a level is for; `RULE_SENTENCES` says which
+ * rule decided. Between them sits the one a reader actually wants, and it was
+ * missing: **what was wrong with the change.**
+ *
+ * A stake factor is that. The Gate's own `reason.detail` is these factors'
+ * `detail` strings joined with semicolons, so until now the only way a reader
+ * could learn that a change *takes a lot of the page away at once* was to open
+ * the disclosure and read `large-removal` inside a sentence written for whoever
+ * wrote the runtime. A screen showing the level and the rule and not the reason
+ * is the altitude failure `TechnicalDetail` exists to fix, one field short of
+ * fixed.
+ *
+ * ## They are clauses, not sentences
+ *
+ * Each one completes *"Loom would not do this because …"*, and several of them
+ * appear in one list under one change — a broad removal near the top of a page
+ * raises three. Written as whole sentences they read as three unrelated verdicts
+ * on three unrelated changes; written as clauses they read as one reason with
+ * three parts, which is what they are.
+ *
+ * The tense is conditional throughout, including for a change that was applied.
+ * A factor is what the Gate *weighed*, and it weighed it before deciding — so
+ * "it would write over work already accepted" is true of an accepted change and
+ * "it wrote over" would be a claim about an outcome this table cannot see.
+ *
+ * ## Two of the thirteen are the reason this table exists today
+ *
+ * `unknown-primitive` and `invalid-props` are the two floors `policy.ts` and
+ * `write.ts` wired on this run, and they are the first two factors on this
+ * deployment that a person can neither approve nor loosen: the change is not
+ * risky, it is **undrawable**. `refusal.ts` is the module that acts on that
+ * difference, and it reads these strings rather than holding a second copy.
+ */
+export const STAKE_FACTORS: Readonly<Record<StakeFactorCode, string>> = {
+  "protected-type-removed": "it would take away a kind of part you marked as one to be careful with",
+  "protected-type-touched": "it would rewrite a kind of part you marked as one to be careful with",
+  "protected-type-relocated": "it would move a kind of part you marked as one to be careful with",
+  "protected-prop-configured": "it would change a setting you marked as one to be careful with",
+  "large-removal": "it takes a lot of the page away at once",
+  "broad-change": "it reaches across a lot of the page at once",
+  "shallow-structural-change":
+    "it rearranges the shape of the page rather than changing the words inside it",
+  "discards-later-work": "it would write over work that has already been accepted",
+  "nested-target":
+    "it would put something to click inside something else to click, where neither works properly",
+  /*
+   * "this site" rather than "this page", and the distinction is the one thing a
+   * reader has to get right to know what to do next. A part nothing here can
+   * draw is missing from the whole deployment, so moving to another page does
+   * not help and neither does changing a setting. Somebody has to add it, in
+   * code, or the ask has to be made in terms of what is already here.
+   */
+  "unknown-primitive": "it asks for a kind of part this site has nothing to draw it with",
+  /*
+   * "refuses" rather than "does not accept", because the part is the thing doing
+   * the refusing and a reader who takes away one fact should take away that one.
+   * The value that was rejected, and the reason its own description gave, are in
+   * the record beside this — quoted rather than reworded, because a refusal
+   * rewritten into friendlier words is a claim about a translation of the
+   * evidence (`Loom marketing`, 23 September).
+   */
+  "invalid-props": "it would set a part up in a way that part itself refuses, so it would not draw",
+  "redirected-submission": "it would send what people type into a form somewhere other than before",
+  "repointed-binding": "it would put different data of yours on the page than before",
+}
+
+export const factorClause = (code: StakeFactorCode): string => STAKE_FACTORS[code]
+
+/**
+ * How a list of clauses is introduced, which depends entirely on what was
+ * decided.
+ *
+ * One list of factors, three meanings. *It takes a lot of the page away at once*
+ * under a refusal is the reason you cannot have it; under a hold it is the reason
+ * you are being asked; under an applied change it is what Loom noticed and went
+ * ahead with regardless. That third one is the reading the portal has never
+ * offered anywhere, and it is the most interesting of the three on a deployment
+ * where nothing is going wrong.
+ *
+ * Keyed by `DispositionKind` and not by the reason code, because the verb follows
+ * the answer rather than the rule: eight of the nine codes can only produce one
+ * kind, and a reader does not need to know which.
+ */
+export const WEIGHING: Readonly<Record<DispositionKind, string>> = {
+  rejected: "Why Loom wouldn't do it",
+  "requires-confirmation": "Why Loom is asking you first",
+  accepted: "What Loom weighed before going ahead",
+}
+
+/**
+ * What a card says where the clauses would be when there are none.
+ *
+ * A rule can fire on something no factor measured — the confidence floor is the
+ * standing case, and it is about what the AI said rather than about what the
+ * change does. So the list is legitimately empty, and an empty list under the
+ * heading above reads as a screen that failed to load its own content.
+ *
+ * Keyed the same way, because the sentence is the negative of the heading and
+ * the two must not drift apart.
+ */
+export const NOTHING_WEIGHED: Readonly<Record<DispositionKind, string>> = {
+  rejected: "Nothing about the change itself counted against it — the rule below is the whole reason.",
+  "requires-confirmation":
+    "Nothing about the change itself counted against it — the rule below is the whole reason you are being asked.",
+  accepted: "Nothing about this change counted against it.",
+}
+
+/**
+ * A refusal a person cannot answer, as its own plain state.
+ *
+ * `CHANGE_STATES.refused` reads *"Not allowed — a rule in this project's
+ * settings blocked it"*, which was the whole truth while every refusal on this
+ * deployment came from a line somebody drew. The two floors wired on 23
+ * September are not lines somebody drew. A change that adds a part this site
+ * cannot draw is refused because it **cannot be carried out**, and telling
+ * somebody their settings blocked it sends them to `/portal/rules` to loosen a
+ * rule that is not there.
+ *
+ * Its own state rather than a ninth entry in `CHANGE_STATES`, for the reason
+ * `CANNOT_UNDO` gives and on the same precedent: that table is keyed by what a
+ * write *ended as*, `stateOfWrite` maps a kind onto it, and a kind cannot tell
+ * these two refusals apart. Only the factors can, which is a fact about why
+ * rather than about what.
+ *
+ * The tone stays `rejected`. Nothing about this is gentler than a refusal — the
+ * change did not happen — and a fourth colour for a fourth shade of no would
+ * teach a reader a palette instead of an answer.
+ */
+export const CANNOT_BE_DRAWN: PlainState = {
+  label: "Loom couldn't build that",
+  /*
+   * Three sentences, and each of them was got wrong once first.
+   *
+   * **"Loosening a rule would not help"** replaced *"this is not a setting you
+   * can loosen"*, which is a claim and a slightly false one — a host that
+   * withdrew the two floors would let this change through. What it would let
+   * through is a page with a hole in it, which is the honest thing to say, and
+   * saying it pre-empts the wrong move with a reason rather than with an
+   * instruction.
+   *
+   * **"This change needs"** replaced *"The AI asked for"*, and that one was
+   * found in a photograph rather than in a test. The first refusal this lane
+   * managed to photograph was an **undo** — the case 0173 names, where putting
+   * back what a change deleted means adding a part this deployment no longer
+   * draws — and an inverse is worked out from the record rather than asked of a
+   * model (0007, 0031). So the sentence credited a model with a request it never
+   * made, on the one screen where that is most misleading, and
+   * `NO_CONFIDENCE_TO_JUDGE` twelve lines below exists to prevent exactly this
+   * mistake about exactly these changes. Nothing here names an author now,
+   * because this state is reachable from both paths and only one of them has one.
+   *
+   * **The last sentence names two moves rather than one**, for the same reason:
+   * *ask for something else* is the whole answer from the prompt box and half of
+   * it from a refused undo, where the part that is missing is a part the page
+   * used to have and somebody has to put the means to draw it back.
+   */
+  meaning:
+    "This change needs a kind of part this site has no way to draw, so nothing was changed. Loosening a rule would not help — there would still be nothing to draw it with. Either ask for something built from the parts your site already has, or add the missing one to your site's code.",
+  technical: "refused",
+  tone: "rejected",
 }
 
 /**
