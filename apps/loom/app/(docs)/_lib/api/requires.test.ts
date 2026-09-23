@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest"
 
 import type { PublishedEntry } from "./extract"
-import { packageOf, packagesNamedIn, packagesReachedFrom, peersOf, requirementsFor, type Peers } from "./requires"
+import {
+  doorReach,
+  packageOf,
+  packagesNamedIn,
+  packagesReachedFrom,
+  peersOf,
+  reachFrom,
+  requirementsFor,
+  type Peers,
+  type ReadFile,
+} from "./requires"
 
 /**
  * What a page may tell a reader to install.
@@ -81,6 +91,46 @@ describe("the packages a door loads", () => {
   })
 })
 
+describe("how much of the package a door goes through", () => {
+  it("counts every file the walk visited, the door's own included", () => {
+    const reach = reachFrom(
+      "/dist/door.js",
+      files({
+        "/dist/door.js": `export * from "./a.js"; export * from "./b.js";`,
+        "/dist/a.js": `import "./shared.js";`,
+        "/dist/b.js": `import "./shared.js";`,
+        "/dist/shared.js": `import "zod"; export const shared = 1;`,
+      })
+    )
+
+    expect(reach.files).toBe(4)
+    expect([...reach.packages]).toEqual(["zod"])
+  })
+
+  it("counts a file once however many others import it", () => {
+    const reach = reachFrom(
+      "/dist/door.js",
+      files({
+        "/dist/door.js": `import "./a.js"; import "./b.js";`,
+        "/dist/a.js": `import "./b.js";`,
+        "/dist/b.js": `export const b = 1;`,
+      })
+    )
+
+    expect(reach.files).toBe(3)
+  })
+
+  it("is nothing at all for a door with no implementation behind it", () => {
+    const reach = doorReach(
+      { specifier: "@loom/runtime/typesonly", types: "/dist/door.d.ts", runtime: undefined },
+      files({ "/dist/door.d.ts": `import type A from "@anthropic-ai/sdk";` })
+    )
+
+    expect(reach.files).toBe(0)
+    expect([...reach.packages]).toEqual([])
+  })
+})
+
 describe("the packages a declaration file names", () => {
   it("reads the file itself and follows nothing", () => {
     const named = packagesNamedIn(
@@ -130,10 +180,17 @@ describe("what one door needs", () => {
     runtime,
   })
 
+  /**
+   * The composition the generator performs, named once here as it is named once
+   * there: the walk that says what a door loads, the one file that says what it
+   * declares, and the rule that turns the two into a list a reader can act on.
+   */
+  const needsOf = (entry: PublishedEntry, read: ReadFile) =>
+    requirementsFor(peers, doorReach(entry, read).packages, packagesNamedIn(entry.types, read))
+
   it("calls a package the JavaScript loads `loaded`", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({ "/dist/door.js": `import "vitest";`, "/dist/door.d.ts": `export declare const a: number;` })
     )
 
@@ -141,9 +198,8 @@ describe("what one door needs", () => {
   })
 
   it("calls a package only the declarations name `declared`", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({
         "/dist/door.js": `export const adapt = (client) => client;`,
         "/dist/door.d.ts": `import type Anthropic from "@anthropic-ai/sdk";`,
@@ -154,9 +210,8 @@ describe("what one door needs", () => {
   })
 
   it("makes the stronger claim about a package that is both", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({
         "/dist/door.js": `import "react";`,
         "/dist/door.d.ts": `import type { ReactNode } from "react";`,
@@ -167,9 +222,8 @@ describe("what one door needs", () => {
   })
 
   it("says nothing about a package the host is not asked to bring", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({ "/dist/door.js": `import "zod"; import "node:fs";`, "/dist/door.d.ts": `export {};` })
     )
 
@@ -177,9 +231,8 @@ describe("what one door needs", () => {
   })
 
   it("lists what it finds in one order whatever order the imports are in", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({ "/dist/door.js": `import "vitest"; import "react";`, "/dist/door.d.ts": `export {};` })
     )
 
@@ -193,9 +246,8 @@ describe("what one door needs", () => {
      * A file two steps down the type graph naming one is a fact about a type
      * chain, and the store's declarations reach `react` that way.
      */
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", "/dist/door.js"),
-      peers,
       files({
         "/dist/door.js": `export const open = () => undefined;`,
         "/dist/door.d.ts": `import type { Suite } from "./deep.js";\nexport declare const open: () => Suite;`,
@@ -207,9 +259,8 @@ describe("what one door needs", () => {
   })
 
   it("reads the declarations of a door that publishes no implementation", () => {
-    const needs = requirementsFor(
+    const needs = needsOf(
       door("/dist/door.d.ts", undefined),
-      peers,
       files({ "/dist/door.d.ts": `import type Anthropic from "@anthropic-ai/sdk";` })
     )
 

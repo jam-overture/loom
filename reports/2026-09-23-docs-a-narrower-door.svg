@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #ffffff; }
+    .ink { fill: #111418; }
+    .muted { fill: #5b6570; }
+    .faint { fill: #8a939d; }
+    .box { fill: none; stroke: #dfe3e8; stroke-width: 1; }
+    .panel { fill: #f7f8f9; stroke: #dfe3e8; stroke-width: 1; }
+    .rule { stroke: #dfe3e8; stroke-width: 1; }
+    .arrow { stroke: #8a939d; stroke-width: 1.5; fill: none; }
+    .yes { fill: #2b6b4b; }
+    .yes-chip { fill: #dcefe4; stroke: #b6d8c5; }
+    .no { fill: #b4402f; }
+    .no-chip { fill: #f6e3df; stroke: #e6c3bb; }
+    .pkg { fill: #efe2d0; stroke: #dcc7a8; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0e1114; }
+      .ink { fill: #e8ecf0; }
+      .muted { fill: #9aa4ae; }
+      .faint { fill: #78828c; }
+      .box { stroke: #2a3138; }
+      .panel { fill: #151a1f; stroke: #2a3138; }
+      .rule { stroke: #2a3138; }
+      .arrow { stroke: #78828c; }
+      .yes { fill: #7fc7a1; }
+      .yes-chip { fill: #16291f; stroke: #2d4b39; }
+      .no { fill: #e08b78; }
+      .no-chip { fill: #2a1a16; stroke: #4a2c25; }
+      .pkg { fill: #2a2318; stroke: #4a3d28; }
+    }
+  </style>
+
+  <rect class="bg" width="900" height="600" />
+
+  <text class="ink" x="40" y="46" font-size="21" font-weight="700">When one door is another door onto a smaller room</text>
+  <text class="muted" x="40" y="70" font-size="13.5">Two tests, both required. Measured over the sixteen entry points <tspan class="mono">@loom/runtime</tspan> publishes.</text>
+
+  <line class="rule" x1="40" y1="90" x2="860" y2="90" />
+
+  <!-- ===== qualifies ===== -->
+  <rect class="panel" x="40" y="110" width="390" height="330" rx="8" />
+  <circle class="yes" cx="62" cy="139" r="6" />
+  <text class="yes" x="76" y="144" font-size="13.5" font-weight="700">A narrower door</text>
+  <text class="faint" x="76" y="162" font-size="12">the one pair in the package</text>
+
+  <text class="ink mono" x="62" y="196" font-size="11.5">@loom/runtime/signals</text>
+  <text class="faint" x="62" y="213" font-size="11.5">91 exports · 23 built files</text>
+  <rect class="pkg" x="318" y="184" width="44" height="19" rx="4" />
+  <text class="ink mono" x="327" y="197" font-size="11">zod</text>
+
+  <path class="arrow" d="M 76 228 L 76 258" marker-end="url(#tip)" />
+  <text class="muted" x="92" y="243" font-size="11.5">loads strictly fewer packages</text>
+
+  <text class="ink mono" x="62" y="282" font-size="11.5">@loom/runtime/signals/broadcast</text>
+  <text class="faint" x="62" y="299" font-size="11.5">14 exports · 9 built files</text>
+  <text class="faint" x="318" y="282" font-size="11">no packages</text>
+
+  <line class="rule" x1="62" y1="322" x2="408" y2="322" />
+
+  <circle class="yes" cx="68" cy="348" r="4" />
+  <text class="muted" x="80" y="352" font-size="12">packages <tspan class="mono">{ }</tspan> ⊊ <tspan class="mono">{ zod }</tspan></text>
+  <circle class="yes" cx="68" cy="374" r="4" />
+  <text class="muted" x="80" y="378" font-size="12">all 14 exports are among the 91,</text>
+  <text class="muted" x="80" y="393" font-size="12">each with the same kind and declaration</text>
+
+  <rect class="yes-chip" x="62" y="406" width="346" height="22" rx="5" />
+  <text class="yes" x="74" y="421" font-size="10.5" font-weight="600">the wide page says so; the narrow page says nothing</text>
+
+  <!-- ===== does not ===== -->
+  <rect class="panel" x="470" y="110" width="390" height="330" rx="8" />
+  <circle class="no" cx="492" cy="139" r="6" />
+  <text class="no" x="506" y="144" font-size="13.5" font-weight="700">Not a narrower door</text>
+  <text class="faint" x="506" y="162" font-size="12">why the second test has to be there</text>
+
+  <text class="ink mono" x="492" y="196" font-size="11.5">@loom/runtime/telemetry</text>
+  <text class="faint" x="492" y="213" font-size="11.5">64 exports · 25 built files</text>
+  <rect class="pkg" x="672" y="184" width="44" height="19" rx="4" />
+  <text class="ink mono" x="681" y="197" font-size="11">zod</text>
+  <rect class="pkg" x="724" y="184" width="86" height="19" rx="4" />
+  <text class="ink mono" x="732" y="197" font-size="11">drizzle-orm</text>
+
+  <path class="arrow" d="M 506 228 L 506 258" marker-end="url(#tip)" />
+  <text class="muted" x="522" y="243" font-size="11.5">loads strictly fewer packages</text>
+
+  <text class="ink mono" x="492" y="282" font-size="11.5">@loom/runtime/telemetry/postgres</text>
+  <text class="faint" x="492" y="299" font-size="11.5">4 exports · 21 built files</text>
+  <rect class="pkg" x="724" y="270" width="86" height="19" rx="4" />
+  <text class="ink mono" x="732" y="283" font-size="11">drizzle-orm</text>
+
+  <line class="rule" x1="492" y1="322" x2="838" y2="322" />
+
+  <circle class="yes" cx="498" cy="348" r="4" />
+  <text class="muted" x="510" y="352" font-size="11.5">packages <tspan class="mono">{ drizzle-orm }</tspan> ⊊ <tspan class="mono">{ zod, drizzle-orm }</tspan></text>
+  <circle class="no" cx="498" cy="374" r="4" />
+  <text class="muted" x="510" y="378" font-size="12">none of its 4 exports is among the 64 —</text>
+  <text class="muted" x="510" y="393" font-size="12">two doors to two different places</text>
+
+  <rect class="no-chip" x="492" y="406" width="346" height="22" rx="5" />
+  <text class="no" x="504" y="421" font-size="10.5" font-weight="600">packages alone would cost a reader sixty exports</text>
+
+  <!-- ===== foot ===== -->
+  <line class="rule" x1="40" y1="472" x2="860" y2="472" />
+  <text class="ink" x="40" y="500" font-size="13" font-weight="600">The runtime's author already knew.</text>
+  <text class="muted" x="40" y="522" font-size="12.5">A paragraph at the top of <tspan class="mono">src/signals/index.ts</tspan> tells a reader to use the other door in a browser bundle.</text>
+  <text class="muted" x="40" y="541" font-size="12.5">A barrel's opening paragraph reaches no page, and a generated reference may not quote prose — so the fact is</text>
+  <text class="muted" x="40" y="560" font-size="12.5">measured from the built package instead, by the same walk that already knows what every door loads.</text>
+
+  <defs>
+    <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a939d" />
+    </marker>
+  </defs>
+</svg>

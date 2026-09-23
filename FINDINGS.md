@@ -29855,9 +29855,12 @@ which already carry it.
 
 ## 2026-09-22 — a door whose own comment says *use the other door in a browser*, and the page that cannot say it
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
-nothing is broken; a reader following the reference into a browser bundle ships
-about 60 KB they did not need to
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed**
+— by the rule it proposed, on #373, 23 September. Every reference page whose
+door has a narrower one now names it, measured rather than quoted. The rule
+gained a half the finding did not specify: two doors must publish the same
+**declarations** and not merely the same names. What is still not measured is
+the 60 KB itself, which is the finding filed the same day
 
 Every entry-point page now carries what its door **loads** that a host has to
 install, measured from the built package. That instrument answers *will my
@@ -30118,6 +30121,88 @@ staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
 
 ---
+## 2026-09-23 — the narrower door is named and its saving is described in files, because nothing here can weigh a bundle
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+nothing is wrong on any page; a reader is told which import is smaller and not
+by how much, in the unit they would act on
+
+`/docs/api-reference/signals` now tells a reader that
+`@loom/runtime/signals/broadcast` publishes the same fourteen names and does
+not load `zod`, and that its JavaScript goes through **9** of the package's
+built files where the wider door goes through **23**.
+
+Both numbers are true and neither is the one the runtime's author wrote down:
+
+> This entry also carries the schemas, and a bundler cannot leave the schema
+> library out once it is imported — **about 60 KB of it.**
+
+**Files are reach, not weight.** The walk follows every `import` and every
+`export … from` and counts what it visited. A bundler then drops what the
+reader's program does not call, so nine files is an upper bound on nine files'
+worth and says nothing about how many bytes each one is. A reader deciding
+whether to change an import wants kilobytes; what this site can give them today
+is a count of files and a package name.
+
+**What would measure it.** Bundle each door on its own with `esbuild`,
+minified, and record the output size — the difference between two doors' sizes
+is the number the author's paragraph states, in the reader's unit, measured
+rather than remembered. Two costs, and the second is the one that decides it:
+
+- The docs pipeline would gain a bundler at generation time. It already loads
+  the TypeScript compiler, so this is a difference of degree.
+- **The answer is about the reader's bundler, not ours.** `esbuild` with our
+  settings is not Webpack with theirs, and a number presented in kilobytes
+  reads as a promise in a way *9 files against 23* does not. A band that said
+  **60 KB** and delivered 41 would be worse than one that said nothing.
+
+The shape that might resolve it is a range or a rounded order — *tens of
+kilobytes* — which is a judgement about wording and not a measurement, and so
+is left for the maintainer rather than decided here.
+
+**Also measured, and left out of the rule.** A door that loads the *same*
+packages as another and goes through far fewer files is not called narrower,
+because the rule requires a **strict** package subset. There is no such pair in
+the package today — checked over all 240 ordered pairs — so the choice costs a
+reader nothing yet. If one ever appears, the symptom is silence rather than a
+wrong sentence, and this is the entry that says so.
+
+---
+## 2026-09-23 — the four longest entry-point headings break mid-word on a phone, because `break-words` was the fix that stopped the page scrolling and not the one that made it read
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+cosmetic; measured in Chromium against `next start` at 390 pixels, 23 September
+
+On 22 September `/docs/api-reference/[entry]`'s `h1` gained `break-words`,
+because an import specifier is one unbroken word to a line-breaker — CSS offers
+no break opportunity after a slash — and the four longest doors pushed the
+document 169 pixels wider than the viewport. That worked: `scrollWidth 559`
+became `scrollWidth 390`, and it still holds today.
+
+What it did not do is choose **where** the break lands. `break-words` breaks
+wherever the line runs out, so `@loom/runtime/signals` is photographed as
+
+```
+@loom/runtime/signal
+s
+```
+
+with a single orphaned `s` on the second line, in the page's largest type, as
+the first thing a reader on a phone sees.
+
+**The remedy is a break opportunity at each slash**, which is where a reader
+would break it themselves: render the heading as its segments with `<wbr/>`
+after each `/`, and keep `break-words` as the fallback for a segment longer
+than the line. `@loom/runtime/` then breaks from `signals` and nothing is
+orphaned.
+
+**Not fixed in the branch that photographed it.** The heading is in this lane
+and it is one small component, but it is a different subject from that branch —
+which is about two doors compared with each other, not about one door's title —
+and the run before it had already explained one such in-passing fix. It is a
+line of work rather than a line of code: the segments have to be rendered, and
+a `<wbr/>` is a thing `prerender:check` reads as a junction, so it needs the
+test that says the words either side of it do not run together.
 ## 2026-09-23 — the props vocabulary is wired on the marketing site, and the two floors it closes were claims the page had been making for twelve days
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom portal`, `Loom docs` ·

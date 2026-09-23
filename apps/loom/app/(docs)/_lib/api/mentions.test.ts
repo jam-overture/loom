@@ -203,6 +203,8 @@ describe("what one reference page is told about the prose", () => {
     slug: "runtime",
     types: "./dist/index.d.ts",
     requires: [],
+    files: 0,
+    narrower: [],
     groups: [
       {
         module: "tree/tree",
