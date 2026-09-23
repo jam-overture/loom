@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest"
 import { BAND } from "../bands"
 import { RESERVED_VOCABULARY } from "../copy"
 import { siteRegistry } from "../registry"
-import { pageTreeFor, treeFor } from "../render"
+import { FLOORS } from "../adapt/floors"
+import { floorsFor, pageTreeFor, treeFor } from "../render"
 import {
   DEFAULT_THEME,
   HOME,
@@ -228,16 +229,104 @@ describe("the front door, which said two things about where pieces come from", (
 })
 
 /**
- * Served rather than built, because the two differ everywhere else on this site
- * and a page that only ever passes as its builder leaves it is a page whose
- * route is untested.
+ * Served rather than built, and since 23 September the two differ — which is the
+ * change rather than a regression.
+ *
+ * This suite asserted the opposite until today: *is the same page the builder
+ * produced*, which was true while nothing on the page was measured. Two of its
+ * three limits are now put to this site while the page is being built, and a
+ * request through the whole sequence is not something a synchronous builder can
+ * make. So the assertion becomes the one worth making all along — the served
+ * page carries evidence the builder alone cannot produce, and the builder's page
+ * is the page as it stood, with the three claims and no cards under them.
  */
 describe("as the route serves it", () => {
-  it("is the same page the builder produced", async () => {
+  it("carries the two refusals, which the builder alone cannot produce", async () => {
+    const served = wordsOf(
+      (await pageTreeFor(YOUR_COMPONENTS, { origin: ORIGIN, theme: DEFAULT_THEME })).root
+    )
+    const built = words()
+
+    for (const floor of FLOORS) {
+      expect(served).toContain(floor.utterance)
+      expect(built).not.toContain(floor.utterance)
+    }
+  })
+
+  /**
+   * The evidence is the half a reader should not have to take on trust, so what
+   * the machinery named has to reach the page rather than being summarised into
+   * *it was refused*.
+   */
+  it("prints what each refusal named, off the run rather than off this file", async () => {
+    const results = await floorsFor({ origin: ORIGIN, theme: DEFAULT_THEME })
+    const served = wordsOf(
+      (await pageTreeFor(YOUR_COMPONENTS, { origin: ORIGIN, theme: DEFAULT_THEME })).root
+    )
+
+    expect(results).toHaveLength(FLOORS.length)
+
+    for (const result of results) {
+      for (const piece of result.pieces) expect(served).toContain(piece)
+
+      for (const setting of result.settings) {
+        expect(served).toContain(setting.name)
+        expect(served).toContain(setting.said)
+      }
+
+      for (const clause of result.raisedBy) expect(served).toContain(clause)
+    }
+  })
+
+  /**
+   * The line over the cards says how many of the three were put to this site. A
+   * count that was typed would be the one number on this page able to contradict
+   * the cards directly beneath it, which is the failure this site has recorded
+   * seven times and now counts everything it prints to avoid.
+   */
+  it("counts the cards it actually printed rather than promising a number", async () => {
+    const served = wordsOf(
+      (await pageTreeFor(YOUR_COMPONENTS, { origin: ORIGIN, theme: DEFAULT_THEME })).root
+    )
+
+    expect(served).toContain(`${FLOORS.length} of the three, put to this site`)
+    expect(served).toContain("Three things no request gets past")
+  })
+
+  /**
+   * The assertion above cannot tell a derived two from a typed one while there
+   * are exactly two floors, which is the shape of every count this site has got
+   * wrong. So the builder is handed one result and asked what it says — the only
+   * way to see the number move without waiting for a third floor to exist.
+   */
+  it("says one when it was handed one, rather than two whatever it was handed", async () => {
+    const [first] = await floorsFor({ origin: ORIGIN, theme: DEFAULT_THEME })
+
+    expect(first).toBeDefined()
+
+    const built = wordsOf(
+      treeFor(YOUR_COMPONENTS, {
+        origin: ORIGIN,
+        theme: DEFAULT_THEME,
+        floors: first === undefined ? [] : [first],
+      }).root
+    )
+
+    expect(built).toContain("1 of the three, put to this site")
+    expect(built).not.toContain("2 of the three, put to this site")
+  })
+
+  /**
+   * Nothing else about the page is a function of the run, which is what keeps
+   * every reader of it looking at the same two answers: the requests are fixed
+   * in `render.ts` rather than read off the address.
+   */
+  it("changes nothing else the builder wrote", async () => {
     const served = await pageTreeFor(YOUR_COMPONENTS, { origin: ORIGIN, theme: DEFAULT_THEME })
 
-    expect(JSON.stringify(served)).toBe(
-      JSON.stringify(treeFor(YOUR_COMPONENTS, { origin: ORIGIN, theme: DEFAULT_THEME }))
+    expect(wordsOf(served.root)).toContain(SPECIMEN_ROWS.description())
+    expect(wordsOf(served.root)).toContain(
+      "The ready-made ones are a starting point, not the deal"
     )
   })
 })

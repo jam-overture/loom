@@ -6,6 +6,7 @@ import type { JsonObject, JsonObjectView } from "../json.js"
 import type { BehaviourName } from "../render/behaviour.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
+import type { BindingDeclaration } from "../render/reads.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import type { PrimitiveRole } from "../role.js"
 
@@ -52,8 +53,9 @@ import type { PrimitiveRole } from "../role.js"
  *   declaring it empty are different answers.
  * - `reads` — which binding names it reads an answer under, so a model can be
  *   told them and the walk can say when a tree asked under a name this
- *   primitive never reads (0181). Optional, and the second declaration where
- *   leaving it out and declaring it empty differ.
+ *   primitive never reads (0181). Each entry is a fixed name or the name a prop
+ *   gives (0184). Optional, and the second declaration where leaving it out and
+ *   declaring it empty differ.
  */
 
 export type PrimitiveDefinition<
@@ -167,6 +169,12 @@ export type PrimitiveDefinition<
    * name nothing reads resolves cleanly and is then read by nobody. Declaring
    * the names is what lets something say so.
    *
+   * An entry is either a name or `{ fromProp, default }`, which says *under
+   * whichever name this prop gives, and this one when it gives none* (0184).
+   * The second form is what a primitive that takes its binding name from a prop
+   * has to declare, because a fixed list could only say something untrue about
+   * it.
+   *
    * Optional, and — like `copy`, and for the same reason — leaving it out and
    * declaring it empty are different answers. `[]` says *this primitive reads
    * no data*; absence says *nobody has said*, and the seam reports the second
@@ -174,11 +182,12 @@ export type PrimitiveDefinition<
    * made, and the claim would be wrong for every bound primitive written before
    * anyone thought to declare one.
    *
-   * These are binding names and not prop names, so the registry checks them
-   * against the grammar rather than against the props schema — there is no
-   * second list here for them to drift out of agreement with.
+   * A name is checked against the binding grammar rather than against the props
+   * schema, because it is not a prop name. The one half that *is* a prop name —
+   * `fromProp` — is checked against the schema the way `copy` and `frames` are,
+   * so a declaration cannot go on naming a prop that was renamed away.
    */
-  readonly reads?: readonly string[]
+  readonly reads?: readonly BindingDeclaration[]
   readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
@@ -228,7 +237,7 @@ export type PrimitiveEntry = {
    * `undefined` is carried through rather than defaulted to `[]`, because the
    * two mean different things here and all the way out to the render walk.
    */
-  readonly reads: readonly string[] | undefined
+  readonly reads: readonly BindingDeclaration[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 

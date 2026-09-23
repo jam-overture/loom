@@ -41,6 +41,8 @@ const page = (specifier: string, symbols: readonly (readonly [string, ApiKind])[
   slug: "invented",
   types: "./dist/invented.d.ts",
   requires: [],
+  files: 0,
+  narrower: [],
   groups: [
     {
       module: "invented",

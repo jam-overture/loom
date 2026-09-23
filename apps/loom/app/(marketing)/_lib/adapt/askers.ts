@@ -17,7 +17,7 @@ import {
 
 import { askById, askInterpreter, type Ask, type AskId } from "./asks"
 import { NOT_A_RULE, WEIGHT } from "./record"
-import { FRONT_DOOR_POLICY } from "./run"
+import { FRONT_DOOR_POLICY, SITE_PROPS_VOCABULARY } from "./run"
 
 /**
  * Who is asking, and the one thing on this site that turns on the answer.
@@ -186,6 +186,12 @@ const put = async (page: LoomTree, ask: Ask, asker: Asker): Promise<Run> => {
   const runtime: CompositionRuntime = {
     interpreter: askInterpreter(ask, idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),
+    /**
+     * The floors are not per asker, and that is the point worth keeping here. A
+     * ceiling reads who wanted a change; a piece nobody described draws nothing
+     * whoever asked for it, so all sixteen runs meet the same two.
+     */
+    propsVocabulary: SITE_PROPS_VOCABULARY,
     events: noopEventSink,
     clock: systemClock,
     idFactory,

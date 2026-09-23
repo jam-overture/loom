@@ -1,10 +1,12 @@
 import type { CataloguedPrimitive, CataloguedProp, PrimitiveCatalogue } from "../catalogue.js"
 import type { DataCatalogue } from "../data/catalogue.js"
+import type { BindingName } from "../data/source.js"
 import type { FrameCatalogue } from "../frame/catalogue.js"
 import type { SubmissionCatalogue } from "../submit/catalogue.js"
 import type { ThemeCatalogue, ThemeCatalogueEntry } from "../theme/registry.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject, JsonValue } from "../json.js"
+import type { BindingDeclaration } from "../render/reads.js"
 import { assertNever } from "../result.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
 import type { LoomNode } from "../tree/node.js"
@@ -180,8 +182,22 @@ const renderCataloguedReads = (primitive: CataloguedPrimitive): string => {
   if (primitive.reads === undefined) return ""
   if (primitive.reads.length === 0) return " reads: none"
 
-  return ` reads: ${primitive.reads.join(", ")}`
+  return ` reads: ${primitive.reads.map(renderCataloguedRead).join(", ")}`
 }
+
+/**
+ * One entry of that clause: a name, or the prop that gives one.
+ *
+ * The prop-named form is spelled out rather than shortened to its default,
+ * because the default is the less useful half of what a model needs. A model
+ * binding one thing writes the default and says nothing; a model binding a
+ * second thing to the same primitive has to know that the prop is what makes
+ * the two names differ, and the only place it could learn that is here.
+ */
+const renderCataloguedRead = (read: BindingDeclaration<BindingName>): string =>
+  typeof read === "string"
+    ? read
+    : `the name in "${read.fromProp}" (default ${read.default})`
 
 /**
  * A description ends its own sentence, and the renderer finishes one that does

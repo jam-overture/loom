@@ -5,6 +5,8 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
+      "files": 91,
+      "narrower": [],
       "groups": [
         {
           "module": "catalogue",
@@ -21,7 +23,7 @@
             {
               "name": "CataloguedPrimitive",
               "kind": "type",
-              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n    /**\n     * The binding names this primitive reads an answer under, name-sorted.\n     * `undefined` when its author has not said — which, like `props`, is not the\n     * same claim as \"none\" and is not rounded to one.\n     *\n     * It is the one field here that is about what the primitive *asks the\n     * deployment for* rather than about what a tree may write on it, and it is\n     * here because the name in a binding belongs to the primitive. A model is\n     * told which sources exist by the data catalogue; without this it was never\n     * told which names those answers may be filed under, so the only name it\n     * could write was one it had seen on the page already.\n     */\n    readonly reads: readonly BindingName[] | undefined;\n};",
+              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n    /**\n     * The binding names this primitive reads an answer under, in declaration\n     * order. `undefined` when its author has not said — which, like `props`, is\n     * not the same claim as \"none\" and is not rounded to one.\n     *\n     * An entry is a name, or the prop that gives one and the name it falls back\n     * to. The second form is carried out rather than flattened to its\n     * default, because the two say different things to a model: one name it must\n     * write, against one name it may replace by setting a prop.\n     *\n     * It is the one field here that is about what the primitive *asks the\n     * deployment for* rather than about what a tree may write on it, and it is\n     * here because the name in a binding belongs to the primitive. A model is\n     * told which sources exist by the data catalogue; without this it was never\n     * told which names those answers may be filed under, so the only name it\n     * could write was one it had seen on the page already.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -4262,6 +4264,8 @@
           "reach": "declared"
         }
       ],
+      "files": 2,
+      "narrower": [],
       "groups": [
         {
           "module": "interpretation/anthropic",
@@ -4298,6 +4302,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 56,
+      "narrower": [],
       "groups": [
         {
           "module": "render/addressing",
@@ -4851,9 +4857,16 @@
           "summary": "What a primitive says it reads, and what a tree asked for that nothing will look at.",
           "symbols": [
             {
+              "name": "BindingDeclaration",
+              "kind": "type",
+              "signature": "type BindingDeclaration<Name extends string = string> = Name | {\n    /** The prop whose value is the name. Declared by the primitive's schema. */\n    readonly fromProp: string;\n    /** The name read when that prop is absent, which is the common case. */\n    readonly default: Name;\n};",
+              "truncated": false,
+              "summary": "The name a primitive reads one answer under: a fixed one, or the one a prop gives."
+            },
+            {
               "name": "BindingReader",
               "kind": "interface",
-              "signature": "interface BindingReader {\n    readonly bindingsReadBy: (type: PrimitiveType) => readonly string[] | undefined;\n}",
+              "signature": "interface BindingReader {\n    readonly bindingsReadBy: (type: PrimitiveType) => readonly BindingDeclaration[] | undefined;\n}",
               "truncated": false,
               "summary": "Which binding names a primitive says it reads, asked per type."
             },
@@ -4867,7 +4880,7 @@
             {
               "name": "unreadBindings",
               "kind": "function",
-              "signature": "const unreadBindings: (asked: Iterable<string>, declared: readonly string[] | undefined) => readonly string[]",
+              "signature": "const unreadBindings: (asked: Iterable<string>, declared: readonly BindingDeclaration[] | undefined, props: JsonObject) => readonly string[]",
               "truncated": false,
               "summary": "The names this node asked under that its primitive says it does not read."
             }
@@ -5104,6 +5117,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 174,
+      "narrower": [],
       "groups": [
         {
           "module": "primitives",
@@ -5546,6 +5561,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 35,
+      "narrower": [],
       "groups": [
         {
           "module": "catalogue",
@@ -5562,7 +5579,7 @@
             {
               "name": "CataloguedPrimitive",
               "kind": "type",
-              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n    /**\n     * The binding names this primitive reads an answer under, name-sorted.\n     * `undefined` when its author has not said — which, like `props`, is not the\n     * same claim as \"none\" and is not rounded to one.\n     *\n     * It is the one field here that is about what the primitive *asks the\n     * deployment for* rather than about what a tree may write on it, and it is\n     * here because the name in a binding belongs to the primitive. A model is\n     * told which sources exist by the data catalogue; without this it was never\n     * told which names those answers may be filed under, so the only name it\n     * could write was one it had seen on the page already.\n     */\n    readonly reads: readonly BindingName[] | undefined;\n};",
+              "signature": "type CataloguedPrimitive = {\n    readonly type: PrimitiveType;\n    /** One line, written by the primitive's author, about what it is for. */\n    readonly description: string;\n    /**\n     * Declared props, name-sorted. `undefined` when the declared schema is not an\n     * object schema and its keys therefore cannot be enumerated — unknown, which\n     * is not the same claim as \"none\".\n     */\n    readonly props: readonly CataloguedProp[] | undefined;\n    readonly slots: readonly SlotName[];\n    /**\n     * The binding names this primitive reads an answer under, in declaration\n     * order. `undefined` when its author has not said — which, like `props`, is\n     * not the same claim as \"none\" and is not rounded to one.\n     *\n     * An entry is a name, or the prop that gives one and the name it falls back\n     * to. The second form is carried out rather than flattened to its\n     * default, because the two say different things to a model: one name it must\n     * write, against one name it may replace by setting a prop.\n     *\n     * It is the one field here that is about what the primitive *asks the\n     * deployment for* rather than about what a tree may write on it, and it is\n     * here because the name in a binding belongs to the primitive. A model is\n     * told which sources exist by the data catalogue; without this it was never\n     * told which names those answers may be filed under, so the only name it\n     * could write was one it had seen on the page already.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -5849,7 +5866,7 @@
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly string[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
@@ -5933,14 +5950,14 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under. `undefined` where the\n     * primitive has not said, which is not the same answer as `[]` and is not\n     * rounded to it — the walk reports under the first and stays quiet under the\n     * second.\n     */\n    readonly reads: readonly BindingName[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6086,6 +6103,8 @@
       "slug": "cli",
       "types": "./dist/cli/index.d.ts",
       "requires": [],
+      "files": 11,
+      "narrower": [],
       "groups": [
         {
           "module": "cli/args",
@@ -6304,6 +6323,8 @@
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
+      "files": 26,
+      "narrower": [],
       "groups": [
         {
           "module": "store/attribution",
@@ -6711,6 +6732,8 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
+      "files": 52,
+      "narrower": [],
       "groups": [
         {
           "module": "write/commit",
@@ -7055,6 +7078,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 27,
+      "narrower": [],
       "groups": [
         {
           "module": "store/database",
@@ -7168,6 +7193,18 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
+      "files": 23,
+      "narrower": [
+        {
+          "specifier": "@loom/runtime/signals/broadcast",
+          "slug": "signals-broadcast",
+          "avoids": [
+            "zod"
+          ],
+          "shared": 14,
+          "files": 9
+        }
+      ],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7904,6 +7941,8 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
+      "files": 9,
+      "narrower": [],
       "groups": [
         {
           "module": "signals/broadcast",
@@ -8031,6 +8070,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 12,
+      "narrower": [],
       "groups": [
         {
           "module": "signals/migrate",
@@ -8081,6 +8122,8 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
+      "files": 25,
+      "narrower": [],
       "groups": [
         {
           "module": "telemetry/calibration",
@@ -8593,6 +8636,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 21,
+      "narrower": [],
       "groups": [
         {
           "module": "telemetry/migrate",
@@ -8657,6 +8702,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 84,
+      "narrower": [],
       "groups": [
         {
           "module": "testing/definitions",
@@ -9063,6 +9110,8 @@
           "reach": "loaded"
         }
       ],
+      "files": 36,
+      "narrower": [],
       "groups": [
         {
           "module": "testing/hold-contract",
