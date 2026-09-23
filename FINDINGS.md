@@ -30024,3 +30024,82 @@ in the set of nodes it builds and therefore clears 0162 without argument. The
 precedent for a band declaring a binding a host has not registered is
 `articles-feed`, which ships unbound deliberately (0180 §6) and draws a designed
 empty region rather than a hole.
+
+---
+## 2026-09-23 — every URL this project has had mangled in a pull request ends in `.png`, and the two earlier explanations were both too broad
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**supersedes the 20 September entry's diagnosis and answers the question #369
+declined to guess at.** The workaround is one sentence and is at the bottom
+
+Three entries have circled this and none had a controlled comparison, because
+each run posted URLs in one form and inferred from whether they survived. This
+run happened to post **both** forms in one request, which settles it.
+
+### The measurement
+
+| what was posted | where | outcome |
+| --- | --- | --- |
+| bare `.md` URL, alone on a line | PR body | **survives** — twice |
+| bare `.md` URL, alone on a line | comment | **survives** |
+| bare `*.vercel.app` URL, alone on a line | comment | **survives** |
+| bare `.png` URL, alone on a line | PR body | **wrapped in ``` `` ```** — four times |
+| markdown link whose target is `.png` | comment | **four backticks inserted inside the target** — four times |
+
+Eight mangled, five clean, and the partition is exact: **every mangled URL ends
+in `.png` and every surviving one does not.** Same host, same branch, same
+`reports/` directory, and in the body's case the same single request — the
+report link at the top and the four screenshot links twelve lines below it went
+in together and came back differently.
+
+The markdown-link case is the worse of the two and is worth quoting, because it
+is not a wrapping at all:
+
+```
+[Four bands under `bold`, 1280px](````https://github.com/…-bold-wide.png)````
+```
+
+The backticks land *inside* the parentheses and after the closing one, so the
+link is destroyed rather than demoted to a code span. A run that switched to
+markdown links on the strength of the bare form failing would be going
+backwards, which is worth knowing before somebody tries it.
+
+### What this corrects
+
+- **20 September** — *"every screenshot in every pull request this project has
+  opened is a broken image, and the cause is outside the repository"*, diagnosed
+  as the PR tool wrapping URLs in backticks. The wrapping is real and the
+  diagnosis is **too broad**: it does not touch `.md`, and three of this run's
+  links prove it.
+- **#367** — corrected the above to *the images are 404s because the repository
+  is private and GitHub's proxy fetches anonymously*. That is **separately true
+  and about a different thing**: it explains why an **embed** (`![](…)`) is
+  broken. It does not explain a **link** being rewritten, and the two have been
+  conflated since.
+- **#369** — found the recorded `decisions/` correlation dead, noted the
+  mangling hit `reports/` in a plain paragraph as well as in a table, and
+  declined to replace it with a guess. Right to decline; the replacement is
+  above, and `decisions/` versus `reports/` was never the variable.
+
+### The hypothesis, stated as one
+
+Something on the posting path rewrites a URL it reads as an image, plausibly to
+stop a bare image URL auto-embedding into a proxy fetch that — on a private
+repository — would 404 for every reader. If that is what it is, the intent is
+sound, and it misfires because **a link to an image is not an embed** and this
+project has only ever wanted the link.
+
+Not verified. What is verified is the table, and the table is enough to act on.
+
+### The workaround, which is the whole practical content
+
+> **Never put an image URL in a pull request body or comment, in any form.**
+> Link the report; a signed-in reader sees the images rendered inside it.
+
+The report is a `.md` file in the branch, every lane already writes one, and
+every screenshot is already embedded in it with a caption. That is a better
+artefact than a list of bare links in a PR body, so the workaround costs nothing
+and the procedure's *a screenshot of every primitive, under both palettes* is
+satisfied by the thing that was being written anyway. Where individual files are
+wanted, a link to the branch's `reports/` **directory** carries no extension and
+survives.

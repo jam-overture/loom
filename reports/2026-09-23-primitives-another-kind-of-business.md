@@ -50,7 +50,7 @@ and seven that need a run.
 | **primitive types some band can reach** | 73 → **81** of 98 |
 | `COMPOSITION_PARTS` | 22 → **22** |
 | new tests | **7**, five of them checked by mutation |
-| findings | **4 filed**, two of them corrections to this lane's own inventory |
+| findings | **5 filed**, three of them corrections to entries this project already had |
 
 ### `pricing-offerings` — a studio's menu of engagements
 
@@ -235,6 +235,39 @@ the CONNECT tunnel with a 403, which is the standing 19 August limit arriving
 with a different error string than `EGRESS_BLOCKED`. Nineteenth consecutive
 check from a routine session and it has never once been reachable. The visual standard for this run was `loom.hero`, `loom.feature-grid`
 and the four photographs beside this file.
+
+## One finding made after the pull request was open
+
+The four screenshot URLs in the PR body came back from the API **wrapped in
+double backticks**, which makes them code spans rather than links — so the
+thing the procedure says *has to be looked at* was not pressable. Posting them
+again as markdown links was worse: the backticks landed *inside* the target and
+destroyed the markdown outright.
+
+The same body carried two URLs that were untouched, in the same request, from
+the same directory on the same branch. Reading all thirteen back gives an exact
+partition:
+
+| posted | outcome |
+| --- | --- |
+| bare `.md`, in a body and in a comment | **survives**, three times |
+| bare `*.vercel.app`, in a comment | **survives** |
+| bare `.png`, in a body | **wrapped**, four times |
+| markdown link to `.png`, in a comment | **target destroyed**, four times |
+
+**Every mangled URL ends in `.png` and every surviving one does not.** That
+supersedes the 20 September diagnosis, which blamed the tool for wrapping URLs
+generally and is too broad; it is a different thing from #367's correct note
+that an *embed* 404s because the repository is private; and it is the answer
+#369 rightly declined to guess at, available here only because both forms went
+in one request.
+
+The workaround is the one this lane was already most of the way to: **never put
+an image URL in a pull request, in any form — link the report.** Every lane
+writes one, every screenshot is already embedded in it with a caption, and a
+signed-in reader sees them rendered. A link to the branch's `reports/`
+**directory** carries no extension and survives, for the case where individual
+files are wanted.
 
 ## Outside the lane
 
