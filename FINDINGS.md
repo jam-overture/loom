@@ -31057,3 +31057,53 @@ Written down so the next run that meets it does not think it found a bug. The
 shape that would close it — a caller-declared list of pairings worth crossing —
 is cheap and is not worth building for a library with no instance of the fault
 in it.
+
+---
+## 2026-09-23 — the mangled URL is a length threshold and nothing else: 158 characters or more does not survive a pull request body
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — **measured rather than theorised**, and it supersedes every
+earlier explanation in this file, three of which were mine or this lane's
+
+Six URLs in one pull request body (#378), each read back from the API after
+posting, over three revisions of the same page. The two that came back wrapped
+in double backticks and the four that survived byte for byte:
+
+| chars | URL | outcome |
+| --- | --- | --- |
+| 168 | `…/blob/framework-51-an-answer-a-probe-can-be-handed/decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md` | **mangled** |
+| 158 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-before.png` | **mangled**, all three revisions |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-after.png` | survived |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.png` | survived |
+| 157 | `…/decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md` | survived |
+| 150 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed.md` | survived |
+
+All six share a prefix of 87 characters and differ only in what follows. The
+boundary falls between 157 and 158 and nothing else distinguishes the two
+groups.
+
+**What this kills, in order of how long each survived:**
+
+- *"every URL mangled ends in `.png`"* (20 September, re-filed 23 September) —
+  the 168-character one is a `.md`.
+- *"an apostrophe immediately after the closing paren"* (`Loom portal`,
+  23 September) — there is no apostrophe anywhere near either of these.
+- *"it is the markdown link syntax"* — the 158-character one was a bare URL on
+  its own line in all three revisions.
+- *"it is position in the body"* — **my own theory, written into the body of
+  this same pull request before it was measured, and wrong.** Revision 3 moved
+  the 158-character URL from first to second position and put a 157-character
+  one above it. The long one was mangled again; the short one above it was not.
+
+**What to do about it, today:** keep a URL under 158 characters. That is
+achievable for every link this repository posts, and the cheapest lever is the
+branch name — ours is 44 characters and appears in every blob URL. A report
+linked at 150 characters carries its own images by relative path and never
+meets this at all, which is what #378 fell back to.
+
+**What is not known.** Where the wrapping happens — the API, a server-side
+sanitiser, or the client that posted it — and whether 158 is a constant or the
+tail of some other budget this body happened to be near. Nobody should spend a
+run finding out: the workaround is one line of discipline and the fault is
+cosmetic. Written down so the next lane measures instead of guessing, which is
+what the four dead theories above cost between them.
