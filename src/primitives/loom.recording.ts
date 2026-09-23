@@ -172,6 +172,33 @@ export const loomRecording = definePrimitive({
      */
     const framed = given.artwork !== undefined || playable
 
+    /**
+     * **A ratio reserves the shape of a picture, so a frame with no picture in
+     * it does not get one.**
+     *
+     * `shape` was applied unconditionally until 23 September, and the first
+     * band to place a shelf of recordings without cover art is what found it.
+     * In the row arrangement the mistake is invisible — the art column is
+     * `11rem` wide and a square of that is a small mark. In the **stacked**
+     * arrangement, which is every one of these cards on a phone, the art is the
+     * card's full width, and `aspect-ratio: 1 / 1` turns a play mark into a
+     * 350-pixel void with a button floating in the middle of it. Six of them
+     * down a phone screen read as six cards that failed to load.
+     *
+     * Nothing was wrong in the source and no test could have caught it: the
+     * ratio was exactly the one asked for, the mark was centred in it, and the
+     * band renders with no diagnostic at either width. It is the second defect
+     * in this file found by photographing a record with no artwork — the
+     * `border-strong` note below is the first — which is worth saying plainly,
+     * because *a card with no cover* is the ordinary case for a page whose
+     * pictures are not ready, not an edge one.
+     *
+     * A fixed block size rather than a smaller ratio: with no picture there is
+     * no proportion to keep, only a mark to place and a runtime to put beside
+     * it, and both are the same height whatever the card is doing.
+     */
+    const marked = framed && given.artwork === undefined
+
     const art: ReactNode = !framed
       ? null
       : createElement(
@@ -180,7 +207,7 @@ export const loomRecording = definePrimitive({
             key: "art",
             className: LIBRARY_CLASS.recordingArt,
             style: {
-              aspectRatio: SHAPES[given.shape ?? "wide"],
+              ...(marked ? { blockSize: "4.75rem" } : { aspectRatio: SHAPES[given.shape ?? "wide"] }),
               background: colour("bg-surface-muted"),
             },
           },

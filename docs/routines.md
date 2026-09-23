@@ -268,6 +268,73 @@ your application.** And one rule worth keeping in mind while writing one:
 submits by fetch, so the page is idle *before* the cookie it sets exists — one
 run photographed a sign-in page believing it was the screen behind it.
 
+#### Reaching the state, and the screen behind a session
+
+A shot may do things before the shutter, and a shot may be *preceded* by an
+address it never photographs
+([0182](../decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md),
+extending [0159](../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
+That is the whole of how a signed-in screen gets photographed — there is no
+`signIn` step and there is not going to be one:
+
+```json
+{
+  "path": "/portal/readers",
+  "out": "2026-09-22-readers-wide",
+  "waitFor": "[data-readers]",
+  "before": {
+    "path": "/portal/sign-in",
+    "waitFor": "#email",
+    "do": [
+      { "fill": "#email", "text": "reviewer@example.com" },
+      { "fill": "#password", "text": "…" },
+      { "click": "button[type=submit]" },
+      { "waitFor": "[data-signed-in]" }
+    ]
+  }
+}
+```
+
+| in a `do` list | what it does |
+| --- | --- |
+| `{ "click": "<selector>" }` | press it. The selector must match **one** element |
+| `{ "fill": "<selector>", "text": "…" }` | type into it. `""` clears it |
+| `{ "waitFor": "<selector>" }` | wait for it to appear. The **first** match; several is fine |
+| `{ "wait": <ms> }` | let it settle. 30 seconds is the ceiling and there is no way past it |
+
+`before` is one approach — a `path`, an optional `waitFor`, an optional `frame`,
+and a `do` list — made in the shot's own browser context before its own address
+is opened. Every shot gets a fresh context, so a shot list of eight signed-in
+screens signs in eight times and each of the eight can be re-run on its own.
+
+**The trailing `{ "waitFor": … }` in that example is load-bearing**, and it is
+the rule above applied to a sequence rather than to a load. Without it the
+press resolves, the shot navigates, and the cookie is set a moment later against
+a page nobody is looking at — the picture that comes back is byte-identical to
+the one you get without signing in at all. That was photographed on the run that
+built this, both ways, and the two files have the same `md5`.
+
+**`frame`** names the document an approach's selectors resolve against —
+`waitFor`, every step, and `clip`:
+
+```json
+{ "path": "/", "out": "…", "frame": "iframe#demo", "waitFor": "[data-stage]",
+  "do": [{ "click": "[data-yes]" }] }
+```
+
+A selector engine pierces an open shadow root and does not pierce a browsing
+context, so without it a page that *contains* the surface — the front door
+frames `/demo` — can be photographed and not touched. It does not apply to
+`fullPage` or to the viewport shot: a frame is not a page. One thing to know:
+navigation is pinned in the **top** document only, so a link pressed inside a
+frame still navigates that frame, and a `waitFor` step is how the shot
+re-synchronises.
+
+**What a shot list still cannot do**, so nobody spends a run finding out: run a
+script of its own, hover, scroll to a position, or read anything back out of the
+page. The first is refused (0159, 0182); the middle two are simply not asked for
+yet and would be a finding rather than an argument; the last is the line itself.
+
 ### The three files every lane writes to
 
 Almost every branch in this repository touches the same three, and almost every

@@ -68,14 +68,22 @@ export type DemoPreset = {
   readonly plan: (tree: LoomTree, ids: IdFactory) => readonly TreeOperation[] | undefined
 }
 
-const elementsOf = (node: LoomNode): readonly ElementNode[] => {
+/**
+ * Every element under a node, this one first.
+ *
+ * Exported because `share.ts` needs the same walk to read the page's own
+ * headline off the tree, and a second copy of four lines is how two readings of
+ * one page come to disagree about what is on it.
+ */
+export const elementsOf = (node: LoomNode): readonly ElementNode[] => {
   if (node.kind === "text") return []
   const here = node.kind === "element" ? [node] : []
 
   return [...here, ...node.children.flatMap(elementsOf)]
 }
 
-const firstOfType = (tree: LoomTree, type: string): ElementNode | undefined =>
+/** The first element of a type, in document order. */
+export const firstOfType = (tree: LoomTree, type: string): ElementNode | undefined =>
   elementsOf(tree.root).find((element) => element.type === type)
 
 /** Only the root's own children can be reordered as page bands. */

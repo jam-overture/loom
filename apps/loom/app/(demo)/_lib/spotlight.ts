@@ -168,8 +168,13 @@ const restoringLabel = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"
  * back, and it cannot be read off the operation: both are an `insert`. It is the
  * runtime's `REVERT_INTERPRETER` stamp, read through `undo.ts`, which is the
  * same source the card's own quotation uses.
+ *
+ * Exported so the share card can draw the chip the page draws rather than a
+ * sentence somebody typed into a picture. A shared link is the one place this
+ * surface's words are read by people who have not seen the surface, so a chip
+ * invented there would be the only copy on this project nothing could correct.
  */
-const labelFor = (
+export const labelFor = (
   kind: TouchKind,
   tone: SpotTone,
   placed: "node" | "near",

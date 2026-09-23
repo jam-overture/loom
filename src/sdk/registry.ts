@@ -20,7 +20,7 @@ import {
   type BehaviourResolver,
 } from "../render/behaviour.js"
 import type { FrameResolver } from "../render/frame.js"
-import type { BindingReader } from "../render/reads.js"
+import type { BindingDeclaration, BindingReader } from "../render/reads.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
@@ -80,12 +80,12 @@ export type RegisteredPrimitive = {
    */
   readonly copy: readonly string[] | undefined
   /**
-   * The binding names it reads an answer under (0181). `undefined` where the
-   * primitive has not said, which is not the same answer as `[]` and is not
-   * rounded to it — the walk reports under the first and stays quiet under the
-   * second.
+   * The binding names it reads an answer under (0181), each either a name or
+   * the prop that gives one (0184). `undefined` where the primitive has not
+   * said, which is not the same answer as `[]` and is not rounded to it — the
+   * walk reports under the first and stays quiet under the second.
    */
-  readonly reads: readonly BindingName[] | undefined
+  readonly reads: readonly BindingDeclaration<BindingName>[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -115,8 +115,15 @@ export type RegistryError =
       readonly type: string
       readonly behaviour: string
     }
+  | {
+      readonly code: "unpaired-behaviour"
+      readonly type: string
+      readonly behaviour: string
+      readonly requires: string
+    }
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "invalid-binding-name"; readonly type: string; readonly name: string }
+  | { readonly code: "undeclared-reads-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
@@ -167,6 +174,10 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
     case "invalid-binding-name":
       return `"${error.type}" says it reads a binding called "${error.name}", which is not a binding name — ${BINDING_NAME_EXPECTATION}; a tree cannot ask under a name it cannot write, so this primitive would report every binding it was ever given`
+    case "unpaired-behaviour":
+      return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
+    case "undeclared-reads-prop":
+      return `"${error.type}" says it reads a binding under whichever name its "${error.prop}" prop gives, which its props schema does not declare; that prop can never arrive, so the primitive would read its default for ever and go on doing so after the prop it names was renamed`
     case "unknown-role":
       return `"${error.type}" declares the role "${error.role}", which the runtime has none of; the vocabulary is closed and its members are ${PRIMITIVE_ROLES.map((role) => `"${role}"`).join(", ")} — and a misspelling accepted here would read to every consumer as a primitive that declares no role at all`
     case "duplicate-primitive-type":
@@ -245,11 +256,12 @@ const undeclaredCopyProp = (entry: PrimitiveEntry): string | undefined => {
 /**
  * The declared behaviours, or the first thing wrong with them.
  *
- * Three checks, and each one is the whole of what can be known without calling
+ * Four checks, and each one is the whole of what can be known without calling
  * the component: the name is in the vocabulary, the strings its control needs
- * are strings this primitive declares, and a primitive taking a control says it
- * renders a target. Whether the primitive actually *places* what it declared
- * needs the component called, which is the audit's job and not this one's.
+ * are strings this primitive declares, a primitive taking a control says it
+ * renders a target, and a control that answers to another one was declared
+ * beside it. Whether the primitive actually *places* what it declared needs the
+ * component called, which is the audit's job and not this one's.
  */
 const registeredBehaviours = (
   entry: PrimitiveEntry
@@ -271,6 +283,16 @@ const registeredBehaviours = (
 
     if (BEHAVIOURS[behaviour].rendersControl && !entry.interactive) {
       return err({ code: "undeclared-interactive-behaviour", type: entry.type, behaviour })
+    }
+
+    /**
+     * Checked against the entry's own raw list rather than against `names`, so
+     * the two may be declared in either order — a primitive that names the
+     * cross before the trigger is not making a mistake.
+     */
+    const requires = BEHAVIOURS[behaviour].requires
+    if (requires !== undefined && !entry.behaviours.includes(requires)) {
+      return err({ code: "unpaired-behaviour", type: entry.type, behaviour, requires })
     }
 
     names.push(behaviour)
@@ -299,33 +321,64 @@ const registeredRole = (
 }
 
 /**
- * The declared binding names, checked against the grammar a tree has to write
- * them in — `undefined` for the primitive that has not said, which is all of
+ * The declared bindings, checked against the grammar a tree has to write their
+ * names in — `undefined` for the primitive that has not said, which is all of
  * them until their authors do.
  *
- * Unlike `frames` and `copy` there is no second list to drift against: a
- * binding name is not a prop, so nothing here can be renamed out from under the
- * declaration. What is checked is the only thing that can be wrong, and it is
- * worth checking because it fails in the worst direction — a name no tree could
- * ever write is a name no binding can ever match, so the primitive would report
- * every binding it was handed rather than none.
+ * Every entry carries a name to check, and the check is worth making because it
+ * fails in the worst direction: a name no tree could ever write is a name no
+ * binding can ever match, so the primitive would report every binding it was
+ * handed rather than none. On a prop-named entry that name is the default,
+ * which is what a node that says nothing reads.
+ *
+ * The prop-named form brings the one thing the first form did not have — a prop
+ * name, which *can* be renamed out from under the declaration — so it is
+ * checked against the schema exactly as `frames` and `copy` are. What the
+ * catalogue knows about a prop is its name and whether it is required (0009),
+ * so that a declared prop holds a string is not checkable here and is not
+ * claimed to be; a value that is not one falls back to the default at the walk.
  */
 const registeredReads = (
   entry: PrimitiveEntry
-): Result<readonly BindingName[] | undefined, RegistryError> => {
+): Result<readonly BindingDeclaration<BindingName>[] | undefined, RegistryError> => {
   if (entry.reads === undefined) return ok(undefined)
 
-  const names: BindingName[] = []
+  const declarations: BindingDeclaration<BindingName>[] = []
 
-  for (const name of entry.reads) {
-    const parsed = bindingNameSchema.safeParse(name)
-    if (!parsed.success) return err({ code: "invalid-binding-name", type: entry.type, name })
+  for (const declaration of entry.reads) {
+    const written = typeof declaration === "string" ? declaration : declaration.default
+    const parsed = bindingNameSchema.safeParse(written)
 
-    names.push(parsed.data)
+    if (!parsed.success) {
+      return err({ code: "invalid-binding-name", type: entry.type, name: written })
+    }
+
+    if (typeof declaration === "string") {
+      declarations.push(parsed.data)
+      continue
+    }
+
+    if (!declaresProp(entry, declaration.fromProp)) {
+      return err({ code: "undeclared-reads-prop", type: entry.type, prop: declaration.fromProp })
+    }
+
+    declarations.push({ fromProp: declaration.fromProp, default: parsed.data })
   }
 
-  return ok(Object.freeze(names))
+  return ok(Object.freeze(declarations))
 }
+
+/**
+ * Whether the props schema names this prop.
+ *
+ * `true` when the schema's keys cannot be enumerated at all, which is the same
+ * answer `undeclaredCopyProp` gives and for the same reason: a union of shapes
+ * is a schema the catalogue reports as unknown, and refusing a registration on
+ * the strength of a list that was never built would refuse the honest along
+ * with the mistaken.
+ */
+const declaresProp = (entry: PrimitiveEntry, prop: string): boolean =>
+  !entry.declaredProps || entry.declaredProps.some((declared) => declared.name === prop)
 
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
   const type = primitiveTypeSchema.safeParse(entry.type)
@@ -454,7 +507,7 @@ export const createPrimitiveRegistry = (
      * `unknown-primitive`, and has no standing to say anything about what that
      * primitive reads.
      */
-    bindingsReadBy: (type: PrimitiveType): readonly string[] | undefined =>
+    bindingsReadBy: (type: PrimitiveType): readonly BindingDeclaration[] | undefined =>
       byType.get(type)?.reads,
     /**
      * `undefined` for a type nobody registered as well as for one that declared

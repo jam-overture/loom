@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect width="900" height="520" fill="#ffffff"/>
+
+  <text x="40" y="44" font-size="20" font-weight="700" fill="#111827">A shot is an approach with a camera on the end</text>
+  <text x="40" y="68" font-size="13" fill="#6b7280">one browser context per shot — which is why the session has to be produced inside it</text>
+
+  <!-- the context -->
+  <rect x="40" y="96" width="820" height="150" rx="14" fill="#f9fafb" stroke="#e5e7eb"/>
+  <text x="60" y="122" font-size="12" font-weight="700" fill="#9ca3af" letter-spacing="0.06em">ONE CONTEXT · 1280×900@2x · REDUCED MOTION</text>
+
+  <rect x="60" y="136" width="300" height="88" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="76" y="160" font-size="13.5" font-weight="700" fill="#111827">before — an approach</text>
+  <text x="76" y="182" font-size="12" fill="#6b7280">/portal/sign-in · waitFor · do</text>
+  <text x="76" y="202" font-size="12" fill="#6b7280">fill · fill · click · waitFor</text>
+  <text x="76" y="218" font-size="11.5" fill="#9ca3af">never photographed</text>
+
+  <path d="M368 180 L 400 180" stroke="#9ca3af" stroke-width="1.5"/>
+  <path d="M394 175 L 400 180 L 394 185" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="372" y="170" font-size="11" fill="#9ca3af">cookie</text>
+
+  <rect x="408" y="136" width="300" height="88" rx="10" fill="#ffffff" stroke="#111827"/>
+  <text x="424" y="160" font-size="13.5" font-weight="700" fill="#111827">the shot — an approach</text>
+  <text x="424" y="182" font-size="12" fill="#6b7280">/portal/readers · waitFor · do</text>
+  <text x="424" y="202" font-size="12" fill="#6b7280">+ viewport · frame · clip · out</text>
+  <text x="424" y="218" font-size="11.5" fill="#166534">measure, then the shutter</text>
+
+  <path d="M716 180 L 748 180" stroke="#9ca3af" stroke-width="1.5"/>
+  <path d="M742 175 L 748 180 L 742 185" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+  <rect x="756" y="160" width="84" height="40" rx="8" fill="#dcfce7"/>
+  <text x="772" y="185" font-size="12.5" fill="#166534">one .png</text>
+
+  <!-- the steps table -->
+  <text x="40" y="288" font-size="12" font-weight="700" fill="#9ca3af" letter-spacing="0.06em">A STEP</text>
+  <text x="300" y="288" font-size="12" font-weight="700" fill="#9ca3af" letter-spacing="0.06em">REACHES</text>
+  <text x="600" y="288" font-size="12" font-weight="700" fill="#9ca3af" letter-spacing="0.06em">ASKED FOR BY</text>
+  <line x1="40" y1="300" x2="860" y2="300" stroke="#e5e7eb"/>
+
+  <text x="40" y="328" font-size="13.5" fill="#111827">{ click }</text>
+  <text x="300" y="328" font-size="13" fill="#6b7280">the state a press produces</text>
+  <text x="600" y="328" font-size="13" fill="#9ca3af">0159, 15 September</text>
+  <line x1="40" y1="344" x2="860" y2="344" stroke="#f3f4f6"/>
+
+  <text x="40" y="372" font-size="13.5" fill="#111827">{ wait }</text>
+  <text x="300" y="372" font-size="13" fill="#6b7280">the state a settle produces · ceiling 30s</text>
+  <text x="600" y="372" font-size="13" fill="#9ca3af">0159, 15 September</text>
+  <line x1="40" y1="388" x2="860" y2="388" stroke="#f3f4f6"/>
+
+  <text x="40" y="416" font-size="13.5" font-weight="700" fill="#111827">{ fill, text }</text>
+  <text x="300" y="416" font-size="13" fill="#6b7280">a search box with a query in it</text>
+  <text x="600" y="416" font-size="13" fill="#111827">Loom docs, 19 September</text>
+  <line x1="40" y1="432" x2="860" y2="432" stroke="#f3f4f6"/>
+
+  <text x="40" y="460" font-size="13.5" font-weight="700" fill="#111827">{ waitFor }</text>
+  <text x="300" y="460" font-size="13" fill="#6b7280">the page a fetch-driven submit lands on</text>
+  <text x="600" y="460" font-size="13" fill="#111827">Loom portal, 14–21 September</text>
+  <line x1="40" y1="476" x2="860" y2="476" stroke="#f3f4f6"/>
+
+  <text x="40" y="504" font-size="13.5" font-weight="700" fill="#111827">frame:</text>
+  <text x="300" y="504" font-size="13" fill="#6b7280">a control inside the frame the door contains</text>
+  <text x="600" y="504" font-size="13" fill="#111827">Loom demo, 18 September</text>
+</svg>
