@@ -4,8 +4,8 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-50-a-name-a-prop-gives`
 **Section:** §2 — the data seam, reaching the catalogue, the interpreter's prompt and the render walk
-**Pull request:** #371
-**Preview:** https://loom-git-framework-50-a-name-a-prop-gives-jpizzolato36-6341s-projects.vercel.app
+**Pull request:** https://github.com/jam-overture/loom/pull/371
+**Preview:** https://loom-git-framework-50-a-name-beee2c-jpizzolato36-6341s-projects.vercel.app
 — there is nothing to look at beyond the figure below. This is a declaration
 seam whose surfaces are a string sent to a model and a diagnostic collected by
 the render walk, and no page in this repository declares one yet.
