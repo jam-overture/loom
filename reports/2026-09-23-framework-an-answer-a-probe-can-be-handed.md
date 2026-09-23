@@ -5,8 +5,8 @@
 **Branch:** `framework-51-an-answer-a-probe-can-be-handed`
 **Section:** §4 — the SDK and the specimen harness
 **Pull request:** #378
-**Preview:** the Vercel comment on the pull request. Nothing on the deployed site
-changes — this diff is the SDK and a harness, and the application it deploys is
+**Preview:** https://loom-git-framework-51-an-ans-bbb4e3-jpizzolato36-6341s-projects.vercel.app
+— deployed `Ready`. Nothing on the deployed site changes — this diff is the SDK and a harness, and the application it deploys is
 byte-for-byte what `main` serves apart from a generated API reference gaining
 three names. Published unverified, as every report here has to: `*.vercel.app`
 is off this sandbox's egress allowlist.
