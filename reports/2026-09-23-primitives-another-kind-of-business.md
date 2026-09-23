@@ -3,9 +3,13 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-23 · **Branch:**
 `primitives-43-the-row-that-was-waiting-on-nothing` · **Section:** §4b ·
 **Pull request:** [#370](https://github.com/jam-overture/loom/pull/370) ·
-**Preview:** posted on the PR once Vercel reports it — `*.vercel.app` is off
-this sandbox's egress allowlist, the standing 19 August limit. Everything below
-was driven against the specimen harness and a local render.
+**Preview:**
+https://loom-git-primitives-43-the-r-6684a5-jpizzolato36-6341s-projects.vercel.app
+— Vercel reported `Deployment has completed` for this commit. Published
+unverified: `*.vercel.app` is off this sandbox's egress allowlist, the standing
+19 August limit. **There is nothing new on it to look at** — a band is a thing a
+host drops into a tree, and this deployment seeds trees that do not carry one.
+Everything below was driven against the specimen harness and a local render.
 
 ![Four bands under bold, at 1280px](2026-09-23-primitives-another-kind-of-business-bold-wide.png)
 
