@@ -2,12 +2,15 @@ import { createElement, useState } from "react"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import { nodeDataOf } from "../data/resolution.js"
+import type { JsonValue } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { createStarterPrimitiveRegistry } from "../primitives/index.js"
 import { registryOf, testDefinitions } from "../testing/definitions.js"
 
 import { auditRegistry, decorationFromAudit, describeRegistryAudit, type RegistryAudit } from "./audit.js"
+import type { ProbeAnswers } from "./conformance.js"
 import { definePrimitive } from "./definition.js"
 import { describeRegistryError } from "./registry.js"
 
@@ -459,5 +462,73 @@ describe("decorationFromAudit", () => {
     const decorates = decorationFromAudit(auditRegistry(registryOf(testDefinitions)))
 
     expect(decorates(primitiveTypeSchema.parse("loom.stranger"))).toBe(false)
+  })
+})
+
+/**
+ * A bound primitive, and the reason `auditRegistry` grew a second argument
+ * (0185). It places one region for rows, another for an answer of none, and
+ * draws a line of its own when the source did not answer — so with nothing
+ * answered it takes the third branch every time and both regions read as
+ * dropped content.
+ */
+const boundListing = definePrimitive({
+  type: "loom.bound-listing",
+  description: "draws rows, an empty region, or a line saying it could not read them",
+  props: z.object({ binding: z.string().optional() }),
+  slots: ["rows", "empty"],
+  reads: [{ fromProp: "binding", default: "entries" }],
+  component: ({ loom, props }) => {
+    const answer = loom.data[props.binding ?? "entries"]
+
+    if (!answer || answer.status !== "ready") {
+      return createElement("p", { ...loom.editable }, "could not be read")
+    }
+
+    return createElement(
+      "div",
+      { ...loom.editable },
+      Array.isArray(answer.value) && answer.value.length > 0 ? loom.slots["rows"] : loom.slots["empty"]
+    )
+  },
+})
+
+const answering = (value: JsonValue): ProbeAnswers => ({
+  data: nodeDataOf({ entries: { status: "ready", value } }),
+})
+
+describe("auditRegistry, handed answers", () => {
+  it("reports a bound primitive's regions as dropped when it is asked about props alone", () => {
+    const audit = auditRegistry(registryOf([boundListing]))
+
+    expect(audit.unplacedSlots).toEqual([{ type: "loom.bound-listing", slots: ["rows", "empty"] }])
+  })
+
+  it("finds both regions once the answers that reach them are declared", () => {
+    const audit = auditRegistry(registryOf([boundListing]), {
+      answers: new Map([[primitiveTypeSchema.parse("loom.bound-listing"), [answering([{ title: "one" }]), answering([])]]]),
+    })
+
+    expect(audit.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * The answers are keyed by type and reach that type only. A registry audited
+   * with answers for one primitive must not quietly excuse another's genuinely
+   * dropped region, which is the failure `unplacedSlots` exists for.
+   */
+  it("hands each type only the answers declared for it", () => {
+    const audit = auditRegistry(registryOf([boundListing, forgetful]), {
+      answers: new Map([[primitiveTypeSchema.parse("loom.bound-listing"), [answering([{ title: "one" }]), answering([])]]]),
+    })
+
+    expect(audit.unplacedSlots).toEqual([{ type: "loom.forgetful", slots: ["aside"] }])
+  })
+
+  /** Ninety-six of the ninety-eight read no binding, and none of them changes. */
+  it("audits a library that reads nothing exactly as it did before answers existed", () => {
+    expect(auditRegistry(registryOf(testDefinitions), { answers: new Map() })).toEqual(
+      auditRegistry(registryOf(testDefinitions))
+    )
   })
 })

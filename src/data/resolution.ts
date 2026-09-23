@@ -38,6 +38,26 @@ export type NodeData = Readonly<Record<string, DataOutcome>>
 
 export const NO_DATA: NodeData = Object.freeze(Object.create(null) as Record<string, DataOutcome>)
 
+/**
+ * One node's answers, built from a plain record.
+ *
+ * `buildDataResolution` is the only thing in the runtime that produces a
+ * `NodeData` from a plan, and everything else that needs one — a probe handed
+ * answers, a test, a fixture — was writing `Object.create(null)` and a loop.
+ * The null prototype is the whole reason this is not an object literal, and it
+ * is the kind of detail every caller gets right once and then forgets.
+ */
+export const nodeDataOf = (answers: Readonly<Record<string, DataOutcome>>): NodeData => {
+  const bag = Object.create(null) as Record<string, DataOutcome>
+
+  for (const name of Object.keys(answers)) {
+    const outcome = answers[name]
+    if (outcome) bag[name] = outcome
+  }
+
+  return Object.freeze(bag)
+}
+
 /** What a node's data could not do, in the seam's own vocabulary. */
 export type NodeDataProblem =
   | { readonly kind: "misdeclared"; readonly error: BindingError }
