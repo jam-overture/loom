@@ -84,7 +84,7 @@
     "verify": "pnpm build && pnpm typecheck && pnpm test && pnpm findings:check && pnpm --filter @loom/app verify && pnpm prerender:check",
     "findings:check": "tsx tools/findings/main.ts",
     "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist apps/loom/.next",
     "decisions:index": "tsx tools/decisions/build-index.ts",
     "prerender:check": "tsx tools/prerender/main.ts",
     "queue": "tsx tools/queue/main.ts",
