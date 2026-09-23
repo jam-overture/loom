@@ -117,7 +117,7 @@ the design now rather than on what the instrument permitted.
   through `defineSource`, exactly as its own quotation of `endpoints`' comment
   said it should be.
 
-**Two filed:**
+**Three filed:**
 
 - for `Loom primitives`: 0180's restriction is discharged, with the one argument
   to `library.test.ts` that spends it written out. Nothing is broken and nothing
@@ -125,6 +125,10 @@ the design now rather than on what the instrument permitted.
 - for this lane: a probe still cannot find a region that needs a prop **and** an
   answer together. A stated limit, the same trade 0075 made, reachable by
   declaring the pairing and not found by anything that goes looking.
+- for this lane: the mangled-URL fault is a length threshold at 158 characters,
+  measured over six URLs rather than theorised. It supersedes four earlier
+  explanations in the ledger, one of them written by this run before it
+  measured.
 
 ## Test numbers
 
@@ -196,6 +200,16 @@ undeclared source gets `data-unavailable / no-such-source`, which is what a
 deployment that had not registered it would produce, rather than
 `data-unresolved`, which means the caller resolved a different tree's plan and
 was true of no specimen.
+
+**The mangled URL is a length threshold, measured at last.** Six URLs in this
+pull request's body, read back from the API over three revisions: the two that
+came back wrapped in double backticks are **168 and 158 characters**, the four
+that survived are **157, 157, 157 and 150**. It is not the extension, not an
+apostrophe, not the link syntax, and not position — revision 3 moved the long
+one down a place, under a short one, and it was mangled again while the short
+one above it was not. **Position was this run's own theory and it was wrong**,
+written into the body before it was measured. Filed with all six measurements
+and with the four dead theories named, including mine.
 
 **Four exported probe signatures changed**, from `readonly JsonObject[]` to
 `readonly ProbeConfiguration[]`. A published break, taken now rather than behind
