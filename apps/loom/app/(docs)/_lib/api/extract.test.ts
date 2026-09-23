@@ -263,11 +263,71 @@ describe("what the generated file says a door needs installed", () => {
             slug: "runtime",
             types: "./dist/index.d.ts",
             requires: [{ package: "vitest", range: "^3.0.5", optional: true, reach: "imagined" }],
+            files: 0,
+            narrower: [],
             groups: [],
           },
         ],
       })
     ).toThrow(/is reached by being imagined/)
+  })
+
+  it("refuses a reference that offers a narrower door saving nothing", () => {
+    /*
+     * The rule cannot produce one: a strict subset of a set is missing at least
+     * one member. A file carrying one was written by nobody's generator, and
+     * the sentence it would render — *it does not load, which this import
+     * does* — is true and empty.
+     */
+    expect(() =>
+      parseReference({
+        entries: [
+          {
+            specifier: "@loom/runtime",
+            slug: "runtime",
+            types: "./dist/index.d.ts",
+            requires: [],
+            files: 91,
+            narrower: [{ specifier: "@loom/runtime/x", slug: "x", avoids: [], shared: 2, files: 1 }],
+            groups: [],
+          },
+        ],
+      })
+    ).toThrow(/loads everything the wider door does/)
+  })
+
+  it("refuses a reference that does not say which doors are narrower than a door", () => {
+    expect(() =>
+      parseReference({
+        entries: [
+          {
+            specifier: "@loom/runtime",
+            slug: "runtime",
+            types: "./dist/index.d.ts",
+            requires: [],
+            files: 91,
+            groups: [],
+          },
+        ],
+      })
+    ).toThrow(/does not say which doors are narrower than it/)
+  })
+
+  it("refuses a reference that does not say how much of the package a door goes through", () => {
+    expect(() =>
+      parseReference({
+        entries: [
+          {
+            specifier: "@loom/runtime",
+            slug: "runtime",
+            types: "./dist/index.d.ts",
+            requires: [],
+            narrower: [],
+            groups: [],
+          },
+        ],
+      })
+    ).toThrow(/has no @loom\/runtime\.files/)
   })
 
   it("refuses a reference that does not say what a door needs at all", () => {
@@ -276,6 +336,52 @@ describe("what the generated file says a door needs installed", () => {
         entries: [{ specifier: "@loom/runtime", slug: "runtime", types: "./dist/index.d.ts", groups: [] }],
       })
     ).toThrow(/does not say what it needs installed/)
+  })
+})
+
+describe("which door a reader should have gone through instead", () => {
+  it("sends a reader of the signals door to the broadcaster, which is the pair the package has", () => {
+    expect(apiEntryAt("signals")?.narrower).toEqual([
+      {
+        specifier: "@loom/runtime/signals/broadcast",
+        slug: "signals-broadcast",
+        avoids: ["zod"],
+        shared: 14,
+        files: 9,
+      },
+    ])
+  })
+
+  it("does not send a reader of the broadcaster back to the wider door", () => {
+    expect(apiEntryAt("signals-broadcast")?.narrower).toEqual([])
+  })
+
+  it("does not call the Postgres journal a narrower way into the journal", () => {
+    /*
+     * It loads a strict subset of the journal's packages and publishes four
+     * names that are none of the journal's sixty-four. Packages alone would
+     * have made this pair qualify, and a reader who followed it would have
+     * lost everything they came for.
+     */
+    expect(apiEntryAt("telemetry")?.narrower).toEqual([])
+  })
+
+  it("finds exactly one pair in the whole package, so the band is rare rather than decorative", () => {
+    const offering = apiEntries.filter((entry) => entry.narrower.length > 0).map((entry) => entry.specifier)
+
+    expect(offering).toEqual(["@loom/runtime/signals"])
+  })
+
+  it("counts every door's reach, so the band always has both halves of its comparison", () => {
+    expect(apiEntries.every((entry) => entry.files > 0)).toBe(true)
+  })
+
+  it("never offers a door more of the package than the one a reader is standing at", () => {
+    const wider = apiEntries.flatMap((entry) =>
+      entry.narrower.filter((door) => door.files >= entry.files).map((door) => door.specifier)
+    )
+
+    expect(wider).toEqual([])
   })
 })
 

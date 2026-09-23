@@ -7,6 +7,7 @@ import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
 import { weighEachAsker, type WeighedRequest } from "./adapt/askers"
 import { roundTripsOn, type RoundTrip } from "./adapt/round-trip"
+import { probeFloors, type FloorResult } from "./adapt/floors"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
 import { siteFrameOrigins } from "./frames"
@@ -25,7 +26,7 @@ import {
   type RefusedRun,
 } from "./pages/when-it-goes-wrong"
 import { whoCanAskPageTree, type AskersContext } from "./pages/who-can-ask"
-import { yourComponentsPageTree } from "./pages/your-components"
+import { yourComponentsPageTree, type ComponentsContext } from "./pages/your-components"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
 import {
@@ -65,6 +66,7 @@ export type SitePageContext = RecordContext &
   MechanismContext &
   RefusalContext &
   AskersContext &
+  ComponentsContext &
   BackContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
@@ -264,6 +266,26 @@ export const roundTripsFor = async (
 ): Promise<readonly RoundTrip[]> =>
   roundTripsOn(treeFor(HOME, { origin: context.origin, theme: context.theme }))
 
+/**
+ * The two refused requests `/your-components` prints, made while the page is
+ * built.
+ *
+ * The same seam as the five above and the same reason — a page builder is
+ * synchronous and a request through the whole sequence is not. Like the refusal
+ * band, the comparison and the round trips, they are **fixed here rather than
+ * read off the address**: that page argues about what always happens rather than
+ * offering somewhere to try things, so every reader of it meets the same two
+ * answers.
+ *
+ * They are put to the front door rather than to the page that prints them, which
+ * every other measured band on this site also does — and here it is the only
+ * order that works at all: the evidence is part of `/your-components`, so a
+ * request judged against that page would be judged against a page already
+ * holding its own answer.
+ */
+export const floorsFor = async (context: SitePageContext): Promise<readonly FloorResult[]> =>
+  probeFloors(treeFor(HOME, { origin: context.origin, theme: context.theme }))
+
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
@@ -290,6 +312,10 @@ export const pageTreeFor = async (
 
   if (route.path === PUTTING_IT_BACK.path) {
     return treeFor(route, { ...context, trips: await roundTripsFor(context) })
+  }
+
+  if (route.path === YOUR_COMPONENTS.path) {
+    return treeFor(route, { ...context, floors: await floorsFor(context) })
   }
 
   if (route.path === THE_RECORD.path) {

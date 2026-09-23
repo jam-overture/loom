@@ -4,6 +4,7 @@ import {
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
+  type ApiNarrowerDoor,
   type ApiReference,
   type ApiRequirement,
   type ApiRequirementReach,
@@ -83,9 +84,41 @@ const asRequirement = (value: unknown, where: string): ApiRequirement => {
   }
 }
 
+const asNumber = (value: unknown, where: string): number => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`loom: the generated reference has no ${where}`)
+  }
+
+  return value
+}
+
+const asNarrowerDoor = (value: unknown, where: string): ApiNarrowerDoor => {
+  if (!isRecord(value) || !Array.isArray(value.avoids)) throw new Error(`loom: ${where} is not a narrower door`)
+
+  /*
+   * A narrower door that avoids nothing is the one shape of this record that
+   * would render a true sentence saying nothing: *it does not load, which this
+   * import does*. The rule cannot produce one — a strict subset of a set is
+   * missing at least one member — so a file carrying one is a file nobody's
+   * generator wrote, and the page must not paper over it.
+   */
+  if (value.avoids.length === 0) {
+    throw new Error(`loom: ${where} is offered as narrower and loads everything the wider door does`)
+  }
+
+  return {
+    specifier: asString(value.specifier, `${where}.specifier`),
+    slug: asString(value.slug, `${where}.slug`),
+    avoids: value.avoids.map((name, index) => asString(name, `${where}.avoids[${index}]`)),
+    shared: asNumber(value.shared, `${where}.shared`),
+    files: asNumber(value.files, `${where}.files`),
+  }
+}
+
 const asEntry = (value: unknown, where: string): ApiEntry => {
   if (!isRecord(value) || !Array.isArray(value.groups)) throw new Error(`loom: ${where} is not an entry point`)
   if (!Array.isArray(value.requires)) throw new Error(`loom: ${where} does not say what it needs installed`)
+  if (!Array.isArray(value.narrower)) throw new Error(`loom: ${where} does not say which doors are narrower than it`)
 
   const specifier = asString(value.specifier, `${where}.specifier`)
 
@@ -94,6 +127,8 @@ const asEntry = (value: unknown, where: string): ApiEntry => {
     slug: asString(value.slug, `${where}.slug`),
     types: asString(value.types, `${where}.types`),
     requires: value.requires.map((requirement, index) => asRequirement(requirement, `${specifier} needs [${index}]`)),
+    files: asNumber(value.files, `${specifier}.files`),
+    narrower: value.narrower.map((door, index) => asNarrowerDoor(door, `${specifier} narrower [${index}]`)),
     groups: value.groups.map((group, index) => asGroup(group, `${specifier}[${index}]`)),
   }
 }

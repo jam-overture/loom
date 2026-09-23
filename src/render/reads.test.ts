@@ -52,6 +52,23 @@ const page = definePrimitive({
   component: ({ children }: LoomPrimitiveProps) => createElement("main", null, children),
 })
 
+/**
+ * The shape both bound primitives in the library actually have: the name is a
+ * prop, so the declaration is the prop and the name a node that says nothing
+ * reads.
+ */
+const boundFeed = definePrimitive({
+  type: "loom.listing",
+  description: "A list of entries, read under whichever name the tree gave it.",
+  props: z.object({ binding: z.string().optional() }),
+  reads: [{ fromProp: "binding", default: "entries" }],
+  component: ({ loom, props }: LoomPrimitiveProps<{ binding?: string | undefined }>) => {
+    const outcome = loom.data[props.binding ?? "entries"]
+
+    return createElement("section", null, outcome?.status === "ready" ? "ready" : "unbound")
+  },
+})
+
 const undeclared = definePrimitive({
   type: "loom.panel",
   description: "A panel whose author has not thought about data.",
@@ -81,12 +98,12 @@ const sources = (): DataRegistry => {
   return registry.value
 }
 
-const treeBinding = (type: string, declared: unknown): LoomTree => {
+const treeBinding = (type: string, declared: unknown, props: object = {}): LoomTree => {
   const idFactory = sequentialIdFactory()
 
   const bound = buildElement(idFactory, {
     type,
-    props: { [DATA_PROP_KEY]: declared } as never,
+    props: { ...props, [DATA_PROP_KEY]: declared } as never,
     children: [buildText(idFactory, "")],
   })
 
@@ -178,16 +195,102 @@ describe("a binding nobody reads", () => {
   })
 })
 
+/**
+ * The second declaration form, on the shape that made it necessary: the name is
+ * whatever the node's prop says, and the default is what a node binding one
+ * thing gets without saying anything.
+ */
+describe("a binding on a primitive that takes its name from a prop", () => {
+  it("is read under the default when the node named no prop", async () => {
+    const tree = treeBinding("loom.listing", { entries: { source: "catalogue.entries" } })
+    const rendered = await renderWith(tree, registryOf(page, boundFeed))
+
+    expect(rendered.diagnostics).toEqual([])
+    expect(renderToStaticMarkup(rendered.element)).toContain("ready")
+  })
+
+  it("is read under the name the prop gives", async () => {
+    const tree = treeBinding(
+      "loom.listing",
+      { rows: { source: "catalogue.entries" } },
+      { binding: "rows" }
+    )
+    const rendered = await renderWith(tree, registryOf(page, boundFeed))
+
+    expect(rendered.diagnostics).toEqual([])
+    expect(renderToStaticMarkup(rendered.element)).toContain("ready")
+  })
+
+  /**
+   * The direction that makes this worth building rather than shrugging at. A
+   * static list would have had to declare `entries`, so this node — which reads
+   * `rows` and was answered under `entries` — would have passed the check while
+   * drawing an empty region.
+   */
+  it("reports the default as unread once the prop names something else", async () => {
+    const tree = treeBinding(
+      "loom.listing",
+      { entries: { source: "catalogue.entries" } },
+      { binding: "rows" }
+    )
+    const rendered = await renderWith(tree, registryOf(page, boundFeed))
+
+    const unread = rendered.diagnostics.filter(
+      (diagnostic) => diagnostic.code === "data-unread"
+    )
+
+    expect(unread).toHaveLength(1)
+    expect(unread[0]).toMatchObject({ type: "loom.listing", name: "entries" })
+  })
+
+  it("reports a name nothing on the node asked for", async () => {
+    const tree = treeBinding("loom.listing", { rows: { source: "catalogue.entries" } })
+    const rendered = await renderWith(tree, registryOf(page, boundFeed))
+
+    expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["data-unread"])
+  })
+})
+
 describe("unreadBindings", () => {
   it("reports nothing when nobody has declared", () => {
-    expect(unreadBindings(["a", "b"], undefined)).toEqual([])
+    expect(unreadBindings(["a", "b"], undefined, {})).toEqual([])
   })
 
   it("reports everything when the primitive declared it reads nothing", () => {
-    expect(unreadBindings(["b", "a"], [])).toEqual(["a", "b"])
+    expect(unreadBindings(["b", "a"], [], {})).toEqual(["a", "b"])
   })
 
   it("is name-sorted, so a diagnostic list does not depend on key order", () => {
-    expect(unreadBindings(["z", "a", "m"], ["m"])).toEqual(["a", "z"])
+    expect(unreadBindings(["z", "a", "m"], ["m"], {})).toEqual(["a", "z"])
+  })
+
+  it("resolves a prop-named declaration against the node's own props", () => {
+    const declared = [{ fromProp: "binding", default: "entries" }]
+
+    expect(unreadBindings(["rows"], declared, { binding: "rows" })).toEqual([])
+    expect(unreadBindings(["entries"], declared, { binding: "rows" })).toEqual(["entries"])
+    expect(unreadBindings(["entries"], declared, {})).toEqual([])
+  })
+
+  /**
+   * A prop the schema would refuse cannot reach a rendered node, and the
+   * fallback is what makes that true of this seam as well rather than
+   * something a later change has to remember.
+   */
+  it("falls back to the default for a prop value that is not a name", () => {
+    const declared = [{ fromProp: "binding", default: "entries" }]
+
+    expect(unreadBindings(["entries"], declared, { binding: "" })).toEqual([])
+    expect(unreadBindings(["entries"], declared, { binding: 7 })).toEqual([])
+    expect(unreadBindings(["entries"], declared, { binding: null })).toEqual([])
+  })
+
+  it("reads a fixed name and a prop-named one on the same primitive", () => {
+    const declared = ["summary", { fromProp: "binding", default: "entries" }]
+
+    expect(unreadBindings(["summary", "rows"], declared, { binding: "rows" })).toEqual([])
+    expect(unreadBindings(["summary", "entries"], declared, { binding: "rows" })).toEqual([
+      "entries",
+    ])
   })
 })

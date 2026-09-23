@@ -15,6 +15,10 @@ import {
   type TreeDelta,
 } from "@loom/runtime"
 
+import { propsVocabularyFor, registeredTypesFor } from "@loom/runtime/sdk"
+
+import { siteRegistry } from "../registry"
+
 import { askInterpreter, type Ask } from "./asks"
 import { nothingHappened, recordOf, requestOf, type ChangeRecord } from "./record"
 
@@ -63,12 +67,47 @@ import { nothingHappened, recordOf, requestOf, type ChangeRecord } from "./recor
  * ([0033](../../../../../../decisions/0033-the-policy-is-resolved-per-change-and-named-on-the-verdict.md)):
  * the name is what the verdict carries, and a host that changes what a set of
  * rules contains owes it a new name. `front-door` has never meant anything else.
+ *
+ * **Two floors were added under it on 23 September, and neither is a rule
+ * anybody wrote.** `/your-components` has said since 11 September that there are
+ * *three things no request gets past*, and two of the three were claims this
+ * deployment was not in a position to make: a request naming a piece nobody
+ * described, or setting one of ours to a value its own description does not
+ * allow, reached the rules, passed them and was committed — and what the reader
+ * got was a hole where the piece should be, on every visit, until somebody
+ * looked at a screen rather than at a test.
+ *
+ * `registeredPrimitiveTypes` closes the first
+ * ([0173](../../../../../../decisions/0173-a-change-may-not-add-a-node-the-deployment-cannot-draw.md))
+ * and `propsVocabulary` on the runtime below closes the second
+ * ([0179](../../../../../../decisions/0179-what-a-primitive-accepts-is-a-vocabulary-the-write-path-is-handed-not-a-field-on-a-policy.md)).
+ * Both are read off `siteRegistry` — the same list the renderer resolves against
+ * — rather than kept beside it, because a deployment whose rules and whose
+ * renderer disagree about what can be drawn has a hole that no test of either
+ * one alone would find.
+ *
+ * **It is not an edit to what this set of rules protects**, which is what keeps
+ * the name honest: the three protected types are unchanged, and every answer the
+ * five buttons get is unchanged. What the two add is a floor under *every*
+ * request, including the ones this site offers no button for. `floors.ts` puts
+ * two of those and prints what came back.
  */
 export const FRONT_DOOR_POLICY: GatePolicy = gatePolicySchema.parse({
   ...defaultGatePolicy,
   policyId: "front-door",
   protectedPrimitiveTypes: ["loom.mosaic", "loom.nav", "loom.footer"],
+  registeredPrimitiveTypes: registeredTypesFor(siteRegistry),
 })
+
+/**
+ * What this site's pieces accept, in the shape the write path takes.
+ *
+ * One value rather than a call per composition root, because all three of this
+ * lane's roots are the same deployment asking the same question — and a root
+ * that quietly wired a different one would be a second answer to *what can this
+ * site draw*, with nothing holding the two together.
+ */
+export const SITE_PROPS_VOCABULARY = propsVocabularyFor(siteRegistry)
 
 /**
  * What each protected type is, said the way a visitor would say it.
@@ -194,6 +233,7 @@ export const runAsk = async (
   const runtime: CompositionRuntime = {
     interpreter: askInterpreter(ask, idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),
+    propsVocabulary: SITE_PROPS_VOCABULARY,
     events,
     clock: systemClock,
     idFactory,

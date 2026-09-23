@@ -304,6 +304,31 @@ describe("renderCatalogue", () => {
     ])
   })
 
+  /**
+   * The prop-named form, written out rather than collapsed to its default. A
+   * model that is shown only `entries` can bind one thing correctly and has no
+   * way to bind a second, because the prop is what makes the two names differ
+   * and this line is where it would learn that.
+   */
+  it("names the prop that gives a binding name, and the name used when it is absent", () => {
+    const rendered = renderCatalogue([
+      {
+        type: primitiveTypeSchema.parse("loom.feed"),
+        description: "A list of entries.",
+        props: [{ name: "binding", required: false }],
+        slots: [],
+        reads: [
+          bindingNameSchema.parse("summary"),
+          { fromProp: "binding", default: bindingNameSchema.parse("entries") },
+        ],
+      },
+    ])
+
+    expect(rendered).toContain(
+      'reads: summary, the name in "binding" (default entries)'
+    )
+  })
+
   it("does not end a line in two full stops when its author wrote one", () => {
     const rendered = renderCatalogue([
       {

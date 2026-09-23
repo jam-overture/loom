@@ -25,18 +25,44 @@ import type { SpecimenViewport } from "./specimen.js"
  * test rather than discovered by a lane whose screenshots came out wrong.
  */
 
-/** One element, which is the only thing Playwright will photograph on its own. */
+/**
+ * One element: everything the harness does to a page, it does through one.
+ *
+ * `page.click(selector)` and `page.waitForSelector(selector)` were the older
+ * spelling and neither has a frame-shaped version. A locator does, so
+ * resolving every selector to a locator first is what lets the frame be a
+ * field on an approach rather than a second code path beside each call.
+ */
 export type LaunchedLocator = {
+  readonly click: () => Promise<unknown>
+  readonly fill: (value: string) => Promise<unknown>
+  readonly waitFor: () => Promise<unknown>
+  /**
+   * The first match, which is what waiting for a selector has always meant
+   * here and is **not** what acting on one means.
+   *
+   * A locator is strict and `page.waitForSelector` was not, so moving the wait
+   * onto a locator quietly made *wait until the results appear* an error the
+   * moment two results appeared — found by this harness photographing a search
+   * box with two hits in it. A press or a keystroke keeps the strictness: which
+   * of two buttons was pressed is a coin flip whose outcome ends up in the
+   * picture, and there the ambiguity is the lane's to resolve.
+   */
+  readonly first: () => LaunchedLocator
   readonly screenshot: (options: { readonly path: string }) => Promise<unknown>
+}
+
+/** A browsing context inside the page, which resolves selectors and nothing else. */
+export type LaunchedFrame = {
+  readonly locator: (selector: string) => LaunchedLocator
 }
 
 export type LaunchedPage = {
   readonly goto: (url: string, options: { readonly waitUntil: "load" }) => Promise<unknown>
-  readonly waitForSelector: (selector: string) => Promise<unknown>
   readonly evaluate: <TValue>(body: () => TValue) => Promise<TValue>
-  readonly click: (selector: string) => Promise<unknown>
   readonly waitForTimeout: (ms: number) => Promise<unknown>
   readonly locator: (selector: string) => LaunchedLocator
+  readonly frameLocator: (selector: string) => LaunchedFrame
   readonly screenshot: (options: {
     readonly path: string
     readonly fullPage: boolean
@@ -100,7 +126,7 @@ const measureOverflow = (): Overflow => ({
 })
 
 /**
- * Run in the page before the first step of a `do` list: hold the page still.
+ * Run in the top document before the first step of a `do` list: hold it still.
  *
  * A click on a real `a[href]` in the starter library navigates, and every step
  * after it then runs on a different page — so a three-step shot silently
@@ -108,6 +134,11 @@ const measureOverflow = (): Overflow => ({
  * exists to prevent. A `do` list is a sequence against *one* page by
  * construction, so the navigation is refused rather than the lane being asked
  * to remember.
+ *
+ * It is the **top** document, and that is stated rather than glossed: a
+ * listener added here does not reach inside a frame, so a link pressed in a
+ * framed approach still navigates that frame. A `waitFor` step is how such a
+ * shot re-synchronises with the document it landed in.
  *
  * Capture phase, and `preventDefault` rather than `stopPropagation`: the page's
  * own delegated listeners must still see the click. A reader-signal broadcaster
@@ -137,15 +168,29 @@ export const chromiumBrowser = async (
       const context = await browser.newContext(contextOptionsFor(viewport))
       const page = await context.newPage()
 
+      /**
+       * Where a selector is resolved: the top document, or the frame an
+       * approach named. One function, used by `waitFor`, by every step and by
+       * a clipped capture, so the three cannot disagree about what `frame`
+       * means.
+       */
+      const locatorFor =
+        (frame: string | undefined) =>
+        (selector: string): LaunchedLocator =>
+          frame === undefined ? page.locator(selector) : page.frameLocator(frame).locator(selector)
+
       return {
-        goto: async (url, waitFor) => {
+        goto: async (url, waitFor, frame) => {
           await page.goto(url, { waitUntil: "load" })
-          if (waitFor !== undefined) await page.waitForSelector(waitFor)
+          if (waitFor !== undefined) await locatorFor(frame)(waitFor).first().waitFor()
         },
-        act: async (steps) => {
+        act: async (steps, frame) => {
           await page.evaluate(pinNavigation)
+          const at = locatorFor(frame)
           for (const step of steps) {
-            if ("click" in step) await page.click(step.click)
+            if ("click" in step) await at(step.click).click()
+            else if ("fill" in step) await at(step.fill).fill(step.text)
+            else if ("waitFor" in step) await at(step.waitFor).first().waitFor()
             else await page.waitForTimeout(step.wait)
           }
         },
@@ -158,7 +203,7 @@ export const chromiumBrowser = async (
         capture: async (file, target) => {
           await mkdir(dirname(file), { recursive: true })
           if (target.clip !== undefined) {
-            await page.locator(target.clip).screenshot({ path: file })
+            await locatorFor(target.frame)(target.clip).screenshot({ path: file })
             return
           }
           await page.screenshot({ path: file, fullPage: target.fullPage })

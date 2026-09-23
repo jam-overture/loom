@@ -5,8 +5,9 @@ import { fileURLToPath } from "node:url"
 import ts from "typescript"
 
 import { moduleTitle } from "./groups"
-import { apiSlugFor, type ApiEntry, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
-import { peersOf, requirementsFor, type Peers, type ReadFile } from "./requires"
+import { apiSlugFor, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
+import { narrowerDoorsBySpecifier, type DoorFacts } from "./narrower"
+import { doorReach, packagesNamedIn, peersOf, requirementsFor, type Peers, type ReadFile } from "./requires"
 
 /**
  * The API reference, read off the package rather than written beside it.
@@ -414,7 +415,7 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
   const typesRoot = join(root, "dist")
   const peers = publishedPeers(root)
 
-  const built: ApiEntry[] = entries.map((entry) => {
+  const doors: DoorFacts[] = entries.map((entry) => {
     const file = program.getSourceFile(join(root, entry.types))
 
     if (file === undefined) {
@@ -437,14 +438,31 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
         return extracted === undefined ? [] : [extracted]
       })
 
+    const reach = doorReach(entry, builtFileReader, root)
+    const declared = packagesNamedIn(join(root, entry.types), builtFileReader)
+
     return {
-      specifier: entry.specifier,
-      slug: apiSlugFor(entry.specifier),
-      types: entry.types,
-      requires: requirementsFor(entry, peers, builtFileReader, root),
-      groups: groupSymbols(symbols, root),
+      entry: {
+        specifier: entry.specifier,
+        slug: apiSlugFor(entry.specifier),
+        types: entry.types,
+        requires: requirementsFor(peers, reach.packages, declared),
+        files: reach.files,
+        /*
+         * Filled on the second pass below. Which door is the narrow one is not
+         * a fact about a door — it is a fact about a door and every other door
+         * in the package, and the first of the sixteen cannot know it.
+         */
+        narrower: [],
+        groups: groupSymbols(symbols, root),
+      },
+      packages: reach.packages,
     }
   })
 
-  return { entries: built }
+  const narrower = narrowerDoorsBySpecifier(doors)
+
+  return {
+    entries: doors.map(({ entry }) => ({ ...entry, narrower: narrower.get(entry.specifier) ?? [] })),
+  }
 }

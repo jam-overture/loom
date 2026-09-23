@@ -19,6 +19,8 @@ const entry: ApiEntry = {
   slug: "react",
   types: "./dist/render/index.d.ts",
   requires: [{ package: "react", range: "^19.0.0", optional: true, reach: "loaded" }],
+  files: 54,
+  narrower: [],
   groups: [
     {
       module: "render/addressing",
@@ -303,6 +305,84 @@ describe("what to install before the import will run", () => {
 
     expect(band().textContent).toContain("peer dependency")
     expect(band().textContent).not.toContain("optional peer dependency")
+  })
+})
+
+describe("the narrower door", () => {
+  const broadcast = {
+    specifier: "@loom/runtime/signals/broadcast",
+    slug: "signals-broadcast",
+    avoids: ["zod"],
+    shared: 14,
+    files: 9,
+  }
+
+  const wide = (narrower: ApiEntry["narrower"]): ApiEntry => ({ ...entry, narrower })
+
+  const band = () => screen.queryByRole("region", { name: "Narrower imports onto part of this one" })
+
+  it("names the other import, what it saves and how much less of the package it goes through", () => {
+    render(<ApiEntryReference entry={wide([broadcast])} prose={noProse} />)
+
+    const text = band()?.textContent ?? ""
+
+    expect(text).toContain("A narrower door opens onto part of this one")
+    expect(text).toContain("@loom/runtime/signals/broadcast")
+    expect(text).toContain("publishes 14 of the 2 exports below")
+    expect(text).toContain("It does not load")
+    expect(text).toContain("zod")
+    expect(text).toContain("goes through 9 of the package's built files where this one goes through 54")
+  })
+
+  it("links to the narrower door's own page", () => {
+    render(<ApiEntryReference entry={wide([broadcast])} prose={noProse} />)
+
+    expect(band()?.querySelector("a")?.getAttribute("href")).toBe("/docs/api-reference/signals-broadcast")
+  })
+
+  it("says nothing at all on a door that has none, rather than announcing an absence", () => {
+    /*
+     * The one place this band departs from the two around it, which both print
+     * a sentence when they have nothing. A reader arrives wondering what they
+     * must install; nobody arrives wondering whether a narrower door exists,
+     * and fifteen of the sixteen pages would be teaching the idea only to take
+     * it away again.
+     */
+    render(<ApiEntryReference entry={entry} prose={noProse} />)
+
+    expect(band()).toBeNull()
+  })
+
+  it("comes after what must be installed, which is the more urgent of the two", () => {
+    const { container } = render(<ApiEntryReference entry={wide([broadcast])} prose={noProse} />)
+
+    const order = [...container.querySelectorAll("section[aria-label], nav[aria-label]")].map((node) =>
+      node.getAttribute("aria-label")
+    )
+
+    expect(order).toEqual([
+      "What to install before this import will run",
+      "Narrower imports onto part of this one",
+      "Written pages about this import",
+      "On this page",
+    ])
+  })
+
+  it("joins two narrower doors' packages with an 'or' rather than a comma", () => {
+    render(<ApiEntryReference entry={wide([{ ...broadcast, avoids: ["drizzle-orm", "zod"] }])} prose={noProse} />)
+
+    expect(band()?.textContent).toContain("It does not load drizzle-orm or zod, which this import does")
+  })
+
+  it("counts the doors in its own heading when there is more than one", () => {
+    render(
+      <ApiEntryReference
+        entry={wide([broadcast, { ...broadcast, specifier: "@loom/runtime/other", slug: "other" }])}
+        prose={noProse}
+      />
+    )
+
+    expect(band()?.textContent).toContain("Narrower doors open onto part of this one")
   })
 })
 

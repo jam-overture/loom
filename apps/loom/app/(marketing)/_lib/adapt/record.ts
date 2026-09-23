@@ -140,8 +140,17 @@ export const BECAUSE = {
  */
 export const NOT_A_RULE: DispositionReasonCode = "within-policy"
 
-/** What raised the weight, one clause per code. Joined into the sentence below. */
-const RAISED_BY = {
+/**
+ * What raised the weight, one clause per code. Joined into the sentence below.
+ *
+ * **Exported since 23 September**, for the reason `BECAUSE` was: `floors.ts`
+ * prints why two refused requests weighed what they did, and a second wording
+ * kept beside that band would be one fact said two ways on one site. Two of the
+ * clauses here — the piece nothing could draw and the setting nothing would
+ * accept — described failures no request on this deployment could produce until
+ * the floors were wired, and that band is what makes them reachable.
+ */
+export const RAISED_BY = {
   "protected-type-removed": "it destroys something you marked as protected",
   "protected-type-touched": "it rewrites something you marked as protected",
   "protected-type-relocated": "it moves something you marked as protected",
