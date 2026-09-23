@@ -169,8 +169,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers thirty-six bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(36)
+  it("offers forty bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(40)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1270,6 +1270,228 @@ describe("what the assembled page says about itself", () => {
         for (const logo of elementsOfType(cloud, "loom.logo")) {
           expect(logo.props["name"], `${composition.id} lists ${site} among its customers`).not.toBe(site)
         }
+      }
+    }
+  })
+})
+
+/**
+ * The four bands that made a page for another kind of business, and the claim
+ * underneath all of them.
+ *
+ * The 21 September inventory filed twelve registered primitives — `product`,
+ * `offering`, `recording`, `message`, `event`, `listing`, `book` and their
+ * grids — behind *a second page sequence*, on the reading that a shop, a
+ * studio, a podcast and an assistant are not landing pages. Four of those
+ * twelve are now reachable and `COMPOSITION_PARTS` did not move, because the
+ * reading was wrong:
+ * [0171](../../decisions/0171-a-page-part-is-earned-by-the-region-it-occupies.md)
+ * makes a part a **region**, and a region is the same region whatever business
+ * the page is for.
+ *
+ * These are asserted as a group rather than one test per band because what is
+ * being held is the *claim*, not four subtrees. A run that deleted one of the
+ * four would otherwise take a primitive back out of reach and leave every
+ * other test green.
+ */
+describe("a page for another kind of business", () => {
+  /**
+   * The eight types the four bands put back in reach, named rather than
+   * counted.
+   *
+   * A count — *reach went 73 to 81* — is the assertion a later run edits
+   * without reading. Naming them means a deleted band fails with the name of
+   * the primitive that went dark, which is the sentence somebody needs.
+   */
+  const REACHED: readonly { readonly type: string; readonly by: string }[] = [
+    { type: "loom.offering", by: "pricing-offerings" },
+    { type: "loom.offering-grid", by: "pricing-offerings" },
+    { type: "loom.message", by: "code-conversation" },
+    { type: "loom.message-list", by: "code-conversation" },
+    { type: "loom.recording", by: "articles-episodes" },
+    { type: "loom.recording-grid", by: "articles-episodes" },
+    { type: "loom.product", by: "features-catalogue" },
+    { type: "loom.product-grid", by: "features-catalogue" },
+  ]
+
+  it("puts eight primitives that no band could place back in reach", () => {
+    for (const { type, by } of REACHED) {
+      expect(CATALOGUE_TYPES, `${type} is unreachable: no band builds one`).toContain(type)
+
+      const band = compositionById(by)
+      expect(band, `${by} is not in the phrasebook`).toBeDefined()
+      if (band === undefined) continue
+
+      expect(typesIn(band.build(sequentialIdFactory())), `${by} no longer builds a ${type}`).toContain(type)
+    }
+  })
+
+  /**
+   * None of the four is a new part, and this is the assertion that says so.
+   *
+   * If a later run decides one of them really does occupy a region of its own,
+   * this test is where the argument has to be made — 0171 asks for the swap in
+   * both directions, and a part admitted quietly is the failure mode that
+   * record was written against.
+   */
+  it("adds no part, because a different business is not a different sequence", () => {
+    expect(COMPOSITION_PARTS).toHaveLength(22)
+
+    for (const { by } of REACHED) {
+      const band = compositionById(by)
+      expect(band).toBeDefined()
+      if (band === undefined) continue
+
+      expect(compositionsForPart(band.part).length, `${by} is the only design of ${band.part}`).toBeGreaterThan(1)
+      expect(band.id.startsWith(`${band.part}-`), `${by} is not named for the part it designs`).toBe(true)
+    }
+  })
+
+  /**
+   * A design answers to its part's fragment, so swapping one design for
+   * another leaves the page's own navigation working.
+   *
+   * This is the invariant that makes a phrasebook usable at all and nothing
+   * held it. `navBand` links at `#pricing`; a page that swapped the tier table
+   * for the service menu would have kept a nav link pointing at nothing if
+   * this band had introduced an anchor of its own — no error, no diagnostic,
+   * and a press that does nothing. The existing fragment test walks
+   * `PAGE_SEQUENCE`, which is canonical designs only, so every non-canonical
+   * band in the catalogue was outside it.
+   *
+   * Stated as *agrees with the canonical design*, including when both have
+   * none: `metrics` and `metrics-chart` carry no anchor at all, and a rule
+   * demanding one would be a rule about headings rather than about fragments.
+   */
+  it("answers to its part's own fragment, in every design of every part", () => {
+    for (const composition of STARTER_COMPOSITIONS) {
+      const canonical = compositionById(composition.part)
+
+      expect(canonical, `${composition.part} has no canonical design`).toBeDefined()
+      if (canonical === undefined) continue
+
+      expect(
+        anchorsIn(composition.build(sequentialIdFactory())),
+        `${composition.id} does not answer to the fragments ${composition.part} does`
+      ).toEqual(anchorsIn(canonical.build(sequentialIdFactory())))
+    }
+  })
+})
+
+/**
+ * What the four bands actually draw, as opposed to what they declare.
+ *
+ * Each of these is the one claim its band rests on, and each of them is
+ * invisible in the subtree: a band whose recordings lost their `href` still
+ * renders, still passes every schema and still produces no diagnostic — it
+ * just draws six cards with nothing to press.
+ */
+describe("what a page for another kind of business draws", () => {
+  const slotOf = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotOf(child, name))
+  }
+
+  const bandOf = (id: string): ElementNode => {
+    const composition = compositionById(id)
+    if (composition === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return composition.build(sequentialIdFactory())
+  }
+
+  /**
+   * The episodes band is not waiting on an image source, and this is the
+   * assertion that says so out loud.
+   *
+   * `loom.recording` draws its frame when there is artwork **or** somewhere to
+   * play, so a shelf with no cover art still has the play mark that is the
+   * primitive's whole signal. Six cards, six marks, and no `artwork` prop
+   * anywhere in the subtree — which is also what keeps the band inside the
+   * catalogue-wide *ships no image source at all* rule rather than beside it.
+   *
+   * Put the defect back by dropping `href` from the episodes and this fails
+   * with six marks missing, while every other test in this file stays green.
+   */
+  it("draws a play mark on every episode, from an address rather than a picture", () => {
+    const band = bandOf("articles-episodes")
+    const recordings = elementsOfType(band, "loom.recording")
+
+    expect(recordings.length).toBe(6)
+    for (const recording of recordings) {
+      expect(recording.props["artwork"], "an episode carries artwork the catalogue may not ship").toBeUndefined()
+      expect(typeof recording.props["href"], "an episode has nowhere to play").toBe("string")
+    }
+
+    const ids = sequentialIdFactory()
+    const { markup, diagnostics } = render(pageOf(BOLD, [bandOf("articles-episodes")], ids))
+
+    expect(diagnostics).toEqual([])
+    expect(treeMarkup(markup).split("loom-recording-play").length - 1).toBe(recordings.length)
+  })
+
+  /**
+   * The conversation ends mid-answer, and the dots say so in words.
+   *
+   * Two separate claims. The first is about the band: exactly one turn is
+   * pending and it is the **last** one, because a transcript with a pending
+   * turn in the middle is a page claiming an answer arrived after the thing
+   * that is still being written.
+   *
+   * The second is about where the words come from. `loom.message` declares
+   * `pending: "Still writing"` in its own text seam (0060), so the accessible
+   * name is the primitive's and not a string this band typed. Asserting the
+   * rendered `aria-label` is what holds those two halves together: a band that
+   * wrote its own label would pass a subtree check and fail here.
+   */
+  it("leaves the last turn still being written, and names it from the primitive's own words", () => {
+    const band = bandOf("code-conversation")
+    const turns = elementsOfType(band, "loom.message")
+    const pending = turns.filter((turn) => turn.props["pending"] === true)
+
+    expect(turns.length).toBeGreaterThan(2)
+    expect(pending).toHaveLength(1)
+    expect(turns[turns.length - 1], "a turn arrives after the one still being written").toBe(pending[0])
+    expect(pending[0]?.children.length, "the dots replace the answer rather than following its first clause").toBe(1)
+
+    const ids = sequentialIdFactory()
+    const { markup, diagnostics } = render(pageOf(EDITORIAL, [bandOf("code-conversation")], ids))
+
+    expect(diagnostics).toEqual([])
+    expect(treeMarkup(markup)).toContain('aria-label="Still writing"')
+  })
+
+  /**
+   * Every priced card pins its way in to the foot, in the region rather than
+   * in the flow.
+   *
+   * Both grids stretch their cells, and a stretched cell only buys aligned
+   * buttons if the button is in the region the primitive pins. A `loom.action`
+   * that landed in `children` instead would sit directly under a description,
+   * so six cards with six different description lengths would give six
+   * different button positions — right in a test, ragged in a photograph.
+   *
+   * Asserted over both bands at once because it is a fact about how these
+   * primitives are composed and not about either band's copy.
+   */
+  it("pins the way in to the foot of every offering and every product", () => {
+    for (const [id, type] of [
+      ["pricing-offerings", "loom.offering"],
+      ["features-catalogue", "loom.product"],
+    ] as const) {
+      const cards = elementsOfType(bandOf(id), type)
+
+      expect(cards.length).toBeGreaterThan(2)
+      for (const card of cards) {
+        const pinned = slotOf(card, "action").flatMap((node) => elementsOfType(node, "loom.action"))
+        const loose = card.children
+          .filter((child) => child.kind === "element")
+          .flatMap((child) => elementsOfType(child, "loom.action"))
+
+        expect(pinned, `a ${type} in ${id} has no way in`).toHaveLength(1)
+        expect(loose, `a ${type} in ${id} puts its action in the flow rather than the region`).toHaveLength(0)
+        expect(slotOf(card, "meta").length, `a ${type} in ${id} carries no qualifier`).toBeGreaterThan(0)
       }
     }
   })
