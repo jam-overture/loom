@@ -68,6 +68,32 @@ and run against `src/` whenever this course is built, so a lesson whose
 exercises have stopped working is a failing test naming the lesson — and the
 outputs shown at `/lessons` are that run's, not a transcript somebody typed up.
 
+**And since 23 September a sentence can be checked too, where it is counting
+something.** A lesson that says *the Gate is eight rules in a fixed order* is
+making a claim about a list in `src/`, and the course now holds every such
+phrase against the list that settles it — every occurrence of it, across the
+lessons and this schedule, because an interleaved course repeats a count on
+purpose. That check exists because lesson 09 said "six" for a week after there
+were seven, and then "seven" for a week after there were eight, with every
+exercise in it passing on both occasions.
+
+Two things it does not reach, said here rather than discovered later. A count is
+the cheapest second copy a sentence can carry and most of what a lesson says
+carries none — rungs numbered one too low and a type signature the runtime had
+stopped having were both part of that second drift and neither is a count. And
+the transcript check above reads a lesson's **Try it** section: lessons 01 to 11
+print their outputs under `## Answers` instead, where nothing has been comparing
+them, which is how one of lesson 09's transcripts came to be three days stale.
+
+**One thing that gap is currently hiding, said here so that you do not learn it
+from the page instead.** [Lesson 05](05-purity-at-the-seams.md)'s exercise D
+emits into a sink that throws, and its answer says the exception reaches the
+caller. It does not any more: since 16 September the runtime puts every event
+through one containing door, and the exercise prints `returned applied`. The
+lesson's argument about where that guarantee lives is wrong in the same way and
+at more length. Repairing it is the next thing this course owes you; until that
+lands, read `src/runtime/narration.ts` beside it.
+
 ## The spaced review schedule
 
 [`review-schedule.md`](review-schedule.md) is the spacing machinery: cumulative,

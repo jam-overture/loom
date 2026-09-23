@@ -759,7 +759,7 @@ the target, and slot and text nodes are nodes.
 **Q2** One measurement, two verdicts:
 
 ```
-analysis: {"operationCount":1,"insertedNodeCount":0,"removedNodeCount":2,"movedNodeCount":0,"configuredNodeCount":0,"relocatedNodeCount":0,"affectedNodeIds":["n_4","n_3"],"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":["loom.card"],"relocatedPrimitiveTypes":[],"configuredPropKeys":[],"nestedTargets":[],"redirectedSubmissions":[],"shallowestAffectedDepth":2}
+analysis: {"operationCount":1,"insertedNodeCount":0,"removedNodeCount":2,"movedNodeCount":0,"configuredNodeCount":0,"relocatedNodeCount":0,"affectedNodeIds":["n_4","n_3"],"touchedPrimitiveTypes":["loom.card"],"removedPrimitiveTypes":["loom.card"],"relocatedPrimitiveTypes":[],"configuredPropKeys":[],"nestedTargets":[],"unknownPrimitives":[],"invalidProps":[],"redirectedSubmissions":[],"repointedBindings":[],"shallowestAffectedDepth":2}
 default:  {"level":"low","factors":[]}
 strict:   {"level":"critical","factors":[{"code":"protected-type-removed","level":"critical","detail":"destroys protected loom.card"},{"code":"protected-type-touched","level":"high","detail":"touches protected loom.card"}]}
 ```
@@ -917,7 +917,7 @@ because the system got better. That is the correct trade and it is still a loss.
 **Q5** The same two operations, in two orders:
 
 ```
-in order:  {"operationCount":2,"insertedNodeCount":1,"removedNodeCount":0,"movedNodeCount":0,"configuredNodeCount":1,"relocatedNodeCount":0,"affectedNodeIds":["n_x5"],"touchedPrimitiveTypes":["loom.banner"],"removedPrimitiveTypes":[],"relocatedPrimitiveTypes":[],"configuredPropKeys":["tone"],"nestedTargets":[],"redirectedSubmissions":[],"shallowestAffectedDepth":2}
+in order:  {"operationCount":2,"insertedNodeCount":1,"removedNodeCount":0,"movedNodeCount":0,"configuredNodeCount":1,"relocatedNodeCount":0,"affectedNodeIds":["n_x5"],"touchedPrimitiveTypes":["loom.banner"],"removedPrimitiveTypes":[],"relocatedPrimitiveTypes":[],"configuredPropKeys":["tone"],"nestedTargets":[],"unknownPrimitives":[],"invalidProps":[],"redirectedSubmissions":[],"repointedBindings":[],"shallowestAffectedDepth":2}
 reversed:  {"code":"node-not-found","nodeId":"n_x5"}
 absent:    {"code":"node-not-found","nodeId":"n_nowhere"}
 ```

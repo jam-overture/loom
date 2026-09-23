@@ -293,11 +293,11 @@ system starts keeping records: **mistaking what was decided for what was true.**
 A verdict names one reason; several were true at the moment it was reached, and
 four of these questions are about the gap between those two things.
 
-1. Name the seven Gate rules in order. Then name the pair that reads the same
+1. Name the eight Gate rules in order. Then name the pair that reads the same
    input, say where each sits, and say what that pair proves about how a rule's
-   position is chosen. Then name the *other* pair — two rules that read different
-   inputs and sit next to each other because they share an argument — and give
-   that argument once, covering both.
+   position is chosen. Then name the *other* group — rules that read different
+   inputs and sit next to each other because they share an argument — say how
+   many of them there are, and give that argument once, covering all of them.
 2. A change is irreversible *and* above its origin's ceiling. Give the reason
    recorded on the disposition. Then say what a count of that reason code across
    a month of records is actually a count of, and name the one thing that would
@@ -319,6 +319,16 @@ four of these questions are about the gap between those two things.
    each answers that the other cannot, then say what a rename does to the pair
    and what an edit does — and which of those two the contract in 0033 asks a
    host to do.
+9. Three rules sit in one band of the ladder and share one argument. Name all
+   three, give the argument once so that it covers them without naming any of
+   them, and then say what the third one has to report that the first two never
+   have to — and why it reports it in a sentence that cannot say what changed.
+10. Lesson 09 counted the ladder wrongly for a week, twice, while two decision
+   records counting the same ladder were right within hours both times. Neither
+   was written more carefully. Say what the difference was, in terms of copies
+   rather than of care. Then name one thing that was wrong in that lesson which
+   the remedy would still not have caught, and say what kind of claim it was.
+   *(09, 25)*
 
 Question 2 is the slow one, and it is the same shape as Set J's question 3 in a
 new costume: something derived is being read as though it were measured. If you
@@ -397,12 +407,13 @@ written notes let you skate over — you cannot silently mean the right thing.
 4. Somebody proposes a `GatePolicy` knob for how many repair attempts a refusal
    gets. Argue against it using only what is in Part II, then argue for it as
    strongly as you can, then say which argument would have to be answered first.
-5. Write the seven Gate rules in order from memory. Beside each, write the
+5. Write the eight Gate rules in order from memory. Beside each, write the
    disposition kind it produces, and mark the two that read the same input. Then:
-   one of the seven was added a month after the other six, and the position it
-   was given is the only part of that change anyone had to argue about. Say which
-   rule, say what its position buys above and below, and name the one neighbour
-   the choice between them barely matters against.
+   three of the eight were added after the ladder was first written, all three
+   into the same band, and the position each was given is the only part of those
+   changes anyone had to argue about. Name the three, say what that band buys
+   above and below it, and name the one neighbour the choice barely matters
+   against.
 6. A change is applied at revision 7 and undone at revision 8. Say what the
    disposition on revision 8 can say, what it cannot, and which of Part II's
    separations is the reason.
