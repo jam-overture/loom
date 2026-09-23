@@ -26663,8 +26663,41 @@ too. Both are this lane's and neither belongs in a run whose subject is a page.
 ## 2026-09-15 — the other four surfaces unfurl as nothing, and the one that would draw them a card draws the wrong one
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
-`Loom lessons` · **Status:** open — measured while closing the same fault on my
-own lane, and offered rather than requested
+`Loom lessons` · **Status:** **closed for `Loom demo` by
+`demo-25-a-link-worth-sending`**; **still open for `Loom docs` and
+`Loom lessons`** — measured while closing the same fault on my own lane, and
+offered rather than requested
+
+> **The demo's half, 22 September.** Option 2 was taken — *draw your own* — for
+> the reason this entry gives: the card carries something a marketing card does
+> not, which is the record beside the page. `(demo)/_lib/share.ts` and
+> `share-card.tsx` draw it, `demo/opengraph-image.tsx` serves it, and nothing in
+> `(marketing)` was opened for writing; `siteOrigin()` is imported from it, as
+> three files in this lane already import `HOME` and `DOCS`.
+>
+> **Next's file convention rather than a route handler**, which is worth knowing
+> before `Loom docs` or `Loom lessons` picks one. A handler is right for
+> `(marketing)` because its cards differ by query string and
+> `opengraph-image.tsx` is never handed one. A surface whose card is a function
+> of the *route* — which a docs page's and a lesson's both are — can use the
+> convention, and then Next fills `og:image`, its width, height, type and alt
+> off the route's own exports and nothing names the address twice. A lesson with
+> a `[lesson]` segment gets the params, which is the half the query string does
+> not have.
+>
+> **The advice in this entry about the test was right and is what the run cost
+> was spent on.** Forty-four tests, three files, and the shape worth copying is
+> *the card quotes the surface rather than restating it*: every string on the
+> image is read from the tree, the preset table or `(portal)/_lib/vocabulary`,
+> and each quotation has a case that unwires it at the source and goes red.
+> Eleven defects restored, eleven caught.
+>
+> One of them is a warning for whoever draws the next card. The first render put
+> the end of its one sentence past the right edge of the image — a flex item will
+> not shrink below its own min-content, so a pane sized by `flexGrow` widens to
+> fit the longest unbroken run of its text. **Every word was in the element tree
+> and three of them were not in the picture.** State the pane widths, and assert
+> the widths the element draws with rather than the constants beside them.
 
 Nine marketing pages now emit a share card. **Nothing else in this application
 does.** `openGraph`, `twitter:` and `opengraph-image` do not appear anywhere in
@@ -30008,6 +30041,103 @@ staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
 
 ---
+## 2026-09-22 — the share card is asserted as an element tree and shipped as a picture, and the gap between those is where its one sentence went
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of the unit that drew the card, filed with the worked example it
+already cost, and **recommended not to take as a unit yet**
+
+`share-card.test.tsx` asserts the React element `ImageResponse` is handed: the
+strings are present, the pairings are above 4.5:1, the two panes add up to 1200.
+Twenty-one cases, and they are the right ones. What none of them can see is
+**the PNG**.
+
+**The worked example is this run's own first render.** The rail was sized
+`flexGrow: 1`. A flex item will not shrink below its own min-content, so it
+widened to fit the longest unbroken run of *Loom will not make this change until
+you say yes* and drew the last three words past the right edge of the image.
+Every word was in the element tree. Three of them were not in the picture.
+
+It was found by looking at the file, which is exactly the method this whole unit
+argues is not good enough for this artefact: **a share card is the one thing on
+this project seen only by people who do not work here**, so "somebody will
+notice" is the one assumption it cannot make.
+
+The pane-width assertion closes that specific shape and does not close the
+class. Still invisible to the suite:
+
+- text that wraps to four lines in a box with room for three — the strings are
+  all present and one of them is drawn outside the pane's height
+- a chip that lands on top of a figure at some future font size
+- a background that did not paint, leaving white ink on white
+
+**What would close it:** rasterise in the test and assert about pixels. `satori`
+and `@vercel/og` both produce an image outside a Next runtime — this run drove
+`new ImageResponse(...)` from a `tsx` script in about a second — so the machinery
+is a `vitest` case away. The cheap assertions are the ones worth having rather
+than a snapshot: **no ink within 8px of any edge**, and **the image is not one
+colour**. Both are a few lines over a decoded buffer and both would have failed
+against the overflow above.
+
+**Why not now.** It needs a PNG decoder in the test environment, which is a
+dependency decision for a repository that has deliberately kept `playwright-core`
+out of its `package.json` ([0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md))
+— and the same argument applies: a picture is a thing a *run* takes, not a thing
+the framework ships. The honest question for whoever takes it is whether this
+belongs in `vitest` at all or in `tools/screenshot`, which already owns
+photographing things and already runs outside the suite. **Recommend it is
+settled there rather than by adding a decoder to the app's test
+dependencies.**
+
+Until then the rule this run would give its successor: **an edit to the card is
+looked at.** `new ImageResponse(shareCardImage(demoShareCard()), SHARE_IMAGE_SIZE)`
+in a five-line `tsx` script renders it without a build, and that is the whole of
+the discipline.
+
+---
+## 2026-09-22 — two surfaces now hand-draw a share card, because the renderer has one projection and a PNG is not it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**re-filed by reference** against the 29 August entry *a tree has one projection,
+and a share card needs a second*, with a second data point rather than new
+analysis
+
+That entry was filed when `(marketing)` hand-drew the only share card in this
+repository, and it was explicit that one consumer did not justify a seam:
+*"never wanted; not worth one for a share card."* There are two now. `(demo)`
+drew its own this run, and the 15 September unfurl entry leaves `Loom docs` and
+`Loom lessons` owing one each — so the plausible count is four.
+
+**What the second copy actually cost, measured rather than estimated**, because
+that is the only thing a second data point adds:
+
+- **The drawing did not transfer and should not have.** `(marketing)`'s card is a
+  wordmark, a headline and a footnote; this one is a two-pane composition of a
+  page and a record. Nothing was copied and nothing should have been.
+- **The *shape* transferred exactly**, unchanged, and was worth having: a card as
+  data, an element function over it, a `CARD_PAIRINGS` list the contrast test
+  measures, and a route that is three lines. About twenty minutes saved by
+  reading their file.
+- **The colour problem is the one that repeats**, and it is the seam-shaped half.
+  Both lanes need registered theme values in a medium that reads no cascade.
+  `(marketing)` reads a `ResolvedTheme`; `(demo)` reads `editorialPalette` for
+  the stage and a hand-kept subset of its own stylesheet for the chrome, pinned
+  by a test that re-reads the CSS. **Two lanes have now written a private answer
+  to "what is this token, as a value".**
+
+That last one is the finding. It is not *render a tree to a PNG* — nobody needs
+that — it is smaller and it is the runtime's: **resolving a theme to plain values
+outside a browser.** `resolveTheme` already exists and already returns them; what
+neither lane could find was the same for the *chrome*, which is CSS by
+construction. A surface whose chrome is a stylesheet will keep writing a
+`chrome.ts` and a test that greps its own CSS, which is what this lane just did
+and would do again.
+
+**No recommendation to build anything on two data points.** The number worth
+watching is four: if `Loom docs` and `Loom lessons` both write a third and fourth
+private token table, the shape of the answer will be obvious and one of them will
+have paid for it. This entry exists so that the fourth lane finds three
+precedents rather than one.
 ## 2026-09-22 — the red checkup has been photographed, and what it took says which half of the 13 September finding is actually open
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** the
