@@ -4,7 +4,12 @@
 **Routine:** `Loom daily build` — the framework core, `src/` except `src/primitives/`
 **Branch:** `framework-46-the-build-that-outlived-its-routes`
 **Section:** the application shell — the gate, not the runtime
-**Pull request:** #TBD
+**Pull request:** #374 ·
+**Preview:** https://loom-git-framework-46-the-bu-3d3ef5-jpizzolato36-6341s-projects.vercel.app
+— there is nothing on it to look at. This diff is one line of a script; the
+application it deploys is byte-for-byte what `main` already serves. Published
+unverified, as every report in this repository has to: `*.vercel.app` is off
+this sandbox's egress allowlist.
 
 A small one, and reactive: this is the failure the previous unit's merge wake
 exposed, not something found by going looking.
