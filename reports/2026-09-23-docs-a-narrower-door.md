@@ -139,9 +139,10 @@ not nest. A reader who imports `@loom/runtime` believing it is the door that has
 everything behind it is wrong, and nothing on the site corrects them. That is the
 next page I would write and it is not this branch's.
 
-**Filed — one, for this lane.** The saving is named in files and packages, not in
-kilobytes, and what would measure the third is written down with both reasons not
-to take it lightly.
+**Filed — two, both for this lane.** The saving is named in files and packages,
+not in kilobytes, and what would measure the third is written down with both
+reasons not to take it lightly. And the phone photograph found an orphaned
+letter in the largest type on the page — *At 390 pixels*, below.
 
 **Closed — one.** Yesterday's entry, by the rule it proposed plus the
 declaration-matching half it did not have.
@@ -211,7 +212,7 @@ from a log file rather than through a pipe.
 | --- | --- | --- |
 | `@loom/runtime` | 158 files / 2,927 tests | **158 / 2,927** — `src/` was not opened |
 | `@loom/app` | 290 / 5,202 | **291 / 5,231** |
-| findings ledger | 744 entries, 0 malformed | 745, 0 malformed |
+| findings ledger | 744 entries, 0 malformed | 746, 0 malformed |
 | prerender | 109 pages, 943 junctions, 0 run together | 109, **954**, 0 |
 
 **+29 tests, one new file**, none weakened, nothing skipped. The `main` figures
@@ -275,6 +276,22 @@ it moved.
 wraps: the specifier is a link inside a paragraph rather than a row of its own,
 so it breaks like any other word, and the `break-words` class added to the
 heading yesterday still holds the four longest specifiers.
+
+**The photograph found something yesterday's fix did not cover**, and it is
+filed rather than fixed. `break-words` stopped the page scrolling sideways and
+says nothing about *where* the break lands, so the heading reads
+
+```
+@loom/runtime/signal
+s
+```
+
+— an orphaned `s`, in the largest type on the page, as the first thing a reader
+on a phone sees. The remedy is a break opportunity at each slash, which is where
+a person would break it themselves. It is not in this branch because the heading
+is a different subject from two doors compared with each other, and because a
+`<wbr/>` is a junction `prerender:check` reads, so it comes with a test rather
+than with a class.
 
 ## What I would write next
 

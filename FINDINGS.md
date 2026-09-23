@@ -29919,3 +29919,40 @@ because the rule requires a **strict** package subset. There is no such pair in
 the package today — checked over all 240 ordered pairs — so the choice costs a
 reader nothing yet. If one ever appears, the symptom is silence rather than a
 wrong sentence, and this is the entry that says so.
+
+---
+## 2026-09-23 — the four longest entry-point headings break mid-word on a phone, because `break-words` was the fix that stopped the page scrolling and not the one that made it read
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+cosmetic; measured in Chromium against `next start` at 390 pixels, 23 September
+
+On 22 September `/docs/api-reference/[entry]`'s `h1` gained `break-words`,
+because an import specifier is one unbroken word to a line-breaker — CSS offers
+no break opportunity after a slash — and the four longest doors pushed the
+document 169 pixels wider than the viewport. That worked: `scrollWidth 559`
+became `scrollWidth 390`, and it still holds today.
+
+What it did not do is choose **where** the break lands. `break-words` breaks
+wherever the line runs out, so `@loom/runtime/signals` is photographed as
+
+```
+@loom/runtime/signal
+s
+```
+
+with a single orphaned `s` on the second line, in the page's largest type, as
+the first thing a reader on a phone sees.
+
+**The remedy is a break opportunity at each slash**, which is where a reader
+would break it themselves: render the heading as its segments with `<wbr/>`
+after each `/`, and keep `break-words` as the fallback for a segment longer
+than the line. `@loom/runtime/` then breaks from `signals` and nothing is
+orphaned.
+
+**Not fixed in the branch that photographed it.** The heading is in this lane
+and it is one small component, but it is a different subject from that branch —
+which is about two doors compared with each other, not about one door's title —
+and the run before it had already explained one such in-passing fix. It is a
+line of work rather than a line of code: the segments have to be rendered, and
+a `<wbr/>` is a thing `prerender:check` reads as a junction, so it needs the
+test that says the words either side of it do not run together.
