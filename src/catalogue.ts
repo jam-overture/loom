@@ -12,6 +12,7 @@ import {
 
 import type { BindingName } from "./data/source.js"
 import type { PrimitiveType, SlotName } from "./primitive-type.js"
+import type { BindingDeclaration } from "./render/reads.js"
 
 /**
  * What a deployment can build with, as data.
@@ -47,9 +48,14 @@ export type CataloguedPrimitive = {
   readonly props: readonly CataloguedProp[] | undefined
   readonly slots: readonly SlotName[]
   /**
-   * The binding names this primitive reads an answer under, name-sorted.
-   * `undefined` when its author has not said — which, like `props`, is not the
-   * same claim as "none" and is not rounded to one.
+   * The binding names this primitive reads an answer under, in declaration
+   * order. `undefined` when its author has not said — which, like `props`, is
+   * not the same claim as "none" and is not rounded to one.
+   *
+   * An entry is a name, or the prop that gives one and the name it falls back
+   * to (0184). The second form is carried out rather than flattened to its
+   * default, because the two say different things to a model: one name it must
+   * write, against one name it may replace by setting a prop.
    *
    * It is the one field here that is about what the primitive *asks the
    * deployment for* rather than about what a tree may write on it, and it is
@@ -58,7 +64,7 @@ export type CataloguedPrimitive = {
    * told which names those answers may be filed under, so the only name it
    * could write was one it had seen on the page already.
    */
-  readonly reads: readonly BindingName[] | undefined
+  readonly reads: readonly BindingDeclaration<BindingName>[] | undefined
 }
 
 export type PrimitiveCatalogue = readonly CataloguedPrimitive[]

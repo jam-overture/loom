@@ -319,6 +319,7 @@ describe("the data block", () => {
     })
 
     expect(message).toContain('"reads: none" means the primitive reads no data at all')
+    expect(message).toContain('the name in "x" (default y)')
     expect(message).toContain("has not declared either way")
   })
 

@@ -58,6 +58,42 @@ describe("the checkup screen's reading order", () => {
     expect(source.indexOf("<CheckupTreeChooser")).toBeGreaterThan(-1)
   })
 
+  /**
+   * **One primary action, above the several.**
+   *
+   * Until 22 September this screen opened on a list of pages with an identical
+   * button on every row, which is a screen with as many primary actions as you
+   * have pages — which is to say none. The question a reviewer arrives with is
+   * not *which page shall I check*; it is *is anything wrong*. So the press
+   * that answers the question they have comes first, and picking one page is
+   * what it degrades to.
+   *
+   * Pinned at the source because it is an ordering, and an ordering is the one
+   * thing every component test on this screen is blind to.
+   */
+  it("offers the answer over everything before it offers one page at a time", () => {
+    const sweep = source.indexOf('href="/portal/checkup/everything"')
+
+    expect(sweep).toBeGreaterThan(-1)
+    expect(sweep).toBeLessThan(source.indexOf("<CheckupTreeChooser"))
+  })
+
+  /**
+   * And the sweep is a link rather than a form, which is the half a reading
+   * order cannot state. It reads and writes nothing, so it is a URL a reviewer
+   * can send somebody — the same reason a single checkup puts its tree in the
+   * query string rather than in a POST.
+   */
+  it("reaches the sweep by an address rather than by a press that writes", () => {
+    const button = source.slice(
+      source.indexOf('href="/portal/checkup/everything"') - 200,
+      source.indexOf('href="/portal/checkup/everything"')
+    )
+
+    expect(button).toContain("<Link")
+    expect(source).not.toContain("<form")
+  })
+
   it("never reverses a row or a column to place something", () => {
     expect(source).not.toContain("flex-row-reverse")
     expect(source).not.toContain("flex-col-reverse")

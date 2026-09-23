@@ -13,7 +13,7 @@ import { registryOf } from "../testing/definitions.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
-import { BEHAVIOURS, isBehaviourName, resolveBehaviours } from "./behaviour.js"
+import { BEHAVIOURS, BEHAVIOUR_NAMES, isBehaviourName, resolveBehaviours } from "./behaviour.js"
 import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { NO_TEXT } from "./text.js"
@@ -57,6 +57,27 @@ const barDefinition: PrimitiveEntry = definePrimitive({
       { ...loom.editable },
       loom.behaviours.disclose,
       createElement("ul", null, children)
+    ),
+})
+
+/**
+ * The pair, in the shape a primitive presenting a region actually takes: the
+ * trigger and the region inside one box, and the cross down inside the region
+ * rather than beside the trigger.
+ */
+const dialogDefinition: PrimitiveEntry = definePrimitive({
+  type: "loom.dialog",
+  description: "A panel that opens over the page",
+  props: z.object({}),
+  text: { present: "Details", dismiss: "Close" },
+  interactive: "always",
+  behaviours: ["present", "dismiss"],
+  component: ({ loom, children }) =>
+    createElement(
+      "div",
+      { ...loom.editable },
+      loom.behaviours.present,
+      createElement("div", { className: "panel" }, loom.behaviours.dismiss, children)
     ),
 })
 
@@ -123,8 +144,32 @@ describe("the behaviour vocabulary", () => {
    * for the friction of adding to it. This is that list, asserted rather than
    * described, so growing it is a visible edit here as well as there.
    */
-  it("is the three controls the runtime implements, and no others", () => {
-    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose", "adjust"])
+  it("is the five controls the runtime implements, and no others", () => {
+    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose", "adjust", "present", "dismiss"])
+  })
+
+  /**
+   * Keyed rather than listed, for the reason the `HoldError` suite gives: a
+   * list cannot tell covering the vocabulary from holding the right number of
+   * things, and a sixth member would go in without it noticing.
+   */
+  it("says of every member whether it answers to another, and names one that resolves", () => {
+    const requires = Object.fromEntries(
+      BEHAVIOUR_NAMES.map((name) => [name, BEHAVIOURS[name].requires])
+    )
+
+    expect(requires).toEqual({
+      copy: undefined,
+      disclose: undefined,
+      adjust: undefined,
+      present: undefined,
+      dismiss: "present",
+    })
+
+    for (const [name, required] of Object.entries(requires)) {
+      if (required === undefined) continue
+      expect(BEHAVIOUR_NAMES, name).toContain(required)
+    }
   })
 
   it("says of every behaviour which strings its control needs", () => {
@@ -274,6 +319,22 @@ describe("a rendered tree", () => {
     expect(markup).not.toContain("data-loom-disclosed")
   })
 
+  /**
+   * The same property for the pair, and it is the one that decides which way a
+   * primitive must write its rule. Neither control is in the server's markup, so
+   * the attribute the hiding rule selects is on nothing — which means a page
+   * served without scripting shows the panel's content rather than hiding it
+   * behind a trigger that never arrives.
+   */
+  it("emits a presented region open, with neither control and nothing hiding it", () => {
+    const markup = markupOf(treeWith("loom.dialog", "The small print"), [dialogDefinition])
+
+    expect(markup).toContain("The small print")
+    expect(markup).toContain('class="panel"')
+    expect(markup).not.toContain("<button")
+    expect(markup).not.toContain("data-loom-presented")
+  })
+
   it("hands a primitive that declared none an empty map", () => {
     expect(markupOf(treeWith("loom.prose", "hello"), [proseDefinition])).toContain(
       'data-behaviours="0"'
@@ -363,6 +424,48 @@ describe("registering a primitive that takes a behaviour", () => {
     const entry: PrimitiveEntry = { ...barDefinition, interactive: undefined }
 
     expect(errorOf(entry)).toContain("renders a target")
+  })
+
+  it("accepts a presentation that declares both its strings", () => {
+    expect(createPrimitiveRegistry([dialogDefinition]).ok).toBe(true)
+  })
+
+  /**
+   * The check the pair exists to need. A cross with no presentation above it
+   * renders a button that asks a region nothing opens to close, which is a dead
+   * control rather than a wrong one — so it is refused here rather than left for
+   * the audit, the same judgement the seam makes about a control with no name.
+   */
+  it("refuses a cross declared without the presentation it closes", () => {
+    const entry: PrimitiveEntry = {
+      ...dialogDefinition,
+      text: { dismiss: "Close" },
+      behaviours: ["dismiss"],
+    }
+
+    expect(errorOf(entry)).toContain("does nothing without")
+  })
+
+  /**
+   * Checked against the entry's own list rather than against the names accepted
+   * so far, so a primitive that names the cross first is not making a mistake.
+   */
+  it("accepts the pair whichever order it is declared in", () => {
+    const entry: PrimitiveEntry = { ...dialogDefinition, behaviours: ["dismiss", "present"] }
+
+    expect(createPrimitiveRegistry([entry]).ok).toBe(true)
+  })
+
+  it("refuses a presentation that does not call itself interactive", () => {
+    const entry: PrimitiveEntry = { ...dialogDefinition, interactive: undefined }
+
+    expect(errorOf(entry)).toContain("renders a target")
+  })
+
+  it("refuses a cross with no string to be named by", () => {
+    const entry: PrimitiveEntry = { ...dialogDefinition, text: { present: "Details" } }
+
+    expect(errorOf(entry)).toContain('declares no "dismiss" text')
   })
 
   it("answers for a type it knows, and for one it does not", () => {

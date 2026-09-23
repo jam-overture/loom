@@ -222,6 +222,175 @@ describe("reaching the state worth photographing", () => {
     expect(wait(1.5)).toBe(false)
   })
 
+  it("carries what to type through with the field it goes in", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/docs",
+            out: "search",
+            do: [{ click: "[data-search]" }, { fill: "input[type=search]", text: "planReverts" }],
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.do).toEqual([
+      { click: "[data-search]" },
+      { fill: "input[type=search]", text: "planReverts" },
+    ])
+  })
+
+  /** A cleared field is a state a screen is in, so an empty string is a value. */
+  it("takes an empty string to type, and refuses a fill with nothing to type into", () => {
+    const fill = (step: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", do: [step] }] }).success
+
+    expect(fill({ fill: "input", text: "" })).toBe(true)
+    expect(fill({ fill: "input" })).toBe(false)
+    expect(fill({ fill: "", text: "a" })).toBe(false)
+    expect(fill({ fill: "input", text: 7 })).toBe(false)
+  })
+
+  /**
+   * 0159's fourth item, resolved the way 0159 said it resolves: naming the
+   * thing to wait for is a reach, and "wait until the count is 3" is an
+   * assertion wearing a wait's clothes and is still not expressible.
+   */
+  it("carries a wait for a selector through, beside a wait for a duration", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/portal",
+            out: "signed-in",
+            do: [{ click: "button[type=submit]" }, { waitFor: "[data-signed-in]" }],
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.do).toEqual([
+      { click: "button[type=submit]" },
+      { waitFor: "[data-signed-in]" },
+    ])
+  })
+
+  it("refuses a step that is both a wait for a selector and a wait for a duration", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [{ path: "/x", out: "x", do: [{ waitFor: "[data-x]", wait: 10 }] }],
+      }).success
+    ).toBe(false)
+  })
+
+  it("carries the frame a shot names through, and omits the key when there is none", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          { path: "/", out: "framed", frame: "iframe[title='Loom demo']", do: [{ click: "[data-yes]" }] },
+          { path: "/", out: "top" },
+        ],
+      })
+    )
+
+    expect(planned[0]?.frame).toBe("iframe[title='Loom demo']")
+    expect(planned[1] && "frame" in planned[1]).toBe(false)
+  })
+
+  /**
+   * Refused rather than ignored: a misspelled `frame` on a permissive object is
+   * dropped in silence, and what comes back is a correct picture of the top
+   * document — the wrong-thing-photographed failure this schema exists for,
+   * one level up from the steps it has always caught it in.
+   */
+  it("refuses a key the shot does not have, rather than photographing the wrong document", () => {
+    expect(
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", fram: "iframe" }] }).success
+    ).toBe(false)
+  })
+})
+
+describe("reaching a state that is not photographed", () => {
+  it("resolves a before's address against the same base the shot uses", () => {
+    const planned = planShots(
+      listOf({
+        baseUrl: "http://localhost:3210",
+        shots: [
+          {
+            path: "/portal/readers",
+            out: "readers",
+            waitFor: "[data-readers]",
+            before: {
+              path: "/portal/sign-in",
+              waitFor: "form",
+              do: [
+                { fill: "#email", text: "reviewer@example.com" },
+                { fill: "#password", text: "hunter2" },
+                { click: "button[type=submit]" },
+                { waitFor: "[data-signed-in]" },
+              ],
+            },
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.before?.url).toBe("http://localhost:3210/portal/sign-in")
+    expect(planned[0]?.url).toBe("http://localhost:3210/portal/readers")
+    expect(planned[0]?.before?.waitFor).toBe("form")
+    expect(planned[0]?.before?.do).toHaveLength(4)
+  })
+
+  it("omits the key entirely for a shot that needs nothing before it", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "x" }] }))
+
+    expect(planned[0] && "before" in planned[0]).toBe(false)
+  })
+
+  it("gives a before with no steps an empty list, like a shot with none", () => {
+    const planned = planShots(
+      listOf({ shots: [{ path: "/x", out: "x", before: { path: "/set-a-cookie" } }] })
+    )
+
+    expect(planned[0]?.before?.do).toEqual([])
+  })
+
+  it("lets a before name its own frame, independently of the shot's", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/",
+            out: "x",
+            frame: "iframe#demo",
+            before: { path: "/", frame: "iframe#setup", do: [{ click: "[data-seed]" }] },
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.before?.frame).toBe("iframe#setup")
+    expect(planned[0]?.frame).toBe("iframe#demo")
+  })
+
+  /**
+   * A `before` is an approach and nothing else. Letting it carry a camera would
+   * make it a shot, and a shot list's shots are the pictures it takes — which
+   * is the property a report quotes when it says how many there were.
+   */
+  it("refuses a before that tries to take a picture, or misspells a step", () => {
+    const before = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", before: value }] }).success
+
+    expect(before({ path: "/sign-in" })).toBe(true)
+    expect(before({ path: "/sign-in", out: "sign-in" })).toBe(false)
+    expect(before({ path: "/sign-in", clip: "[data-form]" })).toBe(false)
+    expect(before({ path: "/sign-in", viewport: "phone" })).toBe(false)
+    expect(before({ path: "/sign-in", do: [{ fil: "#email", text: "a" }] })).toBe(false)
+    expect(before({ do: [{ click: "#x" }] })).toBe(false)
+  })
+
   /**
    * Refused rather than resolved by precedence: the two mean opposite things,
    * so picking a winner hands a lane the picture it did not ask for silently.

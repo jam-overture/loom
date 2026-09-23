@@ -3,16 +3,19 @@ import { COMPOSITION_PARTS } from "./composition.js"
 import { articlesBand } from "./articles-band.js"
 import { bannerBand } from "./banner-band.js"
 import { bentoBand } from "./bento-band.js"
+import { catalogueBand } from "./catalogue-band.js"
 import { changelogBand } from "./changelog-band.js"
 import { codeBand } from "./code-band.js"
 import { codeSessionBand } from "./code-session-band.js"
 import { comparisonBand } from "./comparison-band.js"
+import { conversationBand } from "./conversation-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
 import { credentialsBand } from "./credentials-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
+import { episodesBand } from "./episodes-band.js"
 import { faqGridBand } from "./faq-grid-band.js"
 import { featuresBand } from "./features-band.js"
 import { feedBand } from "./feed-band.js"
@@ -25,6 +28,7 @@ import { integrationsGridBand } from "./integrations-grid-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
 import { navBand } from "./nav-band.js"
+import { offeringsBand } from "./offerings-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
@@ -49,15 +53,18 @@ export {
   articlesBand,
   bannerBand,
   bentoBand,
+  catalogueBand,
   changelogBand,
   codeBand,
   codeSessionBand,
   comparisonBand,
   contactBand,
+  conversationBand,
   contactDetailsBand,
   credentialsBand,
   ctaBand,
   ctaSignupBand,
+  episodesBand,
   faqBand,
   faqGridBand,
   featuresBand,
@@ -71,6 +78,7 @@ export {
   metricsBand,
   metricsChartBand,
   navBand,
+  offeringsBand,
   pricingBand,
   pricingMatrixBand,
   proofBand,
@@ -137,11 +145,13 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   proofStoryBand,
   featuresBand,
   featuresAlternatingBand,
+  catalogueBand,
   bentoBand,
   stepsBand,
   stepsCardsBand,
   codeBand,
   codeSessionBand,
+  conversationBand,
   integrationsBand,
   integrationsGridBand,
   metricsBand,
@@ -149,6 +159,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   specsBand,
   pricingBand,
   pricingMatrixBand,
+  offeringsBand,
   comparisonBand,
   testimonialsBand,
   testimonialsWallBand,
@@ -156,6 +167,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   teamBand,
   articlesBand,
   feedBand,
+  episodesBand,
   changelogBand,
   faqBand,
   faqGridBand,
