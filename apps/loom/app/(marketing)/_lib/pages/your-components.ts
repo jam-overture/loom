@@ -33,7 +33,22 @@ import {
   YOUR_COMPONENTS,
 } from "../site"
 
+import type { FloorResult } from "../adapt/floors"
+
 import type { PageContext } from "./home"
+
+/**
+ * The two refused requests, made where a page builder cannot: a builder is
+ * synchronous and a request through the whole sequence is not. The same seam,
+ * and the same reason, as the comparison `/who-can-ask` prints and the refusal
+ * `/when-it-goes-wrong` does.
+ *
+ * Optional, and an absent one means the three claims are printed without the
+ * evidence rather than with a gap where it should be. See `neverDoes`.
+ */
+export type ComponentsContext = PageContext & {
+  readonly floors?: readonly FloorResult[]
+}
 
 /**
  * The page for the question the other four left open.
@@ -334,7 +349,68 @@ const oursAndYours = (ids: IdFactory, context: PageContext): LoomNode =>
  * whatever the request said — which is the difference between a limit and a
  * promise, and is the same distinction the rules page draws about prompts.
  */
-const neverDoes = (ids: IdFactory): LoomNode =>
+/**
+ * The line over the evidence, and the one number in it that is read rather than
+ * typed.
+ *
+ * Two of the three claims above can be put to this site and the third cannot: a
+ * change carries a list of operations and nothing else, so *it cannot write code
+ * into your page* is a fact about the shape of a request rather than something a
+ * request can be refused for. Saying **two** here while printing three cards, or
+ * three while printing two, would be the band contradicting itself on one
+ * screen, so the number is the count of what was actually run.
+ */
+const evidenceLine = (results: readonly FloorResult[]): string =>
+  `${results.length} of the three, put to this site`
+
+/**
+ * What the refusal named, which is the half a reader should not have to take on
+ * trust.
+ *
+ * The two floors name different things — one a piece, the other a setting and
+ * the sentence its own description answered with — so this is a branch rather
+ * than one sentence with a hole in it. A result naming neither would be a card
+ * with no evidence on it, which is the one thing this band must not print, so it
+ * throws while the page is being built.
+ */
+const namedBy = (result: FloorResult): string => {
+  if (result.pieces.length > 0) {
+    return `The piece it asked for, which nobody described: ${result.pieces.join(", ")}`
+  }
+
+  if (result.settings.length > 0) {
+    return `The setting it named, and what that piece said back: ${result.settings
+      .map((setting) => `${setting.name} — ${setting.said}`)
+      .join("; ")}`
+  }
+
+  throw new Error(`loom: "${result.asked}" was refused and named nothing a reader could check`)
+}
+
+/**
+ * One refused request, as a reader meets it: what was asked, what came back, and
+ * what the machinery named.
+ *
+ * Every word of it but the two labels is read off the run. It is a `loom.card`
+ * on purpose — the specimen band two screens up takes that very piece apart, so
+ * a reader who has just been shown everything Loom is told about a card is now
+ * reading the answer off two of them.
+ */
+const refused = (ids: IdFactory, result: FloorResult): LoomNode =>
+  buildElement(ids, {
+    type: "loom.card",
+    props: { tone: "outline", padding: "normal" },
+    children: [
+      heading(ids, 3, `“${result.asked}”`, { balance: true }),
+      prose(
+        ids,
+        `Refused. Weighed as ${result.weighedAs}, because ${result.raisedBy.join(", and ")}.`
+      ),
+      buildSlot(ids, "footer", [prose(ids, namedBy(result), { size: "small", tone: "muted" })]),
+    ],
+  })
+
+const neverDoes = (ids: IdFactory, results: readonly FloorResult[]): LoomNode =>
   section(
     ids,
     { tone: "surface", width: "wide", eyebrow: "The limits, which are not promises" },
@@ -372,6 +448,47 @@ const neverDoes = (ids: IdFactory): LoomNode =>
         "None of the three is a rule you write. They are how the machinery is built, so they hold on the day somebody wires up a model you have never heard of.",
         { measured: true, tone: "muted" }
       ),
+      /**
+       * The evidence, and it is absent rather than invented when the run that
+       * produces it has not been made.
+       *
+       * The same arrangement the comparison on `/who-can-ask` has, for the same
+       * reason: a page builder is synchronous and a request through the whole
+       * sequence is not, so the two runs are made in `render.ts` and handed in. A
+       * builder called without them — by a test looking at the tree, or by
+       * anything with no reason to run two requests — gets the three claims and
+       * no cards, which is the page as it stood until today rather than a page
+       * with a hole in it.
+       */
+      ...(results.length === 0
+        ? []
+        : [
+            /**
+             * A rule rather than a second band, because the evidence is the
+             * claim's own and belongs under it. `normal` rather than `loose`:
+             * the section already puts a gap between its children, and the two
+             * together left a hand's width of nothing where a reader needs a
+             * breath.
+             */
+            buildElement(ids, {
+              type: "loom.divider",
+              props: { ornament: "rule", spacing: "normal" },
+            }),
+            prose(ids, evidenceLine(results), { size: "small", tone: "muted" }),
+            heading(ids, 3, "Both were asked for while this page was built, and both were refused", {
+              balance: true,
+            }),
+            prose(
+              ids,
+              "Neither answer below was written for this page. Two requests were put to the front page of this site as it is published — one asking for a piece nobody described, one setting a piece to a value its own description does not offer — and what you are reading is what came back, including the sentence the piece itself answered with.",
+              { measured: true }
+            ),
+            buildElement(ids, {
+              type: "loom.grid",
+              props: { columns: "two", gap: "snug" },
+              children: results.map((result) => refused(ids, result)),
+            }),
+          ]),
     ]
   )
 
@@ -443,7 +560,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
     { align: "center" }
   )
 
-export const yourComponentsPageTree = (context: PageContext): LoomTree => {
+export const yourComponentsPageTree = (context: ComponentsContext): LoomTree => {
   const ids = sequentialIdFactory("yours")
   const chrome: ChromeContext = {
     origin: context.origin,
@@ -466,7 +583,7 @@ export const yourComponentsPageTree = (context: PageContext): LoomTree => {
         handedOver(ids),
         oneOfThem(ids),
         oursAndYours(ids, context),
-        neverDoes(ids),
+        neverDoes(ids, context.floors ?? []),
         asked(ids),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),
