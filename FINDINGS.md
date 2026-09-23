@@ -29434,6 +29434,143 @@ nothing performs is the weakest available support for a correct conclusion,
 because the day somebody checks it, it does not check out. Naming
 `renderLoomExcerpt` instead of the portal costs two words and is true.
 
+---
+
+## 2026-09-20 — the presentation pair is open and nothing in the library places either control
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives` · **Status:**
+open — four of Tier B's nine are unblocked as of this entry, and none is built
+
+`present` and `dismiss` are in the behaviour vocabulary as of
+`framework-45-a-control-somebody-else-can-close`
+([0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)).
+**Nothing declares either**, which is the same split 0131 made when
+`--loom-accent-strong-chroma` shipped with no paint reading it: the seam is this
+lane's and the primitives are yours.
+
+What is now buildable, and was not: **dialog, dropdown, lightbox, tooltip.** A
+dialog built on `disclose` today is a box a reader can open and cannot close —
+Escape does nothing, a press on the page behind does nothing, and a cross inside
+the panel is a second control the seam had no way to let agree with the first.
+
+The two things to read before placing them, both of which are contracts rather
+than advice:
+
+- **The state is on the element you place the trigger in**, not on the trigger,
+  so the rule is a descendant selector: `[data-loom-presented="false"] .panel
+  { display: none }`. It must **hide** on `"false"` and never **reveal** on
+  `"true"` — neither control renders until scripting has proved itself, so a
+  page without it has no attribute and must be left showing the region.
+- **Put the cross inside the element the trigger was placed in.** The pair
+  agrees through a bubbling event, so a cross outside that subtree is a button
+  that does nothing, and the seam cannot see your layout well enough to say so.
+  Same class of mistake as a disclosure whose region is not its button's
+  sibling.
+
+Focus trapping, `inert` and a scroll lock are **not** in the seam and are not
+coming: they are facts about the region and the page around it. A modal needs
+them and they are yours.
+
+**One thing worth settling before a dialog rather than after it.** Its scrim is
+the third consumer of `bg-overlay` — after `loom.pin` (4 September) and
+`loom.listing`'s flags (8 September), both still open against this lane. Two
+instances was the threshold that entry named for acting; three with a scrim is
+the strongest case the slot has had, and a dialog that paints its scrim out of
+something else is a fourth workaround. Say so on the run that reaches for it and
+this lane will take the theme half.
+
+---
+
+## 2026-09-20 — a container cannot read a label off its own child, so the one-of-*n* half of Tier B cannot be a behaviour
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **`ARCHITECTURAL — needs review`**, and nothing is blocked
+that was not blocked yesterday
+
+Sorting Tier B's nine by what they actually need gives three groups, not one.
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+closes the first — an overlay that something other than its opener can close —
+and this is the second: **tabs, segmented control, pricing toggle, radio group.**
+The third is a toast, which appears on an event nobody pressed and is a separate
+question again.
+
+A `select` member of the behaviour vocabulary is the obvious answer and cannot be
+written, for a reason that is three existing decisions rather than a difficulty:
+
+- A tab strip's labels are content a model writes, so they are **child nodes**
+  (0052) and not a `tabs: string[]` prop.
+- A render is a **pure function of one node** (0008), and a container receives
+  its children as one rendered `ReactNode` — so it cannot read a prop off one.
+- Primitives render as Server Components and carry no `"use client"`, so React
+  context is not available either, and `cloneElement` reaches elements the render
+  seam owns rather than the child primitive's.
+
+So a control that renders *n* labelled buttons cannot learn what to put on them.
+The 14 September entry *a container cannot tell its child which element to be*
+is the same wall from the other side, and its shape 2 — **a declared shape a
+container may ask of its children** — is what closes both. That is a change to
+what a node is and what a container may know about its subtree, which is the
+tree schema, which is why this is filed rather than proposed: writing a
+`Proposed` record for a design this run has not worked out would be a record in
+name only.
+
+**What this lane recommends, and it is a question rather than a plan.** Shape 2
+is worth it if the answer is *one* mechanism serving tabs, segmented controls,
+radio groups and the pricing toggle. It is not worth it for a pricing toggle
+alone, and the 14 September entry's shape 1 — a second primitive, `loom.choice`,
+with `radio` as a field type beside it — remains the cheap answer to the
+narrowest case and needs no framework decision at all.
+
+**Nothing is blocked meanwhile.** A form that needs one choice of several uses a
+`select`, which is registered and works. Five of Tier B's nine stay closed:
+these four and the toast.
+
+---
+
+## 2026-09-20 — no behaviour control can appear in a specimen, so the seam that builds them is the one thing `pnpm specimen` cannot photograph
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — worked around with a scratch bundle, and this lane is the third to write
+one in four days
+
+A specimen page is `renderToStaticMarkup` with no dev server and no hydration.
+`plan.ts` says so in as many words — *"there is no script in it to press"* — and
+that is right for the subject the harness was built for. The consequence nobody
+had had to hit yet: **every control in the behaviour vocabulary renders `null`
+until an effect proves scripting runs.** So a specimen of a primitive that takes
+`copy`, `disclose`, `adjust`, `present` or `dismiss` photographs the page
+*without* the control, correctly, and there is no flag that changes it.
+
+Five members in, nothing in this repository has ever photographed one.
+
+**What this run did instead**, because the picture was the whole point of a pair
+of controls that close each other: bundled `behaviour-present.ts` with the
+`esbuild` already in the store, served the bundle beside a hand-written page on
+`127.0.0.1`, and pointed `pnpm shoot` at it with `do: [{ click }]` steps. That
+works, takes about fifteen minutes, and is the third private screenshot script
+this repository has grown since the harness was folded into one on 8 September —
+the exact thing [0117](decisions/0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md)
+exists to stop.
+
+**Half of the fix is already built and unreachable.** `renderSpecimen` takes an
+`additionalPrimitives` list and nothing can pass one: it is not on the
+`Specimen` type, so the CLI always calls it with `[]`. Without that, a run
+photographing a *seam* has to add a primitive to `src/primitives/` to have
+anything to photograph, which is another lane's directory. Four lines, and this
+run wrote and then reverted them, because they buy nothing until the other half
+exists.
+
+**The other half is hydration**, and it is the real decision: serving a bundle
+means a build step inside the harness, which is what `renderToStaticMarkup` was
+chosen to avoid. Three shapes, smallest first — (1) hydrate only when the
+specimen asks, so every existing one stays static and costs nothing; (2) a
+second entry point, `pnpm specimen --live`; (3) leave it, and tell lanes to use
+`pnpm shoot` against their own served page, which is what the portal and the
+demo already do and what a framework seam has no page for.
+
+Recommended (1). Nothing is blocked — a scratch bundle works and this run's four
+pictures came out of one — but the next lane to want a photograph of a control
+will write the fourth script.
 ## 2026-09-21 — the words of *The runtime* are 56% of the site's, so the cap that just replaced one number is already uneven
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
@@ -30001,3 +30138,130 @@ watching is four: if `Loom docs` and `Loom lessons` both write a third and fourt
 private token table, the shape of the answer will be obvious and one of them will
 have paid for it. This entry exists so that the fourth lane finds three
 precedents rather than one.
+## 2026-09-22 — the red checkup has been photographed, and what it took says which half of the 13 September finding is actually open
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** the
+**photography half is closed**; the *reachable in the seeded portal* half stays
+open, unchanged, and is still above this lane's line
+
+The 13 September entry said the portal's three most important screens cannot be
+photographed because a healthy deployment never reaches their important state,
+and named one fix: a second seeded page, deliberately drifted, shipped in the
+demo deployment. That is still a product decision and this run did not take it.
+
+**What this run did instead, and why it closes half of it.** The sweep's red
+verdict was photographed on a real screen at a real URL, served by a production
+build of this commit, from a browser with a real session — by putting a
+*drifted store* on `globalThis` before the server's route modules evaluate,
+which is the same staging mechanism the 21 September run used for the reader
+counters. Four pages, three accepted changes appended through the store's own
+`append`, and one snapshot read that returns a tree the log does not produce.
+The pictures in this run's report are of the screen, not of a component stood up
+beside one.
+
+So the sentence that mattered in the finding — *"a picture that requires a
+paragraph explaining how it was taken is one the maintainer has to take on
+trust"* — is now a much smaller paragraph: the staging is one wrapper around
+`memoryTreeStore` and everything above it is the shipped code doing its own
+reads and its own render.
+
+**What is still open is the other claim, and it is the sharper one.** The red
+state remains unreachable *by any sequence of clicks in the deployed portal*.
+That matters for two audiences this lane cannot serve by taking a screenshot:
+anybody evaluating Loom, and the next run of this lane, which will have to build
+the staging again from this entry. The recommendation is unchanged and is the
+13 September one.
+
+**One thing to know before taking it, learned here.** A drift cannot be produced
+through the portal's own write path at all — `append` is one write over the log
+and the snapshot, by construction (`src/store/memory.ts`), which is exactly what
+0016 promises. So a deliberately drifted seed cannot be *created*; it has to be
+*stored that way*, which means the demo deployment would need a seed whose
+recorded starting shape is not the one its snapshot came from. That is a
+different and smaller change than it sounded like in September, and it is worth
+saying before somebody reaches for a sequence of proposals that cannot produce
+the state.
+
+---
+## 2026-09-22 — the one page you can check is the last row on the screen that offers to check it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+seen in a photograph of this branch, one component and one sort away, not taken
+because it is a different screen from the one this unit is about
+
+`/portal/checkup` lists the pages you might check in the order the store lists
+them, and a page this deployment has no starting shape for is listed as a
+dashed, unpressable row. On this branch's staged deployment that puts **three
+rows nobody can press above the one row somebody can** — see the landing
+screenshot in this run's report, where `Check this page →` is the last thing on
+the screen.
+
+The sweep added in this run sorts worst-first and argues for it in
+`inWorstFirstOrder`: *a reviewer opens this screen to find the row that matters,
+and store order buries it*. The chooser one route up has the same defect and did
+not get the same treatment, so the portal now sorts two lists of the same pages
+by two different rules.
+
+**Why it is filed rather than fixed.** The unit was the sweep, and the chooser's
+order is a claim about a different screen — one whose rows are *actions* rather
+than *results*, where "what can I do" may be a better sort than "what is wrong".
+Both readings are defensible and the argument belongs in the run that takes it.
+
+**The recommendation:** pressable rows first, in store order within each group,
+which is the same shape `inWorstFirstOrder` already has and would make one rule
+serve both lists. It is a `sort` and a test; the wording needs nothing.
+
+---
+## 2026-09-22 — the screenshots in every pull request are broken, and the cause named on 20 September is not the cause
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Corrects:** the
+20 September entry *"every screenshot in every pull request this project has
+opened is a broken image, and the cause is outside the repository"* ·
+**Status:** open, with a workaround taken on #367 and the real remedy named
+
+The 20 September entry is right that no screenshot has ever arrived and wrong
+about why. It says the tool these lanes open pull requests with rewrites
+markdown image targets, wrapping the URL in a pair of backticks. **That is not
+happening.**
+
+**Measured, on #367.** The body was posted through the GitHub MCP
+`create_pull_request` tool and then read back through `pull_request_read`. Every
+URL came back byte-for-byte as it was sent — no backticks, on any link or any
+image, in markdown or in an `<img>` tag. Whatever produced the corruption the
+20 September run read back on #349, #350 and #351, this path does not.
+
+**The images were still invisible, and the reason is one line.** *This
+repository is private.* GitHub does not serve a PR body's images from their
+source: it proxies them, anonymously, through camo. An anonymous fetch of
+`https://raw.githubusercontent.com/jam-overture/loom/<branch>/reports/<shot>.png`
+returns **404**, which is what five of them returned when this run checked from
+the sandbox before posting a second body. So:
+
+- **`raw.githubusercontent.com` can never work here**, in markdown or in HTML,
+  with or without backticks, for any branch, for any reader including the
+  maintainer. It is not a formatting problem and no escaping fixes it.
+- A **link** to the blob page does work, because that is a `github.com` page
+  the reader is signed in to. It costs a click, and it is what #367 uses.
+- The one form that embeds is a **GitHub user-attachment** — the asset you get
+  from dragging a file into a comment box, served from `user-images` /
+  `github.com/user-attachments` with its own signed URL. No routine has one,
+  because getting one means uploading through an endpoint none of these tools
+  expose.
+
+**What this means for the four surface lanes**, all of which are told a PR must
+carry a screenshot: **link, do not embed**, until somebody finds an upload path.
+A link a maintainer can click beats an image nobody can see, and it is one line
+of difference in the body.
+
+**The recommendation, for whoever owns the PR tooling.** If an upload path to
+GitHub's attachment store can be reached from a routine, that closes this for
+every lane at once and is worth more than any wording. If it cannot, the honest
+alternative is to stop promising an image in the brief and promise a link and
+the deployed preview instead — which is the thing a maintainer judging by eye
+actually wants, and the one channel that has been working all along.
+
+**What is worth keeping from the 20 September entry** is its method rather than
+its conclusion: it is the run that established you have to *read the body back
+from the API* to see what a PR actually says, because the text sent is not
+evidence of the text stored. This entry exists because that instruction was
+followed.

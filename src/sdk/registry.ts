@@ -115,6 +115,12 @@ export type RegistryError =
       readonly type: string
       readonly behaviour: string
     }
+  | {
+      readonly code: "unpaired-behaviour"
+      readonly type: string
+      readonly behaviour: string
+      readonly requires: string
+    }
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "invalid-binding-name"; readonly type: string; readonly name: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
@@ -167,6 +173,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
     case "invalid-binding-name":
       return `"${error.type}" says it reads a binding called "${error.name}", which is not a binding name — ${BINDING_NAME_EXPECTATION}; a tree cannot ask under a name it cannot write, so this primitive would report every binding it was ever given`
+    case "unpaired-behaviour":
+      return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
     case "unknown-role":
       return `"${error.type}" declares the role "${error.role}", which the runtime has none of; the vocabulary is closed and its members are ${PRIMITIVE_ROLES.map((role) => `"${role}"`).join(", ")} — and a misspelling accepted here would read to every consumer as a primitive that declares no role at all`
     case "duplicate-primitive-type":
@@ -245,11 +253,12 @@ const undeclaredCopyProp = (entry: PrimitiveEntry): string | undefined => {
 /**
  * The declared behaviours, or the first thing wrong with them.
  *
- * Three checks, and each one is the whole of what can be known without calling
+ * Four checks, and each one is the whole of what can be known without calling
  * the component: the name is in the vocabulary, the strings its control needs
- * are strings this primitive declares, and a primitive taking a control says it
- * renders a target. Whether the primitive actually *places* what it declared
- * needs the component called, which is the audit's job and not this one's.
+ * are strings this primitive declares, a primitive taking a control says it
+ * renders a target, and a control that answers to another one was declared
+ * beside it. Whether the primitive actually *places* what it declared needs the
+ * component called, which is the audit's job and not this one's.
  */
 const registeredBehaviours = (
   entry: PrimitiveEntry
@@ -271,6 +280,16 @@ const registeredBehaviours = (
 
     if (BEHAVIOURS[behaviour].rendersControl && !entry.interactive) {
       return err({ code: "undeclared-interactive-behaviour", type: entry.type, behaviour })
+    }
+
+    /**
+     * Checked against the entry's own raw list rather than against `names`, so
+     * the two may be declared in either order — a primitive that names the
+     * cross before the trigger is not making a mistake.
+     */
+    const requires = BEHAVIOURS[behaviour].requires
+    if (requires !== undefined && !entry.behaviours.includes(requires)) {
+      return err({ code: "unpaired-behaviour", type: entry.type, behaviour, requires })
     }
 
     names.push(behaviour)
