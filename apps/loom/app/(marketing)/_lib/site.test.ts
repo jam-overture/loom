@@ -12,12 +12,14 @@ import {
   otherThemes,
   PORTAL,
   PRODUCT_SURFACES,
+  readingNeighbours,
   readThemeName,
   siteOrigin,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
   surfaceHref,
+  type SiteRoute,
 } from "./site"
 
 describe("the palette a visitor arrives on", () => {
@@ -299,5 +301,93 @@ describe("every surface named here", () => {
     )
 
     expect(serving).toHaveLength(1)
+  })
+})
+
+/**
+ * The reading order, which `SITE_ROUTES` has been since the third page was
+ * written and nothing read until the band at the foot of every page.
+ */
+describe("the page before and the page after", () => {
+  /**
+   * The ends of the order, taken rather than indexed. `SITE_ROUTES` is a
+   * `readonly SiteRoute[]`, so an index gives back `SiteRoute | undefined` and
+   * an empty list would make every assertion below pass against nothing.
+   */
+  const ends = (): { readonly first: SiteRoute; readonly last: SiteRoute } => {
+    const [first] = SITE_ROUTES
+    const final = SITE_ROUTES[SITE_ROUTES.length - 1]
+
+    if (first === undefined || final === undefined) throw new Error("the site has no pages")
+
+    return { first, last: final }
+  }
+
+  it("agrees with the order the site's argument is written in", () => {
+    SITE_ROUTES.forEach((route, at) => {
+      const { before, after } = readingNeighbours(route)
+
+      expect(before?.path).toBe(SITE_ROUTES[at - 1]?.path)
+      expect(after?.path).toBe(SITE_ROUTES[at + 1]?.path)
+    })
+  })
+
+  /**
+   * The property that makes it a sequence rather than ten opinions: if this
+   * page says that one is next, that one says this one is before.
+   */
+  it("is the same relation read from either end", () => {
+    for (const route of SITE_ROUTES) {
+      const { after } = readingNeighbours(route)
+
+      if (after === undefined) continue
+
+      expect(readingNeighbours(after).before?.path).toBe(route.path)
+    }
+  })
+
+  it("puts nothing before the front door, which is where a stranger starts", () => {
+    const { first } = ends()
+
+    expect(first.path).toBe("/")
+    expect(readingNeighbours(first).before).toBeUndefined()
+  })
+
+  /**
+   * The one hand-off, on the one page that has run out of argument. The four
+   * surfaces are one application (0067) with this one at its root (0070), so
+   * the documentation is a step along the same origin rather than a way off
+   * the site.
+   */
+  it("hands the reader to the documentation once this site has nothing left to say", () => {
+    const { after, onward } = readingNeighbours(ends().last)
+
+    expect(after).toBeUndefined()
+    expect(onward).toBe(DOCS)
+  })
+
+  it("offers the hand-off on exactly one page, so it stays a sequence", () => {
+    const handoffs = SITE_ROUTES.filter((route) => readingNeighbours(route).onward !== undefined)
+
+    expect(handoffs).toHaveLength(1)
+  })
+
+  /**
+   * The guarantee the pager exists for, stated where the order is: **every page
+   * of this site is somebody's neighbour.** On `main` two of the ten were the
+   * destination of no page's body at all — `/putting-it-back` and
+   * `/what-readers-do`, both also off the bar — so the only way to either was
+   * to notice it in the footer's map.
+   */
+  it("leaves no page of this site off every other page's shoulder", () => {
+    const reached = new Set(
+      SITE_ROUTES.flatMap((route) => {
+        const { before, after } = readingNeighbours(route)
+
+        return [before?.path, after?.path].filter((path): path is string => path !== undefined)
+      })
+    )
+
+    for (const route of SITE_ROUTES) expect(reached.has(route.path), route.path).toBe(true)
   })
 })

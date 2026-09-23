@@ -4,9 +4,16 @@ import { describe, expect, it } from "vitest"
 
 import { apiSlugFor } from "../api/model"
 import { apiEntries } from "../api/reference"
-import { docsHref, docsOrder, writtenDocsSections } from "../nav"
+import { docsHref, docsOrder, docsSections, writtenDocsSections } from "../nav"
 
-import { buildSearchIndex, searchCode, searchContents, searchNames, searchProse } from "./build"
+import {
+  buildSearchIndex,
+  searchCode,
+  searchContents,
+  searchNames,
+  searchProse,
+  searchProseFor,
+} from "./build"
 import { readPageHeadings } from "./headings"
 import { namesToEntries, parseSearchIndex, parseSearchNames, withCode, withNames, withProse } from "./model"
 
@@ -196,15 +203,46 @@ describe("what the index contains", () => {
    *
    * | | Uncompressed | gzip | grows when |
    * | --- | --- | --- | --- |
-   * | Contents — 206 pages and headings | 38.8 KB | **7.4 KB** | somebody writes a page here |
-   * | Names — 1,067 published exports | 20.2 KB | 6.1 KB | any lane exports something |
-   * | Prose | 168.6 KB | 53.6 KB | anybody writes a paragraph |
+   * | Contents — 206 pages and headings | 38.8 KB | **7.5 KB** | somebody writes a page here |
+   * | Names — 1,081 published exports | 20.2 KB | 6.2 KB | any lane exports something |
+   * | Prose — *The runtime* | 98.2 KB | 32.5 KB | anybody writes a runtime paragraph |
+   * | Prose — *Getting started* | 30.7 KB | 11.0 KB | …a getting-started paragraph |
+   * | Prose — *Building with Loom* | 31.1 KB | 11.3 KB | …a building-with-Loom paragraph |
+   * | Prose — *Architecture* | 8.7 KB | 3.3 KB | …an architecture paragraph |
+   * | Prose — *API reference* | 13 bytes | 33 bytes | never; it has no words |
    * | Code | 22.3 KB | 6.2 KB | anybody adds a block |
    *
    * **Only the first row is waited for.** That is what every one of these
-   * numbers is ultimately about, and it is why they are four caps rather than
-   * one: a reader who opens the box and types waits for 7.4 KB, and the other
-   * three land underneath the results as they arrive.
+   * numbers is ultimately about, and it is why they are separate caps rather
+   * than one: a reader who opens the box and types waits for 7.5 KB, and
+   * everything else lands underneath the results as it arrives.
+   *
+   * ### Why the words became five files
+   *
+   * They were one until 21 September, at **54.9 KB compressed against a 60 KB
+   * cap — 91%**, which is about two more written pages for the whole site, and
+   * this lane writes roughly one a week. Same remedy as the two splits before
+   * it, along the line these actually grow on: somebody writes a page, and one
+   * **section's** words move.
+   *
+   * It buys two things. The reader's own section is asked for first, so the
+   * band most likely to answer them turns on before the rest of the site's
+   * words are even requested. And the number that fires is now a number about
+   * one section, which is a thing this lane writes, rather than a number about
+   * every section at once.
+   *
+   * It costs **5.9% more bytes in total** — 58.2 KB across the five against
+   * 54.9 KB as one — because compression works on one file at a time. That is
+   * measured below rather than asserted to be small, and it is the same trade
+   * the first split made.
+   *
+   * **The five are not even**, and the run that made them said so rather than
+   * pretending otherwise: *The runtime* is 56% of the words on its own, at 81%
+   * of the per-section cap, so it is the one that will fire next — in about
+   * three more runtime pages, against roughly twenty for any other section.
+   * When it does, the answer is one file per page within a section, and the
+   * browser already knows which page a reader is on for the same reason it
+   * already knows which section.
    *
    * ### Why the names had to leave
    *
@@ -247,28 +285,54 @@ describe("what the index contains", () => {
    * serve them per entry point rather than to take the number up again.
    */
   it("stays small enough to send", () => {
+    /*
+     * **Bytes, not characters.** `"…".length` is 1 and what goes down the wire
+     * is 3, and this site's prose is full of ellipses, em-dashes and curly
+     * quotes — so measuring the raw files with `.length` made every one of
+     * these numbers about 1% kinder than the bill it stands for. The gzip
+     * figures were always honest, because `gzipSync` encodes before it
+     * compresses; the uncompressed ones were not until 21 September.
+     */
+    const bytes = (json: string): number => Buffer.byteLength(json, "utf8")
+
     const contents = JSON.stringify(searchContents())
     const names = JSON.stringify(searchNames())
-    const prose = JSON.stringify(searchProse())
     const code = JSON.stringify(searchCode())
 
     // What a reader waits for, and now the only thing they wait for: this
     // site's own pages and the headings on them. It grows when somebody writes
     // a page here, which is this lane, slowly, and visibly.
     expect(gzipSync(contents).length).toBeLessThan(12_000)
-    expect(contents.length).toBeLessThan(60_000)
+    expect(bytes(contents)).toBeLessThan(60_000)
 
     // The runtime's surface. Nobody waits for it, and the count is nobody's
     // here to hold down — see the comment above for why this is two numbers.
-    expect(names.length / namesToEntries(searchNames()).length).toBeLessThan(24)
+    expect(bytes(names) / namesToEntries(searchNames()).length).toBeLessThan(24)
     expect(gzipSync(names).length).toBeLessThan(12_000)
-    expect(names.length).toBeLessThan(40_000)
+    expect(bytes(names)).toBeLessThan(40_000)
 
-    // What nobody waits for. It grows every time anybody writes a paragraph, so
-    // it has the room — and the day it runs out, it shards by section rather
-    // than taking the number up again.
-    expect(gzipSync(prose).length).toBeLessThan(60_000)
-    expect(prose.length).toBeLessThan(200_000)
+    // One section's words, which is a file a reader's connection has to carry
+    // in one go. 40 KB compressed is where the whole index sat before any of
+    // these splits existed, so no single fetch this box makes is bigger than
+    // the one fetch it used to make. When it fires, the section it fires on
+    // shards by page: the browser already knows which page a reader is on.
+    const proseFiles = docsSections.map((section) => JSON.stringify(searchProseFor(section.slug)))
+
+    for (const [at, words] of proseFiles.entries()) {
+      const slug = docsSections[at]?.slug ?? ""
+
+      expect(gzipSync(words).length, slug).toBeLessThan(40_000)
+      expect(bytes(words), slug).toBeLessThan(120_000)
+    }
+
+    // And the bill: every section's words, which is what a reader who leaves
+    // the box open eventually receives. A different number with a different
+    // remedy — when this one fires, sharding is finished as an answer and the
+    // question becomes whether a browser should be sent the whole site's prose
+    // at all. It is measured over the files as served rather than over the
+    // whole, because four files of one text cost more than one file of it.
+    expect(proseFiles.reduce((total, words) => total + gzipSync(words).length, 0)).toBeLessThan(80_000)
+    expect(proseFiles.reduce((total, words) => total + bytes(words), 0)).toBeLessThan(260_000)
 
     // The blocks. Capped an order of magnitude below the words rather than
     // beside them, because a code file that ever approached the prose file
@@ -276,7 +340,47 @@ describe("what the index contains", () => {
     // pasting a generated file in, most likely — and that is worth a red test
     // rather than a quiet doubling of what a reader downloads.
     expect(gzipSync(code).length).toBeLessThan(12_000)
-    expect(code.length).toBeLessThan(60_000)
+    expect(bytes(code)).toBeLessThan(60_000)
+  })
+
+  /**
+   * The words, cut up, as the property rather than as the numbers.
+   *
+   * **Every body is in exactly one file, and between them they are all of
+   * them.** That is what makes five files a split rather than five guesses: a
+   * sentence that fell between two sections would be a sentence the site says
+   * and the search box cannot find, and nothing else in this repository would
+   * notice — the caps would only read *smaller*, which is the direction they
+   * are written to be happy about.
+   */
+  it("cuts the words up without losing or repeating one", () => {
+    const whole = searchProse().bodies
+    const parts = docsSections.flatMap((section) => searchProseFor(section.slug).bodies)
+
+    expect([...parts].sort()).toEqual([...whole].sort())
+    expect(new Set(parts.map(([href]) => href)).size).toBe(parts.length)
+    expect(whole.length).toBeGreaterThan(100)
+  })
+
+  /**
+   * And what the cut costs, measured.
+   *
+   * Compression works on one file at a time, so the same words in five files
+   * are bigger than in one, and the honest question is by how much. Around 6%
+   * is the price of sending a reader their own section first. Much more than
+   * that would mean the split had stopped being a partition and started being a
+   * duplication — which the test above would also catch, but this is the one
+   * that would catch it getting *expensive* rather than wrong.
+   */
+  it("pays about what a split costs and no more", () => {
+    const whole = gzipSync(JSON.stringify(searchProse())).length
+    const parts = docsSections.reduce(
+      (total, section) => total + gzipSync(JSON.stringify(searchProseFor(section.slug))).length,
+      0
+    )
+
+    expect(parts).toBeGreaterThan(whole)
+    expect(parts / whole).toBeLessThan(1.1)
   })
 
   /**

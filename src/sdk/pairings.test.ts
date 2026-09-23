@@ -120,6 +120,161 @@ describe("probeColourPairings", () => {
     expect(verdict.childGrounds).toEqual([])
   })
 
+  /**
+   * CSS inherits `color` down the tree and paints a background on the box
+   * behind the glyphs, and those are two different walks. An ink declared above
+   * a ground declared below is the ordinary way round for a card that tints one
+   * of its own regions, and it was invisible until today.
+   */
+  it("reads an ink inherited from above onto a ground painted below it", () => {
+    const verdict = probeColourPairings(() =>
+      createElement(
+        "article",
+        { style: { color: colour("fg-default"), background: colour("bg-surface") } },
+        createElement("div", { style: { background: colour("bg-surface-muted") } }, "a tinted well")
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([
+      { foreground: "fg-default", background: "bg-surface" },
+      { foreground: "fg-default", background: "bg-surface-muted" },
+    ])
+  })
+
+  /**
+   * `loom.overlay`'s shape, which is the case that found all of this: the ink
+   * on the root, the ground on a scrim in grid cell `1 / 1`, and the words in
+   * the same cell one layer up. Read as an ancestor chain the two ends never
+   * meet.
+   */
+  it("reads the ground a sibling stacked under the content painted", () => {
+    const verdict = probeColourPairings(({ children }) =>
+      createElement(
+        "div",
+        { style: { display: "grid", color: colour("fg-default") } },
+        createElement("div", {
+          key: "scrim",
+          style: { gridArea: "1 / 1", zIndex: 1, background: colour("bg-overlay") },
+        }),
+        createElement("div", { key: "content", style: { gridArea: "1 / 1", zIndex: 2 } }, children)
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([{ foreground: "fg-default", background: "bg-overlay" }])
+    expect(verdict.childGrounds).toEqual(["bg-overlay"])
+  })
+
+  /**
+   * A scrim over a photograph over a card is three layers and the words sit on
+   * the scrim. Taking the bottom of the stack would name a ground no reader
+   * sees through.
+   *
+   * Written out of source order, and with the content's depth as the string
+   * React equally accepts — so a rule that fell back on source order, or that
+   * read `"2"` as no depth at all, would put the words at the bottom of their
+   * own stack and find no ground under them.
+   */
+  it("takes the nearest ground below in the stack, not the bottom of it", () => {
+    const verdict = probeColourPairings(({ children }) =>
+      createElement(
+        "div",
+        { style: { display: "grid", color: colour("fg-default") } },
+        createElement("div", { key: "content", style: { gridArea: "1 / 1", zIndex: "2" } }, children),
+        createElement("div", { key: "scrim", style: { gridArea: "1 / 1", zIndex: 1, background: colour("bg-overlay") } }),
+        createElement("div", { key: "back", style: { gridArea: "1 / 1", zIndex: 0, background: colour("bg-canvas") } })
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([{ foreground: "fg-default", background: "bg-overlay" }])
+    expect(verdict.childGrounds).toEqual(["bg-overlay"])
+  })
+
+  /**
+   * Source order decides between two layers that declare no depth, the way
+   * `z-index: auto` does — so the later sibling is the one on top and the
+   * earlier one is what it sits on.
+   */
+  it("orders a stack that declares no depth by the order it was written in", () => {
+    const verdict = probeColourPairings(({ children }) =>
+      createElement(
+        "div",
+        { style: { display: "grid", color: colour("fg-muted") } },
+        createElement("div", { key: "under", style: { gridArea: "a", background: colour("bg-surface-muted") } }),
+        createElement("div", { key: "over", style: { gridArea: "a" } }, children)
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([{ foreground: "fg-muted", background: "bg-surface-muted" }])
+  })
+
+  /**
+   * Two boxes side by side in a grid are not a stack, and inferring one would
+   * put every row of a table on the ground of the row beside it.
+   */
+  it("does not stack two siblings that sit in different cells", () => {
+    const verdict = probeColourPairings(({ children }) =>
+      createElement(
+        "div",
+        { style: { display: "grid", color: colour("fg-default") } },
+        createElement("div", { key: "left", style: { gridArea: "1 / 1", background: colour("bg-overlay") } }),
+        createElement("div", { key: "right", style: { gridArea: "1 / 2" } }, children)
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([])
+    expect(verdict.childGrounds).toEqual([])
+  })
+
+  /**
+   * `loom.frame` draws its camera notch as an empty `span` filled with
+   * `fg-default` and `loom.message` its typing dots with `fg-muted`. Counting
+   * those as grounds gives `fg-muted on fg-muted` — 1.00:1 in every palette
+   * that will ever be written, for a pair no reader can meet.
+   */
+  it("does not make a ground of an empty box, because nothing is written on a dot", () => {
+    const verdict = probeColourPairings(() =>
+      createElement(
+        "div",
+        { style: { color: colour("fg-default"), background: colour("bg-surface") } },
+        createElement("span", { key: "dot", style: { background: colour("fg-muted") } }),
+        createElement("span", { key: "spacer", style: { background: colour("fg-subtle") } }, null)
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([{ foreground: "fg-default", background: "bg-surface" }])
+  })
+
+  /**
+   * The other half of that rule, which keeps it from swallowing a real claim:
+   * an ink a component *declares* is recorded whether or not it wrapped
+   * anything, because the component said it.
+   */
+  it("still records an ink the component declared on a box with nothing in it", () => {
+    const verdict = probeColourPairings(() =>
+      createElement(
+        "div",
+        { style: { background: colour("bg-surface") } },
+        createElement("span", { key: "mark", style: { color: colour("accent") } })
+      )
+    )
+
+    expect(verdict.outcome).toBe("probed")
+    if (verdict.outcome !== "probed") return
+    expect(verdict.painted).toEqual([{ foreground: "accent", background: "bg-surface" }])
+  })
+
   it("says it could not answer for a component it cannot call", () => {
     const verdict = probeColourPairings(class Legacy {} as never)
 
@@ -349,6 +504,24 @@ describe("the declared list against the components", () => {
       )?.basis
     ).toBe("composed")
     expect(declared.get("accent-strong|bg-surface")?.basis).toBe("painted")
+  })
+
+  /**
+   * The row this run exists for, asserted against the real component rather
+   * than a fixture. `loom.overlay` shipped on 15 September and painted
+   * `bg-overlay` from its first commit; the slot appeared in no pairing, no
+   * child ground and no report until the probe could follow a stacked sibling,
+   * so `auditPalette` measured nothing about a surface the library writes on.
+   */
+  it("derives the overlay's pairing from the overlay, which no ancestor walk could reach", () => {
+    const overlay = derived.pairings.find(
+      (pairing) => pairing.foreground === "fg-default" && pairing.background === "bg-overlay"
+    )
+
+    expect(overlay?.basis).toBe("painted")
+    expect(overlay?.types).toEqual(["loom.overlay"])
+    expect(derived.childGrounds.find((ground) => ground.ground === "bg-overlay")?.types).toEqual(["loom.overlay"])
+    expect(declared.get("fg-default|bg-overlay")?.basis).toBe("painted")
   })
 
   it("holds the ramp to exactly the grounds children land on, bar the filled ones", () => {

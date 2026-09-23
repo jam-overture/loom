@@ -10,7 +10,7 @@ import {
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 import { READER_SIGNAL_KINDS, type ReaderSignalKind } from "@loom/runtime/signals"
 
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"
 import {
   bandSentence,
@@ -635,6 +635,7 @@ export const whatReadersDoPageTree = (context: PageContext): LoomTree => {
         thenWhat(ids, context),
         asked(ids, context.counting === true),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

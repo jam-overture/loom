@@ -10,7 +10,7 @@ import {
 import { THEME_PROP_KEY } from "@loom/runtime/react"
 
 import { askedAgain, weighedDifferently, type RoundTrip } from "../adapt/round-trip"
-import { siteFooter, siteHeader, type ChromeContext } from "../chrome"
+import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { spell, spellCapitalised } from "../journey"
 import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
 import {
@@ -439,6 +439,7 @@ export const puttingItBackPageTree = (context: BackContext): LoomTree => {
               ...weighedOnItsOwn(ids, trips),
             ]),
         closing(ids, context),
+        ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
       ],
     }),

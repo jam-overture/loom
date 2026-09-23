@@ -136,6 +136,28 @@ export type RenderDiagnostic =
     }
   | {
       /**
+       * A binding the node asked under a name this primitive says it does not
+       * read. The answer arrived and nothing will ever look at it.
+       *
+       * The quietest of the three ways a binding can be wrong, and until the
+       * primitive declared its names it was the only one nothing could see: an
+       * unregistered source is refused as `no-such-source`, params the source
+       * did not declare are refused by its own schema, and a name nothing reads
+       * resolves perfectly and is then dropped on the floor. The node renders —
+       * the binding cost it nothing but a round trip — and what is reported is
+       * that somebody asked a question whose answer has no reader.
+       *
+       * Only ever reported for a primitive whose author has declared `reads`.
+       * Absence is not emptiness (0181), so a primitive that has said nothing
+       * says nothing about the names it is given.
+       */
+      readonly code: "data-unread"
+      readonly nodeId: NodeId
+      readonly type: PrimitiveType
+      readonly name: string
+    }
+  | {
+      /**
        * `loom:submit` that is not an endpoint id under `to`. The node renders —
        * its props are its own and are still valid — with no target, which is
        * what a form primitive's unavailable path is for.
@@ -288,6 +310,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} declares data that is not a map of binding names to sources, so it rendered with none — ${describeBindingError(diagnostic.error)}`
     case "data-unavailable":
       return `node ${diagnostic.nodeId} binds "${diagnostic.name}" to "${diagnostic.source}" and it could not be answered — ${describeDataUnavailable(diagnostic.unavailable)}`
+    case "data-unread":
+      return `node ${diagnostic.nodeId} binds "${diagnostic.name}" and "${diagnostic.type}" does not read a binding of that name, so the answer was resolved and then read by nobody`
     case "data-unresolved":
       return diagnostic.resolution === "absent"
         ? `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`

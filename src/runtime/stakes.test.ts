@@ -24,6 +24,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   configuredPropKeys: [],
   nestedTargets: [],
   unknownPrimitives: [],
+  invalidProps: [],
   redirectedSubmissions: [],
   repointedBindings: [],
   shallowestAffectedDepth: 5,
@@ -352,6 +353,42 @@ describe("assessStakes on a node nothing can draw", () => {
     expect(
       stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "unknown-primitive")
     ).toBeUndefined()
+  })
+})
+
+describe("assessStakes on a node its own primitive refuses", () => {
+  const refused = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_bad${index}`),
+      type: primitiveTypeSchema.parse("loom.card"),
+      issues: [{ path: "variant", message: `received invented${index}` }],
+    }))
+
+  /**
+   * The same level as `unknown-primitive`, because `renderElement` returns
+   * `null` for both and a reader meets the same hole. Asserted rather than
+   * assumed: a level that drifted to `high` would turn a refusal into a
+   * question, and the question has no answer a person can usefully give.
+   */
+  it("is critical, which under the default floor is a refusal rather than a question", () => {
+    const assessment = stakesOf(analysisOf({ invalidProps: refused(1) }), defaultGatePolicy)
+
+    expect(assessment.level).toBe("critical")
+    expect(stakeFactor(assessment, "invalid-props")?.detail).toBe(
+      "leaves a node carrying props the declaring primitive refuses, so it draws nothing: loom.card at n_bad0 (variant: received invented0)"
+    )
+  })
+
+  it("names every node and what its schema said, because that is what a repairer rewrites", () => {
+    const assessment = stakesOf(analysisOf({ invalidProps: refused(2) }), defaultGatePolicy)
+
+    expect(stakeFactor(assessment, "invalid-props")?.detail).toBe(
+      "leaves 2 nodes carrying props the declaring primitive refuses, so they draw nothing: loom.card at n_bad0 (variant: received invented0); loom.card at n_bad1 (variant: received invented1)"
+    )
+  })
+
+  it("says nothing about a change that leaves none", () => {
+    expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "invalid-props")).toBeUndefined()
   })
 })
 

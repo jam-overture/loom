@@ -13,6 +13,7 @@ import type {
 } from "@loom/runtime"
 
 import { plainChange, type PlainChange } from "./plain-change"
+import { reversesTheLastChange, settingsMoved, type SettingMove } from "./put-back"
 import { touchedBy, type TouchedNode } from "./touched"
 
 /**
@@ -179,6 +180,36 @@ export type ChangeRecord = {
    * would print a confident account of a change that did not happen.
    */
   readonly did?: readonly PlainChange[]
+  /**
+   * Which settings this change moved, and what it moved them from — frozen
+   * against the tree it was judged against, for the same reason `did` and
+   * `touched` are frozen: that tree is gone by the time anything reads this.
+   *
+   * It is the only thing on the record that carries a prop's *value*. The
+   * technical half already names the props a change configured — `configure
+   * demo-n3: backdrop` — and stops there, which is enough to say what was
+   * touched and not enough to say which way it went. Two presses of one toggle
+   * produce that identical string twice.
+   *
+   * Absent when the caller could not name the tree, which is the same condition
+   * `did` is absent under and the same honesty: a move with no "from" in it is
+   * not a move anybody can check.
+   */
+  readonly settingsMoved?: readonly SettingMove[]
+  /**
+   * Whether this change put those settings back where the change before them
+   * moved them from.
+   *
+   * Frozen rather than read per render, because the history it is computed
+   * against is the history *at the moment of the ask*. A reading taken later
+   * would answer a different question every time the visitor pressed something
+   * else, and a card that changes its account of what happened is the one thing
+   * a record may never do.
+   *
+   * `put-back.ts` has the argument. It is what lets an ordinary second press
+   * wear the words the undo already had.
+   */
+  readonly wentBack?: boolean
 }
 
 /**
@@ -200,6 +231,21 @@ export type AssessedAgainst = {
   readonly settings: ReadonlySet<string>
   /** Whether this change puts something back rather than making it. */
   readonly restoring?: boolean
+  /**
+   * The asks this visitor has already made, newest first, so a change that
+   * reverses the last one can say so.
+   *
+   * Handed in for the same reason `before` is: it is knowledge the caller holds
+   * and the event stream does not. The runtime narrates one ask at a time and
+   * has no opinion about the ask before it — correctly, because whether a change
+   * is *a second press* is a fact about this visitor's session rather than about
+   * the tree or the delta.
+   *
+   * Optional, and an absent history is read as no history rather than as an
+   * error: a caller that cannot name what came before should say nothing, and
+   * the cost is one card that does not mention it went back.
+   */
+  readonly earlier?: readonly ChangeRecord[]
 }
 
 const describeOperation = (operation: TreeDelta["operations"][number]): string => {
@@ -292,6 +338,13 @@ type Draft = {
   touched: readonly TouchedNode[]
   /** Carried for the same reason `touched` is: the tree it describes is gone. */
   did?: readonly PlainChange[]
+  /** Carried for the same reason `did` is, and it is what a later ask compares
+   * itself against — so a fold that dropped it would make the *next* toggle
+   * press unable to tell it had gone back. */
+  settingsMoved?: readonly SettingMove[]
+  /** Carried for the same reason `settingsMoved` is: the history it was computed
+   * against is the history at the moment of the ask, and no later fold has it. */
+  wentBack?: boolean
 }
 
 const identityOf = (intent: EditIntent, askedAt: string): NonNullable<Draft["identity"]> => ({
@@ -333,6 +386,8 @@ const draftFrom = (base: ChangeRecord | undefined): Draft =>
          * would empty the line at the exact press that makes it true.
          */
         ...(base.did === undefined ? {} : { did: base.did }),
+        ...(base.settingsMoved === undefined ? {} : { settingsMoved: base.settingsMoved }),
+        ...(base.wentBack === undefined ? {} : { wentBack: base.wentBack }),
       }
 
 const failureOf = (event: RuntimeEvent): string | undefined => {
@@ -353,6 +408,40 @@ const failureOf = (event: RuntimeEvent): string | undefined => {
       return `the second attempt failed: ${event.error.detail}`
     default:
       return undefined
+  }
+}
+
+/**
+ * What this change moved, and whether that put the last change back.
+ *
+ * Computed at the one fold that has both halves in hand — the delta, and the
+ * tree it was planned against — and never afterwards. `put-back.ts` says why
+ * the answer is frozen rather than read per render.
+ *
+ * The comparison is against the earlier record's own frozen moves, so the two
+ * changes were each measured against the tree they actually ran on. Nothing is
+ * re-resolved against a tree that has since moved.
+ *
+ * **Only the change immediately before this one, and only one that reached the
+ * page.** A record with no revision never moved the tree — it is waiting, or it
+ * was refused, or it did not apply — so it is not the thing a later change could
+ * have put back, and stepping over it is what stops a hold sitting in the rail
+ * from hiding the change that really came before. The first applied record in a
+ * newest-first list is that change; what it moved, if anything, is the whole of
+ * what `reversesTheLastChange` is allowed to look at.
+ */
+const lastMovesIn = (earlier: readonly ChangeRecord[]): readonly SettingMove[] | undefined =>
+  earlier.find((record) => record.revision !== undefined)?.settingsMoved
+
+const movesOf = (
+  assessment: ChangeAssessment,
+  against: AssessedAgainst
+): Pick<Draft, "settingsMoved" | "wentBack"> => {
+  const moved = settingsMoved(against.before, assessment.proposal.delta)
+
+  return {
+    settingsMoved: moved,
+    wentBack: reversesTheLastChange(moved, lastMovesIn(against.earlier ?? [])),
   }
 }
 
@@ -384,15 +473,35 @@ const assessed = (
    */
   ...(against === undefined
     ? {}
-    : {
-        did: plainChange(
-          against.before,
-          assessment.proposal.delta,
-          against.settings,
-          against.restoring ?? false,
-          "done"
-        ),
-      }),
+    : (() => {
+        const moves = movesOf(assessment, against)
+
+        return {
+          ...moves,
+          did: plainChange(
+            against.before,
+            assessment.proposal.delta,
+            against.settings,
+            /*
+             * Two ways of putting something back, and the card only ever needed
+             * one word for both.
+             *
+             * `against.restoring` is the undo — knowledge the *control* had,
+             * because an undo's operations are ordinary inserts and removes
+             * (0032) and nothing in the delta says which way it is going.
+             * `wentBack` is the second press of a toggle — knowledge the
+             * *history* has, because a configure's delta says exactly which way
+             * it went and only the change before it says whether that is back.
+             *
+             * Neither can be derived from the other and both mean the same thing
+             * to a reader, so they are joined here rather than in `plainChange`,
+             * which is a function of one delta and one tree and should stay one.
+             */
+            (against.restoring ?? false) || (moves.wentBack ?? false),
+            "done"
+          ),
+        }
+      })()),
 })
 
 const fold =
@@ -519,5 +628,7 @@ export const recordFromEvents = (
     repaired: draft.repaired,
     touched: draft.touched,
     ...(draft.did === undefined ? {} : { did: draft.did }),
+    ...(draft.settingsMoved === undefined ? {} : { settingsMoved: draft.settingsMoved }),
+    ...(draft.wentBack === undefined ? {} : { wentBack: draft.wentBack }),
   }
 }

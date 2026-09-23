@@ -928,3 +928,73 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"
+
+/**
+ * The page before this one and the page after it, in the order the site's own
+ * argument is written in.
+ *
+ * `SITE_ROUTES` has been a **reading order** since the third page was written,
+ * and the comment above it is the longest in this file: which page earns which,
+ * why the objection arrives seventh rather than second, why the page about
+ * counting readers closes a group instead of opening the site. Every one of
+ * those sentences is a decision about what a stranger should read next.
+ *
+ * Until now the only thing that read the order was the footer's map, which
+ * renders it as ten links in a column — where being third and being ninth look
+ * exactly alike. So the order was an argument the site made to itself.
+ *
+ * It costs more than tidiness. Measured across the ten page builders on
+ * `main`, the onward links each page hand-picks leave **`/putting-it-back` and
+ * `/what-readers-do` linked from no other page's body at all**; both are also
+ * off the bar, so the only way to either is to notice it in the footer. And the
+ * page the front door's own closing band sends every visitor to —
+ * `/how-it-works` — ends without pointing anywhere. A reader who follows the
+ * front door's main call to action lands on a page with no way forward in it.
+ *
+ * Neighbours are derived rather than written down, so a route inserted into
+ * `SITE_ROUTES` is a route the pages before and after it start pointing at on
+ * the same commit. There is no second list to keep in step.
+ */
+export type ReadingNeighbours = {
+  /** The page before, absent on the first. */
+  readonly before?: SiteRoute
+  /** The page after, absent on the last. */
+  readonly after?: SiteRoute
+  /**
+   * Where the reading hands off once this site has nothing left to say.
+   *
+   * The last page asks *what do I have to hand it*, and the honest answer to
+   * *what now* at the foot of it is not another page of argument — it is the
+   * documentation, whose own blurb is `How to install it, hand it the
+   * components you already have`. The four surfaces are one application (0067)
+   * with this one at its root (0070), so that is a step along the same origin
+   * rather than a way off the site.
+   *
+   * It is the way out and it is therefore on exactly one page. A pager whose
+   * `next` was *Docs* on all ten would be a menu item pretending to be a
+   * sequence.
+   */
+  readonly onward?: Surface
+}
+
+/**
+ * Where a route sits in the reading order, and what is on either side of it.
+ *
+ * A route that is not in `SITE_ROUTES` has no neighbours rather than throwing:
+ * the only callers are the ten page builders, every one of which is looked up
+ * out of that same list by `render.ts`, so an unknown route here is not a state
+ * this site can reach. Returning an empty pair keeps the one function total.
+ */
+export const readingNeighbours = (route: SiteRoute): ReadingNeighbours => {
+  const at = SITE_ROUTES.findIndex((other) => other.path === route.path)
+
+  if (at < 0) return {}
+
+  const before = SITE_ROUTES[at - 1]
+  const after = SITE_ROUTES[at + 1]
+
+  return {
+    ...(before === undefined ? {} : { before }),
+    ...(after === undefined ? { onward: DOCS } : { after }),
+  }
+}

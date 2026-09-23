@@ -192,8 +192,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 96 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(96)
+  it("registers as 98 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(98)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -222,6 +222,7 @@ describe("the starter library", () => {
       "loom.stat-grid",
       "loom.stat-chart",
       "loom.stat",
+      "loom.tally",
       "loom.meter",
       "loom.tier-table",
       "loom.tier",
@@ -268,6 +269,7 @@ describe("the starter library", () => {
       "loom.link-list",
       "loom.link-trail",
       "loom.link-pager",
+      "loom.feed",
       "loom.empty-state",
       "loom.waiting-state",
       "loom.heading",
@@ -416,6 +418,7 @@ describe("the starter library", () => {
       "loom.feature",
       "loom.milestone",
       "loom.stat",
+      "loom.tally",
       "loom.meter",
       "loom.perk-list-item",
       "loom.product",
@@ -429,6 +432,13 @@ describe("the starter library", () => {
       "loom.logo",
       "loom.credential",
       "loom.faq",
+      /**
+       * A leaf for a third reason, and the only one in the list whose content
+       * is not in its props either: its entries come from an answer, and an
+       * answer is never a node. A child put in it is a child nothing draws,
+       * which is exactly what this list exists to tell a portal.
+       */
+      "loom.feed",
       /**
        * A leaf for a different reason than the twenty-two around it. The others
        * hold their copy in props; this one holds no copy at all — its whole
@@ -8835,6 +8845,69 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
     ],
   })
 
+  /**
+   * The two primitives that read an answer, drawn as a page meets them before a
+   * source has been connected: a node that never asked has no answer, so the
+   * feed shows the region the tree gave it for an absence and the figure stands
+   * its declared word where the number goes.
+   *
+   * That is the whole of what this fixture can show — it renders with no
+   * resolution, like every other fixture here — and the states that need one
+   * are in `bound.test.ts`, which drives the real seam. What it is here for is
+   * the two properties this file holds over *every* primitive: that the markup
+   * is identical under both starter palettes, and that no colour in it is the
+   * primitive's own.
+   */
+  const answered = buildElement(idFactory, {
+    type: "loom.section",
+    props: { eyebrow: "Bound", anchor: "answered" },
+    children: [
+      buildSlot(idFactory, "heading", [
+        buildElement(idFactory, {
+          type: "loom.heading",
+          props: { level: 2 },
+          children: [text("What the page draws from an answer")],
+        }),
+      ]),
+      buildElement(idFactory, {
+        type: "loom.feed",
+        props: { density: "loose", separators: "rule", meta: "above" },
+        children: [
+          buildSlot(idFactory, "empty", [
+            buildElement(idFactory, {
+              type: "loom.empty-state",
+              props: { outline: "dashed", align: "center", cause: "empty" },
+              children: [
+                buildSlot(idFactory, "heading", [
+                  buildElement(idFactory, {
+                    type: "loom.heading",
+                    props: { level: 3 },
+                    children: [text("No posts yet")],
+                  }),
+                ]),
+                text("Connect a source and the latest entries appear here."),
+              ],
+            }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.stat-grid",
+        props: { columns: "two", align: "start" },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.tally",
+            props: { label: "Teams shipping weekly", suffix: "+" },
+          }),
+          buildElement(idFactory, {
+            type: "loom.stat",
+            props: { value: "99.98%", label: "Uptime last quarter" },
+          }),
+        ],
+      }),
+    ],
+  })
+
   const along = buildElement(idFactory, {
     type: "loom.section",
     props: { eyebrow: "Archive", anchor: "along" },
@@ -8862,7 +8935,12 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
       buildElement(idFactory, {
         type: "loom.link-list",
         props: { label: "On this page", direction: "row" },
-        children: [link("#arriving", "Waiting"), link("#nothing", "Empty"), link("#along", "Paging")],
+        children: [
+          link("#arriving", "Waiting"),
+          link("#nothing", "Empty"),
+          link("#answered", "Bound"),
+          link("#along", "Paging"),
+        ],
       }),
     ],
   })
@@ -8899,7 +8977,7 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
     buildElement(idFactory, {
       type: "loom.page",
       props: { [THEME_PROP_KEY]: theme, width: "wide" },
-      children: [arriving, nothing, along, consent],
+      children: [arriving, nothing, answered, along, consent],
     }),
     idFactory
   )

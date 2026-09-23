@@ -15,6 +15,7 @@ import { isInterpreterConfigured } from "@/app/(portal)/_lib/interpreter"
 import { outlineRows } from "@/app/(portal)/_lib/outline"
 import { pageNameOf } from "@/app/(portal)/_lib/page-name"
 import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+import { unreadableChangesIn } from "@/app/(portal)/_lib/unreadable-change"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
@@ -116,6 +117,16 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
    * would show them a "before" that is not on their screen, which is a worse
    * failure than showing none.
    */
+  /**
+   * The rows on this page that this build could place and could not read.
+   *
+   * Dropped until now, along with the whole of 0175's second half. A page whose
+   * only waiting change is one of these said **"Nothing is waiting for you."**
+   * in a green box — the confident empty state, over a queue with something
+   * stuck in it.
+   */
+  const unreadable = holds.ok ? unreadableChangesIn(parsed.data, holds.value) : []
+
   const changes = (holds.ok ? holds.value.held : []).map((held) => ({
     held,
     /**
@@ -169,7 +180,7 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
             configured={isInterpreterConfigured}
           />
 
-          <ReviewQueue changes={changes} />
+          <ReviewQueue changes={changes} unreadable={unreadable} />
         </div>
 
         <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">

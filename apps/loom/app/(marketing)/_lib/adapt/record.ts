@@ -152,6 +152,7 @@ const RAISED_BY = {
   "discards-later-work": "it writes over work done since it was planned",
   "nested-target": "it would leave a button inside a link, where nobody can click it",
   "unknown-primitive": "it adds a piece your site has nothing to draw it with",
+  "invalid-props": "it sets a piece up in a way that piece does not accept, so it would not draw",
   "redirected-submission": "it changes where the page sends what people type",
   "repointed-binding": "it changes which of your data the page shows",
 } satisfies Record<StakeFactorCode, string>

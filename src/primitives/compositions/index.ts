@@ -15,6 +15,7 @@ import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
 import { faqGridBand } from "./faq-grid-band.js"
 import { featuresBand } from "./features-band.js"
+import { feedBand } from "./feed-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
 import { heroBand } from "./hero-band.js"
@@ -29,6 +30,7 @@ import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
 import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
+import { specsBand } from "./specs-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
@@ -60,6 +62,7 @@ export {
   faqGridBand,
   featuresBand,
   featuresAlternatingBand,
+  feedBand,
   footerBand,
   heroBand,
   heroSplitBand,
@@ -73,6 +76,7 @@ export {
   proofBand,
   proofFacesBand,
   proofStoryBand,
+  specsBand,
   stepsBand,
   stepsCardsBand,
   teamBand,
@@ -142,6 +146,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   integrationsGridBand,
   metricsBand,
   metricsChartBand,
+  specsBand,
   pricingBand,
   pricingMatrixBand,
   comparisonBand,
@@ -150,6 +155,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   credentialsBand,
   teamBand,
   articlesBand,
+  feedBand,
   changelogBand,
   faqBand,
   faqGridBand,

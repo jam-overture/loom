@@ -9,6 +9,7 @@ import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
+import { pagesWaitingSummary, unreadableMark } from "@/app/(portal)/_lib/unreadable-change"
 
 /**
  * Every page this deployment holds, and the one number that decides whether a
@@ -91,11 +92,20 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         treeId: listing.treeId,
         revision: listing.revision,
         waiting: holds.ok ? holds.value.held.length : null,
+        /*
+         * The rows this build could place and could not read, counted but never
+         * folded into `waiting`.
+         *
+         * 0175's listing answers both halves and this screen took `.held` and
+         * dropped the rest, so a page whose only waiting change was one of
+         * these listed with no mark on it at all — indistinguishable from a
+         * page with nothing happening on it. The count beside it stays a count
+         * of what somebody can actually answer; see `pagesWaitingSummary`.
+         */
+        unreadable: holds.ok ? holds.value.unreadable.length : 0,
       }
     })
   )
-
-  const waitingTotal = summaries.reduce((total, page) => total + (page.waiting ?? 0), 0)
 
   return (
     <div className="flex max-w-xl flex-col gap-4 p-8">
@@ -104,9 +114,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         <p className="text-ink-muted text-sm">
           {summaries.length === 0
             ? "Pages that Loom is looking after will show up here."
-            : waitingTotal === 0
-              ? "Nothing is waiting for you. Open a page to see it or to ask for a change."
-              : `${waitingTotal} ${waitingTotal === 1 ? "change is" : "changes are"} waiting for your answer.`}
+            : pagesWaitingSummary(summaries)}
         </p>
       </header>
 
@@ -152,11 +160,29 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
                   </span>
                 </span>
 
-                {page.waiting !== null && page.waiting > 0 && (
-                  <span className="bg-awaiting text-awaiting-ink shrink-0 rounded-sm px-2 py-1 text-xs">
-                    {page.waiting} waiting on you
-                  </span>
-                )}
+                {/*
+                 * Two marks, never one number covering both.
+                 *
+                 * A page with four answerable changes and one row from a later
+                 * build reads "4 waiting on you · 1 can't be read", and a page
+                 * whose only row is the second one gets the second mark alone.
+                 * That last case is the one worth the second element: before
+                 * this it was a row with no mark on it, which on an index whose
+                 * whole job is "which of these needs me" reads as *nothing is
+                 * happening here*.
+                 */}
+                <span className="flex shrink-0 items-center gap-1.5">
+                  {page.waiting !== null && page.waiting > 0 && (
+                    <span className="bg-awaiting text-awaiting-ink rounded-sm px-2 py-1 text-xs">
+                      {page.waiting} waiting on you
+                    </span>
+                  )}
+                  {page.unreadable > 0 && (
+                    <span className="border-edge-subtle text-ink-muted rounded-sm border border-dashed px-2 py-1 text-xs">
+                      {unreadableMark(page.unreadable)}
+                    </span>
+                  )}
+                </span>
               </Link>
             </li>
           ))}

@@ -17,6 +17,7 @@ const piece = (over: Partial<CataloguedPrimitive> = {}): CataloguedPrimitive => 
   description: "A block of related content, optionally outlined",
   props: [{ name: "variant", required: false }],
   slots: [],
+  reads: undefined,
   ...over,
 })
 

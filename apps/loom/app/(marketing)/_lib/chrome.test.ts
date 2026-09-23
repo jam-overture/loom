@@ -1,17 +1,29 @@
 import { sequentialIdFactory, type ElementNode, type LoomNode } from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
-import { PALETTE_SWITCHER_LABEL, siteFooter, siteHeader, type ChromeContext } from "./chrome"
+import {
+  BEFORE_LABEL,
+  NEXT_LABEL,
+  PALETTE_SWITCHER_LABEL,
+  READ_NEXT_EYEBROW,
+  siteFooter,
+  siteHeader,
+  siteReadingBand,
+  type ChromeContext,
+} from "./chrome"
 import {
   DEFAULT_THEME,
+  DOCS,
   HOME,
   HOW_IT_WORKS,
   internalHref,
   PORTAL,
   PRODUCT_SURFACES,
+  readingNeighbours,
   SITE_ROUTES,
   surfaceHref,
   WHAT_READERS_DO,
+  type SiteRoute,
 } from "./site"
 import { wordsOf } from "./words"
 
@@ -45,6 +57,19 @@ const footer = (current = HOME): LoomNode => siteFooter(sequentialIdFactory("t")
 /** The same footer, on a deployment that is counting its readers. */
 const counting = (current = HOME): LoomNode =>
   siteFooter(sequentialIdFactory("t"), { ...context(current), counting: true })
+
+/** The band, or nothing at all on the one page that does not carry it. */
+const readingBand = (current: SiteRoute): readonly LoomNode[] =>
+  siteReadingBand(sequentialIdFactory("t"), context(current))
+
+/** The band on a page that has one, asserted rather than assumed. */
+const bandOn = (current: SiteRoute): LoomNode => {
+  const [band] = readingBand(current)
+
+  if (band === undefined) throw new Error(`${current.path} carries no reading band`)
+
+  return band
+}
 
 /** Every element node in the subtree, in document order. */
 const elements = (node: LoomNode): readonly ElementNode[] => [
@@ -285,5 +310,112 @@ describe("the footer", () => {
     expect(hrefsIn(counting())).toContain(
       internalHref(ORIGIN, WHAT_READERS_DO.path, DEFAULT_THEME)
     )
+  })
+})
+
+/**
+ * The band that walks a reader along the site's argument.
+ *
+ * `site.test.ts` asks whether the order is a sequence; this asks whether the
+ * band says so in nodes. The two are different questions and the second is the
+ * one a reader meets: a correct `readingNeighbours` rendered into a region
+ * nothing draws would be a page that quietly offers nothing.
+ */
+describe("the band that says what to read next", () => {
+  it("names itself, so the outline has a row for it rather than a hole", () => {
+    const band = bandOn(HOW_IT_WORKS)
+
+    expect(band.kind === "element" ? band.type : "").toBe("loom.section")
+    expect(band.kind === "element" ? band.props["eyebrow"] : "").toBe(READ_NEXT_EYEBROW)
+  })
+
+  /**
+   * A card apiece, in a grid. The shape this band wanted was
+   * `loom.link-pager`, and the two reasons it could not have it are filed for
+   * `Loom primitives` — pinned here so a run that reaches for the pager meets
+   * the measurement rather than repeating it.
+   */
+  it("gives each way on a card of its own, in a grid that gives it a width", () => {
+    const band = bandOn(HOW_IT_WORKS)
+
+    expect(ofType(band, "loom.grid")).toHaveLength(1)
+    expect(ofType(band, "loom.card")).toHaveLength(2)
+    /** The whole card is the link, so nothing inside it may be one. */
+    expect(ofType(band, "loom.link")).toHaveLength(0)
+  })
+
+  const CARRIED = SITE_ROUTES.filter((route) => route.path !== HOME.path)
+
+  it.each(CARRIED)("$path offers the page before it and the page after it", (route) => {
+    const { before, after, onward } = readingNeighbours(route)
+    const band = bandOn(route)
+    const cards = ofType(band, "loom.card")
+
+    expect(cards).toHaveLength(
+      [before, after, onward].filter((way) => way !== undefined).length
+    )
+
+    for (const neighbour of [before, after]) {
+      if (neighbour === undefined) continue
+
+      const href = internalHref(ORIGIN, neighbour.path, DEFAULT_THEME)
+      const card = cards.find((found) => found.props["href"] === href)
+
+      expect(card, `${route.path} should offer ${neighbour.path}`).toBeDefined()
+      expect(labelOf(card as LoomNode)).toContain(neighbour.label)
+    }
+
+    if (onward !== undefined) {
+      expect(hrefsIn(band)).toContain(surfaceHref(ORIGIN, onward))
+    }
+  })
+
+  it("says which way each card goes, in words rather than in a glyph", () => {
+    const words = wordsOf(bandOn(HOW_IT_WORKS))
+
+    expect(words).toContain(BEFORE_LABEL)
+    expect(words).toContain(NEXT_LABEL)
+  })
+
+  /**
+   * The front door does not carry one, and it is the only page that does not.
+   * `chrome.ts` has the reasoning; what matters here is that it is exactly one
+   * page and that the decision is read off the order rather than off the path.
+   */
+  it("is on every page of the site except the front door", () => {
+    const without = SITE_ROUTES.filter((route) => readingBand(route).length === 0)
+
+    expect(without.map((route) => route.path)).toEqual([HOME.path])
+  })
+
+  /**
+   * The guarantee, as a reader meets it: **every page of this site is offered
+   * by the body of another page.** On `main` two of the ten were offered by no
+   * page's body at all, and both are off the bar as well — so the footer's map
+   * was the only way to either.
+   */
+  it("leaves no page of this site reachable only from the footer's map", () => {
+    const offered = new Set(SITE_ROUTES.flatMap((route) => readingBand(route).flatMap(hrefsIn)))
+
+    for (const route of SITE_ROUTES) {
+      expect(offered.has(internalHref(ORIGIN, route.path, DEFAULT_THEME)), route.path).toBe(true)
+    }
+  })
+
+  /**
+   * The palette travels between pages of this site and stops at its edge — the
+   * rule the header's links and the footer's map already follow, and the reason
+   * is that `?theme=bold` arriving at a surface that does not read it is a
+   * parameter that means nothing and looks like it means something.
+   */
+  it("carries the visitor's palette along the site and not into another surface", () => {
+    const along = hrefsIn(bandOn(HOW_IT_WORKS))
+
+    expect(along.every((href) => href.includes(`theme=${DEFAULT_THEME}`))).toBe(true)
+
+    const last = SITE_ROUTES[SITE_ROUTES.length - 1]
+
+    expect(last).toBeDefined()
+    expect(hrefsIn(bandOn(last as SiteRoute))).toContain(surfaceHref(ORIGIN, DOCS))
   })
 })

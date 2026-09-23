@@ -4,7 +4,7 @@ import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import { describeRedirectedSubmission } from "./redirection.js"
 import { describeRepointedBinding } from "./repointing.js"
-import { describeUnknownPrimitive } from "./vocabulary.js"
+import { describeInvalidProps, describeUnknownPrimitive } from "./vocabulary.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -35,6 +35,7 @@ export type StakeFactorCode =
   | "discards-later-work"
   | "nested-target"
   | "unknown-primitive"
+  | "invalid-props"
   | "redirected-submission"
   | "repointed-binding"
 
@@ -286,6 +287,40 @@ const unknownPrimitive = ({ analysis }: StakeInput): StakeFactor | null => {
 }
 
 /**
+ * Props the declaring primitive refuses, as damage.
+ *
+ * `critical`, the same level as `unknown-primitive`, because the damage is
+ * identical and it is worth being blunt about why: `renderElement` returns
+ * `null` for both. A type nothing registered and a node whose props its own
+ * schema rejects produce the same hole on the same page for the same reader,
+ * and a level that ranked them differently would be ranking the explanation
+ * rather than the harm.
+ *
+ * The reason to refuse rather than to hold, as with `unknown-primitive`: a
+ * refusal is the disposition a repairer is offered, and *`text` is longer than
+ * this primitive accepts, by this much* is among the most actionable things a
+ * model can be told. Confirmation would put a broken node to a person whose
+ * only available answer is no.
+ *
+ * A host that disagrees does not need a knob. It wires no props vocabulary and
+ * this never fires, which is today's behaviour and the default (0002).
+ */
+const invalidProps = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { invalidProps: invalid } = analysis
+  if (invalid.length === 0) return null
+
+  const one = invalid.length === 1
+
+  return {
+    code: "invalid-props",
+    level: "critical",
+    detail: `leaves ${one ? "a node" : `${invalid.length} nodes`} carrying props the declaring primitive refuses, so ${
+      one ? "it draws" : "they draw"
+    } nothing: ${invalid.map(describeInvalidProps).join("; ")}`,
+  }
+}
+
+/**
  * A form pointed somewhere else, as damage.
  *
  * `high` rather than `critical`, and the comparison with `nested-target` above
@@ -361,6 +396,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   discardsLaterWork,
   nestedTarget,
   unknownPrimitive,
+  invalidProps,
   redirectedSubmission,
   repointedBinding,
 ]

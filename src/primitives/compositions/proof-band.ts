@@ -35,7 +35,7 @@ import type { Composition } from "./composition.js"
  * prop would be `insert` and `remove` in a prop bag, and adding a seventh
  * customer would rewrite the whole row as one unreadable `configure`.
  */
-const CUSTOMERS = ["Northwind", "Kestrel", "Aperture Labs", "Meridian", "Halcyon", "Blackpine"] as const
+const CUSTOMERS = ["Fairwater", "Kestrel", "Aperture Labs", "Meridian", "Halcyon", "Blackpine"] as const
 
 export const proofBand: Composition = {
   id: "proof",

@@ -5,9 +5,11 @@ import {
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
   SEARCH_NAMES_PATH,
-  SEARCH_PROSE_PATH,
+  searchProsePath,
   type SearchIndex,
 } from "@/app/(docs)/_lib/search/model"
+
+import { docsSectionOfPath } from "@/app/(docs)/_lib/search/shards"
 
 import { Search } from "./search"
 
@@ -24,8 +26,9 @@ import { Search } from "./search"
  */
 
 const push = vi.hoisted(() => vi.fn())
+const pathname = vi.hoisted(() => ({ at: "/docs/the-runtime/what-the-gate-decides" }))
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: () => pathname.at }))
 
 const index: SearchIndex = {
   entries: [
@@ -65,6 +68,22 @@ const index: SearchIndex = {
       body: "",
       code: "",
     },
+    /*
+     * A page of the generated section, which is here so the fixture has a
+     * section with **no words in it**. That is a real case and the one most
+     * likely to be got wrong: the browser asks for every section the table of
+     * contents mentions, and the one built from data has to answer with an
+     * empty file rather than with a 404.
+     */
+    {
+      href: "/docs/api-reference/runtime",
+      title: "@loom/runtime",
+      context: "API reference",
+      kind: "page",
+      summary: "",
+      body: "",
+      code: "",
+    },
   ],
 }
 
@@ -93,17 +112,35 @@ const contents = {
 
 const names = { entryPoints: [{ specifier: "@loom/runtime", names: ["evaluateGate"] }] }
 
-const prose = {
-  bodies: index.entries.filter((entry) => entry.body !== "").map((entry) => [entry.href, entry.body]),
-}
+/**
+ * The words, **one file per section**, which is how they really travel.
+ *
+ * Cut here the way the builder cuts them, off the same `docsSectionOfPath`, so
+ * that a fixture cannot quietly agree with a component that has got the address
+ * scheme wrong. The sections this fixture has are the two its entries are in —
+ * the runtime and getting started — plus the API reference, which is a section
+ * of the site with no words in it and answers with none.
+ */
+const PROSE_SECTIONS = ["the-runtime", "getting-started", "api-reference"] as const
+
+const proseFor = (section: string): unknown => ({
+  bodies: index.entries
+    .filter((entry) => entry.body !== "" && docsSectionOfPath(entry.href) === section)
+    .map((entry) => [entry.href, entry.body]),
+})
 
 const code = {
   blocks: index.entries.filter((entry) => entry.code !== "").map((entry) => [entry.href, entry.code]),
 }
 
+const proseSectionAsked = (path: string): string | undefined =>
+  PROSE_SECTIONS.find((section) => path === searchProsePath(section))
+
 const serve = (path: string): unknown => {
+  const section = proseSectionAsked(path)
+
+  if (section !== undefined) return proseFor(section)
   if (path === SEARCH_NAMES_PATH) return names
-  if (path === SEARCH_PROSE_PATH) return prose
   if (path === SEARCH_CODE_PATH) return code
 
   return contents
@@ -111,6 +148,7 @@ const serve = (path: string): unknown => {
 
 beforeEach(() => {
   push.mockReset()
+  pathname.at = "/docs/the-runtime/what-the-gate-decides"
   fetchMock.mockReset()
   fetchMock.mockImplementation((path: string) =>
     Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
@@ -151,11 +189,99 @@ describe("the search box", () => {
     await open()
     await type("gate")
 
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3 + PROSE_SECTIONS.length))
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_INDEX_PATH)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_NAMES_PATH)
-    expect(fetchMock).toHaveBeenCalledWith(SEARCH_PROSE_PATH)
     expect(fetchMock).toHaveBeenCalledWith(SEARCH_CODE_PATH)
+
+    for (const section of PROSE_SECTIONS) {
+      expect(fetchMock, section).toHaveBeenCalledWith(searchProsePath(section))
+    }
+  })
+
+  /**
+   * The ordering the split was made for, as the only thing that can actually
+   * demonstrate it: **what was asked for before anything came back.**
+   *
+   * Four requests leaving at once and arriving in whatever order a connection
+   * gives them is not an ordering, so the reader's own section is asked for on
+   * its own and the rest wait for it to settle. A reader standing in *The
+   * runtime* who searches the runtime gets the band that answers them without
+   * queueing behind the words of every other section.
+   */
+  it("asks for the reader's own section before any other", async () => {
+    const held: (() => void)[] = []
+    const answer = (path: string): unknown => ({
+      ok: true,
+      json: async () => JSON.parse(JSON.stringify(serve(path))),
+    })
+
+    /*
+     * The words are held and **everything else is not**, which is the whole
+     * point of the fixture. Holding the lot would prove nothing: the browser
+     * cannot know which sections exist until the table of contents lands, so a
+     * box that asked for one section would look identical to one that meant to
+     * ask for all of them. Letting the contents land and holding only the words
+     * is the arrangement in which the two differ.
+     */
+    fetchMock.mockImplementation((path: string) =>
+      proseSectionAsked(path) === undefined
+        ? Promise.resolve(answer(path))
+        : new Promise((resolve) => held.push(() => resolve(answer(path))))
+    )
+
+    render(<Search />)
+    await open()
+    await type("gate")
+
+    const proseAsked = (): readonly string[] =>
+      fetchMock.mock.calls.map((call) => String(call[0])).filter((path) => proseSectionAsked(path) !== undefined)
+
+    expect(proseAsked()).toEqual([searchProsePath("the-runtime")])
+
+    for (const settle of [...held]) settle()
+
+    await waitFor(() => expect(proseAsked().length).toBe(PROSE_SECTIONS.length))
+  })
+
+  /**
+   * And a reader who opened the box from somewhere with no section of its own
+   * is not left without words. The docs root is the honest example: a real
+   * address on this site, and one no section owns.
+   */
+  it("sends for every section when the reader is not standing in one", async () => {
+    pathname.at = "/docs"
+
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3 + PROSE_SECTIONS.length))
+
+    for (const section of PROSE_SECTIONS) {
+      expect(fetchMock, section).toHaveBeenCalledWith(searchProsePath(section))
+    }
+  })
+
+  /**
+   * The one that would be an outage rather than a slow band: a section whose
+   * words never arrive must not take the other sections down with it. The
+   * reader's own is the dangerous one, because everything else waits on it.
+   */
+  it("sends for the rest when the reader's own section never answers", async () => {
+    fetchMock.mockImplementation((path: string) =>
+      path === searchProsePath("the-runtime")
+        ? Promise.resolve({ ok: false, status: 404 })
+        : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
+    )
+
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(searchProsePath("getting-started")))
   })
 
   it("opens on the shortcut every reader tries", async () => {
@@ -204,7 +330,7 @@ describe("what a reader sees after typing", () => {
    */
   it("answers by name while the words are still on their way", async () => {
     fetchMock.mockImplementation((path: string) =>
-      path === SEARCH_PROSE_PATH
+      proseSectionAsked(path) !== undefined
         ? new Promise(() => undefined)
         : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
     )
@@ -220,7 +346,7 @@ describe("what a reader sees after typing", () => {
 
   it("does not say it read the words until it has", async () => {
     fetchMock.mockImplementation((path: string) =>
-      path === SEARCH_PROSE_PATH
+      proseSectionAsked(path) !== undefined
         ? new Promise(() => undefined)
         : Promise.resolve({ ok: true, json: async () => JSON.parse(JSON.stringify(serve(path))) })
     )

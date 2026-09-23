@@ -100,6 +100,12 @@ const DEMO_SETTINGS = settingsOf(demoRegistry)
  * handling: the reading is an addition to the card, not a precondition for the
  * write. A failed read costs one sentence on one card. Refusing the ask because
  * a sentence could not be composed would cost the visitor the demo.
+ *
+ * **The asks already made travel with it, and they are read here rather than
+ * later for the same reason the tree is.** Whether a change puts the last one
+ * back is a fact about this session at the moment of the press: read it after
+ * the write and the record being written is already in the list, comparing
+ * itself against itself.
  */
 const assessedAgainst = async (
   session: DemoSession,
@@ -108,7 +114,12 @@ const assessedAgainst = async (
   const head = await session.store.head(session.seed.treeId)
 
   return head.ok
-    ? { before: head.value, settings: DEMO_SETTINGS, ...(restoring ? { restoring } : {}) }
+    ? {
+        before: head.value,
+        settings: DEMO_SETTINGS,
+        earlier: session.records,
+        ...(restoring ? { restoring } : {}),
+      }
     : undefined
 }
 

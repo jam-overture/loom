@@ -1,3 +1,8 @@
+import {
+  BINDING_NAME_EXPECTATION,
+  bindingNameSchema,
+  type BindingName,
+} from "../data/source.js"
 import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject } from "../json.js"
 import {
@@ -15,6 +20,7 @@ import {
   type BehaviourResolver,
 } from "../render/behaviour.js"
 import type { FrameResolver } from "../render/frame.js"
+import type { BindingReader } from "../render/reads.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
@@ -73,6 +79,13 @@ export type RegisteredPrimitive = {
    * it.
    */
   readonly copy: readonly string[] | undefined
+  /**
+   * The binding names it reads an answer under (0181). `undefined` where the
+   * primitive has not said, which is not the same answer as `[]` and is not
+   * rounded to it — the walk reports under the first and stays quiet under the
+   * second.
+   */
+  readonly reads: readonly BindingName[] | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -109,6 +122,7 @@ export type RegistryError =
       readonly requires: string
     }
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
+  | { readonly code: "invalid-binding-name"; readonly type: string; readonly name: string }
   | { readonly code: "duplicate-primitive-type"; readonly type: string }
 
 export type PrimitiveRegistry = PrimitiveResolver &
@@ -116,6 +130,7 @@ export type PrimitiveRegistry = PrimitiveResolver &
   TextResolver &
   BehaviourResolver &
   FrameResolver &
+  BindingReader &
   CopyDeclarations & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
@@ -156,6 +171,8 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
     case "undeclared-interactive-behaviour":
       return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
+    case "invalid-binding-name":
+      return `"${error.type}" says it reads a binding called "${error.name}", which is not a binding name — ${BINDING_NAME_EXPECTATION}; a tree cannot ask under a name it cannot write, so this primitive would report every binding it was ever given`
     case "unpaired-behaviour":
       return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
     case "unknown-role":
@@ -300,6 +317,35 @@ const registeredRole = (
   return ok(role)
 }
 
+/**
+ * The declared binding names, checked against the grammar a tree has to write
+ * them in — `undefined` for the primitive that has not said, which is all of
+ * them until their authors do.
+ *
+ * Unlike `frames` and `copy` there is no second list to drift against: a
+ * binding name is not a prop, so nothing here can be renamed out from under the
+ * declaration. What is checked is the only thing that can be wrong, and it is
+ * worth checking because it fails in the worst direction — a name no tree could
+ * ever write is a name no binding can ever match, so the primitive would report
+ * every binding it was handed rather than none.
+ */
+const registeredReads = (
+  entry: PrimitiveEntry
+): Result<readonly BindingName[] | undefined, RegistryError> => {
+  if (entry.reads === undefined) return ok(undefined)
+
+  const names: BindingName[] = []
+
+  for (const name of entry.reads) {
+    const parsed = bindingNameSchema.safeParse(name)
+    if (!parsed.success) return err({ code: "invalid-binding-name", type: entry.type, name })
+
+    names.push(parsed.data)
+  }
+
+  return ok(Object.freeze(names))
+}
+
 const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, RegistryError> => {
   const type = primitiveTypeSchema.safeParse(entry.type)
   if (!type.success) return err({ code: "invalid-primitive-type", type: entry.type })
@@ -342,6 +388,9 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
   const role = registeredRole(entry)
   if (!role.ok) return role
 
+  const reads = registeredReads(entry)
+  if (!reads.ok) return reads
+
   return ok({
     type: type.data,
     description: entry.description,
@@ -356,6 +405,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     behaviours: behaviours.value,
     role: role.value,
     copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
+    reads: reads.value,
     validate: entry.validate,
   })
 }
@@ -416,6 +466,15 @@ export const createPrimitiveRegistry = (
       byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
     framePropsFor: (type: PrimitiveType): readonly string[] =>
       byType.get(type)?.frames ?? NO_FRAME_PROPS,
+    /**
+     * `undefined` both for a primitive that declared nothing and for a type
+     * this registry does not hold — the same answer, and the right one: a walk
+     * that cannot find the primitive has already said so as
+     * `unknown-primitive`, and has no standing to say anything about what that
+     * primitive reads.
+     */
+    bindingsReadBy: (type: PrimitiveType): readonly string[] | undefined =>
+      byType.get(type)?.reads,
     /**
      * `undefined` for a type nobody registered as well as for one that declared
      * nothing, and the two collapsing here is correct: neither has said what a

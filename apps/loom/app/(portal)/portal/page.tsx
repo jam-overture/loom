@@ -8,6 +8,7 @@ import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnattendedCard } from "@/app/(portal)/_components/unattended-card"
+import { UnreadableChangeCard } from "@/app/(portal)/_components/unreadable-change-card"
 import { UnreadablePages } from "@/app/(portal)/_components/unreadable-pages"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -19,9 +20,13 @@ import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { unattendedIn, unattendedSummary } from "@/app/(portal)/_lib/unattended"
 import {
   inQueueOrder,
+  unreadableChangesIn,
+} from "@/app/(portal)/_lib/unreadable-change"
+import {
   sweepIsPartial,
   unreadableIn,
   waitingChange,
+  waitingSince,
   waitingSummary,
 } from "@/app/(portal)/_lib/waiting"
 import { triageAgainst } from "@/app/(portal)/_lib/waiting-effect"
@@ -123,6 +128,30 @@ const PortalHome = async () => {
   const held = perPage.flatMap((holds) => (holds.ok ? holds.value.held : []))
 
   /**
+   * The rows the store could place and this build could not read.
+   *
+   * Paired back to the page they came from by index, exactly as `unreadableIn`
+   * pairs the pages that would not answer at all: `perPage` is `trees.map`, so
+   * index `i` of one is the page at index `i` of the other. A row whose page
+   * cannot be found is dropped rather than guessed at, for the same reason —
+   * naming the wrong page in a warning is worse than the silence it replaced.
+   *
+   * This is not the same fact as `sweep.unreadable` and must never be folded
+   * into it. That one is *this page could not be checked*, and its remedy is to
+   * go and look at the page. This one is *this page was checked, and one change
+   * on it could not be read* — the queue is known, the row is on this screen,
+   * and going to look at the page reaches the same store and fails on the same
+   * row.
+   */
+  const unreadableChanges = perPage.flatMap((holds, index) => {
+    const listing = trees[index]
+
+    return holds.ok && listing !== undefined
+      ? unreadableChangesIn(listing.treeId, holds.value)
+      : []
+  })
+
+  /**
    * The other half: what Loom went ahead with on its own.
    *
    * One read, of the record rather than of any tree — the fan-out above is per
@@ -185,14 +214,18 @@ const PortalHome = async () => {
    * component, so the only honest answer available here is the one the
    * primitives this host registered gave.
    */
-  const changes = inQueueOrder(
-    held.map((hold) =>
-      waitingChange(
-        hold,
-        triageAgainst(heads.get(hold.treeId), hold.proposal.delta, portalRegistry)
-      )
-    )
+  const changes = held.map((hold) =>
+    waitingChange(hold, triageAgainst(heads.get(hold.treeId), hold.proposal.delta, portalRegistry))
   )
+
+  /**
+   * The queue itself: both kinds of row, in one order, oldest first.
+   *
+   * Merged here rather than rendered as two lists, because a row that cannot be
+   * answered still has a position in time and that position is the only thing
+   * it carries. See `inQueueOrder`.
+   */
+  const rows = inQueueOrder(changes, unreadableChanges, waitingSince)
 
   /*
    * What this screen did *not* look at, carried beside what it found.
@@ -269,8 +302,10 @@ const PortalHome = async () => {
             * partial are the short version of the notice directly below, which
             * renders whether or not anything is waiting.
             */}
-          {changes.length > 0 && (
-            <p className="text-ink-muted text-sm">{waitingSummary(changes, sweep)}</p>
+          {rows.length > 0 && (
+            <p className="text-ink-muted text-sm">
+              {waitingSummary(changes, unreadableChanges, sweep)}
+            </p>
           )}
         </header>
 
@@ -381,7 +416,20 @@ const PortalHome = async () => {
               </p>
             </TechnicalDetail>
           </StateNotice>
-        ) : changes.length === 0 ? (
+        ) : rows.length === 0 ? (
+          /*
+           * The caught-up notice, and the one condition it must not be drawn
+           * under.
+           *
+           * It was `changes.length === 0`, which was right while a queue had
+           * one kind of row in it. A green box headed "You're all caught up."
+           * over a queue holding a change nobody can read is the failure this
+           * whole surface is being rebuilt against — the confident empty state
+           * — and it is the worst instance of it, because the thing that makes
+           * it false is the thing it is hiding. `rows` rather than `changes` is
+           * the whole fix and it is the reason the merge is a value on this
+           * screen rather than a `<>` in the list below.
+           */
           <StateNotice
             tone="settled"
             title="You're all caught up."
@@ -423,13 +471,21 @@ const PortalHome = async () => {
           </StateNotice>
         ) : (
           <ul className="flex flex-col gap-3">
-            {changes.map((change) => (
-              <WaitingCard
-                key={change.proposalId}
-                change={change}
-                page={nameFrom(names, change.treeId)}
-              />
-            ))}
+            {rows.map((row) =>
+              row.kind === "answerable" ? (
+                <WaitingCard
+                  key={row.change.proposalId}
+                  change={row.change}
+                  page={nameFrom(names, row.change.treeId)}
+                />
+              ) : (
+                <UnreadableChangeCard
+                  key={row.row.proposalId}
+                  change={row.row}
+                  page={nameFrom(names, row.row.treeId)}
+                />
+              )
+            )}
           </ul>
         )}
       </section>

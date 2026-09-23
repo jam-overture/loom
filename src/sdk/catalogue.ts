@@ -43,4 +43,5 @@ export const catalogueOf = (registry: PrimitiveRegistry): PrimitiveCatalogue =>
     description: primitive.description,
     props: primitive.declaredProps,
     slots: primitive.slots,
+    reads: primitive.reads,
   }))
