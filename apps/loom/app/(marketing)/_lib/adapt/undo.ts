@@ -16,7 +16,7 @@ import {
 
 import type { Ask } from "./asks"
 import { nothingHappened, recordOf, type ChangeRecord, type Request } from "./record"
-import { FRONT_DOOR_POLICY } from "./run"
+import { FRONT_DOOR_POLICY, SITE_PROPS_VOCABULARY } from "./run"
 
 /**
  * Putting it back, as a change of its own.
@@ -178,6 +178,13 @@ export const runUndo = async (
   const runtime: CompositionRuntime = {
     interpreter: inverseInterpreter(frontDoorUndo(inverse), idFactory, systemClock),
     policySource: fixedPolicy(FRONT_DOOR_POLICY),
+    /**
+     * The same floors as the change this reverses, and for the same reason the
+     * rules are the same: an undo exempt from a check the change had to pass
+     * would be this site demonstrating reversibility under easier terms than the
+     * thing it reverses.
+     */
+    propsVocabulary: SITE_PROPS_VOCABULARY,
     events,
     clock: systemClock,
     idFactory,

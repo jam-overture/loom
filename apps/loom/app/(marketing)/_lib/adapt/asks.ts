@@ -300,7 +300,34 @@ export const readAskId = (given: string | readonly string[] | undefined): AskId 
 }
 
 /**
- * One choice, as an interpreter.
+ * A change this site works out for itself, as the three things an interpreter
+ * needs to be one.
+ *
+ * Extracted from `askInterpreter` on 23 September, when `floors.ts` needed the
+ * same machinery for a request that is **not** one of the five buttons: a floor
+ * probe has no `AskId`, no label and no place in the band, and the alternative
+ * to a shared shape was a second copy of the block below — thirty lines whose
+ * whole job is to say *this was computed, not guessed*, kept in step by hand.
+ *
+ * `interpreter` is a parameter rather than a constant for the same reason. Both
+ * kinds are deterministic interpreters under
+ * [0057](../../../../../../decisions/0057-a-preset-is-a-deterministic-interpreter.md),
+ * and the record is the one place the difference between them is worth keeping:
+ * a paper trail calling a floor probe one of the front door's buttons would be
+ * naming the wrong request.
+ */
+export type PlannedChange = {
+  readonly plan: (page: LoomTree, ids: IdFactory) => readonly TreeOperation[] | undefined
+  /** Why these changes answer the request, in the words the record will show. */
+  readonly rationale: string
+  /** What the refusal says when this page gives the plan nothing to do. */
+  readonly nothingToChange: string
+  /** What the record says worked the change out. Never a model, and it says so. */
+  readonly interpreter: string
+}
+
+/**
+ * A planned change, as an interpreter.
  *
  * It works the changes out against the page it is handed rather than against
  * the one the button was drawn on. That is not defensive coding: the front door
@@ -313,15 +340,19 @@ export const readAskId = (given: string | readonly string[] | undefined): AskId 
  * would otherwise walk into calibration as a model's perfect score
  * ([0031](../../../../../../decisions/0031-calibration-is-a-reader-not-a-controller.md)).
  */
-export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeInterpreter => ({
+export const plannedInterpreter = (
+  change: PlannedChange,
+  ids: IdFactory,
+  clock: Clock
+): ChangeInterpreter => ({
   interpret: (intent, page) => {
-    const operations = ask.plan(page, ids)
+    const operations = change.plan(page, ids)
 
     return Promise.resolve(
       operations === undefined || operations.length === 0
         ? err({
             code: "refused",
-            detail: `this page gives "${ask.label}" nothing to change`,
+            detail: change.nothingToChange,
           })
         : ok({
             proposalId: ids.proposalId(),
@@ -332,11 +363,11 @@ export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeIn
               baseRevision: page.revision,
               operations,
             },
-            rationale: ask.rationale,
+            rationale: change.rationale,
             provenance: {
               origin: intent.origin,
               ...(intent.actor === undefined ? {} : { actor: intent.actor }),
-              interpreter: FRONT_DOOR_INTERPRETER,
+              interpreter: change.interpreter,
               authoredBy: "runtime" as const,
               confidence: 1,
               interpretedAt: clock.now(),
@@ -345,3 +376,16 @@ export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeIn
     )
   },
 })
+
+/** One of the five buttons, as an interpreter. */
+export const askInterpreter = (ask: Ask, ids: IdFactory, clock: Clock): ChangeInterpreter =>
+  plannedInterpreter(
+    {
+      plan: ask.plan,
+      rationale: ask.rationale,
+      nothingToChange: `this page gives "${ask.label}" nothing to change`,
+      interpreter: FRONT_DOOR_INTERPRETER,
+    },
+    ids,
+    clock
+  )

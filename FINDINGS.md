@@ -30118,6 +30118,101 @@ staging half is this lane's own and would be a recipe in `tools/screenshot/`
 rather than a capability, if a fifth lane ever needs it.
 
 ---
+## 2026-09-23 — the props vocabulary is wired on the marketing site, and the two floors it closes were claims the page had been making for twelve days
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom portal`, `Loom docs` ·
+**Status:** **the marketing row is closed** by
+`marketing-34-three-things-no-request-gets-past`; the two rows for the other
+lanes are untouched and their owners' to take
+
+Closing this lane's row on the 21 September entry *nothing in this repository
+wires a props vocabulary, so the check 0179 built is off on all four surfaces*.
+Three things worth having before either other lane writes its own line.
+
+**It is two lines, not one.** The entry names `propsVocabulary:
+propsVocabularyFor(registry)` and that is half of what a surface wants.
+`registeredPrimitiveTypes: registeredTypesFor(registry)` — 0173's half — was
+also unset here, and on this deployment it was the *more* visible of the two: a
+delta inserting `app.anything` was committed, served, and drawn as a hole.
+Checking your own policy for it costs nothing and we had had it unset for a
+month without noticing.
+
+**Nothing about the surface's existing behaviour changed.** All five of the
+front door's buttons get the same answer they got yesterday, byte for byte, and
+`pnpm verify` needed no test rewritten for the wiring itself. That is the
+property the entry predicted and it held: the two floors fire on changes this
+site's own demonstrations never propose.
+
+**It was invisible to every assertion in the repository, and the fix for that
+is a page rather than a test.** `/your-components` has said since 11 September
+that there are *three things no request gets past*, and two of the three were
+things this deployment did not do. Nothing was red. The band now runs both
+requests through the real sequence while the page is built and prints what came
+back, and `probeFloors` throws rather than returning if either is not refused —
+so the page cannot publish while the claim on it is false. `floors.test.ts` puts
+the same two requests to a runtime with neither floor wired and watches both
+**apply**, which is the measurement behind the band and the half the band itself
+cannot make.
+
+One caution for the portal, whose refusal card is the first screen where any of
+this is visible to a person: the schema's sentence is written for a developer —
+ours reads `stature — Invalid enum value. Expected 'standard' | 'tall', received
+'enormous'`. This lane printed it verbatim on the grounds that a refusal
+reworded into friendlier words is a claim about a translation of the evidence.
+A screen with a repair button beside it may want the opposite.
+
+---
+## 2026-09-23 — two clauses of the marketing site's own record vocabulary described failures the deployment could not produce, and nothing could have reported that
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by the same branch — recorded for the shape, which is not this lane's
+alone
+
+`RAISED_BY` in `(marketing)/_lib/adapt/record.ts` is the site's plain-words
+translation of every stake factor the runtime can raise, one clause each, held
+to the register by `voice.test.ts` and complete by `satisfies
+Record<StakeFactorCode, string>`. Two of its thirteen clauses —
+*it adds a piece your site has nothing to draw it with* and *it sets a piece up
+in a way that piece does not accept, so it would not draw* — named factors that
+**no request on this deployment could raise**, because neither floor was wired.
+
+Both were correct. Both were checked. Neither was reachable, and nothing in this
+repository can tell a translation that is waiting for a state from one that is
+waiting for nothing — `satisfies` proves the map is total over the *type*, and
+the type is the runtime's, not this deployment's.
+
+The shape generalises to every lane that translates a union it does not own: a
+surface's copy is complete against what the framework **can** say, and reachable
+only against what the surface has **wired**. The gap between the two is copy no
+test can distinguish from a promise. Worth knowing next time a lane writes a
+total map of a runtime enum and reads the compiler's approval as coverage.
+
+---
+## 2026-09-23 — `npx prettier` is not this repository's formatter and running it rewrites every file it is pointed at
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — cosmetic, cheap to avoid, and it cost this run a full revert and a
+re-application of eight files' worth of edits
+
+There is no `.prettierrc`, no `prettier` in either `package.json`, and no
+formatter script. The house style is unmistakable from any file — no
+semicolons, double quotes, `trailingComma: es5`, roughly a hundred columns — and
+nothing in the repository states it or enforces it.
+
+So a run that reaches for `npx prettier --write` on the files it just edited,
+which is an ordinary reflex, gets prettier's defaults: **semicolons on every
+statement in every file it touched**, and a diff of several hundred lines that
+has nothing to do with the change. Checked afterwards: `--no-semi --print-width
+100 --trailing-comma es5` still does not reproduce the existing formatting, so
+the style is not prettier-with-options either.
+
+Nothing is broken and `pnpm verify` is perfectly happy with either style, which
+is exactly why it is worth a line: the cost lands on the reviewer of a diff, or
+on the run that notices and has to undo it. Either a devDependency with a config
+and a `format` script, or one sentence in `docs/routines.md` under *Standards*
+saying the repository is formatted by hand and no formatter is to be run over
+it. This lane has no preference between the two and is not asking for either on
+any schedule.
 ## 2026-09-23 — twelve primitives were filed behind a decision nobody needed to make, and four of them only ever needed a band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
