@@ -1,7 +1,7 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react"
 
 import type { ClosedChoice } from "../catalogue.js"
-import { NO_DATA } from "../data/resolution.js"
+import { NO_DATA, type NodeData } from "../data/resolution.js"
 import { NO_FRAMES, type FrameOutcome, type NodeFrames } from "../frame/resolution.js"
 import { frameOriginSchema } from "../frame/origin.js"
 import { nodeIdSchema } from "../ids.js"
@@ -51,6 +51,15 @@ import type { SubmissionOutcome } from "../submit/resolution.js"
 export type ProbeFailure = {
   readonly props: JsonObject
   readonly reason: string
+  /**
+   * The binding names the node had answers under when it threw, sorted, and
+   * absent when it had none.
+   *
+   * Without it two failures of `loom.feed` at its default props read as the
+   * same line twice, and the one that matters — *it renders until you answer
+   * it* — is the one a reader cannot pick out (0185).
+   */
+  readonly answered?: readonly string[]
 }
 
 /**
@@ -97,7 +106,16 @@ const notCallable = (reason: string): NotProbeable => ({
  * `{"type":"select"}` is the whole reproduction.
  */
 export const describeProbeFailures = (failures: readonly ProbeFailure[]): string =>
-  failures.map((failure) => `${JSON.stringify(failure.props)} (${failure.reason})`).join(", ")
+  failures
+    .map((failure) => {
+      const answering =
+        failure.answered && failure.answered.length > 0
+          ? ` answering ${failure.answered.join(", ")}`
+          : ""
+
+      return `${JSON.stringify(failure.props)}${answering} (${failure.reason})`
+    })
+    .join(", ")
 
 const threwThroughout = (failures: readonly ProbeFailure[]): NotProbeable => ({
   outcome: "not-probeable",
@@ -138,7 +156,7 @@ const PROBE_DECORATIVE = (): ReactNode => "loom-probe-decorative"
 const probeProps = (
   editable: EditableAttributes,
   text: PrimitiveText<string>,
-  props: JsonObject,
+  configuration: ProbeConfiguration,
   frames: NodeFrames = NO_FRAMES
 ): LoomPrimitiveProps => ({
   loom: {
@@ -146,15 +164,62 @@ const probeProps = (
     type: PROBE_TYPE,
     editable,
     slots: NO_SLOTS,
-    data: NO_DATA,
+    data: configuration.data,
     frames,
     text,
     behaviours: NO_BEHAVIOURS,
     decorative: PROBE_DECORATIVE,
   },
-  props,
+  props: configuration.props,
   children: PROBE_CHILDREN,
 })
+
+/**
+ * One call of the probe: the props the node carries, and the answers it had.
+ *
+ * The second half was `NO_DATA` for every probe in this module until 0185, and
+ * that was not a default — it was the only state reachable. A primitive that
+ * places a region only when a source failed placed it in no probe, so
+ * `unplacedSlots` read that region as dropped content and 0180 wrote the
+ * consequence down as a rule about what a bound primitive may declare. The
+ * rule was the probe's limit wearing the library's clothes.
+ */
+export type ProbeConfiguration = {
+  readonly props: JsonObject
+  /** `NO_DATA` means *this node asked nothing*, which is most of them. */
+  readonly data: NodeData
+}
+
+/** Props with nothing answered beside them, which is most configurations (0185). */
+export const unasked = (props: JsonObject): ProbeConfiguration => ({ props, data: NO_DATA })
+
+/**
+ * An answer state a caller wants a primitive probed in, beside the states its
+ * own schema closes over.
+ *
+ * Supplied rather than derived, for the reason the specimen's `endpoints` is:
+ * the probe would have to invent a value, and an invented answer is either one
+ * the primitive happens to be able to draw — in which case the probe is
+ * measuring the guess — or one it cannot, in which case every bound primitive
+ * reports its failure region as the only one it places. Whoever registered the
+ * primitive knows what it reads; the probe does not.
+ */
+export type ProbeAnswers = {
+  /** Answers by binding name, as the render walk would hand them over. */
+  readonly data: NodeData
+  /**
+   * The props the node carries in this state. Absent means its defaults, which
+   * is the configuration a binding name's default was chosen for (0184).
+   */
+  readonly props?: JsonObject
+}
+
+const namesIn = (data: NodeData): readonly string[] => {
+  const names: string[] = []
+  for (const name in data) names.push(name)
+
+  return names.sort()
+}
 
 /**
  * The prop configurations a primitive is probed under (0075).
@@ -172,7 +237,33 @@ export const probeConfigurations = (choices: readonly ClosedChoice[]): readonly 
   ...choices.flatMap(({ name, options }) => options.map((option) => ({ [name]: option }))),
 ]
 
-const DEFAULT_CONFIGURATIONS: readonly JsonObject[] = [{}]
+/**
+ * The states a primitive is probed in: what its schema closes over, then what
+ * its registrant declared it can be answered with (0185).
+ *
+ * Two functions rather than one, and the split is the argument. What a schema
+ * closes over is **derived** — `probeConfigurations` reads it off the
+ * registration and cannot be wrong about it. What a bound primitive can be
+ * answered with is **supplied**, because nothing here knows it. Folding the
+ * second into the first would put a caller's declaration and a machine's
+ * enumeration behind one name, and the day they disagree is the day nobody can
+ * tell which half was wrong.
+ *
+ * The answers are summed in rather than crossed with every prop value, for the
+ * reason 0075 sums the choices, and it costs less here: what a bound primitive
+ * draws turns on the *answer*, and the state a caller has to reach to find an
+ * unplaced region is the answer under the props that name it — which is why an
+ * answer carries its own optional props.
+ */
+export const probeStates = (
+  configurations: readonly JsonObject[],
+  answers: readonly ProbeAnswers[] = []
+): readonly ProbeConfiguration[] => [
+  ...configurations.map(unasked),
+  ...answers.map((answer) => ({ props: answer.props ?? {}, data: answer.data })),
+]
+
+const DEFAULT_CONFIGURATIONS: readonly ProbeConfiguration[] = [unasked({})]
 
 /**
  * A probe has no allowlist, so a declared framable prop is answered `allowed`
@@ -255,13 +346,21 @@ const call = (probeable: ProbeableComponent, props: LoomPrimitiveProps): Result<
 }
 
 type ProbeAttempt = {
-  readonly props: JsonObject
+  readonly configuration: ProbeConfiguration
   readonly result: Result<ReactNode, string>
+}
+
+const failureOf = (configuration: ProbeConfiguration, reason: string): ProbeFailure => {
+  const answered = namesIn(configuration.data)
+
+  return answered.length === 0
+    ? { props: configuration.props, reason }
+    : { props: configuration.props, reason, answered }
 }
 
 const failuresIn = (attempts: readonly ProbeAttempt[]): readonly ProbeFailure[] =>
   attempts.flatMap((attempt) =>
-    attempt.result.ok ? [] : [{ props: attempt.props, reason: attempt.result.error }]
+    attempt.result.ok ? [] : [failureOf(attempt.configuration, attempt.result.error)]
   )
 
 /**
@@ -275,7 +374,7 @@ const failuresIn = (attempts: readonly ProbeAttempt[]): readonly ProbeFailure[] 
 export const probeEditableDecoration = (
   primitive: LoomPrimitive,
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
   declaredFrames: readonly string[] = []
 ): ConformanceVerdict => {
   const probeable = asProbeable(primitive)
@@ -286,9 +385,12 @@ export const probeEditableDecoration = (
     [LOOM_TYPE_ATTRIBUTE]: PROBE_TYPE,
   }
 
-  const attempts = configurations.map((props) => ({
-    props,
-    result: call(probeable.value, probeProps(editable, text, props, probeFrames(declaredFrames))),
+  const attempts = configurations.map((configuration) => ({
+    configuration,
+    result: call(
+      probeable.value,
+      probeProps(editable, text, configuration, probeFrames(declaredFrames))
+    ),
   }))
   const answered = attempts.flatMap((attempt) => (attempt.result.ok ? [attempt.result.value] : []))
 
@@ -345,8 +447,11 @@ export type PlacementVerdict =
       readonly unplacedBehaviours: readonly BehaviourName[]
       /** Whether any probed configuration placed the children it was handed. */
       readonly rendersChildren: boolean
-      /** The configurations that answered — `{}` alone when the schema closes over nothing. */
-      readonly probed: readonly JsonObject[]
+      /**
+       * The configurations that answered — one unasked `{}` alone when the
+       * schema closes over nothing and the caller supplied no answers.
+       */
+      readonly probed: readonly ProbeConfiguration[]
       /**
        * Configurations built from the primitive's own schema that it threw on.
        * Never a reason to distrust the verdict — the configurations that
@@ -379,7 +484,7 @@ export const probePlacement = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[],
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
   declaredBehaviours: readonly BehaviourName[] = [],
   declaredFrames: readonly string[] = []
 ): PlacementVerdict => {
@@ -392,20 +497,20 @@ export const probePlacement = (
   const behaviours: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredBehaviours) behaviours[name] = behaviourMarker(name)
 
-  const attempts = configurations.map((props) => ({
-    props,
+  const attempts = configurations.map((configuration) => ({
+    configuration,
     result: call(probeable.value, {
       loom: {
         nodeId: PROBE_NODE_ID,
         type: PROBE_TYPE,
         slots,
-        data: NO_DATA,
+        data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
         behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
         decorative: PROBE_DECORATIVE,
       },
-      props,
+      props: configuration.props,
       children: PROBE_CHILDREN,
     }),
   }))
@@ -422,7 +527,7 @@ export const probePlacement = (
     unplacedSlots: declaredSlots.filter((name) => !placed(slotMarker(name))),
     unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
     rendersChildren: placed(PROBE_CHILDREN),
-    probed: answered.map((attempt) => attempt.props),
+    probed: answered.map((attempt) => attempt.configuration),
     threw: failuresIn(attempts),
   }
 }
@@ -480,27 +585,27 @@ const PROBE_SUBMISSION: SubmissionOutcome = {
 export const probeSubmissionPlacement = (
   primitive: LoomPrimitive,
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
   declaredFrames: readonly string[] = []
 ): SubmissionVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
 
-  const attempts = configurations.map((props) => ({
-    props,
+  const attempts = configurations.map((configuration) => ({
+    configuration,
     result: call(probeable.value, {
       loom: {
         nodeId: PROBE_NODE_ID,
         type: PROBE_TYPE,
         slots: NO_SLOTS,
-        data: NO_DATA,
+        data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
         behaviours: NO_BEHAVIOURS,
         submit: PROBE_SUBMISSION,
         decorative: PROBE_DECORATIVE,
       },
-      props,
+      props: configuration.props,
       children: PROBE_CHILDREN,
     }),
   }))
@@ -791,7 +896,7 @@ export const probeColourPairings = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[] = [],
   text: PrimitiveText<string> = NO_TEXT,
-  configurations: readonly JsonObject[] = DEFAULT_CONFIGURATIONS,
+  configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
   declaredFrames: readonly string[] = []
 ): ColourVerdict => {
   const probeable = asProbeable(primitive)
@@ -802,20 +907,20 @@ export const probeColourPairings = (
 
   const markers = new Set<string>([PROBE_CHILDREN, ...declaredSlots.map(slotMarker)])
 
-  const attempts = configurations.map((props) => ({
-    props,
+  const attempts = configurations.map((configuration) => ({
+    configuration,
     result: call(probeable.value, {
       loom: {
         nodeId: PROBE_NODE_ID,
         type: PROBE_TYPE,
         slots,
-        data: NO_DATA,
+        data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
         behaviours: NO_BEHAVIOURS,
         decorative: PROBE_DECORATIVE,
       },
-      props,
+      props: configuration.props,
       children: PROBE_CHILDREN,
     }),
   }))

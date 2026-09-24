@@ -40,7 +40,8 @@ export type { OutcomeTone }
 export { toneClasses } from "@/app/(portal)/_lib/vocabulary"
 
 /**
- * The one sentence in the shared table that is written about somewhere else.
+ * The two sentences in the shared table this surface cannot say, and the first
+ * of them is a true sentence in the wrong place.
  *
  * `applied` reads *"This change is live on the page. You can undo it from
  * What's changed."* — true in the portal, where undo is offered on
@@ -74,8 +75,32 @@ export { toneClasses } from "@/app/(portal)/_lib/vocabulary"
  * label and for the same reason: they are one claim about direction and they
  * drifted apart while each stayed true on its own.
  */
+/**
+ * The second sentence, and it is wrong in a way the first one is not.
+ *
+ * `applied` is a true sentence pointing at the wrong place. `no-change` reads
+ * *“The change no longer fits this page — something it referred to has moved
+ * or gone”*, and in the review queue that is the cause: a delta is replayed
+ * against a tree whose anchors are not there any more, and what it referred to
+ * has genuinely gone.
+ *
+ * **On this surface a visitor reaches that state by pressing two buttons**, and
+ * nothing it referred to has moved or gone. They asked for the numbers band to
+ * come off, then asked for a new palette; the band is still exactly where it
+ * was, three inches to the left, and the sentence naming its disappearance was
+ * the largest thing on the card. What moved is the page's *revision*, and the
+ * Gate will not carry a verdict onto a tree it never saw (`_lib/moved.ts`) —
+ * which is a different and far more interesting fact.
+ *
+ * So the override says only what this surface can always vouch for: the ask did
+ * not reach the page. It claims no cause, because `did-not-apply` is every
+ * write failure the demo can record and their causes are not one thing. The
+ * cause is `moved.ts`'s to give when the demo knows it, and `record-card` puts
+ * it in this slot when there is one.
+ */
 const DEMO_MEANINGS: Partial<Record<ChangeState, string>> = {
   applied: "This change is live on the page beside you. “Put it back” undoes it.",
+  "no-change": "Loom did not write this one, so nothing on the page changed because of it.",
 }
 
 /** A state, in the words this surface has to say it in. */

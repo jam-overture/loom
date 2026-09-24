@@ -1,7 +1,7 @@
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PaletteSlot } from "../theme/theme.js"
 
-import { probeColourPairings, probeConfigurations } from "./conformance.js"
+import { probeColourPairings, probeConfigurations, probeStates } from "./conformance.js"
 import type { PrimitiveRegistry, RegisteredPrimitive } from "./registry.js"
 
 /**
@@ -178,7 +178,7 @@ export const registryPairings = (
       primitive.component,
       primitive.slots,
       primitive.text,
-      probeConfigurations(primitive.choices)
+      probeStates(probeConfigurations(primitive.choices))
     ),
   }))
 
