@@ -31911,16 +31911,19 @@ routine cannot commit as the maintainer: the sandbox refuses an author override,
 correctly, because a process that can author commits as a person is a process
 that can forge them.
 
-**If this branch's own check comes back red**, that is the answer to the open
-question and it means the rule above is necessary and not sufficient — a routine
-session cannot produce a deployable commit at all, and the preview URL every
-surface lane's brief asks for is not something those lanes can deliver. That
-would be a finding for the maintainer rather than for any lane, and the remedy is
-a Vercel setting (granting the routine's commit identity access to the team)
-rather than anything in this repository. **If it comes back green**, the rule
-above is the whole of it.
+**Answered, on this entry's own branch.** #385 carries one commit, authored by
+the session's configured identity with nothing overridden, and Vercel's status on
+it went straight to *"Vercel is deploying your app"* — **verified and building**,
+where #376's two commits were refused before a build started. So:
 
-Either way the two occurrences above were avoidable and were this lane's fault.
+> **The routine session's own identity deploys. The rule above is the whole of
+> it**, and both losses were this lane setting an author it had no reason to set.
+
+Which means the preview URL a surface lane's brief asks for **is** deliverable by
+a routine, on every run, at the cost of not doing one thing. Nothing needs
+changing in Vercel, nothing needs changing in the repository, and the 20
+September entry's instinct — that this is the lane's own mistake wearing a
+message that points elsewhere — was right twice.
 
 **What it cost this time, and what it did not.** #376 merged, so the change
 landed; what was lost is the thing the brief asks a portal pull request for in
