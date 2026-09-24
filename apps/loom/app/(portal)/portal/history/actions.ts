@@ -100,5 +100,5 @@ export const undoRevision = async (
     revalidatePath(`/portal/pages/${treeId}`)
   }
 
-  return revertReportOf(outcome)
+  return revertReportOf(outcome, write.weighedAgainst)
 }

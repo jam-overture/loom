@@ -168,7 +168,28 @@ export const asPercent = (fraction: number): string => `${Math.round(fraction * 
 
 const listOrNone = (names: readonly string[]): string => (names.length === 0 ? "none" : names.join(", "))
 
-export const rulesOf = (policy: GatePolicy): readonly PlainRule[] => [
+/**
+ * The one thing about this deployment's rules that is not on its policy.
+ *
+ * A record rather than a bare boolean, so a second non-policy rule — and 0179 is
+ * unlikely to be the last function-shaped floor — arrives as a field instead of
+ * as a second positional argument nobody can read at a call site.
+ *
+ * Passed in rather than imported, although `policy.ts` exports exactly this
+ * value. `rulesOf` is handed the policy it is describing, and a module-level
+ * import would mean a test describing a stricter policy silently got this
+ * deployment's answer for one row of it — a view that is pure in five arguments
+ * and not in the sixth is worse than one that is impure throughout, because only
+ * the sixth surprises anybody.
+ */
+export type NonPolicyRules = {
+  readonly settingsAreChecked: boolean
+}
+
+export const rulesOf = (
+  policy: GatePolicy,
+  { settingsAreChecked }: NonPolicyRules
+): readonly PlainRule[] => [
   {
     id: "never",
     title: "Some changes are never made at all",
@@ -271,7 +292,7 @@ export const rulesOf = (policy: GatePolicy): readonly PlainRule[] => [
     id: "how-risk-is-measured",
     title: "How Loom decides a change is risky in the first place",
     reading:
-      "This one refuses nothing by itself. It is the measurement the two rules about risk are read against — how much a change takes away, how widely it reaches, how close to the top of the page it cuts, and which pieces and settings you have marked as ones to be careful with.",
+      "This one refuses nothing by itself. It is the measurement the two rules about risk are read against — how much a change takes away, how widely it reaches, how close to the top of the page it cuts, which pieces and settings you have marked as ones to be careful with, and two things that go straight to the top of the scale because the result would not draw at all.",
     rows: [
       {
         of: "Taking parts away",
@@ -293,6 +314,33 @@ export const rulesOf = (policy: GatePolicy): readonly PlainRule[] => [
         of: "Settings you have marked",
         is: listOrNone(policy.protectedPropKeys),
       },
+      /*
+       * The two floors, as measurements rather than as rules of their own.
+       *
+       * They belong under this heading and not as two more entries above it, and
+       * the reason is arithmetic rather than taste: `recordFor` attributes a
+       * count to a rule by the reason code the Gate recorded, these two are
+       * recorded under `stakes-at-refusal-floor` like any other change that
+       * reaches the top of the scale, and a second entry carrying that code would
+       * print the same count twice on one screen as though two rules had each
+       * fired that often.
+       *
+       * So they are measurements, which is what they are. What turns them into a
+       * refusal is the first rule on this screen, and the wording says so.
+       */
+      {
+        of: "Pieces this site can draw",
+        is:
+          policy.registeredPrimitiveTypes.length === 0
+            ? "not declared, so a change may add a kind of piece nothing here can draw — it will be written, and the page will have a hole in it"
+            : `${listOrNone(policy.registeredPrimitiveTypes)} — a change that adds anything else goes straight to the top of the scale, so the first rule on this page turns it down`,
+      },
+      {
+        of: "Settings a piece refuses",
+        is: settingsAreChecked
+          ? "checked against each piece's own description before the change is written, and a change carrying one it refuses goes straight to the top of the scale"
+          : "not checked, so a change may set a piece up in a way that piece refuses — it will be written, and that piece will not draw",
+      },
     ],
     settings: [
       { name: "removalThresholds.medium", value: String(policy.removalThresholds.medium) },
@@ -301,6 +349,17 @@ export const rulesOf = (policy: GatePolicy): readonly PlainRule[] => [
       { name: "shallowDepthThreshold", value: String(policy.shallowDepthThreshold) },
       { name: "protectedPrimitiveTypes", value: listOrNone(policy.protectedPrimitiveTypes) },
       { name: "protectedPropKeys", value: listOrNone(policy.protectedPropKeys) },
+      { name: "registeredPrimitiveTypes", value: listOrNone(policy.registeredPrimitiveTypes) },
+      /*
+       * Not a field on the policy, and the only line on this screen that is not.
+       *
+       * Named with the shape it has on the runtime rather than invented, so a
+       * reader comparing this screen against their own wiring is looking for the
+       * right thing. The consequence is worth knowing and is filed as a finding:
+       * this one is **not in the policy fingerprint** two rows up, so two
+       * deployments whose fingerprints match can disagree about whether it is on.
+       */
+      { name: "propsVocabulary", value: settingsAreChecked ? "wired" : "unset" },
       { name: "policyId", value: policy.policyId },
     ],
   },

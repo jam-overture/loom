@@ -1,11 +1,17 @@
-import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
+import {
+  fixedPolicy,
+  randomIdFactory,
+  systemClock,
+  type EventSink,
+  type StakeFactor,
+} from "@loom/runtime"
 import { postgresHoldStore } from "@loom/runtime/postgres"
 import { collectTelemetry } from "@loom/runtime/telemetry"
 import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
 
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"
-import { portalPolicy } from "./policy"
+import { portalPolicy, portalPropsVocabulary } from "./policy"
 import { portalStore } from "./store"
 import { portalTelemetry } from "./telemetry"
 
@@ -81,10 +87,68 @@ export type PortalWrite = {
    * cancels when the response ends — and it never fails the change it describes.
    */
   readonly finish: () => Promise<void>
+  /**
+   * What the Gate weighed against one proposal, as it weighed it.
+   *
+   * The reason this exists is that a `WriteOutcome` carries the Gate's *verdict*
+   * and not its *reasoning*. `disposition.reason` is a code and one prose string
+   * — `stakes-at-refusal-floor`, then every factor's `detail` joined with
+   * semicolons — so a screen wanting to say **which** of thirteen things was
+   * wrong, in a person's words, has two options: parse that string, or ask the
+   * runtime. This asks the runtime.
+   *
+   * `change-assessed` carries the whole `ChangeAssessment` because it is the
+   * runtime narrating itself within one request (0023), and the narrowing that
+   * survives to the journal drops the factor codes. So this is the only place
+   * they can be read, and reading them here costs nothing: the event is emitted
+   * whether or not anybody listens.
+   *
+   * Keyed by proposal rather than held as one value, because a refusal handed to
+   * a repairer produces a second assessment of a second proposal in the same
+   * write (0021) — and a reviewer told why a change was refused must be told
+   * about the change that was refused, not about the smaller one offered
+   * instead.
+   *
+   * Empty for a proposal the Gate never got to weigh: a request the model could
+   * not interpret, or one whose delta would not apply. A caller reading an empty
+   * list must not conclude the Gate objected to nothing.
+   */
+  readonly weighedAgainst: (proposalId: string) => readonly StakeFactor[]
 }
 
 export const beginWrite = (): PortalWrite => {
   const collector = collectTelemetry(portalTelemetry)
+
+  /**
+   * One request's assessments, kept for as long as the action that began the
+   * write. Not on `globalThis` and deliberately not shared the way the store and
+   * the holds are: this is what the Gate thought about *this* ask, and a
+   * process-wide map of it would be a memory leak whose entries are the one
+   * thing on this deployment that names what a person typed.
+   */
+  const weighed = new Map<string, readonly StakeFactor[]>()
+
+  /**
+   * The collector's sink with one ear on it.
+   *
+   * The recording happens **before** the delegation, which is the only ordering
+   * that is safe in both directions. A `Map.set` cannot throw; a journal write
+   * can, and `narrator` contains whatever `emit` throws (0042) — so delegating
+   * first would mean a journal that failed took the reading down with it, and a
+   * reviewer would be told a refusal had no reasons rather than that the record
+   * could not be written.
+   */
+  const sink: EventSink = {
+    emit: (envelope) => {
+      if (envelope.event.type === "change-assessed") {
+        const { assessment } = envelope.event
+
+        weighed.set(assessment.proposal.proposalId, assessment.stakes.factors)
+      }
+
+      collector.sink.emit(envelope)
+    },
+  }
 
   return {
     path: {
@@ -93,14 +157,27 @@ export const beginWrite = (): PortalWrite => {
       runtime: {
         interpreter: portalInterpreter,
         policySource: fixedPolicy(portalPolicy),
-        events: collector.sink,
+        events: sink,
         clock: systemClock,
         idFactory: randomIdFactory,
+        /**
+         * 0179's half of the pair `policy.ts` explains, spread rather than set
+         * so that "this deployment does not check settings" is expressible in one
+         * place and lands here as the runtime's own default rather than as an
+         * `undefined` this module had to reason about.
+         *
+         * The registry behind it is the same object the renderer resolves
+         * against, so a change this refuses to write is a change the renderer
+         * would have refused to draw. The two seams cannot drift, because there
+         * is one of them.
+         */
+        ...(portalPropsVocabulary ? { propsVocabulary: portalPropsVocabulary } : {}),
         ...(portalRepairer ? { repairer: portalRepairer } : {}),
       },
     },
     finish: async () => {
       await collector.flush()
     },
+    weighedAgainst: (proposalId) => weighed.get(proposalId) ?? [],
   }
 }
