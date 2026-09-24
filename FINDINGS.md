@@ -8,6 +8,86 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-23 — the shared vocabulary has five states, and two of them are now overridden by the demo for two different reasons
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/vocabulary.ts`) · **Status:** open — **not a request to
+change either sentence.** Both are correct in the review queue. Filed so the
+coupling is visible from your side, because it is your file and the next edit to
+it is where this matters.
+
+`(demo)/_lib/report.ts` has a table called `DEMO_MEANINGS`. It had one entry and
+now has two, and the two are wrong in different ways:
+
+| state | the shared sentence | why the demo cannot say it |
+| --- | --- | --- |
+| `applied` | *“You can undo it from What's changed.”* | **a signpost to a place this surface does not have.** A demo visitor has no account, and the undo is a button on the card they are already reading |
+| `no-change` | *“something it referred to has moved or gone”* | **a cause that did not happen.** On the demo this state is reached by pressing two buttons, and the thing the dead ask referred to is still on the page beside the visitor |
+
+The second one is the one worth your attention, and it shipped wrong for a week.
+A visitor asks for the numbers band to come off, then asks for a new palette
+before answering. The hold is now aimed at revision 0 and the page is at 1, so
+the verdict cannot be carried (`confirmHeld`) — and the card announced the
+disappearance of a band that was three inches to its left, unchanged, in the
+largest sentence on it.
+
+**In the portal that sentence is exactly right** and this is why the finding is
+filed rather than a change proposed: a delta replayed against a tree whose
+anchors have gone has genuinely lost what it referred to, and your screens reach
+the state that way. The demo reaches the same state by a road your vocabulary
+was not written for.
+
+**What this is actually asking for, which is nothing today:** if a future portal
+run rewrites either sentence, `report.test.ts` fails on this side rather than
+shipping a stale override — both guards assert the *shared* sentence still has
+the property the override exists for. So the coupling is alarmed and you will
+hear about it. The thing worth knowing is that it exists, and that the honest
+home for the table is still the one the 23 August entry asks for: shared ground
+that says it is shared, rather than the portal's file that the demo reads.
+
+---
+## 2026-09-23 — an ask that dies on the *late* path still gets the generic sentence, because custody is cleared before the surface can name the reason
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-26-the-reason-it-gave`, and **recommended as small rather
+than urgent**
+
+`moved.ts` promises *one sentence, whichever way a visitor reaches it*, and this
+run made that true of the way a visitor actually reaches it: the demo compares
+the hold's `baseRevision` against the tree's revision before the press, so it
+knows the reason and the card now says it in the header.
+
+**The other way round is still generic.** A press that crosses another — two
+tabs, or a click that lands after a change the visitor made elsewhere — is
+caught by the runtime instead: `confirmHeld` reports the conflict, `record.ts`
+clears custody on `commit-failed`, and with the hold gone there is no
+`baseRevision` left to compare. The card falls through to the demo's own
+`no-change` sentence — *“Loom did not write this one, so nothing on the page
+changed because of it”* — which is **true and says nothing about why**.
+
+That is a much smaller gap than the one this run closed (the old sentence was
+false; this one is merely incomplete), and it is the reason the override was
+written without a cause in it at all.
+
+**The shape that would close it**, for whoever takes it:
+
+- `ChangeRecord` carries `failure?: string` and a `RevisionView`, and neither
+  says which revision the *hold* named. The runtime's `HeldProposal` does, and
+  its own comment says the field is there *“so a reader can tell a hold is stale
+  without parsing the delta”*.
+- So the fix is to freeze `baseRevision` onto the record when the hold is
+  folded, in `record.ts`, and read `movedOn` off the record rather than off the
+  live hold. One field, this lane's own file, and it makes both paths take the
+  same branch instead of agreeing by coincidence.
+- **Do not parse `failure`** to get there. It is the runtime's string, written
+  for the disclosure, and a surface keying its plain language off its text is
+  the class of coupling this lane has filed against three times.
+
+Not taken this run because the reachable path was the defect and the unreachable
+one is a refinement, and because a field on `ChangeRecord` is worth landing
+beside something else that needs it rather than on its own.
+
+---
 ## 2026-09-23 — `loom.feed` and `loom.tally` can now declare what they read, and the declaration is two lines
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
