@@ -30942,3 +30942,59 @@ a tree has asked for a ratio explicitly, and whether an explicit ask survives an
 absent picture is a different question from whether a default does.
 
 **What would close it**: three photographs and whatever they say. Not a sweep.
+
+---
+## 2026-09-24 — the `.png` partition is a spurious correlation, and one request disproved it in both directions
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Status:** open — the corruption is
+unexplained and is not going to be explained by a rule about URLs; **what is
+closed is one wrong theory**, and there is a form that has survived every
+observation
+
+The 23 September entry read thirteen URLs back from the API and reported an
+exact partition:
+
+> **Every mangled URL ends in `.png` and every surviving one does not.** That
+> supersedes the 20 September diagnosis, which blamed the tool for wrapping URLs
+> generally and is too broad.
+
+It is not true. This run posted a body with six links in it and read it back
+before doing anything else, which is the method that entry established and the
+only part of it that should be kept. In **one** request:
+
+| posted, as a markdown link | outcome |
+| --- | --- |
+| `…-editorial-wide.png` | **target destroyed** |
+| `…-bold-wide.png` | **survived** |
+| `…-editorial-phone.png` | **target destroyed** |
+| `…-bold-phone.png` | **target destroyed** |
+| `decisions/0186-….md` | **survived** |
+| `decisions/0187-….md` | **target destroyed** |
+
+A `.md` was mangled and a `.png` was not, which breaks the partition in both
+directions at once. Sharper than that: **three of the four screenshot links were
+corrupted and the fourth was not** — same directory, same branch, same request,
+same extension, same markdown, adjacent lines. No property of a URL can produce
+that. Whatever is injecting the backticks is not reading the URL, so a rule that
+sorts URLs will keep being right for a while and then wrong, which is what has
+now happened twice.
+
+**What has survived every observation is the form, not the target.** Backticks
+around a *bare* URL make it a code span, which is ugly and still copyable.
+Backticks inside a *markdown* target land between the parentheses and destroy
+the link outright. So:
+
+> **Post a bare URL on its own line. Never a markdown link, for anything a
+> reader has to be able to press.**
+
+Re-posted that way, all six URLs in #379's body came back byte-for-byte. That is
+one observation and it is not a mechanism; it is a form that cannot fail worse
+than the alternative, which is the most a routine can honestly claim here.
+
+**The recommendation from 23 September stands and is worth repeating**, because
+it is the only thing that would actually close this: an upload path to GitHub's
+attachment store would let a body carry an image a reader can see, and no amount
+of wording will. If there is no such path, the brief's promise of a screenshot
+*in the pull request* should become a promise of a link and a preview, which is
+what four lanes have been delivering anyway.
