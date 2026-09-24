@@ -7,6 +7,25 @@
       "requires": [],
       "files": 91,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 13,
+        "widest": true,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/react",
+            "slug": "react",
+            "names": 5
+          },
+          {
+            "specifier": "@loom/runtime/sdk",
+            "slug": "sdk",
+            "names": 8
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "catalogue",
@@ -4273,6 +4292,14 @@
       ],
       "files": 2,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "interpretation/anthropic",
@@ -4311,6 +4338,20 @@
       ],
       "files": 56,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime",
+            "slug": "runtime",
+            "names": 5
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "render/addressing",
@@ -5126,6 +5167,14 @@
       ],
       "files": 178,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "primitives",
@@ -5570,6 +5619,20 @@
       ],
       "files": 35,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime",
+            "slug": "runtime",
+            "names": 8
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "catalogue",
@@ -6147,6 +6210,14 @@
       "requires": [],
       "files": 11,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "cli/args",
@@ -6367,6 +6438,14 @@
       "requires": [],
       "files": 26,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "store/attribution",
@@ -6776,6 +6855,14 @@
       "requires": [],
       "files": 52,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "write/commit",
@@ -7122,6 +7209,14 @@
       ],
       "files": 27,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "store/database",
@@ -7247,6 +7342,31 @@
           "files": 9
         }
       ],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 13,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals/broadcast",
+            "slug": "signals-broadcast",
+            "names": 14
+          },
+          {
+            "specifier": "@loom/runtime/telemetry",
+            "slug": "telemetry",
+            "names": 1
+          }
+        ],
+        "collisions": [
+          {
+            "name": "horizonOf",
+            "specifier": "@loom/runtime/telemetry",
+            "slug": "telemetry"
+          }
+        ]
+      },
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7985,6 +8105,20 @@
       "requires": [],
       "files": 9,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals",
+            "names": 14
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "signals/broadcast",
@@ -8114,6 +8248,14 @@
       ],
       "files": 12,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "signals/migrate",
@@ -8166,6 +8308,26 @@
       "requires": [],
       "files": 25,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals",
+            "names": 1
+          }
+        ],
+        "collisions": [
+          {
+            "name": "horizonOf",
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals"
+          }
+        ]
+      },
       "groups": [
         {
           "module": "telemetry/calibration",
@@ -8680,6 +8842,14 @@
       ],
       "files": 21,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "telemetry/migrate",
@@ -8746,6 +8916,14 @@
       ],
       "files": 84,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "testing/definitions",
@@ -9154,6 +9332,14 @@
       ],
       "files": 36,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "testing/hold-contract",
