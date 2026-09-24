@@ -350,6 +350,18 @@ export const loomFeed = definePrimitive({
   props,
   slots: ["empty"],
   /**
+   * The name this looks its entries up under: whichever name the `binding` prop
+   * gives, and `entries` when it gives none.
+   *
+   * 0184's second form, and the reason that form exists — see `loom.tally`,
+   * which declares the same shape for the same reason. What it buys here is the
+   * sharper of the two cases: a tree that binds under `entires` gets a feed
+   * drawing its empty region for ever, with no error, no diagnostic and a source
+   * that answered correctly. Declared, it is a `data-unread` report naming the
+   * name.
+   */
+  reads: [{ fromProp: "binding", default: "entries" }],
+  /**
    * The two sentences a reader may meet, declared rather than taken from the
    * tree (0060): a model has nothing to say about a failure it cannot see, and
    * a deployment serving French has two strings to replace.

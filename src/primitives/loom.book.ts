@@ -58,6 +58,21 @@ import { linkUrlSchema, mediaUrlSchema } from "./url.js"
  * true, rather than as an empty rectangle. So a shelf of eight books lines up
  * whether or not every cover was found.
  *
+ * **A panel with no cover in it is a spine's width, not a cover's.** The
+ * paragraph above is the argument for drawing the panel at all and it stands;
+ * what it got wrong is the *size*. A 2:3 ratio reserves the shape of a picture,
+ * so at a tile's full width a missing cover is 350px of blank panel on a phone
+ * and 360px in a three-across shelf — which is not *this edition's cover is not
+ * to hand*, it is a hole. `features-shelf` photographed six of them.
+ *
+ * This is [0187](../../decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
+ * applied, which is the rule `articles-episodes` produced from the identical
+ * fault in `loom.recording` on 23 September, stated once for the library.
+ * Without a cover the panel keeps the ratio at 4.5rem of width, so it stays a
+ * book seen edge-on and stops being a void. The **row** rendering is untouched:
+ * `flex: 0 0 7rem` beats a width on a flex item, so a card that was already
+ * drawing a small cover is exactly as it was.
+ *
  * **The spine is the one ornament, and it is a border rather than a shadow.**
  * A cover drawn as a plain rectangle reads as a thumbnail; the same rectangle
  * with a darker edge down its leading side reads as a book seen slightly from
@@ -124,7 +139,10 @@ export const loomBook = definePrimitive({
       "div",
       {
         key: "cover",
-        className: LIBRARY_CLASS.bookCover,
+        className:
+          given.cover === undefined
+            ? `${LIBRARY_CLASS.bookCover} ${LIBRARY_CLASS.bookCoverBare}`
+            : LIBRARY_CLASS.bookCover,
         style: {
           background: colour("bg-surface-muted"),
           /**

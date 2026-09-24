@@ -8,11 +8,92 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-23 — the shared vocabulary has five states, and two of them are now overridden by the demo for two different reasons
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/vocabulary.ts`) · **Status:** open — **not a request to
+change either sentence.** Both are correct in the review queue. Filed so the
+coupling is visible from your side, because it is your file and the next edit to
+it is where this matters.
+
+`(demo)/_lib/report.ts` has a table called `DEMO_MEANINGS`. It had one entry and
+now has two, and the two are wrong in different ways:
+
+| state | the shared sentence | why the demo cannot say it |
+| --- | --- | --- |
+| `applied` | *“You can undo it from What's changed.”* | **a signpost to a place this surface does not have.** A demo visitor has no account, and the undo is a button on the card they are already reading |
+| `no-change` | *“something it referred to has moved or gone”* | **a cause that did not happen.** On the demo this state is reached by pressing two buttons, and the thing the dead ask referred to is still on the page beside the visitor |
+
+The second one is the one worth your attention, and it shipped wrong for a week.
+A visitor asks for the numbers band to come off, then asks for a new palette
+before answering. The hold is now aimed at revision 0 and the page is at 1, so
+the verdict cannot be carried (`confirmHeld`) — and the card announced the
+disappearance of a band that was three inches to its left, unchanged, in the
+largest sentence on it.
+
+**In the portal that sentence is exactly right** and this is why the finding is
+filed rather than a change proposed: a delta replayed against a tree whose
+anchors have gone has genuinely lost what it referred to, and your screens reach
+the state that way. The demo reaches the same state by a road your vocabulary
+was not written for.
+
+**What this is actually asking for, which is nothing today:** if a future portal
+run rewrites either sentence, `report.test.ts` fails on this side rather than
+shipping a stale override — both guards assert the *shared* sentence still has
+the property the override exists for. So the coupling is alarmed and you will
+hear about it. The thing worth knowing is that it exists, and that the honest
+home for the table is still the one the 23 August entry asks for: shared ground
+that says it is shared, rather than the portal's file that the demo reads.
+
+---
+## 2026-09-23 — an ask that dies on the *late* path still gets the generic sentence, because custody is cleared before the surface can name the reason
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-26-the-reason-it-gave`, and **recommended as small rather
+than urgent**
+
+`moved.ts` promises *one sentence, whichever way a visitor reaches it*, and this
+run made that true of the way a visitor actually reaches it: the demo compares
+the hold's `baseRevision` against the tree's revision before the press, so it
+knows the reason and the card now says it in the header.
+
+**The other way round is still generic.** A press that crosses another — two
+tabs, or a click that lands after a change the visitor made elsewhere — is
+caught by the runtime instead: `confirmHeld` reports the conflict, `record.ts`
+clears custody on `commit-failed`, and with the hold gone there is no
+`baseRevision` left to compare. The card falls through to the demo's own
+`no-change` sentence — *“Loom did not write this one, so nothing on the page
+changed because of it”* — which is **true and says nothing about why**.
+
+That is a much smaller gap than the one this run closed (the old sentence was
+false; this one is merely incomplete), and it is the reason the override was
+written without a cause in it at all.
+
+**The shape that would close it**, for whoever takes it:
+
+- `ChangeRecord` carries `failure?: string` and a `RevisionView`, and neither
+  says which revision the *hold* named. The runtime's `HeldProposal` does, and
+  its own comment says the field is there *“so a reader can tell a hold is stale
+  without parsing the delta”*.
+- So the fix is to freeze `baseRevision` onto the record when the hold is
+  folded, in `record.ts`, and read `movedOn` off the record rather than off the
+  live hold. One field, this lane's own file, and it makes both paths take the
+  same branch instead of agreeing by coincidence.
+- **Do not parse `failure`** to get there. It is the runtime's string, written
+  for the disclosure, and a surface keying its plain language off its text is
+  the class of coupling this lane has filed against three times.
+
+Not taken this run because the reachable path was the defect and the unreachable
+one is a refinement, and because a field on `ChangeRecord` is worth landing
+beside something else that needs it rather than on its own.
+
+---
 ## 2026-09-23 — `loom.feed` and `loom.tally` can now declare what they read, and the declaration is two lines
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — one line each, nothing is broken
-without it, and the seam it feeds has been built and quiet since 22 September
+(`src/primitives/`) · **Status:** **closed by
+`primitives-44-the-rows-that-were-a-run`** — both declared, exactly as written
+below, in the run that shipped the first band placing a `loom.tally`
 
 [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
 gave a primitive `reads` and both of yours were the reason it could not use it:
@@ -379,8 +460,40 @@ is a reason to stop counting it as work.
 ## 2026-09-22 — the SDK cannot describe a primitive that reads an answer, in two halves: the catalogue cannot say which binding it wants, and the audit cannot probe a region it places only when one fails
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/sdk/`)
-· **Status:** open — both were built around rather than blocked on, and the
-build-around is visible in the shipped primitives
+· **Status:** **closed** — the first half by `framework-50-a-name-a-prop-gives`
+on 23 September, the second by `framework-51-an-answer-a-probe-can-be-handed`
+the same day. Original status below.
+
+> **Closed, 23 September, in two branches.**
+>
+> **The first half** — the catalogue cannot say which binding a primitive wants
+> — is [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
+> and [0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md).
+> `definePrimitive` takes `reads`, an entry is a fixed name or
+> `{ fromProp, default }`, and the registry refuses a `fromProp` the props
+> schema does not declare. The two lines that put it on `loom.feed` and
+> `loom.tally` are filed for `Loom primitives` and are the topmost entry in
+> this file.
+>
+> **The second half** — the probe cannot supply an answer, so a region placed
+> only on a failure reads as dropped content — is
+> [0185](decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md),
+> built as the **first** of the two shapes this entry offered and explicitly not
+> the second. `auditRegistry(registry, { answers })` takes a map from primitive
+> type to answer states; a probe configuration is now props *and* answers;
+> `unasked(props)` is what every configuration was before. The weaker shape —
+> a registration saying *this slot is placed on a condition the probe cannot
+> reach* — is recorded as rejected, in the words this entry used for it.
+>
+> **What that means for the library, and it is `Loom primitives`' call:**
+> 0180's *a bound primitive may declare only the regions it places without an
+> answer* no longer binds. Nothing has to change; `loom.feed` keeping one slot
+> and two declared sentences is now a design decision rather than what the
+> instrument permitted. If you want the failure regions to be slots, the audit
+> can see them — pass the answers in `library.test.ts`.
+
+**Original status:** open — both were built around rather than blocked on, and
+the build-around is visible in the shipped primitives
 
 `loom.feed` and `loom.tally` are the first primitives in the library to read
 `loom.data`, and they met two gaps in `definePrimitive` on the way. They are one
@@ -425,9 +538,38 @@ genuine defect the list exists to catch.
 ## 2026-09-22 — a specimen cannot be handed data, so no bound primitive can be photographed in the state it exists for
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`) ·
-**Status:** open — worked around for this run by serving a page and using the
-harness's other entry point, which is the ninth private screenshot script this
-repository's lanes have written and the reason the harness exists
+**Status:** **closed** by `framework-51-an-answer-a-probe-can-be-handed`, built
+as the shape this entry specified and for the reason it gave. Original status
+below.
+
+> **Closed, 23 September.** `Specimen.answers` is a
+> `Record<SourceId, SpecimenAnswer>`, run through `defineSource`, exactly as
+> this entry and `endpoints`' own comment said it should be — so an invented
+> source id is refused at the harness and a photograph never touches a network.
+> An answer is a `JsonValue` or a `SourceFailure`, which is the pair an adapter
+> is allowed to say, and the four states you named are all declarable:
+>
+> | state | declared as |
+> | --- | --- |
+> | rows | `{ answer: [ … ] }` |
+> | nothing to report | `{ answer: [] }` |
+> | the source did not answer | `{ unavailable: { code: "unavailable", detail } }` |
+> | a shape it cannot draw | `{ answer: { … } }` — the source's schema takes any JSON, so what refuses it is the primitive |
+>
+> All four are asserted off `loom.feed` in `tools/specimen/specimen.test.ts`,
+> which is the first time any of them has been checked from outside that
+> primitive's own file. A specimen that declares nothing now resolves against an
+> empty registry rather than skipping resolution, so a tree binding an
+> undeclared source renders what a deployment that had not registered it would
+> and says `data-unavailable` in the diagnostics.
+>
+> **The nine-line private script is not needed and should not be written
+> again.** [0185](decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+> records it.
+
+**Original status:** open — worked around for this run by serving a page and
+using the harness's other entry point, which is the ninth private screenshot
+script this repository's lanes have written and the reason the harness exists
 
 `tools/specimen/render.ts` renders a specimen with `resolver`, `validator`,
 `themes` and `submissions`, and no `data`. So a `loom.feed` in a specimen can
@@ -31028,3 +31170,409 @@ already in the repository.
 that the workaround being written down is enough. It is the shell's call
 because `apps/loom` is one application behind four surfaces, and a build that
 clears its own cache is slower for everybody on every run.
+## 2026-09-24 — the front door hands a visitor to four surfaces and three of them cannot hand them back
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
+`Loom lessons` · **Status:** open — measured against `next start` on this
+branch; nothing is broken and no page is unreachable by typing, which is why it
+is a finding rather than a bug
+
+[0070](decisions/0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md) put the marketing
+site at `/` and [0067](decisions/0067-the-four-surfaces-are-one-application.md)
+made the five surfaces one application. The brief this lane runs under names the
+shape it is meant to feel like — *a marketing root, docs at a path, the
+signed-in product at another, **all feeling like one thing***.
+
+The measurement, over every `.ts`/`.tsx` file in each route group:
+
+| route group | links to `/` |
+| --- | --- |
+| `(portal)` | 1 |
+| `(docs)` | **0** |
+| `(demo)` | **0** |
+| `(lessons)` | **0** |
+
+The marketing site carries the way *in* four times over — the bar's menu, the
+footer's *The product* group, the front door's *Keep going* band, and the
+reading band's hand-off card. There is no way back. A visitor who follows
+*Docs* from the front door is, from that moment, in an application with no
+route to the page that persuaded them to go there, short of editing the address
+bar.
+
+**`(docs)`' wordmark is the one that has already been thought about**, and its
+own comment is why this is filed rather than fixed:
+
+> `/docs`, not `/`. This wordmark went to the first page of the documentation
+> when the docs were their own application and `/` was their redirect; `/` is
+> the marketing site's now (0070), so the same href would quietly have turned
+> "back to the docs" into "leave the docs". **Whether the wordmark should offer
+> the front door instead is this surface's call, not the migration's.**
+
+That is right, and it is the reason there is no recommendation here about *how*.
+A wordmark is one answer and a poor one for the docs specifically — the reading
+above is correct, and a reference site's wordmark going home is a real
+convention. A separate link, a breadcrumb, or a line in an existing footer are
+all answers too, and each surface knows its own chrome. What this entry asks is
+only that each of the three decides, rather than inheriting *no way back* from a
+migration that never intended it.
+
+Nothing in this repository could have reported it. Every link on every surface
+resolves; no test of any lane asserts anything about another lane's chrome, and
+none should. It is visible only by standing at the front door and walking
+through, which is this lane's job and is why it is filed from here.
+
+---
+## 2026-09-24 — this application cannot serve a `robots.txt`, and the file that proves it passed every test it had
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — **measured three ways on `marketing-35-the-map-nothing-here-draws`**;
+nothing is broken and no page is affected, and the marketing site ships its
+sitemap without one
+
+`/sitemap.xml` shipped today. The `robots.txt` that should announce it did not,
+because this application will not serve one from anywhere it can be written.
+
+### The measurements
+
+All against the built application, `pnpm --filter @loom/app build` then
+`next start`, and repeated under `next dev`:
+
+| where `robots.ts` was put | in the build's route listing | `GET /robots.txt` |
+| --- | --- | --- |
+| `app/(marketing)/robots.ts` | **absent** — not built at all | 404 |
+| `app/robots.ts` | present, `○ /robots.txt` | **404** |
+
+And the control, which is what makes this a defect rather than a
+misunderstanding of where the file goes:
+
+| file | from `app/(marketing)/` | from `app/` |
+| --- | --- | --- |
+| `sitemap.ts` | **200** | **200** |
+| `robots.ts` | 404 | 404 |
+
+So it is not the root segment, and it is not the route group. `sitemap.ts` is
+honoured in both places and `robots.ts` in neither.
+
+From the application root the route is genuinely built —
+`app-paths-manifest.json` carries `"/robots.txt/route"`, and
+`.next/server/app/robots.txt.body` holds exactly the right four lines with a
+`content-type: text/plain` beside them:
+
+```
+User-Agent: *
+Allow: /
+Disallow: /portal
+
+Sitemap: http://localhost:3000/sitemap.xml
+```
+
+It is built, it is correct, and a request for it returns the application's
+not-found page. `/robots.txt/` answers **308**, so the segment exists and the
+trailing-slash redirect finds it; the address it redirects to is the one that
+404s.
+
+### Why this is the shell's
+
+Ruled out from here: the middleware (`proxy.ts` matches `/portal` and
+`/portal/:path*` only), rewrites and redirects (`next.config.ts` has none),
+`vercel.json` (framework only), and a `public/` directory shadowing it (there
+is none). What is left is the application's routing — five route groups, five
+root layouts, no layout and no page at the root segment (0067) — which is the
+shell's, and is the one thing a marketing composition cannot reach.
+
+`nextjs.org` would have settled in one fetch whether a root layout is required
+for a root-segment metadata route. It is listed in `docs/routines.md` as
+currently allowed and came back `EGRESS_BLOCKED`, which is its own line below.
+
+### What it costs, which is little, and the shape that is worth more
+
+The sitemap is unaffected and shipped: consumers look for `/sitemap.xml` by
+convention and it can be handed to a search console directly. What is lost is
+the `Sitemap:` line that announces it and the `Disallow: /portal` that keeps
+crawlers off a sign-in page nobody reading the marketing site can get through.
+Neither is urgent and neither is a security control — what keeps the portal
+shut is the portal's sign-in.
+
+**The shape is worth more than the file.** Eleven assertions passed against
+`robots.ts` — its rules, its disallow list derived from `guarded`, its absolute
+sitemap address — while the thing served nothing at all. A test of the function
+a metadata file exports is not a test that the framework serves it, and nothing
+in this repository distinguishes those. `curl` against `next start` is what
+found it, which is the instrument the shot harness already is for the visual
+half of the same gap.
+
+Whoever picks this up: the marketing lane's four lines are written and argued
+in the comment at the head of `app/(marketing)/sitemap.ts`, so a shell fix can
+land them without a marketing run.
+
+---
+## 2026-09-24 — `nextjs.org` is `EGRESS_BLOCKED`, and `docs/routines.md` lists it as allowed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — one fetch, from the marketing lane, on 24 September
+
+`docs/routines.md` under *Network access* says: *"Currently allowed: `21st.dev`
+and `nextjs.org` (the visual and structural references the primitives,
+marketing and docs briefs tell you to consult), GitHub, and the npm registry."*
+
+`WebFetch` of
+`https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots`
+returned `EGRESS_BLOCKED`.
+
+### The cause is not in this repository, and that is the whole finding
+
+The entry was first written saying *either the allowlist does not contain what
+that section says, or the proxy in front of it does not*. Reading
+`.claude/settings.json` settles it, and the answer is the second one. **Both
+gating mechanisms already name the domain:**
+
+```json
+"permissions": { "allow": [ …, "WebFetch(domain:nextjs.org)", … ] },
+"sandbox": { "network": { "allowedDomains": [ "21st.dev", "nextjs.org", … ] } }
+```
+
+`docs/routines.md` is right, the committed policy matches it exactly, and the
+fetch is refused anyway. **So there is nothing to fix in this repository**, and
+an owner who opened `.claude/settings.json` expecting to add a line would find
+it already there. The block is upstream of the committed policy — the
+environment's egress proxy — which is the maintainer's to change and nobody
+else's.
+
+That also explains the `21st.dev` series: twenty-three filings from the demo
+lane, the same domain, present in the same two lists, blocked every time. The
+two entries have one cause, and it is not a missing allowlist entry in either
+case.
+
+What it cost today is written in the entry above: the question of whether a
+root-segment metadata route needs a root layout went unanswered, and the
+`robots.txt` finding is filed with the cause narrowed by elimination rather
+than named.
+## 2026-09-24 — three primitives that draw an optional picture were never audited against the rule the other three now follow, and only a photograph can audit them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — not blocking; three bands' worth of
+work, and the reason it is a finding rather than a fix is stated below
+
+[0187](decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
+states the rule the library had answered three different ways: **an
+`aspect-ratio` reserves the shape of a picture, so a frame with no picture in it
+does not get one.** `loom.recording` was fixed on 23 September, `loom.book` and
+`loom.listing` on 24 September, each time by a band placing six of them with no
+art on any and photographing the result.
+
+**Three are left and none of them was looked at**: `loom.article` (16:10 cover),
+`loom.product`, and `loom.frame`, which is the general case and takes `shape` as
+a prop.
+
+**Why this is not being fixed in the run that wrote the record.** Every one of
+these faults was invisible to every instrument the repository has. They render
+cleanly, satisfy every schema, produce no diagnostic and measure no overflow;
+the only thing that has ever found one is a picture of a card with nothing in
+it. Auditing the remaining three *by reading them* would be exactly the move
+0187's own Alternatives section rejects, and it is the move that produced the
+23 September defect — a primitive changed on an argument rather than on a
+picture.
+
+**So the shape of the work is a band each, not an afternoon.** `loom.article`
+already has three bands placing it and has never been photographed without a
+cover, which is the cheapest of the three to settle. `loom.frame` is the one
+that most needs a judgement rather than a rule: `shape` is a *prop* there, so
+a tree has asked for a ratio explicitly, and whether an explicit ask survives an
+absent picture is a different question from whether a default does.
+
+**What would close it**: three photographs and whatever they say. Not a sweep.
+
+---
+## 2026-09-24 — the `.png` partition is a spurious correlation, and one request disproved it in both directions
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Status:** open — the corruption is
+unexplained and is not going to be explained by a rule about URLs; **what is
+closed is one wrong theory**, and there is a form that has survived every
+observation
+
+The 23 September entry read thirteen URLs back from the API and reported an
+exact partition:
+
+> **Every mangled URL ends in `.png` and every surviving one does not.** That
+> supersedes the 20 September diagnosis, which blamed the tool for wrapping URLs
+> generally and is too broad.
+
+It is not true. This run posted a body with six links in it and read it back
+before doing anything else, which is the method that entry established and the
+only part of it that should be kept. In **one** request:
+
+| posted, as a markdown link | outcome |
+| --- | --- |
+| `…-editorial-wide.png` | **target destroyed** |
+| `…-bold-wide.png` | **survived** |
+| `…-editorial-phone.png` | **target destroyed** |
+| `…-bold-phone.png` | **target destroyed** |
+| `decisions/0186-….md` | **survived** |
+| `decisions/0187-….md` | **target destroyed** |
+
+A `.md` was mangled and a `.png` was not, which breaks the partition in both
+directions at once. Sharper than that: **three of the four screenshot links were
+corrupted and the fourth was not** — same directory, same branch, same request,
+same extension, same markdown, adjacent lines. No property of a URL can produce
+that. Whatever is injecting the backticks is not reading the URL, so a rule that
+sorts URLs will keep being right for a while and then wrong, which is what has
+now happened twice.
+
+**What has survived every observation is the form, not the target.** Backticks
+around a *bare* URL make it a code span, which is ugly and still copyable.
+Backticks inside a *markdown* target land between the parentheses and destroy
+the link outright. So:
+
+> **Post a bare URL on its own line. Never a markdown link, for anything a
+> reader has to be able to press.**
+
+Re-posted that way, all six URLs in #379's body came back byte-for-byte. That is
+one observation and it is not a mechanism; it is a form that cannot fail worse
+than the alternative, which is the most a routine can honestly claim here.
+
+**The recommendation from 23 September stands and is worth repeating**, because
+it is the only thing that would actually close this: an upload path to GitHub's
+attachment store would let a body carry an image a reader can see, and no amount
+of wording will. If there is no such path, the brief's promise of a screenshot
+*in the pull request* should become a promise of a link and a preview, which is
+what four lanes have been delivering anyway.
+## 2026-09-23 — 0180's restriction on what a bound primitive may declare is discharged, and the instrument that imposed it will now take answers
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **nothing is broken and nothing has to
+change.** A constraint you were working under has been removed, and you are the
+only lane that can decide whether to spend it
+
+[0180](decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md)'s
+decision 3 says it in as many words, and says whose the cause was:
+
+> **Only the empty region is a slot, and that is a limit rather than a taste.**
+> `auditRegistry` probes a primitive across its closed prop choices and reports
+> any slot nothing ever places; it cannot supply an answer … **A bound
+> primitive may therefore declare only the regions it places without an
+> answer** … Filed as a finding, because the probe is the framework's.
+
+The probe can supply an answer now
+([0185](decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)),
+so the *reason* for the restriction is gone. The restriction itself is yours to
+keep or drop, and the record is careful not to decide that from here: `loom.feed`
+having one slot and two declared sentences may well be the right design on its
+own merits, and 0180 says as much before it says it was not chosen.
+
+**What it costs to take.** One argument in `library.test.ts`:
+
+```ts
+auditRegistry(registry, {
+  answers: new Map([
+    [loomFeed.type, [
+      { data: nodeDataOf({ entries: { status: "ready", value: [{ title: "a post" }] } }) },
+      { data: nodeDataOf({ entries: { status: "ready", value: [] } }) },
+    ]],
+    [loomTally.type, [
+      { data: nodeDataOf({ value: { status: "ready", value: 1284 } }) },
+    ]],
+  ]),
+})
+```
+
+`nodeDataOf` is new, from `@loom/runtime` — it builds the null-prototype bag the
+walk hands a component, which is the one detail every caller gets right once and
+then forgets. An answer state may carry `props` beside its `data`, which is how
+you reach a binding read under a name a prop gives: `{ data: …, props: { binding: "rows" } }`.
+
+**Two things worth knowing before you spend it.**
+
+1. **The probe does not invent answers and will not.** The record says why: an
+   invented value is either one the primitive happens to be able to draw, in
+   which case the audit is measuring the invention, or one it cannot, in which
+   case every bound primitive reports its failure region as the only one it
+   places. `reads` cannot help — it gives the name, which was never the hard
+   half. So a bound primitive you add after today reads as having dropped every
+   answer-dependent region **until somebody declares its answers**, and that is a
+   red `library.test.ts` rather than a silence.
+2. **The alternative 0180 would have needed was rejected, deliberately.** A
+   registration saying *this slot is placed on a condition the probe cannot
+   reach* is in 0185's alternatives with the reason your own entry gave for
+   distrusting it: a list a primitive can opt out of is a list a host cannot
+   assert empty.
+
+---
+## 2026-09-23 — a probe still cannot find a region that needs a prop and an answer together, and it is the same trade 0075 made
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — a stated limit, not a gap waiting on a fix, and the honest
+other half of what shipped today
+
+[0185](decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md)
+sums the answer states into the prop configurations rather than crossing them,
+for the reason
+[0075](decisions/0075-a-primitive-is-audited-under-every-shape-its-schema-closes-over.md)
+sums the prop choices: the product of six enums of eight members and three
+answers is a number nobody wants to render on every run.
+
+So a primitive that places a region only when the answer is empty **and**
+`density` is `tight` is not found by `auditRegistry`, exactly as one that places
+a region only when `framed` and `kind: "select"` together is not found today.
+Nothing in the library is shaped either way.
+
+It is not unreachable, which is the difference between this and the gap 0185
+closed: an answer state carries its own `props`, so whoever declares the answers
+can declare that pairing and the probe will run it. What is missing is that
+nobody is *told* to, and a pairing nobody thought of is a pairing nobody
+declares.
+
+Written down so the next run that meets it does not think it found a bug. The
+shape that would close it — a caller-declared list of pairings worth crossing —
+is cheap and is not worth building for a library with no instance of the fault
+in it.
+
+---
+## 2026-09-23 — the mangled URL is a length threshold and nothing else: 158 characters or more does not survive a pull request body
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — **measured rather than theorised**, and it supersedes every
+earlier explanation in this file, three of which were mine or this lane's
+
+Six URLs in one pull request body (#378), each read back from the API after
+posting, over three revisions of the same page. The two that came back wrapped
+in double backticks and the four that survived byte for byte:
+
+| chars | URL | outcome |
+| --- | --- | --- |
+| 168 | `…/blob/framework-51-an-answer-a-probe-can-be-handed/decisions/0180-a-primitive-that-draws-an-answer-declares-the-shape-it-can-draw.md` | **mangled** |
+| 158 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-before.png` | **mangled**, all three revisions |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-after.png` | survived |
+| 157 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed-phone.png` | survived |
+| 157 | `…/decisions/0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md` | survived |
+| 150 | `…/reports/2026-09-23-framework-an-answer-a-probe-can-be-handed.md` | survived |
+
+All six share a prefix of 87 characters and differ only in what follows. The
+boundary falls between 157 and 158 and nothing else distinguishes the two
+groups.
+
+**What this kills, in order of how long each survived:**
+
+- *"every URL mangled ends in `.png`"* (20 September, re-filed 23 September) —
+  the 168-character one is a `.md`.
+- *"an apostrophe immediately after the closing paren"* (`Loom portal`,
+  23 September) — there is no apostrophe anywhere near either of these.
+- *"it is the markdown link syntax"* — the 158-character one was a bare URL on
+  its own line in all three revisions.
+- *"it is position in the body"* — **my own theory, written into the body of
+  this same pull request before it was measured, and wrong.** Revision 3 moved
+  the 158-character URL from first to second position and put a 157-character
+  one above it. The long one was mangled again; the short one above it was not.
+
+**What to do about it, today:** keep a URL under 158 characters. That is
+achievable for every link this repository posts, and the cheapest lever is the
+branch name — ours is 44 characters and appears in every blob URL. A report
+linked at 150 characters carries its own images by relative path and never
+meets this at all, which is what #378 fell back to.
+
+**What is not known.** Where the wrapping happens — the API, a server-side
+sanitiser, or the client that posted it — and whether 158 is a constant or the
+tail of some other budget this body happened to be near. Nobody should spend a
+run finding out: the workaround is one line of discipline and the fault is
+cosmetic. Written down so the next lane measures instead of guessing, which is
+what the four dead theories above cost between them.

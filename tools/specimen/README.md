@@ -57,8 +57,35 @@ token, and a photograph must not depend on a network. It is still validated the
 way a host's answer is, so an action that leaves the origin is refused here
 rather than in review.
 
+### Photographing a bound primitive
+
+A `loom.feed` nothing answered draws the sentence it draws when the source
+could not be reached — correct, and the same picture whatever state you meant
+to photograph. Declare what each source answers with:
+
+```ts
+export default defineSpecimen({
+  // …
+  answers: {
+    "posts.latest": { answer: [{ title: "A narrower door", meta: "23 September" }] },
+    "posts.drafts": { answer: [] },
+    "posts.archive": { unavailable: { code: "unavailable", detail: "no answer in time" } },
+  },
+})
+```
+
+An **answer**, not a source, for the reason `endpoints` takes a target: a
+specimen that can do IO is one whose pictures differ between two runs of the
+same tree. It goes through `defineSource`, so an invalid id is refused here, and
+the params a tree asks with are validated before the answer comes back.
+
+The source's schema accepts any JSON deliberately. Three of a bound primitive's
+four states are an answer, and the fourth — *a shape this primitive cannot draw*
+— is only reachable if the answer gets past the source. `answers.specimen.ts` is
+the worked copy and puts all four in one frame.
+
 Put it beside the code it photographs. Nothing in this directory is any lane's
-content, and the harness imports no specimen but the example.
+content, and the harness imports no specimen but its own two.
 
 ## Why it is shaped like this
 

@@ -113,6 +113,24 @@ export const loomTally = definePrimitive({
   props,
   slots: [],
   /**
+   * The name this looks its figure up under, which is whichever name the
+   * `binding` prop gives and `value` when it gives none.
+   *
+   * The second form of the declaration (0184), and this primitive is one of the
+   * two it was added for: a fixed list would have had to write `value` and then
+   * be wrong about every node that set the prop. Declaring it turns the one way
+   * a binding can be wrong that nothing refuses — *a name nothing reads*, which
+   * resolves cleanly, costs the round trip and is then dropped on the floor —
+   * into a `data-unread` diagnostic, and tells a model reading the catalogue
+   * that `binding` has to match a key in this node's own `loom:data` rather than
+   * leaving it to infer that from a camelCase string rule.
+   *
+   * Leaving it out and declaring it empty are different answers (0181), which is
+   * why this was worth two lines rather than nothing: absence says *nobody has
+   * said*, and this says what is true.
+   */
+  reads: [{ fromProp: "binding", default: "value" }],
+  /**
    * The word that stands where the figure would have been. Declared (0060)
    * because a model has nothing to say about a failure it cannot see, and
    * because a page that dropped the figure silently would leave a label with

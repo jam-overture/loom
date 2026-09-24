@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
 import { themeSelectionSchema, type ThemeSelection } from "../../src/theme/theme.js"
 import { sequentialIdFactory } from "../../src/ids.js"
-import { SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../../src/tree/builders.js"
 import { createTree } from "../../src/tree/tree.js"
 
@@ -1058,6 +1058,130 @@ describe("wiring a submission into a specimen", () => {
 
   it("leaves a specimen with no forms in it exactly as it was", async () => {
     const withRegistry = await renderSpecimen(specimenOf({ endpoints: {} }))
+    const without = await renderSpecimen(specimenOf())
+
+    expect(withRegistry.ok && without.ok).toBe(true)
+    expect(withRegistry.ok && withRegistry.value[0]?.html).toBe(
+      without.ok ? without.value[0]?.html : "mismatch"
+    )
+  })
+})
+
+/**
+ * The data seam's half of the block above, and the finding it closes (0185).
+ *
+ * `loom.feed` has four states — rows, an answer of none, a source that did not
+ * answer, and an answer of a shape it cannot draw — and before a specimen could
+ * declare an answer exactly one of them was reachable. Every assertion here is
+ * a photograph a lane could not take.
+ */
+describe("wiring an answer into a specimen", () => {
+  const feedSpecimen = (answers?: Specimen["answers"]): Specimen =>
+    specimenOf({
+      build: (theme) => {
+        const idFactory = sequentialIdFactory()
+        const feed = buildElement(idFactory, {
+          type: "loom.feed",
+          props: { [DATA_PROP_KEY]: { entries: { source: "posts.latest", params: { limit: 3 } } } },
+          children: [
+            buildSlot(idFactory, "empty", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [buildText(idFactory, "Nothing posted yet")],
+              }),
+            ]),
+          ],
+        })
+        const page = buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [feed],
+        })
+
+        return createTree(page, idFactory)
+      },
+      ...(answers === undefined ? {} : { answers }),
+    })
+
+  const htmlOf = async (answers?: Specimen["answers"]): Promise<string> => {
+    const rendered = await renderSpecimen(feedSpecimen(answers))
+
+    return (rendered.ok && rendered.value[0]?.html) || ""
+  }
+
+  it("draws the rows a specimen declared", async () => {
+    const html = await htmlOf({
+      "posts.latest": {
+        answer: [
+          { title: "The second release", meta: "March" },
+          { title: "The first release", meta: "February" },
+        ],
+      },
+    })
+
+    expect(html).toContain("The second release")
+    expect(html).toContain("The first release")
+    expect(html).not.toContain("Nothing posted yet")
+  })
+
+  it("draws the region the tree supplied when the answer is none", async () => {
+    const html = await htmlOf({ "posts.latest": { answer: [] } })
+
+    expect(html).toContain("Nothing posted yet")
+    expect(html).not.toContain("could not be loaded")
+  })
+
+  it("draws the failure sentence when the source did not answer", async () => {
+    const html = await htmlOf({
+      "posts.latest": { unavailable: { code: "unavailable", detail: "the database is asleep" } },
+    })
+
+    expect(html).toContain("This list could not be loaded.")
+    expect(html).not.toContain("Nothing posted yet")
+  })
+
+  /**
+   * The source's own schema takes any JSON, so what refuses this answer is the
+   * primitive — which is exactly the state being photographed. A specimen that
+   * had to declare a schema could only ever photograph its own strictness.
+   */
+  it("draws the other failure sentence when the answer is a shape it cannot read", async () => {
+    const html = await htmlOf({ "posts.latest": { answer: { total: 4 } } })
+
+    expect(html).toContain("This list could not be shown.")
+  })
+
+  /**
+   * The state every specimen of a bound primitive was stuck in until now, and
+   * it is still what a specimen that declares nothing gets — with the seam's
+   * own reason for it in the diagnostics rather than silence.
+   */
+  it("reports the binding as unanswered when a specimen declares nothing", async () => {
+    const rendered = await renderSpecimen(feedSpecimen())
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    expect(rendered.value[0]?.diagnostics).toEqual([
+      expect.objectContaining({ code: "data-unavailable" }),
+    ])
+    expect(rendered.value[0]?.html).toContain("This list could not be loaded.")
+  })
+
+  /** Through `defineSource`, so a specimen's id meets the schema a host's does. */
+  it("says which source id it refused rather than rendering half a page", async () => {
+    const rendered = await renderSpecimen(feedSpecimen({ "Not An Id": { answer: [] } }))
+
+    expect(rendered.ok).toBe(false)
+    if (rendered.ok) return
+
+    expect(rendered.error.code).toBe("sources")
+    expect(describeRenderError(rendered.error)).toContain("Not An Id")
+  })
+
+  it("leaves a specimen that binds nothing exactly as it was", async () => {
+    const withRegistry = await renderSpecimen(specimenOf({ answers: {} }))
     const without = await renderSpecimen(specimenOf())
 
     expect(withRegistry.ok && without.ok).toBe(true)
