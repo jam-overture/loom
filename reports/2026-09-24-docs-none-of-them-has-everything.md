@@ -302,3 +302,33 @@ phone heading break (23 September) is named above rather than filed again.
   *Installation* and does not acknowledge a reader who arrives having already
   run the quickstart. One paragraph in `_lib/arrival/route.ts`. Unchanged from
   the last five reports, and it is the oldest thing here.
+
+---
+
+## Postscript — the merge moved the numbers, and that is the point
+
+`Loom merge` merged `main` into this branch at 16:02 UTC and regenerated the
+reference, picking up #378's probe exports and #379's file count. Everything
+above was measured against `main` at `b2a5176` and is left as it was written;
+this is what the branch says now, against `main` at `b93d7a1`:
+
+| | measured at `b2a5176` | on the merged head |
+| --- | --- | --- |
+| names the package publishes | 1,071 | **1,077** |
+| behind `@loom/runtime` | 526 | **527** |
+| other doors sharing nothing with it | 13 of 15 | 13 of 15 |
+| doors it overlaps | react 5, sdk 8 | react 5, sdk 8 |
+| names meaning two things | `horizonOf`, 1 of 1,071 | `horizonOf`, 1 of 1,077 |
+| doors contained in another | 1 of 16 | 1 of 16 |
+
+**Nobody edited a sentence and every page is still true**, which is the §4c rule
+working rather than a thing to note in passing: six exports landed in `src/`
+from another lane, and sixteen pages changed what they say about the package
+without a word of prose moving. A hand-written *"526 of 1,071"* would now be
+wrong on every one of them and nothing would have gone red.
+
+`pnpm install && pnpm verify` on the merged head `1020611`: **green, exit 0** —
+`@loom/runtime` 159 files / 3,029 tests, `@loom/app` **302 / 5,445**, 779
+findings 0 malformed, 109 prerendered pages / 1,208 junctions / 0 run together.
+Every hard-coded assertion in this branch's tests survived the merge, because
+what they assert is the package's *shape* and the merge changed its *size*.
