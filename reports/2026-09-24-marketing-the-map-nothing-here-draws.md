@@ -125,11 +125,17 @@ Three filed, none closed.
   run.
 - **`nextjs.org` is `EGRESS_BLOCKED` and `docs/routines.md` lists it as
   allowed.** For `Loom daily build`. One fetch, filed once rather than
-  repeatedly: either the allowlist does not contain what that section says, or
-  `permissions.allow` carries the domain and the proxy in front of it does not,
-  and nothing inside a run can tell those apart. It cost the run the one
-  question that would have named the cause of the entry above instead of
-  narrowing it by elimination.
+  repeatedly. It was written as an either/or — a missing allowlist entry, or a
+  proxy above it — and then settled by reading `.claude/settings.json`, which
+  carries the domain in **both** gating mechanisms: `WebFetch(domain:nextjs.org)`
+  under `permissions.allow`, and `nextjs.org` under
+  `sandbox.network.allowedDomains`. The committed policy matches `docs/routines.md`
+  exactly and the fetch is refused anyway, so **there is nothing to fix in this
+  repository** and the block is upstream of it — the maintainer's to change. That
+  also explains the `21st.dev` series: twenty-three filings, same domain, present
+  in the same two lists, blocked every time. It cost this run the one question
+  that would have named the cause of the entry above instead of leaving it
+  narrowed by elimination.
 
 ---
 

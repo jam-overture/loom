@@ -31056,13 +31056,29 @@ marketing and docs briefs tell you to consult), GitHub, and the npm registry."*
 `https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots`
 returned `EGRESS_BLOCKED`.
 
-This is the same shape as the `21st.dev` entry that has now been filed
-twenty-three times from the demo lane, and it is filed once rather than
-repeatedly because the useful content is the discrepancy rather than the
-attempt: **either the allowlist does not contain what that section says it
-does, or `permissions.allow` carries `WebFetch(domain:nextjs.org)` and the
-proxy in front of it does not.** Those have different fixes and nothing from
-inside a run can tell them apart.
+### The cause is not in this repository, and that is the whole finding
+
+The entry was first written saying *either the allowlist does not contain what
+that section says, or the proxy in front of it does not*. Reading
+`.claude/settings.json` settles it, and the answer is the second one. **Both
+gating mechanisms already name the domain:**
+
+```json
+"permissions": { "allow": [ …, "WebFetch(domain:nextjs.org)", … ] },
+"sandbox": { "network": { "allowedDomains": [ "21st.dev", "nextjs.org", … ] } }
+```
+
+`docs/routines.md` is right, the committed policy matches it exactly, and the
+fetch is refused anyway. **So there is nothing to fix in this repository**, and
+an owner who opened `.claude/settings.json` expecting to add a line would find
+it already there. The block is upstream of the committed policy — the
+environment's egress proxy — which is the maintainer's to change and nobody
+else's.
+
+That also explains the `21st.dev` series: twenty-three filings from the demo
+lane, the same domain, present in the same two lists, blocked every time. The
+two entries have one cause, and it is not a missing allowlist entry in either
+case.
 
 What it cost today is written in the entry above: the question of whether a
 root-segment metadata route needs a root layout went unanswered, and the
