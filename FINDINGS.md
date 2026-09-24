@@ -91,8 +91,9 @@ beside something else that needs it rather than on its own.
 ## 2026-09-23 — `loom.feed` and `loom.tally` can now declare what they read, and the declaration is two lines
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — one line each, nothing is broken
-without it, and the seam it feeds has been built and quiet since 22 September
+(`src/primitives/`) · **Status:** **closed by
+`primitives-44-the-rows-that-were-a-run`** — both declared, exactly as written
+below, in the run that shipped the first band placing a `loom.tally`
 
 [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
 gave a primitive `reads` and both of yours were the reason it could not use it:
@@ -31048,6 +31049,96 @@ symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
 
 ---
+## 2026-09-24 — three primitives that draw an optional picture were never audited against the rule the other three now follow, and only a photograph can audit them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — not blocking; three bands' worth of
+work, and the reason it is a finding rather than a fix is stated below
+
+[0187](decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
+states the rule the library had answered three different ways: **an
+`aspect-ratio` reserves the shape of a picture, so a frame with no picture in it
+does not get one.** `loom.recording` was fixed on 23 September, `loom.book` and
+`loom.listing` on 24 September, each time by a band placing six of them with no
+art on any and photographing the result.
+
+**Three are left and none of them was looked at**: `loom.article` (16:10 cover),
+`loom.product`, and `loom.frame`, which is the general case and takes `shape` as
+a prop.
+
+**Why this is not being fixed in the run that wrote the record.** Every one of
+these faults was invisible to every instrument the repository has. They render
+cleanly, satisfy every schema, produce no diagnostic and measure no overflow;
+the only thing that has ever found one is a picture of a card with nothing in
+it. Auditing the remaining three *by reading them* would be exactly the move
+0187's own Alternatives section rejects, and it is the move that produced the
+23 September defect — a primitive changed on an argument rather than on a
+picture.
+
+**So the shape of the work is a band each, not an afternoon.** `loom.article`
+already has three bands placing it and has never been photographed without a
+cover, which is the cheapest of the three to settle. `loom.frame` is the one
+that most needs a judgement rather than a rule: `shape` is a *prop* there, so
+a tree has asked for a ratio explicitly, and whether an explicit ask survives an
+absent picture is a different question from whether a default does.
+
+**What would close it**: three photographs and whatever they say. Not a sweep.
+
+---
+## 2026-09-24 — the `.png` partition is a spurious correlation, and one request disproved it in both directions
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Status:** open — the corruption is
+unexplained and is not going to be explained by a rule about URLs; **what is
+closed is one wrong theory**, and there is a form that has survived every
+observation
+
+The 23 September entry read thirteen URLs back from the API and reported an
+exact partition:
+
+> **Every mangled URL ends in `.png` and every surviving one does not.** That
+> supersedes the 20 September diagnosis, which blamed the tool for wrapping URLs
+> generally and is too broad.
+
+It is not true. This run posted a body with six links in it and read it back
+before doing anything else, which is the method that entry established and the
+only part of it that should be kept. In **one** request:
+
+| posted, as a markdown link | outcome |
+| --- | --- |
+| `…-editorial-wide.png` | **target destroyed** |
+| `…-bold-wide.png` | **survived** |
+| `…-editorial-phone.png` | **target destroyed** |
+| `…-bold-phone.png` | **target destroyed** |
+| `decisions/0186-….md` | **survived** |
+| `decisions/0187-….md` | **target destroyed** |
+
+A `.md` was mangled and a `.png` was not, which breaks the partition in both
+directions at once. Sharper than that: **three of the four screenshot links were
+corrupted and the fourth was not** — same directory, same branch, same request,
+same extension, same markdown, adjacent lines. No property of a URL can produce
+that. Whatever is injecting the backticks is not reading the URL, so a rule that
+sorts URLs will keep being right for a while and then wrong, which is what has
+now happened twice.
+
+**What has survived every observation is the form, not the target.** Backticks
+around a *bare* URL make it a code span, which is ugly and still copyable.
+Backticks inside a *markdown* target land between the parentheses and destroy
+the link outright. So:
+
+> **Post a bare URL on its own line. Never a markdown link, for anything a
+> reader has to be able to press.**
+
+Re-posted that way, all six URLs in #379's body came back byte-for-byte. That is
+one observation and it is not a mechanism; it is a form that cannot fail worse
+than the alternative, which is the most a routine can honestly claim here.
+
+**The recommendation from 23 September stands and is worth repeating**, because
+it is the only thing that would actually close this: an upload path to GitHub's
+attachment store would let a body carry an image a reader can see, and no amount
+of wording will. If there is no such path, the brief's promise of a screenshot
+*in the pull request* should become a promise of a link and a preview, which is
+what four lanes have been delivering anyway.
 ## 2026-09-23 — 0180's restriction on what a bound primitive may declare is discharged, and the instrument that imposed it will now take answers
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`

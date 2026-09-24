@@ -8028,18 +8028,31 @@ describe("the shelf and the listings band", () => {
     expect(tree).not.toContain("·")
   })
 
-  it("draws the book's cover panel whether or not there is a cover", () => {
+  it("draws the book's cover panel whether or not there is a cover, at a spine's width when there is not", () => {
     /**
      * The 2 September finding's first option, taken here and declined by
      * `loom.recording`. Six books, four covers, six panels — so a shelf lines up
      * rather than starting one card's text at its edge.
+     *
+     * **The size is the half that changed on 24 September**, and it is 0187: the
+     * panel is still drawn, and it no longer takes a *picture's* width when
+     * there is no picture. `features-shelf` was the first band to place six
+     * books with no cover art between them and photographed what the full-width
+     * 2:3 rendering costs — 350 pixels of blank panel per card on a phone. Both
+     * halves are asserted, because either alone is the wrong rule: drop the
+     * panel and the shelf goes ragged, keep its width and the shelf is holes.
      */
-    const { tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
-    const panels = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.bookCover}"`, "g"))]
+    const { stylesheet, tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
+    const panels = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.bookCover}[ "]`, "g"))]
+    const bare = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.bookCover} ${LIBRARY_CLASS.bookCoverBare}"`, "g"))]
     const images = [...tree.matchAll(/<img[^>]+everyday\.jpg|<img[^>]+systems\.jpg|<img[^>]+state\.jpg|<img[^>]+timeless\.jpg/g)]
 
     expect(panels).toHaveLength(6)
     expect(images).toHaveLength(4)
+    expect(bare, "a panel with a cover in it was narrowed, or one without it was not").toHaveLength(2)
+    expect(stylesheet).toContain(".loom-book-cover-bare {\n  inline-size: 4.5rem;\n}")
+    /** The row rendering is untouched: a flex basis beats a width on a flex item. */
+    expect(stylesheet).toContain("  .loom-book-cover {\n    flex: 0 0 7rem;\n  }")
     /** The spine is a border off the palette, never a shadow — there is no shadow slot. */
     expect(tree).toContain("border:1px solid var(--loom-border-subtle);border-inline-start:3px solid var(--loom-border-strong)")
     expect(tree).not.toContain("box-shadow")
@@ -8083,16 +8096,73 @@ describe("the shelf and the listings band", () => {
     expect(tree).toContain(`class="${LIBRARY_CLASS.underline}" style="color:inherit;text-decoration:none"`)
   })
 
-  it("wears a listing's flags on the picture, and draws no empty strip when it has none", () => {
+  it("wears a listing's flags on the picture, and reserves no picture's shape for a picture it has not got", () => {
+    /**
+     * **This assertion changed on 24 September and the old one is stated so the
+     * change is legible**: it read *three listings, three media panels — the
+     * plot has no photograph and still has a frame*, and that was right about
+     * the frame and wrong about what the frame is for.
+     *
+     * The frame is drawn without a photograph because the **flags** live on it,
+     * which is the second job that separates this primitive from
+     * `loom.recording`. It is not drawn because a listing needs a rectangle. The
+     * plot has no photograph *and no flag*, so under 0187 it now draws no frame
+     * at all, and the two that carry a flag draw a strip as tall as the badges
+     * on it rather than a 4:3 panel with a badge floating in the corner of it.
+     *
+     * `features-listings` is what decided it: six cards with no photography, a
+     * quarter of every one of them given to a grey rectangle, which is the fault
+     * `articles-episodes` found in `loom.recording` the day before.
+     */
     const { stylesheet, tree } = splitStylesheet(render(shelfPage(EDITORIAL)).markup)
-    const media = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingMedia}"`, "g"))]
+    const media = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingMedia}[ "]`, "g"))]
+    const bare = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingMedia} ${LIBRARY_CLASS.listingMediaBare}"`, "g"))]
     const flags = [...tree.matchAll(new RegExp(`class="${LIBRARY_CLASS.listingFlags}"`, "g"))]
 
-    /** Three listings, three media panels — the plot has no photograph and still has a frame. */
-    expect(media).toHaveLength(3)
+    /** Two photographs, two frames; the plot has neither a picture nor a flag and has no frame. */
+    expect(media).toHaveLength(2)
+    expect(bare, "a frame was kept for a listing that has nothing to put in one").toHaveLength(0)
     expect(flags).toHaveLength(2)
     expect(stylesheet).toContain(".loom-listing-flags:empty {\n  display: none;\n}")
     expect(stylesheet).toContain(".loom-listing-specs:empty {\n  display: none;\n}")
+    expect(stylesheet).toContain(".loom-listing-media-bare {\n  aspect-ratio: auto;\n}")
+  })
+
+  /**
+   * The case the fixture above cannot reach: a listing with a state to wear and
+   * no photograph to wear it on.
+   *
+   * It is the one 0187 has to get right rather than merely simplify, because
+   * `loom.listing`'s frame carries the flags and dropping it outright — which is
+   * what `loom.recording` does — would leave a band that moved its badges
+   * depending on whether a photograph was found. Built here rather than added to
+   * `shelfPage` so the assertion above keeps counting what it counts.
+   */
+  it("keeps a flag on a listing that has no photograph to wear it on", () => {
+    const ids = sequentialIdFactory()
+    const card = buildElement(ids, {
+      type: "loom.listing",
+      props: { address: "The old dairy, Fenn Lane", price: "POA" },
+      children: [
+        buildSlot(ids, "flags", [
+          buildElement(ids, { type: "loom.badge", props: { tone: "accent" }, children: [buildText(ids, "Under offer")] }),
+        ]),
+        buildElement(ids, { type: "loom.spec", props: { value: "0.4", label: "acres" } }),
+      ],
+    })
+
+    const { markup, diagnostics } = render(
+      createTree(
+        buildElement(ids, { type: "loom.page", props: { [THEME_PROP_KEY]: EDITORIAL }, children: [card] }),
+        ids
+      )
+    )
+    const { tree } = splitStylesheet(markup)
+
+    expect(diagnostics).toEqual([])
+    expect(tree).toContain("Under offer")
+    expect(tree).toContain(`class="${LIBRARY_CLASS.listingMedia} ${LIBRARY_CLASS.listingMediaBare}"`)
+    expect(tree).not.toContain("<img")
   })
 
   it("keeps every container a floor rather than a count", () => {

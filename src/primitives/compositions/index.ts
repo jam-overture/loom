@@ -25,8 +25,10 @@ import { heroBand } from "./hero-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
 import { integrationsGridBand } from "./integrations-grid-band.js"
+import { listingsBand } from "./listings-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
+import { metricsLiveBand } from "./metrics-live-band.js"
 import { navBand } from "./nav-band.js"
 import { offeringsBand } from "./offerings-band.js"
 import { pricingBand } from "./pricing-band.js"
@@ -34,12 +36,14 @@ import { pricingMatrixBand } from "./pricing-matrix-band.js"
 import { proofBand } from "./proof-band.js"
 import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
+import { shelfBand } from "./shelf-band.js"
 import { specsBand } from "./specs-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
+import { whatsOnBand } from "./whats-on-band.js"
 
 export type { Composition, CompositionPart, CompositionPlan, CompositionTarget } from "./composition.js"
 export {
@@ -75,8 +79,10 @@ export {
   heroSplitBand,
   integrationsBand,
   integrationsGridBand,
+  listingsBand,
   metricsBand,
   metricsChartBand,
+  metricsLiveBand,
   navBand,
   offeringsBand,
   pricingBand,
@@ -84,12 +90,14 @@ export {
   proofBand,
   proofFacesBand,
   proofStoryBand,
+  shelfBand,
   specsBand,
   stepsBand,
   stepsCardsBand,
   teamBand,
   testimonialsBand,
   testimonialsWallBand,
+  whatsOnBand,
 }
 
 /**
@@ -146,6 +154,8 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   featuresBand,
   featuresAlternatingBand,
   catalogueBand,
+  shelfBand,
+  listingsBand,
   bentoBand,
   stepsBand,
   stepsCardsBand,
@@ -156,6 +166,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   integrationsGridBand,
   metricsBand,
   metricsChartBand,
+  metricsLiveBand,
   specsBand,
   pricingBand,
   pricingMatrixBand,
@@ -168,6 +179,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   articlesBand,
   feedBand,
   episodesBand,
+  whatsOnBand,
   changelogBand,
   faqBand,
   faqGridBand,
