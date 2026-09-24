@@ -3,8 +3,9 @@
 **After this lesson you will be able to** say why every fallible function in Loom
 returns a `Result` instead of throwing, name the one property that decides what
 belongs in a `CompositionRuntime`, explain the difference between a log and an
-audit trail, and say where Loom throws on purpose and why those cases are not
-exceptions to the rule.
+audit trail, say where Loom throws on purpose and why those cases are not
+exceptions to the rule, and tell an obligation from a guarantee when both are
+written in the same sentence.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md).
@@ -150,6 +151,7 @@ export type CompositionRuntime = {
   readonly clock: Clock
   readonly idFactory: IdFactory
   readonly repairer?: ChangeRepairer
+  readonly propsVocabulary?: PropsVocabulary
 }
 ```
 
@@ -169,6 +171,20 @@ Everything *not* on that list — `assessChange`, the stake factors, the
 reversibility analysis, `gate`, `applyDelta`, `invertDelta` — is a pure function
 of its arguments. So the non-determinism budget of an entire change is five
 fields long, and you can read it in one place.
+
+The two optional fields are optional for different reasons, and being able to
+say which is a better test of whether you have the idea than reciting the five.
+`repairer` is a second visit to the interpreter, so it is the same source of
+variation as the first field; it is absent by default because a refusal being
+terminal is the safer thing to have to ask for. `propsVocabulary` is not a
+source of variation at all — it is a pure validator, and it answers the same on
+both runs. It is here because it is something a **deployment** declares, and the
+composition root is where a deployment gets to speak.
+
+So the type is doing two jobs, and only one of them is the inventory. A field
+can sit on `CompositionRuntime` without being an answer to *what could differ
+between two runs* — which is the question Self-check 1 turns on, and the reason
+it asks about the five rather than about the type.
 
 The clock earns its seat the same way the id factory does. `systemClock.now()` is
 four tokens of code and it is a side effect: it reads something outside the
@@ -243,12 +259,12 @@ one sentence:
 
 > **A throw is a fact about the program. A `Result` is a fact about the data.**
 
-### The promise the runtime does not keep for you
+### The promise, and who has to keep it
 
-`EventSink.emit` returns `void`, and its comment states a rule:
+`EventSink.emit` returns `void`, and the interface comment states a rule:
 
-> a sink that throws or blocks must not be able to fail a change the Gate already
-> accepted
+> Emission is fire-and-forget: a sink that throws cannot fail a change the Gate
+> already accepted.
 
 The reason is that narration must not be able to change the story it narrates. If
 emitting could fail a change, a telemetry outage would become a product outage,
@@ -257,11 +273,129 @@ to record. 0024 is the record that took this seriously: emission does no IO at
 all, the collector buffers, the host flushes once, and a batch that fails is
 dropped rather than retried.
 
-But look closely at where that promise is kept. `collectTelemetry` upholds it
-inside its own `emit`, with a `try`/`catch` that counts and drops. The runtime's
-emit call sites do not. Exercise D asks you to find out what that means, and you
-should predict the answer before you run it — your Predict question 3 already
-committed you to one.
+Now read the sentence again and ask something else of it. Not *is that a good
+rule* — it is — but **who has to do something in order for it to be true?**
+
+There are two possible answers and they are not close together:
+
+- **Every host that ever writes a sink.** The rule is then an obligation
+  travelling with a public interface, and it holds exactly as long as nobody
+  gets it wrong.
+- **The runtime, once, at the place every event leaves through.** The rule is
+  then a guarantee, and a host that gets it wrong is a broken observer rather
+  than a broken product.
+
+A comment cannot tell you which of the two it is. Both read identically, and
+this one read as the second while being the first: `emitter` in `pipeline.ts`
+and `narrator` in `commit.ts` — two copies of the same three lines — called
+`emit` bare. Every sink in the repository honoured the rule, so nothing
+misbehaved, and *a codebase where everyone happens to comply* is not a system
+that provides a guarantee. It is one that has not met the person who will not.
+
+**That is the general thing to take out of this section**, and it applies well
+beyond event sinks:
+
+> An obligation and a guarantee are written in the same words. The difference is
+> whether a stranger can violate it, and you find that out at the call sites,
+> never in the comment.
+
+Open `events.ts` now and you will find the comment answering the question in its
+very next line — *that is a guarantee the runtime provides, not an obligation
+this interface places on whoever implements it.* It is allowed to say that
+because somebody made it true first. A comment that says which of the two it is
+is worth having; it is worth nothing as evidence, because the version that was
+wrong was equally confident and cost nothing to write.
+
+### Where the promise is kept now
+
+Before the exercises, one thing to decide for yourself, because deciding it is
+what makes the rest land.
+
+A sink is handed `change-applied`, which the pipeline emits **before** anything
+is persisted, and `change-committed`, which the write path emits **after**
+`store.append` has returned. Under a bare `emit`, a throw at either one
+propagated out of `commitIntent`.
+
+> **Which of those two is worse, and what does a user see in each case?** Write
+> an answer before reading on. They are not symmetric, and the asymmetry is what
+> decided the design.
+
+They fail in opposite directions:
+
+| Sink throws on | What happens under a bare `emit` |
+| --- | --- |
+| `change-applied` | `composeChange` throws, and the tree `applyDelta` had already returned is lost past the `return`. In `commitIntent` this lands *before* `store.append`, so the change is abandoned between the Gate accepting it and the log receiving it — and no `commit-failed` is emitted, because the thing that would emit it is the thing that threw. |
+| `change-committed` | The inverse, and worse. The store ends at revision 1 with the change durably in it, and `commitIntent` throws instead of returning `committed`. A host reports failure to a user for a change that happened. |
+
+The second one settles it. Past `store.append` the log is the truth — that is
+0016, and it is [lesson 16](16-persistence.md)'s whole subject — and a runtime
+whose *observer* can make it lie about the truth is not honest
+about what changed — which is the property this whole project exists for. Losing
+an event is a cost. Reporting a durable change as an error is the system
+contradicting its own record.
+
+So [`0042`](../decisions/0042-a-sink-observes-and-the-runtime-contains-it.md)
+moved the promise from the sinks to the runtime. Every event now leaves through
+one `narrator` in [`src/runtime/narration.ts`](../src/runtime/narration.ts),
+which contains whatever `emit` throws, and the comment on it is the whole
+decision in a line:
+
+> A sink is free to be a bad citizen; what it cannot be is load-bearing.
+
+Three things follow from putting it *there* rather than at each call site, and
+each one is a separate idea.
+
+**It is structural rather than remembered.** The two duplicate emitter factories
+are gone. There is one door, and a call site written next year cannot forget to
+use it, because building a `RuntimeEventEnvelope` by hand is now the odd thing
+to do. Compare the alternative that was on the table — a `guardedSink(sink)`
+decorator the host wraps its sink in. Same containment, and it is the same
+obligation one level further out: a host that forgets to wrap gets the old
+behaviour with nothing to indicate anything is missing. **A guarantee a caller
+can opt out of by omission is not one.**
+
+**It covers rejecting as well as throwing, and this is the half you would not
+have written yourself.** `emit` is declared `() => void`, which does not stop a
+host writing an `async` one, because TypeScript assigns `() => Promise<void>` to
+`() => void` without a murmur. Such a sink does not throw. It hands back a
+rejected promise that nobody is holding, and an unhandled rejection is a
+process-level failure on exactly the serverless hosts 0024 was written for. A
+`try`/`catch` at the call site would not have caught it, which is worth saying
+plainly: **the shape a host reaches by accident is the one the obvious guard
+misses.** `narrator` checks the returned value for a `then` and attaches a
+no-op handler — attached, never awaited, because awaiting is what 0024 forbids.
+Exercise E is that assignment compiling.
+
+**The clock is deliberately outside the containment.** A sink that fails is a
+broken observer and the change is still true. A clock that fails means the
+runtime cannot say when anything happened — and the same clock stamps
+`appliedAt` on the commit itself, so containing it would put a *wrong time in
+the log* rather than lose an event. It propagates, and exercise G is it
+propagating. Notice what the line is: not "contain effects", which would have
+been the tidy rule, but **contain the effect whose failure costs less than the
+lie you would have to tell to hide it.**
+
+### What containment costs, said out loud
+
+The event is lost and **nothing says so**. There is nowhere for the runtime to
+report a failed emit — the sink is the reporting channel, and it just failed.
+
+That is an accepted cost, not an oversight, and the reasoning is worth having
+because it is the kind of trade that usually gets made silently. A counter would
+have to live on `CompositionRuntime`, which is a *value*, not a stateful object;
+making it stateful to hold a number with no reader is a worse trade than losing
+the number. If a reader ever appears, the honest shape is a seam of its own
+(`onEmitError`) added then, rather than a mutable field added now in
+anticipation.
+
+Which leaves `collectTelemetry` in an interesting position. It still wraps its
+own `emit` in a `try`/`catch` that counts and drops — but that is no longer what
+keeps the system safe, because containment does. What it keeps is the **count**.
+Containment makes a drop harmless; only the sink can make it *visible*. The
+comment in `sink.ts` that claimed otherwise was corrected when 0042 landed, and
+the distinction — `collectTelemetry` is no longer load-bearing for correctness
+and is still load-bearing for observability — is the sort of thing that rots
+quietly if nobody writes it down.
 
 ---
 
@@ -276,7 +410,12 @@ committed you to one.
 | Why policy resolution is synchronous | [`src/runtime/policy-source.ts`](../src/runtime/policy-source.ts) |
 | The `IdFactory` seam | [`src/ids.ts`](../src/ids.ts) |
 | Throwing on purpose, for trusted callers | [`src/tree/builders.ts`](../src/tree/builders.ts) |
-| The sink that keeps the promise | [`src/telemetry/sink.ts`](../src/telemetry/sink.ts) — `collectTelemetry` |
+| The one door every event leaves through | [`src/runtime/narration.ts`](../src/runtime/narration.ts) — `narrator` |
+| The sink that keeps the count | [`src/telemetry/sink.ts`](../src/telemetry/sink.ts) — `collectTelemetry` |
+
+`narration.ts` is forty lines and three of its four comments are about something
+it deliberately does *not* do. Read it before the exercises; it is the shortest
+file in this lesson and the densest.
 
 ---
 
@@ -463,9 +602,141 @@ describe("D", () => {
     }
 
     console.log(JSON.stringify(seen))
-    // Q4: this sink fails only on the last event, after the delta has already
-    //     been applied. What does the caller get? And given that `commitIntent`
-    //     calls `composeChange` and only then persists — what is in the store?
+    // Q4: this sink fails on the last event, after the delta has already been
+    //     applied. What does the caller get, and what did the sink see? Then
+    //     say which of those two lines you could have predicted from the
+    //     `EventSink` comment alone.
+  })
+})
+```
+
+**E — the sink a host reaches by accident.** The same failure written `async`.
+Predict two things before running: whether the outcome differs from D, and what
+`emit` hands back to a caller that does nothing with it.
+
+```ts
+import { type RuntimeEventEnvelope } from "./runtime/events.js"
+
+describe("E", () => {
+  it("is contained in the shape a host reaches by accident", async () => {
+    const seen: string[] = []
+    const asyncDown: EventSink = {
+      emit: async (envelope) => {
+        seen.push(envelope.event.type)
+        if (envelope.event.type === "change-applied") throw new Error("telemetry is down")
+      },
+    }
+
+    try {
+      const out = await transcript({
+        clock: fixedClock(), idFactory: sequentialIdFactory("a"), events: asyncDown,
+      })
+      console.log("returned", out.kind)
+    } catch (thrown) {
+      console.log("threw", (thrown as Error).message)
+    }
+    console.log(seen.length, seen.at(-1))
+
+    /** What a bare call site would have been handed, had one survived 0042. */
+    const recorded = JSON.parse(
+      (await transcript({ clock: fixedClock(), idFactory: sequentialIdFactory("b") })).json
+    ) as readonly RuntimeEventEnvelope[]
+    const applied = recorded[recorded.length - 1] as RuntimeEventEnvelope
+
+    try {
+      const returned: unknown = asyncDown.emit(applied)
+      console.log("bare emit", returned instanceof Promise ? "returned a promise" : "returned void")
+      void Promise.resolve(returned).catch(() => undefined)
+    } catch (thrown) {
+      console.log("bare emit threw", (thrown as Error).message)
+    }
+    // Q5: `asyncDown` is annotated `EventSink` and there is no cast anywhere in
+    //     this block. Say what that means for a host, and then say what a
+    //     `try`/`catch` around a bare `emit` would have done about it.
+  })
+})
+```
+
+**F — the inverse, in the write path.** D and E both fail before anything is
+persisted. This one fails after. It needs a store, so the harness is its own.
+
+```ts
+import { memoryTreeStore } from "./store/memory.js"
+import { findNode } from "./tree/navigation.js"
+import { commitIntent, type WritePath } from "./write/commit.js"
+import { memoryHoldStore } from "./write/held.js"
+
+describe("F", () => {
+  it("commits under a sink that refuses the last word", async () => {
+    const { tree, ids } = sampleTree()
+    const idFactory = sequentialIdFactory("w")
+
+    const store = memoryTreeStore()
+    await store.create(tree)
+
+    const delta: TreeDelta = {
+      deltaId: idFactory.deltaId(),
+      treeId: tree.treeId,
+      baseRevision: tree.revision,
+      operations: tweak(ids),
+    }
+    const intent = buildIntent(idFactory, { treeId: tree.treeId, baseRevision: tree.revision })
+    const proposal = buildProposal(idFactory, { intentId: intent.intentId, delta })
+
+    const seen: string[] = []
+    const down: EventSink = {
+      emit: (envelope) => {
+        seen.push(envelope.event.type)
+        if (envelope.event.type === "change-committed") throw new Error("telemetry is down")
+      },
+    }
+
+    const path: WritePath = {
+      store,
+      holds: memoryHoldStore(),
+      runtime: {
+        interpreter: scriptedInterpreter(ok(proposal)),
+        policySource: fixedPolicy(defaultGatePolicy),
+        events: down,
+        clock: fixedClock(),
+        idFactory,
+      },
+    }
+
+    const outcome = await commitIntent(path, intent)
+    console.log(outcome.kind)
+
+    const head = await store.head(tree.treeId)
+    const body = head.ok ? findNode(head.value.root, ids.body) : undefined
+    console.log(head.ok ? head.value.revision : "no head", body?.kind === "text" ? body.value : "?")
+    console.log(seen.at(-1))
+    // Q6: write down what these three lines would have been before 0042, then
+    //     say which line a *user* of this host would have seen, and what they
+    //     would have done next.
+  })
+})
+```
+
+**G — the seam that is not contained.** One of the five is left to fail. Predict
+which, and why, before you look at the code.
+
+```ts
+describe("G", () => {
+  it("does not contain the clock", async () => {
+    const stopped: Clock = {
+      now: () => {
+        throw new Error("no clock")
+      },
+    }
+
+    try {
+      const out = await transcript({ clock: stopped, idFactory: sequentialIdFactory("k") })
+      console.log("returned", out.kind)
+    } catch (thrown) {
+      console.log("threw", (thrown as Error).message)
+    }
+    // Q7: state the rule that puts the sink inside the containment and the
+    //     clock outside it, in one sentence, without using the word "important".
   })
 })
 ```
@@ -505,6 +776,84 @@ failure shape.
 to handle variants that cannot occur will write `if (!r.ok) throw new Error()`,
 and once that is in the codebase the enumeration is decorative.
 
+Four more, all from 0042, and they are about the *containment* rather than about
+`Result`. They are worth reading as a set, because three of the four are cheaper
+than what was chosen and the fourth is better:
+
+**Reword the two comments so the promise reads as an obligation on the sink.**
+Free, and it makes the documentation true by lowering the contract to match the
+code. Rejected on where the failure lands: a durable change reported to a user
+as an error. A framework whose claim is that change is inspectable cannot make
+its inspection load-bearing on the write path.
+
+**A `guardedSink(sink)` decorator the host wraps its own sink in.** Rejected, as
+above: the same obligation one level further out, and omission is silent.
+
+**Count contained failures on the runtime.** Rejected, and this is the one worth
+arguing with, because losing events silently is a genuine cost and a counter is
+four lines. It would make `CompositionRuntime` — a value — stateful, to hold a
+number nothing reads. The shape that is honest when a reader appears is a seam,
+added then.
+
+**Make `emit` return a `Result` instead of throwing.** Rejected, and the reason
+is the interesting one, because by this lesson's own first rule it is the right
+answer: it puts the guarantee in the type where a comment cannot drift away from
+it. It was rejected because the caller's only possible response to an `err` here
+is to ignore it — the runtime has already decided that a failed emit changes
+nothing — so the type would be honest about a choice nobody gets to make, at the
+cost of breaking every sink anyone has written. **A `Result` is for a failure the
+caller can do something about.** That is a sharper statement of this lesson's
+first rule than the lesson itself makes, and it arrived from somebody trying to
+apply the rule too evenly.
+
+---
+
+## What this lesson got wrong, and for how long
+
+Everything above about `narrator` is new. For seven weeks this lesson taught the
+opposite, at length, and the way that happened is more useful than the
+correction.
+
+**The fault was found by writing exercise D.** Not by reading `events.ts` — the
+comment there was reassuring and had been for months. By writing a sink that
+throws, running it, and looking at what came back. The lesson shipped on 6
+August with a *Found while teaching* entry that stated the gap, ran both failure
+directions, and recommended containing them at both call sites, noting the cheap
+alternative was to reword the comments.
+
+**The repository did it the next day.** 0042 took the recommended half rather
+than the cheap one, chose one door over two `try`/`catch` blocks, and added the
+two things the lesson had not thought of — the rejecting `async` sink, and the
+argument for leaving the clock outside.
+
+**And then nobody came back.** The report that landed the fix said, in as many
+words, that shipping it would leave this lesson wrong. It was right. Two later
+reports carried the same note forward as an open item. The lesson went on
+telling readers that each sink had to uphold the promise for itself and that the
+runtime left the sinks it was handed alone, which by then was backwards, and every
+one of its exercises kept passing — because a program that prints
+`threw telemetry is down` and a lesson that says `threw telemetry is down` do not
+disagree until somebody runs the program.
+
+Three things in that sequence are worth keeping, and none of them is "check your
+work":
+
+1. **Prose is the part of a lesson nothing can check.** This course holds counted
+   phrases against the lists that settle them, and it holds a transcript against
+   a run. An argument has one copy and nothing to disagree with. The two
+   sentences this lesson located the guarantee in the wrong place with were
+   wrong for seven weeks in a file under continuous test, and nothing in this
+   repository was in a position to notice.
+2. **A drift that was predicted in writing is still a drift.** Knowing it would
+   happen, and saying so in the report that caused it, changed nothing — because
+   a note in a report is not a place where being wrong is an event. That is
+   [lesson 25](25-exhaustiveness.md)'s conclusion arriving at this lesson's
+   expense.
+3. **The mechanism that found it is the one the course already had.** Writing
+   the exercise out and running it. That is what found the gap in August, and it
+   is what found the stale answer in September. It is slow, it does not scale,
+   and it is the only thing here with a record of working.
+
 ---
 
 ## Explain it back
@@ -531,6 +880,16 @@ Closed book.
    do to answer it? That gap is the whole argument, in a form you already
    believe.
 
+5. **Connect it back:** the first rule of this lesson is that a failure is a
+   value, and 0042 rejected making `emit` return a `Result` — which is that rule
+   applied exactly. Say why the rejection is right rather than an exception,
+   and then give the rule in the sharper form the rejection implies.
+
+6. Find an interface you maintain whose doc comment promises something the
+   callers are trusted to do. Do not fix it. Just say, out loud, which of the
+   two answers on page one it is — an obligation or a guarantee — and what the
+   first host to violate it would see.
+
 ---
 
 ## Self-check
@@ -551,8 +910,19 @@ ones that quietly break your model later.
    distinguishes them from everywhere a `Result` is returned.
 
 4. Your `emit` writes to a database, and the database is down. Say what *should*
-   happen to a change the Gate has already accepted, then say what happens today
-   if you wire that sink into `composeChange` yourself.
+   happen to a change the Gate has already accepted, then say what does happen
+   if you wire that sink into `composeChange` yourself — and name what you lose
+   when it does.
+
+5. The clock and the event sink are both injected seams and both can fail. One
+   failure is contained and the other propagates. Give the rule that decides
+   which, and then apply the same rule to `idFactory`: would you contain a
+   throwing id factory?
+
+6. `EventSink`'s comment said the right thing for months while the runtime did
+   not do it. State what you would have had to look at to find that out, and say
+   why the comment being accurate about every sink in the repository was not
+   evidence.
 
 ---
 
@@ -565,8 +935,14 @@ ones that quietly break your model later.
 - Predict Q2: did your answer name a *question*, or did it describe the type
   system? The version that convinces people is a question somebody actually asks.
 - Predict Q3: you committed to whether a failing sink should stop an accepted
-  change. Exercise D shows what Loom does. Were you right about what *should*
-  happen, wrong about what *does*, or both?
+  change. Exercises D and F show what Loom does. Were you right about what
+  *should* happen, wrong about what *does*, or both? Note which one you were more
+  confident about — the *should* is an opinion you can defend, and the *does* was
+  a guess about a codebase you had not looked at.
+- Before the table in *Where the promise is kept now*, you wrote down which of
+  the two failure directions is worse. If you picked `change-applied` — losing a
+  change — you are in good company and you were weighing the wrong thing. Say
+  what you were weighing, and what the argument you were missing is.
 - Lesson 03 asked you to defend atomicity to a sceptic. Would your answer be
   different now that you know there is no rollback to defend?
 
@@ -579,7 +955,9 @@ ones that quietly break your model later.
   say what varies in each. Then explain — out loud — why the id factory being a
   seam is what makes lesson 04's audit possible.
 - **In 1 month:** Redo exercise B from memory. Predict the four field names
-  before you run it.
+  before you run it. Then, without opening `narration.ts`, say what it contains,
+  what it deliberately does not contain, and what it reports when containment
+  fires.
 - See [`review-schedule.md`](review-schedule.md).
 
 ---
@@ -588,6 +966,7 @@ ones that quietly break your model later.
 
 - [`decisions/0002`](../decisions/0002-gate-is-a-pure-function-of-two-axes.md) — the decision function itself
 - [`decisions/0024`](../decisions/0024-emission-never-does-io-and-the-host-flushes-once.md) — emission does no IO, and what a failing batch costs
+- [`decisions/0042`](../decisions/0042-a-sink-observes-and-the-runtime-contains-it.md) — the promise moved from the sinks to the runtime, and the four alternatives it turned down
 - [`decisions/0028`](../decisions/0028-a-tree-is-auditable-only-if-its-host-can-reproduce-the-seed.md) — what an audit needs from the host
 - [`src/result.test.ts`](../src/result.test.ts) — the tests are the specification
 - Next: [06 — Undo as computation](06-undo-as-computation.md)
@@ -676,39 +1055,108 @@ what tells you where to look, and — for telemetry — is what separates "our m
 is producing nonsense" from "our model is fine and something downstream refuses
 it". Those need different fixes and would have been the same log line.
 
-**Q4** The caller gets the exception:
+**Q4** The caller gets the outcome. The sink threw and nothing happened to the
+change:
 
 ```
-threw telemetry is down
+returned applied
 ["intent-received","policy-resolved","change-proposed","change-assessed","disposition-decided","change-applied"]
 ```
 
-All six events reached the sink, so the narration is complete and its last entry
-says `change-applied`. It was applied — in memory, by `applyDelta`, which had
-already returned a new tree by the time `emit` was called. That tree is now
-unreachable: the throw unwound past the `return`.
+All six events reached the sink — `seen` is pushed to before the throw — and the
+change applied anyway. `composeChange` returned `applied` with the new tree in
+it, because the throw never left `narrator`.
 
-And in the write path it is worse than losing a tree. `commitIntent` calls
-`composeChange` and *then* persists, so the exception propagates out before
-`store.append` is reached. Nothing is committed. The narration claims the change
-was applied and the log does not contain it — which is precisely the gap
-`commit-failed` exists to cover, entered through a door that emits no
-`commit-failed` because the thing that would emit it is the thing that threw.
+The second half of the question is the one to have got wrong. **Neither line is
+predictable from the `EventSink` comment**, and that is the point of asking.
+The comment says a sink that throws cannot fail an accepted change; a comment
+saying so is compatible with a runtime that provides it and with a runtime that
+merely expects it, and those two produce opposite outputs here. You had to look
+at the call site. This lesson did not, for seven weeks, and printed the other
+line.
 
-Move the same sink's failure one event later — to `change-committed`, which is
-emitted *after* `store.append` returns — and it inverts. The store is at revision
-1 with the new text in it, and `commitIntent` throws instead of returning
-`committed`. The change is durable and the caller has been told it failed. Worth
-predicting which of those two you would rather debug before you decide the
-difference is academic.
+What you are not seeing is the cost. The `change-applied` envelope is gone —
+dropped inside `contain`, uncounted, unreported. Nothing in this transcript says
+an event was lost, and nothing anywhere else does either. The narration a reader
+gets from a broken sink is not a complete narration; it is whatever survived,
+with no marker where the rest was.
 
-So the answer to "should it still apply" is yes, unambiguously, and 0024 argues
-it at length. But the guarantee lives in each **sink**, not at the emit call
-site: `collectTelemetry` wraps its own body in a `try`/`catch` that counts and
-drops, and the runtime does not wrap the sinks it is given. All three sinks in
-the repository honour the contract. A fourth, written by a host against a public
-interface whose comment reads as a promise, need not — and this exercise is what
-that costs.
+**Q5** No cast, and it compiles:
+
+```
+returned applied
+6 change-applied
+bare emit returned a promise
+```
+
+`asyncDown` is annotated `EventSink` and `emit` is `async`. TypeScript assigns
+`() => Promise<void>` to `() => void` without complaint — that is not a bug, it
+is the rule that lets you ignore a return value — so a host that reaches for
+`async` because their logger is async has written a sink that **rejects** rather
+than throws, and nothing told them.
+
+The last line is what a bare call site would have been handed: a rejected
+promise, returned, with nobody holding it. A `try`/`catch` around that call
+catches nothing at all — there is nothing to catch; the failure arrives later,
+at the process, as an unhandled rejection. On the serverless hosts 0024 was
+written for that is a dead process rather than a logged error.
+
+So the guard everyone would have written — wrap the two `emit` calls in
+`try`/`catch` — would have closed the shape a host reaches on purpose and left
+open the one they reach by accident. `narrator` checks the returned value for a
+`then` and attaches a no-op handler to it. Attached, never awaited: awaiting is
+the thing 0024 forbids, and a handler is not an await.
+
+(The exercise defuses that promise on the line after it prints, which a bare
+call site would not. That defusing is the whole difference between this block
+and a crashed test run.)
+
+**Q6** The store has it, and so does the caller:
+
+```
+committed
+1 Rewritten
+change-committed
+```
+
+Revision 1, the new text in the tree, `committed` returned, and the sink's last
+sight of anything was the `change-committed` it refused.
+
+Before 0042 those three lines were `1 Rewritten` and a thrown
+`telemetry is down` reaching whoever called `commitIntent`. The store was
+identical — that is the part to sit with. **The change was durable in both
+worlds.** The only thing that differed was what the caller was told about it.
+
+What a user saw: an error. What they did next: the change again. A form
+resubmitted, a second identical revision on top of the first, or a support
+thread about a save that failed and happened. And the audit trail this entire
+lesson is built to defend would have shown, correctly, that it was applied —
+against a user who had been told it was not, by a system whose observer had a
+vote.
+
+That is why this direction settled the design rather than the other one. Losing
+the `change-applied` event costs a change. Losing the `change-committed` event
+would have cost the record's agreement with reality, which is the only thing
+Loom is selling.
+
+**Q7** It propagates:
+
+```
+threw no clock
+```
+
+The clock is outside the containment, and stating the rule is the exercise. The
+version that works: **contain the failure whose consequence is a gap in the
+record; do not contain the one whose consequence is a false entry in it.** A
+sink that fails loses an event, and a missing event is visibly missing to
+anybody reading the stream in order. A clock that fails and is contained would
+mean either an envelope with a fabricated `occurredAt` or a commit stamped
+`appliedAt` with a time nobody stood behind — a record that reads as complete
+and is wrong.
+
+"Losing data is worse than failing loudly" is the instinct, and it gets this
+backwards. The thing being protected is not the data. It is whether the record
+can be believed.
 
 **1** Whether it can produce a different answer on two identical runs. Every
 field of `CompositionRuntime` names a source of variation: a model, a policy
@@ -747,9 +1195,39 @@ store — returns a `Result`.
 narrates, or a telemetry outage becomes a product outage and the recording system
 starts deciding what there is to record.
 
-What happens today depends on the sink. `collectTelemetry` never lets it come up:
-it does no IO at emit time at all, buffers, and drops on a failed flush. Wire in a
-sink that throws from `emit` and the exception propagates out of `composeChange`
-— exercise D — taking the applied tree with it and reaching `commitIntent` before
-anything was persisted. The promise is real and it is upheld sink by sink, not by
-the runtime.
+And it does. It does not depend on your sink, which is the part worth being
+precise about: every event leaves through `narrator`, which contains a throw and
+a rejection alike, so a sink you wire in yourself is contained whether or not you
+wrote it carefully. `collectTelemetry` additionally never lets the case come up —
+it does no IO at emit time, buffers, and drops on a failed flush.
+
+What you lose is the event, and the knowledge that you lost it. Containment
+reports nothing, because the only channel for reporting it is the thing that just
+failed. If you need the number, keep it in your own sink, which is what
+`collectTelemetry` is still doing and is now the only thing it is doing that
+matters.
+
+**5** Contain the failure whose consequence is a missing entry; let the one whose
+consequence is a *false* entry propagate. A lost event is visibly absent. A
+fabricated timestamp is not, and the clock stamps `appliedAt` on the commit as
+well as `occurredAt` on the envelope.
+
+Applied to `idFactory`: no, and it is not a close call. There is nothing to
+contain *toward*. A contained sink still has a change to return; a contained id
+factory would have to invent an id, and a minted id is a join key (lesson 04) —
+inventing one produces a tree whose identity is a lie, which is the fabricated
+entry the rule is about. It fails the same test as the clock, for the same
+reason, and it is a good sign if the two felt different before you applied the
+rule.
+
+**6** The call sites. Nothing else would have shown it: the type is `void`
+either way, the comment is the same sentence either way, and every test passed
+because every sink in the repository behaved.
+
+Every sink behaving is not evidence about the guarantee, because a guarantee is
+a claim about the sinks that have *not* been written yet — and specifically about
+the ones written by somebody who has not read the comment. A codebase where
+everybody complies is indistinguishable from one that enforces, right up until
+the first stranger, and the first stranger is the case the promise exists for.
+
+
