@@ -11,8 +11,9 @@ list and it is not a report.
 ## 2026-09-23 — `loom.feed` and `loom.tally` can now declare what they read, and the declaration is two lines
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — one line each, nothing is broken
-without it, and the seam it feeds has been built and quiet since 22 September
+(`src/primitives/`) · **Status:** **closed by
+`primitives-44-the-rows-that-were-a-run`** — both declared, exactly as written
+below, in the run that shipped the first band placing a `loom.tally`
 
 [0181](decisions/0181-a-primitive-declares-the-binding-names-it-reads-and-saying-nothing-is-not-saying-none.md)
 gave a primitive `reads` and both of yours were the reason it could not use it:
@@ -30905,3 +30906,39 @@ Not decided here because the application's build configuration is the shell's
 and the cost lands on four surfaces, and because a mitigation that removes the
 symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
+
+---
+## 2026-09-24 — three primitives that draw an optional picture were never audited against the rule the other three now follow, and only a photograph can audit them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — not blocking; three bands' worth of
+work, and the reason it is a finding rather than a fix is stated below
+
+[0187](decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
+states the rule the library had answered three different ways: **an
+`aspect-ratio` reserves the shape of a picture, so a frame with no picture in it
+does not get one.** `loom.recording` was fixed on 23 September, `loom.book` and
+`loom.listing` on 24 September, each time by a band placing six of them with no
+art on any and photographing the result.
+
+**Three are left and none of them was looked at**: `loom.article` (16:10 cover),
+`loom.product`, and `loom.frame`, which is the general case and takes `shape` as
+a prop.
+
+**Why this is not being fixed in the run that wrote the record.** Every one of
+these faults was invisible to every instrument the repository has. They render
+cleanly, satisfy every schema, produce no diagnostic and measure no overflow;
+the only thing that has ever found one is a picture of a card with nothing in
+it. Auditing the remaining three *by reading them* would be exactly the move
+0187's own Alternatives section rejects, and it is the move that produced the
+23 September defect — a primitive changed on an argument rather than on a
+picture.
+
+**So the shape of the work is a band each, not an afternoon.** `loom.article`
+already has three bands placing it and has never been photographed without a
+cover, which is the cheapest of the three to settle. `loom.frame` is the one
+that most needs a judgement rather than a rule: `shape` is a *prop* there, so
+a tree has asked for a ratio explicitly, and whether an explicit ask survives an
+absent picture is a different question from whether a default does.
+
+**What would close it**: three photographs and whatever they say. Not a sweep.
