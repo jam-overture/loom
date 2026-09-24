@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { transcriptText } from "./exercises"
 import { readLesson, section } from "./lesson"
+import type { Block } from "./markdown"
 import { runExercises } from "./run"
 import { WRITTEN_LESSONS } from "./syllabus"
 
@@ -49,6 +50,25 @@ import { WRITTEN_LESSONS } from "./syllabus"
 const TRY_IT = "Try it"
 
 /**
+ * The other place a lesson prints what its code did.
+ *
+ * Lessons 01 to 11 hold their exercise transcripts under `## Answers`, beside
+ * the answers to the questions the exercises ask; from lesson 12 on they stand
+ * under Try it. Only the second half was ever compared to anything, and the pin
+ * below could not notice, because it counts Try it blocks and there were always
+ * exactly as many of those as there were.
+ *
+ * What that cost is on the record. Lesson 05's exercise D emits into a sink that
+ * throws, and its answer said the exception reaches the caller — which was true
+ * when it was written, was made false the next day by 0042, and stayed in the
+ * lesson for seven weeks with a green suite either side of it. The lesson had
+ * found that defect itself, and the report that fixed it predicted in writing
+ * that this lesson would be left wrong. Nothing was in a position to act on the
+ * prediction.
+ */
+const ANSWERS = "Answers"
+
+/**
  * How many plain fences across the course are currently recognised as
  * transcripts. Pinned so that a change in how the exercises print — which would
  * make every block stop matching and so stop being recognised — fails here
@@ -70,9 +90,68 @@ const TRY_IT = "Try it"
  */
 const RECOGNISED_TRANSCRIPTS = 102
 
-/** Printable, so that a byte a markdown file cannot hold compares as the space it is written as. */
+/**
+ * The same, for the `## Answers` sections of lessons 01 to 11.
+ *
+ * Fifty blocks: nine in lesson 05, eight in 09, six each in 06, 08, 10 and 11,
+ * five in 07 and four in 04. Lessons 02 and 03 print nothing and 01 has no
+ * exercises, so they contribute none and always did.
+ *
+ * It is pinned for the reason the other one is, and with one extra failure mode
+ * worth naming: these fences sit under a heading the reader is meant to reach
+ * last, so nobody is looking at them. A format change that stopped every block
+ * matching would take this from 50 to 0 and, without the pin, read as a clean
+ * sheet.
+ */
+const RECOGNISED_ANSWERS = 50
+
+/**
+ * Lines under `## Answers` that are the author speaking rather than the program
+ * printing, per lesson, and why each lesson is allowed any.
+ *
+ * Lesson 04 is the only one. Its Q4 block labels two transcripts `move:` and
+ * `rebuild:` so that a reader can tell which run produced which, and its Q5
+ * block appends `a different node at n_4`, `the card itself, moved` and `a
+ * look-alike is not it` to three otherwise identical-looking lines. Every value
+ * in both is correct — they were checked by hand, line by line, against a run.
+ *
+ * The alternative was to flatten them into raw terminal output, and that is the
+ * trade this file declines to make: the annotation is the explanatory device,
+ * and a check that demands its removal has bought a comparison by spending the
+ * thing being compared. So the count is declared and held **exactly**. Annotate
+ * a sixth line and this fails; remove one and it fails; let a real transcript
+ * drift and it fails, because a drift makes six.
+ *
+ * What it cannot catch is a real drift arriving in the same commit that removes
+ * an annotation. That is the residue, it is small, and it is written down rather
+ * than discovered.
+ */
+const ANNOTATED: Readonly<Record<string, number>> = {
+  "04-identity.md": 5,
+}
+
+/**
+ * Printable, so that a byte a markdown file cannot hold compares as the space it
+ * is written as — and so that a run of spaces compares as one.
+ *
+ * The second half is what lets an Answers fence be checked at all. Lesson 08
+ * lays its six transcripts out in columns (`stakes: low     reversible: true`)
+ * because six rows of settings are unreadable otherwise, and lesson 04 indents
+ * a wrapped JSON line under the one above it. Neither is drift and both would
+ * be reported as drift by a byte comparison.
+ *
+ * It is the one normalisation here that cannot weaken the check, which is the
+ * test to apply to any other one proposed: **a value is never whitespace**, so
+ * collapsing runs of spaces can hide a difference in layout and nothing else.
+ * Stripping a trailing annotation or rejoining a wrapped line would each hide a
+ * class of real difference, and neither is done — see `ANNOTATED` below for what
+ * happens to the fences that would have needed them.
+ *
+ * Applying it to Try it as well changed nothing there: the same 102 blocks are
+ * recognised and none of them drifted before or after. One rule, two sections.
+ */
 const printable = (line: string): string =>
-  line.replace(/[\u0000-\u001f\u007f]/g, " ").trim()
+  line.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/ {2,}/g, " ").trim()
 
 const linesOf = (block: string): readonly string[] =>
   block
@@ -80,24 +159,13 @@ const linesOf = (block: string): readonly string[] =>
     .map(printable)
     .filter((line) => line !== "")
 
-const transcriptsIn = async (
-  file: string
-): Promise<{ readonly recognised: number; readonly drifted: readonly string[] }> => {
-  const blocks = section(readLesson(file), TRY_IT)?.blocks ?? []
-  const { run } = await runExercises(blocks)
+type Comparison = { readonly recognised: number; readonly drifted: readonly string[] }
 
-  if (run.kind === "failed") return { recognised: 0, drifted: [run.message] }
-
-  const printed = run.outputs
-    .map(transcriptText)
-    .join("\n")
-    .split("\n")
-    .map(printable)
-
+const compare = (blocks: readonly Block[], printed: readonly string[]): Comparison => {
   const shown = (line: string): boolean => printed.some((one) => one === line || one.includes(line))
 
   const recorded = blocks.filter(
-    (block): block is Extract<typeof block, { kind: "code" }> =>
+    (block): block is Extract<Block, { kind: "code" }> =>
       block.kind === "code" && block.language === undefined
   )
 
@@ -119,22 +187,68 @@ const transcriptsIn = async (
   return { recognised, drifted }
 }
 
+const transcriptsIn = async (
+  file: string
+): Promise<{ readonly tryIt: Comparison; readonly answers: Comparison }> => {
+  const doc = readLesson(file)
+  const exercises = section(doc, TRY_IT)?.blocks ?? []
+  const { run } = await runExercises(exercises)
+
+  if (run.kind === "failed") {
+    const failed = { recognised: 0, drifted: [run.message] }
+
+    return { tryIt: failed, answers: { recognised: 0, drifted: [] } }
+  }
+
+  const printed = run.outputs
+    .map(transcriptText)
+    .join("\n")
+    .split("\n")
+    .map(printable)
+
+  return {
+    tryIt: compare(exercises, printed),
+    answers: compare(section(doc, ANSWERS)?.blocks ?? [], printed),
+  }
+}
+
 describe("what a lesson says its exercises print", () => {
-  let total = 0
+  let underTryIt = 0
+  let underAnswers = 0
 
   for (const entry of WRITTEN_LESSONS) {
     if (entry.file === undefined) continue
 
+    const file = entry.file as string
+
     it(`is what lesson ${entry.number} actually prints`, async () => {
-      const { recognised, drifted } = await transcriptsIn(entry.file as string)
+      const { tryIt, answers } = await transcriptsIn(file)
 
-      total += recognised
+      underTryIt += tryIt.recognised
+      underAnswers += answers.recognised
 
-      expect(drifted).toEqual([])
+      expect(tryIt.drifted).toEqual([])
+
+      const allowed = ANNOTATED[file] ?? 0
+
+      if (allowed === 0) {
+        expect(answers.drifted).toEqual([])
+      } else {
+        expect(
+          answers.drifted.length,
+          `${file}: ${allowed} lines under Answers are annotation rather than output, and this ` +
+            `is not that number — a line was annotated, un-annotated, or has genuinely drifted. ` +
+            `Read them: ${JSON.stringify(answers.drifted)}`
+        ).toBe(allowed)
+      }
     }, 60_000)
   }
 
   it("still recognises as many transcripts as it did when this was written", () => {
-    expect(total).toBe(RECOGNISED_TRANSCRIPTS)
+    expect(underTryIt).toBe(RECOGNISED_TRANSCRIPTS)
+  })
+
+  it("still recognises as many answer transcripts as it did when this was written", () => {
+    expect(underAnswers).toBe(RECOGNISED_ANSWERS)
   })
 })

@@ -175,11 +175,21 @@ lesson by lesson would be easier and worth less.
 6. A model may not name the nodes it inserts. Give that reason first, then say
    what the `IdFactory` being an injected *seam* adds that the rule alone does
    not. *(04)*
+7. Your event sink throws. State what happens to the change, then state what
+   happens to the event, then say which of those two you would have got right
+   from the `EventSink` comment alone.
+8. Two of the seams can fail. One failure the runtime swallows and one it lets
+   through. Give the rule that decides which — and it is not "the important one
+   propagates".
 
 Question 6 is the one to be honest with yourself about. The two halves are
 different arguments — one is about what a proposal can express, the other about
 what a replay can reproduce — and running them together is the most common way
 this pair gets half-learned.
+
+Question 7's middle clause is the one people drop. A change surviving is the
+answer everybody gives; what the event costs is the half that makes it a trade
+rather than a feature.
 
 ---
 
@@ -421,6 +431,10 @@ written notes let you skate over — you cannot silently mean the right thing.
    rather than trusting a stored answer, and give the single argument all of them
    share. Then name the one thing it deliberately does *not* redo, and say why
    the argument reverses there.
+8. `EventSink`'s comment made the same promise before and after the runtime began
+   keeping it, and every test passed on both days. Say what a reader would have
+   had to look at to tell the two apart — then take any interface in Part II that
+   promises something, and say which of the two it is. *(05)*
 
 Question 7 is the one this set is built around, and the one to be least satisfied
 with a short answer to. Question 3's last clause reaches into Part IV, which you
