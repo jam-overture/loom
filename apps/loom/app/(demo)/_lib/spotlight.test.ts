@@ -16,8 +16,10 @@ import { commitIntent, confirmHeld, revertRevision } from "@loom/runtime/write"
 
 import { markedPage, MARKED_AWAITING, MARKED_MANY } from "./marked"
 import { demoPageTree } from "./page-tree"
+import { settingsOf } from "./plain-change"
 import { presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
+import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, type DemoSession } from "./session"
 import {
   MAX_SPOTS,
@@ -910,5 +912,137 @@ describe("the mark's stylesheet", () => {
 
   it("is nothing at all when there is nothing to mark", () => {
     expect(spotlightCss([])).toBe("")
+  })
+})
+
+/**
+ * What the gap says it is missing, which is the demo's payoff frame.
+ *
+ * Press the one control this surface invites, say yes, and a visitor is carried
+ * to the place the change happened — where, for a removal, there is nothing to
+ * look at. The mark there read *"Something was removed here"*: a sentence about
+ * an absence, over an absence, on a band the visitor had seen for two seconds
+ * and most likely not at all. These assert the words.
+ *
+ * Through the server action's own reading of the tree (`AssessedAgainst`),
+ * because the words come off the subtree the *assessment* carried and the whole
+ * defect this closes is that the fold which produces the applied card is a
+ * second assessment with no tree in it.
+ */
+describe("the words a mark names when there is nothing left to point at", () => {
+  const settings = settingsOf(demoRegistry)
+
+  const askWith = async (session: DemoSession, presetId: string): Promise<ChangeRecord> => {
+    const preset = presetById(presetId)
+    if (!preset) throw new Error(`no preset ${presetId}`)
+
+    const head = await headOf(session)
+    const write = beginDemoWrite(session, presetInterpreter(preset, randomIdFactory, systemClock))
+
+    await commitIntent(write.path, {
+      intentId: randomIdFactory.intentId(),
+      treeId: session.seed.treeId,
+      baseRevision: head.revision,
+      origin: "user-instruction",
+      actor: "a demo visitor",
+      utterance: preset.utterance,
+      observedAt: systemClock.now(),
+    })
+
+    const record = recordFromEvents(write.narrated(), undefined, {
+      before: head,
+      settings,
+      earlier: [],
+    })
+    if (!record) throw new Error("the runtime narrated nothing")
+
+    return record
+  }
+
+  it("quotes what came off the page, in the gap it came off", async () => {
+    const session = await sessionFor("gap-words")
+    const held = await askWith(session, "trim")
+    const applied = await answer(session, held)
+    const marks = await marksFor(session, applied)
+
+    expect(marks[0]?.subject).toBe("place")
+    expect(marks[0]?.label).toBe("Something was removed here: “3,400” “24” “92%”")
+  })
+
+  /**
+   * The assertion the defect actually needed. Confirming a hold narrates a
+   * fresh assessment with no tree in hand, and it used to recompute `touched`
+   * over the top of the reading that had the words — so every fold that could
+   * quote was a fold nobody was looking at, and the one on screen could not.
+   */
+  it("still has them after the answer, which is a second assessment with no tree", async () => {
+    const session = await sessionFor("gap-survives")
+    const held = await askWith(session, "trim")
+    const applied = await answer(session, held)
+
+    expect(applied.touched.find((one) => one.kind === "removed")?.words).toEqual({
+      words: ["3,400", "24", "92%"],
+      more: 0,
+    })
+  })
+
+  /**
+   * The same words the card is wearing three inches away, cut by the same
+   * function — because a stranger reads the two in one glance and a mark that
+   * had cut differently would be this surface contradicting itself about the
+   * thing it had just done.
+   */
+  it("says exactly what the card beside it says", async () => {
+    const session = await sessionFor("gap-agrees")
+    const held = await askWith(session, "trim")
+    const applied = await answer(session, held)
+    const marks = await marksFor(session, applied)
+
+    for (const word of applied.did?.[0]?.words ?? []) {
+      expect(marks[0]?.label).toContain(`“${word}”`)
+    }
+  })
+
+  /**
+   * A mark on a node is drawn round the thing it is about, with every word of
+   * it on the screen inside the ring. Quoting there would be reading a band
+   * aloud to somebody looking straight at it.
+   */
+  it("says nothing extra while the band is still there to be seen", async () => {
+    const session = await sessionFor("gap-held")
+    const held = await askWith(session, "trim")
+    const marks = await marksFor(session, held)
+
+    expect(marks[0]?.subject).toBe("node")
+    expect(marks[0]?.label).toBe("This would be removed")
+  })
+
+  /** A gap a change has not filled yet is the same case, pointed the other way. */
+  it("quotes what would arrive, in the space it would arrive in", async () => {
+    const session = await sessionFor("gap-insert")
+    const held = await askWith(session, "band")
+    const marks = await marksFor(session, held)
+
+    expect(marks[0]?.subject).toBe("place")
+    expect(marks[0]?.label).toMatch(/^Something new would go here: “/u)
+  })
+
+  /**
+   * A mark whose words run past the column would widen the page it is
+   * describing — the one thing every rule in this file is written to avoid — so
+   * a bar wraps and only a chip in a corner is held to one line.
+   */
+  it("lets a bar in a gap wrap and holds a chip in a corner to one line", () => {
+    const inTheGap: Spotlight = {
+      nodeId: id("n_1"),
+      tone: "applied",
+      label: "Something was removed here: “3,400”",
+      placement: "above",
+      subject: "place",
+    }
+    const onTheBand: Spotlight = { ...inTheGap, placement: "inside", subject: "node" }
+
+    expect(spotlightCss([inTheGap])).toContain("white-space: normal")
+    expect(spotlightCss([onTheBand])).toContain("white-space: nowrap")
   })
 })
