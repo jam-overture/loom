@@ -2,7 +2,15 @@
 
 **Routine:** `Loom primitives` · **Date:** 2026-09-24 · **Branch:**
 `primitives-44-the-rows-that-were-a-run` · **Section:** §4b · **Pull request:**
-[#379](https://github.com/jam-overture/loom/pull/379)
+[#379](https://github.com/jam-overture/loom/pull/379) · **Preview:**
+https://loom-git-primitives-44-the-r-26d310-jpizzolato36-6341s-projects.vercel.app
+— Vercel reported `Ready` for this commit. **Published unverified:**
+`*.vercel.app` is off this sandbox's egress allowlist, the standing 19 August
+limit. The URL is not a guess this time: it came back from Vercel's own comment
+on the pull request, which is a primary source and is the first run to have one.
+**There is nothing new on it to look at** — a band is a thing a host drops into
+a tree, and this deployment seeds trees that carry none of the four. Everything
+below was driven against the specimen harness and a local render.
 
 ![Four bands under editorial, at 1280px](2026-09-24-primitives-the-rows-that-were-a-run-editorial-wide.png)
 
