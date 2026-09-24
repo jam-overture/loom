@@ -103,7 +103,7 @@ describe("PageReadingCard", () => {
     cardFor(BUSY)
 
     expect(
-      screen.getByText(/40 visits to this page have reported back .* That is revision 2\./u)
+      screen.getByText(/40 visits to this page have reported back .* That is version 2\./u)
     ).not.toBeNull()
   })
 
@@ -347,7 +347,7 @@ describe("what the last change did", () => {
     const { container } = cardFor(TWO_REVISIONS)
 
     expect(container.textContent).toContain("What the last change did to your readers")
-    expect(container.textContent).toContain("Revision 2 against revision 1")
+    expect(container.textContent).toContain("Version 2 against version 1")
   })
 
   it("says which way each part moved, with both counts beside it", () => {

@@ -119,7 +119,7 @@ const Lead = ({ comparison }: { readonly comparison: Comparison }) => {
     return (
       <p className="text-ink-muted text-xs">
         Nobody has reported on an earlier version of this page, so there is nothing to compare
-        revision {comparison.counted} against yet. Your next change to this page is what gives
+        version {comparison.counted} against yet. Your next change to this page is what gives
         this section something to say.
       </p>
     )
@@ -127,7 +127,7 @@ const Lead = ({ comparison }: { readonly comparison: Comparison }) => {
   if (comparison.kind === "nothing-shared")
     return (
       <p className="text-ink-muted text-xs">
-        Revision {comparison.after} against revision {comparison.before}: not one part was
+        Version {comparison.after} against version {comparison.before}: not one part was
         reported on by both versions, so there is nothing here to compare. That is different
         from nothing having moved — the change replaced everything anybody had reported on, and
         putting a zero against each of them would show a collapse that never happened.
@@ -136,7 +136,7 @@ const Lead = ({ comparison }: { readonly comparison: Comparison }) => {
 
   return (
     <p className="text-ink-muted text-xs">
-      Revision {comparison.after} against revision {comparison.before}, part by part. Only the
+      Version {comparison.after} against version {comparison.before}, part by part. Only the
       parts both versions heard about are here: a part the change added, or removed, has nothing
       on the other side to be compared with, and putting a zero there would show a collapse that
       never happened.
