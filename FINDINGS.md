@@ -29749,8 +29749,24 @@ these four and the toast.
 ## 2026-09-20 — no behaviour control can appear in a specimen, so the seam that builds them is the one thing `pnpm specimen` cannot photograph
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around with a scratch bundle, and this lane is the third to write
-one in four days
+**closed by `framework-53-both-seams-in-one-element`** (24 September) —
+recommendation (1) taken, both halves, and the five controls are photographed.
+`live` is opt-in, so a specimen that says nothing renders, serves and is named
+exactly as it was; `live: {}` hydrates, and `live.states` is a list of
+`{ label, do }` that becomes a third dimension of the plan beside themes and
+viewports. `additionalPrimitives` moved off `renderSpecimen` and onto
+`Specimen.primitives`, which is what the four unreachable lines needed to buy
+something — and it had to move, because the browser builds the same registry
+from the same module and a parameter reaches only one of the two. The two
+renders call one function (`element.ts`), which is also where the data seam now
+resolves, and nothing is serialised onto the page.
+`tools/specimen/behaviour.specimen.ts` places all five controls on a subject
+registered for that specimen alone, so nothing was added to `src/primitives/`.
+**The `dismissed` shot is byte-identical to the `settled` one**, which is the
+pair closing itself, measured rather than argued. Recorded in
+[0188](decisions/0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md).
+The cost the entry weighed is paid as weighed: a build step, by a live specimen
+only, before the browser is looked for.
 
 A specimen page is `renderToStaticMarkup` with no dev server and no hydration.
 `plan.ts` says so in as many words — *"there is no script in it to press"* — and
@@ -30423,8 +30439,17 @@ total map of a runtime enum and reads the compiler's approval as coverage.
 ## 2026-09-23 — `npx prettier` is not this repository's formatter and running it rewrites every file it is pointed at
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — cosmetic, cheap to avoid, and it cost this run a full revert and a
-re-application of eight files' worth of edits
+**closed by `framework-53-both-seams-in-one-element`** (24 September) — the
+second of the two you offered, written under *Standards* in `docs/routines.md`:
+the repository is formatted by hand and no formatter is to be run over it, with
+the style named and your measurement that no options string reproduces it. The
+first — a devDependency with a config and a `format` script — was not taken
+because you had already shown it cannot be had: prettier with those options does
+not reproduce the existing formatting, so adopting it would mean reformatting
+every file in the repository to match a tool rather than the other way round,
+which is a diff nobody can review and an unbounded conflict with four open
+branches. Your entry is also the reason the sentence names the flags: a run that
+reaches for the reflex now finds the answer beside the reason
 
 There is no `.prettierrc`, no `prettier` in either `package.json`, and no
 formatter script. The house style is unmistakable from any file — no

@@ -271,3 +271,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0185](0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md) | A probe is handed answers the way it is handed props, and a specimen declares the reply rather than the source | Accepted | §4, not the library |
 | [0186](0186-a-whats-on-band-occupies-the-come-back-region.md) | A what's-on band occupies the come-back region, so it is a design of `articles` and not a twenty-third part | Accepted | §4b |
 | [0187](0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md) | A frame with no picture in it does not take the picture's shape | Accepted | §4b |
+| [0188](0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md) | A specimen may ask to be hydrated, and one function builds the page for both renders | Accepted | §4, not the library |
