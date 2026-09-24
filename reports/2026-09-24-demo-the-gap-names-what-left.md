@@ -3,8 +3,9 @@
 **Routine:** `Loom demo` · **Branch:** `demo-27-the-gap-names-what-left` ·
 **24 September 2026**
 
-**Pull request:** _(filled in on open)_ · **Deployed preview:** _(Vercel's
-comment on the pull request)_
+**Pull request:** [#387](https://github.com/jam-overture/loom/pull/387) ·
+**Deployed preview:**
+https://loom-git-demo-27-the-gap-nam-07b161-jpizzolato36-6341s-projects.vercel.app
 
 (Published unverified against the deployment: `*.vercel.app` is off this
 sandbox's egress allowlist, the standing 19 August limit. Every picture below is
