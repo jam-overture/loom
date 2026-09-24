@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 
+import { ChangeReasoning } from "@/app/(portal)/_components/change-reasoning"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { toneClasses, type WriteReport } from "@/app/(portal)/_lib/outcome"
@@ -134,9 +135,25 @@ export const PromptBox = ({
       )}
 
       {report && (
-        <div className={`flex flex-col gap-1 rounded-md p-3 text-xs ${toneClasses(report.tone)}`}>
-          <strong className="font-medium">{report.headline}</strong>
-          <p>{report.meaning}</p>
+        <div className={`flex flex-col gap-3 rounded-md p-3 text-xs ${toneClasses(report.tone)}`}>
+          <div className="flex flex-col gap-1">
+            <strong className="font-medium">{report.headline}</strong>
+            <p>{report.meaning}</p>
+          </div>
+
+          {/*
+           * Why, between what happened and the record of it.
+           *
+           * The panel had two of the three layers a verdict has and the missing
+           * one was the middle: a person was told *Not allowed — a rule in this
+           * project's settings blocked it* and then handed the runtime's own
+           * sentence, so the only account of **what was wrong** was behind the
+           * disclosure in the runtime's words. Absent on the four endings that
+           * never reached the Gate, which is why this is a condition rather than
+           * a component that renders nothing.
+           */}
+          {report.reasoning && <ChangeReasoning reasoning={report.reasoning} />}
+
           <TechnicalDetail summary="What the runtime said">
             <p className="font-mono">{report.detail}</p>
           </TechnicalDetail>
