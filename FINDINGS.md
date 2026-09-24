@@ -30905,3 +30905,126 @@ Not decided here because the application's build configuration is the shell's
 and the cost lands on four surfaces, and because a mitigation that removes the
 symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
+
+---
+## 2026-09-24 — one exported name means two different functions at two doors, and nothing in the package says so
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+not a defect the site can fix; the documentation now warns about it on both
+pages, which is the most a reference can do
+
+Counting the sixteen doors' overlaps on the **declaration** rather than on the
+name turned up exactly one pair in the whole package where the two disagree:
+
+| door | declaration |
+| --- | --- |
+| `@loom/runtime/signals` | `horizonOf: (configured: ReaderSignalWindow, now: string) => string \| null` |
+| `@loom/runtime/telemetry` | `horizonOf: (policy: RetentionPolicy, now: string) => string \| null` |
+
+Two functions, two modules — `signals/collect` and `telemetry/retention` —
+sharing a name and nothing else. Both answer *what is the oldest thing I should
+keep*, which is presumably how it happened, and neither knows the other exists.
+
+**Why it is worth a lane's attention rather than a shrug.** The site's search
+indexes every published name with its import as the context beside it, so a
+reader who searches `horizonOf` gets two results that look exactly like one
+export offered at two doors — which is what the other thirteen shared names
+*are*. There is no way to tell from the results that these two are different
+functions, and the first thing a reader does with a name they found is import
+it from whichever door they were already in.
+
+Neither function carries a doc comment, so the reference shows each one's
+signature and nothing else. A sentence on either would help a reader who has
+landed on the right one and does nothing for a reader who has landed on the
+wrong one.
+
+**What the documentation did instead**, in
+`docs-34-none-of-them-has-everything`: both pages now carry a line naming the
+other door and saying plainly that it is a different declaration. That is
+description rather than repair — the names are still the same — and the
+measurement is general, so a second collision appears on its own pages the day
+it is introduced.
+
+**The shapes, for the lane that owns `src/`.** Renaming one of the two is the
+obvious one and is a breaking change to a published surface. Leaving both and
+writing a doc comment on each that names the other is the cheap one and leaves
+the search results ambiguous. Doing nothing is defensible — one collision in
+1,071 names is a low rate — and this entry exists so that the choice is one
+somebody made.
+
+---
+## 2026-09-24 — the API reference has sixteen pages and no front door, so the band that says "most of this is elsewhere" can only point at the search box
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+gap is real and named by the work that exposed it; nothing on the site is wrong
+
+`/docs/api-reference` is not a page. The section's pages are the sixteen entry
+points and nothing else, so `/docs/api-reference/runtime` is the first thing a
+reader meets and the rail is the only place the sixteen are seen together.
+
+That was fine while every page described one door. It stopped being fine this
+run: each reference page now tells a reader that **most of the package is
+behind some other import** — 545 of 1,071 names on the widest door, 1,046 on
+the smallest — and the only thing it can offer them next is the search box.
+Search answers *where is this name*, which is the right question for a reader
+who has one. A reader who has just been told they are looking at a third of
+what they came for does not have one yet.
+
+**What a front door would carry**, all of it already measured and none of it
+written: the sixteen with their sizes, what each is for (`entryPoints` has the
+sentence), and the shape the last two runs found — that the doors do not nest,
+that 116 of the 120 pairs share no name at all, and which four do. Today that
+last part is stated sixteen times, once per page, from each page's own side.
+
+**Two things to decide before writing it**, and they are why this is a finding
+rather than a paragraph in the next branch:
+
+- `nav.ts` has no notion of a section landing page. Every section is a list of
+  pages; adding one that is the section itself touches the rail, the pager and
+  `content.test.ts`'s "written or generated" split, which is chrome shared with
+  four other sections rather than this one's alone.
+- The **Installation** page already renders `<EntryPoints />`, which is the
+  same table with the same sentences. Two pages listing the sixteen doors is
+  either one too many or the right answer for two different readers, and that
+  is an editorial call rather than a technical one.
+
+---
+## 2026-09-24 — a `next build` that exits 0 can serve the previous build's HTML, and a run that photographs it has photographed somebody else's code
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+cost this run one screenshot cycle; **`rm -rf apps/loom/.next` before the build
+is the workaround** and it works
+
+Measured on this branch, in this order:
+
+1. A component was edited so that `1071` rendered as `1,071`. The unit test for
+   the new wording went green.
+2. `next build` was started and **killed before it finished** (the `pkill` that
+   stopped the running server matched the shell running the build).
+3. `next build` was run again and **exited 0**, printing its usual page table.
+4. `next start` served the page with `1071` — the string from before step 1 —
+   and the screenshot harness photographed it.
+5. `rm -rf .next && next build` produced `1,071`, and the same shot came back
+   correct.
+
+**What is established and what is not.** Steps 3 and 4 are the finding: a build
+reported success and the server served output that did not contain a change the
+source had. What caused it is not established here — the killed build in step 2
+is the obvious suspect and this run did not go back and prove it, because the
+cheap workaround was already in hand and the cost of a controlled repro is a
+pair of full builds.
+
+**Why it is worth the entry anyway.** It is a **false green**, and the lane that
+notices is never the lane that caused it. Every routine's report is built on
+`pnpm verify` passing and a photograph of a running build; both were taken here
+against code that was not on disk. The 23 September entry about a stale
+`.next` failing the gate is the same directory causing the opposite symptom —
+that one went red for a change nobody made, this one went green for a change
+nobody could see — and `pnpm clean` now removes it, which is the mitigation
+already in the repository.
+
+**The ask is one line of judgement, not one of code:** whether the application's
+`build` should clear `.next` first, or whether a killed build is rare enough
+that the workaround being written down is enough. It is the shell's call
+because `apps/loom` is one application behind four surfaces, and a build that
+clears its own cache is slower for everybody on every run.

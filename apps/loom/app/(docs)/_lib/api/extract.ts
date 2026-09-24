@@ -7,6 +7,7 @@ import ts from "typescript"
 import { moduleTitle } from "./groups"
 import { apiSlugFor, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
 import { narrowerDoorsBySpecifier, type DoorFacts } from "./narrower"
+import { standingBySpecifier } from "./standing"
 import { doorReach, packagesNamedIn, peersOf, requirementsFor, type Peers, type ReadFile } from "./requires"
 
 /**
@@ -454,6 +455,13 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
          * in the package, and the first of the sixteen cannot know it.
          */
         narrower: [],
+        /*
+         * And this one, for the same reason twice over: how much of the
+         * package is behind this door is a fact about all sixteen of them.
+         * `packageNames: 0` is the shape an unfilled pass would leave, and
+         * `reference.ts` refuses a file carrying it rather than printing it.
+         */
+        standing: { packageNames: 0, otherDoors: 0, doorsSharingNothing: 0, widest: false, sharedWith: [], collisions: [] },
         groups: groupSymbols(symbols, root),
       },
       packages: reach.packages,
@@ -461,8 +469,15 @@ export const extractReference = (root: string = packageRoot): ApiReference => {
   })
 
   const narrower = narrowerDoorsBySpecifier(doors)
+  const standing = standingBySpecifier(doors.map(({ entry }) => entry))
 
   return {
-    entries: doors.map(({ entry }) => ({ ...entry, narrower: narrower.get(entry.specifier) ?? [] })),
+    entries: doors.map(({ entry }) => {
+      const stood = standing.get(entry.specifier)
+
+      if (stood === undefined) throw new Error(`loom: ${entry.specifier} was measured against no other door`)
+
+      return { ...entry, narrower: narrower.get(entry.specifier) ?? [], standing: stood }
+    }),
   }
 }
