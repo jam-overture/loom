@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #ffffff; }
+    .ink { fill: #111418; }
+    .muted { fill: #5b6570; }
+    .faint { fill: #8a939d; }
+    .panel { fill: #f7f8f9; stroke: #dfe3e8; stroke-width: 1; }
+    .rule { stroke: #dfe3e8; stroke-width: 1; }
+    .bar-here { fill: #3d6b8f; }
+    .bar-there { fill: #d7dce1; }
+    .tick { stroke: #8a939d; stroke-width: 1; }
+    .clash { fill: #b4402f; }
+    .clash-chip { fill: #f6e3df; stroke: #e6c3bb; }
+    .same-chip { fill: #e3ebf2; stroke: #c2d2df; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0e1114; }
+      .ink { fill: #e8ecf0; }
+      .muted { fill: #9aa4ae; }
+      .faint { fill: #78828c; }
+      .panel { fill: #151a1f; stroke: #2a3138; }
+      .rule { stroke: #2a3138; }
+      .bar-here { fill: #6ea3cc; }
+      .bar-there { fill: #2a3138; }
+      .tick { stroke: #78828c; }
+      .clash { fill: #e08b78; }
+      .clash-chip { fill: #2a1a16; stroke: #4a2c25; }
+      .same-chip { fill: #16222c; stroke: #2c4152; }
+    }
+  </style>
+
+  <rect class="bg" width="900" height="600" />
+
+  <text class="ink" x="40" y="44" font-size="21" font-weight="700">None of the sixteen doors has everything behind it</text>
+  <text class="muted" x="40" y="68" font-size="13.5">Measured from the declarations <tspan class="mono">@loom/runtime</tspan> publishes: 1,071 names, across sixteen entry points that barely overlap.</text>
+
+  <line class="rule" x1="40" y1="86" x2="860" y2="86" />
+
+  <!-- ===== the widest door against the package ===== -->
+  <rect class="panel" x="40" y="106" width="390" height="228" rx="8" />
+  <text class="ink" x="62" y="134" font-size="13.5" font-weight="700">The widest door, against the package</text>
+  <text class="faint" x="62" y="152" font-size="11.5">the one a reader is told to start with</text>
+
+  <text class="ink mono" x="62" y="186" font-size="11.5">@loom/runtime</text>
+  <rect class="bar-there" x="62" y="196" width="346" height="22" rx="3" />
+  <rect class="bar-here" x="62" y="196" width="170" height="22" rx="3" />
+  <line class="tick" x1="232" y1="192" x2="232" y2="226" />
+  <text class="ink" x="62" y="242" font-size="11.5" font-weight="700">526 here</text>
+  <text class="muted" x="238" y="242" font-size="11.5">545 behind one of the other fifteen</text>
+
+  <line class="rule" x1="62" y1="258" x2="408" y2="258" />
+
+  <text class="muted" x="62" y="282" font-size="12">Other doors sharing no name with it</text>
+  <text class="ink" x="408" y="282" font-size="12" font-weight="700" text-anchor="end">13 of 15</text>
+  <text class="muted" x="62" y="304" font-size="12">Its share of the whole package</text>
+  <text class="ink" x="408" y="304" font-size="12" font-weight="700" text-anchor="end">49%</text>
+  <text class="muted" x="62" y="326" font-size="12">Doors contained in another door</text>
+  <text class="ink" x="408" y="326" font-size="12" font-weight="700" text-anchor="end">1 of 16</text>
+
+  <!-- ===== where the sixteen touch at all ===== -->
+  <rect class="panel" x="470" y="106" width="390" height="228" rx="8" />
+  <text class="ink" x="492" y="134" font-size="13.5" font-weight="700">Everywhere the sixteen touch at all</text>
+  <text class="faint" x="492" y="152" font-size="11.5">120 pairs of doors; four of them share a name</text>
+
+  <rect class="same-chip" x="492" y="174" width="38" height="17" rx="4" />
+  <text class="ink" x="511" y="187" font-size="11" text-anchor="middle">5</text>
+  <text class="ink mono" x="544" y="187" font-size="11">runtime ↔ runtime/react</text>
+
+  <rect class="same-chip" x="492" y="200" width="38" height="17" rx="4" />
+  <text class="ink" x="511" y="213" font-size="11" text-anchor="middle">8</text>
+  <text class="ink mono" x="544" y="213" font-size="11">runtime ↔ runtime/sdk</text>
+
+  <rect class="same-chip" x="492" y="226" width="38" height="17" rx="4" />
+  <text class="ink" x="511" y="239" font-size="11" text-anchor="middle">14</text>
+  <text class="ink mono" x="544" y="239" font-size="11">runtime/signals ↔ runtime/signals/broadcast</text>
+
+  <rect class="same-chip" x="492" y="252" width="38" height="17" rx="4" />
+  <text class="ink" x="511" y="265" font-size="11" text-anchor="middle">1</text>
+  <text class="ink mono" x="544" y="265" font-size="11">runtime/signals ↔ runtime/telemetry</text>
+
+  <rect class="clash-chip" x="492" y="276" width="38" height="17" rx="4" />
+  <text class="clash" x="511" y="289" font-size="11" text-anchor="middle">1</text>
+  <text class="clash" x="544" y="289" font-size="11">the same pair again, and not the same thing</text>
+
+  <line class="rule" x1="492" y1="302" x2="838" y2="302" />
+  <text class="muted" x="492" y="324" font-size="12">The other 116 pairs share no name at all.</text>
+
+  <!-- ===== the collision ===== -->
+  <rect class="panel" x="40" y="356" width="820" height="212" rx="8" />
+  <circle class="clash" cx="62" cy="385" r="6" />
+  <text class="clash" x="76" y="390" font-size="13.5" font-weight="700">One name in the package means two different things</text>
+  <text class="faint" x="76" y="408" font-size="11.5">an overlap is counted on the declaration and not on the name, which is the whole reason the site can say this</text>
+
+  <text class="faint" x="62" y="442" font-size="11">behind</text>
+  <text class="ink mono" x="110" y="442" font-size="11.5">@loom/runtime/signals</text>
+  <text class="muted mono" x="62" y="464" font-size="11.5">horizonOf: (configured: ReaderSignalWindow, now: string) =&gt; string | null</text>
+  <text class="faint" x="62" y="482" font-size="11">when a reader signal falls out of the window it was collected in</text>
+
+  <line class="rule" x1="62" y1="498" x2="838" y2="498" />
+
+  <text class="faint" x="62" y="522" font-size="11">behind</text>
+  <text class="ink mono" x="110" y="522" font-size="11.5">@loom/runtime/telemetry</text>
+  <text class="muted mono" x="62" y="544" font-size="11.5">horizonOf: (policy: RetentionPolicy, now: string) =&gt; string | null</text>
+  <text class="faint" x="62" y="562" font-size="11">when a journal entry may be forgotten — a different function, and a search for the name finds both</text>
+</svg>

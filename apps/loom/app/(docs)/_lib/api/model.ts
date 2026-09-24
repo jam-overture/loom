@@ -89,6 +89,64 @@ export type ApiNarrowerDoor = {
   readonly files: number
 }
 
+/**
+ * Another door that publishes some of the same names, meaning the same thing.
+ *
+ * `names` counts only the exports where both doors give the name the same kind
+ * and the same declaration — the ones where a reader can take either import
+ * and get what they came for. Where two doors give one name two different
+ * declarations, that is an `ApiNameCollision` instead, and the difference
+ * matters more than the total does.
+ */
+export type ApiOverlappingDoor = {
+  readonly specifier: string
+  readonly slug: string
+  readonly names: number
+}
+
+/**
+ * One name, two doors, two different things.
+ *
+ * The case this exists for is real rather than defensive: `horizonOf` is a
+ * function about reader signals behind `@loom/runtime/signals` and a function
+ * about telemetry retention behind `@loom/runtime/telemetry`, and the two share
+ * nothing but four syllables. A reader who searches the name gets two results
+ * and, until a page says otherwise, has every reason to think one of them is a
+ * re-export of the other.
+ */
+export type ApiNameCollision = {
+  readonly name: string
+  /** The other door, not this one. */
+  readonly specifier: string
+  readonly slug: string
+}
+
+/**
+ * How much of the package is behind this door, and how much is not.
+ *
+ * Everything else on a reference page describes what a reader gets by walking
+ * through one door. This describes the door's place among the other fifteen,
+ * and it is here because the belief a reader arrives with is wrong: the
+ * sixteen do **not** nest. The root door is the largest and still publishes
+ * less than half of what the package publishes, and thirteen of the fifteen
+ * others publish not one name it does. There is no import that has everything
+ * behind it.
+ */
+export type ApiStanding = {
+  /** Distinct names published across every door, counting a shared name once. */
+  readonly packageNames: number
+  /** How many doors this package opens besides this one. */
+  readonly otherDoors: number
+  /** Of those, how many publish not a single name this door publishes. */
+  readonly doorsSharingNothing: number
+  /** Whether no other door publishes more names than this one. Ties are all widest. */
+  readonly widest: boolean
+  /** Doors that publish some of the same names, meaning the same thing, sorted. */
+  readonly sharedWith: readonly ApiOverlappingDoor[]
+  /** Names this door shares with another that mean two different things, sorted. */
+  readonly collisions: readonly ApiNameCollision[]
+}
+
 /** The exports that share one module inside an entry point. */
 export type ApiGroup = {
   /** The declaring module, relative to the package root: `tree/navigation`. */
@@ -138,6 +196,17 @@ export type ApiEntry = {
    * on that.
    */
   readonly narrower: readonly ApiNarrowerDoor[]
+  /**
+   * Where this door sits among the others, so a page can say what is *not*
+   * behind it.
+   *
+   * Unlike `narrower`, every door has one and every page prints it. A door
+   * that is one of sixteen is always keeping something back, and which reader
+   * needs to hear it is not knowable from here: the belief that the short
+   * specifier is the whole library is one a reader can arrive at any of the
+   * sixteen pages holding.
+   */
+  readonly standing: ApiStanding
   readonly groups: readonly ApiGroup[]
 }
 
