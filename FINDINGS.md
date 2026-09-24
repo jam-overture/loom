@@ -29966,9 +29966,10 @@ rather than filed separately.
 
 ## 2026-09-20 — a lane that sets its own git author loses the preview deployment, and the failure names a person rather than a cause
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed
-by this branch — this lane's own mistake, recorded because the error message
-points away from it
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**reopened 24 September** — the same lane made the same mistake again three days
+later, through a spelling the rule below does not name. See the entry of
+24 September, which supersedes the rule here
 
 This run committed with an explicit author, `Loom portal <…@gmail.com>`, on the
 reasoning that a lane's commits should say which lane made them. Vercel refused
@@ -31829,3 +31830,111 @@ tail of some other budget this body happened to be near. Nobody should spend a
 run finding out: the workaround is one line of discipline and the fault is
 cosmetic. Written down so the next lane measures instead of guessing, which is
 what the four dead theories above cost between them.
+
+
+---
+
+## 2026-09-24 — the rule against setting a commit author did not cover the spelling the next run used, and the preview was lost again
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Supersedes:** the
+rule in the 20 September entry, which is reopened · **Status:** open, with the
+rule restated below in a form that covers every spelling
+
+On 20 September this lane lost the preview deployment by committing with an
+explicit author, filed it against itself, and wrote the rule:
+
+> **Rule, for any lane:** do not set `--author` on a commit.
+
+On 23 September, on #376, this lane lost the preview deployment by committing
+with an explicit author. The rule was read. It did not fire, and the reason is
+one word: the commit was made with
+
+```
+git -c user.name="Loom portal" -c user.email="portal@loom.local" commit …
+```
+
+which is not `--author`. It is the same act under a different flag, and a rule
+naming one spelling of an act is a rule that stops working the moment somebody
+reaches for the other one. **Both** spellings set the author; `-c` also sets the
+committer.
+
+**The error message moved too**, which is worth recording because the 20
+September entry's whole argument was that the message points away from the
+cause. It said:
+
+```
+Git author jpizzo must have access to the project on Vercel to create deployments.
+```
+
+On #376 the same fault read:
+
+```
+GitHub couldn't verify an account for commit d97b4cf.
+Vercel blocks this deployment before it can verify the account's access to the team.
+Review the commit before changing settings. If you don't recognize it, don't deploy it.
+Ask a repository administrator to investigate.
+```
+
+That is a **security** notice. It reads as an unrecognised commit on your
+repository and tells a maintainer to investigate rather than to fix a setting —
+so a lane that hits this now produces a red check that looks like a compromise
+report. The cause is the same and it is entirely the lane's own.
+
+**The rule, restated to cover the act rather than a flag:**
+
+> **A lane never sets the author or committer of a commit, by any means.** Not
+> `--author`, not `-c user.name` / `-c user.email`, not `git config user.*`, and
+> not `GIT_AUTHOR_*` or `GIT_COMMITTER_*` in the environment. Whatever the
+> session is already configured with is what a commit gets, and the check is
+> `git log -1 --format="%an <%ae>"` **before pushing** — a fact about what you
+> made rather than a memory of what you typed. It would have caught both
+> occurrences.
+
+The lane's name belongs in the branch name, the commit subject and the report,
+all three of which already carry it. That part of the 20 September entry was
+right and is unchanged.
+
+**What this entry does *not* claim, and the 20 September one did.** That entry
+says the identity Vercel accepts is the one every commit on `main` carries,
+`jonathanbravecredit <60827135+…@users.noreply.github.com>`. That inference does
+not hold up: every commit on `main` is a **squash-merge commit**, authored by
+whoever opened the pull request and committed by `GitHub <noreply@github.com>`,
+so `main` says nothing about what the *branch* commits it came from looked like.
+It is the branch head that Vercel judges.
+
+So what is actually measured here is narrower and it is all this entry asserts:
+**setting an author explicitly has blocked the deployment twice, on two
+different spellings.** Whether the session's own configured identity deploys is
+**untested** — in this session that identity is `Claude <noreply@anthropic.com>`,
+which is not a GitHub account with access to the Vercel team either, and a
+routine cannot commit as the maintainer: the sandbox refuses an author override,
+correctly, because a process that can author commits as a person is a process
+that can forge them.
+
+**Answered, on this entry's own branch.** #385 carries one commit, authored by
+the session's configured identity with nothing overridden, and Vercel's status on
+it went straight to *"Vercel is deploying your app"* — **verified and building**,
+where #376's two commits were refused before a build started. So:
+
+> **The routine session's own identity deploys. The rule above is the whole of
+> it**, and both losses were this lane setting an author it had no reason to set.
+
+Which means the preview URL a surface lane's brief asks for **is** deliverable by
+a routine, on every run, at the cost of not doing one thing. Nothing needs
+changing in Vercel, nothing needs changing in the repository, and the 20
+September entry's instinct — that this is the lane's own mistake wearing a
+message that points elsewhere — was right twice.
+
+**What it cost this time, and what it did not.** #376 merged, so the change
+landed; what was lost is the thing the brief asks a portal pull request for in
+as many words — *open the PR with the deployed preview URL, because this surface
+exists to be looked at.* The maintainer reviewed a portal branch with no preview
+and four screenshot links, for the second time in four days, and the reason both
+times was this lane rather than anything about the deployment.
+
+**One thing that is not in this lane's gift**, noted for whoever wants it: a
+`pre-push` hook comparing the head commit's author against `main`'s would make
+this impossible rather than remembered. It is repository tooling and it would
+have to be installed by whoever runs `pnpm install`, so it is a decision for the
+maintainer and the framework lane rather than something a surface lane should
+add on its own.
