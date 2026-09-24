@@ -9,6 +9,7 @@ import {
   type IntentOrigin,
   type NodeId,
   type NodeKind,
+  type StakeFactorCode,
 } from "@loom/runtime"
 import { EPISODE_RESOLUTION_KINDS, type FailureStage } from "@loom/runtime/telemetry"
 import {
@@ -18,16 +19,22 @@ import {
 } from "@loom/runtime/react"
 import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
 
+import { runtimeWordsIn } from "../_test/plain-language"
+
 import {
   ANSWERS,
   ASK_ORIGINS,
   ASK_OUTCOMES,
   CANNOT_UNDO,
   CHANGE_STATES,
+  factorClause,
   FAILURE_STAGES,
   GATE_VERDICTS,
+  NOTHING_WEIGHED,
   PART_KINDS,
+  STAKE_FACTORS,
   STAKES,
+  WEIGHING,
   confidenceWord,
   namedList,
   partPhrase,
@@ -199,6 +206,118 @@ describe("the stakes", () => {
   it("says what the level is for, not only which level it is", () => {
     expect(STAKES.critical.label).not.toBe("critical")
     expect(STAKES.low.label).not.toBe("low")
+  })
+})
+
+/**
+ * The table that was missing, and the assertions that make it a table rather than
+ * two strings somebody needed on a Tuesday.
+ *
+ * `STAKE_FACTORS` is the third of the runtime's vocabularies this module
+ * translates and the first one a reader acts on: the level says where on a scale
+ * you are, the rule says a line exists, and only these say **what was wrong with
+ * the change**. Every assertion below reads the union rather than a list, so a
+ * fourteenth factor arriving in the runtime fails here — which is the moment
+ * somebody still has the stake rule in front of them and can write the clause.
+ */
+describe("STAKE_FACTORS", () => {
+  const codes = Object.keys(STAKE_FACTORS) as StakeFactorCode[]
+
+  it("has a clause for every factor the Gate can raise", () => {
+    expect(codes.length).toBeGreaterThan(0)
+
+    for (const code of codes) {
+      expect(factorClause(code).length, code).toBeGreaterThan(20)
+    }
+  })
+
+  it("never answers with the code itself", () => {
+    for (const code of codes) {
+      expect(factorClause(code), code).not.toContain(code)
+    }
+  })
+
+  /**
+   * They are clauses rather than sentences, because several appear in one list
+   * under one change and whole sentences read as unrelated verdicts. The shape is
+   * asserted rather than described: lower case at the start, no full stop at the
+   * end, and each one completes *"Loom would not do this because …"*.
+   */
+  it("is written as a clause, so a list of three reads as one reason", () => {
+    for (const code of codes) {
+      const clause = factorClause(code)
+
+      expect(clause, code).toMatch(/^[a-z]/u)
+      expect(clause, code).not.toMatch(/[.]$/u)
+    }
+  })
+
+  it("says none of them in the runtime's vocabulary", () => {
+    for (const code of codes) {
+      expect(runtimeWordsIn(factorClause(code)), code).toEqual([])
+    }
+  })
+
+  /**
+   * The two clauses the run that wrote this table exists for, asserted whole
+   * rather than by a phrase inside them — the 24 August rule. Each has one job:
+   * to tell a reader the change is impossible here rather than merely unwelcome.
+   */
+  it("says a part nothing here can draw is about the site and not about the page", () => {
+    expect(factorClause("unknown-primitive")).toBe(
+      "it asks for a kind of part this site has nothing to draw it with"
+    )
+  })
+
+  it("says a refused setting was refused by the part itself", () => {
+    expect(factorClause("invalid-props")).toBe(
+      "it would set a part up in a way that part itself refuses, so it would not draw"
+    )
+  })
+
+  /** Thirteen different facts, so thirteen different clauses. */
+  it("gives each factor its own words", () => {
+    expect(new Set(codes.map((code) => factorClause(code))).size).toBe(codes.length)
+  })
+
+  /**
+   * A factor is what the Gate weighed *before* deciding, so the tense is
+   * conditional even for a change that went ahead. "it wrote over work already
+   * accepted" would be a claim about an outcome this table cannot see, printed
+   * under a green **Applied**.
+   */
+  it("never claims the change happened", () => {
+    for (const code of codes) {
+      expect(factorClause(code), code).not.toMatch(/\b(wrote|removed|deleted|changed the)\b/u)
+    }
+  })
+})
+
+describe("WEIGHING and NOTHING_WEIGHED", () => {
+  const kinds: readonly DispositionKind[] = ["accepted", "requires-confirmation", "rejected"]
+
+  it("introduces one list of clauses three different ways", () => {
+    expect(new Set(kinds.map((kind) => WEIGHING[kind])).size).toBe(3)
+    expect(new Set(kinds.map((kind) => NOTHING_WEIGHED[kind])).size).toBe(3)
+  })
+
+  it("reads plainly, on all three", () => {
+    for (const kind of kinds) {
+      expect(runtimeWordsIn(WEIGHING[kind]), kind).toEqual([])
+      expect(runtimeWordsIn(NOTHING_WEIGHED[kind]), kind).toEqual([])
+    }
+  })
+
+  /**
+   * The heading and its negative have to agree about what they are about. An
+   * accepted change's heading says Loom weighed something and went ahead; its
+   * empty case has to say nothing counted against it, not that nothing was
+   * refused.
+   */
+  it("pairs each heading with a sentence about the same thing", () => {
+    expect(WEIGHING.rejected).toContain("wouldn't")
+    expect(WEIGHING.accepted).toContain("before going ahead")
+    expect(NOTHING_WEIGHED.accepted).not.toContain("rule below")
   })
 })
 

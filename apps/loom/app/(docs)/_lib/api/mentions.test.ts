@@ -205,6 +205,7 @@ describe("what one reference page is told about the prose", () => {
     requires: [],
     files: 0,
     narrower: [],
+    standing: { packageNames: 0, otherDoors: 0, doorsSharingNothing: 0, widest: true, sharedWith: [], collisions: [] },
     groups: [
       {
         module: "tree/tree",

@@ -8,9 +8,11 @@ import {
   probeConfigurations,
   probeEditableDecoration,
   probePlacement,
+  probeStates,
   probeSubmissionPlacement,
   type ConformanceVerdict,
   type PlacementVerdict,
+  type ProbeAnswers,
   type ProbeFailure,
   type SubmissionVerdict,
 } from "./conformance.js"
@@ -185,9 +187,44 @@ const throwingIn = (type: PrimitiveType, placement: PlacementVerdict): readonly 
   return [{ type, failures, everyConfiguration: placement.outcome === "not-probeable" }]
 }
 
-export const auditRegistry = (registry: PrimitiveRegistry): RegistryAudit => {
+/**
+ * What the audit is told beyond the registry itself.
+ *
+ * One field, and it exists because a probe that can only ask a primitive
+ * questions about its props cannot see a bound one at all (0185). `loom.feed`
+ * draws rows, an empty region, and a line for a source that did not answer;
+ * probed with no answers it draws the third of those under every configuration
+ * its schema closes over, so a region it places only for the first two reads as
+ * a region nothing places.
+ *
+ * Keyed by primitive type, and absent for a primitive that reads no binding —
+ * which is ninety-six of the ninety-eight registered today, and every one of
+ * them audits exactly as it did before this field existed.
+ */
+export type RegistryAuditOptions = {
+  /**
+   * The answer states each type is probed in, beside the ones its own schema
+   * closes over.
+   *
+   * A `Map` rather than an object, because the key is a primitive type and a
+   * caller building one from `registry.primitives` has the branded strings
+   * already — and because a lookup on an object literal is a lookup on
+   * `Object.prototype` for any name that happens to be on it.
+   */
+  readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>
+}
+
+const NO_ANSWERS: readonly ProbeAnswers[] = Object.freeze([])
+
+export const auditRegistry = (
+  registry: PrimitiveRegistry,
+  options: RegistryAuditOptions = {}
+): RegistryAudit => {
   const audits = registry.primitives.map((primitive) => {
-    const configurations = probeConfigurations(primitive.choices)
+    const configurations = probeStates(
+      probeConfigurations(primitive.choices),
+      options.answers?.get(primitive.type) ?? NO_ANSWERS
+    )
 
     return {
       type: primitive.type,

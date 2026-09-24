@@ -43,6 +43,7 @@ const page = (specifier: string, symbols: readonly (readonly [string, ApiKind])[
   requires: [],
   files: 0,
   narrower: [],
+  standing: { packageNames: 0, otherDoors: 0, doorsSharingNothing: 0, widest: true, sharedWith: [], collisions: [] },
   groups: [
     {
       module: "invented",

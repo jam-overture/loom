@@ -1,3 +1,5 @@
+import type { SourceFailure } from "../../src/data/adapter.js"
+import type { JsonValue } from "../../src/json.js"
 import type { SubmissionTarget } from "../../src/submit/endpoint.js"
 import type { LoomTree } from "../../src/tree/tree.js"
 import type { ThemeSelection } from "../../src/theme/theme.js"
@@ -72,7 +74,45 @@ export type Specimen = {
    * exactly as a host's would be.
    */
   readonly endpoints?: Readonly<Record<string, SubmissionTarget>>
+  /**
+   * What the sources this specimen's trees bind to answer with, by source id.
+   *
+   * The data seam's half of `endpoints`, and it exists for the same reason.
+   * Without it a bound primitive can only ever be photographed in the one state
+   * it reaches when nobody answered it — so `loom.feed`'s rows, its designed
+   * empty region and its *we could not read this* line are three states of one
+   * primitive of which exactly one was reachable, and it is the failure.
+   *
+   * **An answer, not a source.** The seam takes a `SourceEntry` whose adapter
+   * is an async call that may query a database. A specimen declares the reply
+   * instead, because a photograph must not depend on a network: an adapter free
+   * to do IO is free to be slow, to fail on a bad afternoon, and to make two
+   * runs of the same specimen produce different pictures. It is still
+   * validated — these go through `defineSource`, so a specimen naming
+   * `NotASourceId` is refused exactly as a host's would be, and the params a
+   * tree asks with are checked before the answer is handed back.
+   *
+   * The four states a bound primitive has are all declarable here: rows are an
+   * answer, *nothing to report* is an answer of `[]`, a source that did not
+   * answer is `{ unavailable: … }`, and a shape the primitive cannot draw is an
+   * answer of that shape — the source's own schema accepts any JSON, so what
+   * refuses it is the primitive, which is the state being photographed.
+   */
+  readonly answers?: Readonly<Record<string, SpecimenAnswer>>
 }
+
+/**
+ * What one source answers with: a value, or a named reason there is none.
+ *
+ * The failure half is a `SourceFailure` rather than a `DataUnavailable`,
+ * because those are the two things an *adapter* is allowed to say. The other
+ * reasons a binding can be unavailable — an unregistered source, params the
+ * source refused, an answer of the wrong shape — are produced by the seam, and
+ * a specimen reaches them by declaring the situation rather than the verdict.
+ */
+export type SpecimenAnswer =
+  | { readonly answer: JsonValue }
+  | { readonly unavailable: SourceFailure }
 
 /**
  * The two sizes every report in this repository has been quoting.

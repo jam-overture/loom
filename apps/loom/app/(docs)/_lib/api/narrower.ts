@@ -37,7 +37,7 @@ export type DoorSurface = ReadonlyMap<string, string>
  * reader is *that one gives you the same thing*. Matching on the declaration is
  * what makes the claim true rather than likely.
  */
-export const surfaceOf = (entry: ApiEntry): DoorSurface =>
+export const surfaceOf = (entry: Pick<ApiEntry, "groups">): DoorSurface =>
   new Map(entry.groups.flatMap((group) => group.symbols.map((symbol) => [symbol.name, `${symbol.kind} ${symbol.signature}`])))
 
 /** Whether every one of the first door's exports is the second's, declared the same way. */

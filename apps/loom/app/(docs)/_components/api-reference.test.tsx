@@ -21,6 +21,7 @@ const entry: ApiEntry = {
   requires: [{ package: "react", range: "^19.0.0", optional: true, reach: "loaded" }],
   files: 54,
   narrower: [],
+  standing: { packageNames: 0, otherDoors: 0, doorsSharingNothing: 0, widest: true, sharedWith: [], collisions: [] },
   groups: [
     {
       module: "render/addressing",
@@ -383,6 +384,193 @@ describe("the narrower door", () => {
     )
 
     expect(band()?.textContent).toContain("Narrower doors open onto part of this one")
+  })
+})
+
+describe("what is not behind this door", () => {
+  const standing = (over: Partial<ApiEntry["standing"]> = {}): ApiEntry => ({
+    ...entry,
+    standing: {
+      packageNames: 1071,
+      otherDoors: 15,
+      doorsSharingNothing: 15,
+      widest: false,
+      sharedWith: [],
+      collisions: [],
+      ...over,
+    },
+  })
+
+  const band = () =>
+    screen.queryByRole("region", { name: "How much of this package is behind other imports" })
+
+  it("says how much of the package is behind some other import", () => {
+    render(<ApiEntryReference entry={standing()} prose={noProse} />)
+
+    const text = band()?.textContent ?? ""
+
+    expect(text).toContain("No import here has everything behind it")
+    expect(text).toContain("publishes 2 of the 1,071 names this package publishes")
+    expect(text).toContain("The other 1,069 are behind one of the 15 other imports")
+    expect(text).toContain("The imports do not nest")
+  })
+
+  /**
+   * The sentence the root door's page needs, and the only one on the site that
+   * contradicts what a reader most likely believes. Everywhere else the
+   * heading states the rule; here it has to say the exception is not one.
+   */
+  it("tells a reader of the widest import that it is not the import with everything", () => {
+    render(<ApiEntryReference entry={standing({ widest: true })} prose={noProse} />)
+
+    const text = band()?.textContent ?? ""
+
+    expect(text).toContain("No import here has everything behind it — not even this one")
+    expect(text).toContain("more than any other import, and still less than half")
+  })
+
+  it("does not call the widest import less than half of itself when it is more", () => {
+    render(<ApiEntryReference entry={standing({ widest: true, packageNames: 3 })} prose={noProse} />)
+
+    expect(band()?.textContent).not.toContain("still less than half")
+  })
+
+  it("says plainly that no other import shares a name, rather than counting to fifteen", () => {
+    render(<ApiEntryReference entry={standing()} prose={noProse} />)
+
+    expect(band()?.textContent).toContain("not one of those imports publishes a single name this one does")
+  })
+
+  it("counts the doors that share nothing when some of them do share", () => {
+    render(
+      <ApiEntryReference
+        entry={standing({
+          doorsSharingNothing: 13,
+          sharedWith: [{ specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 }],
+        })}
+        prose={noProse}
+      />
+    )
+
+    expect(band()?.textContent).toContain("13 of those 15 publish nothing this one does")
+  })
+
+  it("names the imports that publish the same names, with how many, and links to them", () => {
+    render(
+      <ApiEntryReference
+        entry={standing({
+          doorsSharingNothing: 13,
+          sharedWith: [
+            { specifier: "@loom/runtime/react", slug: "react", names: 5 },
+            { specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 },
+          ],
+        })}
+        prose={noProse}
+      />
+    )
+
+    const text = band()?.textContent ?? ""
+
+    expect(text).toContain("Some of these names are published elsewhere too: 5 by")
+    expect(text).toContain("and 8 by")
+    expect(text).toContain("the same declarations reached through two doors")
+    expect(band()?.querySelector("a")?.getAttribute("href")).toBe("/docs/api-reference/react")
+  })
+
+  /**
+   * `@loom/runtime/signals/broadcast` is the page this is for: every one of
+   * its fourteen names is behind the wider signals door as well. A band that
+   * said *some* of them there would be understating a fact a reader deciding
+   * between two imports needs exactly.
+   */
+  it("says every one of them when another import publishes the whole surface", () => {
+    render(
+      <ApiEntryReference
+        entry={standing({
+          doorsSharingNothing: 14,
+          sharedWith: [{ specifier: "@loom/runtime/signals", slug: "signals", names: 2 }],
+        })}
+        prose={noProse}
+      />
+    )
+
+    expect(band()?.textContent).toContain("Every one of these names is published elsewhere too")
+  })
+
+  it("warns that a name means something else behind another import, and links there", () => {
+    render(
+      <ApiEntryReference
+        entry={standing({
+          doorsSharingNothing: 14,
+          collisions: [{ name: "horizonOf", specifier: "@loom/runtime/telemetry", slug: "telemetry" }],
+        })}
+        prose={noProse}
+      />
+    )
+
+    const text = band()?.textContent ?? ""
+
+    expect(text).toContain("One name here means something else behind another door")
+    expect(text).toContain("horizonOf")
+    expect(text).toContain("it is declared differently there — the same name, not the same thing")
+    expect(text).toContain("Searching the name finds both")
+  })
+
+  it("says nothing about collisions on a door that has none", () => {
+    render(<ApiEntryReference entry={standing()} prose={noProse} />)
+
+    expect(band()?.textContent).not.toContain("means something else behind another door")
+  })
+
+  /**
+   * The band is a comparison, and a package with one door has nothing to
+   * compare against. Loom has sixteen and always will have more than one, so
+   * this is the shape the component refuses rather than a state the site
+   * reaches — but a sentence reading *the other 0 names are behind one of the
+   * 0 other imports* is the sort a generated page prints for years.
+   */
+  it("is absent from a package with one door", () => {
+    render(<ApiEntryReference entry={standing({ otherDoors: 0, doorsSharingNothing: 0 })} prose={noProse} />)
+
+    expect(band()).toBeNull()
+  })
+
+  it("is absent when this door publishes the whole package", () => {
+    render(<ApiEntryReference entry={standing({ packageNames: 2 })} prose={noProse} />)
+
+    expect(band()).toBeNull()
+  })
+
+  /**
+   * After the two bands about the import a reader is holding, and before the
+   * prose. What to install can stop them dead and comes first; which door to
+   * take instead is about this import; this is about the other fifteen, and it
+   * is the last thing said before the page hands over to the written pages.
+   */
+  it("comes after the two bands about this import and before the prose", () => {
+    const { container } = render(
+      <ApiEntryReference
+        entry={{
+          ...standing(),
+          narrower: [
+            { specifier: "@loom/runtime/x", slug: "x", avoids: ["zod"], shared: 1, files: 1 },
+          ],
+        }}
+        prose={noProse}
+      />
+    )
+
+    const order = [...container.querySelectorAll("section[aria-label], nav[aria-label]")].map((node) =>
+      node.getAttribute("aria-label")
+    )
+
+    expect(order).toEqual([
+      "What to install before this import will run",
+      "Narrower imports onto part of this one",
+      "How much of this package is behind other imports",
+      "Written pages about this import",
+      "On this page",
+    ])
   })
 })
 

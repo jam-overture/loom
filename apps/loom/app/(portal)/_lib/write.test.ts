@@ -30,6 +30,130 @@ describe("beginWrite", () => {
     ])
   })
 
+  /**
+   * The tee, and the reason it exists: a `WriteOutcome` carries the Gate's
+   * verdict and not its reasoning, so the only place the factor codes can be read
+   * is the event the runtime emits while it is deciding.
+   */
+  it("keeps what the Gate weighed, so a screen can say why and not only what", async () => {
+    const write = beginWrite()
+
+    write.path.runtime.events.emit({
+      treeId: "t_weighed" as never,
+      occurredAt: new Date().toISOString(),
+      event: {
+        type: "change-assessed",
+        assessment: {
+          proposal: { proposalId: "p_weighed" },
+          stakes: {
+            level: "critical",
+            factors: [
+              { code: "unknown-primitive", level: "critical", detail: "app.gallery at n_7" },
+            ],
+          },
+        },
+      } as never,
+    })
+
+    expect(write.weighedAgainst("p_weighed").map((factor) => factor.code)).toEqual([
+      "unknown-primitive",
+    ])
+  })
+
+  /**
+   * Keyed by proposal, which is what makes the answer unambiguous when a refusal
+   * was handed to a repairer: two assessments in one write, and the person is
+   * being told about the one that was refused.
+   */
+  it("keeps one write's assessments apart, so a repair's reasons are not the refusal's", async () => {
+    const write = beginWrite()
+    const assess = (proposalId: string, code: string): void => {
+      write.path.runtime.events.emit({
+        treeId: "t_two" as never,
+        occurredAt: new Date().toISOString(),
+        event: {
+          type: "change-assessed",
+          assessment: {
+            proposal: { proposalId },
+            stakes: { level: "high", factors: [{ code, level: "high", detail: code }] },
+          },
+        } as never,
+      })
+    }
+
+    assess("p_refused", "unknown-primitive")
+    assess("p_repair", "large-removal")
+
+    expect(write.weighedAgainst("p_refused").map((factor) => factor.code)).toEqual([
+      "unknown-primitive",
+    ])
+    expect(write.weighedAgainst("p_repair").map((factor) => factor.code)).toEqual(["large-removal"])
+  })
+
+  /**
+   * A proposal the Gate never weighed — a request the model could not interpret,
+   * or a delta that would not apply. Empty rather than undefined, so a caller
+   * renders a rule with no clauses instead of crashing; the distinction between
+   * *nothing was wrong* and *nothing was looked at* is `reportOf`'s to make, from
+   * whether there is a disposition at all.
+   */
+  it("answers with nothing for a proposal it never heard about", async () => {
+    expect(beginWrite().weighedAgainst("p_never")).toEqual([])
+  })
+
+  /**
+   * The ordering inside the sink, which is the one thing about it that is not
+   * obvious.
+   *
+   * A journal write can fail and `narrator` contains whatever `emit` throws
+   * (0042), so a tee that delegated before recording would let a failed record
+   * take the reasoning down with it — and a reviewer would be told a refusal had
+   * no reasons rather than that the record could not be written. The event here is
+   * complete enough for the journal to want it, and the journal is made to reject,
+   * which is the only arrangement that can tell the two orderings apart.
+   */
+  it("keeps the reasoning even when the journal refuses the same event", async () => {
+    const write = beginWrite()
+    const failing = vi
+      .spyOn(portalTelemetry, "record")
+      .mockResolvedValue({ ok: false, error: { code: "unavailable", detail: "no journal" } } as never)
+
+    write.path.runtime.events.emit({
+      treeId: "t_throws" as never,
+      occurredAt: new Date().toISOString(),
+      event: {
+        type: "change-assessed",
+        assessment: {
+          proposal: { proposalId: "p_throws" },
+          analysis: {
+            operationCount: 1,
+            insertedNodeCount: 1,
+            removedNodeCount: 0,
+            movedNodeCount: 0,
+            configuredNodeCount: 0,
+            relocatedNodeCount: 0,
+            touchedPrimitiveTypes: [],
+            removedPrimitiveTypes: [],
+            relocatedPrimitiveTypes: [],
+            shallowestAffectedDepth: 2,
+          },
+          stakes: {
+            level: "critical",
+            factors: [{ code: "invalid-props", level: "critical", detail: "tone" }],
+          },
+          reversibility: { reversible: true, retainedNodeCount: 0, reasons: [] },
+        },
+      } as never,
+    })
+
+    await write.finish()
+
+    expect(failing).toHaveBeenCalled()
+    expect(write.weighedAgainst("p_throws").map((factor) => factor.code)).toEqual(["invalid-props"])
+
+    failing.mockRestore()
+  })
+
   it("gives each write its own sink, so one request cannot flush another's", async () => {
     const first = beginWrite()
     const second = beginWrite()

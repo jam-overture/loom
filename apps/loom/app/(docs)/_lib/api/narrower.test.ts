@@ -40,6 +40,7 @@ const door = (
     requires: [],
     files,
     narrower: [],
+    standing: { packageNames: 0, otherDoors: 0, doorsSharingNothing: 0, widest: true, sharedWith: [], collisions: [] },
     groups: [{ module: "m", title: "M", summary: "", symbols }],
   } satisfies ApiEntry,
   packages: new Set(packages),

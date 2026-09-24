@@ -20,9 +20,17 @@ import { askForChange } from "../actions"
  * question is only ever what replaces them, and *nothing* was the old answer —
  * the controls vanished on the press and the card went on saying it was waiting.
  *
- * Two things, in the order a stranger needs them: **what happened**, in the same
- * plain sentence whether the demo caught it before the press or the runtime
- * caught it after (`_lib/moved.ts` owns the words), and **the way out**.
+ * **What happened is no longer said here, and that is this block's whole
+ * revision.** It used to carry `movedOn`'s sentence at `text-xs`, four blocks
+ * below the card's own `text-sm` account of the same event — which was the
+ * shared table's `no-change` meaning, *“something it referred to has moved or
+ * gone”*, a cause that is what the state means in the review queue and is not
+ * what this visitor did. A stranger read the false one first because it was
+ * larger and higher, and met the true one as a second, competing explanation.
+ * `moved.ts` intended *one sentence, whichever way a visitor reaches it*; the
+ * card printed two. The sentence is now the card's own header line
+ * (`record-card.tsx`) — moved up, not removed — and what is left here is the
+ * half that was only ever this block's: **the way out**.
  *
  * **The left rule, in the third colour.** The card has two of these already and
  * they are a language rather than a decoration: amber for a question still open
@@ -31,6 +39,13 @@ import { askForChange } from "../actions"
  * badge forty pixels above it, which is the colour of a question that is shut.
  * One colour in two places, which is how this rail teaches everything rather
  * than with a legend.
+ *
+ * **And nothing to rule off when there is no way out**, which is the other half
+ * of losing the sentence. An ask that named no preset — free text, or an undo
+ * that has its own control on the card above — has nothing to offer here, and
+ * a marked, empty block is a promise of a control that is not coming. The card
+ * still says what happened; it says it in its header now, where it is said for
+ * every ask, so this renders nothing rather than an outline.
  *
  * A panel in `bg-inapplicable` was the first attempt and it disappeared: that
  * ground is within a shade of the card's own, so the block read as loose prose
@@ -59,24 +74,22 @@ export const PageMovedOn = ({
 }) => {
   const [, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
+  if (presetId === undefined) return null
+
   return (
     <div className="border-inapplicable-ink flex flex-col gap-2.5 border-l-2 pl-2.5">
-      <p className="text-ink-secondary text-xs">{note.sentence}</p>
-
-      {presetId !== undefined && (
-        <form action={submit} className="flex flex-col gap-1.5">
-          <input type="hidden" name="baseRevision" value={note.now} />
-          <input type="hidden" name="presetId" value={presetId} />
-          <button
-            type="submit"
-            disabled={pending}
-            className="border-neutral-edge bg-neutral text-neutral-ink hover:bg-surface-hover self-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-60"
-          >
-            {pending ? "Asking…" : ASK_AGAIN_LABEL}
-          </button>
-          <p className="text-ink-muted text-2xs">{ASK_AGAIN_CAUTION}</p>
-        </form>
-      )}
+      <form action={submit} className="flex flex-col gap-1.5">
+        <input type="hidden" name="baseRevision" value={note.now} />
+        <input type="hidden" name="presetId" value={presetId} />
+        <button
+          type="submit"
+          disabled={pending}
+          className="border-neutral-edge bg-neutral text-neutral-ink hover:bg-surface-hover self-start rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-60"
+        >
+          {pending ? "Asking…" : ASK_AGAIN_LABEL}
+        </button>
+        <p className="text-ink-muted text-2xs">{ASK_AGAIN_CAUTION}</p>
+      </form>
     </div>
   )
 }

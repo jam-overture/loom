@@ -268,3 +268,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0182](0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md) | A shot may reach a state it does not photograph, and may name the document it reaches into | Accepted | §1 (process) |
 | [0183](0183-a-page-for-another-kind-of-business-is-the-same-sequence-with-different-nodes-in-it.md) | A page for another kind of business is the same sequence with different nodes in it | Accepted | §4b |
 | [0184](0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md) | A primitive may read under whichever name a prop gives, and says so as a declaration rather than a name | Accepted | §2, reaching the catalogue, the interpreter's prompt and the render walk |
+| [0185](0185-a-probe-is-handed-answers-the-way-it-is-handed-props.md) | A probe is handed answers the way it is handed props, and a specimen declares the reply rather than the source | Accepted | §4, not the library |
+| [0186](0186-a-whats-on-band-occupies-the-come-back-region.md) | A what's-on band occupies the come-back region, so it is a design of `articles` and not a twenty-third part | Accepted | §4b |
+| [0187](0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md) | A frame with no picture in it does not take the picture's shape | Accepted | §4b |

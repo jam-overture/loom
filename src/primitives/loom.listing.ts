@@ -119,12 +119,24 @@ export const loomListing = definePrimitive({
      * with a state and no picture would otherwise have nowhere to wear it, and a
      * band that moved its flags depending on whether a photograph was found
      * would be two layouts nobody chose.
+     *
+     * **What it does not keep without a photograph is the 4:3.**
+     * [0187](../../decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md):
+     * a ratio reserves the shape of a picture, and the first band to place six
+     * of these photographed what reserving it for nothing costs — a quarter of
+     * every card given to a grey rectangle. Bare, the frame is as tall as the
+     * flags it carries and no taller, and with no flags either it is not drawn.
+     * The second job is the reason this primitive cannot simply drop the frame
+     * the way `loom.recording` does, and it is satisfied by the strip rather
+     * than by the ratio.
      */
+    const bare = given.image === undefined
+
     const media = createElement(
       "div",
       {
         key: "media",
-        className: LIBRARY_CLASS.listingMedia,
+        className: bare ? `${LIBRARY_CLASS.listingMedia} ${LIBRARY_CLASS.listingMediaBare}` : LIBRARY_CLASS.listingMedia,
         style: { background: colour("bg-surface-muted") },
       },
       given.image === undefined
@@ -192,7 +204,11 @@ export const loomListing = definePrimitive({
         },
       },
       libraryStylesheet(),
-      media,
+      /**
+       * Nothing to show and nothing to wear is no frame at all — an empty strip
+       * above an address is a rule of dead space. See 0187 and the note above.
+       */
+      bare && flags === undefined ? null : media,
       createElement(
         "div",
         {
