@@ -26,9 +26,17 @@ import {
   type SpecimenBrowser,
   type SpecimenPage,
 } from "./capture.js"
+import behaviourSpecimen from "./behaviour.specimen.js"
+import { bundleOptions, bundleSpecimen, describeBundleError, entrySource } from "./bundle.js"
+import { specimenElement } from "./element.js"
 import exampleSpecimen from "./example.specimen.js"
-import { escapeHtml, specimenDocument } from "./page.js"
-import { planPages, planShots, shotsAt, slug } from "./plan.js"
+import {
+  escapeHtml,
+  SPECIMEN_BUNDLE_FILE,
+  SPECIMEN_PAGE_ATTRIBUTE,
+  specimenDocument,
+} from "./page.js"
+import { isLive, planPages, planShots, planStates, shotsAt, slug } from "./plan.js"
 import {
   chromiumBrowser,
   contextOptionsFor,
@@ -1065,4 +1073,173 @@ describe("wiring a submission into a specimen", () => {
       without.ok ? without.value[0]?.html : "mismatch"
     )
   })
+})
+
+describe("a specimen that asks to be hydrated", () => {
+  const PRESS = { click: ".loom-control-present" } as const
+
+  const liveSpecimen = (states?: readonly { label: string; do: readonly typeof PRESS[] }[]) =>
+    specimenOf({ live: states === undefined ? {} : { states }, viewports: [WIDE] })
+
+  /**
+   * The property every existing picture depends on, asserted first: a specimen
+   * that says nothing about being live is the specimen it was, down to the file
+   * names in four reports' worth of shots.
+   */
+  it("gives a static specimen one nameless state, so not one file name moves", () => {
+    expect(isLive(specimenOf())).toBe(false)
+    expect(planStates(specimenOf())).toEqual([{ label: "", do: [] }])
+    expect(planShots(specimenOf()).map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-phone.png",
+      "a-band-editorial-serif-wide.png",
+    ])
+  })
+
+  it("gives a live specimen that declares no states the same one, hydrated", () => {
+    const specimen = liveSpecimen()
+
+    expect(isLive(specimen)).toBe(true)
+    expect(planShots(specimen).map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-wide.png",
+    ])
+  })
+
+  it("plans one shot per state and names each after the state it reaches", () => {
+    const shots = planShots(
+      liveSpecimen([
+        { label: "settled", do: [] },
+        { label: "presented", do: [PRESS] },
+      ])
+    )
+
+    expect(shots.map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-wide-settled.png",
+      "a-band-editorial-serif-wide-presented.png",
+    ])
+    /** One document for both: a state is reached in the browser, not rendered. */
+    expect(new Set(shots.map((shot) => shot.page.file)).size).toBe(1)
+  })
+
+  /**
+   * `do` was empty by construction, because a static page has no script in it to
+   * press. This is the whole of what changed about the shot list.
+   */
+  it("carries a state's steps through to the shot list", () => {
+    const shots = planShots(liveSpecimen([{ label: "presented", do: [PRESS] }]))
+
+    expect(shotsAt("http://127.0.0.1:1", shots)[0]?.do).toEqual([PRESS])
+    expect(shotsAt("http://127.0.0.1:1", planShots(specimenOf()))[0]?.do).toEqual([])
+  })
+
+  it("adds no bundle and no attribute to a static document", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>" })
+
+    expect(html).not.toContain(SPECIMEN_BUNDLE_FILE)
+    expect(html).not.toContain(SPECIMEN_PAGE_ATTRIBUTE)
+    expect(html).toContain("<body>\n<p>x</p>\n</body>")
+  })
+
+  it("loads one bundle and names the page on a live document", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>", page: "a-band-editorial" })
+
+    expect(html).toContain(`<script src="${SPECIMEN_BUNDLE_FILE}" defer></script>`)
+    expect(html).toContain(`${SPECIMEN_PAGE_ATTRIBUTE}="a-band-editorial"`)
+  })
+
+  /**
+   * A whitespace text node beside the markup is a node React has to reconcile,
+   * and it reconciles a disagreement by keeping the server's and saying nothing.
+   */
+  it("puts no whitespace round the markup of a live body", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>", page: "p" })
+
+    expect(html).toContain(`<body ${SPECIMEN_PAGE_ATTRIBUTE}="p"><p>x</p></body>`)
+  })
+
+  it("renders a live specimen's pages with the bundle and their own name", async () => {
+    const rendered = await renderSpecimen(liveSpecimen())
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    expect(rendered.value[0]?.html).toContain(SPECIMEN_BUNDLE_FILE)
+    expect(rendered.value[0]?.html).toContain(
+      `${SPECIMEN_PAGE_ATTRIBUTE}="a-band-editorial-serif"`
+    )
+  })
+})
+
+describe("the primitives a specimen registers for itself", () => {
+  /**
+   * `renderSpecimen` took a list of these from the day it was written and the
+   * CLI could never pass one, so a run photographing a seam had to add a
+   * primitive to another lane's directory to have a subject.
+   */
+  it("registers what the specimen declared, which nothing could pass before", async () => {
+    const built = await specimenElement(
+      behaviourSpecimen,
+      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+    )
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.diagnostics).toEqual([])
+  })
+
+  it("leaves the node undrawn when the specimen declares nothing for its type", async () => {
+    const { primitives: _declared, ...withoutPrimitives } = behaviourSpecimen
+    const built = await specimenElement(
+      withoutPrimitives,
+      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+    )
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.diagnostics.length).toBeGreaterThan(0)
+  })
+})
+
+describe("bundling a live specimen", () => {
+  it("imports the lane's module and the hydration entry, and nothing else", () => {
+    const source = entrySource("/repo/tools/specimen/a.specimen.ts", "/repo/tools/specimen/hydrate.ts")
+
+    expect(source).toContain('import specimen from "/repo/tools/specimen/a.specimen.ts"')
+    expect(source).toContain('import { hydrateSpecimen } from "/repo/tools/specimen/hydrate.ts"')
+    expect(source).toContain("void hydrateSpecimen(specimen)")
+  })
+
+  /**
+   * React's development build patches a hydration mismatch into the client's
+   * render, which would photograph a page nobody is ever served.
+   */
+  it("builds React in production mode, from a TypeScript entry", () => {
+    const options = bundleOptions("", "/repo")
+
+    expect(options.define?.["process.env.NODE_ENV"]).toBe('"production"')
+    expect(options.stdin?.loader).toBe("ts")
+    expect(options.stdin?.sourcefile?.endsWith(".ts")).toBe(true)
+    expect(options.format).toBe("iife")
+    expect(options.platform).toBe("browser")
+  })
+
+  it("bundles the behaviour specimen, whose primitive the specimen declares", async () => {
+    const built = await bundleSpecimen("tools/specimen/behaviour.specimen.ts")
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value).toContain("spec.behaviours")
+    expect(built.value.length).toBeGreaterThan(1000)
+  }, 30_000)
+
+  it("reports a module that will not build as a sentence rather than a throw", async () => {
+    const built = await bundleSpecimen("tools/specimen/nothing-here.specimen.ts")
+
+    expect(built.ok).toBe(false)
+    expect(built.ok === false && describeBundleError(built.error)).toContain(
+      "the specimen bundle would not build"
+    )
+  }, 30_000)
 })

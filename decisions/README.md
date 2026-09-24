@@ -268,3 +268,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0182](0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md) | A shot may reach a state it does not photograph, and may name the document it reaches into | Accepted | §1 (process) |
 | [0183](0183-a-page-for-another-kind-of-business-is-the-same-sequence-with-different-nodes-in-it.md) | A page for another kind of business is the same sequence with different nodes in it | Accepted | §4b |
 | [0184](0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md) | A primitive may read under whichever name a prop gives, and says so as a declaration rather than a name | Accepted | §2, reaching the catalogue, the interpreter's prompt and the render walk |
+| 0185 | *No record on this branch* | — | — |
+| 0186 | *No record on this branch* | — | — |
+| 0187 | *No record on this branch* | — | — |
+| [0188](0188-a-specimen-may-ask-to-be-hydrated-and-only-then-is-there-anything-to-press.md) | A specimen may ask to be hydrated, and only then is there anything to press | Accepted | §1 (process) |

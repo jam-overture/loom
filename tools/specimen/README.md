@@ -57,6 +57,57 @@ token, and a photograph must not depend on a network. It is still validated the
 way a host's answer is, so an action that leaves the origin is refused here
 rather than in review.
 
+### Photographing a behaviour
+
+A specimen is static markup, and **every control in the behaviour vocabulary —
+`copy`, `disclose`, `adjust`, `present`, `dismiss` — renders nothing until an
+effect proves scripting runs.** So a specimen of a primitive that takes one
+photographs the page without it, correctly, and there was no flag that changed
+that until 24 September. Say `live`:
+
+```ts
+export default defineSpecimen({
+  // …
+  live: {
+    states: [
+      { label: "settled", do: [] },
+      { label: "presented", do: [{ click: ".loom-control-present" }] },
+    ],
+  },
+})
+```
+
+The pages are then bundled with esbuild and hydrated in the browser before the
+shutter, and each state is a shot named `<specimen>-<theme>-<viewport>-<state>`.
+A state's `do` is the same step list `pnpm shoot` takes. `live: {}` hydrates and
+declares no states, which is one picture of the page as it settles.
+
+A specimen that says nothing about `live` is unchanged in every respect — no
+bundle, no browser JavaScript, and the same file names it had.
+
+Every control carries `loom-control` and `loom-control-<behaviour>`, which is
+what a step clicks. What a control publishes is `data-loom-disclosed`,
+`data-loom-presented` or the `--loom-adjust` custom property, and the primitive's
+own rules read those — see `src/render/behaviour.ts`.
+
+### Registering a primitive for one specimen
+
+`primitives` takes entries from `definePrimitive` and registers them beside the
+starter library, for this specimen only:
+
+```ts
+export default defineSpecimen({
+  // …
+  primitives: [aSubjectThatPlacesTheControl],
+})
+```
+
+It is for photographing a **seam**: the smallest primitive that holds the thing
+under test, so a run does not have to add one to `src/primitives/` — another
+lane's directory — to have a subject. A primitive anybody's page should be able
+to use is not this; it is a finding for `Loom primitives`.
+`tools/specimen/behaviour.specimen.ts` is the worked copy of both halves.
+
 Put it beside the code it photographs. Nothing in this directory is any lane's
 content, and the harness imports no specimen but the example.
 
@@ -111,8 +162,10 @@ instead of the viewport:
 }
 ```
 
-Two steps and no more: `click` and `wait`. The moment this grows a way to assert
-or to branch, the harness has become a test runner with a camera attached.
+Four steps and no more: `click`, `fill`, `wait` and `waitFor`. Every one of them
+names a state to arrive at and none of them reports what is there — the moment
+this grows a way to assert or to branch, the harness has become a test runner
+with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
 
 A `do` list is a sequence against **one** page, so anchor navigation is
 prevented for its duration — otherwise step two runs somewhere else and the
