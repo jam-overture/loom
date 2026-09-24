@@ -2,16 +2,22 @@ import { Component, createElement, useState, type ReactNode } from "react"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import { nodeDataOf } from "../data/resolution.js"
+import type { JsonValue } from "../json.js"
 import type { LoomPrimitive, LoomPrimitiveProps } from "../render/primitive.js"
 import { undecoratedPrimitive } from "../testing/primitives.js"
 
 import { NO_TEXT } from "../render/text.js"
 
 import {
+  describeProbeFailures,
   probeConfigurations,
   probeEditableDecoration,
   probePlacement,
+  probeStates,
   probeSubmissionPlacement,
+  unasked,
+  type ProbeAnswers,
 } from "./conformance.js"
 import { definePrimitive } from "./definition.js"
 
@@ -141,7 +147,7 @@ describe("probePlacement", () => {
       unplacedSlots: [],
       unplacedBehaviours: [],
       rendersChildren: true,
-      probed: [{}],
+      probed: [unasked({})],
       threw: [],
     })
   })
@@ -173,7 +179,7 @@ describe("probePlacement", () => {
       unplacedSlots: [],
       unplacedBehaviours: [],
       rendersChildren: true,
-      probed: [{}],
+      probed: [unasked({})],
       threw: [],
     })
   })
@@ -227,7 +233,7 @@ describe("a probe of a primitive that reads its own declared text", () => {
       unplacedSlots: [],
       unplacedBehaviours: [],
       rendersChildren: true,
-      probed: [{}],
+      probed: [unasked({})],
       threw: [],
     })
   })
@@ -281,14 +287,14 @@ describe("a primitive whose children depend on a prop", () => {
   })
 
   it("finds the children under the one configuration that places them", () => {
-    const verdict = probePlacement(entry.component, entry.slots, entry.text, configurations)
+    const verdict = probePlacement(entry.component, entry.slots, entry.text, probeStates(configurations))
 
     expect(verdict.outcome === "probed" && verdict.rendersChildren).toBe(true)
     expect(verdict.outcome === "probed" && verdict.probed).toHaveLength(configurations.length)
   })
 
   it("counts a region placed under any configuration as placed", () => {
-    const verdict = probePlacement(entry.component, entry.slots, entry.text, configurations)
+    const verdict = probePlacement(entry.component, entry.slots, entry.text, probeStates(configurations))
 
     expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
   })
@@ -321,7 +327,7 @@ describe("a primitive that does not hold its promises under every shape", () => 
 
     expect(probeEditableDecoration(entry.component, entry.text)).toEqual({ outcome: "decorates" })
     expect(
-      probeEditableDecoration(entry.component, entry.text, probeConfigurations(entry.choices))
+      probeEditableDecoration(entry.component, entry.text, probeStates(probeConfigurations(entry.choices)))
     ).toEqual({ outcome: "not-decorated" })
   })
 
@@ -331,14 +337,14 @@ describe("a primitive that does not hold its promises under every shape", () => 
       entry.component,
       entry.slots,
       entry.text,
-      probeConfigurations(entry.choices)
+      probeStates(probeConfigurations(entry.choices))
     )
 
     expect(verdict.outcome === "probed" && verdict.rendersChildren).toBe(true)
     expect(verdict.outcome === "probed" && verdict.threw).toEqual([
       { props: { tone: "loud" }, reason: "no rendering for tone loud" },
     ])
-    expect(verdict.outcome === "probed" && verdict.probed).toEqual([{}, { tone: "calm" }])
+    expect(verdict.outcome === "probed" && verdict.probed).toEqual([{}, { tone: "calm" }].map(unasked))
   })
 
   it("declines to judge only when no configuration answers at all", () => {
@@ -346,10 +352,10 @@ describe("a primitive that does not hold its promises under every shape", () => 
       throw new Error(`never renders ${String(children)}`)
     }
 
-    expect(probePlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }]).outcome).toBe(
+    expect(probePlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }].map(unasked)).outcome).toBe(
       "not-probeable"
     )
-    expect(probeEditableDecoration(alwaysThrows, undefined, [{}, { tone: "calm" }]).outcome).toBe(
+    expect(probeEditableDecoration(alwaysThrows, undefined, [{}, { tone: "calm" }].map(unasked)).outcome).toBe(
       "not-probeable"
     )
   })
@@ -365,7 +371,7 @@ describe("a primitive that does not hold its promises under every shape", () => 
       throw new Error(`boom for ${String(loom.type)}`)
     }
 
-    const verdict = probePlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }])
+    const verdict = probePlacement(alwaysThrows, [], undefined, [{}, { tone: "calm" }].map(unasked))
 
     expect(verdict.outcome === "not-probeable" && verdict.cause).toBe("threw")
     expect(verdict.outcome === "not-probeable" && verdict.failures).toEqual([
@@ -441,7 +447,7 @@ describe("probeSubmissionPlacement", () => {
   /** `some`, not `every`: a primitive that posts under one shape posts. */
   it("counts a primitive that posts under one configuration of its schema", () => {
     expect(
-      probeSubmissionPlacement(postingConditionally, NO_TEXT, [{ mode: "summary" }, { mode: "form" }])
+      probeSubmissionPlacement(postingConditionally, NO_TEXT, [{ mode: "summary" }, { mode: "form" }].map(unasked))
     ).toEqual({ outcome: "places" })
   })
 
@@ -463,5 +469,136 @@ describe("probeSubmissionPlacement", () => {
     }
 
     expect(probeSubmissionPlacement(hoarding)).toEqual({ outcome: "not-placed" })
+  })
+})
+
+/**
+ * The shape 0185 exists for, and the shape the library already ships: a
+ * primitive that reads an answer under the name its `binding` prop gives,
+ * places one region when the answer is rows and another when it is none, and
+ * says a line of its own when the source did not answer.
+ *
+ * Probed with nothing answered it takes the third branch under every
+ * configuration its schema closes over, so both of its regions read as regions
+ * nothing places — which is the audit calling two thirds of a correct primitive
+ * dropped content.
+ */
+const bound = definePrimitive({
+  type: "loom.bound",
+  description: "draws rows, an empty region, or a line saying it could not read them",
+  props: z.object({ binding: z.string().optional() }),
+  slots: ["rows", "empty"],
+  reads: [{ fromProp: "binding", default: "entries" }],
+  component: ({ loom, props }) => {
+    const answer = loom.data[props.binding ?? "entries"]
+
+    if (!answer || answer.status !== "ready") {
+      return createElement("p", { ...loom.editable }, "could not be read")
+    }
+
+    return createElement(
+      "div",
+      { ...loom.editable },
+      Array.isArray(answer.value) && answer.value.length > 0 ? loom.slots["rows"] : loom.slots["empty"]
+    )
+  },
+})
+
+const readyWith = (name: string, value: JsonValue): ProbeAnswers => ({
+  data: nodeDataOf({ [name]: { status: "ready", value } }),
+})
+
+describe("a primitive that draws an answer", () => {
+  it("places neither of its regions when the probe can only ask about props", () => {
+    const verdict = probePlacement(bound.component, bound.slots, bound.text, probeStates(probeConfigurations(bound.choices)))
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual(["rows", "empty"])
+  })
+
+  it("places both once the probe is handed the two answers that reach them", () => {
+    const configurations = probeStates(probeConfigurations(bound.choices), [
+      readyWith("entries", [{ title: "one" }]),
+      readyWith("entries", []),
+    ])
+
+    const verdict = probePlacement(bound.component, bound.slots, bound.text, configurations)
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual([])
+  })
+
+  /**
+   * An answer state carries the props it is answered under, because the name a
+   * binding is read by is a prop on most bound primitives (0184). Answering
+   * `rows` while the node says nothing leaves the primitive looking under
+   * `entries`, which is the same state as no answer at all.
+   */
+  it("reads the answer under the name this node's props give", () => {
+    const underTheDefault = probePlacement(
+      bound.component,
+      bound.slots,
+      bound.text,
+      probeStates(probeConfigurations(bound.choices), [readyWith("rows", [{ title: "one" }])])
+    )
+
+    expect(underTheDefault.outcome === "probed" && underTheDefault.unplacedSlots).toEqual(["rows", "empty"])
+
+    const underTheProp = probePlacement(
+      bound.component,
+      bound.slots,
+      bound.text,
+      probeStates(probeConfigurations(bound.choices), [
+        { ...readyWith("rows", [{ title: "one" }]), props: { binding: "rows" } },
+      ])
+    )
+
+    expect(underTheProp.outcome === "probed" && underTheProp.unplacedSlots).toEqual(["empty"])
+  })
+
+  /** Sum, not product: the prop configurations, then the answers. */
+  it("adds one configuration per answer rather than one per pairing", () => {
+    expect(probeConfigurations(bound.choices)).toHaveLength(1)
+    expect(probeStates(probeConfigurations(bound.choices), [readyWith("entries", [])])).toEqual([
+      unasked({}),
+      { props: {}, data: nodeDataOf({ entries: { status: "ready", value: [] } }) },
+    ])
+  })
+
+  it("carries the answers a configuration was answering into the failure it reports", () => {
+    const throwsWhenAnswered = ({ loom }: LoomPrimitiveProps) => {
+      if (loom.data["entries"]) throw new Error("cannot draw an answer")
+
+      return createElement("div", { ...loom.editable })
+    }
+
+    const verdict = probePlacement(throwsWhenAnswered, [], undefined, [
+      unasked({}),
+      { props: {}, data: nodeDataOf({ entries: { status: "ready", value: [] } }) },
+    ])
+
+    expect(verdict.outcome === "probed" && verdict.threw).toEqual([
+      { props: {}, reason: "cannot draw an answer", answered: ["entries"] },
+    ])
+    expect(
+      verdict.outcome === "probed" ? describeProbeFailures(verdict.threw) : ""
+    ).toBe('{} answering entries (cannot draw an answer)')
+  })
+
+  /** The probe answers a node's data directly, so `unavailable` costs no value. */
+  it("reaches the state a source failed in", () => {
+    const failing: ProbeAnswers = {
+      data: nodeDataOf({
+        entries: { status: "unavailable", unavailable: { reason: "refused", detail: "not for you" } },
+      }),
+    }
+
+    const verdict = probePlacement(
+      bound.component,
+      bound.slots,
+      bound.text,
+      probeStates(probeConfigurations(bound.choices), [failing])
+    )
+
+    expect(verdict.outcome === "probed" && verdict.unplacedSlots).toEqual(["rows", "empty"])
+    expect(verdict.outcome === "probed" && verdict.probed).toHaveLength(2)
   })
 })

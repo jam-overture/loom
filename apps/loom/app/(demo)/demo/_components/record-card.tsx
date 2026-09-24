@@ -309,11 +309,31 @@ export const RecordCard = ({
           * card has no revision, keeps the shared table's sentence, and must —
           * *"Loom will not make this change until you say yes"* is not about a
           * direction and needs no undo's version of itself.
+          *
+          * **And once more, ahead of all of it, on an ask the page has moved
+          * past — because that is the one card whose sentence here was about a
+          * cause that had not happened.** The shared table's `no-change` reads
+          * *"something it referred to has moved or gone"*, which is what the
+          * state means in the review queue and is not what a visitor of this
+          * surface just did: they asked for the numbers band to come off, then
+          * asked for a palette, and the band is still exactly where it was.
+          * `movedOn` has the sentence that is true of what they watched —
+          * *"You changed the page after asking for this…"* — and it was on the
+          * card already, in `text-xs`, four blocks down, under the louder
+          * sentence contradicting it. `moved.ts` said in its own comment that
+          * this is *one sentence, whichever way a visitor reaches it*; the card
+          * was printing two, and a stranger read the false one first.
+          *
+          * So it moves up rather than away. Nothing is removed: the two
+          * revisions behind it are still one click down, and the way out is
+          * still where the buttons were (`PageMovedOn`).
           */}
         <p className="text-ink-secondary text-sm">
-          {offer === "spent"
-            ? applied.spent
-            : (record.revision && applied.meaning) || outcome.meaning}
+          {moved
+            ? moved.sentence
+            : offer === "spent"
+              ? applied.spent
+              : (record.revision && applied.meaning) || outcome.meaning}
         </p>
 
         <p className="text-ink-muted text-2xs">

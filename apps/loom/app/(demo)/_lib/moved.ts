@@ -42,9 +42,20 @@
  * gone dead *before* the press, because the page has the tree and the holds in
  * hand together; a second tab, or a press that crosses another, still gets there
  * after. `record.ts` clears custody on the runtime's `commit-failed` so the late
- * path lands on the same shared state — `no-change`, *“Nothing changed — the
- * change no longer fits this page”* — rather than on a card still claiming to
- * wait. One sentence, whichever way a visitor reaches it.
+ * path lands on the same state — `no-change` — rather than on a card still
+ * claiming to wait. One sentence, whichever way a visitor reaches it.
+ *
+ * **That promise was not kept for a week, and the way it broke is worth the
+ * line.** The sentence below was written, placed and tested, and the card went
+ * on printing the *shared table's* `no-change` meaning above it, larger:
+ * *“The change no longer fits this page — something it referred to has moved or
+ * gone.”* In the review queue that is the cause. Here it is not: a visitor
+ * reaches this state by pressing two buttons, and the thing the dead ask
+ * referred to is still exactly where it was, three inches to the left. So a
+ * stranger met the false account first, in the loud position, and this one as a
+ * second explanation that disagreed with it. `record-card.tsx` now puts this
+ * sentence in that position, and `report.ts` overrides the shared one for the
+ * late path where there is no note to put there.
  */
 
 /** What a visitor is told, and the two numbers behind it. */
