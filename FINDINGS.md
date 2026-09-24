@@ -30905,3 +30905,166 @@ Not decided here because the application's build configuration is the shell's
 and the cost lands on four surfaces, and because a mitigation that removes the
 symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
+
+---
+## 2026-09-24 — the front door hands a visitor to four surfaces and three of them cannot hand them back
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom demo`,
+`Loom lessons` · **Status:** open — measured against `next start` on this
+branch; nothing is broken and no page is unreachable by typing, which is why it
+is a finding rather than a bug
+
+[0070](decisions/0070-the-portal-is-a-segment-and-the-marketing-site-is-the-front-door.md) put the marketing
+site at `/` and [0067](decisions/0067-the-four-surfaces-are-one-application.md)
+made the five surfaces one application. The brief this lane runs under names the
+shape it is meant to feel like — *a marketing root, docs at a path, the
+signed-in product at another, **all feeling like one thing***.
+
+The measurement, over every `.ts`/`.tsx` file in each route group:
+
+| route group | links to `/` |
+| --- | --- |
+| `(portal)` | 1 |
+| `(docs)` | **0** |
+| `(demo)` | **0** |
+| `(lessons)` | **0** |
+
+The marketing site carries the way *in* four times over — the bar's menu, the
+footer's *The product* group, the front door's *Keep going* band, and the
+reading band's hand-off card. There is no way back. A visitor who follows
+*Docs* from the front door is, from that moment, in an application with no
+route to the page that persuaded them to go there, short of editing the address
+bar.
+
+**`(docs)`' wordmark is the one that has already been thought about**, and its
+own comment is why this is filed rather than fixed:
+
+> `/docs`, not `/`. This wordmark went to the first page of the documentation
+> when the docs were their own application and `/` was their redirect; `/` is
+> the marketing site's now (0070), so the same href would quietly have turned
+> "back to the docs" into "leave the docs". **Whether the wordmark should offer
+> the front door instead is this surface's call, not the migration's.**
+
+That is right, and it is the reason there is no recommendation here about *how*.
+A wordmark is one answer and a poor one for the docs specifically — the reading
+above is correct, and a reference site's wordmark going home is a real
+convention. A separate link, a breadcrumb, or a line in an existing footer are
+all answers too, and each surface knows its own chrome. What this entry asks is
+only that each of the three decides, rather than inheriting *no way back* from a
+migration that never intended it.
+
+Nothing in this repository could have reported it. Every link on every surface
+resolves; no test of any lane asserts anything about another lane's chrome, and
+none should. It is visible only by standing at the front door and walking
+through, which is this lane's job and is why it is filed from here.
+
+---
+## 2026-09-24 — this application cannot serve a `robots.txt`, and the file that proves it passed every test it had
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — **measured three ways on `marketing-35-the-map-nothing-here-draws`**;
+nothing is broken and no page is affected, and the marketing site ships its
+sitemap without one
+
+`/sitemap.xml` shipped today. The `robots.txt` that should announce it did not,
+because this application will not serve one from anywhere it can be written.
+
+### The measurements
+
+All against the built application, `pnpm --filter @loom/app build` then
+`next start`, and repeated under `next dev`:
+
+| where `robots.ts` was put | in the build's route listing | `GET /robots.txt` |
+| --- | --- | --- |
+| `app/(marketing)/robots.ts` | **absent** — not built at all | 404 |
+| `app/robots.ts` | present, `○ /robots.txt` | **404** |
+
+And the control, which is what makes this a defect rather than a
+misunderstanding of where the file goes:
+
+| file | from `app/(marketing)/` | from `app/` |
+| --- | --- | --- |
+| `sitemap.ts` | **200** | **200** |
+| `robots.ts` | 404 | 404 |
+
+So it is not the root segment, and it is not the route group. `sitemap.ts` is
+honoured in both places and `robots.ts` in neither.
+
+From the application root the route is genuinely built —
+`app-paths-manifest.json` carries `"/robots.txt/route"`, and
+`.next/server/app/robots.txt.body` holds exactly the right four lines with a
+`content-type: text/plain` beside them:
+
+```
+User-Agent: *
+Allow: /
+Disallow: /portal
+
+Sitemap: http://localhost:3000/sitemap.xml
+```
+
+It is built, it is correct, and a request for it returns the application's
+not-found page. `/robots.txt/` answers **308**, so the segment exists and the
+trailing-slash redirect finds it; the address it redirects to is the one that
+404s.
+
+### Why this is the shell's
+
+Ruled out from here: the middleware (`proxy.ts` matches `/portal` and
+`/portal/:path*` only), rewrites and redirects (`next.config.ts` has none),
+`vercel.json` (framework only), and a `public/` directory shadowing it (there
+is none). What is left is the application's routing — five route groups, five
+root layouts, no layout and no page at the root segment (0067) — which is the
+shell's, and is the one thing a marketing composition cannot reach.
+
+`nextjs.org` would have settled in one fetch whether a root layout is required
+for a root-segment metadata route. It is listed in `docs/routines.md` as
+currently allowed and came back `EGRESS_BLOCKED`, which is its own line below.
+
+### What it costs, which is little, and the shape that is worth more
+
+The sitemap is unaffected and shipped: consumers look for `/sitemap.xml` by
+convention and it can be handed to a search console directly. What is lost is
+the `Sitemap:` line that announces it and the `Disallow: /portal` that keeps
+crawlers off a sign-in page nobody reading the marketing site can get through.
+Neither is urgent and neither is a security control — what keeps the portal
+shut is the portal's sign-in.
+
+**The shape is worth more than the file.** Eleven assertions passed against
+`robots.ts` — its rules, its disallow list derived from `guarded`, its absolute
+sitemap address — while the thing served nothing at all. A test of the function
+a metadata file exports is not a test that the framework serves it, and nothing
+in this repository distinguishes those. `curl` against `next start` is what
+found it, which is the instrument the shot harness already is for the visual
+half of the same gap.
+
+Whoever picks this up: the marketing lane's four lines are written and argued
+in the comment at the head of `app/(marketing)/sitemap.ts`, so a shell fix can
+land them without a marketing run.
+
+---
+## 2026-09-24 — `nextjs.org` is `EGRESS_BLOCKED`, and `docs/routines.md` lists it as allowed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — one fetch, from the marketing lane, on 24 September
+
+`docs/routines.md` under *Network access* says: *"Currently allowed: `21st.dev`
+and `nextjs.org` (the visual and structural references the primitives,
+marketing and docs briefs tell you to consult), GitHub, and the npm registry."*
+
+`WebFetch` of
+`https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots`
+returned `EGRESS_BLOCKED`.
+
+This is the same shape as the `21st.dev` entry that has now been filed
+twenty-three times from the demo lane, and it is filed once rather than
+repeatedly because the useful content is the discrepancy rather than the
+attempt: **either the allowlist does not contain what that section says it
+does, or `permissions.allow` carries `WebFetch(domain:nextjs.org)` and the
+proxy in front of it does not.** Those have different fixes and nothing from
+inside a run can tell them apart.
+
+What it cost today is written in the entry above: the question of whether a
+root-segment metadata route needs a root layout went unanswered, and the
+`robots.txt` finding is filed with the cause narrowed by elimination rather
+than named.
