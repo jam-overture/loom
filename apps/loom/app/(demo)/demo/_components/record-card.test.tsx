@@ -839,6 +839,52 @@ describe("an ask the page has moved past", () => {
   })
 
   /**
+   * **And says it in the position the card's account is read from, because the
+   * sentence that was there said something that had not happened.**
+   *
+   * The card's header carries one `text-sm` line under the quote: the state in
+   * a sentence. On this card it was the shared table's `no-change` meaning —
+   * *"The change no longer fits this page — something it referred to has moved
+   * or gone"* — which is the cause in the review queue and is not the cause
+   * here. The visitor asked for the numbers band to come off and then asked for
+   * a palette; the band is still on the page, and the sentence announcing its
+   * disappearance was the largest thing on the card, with `movedOn`'s true
+   * account four blocks below it at `text-xs`.
+   *
+   * Asserted as a position rather than as presence, because presence was
+   * already true and was exactly the defect: both sentences were on the card
+   * and the wrong one was read first.
+   */
+  it("puts what happened in the one line the card's account is read from", () => {
+    const { container } = render(<RecordCard record={HELD} moved={MOVED} />)
+    const account = container.querySelector("header p.text-sm")
+
+    expect(account?.textContent).toBe(MOVED.sentence)
+  })
+
+  /**
+   * And the sentence it replaced is nowhere on the card at all. It is not
+   * demoted, folded or moved down: it is a claim about this page that is false,
+   * and the one thing the *record* may never contain is a false account of
+   * itself. What it stood for — that nothing was written — is what the sentence
+   * above says, and the revisions that caused it are still one click down.
+   */
+  it("no longer claims that something the change referred to has gone", () => {
+    const { container } = render(<RecordCard record={HELD} moved={MOVED} />)
+
+    expect(container.textContent).not.toMatch(/moved or gone/)
+    expect(container.textContent).not.toMatch(/no longer fits this page/)
+  })
+
+  /** Said once. Two accounts of one event is what this card had. */
+  it("gives the event one sentence and not two", () => {
+    const { container } = render(<RecordCard record={FROM_A_BUTTON} moved={MOVED} />)
+
+    expect(screen.getAllByText(MOVED.sentence)).toHaveLength(1)
+    expect(container.textContent?.split(MOVED.sentence)).toHaveLength(2)
+  })
+
+  /**
    * The one control a dead ask can honestly offer: the same request, weighed
    * again, against the revision the page is actually at. It is a fresh ask
    * rather than a retry and the caution says so, for the same reason
@@ -865,6 +911,25 @@ describe("an ask the page has moved past", () => {
 
     expect(screen.queryByRole("button", { name: ASK_AGAIN_LABEL })).toBeNull()
     expect(screen.getByText(MOVED.sentence)).toBeTruthy()
+  })
+
+  /**
+   * And draws no block to hold it in. The way-out block is marked with a left
+   * rule in the grey of the shut-question badge, and with the sentence gone
+   * from it there is nothing left inside for an ask that named no preset — a
+   * marked, empty outline is a promise of a control that is not coming.
+   *
+   * Counted against the card that *does* offer one, so this fails if the block
+   * stops rendering for both rather than for neither.
+   */
+  it("draws no empty block where there is no way out to offer", () => {
+    const ruled = (record: ChangeRecord) =>
+      render(<RecordCard record={record} moved={MOVED} />).container.querySelectorAll(
+        ".border-inapplicable-ink"
+      ).length
+
+    expect(ruled(FROM_A_BUTTON)).toBe(1)
+    expect(ruled(HELD)).toBe(0)
   })
 
   /**

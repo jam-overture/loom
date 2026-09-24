@@ -76,8 +76,46 @@ describe("the states the demo says out loud", () => {
     expect(demoState("applied").meaning).toContain("Put it back")
   })
 
+  /**
+   * The second override, and it is a different kind of wrong from the first.
+   *
+   * `applied` is a true sentence pointing at a screen this surface does not
+   * have. `no-change` names a **cause**: *"something it referred to has moved
+   * or gone"*, which is what the state means in the review queue, where a delta
+   * is replayed against a tree whose anchors are not there any more.
+   *
+   * A demo visitor reaches the same state by pressing two buttons. The band
+   * their dead ask referred to is still on the page beside them, and the
+   * sentence announcing its disappearance was the largest thing on the card.
+   *
+   * Asserted from both ends, in the same shape as `applied`'s guard: the shared
+   * sentence still claims the cause, and the demo's says only what became of
+   * the ask. If a portal run rewrites `no-change` to stop claiming one, the
+   * first line fails and this override should be deleted rather than kept as a
+   * second copy of a sentence that already agrees.
+   */
+  it("overrides no-change because the shared sentence names a cause this surface cannot have", () => {
+    expect(plainState("no-change").meaning).toMatch(/moved or gone/)
+
+    const demo = demoState("no-change").meaning
+
+    expect(demo).not.toMatch(/moved or gone/)
+    expect(demo).toMatch(/nothing on the page changed/i)
+  })
+
+  /**
+   * And it claims nothing about *why*, which is the property that makes it safe
+   * on every card that can reach this state. `did-not-apply` is every write
+   * failure the demo can record and their causes are not one thing; the cause
+   * is `moved.ts`'s to give when the demo knows it, and `record-card` puts it
+   * in this slot when there is one.
+   */
+  it("keeps the no-change sentence free of a cause it cannot vouch for", () => {
+    expect(demoState("no-change").meaning).not.toMatch(/revision|conflict|referred to|moved/i)
+  })
+
   it("passes every other state through untouched", () => {
-    for (const state of STATES.filter((each) => each !== "applied")) {
+    for (const state of STATES.filter((each) => each !== "applied" && each !== "no-change")) {
       expect(demoState(state).meaning).toBe(plainState(state).meaning)
     }
   })
