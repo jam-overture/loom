@@ -1,5 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server"
 
+import {
+  createDataRegistry,
+  defineSource,
+  describeDataRegistryError,
+  type DataRegistry,
+  type SourceEntry,
+} from "../../src/data/adapter.js"
+import { resolveTreeData } from "../../src/data/resolve.js"
+import { jsonObjectSchema, jsonValueSchema } from "../../src/json.js"
 import { createStarterPrimitiveRegistry } from "../../src/primitives/index.js"
 import type { RenderDiagnostic } from "../../src/render/diagnostics.js"
 import { renderLoomTree } from "../../src/render/render.js"
@@ -18,7 +27,7 @@ import { err, ok, type Result } from "../../src/result.js"
 
 import { specimenDocument } from "./page.js"
 import { planPages, type PlannedPage } from "./plan.js"
-import type { Specimen } from "./specimen.js"
+import type { Specimen, SpecimenAnswer } from "./specimen.js"
 
 /**
  * A specimen, turned into the documents a browser will be pointed at.
@@ -43,11 +52,18 @@ export type RenderedPage = {
 export type RenderError =
   | { readonly code: "registry"; readonly detail: string }
   | { readonly code: "endpoints"; readonly detail: string }
+  | { readonly code: "sources"; readonly detail: string }
 
-export const describeRenderError = (error: RenderError): string =>
-  error.code === "registry"
-    ? `the starter library would not build a registry: ${error.detail}`
-    : `this specimen's endpoints were refused: ${error.detail}`
+export const describeRenderError = (error: RenderError): string => {
+  switch (error.code) {
+    case "registry":
+      return `the starter library would not build a registry: ${error.detail}`
+    case "endpoints":
+      return `this specimen's endpoints were refused: ${error.detail}`
+    case "sources":
+      return `this specimen's answers were refused: ${error.detail}`
+  }
+}
 
 /**
  * A declared target becomes an endpoint that answers with it and does nothing
@@ -77,6 +93,38 @@ const registryOf = (
     : err({ code: "endpoints", detail: describeEndpointRegistryError(built.error) })
 }
 
+/**
+ * A declared answer becomes a source that replies with it and does no IO.
+ *
+ * Through `defineSource` for the reason `endpointsOf` goes through
+ * `defineEndpoint`: the same schemas a host's source is held to run over a
+ * lane's fixture, so a specimen asking with params its own tree got wrong is
+ * told here rather than photographed as a region that drew nothing.
+ *
+ * `jsonObjectSchema` accepts any params, because a specimen declares what comes
+ * back and not what may be asked — the question is the tree's, and refusing it
+ * here would be this harness inventing a contract nobody wrote. What it does
+ * still catch is a binding whose `params` are not an object at all.
+ */
+const sourcesOf = (declared: Readonly<Record<string, SpecimenAnswer>>): readonly SourceEntry[] =>
+  Object.entries(declared).map(([id, answer]) =>
+    defineSource({
+      id,
+      description: `declared by a specimen for ${id}`,
+      params: jsonObjectSchema,
+      answers: jsonValueSchema,
+      adapter: { fetch: async () => ("answer" in answer ? ok(answer.answer) : err(answer.unavailable)) },
+    })
+  )
+
+const sourcesFor = (specimen: Specimen): Result<DataRegistry, RenderError> => {
+  const built = createDataRegistry(sourcesOf(specimen.answers ?? {}))
+
+  return built.ok
+    ? ok(built.value)
+    : err({ code: "sources", detail: describeDataRegistryError(built.error) })
+}
+
 export const renderSpecimen = async (
   specimen: Specimen,
   additionalPrimitives: readonly PrimitiveEntry[] = []
@@ -87,6 +135,9 @@ export const renderSpecimen = async (
   const endpoints = registryOf(specimen)
   if (!endpoints.ok) return endpoints
 
+  const sources = sourcesFor(specimen)
+  if (!sources.ok) return sources
+
   const themes = createThemeRegistry()
 
   const pages: RenderedPage[] = []
@@ -94,11 +145,13 @@ export const renderSpecimen = async (
   for (const page of planPages(specimen)) {
     const tree = specimen.build(page.theme.selection)
     const submissions = await resolveTreeSubmissions(tree, { registry: endpoints.value })
+    const data = await resolveTreeData(tree, { registry: sources.value })
     const rendered = renderLoomTree(tree, {
       resolver: registry.value,
       validator: registry.value,
       themes,
       submissions,
+      data,
     })
 
     pages.push({
