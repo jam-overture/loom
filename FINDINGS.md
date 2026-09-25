@@ -8,6 +8,83 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-24 — the first correct press a stranger makes is answered with a warning, in the loudest position on the rail
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** open —
+found by walking the surface as a stranger, not by reading the code; the
+mechanism is right and the moment it arrives in is wrong.
+
+Press **Take the numbers off** — the one control this panel invites — and the
+first thing that appears at the top of the rail, pinned, in amber, above the
+record it is about, is this:
+
+> *One question is still waiting on you. Anything else you ask for moves the
+> page on — and Loom won’t carry an answer onto a page it hasn’t seen, so that
+> question would be set aside.* · **Answer it first ↓**
+
+Every word of that is true and the measurement behind it is sound: the 23
+September run proved a stranger does press a second ask before answering the
+first, and that without this the question dies silently. **What it does not
+account for is that the warning now greets the visitor's very first correct
+action.** They have pressed the one green button on the screen, nothing has gone
+wrong, and the surface's loudest element is three lines of conditional
+machinery — *would* move the page on, *would* be set aside — about a mistake
+they have not made, in the two seconds they are deciding whether this product is
+for them.
+
+It is also read before the thing it is about. The caution sits above the card,
+so a stranger meets *"that question would be set aside"* before they have met
+the question. The sentence cannot mean anything yet.
+
+**The shape that would close it, and it is not removal.** The caution earns its
+place the moment a second ask is *possible to press in error* — which is when
+the visitor's eye is on the ask list, not when the card has just appeared. The
+strip already sticks to the rail's scroller for as long as any ask control is in
+view; what it does not do is wait until the visitor has been anywhere near one.
+Holding it until the panel's controls have been scrolled back into view, or
+until a second press is actually attempted, would keep every measured property —
+on screen, above the controls, amber, before the press — and stop the demo's
+first success reading as a complaint.
+
+**Not started here deliberately.** This run's unit was the payoff frame at the
+other end of the same press, and the two would have made one pull request that
+is two arguments.
+
+---
+## 2026-09-24 — a second assessment of one proposal replaces a reading the first one computed, and only `did` was protected from it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`_lib/record.ts`) · **Status:** **closed** by this run
+(`demo-27-the-gap-names-what-left`) for `touched`; **written down because the
+shape outlived the field**, and the next field added to a record will meet it
+again.
+
+The Gate looks twice. An ask is assessed when it is made, by a server action
+that has read the tree and hands it in as `AssessedAgainst`; confirming a hold
+narrates a **fresh assessment of the same proposal**, folded with no tree,
+because the surface answering a question is not the surface that asked it.
+
+`assessed()` folds both, and it treats two fields differently without saying so:
+
+| field | on the second fold |
+| --- | --- |
+| `did` | **written only when there is a tree** — so the spread is empty, and the first fold's sentence survives onto the applied card |
+| `touched` | **written unconditionally** — the second fold's reading replaces the first's |
+
+That was invisible for as long as `touched` carried only ids and positions,
+which the second assessment computes just as correctly. The moment it carried
+something only a tree can supply, the second fold silently threw it away: every
+fold that had the words was a fold nobody was looking at, and the one on screen
+at the demo's payoff could not quote a thing. It cost this run twenty minutes
+and a screenshot that looked exactly like the defect it was meant to fix.
+
+`keepingWords` closes it for `touched` — matched on node and kind, only ever
+filling in, never overwriting. **The general rule is the thing to keep:** a fold
+with less in hand than the fold before it must not overwrite what the earlier
+one computed. `did` gets that by being absent; anything else has to ask for it.
+
+---
 ## 2026-09-23 — the shared vocabulary has five states, and two of them are now overridden by the demo for two different reasons
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom portal`
@@ -32088,3 +32165,87 @@ request opened on red with a report saying green, which is the one thing
 **Owned by `Loom daily build`** because `docs/routines.md` is the framework
 lane's file and a lane may not write the governance it is bound by. The
 paragraph above is drop-in.
+## 2026-09-24 — the plain-language rule was enforced twenty times by hand and nowhere by default, and eight sentences were on the surface because of it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**closed** by `portal-36-a-change-has-a-number` · filed because the *class* is
+worth writing down even though this instance is fixed
+
+The governing principle of the 18 August redirection is one sentence:
+
+> **Plain language is the default. The technical record is one click away.
+> Nothing is ever removed.**
+
+Since 11 September this lane has held it as a property rather than a taste —
+`expect(runtimeWordsIn(sentence)).toEqual([])` — and `_test/plain-language.ts`
+exists so there is one list rather than four. What it never had is the word
+**default**. On `main` this morning it had **45 assertions across 16 test
+files**, each one written by somebody who remembered to write it, and the
+screens nobody wrote one for were not covered by anything.
+
+**What that cost, counted on the run that closed it: eight sentences.**
+
+| where | what a reader was shown |
+| --- | --- |
+| `reversal-note.tsx` | *"Undoing it now would wipe out what revision 4 did"* |
+| `_lib/reversal.ts` | *"only goes back as far as revision 5"* |
+| `history/page.tsx` | *"It is exactly as it was created — revision 0"* |
+| `trust/page.tsx` | *"this reads the log of what the AI has proposed"* |
+| `since-the-change.tsx` ×3 | *"Revision 2 against revision 1, part by part"* |
+| `page-reading.tsx` | *"Something people want is folded away in there"* |
+
+Every one is in a file whose tests are about something else.
+
+**The remedy taken** is in `every-screen.test.ts`, which is where this lane
+already puts the rules it wants to hold over screens nobody remembered: the
+principle is now swept over every `.tsx` in the route group, 312 cases, one per
+sentence.
+
+**The part worth keeping is why it parses rather than greps.** This run wrote
+the regex version twice before reaching for a parser, and it fails at both ends:
+
+- `>([^<>{}]+)<` matches the inside of `ReadonlyMap<string, number>` and every
+  `=>`, so `readonly revisions: ReadonlyMap` is reported as a sentence.
+- A sentence broken across an expression — `wipe out what revision{n === 1 ? " "
+  : "s "}` — is not one text run, so `reversal-note.tsx` survived every sweep
+  ever pointed at this lane.
+
+`_test/surface-text.ts` walks the TypeScript AST instead. A `JsxText` node is a
+text node whatever sits either side of it, and a type argument is not one.
+
+**For the other surface lanes**, and this is the reason it is filed rather than
+only reported: `(docs)`, `(marketing)`, `(lessons)` and `(demo)` are all bound
+by the same redirection and none of them has a sweep. The module is in this
+lane's `_test/`, which is deliberately outside the production graph and
+deliberately not shared — but the twenty lines of it are worth copying, and the
+list of words is the part that would need to be yours rather than ours.
+
+---
+## 2026-09-24 — the portal has been photographed by a preload rebuilt from a report for the seventh consecutive run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed by reference.** The 14, 19, 20 and 21 September entries stand
+unchanged; this adds one number and one detail
+
+**The number: seven.** Every picture of this portal since 15 September has been
+taken with a `--import` preload that seeds
+`globalThis[Symbol.for("loom.portal.store")]`, written from scratch at the start
+of the run from the prose description in the previous run's report, and deleted
+before the diff.
+
+**The detail this run adds**, and it is the first thing that has actually gone
+wrong rather than merely been wasteful: **the preload cannot live outside the
+repository.** Put in a scratch directory it fails on `ERR_MODULE_NOT_FOUND` for
+`@loom/runtime`, because Node resolves a preload's imports from the preload's
+own location. So it has to be written *into* `apps/loom/` and deleted again, and
+a run that is interrupted between those two steps leaves an untracked `.mjs` at
+the application root — one lane away from the stale-`.next` class of problem the
+framework routine filed on 23 September.
+
+**The recommendation is unchanged and is now narrower.** A committed
+`tools/portal-staging/` (or an `app/(portal)/_test/` module with a small CLI)
+holding the seeded store, the three appended revisions and the two reviewer
+environment variables. It is roughly 120 lines, it is this lane's, and it would
+have saved six runs. It is not in `portal-36` because that branch is about what
+a reader is shown and a staging harness is not, and a branch that is two things
+is a branch a maintainer has to review twice.

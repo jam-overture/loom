@@ -221,7 +221,7 @@ const HistoryPage = async ({
           action={<Link href={`/portal/pages/${scope.data}`}>Open this page →</Link>}
         >
           <p>
-            It is exactly as it was created &mdash; revision 0. Open it, click any part of it, and
+            It is exactly as it was created &mdash; version 0. Open it, click any part of it, and
             ask for a change; whatever Loom does about it turns up here.
           </p>
           <p>

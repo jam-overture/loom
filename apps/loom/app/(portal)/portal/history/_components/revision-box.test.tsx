@@ -16,7 +16,7 @@ const fieldsOf = (container: HTMLElement): Record<string, string> =>
   )
 
 describe("RevisionBox", () => {
-  it("asks for the revision as a read, so the result is a URL worth sending on", () => {
+  it("asks for the version as a read, so the result is a URL worth sending on", () => {
     const { container } = render(<RevisionBox treeId={treeId} typed={undefined} />)
     const form = container.querySelector("form")
 
@@ -24,7 +24,7 @@ describe("RevisionBox", () => {
     expect(form?.method).toBe("get")
   })
 
-  it("submits the tree it is on and the revision that was typed", () => {
+  it("submits the tree it is on and the version that was typed", () => {
     const { container } = render(<RevisionBox treeId={treeId} typed={undefined} />)
 
     expect(fieldsOf(container)).toEqual({ tree: "tree_alpha/1", at: "" })
@@ -36,7 +36,7 @@ describe("RevisionBox", () => {
    * would name a revision the read then ignores — and from the second page onward
    * the box would appear to do nothing at all.
    */
-  it("carries no cursor, so a typed revision is a position and not a step", () => {
+  it("carries no cursor, so a typed version is a position and not a step", () => {
     const { container } = render(<RevisionBox treeId={treeId} typed={undefined} />)
     const submitted = Object.keys(fieldsOf(container))
 
@@ -51,9 +51,9 @@ describe("RevisionBox", () => {
     expect(fieldsOf(container)["at"]).toBe("elevn")
   })
 
-  it("labels the field and explains what a revision is, in sight and to a reader", () => {
+  it("labels the field and explains what a version is, in sight and to a reader", () => {
     const { container } = render(<RevisionBox treeId={treeId} typed={undefined} />)
-    const field = screen.getByLabelText("Jump to revision")
+    const field = screen.getByLabelText("Jump to a version")
     const hint = field.getAttribute("aria-describedby")
 
     expect(field.getAttribute("name")).toBe("at")
