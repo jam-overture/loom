@@ -32015,3 +32015,89 @@ this impossible rather than remembered. It is repository tooling and it would
 have to be installed by whoever runs `pnpm install`, so it is a decision for the
 maintainer and the framework lane rather than something a surface lane should
 add on its own.
+
+---
+## 2026-09-24 — the plain-language rule was enforced twenty times by hand and nowhere by default, and eight sentences were on the surface because of it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**closed** by `portal-36-a-change-has-a-number` · filed because the *class* is
+worth writing down even though this instance is fixed
+
+The governing principle of the 18 August redirection is one sentence:
+
+> **Plain language is the default. The technical record is one click away.
+> Nothing is ever removed.**
+
+Since 11 September this lane has held it as a property rather than a taste —
+`expect(runtimeWordsIn(sentence)).toEqual([])` — and `_test/plain-language.ts`
+exists so there is one list rather than four. What it never had is the word
+**default**. On `main` this morning it had **45 assertions across 16 test
+files**, each one written by somebody who remembered to write it, and the
+screens nobody wrote one for were not covered by anything.
+
+**What that cost, counted on the run that closed it: eight sentences.**
+
+| where | what a reader was shown |
+| --- | --- |
+| `reversal-note.tsx` | *"Undoing it now would wipe out what revision 4 did"* |
+| `_lib/reversal.ts` | *"only goes back as far as revision 5"* |
+| `history/page.tsx` | *"It is exactly as it was created — revision 0"* |
+| `trust/page.tsx` | *"this reads the log of what the AI has proposed"* |
+| `since-the-change.tsx` ×3 | *"Revision 2 against revision 1, part by part"* |
+| `page-reading.tsx` | *"Something people want is folded away in there"* |
+
+Every one is in a file whose tests are about something else.
+
+**The remedy taken** is in `every-screen.test.ts`, which is where this lane
+already puts the rules it wants to hold over screens nobody remembered: the
+principle is now swept over every `.tsx` in the route group, 312 cases, one per
+sentence.
+
+**The part worth keeping is why it parses rather than greps.** This run wrote
+the regex version twice before reaching for a parser, and it fails at both ends:
+
+- `>([^<>{}]+)<` matches the inside of `ReadonlyMap<string, number>` and every
+  `=>`, so `readonly revisions: ReadonlyMap` is reported as a sentence.
+- A sentence broken across an expression — `wipe out what revision{n === 1 ? " "
+  : "s "}` — is not one text run, so `reversal-note.tsx` survived every sweep
+  ever pointed at this lane.
+
+`_test/surface-text.ts` walks the TypeScript AST instead. A `JsxText` node is a
+text node whatever sits either side of it, and a type argument is not one.
+
+**For the other surface lanes**, and this is the reason it is filed rather than
+only reported: `(docs)`, `(marketing)`, `(lessons)` and `(demo)` are all bound
+by the same redirection and none of them has a sweep. The module is in this
+lane's `_test/`, which is deliberately outside the production graph and
+deliberately not shared — but the twenty lines of it are worth copying, and the
+list of words is the part that would need to be yours rather than ours.
+
+---
+## 2026-09-24 — the portal has been photographed by a preload rebuilt from a report for the seventh consecutive run
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed by reference.** The 14, 19, 20 and 21 September entries stand
+unchanged; this adds one number and one detail
+
+**The number: seven.** Every picture of this portal since 15 September has been
+taken with a `--import` preload that seeds
+`globalThis[Symbol.for("loom.portal.store")]`, written from scratch at the start
+of the run from the prose description in the previous run's report, and deleted
+before the diff.
+
+**The detail this run adds**, and it is the first thing that has actually gone
+wrong rather than merely been wasteful: **the preload cannot live outside the
+repository.** Put in a scratch directory it fails on `ERR_MODULE_NOT_FOUND` for
+`@loom/runtime`, because Node resolves a preload's imports from the preload's
+own location. So it has to be written *into* `apps/loom/` and deleted again, and
+a run that is interrupted between those two steps leaves an untracked `.mjs` at
+the application root — one lane away from the stale-`.next` class of problem the
+framework routine filed on 23 September.
+
+**The recommendation is unchanged and is now narrower.** A committed
+`tools/portal-staging/` (or an `app/(portal)/_test/` module with a small CLI)
+holding the seeded store, the three appended revisions and the two reviewer
+environment variables. It is roughly 120 lines, it is this lane's, and it would
+have saved six runs. It is not in `portal-36` because that branch is about what
+a reader is shown and a staging harness is not, and a branch that is two things
+is a branch a maintainer has to review twice.

@@ -3,6 +3,8 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
+import { runtimeWordsIn } from "./_test/plain-language"
+import { surfaceTextIn } from "./_test/surface-text"
 import { namedScreens } from "./_lib/screen-names"
 import { isForwarding, portalScreens, screenSource } from "./_lib/screen-source"
 
@@ -351,4 +353,62 @@ describe("every plain sentence a reader meets", () => {
   it("finds no component in the lane rendering a sentence by hand", () => {
     expect(byHand).toEqual([])
   })
+})
+
+/**
+ * **The governing principle, over the whole lane.**
+ *
+ * > Plain language is the default. The technical record is one click away.
+ * > Nothing is ever removed.
+ *
+ * This is the one rule in this file that is not new to the portal and *was* new
+ * to this file. It has been enforced since 11 September by `runtimeWordsIn` —
+ * on the morning this was written, 45 assertions across 16 test files, each one
+ * put there by somebody who remembered to put it there, which is the
+ * arrangement the rest of this file exists to replace.
+ *
+ * What that cost, measured on the run that added this: **four leaks in files
+ * nobody had written one for.** `reversal-note.tsx` said *"wipe out what
+ * revision 4 did"* on the surface of `/portal/history`; `reversal.ts` said
+ * *"only goes back as far as revision 9"*; the history screen's empty state
+ * said *revision 0*; and `/portal/trust`'s failure notice said it *"reads the
+ * log"*. Every one of them is a screen a person meets, and every one of them
+ * was in a file whose tests were about something else.
+ *
+ * Two further facts about the sweep are in `_test/surface-text.ts`, and they
+ * are the reason it parses rather than greps: a regex over this lane reports
+ * type arguments as sentences, and misses a sentence broken across an
+ * expression — which is the exact shape of the `reversal-note.tsx` leak.
+ *
+ * The record is not swept. A `<TechnicalDetail>` subtree is *supposed* to say
+ * `revision` and `delta` and `fold`; several tests assert that it does, and one
+ * that did not would be the disclosure failing to be a disclosure.
+ */
+describe("the words a reader meets before they have asked for any", () => {
+  const surface = sourcesUnder(GROUP).flatMap((entry) =>
+    surfaceTextIn(entry.file, entry.file.slice(GROUP.length + 1))
+  )
+
+  it("finds the sentences this lane renders, so an empty sweep cannot pass as clean", () => {
+    expect(surface.length).toBeGreaterThan(200)
+  })
+
+  /**
+   * Guards the guard, from both ends. The extractor has to see a plain sentence
+   * on the surface and has to *not* see the one under a disclosure — a sweep
+   * that skipped everything would report a clean lane for ever.
+   */
+  it("reads the surface and skips the record", () => {
+    const said = surface.map((entry) => entry.text)
+
+    expect(said).toContain("Jump to a version")
+    expect(said.some((text) => text.includes("What the record says"))).toBe(false)
+  })
+
+  it.each(surface.map((entry) => [entry.where, entry.text]))(
+    "%s says it without the runtime's vocabulary",
+    (_where, text) => {
+      expect(runtimeWordsIn(text), text).toEqual([])
+    }
+  )
 })

@@ -7,6 +7,7 @@ import { revisionAnchorId } from "@/app/(portal)/_lib/history-link"
 import { firstNamed, namesInOperations, type PartName } from "@/app/(portal)/_lib/part-name"
 import type { Reversal } from "@/app/(portal)/_lib/reversal"
 import { revisionView } from "@/app/(portal)/_lib/revision-view"
+import { versionHeading, versionOnTheRecord } from "@/app/(portal)/_lib/version"
 import { readingOf } from "@/app/(portal)/_lib/vocabulary"
 import { plainMoment } from "@/app/(portal)/_lib/when"
 
@@ -21,6 +22,14 @@ import { UndoButton } from "./undo-button"
  * that happen to be sorted. The number stays, and so does every other name on
  * this row: 22 August settled that a plain sentence describes a *class* of
  * thing, and what tells two rows apart is the name.
+ *
+ * The heading says *Version 4* rather than *Revision 4*, and that is the only
+ * thing about the number that moved. `version` is the portal's word for it and
+ * has been since `plainObstacle` was written — *"This was worked out on an
+ * older version of this page"* — while this row printed the runtime's. The
+ * number is unchanged, the anchor is unchanged, and `revision 4` is in the
+ * disclosure at the foot, beside the other four things a reader checking the
+ * portal against the log needs.
  *
  * What changed is the wording. The row used to open with `revision 4` and a raw
  * `2026-08-09T12:00:00.000Z`, list its operations as `reconfigure n_head title`,
@@ -100,7 +109,7 @@ export const RevisionRow = ({
        */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
         <h3 className="text-sm">
-          <span className="font-mono">Revision {stored.revision}</span>
+          <span className="font-mono">{versionHeading(stored.revision)}</span>
         </h3>
         <time className="text-ink-muted text-2xs" dateTime={stored.appliedAt}>
           {plainMoment(stored.appliedAt)}
@@ -194,6 +203,17 @@ export const RevisionRow = ({
           <div className="flex gap-1">
             <dt className="text-ink-muted">confidence</dt>
             <dd className="font-mono">{stored.provenance.confidence.toFixed(2)}</dd>
+          </div>
+          {/*
+           * The runtime's own name for the number in the heading above. The
+           * heading says *Version 4* because that is the portal's word; a
+           * reader matching this row against the log, a telemetry record or a
+           * node's attribution needs the word the runtime uses, and this is
+           * where it is. Nothing left the row — it moved one click down.
+           */}
+          <div className="flex gap-1">
+            <dt className="text-ink-muted">in the record</dt>
+            <dd className="font-mono">{versionOnTheRecord(stored.revision)}</dd>
           </div>
           <div className="flex gap-1">
             <dt className="text-ink-muted">proposal</dt>

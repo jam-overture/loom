@@ -3,7 +3,7 @@ import Form from "next/form"
 import type { TreeId } from "@loom/runtime"
 
 /**
- * A revision, typed.
+ * A version number, typed.
  *
  * A revision number is public and stable, so it travels: it appears in a node's
  * attribution, in a report, in a message from whoever asked for the change. Up
@@ -13,7 +13,7 @@ import type { TreeId } from "@loom/runtime"
  * capability for a reader who has the number and no link.
  *
  * A plain GET form rather than an action. There is nothing to submit — naming a
- * revision is a read, it is idempotent, and the result is a URL worth keeping.
+ * version is a read, it is idempotent, and the result is a URL worth keeping.
  * A server action would turn a shareable page into a POST, and a client
  * component would put JavaScript between a person and a query string. `next/form`
  * keeps the client-side navigation the rest of the portal has via `Link`, and
@@ -23,8 +23,12 @@ import type { TreeId } from "@loom/runtime"
  * `historyRead` resolves a cursor ahead of an anchor — a step a reader took is a
  * later instruction than the link that brought them — so a form that carried
  * `older` through would name a revision the read then ignored, and the box would
- * silently do nothing from the second page onwards. Typing a revision is not a
+ * silently do nothing from the second page onwards. Typing a version is not a
  * step from where you are; it is a fresh position.
+ *
+ * The label says *version* because that is the portal's word for the number
+ * (`_lib/version.ts`); the parameter is still `at` and still carries the same
+ * number, so every link anyone holds keeps working.
  */
 export const RevisionBox = ({
   treeId,
@@ -38,7 +42,7 @@ export const RevisionBox = ({
     <input type="hidden" name="tree" value={treeId} />
 
     <label htmlFor="at" className="text-ink-muted text-xs">
-      Jump to revision
+      Jump to a version
     </label>
 
     <input
@@ -62,7 +66,7 @@ export const RevisionBox = ({
 
     {/*
      * Visible rather than `sr-only`. It was written for a screen reader and it
-     * is the sentence that says what the box is *for* — a revision number
+     * is the sentence that says what the box is *for* — a version number
      * arrives from somewhere else, a report or a message, and without this the
      * box reads as a search field for something a reader cannot name.
      */}
