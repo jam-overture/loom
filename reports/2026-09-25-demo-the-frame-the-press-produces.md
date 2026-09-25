@@ -3,9 +3,14 @@
 **Routine:** `Loom demo` · **Branch:** `demo-28-the-frame-the-press-produces` ·
 **25 September 2026**
 
-**Pull request:** #394 · **Deployed preview:** added to the pull request body
-once Vercel reports it (`*.vercel.app` is off this sandbox's egress allowlist —
-the standing 19 August limit — so it cannot be verified from here).
+**Pull request:** [#394](https://github.com/jam-overture/loom/pull/394) ·
+**Deployed preview:**
+https://loom-git-demo-28-the-frame-t-c2e073-jpizzolato36-6341s-projects.vercel.app/demo
+
+(Published unverified against the deployment: `*.vercel.app` is off this
+sandbox's egress allowlist, the standing 19 August limit, and one call from here
+returned nothing at all — `status=000`. Vercel reports the deployment **Ready**
+and the commit status **success** on `2c68e4b`.)
 
 Every picture below is a production `next build` of a real commit — `main`'s
 `d82dcac` for the *before*, this branch's for the *after* — served with
