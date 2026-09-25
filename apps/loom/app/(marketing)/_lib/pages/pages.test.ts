@@ -676,3 +676,94 @@ describe("the record on the mechanism page", () => {
     })
   })
 })
+
+/**
+ * Every panel of data on this site, swept as one.
+ *
+ * `loom.code` scrolls sideways by default, which is right for a command and
+ * wrong for everything this site has ever put in one. The primitive gained
+ * `wrap` on 12 September answering a finding this lane filed on the 3rd, and
+ * three weeks later not one panel here set it — because nothing said it had to,
+ * and a panel whose right-hand end is behind a gesture renders cleanly, emits
+ * no diagnostic, measures no overflow and passes every test on this page.
+ *
+ * The one instrument that found it was a picture, and a picture cannot be
+ * asserted. What *can* be asserted is the decision: a panel either wraps or
+ * says out loud that it does not. So this is the rule written where a panel
+ * added tomorrow meets it, rather than a prop nine call sites have to remember.
+ *
+ * It sweeps the trees the **routes** serve rather than the ones the builders
+ * return, because the panels this is about are the mechanism page's, and those
+ * arrive from a request made outside the builder. A sweep over `treeFor` would
+ * have found one panel and reported eight-eighths green.
+ */
+describe("the panels that print data", () => {
+  const panelsOn = async (route: SiteRoute): Promise<readonly ElementNode[]> => {
+    const tree = await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
+    const found = (node: LoomNode): readonly ElementNode[] =>
+      node.kind === "text"
+        ? []
+        : [
+            ...(node.kind === "element" && node.type === "loom.code" ? [node] : []),
+            ...node.children.flatMap(found),
+          ]
+
+    return found(tree.root)
+  }
+
+  const everyPanel = async (): Promise<readonly ElementNode[]> =>
+    (await Promise.all(SITE_ROUTES.map(panelsOn))).flat()
+
+  /**
+   * Counted, so that the sweep below cannot quietly stop covering anything. A
+   * panel added to a page this test forgot to walk would otherwise show up as
+   * the same green as a panel that wraps.
+   */
+  it("is every loom.code this site serves, and there are eight of them", async () => {
+    expect((await everyPanel()).length).toBe(8)
+  })
+
+  /**
+   * `wrap` is optional on the primitive and absent means `false`, which is the
+   * right default for a library that does not know what it is holding. This
+   * site does know, so absent is the one answer no panel here may give: a
+   * command panel is welcome and says `wrap: false`.
+   */
+  it("each say whether they wrap, rather than leaving it to the default", async () => {
+    for (const panel of await everyPanel()) {
+      expect(typeof panel.props["wrap"]).toBe("boolean")
+    }
+  })
+
+  /**
+   * The premise of the rule, asserted rather than assumed. `wrap: true` is
+   * right here because nothing on this site is a thing you type — the moment
+   * one of these is a terminal, the answer for *that* panel changes and this
+   * test is where the change gets argued.
+   */
+  it("hold data and not commands, which is why they wrap", async () => {
+    for (const panel of await everyPanel()) {
+      expect(panel.props["tone"]).not.toBe("terminal")
+      expect(panel.props["wrap"]).toBe(true)
+    }
+  })
+
+  /**
+   * The three lines this is actually about: the only ones in the whole record
+   * written in English rather than in keys and ids, and — before this — the
+   * only three a reader could not finish. The threshold is well under what a
+   * 1280 panel shows, so this fails when the record stops carrying a sentence,
+   * not when a laptop gets wider.
+   */
+  it("carry the sentences the record is worth reading for", async () => {
+    const text = (node: LoomNode): string =>
+      node.kind === "text" ? node.value : node.children.map(text).join("\n")
+    const lines = (await panelsOn(HOW_IT_WORKS)).flatMap((panel) => text(panel).split("\n"))
+    const long = lines.filter((line) => line.length > 110)
+
+    expect(long.length).toBeGreaterThan(0)
+    for (const line of long) {
+      expect(line).toMatch(/"(rationale|detail)":/)
+    }
+  })
+})

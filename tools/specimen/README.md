@@ -57,8 +57,93 @@ token, and a photograph must not depend on a network. It is still validated the
 way a host's answer is, so an action that leaves the origin is refused here
 rather than in review.
 
+### Photographing a bound primitive
+
+A `loom.feed` nothing answered draws the sentence it draws when the source
+could not be reached — correct, and the same picture whatever state you meant
+to photograph. Declare what each source answers with:
+
+```ts
+export default defineSpecimen({
+  // …
+  answers: {
+    "posts.latest": { answer: [{ title: "A narrower door", meta: "23 September" }] },
+    "posts.drafts": { answer: [] },
+    "posts.archive": { unavailable: { code: "unavailable", detail: "no answer in time" } },
+  },
+})
+```
+
+An **answer**, not a source, for the reason `endpoints` takes a target: a
+specimen that can do IO is one whose pictures differ between two runs of the
+same tree. It goes through `defineSource`, so an invalid id is refused here, and
+the params a tree asks with are validated before the answer comes back.
+
+The source's schema accepts any JSON deliberately. Three of a bound primitive's
+four states are an answer, and the fourth — *a shape this primitive cannot draw*
+— is only reachable if the answer gets past the source. `answers.specimen.ts` is
+the worked copy and puts all four in one frame.
+
+### Photographing a behaviour
+
+A specimen is static markup, and **every control in the behaviour vocabulary —
+`copy`, `disclose`, `adjust`, `present`, `dismiss` — renders nothing until an
+effect proves scripting runs.** So a specimen of a primitive that takes one
+photographs the page without it, correctly, and there was no flag that changed
+that until 24 September. Say `live`:
+
+```ts
+export default defineSpecimen({
+  // …
+  live: {
+    states: [
+      { label: "settled", do: [] },
+      { label: "presented", do: [{ click: ".loom-control-present" }] },
+    ],
+  },
+})
+```
+
+The pages are then bundled with esbuild and hydrated in the browser before the
+shutter, and each state is a shot named `<specimen>-<theme>-<viewport>-<state>`.
+A state's `do` is the same step list `pnpm shoot` takes. `live: {}` hydrates and
+declares no states, which is one picture of the page as it settles.
+
+A specimen that says nothing about `live` is unchanged in every respect — no
+bundle, no browser JavaScript, and the same file names it had.
+
+Every control carries `loom-control` and `loom-control-<behaviour>`, which is
+what a step clicks. What a control publishes is `data-loom-disclosed`,
+`data-loom-presented` or the `--loom-adjust` custom property, and the primitive's
+own rules read those — see `src/render/behaviour.ts`.
+
+**`answers` and `live` compose, and nothing special happens when both are
+declared.** The browser resolves the same declared answers the server did and
+gets the same reply, so its first render agrees with the served markup. That is
+the one property hydration needs, and it holds because a specimen declares
+replies rather than adapters — see `element.ts`.
+
+### Registering a primitive for one specimen
+
+`primitives` takes entries from `definePrimitive` and registers them beside the
+starter library, for this specimen only:
+
+```ts
+export default defineSpecimen({
+  // …
+  primitives: [aSubjectThatPlacesTheControl],
+})
+```
+
+It is for photographing a **seam**: the smallest primitive that holds the thing
+under test, so a run does not have to add one to `src/primitives/` — another
+lane's directory — to have a subject. A primitive anybody's page should be able
+to use is not this; it is a finding for `Loom primitives`.
+`tools/specimen/behaviour.specimen.ts` is the worked copy of all three halves:
+it declares a primitive, a set of answers and a list of states.
+
 Put it beside the code it photographs. Nothing in this directory is any lane's
-content, and the harness imports no specimen but the example.
+content, and the harness imports no specimen but its own three.
 
 ## Why it is shaped like this
 
@@ -111,8 +196,10 @@ instead of the viewport:
 }
 ```
 
-Two steps and no more: `click` and `wait`. The moment this grows a way to assert
-or to branch, the harness has become a test runner with a camera attached.
+Four steps and no more: `click`, `fill`, `wait` and `waitFor`. Every one of them
+names a state to arrive at and none of them reports what is there — the moment
+this grows a way to assert or to branch, the harness has become a test runner
+with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
 
 A `do` list is a sequence against **one** page, so anchor navigation is
 prevented for its duration — otherwise step two runs somewhere else and the

@@ -90,7 +90,15 @@ export const proposeChange = async (
 
   revalidatePath(`/portal/pages/${treeId}`)
 
-  return reportOf(outcome)
+  /*
+   * The Gate's reasoning travels with the verdict, from the write that made it.
+   * `weighedAgainst` is handed over rather than read here, because which proposal
+   * to ask about depends on how the write ended and `reportOf` is the module that
+   * knows — see its note. A refusal that reached a repairer weighed two
+   * proposals, and the one a person is being told about is the one that was
+   * refused.
+   */
+  return reportOf(outcome, write.weighedAgainst)
 }
 
 export const confirmProposal = async (
@@ -119,7 +127,15 @@ export const confirmProposal = async (
    */
   if (outcome.kind === "committed") revalidatePath(`/portal/pages/${parsed.data.treeId}`)
 
-  return reportOf(outcome)
+  /*
+   * Handed over for the same reason, and it answers less here than above. A
+   * confirmation is re-judged (0021), so a second judgement of the same proposal
+   * happens in this request and is the one reported. What no write of this shape
+   * can recover is the judgement that put the proposal in the queue in the first
+   * place: that was a different request, and the card in the queue is where it is
+   * read.
+   */
+  return reportOf(outcome, write.weighedAgainst)
 }
 
 export const discardProposal = async (

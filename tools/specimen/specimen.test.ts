@@ -2,11 +2,12 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
+import { renderToString } from "react-dom/server"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
 import { themeSelectionSchema, type ThemeSelection } from "../../src/theme/theme.js"
 import { sequentialIdFactory } from "../../src/ids.js"
-import { SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
+import { DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../../src/tree/builders.js"
 import { createTree } from "../../src/tree/tree.js"
 
@@ -26,9 +27,17 @@ import {
   type SpecimenBrowser,
   type SpecimenPage,
 } from "./capture.js"
+import behaviourSpecimen from "./behaviour.specimen.js"
+import { bundleOptions, bundleSpecimen, describeBundleError, entrySource } from "./bundle.js"
+import { specimenElement } from "./element.js"
 import exampleSpecimen from "./example.specimen.js"
-import { escapeHtml, specimenDocument } from "./page.js"
-import { planPages, planShots, shotsAt, slug } from "./plan.js"
+import {
+  escapeHtml,
+  SPECIMEN_BUNDLE_FILE,
+  SPECIMEN_PAGE_ATTRIBUTE,
+  specimenDocument,
+} from "./page.js"
+import { isLive, planPages, planShots, planStates, shotsAt, slug } from "./plan.js"
 import {
   chromiumBrowser,
   contextOptionsFor,
@@ -1064,5 +1073,363 @@ describe("wiring a submission into a specimen", () => {
     expect(withRegistry.ok && withRegistry.value[0]?.html).toBe(
       without.ok ? without.value[0]?.html : "mismatch"
     )
+  })
+})
+
+/**
+ * The data seam's half of the block above, and the finding it closes (0185).
+ *
+ * `loom.feed` has four states — rows, an answer of none, a source that did not
+ * answer, and an answer of a shape it cannot draw — and before a specimen could
+ * declare an answer exactly one of them was reachable. Every assertion here is
+ * a photograph a lane could not take.
+ */
+describe("wiring an answer into a specimen", () => {
+  const feedSpecimen = (answers?: Specimen["answers"]): Specimen =>
+    specimenOf({
+      build: (theme) => {
+        const idFactory = sequentialIdFactory()
+        const feed = buildElement(idFactory, {
+          type: "loom.feed",
+          props: { [DATA_PROP_KEY]: { entries: { source: "posts.latest", params: { limit: 3 } } } },
+          children: [
+            buildSlot(idFactory, "empty", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 2 },
+                children: [buildText(idFactory, "Nothing posted yet")],
+              }),
+            ]),
+          ],
+        })
+        const page = buildElement(idFactory, {
+          type: "loom.page",
+          props: { [THEME_PROP_KEY]: theme },
+          children: [feed],
+        })
+
+        return createTree(page, idFactory)
+      },
+      ...(answers === undefined ? {} : { answers }),
+    })
+
+  const htmlOf = async (answers?: Specimen["answers"]): Promise<string> => {
+    const rendered = await renderSpecimen(feedSpecimen(answers))
+
+    return (rendered.ok && rendered.value[0]?.html) || ""
+  }
+
+  it("draws the rows a specimen declared", async () => {
+    const html = await htmlOf({
+      "posts.latest": {
+        answer: [
+          { title: "The second release", meta: "March" },
+          { title: "The first release", meta: "February" },
+        ],
+      },
+    })
+
+    expect(html).toContain("The second release")
+    expect(html).toContain("The first release")
+    expect(html).not.toContain("Nothing posted yet")
+  })
+
+  it("draws the region the tree supplied when the answer is none", async () => {
+    const html = await htmlOf({ "posts.latest": { answer: [] } })
+
+    expect(html).toContain("Nothing posted yet")
+    expect(html).not.toContain("could not be loaded")
+  })
+
+  it("draws the failure sentence when the source did not answer", async () => {
+    const html = await htmlOf({
+      "posts.latest": { unavailable: { code: "unavailable", detail: "the database is asleep" } },
+    })
+
+    expect(html).toContain("This list could not be loaded.")
+    expect(html).not.toContain("Nothing posted yet")
+  })
+
+  /**
+   * The source's own schema takes any JSON, so what refuses this answer is the
+   * primitive — which is exactly the state being photographed. A specimen that
+   * had to declare a schema could only ever photograph its own strictness.
+   */
+  it("draws the other failure sentence when the answer is a shape it cannot read", async () => {
+    const html = await htmlOf({ "posts.latest": { answer: { total: 4 } } })
+
+    expect(html).toContain("This list could not be shown.")
+  })
+
+  /**
+   * The state every specimen of a bound primitive was stuck in until now, and
+   * it is still what a specimen that declares nothing gets — with the seam's
+   * own reason for it in the diagnostics rather than silence.
+   */
+  it("reports the binding as unanswered when a specimen declares nothing", async () => {
+    const rendered = await renderSpecimen(feedSpecimen())
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    expect(rendered.value[0]?.diagnostics).toEqual([
+      expect.objectContaining({ code: "data-unavailable" }),
+    ])
+    expect(rendered.value[0]?.html).toContain("This list could not be loaded.")
+  })
+
+  /** Through `defineSource`, so a specimen's id meets the schema a host's does. */
+  it("says which source id it refused rather than rendering half a page", async () => {
+    const rendered = await renderSpecimen(feedSpecimen({ "Not An Id": { answer: [] } }))
+
+    expect(rendered.ok).toBe(false)
+    if (rendered.ok) return
+
+    expect(rendered.error.code).toBe("sources")
+    expect(describeRenderError(rendered.error)).toContain("Not An Id")
+  })
+
+  it("leaves a specimen that binds nothing exactly as it was", async () => {
+    const withRegistry = await renderSpecimen(specimenOf({ answers: {} }))
+    const without = await renderSpecimen(specimenOf())
+
+    expect(withRegistry.ok && without.ok).toBe(true)
+    expect(withRegistry.ok && withRegistry.value[0]?.html).toBe(
+      without.ok ? without.value[0]?.html : "mismatch"
+    )
+  })
+})
+
+describe("a specimen that asks to be hydrated", () => {
+  const PRESS = { click: ".loom-control-present" } as const
+
+  const liveSpecimen = (states?: readonly { label: string; do: readonly (typeof PRESS)[] }[]) =>
+    specimenOf({ live: states === undefined ? {} : { states }, viewports: [WIDE] })
+
+  /**
+   * The property every existing picture depends on, asserted first: a specimen
+   * that says nothing about being live is the specimen it was, down to the file
+   * names in four reports' worth of shots.
+   */
+  it("gives a static specimen one nameless state, so not one file name moves", () => {
+    expect(isLive(specimenOf())).toBe(false)
+    expect(planStates(specimenOf())).toEqual([{ label: "", do: [] }])
+    expect(planShots(specimenOf()).map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-phone.png",
+      "a-band-editorial-serif-wide.png",
+    ])
+  })
+
+  it("gives a live specimen that declares no states the same one, hydrated", () => {
+    const specimen = liveSpecimen()
+
+    expect(isLive(specimen)).toBe(true)
+    expect(planShots(specimen).map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-wide.png",
+    ])
+  })
+
+  it("plans one shot per state and names each after the state it reaches", () => {
+    const shots = planShots(
+      liveSpecimen([
+        { label: "settled", do: [] },
+        { label: "presented", do: [PRESS] },
+      ])
+    )
+
+    expect(shots.map((shot) => shot.file)).toEqual([
+      "a-band-editorial-serif-wide-settled.png",
+      "a-band-editorial-serif-wide-presented.png",
+    ])
+    /** One document for both: a state is reached in the browser, not rendered. */
+    expect(new Set(shots.map((shot) => shot.page.file)).size).toBe(1)
+  })
+
+  /**
+   * `do` was empty by construction, because a static page has no script in it to
+   * press. This is the whole of what changed about the shot list.
+   */
+  it("carries a state's steps through to the shot list", () => {
+    const shots = planShots(liveSpecimen([{ label: "presented", do: [PRESS] }]))
+
+    expect(shotsAt("http://127.0.0.1:1", shots)[0]?.do).toEqual([PRESS])
+    expect(shotsAt("http://127.0.0.1:1", planShots(specimenOf()))[0]?.do).toEqual([])
+  })
+
+  it("adds no bundle and no attribute to a static document", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>" })
+
+    expect(html).not.toContain(SPECIMEN_BUNDLE_FILE)
+    expect(html).not.toContain(SPECIMEN_PAGE_ATTRIBUTE)
+    expect(html).toContain("<body>\n<p>x</p>\n</body>")
+  })
+
+  it("loads one bundle and names the page on a live document", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>", page: "a-band-editorial" })
+
+    expect(html).toContain(`<script src="${SPECIMEN_BUNDLE_FILE}" defer></script>`)
+    expect(html).toContain(`${SPECIMEN_PAGE_ATTRIBUTE}="a-band-editorial"`)
+  })
+
+  /**
+   * A whitespace text node beside the markup is a node React has to reconcile,
+   * and it reconciles a disagreement by keeping the server's and saying nothing.
+   */
+  it("puts no whitespace round the markup of a live body", () => {
+    const html = specimenDocument({ title: "t", markup: "<p>x</p>", page: "p" })
+
+    expect(html).toContain(`<body ${SPECIMEN_PAGE_ATTRIBUTE}="p"><p>x</p></body>`)
+  })
+
+  it("renders a live specimen's pages with the bundle and their own name", async () => {
+    const rendered = await renderSpecimen(liveSpecimen())
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    expect(rendered.value[0]?.html).toContain(SPECIMEN_BUNDLE_FILE)
+    expect(rendered.value[0]?.html).toContain(
+      `${SPECIMEN_PAGE_ATTRIBUTE}="a-band-editorial-serif"`
+    )
+  })
+})
+
+describe("the primitives a specimen registers for itself", () => {
+  /**
+   * `renderSpecimen` took a list of these from the day it was written and the
+   * CLI could never pass one, so a run photographing a seam had to add a
+   * primitive to another lane's directory to have a subject.
+   */
+  it("registers what the specimen declared, which nothing could pass before", async () => {
+    const built = await specimenElement(
+      behaviourSpecimen,
+      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+    )
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.diagnostics).toEqual([])
+  })
+
+  it("leaves the node undrawn when the specimen declares nothing for its type", async () => {
+    const { primitives: _declared, ...withoutPrimitives } = behaviourSpecimen
+    const built = await specimenElement(
+      withoutPrimitives,
+      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+    )
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value.diagnostics.length).toBeGreaterThan(0)
+  })
+})
+
+describe("bundling a live specimen", () => {
+  it("imports the lane's module and the hydration entry, and nothing else", () => {
+    const source = entrySource(
+      "/repo/tools/specimen/a.specimen.ts",
+      "/repo/tools/specimen/hydrate.ts"
+    )
+
+    expect(source).toContain('import specimen from "/repo/tools/specimen/a.specimen.ts"')
+    expect(source).toContain('import { hydrateSpecimen } from "/repo/tools/specimen/hydrate.ts"')
+    expect(source).toContain("void hydrateSpecimen(specimen)")
+  })
+
+  /**
+   * React's development build patches a hydration mismatch into the client's
+   * render, which would photograph a page nobody is ever served.
+   */
+  it("builds React in production mode, from a TypeScript entry", () => {
+    const options = bundleOptions("", "/repo")
+
+    expect(options.define?.["process.env.NODE_ENV"]).toBe('"production"')
+    expect(options.stdin?.loader).toBe("ts")
+    expect(options.stdin?.sourcefile?.endsWith(".ts")).toBe(true)
+    expect(options.format).toBe("iife")
+    expect(options.platform).toBe("browser")
+  })
+
+  it("bundles the behaviour specimen, whose primitive the specimen declares", async () => {
+    const built = await bundleSpecimen("tools/specimen/behaviour.specimen.ts")
+
+    expect(built.ok).toBe(true)
+    if (!built.ok) return
+
+    expect(built.value).toContain("spec.behaviours")
+    expect(built.value.length).toBeGreaterThan(1000)
+  }, 30_000)
+
+  it("reports a module that will not build as a sentence rather than a throw", async () => {
+    const built = await bundleSpecimen("tools/specimen/nothing-here.specimen.ts")
+
+    expect(built.ok).toBe(false)
+    expect(built.ok === false && describeBundleError(built.error)).toContain(
+      "the specimen bundle would not build"
+    )
+  }, 30_000)
+})
+
+/**
+ * The submit seam, the data seam and the primitive registry all resolve in
+ * `specimenElement`, which is the function a hydrating browser calls. These are
+ * the tests for that being safe, and the first is the whole of the argument:
+ * hydration is React checking that the client's first render agrees with the
+ * server's markup, so what has to hold is that building the page twice gives the
+ * same page.
+ */
+describe("both seams in one element", () => {
+  const themeOf = (specimen: Specimen): ThemeSelection =>
+    specimen.themes[0]?.selection ?? selection("editorial")
+
+  const markupOf = async (specimen: Specimen): Promise<string> => {
+    const built = await specimenElement(specimen, themeOf(specimen))
+    expect(built.ok).toBe(true)
+    return built.ok ? renderToString(built.value.element) : ""
+  }
+
+  it("builds the same markup twice for a specimen that declares answers and live", async () => {
+    const [first, second] = await Promise.all([
+      markupOf(behaviourSpecimen),
+      markupOf(behaviourSpecimen),
+    ])
+
+    expect(first).toBe(second)
+    expect(first.length).toBeGreaterThan(0)
+  })
+
+  /**
+   * The rows are what the composition is for. Before it, a specimen could ask to
+   * be hydrated or ask to be answered and not both — `specimenElement` knew the
+   * submit seam only, so a live page's bound regions drew the state a binding
+   * reaches when nothing answered it.
+   */
+  it("resolves a live specimen's declared answers, so its bound band has rows", async () => {
+    const rendered = await renderSpecimen(behaviourSpecimen)
+
+    expect(rendered.ok).toBe(true)
+    if (!rendered.ok) return
+
+    const html = rendered.value[0]?.html ?? ""
+
+    for (const title of ["copy", "disclose", "adjust", "present and dismiss"]) {
+      expect(html).toContain(title)
+    }
+    expect(html).not.toContain("Nothing answered")
+  })
+
+  /** The worked copy earns its name by declaring all three, so this guards it. */
+  it("has one worked copy declaring a primitive, answers and states at once", () => {
+    expect(behaviourSpecimen.primitives?.length).toBeGreaterThan(0)
+    expect(Object.keys(behaviourSpecimen.answers ?? {})).toEqual(["controls.shipped"])
+    expect(isLive(behaviourSpecimen)).toBe(true)
+  })
+
+  it("names all three ways a specimen page can be refused", () => {
+    expect(describeRenderError({ code: "registry", detail: "x" })).toContain("registry")
+    expect(describeRenderError({ code: "endpoints", detail: "x" })).toContain("endpoints")
+    expect(describeRenderError({ code: "sources", detail: "x" })).toContain("answers")
   })
 })

@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <style>
+    :root { color-scheme: light dark; }
+    .bg { fill: #ffffff; }
+    .ink { fill: #111418; }
+    .muted { fill: #5b6570; }
+    .faint { fill: #8a939d; }
+    .panel { fill: #f7f8f9; stroke: #dfe3e8; stroke-width: 1; }
+    .rule { stroke: #dfe3e8; stroke-width: 1; }
+    .bar { fill: #3d6b8f; }
+    .cell-none { fill: #d7dce1; }
+    .cell-share { fill: #3d6b8f; }
+    .cell-clash { fill: #b4402f; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0e1114; }
+      .ink { fill: #e8ecf0; }
+      .muted { fill: #9aa4ae; }
+      .faint { fill: #78828c; }
+      .panel { fill: #151a1f; stroke: #2a3138; }
+      .rule { stroke: #2a3138; }
+      .bar { fill: #6ea3cc; }
+      .cell-none { fill: #2a3138; }
+      .cell-share { fill: #6ea3cc; }
+      .cell-clash { fill: #e08b78; }
+    }
+  </style>
+  <rect class="bg" width="900" height="640" />
+  <text class="ink" x="40" y="44" font-size="21" font-weight="700">Sixteen imports, and the four pairs with anything in common</text>
+  <text class="muted" x="40" y="68" font-size="13.5">Read from the declarations <tspan class="mono">@loom/runtime</tspan> publishes: 1,077 names, 1,106 export slots, no import with everything behind it.</text>
+  <line class="rule" x1="40" y1="86" x2="860" y2="86" />
+  <rect class="panel" x="40" y="106" width="400" height="502" rx="8" />
+  <text class="ink" x="62" y="134" font-size="13.5" font-weight="700">How many names each one publishes</text>
+  <text class="faint" x="62" y="152" font-size="11.5">in the order the rail lists them &#183; widest 527, narrowest 2</text>
+    <text class="ink mono" x="62" y="193" font-size="10.5">(root)</text>
+    <rect class="bar" x="212" y="184" width="176" height="12" rx="3" />
+    <text class="muted mono" x="395" y="194" font-size="10.5">527</text>
+    <text class="ink mono" x="62" y="219" font-size="10.5">/anthropic</text>
+    <rect class="bar" x="212" y="210" width="2" height="12" rx="3" />
+    <text class="muted mono" x="221" y="220" font-size="10.5">2</text>
+    <text class="ink mono" x="62" y="245" font-size="10.5">/react</text>
+    <rect class="bar" x="212" y="236" width="32" height="12" rx="3" />
+    <text class="muted mono" x="251" y="246" font-size="10.5">95</text>
+    <text class="ink mono" x="62" y="271" font-size="10.5">/primitives</text>
+    <rect class="bar" x="212" y="262" width="18" height="12" rx="3" />
+    <text class="muted mono" x="237" y="272" font-size="10.5">54</text>
+    <text class="ink mono" x="62" y="297" font-size="10.5">/sdk</text>
+    <rect class="bar" x="212" y="288" width="23" height="12" rx="3" />
+    <text class="muted mono" x="242" y="298" font-size="10.5">68</text>
+    <text class="ink mono" x="62" y="323" font-size="10.5">/cli</text>
+    <rect class="bar" x="212" y="314" width="8" height="12" rx="3" />
+    <text class="muted mono" x="227" y="324" font-size="10.5">25</text>
+    <text class="ink mono" x="62" y="349" font-size="10.5">/store</text>
+    <rect class="bar" x="212" y="340" width="16" height="12" rx="3" />
+    <text class="muted mono" x="235" y="350" font-size="10.5">48</text>
+    <text class="ink mono" x="62" y="375" font-size="10.5">/write</text>
+    <rect class="bar" x="212" y="366" width="14" height="12" rx="3" />
+    <text class="muted mono" x="233" y="376" font-size="10.5">43</text>
+    <text class="ink mono" x="62" y="401" font-size="10.5">/postgres</text>
+    <rect class="bar" x="212" y="392" width="3" height="12" rx="3" />
+    <text class="muted mono" x="222" y="402" font-size="10.5">10</text>
+    <text class="ink mono" x="62" y="427" font-size="10.5">/signals</text>
+    <rect class="bar" x="212" y="418" width="30" height="12" rx="3" />
+    <text class="muted mono" x="249" y="428" font-size="10.5">91</text>
+    <text class="ink mono" x="62" y="453" font-size="10.5">/signals/broadcast</text>
+    <rect class="bar" x="212" y="444" width="5" height="12" rx="3" />
+    <text class="muted mono" x="224" y="454" font-size="10.5">14</text>
+    <text class="ink mono" x="62" y="479" font-size="10.5">/signals/postgres</text>
+    <rect class="bar" x="212" y="470" width="2" height="12" rx="3" />
+    <text class="muted mono" x="221" y="480" font-size="10.5">4</text>
+    <text class="ink mono" x="62" y="505" font-size="10.5">/telemetry</text>
+    <rect class="bar" x="212" y="496" width="21" height="12" rx="3" />
+    <text class="muted mono" x="240" y="506" font-size="10.5">64</text>
+    <text class="ink mono" x="62" y="531" font-size="10.5">/telemetry/postgres</text>
+    <rect class="bar" x="212" y="522" width="2" height="12" rx="3" />
+    <text class="muted mono" x="221" y="532" font-size="10.5">4</text>
+    <text class="ink mono" x="62" y="557" font-size="10.5">/testing</text>
+    <rect class="bar" x="212" y="548" width="16" height="12" rx="3" />
+    <text class="muted mono" x="235" y="558" font-size="10.5">48</text>
+    <text class="ink mono" x="62" y="583" font-size="10.5">/testing/contracts</text>
+    <rect class="bar" x="212" y="574" width="3" height="12" rx="3" />
+    <text class="muted mono" x="222" y="584" font-size="10.5">9</text>
+  <rect class="panel" x="460" y="106" width="400" height="502" rx="8" />
+  <text class="ink" x="482" y="134" font-size="13.5" font-weight="700">Every pair of imports, and what they share</text>
+  <text class="faint" x="482" y="152" font-size="11.5">120 pairs &#183; 116 share no name at all</text>
+  <text class="faint" x="482" y="168" font-size="10">a row is one import; its cells are its pairs with those above</text>
+    <text class="faint mono" x="572" y="206" font-size="8.5" text-anchor="end">/anthropic</text>
+      <rect class="cell-none" x="578" y="194" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="223" font-size="8.5" text-anchor="end">/react</text>
+      <rect class="cell-share" x="578" y="211" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="211" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="240" font-size="8.5" text-anchor="end">/primitives</text>
+      <rect class="cell-none" x="578" y="228" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="228" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="228" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="257" font-size="8.5" text-anchor="end">/sdk</text>
+      <rect class="cell-share" x="578" y="245" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="245" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="245" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="245" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="274" font-size="8.5" text-anchor="end">/cli</text>
+      <rect class="cell-none" x="578" y="262" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="262" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="262" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="262" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="262" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="291" font-size="8.5" text-anchor="end">/store</text>
+      <rect class="cell-none" x="578" y="279" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="279" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="279" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="279" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="279" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="279" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="308" font-size="8.5" text-anchor="end">/write</text>
+      <rect class="cell-none" x="578" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="296" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="296" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="325" font-size="8.5" text-anchor="end">/postgres</text>
+      <rect class="cell-none" x="578" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="313" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="313" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="342" font-size="8.5" text-anchor="end">/signals</text>
+      <rect class="cell-none" x="578" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="330" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="330" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="359" font-size="8.5" text-anchor="end">/signals/broadcast</text>
+      <rect class="cell-none" x="578" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="347" width="14" height="14" rx="2" />
+      <rect class="cell-share" x="731" y="347" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="376" font-size="8.5" text-anchor="end">/signals/postgres</text>
+      <rect class="cell-none" x="578" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="731" y="364" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="748" y="364" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="393" font-size="8.5" text-anchor="end">/telemetry</text>
+      <rect class="cell-none" x="578" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-clash" x="731" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="748" y="381" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="765" y="381" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="410" font-size="8.5" text-anchor="end">/telemetry/postgres</text>
+      <rect class="cell-none" x="578" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="731" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="748" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="765" y="398" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="782" y="398" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="427" font-size="8.5" text-anchor="end">/testing</text>
+      <rect class="cell-none" x="578" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="731" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="748" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="765" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="782" y="415" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="799" y="415" width="14" height="14" rx="2" />
+    <text class="faint mono" x="572" y="444" font-size="8.5" text-anchor="end">/testing/contracts</text>
+      <rect class="cell-none" x="578" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="595" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="612" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="629" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="646" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="663" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="680" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="697" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="714" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="731" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="748" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="765" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="782" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="799" y="432" width="14" height="14" rx="2" />
+      <rect class="cell-none" x="816" y="432" width="14" height="14" rx="2" />
+  <text class="ink" x="482" y="463" font-size="11.5" font-weight="700">The four</text>
+    <rect class="cell-share" x="482" y="478" width="10" height="10" rx="2" />
+    <text class="ink mono" x="500" y="485" font-size="9.5">/signals + /signals/broadcast</text>
+    <text class="muted" x="500" y="496" font-size="9.5">14 names &#8212; every one the broadcaster has</text>
+    <rect class="cell-share" x="482" y="505" width="10" height="10" rx="2" />
+    <text class="ink mono" x="500" y="511" font-size="9.5">(root) + /sdk</text>
+    <text class="muted" x="500" y="522" font-size="9.5">8 names</text>
+    <rect class="cell-share" x="482" y="532" width="10" height="10" rx="2" />
+    <text class="ink mono" x="500" y="537" font-size="9.5">(root) + /react</text>
+    <text class="muted" x="500" y="548" font-size="9.5">5 names</text>
+    <rect class="cell-clash" x="482" y="559" width="10" height="10" rx="2" />
+    <text class="ink mono" x="500" y="563" font-size="9.5">/signals + /telemetry</text>
+    <text class="muted" x="500" y="574" font-size="9.5">1 name, and horizonOf, which is two functions</text>
+  <rect class="cell-none" x="482" y="586" width="10" height="10" rx="2" />
+  <text class="muted" x="500" y="594" font-size="9.5">the other 116 pairs &#8212; not one name in common</text>
+</svg>

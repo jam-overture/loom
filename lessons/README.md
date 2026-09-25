@@ -77,22 +77,22 @@ purpose. That check exists because lesson 09 said "six" for a week after there
 were seven, and then "seven" for a week after there were eight, with every
 exercise in it passing on both occasions.
 
-Two things it does not reach, said here rather than discovered later. A count is
-the cheapest second copy a sentence can carry and most of what a lesson says
-carries none — rungs numbered one too low and a type signature the runtime had
-stopped having were both part of that second drift and neither is a count. And
-the transcript check above reads a lesson's **Try it** section: lessons 01 to 11
-print their outputs under `## Answers` instead, where nothing has been comparing
-them, which is how one of lesson 09's transcripts came to be three days stale.
+**And since 24 September the `## Answers` sections are held the same way.** The
+transcript check used to read a lesson's **Try it** section only; lessons 01 to
+11 print their outputs under `## Answers` instead, and nothing had ever compared
+those — fifty blocks across eight lessons, under a heading the reader is meant to
+reach last, which is a good description of where a wrong line can sit for a long
+time. Lesson 05 is what it cost, and that story is [in the lesson
+itself](05-purity-at-the-seams.md#what-this-lesson-got-wrong-and-for-how-long)
+rather than here, because it is the better half of what that lesson now teaches.
 
-**One thing that gap is currently hiding, said here so that you do not learn it
-from the page instead.** [Lesson 05](05-purity-at-the-seams.md)'s exercise D
-emits into a sink that throws, and its answer says the exception reaches the
-caller. It does not any more: since 16 September the runtime puts every event
-through one containing door, and the exercise prints `returned applied`. The
-lesson's argument about where that guarantee lives is wrong in the same way and
-at more length. Repairing it is the next thing this course owes you; until that
-lands, read `src/runtime/narration.ts` beside it.
+One thing it still does not reach, said here rather than discovered later. A
+count is the cheapest second copy a sentence can carry and **most of what a
+lesson says carries none** — rungs numbered one too low, a type signature the
+runtime had stopped having, and an argument about which of two places a
+guarantee lives in are all prose about the code, and none of them is a count or
+a transcript. Lesson 05's was wrong for seven weeks in a file two other checks
+were passing over every day. If you find one, it will be by reading.
 
 ## The spaced review schedule
 
@@ -249,7 +249,7 @@ tree. Everything else in the system follows from protecting that one property.
 
 | # | Lesson | You'll understand |
 | --- | --- | --- |
-| [05](05-purity-at-the-seams.md) | Purity at the seams | Why nothing throws, why the clock is injected, and why that is what makes an audit trail real. |
+| [05](05-purity-at-the-seams.md) | Purity at the seams | Why nothing throws, why the clock is injected, why that is what makes an audit trail real — and how to tell an obligation from a guarantee when both are written in the same sentence. |
 | [06](06-undo-as-computation.md) | Undo as computation | Inverse deltas. Why undo is a delta and not a snapshot. |
 | [07](07-measuring-a-change.md) | Measuring a change | What analysis extracts, and why measurement is separated from judgment. |
 | [08](08-two-axes.md) | Two axes: stakes and reversibility | The distinction that a test caught us getting wrong. |
@@ -287,6 +287,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; why a test that restates the value it is testing is a second copy with a tick beside it — and what was still wrong after the repository read this lesson and fixed the list. |
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 | [27](27-scale.md) | Scale: the fact a sibling holds and a renderer may not reach | Why a container cannot read its own children and what the obvious way round it spends; what you inherit when you hand a computation to a different machine, and which ordinary chart features that machine's data model forbids; why the number the whole design was built to deliver is computed by nobody and is not supposed to be — and what it costs that a record's argument for authoring it is implemented as an optional prop with a default. |
+| [28](28-corroboration.md) | Corroboration: the claim that exists only once | What a check actually is, and why that rules out most of what a repository writes down; the three places a second copy of a fact can come from and what each one costs; why a bare citation cannot be held to its own meaning and a linked one can — and what you take on the moment you manufacture a second copy, given that the bill goes to somebody who has never read your file. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -412,6 +413,27 @@ record argues that stating the ceiling is a feature, the schema says `max?`, and
 exercise D plots four quarters of revenue against the percentage ceiling nobody
 set — four correct figures over four invisible bars, with the render, the
 validator and the Gate all saying yes.
+
+Lesson 28 is the answer to the question lesson 27 ended on, and it turns out not
+to be about decision records. Every seam above is a checker that cannot reach
+something: a scope it may not see, a meaning it cannot interpret, a narrower
+question than the one asked, a second store, one level down. This one has no
+obstacle at all. The checker holds the whole file, understands every character,
+and is asked exactly the right question — *is this record true* — which has no
+second operand. **A check is a comparison, and a unique thing has nothing to be
+compared to.** So the remedy is never to check harder but to arrange for a second
+copy to exist, and the three ways of doing that — derive it, write it twice in a
+form that can disagree, register it by hand — are in that order for a reason the
+lesson makes the reader work out.
+
+Its second half is the one that goes furthest outside this repository, and the
+course found it in its own exercises. **A second copy is not free and it is not
+yours.** Writing one down makes a claim checkable and makes it somebody's to keep
+true, and that somebody is whoever next moves the original — normally a person
+with no idea the copy exists. Three of this course's lessons have been edited
+from outside this lane for exactly that reason. It is why derivation wins: not
+because it catches more, but because it is the only one of the three whose
+obligation is discharged by a program rather than by somebody remembering.
 
 ## Pacing
 

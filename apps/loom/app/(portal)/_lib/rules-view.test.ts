@@ -6,6 +6,15 @@ import { asPercent, rulesOf, WHEN_IT_FIRES, type PlainRule } from "./rules-view"
 
 const policy = (over: Record<string, unknown> = {}) => gatePolicySchema.parse(over)
 
+/**
+ * The non-policy half, defaulted to the deployment's own answer.
+ *
+ * A helper rather than the literal at nine call sites, so the two tests that care
+ * which way it is set say so and the seven that do not stay about what they were
+ * about.
+ */
+const checked = { settingsAreChecked: true }
+
 const ruleById = (rules: readonly PlainRule[], id: string): PlainRule => {
   const found = rules.find((rule) => rule.id === id)
   if (found === undefined) throw new Error(`no rule ${id}`)
@@ -24,7 +33,7 @@ const surfaceOf = (rules: readonly PlainRule[]): string =>
 
 describe("rulesOf", () => {
   it("names every reason the Gate can record, exactly once", () => {
-    const codes = rulesOf(policy())
+    const codes = rulesOf(policy(), checked)
       .map((rule) => rule.code)
       .filter((code) => code !== undefined)
 
@@ -46,7 +55,7 @@ describe("rulesOf", () => {
   })
 
   it("gives every rule a distinct id, and one entry that decides nothing", () => {
-    const rules = rulesOf(policy())
+    const rules = rulesOf(policy(), checked)
     const ids = rules.map((rule) => rule.id)
 
     expect(new Set(ids).size).toBe(ids.length)
@@ -62,7 +71,7 @@ describe("rulesOf", () => {
    * either way, which is what makes it worth a test rather than a reading.
    */
   it("reads its numbers out of the policy it is given", () => {
-    const strict = rulesOf(policy({ minimumConfidence: 0.95, confidenceFloor: 0.5, refusalFloor: "high" }))
+    const strict = rulesOf(policy({ minimumConfidence: 0.95, confidenceFloor: 0.5, refusalFloor: "high" }), checked)
 
     expect(ruleById(strict, "sure-enough-to-act").reading).toContain("95%")
     expect(ruleById(strict, "sure-enough-to-ask").reading).toContain("50%")
@@ -71,7 +80,7 @@ describe("rulesOf", () => {
   })
 
   it("reads a ceiling for every origin, including one the host never set", () => {
-    const partial = rulesOf(policy({ autoApplyCeiling: { "user-instruction": "high" } }))
+    const partial = rulesOf(policy({ autoApplyCeiling: { "user-instruction": "high" } }), checked)
     const ceiling = ruleById(partial, "ceiling")
 
     expect(ceiling.rows).toHaveLength(4)
@@ -90,13 +99,16 @@ describe("rulesOf", () => {
   })
 
   it("says which pieces reach outside the page, and says so when none do", () => {
-    const none = ruleById(rulesOf(policy()), "cannot-undo")
+    const none = ruleById(rulesOf(policy(), checked), "cannot-undo")
 
     expect(none.reading).toContain("No kind of piece here is marked")
     expect(none.rows).toEqual([])
 
     const declared = ruleById(
-      rulesOf(policy({ outOfTreeEffectTypes: [primitiveTypeSchema.parse("commerce.checkout")] })),
+      rulesOf(
+        policy({ outOfTreeEffectTypes: [primitiveTypeSchema.parse("commerce.checkout")] }),
+        checked
+      ),
       "cannot-undo"
     )
 
@@ -105,7 +117,7 @@ describe("rulesOf", () => {
   })
 
   it("keeps the two rules that have no setting honest about having none", () => {
-    const rules = rulesOf(policy())
+    const rules = rulesOf(policy(), checked)
 
     expect(ruleById(rules, "writes-over-work").settings).toEqual([])
     expect(ruleById(rules, "form-destination").settings).toEqual([])
@@ -118,7 +130,7 @@ describe("rulesOf", () => {
    * reachable in the technical record beside it.
    */
   it("uses none of the runtime's own words on the surface", () => {
-    const surface = surfaceOf(rulesOf(policy())).toLowerCase()
+    const surface = surfaceOf(rulesOf(policy(), checked)).toLowerCase()
 
     for (const word of [
       "gate",
@@ -141,7 +153,7 @@ describe("rulesOf", () => {
   })
 
   it("keeps every one of those words one click down", () => {
-    const settings = rulesOf(policy())
+    const settings = rulesOf(policy(), checked)
       .flatMap((rule) => rule.settings)
       .map((setting) => setting.name)
 
@@ -151,6 +163,93 @@ describe("rulesOf", () => {
     expect(settings).toContain("autoApplyCeiling.user-instruction")
     expect(settings).toContain("protectedPrimitiveTypes")
     expect(settings).toContain("policyId")
+  })
+})
+
+/**
+ * The two floors, on the screen that claims to name every rule a change here is
+ * judged by.
+ *
+ * They were wired into this deployment's policy on 23 September and this screen
+ * did not mention either of them, which made its own claim false. They belong
+ * under *how risk is measured* rather than as two more cards, and the reason is
+ * arithmetic: `recordFor` attributes a count to a rule by the reason code the
+ * Gate recorded, both of these are recorded under `stakes-at-refusal-floor` like
+ * anything else that reaches the top of the scale, and a second card carrying that
+ * code would print one count twice as though two rules had each fired that often.
+ */
+describe("the two floors a change cannot be drawn past", () => {
+  const measurement = (over: Record<string, unknown> = {}, nonPolicy = checked) =>
+    ruleById(rulesOf(policy(over), nonPolicy), "how-risk-is-measured")
+
+  it("names what this site can draw, and says a change adding anything else is turned down", () => {
+    const rule = measurement({
+      registeredPrimitiveTypes: [
+        primitiveTypeSchema.parse("loom.page"),
+        primitiveTypeSchema.parse("loom.prose"),
+      ],
+    })
+    const row = rule.rows.find((candidate) => candidate.of === "Pieces this site can draw")
+
+    expect(row?.is).toContain("loom.page")
+    expect(row?.is).toContain("loom.prose")
+    expect(row?.is).toContain("turns it down")
+  })
+
+  /**
+   * The unset state, which is what every deployment gets until it opts in and what
+   * this one had for a month. The screen must not read as though the rule were on:
+   * a row saying "none" where the honest answer is "this check is off and a change
+   * may commit a page with a hole in it" is the screen lying by omission.
+   */
+  it("says plainly that the check is off when nothing is declared", () => {
+    const row = measurement().rows.find((candidate) => candidate.of === "Pieces this site can draw")
+
+    expect(row?.is).toContain("not declared")
+    expect(row?.is).toContain("hole")
+  })
+
+  it("says whether a part's own settings are checked, both ways", () => {
+    const on = measurement({}, { settingsAreChecked: true }).rows.find(
+      (candidate) => candidate.of === "Settings a piece refuses"
+    )
+    const off = measurement({}, { settingsAreChecked: false }).rows.find(
+      (candidate) => candidate.of === "Settings a piece refuses"
+    )
+
+    expect(on?.is).toContain("checked against")
+    expect(off?.is).toContain("not checked")
+    expect(off?.is).toContain("will not draw")
+  })
+
+  /**
+   * `propsVocabulary` is the one line on this screen that is not a field on the
+   * policy, so it is also the one a reader could not otherwise check. It is in the
+   * record with the name it has on the runtime, so somebody comparing this screen
+   * against their own wiring is looking for the right thing.
+   */
+  it("keeps both settings in the record, including the one that is not a policy field", () => {
+    const settings = measurement().settings.map((setting) => setting.name)
+
+    expect(settings).toContain("registeredPrimitiveTypes")
+    expect(settings).toContain("propsVocabulary")
+  })
+
+  it("says in the record which way the one that is not a field is set", () => {
+    const value = (nonPolicy: { settingsAreChecked: boolean }) =>
+      measurement({}, nonPolicy).settings.find((setting) => setting.name === "propsVocabulary")?.value
+
+    expect(value({ settingsAreChecked: true })).toBe("wired")
+    expect(value({ settingsAreChecked: false })).toBe("unset")
+  })
+
+  /**
+   * The sentence above the rows has to say the two are there, because a reader
+   * skimming readings rather than tables is the reader this screen was rewritten
+   * for. And it must not promise them when they are off.
+   */
+  it("mentions them in the rule's own sentence", () => {
+    expect(measurement().reading).toContain("would not draw at all")
   })
 })
 

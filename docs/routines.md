@@ -361,6 +361,18 @@ TypeScript, strict, no `any`. Functional — pure functions, immutability, no
 classes without genuine stateful identity. SOLID at the seams. No dead code, no
 commented-out blocks, no unresolved TODOs. Every unit ships with tests.
 
+**The repository is formatted by hand, and no formatter is to be run over it.**
+There is no `.prettierrc`, no `prettier` in either `package.json`, and no
+`format` script. The house style is unmistakable from any file — no semicolons,
+double quotes, `trailingComma: es5`, roughly a hundred columns — and nothing
+enforces it. So `npx prettier --write` on the files a run just edited, which is
+an ordinary reflex, gets prettier's defaults: a semicolon on every statement in
+every file it touched, and several hundred lines of diff that have nothing to do
+with the change. `--no-semi --print-width 100 --trailing-comma es5` does not
+reproduce the existing formatting either, so there is no options string that
+would. Filed by `Loom marketing` on 23 September after it cost that run a full
+revert and a re-application of eight files' worth of edits.
+
 ## Decision records
 
 Write one when a decision would be expensive to reverse, or when it defines what

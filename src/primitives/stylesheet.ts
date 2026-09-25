@@ -381,6 +381,16 @@ export const LIBRARY_CLASS = {
    * a published interview reads — is a container the same naming rule says to write
    * when somebody wants one. What stays inline is the paint, which no arrangement
    * varies.
+   *
+   * **The face aligns with the name, not with the foot of the bubble.** This
+   * row was `align-items: flex-end` from the day it was written — the messenger
+   * convention, where a portrait sits at the bottom of a speaker's last bubble
+   * — and it was chosen without a picture, because no band in this library had
+   * ever drawn a portrait here at all (`loom.message` had no fallback until 25
+   * September, and the catalogue ships no photographs). The convention assumes
+   * a transcript with no name lines in it. This one puts the speaker's name and
+   * the time *above* the bubble, so a face pinned three lines below the name it
+   * belongs to reads as belonging to nothing.
    */
   message: "loom-message",
   messageBody: "loom-message-body",
@@ -492,6 +502,25 @@ export const LIBRARY_CLASS = {
   book: "loom-book",
   bookFrame: "loom-book-frame",
   bookCover: "loom-book-cover",
+  /**
+   * The cover panel when there is no cover, which is not the same object.
+   *
+   * A 2:3 ratio reserves the shape of a *picture*, and in the tile rendering
+   * that is the card's whole width — 350px of blank panel on a phone and 360px
+   * in a three-across shelf, per book. `articles-episodes` found the identical
+   * fault in `loom.recording` on 23 September and the rule it produced is the
+   * one applied here: **a frame with no picture in it does not get the
+   * picture's proportions.**
+   *
+   * What it gets instead is a spine's worth of width at the same ratio, which
+   * keeps the object a book rather than deleting it — `loom.book` argues at
+   * length that a blank panel reads as *this edition's cover is not to hand*
+   * and that a shelf should line up whether or not every cover was found, and
+   * both of those stay true at 4.5rem. The row rendering is untouched: its
+   * `flex` basis of 7rem beats a width on a flex item, so a card that was
+   * already showing a small cover keeps the size it had.
+   */
+  bookCoverBare: "loom-book-cover-bare",
   bookBody: "loom-book-body",
   /**
    * A `loom.listing`: the photograph, and the flags worn on it. The flags strip
@@ -500,6 +529,22 @@ export const LIBRARY_CLASS = {
    * carrying an invisible box over its picture.
    */
   listingMedia: "loom-listing-media",
+  /**
+   * The same panel with no photograph in it, which is only as tall as the flags
+   * it carries.
+   *
+   * `loom.listing` gives its media frame a second job — the flags are worn on
+   * it — and that is why the frame is drawn at all when there is no picture. It
+   * is not a reason to keep the picture's 4:3, and `features-listings`
+   * photographed what keeping it costs: a quarter of every card given to a grey
+   * rectangle, six times down a band. The flags come out of the corner and into
+   * the flow, the ratio goes, and the strip is as tall as a row of badges.
+   *
+   * A listing with neither a picture nor a flag draws no frame at all; that is
+   * the component's own call, because an empty strip is a rule of dead space
+   * above an address.
+   */
+  listingMediaBare: "loom-listing-media-bare",
   listingFlags: "loom-listing-flags",
   /**
    * The strip of `loom.spec` children under a listing's address, and one
@@ -1450,7 +1495,7 @@ details[open] > summary .loom-marker {
 }
 .loom-message {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--loom-spacing-3);
   margin: 0;
   list-style: none;
@@ -1673,6 +1718,9 @@ details[open] > summary .loom-marker {
   overflow: hidden;
   flex: 0 0 auto;
 }
+.loom-book-cover-bare {
+  inline-size: 4.5rem;
+}
 .loom-book-body {
   flex: 1 1 auto;
   min-inline-size: 0;
@@ -1702,6 +1750,13 @@ details[open] > summary .loom-marker {
 }
 .loom-listing-flags:empty {
   display: none;
+}
+.loom-listing-media-bare {
+  aspect-ratio: auto;
+}
+.loom-listing-media-bare .loom-listing-flags {
+  position: static;
+  padding: var(--loom-spacing-3);
 }
 .loom-listing-specs {
   display: flex;

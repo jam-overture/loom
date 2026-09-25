@@ -7,7 +7,9 @@ import {
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
+  type ApiNameCollision,
   type ApiNarrowerDoor,
+  type ApiOverlappingDoor,
   type ApiRequirement,
   type ApiSymbol,
 } from "@/app/(docs)/_lib/api/model"
@@ -371,6 +373,165 @@ const NarrowerDoors = ({ entry }: { readonly entry: ApiEntry }) =>
   )
 
 /**
+ * What is *not* behind this door, which is most of the package.
+ *
+ * This is the one band on the page that corrects a reader rather than
+ * informing them. The other three answer questions somebody arrived with; this
+ * one answers a question nobody thinks to ask, because the belief underneath it
+ * is so ordinary that a reader has no reason to doubt it: **the short specifier
+ * is the whole library and the longer ones are slices of it.**
+ *
+ * It is wrong here. `@loom/runtime` is the largest of the sixteen doors and
+ * publishes less than half the names the package publishes; thirteen of the
+ * fifteen others publish not one name it does. The sixteen do not nest. A
+ * reader holding the ordinary belief looks for a name behind the root import,
+ * does not find it, and concludes the name does not exist — and nothing on this
+ * site told them otherwise, because every page here described one door and the
+ * rail listed them flat.
+ *
+ * **It is on every page**, unlike the narrower-door band above it, and for the
+ * opposite reason. That one teaches an idea a reader has not met, so printing
+ * it where it has nothing to say would be noise. This one *unteaches* one they
+ * are likely to have arrived with, and which of the sixteen pages they arrived
+ * at is not knowable from here.
+ */
+const OverlappingDoors = ({
+  doors,
+  publishes,
+}: {
+  readonly doors: readonly ApiOverlappingDoor[]
+  readonly publishes: number
+}) => {
+  const total = doors.reduce((count, door) => count + door.names, 0)
+
+  return (
+    <p className="text-ink-muted mt-3 text-sm leading-relaxed">
+      {/*
+       * "Every one" is measured rather than assumed, and it is the sentence
+       * `@loom/runtime/signals/broadcast` needs: all fourteen of its names are
+       * behind `@loom/runtime/signals` as well, so a headline claiming this
+       * import is nobody's slice would be false on exactly that page.
+       */}
+      {total === publishes ? "Every one of these names is published" : "Some of these names are published"}{" "}
+      elsewhere too:{" "}
+      {doors.map((door, index) => (
+        <span key={door.specifier}>
+          {index === 0 ? "" : index === doors.length - 1 ? " and " : ", "}
+          {door.names} by{" "}
+          <Link
+            href={`/docs/api-reference/${door.slug}`}
+            className="text-ink font-mono text-xs underline underline-offset-2 hover:no-underline"
+          >
+            {door.specifier}
+          </Link>
+        </span>
+      ))}
+      {total === 1
+        ? " — the same declaration reached through two doors, so either import gives you the same thing."
+        : " — the same declarations reached through two doors, so either import gives you the same thing."}
+    </p>
+  )
+}
+
+/**
+ * One name, two doors, two different things — said plainly, because search
+ * cannot say it.
+ *
+ * A reader who searches `horizonOf` gets two results with two import
+ * specifiers beside them, which reads exactly like one export offered at two
+ * doors. It is not: one is about the window a reader signal falls in and the
+ * other is about how long telemetry is kept. The signatures differ and nothing
+ * else does.
+ *
+ * Exactly one name in this package is in that state, which is what makes it
+ * worth a sentence rather than a policy. The measurement that finds it is the
+ * same one that counts the overlaps above, so if a second ever appears, it
+ * appears here.
+ */
+const Collisions = ({ collisions }: { readonly collisions: readonly ApiNameCollision[] }) => (
+  <p className="text-ink-muted border-edge mt-4 border-t pt-4 text-sm leading-relaxed">
+    <span className="text-ink font-semibold">
+      {collisions.length === 1
+        ? "One name here means something else behind another door."
+        : `${collisions.length} of these names mean something else behind another door.`}
+    </span>{" "}
+    {collisions.map((collision, index) => (
+      <span key={`${collision.name}-${collision.specifier}`}>
+        {index === 0 ? "" : " "}
+        <code className="code-chip font-mono text-xs">{collision.name}</code> is published by{" "}
+        <Link
+          href={`/docs/api-reference/${collision.slug}`}
+          className="text-ink font-mono text-xs underline underline-offset-2 hover:no-underline"
+        >
+          {collision.specifier}
+        </Link>{" "}
+        as well, and it is declared differently there — the same name, not the same thing.
+      </span>
+    ))}{" "}
+    {collisions.length === 1
+      ? "Searching the name finds both, and only the signature tells them apart."
+      : "Searching one of them finds both doors, and only the signature tells them apart."}
+  </p>
+)
+
+/**
+ * A four-digit count, grouped.
+ *
+ * `1,071` rather than `1071`, because the whole force of the sentence it sits
+ * in is a ratio and a reader has to take the size of both numbers in at a
+ * glance. Fixed to `en-US` rather than left to the reader's locale: this is a
+ * server-rendered page in an English document, and a number that formatted one
+ * way on the server and another in the browser is a hydration mismatch rather
+ * than a courtesy.
+ */
+export const grouped = (count: number): string => count.toLocaleString("en-US")
+
+const WhereThisDoorSits = ({ entry }: { readonly entry: ApiEntry }) => {
+  const { standing } = entry
+  const publishes = apiSymbolCount(entry)
+  const elsewhere = standing.packageNames - publishes
+
+  /* One door is a package with nothing to compare it to, and this band is
+     entirely a comparison. Loom has sixteen; a package that grew down to one
+     should lose the band rather than render a sentence about no other doors. */
+  if (standing.otherDoors === 0 || elsewhere === 0) return null
+
+  return (
+    <section
+      aria-label="How much of this package is behind other imports"
+      className="border-edge bg-surface-muted mt-8 rounded-lg border px-4 py-4"
+    >
+      <p className="text-ink text-sm">
+        <span className="font-semibold">
+          {standing.widest
+            ? "No import here has everything behind it — not even this one."
+            : "No import here has everything behind it."}
+        </span>{" "}
+        <span className="text-ink-muted">
+          <code className="code-chip font-mono text-xs">{entry.specifier}</code> publishes{" "}
+          {grouped(publishes)} of the {grouped(standing.packageNames)} names this package publishes
+          {standing.widest && publishes * 2 < standing.packageNames
+            ? " — more than any other import, and still less than half"
+            : ""}
+          . The other {grouped(elsewhere)} are behind one of the {standing.otherDoors} other imports, and{" "}
+          {standing.doorsSharingNothing === standing.otherDoors
+            ? "not one of those imports publishes a single name this one does"
+            : `${standing.doorsSharingNothing} of those ${standing.otherDoors} publish nothing this one does`}
+          . The imports do not nest: a name that is not on this page is not a name that does not
+          exist, and the search at the top of the page says which import it comes from.
+        </span>
+      </p>
+
+      {standing.sharedWith.length === 0 ? null : (
+        <OverlappingDoors doors={standing.sharedWith} publishes={publishes} />
+      )}
+
+      {standing.collisions.length === 0 ? null : <Collisions collisions={standing.collisions} />}
+    </section>
+  )
+}
+
+/**
  * The list of what is on the page, before the page starts.
  *
  * A reference is read by people who arrived looking for one name, and a rail
@@ -504,6 +665,8 @@ export const ApiEntryReference = ({
     <BeforeItWillRun entry={entry} />
 
     <NarrowerDoors entry={entry} />
+
+    <WhereThisDoorSits entry={entry} />
 
     <ProseFirst entry={entry} prose={prose} />
 

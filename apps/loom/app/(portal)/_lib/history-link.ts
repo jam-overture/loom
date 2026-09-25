@@ -1,6 +1,8 @@
 import type { TreeId } from "@loom/runtime"
 import { FIRST_REVISION, type RevisionReadRequest } from "@loom/runtime/store"
 
+import { versionHeading, versionMention } from "./version"
+
 /**
  * Where a revision is, as a URL.
  *
@@ -192,7 +194,7 @@ export const describeAnchorMiss = (
   if (param.kind === "absent") return undefined
 
   if (param.kind === "malformed") {
-    return `“${param.typed}” is not a revision — a revision is a whole number from 1 up — so these are the newest changes instead.`
+    return `“${param.typed}” is not a version — a version is a whole number from 1 up — so these are the newest changes instead.`
   }
 
   if (onPage) return undefined
@@ -202,8 +204,13 @@ export const describeAnchorMiss = (
    * history is being read, and the batch of changes currently shown — and these
    * sentences used to say it of the second while the heading above them said it
    * of the first. So they say "these changes" instead, and never "log".
+   *
+   * The number is named the way the rows name it — *Version 4*, from
+   * `_lib/version.ts` — because these four sentences exist to send a reader to
+   * a row, and one that called it something else would be asking them to match
+   * two words for one number.
    */
-  const opening = `Revision ${param.revision} isn’t among the changes shown here`
+  const opening = `${versionHeading(param.revision)} isn’t among the changes shown here`
 
   if (newer !== undefined) return `${opening} — it is further back. Keep going back to reach it.`
   if (older !== undefined) return `${opening} — it is further along. Keep going forward to reach it.`
@@ -211,7 +218,7 @@ export const describeAnchorMiss = (
   if (newestOnPage === undefined) return `${opening}, because nothing has been changed on this page yet.`
 
   if (param.revision > newestOnPage) {
-    return `${opening} — this page has only got as far as revision ${newestOnPage}.`
+    return `${opening} — this page has only got as far as ${versionMention(newestOnPage)}.`
   }
 
   return `${opening}, and this deployment’s copy of the record does not reach back to it.`

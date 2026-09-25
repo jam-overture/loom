@@ -7,6 +7,25 @@
       "requires": [],
       "files": 91,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 13,
+        "widest": true,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/react",
+            "slug": "react",
+            "names": 5
+          },
+          {
+            "specifier": "@loom/runtime/sdk",
+            "slug": "sdk",
+            "names": 8
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "catalogue",
@@ -320,6 +339,13 @@
               "signature": "const NO_DATA: NodeData",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "nodeDataOf",
+              "kind": "function",
+              "signature": "const nodeDataOf: (answers: Readonly<Record<string, DataOutcome>>) => NodeData",
+              "truncated": false,
+              "summary": "One node's answers, built from a plain record."
             },
             {
               "name": "NodeDataProblem",
@@ -4266,6 +4292,14 @@
       ],
       "files": 2,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "interpretation/anthropic",
@@ -4304,6 +4338,20 @@
       ],
       "files": 56,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime",
+            "slug": "runtime",
+            "names": 5
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "render/addressing",
@@ -5117,8 +5165,16 @@
           "reach": "loaded"
         }
       ],
-      "files": 174,
+      "files": 179,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "primitives",
@@ -5563,6 +5619,20 @@
       ],
       "files": 35,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime",
+            "slug": "runtime",
+            "names": 8
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "catalogue",
@@ -5668,9 +5738,16 @@
               "summary": ""
             },
             {
+              "name": "RegistryAuditOptions",
+              "kind": "type",
+              "signature": "type RegistryAuditOptions = {\n    /**\n     * The answer states each type is probed in, beside the ones its own schema\n     * closes over.\n     *\n     * A `Map` rather than an object, because the key is a primitive type and a\n     * caller building one from `registry.primitives` has the branded strings\n     * already — and because a lookup on an object literal is a lookup on\n     * `Object.prototype` for any name that happens to be on it.\n     */\n    readonly answers?: ReadonlyMap<PrimitiveType, readonly ProbeAnswers[]>;\n};",
+              "truncated": false,
+              "summary": "What the audit is told beyond the registry itself."
+            },
+            {
               "name": "auditRegistry",
               "kind": "function",
-              "signature": "const auditRegistry: (registry: PrimitiveRegistry) => RegistryAudit",
+              "signature": "const auditRegistry: (registry: PrimitiveRegistry, options?: RegistryAuditOptions) => RegistryAudit",
               "truncated": false,
               "summary": ""
             },
@@ -5712,7 +5789,7 @@
             {
               "name": "ProbeFailure",
               "kind": "type",
-              "signature": "type ProbeFailure = {\n    readonly props: JsonObject;\n    readonly reason: string;\n};",
+              "signature": "type ProbeFailure = {\n    readonly props: JsonObject;\n    readonly reason: string;\n    /**\n     * The binding names the node had answers under when it threw, sorted, and\n     * absent when it had none.\n     *\n     * Without it two failures of `loom.feed` at its default props read as the\n     * same line twice, and the one that matters — *it renders until you answer\n     * it* — is the one a reader cannot pick out.\n     */\n    readonly answered?: readonly string[];\n};",
               "truncated": false,
               "summary": "A configuration the schema accepts that the component threw on."
             },
@@ -5745,6 +5822,27 @@
               "summary": ""
             },
             {
+              "name": "ProbeConfiguration",
+              "kind": "type",
+              "signature": "type ProbeConfiguration = {\n    readonly props: JsonObject;\n    /** `NO_DATA` means *this node asked nothing*, which is most of them. */\n    readonly data: NodeData;\n};",
+              "truncated": false,
+              "summary": "One call of the probe: the props the node carries, and the answers it had."
+            },
+            {
+              "name": "unasked",
+              "kind": "function",
+              "signature": "const unasked: (props: JsonObject) => ProbeConfiguration",
+              "truncated": false,
+              "summary": "Props with nothing answered beside them, which is most configurations."
+            },
+            {
+              "name": "ProbeAnswers",
+              "kind": "type",
+              "signature": "type ProbeAnswers = {\n    /** Answers by binding name, as the render walk would hand them over. */\n    readonly data: NodeData;\n    /**\n     * The props the node carries in this state. Absent means its defaults, which\n     * is the configuration a binding name's default was chosen for.\n     */\n    readonly props?: JsonObject;\n};",
+              "truncated": false,
+              "summary": "An answer state a caller wants a primitive probed in, beside the states its own schema closes over."
+            },
+            {
               "name": "probeConfigurations",
               "kind": "function",
               "signature": "const probeConfigurations: (choices: readonly ClosedChoice[]) => readonly JsonObject[]",
@@ -5752,23 +5850,30 @@
               "summary": "The prop configurations a primitive is probed under."
             },
             {
+              "name": "probeStates",
+              "kind": "function",
+              "signature": "const probeStates: (configurations: readonly JsonObject[], answers?: readonly ProbeAnswers[]) => readonly ProbeConfiguration[]",
+              "truncated": false,
+              "summary": "The states a primitive is probed in: what its schema closes over, then what its registrant declared it can be answered with."
+            },
+            {
               "name": "probeEditableDecoration",
               "kind": "function",
-              "signature": "const probeEditableDecoration: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly JsonObject[], declaredFrames?: readonly string[]) => ConformanceVerdict",
+              "signature": "const probeEditableDecoration: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredFrames?: readonly string[]) => ConformanceVerdict",
               "truncated": false,
               "summary": "Decoration is a promise that holds however the primitive is configured, so one configuration that fails to decorate makes the answer `not-decorated` even if the rest pass. A configuration that throws answers nothing either way and is skipped; when none of them answer, every failure is carried on the verdict, so the reason the probe declined is a value rather than the prose of whichever configuration happened to be first."
             },
             {
               "name": "PlacementVerdict",
               "kind": "type",
-              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /** The configurations that answered — `{}` alone when the schema closes over nothing. */\n    readonly probed: readonly JsonObject[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
+              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
               "truncated": false,
               "summary": "The second probe: does a primitive place what it was handed?"
             },
             {
               "name": "probePlacement",
               "kind": "function",
-              "signature": "const probePlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>, configurations?: readonly JsonObject[], declaredBehaviours?: readonly BehaviourName[], declaredFrames?: readonly string[]) => PlacementVerdict",
+              "signature": "const probePlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredBehaviours?: readonly BehaviourName[], declaredFrames?: readonly string[]) => PlacementVerdict",
               "truncated": false,
               "summary": ""
             },
@@ -5782,7 +5887,7 @@
             {
               "name": "probeSubmissionPlacement",
               "kind": "function",
-              "signature": "const probeSubmissionPlacement: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly JsonObject[], declaredFrames?: readonly string[]) => SubmissionVerdict",
+              "signature": "const probeSubmissionPlacement: (primitive: LoomPrimitive, text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredFrames?: readonly string[]) => SubmissionVerdict",
               "truncated": false,
               "summary": "`some` rather than `every`, matching `probePlacement`. The question is whether this primitive posts at all, and a primitive that renders a form under one layout and a summary under another is answering honestly in both."
             },
@@ -5803,7 +5908,7 @@
             {
               "name": "probeColourPairings",
               "kind": "function",
-              "signature": "const probeColourPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly JsonObject[], declaredFrames?: readonly string[]) => ColourVerdict",
+              "signature": "const probeColourPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredFrames?: readonly string[]) => ColourVerdict",
               "truncated": false,
               "summary": "The union across every configuration, rather than the intersection the decoration probe takes. Decoration is a promise that has to hold however the primitive is configured; a colour pairing is a fact about one configuration, and a `loom.section` that paints `accent-subtle` only under `tone: \"accent\"` renders that pairing on a real page whatever the other tones do."
             }
@@ -6105,6 +6210,14 @@
       "requires": [],
       "files": 11,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "cli/args",
@@ -6325,6 +6438,14 @@
       "requires": [],
       "files": 26,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "store/attribution",
@@ -6734,6 +6855,14 @@
       "requires": [],
       "files": 52,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "write/commit",
@@ -7080,6 +7209,14 @@
       ],
       "files": 27,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "store/database",
@@ -7205,6 +7342,31 @@
           "files": 9
         }
       ],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 13,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals/broadcast",
+            "slug": "signals-broadcast",
+            "names": 14
+          },
+          {
+            "specifier": "@loom/runtime/telemetry",
+            "slug": "telemetry",
+            "names": 1
+          }
+        ],
+        "collisions": [
+          {
+            "name": "horizonOf",
+            "specifier": "@loom/runtime/telemetry",
+            "slug": "telemetry"
+          }
+        ]
+      },
       "groups": [
         {
           "module": "signals/broadcast",
@@ -7943,6 +8105,20 @@
       "requires": [],
       "files": 9,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals",
+            "names": 14
+          }
+        ],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "signals/broadcast",
@@ -8072,6 +8248,14 @@
       ],
       "files": 12,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "signals/migrate",
@@ -8124,6 +8308,26 @@
       "requires": [],
       "files": 25,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 14,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals",
+            "names": 1
+          }
+        ],
+        "collisions": [
+          {
+            "name": "horizonOf",
+            "specifier": "@loom/runtime/signals",
+            "slug": "signals"
+          }
+        ]
+      },
       "groups": [
         {
           "module": "telemetry/calibration",
@@ -8638,6 +8842,14 @@
       ],
       "files": 21,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "telemetry/migrate",
@@ -8704,6 +8916,14 @@
       ],
       "files": 84,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "testing/definitions",
@@ -9112,6 +9332,14 @@
       ],
       "files": 36,
       "narrower": [],
+      "standing": {
+        "packageNames": 1077,
+        "otherDoors": 15,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [],
+        "collisions": []
+      },
       "groups": [
         {
           "module": "testing/hold-contract",

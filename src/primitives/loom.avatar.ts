@@ -1,11 +1,10 @@
-import { createElement } from "react"
 import { z } from "zod"
 
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { monogramOf } from "./monogram.js"
-import { colour, family, radius, size, weight } from "./tokens.js"
+import { portrait } from "./portrait.js"
+import { type RampStep } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
 /**
@@ -67,10 +66,10 @@ type Props = z.infer<typeof props>
  * crop.
  */
 const SIZES = {
-  small: { box: "2rem", glyph: size(1) },
-  medium: { box: "2.75rem", glyph: size(2) },
-  large: { box: "4rem", glyph: size(4) },
-} as const
+  small: { box: "2rem", glyph: 1 },
+  medium: { box: "2.75rem", glyph: 2 },
+  large: { box: "4rem", glyph: 4 },
+} as const satisfies Readonly<Record<string, { readonly box: string; readonly glyph: RampStep }>>
 
 export const loomAvatar = definePrimitive({
   type: "loom.avatar",
@@ -80,59 +79,20 @@ export const loomAvatar = definePrimitive({
   slots: [],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const scale = SIZES[given.size ?? "medium"]
-    const corners = given.shape === "soft" ? radius("md") : radius("full")
 
-    const box = {
-      width: scale.box,
-      height: scale.box,
-      flex: "0 0 auto",
-      borderRadius: corners,
-    } as const
-
-    return given.image === undefined
-      ? createElement(
-          "span",
-          {
-            ...loom.editable,
-            /**
-             * The monogram is decoration and the *node* carries the name, so
-             * the letters are announced once as a name rather than twice as two
-             * capitals. An `img` with no `alt` and a `span` with no role are
-             * both the wrong shape here: this is a picture of somebody, and
-             * `role="img"` with a label is how a span says so.
-             */
-            role: "img",
-            "aria-label": given.name,
-            style: {
-              ...box,
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: colour("accent-subtle"),
-              color: colour("accent-strong"),
-              fontFamily: family("heading"),
-              fontWeight: weight("heading"),
-              fontSize: scale.glyph,
-              lineHeight: 1,
-              letterSpacing: "0.02em",
-              userSelect: "none",
-            },
-          },
-          monogramOf(given.name)
-        )
-      : createElement("img", {
-          ...loom.editable,
-          src: given.image,
-          alt: given.name,
-          loading: "lazy",
-          decoding: "async",
-          style: {
-            ...box,
-            display: "block",
-            objectFit: "cover",
-            /** Shows through while the photograph loads, so the row never has a hole in it. */
-            backgroundColor: colour("bg-surface-muted"),
-          },
-        })
+    /**
+     * `labelled`, because this is the one portrait in the library with nothing
+     * beside it saying who it is — every other caller of {@link portrait} puts
+     * the name in the next node and hides the face from assistive technology.
+     */
+    return portrait({
+      name: given.name,
+      image: given.image,
+      box: scale.box,
+      glyph: scale.glyph,
+      corners: given.shape === "soft" ? "soft" : "circle",
+      labelled: true,
+      attributes: loom.editable,
+    })
   },
 })

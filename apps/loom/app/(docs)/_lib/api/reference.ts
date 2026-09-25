@@ -4,10 +4,13 @@ import {
   type ApiEntry,
   type ApiGroup,
   type ApiKind,
+  type ApiNameCollision,
   type ApiNarrowerDoor,
+  type ApiOverlappingDoor,
   type ApiReference,
   type ApiRequirement,
   type ApiRequirementReach,
+  type ApiStanding,
   type ApiSymbol,
 } from "./model"
 
@@ -115,12 +118,84 @@ const asNarrowerDoor = (value: unknown, where: string): ApiNarrowerDoor => {
   }
 }
 
+const asOverlappingDoor = (value: unknown, where: string): ApiOverlappingDoor => {
+  if (!isRecord(value)) throw new Error(`loom: ${where} is not a door`)
+
+  const names = asNumber(value.names, `${where}.names`)
+
+  /*
+   * An overlap of nothing is not an overlap. The measurement drops a door that
+   * shares no name, so one written down here came from somewhere else, and the
+   * sentence it renders — *shares 0 names with this import* — is the kind of
+   * true statement a page is worse for carrying.
+   */
+  if (names <= 0) throw new Error(`loom: ${where} is listed as sharing names and shares ${names}`)
+
+  return {
+    specifier: asString(value.specifier, `${where}.specifier`),
+    slug: asString(value.slug, `${where}.slug`),
+    names,
+  }
+}
+
+const asNameCollision = (value: unknown, where: string): ApiNameCollision => {
+  if (!isRecord(value)) throw new Error(`loom: ${where} is not a name collision`)
+
+  return {
+    name: asString(value.name, `${where}.name`),
+    specifier: asString(value.specifier, `${where}.specifier`),
+    slug: asString(value.slug, `${where}.slug`),
+  }
+}
+
+/**
+ * The standing, checked against the entry it belongs to.
+ *
+ * The cross-check is the one worth having. A door cannot publish more names
+ * than the package does, so a `packageNames` below this door's own count is a
+ * file written by nobody's generator — which is exactly what an unfilled
+ * second pass would leave behind, and it would render as *this import
+ * publishes 526 of the package's 0 names* rather than as a crash.
+ */
+const asStanding = (value: unknown, where: string, publishes: number): ApiStanding => {
+  if (!isRecord(value)) throw new Error(`loom: ${where} does not say where it stands among the doors`)
+  if (!Array.isArray(value.sharedWith)) throw new Error(`loom: ${where} does not say which doors share its names`)
+  if (!Array.isArray(value.collisions)) throw new Error(`loom: ${where} does not say which of its names mean two things`)
+
+  const packageNames = asNumber(value.packageNames, `${where}.packageNames`)
+
+  if (packageNames < publishes) {
+    throw new Error(
+      `loom: ${where} publishes ${publishes} names and says the whole package publishes ${packageNames}`
+    )
+  }
+
+  const otherDoors = asNumber(value.otherDoors, `${where}.otherDoors`)
+  const doorsSharingNothing = asNumber(value.doorsSharingNothing, `${where}.doorsSharingNothing`)
+
+  if (doorsSharingNothing > otherDoors) {
+    throw new Error(
+      `loom: ${where} says ${doorsSharingNothing} of ${otherDoors} other doors share none of its names`
+    )
+  }
+
+  return {
+    packageNames,
+    otherDoors,
+    doorsSharingNothing,
+    widest: value.widest === true,
+    sharedWith: value.sharedWith.map((door, index) => asOverlappingDoor(door, `${where} shares with [${index}]`)),
+    collisions: value.collisions.map((collision, index) => asNameCollision(collision, `${where} collides [${index}]`)),
+  }
+}
+
 const asEntry = (value: unknown, where: string): ApiEntry => {
   if (!isRecord(value) || !Array.isArray(value.groups)) throw new Error(`loom: ${where} is not an entry point`)
   if (!Array.isArray(value.requires)) throw new Error(`loom: ${where} does not say what it needs installed`)
   if (!Array.isArray(value.narrower)) throw new Error(`loom: ${where} does not say which doors are narrower than it`)
 
   const specifier = asString(value.specifier, `${where}.specifier`)
+  const groups = value.groups.map((group, index) => asGroup(group, `${specifier}[${index}]`))
 
   return {
     specifier,
@@ -129,7 +204,8 @@ const asEntry = (value: unknown, where: string): ApiEntry => {
     requires: value.requires.map((requirement, index) => asRequirement(requirement, `${specifier} needs [${index}]`)),
     files: asNumber(value.files, `${specifier}.files`),
     narrower: value.narrower.map((door, index) => asNarrowerDoor(door, `${specifier} narrower [${index}]`)),
-    groups: value.groups.map((group, index) => asGroup(group, `${specifier}[${index}]`)),
+    standing: asStanding(value.standing, specifier, groups.reduce((total, group) => total + group.symbols.length, 0)),
+    groups,
   }
 }
 

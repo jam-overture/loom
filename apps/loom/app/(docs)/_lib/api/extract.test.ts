@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import { entryPoints } from "../entry-points"
-import { docsSections } from "../nav"
+import { docsHref, docsLandingOf, docsPagesIn, docsSections } from "../nav"
 import {
   DECISION_NUMBER,
   extractReference,
@@ -17,8 +17,8 @@ import {
   serializeReference,
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
-import { apiAnchorFor, apiNavLabelFor, apiSlugFor } from "./model"
-import { apiEntries, apiEntryAt, parseReference } from "./reference"
+import { apiAnchorFor, apiNavLabelFor, apiSlugFor, apiSymbolCount } from "./model"
+import { apiEntries, apiEntryAt, apiSlugs, parseReference } from "./reference"
 
 /**
  * What keeps a generated reference true.
@@ -59,16 +59,35 @@ describe("the published entry points", () => {
    * the order the package's conditions are written; the rail lists them in the
    * order a reader should meet them, which is the order `entryPoints` is in.
    * What must never differ is *which* doors, so both checks sort first.
+   *
+   * `docsPagesIn` rather than the section's pages, because the section's own
+   * landing page is not a door and would be a seventeenth slug here.
    */
   it("each have a page in the rail, and the rail invents none", () => {
     const section = docsSections.find((candidate) => candidate.slug === "api-reference")
 
     expect(section?.source).toBe("generated")
-    expect(section?.pages.map((page) => page.slug).sort()).toEqual(
+    expect(
+      section === undefined ? [] : docsPagesIn(section).map((page) => page.slug).sort()
+    ).toEqual(
       publishedEntries()
         .map((entry) => apiSlugFor(entry.specifier))
         .sort()
     )
+  })
+
+  /**
+   * The landing page is the section itself, and the check that matters about it
+   * is that it is not mistaken for a door: nothing may generate a page for it,
+   * and its address has no segment of its own.
+   */
+  it("are not joined by the section's own page", () => {
+    const section = docsSections.find((candidate) => candidate.slug === "api-reference")
+    const landing = section === undefined ? undefined : docsLandingOf(section)
+
+    expect(landing).toBeDefined()
+    expect(apiSlugs).not.toContain(landing?.slug)
+    expect(docsHref("api-reference", landing?.slug ?? "x")).toBe("/docs/api-reference")
   })
 
   it("say the same thing in the rail and in the generated file", () => {
@@ -382,6 +401,173 @@ describe("which door a reader should have gone through instead", () => {
     )
 
     expect(wider).toEqual([])
+  })
+})
+
+describe("how much of the package is behind one door", () => {
+  it("says the root door is the widest and still has less than half of it", () => {
+    const runtime = apiEntryAt("runtime")
+    const published = runtime === undefined ? 0 : apiSymbolCount(runtime)
+
+    expect(runtime?.standing.widest).toBe(true)
+    expect(published * 2).toBeLessThan(runtime?.standing.packageNames ?? 0)
+  })
+
+  /**
+   * The belief this band exists to correct, stated as a number. Thirteen of
+   * the fifteen other doors publish not one name the root door publishes, so a
+   * reader who reads `@loom/runtime` as the door with everything behind it is
+   * wrong about almost the whole package.
+   */
+  it("finds that thirteen of the other fifteen doors share nothing with the root door", () => {
+    expect(apiEntryAt("runtime")?.standing.doorsSharingNothing).toBe(13)
+    expect(apiEntryAt("runtime")?.standing.otherDoors).toBe(15)
+  })
+
+  it("counts a shared name once, so the package publishes fewer names than its doors do slots", () => {
+    const slots = apiEntries.reduce((total, entry) => total + apiSymbolCount(entry), 0)
+    const names = apiEntries[0]?.standing.packageNames ?? 0
+
+    expect(names).toBeLessThan(slots)
+    expect(names).toBeGreaterThan(0)
+  })
+
+  it("gives every door the same count of the package, because it is one package", () => {
+    expect(new Set(apiEntries.map((entry) => entry.standing.packageNames)).size).toBe(1)
+  })
+
+  it("names the two doors the root door overlaps, and says how much", () => {
+    expect(apiEntryAt("runtime")?.standing.sharedWith).toEqual([
+      { specifier: "@loom/runtime/react", slug: "react", names: 5 },
+      { specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 },
+    ])
+  })
+
+  it("finds every name of the broadcaster behind the wider signals door", () => {
+    const broadcast = apiEntryAt("signals-broadcast")
+
+    expect(broadcast?.standing.sharedWith).toEqual([
+      { specifier: "@loom/runtime/signals", slug: "signals", names: 14 },
+    ])
+    expect(broadcast?.standing.sharedWith[0]?.names).toBe(broadcast === undefined ? -1 : apiSymbolCount(broadcast))
+  })
+
+  it("never lists a door as sharing nothing and as an overlap at once", () => {
+    for (const entry of apiEntries) {
+      expect(
+        entry.standing.doorsSharingNothing + entry.standing.sharedWith.length,
+        entry.specifier
+      ).toBeLessThanOrEqual(entry.standing.otherDoors)
+    }
+  })
+})
+
+describe("one name that means two things", () => {
+  /**
+   * The whole package has exactly one, which is what makes it worth a sentence
+   * on two pages rather than a policy. `horizonOf` answers *when does a reader
+   * signal fall out of the window* behind one door and *when may this
+   * telemetry be forgotten* behind the other.
+   */
+  it("finds horizonOf at the signals door and at the telemetry door", () => {
+    expect(apiEntryAt("signals")?.standing.collisions).toEqual([
+      { name: "horizonOf", specifier: "@loom/runtime/telemetry", slug: "telemetry" },
+    ])
+    expect(apiEntryAt("telemetry")?.standing.collisions).toEqual([
+      { name: "horizonOf", specifier: "@loom/runtime/signals", slug: "signals" },
+    ])
+  })
+
+  it("is the only one in the package, so the band is rare rather than decorative", () => {
+    const colliding = apiEntries
+      .filter((entry) => entry.standing.collisions.length > 0)
+      .map((entry) => entry.specifier)
+
+    expect(colliding).toEqual(["@loom/runtime/signals", "@loom/runtime/telemetry"])
+  })
+
+  /**
+   * The other name those two doors share *is* the same type, and counting it
+   * as a collision would make the page say `ForgetOutcome` means two different
+   * things when a reader can take either import and get the same one.
+   */
+  it("leaves the name the two doors really do share as an overlap", () => {
+    expect(apiEntryAt("signals")?.standing.sharedWith).toContainEqual({
+      specifier: "@loom/runtime/telemetry",
+      slug: "telemetry",
+      names: 1,
+    })
+  })
+})
+
+describe("a reference file that says nothing usable about where a door stands", () => {
+  const entry = (standing: unknown): unknown => ({
+    entries: [
+      {
+        specifier: "@loom/runtime",
+        slug: "runtime",
+        types: "./dist/index.d.ts",
+        requires: [],
+        files: 91,
+        narrower: [],
+        standing,
+        groups: [
+          {
+            module: "tree/tree",
+            title: "Trees",
+            summary: "",
+            symbols: [
+              { name: "createTree", kind: "function", signature: "createTree(): Tree", truncated: false, summary: "" },
+              { name: "buildText", kind: "function", signature: "buildText(): Node", truncated: false, summary: "" },
+            ],
+          },
+        ],
+      },
+    ],
+  })
+
+  const sound = {
+    packageNames: 4,
+    otherDoors: 1,
+    doorsSharingNothing: 0,
+    widest: false,
+    sharedWith: [{ specifier: "@loom/runtime/react", slug: "react", names: 1 }],
+    collisions: [],
+  }
+
+  it("is refused when a door publishes more names than it says the package does", () => {
+    /*
+     * The shape an unfilled second pass leaves behind. It renders as *publishes
+     * 526 of the package's 0 names*, which is a sentence no reader can make
+     * sense of and no test would otherwise notice.
+     */
+    expect(() => parseReference(entry({ ...sound, packageNames: 0 }))).toThrow(
+      /publishes 2 names and says the whole package publishes 0/
+    )
+  })
+
+  it("is refused when more doors share nothing with it than there are doors", () => {
+    expect(() => parseReference(entry({ ...sound, doorsSharingNothing: 2 }))).toThrow(
+      /says 2 of 1 other doors share none of its names/
+    )
+  })
+
+  it("is refused when a door is listed as an overlap and overlaps in nothing", () => {
+    expect(() =>
+      parseReference(entry({ ...sound, sharedWith: [{ specifier: "@loom/runtime/react", slug: "react", names: 0 }] }))
+    ).toThrow(/is listed as sharing names and shares 0/)
+  })
+
+  it("is refused when it does not say where the door stands at all", () => {
+    expect(() => parseReference(entry(undefined))).toThrow(
+      /does not say where it stands among the doors/
+    )
+  })
+
+  it("is refused when it does not say which of its names mean two things", () => {
+    expect(() => parseReference(entry({ ...sound, collisions: undefined }))).toThrow(
+      /does not say which of its names mean two things/
+    )
   })
 })
 

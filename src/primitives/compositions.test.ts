@@ -169,8 +169,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers forty bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(40)
+  it("offers forty-four bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(44)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1494,5 +1494,320 @@ describe("what a page for another kind of business draws", () => {
         expect(slotOf(card, "meta").length, `a ${type} in ${id} carries no qualifier`).toBeGreaterThan(0)
       }
     }
+  })
+})
+
+/**
+ * The two rows of the reach inventory that were work rather than a decision,
+ * and what the four bands closing them each rest on.
+ *
+ * The 21 September inventory sorted twenty-five unreachable primitives into
+ * three rows. 23 September showed that the *not a landing page* row was
+ * reasoning from what a band says rather than from where it goes, and closed
+ * four of its twelve. What was left of it — `book`, `listing`, `event` and
+ * their grids — and the whole of the *bound region* row's figure half were
+ * filed in that run's report as **a run**, with one 0171 judgement inside it.
+ * This is that run, and these are the claims it makes.
+ *
+ * Grouped rather than split one test per band for the reason the 23 September
+ * group gives: what is held is the claim, and a run that deleted one band would
+ * otherwise take a primitive back out of reach with every other test green.
+ */
+describe("the rows that were waiting on a run", () => {
+  const slotOf = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotOf(child, name))
+  }
+
+  const bandOf = (id: string): ElementNode => {
+    const composition = compositionById(id)
+    if (composition === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return composition.build(sequentialIdFactory())
+  }
+
+  /**
+   * The seven types the four bands put back in reach, named rather than
+   * counted — 23 September's form, and for its stated reason: a count is the
+   * assertion a later run edits without reading, and a name is the sentence
+   * somebody needs when a band goes.
+   */
+  const REACHED: readonly { readonly type: string; readonly by: string }[] = [
+    { type: "loom.book", by: "features-shelf" },
+    { type: "loom.book-grid", by: "features-shelf" },
+    { type: "loom.listing", by: "features-listings" },
+    { type: "loom.listing-grid", by: "features-listings" },
+    { type: "loom.event", by: "articles-whats-on" },
+    { type: "loom.event-grid", by: "articles-whats-on" },
+    { type: "loom.tally", by: "metrics-live" },
+  ]
+
+  it("puts seven more primitives that no band could place back in reach", () => {
+    for (const { type, by } of REACHED) {
+      expect(CATALOGUE_TYPES, `${type} is unreachable: no band builds one`).toContain(type)
+
+      const band = compositionById(by)
+      expect(band, `${by} is not in the phrasebook`).toBeDefined()
+      if (band === undefined) continue
+
+      expect(typesIn(band.build(sequentialIdFactory())), `${by} no longer builds a ${type}`).toContain(type)
+    }
+  })
+
+  /**
+   * None of the four is a new part, and the what's-on band is the one this is
+   * really about.
+   *
+   * 0186 answers the question 23 September left open, and the thing it turns on
+   * is which part is the *nearest* one. Against `changelog` the swap fails both
+   * ways and a what's-on band looks like a twenty-third part; against
+   * `articles` it loses nothing, and 0171 is explicit that a shared shape is
+   * content and content is the wrong axis. If a later run reopens it, this is
+   * where the argument has to be made.
+   */
+  it("adds no part, because a calendar is not a region of its own", () => {
+    expect(COMPOSITION_PARTS).toHaveLength(22)
+
+    for (const { by } of REACHED) {
+      const band = compositionById(by)
+      expect(band).toBeDefined()
+      if (band === undefined) continue
+
+      expect(compositionsForPart(band.part).length, `${by} is the only design of ${band.part}`).toBeGreaterThan(1)
+      expect(band.id.startsWith(`${band.part}-`), `${by} is not named for the part it designs`).toBe(true)
+    }
+  })
+
+  /**
+   * A listing carries as many facts as it has and no blanks, which is the
+   * whole of 0052 spent on something load-bearing.
+   *
+   * Hermes held `beds`, `baths` and `sqft` as three fixed fields. As
+   * `loom.spec` children a yard can carry two, a floor can carry four, and the
+   * fourth is one `insert` rather than a prop nothing can register
+   * mid-session. A band where every card had the same number of specs would
+   * render identically and would be a photograph of the prop version, so the
+   * raggedness is asserted rather than left to the copy.
+   */
+  it("gives the listings different numbers of facts, including one that no field could hold", () => {
+    const cards = elementsOfType(bandOf("features-listings"), "loom.listing")
+    const counts = cards.map((card) => elementsOfType(card, "loom.spec").length)
+
+    expect(cards.length).toBeGreaterThan(4)
+    expect(Math.min(...counts), "a listing carries no facts at all").toBeGreaterThan(1)
+    expect(Math.max(...counts), "no listing carries a fourth fact, so nothing is spent on the argument").toBe(4)
+    expect(new Set(counts).size, "every listing carries the same number of facts").toBeGreaterThan(2)
+  })
+
+  /**
+   * The flags are worn on the frame and the way in is pinned to the floor —
+   * both regions, neither in the flow.
+   *
+   * 0051's rule with a photograph behind it: the specs *are* the flow, so an
+   * action that landed among them would sit under a different fact on every
+   * card, and six cards would give six button positions. The flags are in a
+   * region for the other reason — they are drawn over the picture, and a band
+   * that put them in the flow would be a second layout nobody chose.
+   */
+  it("puts every listing's state on its frame and every viewing on its floor", () => {
+    for (const card of elementsOfType(bandOf("features-listings"), "loom.listing")) {
+      const pinned = slotOf(card, "action").flatMap((node) => elementsOfType(node, "loom.action"))
+      const loose = card.children
+        .filter((child) => child.kind === "element")
+        .flatMap((child) => elementsOfType(child, "loom.action"))
+
+      expect(pinned, "a listing has no way to be seen").toHaveLength(1)
+      expect(loose, "a listing puts its action in the flow, among the specs").toHaveLength(0)
+      expect(slotOf(card, "flags").length, "a listing wears no state").toBeGreaterThan(0)
+    }
+  })
+
+  /**
+   * Exactly one date is emphasised, and it is the first.
+   *
+   * `emphasis` is the one prop on `loom.event` that survives the granularity
+   * test — it changes a rendering and no node — and a band that emphasised
+   * three would be emphasising none. First because the band is a column a
+   * finger runs down and the thing being steered towards is at the top of it;
+   * an emphasised row in the middle reads as an accident.
+   */
+  it("steers towards one date, at the top of the column", () => {
+    const dates = elementsOfType(bandOf("articles-whats-on"), "loom.event")
+    const featured = dates.filter((date) => date.props["emphasis"] === "featured")
+
+    expect(dates.length).toBeGreaterThan(3)
+    expect(featured).toHaveLength(1)
+    expect(dates[0], "the emphasised date is not the first one").toBe(featured[0])
+
+    for (const date of dates) {
+      expect(slotOf(date, "meta").length, `${String(date.props["name"])} carries no qualifier`).toBeGreaterThan(0)
+      expect(
+        slotOf(date, "action").flatMap((node) => elementsOfType(node, "loom.action")),
+        `${String(date.props["name"])} cannot be got into`
+      ).toHaveLength(1)
+    }
+  })
+
+  /**
+   * The live figures band arrives **unbound**, and that is the band rather than
+   * an omission.
+   *
+   * `articles-feed` established it and the reasoning is unchanged: a binding
+   * names a **source id**, and a source id is a thing a host registers, so a
+   * composition that declared one would hand every deployment that had not
+   * registered that exact id a page reporting a binding it never agreed to
+   * make. What is asserted is both halves — no `loom:data` anywhere, and every
+   * tally naming the key it will read once somebody adds one.
+   */
+  it("ships four sockets rather than four bindings nobody registered", () => {
+    const band = bandOf("metrics-live")
+    const figures = elementsOfType(band, "loom.tally")
+
+    expect(figures).toHaveLength(4)
+
+    const bound = (node: LoomNode): readonly string[] =>
+      node.kind === "text"
+        ? []
+        : [
+            ...(node.kind === "element" && node.props["loom:data"] !== undefined ? [node.type] : []),
+            ...node.children.flatMap(bound),
+          ]
+
+    expect(bound(band), "the band names a source a host never registered").toEqual([])
+
+    const names = figures.map((figure) => figure.props["binding"])
+    expect(new Set(names).size, "two figures read the same answer").toBe(4)
+
+    for (const figure of figures) {
+      expect(typeof figure.props["binding"], "a figure does not say what it reads").toBe("string")
+      expect(typeof figure.props["caption"], "a figure that cannot be read does not say what it waits on").toBe("string")
+    }
+  })
+
+  /**
+   * The unconnected figure is quiet, which is the one thing that decides
+   * whether this band reads as unconnected or as broken.
+   *
+   * `loom.tally` overrides its own value rule when there is nothing to print —
+   * muted, one step down the ramp, deliberately not the accent — *because a
+   * figure that did not arrive must not be the loudest thing on the page*. The
+   * band is the first thing to rest on that, four times in a row, so the
+   * override is asserted from the band rather than only from the primitive: a
+   * run that removed the inline style would leave every test but this one
+   * green and four `Unavailable`s shouting in yellow.
+   */
+  it("draws four figures that could not be read without shouting any of them", () => {
+    for (const theme of [EDITORIAL, BOLD]) {
+      const ids = sequentialIdFactory()
+      const { markup, diagnostics } = render(pageOf(theme, [bandOf("metrics-live")], ids))
+      const tree = treeMarkup(markup)
+
+      expect(diagnostics).toEqual([])
+      expect((tree.match(/Unavailable/g) ?? []).length, "a figure printed something it was never given").toBe(4)
+      expect(tree).toContain("Connect a source")
+
+      for (const value of tree.matchAll(/loom-stat-value"[^>]*style="([^"]*)"/g)) {
+        expect(value[1], "an unreadable figure keeps the accent it is drawn in when it arrives").toMatch(/color:/)
+      }
+    }
+  })
+
+  /**
+   * Both bound primitives now say which name they read an answer under.
+   *
+   * 0181 gave a primitive `reads` and could not describe either of these,
+   * because both take the name from an optional prop; 0184 added the form that
+   * fits and the framework lane filed the two-line change as this lane's. It is
+   * asserted rather than eyeballed because **absence and emptiness are
+   * different answers** — leaving `reads` out says *nobody has said*, which is
+   * what both of these said for two days, and a run that removed the
+   * declaration would take the `data-unread` diagnostic with it silently.
+   */
+  it("makes both bound primitives declare the name they read under", () => {
+    for (const [type, fallback] of [
+      ["loom.feed", "entries"],
+      ["loom.tally", "value"],
+    ] as const) {
+      const declared = registry.primitives.find((primitive) => primitive.type === type)?.reads
+
+      expect(declared, `${type} still says nothing about what it reads`).toEqual([
+        { fromProp: "binding", default: fallback },
+      ])
+    }
+  })
+})
+
+/**
+ * The claim the whole-page photograph is the evidence for, held where a later
+ * run will read it.
+ *
+ * Two bands attribute quotes and they attribute them differently on purpose:
+ * `testimonials` to **roles**, because a starting composition may not ship a
+ * fabricated endorsement from a person who does not exist, and
+ * `testimonials-wall` to **names**. Until 25 September that difference had no
+ * consequence, because `loom.quote` drew no face either way. It has one now, so
+ * the difference has to be *declared* rather than left implicit in the copy —
+ * which is
+ * [0160](../../decisions/0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md),
+ * and [0189](../../decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md)
+ * is why it matters.
+ *
+ * These are asserted as a pair rather than one test each, for the reason the
+ * reach tests above give: what is held is the *contrast*, and a run that
+ * changed one band's copy without the other's declaration would otherwise leave
+ * every test green and put the initials of a job title in a circle.
+ */
+describe("which quotes have a face", () => {
+  const quotesOf = (id: string): readonly ElementNode[] => {
+    const band = compositionById(id)
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return elementsOfType(band.build(sequentialIdFactory()), "loom.quote")
+  }
+
+  it("declares every role-attributed quote unnamed, and every named one not", () => {
+    const anonymous = quotesOf("testimonials")
+    const named = quotesOf("testimonials-wall")
+
+    expect(anonymous.length).toBeGreaterThan(0)
+    expect(named.length).toBeGreaterThan(0)
+
+    for (const quote of anonymous) {
+      expect(quote.props["anonymous"], `a testimonials quote attributed to ${quote.props["author"]}`).toBe(true)
+    }
+
+    for (const quote of named) {
+      expect(quote.props["anonymous"], `a wall quote attributed to ${quote.props["author"]}`).toBeUndefined()
+    }
+  })
+
+  /**
+   * The rule the copy has to keep for the declaration above to be the right
+   * one. A role has no initials; a name does. Two words is what `monogramOf`
+   * reduces, and it is the property that makes a wall of eight read as eight
+   * people rather than eight paragraphs.
+   */
+  it("attributes the wall to people with names in them", () => {
+    for (const quote of quotesOf("testimonials-wall")) {
+      const author = quote.props["author"]
+
+      expect(typeof author).toBe("string")
+      expect(String(author).split(/\s+/u).length, `${String(author)} is not a person's name`).toBeGreaterThan(1)
+    }
+  })
+
+  /**
+   * The singleton pull quote is the third placement of the same fallback and
+   * the one that is not in a card — it sits against a 2px accent rule — so it
+   * is named here rather than left to the two grids.
+   */
+  it("gives the customer story's pull quote a name to draw a face from", () => {
+    const [story] = quotesOf("proof-story")
+
+    expect(story).toBeDefined()
+    expect(story?.props["anonymous"]).toBeUndefined()
+    expect(String(story?.props["author"]).split(/\s+/u).length).toBeGreaterThan(1)
   })
 })

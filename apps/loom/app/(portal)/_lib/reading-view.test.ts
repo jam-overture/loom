@@ -692,7 +692,7 @@ describe("saying which version these numbers are about, out loud", () => {
 
   it("keeps the sentence it always had when the counters are the page being served", () => {
     expect(visitsHeard(reading, current)).toBe(
-      "40 visits to this page have reported back since it was last changed. That is revision 2."
+      "40 visits to this page have reported back since it was last changed. That is version 2."
     )
   })
 
@@ -703,7 +703,7 @@ describe("saying which version these numbers are about, out loud", () => {
    */
   it("stops claiming the visits arrived since the last change when they did not", () => {
     expect(visitsHeard(reading, behind)).toBe(
-      "40 visits have reported back on revision 2 of this page."
+      "40 visits have reported back on version 2 of this page."
     )
     expect(visitsHeard(reading, behind)).not.toContain("since it was last changed")
   })
@@ -714,7 +714,7 @@ describe("saying which version these numbers are about, out loud", () => {
 
   it("counts one visit as a visit rather than as 1 visits, in both forms", () => {
     expect(visitsHeard(one, current)).toContain("One visit to this page has reported back")
-    expect(visitsHeard(one, behind)).toBe("One visit has reported back on revision 2 of this page.")
+    expect(visitsHeard(one, behind)).toBe("One visit has reported back on version 2 of this page.")
   })
 
   /**
@@ -729,7 +729,7 @@ describe("saying which version these numbers are about, out loud", () => {
   })
 
   it("names the version that has nothing counted for it yet", () => {
-    expect(standingNote(behind)).toContain("nothing has been counted for revision 3 yet")
+    expect(standingNote(behind)).toContain("nothing has been counted for version 3 yet")
   })
 
   it("says how many changes have landed since, the way somebody would say it", () => {
@@ -739,7 +739,7 @@ describe("saying which version these numbers are about, out loud", () => {
   })
 
   it("says the page being served is older rather than calling it unreadable", () => {
-    expect(standingNote(replaced)).toContain("revision 1")
+    expect(standingNote(replaced)).toContain("version 1")
     expect(standingNote(unread)).toContain("couldn’t read the page itself")
   })
 
@@ -764,18 +764,21 @@ describe("saying which version these numbers are about, out loud", () => {
   /**
    * The plain-language rule, on every sentence this screen shows unasked.
    *
-   * `revision` is exempted at the point of use rather than removed from the
-   * list. It is the portal's own word on every other screen — `/portal/history`
-   * numbers its rows *Revision 4* and `RevisionLink` addresses them — so a
-   * reader matching a number here against a row there needs the same label, and
-   * a blanket ban would have this rule enforcing an inconsistency. Nothing else
-   * from the runtime's vocabulary is allowed through.
+   * `revision` used to be exempted here at the point of use, on the reasoning
+   * that it was the portal's own word on every other screen — `/portal/history`
+   * numbered its rows *Revision 4* and `RevisionLink` addressed them — so a
+   * blanket ban would have the rule enforcing an inconsistency. That was true
+   * of the inconsistency and wrong about which side to resolve it on: the
+   * portal already had a plain word for the number and was using it a screen
+   * away. These sentences say *version 12* now, `_lib/version.ts` is where the
+   * word is written once, and **the exemption is gone** — there is nothing
+   * from the runtime's vocabulary left to allow through.
    */
   it("says all of it without the runtime's vocabulary", () => {
     for (const standing of [current, behind, unread, replaced]) {
       const said = `${visitsHeard(reading, standing)} ${standingNote(standing)} ${standingAdvice(standing) ?? ""}`
 
-      expect(runtimeWordsIn(said, ["revision"]), said).toEqual([])
+      expect(runtimeWordsIn(said), said).toEqual([])
     }
   })
 })
