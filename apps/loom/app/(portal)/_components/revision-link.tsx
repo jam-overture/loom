@@ -3,6 +3,7 @@ import Link from "next/link"
 import type { TreeId } from "@loom/runtime"
 
 import { isReachableRevision, revisionHref } from "@/app/(portal)/_lib/history-link"
+import { versionMention } from "@/app/(portal)/_lib/version"
 
 /**
  * A revision, as somewhere to go.
@@ -16,6 +17,11 @@ import { isReachableRevision, revisionHref } from "@/app/(portal)/_lib/history-l
  *
  * Monospaced everywhere, because the number is an identifier rather than a
  * quantity and reads as one beside the ids it sits next to.
+ *
+ * It says *version 12* rather than *revision 12*, which is the portal's word
+ * for the same number and not a different number — see `_lib/version.ts`. The
+ * href, the fragment and the row it lands on are unchanged, so every link
+ * anybody has ever been sent still arrives exactly where it did.
  *
  * Total over every revision a tree can be at, including revision 0, which is not
  * one an entry produced. That case only appears now that the preview names a
@@ -33,8 +39,8 @@ export const RevisionLink = ({
 }) =>
   isReachableRevision(revision) ? (
     <Link href={revisionHref(treeId, revision)} className="font-mono">
-      revision {revision}
+      {versionMention(revision)}
     </Link>
   ) : (
-    <span className="font-mono">revision {revision}</span>
+    <span className="font-mono">{versionMention(revision)}</span>
   )

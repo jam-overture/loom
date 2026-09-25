@@ -238,7 +238,7 @@ describe("describeAnchorMiss", () => {
     expect(
       describeAnchorMiss({ kind: "named", revision: 900 }, { ...ARRIVED, onPage: false })
     ).toBe(
-      "Revision 900 isn’t among the changes shown here — this page has only got as far as revision 12."
+      "Version 900 isn’t among the changes shown here — this page has only got as far as version 12."
     )
   })
 
@@ -248,18 +248,19 @@ describe("describeAnchorMiss", () => {
         { kind: "named", revision: 9 },
         { ...ARRIVED, onPage: false, newestOnPage: undefined }
       )
-    ).toBe("Revision 9 isn’t among the changes shown here, because nothing has been changed on this page yet.")
+    ).toBe("Version 9 isn’t among the changes shown here, because nothing has been changed on this page yet.")
   })
 
   /**
-   * Two words this screen stopped using. "Log" is the runtime's name for what a
-   * reader calls their history. And "this page" used to mean the *batch of
-   * changes on screen* — `Nothing on this page is revision 9` — while the
-   * heading three lines above used the same words for the page being read, so a
-   * reader had two referents and no way to pick. Every miss now leads with the
-   * revision instead.
+   * Three words this screen stopped using. "Log" is the runtime's name for what
+   * a reader calls their history. "Revision" is its name for the number, and
+   * these sentences say *Version 9* now, the way the rows they send a reader to
+   * do. And "this page" used to mean the *batch of changes on screen* —
+   * `Nothing on this page is revision 9` — while the heading three lines above
+   * used the same words for the page being read, so a reader had two referents
+   * and no way to pick. Every miss now leads with the version instead.
    */
-  it("never says log, and leads with the revision rather than with a page", () => {
+  it("never says log or revision, and leads with the version rather than with a page", () => {
     const said = [
       describeAnchorMiss({ kind: "malformed", typed: "elevn" }, ARRIVED),
       describeAnchorMiss({ kind: "named", revision: 900 }, { ...ARRIVED, onPage: false }),
@@ -274,6 +275,7 @@ describe("describeAnchorMiss", () => {
     for (const one of said) {
       expect(one).toBeDefined()
       expect(one).not.toMatch(/\blog\b/)
+      expect(one).not.toMatch(/\brevisions?\b/iu)
       expect(one).not.toMatch(/Nothing on this page/)
     }
   })
@@ -300,11 +302,11 @@ describe("describeAnchorMiss", () => {
 
     expect(back).toContain("further along")
     expect(along).toContain("further back")
-    expect(back).not.toContain("reaches revision")
-    expect(along).not.toContain("reaches revision")
+    expect(back).not.toContain("got as far as")
+    expect(along).not.toContain("got as far as")
   })
 
-  it("names the revision that was asked for in every miss", () => {
+  it("names the version that was asked for in every miss", () => {
     const misses = [
       describeAnchorMiss(
         { kind: "named", revision: 9 },
@@ -313,6 +315,6 @@ describe("describeAnchorMiss", () => {
       describeAnchorMiss({ kind: "named", revision: 9 }, { ...ARRIVED, onPage: false }),
     ]
 
-    for (const said of misses) expect(said).toContain("Revision 9")
+    for (const said of misses) expect(said).toContain("Version 9")
   })
 })

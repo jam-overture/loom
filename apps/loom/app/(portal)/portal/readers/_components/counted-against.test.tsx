@@ -64,7 +64,7 @@ describe("which version these numbers are about", () => {
     const { container } = drawn(BEHIND)
 
     expect(surface(container)).toContain("You have changed this page twice since then")
-    expect(surface(container)).toContain("nothing has been counted for revision 4 yet")
+    expect(surface(container)).toContain("nothing has been counted for version 4 yet")
   })
 
   /**
@@ -171,7 +171,7 @@ describe("the record one click down", () => {
     for (const standing of [CURRENT, BEHIND, UNREAD, REPLACED]) {
       const shown = surface(drawn(standing).container)
 
-      expect(runtimeWordsIn(shown, ["revision"]), shown).toEqual([])
+      expect(runtimeWordsIn(shown), shown).toEqual([])
     }
   })
 })

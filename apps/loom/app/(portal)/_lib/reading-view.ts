@@ -2,6 +2,7 @@ import type { NodeId, PrimitiveType, TreeId } from "@loom/runtime"
 import type { StoredTally } from "@loom/runtime/signals"
 
 import { nounOf, type PartName } from "./part-name"
+import { versionMention } from "./version"
 
 /**
  * What readers did on a page, read the way a person asks it.
@@ -344,8 +345,8 @@ export const visitsHeard = (reading: RevisionReading, standing: CountingStanding
   const verb = reading.views === 1 ? "has" : "have"
 
   return standing.kind === "current"
-    ? `${visits} to this page ${verb} reported back since it was last changed. That is revision ${reading.revision}.`
-    : `${visits} ${verb} reported back on revision ${reading.revision} of this page.`
+    ? `${visits} to this page ${verb} reported back since it was last changed. That is ${versionMention(reading.revision)}.`
+    : `${visits} ${verb} reported back on ${versionMention(reading.revision)} of this page.`
 }
 
 /**
@@ -362,11 +363,11 @@ export const standingNote = (standing: CountingStanding): string => {
     case "current":
       return "These are the numbers for the version you are serving right now."
     case "behind":
-      return `You have changed this page ${timesChanged(standing.changes)} since then, and nothing has been counted for revision ${standing.live} yet.`
+      return `You have changed this page ${timesChanged(standing.changes)} since then, and nothing has been counted for ${versionMention(standing.live)} yet.`
     case "unread":
       return "We couldn’t read the page itself just now, so we can’t tell you whether this is the version you are serving."
     case "replaced":
-      return `The page being served is revision ${standing.live}, which is older than these numbers — something has put a different page at this address.`
+      return `The page being served is ${versionMention(standing.live)}, which is older than these numbers — something has put a different page at this address.`
   }
 }
 

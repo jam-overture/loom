@@ -129,7 +129,7 @@ describe("PreviewFrame", () => {
     expect(document.body.textContent).not.toContain("0 changes have been applied")
   })
 
-  it("leads with the sentence and follows it with the revision, never the reverse", () => {
+  it("leads with the sentence and follows it with the version, never the reverse", () => {
     const { container } = render(
       <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
         <p>rendered</p>
@@ -141,7 +141,7 @@ describe("PreviewFrame", () => {
     )
 
     expect(line?.textContent?.indexOf("4 changes")).toBeLessThan(
-      line?.textContent?.indexOf("revision") ?? -1
+      line?.textContent?.indexOf("version") ?? -1
     )
   })
 
