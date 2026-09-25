@@ -3,8 +3,17 @@
 **Routine:** `Loom primitives` · **Date:** 2026-09-25 · **Branch:**
 `primitives-45-the-face-promised` — deliberately short, because a blob URL
 carries it and the 24 September finding measures the ceiling at 158 characters ·
-**Section:** §4b · **Pull request:** #NNN · **Preview:** in the pull request
-body, from Vercel's own comment
+**Section:** §4b · **Pull request:**
+[#389](https://github.com/jam-overture/loom/pull/389) · **Preview:**
+https://loom-git-primitives-45-the-f-ceef18-jpizzolato36-6341s-projects.vercel.app
+— **published unverified**: `*.vercel.app` is off this sandbox's egress
+allowlist, the standing 19 August limit, so the URL is Vercel's own comment on
+the pull request rather than something this run opened. Vercel reported
+*verified and building* on the head commit, which is the 24 September finding's
+rule holding: nothing about the commit's author was overridden. **There is
+nothing new on it to look at** — a primitive is a thing a tree uses, and this
+deployment seeds trees that carry none of these bands. Everything below was
+driven against the specimen harness and a local render
 
 ![Five bands under editorial, at 1280px](2026-09-25-primitives-the-face-the-band-promised-editorial-wide.png)
 
