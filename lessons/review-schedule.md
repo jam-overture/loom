@@ -1374,6 +1374,63 @@ defect.
 
 ---
 
+## Set AG — two days after lesson 28
+
+Interleaved with 09, 11, 16, 17, 25, 26 and 27. Heavy on 25, because lesson 28
+is that lesson's rule applied to prose rather than to a union and reads as a
+list of complaints if the rule is fuzzy; and heavy on 16, because a derived copy
+is the best of the three sources and lesson 16 is where deriving is actually
+argued for.
+
+1. Define a check in one sentence. Then use your definition — not an appeal to
+   how hard titles are — to say why a decision record's heading *number* is
+   checkable and its heading *title* is not, and name the property the two
+   differ in. *(28)*
+2. Name the three places a second copy of a fact can come from, in order of
+   preference, and give for each what it costs and what it cannot catch. Then say
+   what the third one has that the first two do not have at all, and why that is
+   what puts it last. *(28)*
+3. A bare `(0095)` and a linked `[0095](0095-….md)` cite the same record. Say
+   what each carries and what can be held against each. Then give the reason the
+   repository writes the weaker form in `src/` anyway — the answer is a rule from
+   outside this lane that outranked the check — and say what would have to change
+   first for the stronger form to be usable. *(28)*
+4. The registry of counted sentences asserts its pattern matches **exactly** once
+   rather than at least once. Say what that defends against, describe what the
+   suite would report without it, and then name the *other* way such a registry
+   rots — the one no assertion inside it can reach. *(25, 28)*
+5. State the rule about the population a check runs over. Give two instances from
+   this course, one where the population was a union's members and one where it
+   was a shape in prose, and say for each what the remedy closed and what it left
+   open. *(25, 28)*
+6. A hold carries the revision it was judged against and a tree carries the
+   revision it is at; ten decision records name what supersedes them and are
+   named back. Both are one fact written twice. Say why the first got a function
+   and the second got nothing, and what that tells you about when a second copy
+   gets cashed in. *(26, 28)*
+7. A snapshot is a view you can rebuild from the log, and a self-graded
+   confidence number is worth nothing until an outcome arrives. Say what each is
+   a second copy **of**, place each in the three sources from question 2, and
+   then say precisely how calibration fails to fit — the misfit is the point,
+   not a flaw in the scheme. *(16, 17, 28)*
+8. Lesson 28's exercise D has the totals in hand and prints verdicts instead.
+   Give the reason, then state the general rule about what you take on when you
+   manufacture a second copy: who owes the upkeep, why it is normally not the
+   person who wrote the copy, and what that implies about which of the three
+   sources you should reach for first. *(28)*
+9. Exercise F's hollow record — four headings, nothing under them — passes every
+   check this repository has. Say which fact the check establishes and which fact
+   the people writing records establish. Then say what a reading owes a caller
+   about *no* versus *nobody has said*, and which of the two a present-but-empty
+   section is. *(24, 28)*
+
+Question 1 is the point of the set. Question 8 is where a confident half-answer
+is most likely: an answer that says *because the numbers change* has described
+the mechanism and stopped. Question 6 is the one where the tidy answer — *the
+second one is only prose* — is wrong, and noticing why is worth the whole set.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1420,3 +1477,4 @@ renders this file rather than restating it.
 | AD | 2 days after L25 | | |
 | AE | 2 days after L26 | | |
 | AF | 2 days after L27 | | |
+| AG | 2 days after L28 | | |

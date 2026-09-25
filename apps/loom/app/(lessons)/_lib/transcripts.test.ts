@@ -74,7 +74,18 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 102 since lesson 27 (scale), which added seven — one per exercise, every one
+ * 111 since lesson 28 (corroboration), which added nine — seven exercises, two
+ * of which split their output across two fences so that the half about the
+ * check and the half about the people writing the records are not read as one
+ * thing. Every one of them prints a verdict rather than a total, and the lesson
+ * argues the reason in its own Try it: a transcript is a second copy of
+ * whatever it prints, and these exercises read a directory that six routines
+ * add to three times a day. Printing the size of that directory here would make
+ * a red lessons build the ordinary consequence of writing a decision record —
+ * which is what the size of the primitive library has already done to lessons
+ * 22, 23 and 24.
+ *
+ * It was 102 after lesson 27 (scale), which added seven — one per exercise, every one
  * of them a whole transcript in a single block, and two of them carrying a line
  * of CSS read out of the library's own stylesheet rather than computed. It was
  * 95 after lesson 26 (liveness), which added six on the same terms; 89 after
@@ -88,7 +99,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 102
+const RECOGNISED_TRANSCRIPTS = 111
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
