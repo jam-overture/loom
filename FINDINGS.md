@@ -29926,8 +29926,24 @@ these four and the toast.
 ## 2026-09-20 — no behaviour control can appear in a specimen, so the seam that builds them is the one thing `pnpm specimen` cannot photograph
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — worked around with a scratch bundle, and this lane is the third to write
-one in four days
+**closed by `framework-53-both-seams-in-one-element`** (24 September) —
+recommendation (1) taken, both halves, and the five controls are photographed.
+`live` is opt-in, so a specimen that says nothing renders, serves and is named
+exactly as it was; `live: {}` hydrates, and `live.states` is a list of
+`{ label, do }` that becomes a third dimension of the plan beside themes and
+viewports. `additionalPrimitives` moved off `renderSpecimen` and onto
+`Specimen.primitives`, which is what the four unreachable lines needed to buy
+something — and it had to move, because the browser builds the same registry
+from the same module and a parameter reaches only one of the two. The two
+renders call one function (`element.ts`), which is also where the data seam now
+resolves, and nothing is serialised onto the page.
+`tools/specimen/behaviour.specimen.ts` places all five controls on a subject
+registered for that specimen alone, so nothing was added to `src/primitives/`.
+**The `dismissed` shot is byte-identical to the `settled` one**, which is the
+pair closing itself, measured rather than argued. Recorded in
+[0188](decisions/0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md).
+The cost the entry weighed is paid as weighed: a build step, by a live specimen
+only, before the browser is looked for.
 
 A specimen page is `renderToStaticMarkup` with no dev server and no hydration.
 `plan.ts` says so in as many words — *"there is no script in it to press"* — and
@@ -30600,8 +30616,17 @@ total map of a runtime enum and reads the compiler's approval as coverage.
 ## 2026-09-23 — `npx prettier` is not this repository's formatter and running it rewrites every file it is pointed at
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — cosmetic, cheap to avoid, and it cost this run a full revert and a
-re-application of eight files' worth of edits
+**closed by `framework-53-both-seams-in-one-element`** (24 September) — the
+second of the two you offered, written under *Standards* in `docs/routines.md`:
+the repository is formatted by hand and no formatter is to be run over it, with
+the style named and your measurement that no options string reproduces it. The
+first — a devDependency with a config and a `format` script — was not taken
+because you had already shown it cannot be had: prettier with those options does
+not reproduce the existing formatting, so adopting it would mean reformatting
+every file in the repository to match a tool rather than the other way round,
+which is a diff nobody can review and an unbounded conflict with four open
+branches. Your entry is also the reason the sentence names the flags: a run that
+reaches for the reflex now finds the answer beside the reason
 
 There is no `.prettierrc`, no `prettier` in either `package.json`, and no
 formatter script. The house style is unmistakable from any file — no
@@ -31656,9 +31681,11 @@ through, which is this lane's job and is why it is filed from here.
 ## 2026-09-24 — this application cannot serve a `robots.txt`, and the file that proves it passed every test it had
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — **measured three ways on `marketing-35-the-map-nothing-here-draws`**;
-nothing is broken and no page is affected, and the marketing site ships its
-sitemap without one
+**closed by `framework-54-written-and-never-served`** — the application serves
+`/robots.txt` and `pnpm prerender:check` now fails on a metadata file the build
+did not read. **Two of the three measurements do not reproduce**, and the
+correction is under the entry rather than inside it, because the third one is
+the fault and it is worse than a 404.
 
 `/sitemap.xml` shipped today. The `robots.txt` that should announce it did not,
 because this application will not serve one from anywhere it can be written.
@@ -31739,8 +31766,16 @@ land them without a marketing run.
 ---
 ## 2026-09-24 — `nextjs.org` is `EGRESS_BLOCKED`, and `docs/routines.md` lists it as allowed
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — one fetch, from the marketing lane, on 24 September
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`,
+reassigned from `Loom daily build` on 25 September · **Status:** open — one
+fetch from the marketing lane on 24 September, and **nothing for a lane to do**:
+the entry's own reading of `.claude/settings.json` establishes that both
+committed lists already name the domain, so the block is the environment's
+egress proxy and is the maintainer's. Confirmed from the shell lane rather than
+re-measured. The one question it blocked — whether a root-segment metadata route
+needs a root layout — has since been answered without it, by reading Next's
+matcher out of `node_modules` (0190); that is the general workaround when a
+question is about the framework rather than about its documentation.
 
 `docs/routines.md` under *Network access* says: *"Currently allowed: `21st.dev`
 and `nextjs.org` (the visual and structural references the primitives,
@@ -32008,6 +32043,38 @@ run finding out: the workaround is one line of discipline and the fault is
 cosmetic. Written down so the next lane measures instead of guessing, which is
 what the four dead theories above cost between them.
 
+> **Twelve more measurements, 25 September, from `Loom marketing` on #390.**
+> Three revisions of one pull request body, each read back from the API after
+> posting. They agree with this entry that it is length, and they move the
+> number — **for a markdown link the boundary is between 147 and 151, not 158**:
+>
+> | form | survived | mangled |
+> | --- | --- | --- |
+> | markdown link | 145, 146, 146, 147 | 151, 156, 168, 169, 170, 172 |
+> | bare URL on its own line | 156 | *(158, on #378 above)* |
+>
+> Everything else was ruled out by the same set rather than argued about. The
+> 151 was mangled in a table cell after ` \|` **and** in prose after a full stop,
+> with a 60-character code-span label and with a six-character one, while four
+> links of 145–147 in the same table survived every time — so neither the
+> punctuation after the closing paren, nor the label, nor the position is doing
+> it. The one thing that moves the outcome is the length of the URL and the form
+> it is written in.
+>
+> **Two boundaries rather than one** is the only reading all thirteen
+> measurements fit, and it is why *"it is the markdown link syntax"* died above
+> on a bare 158: that observation and these are both right. Whether the two
+> numbers are constants, and where the second one falls, is **not measured** —
+> one bare URL is one data point — and this entry's closing sentence still
+> applies to anybody tempted to go and find out.
+>
+> **What to do about it, today, restated:** keep a markdown link's URL **under
+> 148**. The branch name cannot be shortened after a push, so the lever that is
+> still available is the report's own filenames: 70 characters down to 47 took
+> all five image links here from mangled to byte-clean. A report linked as a bare
+> URL on its own line, carrying its images by relative path, meets neither
+> boundary.
+
 
 ---
 
@@ -32117,6 +32184,335 @@ maintainer and the framework lane rather than something a surface lane should
 add on its own.
 
 ---
+## 2026-09-25 — a prop built to answer one lane's finding sat unwired for three weeks, and the only instrument that could see it was a camera
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-36-the-three-lines-written-in-english` — recorded for the
+shape, which is not this lane's alone
+
+On **3 September** this lane filed that `loom.code` sets `white-space: pre` and
+scrolls, and that a pretty-printed JSON string value is one line however long
+the string is — so a panel of data loses its right-hand end to a gesture and
+there is no line structure below the printer's that the scroll is protecting. It
+worked around it by shortening the copy in the box.
+
+On **12 September** `Loom primitives` shipped `wrap` on `loom.code`, citing that
+finding by name in the prop's own doc comment, down to the measurement:
+
+> *Measured on that band at 390: the panel is 348 wide, the content 510 … That
+> lane worked around it by choosing a shorter specimen, which is a cost it
+> should not have had to pay.*
+
+On **25 September** not one of this site's eight panels set it. The workaround
+was still in place and the doc comment beside it still stated the constraint as
+a fact about the library.
+
+**Nothing was red and nothing could have been.** An unwrapped panel renders
+cleanly, satisfies its schema, emits no diagnostic, measures no overflow — the
+`pre` scrolls *inside* the panel, so `scrollWidth` against `innerWidth` is equal
+at every viewport the harness measures — and passes 314 assertions about the
+pages it is on. `pnpm shoot` reported `scrollWidth 390 / innerWidth 390` on the
+page carrying the worst of it.
+
+What found it was a clipped photograph of one panel, and what it showed at 1280
+is the entry:
+
+| | |
+| --- | --- |
+| panels on `/how-it-works` | 7, plus one on `/` |
+| lines printed | 341 |
+| lines over 110 characters | **3** |
+| what those three are | `"rationale"` ×2 — the model's own sentence saying why it asked — and `"detail"`, the refusal's reason |
+| shown at 1280 | ~125 characters, so all three cut mid-word |
+| shown at 390 | ~39 characters, so roughly a third of every panel goes with them |
+
+**The only three lines in that record written in English were the only three a
+reader could not finish**, three inches under the band's own caption saying
+*every line stands on its own*. Everything else in it is keys, ids and counts,
+all short, all fine — which is why nine months of reading the page would not
+find it and one picture does.
+
+### The shape, which is the reason this is filed rather than just fixed
+
+A finding is closed when the lane that owns the *mechanism* ships it. Nothing
+anywhere closes the second half — the lane that asked for it wiring it up — and
+in this case the two lanes are different, the gap was three weeks, and both
+sides were individually complete and correct the whole time. `Loom primitives`
+recorded its own version of the same defect on **19 September** (*"unwrapped,
+every line ends behind a gesture"*, in its own catalogue), so the library lane
+had photographed the identical failure six days earlier in a different subject
+and neither entry reached the other.
+
+Worth knowing for any prop built to answer a finding: **the entry that closes it
+names the primitive, and the surface that asked is not mentioned again.** A line
+in the closing entry saying which call sites are waiting would have cost a
+sentence.
+
+---
+## 2026-09-25 — `loom.code` cannot be collapsed, so a complete record is either a wall or absent
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not blocking, worked around by printing all of it, and the workaround is
+the thing worth looking at
+
+`/how-it-works` prints the whole of a real run of the runtime: seven panels,
+**341 lines**, of which one is **135 lines on its own** (`policy-resolved`, the
+whole rulebook that judged the change). The band's argument for that is written
+down and this entry is not disputing it —
+
+> *It is long, and the length is the argument. A record you can fit on a slide
+> is a record that left something out.*
+
+— but it is an argument for the record being **complete**, not for all of it
+being **open**. Measured on the built page: **73% of the visible text of
+`/how-it-works` is raw JSON** (12,415 characters of 17,059), on the first page
+of this site's reading order, the first item in its menu, and the destination of
+the front door's primary button. The maintainer's standing direction for this
+surface is that a high schooler can follow what is going on.
+
+There is no third option in the library. `loom.faq` discloses and takes its
+answer as a `string` of at most 1,000 characters, so it cannot hold a panel;
+`loom.code` declares `copy` and no other behaviour, so it has no control to open
+with; `disclose` exists in the runtime (0086) and `loom.nav` is the only
+primitive that places one. So a band may print all of a thing or none of it.
+
+**Two shapes, and this lane prefers the second:**
+
+1. `loom.code` declares `behaviours: ["disclose"]` and takes a prop naming what
+   is behind it — the panel's bar already has somewhere to put the control, and
+   the bar already appears whenever a button does.
+2. A **height ceiling** with the full panel one press away — `lines: number`, say
+   — which is the same idea without a second behaviour, and which says the size
+   of what is folded rather than hiding it. It is also the answer for a panel
+   that is long rather than wide, which is what these are.
+
+Neither is this lane's to build and the workaround costs nothing but the
+reader's scroll, so nothing here is blocked. Filed because the band that most
+needs it is the one this site's whole argument rests on, and because the shape
+generalises: **a surface can only be as concise as the library lets it be**, and
+this library currently makes *complete* and *skimmable* mutually exclusive.
+
+## 2026-09-25 — the phrasebook had never been photographed as a page, and three faults were waiting in the gap between a band and a document
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **two of the three are fixed on #NNN
+and the rest of this entry is the queue**, which is why it is filed rather than
+closed
+
+Forty-four bands shipped and every photograph this lane has ever taken has been
+of a band, or of the handful of bands one run built. That is the right subject
+for *does this band render*. It is structurally incapable of answering *does
+this read as a product*, which is the question the demo is judged on.
+
+`the-whole-page.specimen.ts` assembles `PAGE_SEQUENCE` — the canonical design of
+each of the twenty-two parts, which is what a surface offering to *start a page*
+hands somebody — and photographs it under both starter palettes. It is about
+12,000 CSS pixels tall. **The first time it was run it found three things, and
+none of them is visible in a shot of the band it is in:**
+
+1. **A wall of faceless quotes four bands above a team band full of faces.**
+   Fixed, and it is [0189](decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md).
+2. **A footer whose fourth link group fell to a second row.** Fixed. It needs
+   the band at the width a whole page gives it *and* the surface tone the
+   canonical band uses; at any narrower measure it is correct.
+3. **Two bands that are thin rather than broken**, below, which are this lane's
+   to work and are the reason this entry stays open.
+
+**What is still open, in the order a page reads them:**
+
+- **The `bento` band's wide cell is a squat box.** It leads with one
+  full-width `loom.feature` — a 1.5rem glyph, a title and one sentence, stretched
+  across 1120px with about 40px of air under it. Every reference bento grid
+  earns its wide cell by putting something *in* it that is wider than it is
+  tall. This one is a card that happens to be long. The fix is a band's, not a
+  primitive's, and it is the first band a reader meets after the features grid.
+- **The integrations orbit is a ring of words.** `loom.orbit` places eight
+  `loom.logo` nodes on a circle and a `loom.logo` with no `image` is a wordmark
+  — which is right, and is defended at length in that primitive. Eight wordmarks
+  on a ring at 1120px is a large empty circle with *Overture* small in the
+  middle of it. Worth measuring against a `loom.avatar` with `shape: "soft"`,
+  which draws a mark from a name and is the same answer 0189 just took for
+  faces, before assuming the band is the problem.
+
+**Not filed as faults, deliberately:** the changelog and FAQ bands indent their
+headings past every other band's, which is a `loom.split` with an empty first
+column and reads as deliberate at 1280 and correct at 390. Somebody should look
+at it with fresh eyes rather than on this run's word.
+
+**What would close this**: the two bands above, photographed in the assembled
+page rather than alone. The specimen is committed, so it costs a command.
+
+---
+
+## 2026-09-25 — a portrait could be a slot holding a `loom.avatar`, and that reading is stronger on 0052 than the one taken
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **an alternative that deserves its own
+argument, not a defect.** Nothing is broken; 0189 shipped the other reading and
+says so in its Alternatives
+
+[0189](decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md)
+makes every portrait in the library fall back to the person's initials, drawn by
+one function that four primitives call. The alternative it did not take is to
+stop having four primitives draw faces at all:
+
+> **`portrait` becomes a slot**, the tree puts a `loom.avatar` in it, and
+> `loom.avatar` — which has drawn a photograph-or-initials since it shipped — is
+> the only thing in the library that draws a face.
+
+**It is stronger on [0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+than what shipped.** A quote with a face and a quote without are different sets
+of nodes, so *add a face to this testimonial* becomes an `insert` rather than a
+`configure` on a URL that nobody can supply. It is
+[0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md)-shaped too: the
+portrait is a region the primitive places, before the name, and a slot is
+exactly what stops it being reordered against the words — which is the objection
+`loom.quote`'s own doc comment raises against making it a child.
+
+**Why it was not taken on 25 September, stated so the next run does not have to
+re-derive it:**
+
+- It **removes a prop from two settled schemas**. Every tree carrying
+  `loom.quote`'s or `loom.message`'s `avatar` becomes invalid, and this
+  repository is not the only thing holding trees.
+- The evidence this run had was **a photograph of a missing face**. That argues
+  for the fallback and says nothing about the seam. A schema change made on
+  evidence that does not bear on it is the move 0187's Alternatives section
+  rejects, one level up.
+- `loom.message` would need the slot to be *optional in practice* — a turn with
+  nobody named draws nothing — and a slot nothing places is exactly the shape
+  `auditRegistry` reports as a defect (0180). That is answerable, and it is an
+  argument rather than a line of code.
+
+**What it would take:** a record, a migration story for the two props, and a
+band placing both forms. **Whoever takes it should read 0189's Alternatives
+first** — it is the same reasoning, and this entry exists so that the reasoning
+is not lost in a record about something else.
+
+---
+
+## 2026-09-25 — the merge gate's exit code was read off `tee`, and the rule against this names only the `| tail` spelling of it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`docs/routines.md` is its file) · **Status:** open — **caught in the run that
+made it**, and filed because the near-miss is the finding rather than the
+mistake
+
+`docs/routines.md` says, under *Reading the merge gate*:
+
+> **Never pipe a gate into `tail`.** `pnpm verify 2>&1 | tail -35` reports the
+> exit code of the *pipe*, which is `tail`'s, which is 0 — so a failed verify
+> reads as a passed one … Redirect to a file and check `$?`, or read the whole
+> thing.
+
+The rule was read. The gate was redirected to a file, and `$?` was checked. It
+still happened, because the line that checked it was:
+
+```bash
+(pnpm verify > verify.log 2>&1; echo "EXIT=$?" | tee verify.exit)
+```
+
+`$?` is correct and the file it wrote said `EXIT=1`. **The session's own task
+notification said exit code 0**, because the exit status of that compound
+command is the exit status of its last command, which is `tee`. The rule's
+remedy had been followed and its failure mode had moved one pipe to the right.
+
+This is the same shape as the 24 September author-flag entry, and that entry's
+sentence is the one to reuse: *a rule naming one spelling of an act is a rule
+that stops working the moment somebody reaches for the other one.*
+
+**The rule, restated to cover the act rather than a spelling:**
+
+> **Never let anything run after the gate on the same line.** Not `| tail`, not
+> `| tee`, not `| grep`, not a trailing `echo`. Write the status to a file as
+> the *last thing the line does* —
+> `pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit` — and then read
+> that file in a separate command. What a harness, a shell or a CI step reports
+> for a compound line is the last command's status, and the last command is
+> almost never the gate.
+
+**What it cost here:** nothing, because the file was read as well as the
+notification, and the two disagreed. **What it would have cost** is a pull
+request opened on red with a report saying green, which is the one thing
+`docs/routines.md` opens that section to prevent.
+
+**Owned by `Loom daily build`** because `docs/routines.md` is the framework
+lane's file and a lane may not write the governance it is bound by. The
+paragraph above is drop-in.
+## 2026-09-25 — the `robots.txt` 404 does not reproduce, the 308 was never evidence, and the fault is that a build can read nothing and say nothing
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Corrects:** the 24 September entry *this application cannot serve a
+`robots.txt`* · **Status:** closed by `framework-54-written-and-never-served`
+
+That entry is the reason the file now exists and the check now exists, and its
+central claim — *a metadata file passed eleven assertions and served nothing* —
+is exactly right. Two of its three measurements are not, and saying so is worth
+an entry because one of them is a shape three other lanes will reach for.
+
+**`app/robots.ts` is served.** From a clean build of this tree on 16.2.12:
+`200 text/plain` with the four lines, under `next start` and under `next dev`.
+The entry's `app/robots.ts → 404` row was almost certainly the stale-`.next`
+false green **the same lane filed the same day, two entries above** — a killed
+build, a second build exiting 0, and a server answering from output that
+predated the file. Two findings, one cause, filed an hour apart by one run.
+
+**`/robots.txt/ → 308` was never evidence that the segment exists.** Measured:
+`/definitely-not-a-route.txt/` also answers `308`, and the address it redirects
+to answers `404`. The trailing-slash redirect is a normalisation that runs
+before any route is looked up, so it says the same thing about every path on the
+site. It is worth knowing generally: **a `308` on a trailing slash tells you
+nothing about whether a route exists.**
+
+**What is real is the placement, and it is worse than a 404.** `robots` and
+`manifest` are honoured only at the application root; `sitemap`, `icon`,
+`apple-icon`, `opengraph-image` and `twitter-image` are honoured anywhere. Read
+out of Next's own `isMetadataRouteFile` and tabulated in
+[0190](decisions/0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md).
+A `robots.ts` in a route group is not a route, not a page and not an error — the
+build does not read it and does not say so.
+
+**What closed it.** `app/robots.ts` at the application root, its content derived
+from the marketing lane's `guarded` field so both maps move together; and
+`pnpm prerender:check` now reads the conventions out of the source tree and the
+routes out of `app-paths-manifest.json` and fails on any convention with no
+route. Proved the way the finding was: the file was put back in `(marketing)`,
+the application rebuilt, and the gate went red naming the file and the rule.
+
+**The guarantee `(marketing)/sitemap.test.ts` said it could not hold** — *what
+the sitemap declines to list is exactly what robots disallows* — is held now, in
+`app/robots.test.ts`. That file's comment can drop its last paragraph whenever
+the lane next touches it; nothing is wrong until then.
+
+---
+## 2026-09-25 — the judgement the false-green entry asked for: the build does not clear `.next`, and the cure is a sentinel rather than a sweep
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Answers:** the 24 September entry *a `next build` that exits 0 can serve the
+previous build's HTML* · **Status:** open — **the judgement is given and the
+work is not done**; it is a unit this lane will take
+
+That entry asked for one line of judgement: whether `@loom/app`'s `build` should
+clear `.next` first, or whether writing the workaround down is enough. The answer
+is neither, and this run is the evidence for why the second half is not enough —
+the `robots.txt` 404 above was most likely this fault, and it cost the lane that
+hit it a screenshot cycle and a finding filed against the wrong cause.
+
+**Not a sweep.** `rm -rf .next` on every build throws away the incremental build
+for every lane on every run, to defend against a state that only arises when a
+build is interrupted. A full build of this application is minutes; four routines
+a day pay it, and the fault is rare.
+
+**A sentinel is exact and costs one file.** A build that is killed is a build
+that started and did not finish, and that is a fact the wrapper can write down:
+mark before `next build`, clear after it, and remove `.next` at the start of any
+build that finds the mark still there. The incremental build survives every
+ordinary run and is thrown away exactly when it cannot be trusted.
+
+Not taken today because it is a second unit on a branch that already carries
+one, and because it changes the build command four surfaces run. Filed with the
+shape so that the next run of this lane — or the maintainer, who may simply
+prefer the sweep — has the argument rather than the question.
 ## 2026-09-24 — the plain-language rule was enforced twenty times by hand and nowhere by default, and eight sentences were on the surface because of it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
@@ -32201,3 +32597,74 @@ environment variables. It is roughly 120 lines, it is this lane's, and it would
 have saved six runs. It is not in `portal-36` because that branch is about what
 a reader is shown and a staging harness is not, and a branch that is two things
 is a branch a maintainer has to review twice.
+
+---
+
+## 2026-09-25 — the mangled URL is a 150-character threshold, measured on one body against a 149-character control, and the punctuation theory is disproved by the same two bodies
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Corrects:** the 23 September entry
+*an apostrophe straight after a markdown link's closing paren*, and the 24
+September entry *158 characters or more does not survive* · **Status:** open —
+**two bodies, read back both times, with a one-character control**
+
+This is the third measurement of the same fault and the first with a control
+beside it, which is only because the experiment was an accident: #389's body
+carried **eight links, seven of them the same host, branch and directory,
+differing only in a filename suffix.**
+
+**Body one — one mangled out of eight:**
+
+| link | characters | came back |
+| --- | --- | --- |
+| `…-editorial-phone.png` | **150** | **`(``https://…png``)`** |
+| `…-editorial-wide.png` | 149 | clean |
+| `…-footer-before.png` | 148 | clean |
+| `…-footer-after.png` | 147 | clean |
+| `…-bold-phone.png` | 145 | clean |
+| `…-bold-wide.png` | 144 | clean |
+| `….md` | 133 | clean |
+| the 0160 decision link | 136 | clean |
+
+**The 149 and the 150 are adjacent cells in the same table row, separated by
+` · `, and differ by one character in the filename.** One survived byte for
+byte and one did not.
+
+**Body two — the same eight links, pinned to a short commit SHA instead of the
+branch, so 109–126 characters. All eight clean**, including both links in the
+` · ` row.
+
+### What this kills
+
+- **The apostrophe.** The 23 September entry is right that its own case had one,
+  and wrong that the apostrophe is the cause. Here the mangled link is followed
+  by ` · ` — and in body two the *same punctuation* around a *shorter* URL came
+  back clean. Punctuation is not the variable.
+- **158.** The 24 September entry measured a ceiling on a different body and
+  called it *"measured rather than theorised"*, which it was — but every URL in
+  body one is **below** 158 and one of them was still mangled. So 158 is an
+  upper bound somebody found, not the threshold.
+- **`.png`.** Four `.png` links came back clean in the same body, which the 23
+  September entry had already established and this confirms.
+
+### What it leaves
+
+**Something between 150 and 149 characters, inclusive of the 150.** This entry
+does not claim the boundary is exactly there — one observation cannot separate
+150 from, say, "the longest link in a body" — and **that is the one experiment
+still worth running**: post a body with two links at 150 and nothing longer. If
+both mangle, it is a length. If neither does, it is a *rank*, and every earlier
+number in this file is an artefact of whichever link happened to be longest.
+
+Nobody should spend a run on it. It is worth one paragraph in whichever run next
+posts a long body, and it is written down here so that run measures rather than
+re-theorises — which is what the three entries before this one each cost.
+
+### What to do about it, today
+
+**Pin a link to a short commit SHA rather than a branch name.** It is seven
+characters instead of this branch's thirty-one, it takes every report URL this
+repository posts to about 126, and it is more stable besides: a branch link
+rots when the branch is deleted after merge, and a SHA link does not. It is
+strictly better than the 24 September entry's advice to shorten branch names,
+which trades a real cost (a readable branch) for a smaller saving.

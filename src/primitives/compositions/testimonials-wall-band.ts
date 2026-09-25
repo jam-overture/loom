@@ -44,12 +44,17 @@ import type { Composition } from "./composition.js"
  *   text above the moving part. A reader who does not chase a single quote has
  *   still read the claim.
  *
- * ## Eight quotes, two rows, and no avatar
+ * ## Eight quotes, two rows, and no photograph
  *
  * `loom.quote`'s `avatar` takes a `mediaUrlSchema`, which is the same wall
  * every other band in this catalogue meets: this library cannot ship an asset
- * and will not ship a link to somebody else's. The quotes carry name and role
- * instead, which is the part a reader weighs anyway.
+ * and will not ship a link to somebody else's.
+ *
+ * What it does ship, from 25 September, is the **face**: these eight are
+ * attributed to people by name, so each one draws its author's initials and the
+ * wall reads as eight voices rather than eight paragraphs. Nothing here
+ * declares `anonymous` — that is the canonical `testimonials` band's, whose
+ * attributions are roles and which is the pair this one completes.
  */
 type Voice = {
   readonly quote: string

@@ -13,7 +13,7 @@ import { THEME_PROP_KEY } from "@loom/runtime/react"
 import type { PaperTrail, TrailLine } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { JOURNEY, ordinal, spell, spellCapitalised, STEPS, STEPS_CAPITALISED } from "../journey"
-import { action, heading, prose, section, stack } from "../nodes"
+import { action, code, heading, prose, section, stack } from "../nodes"
 import {
   DECISIONS_URL,
   DEMO,
@@ -254,14 +254,10 @@ const stage = (
 ): readonly LoomNode[] => [
   heading(ids, 3, `${index + 1}. ${titleOf(line, theirs)}`),
   prose(ids, line.plainly, { tone: "muted", measured: true }),
-  buildElement(ids, {
-    type: "loom.code",
-    props: {
-      language: `${line.type}.json`,
-      density: "compact",
-      ...(line.caption === undefined ? {} : { caption: line.caption }),
-    },
-    children: [buildText(ids, line.json)],
+  code(ids, line.json, {
+    language: `${line.type}.json`,
+    density: "compact",
+    ...(line.caption === undefined ? {} : { caption: line.caption }),
   }),
 ]
 
@@ -405,14 +401,10 @@ const refusal = (ids: IdFactory, trail: PaperTrail): LoomNode => {
         `The front page will not let anything take away the statement of what this site is for. Ask it to and it reaches the same ${spell(matching)} kinds of line as the run above — the request, the rules, the list, the measurement — and then this, its ${ordinal(verdict)}. There is no ${ordinal(absent)}, because nothing happened to the page.`,
         { measured: true }
       ),
-      buildElement(ids, {
-        type: "loom.code",
-        props: {
-          language: `${trail.refused.type}.json`,
-          density: "compact",
-          caption: "Nothing follows this line, because nothing happened to the page.",
-        },
-        children: [buildText(ids, trail.refused.json)],
+      code(ids, trail.refused.json, {
+        language: `${trail.refused.type}.json`,
+        density: "compact",
+        caption: "Nothing follows this line, because nothing happened to the page.",
       }),
       prose(
         ids,

@@ -30,7 +30,9 @@ import { colour, space } from "./tokens.js"
  * minimum width fed to `auto-fit`, a floor rather than a count. Changing it
  * moves no group in or out, which is what keeps it a prop and not `insert` in
  * disguise. What it does *not* borrow is that band's scale — see
- * `GROUP_MINIMUMS`, which is the one place this primitive declines to share.
+ * `GROUP_MINIMUMS`, which is the one place this primitive declines to share —
+ * and what it now also does is *hold*: see {@link promisedWidth}, which is the
+ * difference between a floor a band declares and a floor a band gets.
  */
 
 const props = z
@@ -73,6 +75,62 @@ const GROUP_MINIMUMS: Readonly<Record<(typeof COLUMN_NAMES)[number], string>> = 
   four: "9rem",
 }
 
+/**
+ * How many columns each name is promising, which until 25 September nothing
+ * here knew.
+ *
+ * `auto` promises none — it is the one value that means *as many as fit*, which
+ * is what `auto-fit` does on its own.
+ */
+const GROUP_PROMISES: Readonly<Record<(typeof COLUMN_NAMES)[number], number>> = {
+  auto: 0,
+  two: 2,
+  three: 3,
+  four: 4,
+}
+
+/**
+ * The width the groups need before they will give any back to the brand.
+ *
+ * **This is the fix for the fault the whole-page photograph found**, and the
+ * fault is worth stating because the constant above was already written against
+ * it: `GROUP_MINIMUMS` exists so that *"`columns: "four"` renders two — the
+ * names stop meaning what they say"* could not happen. It happened anyway, one
+ * step smaller. A four-group footer on the canonical wide page, with
+ * `tone: "surface"`, rendered **three columns and an orphan on a second row**,
+ * under both starter palettes.
+ *
+ * Nothing was wrong with the floor. `auto-fit` divides what is *left over*, and
+ * what is left over is decided by the brand column and the surface tone's own
+ * inset: four 9rem tracks with a `space(5)` between them need 672px, and after
+ * a 20rem wordmark-and-blurb had taken its share of a 1120px page there was
+ * less than that. Six and a half rem of blurb was deciding how many link groups
+ * a footer has, which is not a thing `columns` says anywhere.
+ *
+ * So `columns` stops competing with the brand for room. The groups reserve the
+ * width their promise needs, and the row resolves it the two ways flexbox has:
+ * where the line still fits, the brand shrinks (it has `flex-shrink` and has
+ * never grown — see {@link BRAND_BASIS}); where it does not, the row **wraps**
+ * and the groups get a line of their own, which is what happens at the
+ * canonical wide page and is what the photograph beside this run's report
+ * shows — a wordmark, then four columns across the band. Both outcomes keep the
+ * four columns, which is the whole of what the name promised.
+ *
+ * `min(100%, …)` is what stops the reservation becoming an overflow: on a phone
+ * it is capped at the band's own width, so the grid falls to one column instead
+ * of demanding four and pushing the page sideways.
+ *
+ * It is still not a count — nothing here truncates or pads the list, and a
+ * footer with five groups under `columns: "four"` wraps the fifth exactly as
+ * before. What it is, is the floor being *kept* rather than merely declared.
+ */
+const promisedWidth = (name: (typeof COLUMN_NAMES)[number]): string | undefined => {
+  const columns = GROUP_PROMISES[name]
+  if (columns === 0) return undefined
+
+  return `min(100%, calc(${columns} * ${GROUP_MINIMUMS[name]} + ${columns - 1} * ${space(5)}))`
+}
+
 export const loomFooter = definePrimitive({
   type: "loom.footer",
   description:
@@ -103,6 +161,7 @@ export const loomFooter = definePrimitive({
                 columnGap: space(5),
                 rowGap: space(6),
                 flex: "1 1 20rem",
+                minWidth: promisedWidth(given.columns ?? "four"),
               },
             },
             children
