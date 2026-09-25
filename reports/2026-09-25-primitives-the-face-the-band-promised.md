@@ -224,12 +224,17 @@ deliberately changes.
 ## Checks
 
 - `pnpm install && pnpm verify` **green, exit 0**, on the run that opened this
-  pull request. Numbers in the pull request body, read off that run.
-- **It was red first, and the first reading of it said green.** Two failures —
-  a decision record whose section was `## Alternatives` where the tool requires
-  `## Alternatives considered`, and `library.test.ts` asserting the exact
-  `.loom-message` block this run deliberately changed. Both are tests doing
-  their job and both are fixed above. What is worth writing down is *how nearly
+  pull request.
+- Framework **159 files / 3,043 tests**; application **305 files / 5,529 tests**;
+  **789** findings, 0 malformed; 109 prerendered pages, 1,208 text junctions,
+  0 run together. All read off that run.
+- **It was red twice first, and the first reading of each said green.** Three
+  failures across two runs — a decision record whose section was
+  `## Alternatives` where the tool requires `## Alternatives considered`;
+  the generated API reference, whose file count moved because `portrait.ts` is
+  the 179th; and `library.test.ts` asserting the exact
+  `.loom-message` block this run deliberately changed. All three are tests doing
+  their job and all three are dealt with above. What is worth writing down is *how nearly
   they were missed*: the gate was run as
   `(pnpm verify > log 2>&1; echo "EXIT=$?" | tee exit)`, and the session's own
   task report came back **exit code 0** — because the last command in that line
