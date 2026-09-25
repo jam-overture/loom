@@ -32191,6 +32191,154 @@ reader's scroll, so nothing here is blocked. Filed because the band that most
 needs it is the one this site's whole argument rests on, and because the shape
 generalises: **a surface can only be as concise as the library lets it be**, and
 this library currently makes *complete* and *skimmable* mutually exclusive.
+
+## 2026-09-25 — the phrasebook had never been photographed as a page, and three faults were waiting in the gap between a band and a document
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **two of the three are fixed on #NNN
+and the rest of this entry is the queue**, which is why it is filed rather than
+closed
+
+Forty-four bands shipped and every photograph this lane has ever taken has been
+of a band, or of the handful of bands one run built. That is the right subject
+for *does this band render*. It is structurally incapable of answering *does
+this read as a product*, which is the question the demo is judged on.
+
+`the-whole-page.specimen.ts` assembles `PAGE_SEQUENCE` — the canonical design of
+each of the twenty-two parts, which is what a surface offering to *start a page*
+hands somebody — and photographs it under both starter palettes. It is about
+12,000 CSS pixels tall. **The first time it was run it found three things, and
+none of them is visible in a shot of the band it is in:**
+
+1. **A wall of faceless quotes four bands above a team band full of faces.**
+   Fixed, and it is [0189](decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md).
+2. **A footer whose fourth link group fell to a second row.** Fixed. It needs
+   the band at the width a whole page gives it *and* the surface tone the
+   canonical band uses; at any narrower measure it is correct.
+3. **Two bands that are thin rather than broken**, below, which are this lane's
+   to work and are the reason this entry stays open.
+
+**What is still open, in the order a page reads them:**
+
+- **The `bento` band's wide cell is a squat box.** It leads with one
+  full-width `loom.feature` — a 1.5rem glyph, a title and one sentence, stretched
+  across 1120px with about 40px of air under it. Every reference bento grid
+  earns its wide cell by putting something *in* it that is wider than it is
+  tall. This one is a card that happens to be long. The fix is a band's, not a
+  primitive's, and it is the first band a reader meets after the features grid.
+- **The integrations orbit is a ring of words.** `loom.orbit` places eight
+  `loom.logo` nodes on a circle and a `loom.logo` with no `image` is a wordmark
+  — which is right, and is defended at length in that primitive. Eight wordmarks
+  on a ring at 1120px is a large empty circle with *Overture* small in the
+  middle of it. Worth measuring against a `loom.avatar` with `shape: "soft"`,
+  which draws a mark from a name and is the same answer 0189 just took for
+  faces, before assuming the band is the problem.
+
+**Not filed as faults, deliberately:** the changelog and FAQ bands indent their
+headings past every other band's, which is a `loom.split` with an empty first
+column and reads as deliberate at 1280 and correct at 390. Somebody should look
+at it with fresh eyes rather than on this run's word.
+
+**What would close this**: the two bands above, photographed in the assembled
+page rather than alone. The specimen is committed, so it costs a command.
+
+---
+
+## 2026-09-25 — a portrait could be a slot holding a `loom.avatar`, and that reading is stronger on 0052 than the one taken
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **an alternative that deserves its own
+argument, not a defect.** Nothing is broken; 0189 shipped the other reading and
+says so in its Alternatives
+
+[0189](decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md)
+makes every portrait in the library fall back to the person's initials, drawn by
+one function that four primitives call. The alternative it did not take is to
+stop having four primitives draw faces at all:
+
+> **`portrait` becomes a slot**, the tree puts a `loom.avatar` in it, and
+> `loom.avatar` — which has drawn a photograph-or-initials since it shipped — is
+> the only thing in the library that draws a face.
+
+**It is stronger on [0052](decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)
+than what shipped.** A quote with a face and a quote without are different sets
+of nodes, so *add a face to this testimonial* becomes an `insert` rather than a
+`configure` on a URL that nobody can supply. It is
+[0051](decisions/0051-a-slot-is-a-region-the-primitive-places.md)-shaped too: the
+portrait is a region the primitive places, before the name, and a slot is
+exactly what stops it being reordered against the words — which is the objection
+`loom.quote`'s own doc comment raises against making it a child.
+
+**Why it was not taken on 25 September, stated so the next run does not have to
+re-derive it:**
+
+- It **removes a prop from two settled schemas**. Every tree carrying
+  `loom.quote`'s or `loom.message`'s `avatar` becomes invalid, and this
+  repository is not the only thing holding trees.
+- The evidence this run had was **a photograph of a missing face**. That argues
+  for the fallback and says nothing about the seam. A schema change made on
+  evidence that does not bear on it is the move 0187's Alternatives section
+  rejects, one level up.
+- `loom.message` would need the slot to be *optional in practice* — a turn with
+  nobody named draws nothing — and a slot nothing places is exactly the shape
+  `auditRegistry` reports as a defect (0180). That is answerable, and it is an
+  argument rather than a line of code.
+
+**What it would take:** a record, a migration story for the two props, and a
+band placing both forms. **Whoever takes it should read 0189's Alternatives
+first** — it is the same reasoning, and this entry exists so that the reasoning
+is not lost in a record about something else.
+
+---
+
+## 2026-09-25 — the merge gate's exit code was read off `tee`, and the rule against this names only the `| tail` spelling of it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`docs/routines.md` is its file) · **Status:** open — **caught in the run that
+made it**, and filed because the near-miss is the finding rather than the
+mistake
+
+`docs/routines.md` says, under *Reading the merge gate*:
+
+> **Never pipe a gate into `tail`.** `pnpm verify 2>&1 | tail -35` reports the
+> exit code of the *pipe*, which is `tail`'s, which is 0 — so a failed verify
+> reads as a passed one … Redirect to a file and check `$?`, or read the whole
+> thing.
+
+The rule was read. The gate was redirected to a file, and `$?` was checked. It
+still happened, because the line that checked it was:
+
+```bash
+(pnpm verify > verify.log 2>&1; echo "EXIT=$?" | tee verify.exit)
+```
+
+`$?` is correct and the file it wrote said `EXIT=1`. **The session's own task
+notification said exit code 0**, because the exit status of that compound
+command is the exit status of its last command, which is `tee`. The rule's
+remedy had been followed and its failure mode had moved one pipe to the right.
+
+This is the same shape as the 24 September author-flag entry, and that entry's
+sentence is the one to reuse: *a rule naming one spelling of an act is a rule
+that stops working the moment somebody reaches for the other one.*
+
+**The rule, restated to cover the act rather than a spelling:**
+
+> **Never let anything run after the gate on the same line.** Not `| tail`, not
+> `| tee`, not `| grep`, not a trailing `echo`. Write the status to a file as
+> the *last thing the line does* —
+> `pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit` — and then read
+> that file in a separate command. What a harness, a shell or a CI step reports
+> for a compound line is the last command's status, and the last command is
+> almost never the gate.
+
+**What it cost here:** nothing, because the file was read as well as the
+notification, and the two disagreed. **What it would have cost** is a pull
+request opened on red with a report saying green, which is the one thing
+`docs/routines.md` opens that section to prevent.
+
+**Owned by `Loom daily build`** because `docs/routines.md` is the framework
+lane's file and a lane may not write the governance it is bound by. The
+paragraph above is drop-in.
 ## 2026-09-25 — the `robots.txt` 404 does not reproduce, the 308 was never evidence, and the fault is that a build can read nothing and say nothing
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
@@ -32349,3 +32497,74 @@ environment variables. It is roughly 120 lines, it is this lane's, and it would
 have saved six runs. It is not in `portal-36` because that branch is about what
 a reader is shown and a staging harness is not, and a branch that is two things
 is a branch a maintainer has to review twice.
+
+---
+
+## 2026-09-25 — the mangled URL is a 150-character threshold, measured on one body against a 149-character control, and the punctuation theory is disproved by the same two bodies
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Corrects:** the 23 September entry
+*an apostrophe straight after a markdown link's closing paren*, and the 24
+September entry *158 characters or more does not survive* · **Status:** open —
+**two bodies, read back both times, with a one-character control**
+
+This is the third measurement of the same fault and the first with a control
+beside it, which is only because the experiment was an accident: #389's body
+carried **eight links, seven of them the same host, branch and directory,
+differing only in a filename suffix.**
+
+**Body one — one mangled out of eight:**
+
+| link | characters | came back |
+| --- | --- | --- |
+| `…-editorial-phone.png` | **150** | **`(``https://…png``)`** |
+| `…-editorial-wide.png` | 149 | clean |
+| `…-footer-before.png` | 148 | clean |
+| `…-footer-after.png` | 147 | clean |
+| `…-bold-phone.png` | 145 | clean |
+| `…-bold-wide.png` | 144 | clean |
+| `….md` | 133 | clean |
+| the 0160 decision link | 136 | clean |
+
+**The 149 and the 150 are adjacent cells in the same table row, separated by
+` · `, and differ by one character in the filename.** One survived byte for
+byte and one did not.
+
+**Body two — the same eight links, pinned to a short commit SHA instead of the
+branch, so 109–126 characters. All eight clean**, including both links in the
+` · ` row.
+
+### What this kills
+
+- **The apostrophe.** The 23 September entry is right that its own case had one,
+  and wrong that the apostrophe is the cause. Here the mangled link is followed
+  by ` · ` — and in body two the *same punctuation* around a *shorter* URL came
+  back clean. Punctuation is not the variable.
+- **158.** The 24 September entry measured a ceiling on a different body and
+  called it *"measured rather than theorised"*, which it was — but every URL in
+  body one is **below** 158 and one of them was still mangled. So 158 is an
+  upper bound somebody found, not the threshold.
+- **`.png`.** Four `.png` links came back clean in the same body, which the 23
+  September entry had already established and this confirms.
+
+### What it leaves
+
+**Something between 150 and 149 characters, inclusive of the 150.** This entry
+does not claim the boundary is exactly there — one observation cannot separate
+150 from, say, "the longest link in a body" — and **that is the one experiment
+still worth running**: post a body with two links at 150 and nothing longer. If
+both mangle, it is a length. If neither does, it is a *rank*, and every earlier
+number in this file is an artefact of whichever link happened to be longest.
+
+Nobody should spend a run on it. It is worth one paragraph in whichever run next
+posts a long body, and it is written down here so that run measures rather than
+re-theorises — which is what the three entries before this one each cost.
+
+### What to do about it, today
+
+**Pin a link to a short commit SHA rather than a branch name.** It is seven
+characters instead of this branch's thirty-one, it takes every report URL this
+repository posts to about 126, and it is more stable besides: a branch link
+rots when the branch is deleted after merge, and a SHA link does not. It is
+strictly better than the 24 September entry's advice to shorten branch names,
+which trades a real cost (a readable branch) for a smaller saving.

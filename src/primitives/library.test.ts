@@ -7171,7 +7171,24 @@ describe("the exchange, and the way a band arrives", () => {
     const turn = tree.slice(tree.indexOf('class="loom-message '))
 
     expect(turn.slice(0, turn.indexOf(">"))).not.toContain("flex-direction")
-    expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-end;")
+    /**
+     * **Deliberately changed on 25 September**, and the old assertion is quoted
+     * here rather than deleted:
+     *
+     * > `expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-end;")`
+     *
+     * `flex-end` is the messenger convention — a portrait at the foot of a
+     * speaker's last bubble — and it assumes a transcript with no name lines in
+     * it. This one prints the speaker's name and the time *above* the bubble,
+     * and until `loom.message` had a monogram fallback
+     * ([0189](../../decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md))
+     * nothing in this library had ever rendered a portrait here, so the rule
+     * had never been in a picture. The first one showed four faces pinned three
+     * lines below the names they belong to. What the assertion is *for* — the
+     * side of the exchange lives in the stylesheet and not on the element — is
+     * unchanged and is the line above.
+     */
+    expect(stylesheet).toContain(".loom-message {\n  display: flex;\n  align-items: flex-start;")
     expect(stylesheet).toContain(".loom-message-person {\n  flex-direction: row-reverse;\n}")
     expect(stylesheet).toContain(".loom-message-person > .loom-message-body {\n  align-items: flex-end;\n}")
     /** The paint is inline, because no arrangement of these turns varies it. */
@@ -9314,5 +9331,228 @@ describe("the states a region is in when its content is not simply there", () =>
     expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
     expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+})
+
+/**
+ * The four faces, and the rule they had stopped sharing.
+ *
+ * `monogram.ts` left `loom.person` in August so that two faces on one page
+ * could not disagree about what a name reduces to. It took the two letters and
+ * left the circle behind, and by 25 September two of the four primitives that
+ * draw a person had quietly stopped drawing anything at all without a
+ * photograph — which, since this catalogue ships no photographs, meant *every*
+ * quote and *every* turn in the library was faceless.
+ *
+ * Nothing caught it. All four render cleanly, satisfy their schemas, emit no
+ * diagnostic and measure no overflow; the difference is only ever visible in a
+ * picture, which is
+ * [0187](../../decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)'s
+ * lesson arriving a second time and
+ * [0189](../../decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md)'s
+ * reason for existing.
+ *
+ * So these are named rather than counted, for the reason the 23 September reach
+ * tests give: a run that drops the fallback from one primitive should fail with
+ * the name of the primitive that went blank.
+ */
+describe("a portrait with no photograph", () => {
+  const FACES: readonly { readonly type: string; readonly props: JsonObject; readonly initials: string }[] = [
+    { type: "loom.avatar", props: { name: "Ada Okonkwo" }, initials: "AO" },
+    { type: "loom.person", props: { name: "Tomas Lind", role: "Engineering" }, initials: "TL" },
+    {
+      type: "loom.quote",
+      props: { quote: "It took a morning to connect.", author: "Priya Raman", role: "Design" },
+      initials: "PR",
+    },
+    { type: "loom.message", props: { speaker: "person", name: "Joel Mbeki" }, initials: "JM" },
+  ]
+
+  /**
+   * Past the root's opening tag, which is where the palette is mounted: every
+   * literal in a Loom page is in those custom properties and nowhere below
+   * them, so the no-literal assertion has to start after it.
+   */
+  const drawn = (type: string, props: JsonObject, theme: Record<string, string> = EDITORIAL): string => {
+    const ids = sequentialIdFactory()
+
+    const markup = splitStylesheet(
+      render(
+        createTree(
+          buildElement(ids, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: theme },
+            children: [buildElement(ids, { type, props })],
+          }),
+          ids
+        )
+      ).markup
+    ).tree
+
+    return markup.slice(markup.indexOf(">"))
+  }
+
+  /**
+   * The one declaration only a monogram makes, which is what lets "no face" be
+   * asserted at all: a person's own bubble is painted `accent-subtle` too, so
+   * the tint alone cannot tell a drawn face from an undrawn one.
+   */
+  const MONOGRAM = "user-select:none"
+
+  it("falls back to the initials in every primitive that draws one", () => {
+    for (const face of FACES) {
+      expect(drawn(face.type, face.props), `${face.type} draws no face without a photograph`).toContain(face.initials)
+    }
+  })
+
+  it("paints all four out of the palette, under both starter themes", () => {
+    for (const face of FACES) {
+      for (const theme of [EDITORIAL, BOLD]) {
+        const body = drawn(face.type, face.props, theme)
+
+        expect(body, `${face.type} does not tint its monogram`).toContain("background-color:var(--loom-accent-subtle)")
+        expect(body, `${face.type} writes a literal colour`).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      }
+    }
+  })
+
+  /**
+   * The one argument in `portrait.ts` that is not about paint. A face with the
+   * name beside it in the same node is decoration and says nothing; a face
+   * standing on its own is a picture of somebody and has to say who. Getting it
+   * the other way round is a screen reader announcing the person twice.
+   */
+  it("names itself only where nothing beside it does", () => {
+    expect(drawn("loom.avatar", { name: "Ada Okonkwo" })).toContain('aria-label="Ada Okonkwo"')
+
+    for (const face of FACES.filter((candidate) => candidate.type !== "loom.avatar")) {
+      const body = drawn(face.type, face.props)
+
+      expect(body, `${face.type} announces its monogram`).toContain("aria-hidden")
+      expect(body, `${face.type} labels a face its own node already names`).not.toContain(`aria-label="${face.initials}`)
+    }
+  })
+
+  /**
+   * The half that is not a fallback. A turn with nobody named has no face to
+   * draw, and an empty circle in its place is a hole rather than a decision —
+   * which is why `loom.message` reaches `portrait` with a `name` that may be
+   * absent, and is the only caller that does.
+   */
+  it("draws nothing for a turn with no name on it", () => {
+    expect(drawn("loom.message", { speaker: "person" })).not.toContain(MONOGRAM)
+  })
+
+  /**
+   * A system turn is the room speaking rather than somebody, which is the one
+   * place `speaker` means something other than which side of the exchange a
+   * turn is on.
+   */
+  it("draws nothing for a system turn, however it is named", () => {
+    expect(drawn("loom.message", { speaker: "system", name: "Session" })).not.toContain(MONOGRAM)
+  })
+
+  /**
+   * [0160](../../decisions/0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md)
+   * applied: the tree states the fact about its content — *nobody is named
+   * here* — and the library decides what to draw about it. The fact is
+   * genuinely unobservable, which this assertion is the demonstration of:
+   * `"Head of Platform"` and `"Hanna Ochoa"` both reduce to `HO`.
+   */
+  it("keeps a quote's face off when the tree says the attribution names nobody", () => {
+    const attributed = drawn("loom.quote", { quote: "A line.", author: "Head of Platform" })
+    const anonymous = drawn("loom.quote", { quote: "A line.", author: "Head of Platform", anonymous: true })
+
+    expect(attributed).toContain("HO")
+    expect(drawn("loom.quote", { quote: "A line.", author: "Hanna Ochoa" })).toContain("HO")
+    expect(anonymous).not.toContain(MONOGRAM)
+    expect(anonymous, "an unattributed quote still says who it is from").toContain("Head of Platform")
+  })
+
+  /**
+   * A photograph still wins, and an anonymised quote may still carry one — a
+   * silhouette is not a name. Only the *monogram* is what `anonymous` is about.
+   */
+  it("prefers the photograph wherever one is given", () => {
+    const body = drawn("loom.quote", {
+      quote: "A line.",
+      author: "Head of Platform",
+      anonymous: true,
+      avatar: "https://example.com/face.jpg",
+    })
+
+    expect(body).toContain('src="https://example.com/face.jpg"')
+    expect(body).toContain('alt=""')
+  })
+})
+
+/**
+ * The footer column that fell off the row, and why a floor is not a promise
+ * until something keeps it.
+ *
+ * `GROUP_MINIMUMS` was written so that *"`columns: "four"` renders two — the
+ * names stop meaning what they say"* could not happen. It happened one step
+ * smaller: on the canonical wide page, with the surface tone the canonical band
+ * uses, four link groups rendered **three columns and an orphan on a second
+ * row**, under both starter palettes. `auto-fit` divides what is left over, and
+ * what was left over was decided by the brand column's 20rem of blurb.
+ */
+describe("what a footer's columns promise", () => {
+  const footer = (props: JsonObject): string => {
+    const ids = sequentialIdFactory()
+    const group = (name: string) =>
+      buildElement(ids, {
+        type: "loom.link-list",
+        props: { label: name },
+        children: [buildElement(ids, { type: "loom.link", props: { href: "/x" }, children: [buildText(ids, name)] })],
+      })
+
+    return splitStylesheet(
+      render(
+        createTree(
+          buildElement(ids, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: EDITORIAL },
+            children: [
+              buildElement(ids, {
+                type: "loom.footer",
+                props,
+                children: [group("Product"), group("Developers"), group("Company"), group("Resources")],
+              }),
+            ],
+          }),
+          ids
+        )
+      ).markup
+    ).tree
+  }
+
+  it("reserves the width its name is promising, so the brand yields and no group wraps alone", () => {
+    expect(footer({ columns: "four" })).toContain("min-width:min(100%, calc(4 * 9rem + 3 * var(--loom-spacing-5)))")
+    expect(footer({ columns: "two" })).toContain("min-width:min(100%, calc(2 * 17rem + 1 * var(--loom-spacing-5)))")
+  })
+
+  /** The default is what the canonical band gets, and the default is what broke. */
+  it("promises four by default, because that is the number a footer has", () => {
+    expect(footer({})).toContain("min-width:min(100%, calc(4 * 9rem + 3 * var(--loom-spacing-5)))")
+  })
+
+  /**
+   * `auto` is the one value that means *as many as fit*, which is `auto-fit`
+   * left alone — so it reserves nothing, and a tree that wants the old
+   * behaviour has a word for it.
+   */
+  it("reserves nothing for the value that promises nothing", () => {
+    expect(footer({ columns: "auto" })).not.toContain("min-width")
+  })
+
+  /**
+   * `min(100%, …)` is what keeps the promise from becoming an overflow. On a
+   * phone the band is narrower than four columns and the reservation is capped
+   * at its own width, so the grid falls to one column instead of demanding four
+   * and pushing the page sideways.
+   */
+  it("caps the reservation at the band's own width", () => {
+    expect(footer({ columns: "four" })).toContain("min-width:min(100%, ")
   })
 })

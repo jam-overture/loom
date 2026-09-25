@@ -272,5 +272,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0186](0186-a-whats-on-band-occupies-the-come-back-region.md) | A what's-on band occupies the come-back region, so it is a design of `articles` and not a twenty-third part | Accepted | §4b |
 | [0187](0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md) | A frame with no picture in it does not take the picture's shape | Accepted | §4b |
 | [0188](0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md) | A specimen may ask to be hydrated, and one function builds the page for both renders | Accepted | §4, not the library |
-| 0189 | *No record on this branch* | — | — |
+| [0189](0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md) | A portrait with no photograph is the person's initials, and a portrait with nobody named is nothing | Accepted | §4b |
 | [0190](0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md) | A route group may contribute a sitemap and may not contribute a robots.txt | Accepted | §4d |
