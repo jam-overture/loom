@@ -45,6 +45,11 @@ model and knows nothing about React, storage or any model provider. Each of the
 others is one of those things, behind its own door, so that importing the core
 never drags a database driver into your bundle.
 
+The table above is the map you need to write your first import. The
+[API reference](/docs/api-reference) lists the same doors with the number of
+names behind each, and says the thing this table cannot: they do not nest, so
+none of them has the whole package behind it.
+
 <Callout kind="note">
   Reach for `@loom/runtime/sdk` the moment you want a primitive of your own — it
   is where `definePrimitive` and the registry live. Everything on the

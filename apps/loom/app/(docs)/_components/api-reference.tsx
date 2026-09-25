@@ -484,7 +484,7 @@ const Collisions = ({ collisions }: { readonly collisions: readonly ApiNameColli
  * way on the server and another in the browser is a hydration mismatch rather
  * than a courtesy.
  */
-const grouped = (count: number): string => count.toLocaleString("en-US")
+export const grouped = (count: number): string => count.toLocaleString("en-US")
 
 const WhereThisDoorSits = ({ entry }: { readonly entry: ApiEntry }) => {
   const { standing } = entry

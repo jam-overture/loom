@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { docsHref, writtenDocsSections } from "./nav"
+import { docsHref, docsSections, writtenDocsSections } from "./nav"
 
 /**
  * What one page says about another, in a form a test can check.
@@ -74,7 +74,20 @@ export const servableHrefs = (): ReadonlySet<string> => {
         .map((page) => docsHref(section.name, page.name))
     )
 
-  return new Set(["/docs", ...written])
+  /*
+   * The generated half, which the paragraph above describes and this had not
+   * been doing: a generated page has no `page.mdx` to find, so both halves are
+   * asked separately — the section's route directory is on disk, and `nav.ts`
+   * lists the page. Until a written page linked to one it cost nothing, because
+   * none did; the first link to `/docs/api-reference` failed a check that was
+   * right about the rule and looking in one place for it.
+   */
+  const generated = docsSections
+    .filter((section) => section.source === "generated")
+    .filter((section) => existsSync(join(docsRoot, section.slug)))
+    .flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug)))
+
+  return new Set(["/docs", ...written, ...generated])
 }
 
 export type Quotation = {

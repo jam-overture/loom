@@ -31553,8 +31553,17 @@ somebody made.
 ---
 ## 2026-09-24 — the API reference has sixteen pages and no front door, so the band that says "most of this is elsewhere" can only point at the search box
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
-gap is real and named by the work that exposed it; nothing on the site is wrong
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed**
+by #391, 25 September. `/docs/api-reference`
+is a page: the sixteen with their sizes and their sentences, grouped by who
+writes them, and the shape they make underneath. **Both things this entry said
+had to be decided first were decided rather than deferred** — a section may now
+have a page that *is* the section (a page with no slug of its own, so only
+`docsHref` knows what that means, and the rail, the pager, the search index and
+the metadata reach it unchanged), and Installation keeps its table because the
+two answer different questions: *which import do I write* before you have met
+the package, *where is what I want* once you are inside the reference. Each page
+now says in one sentence what the other adds.
 
 `/docs/api-reference` is not a page. The section's pages are the sixteen entry
 points and nothing else, so `/docs/api-reference/runtime` is the first thing a
@@ -32184,6 +32193,49 @@ maintainer and the framework lane rather than something a surface lane should
 add on its own.
 
 ---
+## 2026-09-25 — the site cannot search a sentence a component renders, and there is now a whole page of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+known shape of the search index rather than a defect in it, and nothing on the
+site is wrong
+
+The prose half of the search index is read off the MDX files:
+`_lib/search/build.ts` reads a page's paragraphs and its code blocks through
+`writtenDocsSections`, and a **generated** page has no file to read. What such a
+page contributes is therefore its title and the one-line summary `nav.ts` keeps
+for it, and nothing else.
+
+That was close to free while a generated page was a list of names: what a reader
+wants to find on one is an export, and the names index carries every one of
+them with its import beside it. It is not free any more. Since 23 September the
+sixteen reference pages have grown **five bands of argued prose** — what to
+install before the import will run, the narrower door, where the door stands
+among the others, the names that mean two things, the written pages that show a
+name in use — and as of today `/docs/api-reference` is a whole page of it.
+
+What that costs, precisely: a reader who searches *do the imports nest*, *which
+import should I start with* or *horizonOf is two functions* is searching for
+sentences this site now contains and its index does not. The front door's own
+summary is indexed, so the page is findable by its subject; the paragraph that
+answers the question is not.
+
+**Three ways out, and the choice between them is the whole of the ask:**
+
+- **Index what the component renders**, by rendering it at build time and
+  reading the text back. Truthful by construction and the most expensive: the
+  index build would have to mount React.
+- **Let a generated page declare its prose** beside the data it renders from, as
+  a list of `{ anchor, text }` the component and the index both read. Cheap, and
+  it is a second copy of a sentence unless the component reads it too — which is
+  the arrangement that makes it safe, and also the one that constrains how the
+  bands can be written.
+- **Say nothing and let it stand**, on the argument that a reference is searched
+  by name rather than by sentence. Defensible today; it gets less defensible
+  with each band.
+
+Filed rather than taken, because it is the search index's shape rather than one
+page's, and because the answer decides how every future band on a generated page
+has to be written.
 ## 2026-09-25 — a prop built to answer one lane's finding sat unwired for three weeks, and the only instrument that could see it was a camera
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**

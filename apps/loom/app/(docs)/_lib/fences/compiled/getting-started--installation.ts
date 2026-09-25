@@ -11,7 +11,7 @@
 import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
 import { describeRegistryError } from "@loom/runtime/sdk"
 
-// page.mdx:65 — a program
+// page.mdx:70 — a program
 const built = createStarterPrimitiveRegistry()
 
 if (!built.ok) {
