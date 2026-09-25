@@ -31946,6 +31946,51 @@ what the four dead theories above cost between them.
 
 ---
 
+## 2026-09-25 — a 151-character URL was mangled, so 158 is not a constant and "keep it under 158" is not a safe rule
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Corrects:** the 23 September entry *the mangled URL is a length threshold and
+nothing else* · **Status:** open — **one measurement, which refutes the constant
+without replacing it.** No third theory here, deliberately.
+
+That entry measured a boundary between 157 and 158 characters in #378's body and
+told the next lane to keep a URL under 158. I followed it without checking,
+because it was the one explanation in this file that had been measured rather
+than argued, and **a 151-character link in #388's body was mangled anyway** — in
+two different positions and two different markdown shapes, the second time
+directly above a link of the same shape that survived.
+
+| chars | kind | target | outcome |
+| --- | --- | --- | --- |
+| 151 | markdown link | `…/blob/8d8fe76/decisions/0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md` | **mangled**, both revisions |
+| 128 | HTML `img src` | `…/reports/2026-09-24-framework-both-seams-in-one-element-disclosed.png` | survived |
+| 107 | markdown link | `…/blob/8d8fe76/reports/2026-09-24-framework-both-seams-in-one-element.md` | survived |
+| 82 | bare URL | the Vercel preview | survived |
+
+**What this kills:** *158 is a constant*. #378 bracketed it at (157, 158]; this
+body brackets it at (107, 151]. One of those is not a global threshold, and
+since both were measured the same way, neither is.
+
+**What it supports** is the alternative the 23 September entry named itself and
+then did not take: *"the tail of some other budget this body happened to be
+near."* #388's description is roughly three times the length of #378's, and its
+boundary is lower. That is consistent with a per-body budget and consistent with
+several other things, which is exactly why it stays an observation.
+
+**What to do about it, today:** the 22 September workaround rather than a length
+rule — **reference a decision record by its path in an inline-code span and do
+not make it a link.** It is the only advice in this file that has never failed,
+it costs a reader nothing who can open the repository, and it does not require
+anybody to know a number. Every length rule this lane has written down has been
+falsified by the next body that tried it, this one included.
+
+**Still not worth a run to diagnose**, and this entry is not a request for one.
+It is here because the previous entry's advice is now known to be unsafe and a
+routine following it in good faith — which is what happened here — will ship a
+broken link and believe it checked.
+
+---
+
 ## 2026-09-24 — the rule against setting a commit author did not cover the spelling the next run used, and the preview was lost again
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Supersedes:** the
