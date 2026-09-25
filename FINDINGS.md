@@ -85,6 +85,106 @@ with less in hand than the fold before it must not overwrite what the earlier
 one computed. `did` gets that by being absent; anything else has to ask for it.
 
 ---
+## 2026-09-25 — ten supersessions are written at both ends and one is not, and nothing has ever compared the two ends
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`tools/decisions/numbering.ts`) · **Status:** open — **not a defect in any
+record.** 0137 is compliant with `decisions/README.md` as written. Filed because
+the convention has been producing checkable data for two months and nothing
+cashes it in.
+
+Found writing [lesson 28](lessons/28-corroboration.md), whose subject is which
+claims in this repository have a second copy to be held against. A supersession
+is one of the few in `decisions/` that *does*, by habit rather than by rule.
+
+`checkNumbering` reads the four-digit numbers in a status line and verifies that
+each names a record that exists (`unknown-reference`). It does not ask whether
+the record named agrees. Where both ends say it — `0029` carries
+`Accepted — partially supersedes 0027` and `0027` carries `Accepted — partially
+superseded by 0029` — that is one fact written twice in two files, which is
+exactly the shape this repository's other checks exist to exploit.
+
+The count, from the lesson's exercise E, run against `decisions/` on 25
+September:
+
+| | |
+| --- | --- |
+| directions written in a status line | eleven |
+| answered at the other end | ten |
+| not answered | `0109 -> 0137` |
+
+0109 says `Superseded by [0137](…)`. 0137 says `Accepted`, and does not mention
+0109 anywhere in the file.
+
+**Nothing is wrong.** The README's *Changing direction* section requires the
+**old** record to be marked and says nothing about the replacement; the
+reciprocal form appears in the four partial-supersession pairs because the same
+section asks a partial replacement to say which part it takes over, and in
+`0014` because whoever wrote it did it anyway. Even `decisions.test.ts`'s own
+fixture for the quiet case writes the pair both ways, by that same
+habit.
+
+**What this is asking for, and it is your call which:**
+
+1. **Check it** — a status naming a record that does not name it back is a
+   `one-way-supersession` problem. Cheap, it is four lines beside `danglingIn`,
+   and the data is already there. The cost is that it turns a README-compliant
+   act into a red build on somebody's branch, so the README has to say the
+   reciprocal form is required at the same time.
+2. **Write it down as one-way on purpose** — one sentence in the README saying
+   the replacement need not name what it replaces, and why. Then the asymmetry
+   is a decision rather than eleven data points and a habit.
+3. **Nothing.** In which case the lesson's exercise E keeps printing the list,
+   and a second one-way supersession will turn `lessons/28-corroboration.md`'s
+   transcript red. That is the honest cost of the exercise and it is stated in
+   the lesson; it is a lessons file and this lane will fix it, but you would
+   rather hear it here than in a failing suite.
+
+I have not taken any of the three: a lessons branch that edits
+`tools/decisions/` is a lessons branch nobody can review, and (1) puts a gate in
+front of five other lanes, which is the thing 0118 declined to do to `apps/loom`.
+
+---
+## 2026-09-25 — `decisions/README.md` says a status is one of three things, and the parser accepts any string at all
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`tools/decisions/record.ts`) · **Status:** open — **small, and recommended as a
+README change rather than a check.**
+
+The same lesson, exercise B. `parseDecisionRecord` requires a `**Status:**` line
+to be *present* and reads everything after the colon as an opaque string. So:
+
+```
+  status set to Bananas             accepted, status "Bananas"
+  section set to a § nobody has     accepted, status "Accepted"
+```
+
+Both go into the generated index verbatim. The README states, in *Format*, that
+`Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`, plus the
+`Accepted — partially superseded by NNNN` form described two paragraphs down.
+The real statuses in `decisions/` are more various than that — several carry a
+trailing clause of prose (`Accepted — it changes no schema, no tree and no delta
+model, and …`, `Proposed — **ARCHITECTURAL, needs review.** It reverses a named
+…`), and at least one is accepted for one half and proposed for the other.
+
+**Those are good statuses.** A record that is honest about being half-decided is
+the record doing its job, and this is emphatically not a request to normalise
+them. The finding is that the README's sentence describes a closed set the
+repository does not have, which makes it the one thing in `decisions/README.md`
+that is measurably not true of `decisions/`.
+
+**Cheapest fix, and the one I would take:** reword the README to say a status
+*begins with* one of the three words and may carry a qualifying clause. That is
+a sentence, it costs nothing, and it has the property the current sentence lacks
+— it is true.
+
+**If you would rather check it:** a first word held against a three-member list,
+with `everyMemberOf`, in `record.ts`. It would have to be written so that every
+status in the directory today passes, which they all would.
+
+Not touched from here: `tools/` is yours, and the README is `decisions/`.
+
+---
 ## 2026-09-23 — the shared vocabulary has five states, and two of them are now overridden by the demo for two different reasons
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom portal`
