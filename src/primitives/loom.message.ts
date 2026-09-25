@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { portrait } from "./portrait.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, family, radius, size, space, weight } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
@@ -35,7 +36,9 @@ import { mediaUrlSchema } from "./url.js"
  * `avatar` is a prop rather than a `loom.avatar` child for the reason
  * `loom.quote` gives for the same field — one portrait per record, and a
  * portrait that could be reordered against the words it belongs to is a
- * reachability nobody wants.
+ * reachability nobody wants. With no photograph it falls back to the speaker's
+ * initials, and with no `name` either it draws nothing: `portrait.ts` owns both
+ * halves and this primitive is the one caller that needs the second.
  *
  * ## Why the speakers are called that
  *
@@ -245,23 +248,30 @@ export const loomMessage = definePrimitive({
         className: [LIBRARY_CLASS.message, side].filter((name) => name !== undefined).join(" "),
       },
       libraryStylesheet(),
-      given.avatar === undefined
-        ? null
-        : createElement("img", {
-            key: "avatar",
-            src: given.avatar,
-            alt: "",
-            loading: "lazy",
-            decoding: "async",
-            style: {
-              flex: "0 0 auto",
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              borderRadius: radius("full"),
-              objectFit: "cover",
-              background: colour("bg-surface-muted"),
-            },
-          }),
+      /**
+       * **A turn with a name gets a face; a turn with neither gets nothing.**
+       * The second half is the reason this call passes `name` rather than a
+       * string the primitive could always supply: `name` is optional here, and
+       * a transcript that is obviously one person talking to one assistant
+       * routinely leaves it off. An empty circle in that case is a hole, not a
+       * decision — which is the distinction `portrait.ts` makes and the one
+       * thing this primitive would have had to remember on its own.
+       */
+      portrait({
+        /**
+         * A system turn is not somebody speaking — it is the room saying
+         * something — so it never gets a face, whatever it is called. Every
+         * chat surface draws that line the same way and this is the one place
+         * the enum's third member means something other than *a side*.
+         */
+        name: given.speaker === "system" ? undefined : given.name,
+        image: given.avatar,
+        box: AVATAR_SIZE,
+        glyph: 1,
+        corners: "circle",
+        labelled: false,
+        key: "avatar",
+      }),
       createElement(
         "div",
         { key: "body", className: LIBRARY_CLASS.messageBody },

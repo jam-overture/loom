@@ -67,7 +67,7 @@ describe("ReversalNote", () => {
    * button from a promise into a decision, and it has to name the revisions so a
    * reviewer knows whose work is at stake before they press it.
    */
-  it("warns, naming the revisions, when undoing writes over later work", () => {
+  it("warns, naming the versions, when undoing writes over later work", () => {
     const reversal: Reversal = {
       kind: "revertable",
       restores: [takesBack("n_card")],
@@ -81,7 +81,7 @@ describe("ReversalNote", () => {
     render(<ReversalNote reversal={reversal} />)
 
     const warning = screen.getByText(/wipe out/)
-    expect(warning.textContent).toContain("revisions")
+    expect(warning.textContent).toContain("versions")
     expect(warning.textContent).toContain("4, 6")
     expect(warning.textContent).toContain("say yes")
   })
@@ -89,9 +89,9 @@ describe("ReversalNote", () => {
   /**
    * "revision 4" and "revisions 4, 6" differ by one letter and by a space that
    * has to survive a build. Asserted whole for the same reason as the
-   * restorations: `toContain("revision")` is true of the broken reading.
+   * restorations: `toContain("version")` is true of the broken reading.
    */
-  it("says revision, singular, and keeps the space before the number", () => {
+  it("says version, singular, and keeps the space before the number", () => {
     render(
       <ReversalNote
         reversal={{
@@ -103,7 +103,7 @@ describe("ReversalNote", () => {
       />
     )
 
-    expect(screen.getByText(/wipe out/).textContent).toContain("what revision 4 did")
+    expect(screen.getByText(/wipe out/).textContent).toContain("what version 4 did")
   })
 
   it("says nothing about writing over later work when the undo is clean", () => {

@@ -14,7 +14,7 @@ import type {
 
 import { plainChange, type PlainChange } from "./plain-change"
 import { reversesTheLastChange, settingsMoved, type SettingMove } from "./put-back"
-import { touchedBy, type TouchedNode } from "./touched"
+import { keepingWords, touchedBy, type TouchedNode } from "./touched"
 
 /**
  * One ask, and everything the runtime said about it, in one record.
@@ -459,8 +459,17 @@ const assessed = (
    * a *removed* node's parent and position survive. `assessReversibility`
    * computes it whether or not anybody undoes anything, so pointing at the gap a
    * removal left costs nothing beyond reading a field that already exists.
+   *
+   * And it is the only place the removed node's *words* survive, which is what
+   * lets the mark in that gap name what is missing from it rather than say
+   * "something". The settings are the same ones `did` is read with two fields
+   * below, so the quotation on the band and the quotation on the card are cut
+   * by one function against one registry.
    */
-  touched: touchedBy(assessment.proposal.delta, assessment.reversibility.inverse),
+  touched: keepingWords(
+    touchedBy(assessment.proposal.delta, assessment.reversibility.inverse, against?.settings),
+    draft.touched
+  ),
   /*
    * And the same delta in the words on the page, past tense, against the tree
    * the runtime judged it against.

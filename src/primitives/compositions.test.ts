@@ -1738,3 +1738,76 @@ describe("the rows that were waiting on a run", () => {
     }
   })
 })
+
+/**
+ * The claim the whole-page photograph is the evidence for, held where a later
+ * run will read it.
+ *
+ * Two bands attribute quotes and they attribute them differently on purpose:
+ * `testimonials` to **roles**, because a starting composition may not ship a
+ * fabricated endorsement from a person who does not exist, and
+ * `testimonials-wall` to **names**. Until 25 September that difference had no
+ * consequence, because `loom.quote` drew no face either way. It has one now, so
+ * the difference has to be *declared* rather than left implicit in the copy —
+ * which is
+ * [0160](../../decisions/0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md),
+ * and [0189](../../decisions/0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md)
+ * is why it matters.
+ *
+ * These are asserted as a pair rather than one test each, for the reason the
+ * reach tests above give: what is held is the *contrast*, and a run that
+ * changed one band's copy without the other's declaration would otherwise leave
+ * every test green and put the initials of a job title in a circle.
+ */
+describe("which quotes have a face", () => {
+  const quotesOf = (id: string): readonly ElementNode[] => {
+    const band = compositionById(id)
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return elementsOfType(band.build(sequentialIdFactory()), "loom.quote")
+  }
+
+  it("declares every role-attributed quote unnamed, and every named one not", () => {
+    const anonymous = quotesOf("testimonials")
+    const named = quotesOf("testimonials-wall")
+
+    expect(anonymous.length).toBeGreaterThan(0)
+    expect(named.length).toBeGreaterThan(0)
+
+    for (const quote of anonymous) {
+      expect(quote.props["anonymous"], `a testimonials quote attributed to ${quote.props["author"]}`).toBe(true)
+    }
+
+    for (const quote of named) {
+      expect(quote.props["anonymous"], `a wall quote attributed to ${quote.props["author"]}`).toBeUndefined()
+    }
+  })
+
+  /**
+   * The rule the copy has to keep for the declaration above to be the right
+   * one. A role has no initials; a name does. Two words is what `monogramOf`
+   * reduces, and it is the property that makes a wall of eight read as eight
+   * people rather than eight paragraphs.
+   */
+  it("attributes the wall to people with names in them", () => {
+    for (const quote of quotesOf("testimonials-wall")) {
+      const author = quote.props["author"]
+
+      expect(typeof author).toBe("string")
+      expect(String(author).split(/\s+/u).length, `${String(author)} is not a person's name`).toBeGreaterThan(1)
+    }
+  })
+
+  /**
+   * The singleton pull quote is the third placement of the same fallback and
+   * the one that is not in a card — it sits against a 2px accent rule — so it
+   * is named here rather than left to the two grids.
+   */
+  it("gives the customer story's pull quote a name to draw a face from", () => {
+    const [story] = quotesOf("proof-story")
+
+    expect(story).toBeDefined()
+    expect(story?.props["anonymous"]).toBeUndefined()
+    expect(String(story?.props["author"]).split(/\s+/u).length).toBeGreaterThan(1)
+  })
+})

@@ -183,8 +183,8 @@ describe("reversalOf", () => {
     const reversal = reversalOf(plan)
 
     if (reversal.kind !== "blocked") throw new Error("out-of-range is a blocked reversal")
-    expect(reversal.reason).toContain("revision 2")
-    expect(reversal.reason).toContain("revision 5")
+    expect(reversal.reason).toContain("version 2")
+    expect(reversal.reason).toContain("version 5")
     expect(reversal.technical).toBe("out-of-range: revision 2, earliest 5")
   })
 
@@ -343,6 +343,6 @@ describe("previewReversal, end to end", () => {
     const reversal = await previewReversal(store, seed.treeId, seed, 7)
 
     if (reversal?.kind !== "blocked") throw new Error("a revision past head is out of range")
-    expect(reversal.reason).toContain("revision 7")
+    expect(reversal.reason).toContain("version 7")
   })
 })

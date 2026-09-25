@@ -127,26 +127,26 @@ describe("EpisodeCard", () => {
    * The revision an ask produced is somewhere a reviewer can go (0043), not a
    * number in a sentence they have to retype.
    */
-  it("links the revision an applied ask produced", () => {
+  it("links the version an applied ask produced", () => {
     render(
       <ul>
         <EpisodeCard episode={episode()} />
       </ul>
     )
 
-    const link = screen.getByRole("link", { name: "revision 4" })
+    const link = screen.getByRole("link", { name: "version 4" })
 
     expect(link.getAttribute("href")).toContain("/portal/history")
   })
 
-  it("links the revision the ask was written against", () => {
+  it("links the version the ask was written against", () => {
     render(
       <ul>
         <EpisodeCard episode={episode()} />
       </ul>
     )
 
-    expect(screen.getByRole("link", { name: "revision 3" })).toBeTruthy()
+    expect(screen.getByRole("link", { name: "version 3" })).toBeTruthy()
   })
 
   /**
@@ -289,7 +289,7 @@ describe("EpisodeCard", () => {
   })
 
   /** A window can open mid-episode, and saying so beats rendering a blank line. */
-  it("says so when the ask itself was not recorded, and offers no revision to go to", () => {
+  it("says so when the ask itself was not recorded, and offers no version to go to", () => {
     const { container } = render(
       <ul>
         <EpisodeCard episode={episodeWithoutIntent({ kind: "open" })} />

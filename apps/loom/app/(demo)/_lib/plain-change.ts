@@ -143,6 +143,25 @@ const shown = (words: readonly string[]): Pick<PlainChange, "words" | "more"> =>
 })
 
 /**
+ * The words one subtree puts on the page, cut the way the card cuts them.
+ *
+ * Exported for the **mark on the page**, which needs the same quotation for a
+ * different reason. The card quotes the words of a *change*; a mark on a gap
+ * quotes the words of the one node whose space it is drawn in, and those are
+ * not the same list the moment a change has two operations in it.
+ *
+ * It is this function and not a second reading, because the failure worth
+ * preventing is the two disagreeing: a stranger reads the quotation on the band
+ * and the quotation on the card in one glance, three inches apart, and a mark
+ * that cut at a different length or dropped a different word would be the
+ * surface contradicting itself about the thing it had just done.
+ */
+export const wordsOfNode = (
+  node: LoomNode,
+  settings: ReadonlySet<string>
+): Pick<PlainChange, "words" | "more"> => shown(wordsIn(node, settings))
+
+/**
  * Whether this reading is of a change being offered or of one that has landed.
  *
  * **Both tenses of every sentence are written next to each other, deliberately.**

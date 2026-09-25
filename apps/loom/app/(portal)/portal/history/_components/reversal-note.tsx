@@ -53,7 +53,7 @@ export const ReversalNote = ({ reversal }: { readonly reversal: Reversal }) => {
 
       {reversal.discards.length > 0 && (
         <p className="bg-awaiting text-awaiting-ink text-2xs rounded-sm px-2 py-1">
-          Somebody will have to say yes to this one. Undoing it now would wipe out what revision
+          Somebody will have to say yes to this one. Undoing it now would wipe out what version
           {reversal.discards.length === 1 ? " " : "s "}
           <span className="font-mono">
             {reversal.discards.map((discarded) => discarded.revision).join(", ")}

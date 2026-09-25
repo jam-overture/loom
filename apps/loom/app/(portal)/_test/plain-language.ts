@@ -84,12 +84,19 @@ export const RUNTIME_WORDS: readonly string[] = [
  * comparison is case-insensitive because a word at the start of a sentence is
  * the same word.
  *
- * `except` is for the screens where a runtime word has genuinely become the
- * portal's own. `/portal/history` numbers its rows *revision 4* and the id is
- * on the surface by the 22 August rule, so a blanket ban would be the rule
- * enforcing the opposite of what it is for. It is deliberately a per-assertion
- * argument rather than a second list: an exemption that has to be written at
- * the point of use is one a reviewer sees.
+ * `except` is for the words that are on the surface as **identity** rather
+ * than as vocabulary — the 22 August rule — where a blanket ban would be the
+ * rule enforcing the opposite of what it is for. `id` is the one that is left:
+ * an unreadable change is told apart from the next one by the id of the thing
+ * it is about, the way a filename tells two files apart.
+ *
+ * It is deliberately a per-assertion argument rather than a second list: an
+ * exemption that has to be written at the point of use is one a reviewer sees.
+ * That is what retired the other one. `revision` was exempted on two screens
+ * because `/portal/history` numbered its rows *Revision 4*; both exemptions
+ * were visible, both were read on 24 September, and the answer was to give the
+ * number the portal's own word (`_lib/version.ts`) rather than to keep writing
+ * the argument down.
  */
 export const runtimeWordsIn = (
   sentence: string,
