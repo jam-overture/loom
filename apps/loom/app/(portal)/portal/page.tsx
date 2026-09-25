@@ -4,6 +4,7 @@ import type { TreeId } from "@loom/runtime"
 import { describeStoreError } from "@loom/runtime/store"
 import { describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
 
+import { CheckupInvitation } from "@/app/(portal)/_components/checkup-invitation"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
@@ -12,9 +13,11 @@ import { UnreadableChangeCard } from "@/app/(portal)/_components/unreadable-chan
 import { UnreadablePages } from "@/app/(portal)/_components/unreadable-pages"
 import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
+import { checkupReach } from "@/app/(portal)/_lib/checkup-reach"
 import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
+import { isAuditable } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { unattendedIn, unattendedSummary } from "@/app/(portal)/_lib/unattended"
@@ -82,8 +85,27 @@ const RECENT_RECORDS = 120
  * and did not say who" (0029).
  *
  * The journal can, so the second half of this screen reads the journal. See
- * `_lib/unattended.ts`. The two halves are the whole of what a person wants from
- * a front door: **what needs me, and what happened without me.**
+ * `_lib/unattended.ts`.
+ *
+ * ## The third question, added 25 September
+ *
+ * Both halves above are read from records. Neither of them checks that those
+ * records still describe the pages people are being served — and that is the one
+ * fault in Loom with no symptom at all: a page that has drifted from its own
+ * history serves every request correctly, throws nothing, and logs nothing. The
+ * check over every page shipped on 22 September at
+ * `/portal/checkup/everything`, and the front door did not mention it, which is
+ * how the most Loom-specific screen in the portal stayed the least-opened one.
+ *
+ * It is an invitation rather than a verdict, because a fold is a walk of a whole
+ * accepted history and running one per morning would make this screen slower for
+ * the rest of its life (0016). What the invitation carries is free: which pages a
+ * checkup could speak for at all, and what a press would cost. See
+ * `_lib/checkup-reach.ts`.
+ *
+ * The three questions are the whole of what a person wants from a front door:
+ * **what needs me, what happened without me, and can I trust what I am looking
+ * at.**
  *
  * The holds are read per listed page rather than in one call, because the hold
  * store's contract is per-tree — the same trade `/portal/pages` already makes,
@@ -252,6 +274,27 @@ const PortalHome = async () => {
     unreadable: unreadableIn(trees, perPage),
     complete: cursor === null,
   }
+
+  /**
+   * What a checkup could speak for, from what this screen has already read.
+   *
+   * Free: the listing is above, every head is in `heads`, and whether this
+   * deployment holds a page's starting shape is a lookup rather than a read. No
+   * fan-out is added and nothing is folded here — a fold is a walk of a whole
+   * accepted history and would make the one screen a person opens every morning
+   * slower for the rest of its life (0016). The press is the press.
+   *
+   * Over the listed pages and not the union with the record above, because that
+   * is the set the sweep itself would take: it lists from the same store and
+   * bounds itself the same way, so a page the listing never reached is a page
+   * neither screen can speak for. `sweep.complete` is what says so.
+   */
+  const reach = checkupReach({
+    treeIds: trees.map((listing) => listing.treeId),
+    heads,
+    hasStartingShape: isAuditable,
+    complete: sweep.complete,
+  })
 
   return (
     <div className="flex max-w-2xl flex-col gap-6 p-8">
@@ -544,6 +587,30 @@ const PortalHome = async () => {
           )}
         </section>
       )}
+
+      {/*
+       * The third question, and the one neither section above can answer.
+       *
+       * Both halves above are read from records — what is waiting, and what Loom
+       * went ahead with. Neither of them checks that those records still describe
+       * the pages people are actually being served, and nothing anywhere does
+       * unless somebody asks: a page that has drifted from its own history serves
+       * every request perfectly, throws nothing and logs nothing. That check
+       * shipped over every page on 22 September and the front door did not
+       * mention it, which is how the most Loom-specific screen in the portal
+       * stayed the least-opened one.
+       *
+       * Last of the three, deliberately. It reads as the question that follows
+       * the section above it — you have just been told what Loom changed on its
+       * own, and the next thing worth knowing is whether the record of all that
+       * still produces what is on the page. It is also the only one of the three
+       * with nothing urgent in it, and urgency orders this screen.
+       *
+       * Withheld with no pages, like the section above and the strip below: a
+       * deployment with nothing in it has nothing to check, and a second offer
+       * under the one empty state that matters competes with it.
+       */}
+      {trees.length > 0 && <CheckupInvitation reach={reach} />}
 
       {/*
        * Every screen in the portal is a view of the same deployment, and this
