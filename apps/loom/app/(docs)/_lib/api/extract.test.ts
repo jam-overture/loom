@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import { entryPoints } from "../entry-points"
-import { docsSections } from "../nav"
+import { docsHref, docsLandingOf, docsPagesIn, docsSections } from "../nav"
 import {
   DECISION_NUMBER,
   extractReference,
@@ -18,7 +18,7 @@ import {
 } from "./extract"
 import { MODULE_TITLES, moduleTitle } from "./groups"
 import { apiAnchorFor, apiNavLabelFor, apiSlugFor, apiSymbolCount } from "./model"
-import { apiEntries, apiEntryAt, parseReference } from "./reference"
+import { apiEntries, apiEntryAt, apiSlugs, parseReference } from "./reference"
 
 /**
  * What keeps a generated reference true.
@@ -59,16 +59,35 @@ describe("the published entry points", () => {
    * the order the package's conditions are written; the rail lists them in the
    * order a reader should meet them, which is the order `entryPoints` is in.
    * What must never differ is *which* doors, so both checks sort first.
+   *
+   * `docsPagesIn` rather than the section's pages, because the section's own
+   * landing page is not a door and would be a seventeenth slug here.
    */
   it("each have a page in the rail, and the rail invents none", () => {
     const section = docsSections.find((candidate) => candidate.slug === "api-reference")
 
     expect(section?.source).toBe("generated")
-    expect(section?.pages.map((page) => page.slug).sort()).toEqual(
+    expect(
+      section === undefined ? [] : docsPagesIn(section).map((page) => page.slug).sort()
+    ).toEqual(
       publishedEntries()
         .map((entry) => apiSlugFor(entry.specifier))
         .sort()
     )
+  })
+
+  /**
+   * The landing page is the section itself, and the check that matters about it
+   * is that it is not mistaken for a door: nothing may generate a page for it,
+   * and its address has no segment of its own.
+   */
+  it("are not joined by the section's own page", () => {
+    const section = docsSections.find((candidate) => candidate.slug === "api-reference")
+    const landing = section === undefined ? undefined : docsLandingOf(section)
+
+    expect(landing).toBeDefined()
+    expect(apiSlugs).not.toContain(landing?.slug)
+    expect(docsHref("api-reference", landing?.slug ?? "x")).toBe("/docs/api-reference")
   })
 
   it("say the same thing in the rail and in the generated file", () => {
