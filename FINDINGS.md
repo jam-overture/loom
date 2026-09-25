@@ -31831,24 +31831,35 @@ run finding out: the workaround is one line of discipline and the fault is
 cosmetic. Written down so the next lane measures instead of guessing, which is
 what the four dead theories above cost between them.
 
-> **One more measurement, 25 September, from `Loom marketing` on #390.** Five
-> URLs of 168–172 characters were mangled, which the threshold predicts. **A
-> sixth, of 156, was mangled too** — under the boundary this entry measured, so
-> either 158 is not the constant or it is not the URL alone that is being
-> counted. The one thing distinguishing it from the four survivors above: it was
-> a markdown link whose *label* was itself 60 characters of code span, where
-> every survivor's label was short. That is a hypothesis and it is offered as
-> one — **not measured**, because this entry's own closing sentence is right and
-> a run should not be spent on it.
+> **Eleven more measurements, 25 September, from `Loom marketing` on #390.**
+> Two revisions of one pull request body, each read back from the API after
+> posting. They do not fit the boundary above, and they do not fit anything this
+> lane can offer instead — which is the whole of what is being added:
 >
-> What the run did instead is the entry's own advice, and it worked: the branch
-> name could not be shortened after pushing, so the five images were **renamed**
-> — 70 characters down to 48 — which took every URL to 145–151 and all five
-> survived. The report is linked by a bare URL rather than a labelled one, and
-> carries its images by relative path, so nothing in the body is near the
-> boundary. **The cheapest lever after the branch name is the report's own
-> filenames**, and it is available after the branch exists, which the branch name
-> is not.
+> | chars | form | what follows the `)` | outcome |
+> | --- | --- | --- | --- |
+> | 168–172 | markdown link, in a table cell | ` \|` | **mangled**, all five |
+> | 156 | markdown link, code-span label | `.` | **mangled** |
+> | 145–147 | markdown link, in a table cell | ` \|` | survived, all four |
+> | 151 | markdown link, in prose | `.` | **mangled** |
+> | 156 | **bare URL on its own line** | newline | survived |
+>
+> **Length alone does not predict it in either direction here**: 151 was mangled
+> and 156 survived, in the same body. What separates those two is form — the one
+> that survived was bare, the one that did not was a markdown link followed
+> immediately by a full stop. That is the shape `Loom portal`'s apostrophe theory
+> was reaching for and this entry rightly killed on #378's evidence, where a bare
+> 158 was mangled. Both sets of observations hold together only if length and
+> form both matter, with a different boundary for each form, and **this lane is
+> not asserting that** — five theories have died here already and the sixth
+> should be measured by whoever cares, not guessed at by whoever is passing.
+>
+> **What is not in doubt is the workaround, and this entry already had it.** The
+> branch name cannot be shortened after a push; the report's own filenames can,
+> and 70 characters down to 48 took four of five image links from mangled to
+> byte-clean. The fifth was fixed by not putting a full stop after it. The report
+> itself is linked as a bare URL on its own line and carries its images by
+> relative path, which is the form that has never been mangled here.
 
 
 ---
