@@ -1,7 +1,8 @@
-import type { Shot } from "./capture.js"
+import type { Shot, ShotStep } from "./capture.js"
 import {
   DEFAULT_VIEWPORTS,
   type Specimen,
+  type SpecimenState,
   type SpecimenTheme,
   type SpecimenViewport,
 } from "./specimen.js"
@@ -23,13 +24,45 @@ export type PlannedPage = {
   readonly theme: SpecimenTheme
 }
 
-/** One photograph. A viewport does not change the markup, so it reuses a page. */
+/**
+ * One photograph. A viewport does not change the markup, so it reuses a page;
+ * neither does a state, which is reached in the browser after the page loads.
+ */
 export type PlannedShot = {
   readonly name: string
   readonly file: string
   readonly page: PlannedPage
   readonly viewport: SpecimenViewport
+  /** What to do before the shutter. Empty for a static specimen, always. */
+  readonly do: readonly ShotStep[]
 }
+
+/**
+ * The states a specimen is photographed in.
+ *
+ * A static specimen has exactly one and it is nameless, which is what keeps
+ * every file name in every report written so far exactly as it was: an unnamed
+ * state contributes nothing to a shot's name. A live specimen that declares no
+ * states is in the same position — one picture per page and viewport, of the
+ * page as it settles once hydration lands.
+ */
+const NO_STATE: SpecimenState = { label: "", do: [] }
+
+export const planStates = (specimen: Specimen): readonly SpecimenState[] => {
+  const declared = specimen.live?.states ?? []
+  return declared.length === 0 ? [NO_STATE] : declared
+}
+
+/**
+ * Whether this specimen's pages are to carry a bundle and be hydrated.
+ *
+ * `live` is the declaration; this is the one question every caller actually
+ * asks of it, in one place, so that "a specimen with steps but no `live`" cannot
+ * mean something different in the renderer than it does in the planner. It
+ * cannot arise — `states` lives inside `live` — and stating it as a function is
+ * what keeps that true if `live` ever grows a second field.
+ */
+export const isLive = (specimen: Specimen): boolean => specimen.live !== undefined
 
 /**
  * Lowercase, alphanumeric and hyphens. Every label reaches a file name, and a
@@ -50,12 +83,16 @@ export const planPages = (specimen: Specimen): readonly PlannedPage[] =>
 
 export const planShots = (specimen: Specimen): readonly PlannedShot[] => {
   const viewports = specimen.viewports ?? DEFAULT_VIEWPORTS
+  const states = planStates(specimen)
 
   return planPages(specimen).flatMap((page) =>
-    viewports.map((viewport) => {
-      const name = `${page.name}-${slug(viewport.label)}`
-      return { name, file: `${name}.png`, page, viewport }
-    })
+    viewports.flatMap((viewport) =>
+      states.map((state) => {
+        const suffix = slug(state.label)
+        const name = `${page.name}-${slug(viewport.label)}${suffix === "" ? "" : `-${suffix}`}`
+        return { name, file: `${name}.png`, page, viewport, do: state.do }
+      })
+    )
   )
 }
 
@@ -72,12 +109,12 @@ export const planShots = (specimen: Specimen): readonly PlannedShot[] => {
  * viewport unless its list says otherwise, because a page under test is often
  * a screen rather than a document.
  *
- * `do` is empty here and is not a specimen's to fill, for a stronger reason
- * than economy: a specimen page is `renderToStaticMarkup` with no dev server
- * and no hydration (`render.ts`), so **there is no script in it to press**.
- * Steps belong to `pnpm shoot`, whose subject is an application something else
- * is running. Offering them here would offer a lane a list that silently does
- * nothing.
+ * `do` was empty here for a stronger reason than economy, and the reason held
+ * until a specimen could ask to be hydrated: a static specimen page has no
+ * script in it to press, so offering steps would have offered a lane a list
+ * that silently did nothing. A live specimen has one, so the steps its states
+ * declare are carried through — and a static specimen's list is still empty,
+ * because `planStates` gives it the one nameless state with nothing in it.
  */
 export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly Shot[] =>
   shots.map((shot) => ({
@@ -85,6 +122,6 @@ export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly
     url: `${origin}/${shot.page.file}`,
     file: shot.file,
     viewport: shot.viewport,
-    do: [],
+    do: shot.do,
     fullPage: true,
   }))

@@ -1,8 +1,11 @@
 import type { SourceFailure } from "../../src/data/adapter.js"
 import type { JsonValue } from "../../src/json.js"
+import type { PrimitiveEntry } from "../../src/sdk/definition.js"
 import type { SubmissionTarget } from "../../src/submit/endpoint.js"
 import type { LoomTree } from "../../src/tree/tree.js"
 import type { ThemeSelection } from "../../src/theme/theme.js"
+
+import type { ShotStep } from "./capture.js"
 
 /**
  * A tree, the themes it should be photographed under, and the viewports it
@@ -97,8 +100,89 @@ export type Specimen = {
    * answer is `{ unavailable: … }`, and a shape the primitive cannot draw is an
    * answer of that shape — the source's own schema accepts any JSON, so what
    * refuses it is the primitive, which is the state being photographed.
+   *
+   * **Declarable beside `live`**, and the two compose without a rule saying so:
+   * an answer is resolved from this table rather than fetched, so resolving it
+   * again in the browser gives the same reply and the client's first render
+   * agrees with the server's markup. See `element.ts` for why that is
+   * structural.
    */
   readonly answers?: Readonly<Record<string, SpecimenAnswer>>
+  /**
+   * Primitives registered beside the starter library, for this specimen only.
+   *
+   * `renderSpecimen` has taken a list since the day it was written and nothing
+   * could ever pass one, because it was a parameter of the renderer rather than
+   * a field of the subject — so the CLI, which is what actually runs a specimen,
+   * always called it with none. The consequence was not a missing convenience:
+   * a run photographing a **seam** had nothing of its own to photograph it on,
+   * so it had to add a primitive to `src/primitives/` to have a subject, which
+   * is another lane's directory.
+   *
+   * What goes here is a primitive that exists to be looked at — the smallest
+   * thing that places the control, the slot or the binding under test, with no
+   * styling opinions to confuse the picture. A primitive anybody's page should
+   * be able to use is not this; it is a finding for `Loom primitives`.
+   *
+   * It is on the specimen rather than on the command line for the reason
+   * `args.ts` gives about viewports and themes: what to photograph is a property
+   * of the specimen, checked by the compiler and committed beside the lane that
+   * cares. It also has to be here for a live specimen to work at all — the
+   * browser builds the same registry from the same module, and a flag would
+   * reach only one of the two.
+   */
+  readonly primitives?: readonly PrimitiveEntry[]
+  /**
+   * Present when this specimen is to be **hydrated** in the browser before it is
+   * photographed, absent for the static page every specimen was until now.
+   *
+   * A specimen is `renderToStaticMarkup` with no dev server and no hydration,
+   * and that is the right subject for almost everything: it is the render seam's
+   * own output, with nothing between it and the camera. It is also the one
+   * subject in which **no control in the behaviour vocabulary appears at all.**
+   * Every one of them returns `null` until an effect proves scripting runs
+   * (`behaviour.ts`), which is deliberate and correct on a served page and means
+   * a specimen of a primitive that copies, discloses, adjusts, presents or
+   * dismisses photographs the page without the thing it was taken for. Five
+   * members in, nothing in this repository had ever photographed one; three
+   * lanes in four days wrote a private bundle-and-serve script instead, which is
+   * the drift 0117 folded two harnesses into one to stop.
+   *
+   * **Opt-in, and that is the whole of the design.** A specimen that says
+   * nothing renders, serves and photographs exactly as it did — no bundle, no
+   * browser JavaScript, no change to a single existing picture. Saying `live: {}`
+   * buys hydration and nothing else; saying `states` buys the presses.
+   */
+  readonly live?: SpecimenLive
+}
+
+/**
+ * One state of a live specimen: a name, and what to do to the page to arrive
+ * there.
+ *
+ * The pair of controls that closes itself is the case that asks for it — a
+ * picture of a dialog is two pictures, shut and open, and they are the same
+ * page. So a state is a third dimension of the plan beside themes and viewports
+ * rather than a second specimen, and the page is rendered once for all of them.
+ *
+ * The steps are `pnpm shoot`'s, unchanged and deliberately: an instrument may
+ * reach a state and may never assert one (0159). Nothing here observes what the
+ * press produced — that is what the photograph is for, and what a test in
+ * Vitest is for.
+ */
+export type SpecimenState = {
+  /** Appended to the shot's name, so it is what a report will call the picture. */
+  readonly label: string
+  readonly do: readonly ShotStep[]
+}
+
+export type SpecimenLive = {
+  /**
+   * The states to photograph, in order. Absent takes one state with no steps —
+   * the page as it settles once hydration lands, which is the picture a specimen
+   * of a single control wants and is already more than a static one can give.
+   */
+  readonly states?: readonly SpecimenState[]
 }
 
 /**

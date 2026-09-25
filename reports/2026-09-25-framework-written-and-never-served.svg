@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 572" width="980" height="572" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <style>
+    .bg { fill: #ffffff }
+    .t { fill: #16181d; font-size: 13px }
+    .dim { fill: #6b7280; font-size: 12px }
+    .h { fill: #16181d; font-size: 13px; font-weight: 700 }
+    .title { fill: #16181d; font-size: 17px; font-weight: 700; font-family: ui-sans-serif, system-ui, sans-serif }
+    .sub { fill: #6b7280; font-size: 12.5px; font-family: ui-sans-serif, system-ui, sans-serif }
+    .ok { fill: #0f7b4f; font-size: 13px }
+    .no { fill: #b42318; font-size: 13px }
+    .rule { stroke: #e5e7eb; stroke-width: 1 }
+    .box { fill: #f9fafb; stroke: #e5e7eb; stroke-width: 1 }
+    .redbox { fill: #fef3f2; stroke: #fda29b; stroke-width: 1 }
+    .arrow { stroke: #9ca3af; stroke-width: 1.2; fill: none; marker-end: url(#a) }
+    .arrowred { stroke: #d92d20; stroke-width: 1.2; fill: none; marker-end: url(#ar) }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#d92d20"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="572"/>
+
+  <text class="title" x="32" y="40">Written, and never served</text>
+  <text class="sub" x="32" y="62">What `next build` read out of the source tree, and what it wrote into app-paths-manifest.json.</text>
+
+  <line class="rule" x1="32" y1="80" x2="948" y2="80"/>
+
+  <text class="h" x="32" y="108">app/</text>
+  <text class="h" x="470" y="108">app-paths-manifest.json</text>
+
+  <!-- rows -->
+  <rect class="box" x="32" y="124" width="330" height="34" rx="5"/>
+  <text class="t" x="46" y="146">robots.ts</text>
+  <rect class="box" x="470" y="124" width="380" height="34" rx="5"/>
+  <text class="t" x="484" y="146">/robots.txt/route</text>
+  <path class="arrow" d="M368 141 L462 141"/>
+  <text class="ok" x="866" y="146">200</text>
+
+  <rect class="box" x="32" y="172" width="330" height="34" rx="5"/>
+  <text class="t" x="46" y="194">(marketing)/sitemap.ts</text>
+  <rect class="box" x="470" y="172" width="380" height="34" rx="5"/>
+  <text class="t" x="484" y="194">/(marketing)/sitemap.xml/route</text>
+  <path class="arrow" d="M368 189 L462 189"/>
+  <text class="ok" x="866" y="194">200</text>
+
+  <rect class="box" x="32" y="220" width="330" height="34" rx="5"/>
+  <text class="t" x="46" y="242">(demo)/demo/opengraph-image.tsx</text>
+  <rect class="box" x="470" y="220" width="380" height="34" rx="5"/>
+  <text class="t" x="484" y="242">/(demo)/demo/opengraph-image-4n72ri/route</text>
+  <path class="arrow" d="M368 237 L462 237"/>
+  <text class="ok" x="866" y="242">200</text>
+
+  <rect class="redbox" x="32" y="268" width="330" height="34" rx="5"/>
+  <text class="t" x="46" y="290">(marketing)/robots.ts</text>
+  <rect class="redbox" x="470" y="268" width="380" height="34" rx="5"/>
+  <text class="no" x="484" y="290">— nothing —</text>
+  <path class="arrowred" d="M368 285 L462 285"/>
+  <text class="no" x="866" y="290">404</text>
+
+  <text class="dim" x="32" y="330">Not a route, not a page, not an error. `next build` exits 0 and prints nothing about it.</text>
+
+  <line class="rule" x1="32" y1="356" x2="948" y2="356"/>
+
+  <text class="h" x="32" y="384">Next's own matcher, 16.2.12 — two of seven conventions are anchored to the application root</text>
+
+  <text class="t"   x="46"  y="412">robots   manifest</text>
+  <text class="no"  x="470" y="412">honoured only at app/</text>
+  <text class="t"   x="46"  y="436">sitemap   icon   apple-icon   opengraph-image   twitter-image</text>
+  <text class="ok"  x="470" y="436">honoured anywhere</text>
+
+  <line class="rule" x1="32" y1="460" x2="948" y2="460"/>
+
+  <text class="h" x="32" y="488">pnpm prerender:check</text>
+  <text class="t" x="32" y="510">109 prerendered pages, 1208 text junctions, 0 run together; 3 metadata conventions, 0 unserved</text>
+  <text class="dim" x="32" y="528">the same gate, with the file put back where it was written:</text>
+  <text class="no" x="32" y="548">app/(marketing)/robots.ts produced no route: nothing in the build is served at /(marketing)/robots.txt</text>
+</svg>
