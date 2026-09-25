@@ -7,8 +7,10 @@ import { describeRenderDiagnostic } from "../../src/render/diagnostics.js"
 
 import { describeArgsError, parseSpecimenArgs } from "./args.js"
 import { browsersRoot, describeBrowserError, locateChromium } from "./browser.js"
+import { bundleSpecimen, describeBundleError } from "./bundle.js"
 import { captureShots, describeShot } from "./capture.js"
-import { planShots, shotsAt } from "./plan.js"
+import { SPECIMEN_BUNDLE_FILE } from "./page.js"
+import { isLive, planShots, shotsAt } from "./plan.js"
 import { chromiumBrowser, describeLauncherError, loadChromium } from "./playwright.js"
 import { describeRenderError, renderSpecimen } from "./render.js"
 import { serveDirectory } from "./serve.js"
@@ -46,6 +48,14 @@ if (!isSpecimen(specimen)) fail(`${modulePath} does not default-export a Specime
 const rendered = await renderSpecimen(specimen)
 if (!rendered.ok) fail(describeRenderError(rendered.error))
 
+/**
+ * Bundled before the browser is looked for, so a specimen whose module will not
+ * build says so in a second rather than after Chromium has been located and
+ * launched. It is also the failure most likely to be a lane's own typo.
+ */
+const bundle = isLive(specimen) ? await bundleSpecimen(modulePath) : undefined
+if (bundle !== undefined && !bundle.ok) fail(describeBundleError(bundle.error))
+
 for (const page of rendered.value) {
   for (const diagnostic of page.diagnostics) {
     process.stderr.write(`note: ${page.page.name}: ${describeRenderDiagnostic(diagnostic)}\n`)
@@ -64,6 +74,10 @@ await mkdir(outDir, { recursive: true })
 try {
   for (const page of rendered.value) {
     await writeFile(join(pages, page.page.file), page.html, "utf8")
+  }
+
+  if (bundle?.ok === true) {
+    await writeFile(join(pages, SPECIMEN_BUNDLE_FILE), bundle.value, "utf8")
   }
 
   /**
