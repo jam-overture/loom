@@ -5,7 +5,13 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 import { docsExampleIds } from "./examples/catalogue"
-import { docsHref, docsSections, writtenDocsSections } from "./nav"
+import {
+  DOCS_LANDING_SLUG,
+  docsHref,
+  docsLandingOf,
+  docsSections,
+  writtenDocsSections,
+} from "./nav"
 
 /**
  * The navigation, the pages on disk, and the examples they name — held against
@@ -30,6 +36,13 @@ const writtenOrder = writtenDocsSections.flatMap((section) =>
   section.pages.map((page) => ({ href: docsHref(section.slug, page.slug), section, page }))
 )
 
+/**
+ * The file behind a page.
+ *
+ * A landing page has no segment of its own, so its file is the section
+ * directory's own `page.mdx` — which is the same rule the URL follows, and the
+ * reason `join` is given the empty slug rather than asked to skip it.
+ */
 const pageFileFor = (sectionSlug: string, pageSlug: string): string =>
   join(docsRoot, sectionSlug, pageSlug, "page.mdx")
 
@@ -37,12 +50,17 @@ const pageFileFor = (sectionSlug: string, pageSlug: string): string =>
 const pagesOnDisk = (): readonly string[] =>
   readdirSync(docsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .flatMap((section) =>
-      readdirSync(join(docsRoot, section.name), { withFileTypes: true })
+    .flatMap((section) => [
+      /* A section's own `page.mdx`, where there is one: a written landing page
+         is a page like any other and an unlisted one would be as unreachable. */
+      ...(existsSync(join(docsRoot, section.name, "page.mdx"))
+        ? [`${section.name}/${DOCS_LANDING_SLUG}`]
+        : []),
+      ...readdirSync(join(docsRoot, section.name), { withFileTypes: true })
         .filter((page) => page.isDirectory())
         .filter((page) => existsSync(join(docsRoot, section.name, page.name, "page.mdx")))
-        .map((page) => `${section.name}/${page.name}`)
-    )
+        .map((page) => `${section.name}/${page.name}`),
+    ])
 
 const sourceOf = (sectionSlug: string, pageSlug: string): string =>
   readFileSync(pageFileFor(sectionSlug, pageSlug), "utf8")
@@ -84,6 +102,21 @@ describe("the navigation and the pages on disk", () => {
       expect(sourceOf(section.slug, page.slug), `${section.slug}/${page.slug}`).toContain(
         `pageMetadata("${section.slug}", "${page.slug}")`
       )
+    }
+  })
+
+  /**
+   * A generated section's landing page has no MDX and no `[param]` route to
+   * fall into: it is a `page.tsx` in the section directory, and if that file
+   * goes the rail keeps pointing at a 404 and every check above stays green.
+   */
+  it("has a route behind every generated landing page", () => {
+    for (const section of docsSections.filter((candidate) => candidate.source === "generated")) {
+      const landing = docsLandingOf(section)
+
+      if (landing === undefined) continue
+
+      expect(existsSync(join(docsRoot, section.slug, "page.tsx")), section.slug).toBe(true)
     }
   })
 

@@ -25,7 +25,14 @@ import { apiNavLabelFor, apiSlugFor } from "./api/model"
  */
 
 export type DocsPage = {
-  /** The last path segment, and the directory name under `app/docs/<section>/`. */
+  /**
+   * The last path segment, and the directory name under `app/docs/<section>/`.
+   *
+   * Empty on the one kind of page that has no segment of its own: a **landing
+   * page**, which is the section itself rather than a page inside it. Its
+   * address is `/docs/<section>`, and `docsHref` is the only place that knows
+   * so — everything else asks for an href and gets one.
+   */
   readonly slug: string
   /** What the rail and the pager call it. */
   readonly title: string
@@ -40,12 +47,44 @@ export type DocsSection = {
   readonly title: string
   /** Whether a person writes these pages or the repository does. */
   readonly source: "written" | "generated"
+  /**
+   * The section's pages, in reading order, a landing page first where there is
+   * one.
+   *
+   * A landing page is in this list rather than beside it so that everything
+   * derived from the navigation — the pager, the search index, the metadata
+   * check — reaches it without being taught a second shape. The rail is the one
+   * place the difference shows, because a section whose own title is a link has
+   * nothing to list twice.
+   */
   readonly pages: readonly DocsPage[]
 }
 
 /**
+ * The slug of a page that is its section.
+ *
+ * A constant rather than an empty string spelled out at each of the four places
+ * that ask: `slug === ""` reads as a page that forgot its name, and this reads
+ * as the thing it is.
+ */
+export const DOCS_LANDING_SLUG = ""
+
+/** The page that *is* this section, where the section has one. */
+export const docsLandingOf = (section: DocsSection): DocsPage | undefined =>
+  section.pages.find((page) => page.slug === DOCS_LANDING_SLUG)
+
+/** The pages *inside* this section — everything the rail lists under its title. */
+export const docsPagesIn = (section: DocsSection): readonly DocsPage[] =>
+  section.pages.filter((page) => page.slug !== DOCS_LANDING_SLUG)
+
+/**
  * The API reference: one page per published entry point, and nothing typed
  * twice.
+ *
+ * A landing page comes first, and it is the one page in this section that is
+ * not a door. Sixteen pages that each say *most of this package is somewhere
+ * else* need one place that says where, and a reader who has not got a name to
+ * search for has nothing else to go on.
  *
  * The list is `entryPoints`, which `entry-points.test.ts` already holds against
  * the runtime's own `exports` map — so a door that opens in `package.json` and
@@ -59,12 +98,27 @@ const apiReferenceSection: DocsSection = {
   slug: "api-reference",
   title: "API reference",
   source: "generated",
-  pages: entryPoints.map((entry) => ({
-    slug: apiSlugFor(entry.specifier),
-    title: apiNavLabelFor(entry.specifier),
-    summary: entry.summary,
-    heading: entry.specifier,
-  })),
+  pages: [
+    {
+      slug: DOCS_LANDING_SLUG,
+      title: "API reference",
+      /*
+       * Counted rather than written. "All sixteen imports" is a true heading
+       * today and a false one the morning a seventeenth door opens — and
+       * nothing would go red, because the door itself would have a page and the
+       * rail would be complete. It is the same rule the pages below it follow.
+       */
+      heading: `All ${entryPoints.length} imports`,
+      summary:
+        "Every import this package publishes, how much of the package is behind each one, and the thing they do not do: nest.",
+    },
+    ...entryPoints.map((entry) => ({
+      slug: apiSlugFor(entry.specifier),
+      title: apiNavLabelFor(entry.specifier),
+      summary: entry.summary,
+      heading: entry.specifier,
+    })),
+  ],
 }
 
 /**
@@ -292,8 +346,17 @@ export type DocsEntry = {
   readonly page: DocsPage
 }
 
+/**
+ * A page's address, and the only statement of what one looks like.
+ *
+ * A landing page has no segment of its own, so its address is the section's:
+ * `/docs/api-reference` rather than `/docs/api-reference/`. Everything that
+ * builds a docs link calls this — the rail, the pager, the search index, the
+ * metadata — which is what keeps the trailing-slash version from existing
+ * anywhere.
+ */
 export const docsHref = (sectionSlug: string, pageSlug: string): string =>
-  `/docs/${sectionSlug}/${pageSlug}`
+  pageSlug === DOCS_LANDING_SLUG ? `/docs/${sectionSlug}` : `/docs/${sectionSlug}/${pageSlug}`
 
 /** Every page, in reading order. The pager walks this and nothing else. */
 export const docsOrder: readonly DocsEntry[] = docsSections.flatMap((section) =>
