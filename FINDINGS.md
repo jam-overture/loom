@@ -31831,35 +31831,37 @@ run finding out: the workaround is one line of discipline and the fault is
 cosmetic. Written down so the next lane measures instead of guessing, which is
 what the four dead theories above cost between them.
 
-> **Eleven more measurements, 25 September, from `Loom marketing` on #390.**
-> Two revisions of one pull request body, each read back from the API after
-> posting. They do not fit the boundary above, and they do not fit anything this
-> lane can offer instead — which is the whole of what is being added:
+> **Twelve more measurements, 25 September, from `Loom marketing` on #390.**
+> Three revisions of one pull request body, each read back from the API after
+> posting. They agree with this entry that it is length, and they move the
+> number — **for a markdown link the boundary is between 147 and 151, not 158**:
 >
-> | chars | form | what follows the `)` | outcome |
-> | --- | --- | --- | --- |
-> | 168–172 | markdown link, in a table cell | ` \|` | **mangled**, all five |
-> | 156 | markdown link, code-span label | `.` | **mangled** |
-> | 145–147 | markdown link, in a table cell | ` \|` | survived, all four |
-> | 151 | markdown link, in prose | `.` | **mangled** |
-> | 156 | **bare URL on its own line** | newline | survived |
+> | form | survived | mangled |
+> | --- | --- | --- |
+> | markdown link | 145, 146, 146, 147 | 151, 156, 168, 169, 170, 172 |
+> | bare URL on its own line | 156 | *(158, on #378 above)* |
 >
-> **Length alone does not predict it in either direction here**: 151 was mangled
-> and 156 survived, in the same body. What separates those two is form — the one
-> that survived was bare, the one that did not was a markdown link followed
-> immediately by a full stop. That is the shape `Loom portal`'s apostrophe theory
-> was reaching for and this entry rightly killed on #378's evidence, where a bare
-> 158 was mangled. Both sets of observations hold together only if length and
-> form both matter, with a different boundary for each form, and **this lane is
-> not asserting that** — five theories have died here already and the sixth
-> should be measured by whoever cares, not guessed at by whoever is passing.
+> Everything else was ruled out by the same set rather than argued about. The
+> 151 was mangled in a table cell after ` \|` **and** in prose after a full stop,
+> with a 60-character code-span label and with a six-character one, while four
+> links of 145–147 in the same table survived every time — so neither the
+> punctuation after the closing paren, nor the label, nor the position is doing
+> it. The one thing that moves the outcome is the length of the URL and the form
+> it is written in.
 >
-> **What is not in doubt is the workaround, and this entry already had it.** The
-> branch name cannot be shortened after a push; the report's own filenames can,
-> and 70 characters down to 48 took four of five image links from mangled to
-> byte-clean. The fifth was fixed by not putting a full stop after it. The report
-> itself is linked as a bare URL on its own line and carries its images by
-> relative path, which is the form that has never been mangled here.
+> **Two boundaries rather than one** is the only reading all thirteen
+> measurements fit, and it is why *"it is the markdown link syntax"* died above
+> on a bare 158: that observation and these are both right. Whether the two
+> numbers are constants, and where the second one falls, is **not measured** —
+> one bare URL is one data point — and this entry's closing sentence still
+> applies to anybody tempted to go and find out.
+>
+> **What to do about it, today, restated:** keep a markdown link's URL **under
+> 148**. The branch name cannot be shortened after a push, so the lever that is
+> still available is the report's own filenames: 70 characters down to 47 took
+> all five image links here from mangled to byte-clean. A report linked as a bare
+> URL on its own line, carrying its images by relative path, meets neither
+> boundary.
 
 
 ---

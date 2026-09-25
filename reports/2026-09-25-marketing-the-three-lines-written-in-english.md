@@ -91,7 +91,7 @@ finding below: what this band actually wants is a ceiling, not a longer page.
 The front door's panel is the one where the gain is plainest, because it is the
 one a visitor is meant to read at a glance:
 
-![the front door's panel at 390](2026-09-25-marketing-three-lines-front-door-phone.png)
+![the front door's panel at 390](2026-09-25-marketing-three-lines-front-door.png)
 
 `"title": "This box is one of those pieces"` and `"value": "So is the menu. So
 is every band above."` both used to end at 39 characters.
