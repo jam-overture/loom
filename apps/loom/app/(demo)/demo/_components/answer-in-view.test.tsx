@@ -1,6 +1,8 @@
 import { render } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { ANSWER_ARRIVES } from "@/app/(demo)/_lib/arrival"
+
 import { AnswerInView } from "./answer-in-view"
 
 /**
@@ -52,16 +54,23 @@ describe("the card waiting on an answer", () => {
   })
 
   /**
-   * The minimum movement that puts the answer on screen. `center` would throw
-   * the panel a visitor was reading to the middle of the rail to show them a
-   * card that was seventy pixels away.
+   * **The top of the scroller, and it used to be the minimum movement.**
+   *
+   * `nearest` was argued as the kindest thing to do to a visitor who has just
+   * pressed something, and measured against a production build it is what left
+   * the ask panel on screen above the card — with the caution pinned to the
+   * rail's top edge, in amber, over the question it is about. `arrival.ts`
+   * carries the numbers and the other half of the decision; what is asserted
+   * here is that this component reads it rather than holding an opinion of its
+   * own, because the two drifting apart is the defect.
    */
-  it("moves as little as it can, and animates unless motion is unwelcome", () => {
+  it("carries the card to the top of the scroller, and animates unless motion is unwelcome", () => {
     const { scrollIntoView } = browser({ wide: true })
 
     render(<AnswerInView recordId={RECORD} token="1" />)
 
-    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "nearest" })
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: ANSWER_ARRIVES })
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" })
   })
 
   it("does not animate for a visitor who asked for no motion", () => {
@@ -69,7 +78,7 @@ describe("the card waiting on an answer", () => {
 
     render(<AnswerInView recordId={RECORD} token="1" />)
 
-    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "nearest" })
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: ANSWER_ARRIVES })
   })
 
   /**
