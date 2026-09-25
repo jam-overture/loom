@@ -2,8 +2,10 @@
 
 **Routine:** `Loom docs` · **Branch:** `docs-35-a-front-door-for-the-reference` · **Section:** §4c
 
-**Preview:** _added in the pull request comment, where the deployment's own URL is
-knowable._ Published unverified, as every routine run's is: `*.vercel.app` is off
+**Preview:**
+<https://loom-git-docs-35-a-front-doo-a65bea-jpizzolato36-6341s-projects.vercel.app>
+— Vercel reported **Ready** on the branch. Published unverified, as every
+routine run's is: `*.vercel.app` is off
 this sandbox's egress allowlist and the proxy answers `403 CONNECT tunnel
 failed`. That is the standing 15 September finding and is not re-filed.
 Everything measured below is a production build (`pnpm build && next build &&

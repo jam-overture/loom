@@ -31352,7 +31352,7 @@ somebody made.
 ## 2026-09-24 — the API reference has sixteen pages and no front door, so the band that says "most of this is elsewhere" can only point at the search box
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed**
-by `docs-35-a-front-door-for-the-reference`, 25 September. `/docs/api-reference`
+by #391, 25 September. `/docs/api-reference`
 is a page: the sixteen with their sizes and their sentences, grouped by who
 writes them, and the shape they make underneath. **Both things this entry said
 had to be decided first were decided rather than deferred** — a section may now
