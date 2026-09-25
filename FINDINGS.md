@@ -8,6 +8,83 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-24 — the first correct press a stranger makes is answered with a warning, in the loudest position on the rail
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** open —
+found by walking the surface as a stranger, not by reading the code; the
+mechanism is right and the moment it arrives in is wrong.
+
+Press **Take the numbers off** — the one control this panel invites — and the
+first thing that appears at the top of the rail, pinned, in amber, above the
+record it is about, is this:
+
+> *One question is still waiting on you. Anything else you ask for moves the
+> page on — and Loom won’t carry an answer onto a page it hasn’t seen, so that
+> question would be set aside.* · **Answer it first ↓**
+
+Every word of that is true and the measurement behind it is sound: the 23
+September run proved a stranger does press a second ask before answering the
+first, and that without this the question dies silently. **What it does not
+account for is that the warning now greets the visitor's very first correct
+action.** They have pressed the one green button on the screen, nothing has gone
+wrong, and the surface's loudest element is three lines of conditional
+machinery — *would* move the page on, *would* be set aside — about a mistake
+they have not made, in the two seconds they are deciding whether this product is
+for them.
+
+It is also read before the thing it is about. The caution sits above the card,
+so a stranger meets *"that question would be set aside"* before they have met
+the question. The sentence cannot mean anything yet.
+
+**The shape that would close it, and it is not removal.** The caution earns its
+place the moment a second ask is *possible to press in error* — which is when
+the visitor's eye is on the ask list, not when the card has just appeared. The
+strip already sticks to the rail's scroller for as long as any ask control is in
+view; what it does not do is wait until the visitor has been anywhere near one.
+Holding it until the panel's controls have been scrolled back into view, or
+until a second press is actually attempted, would keep every measured property —
+on screen, above the controls, amber, before the press — and stop the demo's
+first success reading as a complaint.
+
+**Not started here deliberately.** This run's unit was the payoff frame at the
+other end of the same press, and the two would have made one pull request that
+is two arguments.
+
+---
+## 2026-09-24 — a second assessment of one proposal replaces a reading the first one computed, and only `did` was protected from it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`_lib/record.ts`) · **Status:** **closed** by this run
+(`demo-27-the-gap-names-what-left`) for `touched`; **written down because the
+shape outlived the field**, and the next field added to a record will meet it
+again.
+
+The Gate looks twice. An ask is assessed when it is made, by a server action
+that has read the tree and hands it in as `AssessedAgainst`; confirming a hold
+narrates a **fresh assessment of the same proposal**, folded with no tree,
+because the surface answering a question is not the surface that asked it.
+
+`assessed()` folds both, and it treats two fields differently without saying so:
+
+| field | on the second fold |
+| --- | --- |
+| `did` | **written only when there is a tree** — so the spread is empty, and the first fold's sentence survives onto the applied card |
+| `touched` | **written unconditionally** — the second fold's reading replaces the first's |
+
+That was invisible for as long as `touched` carried only ids and positions,
+which the second assessment computes just as correctly. The moment it carried
+something only a tree can supply, the second fold silently threw it away: every
+fold that had the words was a fold nobody was looking at, and the one on screen
+at the demo's payoff could not quote a thing. It cost this run twenty minutes
+and a screenshot that looked exactly like the defect it was meant to fix.
+
+`keepingWords` closes it for `touched` — matched on node and kind, only ever
+filling in, never overwriting. **The general rule is the thing to keep:** a fold
+with less in hand than the fold before it must not overwrite what the earlier
+one computed. `did` gets that by being absent; anything else has to ask for it.
+
+---
 ## 2026-09-23 — the shared vocabulary has five states, and two of them are now overridden by the demo for two different reasons
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom portal`
