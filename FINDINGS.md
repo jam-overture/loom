@@ -31938,3 +31938,112 @@ this impossible rather than remembered. It is repository tooling and it would
 have to be installed by whoever runs `pnpm install`, so it is a decision for the
 maintainer and the framework lane rather than something a surface lane should
 add on its own.
+
+---
+## 2026-09-25 — a prop built to answer one lane's finding sat unwired for three weeks, and the only instrument that could see it was a camera
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-36-the-three-lines-written-in-english` — recorded for the
+shape, which is not this lane's alone
+
+On **3 September** this lane filed that `loom.code` sets `white-space: pre` and
+scrolls, and that a pretty-printed JSON string value is one line however long
+the string is — so a panel of data loses its right-hand end to a gesture and
+there is no line structure below the printer's that the scroll is protecting. It
+worked around it by shortening the copy in the box.
+
+On **12 September** `Loom primitives` shipped `wrap` on `loom.code`, citing that
+finding by name in the prop's own doc comment, down to the measurement:
+
+> *Measured on that band at 390: the panel is 348 wide, the content 510 … That
+> lane worked around it by choosing a shorter specimen, which is a cost it
+> should not have had to pay.*
+
+On **25 September** not one of this site's eight panels set it. The workaround
+was still in place and the doc comment beside it still stated the constraint as
+a fact about the library.
+
+**Nothing was red and nothing could have been.** An unwrapped panel renders
+cleanly, satisfies its schema, emits no diagnostic, measures no overflow — the
+`pre` scrolls *inside* the panel, so `scrollWidth` against `innerWidth` is equal
+at every viewport the harness measures — and passes 314 assertions about the
+pages it is on. `pnpm shoot` reported `scrollWidth 390 / innerWidth 390` on the
+page carrying the worst of it.
+
+What found it was a clipped photograph of one panel, and what it showed at 1280
+is the entry:
+
+| | |
+| --- | --- |
+| panels on `/how-it-works` | 7, plus one on `/` |
+| lines printed | 341 |
+| lines over 110 characters | **3** |
+| what those three are | `"rationale"` ×2 — the model's own sentence saying why it asked — and `"detail"`, the refusal's reason |
+| shown at 1280 | ~125 characters, so all three cut mid-word |
+| shown at 390 | ~39 characters, so roughly a third of every panel goes with them |
+
+**The only three lines in that record written in English were the only three a
+reader could not finish**, three inches under the band's own caption saying
+*every line stands on its own*. Everything else in it is keys, ids and counts,
+all short, all fine — which is why nine months of reading the page would not
+find it and one picture does.
+
+### The shape, which is the reason this is filed rather than just fixed
+
+A finding is closed when the lane that owns the *mechanism* ships it. Nothing
+anywhere closes the second half — the lane that asked for it wiring it up — and
+in this case the two lanes are different, the gap was three weeks, and both
+sides were individually complete and correct the whole time. `Loom primitives`
+recorded its own version of the same defect on **19 September** (*"unwrapped,
+every line ends behind a gesture"*, in its own catalogue), so the library lane
+had photographed the identical failure six days earlier in a different subject
+and neither entry reached the other.
+
+Worth knowing for any prop built to answer a finding: **the entry that closes it
+names the primitive, and the surface that asked is not mentioned again.** A line
+in the closing entry saying which call sites are waiting would have cost a
+sentence.
+
+---
+## 2026-09-25 — `loom.code` cannot be collapsed, so a complete record is either a wall or absent
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — not blocking, worked around by printing all of it, and the workaround is
+the thing worth looking at
+
+`/how-it-works` prints the whole of a real run of the runtime: seven panels,
+**341 lines**, of which one is **135 lines on its own** (`policy-resolved`, the
+whole rulebook that judged the change). The band's argument for that is written
+down and this entry is not disputing it —
+
+> *It is long, and the length is the argument. A record you can fit on a slide
+> is a record that left something out.*
+
+— but it is an argument for the record being **complete**, not for all of it
+being **open**. Measured on the built page: **73% of the visible text of
+`/how-it-works` is raw JSON** (12,415 characters of 17,059), on the first page
+of this site's reading order, the first item in its menu, and the destination of
+the front door's primary button. The maintainer's standing direction for this
+surface is that a high schooler can follow what is going on.
+
+There is no third option in the library. `loom.faq` discloses and takes its
+answer as a `string` of at most 1,000 characters, so it cannot hold a panel;
+`loom.code` declares `copy` and no other behaviour, so it has no control to open
+with; `disclose` exists in the runtime (0086) and `loom.nav` is the only
+primitive that places one. So a band may print all of a thing or none of it.
+
+**Two shapes, and this lane prefers the second:**
+
+1. `loom.code` declares `behaviours: ["disclose"]` and takes a prop naming what
+   is behind it — the panel's bar already has somewhere to put the control, and
+   the bar already appears whenever a button does.
+2. A **height ceiling** with the full panel one press away — `lines: number`, say
+   — which is the same idea without a second behaviour, and which says the size
+   of what is folded rather than hiding it. It is also the answer for a panel
+   that is long rather than wide, which is what these are.
+
+Neither is this lane's to build and the workaround costs nothing but the
+reader's scroll, so nothing here is blocked. Filed because the band that most
+needs it is the one this site's whole argument rests on, and because the shape
+generalises: **a surface can only be as concise as the library lets it be**, and
+this library currently makes *complete* and *skimmable* mutually exclusive.

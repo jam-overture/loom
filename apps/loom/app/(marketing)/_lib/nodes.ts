@@ -109,3 +109,39 @@ export const row = (ids: IdFactory, cells: readonly LoomNode[]): LoomNode =>
 /** The heading row, in the region a table projects it into (0051). */
 export const columns = (ids: IdFactory, headings: readonly string[]): LoomNode =>
   buildSlot(ids, "columns", [row(ids, headings.map((text) => cell(ids, text, { role: "column" })))])
+
+/**
+ * A panel of data, and the one prop this site sets on every one of them.
+ *
+ * `loom.code` renders `white-space: pre` and scrolls sideways, which is right
+ * for the thing it was ported for — a shell line broken across two visual rows
+ * reads as two commands, and the content's own breaks are the only ones that
+ * mean anything. **This site has never printed a command.** All eight of its
+ * panels print pretty-printed JSON, and a pretty-printed JSON string value is
+ * one line however long the string is: there is no line structure below the
+ * printer's to preserve, so nothing is lost by wrapping it and the end of the
+ * line is lost by not.
+ *
+ * That is this lane's own finding of 3 September, and `wrap` was added to the
+ * primitive to answer it on 12 September. **No page here ever set it.** Measured
+ * on `/how-it-works` three weeks later: seven panels, 341 lines, and the three
+ * lines longer than 110 characters are the only three in the whole record
+ * written in English — the model's `rationale` twice, saying why it asked for
+ * the change, and the refusal's `detail`, saying why it was turned down. At
+ * 1280 the panel shows about 125 characters and all three are cut mid-word; at
+ * 390 it shows about 39 and roughly a third of every panel goes with them. The
+ * band's own caption says *every line stands on its own*, three inches under a
+ * line nobody can finish.
+ *
+ * So the default is the rule rather than the primitive's, and it is a default
+ * rather than a fixture: `wrap` is written first, so a panel that one day prints
+ * something you are meant to type can say `wrap: false` and be read as the
+ * deliberate exception it would be. `pages.test.ts` sweeps every page tree for
+ * a panel that says neither.
+ */
+export const code = (ids: IdFactory, text: string, props: JsonObject = {}): LoomNode =>
+  buildElement(ids, {
+    type: "loom.code",
+    props: { wrap: true, ...props },
+    children: [buildText(ids, text)],
+  })
