@@ -257,7 +257,7 @@ describe("CheckupVerdictPanel", () => {
       />
     )
 
-    const link = screen.getByRole("link", { name: "revision 7" })
+    const link = screen.getByRole("link", { name: "version 7" })
 
     expect(link.getAttribute("href")).toContain("/portal/history")
     expect(link.getAttribute("href")).toContain(TREE)

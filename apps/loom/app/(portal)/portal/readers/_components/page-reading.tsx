@@ -149,7 +149,7 @@ export const PageReadingCard = ({
                 <PartName part={highlights.mostOpened.name} /> was opened{" "}
                 {highlights.mostOpened.opens}{" "}
                 {highlights.mostOpened.opens === 1 ? "time" : "times"}. Something people want is
-                folded away in there.
+                tucked away in there.
               </li>
             )}
           </>
