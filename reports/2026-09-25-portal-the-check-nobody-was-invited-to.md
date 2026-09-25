@@ -3,7 +3,11 @@
 **Build order section:** §5 — Loom Portal.
 
 **Branch:** `portal-35-the-check-nobody-was-invited-to` (→ `main`), cut from `main`
-at `b2a5176`. Not stacked. **There were no open pull requests in the repository
+at `b2a5176` and merged up to `d82dcac` once the pull request reported a conflict
+— three commits landed on `main` while this unit was being built, none of them in
+this lane. Not stacked, and `main` was not pushed to. The gate was re-run on the
+merged head: **160 files and 3,073 tests in the framework, 311 files and 5,957 in
+the application, green, exit 0.** **There were no open pull requests in the repository
 when this run started**, so there were no maintainer comments on this lane's
 work to address and nothing of this lane's to push onto. The last portal report
 is 22 September; nothing was filed against this lane in the three days since.
@@ -290,7 +294,7 @@ only shape this lane keeps finding by eye.
 
 ## Findings
 
-**Filed one. Half-closed one, the eighth-oldest open item in this lane.**
+**Filed two. Half-closed one, the oldest open item in this lane.**
 
 1. **Half-closed: the screenshot harness can sign in.** The 14, 19, 20, 21 and
    22 September entries each re-filed *"the harness cannot sign in"*. It can: the
@@ -308,6 +312,21 @@ only shape this lane keeps finding by eye.
    of them: a list of *offers*, a list of *actions* and a list of *results* may
    honestly want different orders, and the argument belongs to the run that takes
    it — but three is enough that it should now be taken rather than noted again.
+
+3. **Filed, after reading this unit's own pull-request body back from the API:**
+   **a URL inside a markdown table cell comes back wrapped in double backticks,
+   and the identical URL outside a table does not.** All five screenshot links in
+   #393's first body were in a table and none of them resolved; the report link
+   below it was fine. This is the exact boundary between the 20 September entry
+   (which said the tool backticks URLs) and the 22 September correction (which
+   read a body with no table in it and found none). Both were right about what
+   they looked at. The workaround costs nothing and every lane can use it today:
+   **put the screenshot links in a list, not a table.** #393's body was rewritten
+   that way and read back clean.
+
+   The rule that caught this is the one the 22 September run established and
+   followed — *read the body back from the API, because the text sent is not
+   evidence of the text stored.* It has now caught something twice.
 
 ## What I did not do
 

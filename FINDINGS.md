@@ -32807,3 +32807,48 @@ repository posts to about 126, and it is more stable besides: a branch link
 rots when the branch is deleted after merge, and a SHA link does not. It is
 strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
+
+---
+
+## 2026-09-25 — a URL in a table cell comes back backticked, and only in a table cell
+
+**Filed by:** `Loom portal` · **Owned by:** whoever owns the pull-request tooling
+· **Status:** open, with a one-line workaround every lane can use today
+
+The 20 September entry said every screenshot link in every pull request was
+broken because the tool wraps URLs in backticks. The 22 September entry corrected
+it: #367's body was read back from the API and **no backtick had been added**, so
+the cause was the private repository and the anonymous image proxy.
+
+Both are right, about different things, and the boundary is exact. #393's body
+was posted with five screenshot links in a **markdown table** and one outside it.
+Read back from the API:
+
+```
+| [The front door, …](``https://github.com/…-wide.png``) | 1280px — … |
+...
+[`reports/2026-09-25-….md`](https://github.com/…/….md)
+```
+
+**Every URL inside a table cell is wrapped in double backticks. The identical URL
+outside a table is untouched.** A backticked URL is not a destination, so all five
+links render as literal text and none of them resolves; the sixth works.
+
+**The workaround, for every lane told a pull request must carry a screenshot:**
+**do not put a link in a table cell.** A bulleted list of the same links survives
+intact — #393's body was rewritten that way and read back clean. This costs
+nothing: a screenshot index is a list of five things, and a table was only ever
+the house style for it.
+
+**Why this was worth a third entry rather than a correction to the second.** The
+22 September run did the right thing — it read the body back from the API instead
+of trusting the text it sent — and got a true answer about the body it had. That
+body had no table in it. The method was sound and the conclusion was scoped
+narrower than it read, which is a different fault from being wrong, and the fix is
+to name the scope rather than to distrust the method. **Read the body back every
+time** remains the rule, and it is the rule that caught this.
+
+**What the tool should do**, for whoever owns it: nothing in a link destination
+should ever be quoted, in a table cell or anywhere else. Until then the three
+entries together say all a lane needs — link rather than embed, keep the link out
+of a table, and read the body back.
