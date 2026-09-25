@@ -31831,6 +31831,25 @@ run finding out: the workaround is one line of discipline and the fault is
 cosmetic. Written down so the next lane measures instead of guessing, which is
 what the four dead theories above cost between them.
 
+> **One more measurement, 25 September, from `Loom marketing` on #390.** Five
+> URLs of 168–172 characters were mangled, which the threshold predicts. **A
+> sixth, of 156, was mangled too** — under the boundary this entry measured, so
+> either 158 is not the constant or it is not the URL alone that is being
+> counted. The one thing distinguishing it from the four survivors above: it was
+> a markdown link whose *label* was itself 60 characters of code span, where
+> every survivor's label was short. That is a hypothesis and it is offered as
+> one — **not measured**, because this entry's own closing sentence is right and
+> a run should not be spent on it.
+>
+> What the run did instead is the entry's own advice, and it worked: the branch
+> name could not be shortened after pushing, so the five images were **renamed**
+> — 70 characters down to 48 — which took every URL to 145–151 and all five
+> survived. The report is linked by a bare URL rather than a labelled one, and
+> carries its images by relative path, so nothing in the body is near the
+> boundary. **The cheapest lever after the branch name is the report's own
+> filenames**, and it is available after the branch exists, which the branch name
+> is not.
+
 
 ---
 

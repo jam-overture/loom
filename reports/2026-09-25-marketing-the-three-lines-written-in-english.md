@@ -10,9 +10,10 @@ the refusal's `detail`, its reason for saying no. **They are the only three
 lines in the record written in English rather than in keys, ids and counts, and
 they were the only three a reader could not finish.**
 
-| before — `main`, 1280 | after — this branch |
+| before — `main` | after — this branch |
 | --- | --- |
-| ![](2026-09-25-marketing-the-three-lines-written-in-english-before-wide.png) | ![](2026-09-25-marketing-the-three-lines-written-in-english-after-wide.png) |
+| ![](2026-09-25-marketing-three-lines-before-wide.png) | ![](2026-09-25-marketing-three-lines-after-wide.png) |
+| ![](2026-09-25-marketing-three-lines-before-phone.png) | ![](2026-09-25-marketing-three-lines-after-phone.png) |
 
 The line reads `"rationale": "This changes two settings on the opening band: the
 pattern painted behind it, and how tall it sta` and then the panel ends. Three
@@ -90,7 +91,7 @@ finding below: what this band actually wants is a ceiling, not a longer page.
 The front door's panel is the one where the gain is plainest, because it is the
 one a visitor is meant to read at a glance:
 
-![the front door's panel at 390](2026-09-25-marketing-the-three-lines-written-in-english-front-door-phone.png)
+![the front door's panel at 390](2026-09-25-marketing-three-lines-front-door-phone.png)
 
 `"title": "This box is one of those pieces"` and `"value": "So is the menu. So
 is every band above."` both used to end at 39 characters.
