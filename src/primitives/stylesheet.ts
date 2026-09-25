@@ -381,6 +381,16 @@ export const LIBRARY_CLASS = {
    * a published interview reads — is a container the same naming rule says to write
    * when somebody wants one. What stays inline is the paint, which no arrangement
    * varies.
+   *
+   * **The face aligns with the name, not with the foot of the bubble.** This
+   * row was `align-items: flex-end` from the day it was written — the messenger
+   * convention, where a portrait sits at the bottom of a speaker's last bubble
+   * — and it was chosen without a picture, because no band in this library had
+   * ever drawn a portrait here at all (`loom.message` had no fallback until 25
+   * September, and the catalogue ships no photographs). The convention assumes
+   * a transcript with no name lines in it. This one puts the speaker's name and
+   * the time *above* the bubble, so a face pinned three lines below the name it
+   * belongs to reads as belonging to nothing.
    */
   message: "loom-message",
   messageBody: "loom-message-body",
@@ -1485,7 +1495,7 @@ details[open] > summary .loom-marker {
 }
 .loom-message {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--loom-spacing-3);
   margin: 0;
   list-style: none;

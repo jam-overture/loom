@@ -4,9 +4,9 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { monogramOf } from "./monogram.js"
+import { portrait } from "./portrait.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { colour, family, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -59,53 +59,19 @@ export const loomPerson = definePrimitive({
     const centred = given.align === "center"
     const linked = given.href !== undefined
 
-    const face: ReactNode =
-      given.photo === undefined
-        ? createElement(
-            "span",
-            {
-              key: "face",
-              "aria-hidden": true,
-              style: {
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: PHOTO_SIZE,
-                height: PHOTO_SIZE,
-                borderRadius: radius("full"),
-                background: colour("accent-subtle"),
-                color: colour("accent-strong"),
-                fontFamily: family("heading"),
-                fontWeight: weight("heading"),
-                fontSize: size(4),
-                lineHeight: 1,
-                letterSpacing: "0.02em",
-              },
-            },
-            monogramOf(given.name)
-          )
-        : createElement("img", {
-            key: "face",
-            src: given.photo,
-            /**
-             * Empty, deliberately. The name is beside the photograph in the
-             * same node; alt text repeating it makes a screen reader say the
-             * name twice, and there is nothing else in a portrait a reader
-             * needs described. `loom.media` requires alt precisely because it
-             * has no such neighbour.
-             */
-            alt: "",
-            loading: "lazy",
-            decoding: "async",
-            style: {
-              display: "block",
-              width: PHOTO_SIZE,
-              height: PHOTO_SIZE,
-              objectFit: "cover",
-              borderRadius: radius("full"),
-              background: colour("bg-surface-muted"),
-            },
-          })
+    /**
+     * Not `labelled`: the name is the next node in this card, so the face is
+     * decoration and a screen reader is told the person once rather than twice.
+     */
+    const face: ReactNode = portrait({
+      name: given.name,
+      image: given.photo,
+      box: PHOTO_SIZE,
+      glyph: 4,
+      corners: "circle",
+      labelled: false,
+      key: "face",
+    })
 
     const name = createElement(
       "p",

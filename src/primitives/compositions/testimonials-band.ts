@@ -31,13 +31,31 @@ import type { Composition } from "./composition.js"
  * **structurally complete but deliberately unattributed** for anything that
  * would be a claim about a third party if it stayed.
  *
- * ## No avatars, for the reason nothing here has an image
+ * ## No faces, and this is the band that had to say so
  *
  * `loom.quote` takes an optional `avatar` and the band is better with one. It
  * would be a URL this library cannot supply — the same wall the hero's `media`
- * slot and the logo wall's marks hit. `loom.quote` draws a monogram from the
- * author when there is no avatar, so the band is complete without one rather
- * than visibly missing something.
+ * slot and the logo wall's marks hit.
+ *
+ * Until 25 September this comment went on to say that `loom.quote` *"draws a
+ * monogram from the author when there is no avatar, so the band is complete
+ * without one rather than visibly missing something."* **It did not**, and
+ * nothing said so from the day the band was written: the catalogue ships no
+ * photographs, so every quote in every band here was faceless and every one of
+ * them satisfied its schema. The whole-page photograph found it four bands above a team band full
+ * of faces (`the-whole-page.specimen.ts`).
+ *
+ * It draws one now — and this band is the one place in the catalogue that must
+ * refuse it. The attributions above are **roles**, on purpose, and the initials
+ * of a role are not a face: *Founder* reduces to a circle with `F` in it, which
+ * reads as a person whose name got lost rather than as a quote nobody signed.
+ * So every quote here declares `anonymous`, which is
+ * [0160](../../../decisions/0160-a-prop-that-unblocks-a-rendering-names-the-content-and-never-the-layout.md)'s
+ * shape — the tree states the fact about its content, *nobody is named here*,
+ * and the library decides what to draw about it.
+ *
+ * `testimonials-wall` is the other half of the pair and declares nothing,
+ * because its eight voices are names.
  */
 const QUOTES = [
   {
@@ -98,7 +116,13 @@ export const testimonialsBand: Composition = {
           children: QUOTES.map((quote) =>
             buildElement(ids, {
               type: "loom.quote",
-              props: { quote: quote.quote, author: quote.author, role: quote.role, emphasis: "card" },
+              props: {
+                quote: quote.quote,
+                author: quote.author,
+                role: quote.role,
+                emphasis: "card",
+                anonymous: true,
+              },
             })
           ),
         }),
