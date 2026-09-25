@@ -1,6 +1,7 @@
 import { childrenOf, findNode, type LoomNode, type LoomTree, type NodeId } from "@loom/runtime"
 import { LOOM_NODE_ATTRIBUTE } from "@loom/runtime/react"
 
+import type { PlainChange } from "./plain-change"
 import type { ChangeRecord } from "./record"
 import type { TouchedNode, TouchKind } from "./touched"
 
@@ -169,12 +170,58 @@ const restoringLabel = (kind: TouchKind, tone: SpotTone, placed: "node" | "near"
  * runtime's `REVERT_INTERPRETER` stamp, read through `undo.ts`, which is the
  * same source the card's own quotation uses.
  *
+ * `quoting` is what the gap is missing, and it is read only when `placed` is
+ * `near`. `quote` below says why it is a suffix on these sentences rather than
+ * eight sentences of its own, and why a mark on a node never takes one.
+ *
  * Exported so the share card can draw the chip the page draws rather than a
  * sentence somebody typed into a picture. A shared link is the one place this
  * surface's words are read by people who have not seen the surface, so a chip
  * invented there would be the only copy on this project nothing could correct.
  */
 export const labelFor = (
+  kind: TouchKind,
+  tone: SpotTone,
+  placed: "node" | "near",
+  restoring: boolean,
+  quoting?: Pick<PlainChange, "words" | "more">
+): string => quote(stem(kind, tone, placed, restoring), placed, quoting)
+
+/**
+ * The words the gap is missing, joined onto the sentence that names the event.
+ *
+ * **The sentence is not rewritten and could not be.** *"Something was removed
+ * here"* is the only thing true of a change with no words in it — an image, a
+ * divider, a band whose every string is a setting — so it stays the stem and
+ * the quotation is what is added when there is one. A table of eight
+ * alternative sentences with the words folded into each would have two ways of
+ * saying one thing and a silent wrong answer waiting in whichever a run forgot
+ * to update.
+ *
+ * **Only a mark on a gap quotes anything**, and that is the point rather than a
+ * limit. A mark on a node is drawn round the thing it is about, with every word
+ * of it on the screen inside the ring; quoting there would be this surface
+ * reading a band aloud to somebody looking straight at it. A mark on a gap has
+ * nothing in it, and until now said so.
+ *
+ * The quotation is the card's, to the character: same three words, same cut,
+ * same *and N more*, because `wordsOfNode` is the function the card's own line
+ * is built with. A stranger sees the two within one glance of each other.
+ */
+const quote = (
+  sentence: string,
+  placed: "node" | "near",
+  quoting: Pick<PlainChange, "words" | "more"> | undefined
+): string => {
+  if (placed === "node" || quoting === undefined || quoting.words.length === 0) return sentence
+
+  const said = quoting.words.map((word) => `“${word}”`).join(" ")
+  const rest = quoting.more > 0 ? ` and ${quoting.more} more` : ""
+
+  return `${sentence}: ${said}${rest}`
+}
+
+const stem = (
   kind: TouchKind,
   tone: SpotTone,
   placed: "node" | "near",
@@ -295,7 +342,13 @@ const spotFor = (
   return {
     nodeId: near.node.id,
     tone,
-    label: labelFor(touched.kind, tone, "near", restoring),
+    /*
+     * The words travel from the operation that left the gap, not from the
+     * change. A change with two operations in it takes two different things off
+     * two different parts of the page, and a mark quoting the change's whole
+     * list would be naming, in one gap, words that went from another.
+     */
+    label: labelFor(touched.kind, tone, "near", restoring, touched.words),
     placement: near.placement,
     subject: "place",
   }
@@ -519,6 +572,27 @@ const stackingFor = (spot: Spotlight): string =>
   inTheGap(spot) && spot.placement === "below" ? "\n  z-index: 1;" : ""
 
 /**
+ * Whether the mark's words may take a second line.
+ *
+ * **A chip in a corner may not and a bar in a gap must.** The chip is sized by
+ * its own text and positioned against a corner, so wrapping it would grow a
+ * floating box inward over the band it is sitting on; `nowrap` is what keeps it
+ * an inch wide in the corner it was put in.
+ *
+ * The bar is the opposite object: its width is the page's content column,
+ * decided by the band under it rather than by what it says, and it is now
+ * carrying a quotation whose length is whatever three of the page's own words
+ * happen to be. Held at `nowrap` a long one runs off the end of the column and
+ * takes the document's scroll width with it — a mark describing the page by
+ * widening it, which is the one thing every rule in this file is written to
+ * avoid. Allowed to wrap it grows *upward* into a seam the page had already set
+ * aside: the two the demo's own changes mark measure about 90px and 120px, and
+ * two lines of an 11px mark is about 34.
+ */
+const wrappingFor = (spot: Spotlight): string =>
+  inTheGap(spot) ? "normal" : "nowrap"
+
+/**
  * The ring, and **only for a mark whose subject is the node it is drawn on.**
  *
  * `outline` rather than `border`, because an outline takes no space and a border
@@ -571,7 +645,7 @@ ${selector}::after {
   letter-spacing: 0;
   text-align: left;
   text-transform: none;
-  white-space: nowrap;
+  white-space: ${wrappingFor(spot)};
   pointer-events: none;
 }`.trim()
     })
