@@ -7,7 +7,7 @@ import {
 } from "@loom/runtime"
 
 import { BAND } from "../bands"
-import { prose, section } from "../nodes"
+import { code, prose, section } from "../nodes"
 
 /**
  * The band where the front door stops claiming it is built in Loom and shows it.
@@ -51,13 +51,21 @@ import { prose, section } from "../nodes"
  * panel is the *shape*: a piece with settings, holding another piece that holds
  * the words. Two levels is the whole idea and one level would not show it.
  *
- * **Its words are short because a JSON string does not wrap.** `loom.code` sets
- * `white-space: pre` and scrolls, which is right for code and wrong for a band
- * a visitor is meant to read at a glance: the first draft of this box carried
- * the band's whole argument, and the line holding it ran off the edge of the
- * panel with only a scrollbar to say so. The argument moved into the prose
- * below, where nothing constrains its length, and the box kept the job it is
- * actually here for — being small enough to read whole, twice.
+ * **Its words are short, and it is no longer a JSON string that keeps them so.**
+ * The first draft of this box carried the band's whole argument, and the line
+ * holding it ran off the edge of the panel with only a scrollbar to say so —
+ * `loom.code` renders `white-space: pre`, which is right for a command and
+ * wrong for a band a visitor is meant to read at a glance. That paragraph is
+ * the finding this lane filed on 3 September; `wrap` answered it on the 12th
+ * and `code` in `nodes.ts` now sets it on every panel here, so the constraint
+ * this comment used to state is gone.
+ *
+ * The box stays short anyway, on the reason that was always the better one:
+ * the argument belongs in the prose below, where nothing constrains its length,
+ * and the box's job is being small enough to read whole, twice. Kept
+ * deliberately rather than by a limit — which is the difference worth the
+ * paragraph, because a constraint nobody re-reads is how an editorial choice
+ * goes on being made by a stylesheet.
  */
 const specimen = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
@@ -79,13 +87,9 @@ export const asJson = (node: LoomNode): string => JSON.stringify(node, null, 2)
  * the thing rather than its position, which costs nothing and is right in both.
  */
 const panel = (ids: IdFactory, node: LoomNode): LoomNode =>
-  buildElement(ids, {
-    type: "loom.code",
-    props: {
-      language: "json",
-      caption: "The box in this band, exactly as this page keeps it — the same one, not a copy of it.",
-    },
-    children: [buildText(ids, asJson(node))],
+  code(ids, asJson(node), {
+    language: "json",
+    caption: "The box in this band, exactly as this page keeps it — the same one, not a copy of it.",
   })
 
 export const asDataBand = (ids: IdFactory): LoomNode => {
