@@ -262,11 +262,39 @@ on scroll is otherwise photographed blank below the fold, and every shot prints
 `scrollWidth` against `innerWidth` so a page wider than the phone says so
 instead of being eyeballed.
 
-One thing neither does, worth knowing before writing a list: **it does not start
-your application.** And one rule worth keeping in mind while writing one:
-**wait on a selector, not on the network.** A form driven by `useActionState`
-submits by fetch, so the page is idle *before* the cookie it sets exists — one
-run photographed a sign-in page believing it was the screen behind it.
+One rule worth keeping in mind while writing a list: **wait on a selector, not
+on the network.** A form driven by `useActionState` submits by fetch, so the
+page is idle *before* the cookie it sets exists — one run photographed a sign-in
+page believing it was the screen behind it.
+
+#### `--serve`, and the server that outlived its build
+
+`pnpm shoot` will start the application for you, photograph it and stop it
+again ([0191](../decisions/0191-the-harness-may-start-the-application-because-there-is-now-only-one.md),
+which takes over that one sentence of 0117):
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot <shot-list.json> --serve apps/loom
+```
+
+The list's `baseUrl` is replaced by the origin it starts on, an ephemeral port
+so it runs beside your own `next dev`, and it prints the build's own newest
+write beside it — `built 2026-09-25T21:32:14.027Z` — which is the line to quote
+in a report. **It does not build.** A build with no `.next` is refused with the
+command that makes one.
+
+**Use it, and this is why.** `next start` loads a route's compiled module the
+first time it is asked for that route and keeps it, so a server left running
+across a rebuild serves a mixture afterwards — stale for every route it had
+already answered, fresh for every route it had not — while `next build` exits 0
+and the source on disk is right. Nothing in a response says which. It cost the
+documentation lane a screenshot cycle on 24 September and was filed as a killed
+build; it is not, and a killed build rebuilds correctly. A server this harness
+started cannot be in that state.
+
+Without the flag nothing changes: a `baseUrl` and a server you are running is
+still how you photograph a preview deployment, or a screen whose environment
+this harness cannot produce.
 
 #### Reaching the state, and the screen behind a session
 

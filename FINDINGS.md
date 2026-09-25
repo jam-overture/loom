@@ -31598,9 +31598,18 @@ rather than a paragraph in the next branch:
 ---
 ## 2026-09-24 — a `next build` that exits 0 can serve the previous build's HTML, and a run that photographs it has photographed somebody else's code
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-cost this run one screenshot cycle; **`rm -rf apps/loom/.next` before the build
-is the workaround** and it works
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-54-a-build-that-did-not-finish` — **the symptom is
+real and the suspect is not.** Reproduced on 25 September: a killed `next
+build` rebuilds correctly (twice, killed at *Running TypeScript* and at
+*Generating static pages*), and what does reproduce the stale HTML exactly is a
+`next start` that was already running when the rebuild happened. `next start`
+loads a route's compiled module the first time it is asked for that route and
+keeps it, so such a server serves a mixture afterwards. `rm -rf .next` "worked"
+because nobody rebuilds without restarting the server after it. `pnpm shoot
+--serve apps/loom` starts and stops the server itself (0191); the fault itself
+is still there for anyone photographing their own, and is re-filed at the
+bottom of this file with the measurements
 
 Measured on this branch, in this order:
 
@@ -32541,8 +32550,13 @@ the lane next touches it; nothing is wrong until then.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
 **Answers:** the 24 September entry *a `next build` that exits 0 can serve the
-previous build's HTML* · **Status:** open — **the judgement is given and the
-work is not done**; it is a unit this lane will take
+previous build's HTML* · **Status:** **closed — the judgement was wrong** and is
+withdrawn by `framework-54-a-build-that-did-not-finish`. A killed build was
+tested twice and rebuilds correctly; `next build` clears everything in `.next`
+except `cache/` at the start of every build, which is why. The sentinel would
+have cost four routines a full rebuild after every interrupted build and left
+the real fault — a server older than the build it serves — exactly where it
+was. 0191 has the evidence
 
 That entry asked for one line of judgement: whether `@loom/app`'s `build` should
 clear `.next` first, or whether writing the workaround down is enough. The answer
@@ -32720,3 +32734,53 @@ repository posts to about 126, and it is more stable besides: a branch link
 rots when the branch is deleted after merge, and a SHA link does not. It is
 strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
+
+---
+## 2026-09-25 — a `next start` serves a mixture after a rebuild, and no response says which half you are looking at
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **avoidable, not fixed.** `pnpm shoot --serve` (0191) cannot photograph
+it; a lane running its own server still can
+
+This is the 24 September *false green* with its cause established, written down
+separately because the cause is not what either of the two entries above
+guessed and because the shape outlives the fix.
+
+**What was measured**, all of it on 16.2.12 with Turbopack, in one session:
+
+| | |
+| --- | --- |
+| `next build` killed during *Running TypeScript*, then re-run | rebuild correct |
+| `next build` killed during *Generating static pages*, then re-run | rebuild correct |
+| a `next start` left running across a rebuild | **serves the previous build** |
+| a stray file and a stray directory placed in `.next` | both gone after a build |
+| the same file placed in `.next/cache` | survives a build |
+
+So `next build` clears its output directory except `cache/`, a killed build
+carries nothing forward, and the thing that carries staleness is **the server
+process**. `next start` loads a route's compiled module on the first request for
+that route and keeps it, so a server that answered `/a` before a rebuild serves
+stale `/a` and fresh `/b` afterwards.
+
+**Nothing over HTTP tells you.** Also measured, and worth having written down
+because the obvious fix is to build a probe and each of these kills one:
+
+- no response header carries the build id, and neither does any page;
+- a prerendered body is re-read from disk on the **first** request for it, so a
+  static probe route answers *fresh* on a server serving stale pages either
+  side of it;
+- a compiled route module is loaded lazily, so a dynamic probe route answers
+  fresh for the same reason;
+- chunk filenames are the same across builds, so a stale page's own assets
+  resolve and nothing 404s.
+
+The one thing that would carry a boot-time value is draft mode's bypass cookie,
+which means an unprotected endpoint that enables draft mode. That is a
+deployment-wide cache bypass and it is not worth a screenshot.
+
+**For every lane, and this is why it is filed rather than only recorded:** if
+you keep a `next start` running while you work, every picture you take of it
+after a rebuild may be of the build before. Either photograph with `pnpm shoot
+<list> --serve apps/loom`, or restart the server after every build. A report
+that quotes the `built …` line the flag prints has said which build its pictures
+are of; none before today could.
