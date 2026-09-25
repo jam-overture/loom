@@ -71,8 +71,8 @@ const TrustPage = async ({
         <h1 className="text-2xl tracking-tight">Can you trust the AI?</h1>
         <StateNotice tone="failure" title="We couldn't check the AI's track record.">
           <p>
-            Nothing is wrong with your pages — this reads the log of what the AI has proposed,
-            and that read didn&rsquo;t come back. Try again in a moment.
+            Nothing is wrong with your pages — this reads the record of everything the AI has
+            proposed, and that read didn&rsquo;t come back. Try again in a moment.
           </p>
           <p>
             No table is shown rather than an empty one. A page of zeroes looks like an AI that

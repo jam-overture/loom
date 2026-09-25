@@ -22,6 +22,7 @@ import {
   subjectFor,
   type PartName,
 } from "./part-name"
+import { versionMention } from "./version"
 import { namedList, type PlainLine } from "./vocabulary"
 
 /**
@@ -173,7 +174,7 @@ const blockedReason = (plan: UnrevertablePlan): { reason: string; technical: str
   switch (plan.outcome) {
     case "out-of-range":
       return {
-        reason: `This deployment’s copy of the record only goes back as far as revision ${plan.earliest}, so it can’t work out what undoing revision ${plan.revision} would put back.`,
+        reason: `This deployment’s copy of the record only goes back as far as ${versionMention(plan.earliest)}, so it can’t work out what undoing ${versionMention(plan.revision)} would put back.`,
         technical: `out-of-range: revision ${plan.revision}, earliest ${plan.earliest}`,
       }
     case "unreplayable":
