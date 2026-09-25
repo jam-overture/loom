@@ -8,10 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:** open —
+**a gap, not a defect**, and the second of this shape. The 17 September entry
+below asked for a state the browser holds *before* the load; this asks for one
+the visitor reaches *after* it.
+
+`stepSchema` takes `click`, `fill`, `wait` and `waitFor`. Between them they can
+reach any state a press produces, and no state a **scroll** produces. That is
+not a corner: this surface pins a caution to the rail's scroller, and whether it
+is on screen is a fact about scroll position and nothing else. The two pictures
+this run needed were
+
+| the frame | reachable by pressing? |
+| --- | --- |
+| what the one invited press lands on | **yes** — and `pnpm shoot` took it, before and after |
+| what a visitor sees when they scroll **back** to the controls | **no** |
+
+The second is the one that shows nothing was lost, so it is the picture that
+answers the obvious objection to the change, and it was taken by a scratch
+Playwright driver in `/tmp` — the arrangement
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to keep from becoming normal.
+
+**A press is not a substitute, and trying was instructive.** Playwright scrolls
+an element into view before clicking it, so pressing something inside the panel
+does move the scroller — but only to the minimum position that exposes *that*
+element, which is a position chosen by the driver rather than by the lane, and
+on this rail it lands between the two frames worth photographing. The only
+elements whose press would reach the controls are the ask buttons, and pressing
+one changes the state the picture is of.
+
+**One step, and it is the smallest of the four.** `{ "scrollTo": "<selector>" }`
+— `locator.scrollIntoViewIfNeeded()` — or `{ "scrollBy": <pixels> }` against the
+scroller the harness already has. It reaches a state and asserts nothing, which
+is the line [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+draws, and it is the same one-field shape the 17 September entry asks for.
+
+---
 ## 2026-09-24 — the first correct press a stranger makes is answered with a warning, in the loudest position on the rail
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
-(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** open —
+(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** **closed**
+by `demo-28-the-frame-the-press-produces` — and **not one character of the
+caution changed**, which is what the entry below predicted and is worth reading
+as the outcome. The moment was wrong because of where the press left the
+visitor, not because of what the strip says: `AnswerInView` stopped the rail the
+minimum distance, which leaves the panel in the scroller, and the strip pins
+itself to the top of whatever is left there. Carrying the card to the top of the
+scroller (`_lib/arrival.ts`) takes the panel, and with it the caution, off the
+frame the press produces. Measured on a production build at both sizes
+afterwards: with any ask control on screen the caution is on screen too — on
+screen, above the controls, amber, before the press — and with the card at the
+top of the rail neither is. *(Original status below.)*
+
+**Status:** open —
 found by walking the surface as a stranger, not by reading the code; the
 mechanism is right and the moment it arrives in is wrong.
 
