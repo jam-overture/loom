@@ -31504,9 +31504,11 @@ through, which is this lane's job and is why it is filed from here.
 ## 2026-09-24 — this application cannot serve a `robots.txt`, and the file that proves it passed every test it had
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — **measured three ways on `marketing-35-the-map-nothing-here-draws`**;
-nothing is broken and no page is affected, and the marketing site ships its
-sitemap without one
+**closed by `framework-54-written-and-never-served`** — the application serves
+`/robots.txt` and `pnpm prerender:check` now fails on a metadata file the build
+did not read. **Two of the three measurements do not reproduce**, and the
+correction is under the entry rather than inside it, because the third one is
+the fault and it is worse than a 404.
 
 `/sitemap.xml` shipped today. The `robots.txt` that should announce it did not,
 because this application will not serve one from anywhere it can be written.
@@ -31587,8 +31589,16 @@ land them without a marketing run.
 ---
 ## 2026-09-24 — `nextjs.org` is `EGRESS_BLOCKED`, and `docs/routines.md` lists it as allowed
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — one fetch, from the marketing lane, on 24 September
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`,
+reassigned from `Loom daily build` on 25 September · **Status:** open — one
+fetch from the marketing lane on 24 September, and **nothing for a lane to do**:
+the entry's own reading of `.claude/settings.json` establishes that both
+committed lists already name the domain, so the block is the environment's
+egress proxy and is the maintainer's. Confirmed from the shell lane rather than
+re-measured. The one question it blocked — whether a root-segment metadata route
+needs a root layout — has since been answered without it, by reading Next's
+matcher out of `node_modules` (0190); that is the general workaround when a
+question is about the framework rather than about its documentation.
 
 `docs/routines.md` under *Network access* says: *"Currently allowed: `21st.dev`
 and `nextjs.org` (the visual and structural references the primitives,
@@ -31963,3 +31973,79 @@ this impossible rather than remembered. It is repository tooling and it would
 have to be installed by whoever runs `pnpm install`, so it is a decision for the
 maintainer and the framework lane rather than something a surface lane should
 add on its own.
+
+---
+## 2026-09-25 — the `robots.txt` 404 does not reproduce, the 308 was never evidence, and the fault is that a build can read nothing and say nothing
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Corrects:** the 24 September entry *this application cannot serve a
+`robots.txt`* · **Status:** closed by `framework-54-written-and-never-served`
+
+That entry is the reason the file now exists and the check now exists, and its
+central claim — *a metadata file passed eleven assertions and served nothing* —
+is exactly right. Two of its three measurements are not, and saying so is worth
+an entry because one of them is a shape three other lanes will reach for.
+
+**`app/robots.ts` is served.** From a clean build of this tree on 16.2.12:
+`200 text/plain` with the four lines, under `next start` and under `next dev`.
+The entry's `app/robots.ts → 404` row was almost certainly the stale-`.next`
+false green **the same lane filed the same day, two entries above** — a killed
+build, a second build exiting 0, and a server answering from output that
+predated the file. Two findings, one cause, filed an hour apart by one run.
+
+**`/robots.txt/ → 308` was never evidence that the segment exists.** Measured:
+`/definitely-not-a-route.txt/` also answers `308`, and the address it redirects
+to answers `404`. The trailing-slash redirect is a normalisation that runs
+before any route is looked up, so it says the same thing about every path on the
+site. It is worth knowing generally: **a `308` on a trailing slash tells you
+nothing about whether a route exists.**
+
+**What is real is the placement, and it is worse than a 404.** `robots` and
+`manifest` are honoured only at the application root; `sitemap`, `icon`,
+`apple-icon`, `opengraph-image` and `twitter-image` are honoured anywhere. Read
+out of Next's own `isMetadataRouteFile` and tabulated in
+[0190](decisions/0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md).
+A `robots.ts` in a route group is not a route, not a page and not an error — the
+build does not read it and does not say so.
+
+**What closed it.** `app/robots.ts` at the application root, its content derived
+from the marketing lane's `guarded` field so both maps move together; and
+`pnpm prerender:check` now reads the conventions out of the source tree and the
+routes out of `app-paths-manifest.json` and fails on any convention with no
+route. Proved the way the finding was: the file was put back in `(marketing)`,
+the application rebuilt, and the gate went red naming the file and the rule.
+
+**The guarantee `(marketing)/sitemap.test.ts` said it could not hold** — *what
+the sitemap declines to list is exactly what robots disallows* — is held now, in
+`app/robots.test.ts`. That file's comment can drop its last paragraph whenever
+the lane next touches it; nothing is wrong until then.
+
+---
+## 2026-09-25 — the judgement the false-green entry asked for: the build does not clear `.next`, and the cure is a sentinel rather than a sweep
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Answers:** the 24 September entry *a `next build` that exits 0 can serve the
+previous build's HTML* · **Status:** open — **the judgement is given and the
+work is not done**; it is a unit this lane will take
+
+That entry asked for one line of judgement: whether `@loom/app`'s `build` should
+clear `.next` first, or whether writing the workaround down is enough. The answer
+is neither, and this run is the evidence for why the second half is not enough —
+the `robots.txt` 404 above was most likely this fault, and it cost the lane that
+hit it a screenshot cycle and a finding filed against the wrong cause.
+
+**Not a sweep.** `rm -rf .next` on every build throws away the incremental build
+for every lane on every run, to defend against a state that only arises when a
+build is interrupted. A full build of this application is minutes; four routines
+a day pay it, and the fault is rare.
+
+**A sentinel is exact and costs one file.** A build that is killed is a build
+that started and did not finish, and that is a fact the wrapper can write down:
+mark before `next build`, clear after it, and remove `.next` at the start of any
+build that finds the mark still there. The incremental build survives every
+ordinary run and is thrown away exactly when it cannot be trusted.
+
+Not taken today because it is a second unit on a branch that already carries
+one, and because it changes the build command four surfaces run. Filed with the
+shape so that the next run of this lane — or the maintainer, who may simply
+prefer the sweep — has the argument rather than the question.
