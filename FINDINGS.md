@@ -32358,3 +32358,74 @@ environment variables. It is roughly 120 lines, it is this lane's, and it would
 have saved six runs. It is not in `portal-36` because that branch is about what
 a reader is shown and a staging harness is not, and a branch that is two things
 is a branch a maintainer has to review twice.
+
+---
+
+## 2026-09-25 — the mangled URL is a 150-character threshold, measured on one body against a 149-character control, and the punctuation theory is disproved by the same two bodies
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Corrects:** the 23 September entry
+*an apostrophe straight after a markdown link's closing paren*, and the 24
+September entry *158 characters or more does not survive* · **Status:** open —
+**two bodies, read back both times, with a one-character control**
+
+This is the third measurement of the same fault and the first with a control
+beside it, which is only because the experiment was an accident: #389's body
+carried **eight links, seven of them the same host, branch and directory,
+differing only in a filename suffix.**
+
+**Body one — one mangled out of eight:**
+
+| link | characters | came back |
+| --- | --- | --- |
+| `…-editorial-phone.png` | **150** | **`(``https://…png``)`** |
+| `…-editorial-wide.png` | 149 | clean |
+| `…-footer-before.png` | 148 | clean |
+| `…-footer-after.png` | 147 | clean |
+| `…-bold-phone.png` | 145 | clean |
+| `…-bold-wide.png` | 144 | clean |
+| `….md` | 133 | clean |
+| the 0160 decision link | 136 | clean |
+
+**The 149 and the 150 are adjacent cells in the same table row, separated by
+` · `, and differ by one character in the filename.** One survived byte for
+byte and one did not.
+
+**Body two — the same eight links, pinned to a short commit SHA instead of the
+branch, so 109–126 characters. All eight clean**, including both links in the
+` · ` row.
+
+### What this kills
+
+- **The apostrophe.** The 23 September entry is right that its own case had one,
+  and wrong that the apostrophe is the cause. Here the mangled link is followed
+  by ` · ` — and in body two the *same punctuation* around a *shorter* URL came
+  back clean. Punctuation is not the variable.
+- **158.** The 24 September entry measured a ceiling on a different body and
+  called it *"measured rather than theorised"*, which it was — but every URL in
+  body one is **below** 158 and one of them was still mangled. So 158 is an
+  upper bound somebody found, not the threshold.
+- **`.png`.** Four `.png` links came back clean in the same body, which the 23
+  September entry had already established and this confirms.
+
+### What it leaves
+
+**Something between 150 and 149 characters, inclusive of the 150.** This entry
+does not claim the boundary is exactly there — one observation cannot separate
+150 from, say, "the longest link in a body" — and **that is the one experiment
+still worth running**: post a body with two links at 150 and nothing longer. If
+both mangle, it is a length. If neither does, it is a *rank*, and every earlier
+number in this file is an artefact of whichever link happened to be longest.
+
+Nobody should spend a run on it. It is worth one paragraph in whichever run next
+posts a long body, and it is written down here so that run measures rather than
+re-theorises — which is what the three entries before this one each cost.
+
+### What to do about it, today
+
+**Pin a link to a short commit SHA rather than a branch name.** It is seven
+characters instead of this branch's thirty-one, it takes every report URL this
+repository posts to about 126, and it is more stable besides: a branch link
+rots when the branch is deleted after merge, and a SHA link does not. It is
+strictly better than the 24 September entry's advice to shorten branch names,
+which trades a real cost (a readable branch) for a smaller saving.
