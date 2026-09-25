@@ -30905,3 +30905,93 @@ Not decided here because the application's build configuration is the shell's
 and the cost lands on four surfaces, and because a mitigation that removes the
 symptom is worth having before an argument about the cure. **Nothing is
 blocked** — `pnpm clean` now does what its name says.
+
+---
+
+## 2026-09-25 — the screenshot harness can sign in, and the recipe is nine lines
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **the
+sign-in half is closed**; the unreachable-red-verdict half stays open, unchanged
+
+Five consecutive portal reports (14, 19, 20, 21 and 22 September) re-filed the
+same entry: *the portal's screens cannot be photographed because the harness
+cannot sign in.* Every one of those runs photographed its screen anyway, by
+staging a store and working around the guard. **The guard was never the
+problem.** A portal session is an HMAC-SHA256 over a payload the portal composes
+in the open (`app/(portal)/_lib/auth/session.ts`):
+
+```
+v1.<base64url(actor)>.<issuedAt>.<base64url(HMAC-SHA256(payload, secret))>
+```
+
+So a session is **minted**, not obtained. Start the server with a secret and a
+roster of your own, mint a cookie against the same secret, and hand it to the
+browser:
+
+```js
+// nine lines, Node 22, no dependency
+const encoder = new TextEncoder()
+const b64 = (bytes) => Buffer.from(bytes).toString("base64")
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+const payload = `v1.${b64(encoder.encode(actor))}.${Date.now()}`
+const key = await crypto.subtle.importKey("raw", encoder.encode(secret),
+  { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payload))
+console.log(`${payload}.${b64(new Uint8Array(sig))}`)
+// → cookie loom_portal_session, domain 127.0.0.1, path /, httpOnly, SameSite=Lax
+```
+
+**Why this is better than driving the form**, and not only shorter: no sign-in
+attempt is recorded, so the throttle and the pressure table are untouched and
+`/portal/sign-ins` still photographs its own real state rather than the
+harness's. It reaches nothing a signed-in reviewer could not reach — forging a
+session needs the secret, which is the secret the run chose one line earlier.
+
+**It is not a way around 0027 and must not become one.** It works *because* the
+portal fails closed: with no `LOOM_PORTAL_SESSION_SECRET` there is no secret to
+sign with and nobody signs in, including this.
+
+**What stays open**, and the five entries above stand on it: **the red checkup
+verdict is unreachable by any sequence of clicks in a deployed portal.** A drift
+cannot be created through the write path at all — `append` is one write over the
+log and the snapshot by construction — so the fault has to be injected at the
+snapshot read, which is what the 22 September run did and said. That is a
+product decision about whether a deployment can be made to show its own bad news,
+and it is above this lane's line.
+
+**Related, for the lanes told a pull request must carry a screenshot:** the
+20 September entry's correction of 22 September still holds — this repository is
+private, so GitHub proxies a pull request body's images anonymously and
+`raw.githubusercontent.com` returns 404 for everybody including the maintainer.
+**Link, do not embed.** Signing in is now solved; hosting an image where the
+maintainer can see it is not.
+
+---
+
+## 2026-09-25 — three screens count the same pages under three different rules
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The 22 September entry filed two of these and said the argument belonged to the
+run that took it. There are three now, so it is re-filed with the third and a
+recommendation rather than a note.
+
+| Screen | What it lists, and in what order |
+| --- | --- |
+| `/portal` — the reach on the front door | one listing page, three states, a failed head read counted apart |
+| `/portal/checkup` — the chooser | whatever the store returned, in store order |
+| `/portal/checkup/everything` — the sweep | five standings, worst first |
+
+Each is defensible on its own. A list of **offers** wants the honest partition; a
+list of **actions** may want the order somebody scans; a list of **results**
+wants the bad news first. What is not defensible is that a reader who opens two
+of them sees the same pages in two orders with two different counts beside them,
+and has no way to know the two screens agree.
+
+**The specific visible consequence**, unchanged from 22 September: the chooser
+lists the one page you *can* check below three you cannot.
+
+**Not taken here** because this unit is one section on one screen and the
+argument is about three, and because the answer may well be that the three orders
+are right and what is missing is one sentence on each saying which order it is
+in. That is a cheap fix if it is the right one and a wrong fix if it is not.

@@ -175,6 +175,26 @@ export type ReachReading = {
   readonly gaps: readonly ReachGap[]
 }
 
+/**
+ * The answer to the heading, and the reason there is not a better one.
+ *
+ * The first screenshot of this section put *"Is everything still accounted
+ * for?"* over *"Loom can check 1 of your 4 pages."* — a question, and under it a
+ * sentence that is not its answer. Every assertion passed, because the reach is
+ * correct and the heading is the right question; what was wrong was the pair,
+ * and a reader can just as easily take the second line as reassurance that
+ * something has looked.
+ *
+ * Nothing has looked. A checkup reads and writes nothing, deliberately, so this
+ * deployment holds no record of one ever having run and this screen has no
+ * freshness to print — which is the one claim the interface this section is
+ * modelled on *does* make, and the one it must not borrow. Said out loud rather
+ * than left as an absence: an absence is exactly what a reader fills in with
+ * good news.
+ */
+export const NOTHING_HAS_CHECKED =
+  "Nothing here has checked. A checkup runs when you ask for one and Loom keeps no answer between times, so this is always a fresh look rather than a result on file."
+
 const pages = (count: number): string => `${count} ${count === 1 ? "page" : "pages"}`
 
 const changesWord = (count: number): string => `${count} ${count === 1 ? "change" : "changes"}`
@@ -243,9 +263,18 @@ const costOf = (reach: CheckupReach): string => {
  * tomorrow and the one a person can do something about. A page that would not
  * answer is a moment's trouble, and a page beyond the listing is a page nobody
  * on this screen can name — which is why it says the least and asks for nothing.
+ *
+ * **A gap is a caveat on an offer, so it is withheld where there is no offer.**
+ * With nothing checkable the headline and the sentence under it are already
+ * about exactly this — *"this deployment doesn't have that on record for any of
+ * them"* — and printing the gap as well said the same fact twice, four lines
+ * apart, which the first screenshot of this section shows plainly. It is the
+ * defect this screen has recorded against itself once before: `Nothing is
+ * waiting for you.` three lines above `You're all caught up.` Nothing is lost,
+ * because the arm that suppresses it is the arm whose own sentence carries it.
  */
 const gapsOf = (reach: CheckupReach): readonly ReachGap[] => [
-  ...(reach.unvouchable > 0
+  ...(reach.unvouchable > 0 && reach.checkable > 0
     ? [
         {
           key: "no-starting-shape" as const,
@@ -301,10 +330,12 @@ export const reachReading = (reach: CheckupReach): ReachReading => ({
  * the whole of the rule this surface is built on.
  */
 export const reachDetail = (reach: CheckupReach): readonly string[] => [
-  `${reach.listed} trees came back from one page of the store's listing${reach.complete ? ", which reached the end of it" : ", and it returned a cursor, so there are more"}.`,
-  `${reach.checkable} of them have a seed registered in this deployment's source, which is what auditSnapshot folds from — a tree without one is refused rather than folded from its own snapshot, because comparing a snapshot with itself agrees every time (0028).`,
+  `${reach.listed === 1 ? "One tree came" : `${reach.listed} trees came`} back from one page of the store's listing${reach.complete ? ", which reached the end of it" : ", and it returned a cursor, so there are more"}.`,
+  `${reach.checkable === 1 ? "One of them has" : `${reach.checkable} of them have`} a seed registered in this deployment's source, which is what auditSnapshot folds from — a tree without one is refused rather than folded from its own snapshot, because comparing a snapshot with itself agrees every time (0028).`,
   `Their head revisions sum to ${reach.changes}, which is the number of accepted deltas a sweep would replay. The snapshot is a materialised view of the log (0016), so the fold is the cost the log has and not the cost the page has.`,
   ...(reach.unreadable > 0
-    ? [`${reach.unreadable} head reads did not come back, so their revisions are not in that sum.`]
+    ? [
+        `${reach.unreadable === 1 ? "One head read" : `${reach.unreadable} head reads`} did not come back, so ${reach.unreadable === 1 ? "its revision is" : "their revisions are"} not in that sum.`,
+      ]
     : []),
 ]

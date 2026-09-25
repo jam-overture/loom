@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
-import type { CheckupReach } from "@/app/(portal)/_lib/checkup-reach"
+import { NOTHING_HAS_CHECKED, type CheckupReach } from "@/app/(portal)/_lib/checkup-reach"
 
 import { CheckupInvitation } from "./checkup-invitation"
 
@@ -43,6 +43,32 @@ describe("the invitation to check everything", () => {
 
     expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(
       "Is everything still accounted for?"
+    )
+  })
+
+  /**
+   * The defect the first screenshot of this section found, and it had no failing
+   * test: the heading asked a question and the line under it — *"Loom can check
+   * 1 of your 4 pages."* — was not its answer. Both were right on their own.
+   * What was wrong was the pair, and a reader can take the second line as
+   * reassurance that something has looked.
+   *
+   * The two sections above this one each put what they *found* under their
+   * heading, so this is the position a reader has been taught to read as a
+   * result. The honest result is that there isn't one yet, and it is said rather
+   * than left as an absence — an absence is what a reader fills in with good
+   * news.
+   */
+  it("answers its own heading with the fact that nothing has looked yet", () => {
+    const { container } = render(<CheckupInvitation reach={reach({ checkable: 1, unvouchable: 3, changes: 4 })} />)
+
+    const surface = container.textContent ?? ""
+    const heading = screen.getByRole("heading", { level: 2 }).textContent ?? ""
+
+    expect(surface).toContain(NOTHING_HAS_CHECKED)
+    expect(surface.indexOf(NOTHING_HAS_CHECKED)).toBe(heading.length)
+    expect(surface.indexOf(NOTHING_HAS_CHECKED)).toBeLessThan(
+      surface.indexOf("Loom can check 1 of your 4 pages.")
     )
   })
 

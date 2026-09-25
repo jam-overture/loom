@@ -6,6 +6,7 @@ import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 
 import {
   checkupReach,
+  NOTHING_HAS_CHECKED,
   reachDetail,
   reachReading,
   type CheckupReach,
@@ -290,6 +291,34 @@ describe("what the invitation says", () => {
   })
 })
 
+describe("the answer to the heading", () => {
+  /**
+   * Nothing stores a checkup result — the check reads and writes nothing,
+   * deliberately — so there is no freshness to print and this sentence must
+   * never imply one. It is the claim the interface this section is modelled on
+   * makes on its own front door, and the one it cannot borrow.
+   */
+  it("says nothing has looked, without inventing a time it last did", () => {
+    expect(NOTHING_HAS_CHECKED).toContain("Nothing here has checked")
+
+    for (const claim of ["ago", "just now", "Last checked", "up to date"])
+      expect(NOTHING_HAS_CHECKED, claim).not.toContain(claim)
+  })
+
+  it("is plain language, like every other sentence shown unasked", () => {
+    expect(runtimeWordsIn(NOTHING_HAS_CHECKED)).toEqual([])
+  })
+
+  /**
+   * It is a standing fact about how a checkup works rather than a reading of
+   * this deployment, which is why it is a constant and not an arm: a version of
+   * it that varied with the counts would be a freshness by another name.
+   */
+  it("says the same thing whatever the reading says", () => {
+    expect(NOTHING_HAS_CHECKED).not.toMatch(/\d/u)
+  })
+})
+
 describe("the gaps between what was listed and what can be checked", () => {
   it("names none of them when a checkup can speak for the whole listing", () => {
     expect(reachReading(reach()).gaps).toEqual([])
@@ -327,6 +356,36 @@ describe("the gaps between what was listed and what can be checked", () => {
     expect(gaps[1]?.plain).toContain("this moment rather than a fault")
   })
 
+  /**
+   * Found by looking at the first screenshot of the arm. With nothing checkable
+   * the sentence under the headline already says *"this deployment doesn't have
+   * that on record for any of them"*, and the gap said it again four lines
+   * below — one fact, twice, which is the defect this screen has recorded
+   * against itself once already (`Nothing is waiting for you.` three lines above
+   * `You're all caught up.`).
+   *
+   * Nothing is lost by withholding it: a gap is a caveat on an offer, and the arm
+   * it is withheld from is the one whose own sentence carries it.
+   */
+  it("does not say the same fact twice where there is no offer to qualify", () => {
+    const reading = reachReading(reach({ checkable: 0, unvouchable: 4, changes: 0 }))
+
+    expect(keys(reading.gaps)).toEqual([])
+    expect(reading.meaning).toContain("doesn’t have that on record for any of them")
+  })
+
+  /**
+   * And the other pages' gaps still are. A store that would not answer, or a
+   * listing that stopped early, is news the headline does not carry.
+   */
+  it("still names the other gaps where nothing can be checked", () => {
+    const gaps = reachReading(
+      reach({ checkable: 0, unvouchable: 2, unreadable: 2, changes: 0, complete: false })
+    ).gaps
+
+    expect(keys(gaps)).toEqual(["would-not-answer", "beyond-the-listing"])
+  })
+
   it("admits the listing was partial rather than counting over the whole deployment", () => {
     const gaps = reachReading(reach({ complete: false })).gaps
 
@@ -362,6 +421,26 @@ describe("the runtime's account, one click down", () => {
 
     expect(runtimeWordsIn(detail).length).toBeGreaterThan(0)
     for (const word of ["seed", "snapshot", "revision", "log"]) expect(detail).toContain(word)
+  })
+
+  /**
+   * Found by looking at it. The first build of this read *"4 trees came back…"*
+   * and *"1 of them **have** a seed registered"* — the same defect the sweep's
+   * own tests caught twice before it shipped, a count and a verb disagreeing,
+   * and it is no more excusable for being behind a disclosure. Both sides of one
+   * are pinned, whole-sentence, on every clause that carries a number.
+   */
+  it("reads as English on both sides of one, in every clause that counts", () => {
+    const one = reachDetail(reach({ listed: 1, checkable: 1, unvouchable: 0, unreadable: 1 }))
+    const many = reachDetail(reach({ listed: 4, checkable: 2, unreadable: 2 }))
+
+    expect(one[0]).toContain("One tree came back")
+    expect(one[1]).toContain("One of them has a seed")
+    expect(one[3]).toContain("One head read did not come back, so its revision is not in that sum.")
+
+    expect(many[0]).toContain("4 trees came back")
+    expect(many[1]).toContain("2 of them have a seed")
+    expect(many[3]).toContain("2 head reads did not come back, so their revisions are not in that sum.")
   })
 
   it("cites the two records the refusal and the cost come from", () => {

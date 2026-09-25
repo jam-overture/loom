@@ -1,7 +1,12 @@
 import Link from "next/link"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import { reachDetail, reachReading, type CheckupReach } from "@/app/(portal)/_lib/checkup-reach"
+import {
+  NOTHING_HAS_CHECKED,
+  reachDetail,
+  reachReading,
+  type CheckupReach,
+} from "@/app/(portal)/_lib/checkup-reach"
 
 /**
  * The front door's third question, and the invitation to answer it.
@@ -50,10 +55,27 @@ export const CheckupInvitation = ({ reach }: { readonly reach: CheckupReach }) =
          * heading is a question.
          */}
         <h2 className="text-lg tracking-tight">Is everything still accounted for?</h2>
-        <p className="text-ink-muted text-sm">{reading.headline}</p>
+        {/*
+         * The answer to the heading, and it is the same answer every time.
+         *
+         * The first screenshot of this section had the reach here — *"Loom can
+         * check 1 of your 4 pages."* directly under a question it does not
+         * answer, which a reader can take as reassurance that something has
+         * looked. Nothing has. The two sections above this one each put what
+         * they *found* under their heading, so this position is where a reader
+         * has been taught to look for a result, and the honest result is that
+         * there isn't one yet.
+         */}
+        <p className="text-ink-muted text-sm">{NOTHING_HAS_CHECKED}</p>
       </header>
 
       <div className="border-edge-subtle flex flex-col gap-3 rounded-md border p-4">
+        {/*
+         * The reach leads the card, because it is the scope of the offer below
+         * it: what pressing would cover. It was under the heading and read as an
+         * answer there; here it reads as the size of the question.
+         */}
+        <p className="text-ink text-sm">{reading.headline}</p>
         <p className="text-ink-secondary text-sm">{reading.meaning}</p>
 
         {/*
