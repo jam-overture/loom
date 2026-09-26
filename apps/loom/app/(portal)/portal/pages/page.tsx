@@ -2,11 +2,13 @@ import Link from "next/link"
 
 import { describeStoreError } from "@loom/runtime/store"
 
+import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
+import { inPageOrder, needsYouRank } from "@/app/(portal)/_lib/page-order"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 import { pagesWaitingSummary, unreadableMark } from "@/app/(portal)/_lib/unreadable-change"
@@ -83,7 +85,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
     trees.map((listing) => listing.treeId)
   )
 
-  const summaries = await Promise.all(
+  const unordered = await Promise.all(
     trees.map(async (listing) => {
       const holds = await portalHolds.forTree(listing.treeId)
 
@@ -106,6 +108,20 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
       }
     })
   )
+
+  /*
+   * The order, decided once for the whole portal rather than here.
+   *
+   * This screen listed whatever the store returned, which is a cursor order — a
+   * position to resume a read from — so a page with four changes waiting for an
+   * answer could sit at the bottom of the one screen whose whole question is
+   * which of these needs me. Every rung of `needsYouRank` is a field already on
+   * these rows, so the order costs no read. See `_lib/page-order.ts`.
+   */
+  const summaries = inPageOrder(unordered, (page) => ({
+    rank: needsYouRank(page),
+    page: page.page,
+  }))
 
   return (
     <div className="flex max-w-xl flex-col gap-4 p-8">
@@ -146,47 +162,51 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           </TechnicalDetail>
         </StateNotice>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {summaries.map((page) => (
-            <li key={page.treeId}>
-              <Link
-                href={`/portal/pages/${page.treeId}`}
-                className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
-              >
-                <span className="flex min-w-0 flex-col gap-1">
-                  <PageName page={page.page} />
-                  <span className="text-ink-muted text-xs">
-                    {page.revision} {page.revision === 1 ? "change" : "changes"} applied
-                  </span>
-                </span>
+        <>
+          <ListOrder order="needs-you-first" />
 
-                {/*
-                 * Two marks, never one number covering both.
-                 *
-                 * A page with four answerable changes and one row from a later
-                 * build reads "4 waiting on you · 1 can't be read", and a page
-                 * whose only row is the second one gets the second mark alone.
-                 * That last case is the one worth the second element: before
-                 * this it was a row with no mark on it, which on an index whose
-                 * whole job is "which of these needs me" reads as *nothing is
-                 * happening here*.
-                 */}
-                <span className="flex shrink-0 items-center gap-1.5">
-                  {page.waiting !== null && page.waiting > 0 && (
-                    <span className="bg-awaiting text-awaiting-ink rounded-sm px-2 py-1 text-xs">
-                      {page.waiting} waiting on you
+          <ul className="flex flex-col gap-2">
+            {summaries.map((page) => (
+              <li key={page.treeId}>
+                <Link
+                  href={`/portal/pages/${page.treeId}`}
+                  className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
+                >
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <PageName page={page.page} />
+                    <span className="text-ink-muted text-xs">
+                      {page.revision} {page.revision === 1 ? "change" : "changes"} applied
                     </span>
-                  )}
-                  {page.unreadable > 0 && (
-                    <span className="border-edge-subtle text-ink-muted rounded-sm border border-dashed px-2 py-1 text-xs">
-                      {unreadableMark(page.unreadable)}
-                    </span>
-                  )}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  </span>
+
+                  {/*
+                   * Two marks, never one number covering both.
+                   *
+                   * A page with four answerable changes and one row from a later
+                   * build reads "4 waiting on you · 1 can't be read", and a page
+                   * whose only row is the second one gets the second mark alone.
+                   * That last case is the one worth the second element: before
+                   * this it was a row with no mark on it, which on an index whose
+                   * whole job is "which of these needs me" reads as *nothing is
+                   * happening here*.
+                   */}
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    {page.waiting !== null && page.waiting > 0 && (
+                      <span className="bg-awaiting text-awaiting-ink rounded-sm px-2 py-1 text-xs">
+                        {page.waiting} waiting on you
+                      </span>
+                    )}
+                    {page.unreadable > 0 && (
+                      <span className="border-edge-subtle text-ink-muted rounded-sm border border-dashed px-2 py-1 text-xs">
+                        {unreadableMark(page.unreadable)}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {cursor !== null && (
