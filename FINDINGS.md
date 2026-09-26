@@ -8,6 +8,114 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-26 — `prettier` has no configuration here, so running it on an existing file rewrites the whole file
+
+**Filed by:** `Loom portal` · **Owned by:** whoever owns the repository's tooling
+· **Status:** open, with the settings that come closest and the measurement that
+they are not exact
+
+There is no `.prettierrc` at any level, no `format` script in either
+`package.json`, and no lint or format step in `pnpm verify`. The gate is
+`build && typecheck && test && findings:check && app verify && prerender:check`,
+and none of those reads formatting.
+
+**What that costs a lane that reaches for the obvious tool.** `npx prettier
+--write` on four files in `app/(portal)/` during this run reformatted **all of
+them end to end** — semicolons added to every statement, an 80-column wrap where
+the repository sits near 98, and `trailingComma: all` where the repository has
+`es5`. A change of about 200 lines came back as 1,100, and **the gate stays green
+throughout**, because nothing checks. It was caught by reading the diff; a run
+that trusted its own tooling would have opened an unreviewable pull request with
+a correct green verify beside it.
+
+**What was measured, on `app/(portal)/_lib/page-name.ts`**, an untouched file:
+
+| settings | lines differing from the file on disk |
+| --- | --- |
+| prettier defaults | the whole file |
+| `--no-semi --print-width 100 --trailing-comma es5` | 6 |
+| `--no-semi --print-width 98 --trailing-comma es5` | **0** |
+
+So the house style is close to `--no-semi --print-width 98 --trailing-comma es5`
+— and **it is not that**, which is the part worth having written down. The same
+settings over three other files in this lane leave 40, 80 and 17 lines differing.
+Some of those are hand-wrapped for reading rather than for width.
+
+**The recommendation is one of two things, and either beats the present state:**
+
+- a `.prettierrc` with those settings, a `format` script, and a `--check` step in
+  the gate — after one commit that reformats everything, which is a whole-repo
+  diff and is the maintainer's call rather than a lane's; **or**
+- one line in `docs/routines.md` saying **formatting in this repository is by
+  hand and no lane may run a formatter over a file it did not create**, which
+  costs nothing and is what every lane needs to know today.
+
+**What this lane did in the meantime**, recorded so the next run does not have to
+work it out: reverted the eight reformatted files with `git checkout --`, redid
+every edit by hand, and used those settings **only on the five files this branch
+created**, where there is no diff to corrupt.
+
+---
+## 2026-09-26 — `revisionReadings` groups a page's versions with a collation, and a collation is not the same in two deployments
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+the *screen's* order is fixed; this is the grouping underneath it
+
+`app/(portal)/_lib/reading-view.ts` ends `revisionReadings` with:
+
+```ts
+.sort((left, right) => left.treeId.localeCompare(right.treeId) || right.revision - left.revision)
+```
+
+The second half is right and is why the sort exists: a page's own versions have
+to come out newest-first and adjacent, because `pageReadings` groups on the first
+key it meets. The first half is a **tree id compared through a collation**, and it
+is the thing `_lib/page-order.ts` is now written against:
+`String.prototype.localeCompare` resolves against the runtime's locale and the ICU
+data it was built with, so two deployments of one portal can order the same two
+ids two ways.
+
+**Nothing visible is broken today** and `/portal/readers` no longer renders this
+order — the screen sorts the grouped readings by name through `inPageOrder`. What
+is left is that the *grouping* is keyed on a comparison that is not guaranteed to
+be the same twice, which means the set of groups is stable and the order the
+groups are built in is not.
+
+**Not fixed here** because it is a different subject from this unit and the safe
+replacement is not the obvious one: swapping in a codepoint compare would also
+change the order `pageReadings` returns, which four assertions in
+`reading-view.test.ts` pin and at least one of them for a reason about adjacency
+rather than about order. It wants its own read. The shape of the answer is a
+grouping that does not depend on a sort at all — a `Map` keyed on the tree id,
+which `pageReadings` already builds one line later.
+
+---
+## 2026-09-26 — `loom.action`, `loom.button` and `loom.link` still cannot carry their own label, and this is the third report to say so and the first to file it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open
+
+The 19 and 25 September portal reports both close with *"`copy` on
+`loom.action`, `loom.button` and `loom.link`, in `Loom primitives` — the cheapest
+thing on this list"*, and neither run filed it. A recommendation in a report this
+lane writes reaches this lane and nobody else; the channel between routines is
+this file. So it is filed, and the omission is this lane's rather than that one's.
+
+**Measured just now:** none of `src/primitives/loom.action.ts`,
+`loom.button.ts` or `loom.link.ts` contains the string `copy`.
+
+**Why the portal keeps asking.** Every other text-bearing primitive in the
+registry takes its words as data, which is the demo's own argument made on the
+demo — *every colour and typeface on this page is data*. These three take theirs
+from children, so the one thing a reviewer most wants to change about a call to
+action — what it says — is the one thing a change has to restructure the tree to
+reach. It is also the shape the portal's own screens keep wanting and cannot use.
+
+This is a note about a gap rather than a request for a particular design, and the
+sizing is that lane's. Filed at this size because three mentions in three reports
+is evidence that it is worth somebody's judgement rather than another mention.
+
+---
 ## 2026-09-26 — a bulleted list of markdown links is not a workaround: five of six were backticked, outside any table
 
 **Filed by:** `Loom demo` · **Owned by:** whoever owns the pull-request tooling
@@ -31454,7 +31562,15 @@ maintainer can see it is not.
 
 ## 2026-09-25 — three screens count the same pages under three different rules
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-36-one-order-for-one-set-of-pages` (26 September).** There were six,
+not three — `/portal/readers` was arranging pages by tree id through
+`localeCompare`, and the failure list on the front door had no order at all. All
+six now share one tiebreak (the page's derived name, then its id, so the order is
+total) and five of the six say which order they are in above themselves; the
+sixth's exemption is stated where it applies. This entry's own recommendation was
+the right one and is a property rather than a sentence somebody remembers to
+write: `every-page-list.test.ts` finds the lists from the filesystem.
 
 The 22 September entry filed two of these and said the argument belonged to the
 run that took it. There are three now, so it is re-filed with the third and a
