@@ -1,6 +1,6 @@
 # 0137. An undo already computed is assembled by the runtime, and stamped by its caller
 
-**Status:** Accepted
+**Status:** Accepted — supersedes 0109
 **Date:** 2026-09-12
 **Section:** §2 — The change pipeline
 

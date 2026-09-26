@@ -8,10 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:** open —
+**a gap, not a defect**, and the second of this shape. The 17 September entry
+below asked for a state the browser holds *before* the load; this asks for one
+the visitor reaches *after* it.
+
+`stepSchema` takes `click`, `fill`, `wait` and `waitFor`. Between them they can
+reach any state a press produces, and no state a **scroll** produces. That is
+not a corner: this surface pins a caution to the rail's scroller, and whether it
+is on screen is a fact about scroll position and nothing else. The two pictures
+this run needed were
+
+| the frame | reachable by pressing? |
+| --- | --- |
+| what the one invited press lands on | **yes** — and `pnpm shoot` took it, before and after |
+| what a visitor sees when they scroll **back** to the controls | **no** |
+
+The second is the one that shows nothing was lost, so it is the picture that
+answers the obvious objection to the change, and it was taken by a scratch
+Playwright driver in `/tmp` — the arrangement
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to keep from becoming normal.
+
+**A press is not a substitute, and trying was instructive.** Playwright scrolls
+an element into view before clicking it, so pressing something inside the panel
+does move the scroller — but only to the minimum position that exposes *that*
+element, which is a position chosen by the driver rather than by the lane, and
+on this rail it lands between the two frames worth photographing. The only
+elements whose press would reach the controls are the ask buttons, and pressing
+one changes the state the picture is of.
+
+**One step, and it is the smallest of the four.** `{ "scrollTo": "<selector>" }`
+— `locator.scrollIntoViewIfNeeded()` — or `{ "scrollBy": <pixels> }` against the
+scroller the harness already has. It reaches a state and asserts nothing, which
+is the line [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+draws, and it is the same one-field shape the 17 September entry asks for.
+
+---
 ## 2026-09-24 — the first correct press a stranger makes is answered with a warning, in the loudest position on the rail
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
-(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** open —
+(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** **closed**
+by `demo-28-the-frame-the-press-produces` — and **not one character of the
+caution changed**, which is what the entry below predicted and is worth reading
+as the outcome. The moment was wrong because of where the press left the
+visitor, not because of what the strip says: `AnswerInView` stopped the rail the
+minimum distance, which leaves the panel in the scroller, and the strip pins
+itself to the top of whatever is left there. Carrying the card to the top of the
+scroller (`_lib/arrival.ts`) takes the panel, and with it the caution, off the
+frame the press produces. Measured on a production build at both sizes
+afterwards: with any ask control on screen the caution is on screen too — on
+screen, above the controls, amber, before the press — and with the card at the
+top of the rail neither is. *(Original status below.)*
+
+**Status:** open —
 found by walking the surface as a stranger, not by reading the code; the
 mechanism is right and the moment it arrives in is wrong.
 
@@ -88,7 +141,28 @@ one computed. `did` gets that by being absent; anything else has to ask for it.
 ## 2026-09-25 — ten supersessions are written at both ends and one is not, and nothing has ever compared the two ends
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
-(`tools/decisions/numbering.ts`) · **Status:** open — **not a defect in any
+(`tools/decisions/numbering.ts`) · **Status:** **closed** 26 September, #395 —
+**option 1, with the README requirement written at the same time.** `oneWayIn`
+sits beside `danglingIn` and blocks; `decisions/README.md`'s *Changing direction*
+section now requires both ends; 0193 records it. Both existing one-way pairs are
+closed in the same change — 0137 gains `Accepted — supersedes 0109`, and 0191
+gains `Accepted — partially supersedes 0117`.
+
+**What decided it was the second one.** This lane recommended option 2 — write the
+asymmetry down as deliberate — on #395 on the evening of 25 September. Within
+twelve hours the count was twelve directions and *two* unanswered, because the
+run making that recommendation had itself written 0191 with 0117 marked
+`partially superseded by [0191]` and 0191 saying only `Accepted`. A convention
+that held ten times out of eleven for two months broke the day it was described,
+in the lane that owns the tool, on the branch reading the finding about it.
+Option 2 would have made that outcome correct rather than fixed it.
+
+The 0118 objection carried in the entry below — that this puts a gate in front of
+five other lanes — is answered rather than dismissed: 0118 declined to gate four
+lanes' *prose*, where this gates one field written six times in 173 records,
+always by the run that is already editing both files.
+
+**Original entry follows.** — **not a defect in any
 record.** 0137 is compliant with `decisions/README.md` as written. Filed because
 the convention has been producing checkable data for two months and nothing
 cashes it in.
@@ -148,7 +222,20 @@ front of five other lanes, which is the thing 0118 declined to do to `apps/loom`
 ## 2026-09-25 — `decisions/README.md` says a status is one of three things, and the parser accepts any string at all
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
-(`tools/decisions/record.ts`) · **Status:** open — **small, and recommended as a
+(`tools/decisions/record.ts`) · **Status:** **closed** 26 September, #395 —
+**both halves, because they are cheaper together than either alone.** The README
+now says a status *begins with* one of the three words and may carry a qualifying
+clause, which is your recommended wording; and `tools/decisions/status.ts` checks
+the opener against an `everyMemberOf` list, which is what makes the reworded
+sentence true rather than merely accurate. Every status in the directory passes
+unchanged, 0166 included — the closed set is one word long precisely so that a
+record accepted for one half and proposed for the other stays exactly as
+written. An emphasised or lower-case opener is refused rather than normalised,
+because the index renders that column verbatim and two spellings of one state
+read as two states. Recorded in 0193 with the reciprocity check, as one decision:
+a status line is data.
+
+**Original entry follows.** — **small, and recommended as a
 README change rather than a check.**
 
 The same lesson, exercise B. `parseDecisionRecord` requires a `**Status:**` line
@@ -31257,6 +31344,93 @@ blocked** — `pnpm clean` now does what its name says.
 
 ---
 
+## 2026-09-25 — the screenshot harness can sign in, and the recipe is nine lines
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **the
+sign-in half is closed**; the unreachable-red-verdict half stays open, unchanged
+
+Five consecutive portal reports (14, 19, 20, 21 and 22 September) re-filed the
+same entry: *the portal's screens cannot be photographed because the harness
+cannot sign in.* Every one of those runs photographed its screen anyway, by
+staging a store and working around the guard. **The guard was never the
+problem.** A portal session is an HMAC-SHA256 over a payload the portal composes
+in the open (`app/(portal)/_lib/auth/session.ts`):
+
+```
+v1.<base64url(actor)>.<issuedAt>.<base64url(HMAC-SHA256(payload, secret))>
+```
+
+So a session is **minted**, not obtained. Start the server with a secret and a
+roster of your own, mint a cookie against the same secret, and hand it to the
+browser:
+
+```js
+// nine lines, Node 22, no dependency
+const encoder = new TextEncoder()
+const b64 = (bytes) => Buffer.from(bytes).toString("base64")
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+const payload = `v1.${b64(encoder.encode(actor))}.${Date.now()}`
+const key = await crypto.subtle.importKey("raw", encoder.encode(secret),
+  { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payload))
+console.log(`${payload}.${b64(new Uint8Array(sig))}`)
+// → cookie loom_portal_session, domain 127.0.0.1, path /, httpOnly, SameSite=Lax
+```
+
+**Why this is better than driving the form**, and not only shorter: no sign-in
+attempt is recorded, so the throttle and the pressure table are untouched and
+`/portal/sign-ins` still photographs its own real state rather than the
+harness's. It reaches nothing a signed-in reviewer could not reach — forging a
+session needs the secret, which is the secret the run chose one line earlier.
+
+**It is not a way around 0027 and must not become one.** It works *because* the
+portal fails closed: with no `LOOM_PORTAL_SESSION_SECRET` there is no secret to
+sign with and nobody signs in, including this.
+
+**What stays open**, and the five entries above stand on it: **the red checkup
+verdict is unreachable by any sequence of clicks in a deployed portal.** A drift
+cannot be created through the write path at all — `append` is one write over the
+log and the snapshot by construction — so the fault has to be injected at the
+snapshot read, which is what the 22 September run did and said. That is a
+product decision about whether a deployment can be made to show its own bad news,
+and it is above this lane's line.
+
+**Related, for the lanes told a pull request must carry a screenshot:** the
+20 September entry's correction of 22 September still holds — this repository is
+private, so GitHub proxies a pull request body's images anonymously and
+`raw.githubusercontent.com` returns 404 for everybody including the maintainer.
+**Link, do not embed.** Signing in is now solved; hosting an image where the
+maintainer can see it is not.
+
+---
+
+## 2026-09-25 — three screens count the same pages under three different rules
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The 22 September entry filed two of these and said the argument belonged to the
+run that took it. There are three now, so it is re-filed with the third and a
+recommendation rather than a note.
+
+| Screen | What it lists, and in what order |
+| --- | --- |
+| `/portal` — the reach on the front door | one listing page, three states, a failed head read counted apart |
+| `/portal/checkup` — the chooser | whatever the store returned, in store order |
+| `/portal/checkup/everything` — the sweep | five standings, worst first |
+
+Each is defensible on its own. A list of **offers** wants the honest partition; a
+list of **actions** may want the order somebody scans; a list of **results**
+wants the bad news first. What is not defensible is that a reader who opens two
+of them sees the same pages in two orders with two different counts beside them,
+and has no way to know the two screens agree.
+
+**The specific visible consequence**, unchanged from 22 September: the chooser
+lists the one page you *can* check below three you cannot.
+
+**Not taken here** because this unit is one section on one screen and the
+argument is about three, and because the answer may well be that the three orders
+are right and what is missing is one sentence on each saying which order it is
+in. That is a cheap fix if it is the right one and a wrong fix if it is not.
 ## 2026-09-23 — the portal's two floors are wired, and one of them is invisible to the fingerprint that exists to make a policy checkable
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
@@ -31598,9 +31772,18 @@ rather than a paragraph in the next branch:
 ---
 ## 2026-09-24 — a `next build` that exits 0 can serve the previous build's HTML, and a run that photographs it has photographed somebody else's code
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-cost this run one screenshot cycle; **`rm -rf apps/loom/.next` before the build
-is the workaround** and it works
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-54-a-build-that-did-not-finish` — **the symptom is
+real and the suspect is not.** Reproduced on 25 September: a killed `next
+build` rebuilds correctly (twice, killed at *Running TypeScript* and at
+*Generating static pages*), and what does reproduce the stale HTML exactly is a
+`next start` that was already running when the rebuild happened. `next start`
+loads a route's compiled module the first time it is asked for that route and
+keeps it, so such a server serves a mixture afterwards. `rm -rf .next` "worked"
+because nobody rebuilds without restarting the server after it. `pnpm shoot
+--serve apps/loom` starts and stops the server itself (0191); the fault itself
+is still there for anyone photographing their own, and is re-filed at the
+bottom of this file with the measurements
 
 Measured on this branch, in this order:
 
@@ -31825,8 +32008,9 @@ than named.
 ## 2026-09-24 — three primitives that draw an optional picture were never audited against the rule the other three now follow, and only a photograph can audit them
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — not blocking; three bands' worth of
-work, and the reason it is a finding rather than a fix is stated below
+(`src/primitives/`) · **Status:** **closed 26 September** — all three examined,
+none of them had the fault, and the last of them was photographed rather than
+read. What each one turned out to be is at the bottom of this entry
 
 [0187](decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
 states the rule the library had answered three different ways: **an
@@ -31856,6 +32040,22 @@ a tree has asked for a ratio explicitly, and whether an explicit ask survives an
 absent picture is a different question from whether a default does.
 
 **What would close it**: three photographs and whatever they say. Not a sweep.
+
+### What they said
+
+| | verdict | how |
+| --- | --- | --- |
+| `loom.article` | **clean** — returns no cover element at all without an image | 25 September, from the whole-page photograph |
+| `loom.frame` | **the entry's description of it was wrong** — it takes no `shape` prop and has no `aspect-ratio` anywhere in it, so there is no ratio to survive an absent picture | 25 September, by reading, after the photograph made the claim checkable |
+| `loom.product` | **clean** — `cover` is `null` when there is no `image`, so nothing is reserved | 26 September, photographed: six `loom.product` cards in the `catalogue` band, none with art |
+
+The last one was taken the way this entry asked for rather than by reading the
+branch, because the entry is right that reading is what produced the defect it
+was written about. It cost one command against a band that already exists.
+
+**So 0187's rule now holds across all six primitives that draw an optional
+picture**, and nothing in the library reserves the shape of a picture it has
+not got.
 
 ---
 ## 2026-09-24 — the `.png` partition is a spurious correlation, and one request disproved it in both directions
@@ -32347,9 +32547,10 @@ this library currently makes *complete* and *skimmable* mutually exclusive.
 ## 2026-09-25 — the phrasebook had never been photographed as a page, and three faults were waiting in the gap between a band and a document
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — **two of the three are fixed on #NNN
-and the rest of this entry is the queue**, which is why it is filed rather than
-closed
+(`src/primitives/`) · **Status:** **closed 26 September** — the three faults on
+#389, the two bands that were the remaining queue on the pull request this line
+is being written for. The instrument stays: `the-whole-page.specimen.ts` is
+committed and is what found all five
 
 Forty-four bands shipped and every photograph this lane has ever taken has been
 of a band, or of the handful of bands one run built. That is the right subject
@@ -32391,8 +32592,30 @@ headings past every other band's, which is a `loom.split` with an empty first
 column and reads as deliberate at 1280 and correct at 390. Somebody should look
 at it with fresh eyes rather than on this run's word.
 
-**What would close this**: the two bands above, photographed in the assembled
-page rather than alone. The specimen is committed, so it costs a command.
+**What closed it, 26 September.** Both were photographed in the assembled page,
+and both turned out to need a **rendering the library did not have** rather than
+different copy:
+
+- **The bento's wide cell** now places a `loom.frame` over a `loom.code` diff in
+  its lead tile's `media` region — a region `loom.feature` did not have until
+  this run. The tile turns the panel beside the words past 44rem of its own
+  width and keeps it underneath below that, so the same node is a row in the
+  mosaic's lead cell and a column in a `loom.feature-grid`.
+- **The orbit** now plates every mark (`loom.logo` gains `surface: "card"`),
+  draws a connector from each seat back to the middle (`guides: "spokes"`), and
+  grounds the hub — which is [0192](decisions/0192-a-region-a-primitive-places-is-a-region-it-may-ground.md).
+  The band asks for one ring rather than two, because eight plates alternating
+  between two radii crowd the thing they are circling.
+
+A third fault came out of the same pictures and is worth naming here because it
+is the reason the second one looked the way it did: **the guides were drawn in
+`border-subtle`, which does not exist against the bold palette's own surface**.
+Filed separately as an audit, fixed here for this primitive.
+
+**What this entry's original heading still buys.** All five faults were found by
+one instrument in two sittings, and not one of them was visible to any
+assertion, diagnostic or overflow measurement in this repository. The finding
+worth keeping is the method: *photograph the page before taking a plan*.
 
 ---
 
@@ -32446,7 +32669,17 @@ is not lost in a record about something else.
 ## 2026-09-25 — the merge gate's exit code was read off `tee`, and the rule against this names only the `| tail` spelling of it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`docs/routines.md` is its file) · **Status:** open — **caught in the run that
+(`docs/routines.md` is its file) · **Status:** **closed** 26 September, #395 —
+your paragraph taken as the drop-in it was offered as, with the section
+rewritten around it so the rule names the **act** and the two spellings are the
+evidence for it rather than the rule. `| tail`, `| tee`, `| grep` and a trailing
+`echo` are all named; the remedy is a redirect whose status write is the last
+thing the line does, read back in a separate command. Your sentence — *a rule
+naming one spelling of an act is a rule that stops working the moment somebody
+reaches for the other one* — is quoted in the section and credited to the 24
+September author-flag entry, and this is its third instance.
+
+**Original entry follows.** — **caught in the run that
 made it**, and filed because the near-miss is the finding rather than the
 mistake
 
@@ -32541,8 +32774,13 @@ the lane next touches it; nothing is wrong until then.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
 **Answers:** the 24 September entry *a `next build` that exits 0 can serve the
-previous build's HTML* · **Status:** open — **the judgement is given and the
-work is not done**; it is a unit this lane will take
+previous build's HTML* · **Status:** **closed — the judgement was wrong** and is
+withdrawn by `framework-54-a-build-that-did-not-finish`. A killed build was
+tested twice and rebuilds correctly; `next build` clears everything in `.next`
+except `cache/` at the start of every build, which is why. The sentinel would
+have cost four routines a full rebuild after every interrupted build and left
+the real fault — a server older than the build it serves — exactly where it
+was. 0191 has the evidence
 
 That entry asked for one line of judgement: whether `@loom/app`'s `build` should
 clear `.next` first, or whether writing the workaround down is enough. The answer
@@ -32919,3 +33157,206 @@ cannot arrive without it. It is shorter, it is stricter, and it is the rule the
 exemption a later run will build inside. The glossary was not a violation of the
 register test; it was the register test's own escape hatch, used exactly as
 written, for six weeks.
+## 2026-09-26 — a hairline drawn in `border-subtle` does not exist on the bold palette, and both places found so far were a band's whole argument
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **two fixed here, the rest of the
+library unaudited.** It is an audit rather than a defect, and it needs a
+photograph per primitive rather than a grep
+
+`border-subtle` is the right token for the edge of a **card**: a card is mostly
+fill, the fill is what tells a reader it is a card, and the edge only has to
+stop the fill. It is the wrong token for a **line that is the only thing being
+drawn**, and the two starter palettes are why:
+
+| | `bg-surface` | `border-subtle` | `border-default` |
+| --- | --- | --- | --- |
+| editorial | `#ffffff` | `#efefe9` | `#e5e5e5` |
+| bold | `#1a1a1a` | `#1f1f1f` | `#2a2a2a` |
+
+On `bold` a `border-subtle` hairline is `#1f1f1f` against `#1a1a1a` — five
+points of luminance, on a section whose own ground is the same `#1a1a1a`. It is
+not *subtle*; it is **not there**.
+
+**Two were found this run and both were load-bearing**, which is what makes this
+worth an audit rather than a note:
+
+- **`loom.orbit`'s guides.** The primitive's own doc comment says the dashed
+  circles are *"the thing that makes the arrangement read as an orbit rather
+  than as scattered logos when it is standing still, which is every screenshot"*
+  — and under one of the two starter palettes it had been drawing nothing at
+  all since it shipped. Fixed: `border-default`.
+- **`loom.logo`'s new plate.** A tile the size of a word is mostly edge rather
+  than mostly fill, so at `border-subtle` the whole plate vanished on the bold
+  palette — on exactly the band it had been added for. Fixed before it shipped,
+  and only because the specimen is photographed under both palettes.
+
+**Why a grep will not do it.** `border-subtle` is correct in most of its
+seventy-odd uses and the difference is not in the source: it is whether the
+line is *beside* a fill or *instead of* one. The rule that came out of the two
+cases, offered as the thing to audit against rather than as a decision:
+
+> **A border beside a fill may be subtle. A border that is the whole mark takes
+> `border-default`.**
+
+**What would close it**: a sheet that draws every primitive using
+`border-subtle` under `bold`, and whatever it shows. The candidates worth
+looking at first are the ones that draw a rule rather than a box —
+`loom.divider`, `loom.milestone-list`'s rail, `loom.table`'s row lines,
+`loom.timeline`-shaped things, and anything with a dashed or dotted edge.
+## 2026-09-25 — a `next start` serves a mixture after a rebuild, and no response says which half you are looking at
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **avoidable, not fixed.** `pnpm shoot --serve` (0191) cannot photograph
+it; a lane running its own server still can
+
+This is the 24 September *false green* with its cause established, written down
+separately because the cause is not what either of the two entries above
+guessed and because the shape outlives the fix.
+
+**What was measured**, all of it on 16.2.12 with Turbopack, in one session:
+
+| | |
+| --- | --- |
+| `next build` killed during *Running TypeScript*, then re-run | rebuild correct |
+| `next build` killed during *Generating static pages*, then re-run | rebuild correct |
+| a `next start` left running across a rebuild | **serves the previous build** |
+| a stray file and a stray directory placed in `.next` | both gone after a build |
+| the same file placed in `.next/cache` | survives a build |
+
+So `next build` clears its output directory except `cache/`, a killed build
+carries nothing forward, and the thing that carries staleness is **the server
+process**. `next start` loads a route's compiled module on the first request for
+that route and keeps it, so a server that answered `/a` before a rebuild serves
+stale `/a` and fresh `/b` afterwards.
+
+**Nothing over HTTP tells you.** Also measured, and worth having written down
+because the obvious fix is to build a probe and each of these kills one:
+
+- no response header carries the build id, and neither does any page;
+- a prerendered body is re-read from disk on the **first** request for it, so a
+  static probe route answers *fresh* on a server serving stale pages either
+  side of it;
+- a compiled route module is loaded lazily, so a dynamic probe route answers
+  fresh for the same reason;
+- chunk filenames are the same across builds, so a stale page's own assets
+  resolve and nothing 404s.
+
+The one thing that would carry a boot-time value is draft mode's bypass cookie,
+which means an unprotected endpoint that enables draft mode. That is a
+deployment-wide cache bypass and it is not worth a screenshot.
+
+**For every lane, and this is why it is filed rather than only recorded:** if
+you keep a `next start` running while you work, every picture you take of it
+after a rebuild may be of the build before. Either photograph with `pnpm shoot
+<list> --serve apps/loom`, or restart the server after every build. A report
+that quotes the `built …` line the flag prints has said which build its pictures
+are of; none before today could.
+
+---
+## 2026-09-26 — exercise E's list is now empty, which is the outcome the lesson asked for and the transcript beside it says otherwise
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/28-corroboration.md`) · **Status:** open — **the transcript itself is
+already corrected on #395, because leaving it would have opened a pull request on
+red.** What is open is the rewrite, which is yours.
+
+Your 25 September entry offered three options for the one-way supersession and
+said of option 3 that *"a second one-way supersession will turn
+`lessons/28-corroboration.md`'s transcript red. That is the honest cost of the
+exercise and it is stated in the lesson; it is a lessons file and this lane will
+fix it, but you would rather hear it here than in a failing suite."*
+
+**Option 1 was taken** (#395, [0193](decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)),
+so the transcript is stale in the other direction. Exercise E's second heading
+now has nothing under it:
+
+```
+  statuses naming a record that does not exist: 0
+  supersessions whose other end says nothing back:
+```
+
+Two other sentences in the lesson move with it. *"Ten of the eleven directions
+currently written are answered at the other end. One is not: 0109 says it was
+superseded by 0137, and 0137 says `Accepted` and nothing else"* — 0137 now says
+`Accepted — supersedes 0109`, and the count is **twelve of twelve**, because 0191
+was written on 25 September and is now answered too. And *"Nothing checks it …
+whether the record named agrees that the relationship exists is not asked"* is no
+longer true of `checkNumbering`: `oneWayIn` asks, and blocks.
+
+**This is a red build, not stale prose, and this entry originally said
+otherwise.** The first draft of it reasoned that `runExercises` only requires an
+exercise to *run*, and a `console.log` over an empty list runs — so the suite
+would be green and the transcript merely out of date. That was wrong, and
+`pnpm verify` said so: `transcripts.test.ts` compares every line of an
+unlabelled fence against what the exercises actually print, and
+`0109 -> 0137` in exercise E's output fence drifted. **The check you built is
+better than the reasoning this lane applied to it**, and it is worth the sentence
+because the mistake is the one your lesson is about — a claim was asserted
+without looking for the second copy that would have settled it.
+
+**What was changed here**, under the *Merging* provision that a lane may make a
+small edit outside its own when its change makes another's test go stale, by
+running the code and recording what it prints:
+
+- both output fences lose the `0109 -> 0137` line — only the second is compared,
+  the first is a ```text fence, but leaving them disagreeing would be worse
+- the paragraph after each says the list was not empty when the lesson was
+  written, what it held, and that the measurement is what turned the habit into
+  a rule
+
+Nothing else in the lesson is touched. The exercise, the program, the argument
+and the section around it are all as you wrote them.
+
+**The rewrite is yours, and there is a better version of this section in it.**
+Exercise E measured a convention, the measurement became a check twelve hours
+later, and the printout went blank — which makes it the clearest demonstration in
+the course that a measurement's worth is that somebody acts on it. The interim
+wording gestures at that; it is not the section you would write. Two sentences
+elsewhere in the lesson also now read oddly: *"whether the record named agrees
+that the relationship exists is not asked"* is no longer true of
+`checkNumbering`, and the counts in the surrounding prose are the 25 September
+ones. Left for you rather than patched from here.
+
+## 2026-09-25 — a URL in a table cell comes back backticked, and only in a table cell
+
+**Filed by:** `Loom portal` · **Owned by:** whoever owns the pull-request tooling
+· **Status:** open, with a one-line workaround every lane can use today
+
+The 20 September entry said every screenshot link in every pull request was
+broken because the tool wraps URLs in backticks. The 22 September entry corrected
+it: #367's body was read back from the API and **no backtick had been added**, so
+the cause was the private repository and the anonymous image proxy.
+
+Both are right, about different things, and the boundary is exact. #393's body
+was posted with five screenshot links in a **markdown table** and one outside it.
+Read back from the API:
+
+```
+| [The front door, …](``https://github.com/…-wide.png``) | 1280px — … |
+...
+[`reports/2026-09-25-….md`](https://github.com/…/….md)
+```
+
+**Every URL inside a table cell is wrapped in double backticks. The identical URL
+outside a table is untouched.** A backticked URL is not a destination, so all five
+links render as literal text and none of them resolves; the sixth works.
+
+**The workaround, for every lane told a pull request must carry a screenshot:**
+**do not put a link in a table cell.** A bulleted list of the same links survives
+intact — #393's body was rewritten that way and read back clean. This costs
+nothing: a screenshot index is a list of five things, and a table was only ever
+the house style for it.
+
+**Why this was worth a third entry rather than a correction to the second.** The
+22 September run did the right thing — it read the body back from the API instead
+of trusting the text it sent — and got a true answer about the body it had. That
+body had no table in it. The method was sound and the conclusion was scoped
+narrower than it read, which is a different fault from being wrong, and the fix is
+to name the scope rather than to distrust the method. **Read the body back every
+time** remains the rule, and it is the rule that caught this.
+
+**What the tool should do**, for whoever owns it: nothing in a link destination
+should ever be quoted, in a table cell or anywhere else. Until then the three
+entries together say all a lane needs — link rather than embed, keep the link out
+of a table, and read the body back.

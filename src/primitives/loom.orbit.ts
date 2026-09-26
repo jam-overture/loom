@@ -5,6 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
+import { colour, radius, space } from "./tokens.js"
 
 /**
  * Whatever it is given, circling something it is given — the *works with*
@@ -76,8 +77,20 @@ const props = z
      * arrangement read as an orbit rather than as scattered logos when it is
      * standing still, which is every screenshot and every reader who asked for
      * calm — so `none` is the exception rather than the default.
+     *
+     * `spokes` is the circles **and** a connector from each seat back to the
+     * middle. It is the rendering that says *these things are attached to that
+     * thing* rather than *these things happen to be arranged in a circle*,
+     * which is this primitive's whole claim over a logo wall and was the one
+     * part of it nothing drew: the first photograph of this band in an
+     * assembled page was eight words on an empty ring with a ninth word in the
+     * middle, and nothing in the picture connected any of them.
+     *
+     * Three renderings of one arrangement, from a closed set the schema names,
+     * changing no node — 0052's display-mode clause, the same shape `rings`
+     * already has.
      */
-    guides: z.enum(["dashed", "none"]).optional(),
+    guides: z.enum(["dashed", "spokes", "none"]).optional(),
   })
   .strict()
 
@@ -114,11 +127,20 @@ const START_ANGLE = -90
  * cannot tell those apart.
  */
 const seatAngle = (index: number, count: number): Record<string, string> => {
-  const angle = ((START_ANGLE + (360 * index) / count) * Math.PI) / 180
+  const bearing = START_ANGLE + (360 * index) / count
+  const angle = (bearing * Math.PI) / 180
 
   return {
     "--loom-orbit-x": Math.cos(angle).toFixed(4),
     "--loom-orbit-y": Math.sin(angle).toFixed(4),
+    /**
+     * The same bearing a third time, in degrees, because a connector is a
+     * rotation and a rotation cannot be recovered from a pair of multipliers in
+     * CSS — `atan2` is not a thing a stylesheet has. It is emitted unitless and
+     * multiplied by `1deg` in the rule, which is the only way a custom property
+     * can carry an angle that `calc` will still fold.
+     */
+    "--loom-orbit-angle": bearing.toFixed(2),
   }
 }
 
@@ -162,6 +184,7 @@ export const loomOrbit = definePrimitive({
         ...loom.editable,
         className: [
           LIBRARY_CLASS.orbit,
+          given.guides === "spokes" ? LIBRARY_CLASS.orbitSpoked : undefined,
           given.direction === "anticlockwise" ? LIBRARY_CLASS.orbitReverse : undefined,
           still ? LIBRARY_CLASS.orbitStill : undefined,
         ]
@@ -204,6 +227,33 @@ export const loomOrbit = definePrimitive({
                 transform: "translate(-50%, -50%)",
                 display: "grid",
                 placeItems: "center",
+                /**
+                 * The hub is drawn by the band rather than asked for, and that
+                 * is [0192](../../decisions/0192-a-region-a-primitive-places-is-a-region-it-may-ground.md):
+                 * a region a primitive *places* is a region it may ground. It
+                 * is the same call `loom.frame` makes over its screen and
+                 * `loom.card` over its media.
+                 *
+                 * It is here because of what the centre has to survive. The
+                 * guides cross behind it, the ring turns around it, and
+                 * whatever the tree puts here is the one thing on the band
+                 * that must read as the middle — and until this was drawn, the
+                 * first photograph of an assembled page showed a wordmark the
+                 * same weight and colour as the eight going round it, sitting
+                 * in the middle of a large empty circle. A ring of nine equals
+                 * is not an orbit; nothing about the arrangement says which one
+                 * the others are moving around.
+                 *
+                 * A pill rather than a disc, because what is named here is a
+                 * product and a product's name is a word. A circle would fit a
+                 * mark of one or two letters and clip every longer one, which
+                 * is a rule that silently punishes the ordinary case.
+                 */
+                background: colour("accent-subtle"),
+                border: `1px solid ${colour("border-accent")}`,
+                borderRadius: radius("full"),
+                paddingBlock: space(3),
+                paddingInline: space(5),
               },
             },
             mark
