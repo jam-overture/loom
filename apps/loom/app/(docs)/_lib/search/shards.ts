@@ -66,11 +66,14 @@ export const docsSectionOfPath = (path: string): string | undefined => {
  * already in the browser's hands, it is already in reading order, and it is
  * already the site's one statement of what it contains.
  *
- * A section with nothing written in it — the API reference, whose pages are
- * built from data — is included and answers with an empty file. Leaving it out
- * would mean the browser holding a second idea of which sections are written,
- * which is the drift this module exists to avoid, and an empty file costs
- * thirteen bytes.
+ * **Every** section, including one nobody wrote a file for. The API reference's
+ * pages are built from data, and until 26 September that meant they had no words
+ * and this list carried a section that answered with thirteen bytes; their words
+ * are now read off what those pages render, so that file is a file like any
+ * other. What has not changed is why the list is every section rather than the
+ * written ones: a section with nothing in it answers with an empty file, and the
+ * alternative is the browser holding a second idea of which sections have words,
+ * which is the drift this module exists to avoid.
  *
  * **In reading order, and nothing depends on that.** The reader's own section
  * is asked for on its own, before this list is even known; what is left has no

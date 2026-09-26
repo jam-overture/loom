@@ -22,6 +22,7 @@ import { createThemeRegistry } from "../theme/registry.js"
 import { STARTER_PALETTES } from "../theme/library.js"
 import { PALETTE_SLOTS } from "../theme/theme.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
+import type { ElementNode } from "../tree/node.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 import {
   createFrameOriginRegistry,
@@ -5997,20 +5998,48 @@ describe("how it works, and what it works with", () => {
      * marks drawn on top of the thing they circle.
      */
     const { stylesheet, tree } = splitStylesheet(render(explainerPage(EDITORIAL)).markup)
+    /**
+     * **This pattern changed on 26 September and the change is the unit.** It
+     * was:
+     *
+     * ```
+     * style="--loom-orbit-x:(-?[0-9.]+);--loom-orbit-y:(-?[0-9.]+)"
+     * ```
+     *
+     * — anchored on the closing quote, so it asserted *these two properties and
+     * nothing else*. A seat now carries a third, `--loom-orbit-angle`, because
+     * a connector drawn back to the middle is a rotation and a rotation cannot
+     * be recovered from a pair of multipliers in CSS. The property it was
+     * really protecting is the one in this test's name and it is unchanged: the
+     * radius is still not on the element, asserted directly below.
+     */
     const seats = [
       ...tree.matchAll(
-        new RegExp(`class="${LIBRARY_CLASS.orbitSeat}[^"]*" style="--loom-orbit-x:(-?[0-9.]+);--loom-orbit-y:(-?[0-9.]+)"`, "g")
+        new RegExp(
+          `class="${LIBRARY_CLASS.orbitSeat}[^"]*" style="--loom-orbit-x:(-?[0-9.]+);--loom-orbit-y:(-?[0-9.]+);--loom-orbit-angle:(-?[0-9.]+)"`,
+          "g"
+        )
       ),
     ]
 
     expect(seats).toHaveLength(6)
     /** The first seat is at twelve o'clock: no horizontal offset, a full radius up. */
-    expect(seats[0]?.slice(1, 3)).toEqual(["0.0000", "-1.0000"])
+    expect(seats[0]?.slice(1, 4)).toEqual(["0.0000", "-1.0000", "-90.00"])
     expect(new Set(seats.map((seat) => `${seat[1]}/${seat[2]}`)).size).toBe(6)
+    /** The third property is the same fact as the first two, so it cannot disagree with them. */
+    for (const seat of seats) {
+      const [x, y, angle] = [Number(seat[1]), Number(seat[2]), Number(seat[3])]
+
+      expect(Math.cos((angle * Math.PI) / 180)).toBeCloseTo(x, 3)
+      expect(Math.sin((angle * Math.PI) / 180)).toBeCloseTo(y, 3)
+    }
     /** Alternating seats take the inner ring, which is all `rings: "two"` means. */
     expect([...tree.matchAll(new RegExp(`${LIBRARY_CLASS.orbitSeat} ${LIBRARY_CLASS.orbitInner}`, "g"))]).toHaveLength(3)
     expect(tree).not.toContain("--loom-orbit-radius")
-    expect(stylesheet).toContain("@container (max-width: 26rem) {\n  .loom-orbit-inner {\n    --loom-orbit-radius: 38%;\n  }")
+    expect(tree).not.toContain("--loom-orbit-reach")
+    expect(stylesheet).toContain(
+      "@container (max-width: 26rem) {\n  .loom-orbit-inner {\n    --loom-orbit-radius: 38%;\n    --loom-orbit-reach: 38cqi;\n  }"
+    )
     /** Nothing about the motion is on an element either: the tree carries no duration at all. */
     expect(tree).not.toContain("animation")
   })
@@ -9554,5 +9583,226 @@ describe("what a footer's columns promise", () => {
    */
   it("caps the reservation at the band's own width", () => {
     expect(footer({ columns: "four" })).toContain("min-width:min(100%, ")
+  })
+})
+
+/**
+ * The region a tile is handed something to show in, and the two renderings that
+ * were missing under the bands nobody had photographed as a page.
+ *
+ * Everything here was found by looking rather than by reasoning, which is why
+ * the assertions are mostly about *what is painted* rather than about what is
+ * declared. A schema cannot tell a tile that earns its width from one that does
+ * not, and it cannot tell a dashed line drawn in a colour nobody can see from
+ * one drawn in a colour they can.
+ */
+describe("what a picture found under the bands", () => {
+  const drawnTree = (node: ElementNode, theme: Record<string, string> = EDITORIAL): string => {
+    const ids = sequentialIdFactory()
+
+    return splitStylesheet(
+      render(
+        createTree(
+          buildElement(ids, { type: "loom.page", props: { [THEME_PROP_KEY]: theme }, children: [node] }),
+          ids
+        )
+      ).markup
+    ).tree
+  }
+
+  const feature = (withMedia: boolean, theme: Record<string, string> = EDITORIAL): string => {
+    const ids = sequentialIdFactory()
+
+    return drawnTree(
+      buildElement(ids, {
+        type: "loom.feature",
+        props: { title: "Every change is a diff", body: "Nothing lands unreviewed.", icon: "◆" },
+        children: withMedia
+          ? [
+              buildSlot(ids, "media", [
+                buildElement(ids, {
+                  type: "loom.code",
+                  props: { tone: "source" },
+                  children: [buildText(ids, "invert(delta)")],
+                }),
+              ]),
+            ]
+          : [],
+      }),
+      theme
+    )
+  }
+
+  /**
+   * The class the `@container` rule keys on, and the only thing standing
+   * between the wide cell and the squat box it was. A run that placed the
+   * region and forgot the modifier would leave every other assertion here green
+   * and the tile a column at every width — which is the state this whole entry
+   * is about, arriving again with the region in place.
+   */
+  it("marks the tile that was handed something, and only that one", () => {
+    expect(feature(true)).toContain("loom-feature-figured")
+    expect(feature(false)).not.toContain("loom-feature-figured")
+  })
+
+  /** Placed, rather than dropped: the region is a promise the schema makes. */
+  it("places what it is handed, after the words", () => {
+    const drawn = feature(true)
+
+    expect(drawn).toContain("loom-feature-media")
+    expect(drawn).toContain("invert(delta)")
+    expect(drawn.indexOf("loom-feature-copy")).toBeLessThan(drawn.indexOf("loom-feature-media"))
+  })
+
+  /**
+   * The tile with nothing to show draws no region at all, which is the rule
+   * 0187 reached for a frame with no picture in it: an empty box reserved for
+   * something that never arrives is a hole, not a placeholder.
+   */
+  it("draws no region on the hundred tiles that were never handed anything", () => {
+    expect(feature(false)).not.toContain("loom-feature-media")
+  })
+
+  it("paints the tile from the palette under both starter themes", () => {
+    for (const theme of [EDITORIAL, BOLD]) {
+      const body = feature(true, theme)
+
+      expect(body.slice(body.indexOf(">")), "a tile writes a literal colour").not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    }
+  })
+
+  const logo = (props: JsonObject, theme: Record<string, string> = EDITORIAL): string => {
+    const ids = sequentialIdFactory()
+
+    return drawnTree(buildElement(ids, { type: "loom.logo", props }), theme)
+  }
+
+  /**
+   * A mark on a ring needs something under it and a mark on a wall does not, so
+   * the plate is a rendering rather than a second primitive — and the assertion
+   * that matters is that the default did not move. Every logo wall in this
+   * library is the `plain` arm.
+   */
+  it("plates a mark only when it is asked to, and never by default", () => {
+    expect(logo({ name: "Linear", surface: "card" })).toContain("var(--loom-bg-surface)")
+    expect(logo({ name: "Linear" })).not.toContain("var(--loom-bg-surface)")
+    expect(logo({ name: "Linear", surface: "plain" })).not.toContain("var(--loom-bg-surface)")
+  })
+
+  /**
+   * Both arms of the primitive, because the plate is spread into two different
+   * style objects and a mark with a destination is the one a logo wall actually
+   * builds.
+   */
+  it("plates the linked mark too", () => {
+    const linked = logo({ name: "Linear", href: "https://linear.app", surface: "card" })
+
+    expect(linked).toContain("<a")
+    expect(linked).toContain("var(--loom-bg-surface)")
+  })
+
+  /**
+   * `border-default` and not `border-subtle`, which is the measurement rather
+   * than the preference: a tile the size of a word is mostly edge, and on the
+   * bold palette `border-subtle` is a grey around a grey on a grey. The plate
+   * would have been invisible on exactly the band it was added for.
+   */
+  it("gives the plate an edge that survives the darker palette", () => {
+    for (const theme of [EDITORIAL, BOLD]) {
+      const body = logo({ name: "Linear", surface: "card" }, theme)
+
+      expect(body).toContain("var(--loom-border-default)")
+      expect(body.slice(body.indexOf(">")), "a plated mark writes a literal colour").not.toMatch(
+        /#[0-9a-fA-F]{3,8}\b/
+      )
+    }
+  })
+
+  const orbit = (props: JsonObject, count = 4): string => {
+    const ids = sequentialIdFactory()
+
+    return drawnTree(
+      buildElement(ids, {
+        type: "loom.orbit",
+        props,
+        children: [
+          buildSlot(ids, "mark", [buildElement(ids, { type: "loom.logo", props: { name: "Overture" } })]),
+          ...Array.from({ length: count }, (_unused, index) =>
+            buildElement(ids, { type: "loom.logo", props: { name: `Tool ${String(index)}` } })
+          ),
+        ],
+      })
+    )
+  }
+
+  it("draws a connector to the middle only where the tree asked for one", () => {
+    expect(orbit({ guides: "spokes" })).toContain("loom-orbit-spoked")
+    expect(orbit({ guides: "dashed" })).not.toContain("loom-orbit-spoked")
+    expect(orbit({ guides: "none" })).not.toContain("loom-orbit-spoked")
+  })
+
+  /**
+   * The bearing, a third copy of the seat's own angle, asserted as *the same
+   * angle the multipliers already encode* rather than as four numbers. Four
+   * seats start at twelve o'clock and are a quarter turn apart, and a run that
+   * wrote the index instead of the angle would pass every other test here.
+   */
+  it("gives each seat its own bearing, starting at twelve o'clock", () => {
+    const drawn = orbit({ guides: "spokes" })
+    const bearings = [...drawn.matchAll(/--loom-orbit-angle:([-\d.]+)/g)].flatMap((match) =>
+      match[1] === undefined ? [] : [Number(match[1])]
+    )
+
+    expect(bearings).toEqual([-90, 0, 90, 180])
+  })
+
+  /**
+   * The hub, which is the primitive grounding a region it places (0192) and is
+   * the difference between a ring of nine equals and an orbit. Only where there
+   * is something to ground: a band that placed no mark would otherwise get an
+   * empty tinted pill in the middle of its ring.
+   */
+  it("grounds the middle, and only when something is in it", () => {
+    const ids = sequentialIdFactory()
+    const bare = drawnTree(
+      buildElement(ids, {
+        type: "loom.orbit",
+        props: { guides: "dashed" },
+        children: [buildElement(ids, { type: "loom.logo", props: { name: "Tool" } })],
+      })
+    )
+
+    expect(orbit({ guides: "spokes" })).toContain("var(--loom-accent-subtle)")
+    expect(bare).not.toContain("var(--loom-accent-subtle)")
+  })
+
+  /**
+   * The guides are this band's whole argument and one of the two starter
+   * palettes was drawing them in a colour that does not exist against its own
+   * surface. Asserted on the shared stylesheet, which is where the rule lives.
+   */
+  it("draws the ring and its connectors in a line the darker palette can show", () => {
+    const ids = sequentialIdFactory()
+    const { stylesheet } = splitStylesheet(
+      render(
+        createTree(
+          buildElement(ids, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: EDITORIAL },
+            children: [
+              buildElement(ids, {
+                type: "loom.orbit",
+                props: { guides: "spokes" },
+                children: [buildElement(ids, { type: "loom.logo", props: { name: "Tool" } })],
+              }),
+            ],
+          }),
+          ids
+        )
+      ).markup
+    )
+
+    expect(stylesheet).toContain("border: 1px dashed var(--loom-border-default)")
+    expect(stylesheet).toContain("border-block-start: 1px dashed var(--loom-border-default)")
   })
 })

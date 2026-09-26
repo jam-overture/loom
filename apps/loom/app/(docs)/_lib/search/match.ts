@@ -279,17 +279,53 @@ const lineOf = (code: string, at: number): string => {
  * keeps the rule to one a person can repeat rather than an arithmetic nobody
  * can predict from the screen.
  */
+/**
+ * Where the page answered: the place the reader's words are most together.
+ *
+ * It was *the first place any of them appeared*, which is the same thing on a
+ * paragraph and is not on a page. A written page's words are cut up by heading,
+ * so a body is a few sentences and the first `two` in it is in the sentence
+ * about `two`; a generated page's words are the **whole page** in one body
+ * (`search/generated.ts`), and the first `two` in 4,500 characters is wherever
+ * the word happens to fall. Searching *same declaration reached two ways* on
+ * the reference's front door showed a reader a sentence about how long it takes
+ * to pick an import — every word they typed was on that page, and none was in
+ * the line they were shown.
+ *
+ * So each place is scored by how many of their words a window centred on it
+ * would contain, and the best wins. **Ties go to the earliest**, which keeps
+ * the old behaviour wherever the terms are as together at the top as anywhere
+ * else, and keeps the same query answering with the same line every time.
+ */
+const answeredAt = (text: string, carried: readonly string[]): number | undefined => {
+  const byTerm = carried.map((term) => placesIn(text, term).map(([at]) => at))
+  const starts = byTerm.flat().sort((a, b) => a - b)
+
+  const best = starts.reduce<{ readonly start: number; readonly words: number } | undefined>(
+    (found, start) => {
+      const words = byTerm.filter((places) =>
+        places.some((at) => at >= start - BEFORE && at <= start + AFTER)
+      ).length
+
+      return found === undefined || words > found.words ? { start, words } : found
+    },
+    undefined
+  )
+
+  return best?.start
+}
+
 const cutFrom = (
   text: string,
   carried: readonly string[],
   terms: readonly string[],
   cut: (text: string, at: number) => string
 ): readonly ExcerptPart[] => {
-  const first = Math.min(...carried.flatMap((term) => placesIn(text, term).map(([at]) => at)))
+  const at = answeredAt(text, carried)
 
-  if (!Number.isFinite(first)) return []
+  if (at === undefined) return []
 
-  return marked(cut(text, first), terms)
+  return marked(cut(text, at), terms)
 }
 
 const excerptOf = (

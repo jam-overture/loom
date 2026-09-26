@@ -2,6 +2,7 @@ import { outsideFences } from "../fences/spans"
 
 import { headingAnchor } from "./anchor"
 import { readPageSource } from "./headings"
+import { ELIDED, plainWords } from "./words"
 
 /**
  * The words on a page, section by section, for the search box to look through.
@@ -57,17 +58,7 @@ const INDEXED_LEVELS: readonly number[] = [2, 3]
 const stripInline = (text: string): string => text.replace(/[`*_]/g, "")
 
 /**
- * What is left where a name was.
- *
- * The names have to go — see above — but taking one out of the middle of a
- * sentence leaves prose that reads as a mistake: *"it asks the you passed"* was
- * the first excerpt this produced. An ellipsis says a word was left out, which
- * is what happened, and it costs a reader nothing to skip.
- */
-const ELIDED = "…"
-
-/**
- * Markdown and MDX reduced to the words a reader sees, in the order they see
+ * The markdown taken out, leaving the words a reader sees in the order they see
  * them.
  *
  * Tags go and what is between them stays, because `<Callout>` holds a sentence
@@ -75,7 +66,7 @@ const ELIDED = "…"
  * its words and loses its href, for the same reason a heading keeps its words:
  * the reader searches for what is on the screen.
  */
-const plainText = (markdown: string): string =>
+const markdownText = (markdown: string): string =>
   markdown
     .replace(/<[^>]*>/g, " ")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
@@ -84,11 +75,17 @@ const plainText = (markdown: string): string =>
     .replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, " ")
     .replace(/^\s*>+/gm, " ")
     .replace(/[*_|#]/g, " ")
-    .replace(/\s+/g, " ")
-    /* Two names in a row are one omission to a reader, not two. */
-    .replace(new RegExp(`${ELIDED}(?:[\\s,;]*${ELIDED})+`, "g"), ELIDED)
-    .replace(new RegExp(`\\s+([,.;:)])`, "g"), "$1")
-    .trim()
+
+/**
+ * Markdown and MDX reduced to the words a reader sees, in the order they see
+ * them, and then spaced and trimmed the way every body in the index is.
+ *
+ * The rules above this line are about markdown and belong to this file. The
+ * ones below it are about what a body looks like, are the same for a body read
+ * off a component (`rendered.ts`), and live in `words.ts` where both readers
+ * can call them.
+ */
+const plainText = (markdown: string): string => plainWords(markdownText(markdown))
 
 type Reading = {
   readonly anchor: string

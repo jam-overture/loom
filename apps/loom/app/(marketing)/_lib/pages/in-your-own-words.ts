@@ -1,6 +1,6 @@
 import { buildElement, type IdFactory, type LoomNode } from "@loom/runtime"
 
-import { BAND } from "../bands"
+import { ANCHOR, BAND } from "../bands"
 import { action, prose, section, stack } from "../nodes"
 import { DEMO, surfaceHref, type SiteThemeName } from "../site"
 
@@ -116,15 +116,19 @@ const wayOut = (ids: IdFactory, origin: string): LoomNode =>
   ])
 
 /**
- * The name this band answers to, spelled once.
+ * The name this band answers to, read off the one list rather than spelled here.
  *
- * Two readers need to agree on it and they are in different files — the band
- * above writes the link and this one writes the anchor — which is the same
- * argument `BAND` makes for the eyebrows, at a smaller scale. A link pointing at
- * a band that has since been renamed is a control that silently does nothing,
- * and nothing else on the page would say so.
+ * It was a literal in this file until the notice at the top of the page needed
+ * an anchor of its own and there were about to be two of these in two files.
+ * The argument for writing it down once has not changed — the band above writes
+ * the link and this one writes the anchor, and a link pointing at a band that
+ * has since been renamed is a control that silently does nothing — it is just
+ * that the one place is now `ANCHOR`, beside the eyebrows it is the smaller
+ * version of.
+ *
+ * The export stays because two files already import this name.
  */
-export const YOUR_TURN_ANCHOR = "your-turn"
+export const YOUR_TURN_ANCHOR = ANCHOR.inYourOwnWords
 
 export type InYourOwnWordsContext = {
   readonly origin: string

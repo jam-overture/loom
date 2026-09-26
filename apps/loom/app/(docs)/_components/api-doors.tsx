@@ -245,8 +245,40 @@ const FromHere = () => (
   </section>
 )
 
+/**
+ * What the page is, in the two sentences a reader meets before the list.
+ *
+ * Here rather than in the route, and that is the point of it: the words on a
+ * generated page have to live somewhere the search index can read them, and
+ * what the index reads is what this component returns (`_lib/api/body.tsx`
+ * says why). A paragraph left in the route would be a sentence on the site that
+ * the site cannot find — which is the state every sentence on this page was in
+ * until 26 September.
+ *
+ * Counted rather than spelled, for the reason `nav.ts` gives about the heading:
+ * *"one of sixteen imports"* is a true sentence today and a false one the
+ * morning a seventeenth door opens, and nothing would go red.
+ */
+const Lead = ({ doorway }: { readonly doorway: ApiDoorway }) => (
+  <>
+    <p className="text-lg">
+      Loom is one package. What you write at the top of a file is one of {doorway.doors.length}{" "}
+      imports, and which one you write decides what your program loads — so they are worth two
+      minutes before you pick.
+    </p>
+
+    <p>
+      Every name behind them is read from the package itself rather than written here, which is why
+      the counts below are exact: {doorway.doors.length} imports, {grouped(doorway.packageNames)}{" "}
+      names, and a page for each import saying what comes out of it.
+    </p>
+  </>
+)
+
 export const ApiDoors = ({ doorway }: { readonly doorway: ApiDoorway }) => (
   <>
+    <Lead doorway={doorway} />
+
     {AUDIENCES.map((group) => {
       const doors = apiDoorsFor(doorway, group.audience)
 

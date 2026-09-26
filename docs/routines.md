@@ -48,15 +48,43 @@ the bill moving.* A run that ends with something scheduled fails it.
 
 ## Reading the merge gate
 
-**Never pipe a gate into `tail`.** `pnpm verify 2>&1 | tail -35` reports the
-exit code of the *pipe*, which is `tail`'s, which is 0 — so a failed verify
-reads as a passed one. The `ELIFECYCLE` lines are in the output and easy to read
-past when you are looking for a test count. Redirect to a file and check `$?`,
-or read the whole thing.
+**Never let anything run after the gate on the same line.** Not `| tail`, not
+`| tee`, not `| grep`, not a trailing `echo`. What a harness, a shell or a CI
+step reports for a compound line is the **last command's** status, and the last
+command is almost never the gate. So:
 
-Filed by `Loom primitives` on 12 September after it cost that run fifteen
-minutes, and written here rather than in any lane's code because it is a thing a
-**run** does, not a thing the repository contains.
+```bash
+pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
+```
+
+and then read `verify.exit` in a separate command. Writing the status to a file
+has to be the *last thing the line does*.
+
+This is the second spelling of one mistake and the reason the rule now names the
+act. `Loom primitives` filed the first on 12 September, after
+`pnpm verify 2>&1 | tail -35` cost that run fifteen minutes: the exit code of a
+pipe is the last stage's, which is `tail`'s, which is 0, so a failed verify reads
+as a passed one — and the `ELIFECYCLE` lines are easy to read past when you are
+looking for a test count. The rule written down then said *never pipe a gate into
+`tail`*, and on 25 September the same lane read it, followed its remedy, and hit
+it anyway with:
+
+```bash
+(pnpm verify > verify.log 2>&1; echo "EXIT=$?" | tee verify.exit)
+```
+
+`$?` was correct and the file said `EXIT=1`. **The session's own notification
+said exit code 0**, because the status of that compound command is `tee`'s. The
+remedy had been followed and the failure mode had moved one pipe to the right.
+It cost nothing, because the file was read as well as the notification and the
+two disagreed; what it would have cost is a pull request opened on red with a
+report saying green, which is the one thing this section exists to prevent.
+
+*A rule naming one spelling of an act is a rule that stops working the moment
+somebody reaches for the other one* — the sentence is the 24 September
+author-flag entry's, and this is its third instance. Written here rather than in
+any lane's code because it is a thing a **run** does, not a thing the repository
+contains.
 
 ## Lanes
 
@@ -262,11 +290,39 @@ on scroll is otherwise photographed blank below the fold, and every shot prints
 `scrollWidth` against `innerWidth` so a page wider than the phone says so
 instead of being eyeballed.
 
-One thing neither does, worth knowing before writing a list: **it does not start
-your application.** And one rule worth keeping in mind while writing one:
-**wait on a selector, not on the network.** A form driven by `useActionState`
-submits by fetch, so the page is idle *before* the cookie it sets exists — one
-run photographed a sign-in page believing it was the screen behind it.
+One rule worth keeping in mind while writing a list: **wait on a selector, not
+on the network.** A form driven by `useActionState` submits by fetch, so the
+page is idle *before* the cookie it sets exists — one run photographed a sign-in
+page believing it was the screen behind it.
+
+#### `--serve`, and the server that outlived its build
+
+`pnpm shoot` will start the application for you, photograph it and stop it
+again ([0191](../decisions/0191-the-harness-may-start-the-application-because-there-is-now-only-one.md),
+which takes over that one sentence of 0117):
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm shoot <shot-list.json> --serve apps/loom
+```
+
+The list's `baseUrl` is replaced by the origin it starts on, an ephemeral port
+so it runs beside your own `next dev`, and it prints the build's own newest
+write beside it — `built 2026-09-25T21:32:14.027Z` — which is the line to quote
+in a report. **It does not build.** A build with no `.next` is refused with the
+command that makes one.
+
+**Use it, and this is why.** `next start` loads a route's compiled module the
+first time it is asked for that route and keeps it, so a server left running
+across a rebuild serves a mixture afterwards — stale for every route it had
+already answered, fresh for every route it had not — while `next build` exits 0
+and the source on disk is right. Nothing in a response says which. It cost the
+documentation lane a screenshot cycle on 24 September and was filed as a killed
+build; it is not, and a killed build rebuilds correctly. A server this harness
+started cannot be in that state.
+
+Without the flag nothing changes: a `baseUrl` and a server you are running is
+still how you photograph a preview deployment, or a screen whose environment
+this harness cannot produce.
 
 #### Reaching the state, and the screen behind a session
 
