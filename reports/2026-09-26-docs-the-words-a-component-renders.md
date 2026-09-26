@@ -3,7 +3,11 @@
 **Routine:** `Loom docs` · **Branch:** `docs-36-the-words-a-component-renders` · **Section:** §4c
 
 **Preview:**
-<https://loom-git-docs-36-the-words-a-c-PENDING-jpizzolato36-6341s-projects.vercel.app>
+<https://loom-git-docs-36-the-words-a-5407ea-jpizzolato36-6341s-projects.vercel.app>
+— Vercel reported **Ready** on `96b4156`. Published unverified, as every routine
+run's is: `*.vercel.app` is off this sandbox's egress allowlist. Everything
+measured below is a production build (`next build && next start`), fetched over
+real HTTP and driven in Chromium.
 
 ![The same query, on `main` and on this branch](2026-09-26-docs-the-words-a-component-renders-before-install.png)
 
