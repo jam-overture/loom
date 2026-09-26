@@ -59,6 +59,22 @@ export type ShotStep =
    * shot exactly as the shot-level `waitFor` does.
    */
   | { readonly waitFor: string }
+  /**
+   * Bring the element `scrollTo` names into view, without pressing it.
+   *
+   * The fourth reach, and the first that is not about time or a press. A
+   * surface that pins something to a scroller — a rail, a sticky caution, a
+   * long table with a header — has states that are a fact about scroll
+   * position and about nothing else, and no sequence of presses reaches them:
+   * the driver scrolls an element into view before clicking it, but only to
+   * the minimum position that exposes *that* element, which is a position
+   * chosen by the driver rather than by the lane.
+   *
+   * It reaches and does not report, so it is on 0159's near side: the harness
+   * never says whether the element was already in view, or where the scroller
+   * ended up.
+   */
+  | { readonly scrollTo: string }
 
 /**
  * The longest a single `wait` step may ask for.
@@ -70,6 +86,43 @@ export type ShotStep =
  * animation or a batched broadcast needs.
  */
 export const MAX_WAIT_MS = 30_000
+
+/**
+ * What the browser already holds when this shot's first document loads.
+ *
+ * Every step in a `do` list happens *after* a page has read what it reads and
+ * decided what to say, so a screen whose whole subject is the state the
+ * browser arrived with is unreachable by any of them: a record that will not
+ * parse, a record carried from another machine, storage the reader has
+ * blocked. Three such screens shipped in one lane on 17 September and all
+ * three were photographed by a hand-written driver in a scratch directory,
+ * which is the arrangement [0116](../../decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+ * exists to keep from becoming normal.
+ *
+ * **A closed set of named states, never a script.** The obvious field is an
+ * `initScript` string, and it is refused in [0195](../../decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md):
+ * a shot list is input, `strict` on every member so that a misspelling is
+ * loud, and a field that runs whatever it is handed is the one thing in such a
+ * file that cannot be checked at all. These two members are data — a map and a
+ * flag — and the JavaScript that applies them is written here, in this
+ * repository, where it is read and typed like everything else.
+ *
+ * A union rather than two optional fields, so *seed this key* and *make
+ * storage throw* cannot both be asked for in one shot. They are opposite
+ * instructions and the pair has no meaning.
+ */
+export type StartState =
+  /** Written to `localStorage` before the first paint of every document here. */
+  | { readonly storage: Readonly<Record<string, string>> }
+  /**
+   * Make `window.localStorage` throw, the way a browser does when the reader
+   * has blocked site data.
+   *
+   * The state most worth photographing of the three, because it is the one a
+   * reader cannot see is happening, and the one a map of keys cannot reach:
+   * there is no value of any key that means *this throws*.
+   */
+  | { readonly storageBlocked: true }
 
 /** Where the shutter points: the viewport, the whole page, or one element. */
 export type CaptureTarget = {
@@ -93,6 +146,14 @@ export type CaptureTarget = {
 }
 
 export type SpecimenPage = {
+  /**
+   * Put the browser in the state the shot starts from, before anything loads.
+   *
+   * On the seam rather than inside `goto`, because it is a property of the
+   * context and not of one address: the `before` that signs a shot in opens a
+   * page too, and a seeded record has to be there for that one as well.
+   */
+  readonly start: (state: StartState) => Promise<void>
   readonly goto: (url: string, waitFor?: string, frame?: string) => Promise<void>
   /** Runs the steps in order. Anchor navigation is pinned; see `playwright.ts`. */
   readonly act: (steps: readonly ShotStep[], frame?: string) => Promise<void>
@@ -181,6 +242,15 @@ export type Shot = Approach & {
    * is inside the context, before the shot.
    */
   readonly before?: Approach
+  /**
+   * What the browser holds before the first document of this shot, `before`
+   * included.
+   *
+   * On the shot rather than on an approach, for the reason `before` is on the
+   * shot: the state belongs to the context, and the context is what a shot
+   * gets one of.
+   */
+  readonly start?: StartState
   readonly fullPage: boolean
   readonly clip?: string
 }
@@ -227,6 +297,12 @@ export const captureShots = async (
   for (const shot of shots) {
     const page = await browser.open(shot.viewport)
     try {
+      /**
+       * Before the `before`. A shot that signs in and then reads a record
+       * wants the record there for both loads, and the only ordering that
+       * gives it that is this one.
+       */
+      if (shot.start !== undefined) await page.start(shot.start)
       if (shot.before !== undefined) await reach(page, shot.before)
       await reach(page, shot)
       /**

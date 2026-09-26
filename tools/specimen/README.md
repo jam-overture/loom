@@ -196,10 +196,42 @@ instead of the viewport:
 }
 ```
 
-Four steps and no more: `click`, `fill`, `wait` and `waitFor`. Every one of them
-names a state to arrive at and none of them reports what is there — the moment
-this grows a way to assert or to branch, the harness has become a test runner
-with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
+Five steps and no more: `click`, `fill`, `wait`, `waitFor` and `scrollTo`. Every
+one of them names a state to arrive at and none of them reports what is there —
+the moment this grows a way to assert or to branch, the harness has become a
+test runner with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
+
+`scrollTo` brings an element into view without pressing it, which is the only
+way to reach a state that is a fact about scroll position: a rail that pins
+something to its scroller has frames no press lands on, because the driver
+scrolls only far enough to expose the thing it is about to click. It is strict
+like `click`, for the same reason — which of two matches is brought into view
+decides what the picture is of.
+
+### Reaching a state the load has already passed
+
+A `do` list runs after the page has read what it reads. A screen whose whole
+subject is *what the browser arrived with* is therefore unreachable by any step,
+and `start` is the field for it ([0195](../../decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)):
+
+```json
+{ "path": "/lessons/3", "out": "unreadable-record",
+  "start": { "storage": { "loom.lessons.progress.v1": "{{{" } } }
+{ "path": "/lessons/3", "out": "storage-blocked", "start": { "storageBlocked": true } }
+```
+
+Two members, both data. `storage` writes keys before the first paint;
+`storageBlocked` makes `window.localStorage` throw a `SecurityError` on access,
+the way a browser does when the reader has blocked site data — the state a map
+of keys cannot reach, and the one a reader cannot see is happening. There is no
+`initScript` and there is not going to be one: a shot list is input, `strict` on
+every member so a misspelling is loud, and a field that runs whatever it is
+handed is the one thing in such a file that cannot be checked at all. The
+JavaScript that applies these lives in `start-state.ts`, in this repository,
+typed and tested like everything else.
+
+`start` is on the shot and applies before the `before` as well, because the
+state belongs to the context and the context is what a shot gets one of.
 
 A `do` list is a sequence against **one** page, so anchor navigation is
 prevented for its duration — otherwise step two runs somewhere else and the

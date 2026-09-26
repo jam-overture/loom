@@ -63,6 +63,40 @@ const stepSchema = z.union([
   z.object({ fill: z.string().min(1), text: z.string() }).strict(),
   z.object({ wait: z.number().int().positive().max(MAX_WAIT_MS) }).strict(),
   z.object({ waitFor: z.string().min(1) }).strict(),
+  /** Bring an element into view without pressing it. `ShotStep.scrollTo`. */
+  z.object({ scrollTo: z.string().min(1) }).strict(),
+])
+
+/**
+ * What the browser starts with, as a lane writes it in JSON.
+ *
+ * A union of two strict objects, for `stepSchema`'s reason and one more of its
+ * own: the two members are opposite instructions, so a union refuses the pair
+ * by construction rather than by a refinement written afterwards. `StartState`
+ * says why this is a closed set of named states and not an `initScript`.
+ */
+const startSchema = z.union([
+  z
+    .object({
+      storage: z
+        .record(z.string().min(1), z.string())
+        /**
+         * An empty map is a lane that believes it seeded something. It parses,
+         * runs, writes nothing and photographs the page an ordinary load
+         * produces — which is the silent wrong picture, arriving through the
+         * one field added to reach a state a load cannot.
+         */
+        .refine((entries) => Object.keys(entries).length > 0, {
+          message: "needs at least one key: an empty map seeds nothing and photographs an ordinary load",
+        }),
+    })
+    .strict(),
+  /**
+   * `true` and not a boolean. `storageBlocked: false` is a field that reads as
+   * a decision and means nothing, and a lane that writes it has said something
+   * it will believe later.
+   */
+  z.object({ storageBlocked: z.literal(true) }).strict(),
 ])
 
 /**
@@ -96,6 +130,11 @@ export const shotSchema = z
      * is opened and never photographed. `Shot.before` says why it is per shot.
      */
     before: approachSchema.optional(),
+    /**
+     * What the browser holds before anything loads, `before` included.
+     * `Shot.start` says why it is per shot rather than per approach.
+     */
+    start: startSchema.optional(),
     fullPage: z.boolean().default(false),
     /** A selector to photograph instead of the viewport. `CaptureTarget.clip`. */
     clip: z.string().min(1).optional(),
@@ -182,6 +221,7 @@ export const planShots = (list: ShotList): readonly Shot[] =>
     file: withExtension(shot.out),
     viewport: typeof shot.viewport === "string" ? VIEWPORTS[shot.viewport] : shot.viewport,
     ...(shot.before === undefined ? {} : { before: approachOf(list, shot.before) }),
+    ...(shot.start === undefined ? {} : { start: shot.start }),
     fullPage: shot.fullPage,
     ...(shot.clip === undefined ? {} : { clip: shot.clip }),
   }))
