@@ -8,6 +8,41 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-26 — the demo's best available device is a photograph, and nothing in this repository can hold one
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a decision rather than a defect**, and it is the maintainer's because
+every way out of it is a licence or a domain.
+
+The maintainer asked for a more modern default state and supplied an
+inspiration image. Its devices are few and this run took all but one of them:
+dark ground, a large tightly-tracked display line with one accent word,
+monospace micro-labels, quiet chips, depth from hairlines. The one left is the
+**photograph behind the hero**, and it is doing more work than any other single
+element in that image.
+
+It is not a thing a routine can add:
+
+| route | what stops it |
+| --- | --- |
+| an inline asset | `mediaUrlSchema` refuses `data:` deliberately, so it is not expressible in a tree |
+| a same-origin path | names a file in `apps/loom/public/`, and there is no such file |
+| a hosted URL | a live third-party link in a tree a page might publish, on a domain nobody here controls |
+| fetching stock photography | a licence, over an egress allowlist, committed to the repository by a scheduled session |
+
+`loom.hero`'s own `aurora` backdrop is what the demo ships instead — drawn from
+the palette, no asset, and it is why the new arrival screen has any depth at
+all. **This is not a request to change `loom.media`**, whose refusal of `data:`
+is right, and the `hero-band` composition already records the same gap in its
+own words: *"the slot stays empty for whoever has a screenshot."*
+
+**Three ways out, and picking one is the whole finding:** an image committed
+under `apps/loom/public/` with a licence you have read; a URL on a domain you
+control; or a decision that this surface is type-led and the hero's media slot
+stays empty for good. The third is a legitimate answer and would let this lane
+stop reaching for the first two.
+
+---
 ## 2026-09-26 — a bulleted list of markdown links is not a workaround: five of six were backticked, outside any table
 
 **Filed by:** `Loom demo` · **Owned by:** whoever owns the pull-request tooling
