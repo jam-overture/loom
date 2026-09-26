@@ -43,6 +43,54 @@ stays empty for good. The third is a legitimate answer and would let this lane
 stop reaching for the first two.
 
 ---
+## 2026-09-26 — a host cannot ask a resolved theme which way round it is, so every surface that frames part of a tree computes it again
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`src/theme/`, `src/render/theme.ts`) · **Status:** open — **a gap, and it cost
+this lane a 1.10:1 contrast ratio on the demo's decisive frame.**
+
+`themeStyle(theme)` hands a host every custom property a primitive reads. What
+it cannot hand a host is the one fact the host itself needs to draw *around* the
+tree: **is this palette light or dark.** Two things follow, and the second is
+the expensive one:
+
+| a host drawing… | needs | gets from the runtime |
+| --- | --- | --- |
+| a page, whole | nothing — the root primitive paints `bg-canvas` | fine |
+| an **excerpt** rooted below the root | the ground the excerpt would have sat on | **nothing** — `loom.stat-grid` never reads `loom.theme` |
+| the frame's `color-scheme` | light or dark | **nothing** |
+
+So a host writes its own ground into a stylesheet, and the stylesheet is a
+constant while the theme is data. This lane had exactly that: `.loom-stage`
+carried `background-color: var(--surface-stage)` and `color-scheme: light`,
+correct for as long as the demo tree named a light palette. It named a dark one
+on 26 September and the excerpt inside the Gate's question — *"This is what
+would come off the page"* — went on painting white under `#f3f4f7` ink.
+**1.10:1**, measured on a production build at 390 × 844: not low contrast, no
+contrast. Nothing errored and no test could see it.
+
+**Closed here for this lane only** (`apps/loom/app/(demo)/_lib/ground.ts`), and
+the reason it is filed rather than left closed is that the derivation is not
+demo-specific and the next host to draw a partial tree will write it a third
+time. It is eight lines and it is arguably the runtime's:
+
+```ts
+relativeLuminance(palette.slots["fg-default"]) > relativeLuminance(palette.slots["bg-canvas"])
+```
+
+**Two shapes, and the second is the smaller ask.** A field on `ResolvedTheme`
+— the palette already measures itself for `paletteScrim`, so this is a third
+derived reading beside `chroma` and `scrim` and would re-theme with everything
+else. Or a `themeGround(theme)` beside `themeStyle(theme)` in
+`@loom/runtime/react`, returning `{ backgroundColor, color, colorScheme }`,
+which is the shape a host applies and needs no schema change at all.
+
+No threshold is wanted in either: comparing a palette's own ink to its own
+canvas needs none, and across the twenty-one registered palettes the two groups
+are canvases at **L > 0.9** and **L < 0.02**, so nothing sits near a line that
+does not exist.
+
+---
 ## 2026-09-26 — a bulleted list of markdown links is not a workaround: five of six were backticked, outside any table
 
 **Filed by:** `Loom demo` · **Owned by:** whoever owns the pull-request tooling

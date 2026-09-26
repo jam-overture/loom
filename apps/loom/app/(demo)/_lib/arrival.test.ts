@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { ANSWER_ARRIVES, clearanceFor } from "./arrival"
+import { ANSWER_ARRIVES, clearanceFor, roomToLand } from "./arrival"
 
 /**
  * One decision held in one place, and the test is for the *pairing* rather than
@@ -53,4 +53,49 @@ describe("where the answer arrives", () => {
       expect(clearanceFor(block) === "").toBe(block === "start")
     }
   )
+})
+
+/**
+ * The third half, added after the two above were measured coming back on a
+ * branch that changed neither of them.
+ *
+ * Folding the explainer took about three hundred pixels out of the rail, and
+ * the scroller then ran out of travel 404 pixels before the card reached the
+ * top — so `ANSWER_ARRIVES` went on saying `start`, `clearanceFor` went on
+ * returning nothing, both tests above went on passing, and the caution was
+ * back on the frame the demo's one invited press produces. A landing the
+ * layout can silently withdraw is not a landing.
+ */
+describe("the room the card needs to land in", () => {
+  it("is given while a question is waiting", () => {
+    expect(roomToLand(true)).toBe("lg:pb-[70vh]")
+  })
+
+  /**
+   * And not otherwise. On arrival the rail is barely taller than the viewport,
+   * so trailing room would make the demo's default state — the one a stranger
+   * judges — scroll into emptiness.
+   */
+  it("is nothing at all when nothing is waiting", () => {
+    expect(roomToLand(false)).toBe("")
+  })
+
+  /**
+   * Wide only, and stated as a property rather than by reading the string
+   * twice: on a phone the document scrolls and the card reaches the top by
+   * ordinary means, so an unprefixed padding would be dead space on the screen
+   * with the least of it to spare.
+   */
+  it("applies only where the rail is a scroller of its own", () => {
+    expect(roomToLand(true).split(" ").every((token) => token.startsWith("lg:"))).toBe(true)
+  })
+
+  /**
+   * A viewport unit rather than a length, because the shortfall is
+   * `viewport − card − what follows it` and therefore grows with the screen: a
+   * rem value measured on a laptop is short on a monitor.
+   */
+  it("is measured against the viewport", () => {
+    expect(roomToLand(true)).toContain("vh")
+  })
 })
