@@ -88,6 +88,7 @@
     "decisions:index": "tsx tools/decisions/build-index.ts",
     "prerender:check": "tsx tools/prerender/main.ts",
     "queue": "tsx tools/queue/main.ts",
+    "package:primitives": "tsx tools/package/main.ts",
     "shoot": "tsx tools/screenshot/shoot.ts",
     "specimen": "tsx tools/specimen/main.ts"
   },

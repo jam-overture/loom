@@ -33423,3 +33423,82 @@ time** remains the rule, and it is the rule that caught this.
 should ever be quoted, in a table cell or anywhere else. Until then the three
 entries together say all a lane needs — link rather than embed, keep the link out
 of a table, and read the body back.
+
+---
+
+## 2026-09-26 — `@loom/primitives` cannot be installed beside `@loom/runtime@0.0.1`, and npm refuses it rather than warning
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`package.json` at the root is its file) · **Status:** open — **measured, not
+predicted**, and it is a one-word fix somebody has to choose
+
+`@loom/primitives` is built to take the runtime as a **peer** dependency, which
+is the right shape: two copies of the runtime in a host's tree would be two
+`PrimitiveType` brands and a registry that refuses its own entries.
+
+The peer range is `~0.1.0`. The root `package.json` says `0.0.1`. Packing both
+and installing them into an empty project:
+
+```
+npm error code ERESOLVE
+npm error Found: @loom/runtime@0.0.1
+npm error Could not resolve dependency:
+npm error peer @loom/runtime@"~0.1.0" from @loom/primitives@0.1.0
+```
+
+**This is a refusal, not a warning.** `npm install` exits non-zero and installs
+nothing, so it is not something a host works around — it is the package being
+uninstallable.
+
+**One of the two numbers has to move**, and the recommendation is that they go
+out together at `0.1.0`: it is the first release either has had, `0.0.1` reads
+as a placeholder because it is one, and the two are compiled against each other
+so an independent version would be a promise nothing tests. `docs/rollout.md`
+Phase 2 asks for *"a version number that means something"*, and a pair that
+moves together is the smallest thing that does.
+
+**Why this lane did not just change it.** The root `package.json` is the
+framework's, its `version` is a claim about what the framework promises, and
+`private: true` sits four lines above it — lifting that is the same decision in
+the same file and it is not this lane's to take. The primitives' peer range is
+one constant (`RUNTIME_RANGE` in `tools/package/manifest.ts`) and moves in
+whichever direction is chosen.
+
+**What would close it**: the two versions agreeing, and a re-run of the install
+check in `docs/publishing.md`.
+
+---
+
+## 2026-09-26 — there is no LICENSE, and for npm that is not a soft blocker
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **the maintainer's, and nothing else unblocks it.** Already
+named in `docs/rollout.md` Phase 2; this entry is the npm-specific consequence,
+which is sharper than that page's framing
+
+`docs/rollout.md` says licensing *"gates whether the repository can be public at
+all"* and is *"the maintainer's and nothing unblocks it but a decision."* That
+is true and it understates the publishing case.
+
+**A published npm package with no licence is a package nobody may legally
+use.** It is not a missing badge: npm displays it as UNLICENSED, every corporate
+dependency scanner flags it, and the default in the absence of a licence is
+exclusive copyright — a reader who installs it has no permission to use, copy or
+modify it. Publishing without one and adding it later means the first release
+anybody sees is the one they are told not to depend on.
+
+So `pnpm package:primitives` **exits non-zero** until `LICENSE` exists at the
+repository root, and the readiness table calls it BLOCKED and attributes it. The
+generated manifest reads the file rather than asserting anything: an SPDX
+identifier on the first line (`MIT`) becomes the `license` field, and anything
+else becomes `SEE LICENSE IN LICENSE`, which is correct and tells a reader
+nothing.
+
+**This run deliberately did not choose one.** A licence is a legal commitment
+about a body of work, made by whoever owns it; a routine picking `MIT` because
+it is the common answer would be a routine making that commitment on somebody
+else's behalf. The path was tested with a temporary `LICENSE` and the file was
+removed.
+
+**What would close it**: a `LICENSE` file at the root. Everything downstream of
+it is already built.
