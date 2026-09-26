@@ -48,15 +48,43 @@ the bill moving.* A run that ends with something scheduled fails it.
 
 ## Reading the merge gate
 
-**Never pipe a gate into `tail`.** `pnpm verify 2>&1 | tail -35` reports the
-exit code of the *pipe*, which is `tail`'s, which is 0 — so a failed verify
-reads as a passed one. The `ELIFECYCLE` lines are in the output and easy to read
-past when you are looking for a test count. Redirect to a file and check `$?`,
-or read the whole thing.
+**Never let anything run after the gate on the same line.** Not `| tail`, not
+`| tee`, not `| grep`, not a trailing `echo`. What a harness, a shell or a CI
+step reports for a compound line is the **last command's** status, and the last
+command is almost never the gate. So:
 
-Filed by `Loom primitives` on 12 September after it cost that run fifteen
-minutes, and written here rather than in any lane's code because it is a thing a
-**run** does, not a thing the repository contains.
+```bash
+pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
+```
+
+and then read `verify.exit` in a separate command. Writing the status to a file
+has to be the *last thing the line does*.
+
+This is the second spelling of one mistake and the reason the rule now names the
+act. `Loom primitives` filed the first on 12 September, after
+`pnpm verify 2>&1 | tail -35` cost that run fifteen minutes: the exit code of a
+pipe is the last stage's, which is `tail`'s, which is 0, so a failed verify reads
+as a passed one — and the `ELIFECYCLE` lines are easy to read past when you are
+looking for a test count. The rule written down then said *never pipe a gate into
+`tail`*, and on 25 September the same lane read it, followed its remedy, and hit
+it anyway with:
+
+```bash
+(pnpm verify > verify.log 2>&1; echo "EXIT=$?" | tee verify.exit)
+```
+
+`$?` was correct and the file said `EXIT=1`. **The session's own notification
+said exit code 0**, because the status of that compound command is `tee`'s. The
+remedy had been followed and the failure mode had moved one pipe to the right.
+It cost nothing, because the file was read as well as the notification and the
+two disagreed; what it would have cost is a pull request opened on red with a
+report saying green, which is the one thing this section exists to prevent.
+
+*A rule naming one spelling of an act is a rule that stops working the moment
+somebody reaches for the other one* — the sentence is the 24 September
+author-flag entry's, and this is its third instance. Written here rather than in
+any lane's code because it is a thing a **run** does, not a thing the repository
+contains.
 
 ## Lanes
 

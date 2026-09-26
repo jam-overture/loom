@@ -1,6 +1,6 @@
 # 0191. The harness may start the application, because there is now only one
 
-**Status:** Accepted
+**Status:** Accepted — partially supersedes 0117
 **Date:** 2026-09-25
 **Section:** §1 (process)
 **Partially supersedes** [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) — the sentence *`pnpm shoot` does not start your server*, and nothing else in it
