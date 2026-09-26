@@ -156,7 +156,22 @@ const Group = ({
   readonly group: ApiGroup
   readonly prose: EntryProse
 }) => (
-  <section id={apiGroupAnchor(group.module)} className="scroll-mt-24">
+  /*
+   * `data-search="off"`: the names are not this page's prose.
+   *
+   * What is in here is a name, its signature and the sentence its author left
+   * on the declaration — and the search index answers a name from the index of
+   * published names, which carries every one of them with its import beside it.
+   * Letting a thousand of them into this page's body as well would put the page
+   * above the export a reader typed letter-for-letter, which is the same
+   * argument `search/prose.ts` makes for leaving a backticked name out of a
+   * written page's body. The bands above this are argued prose and are indexed.
+   */
+  <section
+    id={apiGroupAnchor(group.module)}
+    data-search="off"
+    className="scroll-mt-24"
+  >
     <h2 className="text-ink border-edge mt-14 border-t pt-8 text-[1.375rem] leading-tight font-bold tracking-tight">
       {group.title}
     </h2>
@@ -540,7 +555,13 @@ const WhereThisDoorSits = ({ entry }: { readonly entry: ApiEntry }) => {
  * because it is different on every one of them.
  */
 const Contents = ({ entry }: { readonly entry: ApiEntry }) => (
-  <nav aria-label="On this page" className="border-edge mt-8 rounded-lg border px-4 py-4">
+  /* `data-search="off"`: a page's own table of contents is navigation, and every
+     module title in it is already findable as the heading it links to. */
+  <nav
+    aria-label="On this page"
+    data-search="off"
+    className="border-edge mt-8 rounded-lg border px-4 py-4"
+  >
     <p className="text-ink-faint text-xs font-semibold tracking-wide uppercase">On this page</p>
 
     {/*
@@ -621,7 +642,10 @@ const ProseFirst = ({
             `display: flex`, on the belief that a utility class loses to it;
             measured, a utility always wins — what leaked was every property
             the component did not name. Neither is true inside the barrier. */}
-        <ul className="mt-3 space-y-1">
+        {/* `data-search="off"`: a list of links to pages is navigation, and each
+            page in it is already in the search index under its own title. The
+            sentences around it are this band's argument and are indexed. */}
+        <ul data-search="off" className="mt-3 space-y-1">
           {prose.pages.map((page) => (
             <li key={page.href} className="flex items-baseline justify-between gap-3">
               <Link
@@ -654,26 +678,45 @@ export const ApiEntryReference = ({
   readonly entry: ApiEntry
   readonly prose: EntryProse
 }) => (
-  <div className="not-prose">
-    <p className="text-ink-faint mt-6 text-sm">
-      {apiSymbolCount(entry)} exports, in {entry.groups.length}{" "}
-      {entry.groups.length === 1 ? "module" : "modules"}. Generated from{" "}
-      <code className="code-chip font-mono text-xs">{entry.types}</code>, which is the declaration file this
-      package publishes for <code className="code-chip font-mono text-xs">{entry.specifier}</code>.
+  <>
+    {/*
+     * The page's own opening paragraph, here rather than in the route.
+     *
+     * It is outside the barrier below because it is prose and is styled as the
+     * article's prose — the same paragraph in the same place as before it moved.
+     * What moving it buys is that the search index can read it: what the index
+     * holds for a generated page is the words this component returns, and a
+     * paragraph left in the route would be a sentence the site cannot find.
+     * `_lib/api/body.tsx` carries the argument.
+     */}
+    <p>
+      Everything below is exported from that import. The names, the signatures and the sentences are
+      read from the package itself rather than written here, so this page says what the copy of Loom
+      in your <code>node_modules</code> says — and it changes in the same pull request the code does.
     </p>
 
-    <BeforeItWillRun entry={entry} />
+    <div className="not-prose">
+      <p className="text-ink-faint mt-6 text-sm">
+        {apiSymbolCount(entry)} exports, in {entry.groups.length}{" "}
+        {entry.groups.length === 1 ? "module" : "modules"}. Generated from{" "}
+        <code className="code-chip font-mono text-xs">{entry.types}</code>, which is the declaration
+        file this package publishes for{" "}
+        <code className="code-chip font-mono text-xs">{entry.specifier}</code>.
+      </p>
 
-    <NarrowerDoors entry={entry} />
+      <BeforeItWillRun entry={entry} />
 
-    <WhereThisDoorSits entry={entry} />
+      <NarrowerDoors entry={entry} />
 
-    <ProseFirst entry={entry} prose={prose} />
+      <WhereThisDoorSits entry={entry} />
 
-    <Contents entry={entry} />
+      <ProseFirst entry={entry} prose={prose} />
 
-    {entry.groups.map((group) => (
-      <Group key={group.module} group={group} prose={prose} />
-    ))}
-  </div>
+      <Contents entry={entry} />
+
+      {entry.groups.map((group) => (
+        <Group key={group.module} group={group} prose={prose} />
+      ))}
+    </div>
+  </>
 )

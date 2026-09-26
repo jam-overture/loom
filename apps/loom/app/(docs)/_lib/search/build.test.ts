@@ -153,6 +153,44 @@ describe("what the index contains", () => {
     expect(headingsWithProse.length).toBeGreaterThan(40)
   })
 
+  /**
+   * The half of the site that has no files, findable by its sentences.
+   *
+   * Asserted from the outside — against `nav.ts`'s list of generated pages, not
+   * against the builder's own map — because the failure this is about was
+   * silent for three days: the bands were on the page, the page was in the
+   * index, and the index held its title and nothing it said.
+   *
+   * The second half is the trade. A generated page's words go under the page
+   * entry, so the contents file — the only file in the index a reader waits for
+   * — does not gain a row for any of it.
+   */
+  it("carries the words of a page nobody wrote, without a row in the file a reader waits for", () => {
+    const generated = docsSections.filter((section) => section.source === "generated")
+
+    expect(generated.length).toBeGreaterThan(0)
+
+    const prose = new Map(searchProse().bodies)
+
+    for (const section of generated) {
+      for (const page of section.pages) {
+        const href = docsHref(section.slug, page.slug)
+
+        expect((prose.get(href) ?? "").length, href).toBeGreaterThan(400)
+      }
+    }
+
+    /* One row per generated page and not one more: a band is not a result of
+       its own, which is what keeps the waited-for file the size it was. */
+    const rows = searchContents().entries.filter((entry) =>
+      generated.some((section) => entry.href.startsWith(`/docs/${section.slug}`))
+    )
+
+    expect(rows.map((entry) => entry.href).sort()).toEqual(
+      generated.flatMap((section) => section.pages.map((page) => docsHref(section.slug, page.slug))).sort()
+    )
+  })
+
   it("carries no words for a name, whose words are its signature", () => {
     const prose = new Map(searchProse().bodies)
 
@@ -203,14 +241,29 @@ describe("what the index contains", () => {
    *
    * | | Uncompressed | gzip | grows when |
    * | --- | --- | --- | --- |
-   * | Contents — 206 pages and headings | 38.8 KB | **7.5 KB** | somebody writes a page here |
-   * | Names — 1,081 published exports | 20.2 KB | 6.2 KB | any lane exports something |
-   * | Prose — *The runtime* | 98.2 KB | 32.5 KB | anybody writes a runtime paragraph |
-   * | Prose — *Getting started* | 30.7 KB | 11.0 KB | …a getting-started paragraph |
-   * | Prose — *Building with Loom* | 31.1 KB | 11.3 KB | …a building-with-Loom paragraph |
-   * | Prose — *Architecture* | 8.7 KB | 3.3 KB | …an architecture paragraph |
-   * | Prose — *API reference* | 13 bytes | 33 bytes | never; it has no words |
-   * | Code | 22.3 KB | 6.2 KB | anybody adds a block |
+   * | Contents — 207 pages and headings | 38.1 KB | **7.5 KB** | somebody writes a page here |
+   * | Names — 1,077 published exports | 20.4 KB | 6.3 KB | any lane exports something |
+   * | Prose — *The runtime* | 96.6 KB | 31.7 KB | anybody writes a runtime paragraph |
+   * | Prose — *Getting started* | 30.6 KB | 10.8 KB | …a getting-started paragraph |
+   * | Prose — *Building with Loom* | 30.7 KB | 11.0 KB | …a building-with-Loom paragraph |
+   * | Prose — *API reference* | 24.4 KB | 3.3 KB | a band on a reference page is rewritten |
+   * | Prose — *Architecture* | 8.6 KB | 3.3 KB | …an architecture paragraph |
+   * | Code | 21.9 KB | 6.2 KB | anybody adds a block |
+   *
+   * ### The row that was thirteen bytes
+   *
+   * *API reference* held nothing until 26 September, because its pages have no
+   * file to read — and every sentence on seventeen pages was therefore
+   * unfindable. Its words are now read off what those pages render
+   * (`generated.ts`). It is the cheapest large row here by a distance: 24.4 KB
+   * raw compresses to 3.3 KB, seven and a half times, because sixteen pages
+   * built from one set of bands say many of the same sentences with different
+   * numbers in them.
+   *
+   * **Nothing a reader waits for moved.** The first row is unchanged to the
+   * byte, because a generated page's words sit under the page entry that was
+   * already in the contents file rather than under 85 new heading entries —
+   * which is the trade `generated.ts` describes and the test below holds.
    *
    * **Only the first row is waited for.** That is what every one of these
    * numbers is ultimately about, and it is why they are separate caps rather

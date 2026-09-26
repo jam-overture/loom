@@ -72,11 +72,32 @@ describe("the words of one section, as an address", () => {
   })
 
   /**
-   * A section built from data has no words, and answering with none is the
-   * whole reason the browser can ask for every section without holding its own
-   * idea of which ones somebody has written in.
+   * The section nobody wrote, which until 26 September answered with an empty
+   * file.
+   *
+   * Its pages are built from data and have no MDX to read, so this address was
+   * thirteen bytes — and every sentence on seventeen pages was unfindable. The
+   * words are now read off what those pages render (`search/generated.ts`), so
+   * the file this route serves for the reference is a file like any other, and
+   * the answer to *why can the browser ask for every section* is no longer that
+   * one of them is empty.
+   *
+   * A section with genuinely nothing in it still answers `{"bodies":[]}` rather
+   * than 404, which is what the two tests above are about and is why this one
+   * does not need to arrange for one to exist.
    */
-  it("hands back an empty file for a section with nothing written in it", async () => {
-    expect(parseSearchProse(await served("api-reference")).bodies).toEqual([])
+  it("hands back the reference's words, which no file on disk holds", async () => {
+    const words = parseSearchProse(await served("api-reference"))
+
+    expect(words.bodies.length).toBeGreaterThan(10)
+
+    for (const [href, body] of words.bodies) {
+      expect(docsSectionOfPath(href), href).toBe("api-reference")
+      expect(body.length, href).toBeGreaterThan(400)
+    }
+
+    const front = words.bodies.find(([href]) => href === "/docs/api-reference")?.[1] ?? ""
+
+    expect(front).toContain("No import has everything behind it")
   })
 })
