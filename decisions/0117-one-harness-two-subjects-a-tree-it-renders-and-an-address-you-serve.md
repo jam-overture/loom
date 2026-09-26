@@ -1,6 +1,6 @@
 # 0117. One harness, two subjects: a tree it renders and an address you serve
 
-**Status:** Accepted
+**Status:** Accepted — partially superseded by [0191](0191-the-harness-may-start-the-application-because-there-is-now-only-one.md)
 **Date:** 2026-09-08
 **Section:** §1 (process)
 

@@ -1811,3 +1811,112 @@ describe("which quotes have a face", () => {
     expect(String(story?.props["author"]).split(/\s+/u).length).toBeGreaterThan(1)
   })
 })
+
+/**
+ * The two bands the 25 September whole-page photograph found thin, held to what
+ * the pictures of them now show.
+ *
+ * Both were filed as *thin rather than broken*, and that phrase is the reason
+ * these assertions are worth writing: every test in this file passed on both
+ * bands the whole time. A band that satisfies every schema, emits no
+ * diagnostic, measures no overflow and still reads as unfinished is the shape
+ * this file cannot see, so what is asserted here is the **specific thing the
+ * picture needed** — a panel in the wide cell, a plate under every mark on the
+ * ring — named so that a later edit removing one fails with the reason rather
+ * than with a count.
+ */
+describe("the two bands that did not pop", () => {
+  const bandOf = (id: string): ElementNode => {
+    const composition = compositionById(id)
+    if (composition === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return composition.build(sequentialIdFactory())
+  }
+
+  const slotOf = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotOf(child, name))
+  }
+
+  /**
+   * The wide cell, and only the wide cell. The three under it are a third of a
+   * row each — well under the tile's own 44rem turn — so the same subtree there
+   * would be three tall cards with a panel stacked in each, which is the tidy
+   * row spoiled rather than three cells earning anything.
+   */
+  it("puts a panel in the cell that has room for one, and in no other", () => {
+    const tiles = elementsOfType(bandOf("bento"), "loom.feature")
+    const withMedia = tiles.filter((tile) => slotOf(tile, "media").length > 0)
+
+    expect(tiles).toHaveLength(4)
+    expect(withMedia).toHaveLength(1)
+    expect(withMedia[0], "the panel is not in the cell the rhythm runs across the top").toBe(tiles[0])
+  })
+
+  /**
+   * What is in it is nodes rather than an asset, which is the rule that lets
+   * this catalogue ship a product surface at all: `hero-split-band` established
+   * it and this is the second band resting on it.
+   */
+  it("fills the panel out of the library rather than with a picture nobody has", () => {
+    const [lead] = elementsOfType(bandOf("bento"), "loom.feature")
+    const media = slotOf(lead as LoomNode, "media")
+
+    expect(media.flatMap((node) => elementsOfType(node, "loom.frame"))).toHaveLength(1)
+    expect(media.flatMap((node) => elementsOfType(node, "loom.code"))).toHaveLength(1)
+  })
+
+  /**
+   * The diff is the band's own claim drawn beside itself, and the two markers
+   * are what make it a diff rather than a listing. Asserted as a pair, because
+   * a later edit tidying the removed line away would leave a panel that shows a
+   * result where the sentence beside it promises a change.
+   */
+  it("shows a change rather than a state", () => {
+    const [panel] = elementsOfType(bandOf("bento"), "loom.code")
+    const lines = wordsIn(panel as LoomNode).split("\n")
+
+    expect(lines.some((line) => line.startsWith("-")), "nothing is coming off the page").toBe(true)
+    expect(lines.some((line) => line.startsWith("+")), "nothing is going on to it").toBe(true)
+    expect(Math.max(...lines.map((line) => line.length)), "a line is too long for a phone's panel").toBeLessThan(31)
+  })
+
+  /**
+   * Every mark on the ring, not most of them. A plate under seven of eight is
+   * the kind of edit that looks right in the diff and wrong in the picture.
+   */
+  it("plates every mark on the ring, and leaves the middle to the primitive", () => {
+    const orbit = bandOf("integrations")
+    const marks = elementsOfType(orbit, "loom.logo")
+    const centre = slotOf(orbit, "mark").flatMap((node) => elementsOfType(node, "loom.logo"))
+
+    expect(marks.length).toBeGreaterThan(4)
+    expect(centre).toHaveLength(1)
+
+    for (const logo of marks) {
+      const plated = logo.props["surface"] === "card"
+      const isCentre = centre.includes(logo)
+
+      expect(
+        plated,
+        `${String(logo.props["name"])} is ${isCentre ? "plated as well as grounded" : "a bare word on a ring"}`
+      ).toBe(!isCentre)
+    }
+  })
+
+  /**
+   * The connectors are what this band claims over a logo wall — *these things
+   * are attached to that thing* — and the band asking for them is the only
+   * place that claim is made. Held beside `rings`, because the two were changed
+   * together and for one reason: eight plates alternating between two radii
+   * crowd the hub they are meant to be circling.
+   */
+  it("asks for the rendering that says the marks are attached to the middle", () => {
+    const [orbit] = elementsOfType(bandOf("integrations"), "loom.orbit")
+
+    expect(orbit?.props["guides"]).toBe("spokes")
+    expect(orbit?.props["rings"]).toBe("one")
+  })
+})

@@ -18,6 +18,7 @@ export type NumberingProblem =
   | { readonly code: "duplicate-number"; readonly number: number; readonly files: readonly string[] }
   | { readonly code: "gap"; readonly missing: number }
   | { readonly code: "unknown-reference"; readonly from: number; readonly to: number }
+  | { readonly code: "one-way-supersession"; readonly from: number; readonly to: number }
 
 /**
  * `blocking` fails `pnpm verify`. `reported` is printed, written into the index,
@@ -38,6 +39,8 @@ export const describeNumberingProblem = (problem: NumberingProblem): string => {
       return `${String(problem.missing).padStart(4, "0")} has no record here — either one was deleted, or the number is claimed on a branch that has not merged`
     case "unknown-reference":
       return `${problem.from} names ${String(problem.to).padStart(4, "0")} in its status, and there is no such record`
+    case "one-way-supersession":
+      return `${problem.from} names ${String(problem.to).padStart(4, "0")} in its status, and ${String(problem.to).padStart(4, "0")} does not name it back`
   }
 }
 
@@ -93,6 +96,50 @@ export const missingNumbers = (records: readonly DecisionRecord[]): readonly num
   )
 }
 
+/**
+ * A supersession written at one end only.
+ *
+ * A status that names another record is the one relationship in `decisions/`
+ * that is written down twice — `0027` carries `partially superseded by 0029` and
+ * `0029` carries `partially supersedes 0027`, which is one fact in two files and
+ * therefore comparable. Nothing compared them. `Loom lessons` measured it on 25
+ * September writing the lesson on corroboration: eleven directions written, ten
+ * answered at the other end, `0109 -> 0137` not.
+ *
+ * Nothing was broken and that is the point. The README's *Changing direction*
+ * section required the **old** record to be marked and said nothing about the
+ * replacement, so the reciprocal form was a habit rather than a rule — and a
+ * habit's output is indistinguishable from a rule's right up until somebody is
+ * in a hurry. Somebody was, the next day: `0191` was written with `0117` marked
+ * `partially superseded by [0191]` and `0191` saying only `Accepted`. A
+ * convention that had held ten times out of eleven for two months broke within
+ * twenty-four hours of being described. The README now requires both ends
+ * ([0193](../../decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md))
+ * and this is what holds it to that.
+ *
+ * Symmetric on purpose: it does not read `supersedes` against `superseded by`,
+ * only whether the record named names this one. Parsing the direction would make
+ * the check an opinion about English, and the fault it exists to catch — one end
+ * silent — is the same fault whichever end wrote first.
+ *
+ * A reference to a record that does not exist is `danglingIn`'s and is skipped
+ * here, so one missing record is one problem rather than two.
+ */
+const oneWayIn = (records: readonly DecisionRecord[]): readonly NumberingProblem[] => {
+  const byNumber = new Map(records.map((record) => [record.number, record] as const))
+
+  return records.flatMap((record) =>
+    referencesIn(record.status).flatMap((to): readonly NumberingProblem[] => {
+      const named = byNumber.get(to)
+      if (named === undefined) return []
+
+      return referencesIn(named.status).includes(record.number)
+        ? []
+        : [{ code: "one-way-supersession", from: record.number, to }]
+    })
+  )
+}
+
 const danglingIn = (records: readonly DecisionRecord[]): readonly NumberingProblem[] => {
   const present = new Set(records.map((record) => record.number))
 
@@ -107,4 +154,5 @@ export const checkNumbering = (records: readonly DecisionRecord[]): readonly Num
   ...duplicatesIn(records),
   ...gapsIn(records),
   ...danglingIn(records),
+  ...oneWayIn(records),
 ]

@@ -1,11 +1,20 @@
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 
+import { err, ok, type Result } from "../../src/result.js"
 import { browsersRoot, describeBrowserError, locateChromium } from "../specimen/browser.js"
 import { captureShots, describeShot } from "../specimen/capture.js"
 import { chromiumBrowser, describeLauncherError, loadChromium } from "../specimen/playwright.js"
 
-import { planShots, shotListSchema } from "./plan.js"
+import {
+  describeBuildError,
+  describeReadinessError,
+  locateApplication,
+  startApplication,
+  type RunningApplication,
+} from "./application.js"
+import { describeShootArgsError, parseShootArgs } from "./args.js"
+import { planShots, shotListSchema, type ShotList } from "./plan.js"
 
 /**
  * `pnpm shoot <shot-list.json>` — photograph pages something else is serving.
@@ -22,6 +31,11 @@ import { planShots, shotListSchema } from "./plan.js"
  * had already refused.
  *
  * What is left here is the shot list, which is genuinely this subject's own.
+ *
+ * `--serve <application-dir>` is the one thing this entry point does that the
+ * specimen path does not need: it starts the built application, photographs it
+ * and stops it again, so the pictures cannot be of a build that is no longer on
+ * disk. `./application.ts` says why that is worth a flag, and 0191 records it.
  */
 
 function fail(message: string): never {
@@ -56,23 +70,69 @@ const readList = async (path: string) => {
   return list.data
 }
 
-const listPath = process.argv[2]
-if (listPath === undefined) fail("usage: pnpm shoot <shot-list.json>")
+const args = parseShootArgs(process.argv.slice(2))
+if (!args.ok) fail(describeShootArgsError(args.error))
 
-const list = await readList(listPath)
+const list = await readList(args.value.listPath)
 
-const chromium = await loadChromium()
-if (!chromium.ok) fail(describeLauncherError(chromium.error))
+/**
+ * Started here rather than inside the capture loop: a browser that cannot be
+ * launched should not have cost a `next start` first, and an application that
+ * will not answer should be said so before Chromium is looked for.
+ */
+const served: RunningApplication | undefined = await (async () => {
+  const dir = args.value.serveDir
+  if (dir === undefined) return undefined
 
-const executable = await locateChromium(browsersRoot(process.env))
-if (!executable.ok) fail(describeBrowserError(executable.error))
+  const application = await locateApplication(dir)
+  if (!application.ok) fail(describeBuildError(application.error))
 
-const browser = await chromiumBrowser(chromium.value, executable.value)
-try {
-  const results = await captureShots(planShots(list), browser, { outDir: list.outDir })
+  const running = await startApplication(application.value)
+  if (!running.ok) fail(describeReadinessError(running.error))
 
-  for (const result of results) process.stdout.write(`${describeShot(result)}\n`)
-  process.exitCode = results.some((result) => result.overflowed) ? 1 : 0
-} finally {
-  await browser.close()
+  process.stdout.write(
+    `serving ${dir} at ${running.value.origin}  built ${application.value.finishedAt.toISOString()}\n`
+  )
+
+  return running.value
+})()
+
+/**
+ * A base the harness is responsible for beats one the list guessed. A shot
+ * whose `path` is already a whole URL is untouched, which is what lets one list
+ * mix this server with something else.
+ */
+const addressed: ShotList = served === undefined ? list : { ...list, baseUrl: served.origin }
+
+/**
+ * The shots, as a value rather than as an exit.
+ *
+ * `fail` is `process.exit`, and `process.exit` does not run a `finally` — so a
+ * missing Chromium inside a `try` would have left the server this run started
+ * alive after the command returned. The failure comes back as a message and is
+ * taken after the server has been stopped.
+ */
+const takeShots = async (): Promise<Result<boolean, string>> => {
+  const chromium = await loadChromium()
+  if (!chromium.ok) return err(describeLauncherError(chromium.error))
+
+  const executable = await locateChromium(browsersRoot(process.env))
+  if (!executable.ok) return err(describeBrowserError(executable.error))
+
+  const browser = await chromiumBrowser(chromium.value, executable.value)
+  try {
+    const results = await captureShots(planShots(addressed), browser, { outDir: addressed.outDir })
+
+    for (const result of results) process.stdout.write(`${describeShot(result)}\n`)
+    return ok(results.some((result) => result.overflowed))
+  } finally {
+    await browser.close()
+  }
 }
+
+const outcome = await takeShots().finally(async () => {
+  await served?.stop()
+})
+
+if (!outcome.ok) fail(outcome.error)
+process.exitCode = outcome.value ? 1 : 0

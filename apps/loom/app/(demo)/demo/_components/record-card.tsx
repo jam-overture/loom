@@ -7,6 +7,7 @@ import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { ruleSentence, stateOfRecord } from "@/app/(portal)/_lib/vocabulary"
 
 import { answerNote } from "@/app/(demo)/_lib/answer"
+import { ANSWER_ARRIVES, clearanceFor } from "@/app/(demo)/_lib/arrival"
 import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import type { MovedNote } from "@/app/(demo)/_lib/moved"
 import type { Reasoning } from "@/app/(demo)/_lib/reasoning"
@@ -205,18 +206,24 @@ export const RecordCard = ({
     <li
       id={record.recordId}
       /*
-       * `scroll-mt-28` because the rail has something pinned to its top while a
-       * question is open. `AskPanel`'s caution sticks to the scroller's top edge
-       * for as long as any ask control is in view, and it is that caution's
-       * **Answer it first** that this card is the destination of — so without a
-       * scroll margin the fragment lands the card's top *underneath* the band
-       * that sent the visitor to it, with the `Waiting on you` badge and the
-       * utterance behind it. Measured: the strip is 103px at 1280×900, and the
-       * card arrives at 156 against a rail top of 44. Both scrollers honour it —
-       * a fragment navigation and `AnswerInView`'s `scrollIntoView` read the
-       * same property.
+       * The room this card leaves above itself, which is **not this file's
+       * call and never was**: it depends entirely on where the card is carried
+       * to, and that is `AnswerInView`'s. `arrival.ts` holds both and the
+       * measurement that ties them, and today it is nothing — a card that
+       * arrives at the top of its scroller has left the panel, and the
+       * caution pinned inside it, behind.
+       *
+       * It was a hard-coded `scroll-mt-28` here, for a reason that reads as
+       * sound and is circular: the rail pins something above a waiting card, so
+       * leave room for it. The 112px it reserved on a phone is exactly what the
+       * caution was photographed in, cut through the middle of its first line.
        */
-      className="border-edge-subtle bg-surface-raised flex scroll-mt-28 flex-col gap-3 rounded-md border p-3.5"
+      className={[
+        "border-edge-subtle bg-surface-raised flex flex-col gap-3 rounded-md border p-3.5",
+        clearanceFor(ANSWER_ARRIVES),
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <header className="flex flex-col gap-2">
         {/*

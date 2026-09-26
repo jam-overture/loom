@@ -11,6 +11,7 @@ import {
 import { describeRecordProblem, parseDecisionRecord, RECORD_FILE, type DecisionRecord } from "./record.js"
 import { INDEX_HEADING, renderIndex, withGeneratedIndex } from "./render.js"
 import { checkShape, describeShapeProblem } from "./shape.js"
+import { checkStatuses, describeStatusProblem } from "./status.js"
 
 /**
  * The IO half: read the directory, parse each record, check the set, render.
@@ -73,6 +74,9 @@ export const collectDecisions = async (
     problems: [
       ...unparsed,
       ...malformed,
+      ...checkStatuses(records).map(
+        (problem): Problem => ({ severity: "blocking", message: describeStatusProblem(problem) })
+      ),
       ...checkNumbering(records).map(
         (problem): Problem => ({
           severity: severityOf(problem),
