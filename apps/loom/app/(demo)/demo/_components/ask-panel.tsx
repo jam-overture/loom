@@ -206,18 +206,30 @@ export const AskPanel = ({
         * What the next press would cost, above everything it is true of — and
         * pinned, because the one thing a caution has to be is on screen.
         *
-        * **Measured, after the first version of it was scrolled past.** Pressing
-        * the lead sends `AnswerInView` to bring the 503px card into the rail's
-        * scroller, and `block: "nearest"` — the minimum movement, which is the
-        * right rule — puts the rail at a scrollTop of about 400. That carries
-        * the claim, the frame sentence, the list's own heading, the first ask
-        * and a caution sitting statically above them all off the top. What was
-        * left on screen was four live buttons and the question they would kill,
-        * with nothing between them saying so: the warning had been written and
-        * placed exactly where the visitor was not looking.
+        * **Measured, after the first version of it was scrolled past.** A
+        * caution sitting statically above the list was carried off the top of
+        * the rail by the scroll the press produced, leaving four live buttons
+        * and the question they would kill on screen with nothing between them
+        * saying so: the warning had been written and placed exactly where the
+        * visitor was not looking.
         *
         * So it sticks to the top of the rail's scroller for as long as any ask
         * control is in view, and releases when the panel does.
+        *
+        * **And sticking is why it must never be the whole of what is on
+        * screen.** `AnswerInView` used to stop the rail the minimum distance —
+        * scrollTop about 330 at 1280×900 — which left the panel in the scroller
+        * with the question below it, so this strip pinned itself over the first
+        * ask and became the loudest thing on the frame a stranger's first
+        * correct press produced. On a phone it was worse: the strip was clipped
+        * to 40px by the panel's own bottom edge, its first line cut through the
+        * middle, with no ask control anywhere on the screen it could have been
+        * about. `arrival.ts` carries the fix and the numbers — the card lands
+        * at the top of the scroller now, which leaves this panel, and therefore
+        * this strip, behind. Nothing here changed, and nothing here should: a
+        * visitor who scrolls back to a control still meets it above that
+        * control, in amber, before the press, which is every property it was
+        * built for.
         *
         * **The fives here are the rail's own `p-5`**, and they are a deliberate
         * coupling rather than magic: `-mx-5` and `px-5` take the strip to both
@@ -230,8 +242,10 @@ export const AskPanel = ({
         * Only on a wide screen, because only there is the rail a scroller. On a
         * phone the document scrolls and the strip pins to the viewport, where a
         * negative offset would take the first line of the sentence off the top
-        * of it. `record-card.tsx` carries the matching `scroll-mt-28` for both,
-        * so the card the link points at does not land behind this.
+        * of it. The card the **Answer it first** link points at needs no
+        * clearance from this any more, and `arrival.ts` says why: the fragment
+        * lands it at the top of the scroller, which is a position this panel is
+        * not on screen in.
         *
         * **Amber, which is not decoration.** It is the tone this rail gives an
         * open question everywhere else it has one — the `Waiting on you` badge,

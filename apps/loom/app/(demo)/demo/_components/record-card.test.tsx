@@ -6,6 +6,7 @@ import { REVERT_INTERPRETER } from "@loom/runtime/write"
 import { ruleSentence } from "@/app/(portal)/_lib/vocabulary"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
+import { ANSWER_ARRIVES, clearanceFor } from "@/app/(demo)/_lib/arrival"
 import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
@@ -414,17 +415,40 @@ describe("a record card", () => {
   })
 
   /**
-   * The other coupling to the same strip. `AskPanel`'s **Answer it first** is a
-   * fragment pointing at this card's own id, and the strip it sits in is pinned
-   * to the top of the rail — so without a scroll margin the fragment lands the
-   * card behind the band that sent the visitor to it, `Waiting on you` and the
-   * utterance included. Measured: the strip is 103px at 1280×900, and the card
-   * arrives at 156 against a rail top of 44.
+   * The other coupling to the same strip, and it is now **read rather than
+   * held**.
+   *
+   * This card used to carry `scroll-mt-28` of its own, so that `AskPanel`'s
+   * **Answer it first** — a fragment pointing at this card's id — would not
+   * land it behind the pinned band that sent the visitor here. That was true of
+   * a card carried the minimum distance and false of one carried to the top of
+   * the scroller, which is where both ways in put it now: the panel is behind
+   * it, so nothing is pinned over it, so there is nothing to leave room for.
+   * Measured on a production build at 390×844, the 112px it had reserved was
+   * filled by the caution cut through the middle of its first line.
+   *
+   * Asserted through `clearanceFor` rather than against the empty string,
+   * because the claim is that the card does not decide this alone. A later run
+   * that reaches for the smaller movement changes one value in `arrival.ts` and
+   * the clearance comes back here in the same edit.
    */
-  it("leaves room for what the rail pins above it", () => {
+  it("leaves exactly the room the landing needs, which today is none", () => {
     const { container } = render(<RecordCard record={HELD} />)
 
-    expect(container.querySelector("li")?.className).toContain("scroll-mt-28")
+    const className = container.querySelector("li")?.className ?? ""
+
+    expect(className).not.toMatch(/scroll-m[trblxyse]?-/)
+    expect(clearanceFor(ANSWER_ARRIVES)).toBe("")
+  })
+
+  /**
+   * And the coupling itself, at the one card it is about: hand the same joiner
+   * the other landing and the clearance is on the element, in the class list,
+   * where the fragment reads it. The pairing is the test — the card cannot be
+   * flush *and* reserving, and it cannot be neither.
+   */
+  it("would carry the clearance again if the card stopped short of the top", () => {
+    expect(clearanceFor("nearest")).toBe("scroll-mt-28")
   })
 
   it("shows the stake factors the Gate actually cited", () => {
