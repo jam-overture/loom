@@ -23,7 +23,7 @@ and must not have.
 
 ```
 $ pnpm pack
-644K, 795 files, dist/primitives: 0
+504K, 399 files, maps: 0, dist/primitives: 0
 
 $ npm install loom-runtime-0.1.0.tgz   # in an empty directory, npm not pnpm
 $ node -e "import('@loom/runtime').then(m => console.log(typeof m.createTree))"
@@ -45,6 +45,44 @@ tarball that loads inside this workspace proves nothing at all.
 | `npx loom init` from the tarball | writes a primitive, a registry and a conformance test |
 | `dist/primitives/` in the tarball | **none** |
 | `dist/testing/primitives.*` in the tarball | **yes, and it belongs** — the testing fixture, a different file with the same word |
+
+## The thing I found last and would have wanted to know first
+
+**`jam-overture/loom` is a private repository.** I checked because a question
+about source maps depended on it, and it has two consequences for a *public*
+package that are worth more than the question that found them.
+
+**One is cosmetic and is the npm page.** `repository`, `homepage` and `bugs` all
+point at `github.com/jam-overture/loom`, which 404s for everyone who is not in
+the organisation. The registry page will show a Repository link that goes
+nowhere and an Issues link where nobody can file anything — so a package
+inviting people to try it gives them no way to report what happens when they
+do. I have left the fields pointing there, because the alternative is removing
+them, and a package with nowhere to send a reader is worse than one whose link
+is currently private. **It is the third thing on the list for the morning and
+the only one I have not solved.**
+
+**One I acted on.** `dist` carried 396 `.map` files — 42% of the unpacked
+package — naming `../src/*.ts`, with no `sourcesContent`. With the source in a
+private repository there is nothing for a consumer to resolve them against: a
+debugger asks for a file that is not in the tarball and never will be, and
+falls back. They also print the source layout of a private repository for no
+benefit. The build still emits them, because the workspace wants them; the
+tarball does not carry them.
+
+```
+before   644K, 795 files
+after    504K, 399 files, maps: 0
+```
+
+One line to reverse (`"!dist/**/*.map"` in `files`) if the source ever ships,
+which is a decision about the repository rather than about this manifest.
+
+**And one thing that came out clean and is worth saying.** The tarball was
+searched for absolute container paths, API keys, tokens and connection strings:
+none. There is no `process.env` anywhere in `dist` at all — the runtime takes
+its configuration as arguments, which is a property worth having on the day the
+package stops being ours alone.
 
 ## The one decision that needed making
 

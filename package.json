@@ -158,7 +158,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "!dist/primitives"
+    "!dist/primitives",
+    "!dist/**/*.map"
   ],
   "publishConfig": {
     "access": "public",

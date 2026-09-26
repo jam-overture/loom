@@ -58,6 +58,13 @@ tar xzOf loom-runtime-<version>.tgz package/package.json | grep -A20 '"exports"'
   `apps/loom` import it.
 - **`dist/testing/primitives.*` is in it and belongs there.** It is the testing
   fixture, not the starter library — the same word, two different files.
+- **No `.map` files.** The build emits them and the workspace wants them; the
+  tarball does not carry them, because they name `../src/*.ts` and carry no
+  `sourcesContent`. With the repository private there is nothing for a consumer
+  to resolve them against, so they were 396 files and 42% of the package
+  resolving to nothing. If the source ever ships — which is a decision about
+  the repository, not about this manifest — drop the negation and they become
+  useful again.
 
 `tools/publish/manifest.test.ts` holds all of that as assertions and runs in
 `pnpm verify`, including the drift that is otherwise invisible: a subpath added
