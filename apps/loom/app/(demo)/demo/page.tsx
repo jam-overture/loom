@@ -221,9 +221,18 @@ const DemoPage = async () => {
             */}
           <footer className="border-edge-subtle text-ink-muted mt-auto flex flex-col gap-3 border-t pt-4 text-2xs">
             <ReadTheDocs />
+            {/*
+              * **The clause about accounts is gone from here and it was not
+              * dropped.** `RailHeader` carries *No sign-in* and *Nothing kept*
+              * as chips, three inches up and above the fold at both sizes, which
+              * is where a visitor deciding whether to press anything actually
+              * is. Saying it twice on one screen is how a footer stops being
+              * read at all — and this half, what becomes of the page they
+              * change, is the half the chips cannot fit.
+              */}
             <p>
               Your copy of this page lives in memory for as long as you are here, and belongs to
-              nobody else. No account, no sign-in, nothing kept.
+              nobody else.
             </p>
           </footer>
         </aside>

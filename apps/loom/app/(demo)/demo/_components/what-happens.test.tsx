@@ -79,7 +79,14 @@ describe("the three steps", () => {
    */
   it("numbers the steps, and hides the numbers from a screen reader that already counts them", () => {
     const { container } = render(<WhatHappens />)
-    const markers = [...container.querySelectorAll('[aria-hidden="true"]')]
+    /*
+     * Scoped to the list, because the summary that folds this section carries a
+     * decorative chevron of its own and it is `aria-hidden` for the same reason
+     * these are. The claim is about the *step numbers*: a screen reader reaching
+     * an ordered list already counts it, so the visible markers must not be read
+     * out twice.
+     */
+    const markers = [...container.querySelectorAll('ol [aria-hidden="true"]')]
 
     expect(markers.map((marker) => marker.textContent)).toEqual(["1", "2", "3"])
     expect(container.querySelector("ol")).toBeTruthy()

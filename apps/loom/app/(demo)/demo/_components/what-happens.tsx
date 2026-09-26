@@ -60,13 +60,44 @@ const STEPS: readonly { readonly title: string; readonly body: string }[] = [
   },
 ]
 
+/**
+ * ## Folded, as of 26 September, and the reason is a measurement
+ *
+ * These three steps were open on arrival and cost the rail **about 300px** —
+ * on a phone, where the stage is entirely below the fold and the first screen
+ * is nothing but this rail, they were the whole lower half of it. A stranger's
+ * first screen was a green button followed by three paragraphs of explanation
+ * of a thing they had not done yet.
+ *
+ * The maintainer's direction for the portal binds this surface too: **plain
+ * language is the default, the technical record is one click away, nothing is
+ * ever removed.** A sequence explaining what a press will do is exactly the
+ * second category — useful to the visitor who wants it, noise to the one who
+ * was going to press the button anyway — and nothing is removed by folding it:
+ * the summary is a real control, it works with JavaScript off, and the steps
+ * are unchanged inside it.
+ *
+ * **It is a `<details>` rather than state**, for the reasons the record's own
+ * disclosure gives: no bundle, and the browser supplies the keyboard and
+ * screen-reader semantics free.
+ */
 export const WhatHappens = () => (
-  <section aria-labelledby="what-happens" className="flex flex-col gap-3">
-    <h2 id="what-happens" className="text-ink-muted text-2xs tracking-wide uppercase">
+  <details className="group border-edge-subtle border-t pt-4">
+    <summary className="text-ink-muted hover:text-ink flex cursor-pointer list-none items-center gap-1.5 font-mono text-2xs tracking-wide uppercase transition-colors select-none">
+      <svg
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        aria-hidden="true"
+        className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90"
+      >
+        <path d="M4 2.5L8 6l-4 3.5" />
+      </svg>
       what happens when you ask
-    </h2>
+    </summary>
 
-    <ol className="flex flex-col gap-3">
+    <ol className="mt-3 flex flex-col gap-3">
       {STEPS.map((step, index) => (
         <li key={step.title} className="flex gap-3">
           {/*
@@ -88,5 +119,5 @@ export const WhatHappens = () => (
         </li>
       ))}
     </ol>
-  </section>
+  </details>
 )
