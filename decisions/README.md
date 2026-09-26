@@ -23,13 +23,7 @@ Status, Date, Section, then Context, Decision, Consequences, Alternatives
 considered. Record what was rejected and why, not only what was chosen — the
 rejected options are the part a future reader cannot reconstruct.
 
-`Status` **begins with** one of `Proposed`, `Accepted`, or `Superseded`, and may
-carry a qualifying clause after it — `Accepted — it changes no schema, no tree
-and no delta model`, or `Accepted for the first half, Proposed for the second`.
-The opening word is a closed set and `pnpm verify` checks it; everything after it
-is prose, because a record that is honest about being half-decided is the record
-doing its job. Write the word bare, with no emphasis around it: the index renders
-that column verbatim.
+`Status` is one of `Proposed`, `Accepted`, or `Superseded by NNNN`.
 
 A record that answered several questions at once can be replaced in part. Then
 the status is `Accepted — partially superseded by NNNN`, and the replacement says
@@ -42,15 +36,6 @@ lose more than it clarified. 0027 is the first of these.
 `Superseded by NNNN`, leave its text intact, and write a new record explaining
 what changed and why the earlier reasoning no longer holds. The trail is the
 artefact.
-
-**Both ends say it.** The replacement's status names what it replaces —
-`Accepted — supersedes NNNN`, or `Accepted — partially supersedes NNNN` — as well
-as the old record naming its replacement. That makes the relationship one fact
-written in two files, which is a thing that can be compared, and `pnpm verify`
-compares it: a status naming a record that does not name it back fails the build
-([0193](0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)).
-It was a habit for two months before it was a rule, kept in ten pairs out of
-eleven, and the eleventh was written the day after somebody wrote the habit down.
 
 A change that contradicts an `Accepted` record is an escalation, not a
 refactor: write the replacement with status `Proposed`, flag it for review, and
@@ -82,10 +67,9 @@ hand — it is rebuilt from the `**Status:**` and `**Section:**` lines of the
 files themselves, and an edit here is overwritten on the next run.
 
 `pnpm verify` fails if the committed table has drifted, if two records claim the
-same number, if a status does not begin with one of the three words, if a status
-names a record that does not exist, or if it names one that does not name it
-back. That set is not hypothetical: two concurrent sessions each wrote an `0032`
-on the same day, and nothing noticed until their branches met.
+same number, or if a status names a record that does not exist. That set is not
+hypothetical: two concurrent sessions each wrote an `0032` on the same day, and
+nothing noticed until their branches met.
 
 A number that no record claims is **reported and does not fail**
 ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)). It
@@ -291,5 +275,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0189](0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md) | A portrait with no photograph is the person's initials, and a portrait with nobody named is nothing | Accepted | §4b |
 | [0190](0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md) | A route group may contribute a sitemap and may not contribute a robots.txt | Accepted | §4d |
 | [0191](0191-the-harness-may-start-the-application-because-there-is-now-only-one.md) | The harness may start the application, because there is now only one | Accepted — partially supersedes 0117 | §1 (process) |
-| 0192 | *No record on this branch* | — | — |
+| [0192](0192-a-region-a-primitive-places-is-a-region-it-may-ground.md) | A region a primitive places is a region it may ground | Accepted | §4b |
 | [0193](0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md) | A status line is data: its opener is a closed set, and a supersession is written at both ends | Accepted | §1 (process) |

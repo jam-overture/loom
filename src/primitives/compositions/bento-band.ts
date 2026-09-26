@@ -46,6 +46,50 @@ import type { Composition } from "./composition.js"
  * needs no file, no host `public/`, and no third-party request, and it re-themes
  * with the text around it because it *is* text.
  */
+/**
+ * What the wide cell is showing, and why the cell has something in it at all.
+ *
+ * The first photograph ever taken of this catalogue as a *page* found this
+ * band's lead cell was a squat box: one glyph, one title and one sentence
+ * stretched across 1120px with air underneath. Every reference bento earns its
+ * wide cell by putting something in it that is wider than it is tall, and this
+ * one was a card that happened to be long. Filed 25 September, fixed here.
+ *
+ * It is a diff because the cell's own sentence is *every change is a diff you
+ * can read*, and a band that makes a claim beside a picture of the claim is
+ * worth more than either. It is also the one thing this whole page asserts and
+ * never shows: the code band shows what a developer writes, the conversation
+ * band shows what somebody asks, and until now nothing showed **what comes
+ * back**.
+ *
+ * Nothing here is an asset. It is `loom.frame`'s window chrome over a
+ * `loom.code` panel, which is `hero-split-band`'s rule — *a product surface
+ * built out of the library is worth more than a screenshot* — one level down,
+ * and it re-themes with the page because every colour in it is the palette's.
+ *
+ * The lines are a real `configure` against the tree this band is in, down to
+ * the shape of a node id, rather than invented syntax that would be a lie a
+ * reader could check.
+ *
+ * **It is set one property per line, and that is a measurement rather than a
+ * preference.** `loom.code` puts a line too long for its panel behind a
+ * horizontal scroll, deliberately and for a good reason — a command broken
+ * across two rows reads as two commands. On a 390px phone this panel is about
+ * thirty characters wide, so the same diff written with each `props` object on
+ * one line lost the end of both changed lines off the right edge, which is the
+ * one thing a diff must not do. Nine short lines fit a phone with nothing
+ * hidden and nothing wrapped.
+ */
+const CHANGE = `  {
+    "op": "configure",
+    "id": "n7:heading",
+    "props": {
+-     "align": "start"
++     "align": "center",
++     "balance": true
+    }
+  }`
+
 const FEATURES = [
   {
     icon: "◆",
@@ -61,10 +105,10 @@ export const bentoBand: Composition = {
   id: "bento",
   part: "bento",
   label: "Feature mosaic",
-  promise: "Four features in cells of unequal width, with the first running across the top.",
+  promise: "Four features in cells of unequal width, the first running across the top with a panel beside its words.",
   rationale:
-    "A bento band is a loom.mosaic on the lead rhythm holding a loom.feature per cell. The children are the same nodes a loom.feature-grid takes, so the arrangement is one configure away from an even grid and back.",
-  uses: ["loom.section", "loom.heading", "loom.mosaic", "loom.feature"],
+    "A bento band is a loom.mosaic on the lead rhythm holding a loom.feature per cell, and the wide first cell places a loom.frame over a loom.code panel in its media region. The children are the same nodes a loom.feature-grid takes, so the arrangement is one configure away from an even grid and back, and the panel is an ordinary subtree that can be moved to another cell or dropped.",
+  uses: ["loom.section", "loom.heading", "loom.mosaic", "loom.feature", "loom.frame", "loom.code"],
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
       type: "loom.section",
@@ -93,10 +137,37 @@ export const bentoBand: Composition = {
         buildElement(ids, {
           type: "loom.mosaic",
           props: { rhythm: "lead", gap: "normal" },
-          children: FEATURES.map((feature) =>
+          children: FEATURES.map((feature, index) =>
             buildElement(ids, {
               type: "loom.feature",
               props: { icon: feature.icon, title: feature.title, body: feature.body, surface: "card" },
+              /**
+               * Only the lead cell, and that is the band rather than a
+               * shortcut. The rhythm's first cell is the one with room to set
+               * a panel beside the words; the three under it are a third of
+               * the row each, where the same subtree would turn back into a
+               * column and make three tall cards out of a tidy row.
+               */
+              children:
+                index === 0
+                  ? [
+                      buildSlot(ids, "media", [
+                        buildElement(ids, {
+                          type: "loom.frame",
+                          props: { chrome: "window", label: "Overture — review" },
+                          children: [
+                            buildSlot(ids, "surface", [
+                              buildElement(ids, {
+                                type: "loom.code",
+                                props: { language: "page.tree.json", tone: "source" },
+                                children: [buildText(ids, CHANGE)],
+                              }),
+                            ]),
+                          ],
+                        }),
+                      ]),
+                    ]
+                  : [],
             })
           ),
         }),

@@ -32008,8 +32008,9 @@ than named.
 ## 2026-09-24 — three primitives that draw an optional picture were never audited against the rule the other three now follow, and only a photograph can audit them
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — not blocking; three bands' worth of
-work, and the reason it is a finding rather than a fix is stated below
+(`src/primitives/`) · **Status:** **closed 26 September** — all three examined,
+none of them had the fault, and the last of them was photographed rather than
+read. What each one turned out to be is at the bottom of this entry
 
 [0187](decisions/0187-a-frame-with-no-picture-in-it-is-not-the-pictures-shape.md)
 states the rule the library had answered three different ways: **an
@@ -32039,6 +32040,22 @@ a tree has asked for a ratio explicitly, and whether an explicit ask survives an
 absent picture is a different question from whether a default does.
 
 **What would close it**: three photographs and whatever they say. Not a sweep.
+
+### What they said
+
+| | verdict | how |
+| --- | --- | --- |
+| `loom.article` | **clean** — returns no cover element at all without an image | 25 September, from the whole-page photograph |
+| `loom.frame` | **the entry's description of it was wrong** — it takes no `shape` prop and has no `aspect-ratio` anywhere in it, so there is no ratio to survive an absent picture | 25 September, by reading, after the photograph made the claim checkable |
+| `loom.product` | **clean** — `cover` is `null` when there is no `image`, so nothing is reserved | 26 September, photographed: six `loom.product` cards in the `catalogue` band, none with art |
+
+The last one was taken the way this entry asked for rather than by reading the
+branch, because the entry is right that reading is what produced the defect it
+was written about. It cost one command against a band that already exists.
+
+**So 0187's rule now holds across all six primitives that draw an optional
+picture**, and nothing in the library reserves the shape of a picture it has
+not got.
 
 ---
 ## 2026-09-24 — the `.png` partition is a spurious correlation, and one request disproved it in both directions
@@ -32530,9 +32547,10 @@ this library currently makes *complete* and *skimmable* mutually exclusive.
 ## 2026-09-25 — the phrasebook had never been photographed as a page, and three faults were waiting in the gap between a band and a document
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — **two of the three are fixed on #NNN
-and the rest of this entry is the queue**, which is why it is filed rather than
-closed
+(`src/primitives/`) · **Status:** **closed 26 September** — the three faults on
+#389, the two bands that were the remaining queue on the pull request this line
+is being written for. The instrument stays: `the-whole-page.specimen.ts` is
+committed and is what found all five
 
 Forty-four bands shipped and every photograph this lane has ever taken has been
 of a band, or of the handful of bands one run built. That is the right subject
@@ -32574,8 +32592,30 @@ headings past every other band's, which is a `loom.split` with an empty first
 column and reads as deliberate at 1280 and correct at 390. Somebody should look
 at it with fresh eyes rather than on this run's word.
 
-**What would close this**: the two bands above, photographed in the assembled
-page rather than alone. The specimen is committed, so it costs a command.
+**What closed it, 26 September.** Both were photographed in the assembled page,
+and both turned out to need a **rendering the library did not have** rather than
+different copy:
+
+- **The bento's wide cell** now places a `loom.frame` over a `loom.code` diff in
+  its lead tile's `media` region — a region `loom.feature` did not have until
+  this run. The tile turns the panel beside the words past 44rem of its own
+  width and keeps it underneath below that, so the same node is a row in the
+  mosaic's lead cell and a column in a `loom.feature-grid`.
+- **The orbit** now plates every mark (`loom.logo` gains `surface: "card"`),
+  draws a connector from each seat back to the middle (`guides: "spokes"`), and
+  grounds the hub — which is [0192](decisions/0192-a-region-a-primitive-places-is-a-region-it-may-ground.md).
+  The band asks for one ring rather than two, because eight plates alternating
+  between two radii crowd the thing they are circling.
+
+A third fault came out of the same pictures and is worth naming here because it
+is the reason the second one looked the way it did: **the guides were drawn in
+`border-subtle`, which does not exist against the bold palette's own surface**.
+Filed separately as an audit, fixed here for this primitive.
+
+**What this entry's original heading still buys.** All five faults were found by
+one instrument in two sittings, and not one of them was visible to any
+assertion, diagnostic or overflow measurement in this repository. The finding
+worth keeping is the method: *photograph the page before taking a plan*.
 
 ---
 
@@ -32920,6 +32960,54 @@ strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
 
 ---
+
+## 2026-09-26 — a hairline drawn in `border-subtle` does not exist on the bold palette, and both places found so far were a band's whole argument
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **two fixed here, the rest of the
+library unaudited.** It is an audit rather than a defect, and it needs a
+photograph per primitive rather than a grep
+
+`border-subtle` is the right token for the edge of a **card**: a card is mostly
+fill, the fill is what tells a reader it is a card, and the edge only has to
+stop the fill. It is the wrong token for a **line that is the only thing being
+drawn**, and the two starter palettes are why:
+
+| | `bg-surface` | `border-subtle` | `border-default` |
+| --- | --- | --- | --- |
+| editorial | `#ffffff` | `#efefe9` | `#e5e5e5` |
+| bold | `#1a1a1a` | `#1f1f1f` | `#2a2a2a` |
+
+On `bold` a `border-subtle` hairline is `#1f1f1f` against `#1a1a1a` — five
+points of luminance, on a section whose own ground is the same `#1a1a1a`. It is
+not *subtle*; it is **not there**.
+
+**Two were found this run and both were load-bearing**, which is what makes this
+worth an audit rather than a note:
+
+- **`loom.orbit`'s guides.** The primitive's own doc comment says the dashed
+  circles are *"the thing that makes the arrangement read as an orbit rather
+  than as scattered logos when it is standing still, which is every screenshot"*
+  — and under one of the two starter palettes it had been drawing nothing at
+  all since it shipped. Fixed: `border-default`.
+- **`loom.logo`'s new plate.** A tile the size of a word is mostly edge rather
+  than mostly fill, so at `border-subtle` the whole plate vanished on the bold
+  palette — on exactly the band it had been added for. Fixed before it shipped,
+  and only because the specimen is photographed under both palettes.
+
+**Why a grep will not do it.** `border-subtle` is correct in most of its
+seventy-odd uses and the difference is not in the source: it is whether the
+line is *beside* a fill or *instead of* one. The rule that came out of the two
+cases, offered as the thing to audit against rather than as a decision:
+
+> **A border beside a fill may be subtle. A border that is the whole mark takes
+> `border-default`.**
+
+**What would close it**: a sheet that draws every primitive using
+`border-subtle` under `bold`, and whatever it shows. The candidates worth
+looking at first are the ones that draw a rule rather than a box —
+`loom.divider`, `loom.milestone-list`'s rail, `loom.table`'s row lines,
+`loom.timeline`-shaped things, and anything with a dashed or dotted edge.
 ## 2026-09-25 — a `next start` serves a mixture after a rebuild, and no response says which half you are looking at
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
