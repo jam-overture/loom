@@ -137,7 +137,9 @@ side by side to show one request answered four ways, and `/what-you-run` printed
 the exact size of the prompt that leaves your server, measured at build time.
 Both were honest and neither belongs on a marketing site.
 
-The application suite went from 6,010 tests to 5,094 — **916 fewer**. Not one
+The application suite went from 6,010 tests to 5,094 on this branch — **916
+fewer** (it reads higher in the table below, because `Loom merge` brought four
+other lanes' branches in afterwards). Not one
 was weakened or skipped: every one of them asserted something about a page that
 no longer exists. Where a deleted test was protecting something that outlived
 its page, the assertion was moved rather than dropped — the mechanism page's
@@ -183,11 +185,12 @@ on a `.next` and a `dist` deleted first.
 
 | | |
 | --- | --- |
-| `pnpm verify` | **green, exit 0** |
-| runtime | **3,073 passed** in 160 files — untouched |
-| application | **5,094 passed** in 296 files, down 916 with the pages they tested |
+| `pnpm verify` | **green, exit 0**, on the branch after `Loom merge` brought `main` in |
+| runtime | **3,130 passed** in 161 files — untouched by this lane |
+| application | **5,157 passed** in 299 files |
+| this branch's effect on the app suite | **916 fewer** than before the cut, measured on the branch before the merge (6,010 → 5,094) |
 | marketing suite | **871 passed** in 27 files |
-| findings | **806**, 0 malformed |
+| findings | **813**, 0 malformed |
 | prerender | 112 pages, 1,285 text junctions, 0 run together, 0 unserved |
 | `pnpm shoot` | 4 shots, no overflow at 1280 or 390 |
 
