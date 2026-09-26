@@ -32960,6 +32960,121 @@ strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
 
 ---
+## 2026-09-26 — a fragment is the one broken link this repository cannot report, and the front door had written itself two
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom lessons`,
+`Loom demo`, `Loom portal` · **Status:** open for the four surfaces that have no
+sweep · **the marketing half is closed** by
+`marketing-37-the-way-back-to-what-happened`
+
+Every other control on any of these surfaces is a path, and a path that has gone
+wrong announces itself: the route is missing, the build says so, `pnpm verify`
+goes red. **A fragment fails silently.** `href="…#your-turn"` pointing at a band
+that no longer declares `anchor: "your-turn"` is a button a visitor presses and
+nothing happens — no error, no console line, no failing test, and a page that
+still renders perfectly. Nothing in this repository could have reported it.
+
+It is not hypothetical here. `loom.section`, `loom.hero` and `loom.callout` all
+take an `anchor` and render it as an `id`, so any surface can write one, and the
+marketing site had two links of this kind with nothing holding either end
+together — the band's own comment said as much, in as many words: *"a link
+pointing at a band that has since been renamed is a control that silently does
+nothing, and nothing else on the page would say so."* It was right, it was
+written beside the literal it was about, and it was the whole of the protection.
+
+**The remedy, which is twenty lines and transfers directly.** Walk the page
+tree, collect every `anchor` prop and every `href` whose resolved URL is this
+same page with a non-empty hash, and assert the second is a subset of the first
+— in every state the page can be reached in, which is the part that matters on a
+surface whose bands come and go. `app/(marketing)/_lib/anchors.test.ts` is the
+version of it this lane wrote; it renders to markup and looks for `id="…"`
+rather than trusting the prop, because what a visitor's press depends on is the
+attribute in the document.
+
+Filed rather than written into four other lanes for the usual reason — a sweep
+belongs to the surface it sweeps, and the list of anchors would have to be
+yours rather than ours. It is the same shape as the plain-language sweep
+`Loom portal` filed on 24 September and is offered the same way.
+
+---
+## 2026-09-26 — a comment stating a library limit outlived the limit by a fortnight, and it is the second consecutive run to find that shape
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37-the-way-back-to-what-happened` — recorded because the
+shape is now a pattern rather than an incident
+
+`answer.ts` is the notice at the top of the front door: the band that exists
+because pressing one of the five choices navigates, so the browser leaves the
+visitor at the top of the document, three screens above the band they were
+reading. It says what happened. It could not show anybody where, and the reason
+was written down beside the missing control:
+
+> *The panel below carries the same five steps, and a link to it is the one
+> thing this band cannot offer: a tree can hold a fragment — the scheme
+> allowlist would pass `#…` without complaint — and **no primitive in the
+> library renders an `id` for it to point at**. Filed rather than worked around,
+> because the workaround would be a local component and this lane does not get
+> one.*
+
+The first half is true. The second half is false, and the proof of it is one
+file away: `anchor` is declared by `loom.section`, `loom.hero` and
+`loom.callout`, `anchorAttributes` renders it as an `id`, and **the band
+directly below this one is already using it** — `in-your-own-words.ts` declares
+`anchor: "your-turn"` and `see-it-happen.ts` links to it, one import apart from
+the comment asserting it cannot be done.
+
+How long it had been false is not recoverable here: this checkout's history
+begins on 19 September and both files arrive in it already written. So the claim
+is only the one that can be checked — that it is false now, and that a run
+reading `answer.ts` to decide what this band could offer would have been told
+the wrong thing.
+
+What it cost a visitor: the one change on this site a competitor cannot copy
+happened below the fold, the notice above the fold reported it, and nothing
+connected the two. The site could say *held* and could not show anybody the
+hold.
+
+**Why it is filed rather than only fixed.** This is the second consecutive run
+by this lane to find the same shape — yesterday it was `wrap` on `loom.code`,
+built for this lane's own finding on 12 September, cited in the prop's doc
+comment, and unset on all eight panels on the 25th. Both times the mechanism
+existed, the comment beside the workaround still stated the constraint as a fact
+about the library, and no test anywhere could see the gap because nothing was
+broken — the page rendered, the suite was green, the claim the site made was
+simply smaller than the one the library could have carried.
+
+The generalisation, offered to every lane rather than only owned here: **a
+comment that states a limit is a claim about another lane's code, and this
+repository holds no claim of that kind to anything.** A finding closes when the
+lane owning the mechanism ships it, and nothing closes the half where the lane
+that asked wires it up — so the sentence explaining the workaround is the last
+place the stale fact survives, and it survives in the file most likely to be
+re-read by whoever would have fixed it.
+
+---
+## 2026-09-26 — the two hero findings of 20 September are six days open and re-photographed, on all three palettes
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — **re-filed by reference, with nothing added to the argument**
+
+Both 20 September entries stand exactly as written and both were photographed
+again this morning against `next start` on `main`:
+
+- **`loom.hero` paints its backdrop over its own text.** `heroLayers(backdrop)`
+  is spread after the content in the returned children, so under `minimal` the
+  `grid` paint's 1px lines cross the 72px headline and read as strikethrough
+  through *components,* and *experiences.* — visible in this run's
+  `home-minimal-wide` and, worse for being narrower, in `home-minimal-phone`.
+- **`TEXT_MEASURE = "44rem"` caps the heading slot and the prose with one
+  length**, so the headline takes three lines at 1280 and four at 390, and the
+  front door's two actions sit below the fold at 1280×900. Measured again this
+  morning: the primary button's top edge is at **858px** of a 900px viewport.
+
+Nothing is added because nothing needs to be. Recorded only so the age is
+visible: the first screen a stranger meets has had no action on it for six days,
+and it is the single most expensive thing on this surface that this lane cannot
+reach — `stature` and `align` are the composition's levers and neither moves a
+measure that lives inside the primitive.
 
 ## 2026-09-26 — a hairline drawn in `border-subtle` does not exist on the bold palette, and both places found so far were a band's whole argument
 

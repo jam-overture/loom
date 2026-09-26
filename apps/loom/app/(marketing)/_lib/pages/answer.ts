@@ -1,6 +1,7 @@
 import { buildElement, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
 
 import { writeChangeSequence } from "../adapt/history"
+import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"
 import { action, prose, stack } from "../nodes"
 import { askHref, recordHref, type SiteThemeName } from "../site"
@@ -79,6 +80,31 @@ export type AnswerContext = {
  * here the question is "will you allow this?", and offering the way out beside
  * the way through turns a decision into a pair of exits.
  */
+/**
+ * The address the visitor is at, whole.
+ *
+ * `decision`'s own `sofar` is deliberately partial — each control below builds
+ * the address it is *going* to, so the one that offers *Put it back* adds
+ * `back` and the one that offers a yes adds `approve`. A link that only looks
+ * at the page needs the opposite: every answer the visitor has given so far and
+ * no new one, because a control that quietly dropped `back=1` would put the
+ * change the visitor had just reversed back on the page while claiming to do
+ * nothing but scroll.
+ *
+ * That failure is this site's recorded shape rather than a hypothetical: the
+ * undo is the parameter two of this lane's own findings were about, both times
+ * because a link between two of its pages carried some of what had happened
+ * and not all of it.
+ */
+const where = (context: AnswerContext): string =>
+  askHref(context.origin, {
+    theme: context.theme,
+    ask: context.record.ask,
+    ...(context.approve === true ? { approve: true } : {}),
+    ...(context.back === true ? { back: true } : {}),
+    ...(context.backApprove === true ? { backApprove: true } : {}),
+  })
+
 const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
   const { record } = context
   const home = askHref(context.origin, { theme: context.theme })
@@ -111,19 +137,44 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
           { variant: reversible ? "primary" : "secondary" }
         ),
     /**
+     * The panel below, which is the one destination that is not a departure.
+     *
+     * This band said, in this comment, that a link *to* the panel was the one
+     * thing it could not offer: *a tree can hold a fragment — the scheme
+     * allowlist would pass `#…` without complaint — and no primitive in the
+     * library renders an `id` for it to point at.* The second half stopped
+     * being true before it was written. `loom.section`, `loom.hero` and
+     * `loom.callout` all take an `anchor` and render it as an `id`, and the
+     * band directly below this one has been pointing at another band that way
+     * since it shipped. So the constraint was real, the workaround was right at
+     * the time, and what was left behind was a sentence stating a limit that
+     * had gone.
+     *
+     * What it costs a visitor is the whole reason this band exists. Pressing a
+     * choice navigates, so the browser leaves the reader at the top of the
+     * document — this band's own opening comment measures the screen that
+     * results — and the evidence for what it says is three screens below the
+     * fold with nothing pointing at it. The notice could say *held* and could
+     * not show anybody the hold.
+     *
+     * **It is not a third exit.** The comment above this row refuses to repeat
+     * the panel's *Start again* beside a held change, and that reasoning is
+     * about a pair of ways *out* of the decision. This is the only control on
+     * the band that keeps the visitor on the page, and it carries the whole of
+     * the address they are already at so that reading the record cannot change
+     * what the page is showing.
+     */
+    action(ids, "See it on this page", `${where(context)}#${ANCHOR.seeItHappen}`, {
+      variant: "quiet",
+    }),
+    /**
      * The whole record, on the page built for it.
      *
-     * The panel below carries the same five steps, and a link *to* it is the
-     * one thing this band cannot offer: a tree can hold a fragment — the scheme
-     * allowlist would pass `#…` without complaint — and no primitive in the
-     * library renders an `id` for it to point at. Filed rather than worked
-     * around, because the workaround would be a local component and this lane
-     * does not get one.
-     *
-     * The record page is the better destination anyway. It replays this exact
-     * request from the front door as it is published, so what it shows is a
-     * page anyone can reach with the address rather than a state this visitor
-     * happens to be in.
+     * The record page is the wider destination. It replays this exact request
+     * from the front door as it is published, so what it shows is a page anyone
+     * can reach with the address rather than a state this visitor happens to be
+     * in — which is the right thing to offer second, after the cheaper look
+     * that does not leave.
      */
     action(
       ids,

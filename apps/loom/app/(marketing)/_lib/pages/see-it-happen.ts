@@ -4,7 +4,7 @@ import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
-import { BAND } from "../bands"
+import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
 import { askHref, mechanismHref, type SiteThemeName } from "../site"
 import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
@@ -543,7 +543,16 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
 export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
   buildElement(ids, {
     type: "loom.section",
-    props: { tone: "surface", width: "wide", eyebrow: BAND.seeItHappen },
+    /**
+     * The anchor is what the notice at the top of the page links to.
+     *
+     * A visitor who presses one of the choices below is navigated, so the
+     * browser leaves them at the top of the document — three screens above the
+     * band they were reading. The notice up there tells them what happened;
+     * this is how they get back to where it happened, without scrolling and
+     * guessing. See `ANCHOR`, and `answer.ts` for the control itself.
+     */
+    props: { tone: "surface", width: "wide", eyebrow: BAND.seeItHappen, anchor: ANCHOR.seeItHappen },
     children: [
       buildSlot(ids, "heading", [
         heading(ids, 2, "Ask this page to rearrange itself", { balance: true }),
