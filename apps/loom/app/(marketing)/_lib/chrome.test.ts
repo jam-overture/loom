@@ -19,10 +19,10 @@ import {
   internalHref,
   PORTAL,
   PRODUCT_SURFACES,
-  readingNeighbours,
+  readingNeighbors,
   SITE_ROUTES,
   surfaceHref,
-  WHAT_READERS_DO,
+  WHAT_YOU_RUN,
   type SiteRoute,
 } from "./site"
 import { wordsOf } from "./words"
@@ -308,7 +308,7 @@ describe("the footer", () => {
 
   it("points the disclosure at the page that says the rest of it", () => {
     expect(hrefsIn(counting())).toContain(
-      internalHref(ORIGIN, WHAT_READERS_DO.path, DEFAULT_THEME)
+      internalHref(ORIGIN, WHAT_YOU_RUN.path, DEFAULT_THEME)
     )
   })
 })
@@ -318,7 +318,7 @@ describe("the footer", () => {
  *
  * `site.test.ts` asks whether the order is a sequence; this asks whether the
  * band says so in nodes. The two are different questions and the second is the
- * one a reader meets: a correct `readingNeighbours` rendered into a region
+ * one a reader meets: a correct `readingNeighbors` rendered into a region
  * nothing draws would be a page that quietly offers nothing.
  */
 describe("the band that says what to read next", () => {
@@ -347,7 +347,7 @@ describe("the band that says what to read next", () => {
   const CARRIED = SITE_ROUTES.filter((route) => route.path !== HOME.path)
 
   it.each(CARRIED)("$path offers the page before it and the page after it", (route) => {
-    const { before, after, onward } = readingNeighbours(route)
+    const { before, after, onward } = readingNeighbors(route)
     const band = bandOn(route)
     const cards = ofType(band, "loom.card")
 
@@ -355,14 +355,14 @@ describe("the band that says what to read next", () => {
       [before, after, onward].filter((way) => way !== undefined).length
     )
 
-    for (const neighbour of [before, after]) {
-      if (neighbour === undefined) continue
+    for (const neighbor of [before, after]) {
+      if (neighbor === undefined) continue
 
-      const href = internalHref(ORIGIN, neighbour.path, DEFAULT_THEME)
+      const href = internalHref(ORIGIN, neighbor.path, DEFAULT_THEME)
       const card = cards.find((found) => found.props["href"] === href)
 
-      expect(card, `${route.path} should offer ${neighbour.path}`).toBeDefined()
-      expect(labelOf(card as LoomNode)).toContain(neighbour.label)
+      expect(card, `${route.path} should offer ${neighbor.path}`).toBeDefined()
+      expect(labelOf(card as LoomNode)).toContain(neighbor.label)
     }
 
     if (onward !== undefined) {

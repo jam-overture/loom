@@ -57,20 +57,13 @@ type PageModule = {
  * of a computed path is a glob the bundler has to guess at, and a guess that
  * came back empty would make this file pass by finding nothing. The list being
  * hand-written is safe for exactly one reason: **the first assertion below holds
- * it to `SITE_ROUTES` in both directions**, so a tenth page cannot be added to
+ * it to `SITE_ROUTES` in both directions**, so a fourth page cannot be added to
  * the site and left out of this file, and an entry here cannot outlive its route.
  */
 const PAGE_MODULES: Readonly<Record<string, () => Promise<PageModule>>> = {
   "/": () => import("./page"),
   "/how-it-works": () => import("./how-it-works/page"),
-  "/the-rules": () => import("./the-rules/page"),
-  "/who-can-ask": () => import("./who-can-ask/page"),
-  "/the-record": () => import("./the-record/page"),
-  "/putting-it-back": () => import("./putting-it-back/page"),
-  "/what-readers-do": () => import("./what-readers-do/page"),
-  "/when-it-goes-wrong": () => import("./when-it-goes-wrong/page"),
   "/what-you-run": () => import("./what-you-run/page"),
-  "/your-components": () => import("./your-components/page"),
 }
 
 const ORIGIN = siteOrigin()

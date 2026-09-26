@@ -2,47 +2,17 @@ import type { LoomTree } from "@loom/runtime"
 import { renderLoomTree, type RenderOutput } from "@loom/runtime/react"
 
 import { askById, type Ask } from "./adapt/asks"
-import { runHistory, type ChangeHistory } from "./adapt/history"
 import { paperTrailFor, type PaperTrail } from "./adapt/paper-trail"
 import type { ChangeRecord } from "./adapt/record"
-import { weighEachAsker, type WeighedRequest } from "./adapt/askers"
-import { roundTripsOn, type RoundTrip } from "./adapt/round-trip"
-import { probeFloors, type FloorResult } from "./adapt/floors"
 import { runAsk, type AskRun } from "./adapt/run"
 import { runUndo } from "./adapt/undo"
 import { siteFrameOrigins } from "./frames"
-import { piecesIn } from "./measure"
 import { homePageTree } from "./pages/home"
 import { howItWorksPageTree, type MechanismContext } from "./pages/how-it-works"
-import { puttingItBackPageTree, type BackContext } from "./pages/putting-it-back"
-import { theRecordPageTree, type RecordContext } from "./pages/the-record"
-import { theRulesPageTree } from "./pages/the-rules"
-import { whatReadersDoPageTree } from "./pages/what-readers-do"
 import { whatYouRunPageTree } from "./pages/what-you-run"
-import {
-  DEMONSTRATED_ASK,
-  whenItGoesWrongPageTree,
-  type RefusalContext,
-  type RefusedRun,
-} from "./pages/when-it-goes-wrong"
-import { whoCanAskPageTree, type AskersContext } from "./pages/who-can-ask"
-import { yourComponentsPageTree, type ComponentsContext } from "./pages/your-components"
 import { readersCountedHere } from "./readers/counting"
 import { siteRegistry, siteThemes } from "./registry"
-import {
-  HOME,
-  HOW_IT_WORKS,
-  PUTTING_IT_BACK,
-  THE_RECORD,
-  THE_RULES,
-  WHAT_READERS_DO,
-  WHAT_YOU_RUN,
-  WHEN_IT_GOES_WRONG,
-  WHO_CAN_ASK,
-  YOUR_COMPONENTS,
-  siteOrigin,
-  type SiteRoute,
-} from "./site"
+import { HOME, HOW_IT_WORKS, WHAT_YOU_RUN, siteOrigin, type SiteRoute } from "./site"
 
 /**
  * Route → tree → rendered page, in one place.
@@ -58,30 +28,22 @@ import {
  *
  * One type rather than one per page, because the map below is keyed by path and
  * a builder is looked up rather than called by name. Every field past the origin
- * and the palette is optional and belongs to one page — what the visitor asked
- * the front door for, and the run of changes the record page is reporting on —
- * so a page that does not read a field cannot be broken by one arriving.
+ * and the palette is optional — what the visitor asked the front door for, and
+ * the record of the run the mechanism page prints — so a page that does not read
+ * a field cannot be broken by one arriving.
+ *
+ * It was an intersection of six context types until 26 September, one per page
+ * that wanted a field of its own. Five of those pages are gone and what is left
+ * is the single field the mechanism page adds.
  */
-export type SitePageContext = RecordContext &
-  MechanismContext &
-  RefusalContext &
-  AskersContext &
-  ComponentsContext &
-  BackContext
+export type SitePageContext = MechanismContext
 
 export type PageBuilder = (context: SitePageContext) => LoomTree
 
 export const SITE_PAGES: ReadonlyMap<string, PageBuilder> = new Map<string, PageBuilder>([
   [HOME.path, homePageTree],
   [HOW_IT_WORKS.path, howItWorksPageTree],
-  [THE_RULES.path, theRulesPageTree],
-  [THE_RECORD.path, theRecordPageTree],
-  [WHEN_IT_GOES_WRONG.path, whenItGoesWrongPageTree],
   [WHAT_YOU_RUN.path, whatYouRunPageTree],
-  [WHO_CAN_ASK.path, whoCanAskPageTree],
-  [PUTTING_IT_BACK.path, puttingItBackPageTree],
-  [YOUR_COMPONENTS.path, yourComponentsPageTree],
-  [WHAT_READERS_DO.path, whatReadersDoPageTree],
 ])
 
 /** The page as it is written, before anything the visitor asked for. */
@@ -160,24 +122,6 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
 }
 
 /**
- * The run of changes the record page is reporting on, replayed from the front
- * door as it is published.
- *
- * The record page is *about* the front door, so the sequence starts from the
- * page this site publishes rather than from anything the record page contains.
- * Nothing is kept between requests: a history is a list in the address, run
- * again from scratch every time it is read (0081), which is what lets one be
- * sent to somebody else.
- */
-export const historyFor = async (context: SitePageContext): Promise<ChangeHistory | undefined> => {
-  const tokens = context.changes ?? []
-
-  if (tokens.length === 0) return undefined
-
-  return runHistory(treeFor(HOME, { origin: context.origin, theme: context.theme }), tokens)
-}
-
-/**
  * The run the mechanism page prints, against the front door as it is published.
  *
  * Here rather than in the builder because a page builder is synchronous and a
@@ -200,102 +144,10 @@ export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
     context.approve === true
   )
 
-/**
- * The refusal the *when it goes wrong* page prints, run while the page is built.
- *
- * The same seam as the three above and the same reason — a page builder is
- * synchronous and a request through the whole sequence is not — with one
- * difference worth naming: the request is **fixed here rather than read off the
- * address**. That page is an argument about what always happens rather than a
- * place to try things, so every reader of it sees the same refusal, and the one
- * they see is the one the front door's fifth button runs.
- *
- * The counts are taken off the page the request was handed and the page the
- * sequence gave back. They are the band's whole claim, so they are measured
- * rather than asserted: `runAsk` returns the page it was given when nothing is
- * applied, and two equal numbers are that fact printed instead of promised.
- */
-export const refusalFor = async (context: SitePageContext): Promise<RefusedRun | undefined> => {
-  const ask = askById(DEMONSTRATED_ASK)
-  if (ask === undefined) return undefined
-
-  const page = treeFor(HOME, { origin: context.origin, theme: context.theme })
-  const run = await runAsk(page, ask)
-
-  return {
-    record: run.record,
-    piecesBefore: piecesIn(page.root),
-    piecesAfter: piecesIn(run.page.root),
-  }
-}
-
-/**
- * The sixteen runs `/who-can-ask` prints, made while the page is built.
- *
- * The same seam as the three above and the same reason — a page builder is
- * synchronous and a request through the whole sequence is not. Like the refusal
- * band, the requests are **fixed here rather than read off the address**: the
- * page is an argument about what always happens rather than a place to try
- * things, so every reader of it is looking at the same sixteen answers.
- *
- * The front door is built once and all sixteen are judged against it.
- * `composeChange` returns a new page rather than touching the one it was given,
- * so nothing drifts under the later runs — and the comparison is a comparison
- * of askers rather than of sixteen slightly different pages.
- */
-export const askersFor = async (
-  context: SitePageContext
-): Promise<readonly WeighedRequest[]> =>
-  weighEachAsker(treeFor(HOME, { origin: context.origin, theme: context.theme }))
-
-/**
- * The round trips `/putting-it-back` prints, made while the page is built.
- *
- * The same seam as the four above and the same reason — a page builder is
- * synchronous and a request through the whole sequence is not. Like the refusal
- * band and the comparison, the requests are **fixed here rather than read off
- * the address**: the page is an argument about what always happens rather than a
- * place to try things, so every reader of it is looking at the same trips.
- *
- * The front door is built once and every trip starts from it, so *the page came
- * back as it was* is a comparison against the page this site publishes rather
- * than against whatever the previous trip left behind.
- */
-export const roundTripsFor = async (
-  context: SitePageContext
-): Promise<readonly RoundTrip[]> =>
-  roundTripsOn(treeFor(HOME, { origin: context.origin, theme: context.theme }))
-
-/**
- * The two refused requests `/your-components` prints, made while the page is
- * built.
- *
- * The same seam as the five above and the same reason — a page builder is
- * synchronous and a request through the whole sequence is not. Like the refusal
- * band, the comparison and the round trips, they are **fixed here rather than
- * read off the address**: that page argues about what always happens rather than
- * offering somewhere to try things, so every reader of it meets the same two
- * answers.
- *
- * They are put to the front door rather than to the page that prints them, which
- * every other measured band on this site also does — and here it is the only
- * order that works at all: the evidence is part of `/your-components`, so a
- * request judged against that page would be judged against a page already
- * holding its own answer.
- */
-export const floorsFor = async (context: SitePageContext): Promise<readonly FloorResult[]> =>
-  probeFloors(treeFor(HOME, { origin: context.origin, theme: context.theme }))
-
 export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
-  if (route.path === WHEN_IT_GOES_WRONG.path) {
-    const refusal = await refusalFor(context)
-
-    return treeFor(route, refusal === undefined ? context : { ...context, refusal })
-  }
-
   if (route.path === HOW_IT_WORKS.path) {
     return treeFor(route, { ...context, trail: await trailFor(context) })
   }
@@ -304,24 +156,6 @@ export const pageTreeFor = async (
     const run = await askRunFor(context)
 
     return run === undefined ? treeFor(route, context) : run.page
-  }
-
-  if (route.path === WHO_CAN_ASK.path) {
-    return treeFor(route, { ...context, weighed: await askersFor(context) })
-  }
-
-  if (route.path === PUTTING_IT_BACK.path) {
-    return treeFor(route, { ...context, trips: await roundTripsFor(context) })
-  }
-
-  if (route.path === YOUR_COMPONENTS.path) {
-    return treeFor(route, { ...context, floors: await floorsFor(context) })
-  }
-
-  if (route.path === THE_RECORD.path) {
-    const history = await historyFor(context)
-
-    return history === undefined ? treeFor(route, context) : treeFor(route, { ...context, history })
   }
 
   return treeFor(route, context)

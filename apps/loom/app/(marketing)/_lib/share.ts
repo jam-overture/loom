@@ -89,7 +89,7 @@ export type ShareCard = {
    * Leaving it off a published page is worth more than fixing the duplication
    * would have been. **A pill on this card now means the rules reached a verdict
    * about this exact page**, which is a thing a reader can learn from one glance
-   * at two cards side by side, and could not have learnt from a pill that was
+   * at two cards side by side, and could not have learned from a pill that was
    * always there saying where they were.
    */
   readonly eyebrow?: string
@@ -101,7 +101,7 @@ export type ShareCard = {
    * The first card painted every verdict in the accent, which is the mistake
    * that shipped and was fixed on the band above the fold on 26 August — and it
    * is worse here, because a card is read at thumbnail size by someone who will
-   * not read the word next to the colour.
+   * not read the word next to the color.
    */
   readonly tone?: "accent" | "neutral"
   readonly headline: string

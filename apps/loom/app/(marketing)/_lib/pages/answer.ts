@@ -1,10 +1,9 @@
 import { buildElement, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
 
-import { writeChangeSequence } from "../adapt/history"
 import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"
 import { action, prose, stack } from "../nodes"
-import { askHref, recordHref, type SiteThemeName } from "../site"
+import { askHref, mechanismHref, type SiteThemeName } from "../site"
 
 /**
  * The answer, where the visitor lands.
@@ -168,43 +167,27 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
       variant: "quiet",
     }),
     /**
-     * The whole record, on the page built for it.
+     * The whole record, on the page that prints one.
      *
-     * The record page is the wider destination. It replays this exact request
-     * from the front door as it is published, so what it shows is a page anyone
-     * can reach with the address rather than a state this visitor happens to be
-     * in — which is the right thing to offer second, after the cheaper look
-     * that does not leave.
+     * It was `/the-record` until 26 September, a page whose whole job was
+     * replaying a sequence of requests from the front door. The maintainer's
+     * direction that day retired it into the mechanism page, which already
+     * printed the record of a real run and already took an `ask` in its
+     * address — so the destination is the same argument, one page shorter, and
+     * `mechanismHref` carries the approval with it because the record does.
+     *
+     * What is lost with the page is the multi-change sequence: a history of
+     * several requests, replayable from one address. Nothing on the site linked
+     * to one except that page, and a marketing site is not where somebody
+     * assembles a sequence.
      */
     action(
       ids,
       "See the whole record",
-      recordHref(context.origin, {
+      mechanismHref(context.origin, {
         theme: context.theme,
-        /**
-         * The whole of what the visitor did, off the address rather than off the
-         * verdict.
-         *
-         * `verdict === "approved"` said the same thing while a record could only
-         * ever be one of the five choices. It stopped being true the moment the
-         * undo got a record of its own: that record's verdict is the *undo's*,
-         * and reading it here would drop the approval that let the change it
-         * reverses happen at all — replaying a sequence nobody ran.
-         *
-         * The undo travels too, as of 7 September, because the record page can
-         * now say it. Until it could, a visitor who put a change back here and
-         * pressed *See the whole record* arrived at a list showing only the
-         * change — the site dropping, in the one step between two of its own
-         * pages, exactly the thing it is claiming never gets dropped.
-         */
-        changes: writeChangeSequence([
-          {
-            ask: record.ask,
-            approved: context.approve === true,
-            putBack: context.back === true,
-            putBackApproved: context.backApprove === true,
-          },
-        ]),
+        ask: record.ask,
+        ...(context.approve === true ? { approve: true } : {}),
       }),
       { variant: "quiet" }
     ),
@@ -219,7 +202,7 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
  * and it shipped a refusal in the palette's green. The library has two tones and
  * no red, deliberately and for a recorded reason, so a refusal cannot be painted
  * as one; what it can be is **not painted as the tone this page uses to say
- * "look here"**. A page that colours *Refused* the same as *You said yes* is
+ * "look here"**. A page that colors *Refused* the same as *You said yes* is
  * asking a reader to get the answer from the word alone, on the one band they
  * read fastest.
  *

@@ -12,8 +12,7 @@ import {
   spellCapitalised,
   STEPS,
 } from "./journey"
-import { GLOSSARY } from "./pages/how-it-works"
-import { pageTreeFor, renderTree, trailFor } from "./render"
+import { pageTreeFor, renderTree } from "./render"
 import { HOME, HOW_IT_WORKS, DEFAULT_THEME, type SiteRoute } from "./site"
 import { wordsOf } from "./words"
 
@@ -65,7 +64,13 @@ describe("the number of steps, as the site states it", () => {
     }
 
     expect(mechanism).toContain(`${spellCapitalised(JOURNEY.length)} steps, every time`)
-    expect(mechanism).toContain(`The ${STEPS} steps above`)
+
+    /**
+     * The second sentence this checked — *the five steps above*, written by the
+     * record band pointing back up the page — went with that band on
+     * 26 September. What is left is the heading, plus the sweep above that no
+     * page of this site names a different number.
+     */
   })
 
   /**
@@ -98,67 +103,16 @@ describe("the number of steps, as the site states it", () => {
 })
 
 /**
- * The record's own lines, counted off the record.
+ * **The trail's own counts are gone, with the trail.**
  *
- * The mechanism page prints a real paper trail and then says three things about
- * how long it is. All three were typed, and two of them disagreed with each
- * other: the refusal band was headed *The same five lines* above a sentence
- * reading *the first four lines read exactly as they do above*.
- *
- * The three the refusal band states are positions in the **refused** run, and
- * are checked here against each other rather than against the run printed above
- * it — which is what they were quietly read off while that run could only ever
- * be one length. `the-record-of-your-ask.test.ts` is where they are held against
- * a page whose two runs differ.
+ * This block held three numbers the mechanism page printed about the record it
+ * was showing — how many lines, how many kinds of line, which line carried the
+ * verdict — each derived from the trail rather than typed beside it. They were
+ * good assertions about a band the maintainer retired on 26 September, and a
+ * derived count with nothing to derive it from is not worth keeping as a
+ * fixture. The page no longer prints a record; the front door still does, in
+ * sentences, and `adapt.test.ts` holds that one.
  */
-describe("the number of lines, as the page printing them states it", () => {
-  it("counts the trail it is showing rather than a number typed beside it", async () => {
-    const context = { origin: ORIGIN, theme: DEFAULT_THEME }
-    const trail = await trailFor(context)
-    const mechanism = await markupOf(HOW_IT_WORKS)
-
-    expect(mechanism).toContain(
-      `${spellCapitalised(trail.lines.length)} lines for the ${STEPS} steps above`
-    )
-  })
-
-  it("does not head the refusal with a different count from the sentence under it", async () => {
-    const mechanism = await markupOf(HOW_IT_WORKS)
-
-    const heading = /The same (\w+) kinds of line, and then a different answer/.exec(mechanism)
-    const sentence = /it reaches the same (\w+) kinds of line as the run above/.exec(mechanism)
-
-    expect(heading?.[1]).toBeDefined()
-    expect(sentence?.[1]).toBeDefined()
-    expect(heading?.[1]).toBe(sentence?.[1])
-  })
-
-  it("counts the glossary it is introducing rather than a number typed above it", async () => {
-    const mechanism = await markupOf(HOW_IT_WORKS)
-
-    expect(mechanism).toContain(`${spellCapitalised(GLOSSARY.length)} of our words appear`)
-
-    for (const entry of GLOSSARY) {
-      expect(mechanism).toContain(entry.term)
-    }
-  })
-
-  it("says the verdict line is the one after the lines that match", async () => {
-    const mechanism = await markupOf(HOW_IT_WORKS)
-
-    const matching = /reaches the same (\w+) kinds of line/.exec(mechanism)?.[1]
-    const at = /and then this, its (\w+)\./.exec(mechanism)?.[1]
-    const absent = /There is no (\w+), because nothing happened/.exec(mechanism)?.[1]
-
-    const count = ["no", "one", "two", "three", "four", "five", "six", "seven"].indexOf(
-      matching as string
-    )
-
-    expect(count).toBeGreaterThan(0)
-    expect(at).toBe(ordinal(count + 1))
-    expect(absent).toBe(ordinal(count + 2))
-  })
-})
 
 /**
  * The helpers, at their edges.
@@ -318,7 +272,7 @@ describe("the four plain words, and the line each one carries", () => {
   })
 
   /**
-   * Plain rather than card, and it is a judgement about the page rather than
+   * Plain rather than card, and it is a judgment about the page rather than
    * about the band: the mosaic further down is the front door's one wall of
    * cards, and a second one directly under the hero makes the first screen and
    * a half read as a specification sheet.

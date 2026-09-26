@@ -73,7 +73,7 @@ describe("the font the site actually renders in", () => {
     )
   })
 
-  it("keeps a fallback behind it, so a failed request is a near-neighbour", () => {
+  it("keeps a fallback behind it, so a failed request is a near-neighbor", () => {
     expect(minimalSansFontPack.bodyFamily.split(",").length).toBeGreaterThan(1)
     expect(layout).toContain("display=swap")
   })

@@ -31,30 +31,34 @@ export type JourneyStep = {
  * The five steps, in the order they happen, and this is the only place they are
  * written down.
  *
- * They were literal `loom.milestone` props on the mechanism page until this
- * run. Nothing about the words has changed — they are moved, not rewritten,
- * because the copy is not what was wrong with them.
+ * **Rewritten on 26 September at the maintainer's direction**, which was that
+ * the site is too detailed and too close to the documentation, and should be
+ * simple enough for a high schooler to follow. Two of the five were teaching a
+ * stranger a word — *that list is called a delta*, *the part that applies them
+ * is called the Gate* — on the page they meet the mechanism on. The words are
+ * the documentation's to teach. What each step *does* is unchanged; what is
+ * gone is the naming, and about half the length.
  */
 export const JOURNEY: readonly JourneyStep[] = [
   {
     title: "Someone asks for something",
-    body: "In their own words, about one particular page. Nothing has been worked out yet and nothing has moved.",
+    body: "In their own words, about one page. Nothing has moved yet.",
   },
   {
     title: "The AI writes down what it wants to change",
-    body: "It is shown an outline of the page and the list of pieces it is allowed to use. It answers with an exact list of changes — add this, remove that, move the other, change a setting — and with why it wants them and who asked. That list is called a delta, and it is the only thing that travels from here on.",
+    body: "Not new code — an exact list: add this, remove that, move the other, change a setting. That list is the only thing that goes any further.",
   },
   {
     title: "The change is measured",
-    body: "Facts before opinions: what it touches, how much of the page it moves, and whether it can be taken back cleanly.",
+    body: "How much of the page it moves, what it touches, and whether it can be taken back cleanly.",
   },
   {
     title: "Your rules decide",
-    body: "They read those measurements and give one of three answers — do it, hold it for a person to look at, or refuse it — and name the rule that answered. The part that applies them is called the Gate.",
+    body: "One of three answers: do it, hold it for a person to look at, or refuse it — and which of your rules said so.",
   },
   {
     title: "What happened is written down",
-    body: "The change goes into a log with who asked for it and the change that would undo it. That log is the page’s history — nothing is overwritten and nothing is lost.",
+    body: "Who asked, what moved, and the change that puts it back. Nothing is overwritten.",
   },
 ]
 
@@ -178,7 +182,7 @@ export type PlainWord = {
    * The one line that makes the word mean something here rather than anywhere.
    *
    * **Each line is the fact the hero's paragraph does not already carry.** That
-   * constraint is what took the band from four grey nouns to a band worth its
+   * constraint is what took the band from four gray nouns to a band worth its
    * place, and it is easy to lose: the sentence above this band says *ask in
    * your own words · checked against your rules · a record of who asked, what
    * moved and how to put it back*, which is these four words in a row. A gloss
@@ -197,7 +201,7 @@ export type PlainWord = {
  * The four words, each with the line that earns it.
  *
  * They were rendered as a `loom.logo-cloud` until 20 September — four bare
- * nouns in muted grey under a small label, which is the primitive for *the
+ * nouns in muted gray under a small label, which is the primitive for *the
  * companies who use us* holding a vocabulary instead. It photographed as an
  * empty strip, and a stranger meeting *Ask · Check · Record · Undo* with no
  * object to any of the four verbs has been told nothing.
