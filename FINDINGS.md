@@ -33423,3 +33423,103 @@ time** remains the rule, and it is the rule that caught this.
 should ever be quoted, in a table cell or anywhere else. Until then the three
 entries together say all a lane needs — link rather than embed, keep the link out
 of a table, and read the body back.
+
+---
+## 2026-09-26 — the starter library is withheld from the published package and has no package of its own
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **nothing is broken in this
+repository**, and from the first publish the ten primitives are reachable only
+by working inside it
+
+The maintainer's instruction on 26 September is that `@loom/runtime` goes to npm
+as the framework, and that the starter primitive library ships separately.
+[0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)
+takes the first half: the published export map has fifteen subpaths and not
+`./primitives`, and `dist/primitives/` is not in the tarball. The workspace is
+untouched — `@loom/runtime/primitives` still resolves, all five surfaces still
+import `createStarterPrimitiveRegistry`, and `dist/primitives/` is still built.
+
+**The second half is yours and it is not done.** There is no `@loom/primitives`.
+
+**The end state 0194 points at**, written here rather than decided from outside
+your lane: `src/primitives/` becomes `packages/primitives/`, a workspace package
+with its own manifest, its own version and its own entry point, depending on
+`@loom/runtime` the way any other host does. It was explicitly *not* attempted
+in the publishing change, and the reason is worth having: it moves 131 files,
+twelve import sites across five surfaces, the generated API reference, the
+compiled documentation fences and the lesson transcripts — a migration whose
+failure mode is a red build for four lanes, and it was the night before a
+release. Withholding a subpath is one line to reverse; a move is not.
+
+**What it would settle that withholding does not.** Right now the library is in
+the framework's `dist`, built by the framework's `tsc`, versioned by the
+framework's number, and absent from the registry. That is a coherent
+*temporary* state and a poor permanent one: the library has no version a
+deployment can pin, and the framework pays its build time on every release.
+
+**One measurement you will want before starting.** Nothing in `src/` outside
+`src/primitives/` imports it — the only match for a relative primitives import
+anywhere else in the runtime is `src/testing/primitives.ts`, which is a
+different file with the same word in its name. The dependency runs one way, so
+the split is a move rather than an untangling.
+
+---
+## 2026-09-26 — the documentation tells a reader to import a subpath the published package does not have
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **true from the first publish**,
+and the only part of that change with a cost a stranger pays
+
+[0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)
+publishes `@loom/runtime` without `./primitives`. Inside this workspace nothing
+changes. On the registry, `import { createStarterPrimitiveRegistry } from
+"@loom/runtime/primitives"` is `ERR_PACKAGE_PATH_NOT_EXPORTED`, which is what a
+reader following the site will hit.
+
+Where it is said, from a sweep on 26 September:
+
+| page | what it says |
+| --- | --- |
+| `docs/getting-started/installation/page.mdx` | the import, in the first example a reader runs |
+| `docs/getting-started/rendering-a-tree/page.mdx` | the same import |
+| `docs/building-with-loom/primitives/page.mdx` | *"`@loom/runtime/primitives` ships a library covering the structural range"* |
+| `_lib/entry-points.ts` | lists it as one of the sixteen doors |
+| `_lib/quickstart/quickstart.ts`, the compiled fences, `scaffold.test.ts` | the import, executed |
+
+**The root README is done** — it carries a *What is in the package* section and
+a callout above the starter-primitive section, both saying the subpath is
+workspace-only. The site is yours and I have not touched it.
+
+**A second, smaller half of the same thing.**
+`_lib/entry-points.test.ts` and `_lib/api/extract.test.ts` both assert that the
+documented doors are *exactly* what `package.json` `exports` names. That map is
+now the **workspace's**, which still carries `./primitives`; the published one
+is `publishConfig.exports` and has fifteen. So the two tests are green and are
+checking the wrong map — the sixteenth door is one a consumer does not have.
+Whether they should read `publishConfig.exports` instead is your call, and it
+is a two-character change to the key they read.
+
+**Something for both of us to know:** those tests mean the framework can no
+longer add an entry point without a matching edit in `(docs)`. I found that out
+by trying. Adding `"./package.json": "./package.json"` to the export map — the
+ordinary courtesy that lets tooling read a dependency's manifest, and a
+papercut a consumer hits with `require.resolve` — turned both tests red, so I
+**reverted it** rather than edit your files the night before a release. It is
+purely additive and breaks nobody whenever it lands; it just has to land in
+your lane and mine at once.
+
+**What I would not do:** delete the pages. The library exists, it is good, and
+it is getting a package of its own (filed for `Loom primitives` in the entry
+above). The narrow fix is a line on each page saying the starter library is not
+part of `@loom/runtime` and naming where it will live; the fences and
+`entry-points.ts` are the ones that will need real edits, because they execute.
+
+**The timing is the awkward part and you should hear it from me rather than
+from a reader.** The publish is intended for the morning of 27 September; the
+docs deployment is continuous. There will be a window where the site documents
+a subpath the registry does not have. I do not think that is a reason to hold
+the publish — the instruction was explicit and the framework is what is being
+released — but it is your lane's problem that my lane's change created, and it
+is the sharpest cost 0194 has.
+

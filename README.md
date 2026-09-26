@@ -6,6 +6,61 @@ applies what survives and renders the result.
 
 Pre-production alpha. Nothing here is stable yet.
 
+```bash
+npm install @loom/runtime
+```
+
+## What is in the package, and what is not
+
+`@loom/runtime` is the **framework**: the tree and its deltas, the Gate, the
+interpretation seam, the render seam, the store, the write path, signals,
+telemetry, the SDK, the testing contracts and the `loom` CLI. Fifteen entry
+points, listed under [Entry points](#entry-points).
+
+Four things that live in this repository are deliberately **not** in it, and
+each is somebody's product rather than the framework's plumbing
+(`decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md`):
+
+| not published here | what it is |
+| --- | --- |
+| the starter primitive library | ten primitives a deployment may adopt — a library to choose from, with its own release rhythm |
+| the marketing site, the documentation, the lessons | `apps/loom`, one Next.js application, deployed rather than packaged |
+| the demonstration | a surface, not an import |
+| the portal | a tool over a deployment's own tree |
+
+So `@loom/runtime/primitives` resolves inside this workspace and **is not a
+subpath of the published package.** Everything the README says about the
+starter primitives below is about this repository; a separate package for them
+is the next step and does not exist yet.
+
+## Entry points
+
+Fifteen, each a subpath of the one package. Everything after `.` is there so a
+host can take a part of Loom without the rest; the optional peers are optional
+because the core is usable without any of them.
+
+| import | what it is |
+| --- | --- |
+| `@loom/runtime` | the tree, the deltas, the Gate, the runtime pipeline, the vocabularies |
+| `@loom/runtime/anthropic` | the interpretation seam against Anthropic's API — needs `@anthropic-ai/sdk` |
+| `@loom/runtime/react` | tree to React, per request — needs `react` |
+| `@loom/runtime/sdk` | the primitive registration contract, registries and audits — needs `react` |
+| `@loom/runtime/cli` | the `loom` scaffolding command, as a library |
+| `@loom/runtime/store` | tree storage, in memory |
+| `@loom/runtime/write` | the write path: intent in, disposition out |
+| `@loom/runtime/postgres` | the same store over Postgres — needs `drizzle-orm` |
+| `@loom/runtime/signals` | reader signals, parsed and reduced |
+| `@loom/runtime/signals/broadcast` | the browser half: a published page reporting what readers did |
+| `@loom/runtime/signals/postgres` | signal storage — needs `drizzle-orm` |
+| `@loom/runtime/telemetry` | proposal, provenance, disposition and outcome |
+| `@loom/runtime/telemetry/postgres` | telemetry storage — needs `drizzle-orm` |
+| `@loom/runtime/testing` | fixtures and sample trees |
+| `@loom/runtime/testing/contracts` | the conformance suites a primitive must pass — needs `vitest`, and only loads inside a test run |
+
+`@loom/runtime` itself depends only on `zod`. `react`, `@anthropic-ai/sdk`,
+`drizzle-orm` and `vitest` are optional peer dependencies: install the ones the
+subpaths you use name, and nothing else.
+
 ## Why a tree and a delta, not generated code
 
 AI that emits UI code cannot be reviewed, gated, or reverted at a useful
@@ -601,6 +656,11 @@ attention a model should spend on a vocabulary depends on the model and on the
 latency you will accept, and both are yours.
 
 ## The starter primitives
+
+> **Not in the published package.** `@loom/runtime/primitives` is a subpath of
+> this workspace only. Installing `@loom/runtime` from the registry gets you the
+> framework and none of what follows in this section; the starter library ships
+> separately (0194). This is written for somebody working in this repository.
 
 A deployment does not have to start from an empty registry. `@loom/runtime/primitives`
 ships ten, ported from the Hermes predecessor and chosen to cover the primitive
