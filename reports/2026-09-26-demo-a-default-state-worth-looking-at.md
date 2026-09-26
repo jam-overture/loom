@@ -3,9 +3,14 @@
 **Routine:** `Loom demo` · **Branch:** `demo-30-a-default-state-worth-looking-at` ·
 **26 September 2026**
 
-**Pull request:** #400 · **Deployed preview:** added to the pull request body once
-Vercel reports it (`*.vercel.app` is off this sandbox's egress allowlist, the
-standing 19 August limit, so it cannot be verified from here).
+**Pull request:** [#403](https://github.com/jam-overture/loom/pull/403) ·
+**Deployed preview:**
+https://loom-git-demo-30-a-default-s-2c7850-jpizzolato36-6341s-projects.vercel.app/demo
+
+(Published unverified: `*.vercel.app` is off this sandbox's egress allowlist, the
+standing 19 August limit. Vercel reports the deployment **Ready**. Worth opening
+rather than only reading the pictures — the hover states, the fold of the
+explainer and the `aurora` gradient behind the headline do not survive a still.)
 
 Both pictures are a production `next build` of a real commit — `main`'s
 `b126601` for the *before*, this branch's for the *after* — served with
