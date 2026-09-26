@@ -141,7 +141,28 @@ one computed. `did` gets that by being absent; anything else has to ask for it.
 ## 2026-09-25 — ten supersessions are written at both ends and one is not, and nothing has ever compared the two ends
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
-(`tools/decisions/numbering.ts`) · **Status:** open — **not a defect in any
+(`tools/decisions/numbering.ts`) · **Status:** **closed** 26 September, #395 —
+**option 1, with the README requirement written at the same time.** `oneWayIn`
+sits beside `danglingIn` and blocks; `decisions/README.md`'s *Changing direction*
+section now requires both ends; 0193 records it. Both existing one-way pairs are
+closed in the same change — 0137 gains `Accepted — supersedes 0109`, and 0191
+gains `Accepted — partially supersedes 0117`.
+
+**What decided it was the second one.** This lane recommended option 2 — write the
+asymmetry down as deliberate — on #395 on the evening of 25 September. Within
+twelve hours the count was twelve directions and *two* unanswered, because the
+run making that recommendation had itself written 0191 with 0117 marked
+`partially superseded by [0191]` and 0191 saying only `Accepted`. A convention
+that held ten times out of eleven for two months broke the day it was described,
+in the lane that owns the tool, on the branch reading the finding about it.
+Option 2 would have made that outcome correct rather than fixed it.
+
+The 0118 objection carried in the entry below — that this puts a gate in front of
+five other lanes — is answered rather than dismissed: 0118 declined to gate four
+lanes' *prose*, where this gates one field written six times in 173 records,
+always by the run that is already editing both files.
+
+**Original entry follows.** — **not a defect in any
 record.** 0137 is compliant with `decisions/README.md` as written. Filed because
 the convention has been producing checkable data for two months and nothing
 cashes it in.
@@ -201,7 +222,20 @@ front of five other lanes, which is the thing 0118 declined to do to `apps/loom`
 ## 2026-09-25 — `decisions/README.md` says a status is one of three things, and the parser accepts any string at all
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
-(`tools/decisions/record.ts`) · **Status:** open — **small, and recommended as a
+(`tools/decisions/record.ts`) · **Status:** **closed** 26 September, #395 —
+**both halves, because they are cheaper together than either alone.** The README
+now says a status *begins with* one of the three words and may carry a qualifying
+clause, which is your recommended wording; and `tools/decisions/status.ts` checks
+the opener against an `everyMemberOf` list, which is what makes the reworded
+sentence true rather than merely accurate. Every status in the directory passes
+unchanged, 0166 included — the closed set is one word long precisely so that a
+record accepted for one half and proposed for the other stays exactly as
+written. An emphasised or lower-case opener is refused rather than normalised,
+because the index renders that column verbatim and two spellings of one state
+read as two states. Recorded in 0193 with the reciprocity check, as one decision:
+a status line is data.
+
+**Original entry follows.** — **small, and recommended as a
 README change rather than a check.**
 
 The same lesson, exercise B. `parseDecisionRecord` requires a `**Status:**` line
@@ -31738,9 +31772,18 @@ rather than a paragraph in the next branch:
 ---
 ## 2026-09-24 — a `next build` that exits 0 can serve the previous build's HTML, and a run that photographs it has photographed somebody else's code
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
-cost this run one screenshot cycle; **`rm -rf apps/loom/.next` before the build
-is the workaround** and it works
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by `framework-54-a-build-that-did-not-finish` — **the symptom is
+real and the suspect is not.** Reproduced on 25 September: a killed `next
+build` rebuilds correctly (twice, killed at *Running TypeScript* and at
+*Generating static pages*), and what does reproduce the stale HTML exactly is a
+`next start` that was already running when the rebuild happened. `next start`
+loads a route's compiled module the first time it is asked for that route and
+keeps it, so such a server serves a mixture afterwards. `rm -rf .next` "worked"
+because nobody rebuilds without restarting the server after it. `pnpm shoot
+--serve apps/loom` starts and stops the server itself (0191); the fault itself
+is still there for anyone photographing their own, and is re-filed at the
+bottom of this file with the measurements
 
 Measured on this branch, in this order:
 
@@ -32586,7 +32629,17 @@ is not lost in a record about something else.
 ## 2026-09-25 — the merge gate's exit code was read off `tee`, and the rule against this names only the `| tail` spelling of it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`docs/routines.md` is its file) · **Status:** open — **caught in the run that
+(`docs/routines.md` is its file) · **Status:** **closed** 26 September, #395 —
+your paragraph taken as the drop-in it was offered as, with the section
+rewritten around it so the rule names the **act** and the two spellings are the
+evidence for it rather than the rule. `| tail`, `| tee`, `| grep` and a trailing
+`echo` are all named; the remedy is a redirect whose status write is the last
+thing the line does, read back in a separate command. Your sentence — *a rule
+naming one spelling of an act is a rule that stops working the moment somebody
+reaches for the other one* — is quoted in the section and credited to the 24
+September author-flag entry, and this is its third instance.
+
+**Original entry follows.** — **caught in the run that
 made it**, and filed because the near-miss is the finding rather than the
 mistake
 
@@ -32681,8 +32734,13 @@ the lane next touches it; nothing is wrong until then.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
 **Answers:** the 24 September entry *a `next build` that exits 0 can serve the
-previous build's HTML* · **Status:** open — **the judgement is given and the
-work is not done**; it is a unit this lane will take
+previous build's HTML* · **Status:** **closed — the judgement was wrong** and is
+withdrawn by `framework-54-a-build-that-did-not-finish`. A killed build was
+tested twice and rebuilds correctly; `next build` clears everything in `.next`
+except `cache/` at the start of every build, which is why. The sentinel would
+have cost four routines a full rebuild after every interrupted build and left
+the real fault — a server older than the build it serves — exactly where it
+was. 0191 has the evidence
 
 That entry asked for one line of judgement: whether `@loom/app`'s `build` should
 clear `.next` first, or whether writing the workaround down is enough. The answer
@@ -32862,6 +32920,119 @@ strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
 
 ---
+## 2026-09-25 — a `next start` serves a mixture after a rebuild, and no response says which half you are looking at
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **avoidable, not fixed.** `pnpm shoot --serve` (0191) cannot photograph
+it; a lane running its own server still can
+
+This is the 24 September *false green* with its cause established, written down
+separately because the cause is not what either of the two entries above
+guessed and because the shape outlives the fix.
+
+**What was measured**, all of it on 16.2.12 with Turbopack, in one session:
+
+| | |
+| --- | --- |
+| `next build` killed during *Running TypeScript*, then re-run | rebuild correct |
+| `next build` killed during *Generating static pages*, then re-run | rebuild correct |
+| a `next start` left running across a rebuild | **serves the previous build** |
+| a stray file and a stray directory placed in `.next` | both gone after a build |
+| the same file placed in `.next/cache` | survives a build |
+
+So `next build` clears its output directory except `cache/`, a killed build
+carries nothing forward, and the thing that carries staleness is **the server
+process**. `next start` loads a route's compiled module on the first request for
+that route and keeps it, so a server that answered `/a` before a rebuild serves
+stale `/a` and fresh `/b` afterwards.
+
+**Nothing over HTTP tells you.** Also measured, and worth having written down
+because the obvious fix is to build a probe and each of these kills one:
+
+- no response header carries the build id, and neither does any page;
+- a prerendered body is re-read from disk on the **first** request for it, so a
+  static probe route answers *fresh* on a server serving stale pages either
+  side of it;
+- a compiled route module is loaded lazily, so a dynamic probe route answers
+  fresh for the same reason;
+- chunk filenames are the same across builds, so a stale page's own assets
+  resolve and nothing 404s.
+
+The one thing that would carry a boot-time value is draft mode's bypass cookie,
+which means an unprotected endpoint that enables draft mode. That is a
+deployment-wide cache bypass and it is not worth a screenshot.
+
+**For every lane, and this is why it is filed rather than only recorded:** if
+you keep a `next start` running while you work, every picture you take of it
+after a rebuild may be of the build before. Either photograph with `pnpm shoot
+<list> --serve apps/loom`, or restart the server after every build. A report
+that quotes the `built …` line the flag prints has said which build its pictures
+are of; none before today could.
+
+---
+## 2026-09-26 — exercise E's list is now empty, which is the outcome the lesson asked for and the transcript beside it says otherwise
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/28-corroboration.md`) · **Status:** open — **the transcript itself is
+already corrected on #395, because leaving it would have opened a pull request on
+red.** What is open is the rewrite, which is yours.
+
+Your 25 September entry offered three options for the one-way supersession and
+said of option 3 that *"a second one-way supersession will turn
+`lessons/28-corroboration.md`'s transcript red. That is the honest cost of the
+exercise and it is stated in the lesson; it is a lessons file and this lane will
+fix it, but you would rather hear it here than in a failing suite."*
+
+**Option 1 was taken** (#395, [0193](decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)),
+so the transcript is stale in the other direction. Exercise E's second heading
+now has nothing under it:
+
+```
+  statuses naming a record that does not exist: 0
+  supersessions whose other end says nothing back:
+```
+
+Two other sentences in the lesson move with it. *"Ten of the eleven directions
+currently written are answered at the other end. One is not: 0109 says it was
+superseded by 0137, and 0137 says `Accepted` and nothing else"* — 0137 now says
+`Accepted — supersedes 0109`, and the count is **twelve of twelve**, because 0191
+was written on 25 September and is now answered too. And *"Nothing checks it …
+whether the record named agrees that the relationship exists is not asked"* is no
+longer true of `checkNumbering`: `oneWayIn` asks, and blocks.
+
+**This is a red build, not stale prose, and this entry originally said
+otherwise.** The first draft of it reasoned that `runExercises` only requires an
+exercise to *run*, and a `console.log` over an empty list runs — so the suite
+would be green and the transcript merely out of date. That was wrong, and
+`pnpm verify` said so: `transcripts.test.ts` compares every line of an
+unlabelled fence against what the exercises actually print, and
+`0109 -> 0137` in exercise E's output fence drifted. **The check you built is
+better than the reasoning this lane applied to it**, and it is worth the sentence
+because the mistake is the one your lesson is about — a claim was asserted
+without looking for the second copy that would have settled it.
+
+**What was changed here**, under the *Merging* provision that a lane may make a
+small edit outside its own when its change makes another's test go stale, by
+running the code and recording what it prints:
+
+- both output fences lose the `0109 -> 0137` line — only the second is compared,
+  the first is a ```text fence, but leaving them disagreeing would be worse
+- the paragraph after each says the list was not empty when the lesson was
+  written, what it held, and that the measurement is what turned the habit into
+  a rule
+
+Nothing else in the lesson is touched. The exercise, the program, the argument
+and the section around it are all as you wrote them.
+
+**The rewrite is yours, and there is a better version of this section in it.**
+Exercise E measured a convention, the measurement became a check twelve hours
+later, and the printout went blank — which makes it the clearest demonstration in
+the course that a measurement's worth is that somebody acts on it. The interim
+wording gestures at that; it is not the section you would write. Two sentences
+elsewhere in the lesson also now read oddly: *"whether the record named agrees
+that the relationship exists is not asked"* is no longer true of
+`checkNumbering`, and the counts in the surrounding prose are the 25 September
+ones. Left for you rather than patched from here.
 
 ## 2026-09-25 — a URL in a table cell comes back backticked, and only in a table cell
 

@@ -1,3 +1,5 @@
+import { mkdtemp, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
 import { readFile } from "node:fs/promises"
 
 import { describe, expect, it } from "vitest"
@@ -6,6 +8,7 @@ import { blocking, collectCitations, collectDecisions, generatedReadme, README_P
 import { checkNumbering, missingNumbers, severityOf } from "./numbering.js"
 import { parseDecisionRecord, type DecisionRecord } from "./record.js"
 import { compressSection, renderIndex, withGeneratedIndex } from "./render.js"
+import { checkStatuses, openerOf, STATUS_OPENERS } from "./status.js"
 
 const recordWith = (overrides: Partial<DecisionRecord> = {}): DecisionRecord => ({
   number: 1,
@@ -161,8 +164,164 @@ describe("checkNumbering", () => {
     expect(problems).toEqual([])
   })
 
+  /**
+   * The pair the check was written for. 0109 said it was superseded by 0137 and
+   * 0137 said `Accepted` and nothing else, for two weeks, compliantly.
+   */
+  it("catches a supersession the replacement does not answer", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Superseded by 0002" }),
+      recordWith({ number: 2, file: "0002-b.md", status: "Accepted" }),
+    ])
+
+    expect(problems).toContainEqual({ code: "one-way-supersession", from: 1, to: 2 })
+  })
+
+  /**
+   * Symmetric on purpose: the check asks whether the record named names this one
+   * back, not which of them used which verb. The fault is silence at one end and
+   * it is the same fault whichever end wrote first.
+   */
+  it("catches it from the replacement's side too, when the old record went quiet", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Accepted" }),
+      recordWith({ number: 2, file: "0002-b.md", status: "Accepted — supersedes 0001" }),
+    ])
+
+    expect(problems).toContainEqual({ code: "one-way-supersession", from: 2, to: 1 })
+  })
+
+  it("is quiet about a partial supersession whose other end answers it", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Accepted — partially superseded by 0002" }),
+      recordWith({ number: 2, file: "0002-b.md", status: "Accepted — partially supersedes 0001" }),
+    ])
+
+    expect(problems).toEqual([])
+  })
+
+  /** 0117 writes its reference as a markdown link, and the number in it counts. */
+  it("reads a reference written as a link to the file", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Superseded by [0002](0002-b.md)" }),
+      recordWith({ number: 2, file: "0002-b.md", status: "Accepted — supersedes 0001" }),
+    ])
+
+    expect(problems).toEqual([])
+  })
+
+  it("blocks on a one-way supersession rather than reporting it", () => {
+    const problems = checkNumbering([
+      recordWith({ number: 1, status: "Superseded by 0002" }),
+      recordWith({ number: 2, file: "0002-b.md", status: "Accepted" }),
+    ])
+
+    expect(problems.map(severityOf)).toEqual(["blocking"])
+  })
+
+  /**
+   * One missing record is one problem. Asking the record that is not there
+   * whether it answers would turn every deletion into two complaints about the
+   * same fault, and the dangling one is the one that says what to do.
+   */
+  it("leaves a reference to a record that does not exist to the dangling check", () => {
+    const problems = checkNumbering([recordWith({ number: 1, status: "Superseded by 0099" })])
+
+    expect(problems).toEqual([{ code: "unknown-reference", from: 1, to: 99 }])
+  })
+
   it("says nothing about an empty set rather than inventing a gap", () => {
     expect(checkNumbering([])).toEqual([])
+  })
+})
+
+/**
+ * The opener, which is the only part of a status that is a state.
+ *
+ * Everything after the first word is a person writing, and several of the
+ * records use it well — 0166 is accepted for one half and proposed for the
+ * other. So the closed set is one word long.
+ */
+describe("checkStatuses", () => {
+  it("takes each of the three openers bare", () => {
+    const problems = checkStatuses(
+      STATUS_OPENERS.map((opener, index) =>
+        recordWith({
+          number: index + 1,
+          file: `${String(index + 1).padStart(4, "0")}-a.md`,
+          status: opener,
+        })
+      )
+    )
+
+    expect(problems).toEqual([])
+  })
+
+  it("takes a qualifying clause after the opener", () => {
+    expect(
+      checkStatuses([
+        recordWith({ status: "Accepted — it changes no schema, no tree and no delta model" }),
+      ])
+    ).toEqual([])
+  })
+
+  /** 0166, which is the record this check must not make illegal. */
+  it("takes a status that is accepted for one half and proposed for the other", () => {
+    expect(
+      checkStatuses([
+        recordWith({
+          status:
+            "Accepted for the first half (the completeness check), **Proposed for the second**",
+        }),
+      ])
+    ).toEqual([])
+  })
+
+  it("takes a status naming what superseded it", () => {
+    expect(
+      checkStatuses([recordWith({ status: "Superseded by [0014](0014-a-budget.md)" })])
+    ).toEqual([])
+  })
+
+  /** The status that went into the index verbatim and drew no complaint. */
+  it("refuses an opener that is not one of the three", () => {
+    expect(checkStatuses([recordWith({ status: "Bananas" })])).toEqual([
+      { code: "unknown-status", file: "0001-a-decision.md", opener: "Bananas" },
+    ])
+  })
+
+  /**
+   * Emphasis is refused rather than stripped, because the index renders this
+   * column verbatim and two spellings of one state read as two states.
+   */
+  it("refuses an emphasised opener", () => {
+    expect(checkStatuses([recordWith({ status: "**Accepted** — and bold about it" })])).toEqual([
+      { code: "unknown-status", file: "0001-a-decision.md", opener: "**Accepted**" },
+    ])
+  })
+
+  it("refuses a lower-case opener, because the index's column is the word as written", () => {
+    expect(checkStatuses([recordWith({ status: "accepted" })]).map((problem) => problem.code)).toEqual(
+      ["unknown-status"]
+    )
+  })
+
+  it("says nothing about an empty set", () => {
+    expect(checkStatuses([])).toEqual([])
+  })
+})
+
+describe("openerOf", () => {
+  it("takes the first word and leaves the clause after it alone", () => {
+    expect(openerOf("Accepted — partially supersedes 0117")).toBe("Accepted")
+  })
+
+  it("is the whole status when the status is one word", () => {
+    expect(openerOf("Proposed")).toBe("Proposed")
+  })
+
+  it("is empty for an empty status rather than throwing", () => {
+    expect(openerOf("")).toBe("")
   })
 })
 
@@ -269,6 +428,67 @@ describe("withGeneratedIndex", () => {
 })
 
 /**
+ * That the checks are wired into the thing that fails the build.
+ *
+ * A check nobody calls is the shape another lane filed on 25 September — a prop
+ * built to answer a finding, sitting unwired for three weeks, with a camera as
+ * the only instrument that could see it. Both of the checks added by 0193 pass
+ * on `decisions/` today, so a guard over the real directory would go on passing
+ * if `collectDecisions` stopped asking. This asks it about a directory of two
+ * records written for the purpose.
+ */
+describe("collectDecisions", () => {
+  const withRecords = async (files: ReadonlyMap<string, string>): Promise<string> => {
+    const directory = `${await mkdtemp(`${tmpdir()}/loom-decisions-`)}/`
+
+    for (const [file, content] of files) await writeFile(`${directory}${file}`, content, "utf8")
+
+    return directory
+  }
+
+  const record = (heading: string, status: string) =>
+    `${heading}\n\n**Status:** ${status}\n**Date:** 2026-09-26\n**Section:** §1\n\n## Context\n\n## Decision\n\n## Consequences\n\n## Alternatives considered\n`
+
+  it("fails the build for a status that does not begin with one of the three words", async () => {
+    const directory = await withRecords(
+      new Map([["0001-a.md", record("# 0001 — A", "Bananas")]])
+    )
+
+    const { problems } = await collectDecisions(directory)
+
+    expect(blocking(problems).map((problem) => problem.message)).toEqual([
+      '0001-a.md has a status beginning "Bananas", and a status begins with one of Proposed, Accepted, Superseded',
+    ])
+  })
+
+  it("fails the build for a supersession the replacement does not answer", async () => {
+    const directory = await withRecords(
+      new Map([
+        ["0001-a.md", record("# 0001 — A", "Superseded by 0002")],
+        ["0002-b.md", record("# 0002 — B", "Accepted")],
+      ])
+    )
+
+    const { problems } = await collectDecisions(directory)
+
+    expect(blocking(problems).map((problem) => problem.message)).toEqual([
+      "1 names 0002 in its status, and 0002 does not name it back",
+    ])
+  })
+
+  it("is quiet about the same pair written at both ends", async () => {
+    const directory = await withRecords(
+      new Map([
+        ["0001-a.md", record("# 0001 — A", "Superseded by 0002")],
+        ["0002-b.md", record("# 0002 — B", "Accepted — supersedes 0001")],
+      ])
+    )
+
+    expect(blocking((await collectDecisions(directory)).problems)).toEqual([])
+  })
+})
+
+/**
  * The guard. Everything above tests the generator against fixtures; these two
  * test the repository against the generator, which is the part that turns a
  * numbering clash into a failure somebody sees before a merge conflict does.
@@ -304,5 +524,40 @@ describe("the decision records in this repository", () => {
    */
   it("are cited, from anywhere this lane owns, by a number that resolves", async () => {
     expect(await collectCitations()).toEqual([])
+  })
+
+  /**
+   * Exercise E of `lessons/28-corroboration.md`, as a check rather than a
+   * printout. The lesson measured eleven supersession directions with ten
+   * answered at the other end, and the eleventh was joined by a twelfth the
+   * next day. Both are now answered and 0193 requires the next one to be.
+   *
+   * The mutation is what stops this passing vacuously: the guard above asserts
+   * no blocking problem, which is also what a check that had stopped looking
+   * would report. Blanking one real end has to bring the complaint back.
+   */
+  it("write every supersession at both ends, and would say so if one went quiet", async () => {
+    const { records } = await collectDecisions()
+
+    const quietened = records.map((record) =>
+      record.number === 137 ? { ...record, status: "Accepted" } : record
+    )
+
+    expect(checkNumbering(records).filter((problem) => problem.code === "one-way-supersession")).toEqual(
+      []
+    )
+    expect(checkNumbering(quietened)).toContainEqual({
+      code: "one-way-supersession",
+      from: 109,
+      to: 137,
+    })
+  })
+
+  /** The README's sentence about the three words, held against the directory. */
+  it("all begin with one of the three openers", async () => {
+    const { records } = await collectDecisions()
+
+    expect(checkStatuses(records)).toEqual([])
+    expect(records.map((record) => openerOf(record.status)).filter((opener) => opener === "Accepted").length).toBeGreaterThan(0)
   })
 })

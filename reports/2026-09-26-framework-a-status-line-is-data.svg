@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" width="980" height="640" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <style>
+    .bg { fill: #ffffff }
+    .t { fill: #16181d; font-size: 12.5px }
+    .dim { fill: #6b7280; font-size: 11.5px }
+    .h { fill: #16181d; font-size: 12.5px; font-weight: 700 }
+    .title { fill: #16181d; font-size: 17px; font-weight: 700; font-family: ui-sans-serif, system-ui, sans-serif }
+    .sub { fill: #6b7280; font-size: 12.5px; font-family: ui-sans-serif, system-ui, sans-serif }
+    .ok { fill: #0f7b4f; font-size: 12.5px }
+    .no { fill: #b42318; font-size: 12.5px }
+    .rule { stroke: #e5e7eb; stroke-width: 1 }
+    .box { fill: #f9fafb; stroke: #e5e7eb; stroke-width: 1 }
+    .redbox { fill: #fef3f2; stroke: #fda29b; stroke-width: 1 }
+    .greenbox { fill: #f0fdf6; stroke: #a6e9c5; stroke-width: 1 }
+    .arrow { stroke: #9ca3af; stroke-width: 1.2; fill: none; marker-end: url(#a) }
+    .back { stroke: #0f7b4f; stroke-width: 1.2; fill: none; marker-end: url(#ag) }
+    .missing { stroke: #d92d20; stroke-width: 1.2; fill: none; stroke-dasharray: 4 4; marker-end: url(#ar) }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#0f7b4f"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L8 4 L0 8 z" fill="#d92d20"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="980" height="640"/>
+
+  <text class="title" x="32" y="40">A status line is data</text>
+  <text class="sub" x="32" y="62">Twelve supersession directions in decisions/. Ten were answered at the other end by habit. Two were not.</text>
+
+  <line class="rule" x1="32" y1="82" x2="948" y2="82"/>
+
+  <text class="h" x="32" y="110">the record that was replaced</text>
+  <text class="h" x="560" y="110">what the replacement's status said back</text>
+
+  <!-- the ten that answered -->
+  <rect class="greenbox" x="32" y="126" width="916" height="132" rx="5"/>
+  <text class="t" x="48" y="150">0004  Superseded by [0014]</text>
+  <text class="ok" x="560" y="150">0014  Accepted — supersedes 0004</text>
+  <text class="t" x="48" y="172">0027  Accepted — partially superseded by 0029</text>
+  <text class="ok" x="560" y="172">0029  Accepted — partially supersedes 0027</text>
+  <text class="t" x="48" y="194">0032  Accepted — partially superseded by 0035</text>
+  <text class="ok" x="560" y="194">0035  Accepted — partially supersedes 0032</text>
+  <text class="t" x="48" y="216">0054  Accepted — partially superseded by 0061</text>
+  <text class="ok" x="560" y="216">0061  Accepted — partially supersedes 0054</text>
+  <text class="t" x="48" y="238">0060  Accepted — partially superseded by 0063</text>
+  <text class="ok" x="560" y="238">0063  Accepted — partially supersedes 0060</text>
+
+  <line class="back" x1="540" y1="145" x2="500" y2="145"/>
+  <line class="back" x1="540" y1="167" x2="500" y2="167"/>
+  <line class="back" x1="540" y1="189" x2="500" y2="189"/>
+  <line class="back" x1="540" y1="211" x2="500" y2="211"/>
+  <line class="back" x1="540" y1="233" x2="500" y2="233"/>
+
+  <text class="dim" x="32" y="278">Ten directions, five pairs. One fact written in two files, which is a thing that can be compared. Nothing compared it.</text>
+
+  <!-- the two that did not -->
+  <rect class="redbox" x="32" y="300" width="916" height="88" rx="5"/>
+  <text class="t" x="48" y="326">0109  Superseded by [0137]</text>
+  <text class="no" x="560" y="326">0137  Accepted</text>
+  <text class="dim" x="700" y="326">— written 12 Sep, silent since</text>
+  <text class="t" x="48" y="356">0117  Accepted — partially superseded by [0191]</text>
+  <text class="no" x="560" y="356">0191  Accepted</text>
+  <text class="dim" x="700" y="356">— written 25 Sep, by this lane</text>
+
+  <line class="missing" x1="540" y1="321" x2="500" y2="321"/>
+  <line class="missing" x1="540" y1="351" x2="500" y2="351"/>
+
+  <text class="dim" x="32" y="408">Loom lessons measured eleven directions on 25 September and found one unanswered. The twelfth arrived the same</text>
+  <text class="dim" x="32" y="426">evening, from the run recommending that the asymmetry be written down as deliberate. Eleven and one is a statistic.</text>
+  <text class="dim" x="32" y="444">Twelve and two, one of them a day old, is a measurement of what a habit is worth.</text>
+
+  <line class="rule" x1="32" y1="470" x2="948" y2="470"/>
+
+  <text class="h" x="32" y="498">what pnpm verify now refuses</text>
+
+  <rect class="box" x="32" y="514" width="446" height="96" rx="5"/>
+  <text class="t" x="48" y="538">a status naming a record</text>
+  <text class="t" x="48" y="556">that does not name it back</text>
+  <text class="dim" x="48" y="578">oneWayIn, beside danglingIn</text>
+  <text class="no" x="48" y="598">blocking — 0137 and 0191 fixed in the same change</text>
+
+  <rect class="box" x="502" y="514" width="446" height="96" rx="5"/>
+  <text class="t" x="518" y="538">a status whose first word is not</text>
+  <text class="t" x="518" y="556">Proposed, Accepted or Superseded</text>
+  <text class="dim" x="518" y="578">checkStatuses, over an everyMemberOf list</text>
+  <text class="no" x="518" y="598">blocking — all 174 statuses pass unchanged</text>
+</svg>

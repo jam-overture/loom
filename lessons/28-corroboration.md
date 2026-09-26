@@ -340,17 +340,28 @@ relationship exists is not asked.
 ```text
   statuses naming a record that does not exist: 0
   supersessions whose other end says nothing back:
-    0109 -> 0137
 ```
 
-Ten of the eleven directions currently written are answered at the other end. One
-is not: 0109 says it was superseded by 0137, and 0137 says `Accepted` and nothing
-else. Nothing is broken — `decisions/README.md` requires the *old* record to be
-marked and does not require the new one to say anything — but the shape is worth
-seeing clearly. A convention followed ten times out of eleven is not a check. It
-is a habit, and a habit's output is indistinguishable from a rule's right up
-until the first time somebody is in a hurry. The tool's own test fixture for this
-case writes the pair both ways, by that same habit.
+**That list was not empty when this lesson was written**, and the second heading
+is the reason it is empty now. On 25 September it held `0109 -> 0137`: ten of the
+eleven directions then written were answered at the other end and one was not.
+Nothing was broken — `decisions/README.md` required the *old* record to be marked
+and did not require the new one to say anything — but the shape was worth seeing
+clearly. A convention followed ten times out of eleven is not a check. It is a
+habit, and a habit's output is indistinguishable from a rule's right up until the
+first time somebody is in a hurry.
+
+Somebody was, the next day. 0191 was written with 0117 marked
+`partially superseded by [0191]` and 0191 saying only `Accepted`, which made it
+twelve directions and two unanswered — and that measurement is what turned the
+habit into a rule
+([0193](../decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)).
+`checkNumbering` now compares the two ends and fails the build when one is
+silent, so this exercise prints nothing and cannot print anything again.
+
+The rest of this section is what it looked like before that, left standing
+because the argument it makes is the reason the check exists. The tool's own test
+fixture for this case writes the pair both ways, by that same habit.
 
 ### The section that is present and empty
 
@@ -773,15 +784,21 @@ The output:
 ```
   statuses naming a record that does not exist: 0
   supersessions whose other end says nothing back:
-    0109 -> 0137
 ```
 
-Nothing here is broken. `decisions/README.md` requires the superseded record to
-be marked and says nothing about the replacement, so 0137 is compliant. But look
-at what that means: the repository has ten pairs where one fact is written twice
-and could be compared, one pair where it is not, and no code anywhere that knows
-the comparison is available. The convention produced checkable data as a
-by-product of being followed, and then nobody checked it.
+**Empty, and it was not when the exercise was written.** The list held
+`0109 -> 0137` on 25 September. `decisions/README.md` required the superseded
+record to be marked and said nothing about the replacement, so 0137 was
+compliant — and look at what that meant: the repository had ten pairs where one
+fact was written twice and could be compared, one pair where it was not, and no
+code anywhere that knew the comparison was available. The convention produced
+checkable data as a by-product of being followed, and then nobody checked it.
+
+Somebody read this exercise and checked it. Both ends are now required and
+compared, 0137 and 0191 were given the clause they were missing, and the list
+this prints is empty for good. **That is the exercise's real answer**: the
+measurement was worth taking because acting on it was cheap, and the printout
+going blank is what acting on it looks like.
 
 ### Exercise F — the heading that is checked and the section that is not
 
