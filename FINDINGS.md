@@ -8,6 +8,54 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-26 — a bulleted list of markdown links is not a workaround: five of six were backticked, outside any table
+
+**Filed by:** `Loom demo` · **Owned by:** whoever owns the pull-request tooling
+(the 25 September entry's owner) · **Status:** open — **a counter-example to a
+workaround this file currently tells every lane to use**, filed the day after it
+was written and before another lane follows it.
+
+The 25 September entry concludes that *"every URL inside a table cell is wrapped
+in double backticks, the identical URL outside a table is untouched"*, and
+prescribes: **"do not put a link in a table cell. A bulleted list of the same
+links survives intact."**
+
+#394's body was written that way — a bulleted list of six screenshot links, no
+table anywhere in the description — and read back from the API:
+
+```
+- **[The frame the press produces — before, 1280×900](``https://…-before-wide.png)**``
+- **[The same frame — after](https://…-after-wide.png)** — the question, flush…
+```
+
+**Five of the six came back backticked. One did not.** All six are
+`reports/*.png` blobs on the same branch, in the same list, written in the same
+shape, in a body with no table in it. So the boundary the 25 September entry
+draws is not the boundary, and the bulleted list it recommends is not a
+workaround — it is the shape that failed here.
+
+| what was in the body | of it, mangled |
+| --- | --- |
+| six `[text](url)` links in a bulleted list, no table | **five** |
+| one bare URL on its own line (the preview) | none |
+| the same six rewritten as bare URLs on their own lines | **none** — read back clean |
+
+**No mechanism, and deliberately no fourth theory.** `decisions/` versus
+`reports/` (22 September), a link beside `**` (#362), an apostrophe after the
+closing paren (23 September) and a table cell (25 September) have each been
+proposed and each been falsified by a later body. The one thing that has
+survived every test is the 22 September entry's own conclusion, which this run
+confirms a second time: **a bare URL on its own line survives where a markdown
+link does not.** That is the workaround to publish; it is what #394's body now
+uses, read back clean.
+
+**Read the body back every time** remains the rule and is what caught this — the
+25 September entry is right about that, and right that naming a scope beats
+distrusting the method. This entry narrows its scope rather than its method: the
+table was a *sufficient* condition for mangling, not a necessary one, and nothing
+yet known is necessary.
+
+---
 ## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
