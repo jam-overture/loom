@@ -119,6 +119,29 @@ version fails that test and nothing else.
 **This was found by looking at the picture**, after `md5sum` said two files that
 should differ did not. Nothing else in the run would have said so.
 
+## The other thing this run got wrong
+
+**The first push had no Vercel preview**, because this run set a commit author.
+
+`docs/routines.md` records this trap seven times and closes with the rule in
+plain words — *do not set a commit author; use whatever the session is already
+configured with*. The session was already configured as
+`Claude <noreply@anthropic.com>`, which deploys. This run passed
+`-c user.email=jpizzolato36@gmail.com` on the commit, reaching for the address
+in its own opening note, which is **exactly** the reach the rule was written to
+stop. `jpizzolato36@gmail.com` resolves to the GitHub account `jpizzo`, which is
+not on the Vercel team, and the deployment came back `Blocked`.
+
+Nothing else failed — the commit was fine, the push succeeded, the tests were
+green — which is the whole difficulty with it. It was caught by reading the
+pull request's comments back, which the same file requires for an unrelated
+reason. Fixed with `git commit --amend --reset-author` and a force-push, on a
+one-commit branch nobody else had; the preview is in the pull request.
+
+**No finding is filed**, because there is nothing to tell anyone that is not
+already written down in the place a run is told to read first. This is the
+eighth instance and it is recorded here rather than added to that count.
+
 ## Records
 
 - **[0195](../decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)**
