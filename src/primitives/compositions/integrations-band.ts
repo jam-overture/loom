@@ -35,6 +35,28 @@ import type { Composition } from "./composition.js"
  * third-party requests inside a tree a host might publish. It also happens to be
  * the honest thing for a starting composition: these are placeholder names, and
  * a placeholder *logo* would look like a claim about a partnership nobody has.
+ *
+ * ## What the first photograph of this band in a page changed
+ *
+ * Three props, and none of the content. Photographed at a page's width on
+ * 25 September this was *a ring of words*: eight small grey names on a faint
+ * circle, a ninth the same size in the middle, and the dashed guide drawn
+ * straight through several of them.
+ *
+ * - **`surface: "card"` on every tool**, so each mark is a thing on the ring
+ *   rather than a word floating over it, and the guide passes behind it.
+ * - **`guides: "spokes"`**, which draws the connector from each seat back to
+ *   the middle. The relationship is this band's whole claim over a logo wall
+ *   and nothing in the picture had ever drawn it.
+ * - **`rings: "one"`** rather than two. Eight *plates* alternating between two
+ *   radii crowd the hub they are meant to be circling; eight bare words did
+ *   not, which is why the band could not have been written this way before the
+ *   marks had tiles under them.
+ *
+ * The middle is not plated, and that is deliberate rather than an omission:
+ * `loom.orbit` grounds the region it places
+ * ([0192](../../../decisions/0192-a-region-a-primitive-places-is-a-region-it-may-ground.md)),
+ * so a plate here would be a tile inside a hub.
  */
 const TOOLS = ["GitHub", "Linear", "Figma", "Slack", "Notion", "Vercel", "Sentry", "Stripe"] as const
 
@@ -65,10 +87,12 @@ export const integrationsBand: Composition = {
         }),
         buildElement(ids, {
           type: "loom.orbit",
-          props: { rings: "two", guides: "dashed" },
+          props: { rings: "one", guides: "spokes" },
           children: [
             buildSlot(ids, "mark", [buildElement(ids, { type: "loom.logo", props: { name: "Overture" } })]),
-            ...TOOLS.map((tool) => buildElement(ids, { type: "loom.logo", props: { name: tool } })),
+            ...TOOLS.map((tool) =>
+              buildElement(ids, { type: "loom.logo", props: { name: tool, surface: "card" } })
+            ),
           ],
         }),
       ],

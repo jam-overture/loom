@@ -26,6 +26,40 @@ import { linkUrlSchema } from "./url.js"
  * When `href` is set the whole tile is the link — the target a reader actually
  * aims at — and the title takes the underline wipe rather than the tile
  * sprouting a "learn more" that says nothing.
+ *
+ * ## The `media` region, and what it was for
+ *
+ * A tile may be handed something to show. It is a **slot** and not a child,
+ * which is [0051](../../decisions/0051-a-slot-is-a-region-the-primitive-places.md)'s
+ * test passed plainly: the tile *places* it — after the words, given a width of
+ * its own, and turned beside them when the tile is wide enough — so *the last
+ * child is the picture* would be a rule no schema states and every `move`
+ * breaks. It is a region rather than a prop for
+ * [0052](../../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)'s
+ * reason: a tile with something in it and a tile without are different sets of
+ * nodes, so *show the diff here* is an `insert` carrying whatever the page
+ * already knows how to draw — and never a `mediaUrl` prop nobody can supply.
+ *
+ * It is named `media` because that is what this library calls the region:
+ * `loom.card` and `loom.hero` both have one, and a third name for the same
+ * question would be a third thing a model has to know.
+ *
+ * **What goes in it is nodes, not an asset.** `hero-split-band` established
+ * that a product surface here is worth more than a screenshot — a `loom.frame`
+ * over figures and bars re-themes with the page, needs no file a host has to
+ * place, and is edited by moving nodes rather than by opening an image editor.
+ * The same holds one level down.
+ *
+ * ## Why the turn is a container query
+ *
+ * A tile 340px wide in a `loom.feature-grid` and the same tile running the full
+ * width of a `loom.mosaic`'s lead cell are the same node, and only one of them
+ * has room to set the words beside the picture. The *window* cannot tell those
+ * apart — both are on the same laptop — so the rule is a `@container` query
+ * over the tile's own width, which is the bargain
+ * [0079](../../decisions/0079-a-layout-css-alone-can-express-belongs-in-the-stylesheet.md)
+ * already makes for the mosaic's rhythm and `loom.event`'s row. The markup is
+ * the same either way.
  */
 
 const props = z
@@ -60,10 +94,11 @@ export const loomFeature = definePrimitive({
   props,
   /** The whole tile becomes the anchor when the tree gives it a destination (0064). */
   interactive: { whenProps: ["href"] },
-  slots: [],
+  slots: ["media"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const card = given.surface !== "plain"
     const linked = given.href !== undefined
+    const media = loom.slots["media"]
 
     const body = [
       given.icon === undefined
@@ -125,12 +160,12 @@ export const loomFeature = definePrimitive({
       {
         ...loom.editable,
         ...(linked ? { href: given.href } : {}),
-        className: card ? LIBRARY_CLASS.lift : undefined,
+        className: [LIBRARY_CLASS.feature, card ? LIBRARY_CLASS.lift : undefined]
+          .filter((name) => name !== undefined)
+          .join(" "),
         style: {
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
-          gap: space(3),
           height: "100%",
           /**
            * `height: 100%` and padding, without this, make a tile taller than
@@ -155,7 +190,32 @@ export const loomFeature = definePrimitive({
         },
       },
       libraryStylesheet(),
-      ...body
+      /**
+       * The words and the picture are each one box, always — including on the
+       * tile that has no picture, where the copy box is the only child.
+       *
+       * The alternative is to wrap only when something is placed, and it costs
+       * more than the `<div>` it saves: `flex-direction` would then be inline
+       * on the tile for one rendering and on a rule for the other, and an
+       * inline style beats a rule — so the `@container` query that has to turn
+       * the tile would be unreachable on exactly the tiles it is for. That is
+       * the trap `loom.mosaic` names in its own `display` line, met here from
+       * the other end.
+       */
+      createElement(
+        "div",
+        {
+          key: "frame",
+          className:
+            media === undefined
+              ? LIBRARY_CLASS.featureFrame
+              : `${LIBRARY_CLASS.featureFrame} ${LIBRARY_CLASS.featureFigured}`,
+        },
+        createElement("div", { key: "copy", className: LIBRARY_CLASS.featureCopy }, ...body),
+        media === undefined
+          ? null
+          : createElement("div", { key: "media", className: LIBRARY_CLASS.featureMedia }, media)
+      )
     )
   },
 })

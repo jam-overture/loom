@@ -344,6 +344,21 @@ export const LIBRARY_CLASS = {
   navMenu: "loom-nav-menu",
   /** Its actions end, which takes the slack on a phone when no control was built. */
   navActions: "loom-nav-actions",
+  /**
+   * A `loom.feature`. The tile, which measures itself; the box holding its two
+   * halves; the words; and the region it places what it was handed in.
+   *
+   * `featureFigured` is on the frame of a tile that was handed something, and
+   * it is the only thing the `@container` rule looks at — a tile with nothing
+   * in its `media` region is a column at every width, which is what every
+   * feature in this library was before the region existed and what most of
+   * them still are.
+   */
+  feature: "loom-feature",
+  featureFrame: "loom-feature-frame",
+  featureFigured: "loom-feature-figured",
+  featureCopy: "loom-feature-copy",
+  featureMedia: "loom-feature-media",
   /** A `loom.mosaic`: one column until the band itself has room for six. */
   mosaic: "loom-mosaic",
   /** Its three rhythms, each a cycle of spans that fills a six-column row exactly. */
@@ -368,6 +383,12 @@ export const LIBRARY_CLASS = {
   orbitSeat: "loom-orbit-seat",
   orbitItem: "loom-orbit-item",
   /** The ring turning the other way, and the still rendering it takes while somebody edits it. */
+  /**
+   * The ring drawn with a connector from each seat back to the middle. It is on
+   * the stage rather than on a seat, because what it turns on is one prop of
+   * the arrangement and a seat knows nothing about the arrangement.
+   */
+  orbitSpoked: "loom-orbit-spoked",
   orbitReverse: "loom-orbit-reverse",
   orbitStill: "loom-orbit-still",
   /**
@@ -1386,6 +1407,56 @@ details[open] > summary .loom-marker {
     display: none;
   }
 }
+.loom-feature {
+  container-type: inline-size;
+}
+.loom-feature-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--loom-spacing-3);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+.loom-feature-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--loom-spacing-3);
+  min-inline-size: 0;
+}
+.loom-feature-media {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+/*
+ * The turn, and the number.
+ *
+ * 44rem is the width at which a 20rem column of words and a picture beside it
+ * are both still worth having. Below it the two would be about 15rem each,
+ * which is a paragraph four words wide next to a panel too narrow to read, so
+ * the tile stays a column -- and a cell of an ordinary loom.feature-grid,
+ * which is around 21rem, never reaches it at all.
+ *
+ * The words take the smaller share deliberately. The picture is the thing the
+ * wide cell was widened for; a tile that gave the copy half of 1120px would be
+ * a line of 90 characters, which is the fault READABLE_MEASURE exists to
+ * avoid one level up.
+ */
+@container (min-width: 44rem) {
+  .loom-feature-figured {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--loom-spacing-5);
+  }
+  .loom-feature-figured > .loom-feature-copy {
+    flex: 1 1 18rem;
+  }
+  .loom-feature-figured > .loom-feature-media {
+    flex: 1.35 1 22rem;
+  }
+}
 .loom-mosaic {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -1447,13 +1518,35 @@ details[open] > summary .loom-marker {
 .loom-orbit-guide, .loom-orbit-seat {
   position: absolute;
   --loom-orbit-radius: 38%;
+  /*
+   * The same radius as a length rather than as a percentage, and it is needed
+   * because a percentage on a seat's own connector would resolve against the
+   * seat -- a box the size of a word -- instead of against the stage. cqi is
+   * the stage's inline size, which is what 38% was a percentage of, so the two
+   * declarations are one number written twice and have to stay equal.
+   */
+  --loom-orbit-reach: 38cqi;
 }
 .loom-orbit-inner {
   --loom-orbit-radius: 22%;
+  --loom-orbit-reach: 22cqi;
 }
+/*
+ * border-default and not border-subtle, which is the repair a photograph made.
+ *
+ * The guides are this band's argument -- they are what makes eight marks read
+ * as an orbit rather than as scattered logos -- and on the bold palette
+ * border-subtle is five points of luminance away from the surface it is drawn
+ * against, which is a line nobody has ever seen. The primitive said the guides
+ * were the thing holding the arrangement together and under one of the two
+ * starter palettes it was drawing nothing at all. The numbers are in the
+ * 26 September finding; they cannot be written here, because a hex literal
+ * inside this sheet is indistinguishable from a hardcoded colour to the test
+ * that forbids one.
+ */
 .loom-orbit-guide {
   inset: calc(50% - var(--loom-orbit-radius));
-  border: 1px dashed var(--loom-border-subtle);
+  border: 1px dashed var(--loom-border-default);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -1462,9 +1555,37 @@ details[open] > summary .loom-marker {
   inset-block-start: calc(50% + var(--loom-orbit-y) * var(--loom-orbit-radius));
   transform: translate(-50%, -50%);
 }
+/*
+ * One connector, drawn from the seat back to the middle rather than from the
+ * middle out to the seat.
+ *
+ * It is on the seat because that is the element that already knows where it
+ * sits: the angle is the seat's own, so the line is one rotation of a box
+ * anchored at the seat's centre and turned a half-turn past its bearing. Drawn
+ * from the stage instead, every connector would need the seat's angle passed
+ * back up, and the stage has no element per child to put it on.
+ *
+ * It is under the mark because the mark is painted after the turning layer and
+ * on its own ground: a connector that stopped short of the middle would be a
+ * line pointing at nothing, and one that crossed it would be drawn over the
+ * name of the thing it is pointing at.
+ */
+.loom-orbit-spoked .loom-orbit-seat::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  inline-size: var(--loom-orbit-reach);
+  block-size: 0;
+  border-block-start: 1px dashed var(--loom-border-default);
+  transform-origin: 0 0;
+  transform: rotate(calc(var(--loom-orbit-angle) * 1deg + 180deg));
+  pointer-events: none;
+}
 @container (max-width: 26rem) {
   .loom-orbit-inner {
     --loom-orbit-radius: 38%;
+    --loom-orbit-reach: 38cqi;
   }
   .loom-orbit-guide.loom-orbit-inner {
     display: none;
