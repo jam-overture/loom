@@ -7,7 +7,7 @@ import { describeError, describeReadiness } from "./report.js"
  *
  * **It never publishes, and that is deliberate rather than unfinished.**
  * Publishing is irreversible and outward-facing, and three of its four
- * preconditions are not this repository's to satisfy: a licence, an npm
+ * preconditions are not this repository's to satisfy: a license, an npm
  * account, and the runtime going out first. So the command produces the
  * artifact and a table of what is and is not ready, and the last step is a
  * person reading it and typing the line it prints.

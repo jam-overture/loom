@@ -33429,8 +33429,10 @@ of a table, and read the body back.
 ## 2026-09-26 — `@loom/primitives` cannot be installed beside `@loom/runtime@0.0.1`, and npm refuses it rather than warning
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`package.json` at the root is its file) · **Status:** open — **measured, not
-predicted**, and it is a one-word fix somebody has to choose
+(`package.json` at the root is its file) · **Status:** **closed 26 September**
+— the maintainer chose the recommendation the same evening. Both packages are
+`0.1.0`, `private: true` is lifted from the runtime, and the install that
+produced the error below now succeeds
 
 `@loom/primitives` is built to take the runtime as a **peer** dependency, which
 is the right shape: two copies of the runtime in a host's tree would be two
@@ -33464,25 +33466,29 @@ the same file and it is not this lane's to take. The primitives' peer range is
 one constant (`RUNTIME_RANGE` in `tools/package/manifest.ts`) and moves in
 whichever direction is chosen.
 
-**What would close it**: the two versions agreeing, and a re-run of the install
-check in `docs/publishing.md`.
+**What closed it**: the two versions agreeing at `0.1.0`, and the install check
+re-run against the real tarballs rather than a repacked one — both packages
+resolve, 98 primitives import, a hero band renders to 48KB with no diagnostics.
+The entry stays as the record of *why* npm refuses rather than warns, because
+the next pair of packages this repository publishes will have the same shape.
 
 ---
 
 ## 2026-09-26 — there is no LICENSE, and for npm that is not a soft blocker
 
 **Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
-**Status:** open — **the maintainer's, and nothing else unblocks it.** Already
-named in `docs/rollout.md` Phase 2; this entry is the npm-specific consequence,
-which is sharper than that page's framing
+**Status:** **closed 26 September** — MIT, chosen by the maintainer the same
+evening. `LICENSE` is at the repository root, both manifests carry
+`"license": "MIT"`, and `docs/rollout.md` Phase 2's licensing item is
+discharged with it
 
 `docs/rollout.md` says licensing *"gates whether the repository can be public at
 all"* and is *"the maintainer's and nothing unblocks it but a decision."* That
 is true and it understates the publishing case.
 
-**A published npm package with no licence is a package nobody may legally
+**A published npm package with no license is a package nobody may legally
 use.** It is not a missing badge: npm displays it as UNLICENSED, every corporate
-dependency scanner flags it, and the default in the absence of a licence is
+dependency scanner flags it, and the default in the absence of a license is
 exclusive copyright — a reader who installs it has no permission to use, copy or
 modify it. Publishing without one and adding it later means the first release
 anybody sees is the one they are told not to depend on.
@@ -33494,11 +33500,67 @@ identifier on the first line (`MIT`) becomes the `license` field, and anything
 else becomes `SEE LICENSE IN LICENSE`, which is correct and tells a reader
 nothing.
 
-**This run deliberately did not choose one.** A licence is a legal commitment
+**This run deliberately did not choose one.** A license is a legal commitment
 about a body of work, made by whoever owns it; a routine picking `MIT` because
 it is the common answer would be a routine making that commitment on somebody
 else's behalf. The path was tested with a temporary `LICENSE` and the file was
 removed.
 
-**What would close it**: a `LICENSE` file at the root. Everything downstream of
-it is already built.
+**What closed it**: `LICENSE` at the root, MIT, with the SPDX identifier on the
+first line so the generated manifest reads it rather than asserting it. **One
+field is worth a second look and is not a routine's to get right:** the
+copyright holder reads `Jam Overture`, taken from the GitHub organization that
+owns the repository. If the entity that holds the copyright is a person or a
+differently-named company, that line is the one to correct, and correcting it
+after a publish means a new version rather than an edit.
+
+---
+
+## 2026-09-26 — the same library will be on npm behind two doors, and every documentation page teaches the older one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(the runtime's `exports` map) **with** `Loom docs` (what the site teaches) ·
+**Status:** open — **not a defect and not blocking a publish.** Both doors
+work. It is a coherence problem that is cheap now and expensive after a public
+release
+
+`@loom/runtime` exports `./primitives`, and its tarball carries all 620 files of
+the library: 1.1MB against the 350KB of `@loom/primitives`, which carries the
+same files again.
+
+Nothing breaks. A host reaching through either door gets the same registry, and
+a host that uses `@loom/runtime/primitives` never installs the second package —
+so there is no double-registry hazard of the kind two *runtimes* would create.
+What there is instead is **two published ways to say one thing on the first day
+anybody looks**, and the new one is the one nothing documents:
+
+| | teaches `@loom/runtime/primitives` |
+| --- | --- |
+| the docs site's entry-point reference | yes — it is listed as an entry point |
+| the quickstart | yes |
+| three compiled fences under `(docs)/_lib/fences/` | yes |
+| the marketing and demo registries | yes |
+
+**Why this lane did not change it.** Closing the runtime's door is a breaking
+change to four other lanes' files and to published teaching material, and
+`Loom docs` would have to move with it in the same release. It is also
+genuinely arguable either way: a single package that carries a usable default
+vocabulary is a simpler first install, and a host that wants to swap the
+vocabulary is exactly who the second package is for.
+
+**The three options, so whoever takes it does not re-derive them:**
+
+1. **Keep both, say which is canonical.** One paragraph in the docs and a line
+   in each README. Cheapest, and leaves 620 duplicated files in the runtime's
+   tarball forever.
+2. **Runtime re-exports the package.** `@loom/runtime/primitives` becomes a
+   thin re-export of `@loom/primitives`, which makes it a dependency rather
+   than a copy — every import keeps working, the duplication goes, and the
+   runtime grows a dependency on a package that peer-depends on it.
+3. **Close the door at 1.0.** Deprecate the subpath now, drop it at the major.
+   The cleanest end state and the most work, and it needs `Loom docs` in the
+   same release.
+
+**Recommendation: 1 before publishing, 3 planned for 1.0.** The thing that
+cannot wait is the sentence saying which one a stranger should use, because the
+first release is the one people copy from.

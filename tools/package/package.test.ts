@@ -141,7 +141,7 @@ describe("what the manifest promises", () => {
   })
 
   /**
-   * The licence is read from the repository rather than decided here, so the
+   * The license is read from the repository rather than decided here, so the
    * manifest has to carry whatever the file says — including the honest answer
    * when it says something this cannot reduce to an identifier.
    */
@@ -164,28 +164,28 @@ describe("what the manifest promises", () => {
  *
  * A readiness line that names a missing thing and not who can supply it is a
  * line somebody clears by deleting it, so the two that matter are asserted: the
- * licence is called BLOCKED and attributed, and the runtime's ordering is
+ * license is called BLOCKED and attributed, and the runtime's ordering is
  * stated as a consequence rather than as a preference.
  */
 describe("what the command tells whoever runs it", () => {
-  it("calls the licence blocked, and says whose decision it is", () => {
+  it("calls the license blocked, and says whose decision it is", () => {
     const lines = describeReadiness({ files: 620, rewritten: 310, license: false }).join("\n")
 
     expect(lines).toContain("BLOCKED")
     expect(lines).toContain("maintainer")
-    expect(lines).not.toContain("  ready     licence")
+    expect(lines).not.toContain("  ready     license")
   })
 
   it("stops calling it blocked once there is one", () => {
     const lines = describeReadiness({ files: 620, rewritten: 310, license: true }).join("\n")
 
     expect(lines).not.toContain("BLOCKED")
-    expect(lines).toContain("ready     licence")
+    expect(lines).toContain("ready     license")
   })
 
   /**
    * The three nobody in this repository can clear are listed whether or not the
-   * licence is there, because they are the reason "ready" is a table rather
+   * license is there, because they are the reason "ready" is a table rather
    * than a boolean.
    */
   it("always names the three that are not this repository's to satisfy", () => {

@@ -28,8 +28,8 @@ export const describeReadiness = ({ files, rewritten, license }: Assembled): rea
   `packages/primitives assembled — ${String(files)} files, ${String(rewritten)} rewritten`,
   ``,
   license
-    ? `  ready     licence — LICENSE copied into the package`
-    : `  BLOCKED   licence — there is no LICENSE at the repository root. A public package without one is a package nobody may legally use, and docs/rollout.md names this as the maintainer's decision and nothing else's`,
+    ? `  ready     license — LICENSE copied into the package`
+    : `  BLOCKED   license — there is no LICENSE at the repository root. A public package without one is a package nobody may legally use, and docs/rollout.md names this as the maintainer's decision and nothing else's`,
   `  yours     npm auth — this machine is not logged in. \`npm whoami\` must answer before a publish`,
   `  yours     the @loom scope must exist and be owned by the publishing account`,
   `  yours     @loom/runtime must be published first, at a version this package's peer range accepts — it is a peer dependency, so this resolves to nothing without it`,

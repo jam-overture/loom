@@ -1,8 +1,8 @@
 {
   "name": "@loom/runtime",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Loom — an AI-powered adaptive UI runtime",
-  "private": true,
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -135,6 +135,23 @@
   "packageManager": "pnpm@10.31.0",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jam-overture/loom.git"
+  },
+  "keywords": [
+    "loom",
+    "ai",
+    "adaptive-ui",
+    "react",
+    "server-components",
+    "runtime"
   ]
 }

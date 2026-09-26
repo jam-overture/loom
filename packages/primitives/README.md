@@ -100,6 +100,6 @@ one without the other is the case neither is tested in.
 prop or a region on a primitive; the four operations and the shape of a tree are
 the runtime's promise, not this package's.
 
-## Licence
+## License
 
 See `LICENSE`.

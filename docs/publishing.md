@@ -25,16 +25,18 @@ exactly one copy of it in a host's tree — two would be two `PrimitiveType`
 brands and a registry that refuses its own entries — and a peer dependency is
 how a package says that.
 
-## Before the first publish — four things, three of them nobody here can do
+## Before the first publish
 
-1. **A licence.** There is no `LICENSE` at the repository root.
-   `docs/rollout.md` names this as the maintainer's decision and says it *"gates
-   whether the repository can be public at all"*, which understates it for npm:
-   a published package with no licence is a package nobody may legally use, and
-   npm will show it as UNLICENSED. Put an SPDX identifier on the first line
-   (`MIT`) so the generated manifest can read it; anything else and the manifest
-   says `SEE LICENSE IN LICENSE`, which is correct but tells a reader nothing.
-   **`pnpm package:primitives` exits non-zero until this exists.**
+**Two of the four are settled.** The maintainer chose MIT and the paired
+`0.1.0` on 26 September; `LICENSE` is at the root and both manifests carry it.
+What is left is the two that need an npm account.
+
+1. **A license — done.** MIT, at the repository root, with the SPDX identifier
+   on the first line so the generated manifest reads it rather than asserting
+   it. `pnpm package:primitives` exits non-zero if it ever goes missing. The one
+   field worth a second look is the copyright holder, which reads
+   `Jam Overture`: correcting it after a publish means a new version rather than
+   an edit.
 2. **The `@loom` scope, owned by the publishing account.** Both
    `@loom/runtime` and `@loom/primitives` were unregistered when this was
    written, so the names are available — but a scope belongs to an npm user or
@@ -45,9 +47,12 @@ how a package says that.
    routine session is not logged in and should not be: publishing is a
    deliberate act by a person, and a token that can publish is a token worth
    protecting more carefully than a routine's environment protects anything.
-4. **The runtime goes out first, at a version the primitives' peer range
-   accepts.** This is not a preference, it is `npm install` refusing to
-   resolve — measured, not assumed:
+4. **The runtime still goes out first** — that part does not change, because it
+   is a peer dependency and a package whose peer is not on the registry is a
+   package that installs with a warning and imports nothing. The version
+   mismatch that used to make this a hard error is fixed: both are `0.1.0`. The
+   error is kept here because it is what the failure looks like if the two ever
+   drift again:
 
    ```
    npm error code ERESOLVE
@@ -56,11 +61,8 @@ how a package says that.
    npm error peer @loom/runtime@"~0.1.0" from @loom/primitives@0.1.0
    ```
 
-   The root `package.json` is at `0.0.1` and `@loom/primitives` is built at
-   `0.1.0`. **One of the two has to move**, and the recommendation is that both
-   go out at `0.1.0` together: it is the first release either has had, `0.0.1`
-   reads as a placeholder because it is one, and the two are compiled against
-   each other. The runtime's version is `Loom daily build`'s file to change.
+   `npm install` exits non-zero and installs nothing — it is a refusal, not a
+   warning, so it is not something a host works around.
 
 ## The order
 
@@ -69,7 +71,7 @@ pnpm install && pnpm verify        # the merge gate, green, before anything
 pnpm build                         # dist/ — package:primitives reads it and will not make it
 
 # 1. the runtime
-npm publish --access public        # from the repository root, once `private: true` is lifted
+npm publish --access public        # from the repository root
 
 # 2. the primitives
 pnpm package:primitives            # assembles packages/primitives, prints readiness
