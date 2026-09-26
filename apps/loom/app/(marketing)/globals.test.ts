@@ -30,7 +30,7 @@ const declaredFor = (selector: string): string =>
  * declares applies to every page at once. That is a bad combination for the two
  * things it is capable of getting wrong, and both have now happened once:
  *
- * - **Declaring anything the theme owns.** A colour, a face or a spacing step
+ * - **Declaring anything the theme owns.** A color, a face or a spacing step
  *   here is a second source of truth that no re-theme reaches, and the site's
  *   whole claim is that there is one.
  * - **Sizing the page by its widest contents.** Fixed on 24 August; the comment

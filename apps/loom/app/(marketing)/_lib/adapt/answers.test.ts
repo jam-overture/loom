@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { spell } from "../journey"
 import { treeFor } from "../render"
-import { HOME, THE_RECORD, THE_RULES, type SiteThemeName } from "../site"
+import { HOME, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import {
   ANSWER_ORDER,
@@ -127,7 +127,14 @@ describe("the sentence the count is spelled into", () => {
  * was built is exactly what the old sentence did for sixteen runs.
  */
 describe("every page that counts the choices", () => {
-  it.each([HOME, THE_RECORD])("$path introduces them with what they do", (route) => {
+  /**
+   * One page rather than two, since 26 September: the choices band is the front
+   * door's alone now that `/the-record` has been retired into the mechanism
+   * page. The sweep shape is kept because what it is protecting — a sentence
+   * counting the choices, held against what the choices actually do — is the
+   * same however many pages carry it.
+   */
+  it.each([HOME])("$path introduces them with what they do", (route) => {
     expect(wordsOn(route)).toContain(whatTheChoicesDo())
   })
 
@@ -135,9 +142,6 @@ describe("every page that counts the choices", () => {
     expect(wordsOn(HOME)).toContain(worthWatching())
   })
 
-  it("the rules page counts the same exceptions", () => {
-    expect(wordsOn(THE_RULES)).toContain(`${EXCEPTIONS_SPELLED} of them run into the rules`)
-  })
 
   /**
    * The negative assertion, deliberately wider than the answer.
@@ -147,7 +151,7 @@ describe("every page that counts the choices", () => {
    * saying both. This searches for the claim that was there and for every
    * near-miss of it a rewrite might reach for.
    */
-  it.each([HOME, THE_RECORD, THE_RULES])(
+  it.each([HOME])(
     "$path never says the rest of them just happen",
     (route) => {
       const words = wordsOn(route)

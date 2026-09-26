@@ -37,7 +37,7 @@ export type SiteRoute = {
  * The front door, and **the one page the bar does not carry a link to.**
  *
  * That is a change of 12 September and it is navigation rather than attention,
- * which is what makes it a different judgement from the two below. The bar's
+ * which is what makes it a different judgment from the two below. The bar's
  * left-hand end is a `loom.logo` carrying `HOME.path`, on every page of the
  * site, in the place every site a visitor has ever used puts the way home — so
  * *Home* beside it was the same destination offered twice, and it was spending
@@ -69,86 +69,8 @@ export const HOW_IT_WORKS: SiteRoute = {
   label: "How it works",
   title: "How it works — Loom",
   description:
-    "Every change to a Loom page takes the same five steps: someone asks for it, the AI writes down exactly what it wants to change, the change is measured, your rules decide, and what happened is recorded.",
+    "Someone asks for a change. Before anything moves it is measured and checked against rules you wrote. Then it is written down — every time, whether it happened or not.",
   inMenu: true,
-}
-
-/**
- * The page the front door's central promise sends a reader looking for.
- *
- * Everything else on this site says *nothing lands until it has been checked
- * against your rules*, and until 28 August the obvious next question — **what
- * is a rule, and who writes it?** — was answered in one band of the mechanism
- * page and one line of a questions list. That is the half of the pitch the
- * recorded positioning says is the differentiator: not that a page adapts, but
- * that somebody decided in advance what it may do and can prove which decision
- * applied.
- *
- * It is a description of code rather than a position, like the mechanism page
- * and unlike anything about audience or price, which is why it could be written
- * without waiting for an answer.
- */
-export const THE_RULES: SiteRoute = {
-  path: "/the-rules",
-  label: "The rules",
-  title: "The rules — what your AI may change, and what it may not",
-  description:
-    "You write down what may change on your page and what may never change. Every request is weighed against it before anything moves, and the answer names the rule that gave it.",
-  inMenu: true,
-}
-
-export const THE_RECORD: SiteRoute = {
-  path: "/the-record",
-  label: "The record",
-  title: "The record — what changed, who asked, and how to put it back",
-  description:
-    "Ask the front page for one change after another and watch the list fill in: what each request turned out to be, how much of the page it moved, which of your rules allowed it, and what putting it back would restore.",
-  inMenu: true,
-}
-
-/**
- * The page for the question this site had four pages and no answer to.
- *
- * Read across its own links, the front door says two different things about
- * where the pieces of a page come from. The numbers band offers *"N ready-made
- * pieces to build with"*; the questions band directly below it answers *"can the
- * AI write code into my page?"* with *"it can only use the pieces **you handed
- * it**"*; the band above says it *"only rearranges pieces **you built and
- * already trust**"*. Both halves are true — a starter library exists, and a host
- * describes its own components — and nowhere on the site are the two said in the
- * same breath.
- *
- * A developer reading that has to guess at the one question that decides whether
- * they can use this at all: **do I have to rebuild my page in somebody else's
- * components?** The answer is no, it has always been no, and the site's own copy
- * left it open. This is the sixth run running to find two individually
- * defensible sentences that had never been read next to each other, and the
- * first where the fix is a page rather than a word.
- *
- * It is a description of code rather than a position — what a host hands over,
- * what the machinery does with it, and what it refuses — so it could be written
- * without waiting on the positioning answers the licence line is still waiting
- * on.
- *
- * **It is `inMenu: false`,** and that is the one judgement call in it. See the
- * flag's note above: the bar is back to the eight items the maintainer asked
- * about on #166, and a page that resolves a contradiction is not worth a ninth.
- */
-export const YOUR_COMPONENTS: SiteRoute = {
-  path: "/your-components",
-  label: "Your components",
-  /**
-   * The name is deliberately not in it. `share.ts` splits a title on its
-   * separator and drops the part that is exactly the wordmark, because the card
-   * already carries the name at its top left — so a title with *Loom* inside a
-   * clause prints it twice to the one reader who sees the card and not the page.
-   * Two of the four existing titles solve that by not saying it at all, and this
-   * is the third.
-   */
-  title: "Your components — the ones you already built, rearranged and never rewritten",
-  description:
-    "Loom never asks you to rebuild your page in somebody else's components. You describe the ones you already have — the name, what each is for, and which settings may be changed — and that description is the whole of what the AI is ever allowed to touch.",
-  inMenu: false,
 }
 
 /**
@@ -165,7 +87,7 @@ export const YOUR_COMPONENTS: SiteRoute = {
  * service they point something at, or a site somebody else hosts for them.
  *
  * It is a description of code rather than a position, so it did not wait on the
- * licence line, and nothing on it says what Loom costs or who it is for.
+ * license line, and nothing on it says what Loom costs or who it is for.
  *
  * **The boundary with `Loom docs` was agreed in the finding rather than
  * discovered in review.** `/docs` owns *how to install it* — the commands, the
@@ -184,205 +106,16 @@ export const WHAT_YOU_RUN: SiteRoute = {
   path: "/what-you-run",
   label: "What you run",
   /**
-   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
-   * only the half of a title that is exactly the wordmark, so the name inside a
-   * clause prints twice on the card.
+   * No *Loom* in it: `share.ts` drops only the half of a title that is exactly
+   * the wordmark, so the name inside a clause prints twice on the card.
+   *
+   * Shortened on 26 September with the page. The old one — *a package in your
+   * own application, not a service in front of it* — was a thirteen-word
+   * subtitle doing the page's argument in the browser tab.
    */
-  title: "What you run — a package in your own application, not a service in front of it",
+  title: "What you run — in your own app, not in front of it",
   description:
-    "You install it into an application you already have and already host. Your components stay in your repository, your pages and their history are kept by your own application, and the only thing that ever leaves is one request to a model you chose.",
-  inMenu: false,
-}
-
-/**
- * The page for the question every page of this site so far has answered only in
- * its happy form.
- *
- * `/` shows a change happening. `/how-it-works` walks one from the request to
- * the record. `/the-rules` says what you decide in advance, and `/the-record`
- * what you are left holding afterwards. Every one of them is a page about a
- * change that **worked**, and the reader this site's recorded positioning names
- * — somebody who cannot ship un-reviewed output because they answer to a client,
- * a regulator or a board — reads all four and asks the only question they were
- * ever going to ask: **and when it doesn't?**
- *
- * The answer is unusually good and the site was not making it. A request to
- * change a page can end five ways and exactly one of them touches the page; the
- * other four leave it as it was, and two of them never reach the rules at all.
- * That is not reassurance, it is the shape of the code, which is why this page
- * could be written without waiting on the licence line: nothing on it says what
- * Loom costs, who it is for, or what may be built on it.
- *
- * **The five endings are the runtime's own list, not a copy of it.** They are
- * read off `COMPOSITION_OUTCOME_KINDS` in the order it publishes them, and a
- * sixth ending arriving there is a page that refuses to build rather than a
- * page that goes on telling a reader there are five. The list's own note in
- * `pipeline.ts` names "a surface explaining what a host must handle" as one of
- * the things that would want to walk it, and says such a walker keeps its own
- * copy — so this page keeps one, and holds it to the original in both
- * directions instead of letting the two drift.
- *
- * **It is `inMenu: true`, and the entry above is how it got there.** A seventh
- * page carried by a bar already at the eight items #166 asked about would be
- * the flagged problem made worse; *Home* leaving the bar is what makes room,
- * and the count is unchanged. What the bar cannot yet do — hold these seven
- * under two or three grouped headings, the way the reference site does — needs
- * a menu that opens, and nothing in the library has one. Filed for
- * `Loom primitives` rather than worked around here.
- */
-export const WHEN_IT_GOES_WRONG: SiteRoute = {
-  path: "/when-it-goes-wrong",
-  label: "When it goes wrong",
-  /**
-   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
-   * only the half of a title that is exactly the wordmark, so the name inside a
-   * clause prints twice on the card.
-   */
-  title: "When it goes wrong — the four endings that leave your page exactly as it was",
-  description:
-    "A request to change your page can end five ways, and only one of them changes anything. Here is what each of the other four is, what your page looks like afterwards, and what is written down either way.",
-  inMenu: true,
-}
-
-/**
- * The page for the one input to a verdict that is about people rather than
- * about the change.
- *
- * `/the-rules` has said since 28 August that the same change is weighed
- * differently depending on who wanted it, and it says it in a two-column table:
- * four kinds of asker, and the weight each may go ahead with unwatched. That is
- * the site **stating** its strongest structural fact on a site whose whole
- * method is to show. [0002](../../../../../decisions/0002-the-gate-is-a-pure-function-of-two-independent-axes.md)
- * calls the per-origin ceiling *the one place origin is load-bearing rather than
- * merely recorded*, and nothing anywhere demonstrated it.
- *
- * This page puts four of the front door's own requests — one for each weight the
- * rules can give a change — to all four askers, while the page is being built,
- * and prints the sixteen answers as marks. It also answers the question the
- * table invites and never addresses: **what does being the trusted asker not
- * buy you?** Seven of the eight rules never look at who asked, and the floor is
- * sovereign over all of them.
- *
- * That number was *four* until 17 September and was never derived — it came
- * from counting the rungs whose own comments say "whatever latitude its origin
- * has", which is the wrong question: a rule that never mentions origin because
- * it never reads one refuses to consult the asker just as completely as a rule
- * that says so. Read off `ESCALATION_RULES`, exactly one rung consults it —
- * `stakes-above-ceiling`, through `ceilingFor(policy, origin)`, which is 0002's
- * "one place origin is load-bearing" and the reason this page exists. The
- * page's own measured version of the same claim is below `cannotBuy` in
- * `who-can-ask.ts`, and it agrees: across the sixteen runs, one rule out of the
- * eight ever answered two askers differently.
- *
- * It is a description of code rather than a position, so it did not wait on the
- * licence line: nothing on it says what Loom costs, who it is for, or what may
- * be built on it.
- *
- * **It is `inMenu: false`, and that is now true of four of the eight pages.**
- * See the flag's note on `HOME`. The bar is the eight items the maintainer asked
- * about on #166, and the honest reading of this page is that it is the second
- * question a reader of `/the-rules` asks rather than something anybody arrives
- * wanting — so it is reached from that page's own band, from the front door's
- * band of facts, and from the footer's map. Four off the bar is a bad answer to
- * a real problem and the good answer is a bar that groups, which no primitive in
- * the library can do; see the finding rather than a fifth judgement call here.
- */
-export const WHO_CAN_ASK: SiteRoute = {
-  path: "/who-can-ask",
-  label: "Who can ask",
-  /**
-   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
-   * only the half of a title that is exactly the wordmark, so the name inside a
-   * clause prints twice on the card.
-   */
-  title: "Who can ask — the same request, weighed by who wanted it",
-  description:
-    "A person typing what they want, the page reacting to something it saw, a job on a timer, and the people who built it. You decide in advance how far each may go before somebody has to look. Here are four real requests put by all four, and what each was told.",
-  inMenu: false,
-}
-
-/**
- * The page for the fourth quarter of the one thing this project says is the
- * difference.
- *
- * The recorded positioning is four clauses long: Loom can say **what changed,
- * who asked, which rule allowed it, and how to put it back.** Three of those
- * have had a page of their own since August. The fourth had a sentence in a
- * panel — *putting it back restores every word rather than writing them out
- * again* — and the only place it was ever checked was a test file, which is the
- * one audience it does nothing for.
- *
- * So this page runs it. Every request the front door offers that changes
- * anything is applied and then put back while the page is being built, and what
- * is printed is what came back: how much each change moved, what putting it back
- * was weighed as, what the rules said about *that*, and whether the page
- * afterwards is the page the visitor arrived on — compared piece by piece and
- * name by name, because *the same pieces, not new ones that read the same* is a
- * claim about names and a count cannot tell those two apart.
- *
- * **Two of its three bands are the ones a reader does not expect**, and neither
- * was arranged for. Putting back a change the rules had already asked about asks
- * about it again, because moving a protected band back is still moving a
- * protected band. And putting something back is weighed on what *it* does rather
- * than handed the verdict of the change it reverses — so undoing an addition
- * carries a removal's weight, and the site can show a reader the counter-case to
- * *undo is always safe* on its own front door.
- *
- * It is a description of code rather than a position, like every page here and
- * unlike anything about audience or price, so it did not wait on the licence
- * line. Nothing on it says what Loom costs or who it is for.
- *
- * **It is `inMenu: false`, and that is the one judgement call in it.** See the
- * flag's note on `HOME`: the bar is the eight items the maintainer asked about
- * on #166, and the honest reading of this page is that it is the second question
- * a reader of `/the-record` asks rather than something anybody arrives wanting —
- * exactly as `/who-can-ask` is the second question of `/the-rules`. That now
- * makes five of nine pages off the bar, which is worse than four of eight and is
- * a measurement the 12 September finding asked to be told. The good answer is
- * still a bar that groups, which no primitive in the library can do.
- */
-export const PUTTING_IT_BACK: SiteRoute = {
-  path: "/putting-it-back",
-  label: "Putting it back",
-  /**
-   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
-   * only the half of a title that is exactly the wordmark, so the name inside a
-   * clause prints twice on the card.
-   */
-  title: "Putting it back — the change that reverses a change, written before you ask for it",
-  description:
-    "Every change that lands on a Loom page comes with the change that reverses it, worked out at the same moment. Pressing undo puts the same pieces back rather than building a page that reads the same — and your rules weigh it like anything else.",
-  inMenu: false,
-}
-
-/**
- * Where a request might come from, which is the half of the argument the other
- * eight pages all start after.
- *
- * Every one of them opens with somebody asking for something. Nothing said what
- * would make anybody ask — and the project's own stated reason for existing is
- * that a page should be able to change from how people actually use it, which
- * takes somebody being able to see how people actually use it. That is
- * `docs/signals.md`, approved on 13 September, and the fifth step of it is this
- * page.
- *
- * **Off the bar, which makes six of ten**, and the reason is the 12 September
- * finding rather than this page's importance: `loom.nav` cannot group, so the
- * bar has no way to carry ten destinations under three headings and the footer's
- * map is doing that job alone. The measurement is recorded on the finding again
- * rather than argued with here.
- */
-export const WHAT_READERS_DO: SiteRoute = {
-  path: "/what-readers-do",
-  label: "What readers do",
-  /**
-   * No *Loom* in it, for the reason on `YOUR_COMPONENTS.title`: `share.ts` drops
-   * only the half of a title that is exactly the wordmark, so the name inside a
-   * clause prints twice on the card.
-   */
-  title: "What readers do — which parts of your page people reach, without knowing who any of them are",
-  description:
-    "Loom can count what readers did band by band: how far down they got, how long they stayed, what they used and what they opened. It counts the bands and never the people — no name, no account, nothing that follows anybody anywhere — and a change is still something somebody asks for.",
+    "You install a package into an application you already host. Your components stay in your repository, and the only thing that leaves is one request to a model you chose, when somebody asks for a change.",
   inMenu: false,
 }
 
@@ -439,18 +172,7 @@ export const WHAT_READERS_DO: SiteRoute = {
  * site and a map that omitted the front door would be the navigation failure
  * this list exists to prevent.
  */
-export const SITE_ROUTES: readonly SiteRoute[] = [
-  HOME,
-  HOW_IT_WORKS,
-  THE_RULES,
-  WHO_CAN_ASK,
-  THE_RECORD,
-  PUTTING_IT_BACK,
-  WHAT_READERS_DO,
-  WHEN_IT_GOES_WRONG,
-  WHAT_YOU_RUN,
-  YOUR_COMPONENTS,
-]
+export const SITE_ROUTES: readonly SiteRoute[] = [HOME, HOW_IT_WORKS, WHAT_YOU_RUN]
 
 /**
  * The rest of the product, which is the rest of this same application.
@@ -886,34 +608,6 @@ export const mechanismHref = (origin: string, options: AskedFor = {}): string =>
   askedHref(origin, HOW_IT_WORKS.path, options)
 
 /**
- * The record page, with the run of changes it is reporting on in the address.
- *
- * Same argument as `askHref` and the same property: the page keeps nothing, so
- * a history is not a session — it is a list of requests written into the URL,
- * replayed from the front door as it is published every time the page is
- * loaded. Two people can read the same history a week apart and get the same
- * answer, and neither of them can move it under the other.
- *
- * The sequence arrives here already written out. Composing it is
- * `adapt/history.ts`'s job and that module imports this one, so a `changes`
- * string rather than a list of asks is what keeps the two from importing each
- * other.
- */
-export const recordHref = (
-  origin: string,
-  options: { readonly theme?: SiteThemeName; readonly changes?: string } = {}
-): string => {
-  const url = new URL(THE_RECORD.path, `${origin}/`)
-
-  if (options.theme !== undefined) url.searchParams.set("theme", options.theme)
-  if (options.changes !== undefined && options.changes.length > 0) {
-    url.searchParams.set("changes", options.changes)
-  }
-
-  return url.toString()
-}
-
-/**
  * A link into another surface of the product.
  *
  * The palette is deliberately **not** carried across. It is this site's
@@ -980,12 +674,12 @@ export type ReadingNeighbours = {
 /**
  * Where a route sits in the reading order, and what is on either side of it.
  *
- * A route that is not in `SITE_ROUTES` has no neighbours rather than throwing:
+ * A route that is not in `SITE_ROUTES` has no neighbors rather than throwing:
  * the only callers are the ten page builders, every one of which is looked up
  * out of that same list by `render.ts`, so an unknown route here is not a state
  * this site can reach. Returning an empty pair keeps the one function total.
  */
-export const readingNeighbours = (route: SiteRoute): ReadingNeighbours => {
+export const readingNeighbors = (route: SiteRoute): ReadingNeighbours => {
   const at = SITE_ROUTES.findIndex((other) => other.path === route.path)
 
   if (at < 0) return {}

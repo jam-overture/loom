@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { INTAKE_KEY } from "@/app/_lib/reader-signals/settings"
 
 import { renderSitePage } from "../render"
-import { DEFAULT_THEME, HOME, WHAT_READERS_DO } from "../site"
+import { DEFAULT_THEME, HOME, WHAT_YOU_RUN } from "../site"
 
 import { readersCountedHere } from "./counting"
 
@@ -29,7 +29,7 @@ const markup = async (counting: boolean): Promise<string> =>
 
 const readersPage = async (counting: boolean): Promise<string> =>
   renderToStaticMarkup(
-    (await renderSitePage(WHAT_READERS_DO, { origin: ORIGIN, theme: DEFAULT_THEME, counting }))
+    (await renderSitePage(WHAT_YOU_RUN, { origin: ORIGIN, theme: DEFAULT_THEME, counting }))
       .element
   )
 

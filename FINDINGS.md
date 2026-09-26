@@ -33710,3 +33710,84 @@ not write it.
 **Nothing here is a defect in code and `src/` was read only.** The three records
 are well argued and the two that are oldest are the two that have drifted most,
 which is exactly what a dated document is supposed to do.
+---
+## 2026-09-26 — the marketing site was four surfaces' worth of documentation, and the instruction that cut it was one paragraph
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37-the-cliff-notes` — recorded because the shape is not
+this lane's alone and the next surface to grow will grow the same way
+
+The maintainer read this site on 26 September and gave four instructions: it is
+too detailed and too complex, it should be simple enough for a high schooler,
+there is 60–75% too much of it, and `/the-rules`, `/the-record` and
+`/when-it-goes-wrong` should be cliff notes under `/how-it-works`. He was right
+on every count and none of it was visible from inside.
+
+**The measurement, taken before anything was cut:** ten pages, **13,208 words**
+of copy a visitor reads. `/how-it-works` alone was 1,949, of which 12,415
+characters — 73% of its visible text — were printed JSON. The site carried a
+**glossary teaching five of our own words** (`provenance`, `runtime`,
+`inverse`, `disposition`, `node`) to a stranger, and a register test whose rule
+was *a mechanism page may use one of our words once it has said the plain thing
+first*. That test passed for six weeks. It was enforcing the wrong rule
+correctly.
+
+**How it got there, which is the part worth keeping.** Every page was added by a
+run that had just found a real gap: the front door promised *checked against
+your rules* and nothing said what a rule was, so `/the-rules` was written; the
+undo was claimed and not shown, so `/putting-it-back` was written. Each was a
+defensible answer to a genuine question, each was reviewed on its own, and no
+run ever saw the ten together. **A lane that adds one good page a day builds a
+documentation site in a fortnight, and every individual step is correct.**
+
+Three things would have caught it and none of them existed:
+
+- **A budget.** There was no assertion anywhere about how much copy a page or a
+  site may carry. Every other property this site claims has one. This branch
+  adds a word ceiling per band to the mechanism page, which is the smallest
+  version of it.
+- **An altitude rule.** `docs/routines.md` gives each lane a directory. Nothing
+  says a marketing page and a documentation page answer the same question at
+  different depths, so *depth* was never a thing a review could fail on.
+- **Somebody reading it cold.** `docs/rollout.md`'s Phase 2 asks for exactly
+  this — *a getting-started path that works for a stranger, verified by someone
+  who did not build it* — and it is scoped to the docs. The same gap is the
+  marketing site's.
+
+**For the other surface lanes**, and this is why it is filed rather than only
+reported: `(docs)`, `(lessons)`, `(demo)` and `(portal)` are all built the same
+way by the same kind of run. The question worth asking on each of them is not
+*is this page correct* — it always is — but **is this page the right depth for
+the person who arrives at it, and how would this lane find out if it were
+not?**
+
+---
+## 2026-09-26 — the register test was enforcing the rule that let the jargon in
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37-the-cliff-notes` — recorded for the shape
+
+`voice.test.ts` has held this site's register since 20 August, when the
+maintainer read the front door against `nextjs.org` and said the copy was heavy
+on technical jargon. The rule it encoded was about **place**:
+
+> - The front door may not use a reserved word at all.
+> - A mechanism page may, **once it has said the same thing plainly first** —
+>   the plain phrase earlier on the page, the word after it.
+
+The second half was written to be the thing that keeps the rule from being
+censorship, and it is the thing that let the site drift. It made a glossary the
+*compliant* answer: print five of our words, introduce each one plainly first,
+and the suite goes green on a page that has just taught a stranger
+`disposition`. Both halves were asserted in both directions. Nothing was ever
+red.
+
+The rule is now the flat one the maintainer asked for — **no page of this site
+uses one of these words, anywhere** — swept over every route so a fourth page
+cannot arrive without it. It is shorter, it is stricter, and it is the rule the
+20 August instruction actually meant.
+
+**The general shape:** an exemption written into a test to keep it honest is an
+exemption a later run will build inside. The glossary was not a violation of the
+register test; it was the register test's own escape hatch, used exactly as
+written, for six weeks.

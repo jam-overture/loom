@@ -9,7 +9,8 @@ import { ASKS } from "../adapt/asks"
 import { BAND } from "../bands"
 import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
-import { unhonoured } from "../frames"
+import { unhonored } from "../frames"
+import { SHORT_ANSWERS } from "./how-it-works"
 import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import {
@@ -19,7 +20,7 @@ import {
   HOW_IT_WORKS,
   internalHref,
   PRODUCT_SURFACES,
-  readingNeighbours,
+  readingNeighbors,
   SITE_ROUTES,
   SITE_THEME_NAMES,
   SITE_THEMES,
@@ -33,7 +34,7 @@ import {
  *
  * The site's whole claim is that it is composed rather than written, so the
  * assertions worth making are the ones a hand-written page would fail: that a
- * re-theme touches nothing below the root, that no colour is named anywhere in
+ * re-theme touches nothing below the root, that no color is named anywhere in
  * the markup, and that the pages and the navigation between them cannot drift
  * apart.
  */
@@ -144,8 +145,8 @@ describe.each(SITE_ROUTES)("$path", (route) => {
   })
 
   describe.each(THEMES)("wearing %s", (theme) => {
-    it("renders with nothing the runtime could not honour", () => {
-      expect(unhonoured(rendered(route, theme).diagnostics)).toEqual([])
+    it("renders with nothing the runtime could not honor", () => {
+      expect(unhonored(rendered(route, theme).diagnostics)).toEqual([])
     })
 
     it("resolves the theme its root names", () => {
@@ -158,7 +159,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
       for (const slot of PALETTE_SLOTS) expect(style).toContain(`--loom-${slot}:`)
     })
 
-    it("names no colour of its own, anywhere below the root", () => {
+    it("names no color of its own, anywhere below the root", () => {
       const body = belowRoot(markupOf(route, theme))
 
       expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
@@ -215,7 +216,7 @@ describe.each(SITE_ROUTES)("$path", (route) => {
    * would have, and the one nothing else here would see.
    */
   it("says which page comes next, on the page itself", () => {
-    const { before, after, onward } = readingNeighbours(route)
+    const { before, after, onward } = readingNeighbors(route)
     const markup = markupOf(route, DEFAULT_THEME)
 
     /**
@@ -230,11 +231,11 @@ describe.each(SITE_ROUTES)("$path", (route) => {
 
     expect(markup).toContain(READ_NEXT_EYEBROW)
 
-    for (const neighbour of [before, after]) {
-      if (neighbour === undefined) continue
+    for (const neighbor of [before, after]) {
+      if (neighbor === undefined) continue
 
-      expect(markup).toContain(`href="${internalHref(ORIGIN, neighbour.path, DEFAULT_THEME)}"`)
-      expect(markup).toContain(`>${neighbour.label}<`)
+      expect(markup).toContain(`href="${internalHref(ORIGIN, neighbor.path, DEFAULT_THEME)}"`)
+      expect(markup).toContain(`>${neighbor.label}<`)
     }
 
     if (onward !== undefined) {
@@ -325,7 +326,7 @@ describe("the words that are not engineering's to write", () => {
     }
   })
 
-  it("is down to the footer's licence line, and nothing else", () => {
+  it("is down to the footer's license line, and nothing else", () => {
     /**
      * The count is asserted so that adding placeholder copy is a deliberate act
      * with a test to change, rather than something that accumulates unnoticed
@@ -613,62 +614,64 @@ describe("the band that says what this is for", () => {
 })
 
 /**
- * The mechanism page as it is *served*, which is the only form of it a reader
- * meets.
+ * The mechanism page's bands, held against the page the route serves.
  *
- * Every assertion above is made against `treeFor`, the page before the route
- * supplies what it gathers per request — and the record this page prints is
- * gathered per request, so none of them see it. That is the gap this block
- * closes: the same properties, plus the one that matters most here, which is
- * that the band is there at all. A page whose central band quietly vanishes
- * when a caller forgets to supply it is the failure mode this site keeps
- * finding, and it is silent every time.
+ * This block used to assert the raw record panel — seven `loom.code` panels and
+ * the treeId of the front door printed inside one of them. The maintainer
+ * retired that panel on 26 September: 341 lines of JSON on the first page of the
+ * reading order, in a vocabulary a visitor does not have.
+ *
+ * What the block protected is still worth protecting and is not about the
+ * panel: **a page whose central bands quietly vanish when a caller forgets
+ * something is the failure mode this site keeps finding, and it is silent every
+ * time.** So the same question is asked of the page as it is now — the four
+ * short answers that replaced four pages, each of which is the whole of what
+ * this site says about its subject.
  */
-describe("the record on the mechanism page", () => {
+describe("the mechanism page's short answers", () => {
   const served = async (theme: SiteThemeName) =>
     renderTree(await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme }), { origin: ORIGIN })
 
-  it("is on the page the route serves, whether or not the builder was given one", async () => {
+  const eyebrowsOf = async (): Promise<readonly string[]> => {
     const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
-    const eyebrows = tree.root.children.flatMap((child) =>
+
+    return tree.root.children.flatMap((child) =>
       child.kind === "element" && typeof child.props["eyebrow"] === "string"
         ? [child.props["eyebrow"]]
         : []
     )
+  }
 
-    expect(eyebrows).toContain("The record itself")
-    expect(eyebrows).toContain("And when the answer is no")
+  it("carries every answer that replaced a page", async () => {
+    const eyebrows = await eyebrowsOf()
+
+    for (const answer of SHORT_ANSWERS) {
+      expect({ eyebrow: answer.eyebrow, onThePage: eyebrows.includes(answer.eyebrow) }).toEqual({
+        eyebrow: answer.eyebrow,
+        onThePage: true,
+      })
+    }
   })
 
   /**
-   * Six for the run and one for the refusal. Counted rather than looked for,
-   * because a stage the page stopped printing would otherwise show up as a
-   * slightly shorter page and nothing else.
+   * The length rule, which is the maintainer's instruction made checkable.
+   *
+   * Each of these bands replaced a page of between 951 and 1,382 words. The
+   * thing that would undo the day's work is not a band disappearing — it is a
+   * band growing a third paragraph, then a fourth, until the page is the four
+   * pages again with different headings. A band is one answer and one example.
    */
-  it("prints one panel per line of the run, and one for the refusal", async () => {
-    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
-    const count = (node: LoomNode): number =>
-      (node.kind === "element" && node.type === "loom.code" ? 1 : 0) +
-      (node.kind === "text" ? 0 : node.children.reduce((total, child) => total + count(child), 0))
-
-    expect(count(tree.root)).toBe(7)
-  })
-
-  it("is a record of the page this site publishes, not of a fixture", async () => {
-    const tree = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
-    const front = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
-    const words = (node: LoomNode): string =>
-      node.kind === "text" ? node.value : node.children.map(words).join(" ")
-
-    expect(words(tree.root)).toContain(`"treeId": "${front.treeId}"`)
+  it.each(SHORT_ANSWERS)("keeps $eyebrow to one answer and one example", (answer) => {
+    expect(answer.body.split(/\s+/).length).toBeLessThanOrEqual(60)
+    expect(answer.example.split(/\s+/).length).toBeLessThanOrEqual(30)
   })
 
   describe.each(THEMES)("wearing %s", (theme) => {
-    it("renders with nothing the runtime could not honour", async () => {
-      expect(unhonoured((await served(theme)).diagnostics)).toEqual([])
+    it("renders with nothing the runtime could not honor", async () => {
+      expect(unhonored((await served(theme)).diagnostics)).toEqual([])
     })
 
-    it("names no colour of its own, anywhere below the root", async () => {
+    it("names no color of its own, anywhere below the root", async () => {
       const body = belowRoot(renderToStaticMarkup((await served(theme)).element))
 
       expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
@@ -687,19 +690,15 @@ describe("the record on the mechanism page", () => {
  * and a panel whose right-hand end is behind a gesture renders cleanly, emits
  * no diagnostic, measures no overflow and passes every test on this page.
  *
- * The one instrument that found it was a picture, and a picture cannot be
- * asserted. What *can* be asserted is the decision: a panel either wraps or
- * says out loud that it does not. So this is the rule written where a panel
- * added tomorrow meets it, rather than a prop nine call sites have to remember.
- *
- * It sweeps the trees the **routes** serve rather than the ones the builders
- * return, because the panels this is about are the mechanism page's, and those
- * arrive from a request made outside the builder. A sweep over `treeFor` would
- * have found one panel and reported eight-eighths green.
+ * **This site now serves none of them**, and that is the 26 September cut
+ * rather than a regression: seven were the mechanism page's raw record and the
+ * eighth was the front door's *how this page is put together* band, and the
+ * maintainer's direction retired the lot. The rule is kept rather than deleted
+ * with them, written so it holds whatever the count is — vacuous today, and
+ * waiting for the day somebody adds a panel back.
  */
 describe("the panels that print data", () => {
-  const panelsOn = async (route: SiteRoute): Promise<readonly ElementNode[]> => {
-    const tree = await pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME })
+  const everyPanel = async (): Promise<readonly ElementNode[]> => {
     const found = (node: LoomNode): readonly ElementNode[] =>
       node.kind === "text"
         ? []
@@ -708,62 +707,32 @@ describe("the panels that print data", () => {
             ...node.children.flatMap(found),
           ]
 
-    return found(tree.root)
+    const trees = await Promise.all(
+      SITE_ROUTES.map((route) => pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }))
+    )
+
+    return trees.flatMap((tree) => found(tree.root))
   }
 
-  const everyPanel = async (): Promise<readonly ElementNode[]> =>
-    (await Promise.all(SITE_ROUTES.map(panelsOn))).flat()
-
   /**
-   * Counted, so that the sweep below cannot quietly stop covering anything. A
-   * panel added to a page this test forgot to walk would otherwise show up as
-   * the same green as a panel that wraps.
+   * Pinned so the sweep cannot quietly stop covering anything. A panel added to
+   * a page this test forgot to walk would otherwise read as the same green as a
+   * panel that wraps — which is exactly how the eight went unset for three
+   * weeks.
    */
-  it("is every loom.code this site serves, and there are eight of them", async () => {
-    expect((await everyPanel()).length).toBe(8)
+  it("is none of them today, counted rather than assumed", async () => {
+    expect((await everyPanel()).length).toBe(0)
   })
 
   /**
-   * `wrap` is optional on the primitive and absent means `false`, which is the
-   * right default for a library that does not know what it is holding. This
-   * site does know, so absent is the one answer no panel here may give: a
-   * command panel is welcome and says `wrap: false`.
+   * `wrap` is optional on the primitive and absent means `false`, which is right
+   * for a library that does not know what it is holding. This site does know: it
+   * has never printed a command. So a panel here either wraps or says out loud
+   * that it does not, and the day one arrives without an answer this fails.
    */
   it("each say whether they wrap, rather than leaving it to the default", async () => {
     for (const panel of await everyPanel()) {
       expect(typeof panel.props["wrap"]).toBe("boolean")
-    }
-  })
-
-  /**
-   * The premise of the rule, asserted rather than assumed. `wrap: true` is
-   * right here because nothing on this site is a thing you type — the moment
-   * one of these is a terminal, the answer for *that* panel changes and this
-   * test is where the change gets argued.
-   */
-  it("hold data and not commands, which is why they wrap", async () => {
-    for (const panel of await everyPanel()) {
-      expect(panel.props["tone"]).not.toBe("terminal")
-      expect(panel.props["wrap"]).toBe(true)
-    }
-  })
-
-  /**
-   * The three lines this is actually about: the only ones in the whole record
-   * written in English rather than in keys and ids, and — before this — the
-   * only three a reader could not finish. The threshold is well under what a
-   * 1280 panel shows, so this fails when the record stops carrying a sentence,
-   * not when a laptop gets wider.
-   */
-  it("carry the sentences the record is worth reading for", async () => {
-    const text = (node: LoomNode): string =>
-      node.kind === "text" ? node.value : node.children.map(text).join("\n")
-    const lines = (await panelsOn(HOW_IT_WORKS)).flatMap((panel) => text(panel).split("\n"))
-    const long = lines.filter((line) => line.length > 110)
-
-    expect(long.length).toBeGreaterThan(0)
-    for (const line of long) {
-      expect(line).toMatch(/"(rationale|detail)":/)
     }
   })
 })

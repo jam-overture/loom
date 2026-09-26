@@ -113,7 +113,7 @@ export const FACTS = {
  * all, which is a great deal better than that.
  */
 export const PLACEHOLDER_COPY = {
-  licence: "Licensing is not settled, and this line is where it will be stated.",
+  license: "Licensing is not settled, and this line is where it will be stated.",
 } as const
 
 export type PlaceholderKey = keyof typeof PLACEHOLDER_COPY

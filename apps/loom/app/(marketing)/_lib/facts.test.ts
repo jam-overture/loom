@@ -54,7 +54,7 @@ const statLabelled = (label: string): ElementNode => {
   const found = statsOfHome().find((stat) => stat.props["label"] === label)
 
   if (found === undefined) {
-    throw new Error(`loom: the front door has no stat labelled "${label}"`)
+    throw new Error(`loom: the front door has no stat labeled "${label}"`)
   }
 
   return found

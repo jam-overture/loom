@@ -82,7 +82,7 @@ describe("what this site asks about its readers", () => {
    * one of the two chrome bands deliberately left out.
    *
    * They are named here rather than derived, because *the menu and the foot of
-   * the page are not readings* is a judgement (`asked.ts` has the reasoning, and
+   * the page are not readings* is a judgment (`asked.ts` has the reasoning, and
    * the sticky bar is the half of it that would actually mislead a report). A
    * band type nobody has considered fails this and gets considered.
    */

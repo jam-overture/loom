@@ -57,7 +57,7 @@ export type Request = {
    * A fact about the request rather than something a band works out, because
    * three places need it and they are in three files: the notice at the top of
    * the page, the panel, and the address each of their buttons points at. An
-   * undo that was recognised by comparing its sentence to a string would be this
+   * undo that was recognized by comparing its sentence to a string would be this
    * site pattern-matching its own words.
    */
   readonly putBack: boolean

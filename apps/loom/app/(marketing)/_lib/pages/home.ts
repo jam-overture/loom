@@ -23,7 +23,6 @@ import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
-import { asDataBand } from "./as-data"
 import { inYourOwnWordsBand } from "./in-your-own-words"
 import { seeItHappenBand } from "./see-it-happen"
 import {
@@ -41,14 +40,13 @@ import {
   SITE_THEMES,
   surfaceHref,
   WHAT_YOU_RUN,
-  YOUR_COMPONENTS,
   type SiteThemeName,
 } from "../site"
 
 /**
  * The landing page, as a tree.
  *
- * There is no markup in this file, no styling on anything in it, and no colour
+ * There is no markup in this file, no styling on anything in it, and no color
  * named anywhere — which is the property the site exists to demonstrate rather
  * than to claim. What it says divides in two, deliberately: the mechanism is
  * described in plain fact because the repository is the source for all of it,
@@ -211,7 +209,7 @@ const vocabulary = (ids: IdFactory): LoomNode =>
     /**
      * A band with an eyebrow and no heading, which is what this one is.
      *
-     * The label was a centred `label` prop while the band was a
+     * The label was a centered `label` prop while the band was a
      * `loom.logo-cloud`, and a stacked paragraph for about an hour after that.
      * Both were wrong for the same reason and the suite said so twice: a band
      * of this page is a `loom.section`, and everything that reads this page as
@@ -301,28 +299,28 @@ const problems = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               title: "It writes code, and somebody has to read all of it",
-              body: "A tool that generates components hands you work rather than taking it away. Every line it produces has to be read, reviewed, tested and owned by whoever is on call the night it breaks. Loom never writes code into your page: it only rearranges pieces you built and already trust.",
+              body: "A tool that writes components hands you work rather than taking it away — every line of it has to be read, reviewed and owned by somebody. Loom never writes code into your page. It rearranges pieces you already built and trust.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
               title: "Nobody can say what changed, or why",
-              body: "Ask most tools what happened to a page last Tuesday and the best answer is a diff. Here it is a sentence.",
+              body: "Ask most tools what changed last Tuesday and the best answer is a diff.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
               title: "It is live before anyone has looked at it",
-              body: "Changes land because a model was confident, which is not the same as being right. Anything past the line you drew waits for a person.",
+              body: "Changes land because a model was confident. That is not the same as being right.",
             },
           }),
           buildElement(ids, {
             type: "loom.feature",
             props: {
               title: "Undoing it means finding the commit and hoping",
-              body: "A change you cannot reverse cleanly is a change you should never have allowed to land. Every change here arrives with the change that reverses it, worked out at the same moment and kept beside it. Putting the page back is one step, and that step is recorded like any other.",
+              body: "Every change arrives with the change that reverses it, worked out at the same moment and kept beside it. Putting the page back is one press, and it is recorded like anything else.",
             },
           }),
         ],
@@ -362,7 +360,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
          * too. A stranger reading top to bottom is given two answers to *where do
          * the pieces come from* and no way to tell they are halves of one.
          *
-         * The old caption said that a piece takes its colours from the theme —
+         * The old caption said that a piece takes its colors from the theme —
          * true, and the site demonstrates it in the footer with a switcher rather
          * than needing to claim it here. This one says the thing nothing else on
          * the site says, and `/your-components` is the page that says it in full.
@@ -423,12 +421,6 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
         internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
         { variant: "quiet", scale: "small" }
       ),
-      action(
-        ids,
-        "Where the pieces come from",
-        internalHref(context.origin, YOUR_COMPONENTS.path, context.theme),
-        { variant: "quiet", scale: "small" }
-      ),
       action(ids, "Read the decisions", DECISIONS_URL, {
         variant: "quiet",
         scale: "small",
@@ -448,7 +440,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "Can the AI write code into my page?",
             answer:
-              "No. It can only use the pieces you handed it, and it can only set the options those pieces already have. Your code stays in your own components and never travels with a change, so the worst the AI can ask for is something your page already knows how to do.",
+              "No. It can only use the pieces you handed it, and only set options those pieces already have. The worst it can ask for is something your page already knows how to do.",
             open: true,
           },
         }),
@@ -457,7 +449,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "What stops a bad change from landing?",
             answer:
-              "Your rules do. Each request is weighed on how much of the page it moves, what it touches and whether it can be taken back, and then it is allowed, held for a person to look at, or refused. The rules are ordinary code, so you can test them instead of hoping.",
+              "Your rules do. Each request is weighed on how much it moves and whether it can be taken back, then allowed, held for a person, or refused.",
           },
         }),
         buildElement(ids, {
@@ -465,7 +457,7 @@ const questions = (ids: IdFactory): LoomNode =>
           props: {
             question: "Is this a page builder?",
             answer:
-              "It is the part a page builder would be built on. There is no editor to learn and nothing you have to host with us: you keep your own components, and Loom decides what may change and keeps the record of what did.",
+              "It is the part a page builder would be built on. No editor to learn, nothing hosted with us — you keep your own components.",
           },
         }),
         buildElement(ids, {
@@ -761,19 +753,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
          */
         buildElement(ids, { type: "loom.divider", props: { ornament: "rule" } }),
         facts(ids, context),
-        /**
-         * The claim the facts band makes about the repository, made about this
-         * page. *Not one of these numbers was typed from memory* is directly
-         * above it, and the same argument applied to the page itself is the one
-         * thing this surface can show that a description of it cannot.
-         *
-         * After the numbers rather than before them because a reader who has
-         * not yet been told the site is checkable has no reason to care how it
-         * is put together, and before the questions because *"can the AI write
-         * code into my page?"* is easier to believe from somebody who has just
-         * seen what a change is actually written against.
-         */
-        asDataBand(ids),
         questions(ids),
         waysIn(ids, context),
         closing(ids, context),

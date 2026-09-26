@@ -2,9 +2,8 @@ import type { ElementNode, LoomNode, LoomTree } from "@loom/runtime"
 import { describe, expect, it } from "vitest"
 
 import { ASKS, type AskId } from "../adapt/asks"
-import { readChangeSequence } from "../adapt/history"
-import { askRunFor, historyFor, treeFor } from "../render"
-import { askHref, DEFAULT_THEME, HOME, type SiteThemeName } from "../site"
+import { askRunFor, treeFor } from "../render"
+import { askHref, DEFAULT_THEME, HOME, HOW_IT_WORKS, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import type { PageContext } from "./home"
 
@@ -161,31 +160,27 @@ describe.each(ANSWERED)("%s", (_name, context) => {
   /**
    * The record link, followed.
    *
-   * The band cannot point at the panel below it — a tree may hold a fragment and
-   * no primitive renders an `id` for it to reach — so it offers the page built
-   * for the whole record instead. That page replays the request from the front
-   * door as it is published, which is only worth offering if it comes out the
-   * same: this follows the address the band actually writes, through the same
-   * reader the route uses, and holds the replayed verdict against the one the
-   * visitor was just shown.
+   * It pointed at `/the-record` with a replayable sequence of changes in the
+   * address until 26 September, when the maintainer retired that page into the
+   * mechanism page. The mechanism page already takes an `ask`, so the link is
+   * simpler and the property worth holding is the same one: **the address the
+   * band writes has to carry what the visitor actually did**, or the page they
+   * arrive at is reporting on a different request from the one they just made.
    */
-  it("hands over an address that replays to the same verdict", async () => {
+  it("hands over an address carrying the request the visitor made", async () => {
     const run = await askRunFor(context)
     const record = (run as NonNullable<typeof run>).record
     const band = answerOf((run as NonNullable<typeof run>).page) as ElementNode
     const onward = actionsOf(band)
       .map(hrefOf)
-      .find((href) => new URL(href).searchParams.has("changes"))
+      .find((href) => new URL(href).pathname === HOW_IT_WORKS.path)
 
     expect(onward).toBeDefined()
 
-    const replayed = await historyFor({
-      origin: ORIGIN,
-      theme: THEME,
-      changes: readChangeSequence(new URL(onward as string).searchParams.get("changes") ?? undefined),
-    })
+    const address = new URL(onward as string)
 
-    expect(replayed?.steps.map((step) => step.record.verdict)).toEqual([record.verdict])
+    expect(address.searchParams.get("ask")).toBe(record.ask)
+    expect(address.searchParams.get("approve")).toBe(context.approve === true ? "1" : null)
   })
 })
 
@@ -200,72 +195,6 @@ describe.each(ANSWERED)("%s", (_name, context) => {
  * record page had no way to say *and then its undo*; it does now, so this holds
  * the hand-off in both directions.
  */
-describe("the record link, once a change has been put back", () => {
-  const putBack = (ask: AskId, approve: boolean, backApprove: boolean): PageContext => ({
-    origin: ORIGIN,
-    theme: THEME,
-    ask,
-    approve,
-    back: true,
-    backApprove,
-  })
-
-  const onwardFrom = async (context: PageContext): Promise<string> => {
-    const band = answerOf(await servedPage(context)) as ElementNode
-    const onward = actionsOf(band)
-      .map(hrefOf)
-      .find((href) => new URL(href).searchParams.has("changes"))
-
-    expect(onward).toBeDefined()
-
-    return onward as string
-  }
-
-  const replayOf = async (onward: string) =>
-    historyFor({
-      origin: ORIGIN,
-      theme: THEME,
-      changes: readChangeSequence(new URL(onward).searchParams.get("changes") ?? undefined),
-    })
-
-  it("carries the undo across, so the list has both entries", async () => {
-    const onward = await onwardFrom(putBack("proof", false, false))
-
-    expect(new URL(onward).searchParams.get("changes")).toBe("proof-back")
-
-    const replayed = await replayOf(onward)
-
-    expect(replayed?.steps.map((step) => step.putsBack)).toEqual([undefined, 1])
-    expect(replayed?.steps.map((step) => step.record.landed)).toEqual([true, true])
-  })
-
-  /**
-   * Both answers, kept apart. `problem` is held by the rules and so is its undo,
-   * so this address is the only one on the site carrying two separate yeses —
-   * and dropping either would replay a sequence the visitor never ran.
-   */
-  it("carries both of the visitor's answers, not one standing for both", async () => {
-    const onward = await onwardFrom(putBack("problem", true, true))
-
-    expect(new URL(onward).searchParams.get("changes")).toBe("problem-yes-back-yes")
-
-    const replayed = await replayOf(onward)
-
-    expect(replayed?.steps.map((step) => step.record.verdict)).toEqual(["approved", "approved"])
-    expect(replayed?.steps.map((step) => step.record.landed)).toEqual([true, true])
-  })
-
-  it("keeps the undo unanswered when the visitor has not answered it", async () => {
-    const onward = await onwardFrom(putBack("problem", true, false))
-
-    expect(new URL(onward).searchParams.get("changes")).toBe("problem-yes-back")
-
-    const replayed = await replayOf(onward)
-
-    expect(replayed?.steps[1]?.record.awaitingYou).toBe(true)
-    expect(replayed?.steps[1]?.record.landed).toBe(false)
-  })
-})
 
 /**
  * The register is **not** asserted here, and that is deliberate rather than an

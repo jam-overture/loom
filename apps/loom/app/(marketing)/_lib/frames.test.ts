@@ -7,7 +7,7 @@ import {
   sameOriginFrames,
   siteFrameOrigins,
   siteFrameRegistry,
-  unhonoured,
+  unhonored,
   whyNoFrameOrigins,
 } from "./frames"
 import { FRAME_CAPTION, FRAME_TITLE, YOUR_TURN_ANCHOR } from "./pages/in-your-own-words"
@@ -207,16 +207,16 @@ describe("a frame this deployment did not register", () => {
 
   /**
    * And it is a failure rather than a disclosure, which is the distinction
-   * `unhonoured` exists to keep. Every page test on this site asserts that list
+   * `unhonored` exists to keep. Every page test on this site asserts that list
    * is empty, so getting this backwards would make a refused frame invisible to
    * all of them.
    */
-  it("is something the runtime could not honour, unlike a frame it could", () => {
+  it("is something the runtime could not honor, unlike a frame it could", () => {
     const refused = renderTree(home(), { origin: "https://elsewhere.example", addressed: false })
     const allowed = renderTree(home(), { origin: ORIGIN, addressed: false })
 
-    expect(unhonoured(refused.diagnostics)).not.toEqual([])
-    expect(unhonoured(allowed.diagnostics)).toEqual([])
+    expect(unhonored(refused.diagnostics)).not.toEqual([])
+    expect(unhonored(allowed.diagnostics)).toEqual([])
     expect(allowed.diagnostics).not.toEqual([])
   })
 })
