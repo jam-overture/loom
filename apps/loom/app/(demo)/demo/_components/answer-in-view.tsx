@@ -2,6 +2,8 @@
 
 import { useEffect } from "react"
 
+import { ANSWER_ARRIVES } from "@/app/(demo)/_lib/arrival"
+
 /**
  * Bring the card that is waiting on an answer into view, in whichever scroller
  * the layout has put it in.
@@ -36,10 +38,20 @@ import { useEffect } from "react"
  * out, and an applied one is the case this component does not render for. One
  * scroller, one opinion, in every state.
  *
- * `block: "nearest"` rather than `center`: the minimum movement that puts the
- * answer on screen. A visitor who has just pressed something should see the
- * consequence arrive under their cursor, not have the panel they were reading
- * thrown to the middle of the rail.
+ * **Where it lands is `arrival.ts`'s, not this file's.** `ANSWER_ARRIVES` is
+ * `start` — the top of the scroller — rather than the `nearest` it was, and
+ * the reason is that the card's own clearance is the other half of the same
+ * decision: a card that stops short leaves the panel on screen, where the
+ * caution pins to the scroller's top edge and greets the visitor's first
+ * correct press. That file carries the measurement and both halves read from
+ * it, so the two can no longer disagree.
+ *
+ * The trade the smaller movement was argued on is not a trade. A visitor who
+ * has just pressed something should see the consequence arrive under their
+ * cursor rather than have the panel they were reading thrown across the rail —
+ * except that the press withdraws the green button the panel was made with
+ * (`AskPanel`) and takes the preset out of the list (`already-asked.ts`), so
+ * there is no panel left under the cursor to be continuous with.
  */
 export const AnswerInView = ({
   recordId,
@@ -64,7 +76,7 @@ export const AnswerInView = ({
 
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
-    card.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "nearest" })
+    card.scrollIntoView({ behavior: still ? "auto" : "smooth", block: ANSWER_ARRIVES })
   }, [recordId, token])
 
   return null

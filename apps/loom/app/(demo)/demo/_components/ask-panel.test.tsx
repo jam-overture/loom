@@ -310,11 +310,18 @@ describe("the ask panel, while a question is waiting", () => {
 
   /**
    * The property the first version of this lost, and the reason it is a class
-   * rather than a look: pressing the lead sends `AnswerInView` to bring the
-   * 503px card into the rail, and `block: "nearest"` leaves the scroller at a
-   * scrollTop of about 400 — which carries a statically placed caution off the
-   * top and leaves four live buttons on screen with nothing between them and the
-   * question they would kill.
+   * rather than a look: a statically placed caution is carried off the top of
+   * the rail by any scroll that brings the record into view, leaving four live
+   * buttons on screen with nothing between them and the question they would
+   * kill.
+   *
+   * Sticking is what keeps it there, and it is also why `arrival.ts` had to
+   * take the card to the top of the scroller: pinned, this strip is the whole
+   * of what a visitor sees at the top of the rail, so a landing that left the
+   * panel on screen put a warning over the question rather than over the
+   * controls. The two decisions are one, and they are held apart on purpose —
+   * this file owns *on screen with the controls*, that one owns *not on screen
+   * without them*.
    */
   it("stays on screen while the controls it is about are", () => {
     open()
