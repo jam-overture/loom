@@ -274,3 +274,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0188](0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md) | A specimen may ask to be hydrated, and one function builds the page for both renders | Accepted | §4, not the library |
 | [0189](0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md) | A portrait with no photograph is the person's initials, and a portrait with nobody named is nothing | Accepted | §4b |
 | [0190](0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md) | A route group may contribute a sitemap and may not contribute a robots.txt | Accepted | §4d |
+| 0191 | *No record on this branch* | — | — |
+| [0192](0192-a-region-a-primitive-places-is-a-region-it-may-ground.md) | A region a primitive places is a region it may ground | Accepted | §4b |
