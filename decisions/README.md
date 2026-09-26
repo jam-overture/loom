@@ -200,7 +200,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0114](0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md) | A primitive declares what part it plays, and the registry is what gets asked | Accepted | §1 |
 | [0115](0115-three-fields-of-one-shape-are-a-list-wearing-three-names.md) | Three fields of one shape are a list wearing three names | Proposed — `ARCHITECTURAL — needs review` | §4b |
 | [0116](0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md) | A screenshot is taken by the repository, and Playwright is never a dependency | Accepted | §1 (process) |
-| [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) | One harness, two subjects: a tree it renders and an address you serve | Accepted | §1 (process) |
+| [0117](0117-one-harness-two-subjects-a-tree-it-renders-and-an-address-you-serve.md) | One harness, two subjects: a tree it renders and an address you serve | Accepted — partially superseded by [0191](0191-the-harness-may-start-the-application-because-there-is-now-only-one.md) | §1 (process) |
 | [0118](0118-a-citation-is-a-claim-and-only-a-link-can-be-checked.md) | A citation is a claim, and only a link can be checked | Accepted | §1 (process) |
 | [0119](0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md) | The page a reader gets is the one `pnpm verify` reads last | Accepted | §1 (process) |
 | [0120](0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md) | A starting composition is a subtree a catalogue hands to the ordinary seam | Accepted | §4b |
@@ -220,7 +220,7 @@ Everything above this line is prose a person wrote, and stays that way.
 | 0134 | *No record on this branch* | — | — |
 | [0135](0135-a-same-origin-frame-is-granted-what-its-own-document-needs.md) | A same-origin frame is granted what its own document needs | Accepted — it changes no schema, no tree and no delta model, and | §4d |
 | [0136](0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md) | A published page broadcasts reader signals when its host asks | Accepted | §3, §6 |
-| [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md) | An undo already computed is assembled by the runtime, and stamped by its caller | Accepted | §2 |
+| [0137](0137-an-undo-already-computed-is-assembled-by-the-runtime-and-stamped-by-its-caller.md) | An undo already computed is assembled by the runtime, and stamped by its caller | Accepted — supersedes 0109 | §2 |
 | [0138](0138-a-queue-can-be-told-which-of-its-holds-are-already-dead.md) | A queue can be told which of its holds are already dead, and a head it could not read is a third answer rather than an optimistic one | Accepted | §2 |
 | [0139](0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md) | A shared ledger is union-merged, and a generated file is regenerated | Accepted | §1 (process) |
 | [0140](0140-a-call-into-foreign-code-has-a-ceiling-and-the-runtime-owns-it.md) | A call into foreign code has a ceiling, and the runtime owns it | Accepted | §2 (interpretation), §4c (the data seam) |
@@ -274,5 +274,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0188](0188-a-specimen-may-ask-to-be-hydrated-and-one-function-builds-the-page-for-both-renders.md) | A specimen may ask to be hydrated, and one function builds the page for both renders | Accepted | §4, not the library |
 | [0189](0189-a-portrait-with-no-photograph-is-the-persons-initials-and-a-portrait-with-nobody-named-is-nothing.md) | A portrait with no photograph is the person's initials, and a portrait with nobody named is nothing | Accepted | §4b |
 | [0190](0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md) | A route group may contribute a sitemap and may not contribute a robots.txt | Accepted | §4d |
-| 0191 | *No record on this branch* | — | — |
+| [0191](0191-the-harness-may-start-the-application-because-there-is-now-only-one.md) | The harness may start the application, because there is now only one | Accepted — partially supersedes 0117 | §1 (process) |
 | [0192](0192-a-region-a-primitive-places-is-a-region-it-may-ground.md) | A region a primitive places is a region it may ground | Accepted | §4b |
+| [0193](0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md) | A status line is data: its opener is a closed set, and a supersession is written at both ends | Accepted | §1 (process) |
