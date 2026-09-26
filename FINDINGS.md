@@ -8,10 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:** open —
+**a gap, not a defect**, and the second of this shape. The 17 September entry
+below asked for a state the browser holds *before* the load; this asks for one
+the visitor reaches *after* it.
+
+`stepSchema` takes `click`, `fill`, `wait` and `waitFor`. Between them they can
+reach any state a press produces, and no state a **scroll** produces. That is
+not a corner: this surface pins a caution to the rail's scroller, and whether it
+is on screen is a fact about scroll position and nothing else. The two pictures
+this run needed were
+
+| the frame | reachable by pressing? |
+| --- | --- |
+| what the one invited press lands on | **yes** — and `pnpm shoot` took it, before and after |
+| what a visitor sees when they scroll **back** to the controls | **no** |
+
+The second is the one that shows nothing was lost, so it is the picture that
+answers the obvious objection to the change, and it was taken by a scratch
+Playwright driver in `/tmp` — the arrangement
+[0116](decisions/0116-a-screenshot-is-taken-by-the-repository-and-playwright-is-never-a-dependency.md)
+exists to keep from becoming normal.
+
+**A press is not a substitute, and trying was instructive.** Playwright scrolls
+an element into view before clicking it, so pressing something inside the panel
+does move the scroller — but only to the minimum position that exposes *that*
+element, which is a position chosen by the driver rather than by the lane, and
+on this rail it lands between the two frames worth photographing. The only
+elements whose press would reach the controls are the ask buttons, and pressing
+one changes the state the picture is of.
+
+**One step, and it is the smallest of the four.** `{ "scrollTo": "<selector>" }`
+— `locator.scrollIntoViewIfNeeded()` — or `{ "scrollBy": <pixels> }` against the
+scroller the harness already has. It reaches a state and asserts nothing, which
+is the line [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)
+draws, and it is the same one-field shape the 17 September entry asks for.
+
+---
 ## 2026-09-24 — the first correct press a stranger makes is answered with a warning, in the loudest position on the rail
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
-(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** open —
+(`demo/_components/ask-panel.tsx`, `_lib/set-aside.ts`) · **Status:** **closed**
+by `demo-28-the-frame-the-press-produces` — and **not one character of the
+caution changed**, which is what the entry below predicted and is worth reading
+as the outcome. The moment was wrong because of where the press left the
+visitor, not because of what the strip says: `AnswerInView` stopped the rail the
+minimum distance, which leaves the panel in the scroller, and the strip pins
+itself to the top of whatever is left there. Carrying the card to the top of the
+scroller (`_lib/arrival.ts`) takes the panel, and with it the caution, off the
+frame the press produces. Measured on a production build at both sizes
+afterwards: with any ask control on screen the caution is on screen too — on
+screen, above the controls, amber, before the press — and with the card at the
+top of the rail neither is. *(Original status below.)*
+
+**Status:** open —
 found by walking the surface as a stranger, not by reading the code; the
 mechanism is right and the moment it arrives in is wrong.
 
@@ -31291,6 +31344,93 @@ blocked** — `pnpm clean` now does what its name says.
 
 ---
 
+## 2026-09-25 — the screenshot harness can sign in, and the recipe is nine lines
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **the
+sign-in half is closed**; the unreachable-red-verdict half stays open, unchanged
+
+Five consecutive portal reports (14, 19, 20, 21 and 22 September) re-filed the
+same entry: *the portal's screens cannot be photographed because the harness
+cannot sign in.* Every one of those runs photographed its screen anyway, by
+staging a store and working around the guard. **The guard was never the
+problem.** A portal session is an HMAC-SHA256 over a payload the portal composes
+in the open (`app/(portal)/_lib/auth/session.ts`):
+
+```
+v1.<base64url(actor)>.<issuedAt>.<base64url(HMAC-SHA256(payload, secret))>
+```
+
+So a session is **minted**, not obtained. Start the server with a secret and a
+roster of your own, mint a cookie against the same secret, and hand it to the
+browser:
+
+```js
+// nine lines, Node 22, no dependency
+const encoder = new TextEncoder()
+const b64 = (bytes) => Buffer.from(bytes).toString("base64")
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+const payload = `v1.${b64(encoder.encode(actor))}.${Date.now()}`
+const key = await crypto.subtle.importKey("raw", encoder.encode(secret),
+  { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payload))
+console.log(`${payload}.${b64(new Uint8Array(sig))}`)
+// → cookie loom_portal_session, domain 127.0.0.1, path /, httpOnly, SameSite=Lax
+```
+
+**Why this is better than driving the form**, and not only shorter: no sign-in
+attempt is recorded, so the throttle and the pressure table are untouched and
+`/portal/sign-ins` still photographs its own real state rather than the
+harness's. It reaches nothing a signed-in reviewer could not reach — forging a
+session needs the secret, which is the secret the run chose one line earlier.
+
+**It is not a way around 0027 and must not become one.** It works *because* the
+portal fails closed: with no `LOOM_PORTAL_SESSION_SECRET` there is no secret to
+sign with and nobody signs in, including this.
+
+**What stays open**, and the five entries above stand on it: **the red checkup
+verdict is unreachable by any sequence of clicks in a deployed portal.** A drift
+cannot be created through the write path at all — `append` is one write over the
+log and the snapshot by construction — so the fault has to be injected at the
+snapshot read, which is what the 22 September run did and said. That is a
+product decision about whether a deployment can be made to show its own bad news,
+and it is above this lane's line.
+
+**Related, for the lanes told a pull request must carry a screenshot:** the
+20 September entry's correction of 22 September still holds — this repository is
+private, so GitHub proxies a pull request body's images anonymously and
+`raw.githubusercontent.com` returns 404 for everybody including the maintainer.
+**Link, do not embed.** Signing in is now solved; hosting an image where the
+maintainer can see it is not.
+
+---
+
+## 2026-09-25 — three screens count the same pages under three different rules
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+
+The 22 September entry filed two of these and said the argument belonged to the
+run that took it. There are three now, so it is re-filed with the third and a
+recommendation rather than a note.
+
+| Screen | What it lists, and in what order |
+| --- | --- |
+| `/portal` — the reach on the front door | one listing page, three states, a failed head read counted apart |
+| `/portal/checkup` — the chooser | whatever the store returned, in store order |
+| `/portal/checkup/everything` — the sweep | five standings, worst first |
+
+Each is defensible on its own. A list of **offers** wants the honest partition; a
+list of **actions** may want the order somebody scans; a list of **results**
+wants the bad news first. What is not defensible is that a reader who opens two
+of them sees the same pages in two orders with two different counts beside them,
+and has no way to know the two screens agree.
+
+**The specific visible consequence**, unchanged from 22 September: the chooser
+lists the one page you *can* check below three you cannot.
+
+**Not taken here** because this unit is one section on one screen and the
+argument is about three, and because the answer may well be that the three orders
+are right and what is missing is one sentence on each saying which order it is
+in. That is a cheap fix if it is the right one and a wrong fix if it is not.
 ## 2026-09-23 — the portal's two floors are wired, and one of them is invisible to the fingerprint that exists to make a policy checkable
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
@@ -32893,3 +33033,46 @@ elsewhere in the lesson also now read oddly: *"whether the record named agrees
 that the relationship exists is not asked"* is no longer true of
 `checkNumbering`, and the counts in the surrounding prose are the 25 September
 ones. Left for you rather than patched from here.
+
+## 2026-09-25 — a URL in a table cell comes back backticked, and only in a table cell
+
+**Filed by:** `Loom portal` · **Owned by:** whoever owns the pull-request tooling
+· **Status:** open, with a one-line workaround every lane can use today
+
+The 20 September entry said every screenshot link in every pull request was
+broken because the tool wraps URLs in backticks. The 22 September entry corrected
+it: #367's body was read back from the API and **no backtick had been added**, so
+the cause was the private repository and the anonymous image proxy.
+
+Both are right, about different things, and the boundary is exact. #393's body
+was posted with five screenshot links in a **markdown table** and one outside it.
+Read back from the API:
+
+```
+| [The front door, …](``https://github.com/…-wide.png``) | 1280px — … |
+...
+[`reports/2026-09-25-….md`](https://github.com/…/….md)
+```
+
+**Every URL inside a table cell is wrapped in double backticks. The identical URL
+outside a table is untouched.** A backticked URL is not a destination, so all five
+links render as literal text and none of them resolves; the sixth works.
+
+**The workaround, for every lane told a pull request must carry a screenshot:**
+**do not put a link in a table cell.** A bulleted list of the same links survives
+intact — #393's body was rewritten that way and read back clean. This costs
+nothing: a screenshot index is a list of five things, and a table was only ever
+the house style for it.
+
+**Why this was worth a third entry rather than a correction to the second.** The
+22 September run did the right thing — it read the body back from the API instead
+of trusting the text it sent — and got a true answer about the body it had. That
+body had no table in it. The method was sound and the conclusion was scoped
+narrower than it read, which is a different fault from being wrong, and the fix is
+to name the scope rather than to distrust the method. **Read the body back every
+time** remains the rule, and it is the rule that caught this.
+
+**What the tool should do**, for whoever owns it: nothing in a link destination
+should ever be quoted, in a table cell or anywhere else. Until then the three
+entries together say all a lane needs — link rather than embed, keep the link out
+of a table, and read the body back.

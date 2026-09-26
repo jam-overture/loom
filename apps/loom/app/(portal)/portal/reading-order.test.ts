@@ -296,6 +296,95 @@ describe("what happened without you", () => {
 })
 
 /**
+ * The third question, added 25 September: can you trust what you are looking at?
+ *
+ * The two sections above are read from records. Nothing on this screen checked
+ * that those records still produce the pages people are being served, and that
+ * fault is the one in Loom with no symptom — every request succeeds, nothing
+ * throws, nothing is logged. The check exists over every page and the front door
+ * did not mention it.
+ */
+describe("whether it all still adds up", () => {
+  /**
+   * The press, wired to the deployment-wide check rather than to the screen that
+   * chooses one page. A front door that sent a reader to the chooser would be
+   * handing them the list of pages the checkup screen already grew a press to
+   * get away from.
+   */
+  it("invites the reader to the check over every page", () => {
+    expect(source).toContain("<CheckupInvitation")
+    expect(source).toContain("reach={reach}")
+  })
+
+  /**
+   * **The fold does not happen here.** This is the assertion with the most
+   * riding on it, because the version of this section that a later edit reaches
+   * for is the one that shows a verdict — and a verdict means folding every
+   * page's whole accepted history on the one screen a person opens every
+   * morning, growing for the rest of the deployment's life (0016). What this
+   * screen prints is what a press *would* cost, from the listing and the heads
+   * it has already read.
+   */
+  it("does not run the check it is inviting the reader to", () => {
+    expect(source).not.toContain("auditSnapshot")
+    expect(source).not.toContain("sweepReading")
+    expect(source).not.toContain("standingOf")
+  })
+
+  /**
+   * And it adds no read to get there. Every input is already on this screen: the
+   * listing, the heads read for the names and the queue's account, and a lookup
+   * that touches no store.
+   */
+  it("reads nothing new to say what a check would be worth", () => {
+    const wiring = source.slice(source.indexOf("const reach = checkupReach"))
+
+    expect(wiring).toContain("trees.map((listing) => listing.treeId)")
+    expect(wiring).toContain("heads,")
+    expect(wiring).toContain("hasStartingShape: isAuditable")
+    expect(source.split("await portalStore.list").length - 1).toBe(1)
+    expect(source.split("headsOf(").length - 1).toBe(1)
+  })
+
+  /**
+   * The reach is about the pages the sweep itself would take, which is one
+   * listing page — the same bound, so a page beyond it is a page neither screen
+   * can speak for. Handing the union with the journal's pages would count pages
+   * the sweep never reaches among the ones it can check.
+   */
+  it("counts over the pages a check would reach rather than every page it has named", () => {
+    const wiring = source.slice(source.indexOf("const reach = checkupReach"))
+
+    expect(wiring).toContain("complete: sweep.complete")
+    expect(wiring.slice(0, wiring.indexOf("})"))).not.toContain("named")
+  })
+
+  /**
+   * Last of the three, and the order is the argument. The two sections above are
+   * about changes and one of them is waiting on a human being; this is a standing
+   * question with nothing urgent in it, and urgency is what orders this screen.
+   */
+  it("comes after both of the things that are waiting or have happened", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup.indexOf("<CheckupInvitation")).toBeGreaterThan(
+      markup.indexOf("Changed without asking you")
+    )
+    expect(markup.indexOf("<CheckupInvitation")).toBeGreaterThan(markup.indexOf("Waiting on you"))
+  })
+
+  /**
+   * Withheld on a deployment with no pages, like the section above it and the
+   * strip below. The one empty state that matters is the first screen a new
+   * arrival sees, and a second offer under it competes with the only action that
+   * screen should have.
+   */
+  it("offers nothing to check on a deployment with nothing in it", () => {
+    expect(source).toContain("{trees.length > 0 && <CheckupInvitation")
+  })
+})
+
+/**
  * Two defects a screenshot found on the first build of the section above, and
  * neither had a failing test — both are about a pair of things that are each
  * correct alone, which is the shape this lane keeps finding by looking.
