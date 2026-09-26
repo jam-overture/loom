@@ -1,11 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { ApiDoors } from "@/app/(docs)/_components/api-doors"
-import { grouped } from "@/app/(docs)/_components/api-reference"
-import { doorwayOf } from "@/app/(docs)/_lib/api/doors"
-import { entryPoints } from "@/app/(docs)/_lib/entry-points"
-import { apiEntries } from "@/app/(docs)/_lib/api/reference"
+import { generatedPageBody } from "@/app/(docs)/_lib/api/body"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { DOCS_LANDING_SLUG, docsEntryAt, docsHref } from "@/app/(docs)/_lib/nav"
 
@@ -33,26 +29,17 @@ const ApiReferenceIndexPage = () => {
      page that renders it have to agree, and this is what happens if they stop. */
   if (listed === undefined) notFound()
 
-  const doorway = doorwayOf(apiEntries, entryPoints)
-
+  /*
+   * The words of this page are `generatedPageBody`'s, not this route's, and that
+   * is deliberate: the search index reads the same function for the same
+   * address, so a sentence on this page is a sentence the search box can find.
+   * A paragraph written here instead would be invisible to it.
+   */
   return (
     <>
       <h1>{listed.page.heading ?? listed.page.title}</h1>
 
-      <p className="text-lg">
-        Loom is one package. What you write at the top of a file is one of {doorway.doors.length}{" "}
-        imports, and which one you write decides what your program loads — so they are worth two
-        minutes before you pick.
-      </p>
-
-      <p>
-        Every name behind them is read from the package itself rather than written here, which is
-        why the counts below are exact: {doorway.doors.length} imports, {grouped(doorway.packageNames)}{" "}
-        names,
-        and a page for each import saying what comes out of it.
-      </p>
-
-      <ApiDoors doorway={doorway} />
+      {generatedPageBody("api-reference", DOCS_LANDING_SLUG)}
     </>
   )
 }

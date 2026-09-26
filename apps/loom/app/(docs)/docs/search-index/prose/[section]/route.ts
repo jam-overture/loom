@@ -18,9 +18,12 @@ import { searchProseFor } from "@/app/(docs)/_lib/search/build"
  * carries the argument, including the 6% more total bytes it costs.
  *
  * `dynamicParams` is off, and `generateStaticParams` offers **every** section
- * rather than only the written ones. A section built from data has no words and
- * answers `{"bodies":[]}`, which is thirteen bytes and one fewer place for the
- * browser to keep its own idea of which sections somebody has written in.
+ * rather than only the written ones — a section with no words answers
+ * `{"bodies":[]}` rather than 404, which is one fewer place for the browser to
+ * keep its own idea of which sections somebody has written in. The API
+ * reference used to be that section; since 26 September its words are read off
+ * what its pages render rather than off a file nobody wrote
+ * (`search/generated.ts`), and this address serves 24 KB of them.
  */
 
 export const dynamic = "force-static"

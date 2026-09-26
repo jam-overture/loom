@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-import { ApiEntryReference } from "@/app/(docs)/_components/api-reference"
-import { entryProseFor } from "@/app/(docs)/_lib/api/mentions"
-import { apiEntryAt, apiSlugs } from "@/app/(docs)/_lib/api/reference"
+import { generatedPageBody } from "@/app/(docs)/_lib/api/body"
+import { apiSlugs } from "@/app/(docs)/_lib/api/reference"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { docsEntryAt, docsHref } from "@/app/(docs)/_lib/nav"
 
@@ -36,7 +35,13 @@ export const generateMetadata = async ({ params }: PageParams): Promise<Metadata
 
 const ApiReferencePage = async ({ params }: PageParams) => {
   const { entry } = await params
-  const reference = apiEntryAt(entry)
+
+  /*
+   * What this page is below its title, and the search index reads the same
+   * function for the same address — so the words on this page are words the
+   * search box can find. `_lib/api/body.tsx` carries the argument.
+   */
+  const body = generatedPageBody("api-reference", entry)
   const listed = docsEntryAt(docsHref("api-reference", entry))
 
   /**
@@ -45,7 +50,7 @@ const ApiReferencePage = async ({ params }: PageParams) => {
    * declarations. A test holds them together — this is what happens if it ever
    * stops being true.
    */
-  if (reference === undefined || listed === undefined) notFound()
+  if (body === undefined || listed === undefined) notFound()
 
   return (
     <>
@@ -63,20 +68,7 @@ const ApiReferencePage = async ({ params }: PageParams) => {
 
       <p className="text-lg">{listed.page.summary}</p>
 
-      <p>
-        Everything below is exported from that import. The names, the signatures and the sentences
-        are read from the package itself rather than written here, so this page says what the copy
-        of Loom in your <code>node_modules</code> says — and it changes in the same pull request the
-        code does.
-      </p>
-
-      {/*
-       * Resolved here rather than inside the component, because working it out
-       * means reading every written page off disk. The component takes data and
-       * arranges it, which is what lets its tests state a situation instead of
-       * arranging for one to exist in the repository.
-       */}
-      <ApiEntryReference entry={reference} prose={entryProseFor(reference)} />
+      {body}
     </>
   )
 }

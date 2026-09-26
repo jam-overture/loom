@@ -183,6 +183,35 @@ describe("the sentence a result is shown with", () => {
     expect(excerpt({ title: "Holds", body }, "holds serverless")).toContain("serverless")
   })
 
+  /**
+   * The rule that matters on a page-long body, which is what a generated page
+   * contributes: its words are not cut up by heading, so the first place a term
+   * appears is nowhere in particular.
+   */
+  it("cuts where the most of the reader's words are together, not where the first one is", () => {
+    const body = [
+      "Two minutes is all it takes to pick one.",
+      "word ".repeat(60),
+      "It is the same declaration reached two ways, so either import gives you the same thing.",
+    ].join(" ")
+
+    expect(excerpt({ body }, "same declaration reached two ways")).toContain(
+      "same declaration reached two ways"
+    )
+  })
+
+  it("takes the earliest of two places that answer equally well", () => {
+    const body = `the hold answer here ${"word ".repeat(60)} the hold answer again`
+
+    expect(excerpt({ body }, "hold answer")).toContain("the hold answer here")
+  })
+
+  it("still cuts at the only place there is, when there is only one", () => {
+    const body = `${"word ".repeat(60)}the serverless host${" word".repeat(60)}`
+
+    expect(excerpt({ body }, "serverless")).toContain("serverless host")
+  })
+
   it("is nothing at all for an entry with no prose and no code", () => {
     expect(excerpt({ title: "planReverts", kind: "export", context: "@loom/runtime" }, "planreverts")).toBe("")
   })

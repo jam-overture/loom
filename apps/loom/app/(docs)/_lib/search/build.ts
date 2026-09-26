@@ -2,6 +2,7 @@ import { apiEntries } from "../api/reference"
 import { docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageCode } from "./code"
+import { generatedPageWords } from "./generated"
 import { readPageHeadings } from "./headings"
 import {
   namesToEntries,
@@ -59,8 +60,18 @@ const readByHref = <T>(
 const proseByHref = readByHref(readPageProse)
 const codeByHref = readByHref(readPageCode)
 
-/** The prose under one anchor of one page, or nothing where a generated page has none. */
-const bodyAt = (href: string, anchor: string): string => proseByHref.get(href)?.get(anchor) ?? ""
+/**
+ * The words on a **generated** page, which has no file to read, under the page
+ * itself.
+ *
+ * Read off what the page renders rather than off disk — `generated.ts` carries
+ * the argument, and the anchor is the page's own for the reason it gives.
+ */
+const generatedByHref = generatedPageWords()
+
+/** The prose under one anchor of one page, from whichever half of the site wrote it. */
+const bodyAt = (href: string, anchor: string): string =>
+  proseByHref.get(href)?.get(anchor) ?? (anchor === "" ? (generatedByHref.get(href) ?? "") : "")
 
 /** The blocks under one anchor of one page, joined as `code.ts` joins them. */
 const codeAt = (href: string, anchor: string): string => codeByHref.get(href)?.get(anchor) ?? ""
@@ -70,7 +81,9 @@ const codeAt = (href: string, anchor: string): string => codeByHref.get(href)?.g
  *
  * That is the page's own introduction, and it belongs to the page for the same
  * reason the rest belongs to a heading: it is the part a reader would be
- * scrolled to. A generated page has no file to read and so has none.
+ * scrolled to. A generated page has no file to read, so what sits here for one
+ * is every word it renders, in one body — `generated.ts` says why it is not cut
+ * up by heading the way a written page's is.
  */
 const pageEntries = (): readonly SearchEntry[] =>
   docsSections.flatMap((section) =>
@@ -92,9 +105,11 @@ const pageEntries = (): readonly SearchEntry[] =>
 /**
  * Every `##` and `###` on a written page.
  *
- * A generated section has none to read: the API pages are built from data, and
- * what a reader wants to find on one is an export rather than a module heading
- * — which is the next list down.
+ * A generated section contributes none. Its pages have no file to read their
+ * headings out of, and their bands have no `id` for a result to land on — so
+ * what such a page says arrives as one body under the page itself, which is the
+ * trade `generated.ts` states. What a reader wants to find on one is usually an
+ * export anyway, and that is the next list down.
  */
 const headingEntries = (): readonly SearchEntry[] =>
   writtenDocsSections.flatMap((section) =>

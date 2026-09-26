@@ -32395,9 +32395,12 @@ add on its own.
 ---
 ## 2026-09-25 — the site cannot search a sentence a component renders, and there is now a whole page of them
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
-known shape of the search index rather than a defect in it, and nothing on the
-site is wrong
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+`docs-36-the-words-a-component-renders`, 26 September** — the first of the three
+ways out below, arrived at the way the second describes and without its cost: the
+index reads what the component renders rather than a declaration beside it, so
+nothing is written down twice. What it cost instead is a **new entry at the foot
+of this file**, because sixteen pages saying one sentence are sixteen results
 
 The prose half of the search index is read off the MDX files:
 `_lib/search/build.ts` reads a page's paragraphs and its code blocks through
@@ -32960,6 +32963,99 @@ strictly better than the 24 September entry's advice to shorten branch names,
 which trades a real cost (a readable branch) for a smaller saving.
 
 ---
+## 2026-09-26 — a generated page's words are the words it renders, and sixteen pages saying one sentence are sixteen results
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/search/`) · **Status:** open — a cost this run created and
+measured, with the three ways out and a recommendation
+
+Yesterday's entry — *the site cannot search a sentence a component renders* — is
+**closed** by `docs-36-the-words-a-component-renders`: the seventeen reference
+pages' words are now read off what their components return, and a reader
+searching *same declaration reached two ways* or *no import has everything* is
+answered by the page that says it. What that bought, and what it cost, were
+measured on the real index with the ranking a browser runs.
+
+**What it bought.** Queries that returned nothing now return the right page
+first:
+
+| query | before | after |
+| --- | --- | --- |
+| *no import has everything* | three unrelated headings | **All 16 imports**, then doors |
+| *does the biggest import have everything* | nothing | **All 16 imports** |
+| *same declaration reached two ways* | nothing | **All 16 imports**, alone |
+
+**What it cost.** The four bands on a reference page are one band rendered
+sixteen times with different numbers in it, so a query whose words are in a band
+now matches sixteen near-identical pages:
+
+| query | before | after |
+| --- | --- | --- |
+| *peer dependency* | **Installation → What you actually need**, first | nine reference pages, and that heading **tenth** |
+| *what do I install first* | nothing | ten reference pages, no written page |
+| *no import has everything* | — | ten results, of which ten are reference pages |
+
+The first row is the one that matters and it is a regression for the reader this
+site is written for: somebody who types *peer dependency* three minutes after
+installing wants the Installation page, not `@loom/runtime/sdk`. The result list
+is ten long, and sixteen copies of one sentence can fill it.
+
+**Three ways out, and this lane's recommendation is the third.**
+
+- **Index a repeated band once.** A sentence a band prints on every door is a
+  fact about the band; blank the digits and it is literally the same string on
+  sixteen pages, so it could be kept on the front door and dropped from the
+  rest. Cheap and mechanical. It also makes *the import itself fails*
+  unfindable, which is a sentence a reader might reasonably search.
+- **Fold siblings in the result list.** Ten results from one section become one
+  row with a count — *and 9 more imports*. A change to the results list rather
+  than to the index, and the only one of the three that keeps every sentence
+  findable.
+- **Rank a generated body below a written one.** One line in `match.ts`, and
+  the trap is that it re-breaks the first table: the front door **is** a
+  generated page, and the query it answers best is one where written pages also
+  match a few of the words scattered across a paragraph.
+
+**Recommended: the second**, taken on its own in a later run, because it is a
+ranking-and-presentation question with its own tests and because the first table
+is a bigger gain than the second table is a loss. Filed rather than taken here:
+this unit is the index, and a results-list change argued in the same pull
+request would be two arguments.
+
+---
+## 2026-09-26 — an excerpt cut at the first matching word is a sentence that does not answer, once a body is a whole page
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed by
+this run** — recorded because the *shape* is general and it was invisible until
+a body got long
+
+`match.ts` built a result's excerpt from **the first place any of the reader's
+words appeared** in the body. On a written page that is right by construction: a
+body is the prose under one heading, a few sentences long, so the first `two` in
+it is in the sentence about `two`.
+
+A generated page's body is **the whole page** — 4,548 characters on the
+reference's front door — because its bands have no anchors to cut it at. The
+first occurrence of a word in that is wherever the word happens to fall.
+Photographed on the production build: searching *same declaration reached two
+ways* returned the right page and showed the reader
+
+> *"…what your program loads — so they are worth **two** minutes before you
+> pick. Every name behind them is read from the package…"*
+
+Every word they typed was on the page; not one was in the line they were shown,
+and the sentence they were looking for was 3,000 characters further down.
+
+The excerpt now cuts where **the most of the reader's words are together**,
+ties to the earliest place, which is the old behaviour wherever the words are as
+together at the top as anywhere else. It is a better excerpt on the written
+pages too, and nothing about it is specific to a generated page — the long body
+only made it visible.
+
+**Worth keeping for the class:** a rule that is correct because of a property
+somebody else's code happens to have — *a body is one paragraph* — is a rule
+with an undeclared premise. Nothing here was wrong until the premise stopped
+holding, and the premise was never written down anywhere either.
 ## 2026-09-26 — a fragment is the one broken link this repository cannot report, and the front door had written itself two
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, `Loom lessons`,
