@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -2126,11 +2126,25 @@
           "summary": "Stakes assessment: facts plus policy in, a level plus its reasons out.",
           "symbols": [
             {
+              "name": "stakeFactorCodeSchema",
+              "kind": "schema",
+              "signature": "const stakeFactorCodeSchema: z.ZodEnum<…>",
+              "truncated": false,
+              "summary": "Which rule a factor is, as a closed vocabulary rather than a bare union."
+            },
+            {
               "name": "StakeFactorCode",
               "kind": "type",
-              "signature": "type StakeFactorCode = \"protected-type-removed\" | \"protected-type-touched\" | \"protected-type-relocated\" | \"protected-prop-configured\" | \"large-removal\" | \"broad-change\" | \"shallow-structural-change\" | \"discards-later-work\" | \"nested-target\" | \"unknown-primitive\" | \"invalid-props\" | \"redirected-submission\" | \"repointed-binding\";",
+              "signature": "type StakeFactorCode = z.infer<typeof stakeFactorCodeSchema>;",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "STAKE_FACTOR_CODES",
+              "kind": "value",
+              "signature": "const STAKE_FACTOR_CODES: readonly StakeFactorCode[]",
+              "truncated": false,
+              "summary": "Every rule the Gate can raise, walkable."
             },
             {
               "name": "StakeFactor",
@@ -4307,7 +4321,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4353,7 +4367,7 @@
       "files": 56,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5196,7 +5210,7 @@
       "files": 179,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5648,7 +5662,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6239,7 +6253,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6467,7 +6481,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6884,7 +6898,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7238,7 +7252,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7371,7 +7385,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8134,7 +8148,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8277,7 +8291,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8334,10 +8348,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 25,
+      "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8568,7 +8582,7 @@
             {
               "name": "AssessmentSummary",
               "kind": "type",
-              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n};",
+              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -8868,10 +8882,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 21,
+      "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8945,7 +8959,7 @@
       "files": 84,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9358,10 +9372,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 36,
+      "files": 48,
       "narrower": [],
       "standing": {
-        "packageNames": 1081,
+        "packageNames": 1083,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,

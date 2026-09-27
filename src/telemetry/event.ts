@@ -24,6 +24,7 @@ import { intentOriginSchema, type EditIntent, type IntentOrigin } from "../runti
 import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
 import { proposedChangeSchema, type ProposedChange } from "../runtime/proposal.js"
 import { stakeLevelSchema, type StakeLevel } from "../runtime/stake-level.js"
+import { stakeFactorCodeSchema, type StakeFactorCode } from "../runtime/stakes.js"
 import { describeStoreError } from "../store/errors.js"
 import { describeTreeError } from "../tree/errors.js"
 
@@ -117,9 +118,12 @@ export const assessmentSummarySchema = z.object({
   configuredNodeCount: z.number().int().nonnegative(),
   touchedPrimitiveTypes: z.array(primitiveTypeSchema),
   /**
-   * Bounded, non-identifying, a subset of the touched types, and the input to
-   * the only `critical` stake factor. A corpus that cannot group by "the Gate
-   * saw this type destroyed" cannot ask the question the factor exists for.
+   * Bounded, non-identifying, a subset of the touched types, and *which* types a
+   * removal destroyed. It was written as the input to "the only `critical` stake
+   * factor", which it no longer is — two later rules reach that level (0173,
+   * 0179), and `stakeFactorCodes` below carries all thirteen. What is left is
+   * the half a code cannot say: `protected-type-removed` says a rule fired, this
+   * says what it fired about.
    */
   removedPrimitiveTypes: z.array(primitiveTypeSchema).optional(),
   relocatedPrimitiveTypes: z.array(primitiveTypeSchema).optional(),
@@ -128,6 +132,24 @@ export const assessmentSummarySchema = z.object({
   /** Nodes the inverse would have to carry — the content a removal destroyed. */
   retainedNodeCount: z.number().int().nonnegative(),
   irreversibilityReasons: z.array(z.string().min(1)),
+  /**
+   * Which rules the Gate raised, in the order it raised them (0198).
+   *
+   * `stakes` above is the highest level any of them reached, which is what the
+   * Gate compares against a ceiling and is not what a reader of the record wants
+   * to know. Three factors are `critical`, so *this project refused four changes
+   * as too risky* and *this project refused four changes because the model
+   * invented parts that do not exist here* were the same row, and only the
+   * second is something an operator can act on.
+   *
+   * The codes and not the factors: a code is one of thirteen fixed strings,
+   * while a factor's `detail` is a sentence naming nodes and types, which is
+   * content and does not cross (0023). The level does not cross either, because
+   * it is recoverable — twelve of the thirteen are fixed at their code, and
+   * `large-removal` is decided by `removedNodeCount` here against the
+   * `removalThresholds` of the policy `policyFingerprint` names.
+   */
+  stakeFactorCodes: z.array(stakeFactorCodeSchema).optional(),
 })
 
 export type AssessmentSummary = {
@@ -147,6 +169,8 @@ export type AssessmentSummary = {
   readonly shallowestAffectedDepth: number
   readonly retainedNodeCount: number
   readonly irreversibilityReasons: readonly string[]
+  /** Absent on a record written before the field existed, never defaulted (0045). */
+  readonly stakeFactorCodes?: readonly StakeFactorCode[]
 }
 
 export const telemetryEventSchema = z.discriminatedUnion("type", [
@@ -368,6 +392,7 @@ const summariseAssessment = (assessment: ChangeAssessment): AssessmentSummary =>
   shallowestAffectedDepth: assessment.analysis.shallowestAffectedDepth,
   retainedNodeCount: assessment.reversibility.retainedNodeCount,
   irreversibilityReasons: assessment.reversibility.reasons.map((reason) => reason.code),
+  stakeFactorCodes: assessment.stakes.factors.map((factor) => factor.code),
 })
 
 /**

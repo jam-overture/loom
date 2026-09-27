@@ -63,6 +63,26 @@ export type PartInQuestion = {
    * visitor's to refuse.
    */
   readonly lead: string
+  /**
+   * Which of the two moments this excerpt stands in, decided here rather than
+   * where it is rendered.
+   *
+   * **It is a field because the alternative put the decision in `page.tsx`.**
+   * The moment governs two rules in `globals.css` — whether a wide screen draws
+   * the excerpt at all, and how tall its window is — and the first of those is
+   * `display: none`. A `where="question"` typed by habit on the ask's callback
+   * hides the excerpt at exactly the width this surface is judged at, and
+   * `page.tsx` is an `async` Server Component that no `vitest` run can reach:
+   * the whole suite passes, the build is green, and the arrival screen is back
+   * to a button naming a band nobody can see. That is the sixth row of the
+   * table `rail.ts` opens with, and it was measured on this run rather than
+   * imagined — the defect was restored and **caught by nothing.**
+   *
+   * The two callers already know. `partInQuestion` is called for a hold and
+   * `partTheAskWouldTouch` for a press nobody has made, so the answer is the
+   * function you are in rather than a prop somebody remembers to pass.
+   */
+  readonly where: "question" | "ask"
 }
 
 const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
@@ -87,23 +107,49 @@ const subjectOf = (tree: LoomTree, operation: TreeOperation): LoomNode | undefin
 /**
  * The part a held proposal is asking about, or nothing.
  *
- * Nothing, in three cases, and each is a case where a preview would be worse
- * than none:
+ * A delta's operations, read by `partFromOperations` below, which is where the
+ * three refusals live.
+ */
+export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion | undefined =>
+  partFromOperations(tree, delta.operations, "question")
+
+/**
+ * The same reading, from the operations alone — and nothing, in three cases.
  *
- * - **The delta names the page itself.** The demo's re-theme is exactly this —
- *   one configure against the root — and an excerpt of the root is the whole
- *   page, rendered a second time inside a card in the rail beside it. What
- *   answers "did something happen?" for that change is the page turning over,
- *   which is what `spotlight.ts` already says about marking it.
- * - **The delta names a node this tree does not have.** A stale proposal is a
- *   real state and the card already reports it, in the portal's own words, under
- *   *What this would do to your page*. A preview cannot improve on "that part
- *   isn't on this page any more" and would have nothing to draw.
- * - **The delta has no operations**, which no interpreter should produce and
+ * **It takes operations because a delta is not the only thing that has them.**
+ * A preset plans against the tree (0057), and the plan is a list of operations
+ * before it is a proposal, before it is a hold, and before anything has been
+ * pressed — so the part a visitor is *about to* ask about is read exactly the
+ * way the part they *have* asked about already was, out of this function.
+ * `before-the-press.ts` is that caller. The alternative was a second copy of
+ * this walk, free to disagree with the first about which node an operation
+ * names.
+ *
+ * The lead sentences carry over unchanged and that is not luck: every one of
+ * them is already in the conditional — *would come off*, *would be added* —
+ * because a question is a thing that has not happened. Neither has an ask
+ * nobody has pressed.
+ *
+ * The three cases, each one where a preview would be worse than none:
+ *
+ * - **The operation names the page itself.** The demo's re-theme is exactly
+ *   this — one configure against the root — and an excerpt of the root is the
+ *   whole page, rendered a second time inside the rail beside it. What answers
+ *   "did something happen?" for that change is the page turning over, which is
+ *   what `spotlight.ts` already says about marking it.
+ * - **The operation names a node this tree does not have.** A stale proposal is
+ *   a real state and the card already reports it, in the portal's own words,
+ *   under *What this would do to your page*. A preview cannot improve on "that
+ *   part isn't on this page any more" and would have nothing to draw.
+ * - **There are no operations**, which no interpreter should produce and
  *   nothing downstream should assume it cannot.
  */
-export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion | undefined => {
-  const operation = delta.operations[FIRST]
+export const partFromOperations = (
+  tree: LoomTree,
+  operations: readonly TreeOperation[],
+  where: PartInQuestion["where"]
+): PartInQuestion | undefined => {
+  const operation = operations[FIRST]
   if (operation === undefined) return undefined
 
   const subject = subjectOf(tree, operation)
@@ -116,5 +162,5 @@ export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion
   if (subject === undefined || subject.kind !== "element") return undefined
   if (subject.id === tree.root.id) return undefined
 
-  return { tree: { ...tree, root: subject }, lead: LEADS[operation.op] }
+  return { tree: { ...tree, root: subject }, lead: LEADS[operation.op], where }
 }

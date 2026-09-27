@@ -9,6 +9,8 @@ import {
   availablePresets,
   DEMO_LEADING_PRESET,
   DEMO_PRESETS,
+  leadingAsk,
+  offeredPresets,
   presetById,
   presetInterpreter,
   PRESET_INTERPRETER,
@@ -265,5 +267,52 @@ describe("stamping a record with the suggestion it came from", () => {
     for (const preset of DEMO_PRESETS) {
       expect(presetById(askedWith(RECORD, preset.id).presetId ?? "")).toBe(preset)
     }
+  })
+})
+
+/**
+ * Which ask gets the green button, out of the ones this tree can honour.
+ *
+ * **The nomination moved out of `ask-panel.tsx` and this is why it is worth a
+ * table of its own.** Two callers need the same answer now — the panel, to put
+ * a button in the primary slot, and the rail, to show a stranger the part of
+ * the page that button would touch — and a panel previewing one ask while
+ * offering another is a defect no render test can see, because each half is
+ * correct about itself.
+ */
+describe("the ask that leads", () => {
+  const ALL = DEMO_PRESETS.map((preset) => preset.id)
+
+  it("is the one the table nominates, when the tree can still honour it", () => {
+    expect(leadingAsk(ALL)?.id).toBe(DEMO_LEADING_PRESET)
+  })
+
+  /**
+   * A tree that has already lost its stat grid still has four asks, and a
+   * stranger still needs one of them to be the obvious first move. Falling back
+   * to nothing would leave an arrival screen with four equal grey buttons,
+   * which is the state this panel was rebuilt out of.
+   */
+  it("falls back to the first of the table rather than to nothing", () => {
+    const without = ALL.filter((id) => id !== DEMO_LEADING_PRESET)
+
+    expect(leadingAsk(without)).toBeDefined()
+    expect(leadingAsk(without)?.id).toBe(offeredPresets(without)[0]?.id)
+  })
+
+  /** It is always one of the asks on offer, which is the join every caller makes. */
+  it("never nominates an ask the tree cannot honour", () => {
+    for (const id of ALL) {
+      expect(leadingAsk([id])?.id).toBe(id)
+    }
+
+    expect(leadingAsk([])).toBeUndefined()
+  })
+
+  /** The order the panel lists them in is the table's, not `available`'s. */
+  it("keeps the table's order when it filters", () => {
+    const shuffled = [...ALL].reverse()
+
+    expect(offeredPresets(shuffled).map((preset) => preset.id)).toEqual(ALL)
   })
 })
