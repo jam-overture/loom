@@ -84,14 +84,16 @@ const HELD: readonly Held[] = [
  * Declarations a lesson invents for its own exercise, which stand for nothing in
  * `src/` and are held to nothing.
  *
- * Nine: `Seams` in lesson 05, `Ask` in 09 and again in 19, `Ops` and `Stage` in
- * 10 and the same pair in 13, `StatProps` in 24 and `Code` in 25. They are local
+ * Ten: `Seams` in lesson 05, `Ask` in 09 and again in 19, `Ops` and `Stage` in
+ * 10 and the same pair in 13, `StatProps` in 24, `Code` in 25, and `ExtraState`
+ * in 29 — the last of those is the shape its own exercises pass around, and is a
+ * local for the same reason the others are. They are local
  * on the strength of a name not being found, which is a fact about `src/` rather
  * than about the lesson — so the count is pinned, and the day the runtime
  * publishes a `Code` or a `Stage` this goes red and somebody decides whether the
  * lesson is now printing a copy of it.
  */
-const LOCAL_DECLARATIONS = 9
+const LOCAL_DECLARATIONS = 10
 
 const sources = (dir: string): readonly string[] =>
   readdirSync(dir).flatMap((entry) => {
