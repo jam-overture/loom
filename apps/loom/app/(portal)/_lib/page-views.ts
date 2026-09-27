@@ -117,6 +117,20 @@ const hrefFor = (key: PageViewKey, treeId: TreeId): string =>
  * be a second source of truth about something that was never in doubt, and it is
  * the kind of derivation that quietly stops matching after a route moves.
  */
+/**
+ * One view of one page, as an address.
+ *
+ * `pageViewsFor` has always built these and always built all six, because the
+ * strip is the only thing that had ever wanted one. `/portal/trust`'s list of the
+ * pages the AI misjudged wants a single link per row, and reaching it by
+ * generating six and finding one would be a strip nobody renders.
+ *
+ * Exported rather than the private `hrefFor` renamed, so the strip and a single
+ * link cannot come apart: both resolve through the same table and the same
+ * encoding, which is the property that made this file worth having.
+ */
+export const pageViewHref = (key: PageViewKey, treeId: TreeId): string => hrefFor(key, treeId)
+
 export const pageViewsFor = (treeId: TreeId, current: PageViewKey): readonly PageView[] =>
   VIEWS.map((view) => ({
     key: view.key,

@@ -88,6 +88,7 @@ describe("every list of pages in this portal", () => {
       "portal/history/_components/tree-chooser.tsx",
       "portal/pages/page.tsx",
       "portal/readers/page.tsx",
+      "portal/trust/_components/wrong-pages.tsx",
     ])
   })
 
@@ -143,7 +144,7 @@ describe("every list of pages in this portal", () => {
    * above would report zero cases — which vitest treats as a pass.
    */
   it("recognises a list of pages by something React makes compulsory", () => {
-    expect(lists.length).toBeGreaterThanOrEqual(6)
+    expect(lists.length).toBeGreaterThanOrEqual(7)
     expect(KEYED_ON_A_PAGE.test("<li key={listing.treeId}>")).toBe(true)
     expect(KEYED_ON_A_PAGE.test("<li key={change.proposalId}>")).toBe(false)
   })

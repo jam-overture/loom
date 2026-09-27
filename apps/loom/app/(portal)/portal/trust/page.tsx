@@ -9,17 +9,24 @@ import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { nameFor } from "@/app/(portal)/_lib/page-name"
+import { nameFor, namesOf } from "@/app/(portal)/_lib/page-name"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 import { portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 
-import { contradictedBands, groupMisses, missesOf } from "@/app/(portal)/_lib/calibration-misses"
+import {
+  contradictedBands,
+  groupMisses,
+  missesOf,
+  pagesInMisses,
+  pagesWithMisses,
+} from "@/app/(portal)/_lib/calibration-misses"
 import { isOnTheMark } from "@/app/(portal)/_lib/calibration-view"
 
 import { BucketRow } from "./_components/bucket-row"
 import { MissedClaims } from "./_components/missed-claims"
 import { PolicyBreakdown } from "./_components/policy-breakdown"
 import { TrustSummary } from "./_components/trust-summary"
+import { WrongPages } from "./_components/wrong-pages"
 
 /**
  * Whether a 0.9 is actually a 0.9 — asked the way a person asks it.
@@ -107,6 +114,25 @@ const TrustPage = async ({
    * gets.
    */
   const pageName = scope?.success ? await nameFor(portalStore, scope.data) : undefined
+
+  /**
+   * The pages the wrong claims were made against, named — and the list of them,
+   * arranged.
+   *
+   * **Only on the unscoped view, and that is the whole of why this read is
+   * cheap.** A screen scoped to one page has already named it above, and a list
+   * of one page under a heading saying which pages is a section that answers
+   * nothing. So the read is skipped there rather than made and discarded.
+   *
+   * On the unscoped view it is one bounded fan-out over the *distinct* pages a
+   * miss happened on, which is at most the number of misses and in practice far
+   * fewer — a page the AI keeps misjudging contributes many claims and one read.
+   * A failed read costs the name and nothing else: `namesOf` answers for every id
+   * it was asked about, so a row still lists, still links and still shows its id.
+   */
+  const missPages = scope?.success ? undefined : pagesWithMisses(misses)
+  const missNames =
+    missPages === undefined ? undefined : await namesOf(portalStore, missPages)
 
   /*
    * Nothing scored is not the same as nothing happened, and the page used to
@@ -200,11 +226,27 @@ const TrustPage = async ({
            * is a different question and one nobody asks first.
            */}
           {misses.length > 0 ? (
-            <MissedClaims
-              groups={groupMisses(misses)}
-              contradicted={contradictedBands(report.buckets, misses, isOnTheMark)}
-              total={misses.length}
-            />
+            <>
+              <MissedClaims
+                groups={groupMisses(misses)}
+                contradicted={contradictedBands(report.buckets, misses, isOnTheMark)}
+                total={misses.length}
+                {...(missNames === undefined ? {} : { names: missNames })}
+              />
+
+              {/*
+               * Below the groups rather than above them, and the order is the
+               * argument. The groups name a *kind* of change the AI keeps
+               * misjudging, which is the finding; this names the pages that kind
+               * of change landed on, which is where to go about it. A reader who
+               * stops after the groups has read the part that generalises.
+               *
+               * Suppressed entirely on a scoped view — see the read above.
+               */}
+              {missNames !== undefined && (
+                <WrongPages pages={pagesInMisses(misses)} names={missNames} />
+              )}
+            </>
           ) : (
             <StateNotice tone="settled" title="It was never wrong by more than a coin flip.">
               <p>

@@ -23,6 +23,8 @@ import {
   groupMisses,
   missesOf,
   MISS_THRESHOLD,
+  pagesInMisses,
+  pagesWithMisses,
   surpriseOf,
 } from "./calibration-misses"
 import { isOnTheMark } from "./calibration-view"
@@ -444,5 +446,147 @@ describe("the misses and the report", () => {
     expect(misses.length).toBeLessThanOrEqual(report.overall.judged)
     expect(report.overall.judged).toBe(2)
     expect(misses.map((miss) => miss.proposalId as ProposalId).sort()).toEqual(["p_1", "p_3"])
+  })
+})
+
+/**
+ * A window whose claims were made against more than one page.
+ *
+ * Every other fixture in this file uses one `treeId`, because every other test
+ * here is about the relationship between a confidence and an outcome and the page
+ * is not part of it. It is the whole of what `pagesInMisses` is about, so these
+ * two need a builder that can say which.
+ */
+const acrossPages = (
+  ...claims: readonly { readonly page: string; readonly proposal: ProposalEpisode }[]
+): EpisodeFold => ({
+  episodes: claims.map(
+    (claim, index): IntentEpisode => ({
+      intentId: intentIdSchema.parse(`i_${index + 1}`),
+      treeId: treeIdSchema.parse(claim.page),
+      startedAt: claim.proposal.proposedAt,
+      proposals: [claim.proposal],
+      resolution: { kind: "open" },
+    })
+  ),
+  unattributed: [],
+})
+
+describe("pagesWithMisses", () => {
+  it("names each page once, however many claims it holds", () => {
+    const misses = missesOf(
+      acrossPages(
+        { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.9, outcome: "refused" }) },
+        { page: "t_a", proposal: proposal({ id: "p_2", confidence: 0.8, outcome: "refused" }) },
+        { page: "t_b", proposal: proposal({ id: "p_3", confidence: 0.7, outcome: "refused" }) }
+      )
+    )
+
+    expect(pagesWithMisses(misses)).toEqual(["t_a", "t_b"])
+  })
+
+  /**
+   * The read this drives is one per entry, so a duplicate here is a store read
+   * nobody asked for. Asserting the length rather than only the contents is what
+   * makes that a property instead of a hope.
+   */
+  it("asks for no more reads than there are pages", () => {
+    const misses = missesOf(
+      acrossPages(
+        { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.9, outcome: "refused" }) },
+        { page: "t_a", proposal: proposal({ id: "p_2", confidence: 0.8, outcome: "refused" }) },
+        { page: "t_a", proposal: proposal({ id: "p_3", confidence: 0.7, outcome: "refused" }) }
+      )
+    )
+
+    expect(misses).toHaveLength(3)
+    expect(pagesWithMisses(misses)).toHaveLength(1)
+  })
+
+  it("is empty when nothing was wrong", () => {
+    expect(pagesWithMisses([])).toEqual([])
+  })
+})
+
+describe("pagesInMisses", () => {
+  it("gathers the claims made against one page", () => {
+    const pages = pagesInMisses(
+      missesOf(
+        acrossPages(
+          { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.9, outcome: "refused" }) },
+          { page: "t_b", proposal: proposal({ id: "p_2", confidence: 0.8, outcome: "refused" }) },
+          { page: "t_a", proposal: proposal({ id: "p_3", confidence: 0.7, outcome: "refused" }) }
+        )
+      )
+    )
+
+    expect(pages).toHaveLength(2)
+    expect(pages.find((page) => page.treeId === "t_a")?.claims).toHaveLength(2)
+    expect(pages.find((page) => page.treeId === "t_b")?.claims).toHaveLength(1)
+  })
+
+  /**
+   * The one property the grouping gets for free from `missesOf` and would lose
+   * the moment somebody re-sorted it: the head of each group is the worst claim
+   * on that page, so `worstSurprise` needs no second pass and cannot drift from
+   * the sort that produced it.
+   */
+  it("takes the worst claim as the page's own, because the claims arrive worst first", () => {
+    const pages = pagesInMisses(
+      missesOf(
+        acrossPages(
+          { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.6, outcome: "refused" }) },
+          { page: "t_a", proposal: proposal({ id: "p_2", confidence: 0.95, outcome: "refused" }) },
+          { page: "t_a", proposal: proposal({ id: "p_3", confidence: 0.7, outcome: "refused" }) }
+        )
+      )
+    )
+
+    expect(pages).toHaveLength(1)
+    expect(pages[0]?.worstSurprise).toBeCloseTo(0.95)
+    expect(pages[0]?.claims[0]?.proposalId).toBe("p_2")
+  })
+
+  /** A page's worst claim is its own, and not the window's. */
+  it("gives each page the worst claim on that page rather than the worst anywhere", () => {
+    const pages = pagesInMisses(
+      missesOf(
+        acrossPages(
+          { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.95, outcome: "refused" }) },
+          { page: "t_b", proposal: proposal({ id: "p_2", confidence: 0.6, outcome: "refused" }) }
+        )
+      )
+    )
+
+    expect(pages.find((page) => page.treeId === "t_a")?.worstSurprise).toBeCloseTo(0.95)
+    expect(pages.find((page) => page.treeId === "t_b")?.worstSurprise).toBeCloseTo(0.6)
+  })
+
+  /**
+   * The two views of one set of claims cannot describe different windows, which
+   * is the property `missesOf`'s own comment is written under. Every claim is in
+   * exactly one page group and no group is empty.
+   */
+  it("partitions the claims, losing none and inventing none", () => {
+    const misses = missesOf(
+      acrossPages(
+        { page: "t_a", proposal: proposal({ id: "p_1", confidence: 0.9, outcome: "refused" }) },
+        { page: "t_b", proposal: proposal({ id: "p_2", confidence: 0.8, outcome: "refused" }) },
+        { page: "t_c", proposal: proposal({ id: "p_3", confidence: 0.2, outcome: "survived" }) },
+        { page: "t_a", proposal: proposal({ id: "p_4", confidence: 0.7, outcome: "discarded" }) }
+      )
+    )
+    const pages = pagesInMisses(misses)
+
+    expect(pages.flatMap((page) => page.claims)).toHaveLength(misses.length)
+    expect(pages.every((page) => page.claims.length > 0)).toBe(true)
+    expect(new Set(pages.map((page) => page.treeId)).size).toBe(pages.length)
+    expect(
+      pages.every((page) => page.claims.every((claim) => claim.treeId === page.treeId))
+    ).toBe(true)
+  })
+
+  it("is empty when nothing was wrong", () => {
+    expect(pagesInMisses([])).toEqual([])
   })
 })

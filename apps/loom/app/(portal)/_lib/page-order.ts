@@ -82,6 +82,7 @@ export type PageOrder =
   | "needs-you-first"
   | "ready-to-check-first"
   | "most-changed-first"
+  | "most-wrong-first"
   | "worst-first"
   | "by-name"
 
@@ -97,6 +98,13 @@ export const ORDER_LEAD: Readonly<Record<PageOrder, string>> = {
   "needs-you-first": "Pages waiting on you come first.",
   "ready-to-check-first": "Pages Loom can check come first.",
   "most-changed-first": "Pages with the most changes come first.",
+  /**
+   * `/portal/trust`, and the one order whose rung is about the AI rather than
+   * about the page. *Wrong about* rather than *worst* — the sweep already owns
+   * that word for a page that does not add up, and a page the AI misjudged is
+   * not a page with anything wrong with it.
+   */
+  "most-wrong-first": "Pages the AI got most wrong come first.",
   "worst-first": "Anything that needs looking at comes first.",
   /**
    * The one order with no rank in front of it — `/portal/readers`, which had
@@ -246,3 +254,25 @@ export const readyToCheckRank = (page: { readonly canBeChecked: boolean }): numb
  * reader, and a page with nothing in its history has nothing to open.
  */
 export const mostChangedRank = (page: { readonly revision: number }): number => -page.revision
+
+/**
+ * `/portal/trust`'s list of the pages the AI misjudged.
+ *
+ * The count, negated, exactly as `mostChangedRank` does it — and for the same
+ * reason rather than by imitation. This is a list somebody **picks from**, and a
+ * page holding one wrong claim has less to look at than a page holding six. A
+ * page with nothing wrong on it is not in the list at all, so unlike the four
+ * ranks above this one there is no rung for *nothing here*.
+ *
+ * **The count only, with the name breaking ties.** The alternative was to fall
+ * back to the worst claim on the page, and it is rejected on the rule this module
+ * is written under: every order here ends on the shared tiebreak, so that two
+ * screens agree about the pages they have nothing to say about. Two pages holding
+ * three wrong claims each *are* two pages this screen has nothing to separate,
+ * and slipping a second numeric key in front of the name would make this the one
+ * list in the portal whose tail nobody else can reproduce. The worst claim is on
+ * the row either way, which is where a reader comparing two equal counts is
+ * actually looking.
+ */
+export const mostWrongRank = (page: { readonly claims: readonly unknown[] }): number =>
+  -page.claims.length
