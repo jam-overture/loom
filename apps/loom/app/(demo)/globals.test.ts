@@ -183,8 +183,66 @@ describe("the part in question", () => {
    * for the reason the record bar gives: a media query is right between a
    * resize and a re-render and a mount-time read is not.
    */
-  it("removes the preview on the layout that can already see the band", () => {
-    expect(css).toMatch(/@media \(min-width: 1024px\) \{\s*\.demo-part \{\s*display: none;/)
+  it("removes a question's preview on the layout that can already see the band", () => {
+    expect(css).toMatch(
+      /@media \(min-width: 1024px\) \{\s*\.demo-part--question \{\s*display: none;/
+    )
+  })
+
+  /**
+   * **And removes nothing on an ask's**, which is the whole of why that rule
+   * moved onto the modifier.
+   *
+   * The exemption's stated reason is a mark that is already on the stage, and
+   * before any press there is no mark: a ring is what a press produces. So at
+   * 1280×900 the band *Take the numbers off* is about sits below the fold of a
+   * page a stranger has not scrolled, and the excerpt under the button is the
+   * only place on the arrival screen it exists.
+   *
+   * Written as a sweep over every `display: none` in the file rather than as
+   * the absence of one string, because the failure this is for is a later run
+   * tidying the modifier back off the selector — which puts the rule back on
+   * `.demo-part`, hides both, and breaks nothing a render test can see.
+   */
+  it("hides an ask's preview at no width", () => {
+    /*
+     * Comments out first. This stylesheet argues with itself at length, and the
+     * paragraph above the rule under test names `.demo-part` in prose — which a
+     * sweep reading whatever precedes a brace would take for a selector.
+     */
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "")
+    const hidden = [...rules.matchAll(/([^{}]+)\{[^}]*display:\s*none[^}]*\}/g)].map(
+      (match) => match[1] ?? ""
+    )
+
+    expect(hidden.length).toBeGreaterThan(0)
+    for (const selector of hidden) {
+      expect(selector).not.toMatch(/\.demo-part(?![-\w])/)
+      expect(selector).not.toContain(".demo-part--ask")
+    }
+  })
+
+  /**
+   * The two windows, and the difference between them is what is under each.
+   *
+   * A question's preview has two buttons below it that a visitor has to reach
+   * on a 390×844 screen; an ask's has a list of alternatives and nothing
+   * waiting on an answer. At rail width the stat grid falls to one column and
+   * its three figures stand about 330px, so the question's 13rem window shows
+   * *3,400* and fades out before *24* and *92%* — under a button promising all
+   * three, that is a preview of one number.
+   */
+  it("gives an ask's preview a taller window than a question's", () => {
+    const rem = (from: string): number =>
+      Number.parseFloat(/max-height:\s*([\d.]+)rem/.exec(from)?.[1] ?? "0")
+
+    const question = rem(block(".demo-part-stage"))
+    const ask = rem(
+      /\.demo-part--ask \.demo-part-stage\s*\{([^}]*)\}/.exec(css)?.[1] ?? ""
+    )
+
+    expect(question).toBeGreaterThan(0)
+    expect(ask).toBeGreaterThan(question)
   })
 
   /**

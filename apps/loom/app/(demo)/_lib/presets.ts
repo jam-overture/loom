@@ -264,6 +264,33 @@ export const DEMO_PRESETS: readonly DemoPreset[] = [palette, backdrop, band, tri
  */
 export const DEMO_LEADING_PRESET: DemoPresetId = "trim"
 
+/** The presets a tree can honour, in table order, as presets rather than ids. */
+export const offeredPresets = (available: readonly DemoPresetId[]): readonly DemoPreset[] =>
+  DEMO_PRESETS.filter((preset) => available.includes(preset.id))
+
+/**
+ * Which ask gets the green button, out of the ones this tree can honour.
+ *
+ * `DEMO_LEADING_PRESET` when it is still on offer, and the first of the table
+ * otherwise — because a tree that has already lost its stat grid still has four
+ * asks and a stranger still needs one of them to be the obvious first move.
+ *
+ * **It moved here from `ask-panel.tsx` and the move is the point of the
+ * function.** The nomination is a reading — *given what is on offer, which one
+ * is primary* — and this lane has a five-row table in `rail.ts` about readings
+ * that lived in a file no test could reach. This one was in a client component,
+ * which a test *can* reach, and so it was tested; what it could not be was
+ * *shared*. The part of the page the leading ask would touch has to be computed
+ * beside the tree, on the server, and computing it needed the same answer to
+ * the same question. Two copies of a nomination is how a panel comes to preview
+ * one ask and offer another.
+ */
+export const leadingAsk = (available: readonly DemoPresetId[]): DemoPreset | undefined => {
+  const offered = offeredPresets(available)
+
+  return offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
+}
+
 export const presetById = (id: string): DemoPreset | undefined =>
   DEMO_PRESETS.find((preset) => preset.id === id)
 

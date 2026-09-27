@@ -6,6 +6,7 @@ import { LOOM_NODE_ATTRIBUTE, renderLoomTree } from "@jam-overture/loom/react"
 
 import { pageGround } from "@/app/(demo)/_lib/ground"
 import { partInQuestion, type PartInQuestion } from "@/app/(demo)/_lib/in-question"
+import { partTheAskWouldTouch } from "@/app/(demo)/_lib/before-the-press"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { presetById } from "@/app/(demo)/_lib/presets"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
@@ -45,6 +46,24 @@ const deltaFor = (presetId: string, against: LoomTree): TreeDelta => {
 
 const partFor = (presetId: string, against: LoomTree): PartInQuestion => {
   const part = partInQuestion(against, deltaFor(presetId, against))
+  if (part === undefined) throw new Error(`${presetId} has no part to preview`)
+
+  return part
+}
+
+/**
+ * The same excerpt as the ask's, taken from the function the rail takes it
+ * from.
+ *
+ * Not `{ ...partFor(id), where: "ask" }`. The moment is decided in
+ * `in-question.ts` by which caller asked, and a test that spreads its own
+ * answer over that one is a test of the spread.
+ */
+const askFor = (presetId: string, against: LoomTree): PartInQuestion => {
+  const preset = presetById(presetId)
+  if (!preset) throw new Error(`no preset ${presetId}`)
+
+  const part = partTheAskWouldTouch(against, randomIdFactory, preset)
   if (part === undefined) throw new Error(`${presetId} has no part to preview`)
 
   return part
@@ -195,5 +214,71 @@ describe("the part in question", () => {
 
     expect(container.querySelector(".demo-part")).not.toBeNull()
     expect(container.querySelector(".demo-part-stage.loom-stage")).not.toBeNull()
+  })
+})
+
+/**
+ * The two moments the same excerpt stands in, and everything that differs
+ * between them is a class name — which is the claim worth holding, because the
+ * alternative every run reaches for first is a second component.
+ *
+ * `globals.css` hangs two rules off the modifier: the wide-screen `display:
+ * none`, which is the question's and not the ask's, and the window height. A
+ * rename on either side is silent, so both hooks are named here.
+ */
+describe("the moment it is standing in", () => {
+  it("marks a question's excerpt as a question's, which is what the wide-screen rule hides", () => {
+    const tree = page()
+    const { container } = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    expect(container.querySelector(".demo-part.demo-part--question")).not.toBeNull()
+    expect(container.querySelector(".demo-part--ask")).toBeNull()
+  })
+
+  /**
+   * **The one that matters.** If an ask's excerpt carried the question's
+   * modifier it would be hidden at exactly the width the maintainer judges this
+   * surface at, and every assertion above would still pass: the markup would be
+   * right and the arrival screen would be back to a button naming a band
+   * nobody can see.
+   */
+  it("marks an ask's excerpt as an ask's, which no rule hides", () => {
+    const tree = page()
+    const { container } = render(<PartInQuestionView part={askFor("trim", tree)} />)
+
+    expect(container.querySelector(".demo-part.demo-part--ask")).not.toBeNull()
+    expect(container.querySelector(".demo-part--question")).toBeNull()
+  })
+
+  /**
+   * Same words, same size, different element — and the element is the claim
+   * about the document. In the card the lead is a sibling of the card's own
+   * heading; in the ask panel the nearest heading is the rail's `h1`, two
+   * levels up, so an `h4` there announces a subsection of nothing.
+   */
+  it("says what would happen as a heading in a card and as a paragraph in the panel", () => {
+    const tree = page()
+    const lead = "This is what would come off the page."
+
+    const asked = render(<PartInQuestionView part={askFor("trim", tree)} />)
+
+    expect(asked.container.querySelector("h4")).toBeNull()
+    expect(asked.container.querySelector("p")?.textContent).toBe(lead)
+
+    const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    expect(questioned.container.querySelector("h4")?.textContent).toBe(lead)
+  })
+
+  /** Neither moment is operable: it is a second rendering of somebody else's page. */
+  it("is the same excerpt either way, down to the words in it", () => {
+    const tree = page()
+    const asked = render(<PartInQuestionView part={askFor("trim", tree)} />)
+    const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    expect(asked.container.querySelector(".demo-part-stage")?.textContent).toBe(
+      questioned.container.querySelector(".demo-part-stage")?.textContent
+    )
+    expect(asked.container.textContent).toContain("3,400")
   })
 })
