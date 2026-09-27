@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 
 import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, pageMetadata } from "@/app/(marketing)/_lib/share"
 import { HOME, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
@@ -52,7 +53,7 @@ const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams 
   const params = await searchParams
   const ask = readAskId(params["ask"])
   const rendered = await renderSitePage(HOME, {
-    origin: siteOrigin(),
+    origin: await servedOrigin(),
     theme: readThemeName(params["theme"]),
     ...(ask === undefined
       ? {}
