@@ -3,13 +3,14 @@
   "private": true,
   "type": "module",
   "version": "0.0.0",
-  "description": "A Loom page about ski kit, built only from registered primitives.",
+  "description": "A Loom page about ski kit, built from the published library only.",
   "scripts": {
     "dev": "node server.mjs",
     "build": "node build.mjs"
   },
   "dependencies": {
-    "@jam-overture/loom": "file:../..",
+    "@jam-overture/loom": "^0.1.0",
+    "@jam-overture/loom-primitives": "^0.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

@@ -85,7 +85,7 @@ export const SIDEBAR_MARKUP = `
   <header>
     <div>
       <h2>Signals</h2>
-      <p class="sub">From <code>@jam-overture/loom/signals</code></p>
+      <p class="sub">From <code>@jam-overture/loom/signals/broadcast</code></p>
     </div>
     <button class="again" id="again" title="Clear what the rail has counted">Start over</button>
   </header>

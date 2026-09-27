@@ -4,10 +4,20 @@ A single page about buying ski kit, built entirely from registered Loom
 primitives. Nothing here is bespoke markup: every band on the page is a node in
 a `LoomTree`, and the whole thing is one call to `renderLoomTree`.
 
+**It consumes the published packages, not this repository.** `@jam-overture/loom`
+and `@jam-overture/loom-primitives` are installed from npm at their released
+versions, so this prototype exercises what a host actually gets. It is the one
+place in this repository that does, which is the point of it: a page built the
+way a customer would build one, catching anything that is true of the working
+tree and not of the release.
+
 ```bash
-pnpm install
+pnpm install --ignore-workspace
 pnpm dev          # http://localhost:4321
 ```
+
+`--ignore-workspace` because this directory is outside `pnpm-workspace.yaml` and
+resolves its Loom dependencies from the registry.
 
 `pnpm build` writes `out/index.html` instead of serving.
 
@@ -31,7 +41,7 @@ call.
 ## The signal rail
 
 `pnpm dev` serves the page with a rail down the right-hand side, driven by the
-framework's own broadcaster, `@jam-overture/loom/signals`. There is no hand-written
+framework's own broadcaster, `@jam-overture/loom/signals/broadcast`. There is no hand-written
 collector.
 
 What happens, end to end:
