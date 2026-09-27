@@ -1,4 +1,5 @@
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
@@ -16,7 +17,7 @@ export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
 const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchParams }) => {
   const params = await searchParams
   const rendered = await renderSitePage(WHAT_YOU_RUN, {
-    origin: siteOrigin(),
+    origin: await servedOrigin(),
     theme: readThemeName(params["theme"]),
   })
 

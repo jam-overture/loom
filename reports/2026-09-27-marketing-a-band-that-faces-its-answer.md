@@ -142,6 +142,22 @@ tell you?*
 
 ## Found while building: the front door is photographed with a hole in it
 
+> **Wrong, corrected the same day — 27 September.** This section concludes that
+> the broken frame is the screenshot harness's and that *"the site is fine and
+> a deployment is fine."* **It is not.** The maintainer reported the same
+> broken box on the preview deployment of this pull request, hours after this
+> was written. The cause is this lane's: `siteOrigin()` names the
+> deployment-unique host while a reader is on the branch alias, so the frame is
+> cross-origin and a protected preview answers it with a sign-in page that
+> refuses to be framed.
+>
+> The section is **kept rather than rewritten**, on the precedent
+> `docs/routines.md` sets for its own superseded passage — what it got wrong is
+> worth reading once, and how a correct set of observations produced a wrong
+> owner is the subject of
+> [the follow-up report](2026-09-27-marketing-the-origin-a-request-arrived-on.md).
+> Nothing is asked of the harness; the same fix closes both halves.
+
 Not fixed here, because it is the harness's and not this lane's.
 
 | `pnpm shoot --serve` | serving on port 3000 by hand |
