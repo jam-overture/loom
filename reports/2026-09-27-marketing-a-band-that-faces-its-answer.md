@@ -140,26 +140,88 @@ tell you?*
 
 ---
 
-## Found while building: the front door is photographed with a hole in it
+## The second half: the front door was framing the wrong host
 
-Not fixed here, because it is the harness's and not this lane's.
+**Not "found while building" — found by the maintainer, after this lane looked
+straight at it and got it wrong.**
 
-| `pnpm shoot --serve` | serving on port 3000 by hand |
+| `pnpm shoot --serve`, as filed this morning | the same band, after the fix |
 | --- | --- |
-| ![](2026-09-27-marketing-facing-embed-broken.png) | ![](2026-09-27-marketing-facing-embed-served.png) |
+| ![](2026-09-27-marketing-facing-embed-broken.png) | ![](2026-09-27-marketing-facing-embed-fixed.png) |
 
-The framed demonstration's `src` is absolute, built from `siteOrigin()`, which
-with no `LOOM_SITE_ORIGIN` and no `VERCEL_URL` is `http://localhost:3000`.
-`--serve` starts on an **ephemeral port** on purpose, so the frame points at
-nothing and Chromium draws its broken-document glyph in a 1078 × 673 box.
+### What was filed, and why it was wrong
 
-**Nothing in the run says so**: the shot succeeds, the exit is 0, `scrollWidth`
-equals `innerWidth`, every test of that band passes. This run photographed it
-twice before recognising it. The site is fine and a deployment is fine — Vercel
-sets `VERCEL_URL` — but every full-page shot of the front door this lane has
-shipped with `--serve` has had that hole in the middle of it, on the surface the
-maintainer judges by eye. Filed for `Loom daily build`; the fix is the harness
-passing the origin it already prints to the child as `LOOM_SITE_ORIGIN`.
+The first version of this section said the broken box was the screenshot
+harness's: `--serve` starts on an ephemeral port, the frame's absolute `src`
+resolves to `localhost:3000`, so the frame points at nothing. It ended *"the
+site is fine and a deployment is fine — Vercel sets `VERCEL_URL`."*
+
+Every observation was accurate. The conclusion was wrong, and the maintainer
+reported the same broken box **on the preview deployment of this pull request**
+within hours.
+
+`siteOrigin()` answers *where does this page live*. A frame needs *where did
+this request arrive*. On a preview those are two different hosts:
+
+| | |
+| --- | --- |
+| `VERCEL_URL`, so `siteOrigin()` | `loom-9kd3jf-….vercel.app` — deployment-unique |
+| what the reader is on | `loom-git-<branch>-….vercel.app` — the branch alias |
+
+So the frame was cross-origin; a preview sits behind Vercel's deployment
+protection; the framed request arrived without the reader's cookie; Vercel
+answered with a sign-in page that refuses to be framed. Broken-document glyph.
+
+Reproduced by serving a production build with `VERCEL_URL` pointed at a host
+the browser was not on, which put
+`iframe src="https://loom-9kd3jf-….vercel.app/demo"` into the page exactly as
+the maintainer's screenshot showed.
+
+### Why the wrong reading was the comfortable one
+
+Worth writing down, because it was not carelessness and it will recur:
+
+- The symptom was **first met through a local tool**, where the second host is
+  an ephemeral port rather than a protected preview. "My tooling is wrong" is a
+  smaller and more familiar story than "the site is wrong", and it fit every
+  fact in hand.
+- It was **confirmed by a fix that worked**. Serving on port 3000 by hand made
+  the frame render — which proves the *mechanism*, that the frame's host must
+  match the page's, and was then read as proving the *diagnosis*. The mechanism
+  holds on any host, Vercel's included.
+- **Nothing disagreed.** Exit 0, `scrollWidth` equals `innerWidth`, the tree is
+  right, and the frame-origin allowlist does not fire because the registry and
+  the `src` are built from the same `siteOrigin()` — they agree with each other
+  and are both wrong about the reader. The only instrument that reports it is a
+  person looking at the page.
+
+### The fix, and the rule it states
+
+**The tree's addresses follow the browser; the document's declared identity
+stays pinned.**
+
+| | answers | reads | used by |
+| --- | --- | --- | --- |
+| `servedOrigin()` | where did this request arrive | `x-forwarded-host` | the three page renders |
+| `siteOrigin()` | where does this page live | `LOOM_SITE_ORIGIN`, `VERCEL_URL` | canonical, sitemap, share image, the graph |
+
+A canonical link announcing itself under whichever host a reader happened to
+reach it by would be a page telling a crawler there are three of it, so those
+keep the pinned answer. A `Host` header is attacker-controlled where nothing
+pins one and what it reaches is an address the visitor's own page tells their
+browser to load, so it is **parsed rather than interpolated**: a path, a second
+scheme, credentials or a space is refused and the caller falls back to the
+environment.
+
+Verified on a build served under a misleading `VERCEL_URL`: the frame resolved
+to `http://localhost:3100/demo` while the canonical stayed on the pinned host.
+
+**Nothing is asked of the harness, and that is the evidence it is one bug.**
+`pnpm shoot --serve` sets the `Host` header to its own ephemeral origin, so the
+frame follows it — the picture on the right above is the band rendering live in
+a screenshot, which had never once happened.
+
+18 cases cover the parsing, including every malformed authority.
 
 ### And the other one, which is already written down
 
@@ -179,12 +241,14 @@ be somebody else's.
 
 `pnpm verify` — **exit 0**, read out of a file written as the last thing on its
 own line, on a `.next` and a `dist` deleted first and a fresh `pnpm install`.
+Re-run on the merged head after `Loom merge` brought `main` in at 15:44, and
+again after the origin fix.
 
 | | |
 | --- | --- |
-| runtime | **3,200 passed** in 165 files — untouched |
-| application | **5,390 passed** in 311 files — **9 added** |
-| findings | **834**, 0 malformed |
+| runtime | **3,216 passed** in 165 files — untouched |
+| application | **5,408 passed** in 312 files — **27 added** (9 for the bands, 18 for the origin) |
+| findings | **839**, 0 malformed |
 | prerender | 112 pages, 1,300 junctions, 0 run together, 0 unserved |
 | overflow | 1280, 820 and 390: `scrollWidth` equals `innerWidth` on both pages |
 
@@ -199,8 +263,11 @@ weakened.
 
 **One filed, one closed.**
 
-- **Filed, for `Loom daily build`:** `--serve` photographs the embedded
-  demonstration as a broken-document icon.
+- **Filed and then corrected, this lane's own:** the framed demonstration
+  pointed at a host the reader is not on. Filed first as the harness's with the
+  status *"nothing is wrong on a deployment"*, which was false; rewritten with
+  the real diagnosis, and closed by this branch. Nothing is asked of the
+  harness.
 - **Closed** by this branch: the empty half, recorded for the shape rather than
   for the nine bands — the instrument that would have caught it does not exist
   on any surface.
