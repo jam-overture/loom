@@ -654,6 +654,39 @@ export const LIBRARY_CLASS = {
    * every property a parent might need to change must not also be set on the
    * element. A stat that kept its type inline could be put in a chart and would
    * render its figure at the headline size inside a 12-pixel-wide column.
+   *
+   * ## The stat is its own container, and that closed a figure running off a phone
+   *
+   * `.loom-stat` declares `container-type: inline-size` and `.loom-stat-value`
+   * takes `min(var(--loom-scale-7), 26cqi)`. Both halves are load-bearing and
+   * the second cannot be written without the first: the figure's size has to be
+   * capped against **the column the stat is in**, and a grid styles its children
+   * rather than wrapping them, so there is no ancestor to declare the
+   * containment on. `loom.heading` names this exact hole in its own cap comment
+   * — *what is still not held back is a heading in a bare grid cell* — and the
+   * answer is that the child declares it for itself.
+   *
+   * **Found on 27 September, in a band that had been hiding it twice.** A
+   * `loom.stat-grid` with `columns: "four"` on a `canvas` section is 358 pixels
+   * of content at a 390-pixel viewport, which `auto-fit` splits into two
+   * columns of about 166. `"99.98%"` at `--loom-scale-7` in `bold-sans` is
+   * about 185 pixels and does not break, so the grid item's automatic minimum
+   * size pushed its own track wide: measured `scrollWidth 401 / innerWidth 390`,
+   * with the figure visibly off the right edge of the page.
+   *
+   * Nothing had ever seen it. The catalogue's `metricsBand` uses `tone:
+   * "surface"`, whose inline padding narrows the band enough that `auto-fit`
+   * drops to **one** column, where the figure fits — and the one specimen that
+   * photographs a stat grid on a canvas band wrapped it in a `loom.backdrop`,
+   * which clips, so the harness measured 390 against 390. Two independent
+   * accidents, each of which alone would have hidden it.
+   *
+   * The containment does both jobs at once, which is why it is one declaration
+   * rather than a `min-width: 0` and a cap: an element with inline-size
+   * containment contributes nothing of its contents to track sizing, so the
+   * track stops blowing out, *and* `cqi` starts resolving against the column.
+   * `26cqi` is sized for a seven-character figure and is inert above a
+   * 215-pixel column, which is every stat in a grid on a desktop.
    */
   stat: "loom-stat",
   statValue: "loom-stat-value",
@@ -2002,11 +2035,12 @@ details[open] > summary .loom-marker {
   display: flex;
   flex-direction: column;
   gap: var(--loom-spacing-1);
+  container-type: inline-size;
 }
 .loom-stat-value {
   font-family: var(--loom-heading-family);
   font-weight: var(--loom-heading-weight);
-  font-size: var(--loom-scale-7);
+  font-size: min(var(--loom-scale-7), 26cqi);
   line-height: 1.05;
   color: var(--loom-accent);
 }

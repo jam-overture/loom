@@ -84,6 +84,16 @@ const props = z
      * `backdrop.ts` is that a reader tells them apart at a glance. Changing it
      * changes no node, which is the granularity doc's sharper question, so it
      * is a prop rather than a delta in disguise.
+     *
+     * **Two of the five have a minimum height and the description says which.**
+     * `grid` and `dots` are ruled at a stride measured in `rem`, so a band that
+     * is not a few strides tall has nothing to rule; `aurora`, `rays` and
+     * `spotlight` are written in the box's own units and hold at any aspect
+     * ([0196](../../decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md)).
+     * It is in the description rather than in a refusal because a render is
+     * total (0008) and a band four strides tall is a judgement rather than a
+     * threshold — the fix for a model that picks wrongly is knowing, not being
+     * stopped.
      */
     paint: z.enum(PAINT_NAMES).optional(),
     /**
@@ -103,7 +113,7 @@ type Props = z.infer<typeof props>
 export const loomBackdrop = definePrimitive({
   type: "loom.backdrop",
   description:
-    "Atmosphere behind whatever is put inside it: drifting colour, a ruled grid, a lattice of dots, beams from above, or one pool of light. Wraps anything and draws nothing of its own.",
+    "Atmosphere behind whatever is put inside it: drifting colour, a ruled grid, a lattice of dots, beams from above, or one pool of light. Wraps anything and draws nothing of its own. The grid and dots need a band a few hundred pixels tall to read as a ground; the other three work at any height.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
