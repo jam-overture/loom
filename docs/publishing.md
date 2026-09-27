@@ -70,11 +70,25 @@ tar xzOf loom-runtime-<version>.tgz package/package.json | grep -A20 '"exports"'
   fixture, not the starter library — the same word, two different files.
 - **No `.map` files.** The build emits them and the workspace wants them; the
   tarball does not carry them, because they name `../src/*.ts` and carry no
-  `sourcesContent`. With the repository private there is nothing for a consumer
-  to resolve them against, so they were 396 files and 42% of the package
-  resolving to nothing. If the source ever ships — which is a decision about
-  the repository, not about this manifest — drop the negation and they become
-  useful again.
+  `sourcesContent`. From a consumer's `node_modules/@jam-overture/loom/dist/`
+  that path resolves to `node_modules/@jam-overture/src/*.ts`, which does not
+  exist and never will — so they were 396 files and 42% of the package
+  resolving to nothing.
+
+  **A public repository does not change this**, and an earlier draft of this
+  section implied it did. The maps carry no source text and the relative path
+  is wrong wherever the package is installed; whether the source is readable on
+  GitHub is irrelevant to a debugger resolving a path inside `node_modules`.
+  Two things would make them useful, and both are a decision about the build
+  rather than about the repository:
+
+  - `"inlineSources": true` in `tsconfig.build.json`, which puts the source
+    text inside each map. Self-contained, works for every consumer, and the
+    ordinary answer. It makes the maps larger.
+  - shipping `src/` in the tarball beside `dist/`, so `../src/*.ts` resolves.
+
+  Either one is paired with dropping `"!dist/**/*.map"` from `files`. Doing
+  only the drop ships 396 files that still resolve to nothing.
 
 `tools/publish/manifest.test.ts` holds all of that as assertions and runs in
 `pnpm verify`, including the drift that is otherwise invisible: a subpath added
