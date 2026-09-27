@@ -42,7 +42,14 @@ describe("the ask panel", () => {
 
     const buttons = screen.getAllByRole("button")
 
-    expect(buttons[0]?.textContent).toBe(labelOf(DEMO_LEADING_PRESET))
+    /*
+     * The accessible name rather than `textContent`. The primary carries a
+     * decorative arrow beside its label — `aria-hidden`, so it is outside the
+     * name and inside the text — and the claim being made here is about which
+     * preset is *offered* in the primary slot, which is the name a screen
+     * reader announces and the words a visitor reads.
+     */
+    expect(buttons[0]).toBe(screen.getByRole("button", { name: labelOf(DEMO_LEADING_PRESET) }))
   })
 
   /**
