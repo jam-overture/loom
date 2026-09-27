@@ -341,6 +341,55 @@ It is not in `portal-37` for the same reason it was not in `portal-36`: that
 branch is about what a reader is shown, and a staging harness is not.
 
 ---
+## 2026-09-27 — a shot leaves the pointer where it last clicked, so a `before` that signs in can photograph a hover state
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`tools/`), with a
+note for every lane that signs a shot in · **Status:** open — **measured on one
+pair of pictures**, and the cheaper half of the remedy is a lane's
+
+`pnpm shoot`'s `before` approach reaches a state by pressing things
+([0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md)).
+A press moves the pointer and **nothing moves it back**, so the shot that follows
+is taken with the cursor resting wherever the last `click` step put it.
+
+**What that cost today, and it is small but it is a lie.** The front door's wide
+shot on 27 September came back with the *second* page card tinted —
+`hover:bg-surface-hover`, drawn because the sign-in button on `/portal/sign-in`
+and that card on `/portal` happen to occupy overlapping points, and the pointer
+never left. The phone shot of the same build, whose layout puts nothing at that
+point, shows the card untinted.
+
+So a reviewer comparing the two pictures sees a card that is highlighted in one
+and not the other, with nothing in the diff to explain it. That is the class of
+thing a screenshot exists to settle, arriving as a thing a screenshot has just
+confused — and on a surface whose hover states are load-bearing (every list of
+pages in this portal fills on hover, and 27 September made that the affordance
+after Tailwind's preflight removed the underline) it will keep happening.
+
+**It is not the hover being wrong.** The hover is correct CSS responding to a
+real pointer. What is wrong is that the pointer's position is an input to the
+picture that no shot list declares and no report records.
+
+**The remedy, and it is one line in the harness.** After a `before` approach
+completes and before the shot navigates, move the pointer somewhere that
+addresses nothing — Playwright's `mouse.move(0, 0)` is enough, and the harness
+already owns the browser context. That makes a shot's pointer position a
+*property of the instrument* rather than a residue of whatever the last step
+pressed, which is the same standard 0117 already holds for reduced motion.
+
+**What a lane can do until then**, since this is filed for another lane's
+directory: end a `before` list with a `scrollTo` of something in the page's own
+header, which moves nothing but is at least a position the lane chose. It is a
+workaround and it does not generalise — `scrollTo` does not move the pointer, it
+only makes the accident visible somewhere predictable.
+
+**Why this is worth a finding rather than a note in a report.** Six lanes take
+signed-in screenshots through this path, the 22 September entry recommended it
+to all of them, and none of their pictures records where the pointer was. Every
+one of them has been photographing an unstated state.
+
+
+---
 ## 2026-09-27 — a `loom.backdrop` clips, so every band inside one is invisible to the only automated visual check this repository has
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`),
