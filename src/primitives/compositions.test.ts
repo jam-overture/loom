@@ -1920,3 +1920,59 @@ describe("the two bands that did not pop", () => {
     expect(orbit?.props["rings"]).toBe("one")
   })
 })
+
+/**
+ * What the code band tells a stranger to type, held against what the registry
+ * actually publishes.
+ *
+ * This is the one band in the catalogue whose content is **executable
+ * instructions**, and the 26 September framework rename made it wrong without
+ * making it fail: every schema passed, the band rendered, and the import line
+ * it printed resolved for nobody outside this workspace, because
+ * [0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)
+ * withholds `./primitives` from the published framework and
+ * `createStarterPrimitiveRegistry` lives only there.
+ *
+ * So the assertion reads the runtime's own `publishConfig.exports` — the map
+ * that reaches the registry — rather than restating a package name here, where
+ * it would be a second copy of a fact and would go stale the same way.
+ */
+describe("the band that prints instructions", () => {
+  const band = (): ElementNode => {
+    const composition = compositionById("code")
+    if (composition === undefined) throw new Error("the code band is not in the phrasebook")
+
+    return composition.build(sequentialIdFactory())
+  }
+
+  it("does not import the registry from a package that does not export it", async () => {
+    const { readFile } = await import("node:fs/promises")
+    const root: { name?: string; publishConfig?: { exports?: Record<string, unknown> } } = JSON.parse(
+      await readFile(new URL("../../package.json", import.meta.url), "utf8")
+    )
+    const framework = root.name ?? ""
+    const published = Object.keys(root.publishConfig?.exports ?? {})
+    const words = wordsIn(band())
+
+    expect(published, "the framework now publishes ./primitives, so this test is the stale one").not.toContain(
+      "./primitives"
+    )
+    expect(words).toContain("createStarterPrimitiveRegistry")
+    expect(
+      words.includes(`from "${framework}"`),
+      "the band imports the registry from the framework, which does not export it"
+    ).toBe(false)
+  })
+
+  /**
+   * Both packages, in the one line a visitor copies first. A page that tells
+   * somebody to install the framework alone and then hands them a registry
+   * import is a page that fails on the second step.
+   */
+  it("tells them to install both packages", () => {
+    const words = wordsIn(band())
+    const framework: string = "@jam-overture/loom"
+
+    expect(words).toContain(`pnpm add ${framework} ${framework}-primitives`)
+  })
+})

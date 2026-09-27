@@ -111,13 +111,23 @@ const STEPS = [
   { before: "Hand an instruction and the current tree to the seam, and read back a proposal: ", code: "commitIntent" },
 ] as const
 
-const INSTALL = "pnpm add @jam-overture/loom"
+const INSTALL = "pnpm add @jam-overture/loom @jam-overture/loom-primitives"
 
 /**
  * Every line is under 63 characters, which is a constraint the screenshot
  * imposed rather than a preference. See the note on `wrap` below.
+ *
+ * **The registry comes from the second package, and that is not a detail this
+ * band may get wrong.** The framework rename on 26 September moved this copy
+ * to `@jam-overture/loom` correctly and left the import line pointing at the
+ * same package — but 0194 withholds `./primitives` from the published
+ * framework, and `createStarterPrimitiveRegistry` is only in there. The line
+ * this band prints is the first line of code a visitor copies, and as written
+ * it threw `ERR_PACKAGE_PATH_NOT_EXPORTED` for anybody outside this
+ * workspace. Asserted in `compositions.test.ts` against the runtime's
+ * published export map rather than remembered.
  */
-const SOURCE = `import { createStarterPrimitiveRegistry } from "@jam-overture/loom"
+const SOURCE = `import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
 
 const registry = createStarterPrimitiveRegistry()
 

@@ -15,6 +15,15 @@ coverage/
 .next/
 next-env.d.ts
 
+# The publishable package is assembled by `pnpm package:primitives` from a
+# build of the runtime. Its README is source and is committed; everything else
+# under it is generated, and a generated file in git is a file that goes stale
+# without anybody editing it.
+packages/*/dist/
+packages/*/package.json
+packages/*/LICENSE
+packages/*/*.tgz
+
 # Lesson exercises — scribble freely (see lessons/README.md)
 src/scratch.test.ts
 prototypes/ski-apparel/out/
