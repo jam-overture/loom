@@ -253,3 +253,42 @@ describe("what the command tells whoever runs it", () => {
     expect(described).toContain("../../y.js")
   })
 })
+
+/**
+ * What this package promises about somebody else's packages, held against what
+ * those packages actually say.
+ *
+ * Both of these were wrong on 27 September and neither was catchable from
+ * inside this repository: the declarations are about the *published* framework,
+ * and until it was published there was nothing to be wrong about.
+ */
+describe("what it declares about the framework beside it", () => {
+  const root = async (): Promise<{
+    peerDependencies?: Record<string, string>
+    dependencies?: Record<string, string>
+  }> => JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"))
+
+  /**
+   * A library that accepts React 20 while the framework beside it accepts only
+   * 19 advertises a combination npm cannot install — both peers resolve against
+   * one tree. Narrower is safe and wider is a promise nothing has tested.
+   */
+  it("does not accept a React the framework refuses", async () => {
+    const built: Record<string, unknown> = manifest("MIT")
+    const peers = built["peerDependencies"] as Record<string, string>
+
+    expect(peers["react"]).toBe((await root()).peerDependencies?.["react"])
+  })
+
+  /**
+   * `zod` is a real dependency of both — every props schema is a `z.object` —
+   * and two majors in one tree is two `ZodType` identities. Held to the
+   * framework's range rather than restated.
+   */
+  it("depends on the zod the framework depends on", async () => {
+    const built: Record<string, unknown> = manifest("MIT")
+    const deps = built["dependencies"] as Record<string, string>
+
+    expect(deps["zod"]).toBe((await root()).dependencies?.["zod"])
+  })
+})

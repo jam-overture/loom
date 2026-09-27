@@ -34163,3 +34163,46 @@ The general shape, offered to any lane that adds structured data later:
 reads as settled and a later run adds the field in good faith, because the
 schema looked incomplete and nothing said otherwise. The absence has to be the
 thing that is asserted.
+
+---
+
+## 2026-09-27 — a package's promises about its neighbor cannot be checked until the neighbor is published, and two of this one's were wrong
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`tools/package/`) · **Status:** **closed in the same run** — both corrected
+and asserted against the framework's own manifest. Filed for the shape, which
+will recur at every future package split
+
+`@jam-overture/loom-primitives` declares three things about packages that are
+not it: a peer range on the framework, a React range, and a `zod` dependency.
+All three were written before the framework was published, which means all
+three were written against a guess.
+
+An audit against the published package found two of them wrong. Neither would
+have failed a test in this repository, and neither is visible in a workspace,
+where one `node_modules` satisfies everything:
+
+| | was | is | why it mattered |
+| --- | --- | --- | --- |
+| `react` | `>=19.0.0` | `^19.0.0` | The framework declares `^19.0.0`. A library advertising React 20 beside a framework that refuses it advertises a tree npm cannot build — both peers resolve against one `node_modules` — and the only thing the wider range could buy is a major nothing here has been run against |
+| `repository.directory` | `packages/primitives` | `src/primitives` | npm turns this into a *view source* link. The package root is assembled by `pnpm package:primitives` and everything in it but the README is generated and gitignored, so the link landed a reader in an almost empty directory |
+
+`zod` was already right — `^3.24.1` in both — and is now asserted rather than
+coincidental, because two majors of it in one tree is two `ZodType` identities
+and a registry that refuses schemas it built itself.
+
+**What the assertions do that the values do not.** All three now read the
+framework's own manifest instead of restating a range. A framework that moves
+to React 20 or a `zod` major drags this package with it or fails the gate here;
+neither can drift silently, which is the only property worth having, because the
+symptom otherwise appears in a stranger's `npm install` and nowhere else.
+
+### The rule
+
+**A declaration about another package is checked against that package, not
+written down twice.** The three facts above are cheap to assert and were wrong
+within a day of being written — not through carelessness, but because the thing
+they describe did not exist yet.
+
+**What would close it for the next split**: nothing to do here. The pattern is
+`manifest.ts` reading `../../package.json`, and it is four lines.

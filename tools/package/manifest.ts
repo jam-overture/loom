@@ -115,6 +115,22 @@ export const VERSION = "0.1.0"
 /** The range the peer dependency carries. Pre-1.0, a minor is allowed to break. */
 export const RUNTIME_RANGE = `~${VERSION}`
 
+/**
+ * React's range, and it is the framework's rather than a looser one.
+ *
+ * This said `>=19.0.0` until an audit against the published framework on
+ * 27 September, which declares `^19.0.0`. A library that accepts React 20 while
+ * the framework beside it does not is a library advertising a combination that
+ * cannot install — npm resolves both peers against one tree — and the only
+ * thing the wider range could do is let somebody onto a major nothing here has
+ * ever been run against.
+ *
+ * It is **required** here and optional in the framework, which is correct in
+ * both: the framework can be used for its tree and its Gate without rendering
+ * anything, and every primitive in this package calls `createElement`.
+ */
+const REACT_RANGE = "^19.0.0"
+
 export type Manifest = Readonly<Record<string, unknown>>
 
 /**
@@ -156,9 +172,16 @@ export const manifest = (license: string): Manifest => ({
    * each in a host's tree or nothing works.
    */
   dependencies: { zod: "^3.24.1" },
-  peerDependencies: { "@jam-overture/loom": RUNTIME_RANGE, react: ">=19.0.0" },
+  peerDependencies: { "@jam-overture/loom": RUNTIME_RANGE, react: REACT_RANGE },
   engines: { node: ">=22.0.0" },
   publishConfig: { access: "public" },
-  repository: { type: "git", url: "git+https://github.com/jam-overture/loom.git", directory: "packages/primitives" },
+  /**
+ * `src/primitives`, not `packages/primitives`. npm turns this into a "view
+ * source" link, and the package root is assembled by `pnpm package:primitives`
+ * — everything in it but the README is generated and gitignored, so the link
+ * would land a reader in an almost empty directory. The source they want is
+ * where it has always been.
+ */
+  repository: { type: "git", url: "git+https://github.com/jam-overture/loom.git", directory: "src/primitives" },
   keywords: ["loom", "primitives", "ui", "react", "server-components", "design-system", "ai"],
 })
