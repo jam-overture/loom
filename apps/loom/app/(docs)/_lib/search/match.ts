@@ -21,6 +21,14 @@ import type { SearchEntry, SearchIndex } from "./model"
  * would produce results a reader cannot account for — and this index is small
  * and its titles are the site's own words, so the honest failure mode is a
  * reader typing a word that genuinely is not on the site.
+ *
+ * **One thing is taken out of the list rather than ranked down it**, and it is
+ * the last thing this file does. Some pages on this site are one page rendered
+ * many times — the reference's sixteen doors — so a sentence in a band they
+ * share matches every one of them, for one reason, and can fill a list ten rows
+ * long. Those become a single row that says how many there were.
+ * `foldFamilies` carries that argument; `nav.ts` is where a section declares
+ * which of its pages are copies of each other.
  */
 
 const TITLE_EXACT = 100
@@ -173,6 +181,36 @@ export type ExcerptPart = {
   readonly match: boolean
 }
 
+/**
+ * What a row stands for, where it stands for more than itself.
+ *
+ * **Why a row ever stands for more than itself.** The reference's sixteen pages
+ * are one page rendered per import, so a sentence in a band they share is a
+ * sentence on all sixteen. A reader who types *peer dependency* three minutes
+ * after installing matched nine of them, and the heading that answers them —
+ * *Installation → What you actually need* — came tenth. Nine rows saying one
+ * thing about nine different doors is nine rows' worth of a list ten rows long.
+ *
+ * So a run of them becomes one row, the closest, and this says how many there
+ * were and what they are called. `nav.ts` is where a section declares that its
+ * pages are variations of one page, and `SearchEntry.family` is how that reaches
+ * here.
+ */
+export type FoldedFamily = {
+  /**
+   * How many of the family the query matched, **this row included**.
+   *
+   * The total rather than the remainder, and that is the reason the row can read
+   * *the closest of 9 imports* with one spelling of the word. A total is never
+   * below two — a family of one is not folded at all — so the noun is always
+   * plural, and the site never has to hold both *import* and *imports* to write
+   * one line. *And 1 more imports* is the sentence that rule exists to prevent.
+   */
+  readonly matched: number
+  /** What they are called, plural, in the words the section uses for its own pages. */
+  readonly noun: string
+}
+
 export type SearchHit = {
   readonly entry: SearchEntry
   readonly score: number
@@ -193,6 +231,11 @@ export type SearchHit = {
    * at a glance.
    */
   readonly excerptIsCode: boolean
+  /**
+   * The rest of this row's family, where it has one and the query reached more
+   * than this page. Nothing on every other row, which is most of them.
+   */
+  readonly folded: FoldedFamily | undefined
 }
 
 /** How much of the paragraph either side of the word is worth showing. */
@@ -375,19 +418,78 @@ const marked = (text: string, terms: readonly string[]): readonly ExcerptPart[] 
 }
 
 /**
+ * One row per family, the closest of each, with the rest counted on it.
+ *
+ * **Before the list is cut to ten, and that is the point.** Folding after the
+ * cut would turn ten results into one row and show a reader a list of one; the
+ * whole gain is that nine slots go back to the rest of the site, so *peer
+ * dependency* answers with the reference and then with the Installation heading
+ * it was burying. It also means the count is true about the site rather than
+ * about the top ten — a reader told *the closest of 9 imports* was told how many
+ * there are, not how many happened to fit.
+ *
+ * **Order is untouched.** The row a family keeps is the one that ranked highest,
+ * it stays exactly where it ranked, and every entry with no family passes
+ * through as it is. So a query that matches one import and nothing else shows
+ * that import, with nothing about a family, because there is no family to count.
+ *
+ * What a reader loses is the other eight rows, and that is the trade this takes
+ * deliberately: the other two remedies considered were dropping a repeated band
+ * from fifteen of the sixteen pages — which makes *the import itself fails*
+ * findable on one door and nowhere else — and ranking a generated page below a
+ * written one, which breaks the reference's own front door. This one is the only
+ * one of the three where every sentence stays findable by every page that says
+ * it; a reader who wants a different door types its name and the door wins on
+ * its title.
+ */
+const foldFamilies = <T extends { readonly entry: SearchEntry }>(
+  ranked: readonly T[]
+): readonly (T & { readonly folded: FoldedFamily | undefined })[] => {
+  const matched = ranked.reduce<Map<string, number>>(
+    (counts, hit) =>
+      hit.entry.family === ""
+        ? counts
+        : counts.set(hit.entry.family, (counts.get(hit.entry.family) ?? 0) + 1),
+    new Map()
+  )
+
+  const shown = new Set<string>()
+
+  return ranked.flatMap((hit) => {
+    const family = hit.entry.family
+
+    if (family === "") return [{ ...hit, folded: undefined }]
+    if (shown.has(family)) return []
+
+    shown.add(family)
+
+    const count = matched.get(family) ?? 1
+
+    /* A family of one is a page like any other, so it says nothing about being
+       one of a set — there is nothing to disclose and a count of one would read
+       as an error. */
+    return [{ ...hit, folded: count < 2 ? undefined : { matched: count, noun: family } }]
+  })
+}
+
+/**
  * The ranked answer.
  *
  * Ties are broken by the shorter title and then by the order the index was
  * built in, so the same query always returns the same list in the same order. A
  * search box whose results shuffle between two identical queries is one a
  * reader stops trusting.
+ *
+ * Between the ranking and the cut to ten, a family folds to one row — see
+ * `foldFamilies` for which pages are a family and why the fold has to happen on
+ * this side of the cut.
  */
 export const searchDocs = (index: SearchIndex, query: string, limit: number): readonly SearchHit[] => {
   const terms = searchTerms(query)
 
   if (terms.length === 0) return []
 
-  return index.entries
+  const ranked = index.entries
     .map((entry, position) => {
       const scores = terms.map((term) => scoreTerm(entry, term))
 
@@ -406,15 +508,19 @@ export const searchDocs = (index: SearchIndex, query: string, limit: number): re
         a.entry.title.length - b.entry.title.length ||
         a.position - b.position
     )
-    .slice(0, limit)
-    /*
-     * The excerpt is cut after the ranking and after the limit, so the work of
-     * reading a paragraph is done for the ten rows a reader will see rather
-     * than for the nine hundred entries they will not.
-     */
-    .map(({ entry, score }) => {
-      const { parts, isCode } = excerptOf(entry, terms)
 
-      return { entry, score, excerpt: parts, excerptIsCode: isCode }
-    })
+  return (
+    foldFamilies(ranked)
+      .slice(0, limit)
+      /*
+       * The excerpt is cut after the ranking, the fold and the limit, so the work
+       * of reading a paragraph is done for the ten rows a reader will see rather
+       * than for the nine hundred entries they will not.
+       */
+      .map(({ entry, score, folded }) => {
+        const { parts, isCode } = excerptOf(entry, terms)
+
+        return { entry, score, excerpt: parts, excerptIsCode: isCode, folded }
+      })
+  )
 }

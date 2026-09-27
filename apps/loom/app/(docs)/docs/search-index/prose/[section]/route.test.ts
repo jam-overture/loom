@@ -51,6 +51,7 @@ describe("the words of one section, as an address", () => {
         summary: "",
         body: "",
         code: "",
+        family: "",
       })),
     })
 

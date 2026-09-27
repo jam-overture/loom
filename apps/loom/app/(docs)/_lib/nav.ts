@@ -48,6 +48,29 @@ export type DocsSection = {
   /** Whether a person writes these pages or the repository does. */
   readonly source: "written" | "generated"
   /**
+   * What one of this section's pages is, plural — and by declaring it, that its
+   * pages are **one page rendered many times** rather than separate writing.
+   *
+   * Only a section whose pages are variations of each other says this, and the
+   * reference is the only one today: its sixteen pages are the same five bands
+   * with a different import's numbers in them. That has a consequence a reader
+   * feels, which is the whole reason this field exists. A sentence in one of
+   * those bands is a sentence on all sixteen pages, so a query whose words are
+   * in a band matches sixteen near-identical results and can fill a list ten
+   * rows long — the search box folds them into one row reading *the closest of
+   * 9 imports*, and this is the word it uses.
+   *
+   * It is declared rather than inferred from `source`, because being generated
+   * is not the property that licenses folding. A generated section could
+   * perfectly well hold pages that answer different questions; what licenses it
+   * is that these answer the same one about a different door.
+   *
+   * **A landing page is never a member of the family.** It is the section
+   * itself, it says something the pages inside it do not, and folding it away
+   * would hide the page that answers best. `build.ts` is where that is applied.
+   */
+  readonly family?: string
+  /**
    * The section's pages, in reading order, a landing page first where there is
    * one.
    *
@@ -98,6 +121,7 @@ const apiReferenceSection: DocsSection = {
   slug: "api-reference",
   title: "API reference",
   source: "generated",
+  family: "imports",
   pages: [
     {
       slug: DOCS_LANDING_SLUG,
