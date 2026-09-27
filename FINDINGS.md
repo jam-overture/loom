@@ -33506,3 +33506,71 @@ time** remains the rule, and it is the rule that caught this.
 should ever be quoted, in a table cell or anywhere else. Until then the three
 entries together say all a lane needs — link rather than embed, keep the link out
 of a table, and read the body back.
+
+---
+## 2026-09-26 — three declaration fences in `decisions/` simplify a type that has since become more precise, and nothing in the repository says whether that is allowed
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`decisions/README.md`, and `tools/decisions/` if a check is wanted) ·
+**Status:** open — **not a defect list.** Three of them are correct-as-of-their-date
+and the question is whether that reading is written down anywhere; it is not.
+
+Found while building a check over the course's own type fences and then pointing
+the same reader at `decisions/` and `docs/`, which took four minutes and is the
+whole reason this entry exists rather than a paragraph in a report.
+
+**What was measured.** Ten fences across `decisions/` and `docs/` open with a
+`type` or `interface` whose name `src/` also declares exactly once. Five of the
+ten say something the declaration does not. Two of those five are the reader's
+own limit and are named below. The other three are real:
+
+| record | date | what the fence says | what `src/` says |
+| --- | --- | --- | --- |
+| [0009](decisions/0009-primitives-receive-props-in-a-bag.md) | 29 Jul | `loom: LoomRenderContext`, `props: JsonObject` | `LoomRenderContext<TText, TBehaviour>`, `props: TProps` |
+| [0090](decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md) | 24 Aug | `cause: "not-callable" \| "threw"` | `cause: NotProbeableCause` |
+| [0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md) | 23 Sep | `default: string` | `default: Name` |
+
+**Every one of the three is a simplification rather than an error**, and in each
+case the declaration became *more* precise afterwards: a generic where there was a
+concrete type, a named union where there was an inline one, a branded string where
+there was a string. A reader following any of the three writes code that compiles.
+0184 is the one worth looking at twice — it is three days old, and the fence was
+already a simplification on the day it was written.
+
+**So the finding is not the drift. It is that two readings of a record's code
+fence are both defensible and the repository picks neither.**
+
+- **A fence is a snapshot as of the record's date.** Then all three are correct,
+  a reader who copies one and finds `src/` more precise has learned something
+  true about the history, and nothing needs doing except saying so.
+- **A fence is a quotation of current code.** Then all three are stale, and the
+  bill falls on whoever next makes a declaration more precise — a person with no
+  reason to know which of 195 records quoted it.
+
+The second reading is the one a reader arriving from the generated index will
+assume, because the index lists records by status and `Accepted` reads as
+*current*. `decisions/README.md` requires a status, a date, four headings and a
+citation, and says nothing at all about code.
+
+**Recommended: the first reading, written down.** One sentence in
+`decisions/README.md` — *a code fence in a record is as of the record's date; the
+declaration in `src/` is the authority* — costs nothing, is true of all 195
+records today, and makes every future simplification correct rather than owed.
+This is lesson 28's own order of preference applied to somebody else's directory:
+a second copy you did not have to manufacture is cheapest, and the cheapest way
+to stop owing one is to say out loud that it was never a copy.
+
+**If a check is wanted instead**, the reader exists and transfers directly:
+`apps/loom/app/(lessons)/_lib/declarations.ts` on this branch, 250 lines, no
+dependency on anything under `app/`. It holds a fence to every member it names
+and to nothing it leaves out, treats `…` as a wildcard, and reads completeness off
+the fence rather than from a list beside it. **Do not take it without the limit**:
+it does not follow a declaration assembled from others, so `RevisionPage =
+PageEnds & { revisions }` reports `older` and `newer` as members that do not
+exist. That is both of 0026's rows above and is a false red rather than a false
+green, which is the direction to be wrong in, but it would land on a lane that did
+not write it.
+
+**Nothing here is a defect in code and `src/` was read only.** The three records
+are well argued and the two that are oldest are the two that have drifted most,
+which is exactly what a dated document is supposed to do.
