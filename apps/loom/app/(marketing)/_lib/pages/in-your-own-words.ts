@@ -11,7 +11,7 @@ import { DEMO, surfaceHref, type SiteThemeName } from "../site"
  * demonstration rather than describing it**, and that this is the whole reason
  * the demonstration is public at all
  * ([0056](../../../../../decisions/0056-the-demo-is-public-and-shares-nothing-but-the-deployment.md)).
- * For a fortnight it did not, and the reason was not a judgement about whether
+ * For a fortnight it did not, and the reason was not a judgment about whether
  * it should.
  *
  * **It was built on 4 September and withdrawn the same run.** The frame rendered
@@ -34,7 +34,7 @@ import { DEMO, surfaceHref, type SiteThemeName } from "../site"
  * ## Why it belongs directly under the band above it
  *
  * The band above is this site changing itself, through five prepared choices,
- * and its closing line has apologised for that since 22 August: the hero
+ * and its closing line has apologized for that since 22 August: the hero
  * promises *ask for a change in your own words* and the band offers buttons. The
  * reason is real and unchanged — a text box on the most-loaded page the project
  * has is a model call for every visitor and a dead control on every deployment

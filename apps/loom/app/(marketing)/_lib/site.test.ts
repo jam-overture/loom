@@ -12,7 +12,7 @@ import {
   otherThemes,
   PORTAL,
   PRODUCT_SURFACES,
-  readingNeighbours,
+  readingNeighbors,
   readThemeName,
   siteOrigin,
   SITE_ROUTES,
@@ -325,7 +325,7 @@ describe("the page before and the page after", () => {
 
   it("agrees with the order the site's argument is written in", () => {
     SITE_ROUTES.forEach((route, at) => {
-      const { before, after } = readingNeighbours(route)
+      const { before, after } = readingNeighbors(route)
 
       expect(before?.path).toBe(SITE_ROUTES[at - 1]?.path)
       expect(after?.path).toBe(SITE_ROUTES[at + 1]?.path)
@@ -338,11 +338,11 @@ describe("the page before and the page after", () => {
    */
   it("is the same relation read from either end", () => {
     for (const route of SITE_ROUTES) {
-      const { after } = readingNeighbours(route)
+      const { after } = readingNeighbors(route)
 
       if (after === undefined) continue
 
-      expect(readingNeighbours(after).before?.path).toBe(route.path)
+      expect(readingNeighbors(after).before?.path).toBe(route.path)
     }
   })
 
@@ -350,7 +350,7 @@ describe("the page before and the page after", () => {
     const { first } = ends()
 
     expect(first.path).toBe("/")
-    expect(readingNeighbours(first).before).toBeUndefined()
+    expect(readingNeighbors(first).before).toBeUndefined()
   })
 
   /**
@@ -360,21 +360,21 @@ describe("the page before and the page after", () => {
    * the site.
    */
   it("hands the reader to the documentation once this site has nothing left to say", () => {
-    const { after, onward } = readingNeighbours(ends().last)
+    const { after, onward } = readingNeighbors(ends().last)
 
     expect(after).toBeUndefined()
     expect(onward).toBe(DOCS)
   })
 
   it("offers the hand-off on exactly one page, so it stays a sequence", () => {
-    const handoffs = SITE_ROUTES.filter((route) => readingNeighbours(route).onward !== undefined)
+    const handoffs = SITE_ROUTES.filter((route) => readingNeighbors(route).onward !== undefined)
 
     expect(handoffs).toHaveLength(1)
   })
 
   /**
    * The guarantee the pager exists for, stated where the order is: **every page
-   * of this site is somebody's neighbour.** On `main` two of the ten were the
+   * of this site is somebody's neighbor.** On `main` two of the ten were the
    * destination of no page's body at all — `/putting-it-back` and
    * `/what-readers-do`, both also off the bar — so the only way to either was
    * to notice it in the footer's map.
@@ -382,7 +382,7 @@ describe("the page before and the page after", () => {
   it("leaves no page of this site off every other page's shoulder", () => {
     const reached = new Set(
       SITE_ROUTES.flatMap((route) => {
-        const { before, after } = readingNeighbours(route)
+        const { before, after } = readingNeighbors(route)
 
         return [before?.path, after?.path].filter((path): path is string => path !== undefined)
       })

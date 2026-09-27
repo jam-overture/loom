@@ -4,7 +4,7 @@ import { ASKS } from "./adapt/asks"
 import { askRunFor } from "./render"
 import { shareImageFor } from "./share-image"
 import { publishedCard } from "./share"
-import { HOME, HOW_IT_WORKS, SITE_ROUTES, SITE_THEME_NAMES, THE_RECORD } from "./site"
+import { HOME, HOW_IT_WORKS, SITE_ROUTES, SITE_THEME_NAMES, WHAT_YOU_RUN } from "./site"
 
 /**
  * An address, turned into the card it should unfurl as.
@@ -82,11 +82,11 @@ describe.each(ASKS)("a request for $id in the address", (ask) => {
 describe("a request that does not belong to the address", () => {
   it("is ignored on a page that cannot run one", async () => {
     const { card } = await shareImageFor(
-      query({ page: THE_RECORD.path, ask: "problem", approve: "1" }),
+      query({ page: WHAT_YOU_RUN.path, ask: "problem", approve: "1" }),
       ORIGIN
     )
 
-    expect(card).toEqual(publishedCard(THE_RECORD, ORIGIN))
+    expect(card).toEqual(publishedCard(WHAT_YOU_RUN, ORIGIN))
   })
 
   it("is ignored when it names nothing this page offers", async () => {

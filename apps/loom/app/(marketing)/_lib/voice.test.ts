@@ -2,9 +2,8 @@ import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "./copy"
-import { GLOSSARY, glossaryLine } from "./pages/how-it-works"
 import { pageTreeFor, treeFor } from "./render"
-import { DEFAULT_THEME, HOME, HOW_IT_WORKS, SITE_ROUTES, type SiteRoute } from "./site"
+import { DEFAULT_THEME, HOME, SITE_ROUTES, type SiteRoute } from "./site"
 import { uses, wordsOf } from "./words"
 
 /**
@@ -13,7 +12,7 @@ import { uses, wordsOf } from "./words"
  * The maintainer read the front door against `nextjs.org` on 20 August and said
  * the copy was heavy on technical jargon. It was, and the reason is worth
  * naming: **nothing stopped it.** Every other property this site claims — a
- * re-theme touching only the root, no colour below it, every surface reachable
+ * re-theme touching only the root, no color below it, every surface reachable
  * — has an assertion behind it, so a run that broke one found out. The register
  * had nothing, so it drifted a sentence at a time, each one defensible on its
  * own, until the third band of the landing page was four of our nouns in a row.
@@ -70,9 +69,6 @@ const heroOf = (route: SiteRoute): ElementNode => {
 
   return hero
 }
-
-const firstUse = (text: string, term: string): number =>
-  text.toLowerCase().indexOf(term.toLowerCase())
 
 describe("the front door", () => {
   let words = ""
@@ -135,63 +131,110 @@ describe("every page's opening band", () => {
 })
 
 /**
- * What a mechanism page is allowed to say, and what it has to say first.
+ * **The exemption is gone, and that is the maintainer's instruction of
+ * 26 September made into a test.**
  *
- * The plain phrase is not a definition in a glossary somewhere — it is the
- * sentence immediately before the word, doing the work. `delta` arrives after
- * the page has already said "an exact list of changes"; `the Gate` arrives after
- * "Your rules decide". Read aloud, the reader is told the thing and then told
- * what it is called, which is the order people learn words in.
+ * The rule used to be about *place*: the front door may not use a reserved word
+ * at all, and a mechanism page may, once it has said the same thing plainly
+ * first. The second half existed because `/how-it-works` printed the runtime's
+ * own lines — 341 lines of JSON in which our vocabulary arrives whether anybody
+ * chose it or not — and a glossary introduced five of our words before the page
+ * used them.
+ *
+ * That panel and that glossary are both gone. What is left is the simpler rule
+ * the maintainer asked for: **no page of this site uses one of these words,
+ * anywhere.** The vocabulary is the documentation's to teach, and a marketing
+ * site that has to define its terms before it can make its point is a marketing
+ * site making the wrong point.
+ *
+ * Swept over every route rather than named page by page, so a fourth page
+ * cannot arrive without it.
  */
-const GLOSSED: Readonly<Record<string, string>> = {
-  delta: "exact list of changes",
-  "the Gate": "Your rules decide",
-  /**
-   * The rest arrive with the runtime's own lines, printed whole on 24 August,
-   * and they are read off the glossary the page prints rather than kept here.
-   *
-   * They are not a relaxation of the rule. Each is now a *requirement* that the
-   * page say the plain thing before the word, checked in both directions — the
-   * term has to appear (an entry for a word nobody uses fails) and the plain
-   * phrase has to come first — and deleting a glossary line without deleting
-   * the band it introduces fails here rather than on the page.
-   */
-  ...Object.fromEntries(GLOSSARY.map((entry) => [entry.term, entry.plainly])),
-}
-
-describe("the mechanism page", () => {
-  let words = ""
-
-  beforeAll(async () => {
-    words = await pageWords(HOW_IT_WORKS)
+describe("every page of this site", () => {
+  it.each(
+    SITE_ROUTES.flatMap((route) => RESERVED_VOCABULARY.map((term) => [route, term] as const))
+  )("$0.path never says %s", async (route, term) => {
+    expect({ route: route.path, term, uses: uses(await pageWords(route), term) }).toEqual({
+      route: route.path,
+      term,
+      uses: false,
+    })
   })
+})
 
-  it("uses no reserved word it has not first said plainly", () => {
-    const unglossed = RESERVED_VOCABULARY.filter(
-      (term) => uses(words, term) && GLOSSED[term] === undefined
-    )
+/**
+ * US spelling, everywhere a visitor reads.
+ *
+ * **The maintainer's third instruction of 26 September**, and the only one of
+ * the four that is a property rather than a judgement call — which is why it is
+ * a test rather than a pass somebody did once. A site edited by seven routines
+ * with no memory of each other will drift back into *colour* and *behaviour*
+ * within a week of anybody fixing it by hand, and nothing would say so.
+ *
+ * It reads the words a page actually renders rather than grepping the source,
+ * for the same reason the register test does: most of the copy on this site is
+ * props rather than text nodes, and a scan that missed those would have been
+ * reporting a clean site while every feature title went unread. Identifiers and
+ * comments are deliberately out of scope — the instruction was about the page.
+ */
+const BRITISH = new RegExp(
+  [
+    "colou?rs?",
+    "coloured",
+    "behaviours?",
+    "honou?r(ed|s)?",
+    "favou?rites?",
+    "neighbou?rs?",
+    "centre[ds]?",
+    "theatre",
+    "metres?",
+    "organis(e|ed|ing|ation)",
+    "recognis(e|ed|ing)",
+    "realis(e|ed|ing)",
+    "apologis(e|ed|ing)",
+    "emphasis(e|ed|ing)",
+    "analys(e|ed|ing)",
+    "catalogues?",
+    "dialogues?",
+    "defence",
+    "licence",
+    "practis(e|ed|ing)",
+    "travelled",
+    "cancelled",
+    "labelled",
+    "modelled",
+    "signalling",
+    "whilst",
+    "amongst",
+    "learnt",
+    "spelt",
+    "grey",
+    "programme",
+    "judgement",
+    "ageing",
+    "sizeable",
+    "towards",
+    "offence",
+    "storey",
+    "cheque",
+    "tyres?",
+    "plough",
+    "draught",
+    "kerb",
+    "pyjamas",
+    "aluminium",
+    "maths",
+  ].join("|"),
+  "gi"
+)
 
-    expect(unglossed).toEqual([])
-  })
+describe("the spelling a reader meets", () => {
+  it.each(SITE_ROUTES)("$path is written in US English", async (route) => {
+    const found = [...(await pageWords(route)).matchAll(BRITISH)].map((match) => match[0])
 
-  it.each(Object.entries(GLOSSED))("says it plainly before it says %s", (term, plainly) => {
-    expect(firstUse(words, plainly)).toBeGreaterThanOrEqual(0)
-    expect(firstUse(words, plainly)).toBeLessThan(firstUse(words, term))
-  })
-
-  /**
-   * The glossary's own shape, checked so the test above cannot be satisfied by
-   * an entry that never names anything: a line whose plain half already
-   * contained the word would pass "plainly first" trivially and teach a reader
-   * nothing.
-   */
-  it.each(GLOSSARY)("introduces $term with the plain thing first, and only then names it", (entry) => {
-    expect(RESERVED_VOCABULARY).toContain(entry.term)
-    expect(uses(entry.plainly, entry.term)).toBe(false)
-    expect(uses(entry.naming, entry.term)).toBe(true)
-  })
-
-  it.each(GLOSSARY)("prints the line introducing $term on the page", (entry) => {
-    expect(words).toContain(glossaryLine(entry))
+    expect({ route: route.path, british: [...new Set(found)] }).toEqual({
+      route: route.path,
+      british: [],
+    })
   })
 })

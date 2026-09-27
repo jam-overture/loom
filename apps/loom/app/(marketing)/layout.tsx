@@ -52,7 +52,7 @@ export const metadata: Metadata = {
  *
  * Two weights, because the pack uses exactly two: 700 for headings, 400 for
  * body. Nothing renders wrong if the request fails — the fallback is a
- * near-neighbour by design, which is the property that makes the failure quiet
+ * near-neighbor by design, which is the property that makes the failure quiet
  * and is why it is worth a comment.
  */
 const GEIST = "https://fonts.googleapis.com/css2?family=Geist:wght@400;700&display=swap"

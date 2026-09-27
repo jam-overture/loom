@@ -107,12 +107,12 @@ export const whyNoFrameOrigins = (origin: string): string | undefined => {
  * line is the seam working, not the seam complaining.
  *
  * It matters because every page test on this site asserts *nothing the runtime
- * could not honour*, and until 18 September that was spelled `diagnostics` is
+ * could not honor*, and until 18 September that was spelled `diagnostics` is
  * empty. Those two sentences were the same sentence while the site framed
  * nothing, and the front door framing the demonstration is what pulled them
  * apart.
  *
- * The split is the strict reading rather than the lenient one. `unhonoured`
+ * The split is the strict reading rather than the lenient one. `unhonored`
  * holds the original claim exactly — anything the render could not do is still a
  * failing test — and the disclosure is not merely tolerated but **required**:
  * `frames.test.ts` asserts the front door emits exactly one of these, naming the
@@ -123,7 +123,7 @@ export const whyNoFrameOrigins = (origin: string): string | undefined => {
 const DISCLOSED_CODES: ReadonlySet<RenderDiagnostic["code"]> = new Set(["frame-same-origin"])
 
 /** Everything the render could not do, which is what a page test asserts is empty. */
-export const unhonoured = (
+export const unhonored = (
   diagnostics: readonly RenderDiagnostic[]
 ): readonly RenderDiagnostic[] =>
   diagnostics.filter((diagnostic) => !DISCLOSED_CODES.has(diagnostic.code))

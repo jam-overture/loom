@@ -47,7 +47,7 @@ const listener = (): {
  * Keyed by the type the runtime actually emitted, so a stage that starts
  * narrating itself differently arrives here as a missing key and fails the
  * build. The alternative — a page that quietly skips an event it does not
- * recognise — is a paper trail with a hole in it presented as a complete one,
+ * recognize — is a paper trail with a hole in it presented as a complete one,
  * which is the exact failure this band exists to argue cannot happen.
  */
 const STAGE: Readonly<
