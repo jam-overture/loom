@@ -479,6 +479,12 @@ shape of the first.
    which of the seven interpretation codes produce the first of the two — all of
    them, or some. *(10)*
 8. Why is a half-applied delta worse than a rejected one? *(03)*
+9. `complete` takes a second argument that carries an `AbortSignal`, and a client
+   that never looks at it still cannot make the runtime wait. Say where the
+   ceiling is enforced and why one level up rather than in the vendor adapter,
+   then apply lesson 05's test — *can a stranger violate it* — and say which of
+   its two readings the signal is. Then say what moving the enforcement down
+   would change in the signature. *(05)*
 
 Question 4 is the slow one and the reason this set exists. Both answers are
 "something upstream must not see something downstream", and they diverge on
@@ -611,9 +617,19 @@ Gate says no.
    name who has to do it. Then say what this system looks like if nobody ever
    does.
 
+8. Part III's two seams each hand something across that the runtime does not
+   need honoured: the draft schema asks a model for operations without ids, and
+   `ModelCallOptions` asks a client to stop when nobody is listening. Say what
+   keeps each of those true when the far side does not cooperate, then say which
+   of the two would be a hole rather than a courtesy if its enforcement moved one
+   level, and in which direction. *(05, 11)*
+
 Question 7 is what this set is built around, and it is the one to be least
 satisfied with a short answer to. Question 3's count is deliberately given as a
-floor rather than a number — finding a fifth is the exercise.
+floor rather than a number — finding a fifth is the exercise. Question 8 arrived
+on 26 September, when a check over the course's own type fences found lesson 11
+printing this seam with one argument six days after it grew a second one; the
+question it raises was worth more than the correction.
 
 ---
 
