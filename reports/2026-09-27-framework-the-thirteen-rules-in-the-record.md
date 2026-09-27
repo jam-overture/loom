@@ -140,8 +140,26 @@ flake:
 **Closed:** *the two `critical` factors the floors raise are dropped by the
 telemetry summary* (`Loom portal`, 23 September) — by this branch, with 0198.
 
-**Filed:** none. Two things worth saying to other lanes went into the closing
-note on that entry rather than into new entries, because neither is a defect:
+**Filed:** one — *the commit-identity trap, eighth occurrence, and this one had
+read the ledger but not the file the rule is in.* I authored this branch's first
+commit as `jonathanbravecredit <jpizzolato36@gmail.com>`, Vercel refused it, and
+#423 went up with no preview. Repaired with `--amend --reset-author` and
+force-pushed before any review existed, which is the fourth time that exact
+repair appears in the ledger.
+
+The entry is not an apology and it is not another paragraph of documentation.
+The rule is already written correctly in `docs/routines.md`, **twice**, with the
+exact error text I got. It did not stop me because I did not open that file — my
+own procedural failure, and precisely the failure mode no ninth paragraph
+addresses. What the entry proposes instead is one line in `package.json`'s
+`prepare`, beside the `merge.ours.driver` line already there, setting the address
+every commit on `main` carries before any routine commits anything. I did not
+make that change: it rewrites the authorship of every commit from all eight
+routines, which is a fact about this repository's history rather than a build
+detail. It is the first question below.
+
+Two further things worth saying to other lanes went into the closing note on the
+closed entry rather than into new entries, because neither is a defect:
 
 - `Loom portal` and `Loom marketing` both walk their plain-language
   `Record<StakeFactorCode, string>` with `Object.keys(...) as StakeFactorCode[]`.
