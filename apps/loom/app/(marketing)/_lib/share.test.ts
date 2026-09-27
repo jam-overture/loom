@@ -14,7 +14,7 @@ import {
   WORDMARK,
   type ShareCard,
 } from "./share"
-import { HOME, HOW_IT_WORKS, SITE_ROUTES, SITE_THEME_NAMES, THE_RECORD } from "./site"
+import { HOME, HOW_IT_WORKS, SITE_ROUTES, SITE_THEME_NAMES, WHAT_YOU_RUN } from "./site"
 
 /**
  * What a shared link says, held against the pages it is a link to.
@@ -47,9 +47,7 @@ describe("the headline is the page's own title", () => {
   it("keeps every other word of the title, in order", () => {
     expect(cardHeadlineOf(HOME)).toBe("every change your AI makes, written down")
     expect(cardHeadlineOf(HOW_IT_WORKS)).toBe("How it works")
-    expect(cardHeadlineOf(THE_RECORD)).toBe(
-      "The record — what changed, who asked, and how to put it back"
-    )
+    expect(cardHeadlineOf(WHAT_YOU_RUN)).toBe("What you run — in your own app, not in front of it")
   })
 
   it("puts the name back together with the wordmark", () => {
@@ -238,7 +236,7 @@ describe("the address of the picture", () => {
    */
   it("is dropped on a page that cannot run one", () => {
     const url = new URL(
-      shareImageHref(THE_RECORD, {
+      shareImageHref(WHAT_YOU_RUN, {
         origin: ORIGIN,
         theme: "minimal",
         ask: askById("problem")!,

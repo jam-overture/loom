@@ -33808,3 +33808,154 @@ not write it.
 **Nothing here is a defect in code and `src/` was read only.** The three records
 are well argued and the two that are oldest are the two that have drifted most,
 which is exactly what a dated document is supposed to do.
+---
+## 2026-09-26 — the marketing site was four surfaces' worth of documentation, and the instruction that cut it was one paragraph
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37-the-cliff-notes` — recorded because the shape is not
+this lane's alone and the next surface to grow will grow the same way
+
+The maintainer read this site on 26 September and gave four instructions: it is
+too detailed and too complex, it should be simple enough for a high schooler,
+there is 60–75% too much of it, and `/the-rules`, `/the-record` and
+`/when-it-goes-wrong` should be cliff notes under `/how-it-works`. He was right
+on every count and none of it was visible from inside.
+
+**The measurement, taken before anything was cut:** ten pages, **13,208 words**
+of copy a visitor reads. `/how-it-works` alone was 1,949, of which 12,415
+characters — 73% of its visible text — were printed JSON. The site carried a
+**glossary teaching five of our own words** (`provenance`, `runtime`,
+`inverse`, `disposition`, `node`) to a stranger, and a register test whose rule
+was *a mechanism page may use one of our words once it has said the plain thing
+first*. That test passed for six weeks. It was enforcing the wrong rule
+correctly.
+
+**How it got there, which is the part worth keeping.** Every page was added by a
+run that had just found a real gap: the front door promised *checked against
+your rules* and nothing said what a rule was, so `/the-rules` was written; the
+undo was claimed and not shown, so `/putting-it-back` was written. Each was a
+defensible answer to a genuine question, each was reviewed on its own, and no
+run ever saw the ten together. **A lane that adds one good page a day builds a
+documentation site in a fortnight, and every individual step is correct.**
+
+Three things would have caught it and none of them existed:
+
+- **A budget.** There was no assertion anywhere about how much copy a page or a
+  site may carry. Every other property this site claims has one. This branch
+  adds a word ceiling per band to the mechanism page, which is the smallest
+  version of it.
+- **An altitude rule.** `docs/routines.md` gives each lane a directory. Nothing
+  says a marketing page and a documentation page answer the same question at
+  different depths, so *depth* was never a thing a review could fail on.
+- **Somebody reading it cold.** `docs/rollout.md`'s Phase 2 asks for exactly
+  this — *a getting-started path that works for a stranger, verified by someone
+  who did not build it* — and it is scoped to the docs. The same gap is the
+  marketing site's.
+
+**For the other surface lanes**, and this is why it is filed rather than only
+reported: `(docs)`, `(lessons)`, `(demo)` and `(portal)` are all built the same
+way by the same kind of run. The question worth asking on each of them is not
+*is this page correct* — it always is — but **is this page the right depth for
+the person who arrives at it, and how would this lane find out if it were
+not?**
+
+---
+## 2026-09-26 — the register test was enforcing the rule that let the jargon in
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37-the-cliff-notes` — recorded for the shape
+
+`voice.test.ts` has held this site's register since 20 August, when the
+maintainer read the front door against `nextjs.org` and said the copy was heavy
+on technical jargon. The rule it encoded was about **place**:
+
+> - The front door may not use a reserved word at all.
+> - A mechanism page may, **once it has said the same thing plainly first** —
+>   the plain phrase earlier on the page, the word after it.
+
+The second half was written to be the thing that keeps the rule from being
+censorship, and it is the thing that let the site drift. It made a glossary the
+*compliant* answer: print five of our words, introduce each one plainly first,
+and the suite goes green on a page that has just taught a stranger
+`disposition`. Both halves were asserted in both directions. Nothing was ever
+red.
+
+The rule is now the flat one the maintainer asked for — **no page of this site
+uses one of these words, anywhere** — swept over every route so a fourth page
+cannot arrive without it. It is shorter, it is stricter, and it is the rule the
+20 August instruction actually meant.
+
+**The general shape:** an exemption written into a test to keep it honest is an
+exemption a later run will build inside. The glossary was not a violation of the
+register test; it was the register test's own escape hatch, used exactly as
+written, for six weeks.
+## 2026-09-27 — a preview deployment now carries a full structured-data graph, and nothing tells a crawler to ignore it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — **a sharpening of the `noindex` question this lane has carried as an
+open item since 8 September**, not a new one, and now worth more than it was
+
+Every preview deployment serves `/sitemap.xml`, `/robots.txt` with
+`allow: /`, per-page canonicals, Open Graph cards — and as of today a
+`schema.org` graph on every page and an `/llms.txt` listing the site. None of it
+says *this is a preview*.
+
+The canonical is the honest part and it is what has kept this harmless so far:
+`pageMetadata` sets it to the address the page is served from, so a preview
+page's canonical is the preview's own URL rather than production's. That stops a
+preview competing with production for the same address. It does not stop the
+preview being indexed **as itself**, and there is one per pull request.
+
+What changed today is the value of indexing one. A page with a `FAQPage` and a
+`SoftwareApplication` node is a page a search engine can present as a rich
+result and an assistant can quote as fact. Thirty preview deployments of a
+product, each stating it is that product, is a worse thing to have crawled than
+thirty copies of some HTML.
+
+**The fix is one line in the shell** and it is the shell's because
+[0190](decisions/0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md)
+put `robots.ts` at the application root: `VERCEL_ENV !== "production"` →
+`rules: { userAgent: "*", disallow: "/" }`. The same signal could set
+`robots: { index: false }` in `pageMetadata`, which is this lane's file and this
+lane will make that change on a word from the maintainer — it is held here
+rather than taken because turning indexing off on the wrong deployment is a
+silent, total SEO failure, and *which* deployments are production is a
+deployment question rather than a marketing one.
+
+---
+## 2026-09-27 — structured data is the one text on this site nobody proofreads, and a fabricated rating in it would have passed every test this repository had
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37` — recorded for the shape, which the other surfaces will
+meet the moment any of them emits schema
+
+A JSON-LD graph does not render. A wrong field in one breaks no page, fails no
+render diagnostic, changes no screenshot and reads as the same green as a
+correct one. It is also the only text on this site with a **non-human reader**,
+which means a wrong claim in it is repeated by a machine to somebody who never
+opens the page.
+
+The fields that make this dangerous rather than merely untidy are the ones that
+make a graph look more complete, each of which is one line:
+
+| field | what adding it would claim |
+| --- | --- |
+| `offers` / `price: "0"` | a price nobody has set, on a product whose licensing is explicitly unsettled |
+| `aggregateRating` | that people have rated this. Nobody has |
+| `review` | reviews that do not exist |
+| `publisher` as an `Organization` | that somebody in particular publishes this, which is positioning |
+| `dateModified` | a date nothing at serve time knows — the sitemap's own recorded argument |
+
+**`UNMADE_CLAIMS` in `_lib/schema.ts` is a denylist of exactly those**, swept
+over every node of every page's graph, plus a second assertion from the other
+side that no value anywhere in it is a bare number or a currency code — because
+a price can arrive as a value rather than as a key. Both were checked red by
+planting `offers: { price: "0", priceCurrency: "USD" }` and an
+`aggregateRating` of 4.8 from 37 reviews: **six assertions failed.** Before
+today, that plant would have passed the entire suite.
+
+The general shape, offered to any lane that adds structured data later:
+**a comment explaining why a field is absent is not a mechanism.** The reasoning
+reads as settled and a later run adds the field in good faith, because the
+schema looked incomplete and nothing said otherwise. The absence has to be the
+thing that is asserted.

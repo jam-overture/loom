@@ -20,7 +20,7 @@ import type { ShareCard } from "./share"
  * here, it is private to this module, no page imports it, and it is a picture of
  * a page rather than a piece of one.
  *
- * The rule the site does keep, it keeps exactly: **not one colour, size or
+ * The rule the site does keep, it keeps exactly: **not one color, size or
  * weight below is written down here.** Every one is read off the registered
  * theme the address selects — the palette's slots, the font pack's ramp and
  * weights, the style preset's radii and spacing — so `?theme=bold` unfurls in
@@ -37,13 +37,13 @@ import type { ShareCard } from "./share"
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 } as const
 
 export const ink = (theme: ResolvedTheme, slot: PaletteSlot): string => {
-  const colour = theme.palette.slots[slot]
+  const color = theme.palette.slots[slot]
 
-  if (colour === undefined) {
+  if (color === undefined) {
     throw new Error(`loom: the ${theme.palette.id} palette has no ${slot}`)
   }
 
-  return colour
+  return color
 }
 
 /**
@@ -80,7 +80,7 @@ const space = (theme: ResolvedTheme, index: number): number => {
  * Exported as data so the contrast test measures what is drawn rather than a
  * second list of what somebody believed was drawn. A pairing added to the card
  * and not to this map is a pairing the element cannot use — there is nowhere
- * else for a colour to come from.
+ * else for a color to come from.
  */
 export const CARD_PAIRINGS: readonly {
   readonly what: string
@@ -96,7 +96,7 @@ export const CARD_PAIRINGS: readonly {
 ]
 
 /**
- * The one band of colour on the card, and the only place the palette is painted
+ * The one band of color on the card, and the only place the palette is painted
  * as an area rather than read as ink.
  *
  * `accent-strong` and `brand-secondary` are the two slots every palette gives

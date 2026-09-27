@@ -1,7 +1,8 @@
 import type { LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
-import { readChangeSequence, runHistory } from "./adapt/history"
+import { askById, type AskId } from "./adapt/asks"
+import { runAsk, type AskRun } from "./adapt/run"
 import { BAND } from "./bands"
 import { bandsOf, outlineDiff, outlineOf, type OutlineRow } from "./outline"
 import { treeFor } from "./render"
@@ -19,8 +20,32 @@ const ORIGIN = "https://loom.example"
 
 const front = (): LoomTree => treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
 
-const after = async (changes: string) =>
-  runHistory(front(), readChangeSequence(changes))
+/**
+ * The page before and after one request, which is all this file ever needed.
+ *
+ * It went through `runHistory` until 26 September, because the record page
+ * replayed sequences and this borrowed its machinery to build a two-state
+ * fixture. That page is retired and the machinery with it; a single ask against
+ * the published front door is the same fixture with nothing in between.
+ */
+const after = async (...asks: readonly (readonly [AskId, boolean])[]) => {
+  const start = front()
+  const steps: AskRun[] = []
+  let page = start
+
+  for (const [id, approve] of asks) {
+    const chosen = askById(id)
+
+    if (chosen === undefined) throw new Error(`loom: no ask called ${id}`)
+
+    const run = await runAsk(page, chosen, approve)
+
+    steps.push(run)
+    page = run.page
+  }
+
+  return { start, page, steps }
+}
 
 const rowFor = (rows: readonly OutlineRow[], name: string): OutlineRow | undefined =>
   rows.find((row) => row.name === name)
@@ -64,7 +89,7 @@ describe("the front door's outline", () => {
 
 describe("what the outline says a change did", () => {
   it("marks a band that has been taken off the page", async () => {
-    const history = await after("shorter")
+    const history = await after(["shorter", false])
     const rows = outlineDiff(history.start, history.page)
     const questions = rowFor(rows, BAND.questions)
 
@@ -78,7 +103,7 @@ describe("what the outline says a change did", () => {
   })
 
   it("marks a band that was not there when the visitor arrived", async () => {
-    const history = await after("proof")
+    const history = await after(["proof", false])
     const rows = outlineDiff(history.start, history.page)
     const added = rows.filter((row) => row.state === "added")
 
@@ -94,7 +119,7 @@ describe("what the outline says a change did", () => {
    * claim the request itself makes in words.
    */
   it("marks a band that is the same band, further up", async () => {
-    const history = await after("problem-yes")
+    const history = await after(["problem", true])
     const rows = outlineDiff(history.start, history.page)
     const moved = rows.filter((row) => row.state === "moved")
 
@@ -105,7 +130,7 @@ describe("what the outline says a change did", () => {
   })
 
   it("reads the outline off the changed page rather than off the requests", async () => {
-    const history = await after("drop-pitch")
+    const history = await after(["drop-pitch", false])
     const rows = outlineDiff(history.start, history.page)
 
     /** The request asked for that band to go and the rules refused, so it stays. */
@@ -114,7 +139,7 @@ describe("what the outline says a change did", () => {
   })
 
   it("keeps every band of the changed page, in its order", async () => {
-    const history = await after("proof.problem-yes.shorter")
+    const history = await after(["proof", false], ["problem", true], ["shorter", false])
     const rows = outlineDiff(history.start, history.page)
     const present = rows.filter((row) => row.state !== "taken-away").map((row) => row.name)
 

@@ -49,3 +49,17 @@ export const ANCHOR = {
   seeItHappen: "see-it-happen",
   inYourOwnWords: "your-turn",
 } as const satisfies Partial<Record<BandName, string>>
+
+/**
+ * The one anchor that is not a band of the front door.
+ *
+ * `/what-you-run` says what this deployment counts about a reader, and the
+ * footer of every page links to it — which it did by naming a page until
+ * 26 September, when that page was retired into a band. A band is reachable
+ * only by its anchor, so this is the link that used to be a route.
+ *
+ * It is separate from `ANCHOR` rather than a sixth entry because that map is
+ * keyed by `BandName`, and `BandName` is the front door's bands. Widening it to
+ * hold a second page's would make the key mean two things.
+ */
+export const COUNTED_ANCHOR = "what-we-count"

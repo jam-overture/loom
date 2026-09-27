@@ -1,747 +1,190 @@
 import {
   buildElement,
   buildSlot,
-  buildText,
   createTree,
-  frameCatalogue,
-  measurePrompt,
   sequentialIdFactory,
-  systemClock,
-  type EditIntent,
   type IdFactory,
   type LoomNode,
   type LoomTree,
-  type PromptMeasurement,
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
-import { catalogueOf } from "@jam-overture/loom/sdk"
 
-import { askById } from "../adapt/asks"
+import { COUNTED_ANCHOR } from "../bands"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
-import { FACTS } from "../copy"
-import { siteFrameOrigins } from "../frames"
-import { action, cell, columns, heading, prose, row, section, stack } from "../nodes"
-import { siteRegistry, siteThemes } from "../registry"
+import { action, heading, prose, section, stack } from "../nodes"
 import {
-  DEFAULT_THEME,
   DEMO,
   DOCS,
-  internalHref,
+  HOW_IT_WORKS,
+  REPOSITORY_URL,
   SITE_THEMES,
-  surfaceHref,
-  THE_RECORD,
-  THE_RULES,
   WHAT_YOU_RUN,
-  YOUR_COMPONENTS,
+  internalHref,
+  surfaceHref,
 } from "../site"
 
-import { homePageTree, type PageContext } from "./home"
+import type { PageContext } from "./home"
 
 /**
- * The page for the question every other page hands the reader and none of them
- * takes back.
+ * What you would actually be running, and the one page on this site that
+ * answers a buying question rather than a mechanical one.
  *
- * `/how-it-works` is the journey one change takes. `/the-rules` is what you
- * decide in advance. `/your-components` is what you hand over. `/the-record` is
- * what you are left holding. Each is about a *part* of this, and a reader who
- * has understood all four still cannot say what the thing on their machine
- * would be — a library they add to something, a service they point something
- * at, or a site somebody else hosts for them.
+ * **Rewritten on 26 September at the maintainer's direction**, which was that
+ * the site is too detailed and too close to the documentation. This page was
+ * 1,286 words of it — a measured table of every byte that leaves a server, a
+ * four-column comparison against three other places a thing like this could
+ * live, and a prompt weighed to the character.
  *
- * The question arrived in as many words on 10 September. That run put *"whoever
- * runs the site writes the list of who may sign in"* on the front door, which is
- * true and is the answer to what a stranger asks about the portal. It also hands
- * them the next question in the same breath: **so what do I run?**
+ * All of that is true and none of it belongs on a marketing site. What a
+ * stranger needs from this page is three sentences: it runs inside your own
+ * application, you bring your own components, and one request goes to a model
+ * you chose when somebody asks for something. The documentation has the rest.
  *
- * Every claim on this page is a description of code in this repository rather
- * than a position, which is why it did not wait on the licence line. Nothing on
- * it says what Loom costs, who it is for, or what may be built on it — the three
- * things that are the maintainer's.
- *
- * **Two bands carry it and they are a pair.** The comparison says where each
- * thing a reader owns ends up; the band below it measures what actually leaves,
- * on this site's own front door, as the page is built. A page claiming *your
- * code never goes anywhere* and then typing out an example of what does go
- * would be making its case in the form it is asking nobody to trust — the same
- * argument the specimen band on `/your-components` is built on, applied to the
- * one question a reader is entitled to be suspicious about.
+ * It also absorbed two pages that were retired the same day: `/your-components`
+ * (1,405 words) became *What you bring*, and `/what-readers-do` (1,591 words)
+ * became *What this page counts*. The second is not optional — this deployment
+ * collects reader signals, and the footer of every page links here to say what
+ * they are.
  */
 
-/**
- * The request the measurement is taken on.
- *
- * Named rather than picked, for the reason the components page names its
- * specimen: "the first ask in the list" is a subject that moves whenever the
- * list is reordered, and a band whose subject moves is a band nobody can write
- * copy for. This one is the request the front door leads with, so the numbers
- * below are the numbers for the change a visitor is most likely to have just
- * watched happen.
- */
-const MEASURED_ASK = "problem"
-
-/**
- * What the model is sent, in the order it is sent, said in words a visitor has.
- *
- * The keys are `PromptMeasurement`'s and the sentences are this page's. The
- * pairing is checked rather than assumed: `partsOf` refuses to build the band if
- * the measurement grows a part nobody has written a sentence for, so a sixth
- * thing arriving in the request is a page that does not build rather than a page
- * that quietly goes on naming five.
- *
- * That is the lesson of 9 September in a second place. A fact the test suite
- * held and the page could not reach was a fact the page eventually contradicted;
- * this is the same fact — *what leaves* — held by the one function that knows,
- * with the page reading it rather than restating it.
- */
-export type LeavingPart = {
-  readonly key: Exclude<keyof PromptMeasurement, "total">
-  readonly what: string
-  readonly detail: string
-  /**
-   * The row of the band above that this part is the last column of.
-   *
-   * The two bands are a pair — the comparison says where each thing a reader
-   * owns ends up, and this one measures the last column of it — and until this
-   * field existed that was a claim in a comment. The comparison's own opening
-   * line tells a reader to read *down the last column to see the whole of what
-   * ever leaves*, and the column was two rows short of the measurement beside
-   * it: no row for the palettes, and none for the origins. Both were sent.
-   *
-   * Absent for exactly one part, and the absence is the point. The standing
-   * instructions are the same words on every request on every site — nothing in
-   * them is about the reader, so there is nothing of theirs for a row to say
-   * where it ends up. `agreement` below holds every other part to a row.
-   */
-  readonly owned?: string
-}
-
-const LEAVING: readonly LeavingPart[] = [
-  {
-    key: "system",
-    what: "The standing instructions",
-    detail:
-      "The same words on every request, on every site. They say what an edit is allowed to be. Nothing in them is about you.",
-  },
-  {
-    key: "primitives",
-    what: "What you said about your pieces",
-    detail:
-      "The name of each one, the line you wrote about what it is for, and which of its settings may be changed. Not one line of what any of them is made of.",
-    owned: "What you said each piece is for",
-  },
-  {
-    key: "themes",
-    what: "The palettes your site offers",
-    detail:
-      "The names of the looks a page may be asked to wear, so that asking for the quieter one reaches something that exists.",
-    owned: "The looks you built for it to wear",
-  },
-  {
-    key: "frames",
-    what: "Whose pages you let inside yours",
-    detail:
-      "If one of your pages can show another page inside it — a video, a map, a booking form — this is the list of whose those are allowed to be. The names of the sites, and nothing that is on them.",
-    owned: "Whose pages you let inside yours",
-  },
-  {
-    key: "tree",
-    what: "The page as it currently stands",
-    detail:
-      "How the page is put together right now — and this is the honest part: the words a visitor can already read on it go too, because a request about the third paragraph cannot be answered by something that cannot see it.",
-    owned: "The pages themselves, and the words on them",
-  },
-  {
-    key: "request",
-    what: "What was asked for",
-    detail: "The sentence somebody typed, exactly as they typed it.",
-    owned: "What a visitor typed into the box",
-  },
-]
-
-const NUMBER = new Intl.NumberFormat("en-US")
-
-/**
- * The measurement, taken against this site's own front door.
- *
- * `measurePrompt` is the function a host calls to find out what registering more
- * of something costs, and it builds the request without sending it — so this is
- * not an estimate of what would be sent, it is the thing that would be sent,
- * counted. It runs at build time against the page published at `/`, with the
- * same library and the same palettes this site renders with.
- *
- * It throws rather than falling back, on the same terms as the specimen band: a
- * band whose entire claim is *these are the real numbers* has nothing to say if
- * it cannot take the measurement, and printing it half-filled would be worse
- * than not building.
- *
- * **It measures the front door in the palette it is published in, not the one
- * the reader is wearing**, and that is a correction rather than a convenience.
- * The first version passed `context.theme` through, which is the obvious thing
- * to write and is wrong twice over. The root of a page carries what it is
- * wearing, so the request describing that page is a few characters longer in one
- * palette than another — and a number below the root that changes when the
- * palette changes is precisely what 0049 says cannot happen. `pages.test.ts`
- * caught it on all three pairs before this page had ever been looked at, which
- * is the existing suite doing the job this lane keeps having to do by reading.
- *
- * The honest reading is the better one anyway: `/` is published in the house
- * palette and that is the page a visitor arrives on, so the measurement is of
- * the site as it is served rather than of a private re-theme of it.
- */
-const measured = (context: PageContext): PromptMeasurement => {
-  const ask = askById(MEASURED_ASK)
-
-  if (ask === undefined) {
-    throw new Error(`loom: ${MEASURED_ASK} is not an ask ${WHAT_YOU_RUN.path} can measure`)
-  }
-
-  const page = homePageTree({ origin: context.origin, theme: DEFAULT_THEME })
-
-  const intent: EditIntent = {
-    /**
-     * A real id from a real factory, because `IntentId` is branded and a string
-     * literal is not one. Sequential rather than random so that two builds of
-     * this page measure the same request — the id is in the part of the message
-     * that carries the request, so a random one would make the last number in
-     * the table wobble by a character or two between deployments for no reason a
-     * reader could act on.
-     */
-    intentId: sequentialIdFactory("measured").intentId(),
-    treeId: page.treeId,
-    baseRevision: page.revision,
-    origin: "user-instruction",
-    actor: "a visitor",
-    utterance: ask.utterance,
-    observedAt: systemClock.now(),
-  }
-
-  /**
-   * The third vocabulary this site has and had never handed over.
-   *
-   * `siteFrameOrigins` is the list of whose documents this deployment will put
-   * inside one of its pages, and it has had exactly one entry — its own origin,
-   * so the front door can frame the demonstration — since 12 September. A model
-   * asked to change this page was never told it existed, which is the gap
-   * [0172](../../../../../../decisions/0172-what-a-deployment-offers-a-model-is-one-value.md)
-   * closed the seam for and left each surface to wire.
-   *
-   * It is the one vocabulary of the five that **narrows a value the model still
-   * chooses** rather than supplying the only values it may write: which document
-   * belongs on a page is a content decision and its URL stays in the tree, so
-   * this list is the difference between a model proposing a frame that renders
-   * and one proposing a frame that renders a refusal.
-   *
-   * **Absent rather than empty when there is no registry.** A mistyped origin
-   * yields no allowlist at all (`frames.ts` says why the page still renders),
-   * and a `frameCatalogue` of zero entries would be a vocabulary block the
-   * prompt drops anyway — so the spread says the same thing one step earlier,
-   * and the band below simply has one row fewer, which is exactly what it does
-   * for the two registries this site genuinely does not have.
-   */
-  const origins = siteFrameOrigins(context.origin)
-
-  return measurePrompt(intent, page, {
-    catalogue: catalogueOf(siteRegistry),
-    themeCatalogue: siteThemes.catalogue(),
-    ...(origins === undefined ? {} : { frameCatalogue: frameCatalogue(origins) }),
-  })
-}
-
-/**
- * The five parts, each with its number, and a refusal if the two lists differ.
- *
- * The check is in both directions on purpose. A part the measurement reports and
- * this page has no sentence for is something leaving a reader's server that the
- * page does not mention; a sentence for a part the measurement no longer reports
- * is the page describing something that has stopped happening. Both are the same
- * failure this lane has now found seven runs running, and this is the first time
- * it can be a compile-time-shaped error rather than a sentence somebody has to
- * notice.
- */
-export const partsOf = (
-  measurement: PromptMeasurement
-): readonly (LeavingPart & { readonly characters: number })[] => {
-  const reported = Object.keys(measurement).filter((key) => key !== "total")
-  const described = LEAVING.map((part) => String(part.key))
-
-  /**
-   * A part this deployment does not send is not a part the page owes a
-   * sentence, and `0172` is why the distinction had to be drawn. The runtime
-   * now reports eight parts; three of them are blocks that are **absent** from
-   * the request unless a host has registered data, a form destination or a
-   * framable origin, and this site has registered none of the three. Naming
-   * them anyway would put three rows reading *0 characters* under a heading
-   * that says what leaves your server.
-   *
-   * The guard is not weakened by it, which is the part worth checking. It still
-   * fires on anything actually sent that nobody has written a sentence for — so
-   * the day this site registers one of the three, the page refuses to build
-   * until it says so, which is the same alarm one step later and at the moment
-   * it becomes true.
-   */
-  const sent = reported.filter((key) => measurement[key as keyof PromptMeasurement] > 0)
-
-  const missing = sent.filter((key) => !described.includes(key))
-  const stale = described.filter((key) => !reported.includes(key))
-
-  if (missing.length > 0 || stale.length > 0) {
-    throw new Error(
-      `loom: ${WHAT_YOU_RUN.path} says what leaves and the measurement disagrees — unnamed: ${missing.join(", ") || "none"}; named but not sent: ${stale.join(", ") || "none"}`
-    )
-  }
-
-  const shipped = LEAVING.filter((part) => measurement[part.key] > 0)
-
-  bandsAgree(shipped)
-
-  return shipped.map((part) => ({
-    ...part,
-    characters: measurement[part.key],
-  }))
-}
-
-/**
- * The two bands, held to each other rather than to a comment saying they agree.
- *
- * `whereItLives` opens by telling a reader to read **down the last column to
- * see the whole of what ever leaves**, and the band below it measures that
- * column part by part. That is a promise about two lists, and nothing was
- * checking it: the column was two rows short — no row for the palettes, none
- * for the origins — while the measurement had been counting the palettes since
- * the band was written.
- *
- * It is the same guard as the one above, one band further out, and it fires in
- * the same two directions. A part that leaves and has no row is the comparison
- * under-reporting, which is the failure that matters — a reader who checks the
- * column and finds it short is entitled to distrust the rest of the page. A row
- * claiming something leaves that no part accounts for is the comparison
- * over-reporting, which is merely wrong.
- *
- * The standing instructions are the one part with no row and it is deliberate:
- * they are the same words on every request on every site, so there is nothing
- * of the reader's for a row about where their things end up to be about.
- */
-export const bandsAgree = (
-  shipped: readonly LeavingPart[],
-  sent: readonly string[] = sentCriteria()
-): void => {
-  const owned = shipped.flatMap((part) => (part.owned === undefined ? [] : [part.owned]))
-
-  const unlisted = owned.filter((heading) => !sent.includes(heading))
-  const unaccounted = sent.filter((heading) => !owned.includes(heading))
-
-  if (unlisted.length > 0 || unaccounted.length > 0) {
-    throw new Error(
-      `loom: ${WHAT_YOU_RUN.path} measures what leaves and the table above it disagrees — leaves with no row: ${unlisted.join("; ") || "none"}; row with nothing leaving: ${unaccounted.join("; ") || "none"}`
-    )
-  }
-}
-
-const hero = (ids: IdFactory, context: PageContext): LoomNode =>
+const hero = (ids: IdFactory): LoomNode =>
   buildElement(ids, {
     type: "loom.hero",
     props: {
       backdrop: "grid",
       align: "start",
       stature: "standard",
-      eyebrow: "What you would actually be running",
+      eyebrow: "Before you install anything",
     },
     children: [
-      buildSlot(ids, "heading", [
-        heading(ids, 1, "It is your own site, with this added to it", { balance: true }),
-      ]),
+      buildSlot(ids, "heading", [heading(ids, 1, "It runs in your app, not in front of it", { balance: true })]),
       prose(
         ids,
-        "You install it into an application you already have and already host. Your addresses, your sign-in, your data and your deploy stay exactly as they are. There is no site of ours in front of yours.",
+        "There is no machine of ours between you and your visitor. You install a package, it runs on your own hardware at your own address, and nothing here has to be reachable for your site to stay up.",
         { size: "lead", measured: true }
       ),
-      buildSlot(ids, "actions", [
-        action(ids, "How to install it", surfaceHref(context.origin, DOCS), {
-          variant: "primary",
-          scale: "large",
-        }),
-        action(ids, "Try one that is already running", surfaceHref(context.origin, DEMO), {
-          variant: "secondary",
-          scale: "large",
-        }),
-      ]),
     ],
   })
 
-/**
- * The four things, and the fourth one is the one people expect to be compulsory.
- *
- * A reader who has been told their interface will rearrange itself assumes there
- * is a service behind it that they are about to depend on. There is not. The
- * only outside thing in the list is a model, it is one they choose and already
- * pay for, and the page works with nothing in that slot at all — which is the
- * fact worth putting on a marketing page, because it is the one nobody expects.
- */
-const whatYouBring = (ids: IdFactory, context: PageContext): LoomNode =>
+const whatYouBring = (ids: IdFactory): LoomNode =>
   section(
     ids,
-    { width: "wide", eyebrow: "What you bring" },
-    "Four things, and you already have three of them",
+    { tone: "surface", width: "wide", eyebrow: "What you bring" },
+    "Your own components, never rewritten",
     [
       prose(
         ids,
-        "Nothing here replaces the application you have. It is a package you add to it, the way you would add anything else.",
-        { size: "lead", measured: true }
+        "You hand over the pieces your site is already built from and say what each one can be told. From then on the AI can arrange those pieces and set those options — and nothing else. It cannot write new code into your page, because code is not a thing a change is allowed to carry.",
+        { measured: true }
       ),
-      buildElement(ids, {
-        type: "loom.feature-grid",
-        props: { columns: "four", density: "tight" },
-        children: [
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "The application itself",
-              body: "Your addresses, your sign-in, your data, your hosting. None of it is asked about, and none of it is taken over.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "The pieces you already built",
-              body: "Described rather than rewritten — a few lines beside each one, saying what it is for and what may be changed about it.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "What you will allow",
-              body: "Written once, in your own code, and read every single time somebody asks for something. You review a change to it the way you review anything else.",
-            },
-          }),
-          buildElement(ids, {
-            type: "loom.feature",
-            props: {
-              title: "A model, when you want one",
-              body: "You point it at one you already pay for, and it is the only outside thing in this list. Leave the slot empty and everything else still works — there is simply nothing to turn a sentence into a change.",
-            },
-          }),
-        ],
-      }),
-      stack(ids, { direction: "row", gap: "snug", wrap: true }, [
-        action(
-          ids,
-          "What describing a piece looks like",
-          internalHref(context.origin, YOUR_COMPONENTS.path, context.theme),
-          { variant: "secondary", scale: "medium" }
-        ),
-        action(
-          ids,
-          "What you are allowed to say",
-          internalHref(context.origin, THE_RULES.path, context.theme),
-          { variant: "quiet", scale: "medium" }
-        ),
-      ]),
+      prose(
+        ids,
+        "If you would rather not build any, a starter set comes with it and this site is made out of that set.",
+        { tone: "muted", measured: true }
+      ),
     ]
   )
 
 /**
- * The three places a thing can be, which are the comparison's columns.
+ * The one thing that leaves, said plainly and without the measurement.
  *
- * Said as the reader owns them — *your* code, *your* application — because the
- * whole answer of the band is whose each column is, and a column headed
- * "Storage" would be answering a different question from the one being asked.
+ * This band used to print the exact size of the prompt, the exact number of
+ * pieces described in it and a four-row table of what each one contained,
+ * computed at build time against a real request. It was the most honest band on
+ * the site and it was answering a question nobody has yet asked out loud.
+ *
+ * What is kept is the shape of the answer — *one request, to a model you chose,
+ * only when somebody asks* — because that is the part a reader is deciding on.
+ * The measurement is the documentation's, and the code that made it is still in
+ * the repository for anyone who wants to run it.
  */
-export const PLACES: readonly string[] = [
-  "Stays in your code",
-  "Kept by your application",
-  "Sent to the model",
-]
-
-const subject = (ids: IdFactory, name: string): LoomNode =>
-  buildElement(ids, {
-    type: "loom.comparison",
-    props: { role: "subject" },
-    children: [buildText(ids, name)],
-  })
-
-/** One cell of the comparison, which is a mark and nothing else. */
-const mark = (ids: IdFactory, verdict: "yes" | "no"): LoomNode =>
-  buildElement(ids, { type: "loom.comparison", props: { mark: verdict } })
-
-export type Verdict = "yes" | "no"
-
-/** One row of the comparison: a thing a reader owns, and where it ends up. */
-type Criterion = {
-  readonly heading: string
-  /** One mark per column, in `PLACES` order. The last is *sent to the model*. */
-  readonly marks: readonly [Verdict, Verdict, Verdict]
-  readonly note?: string
-}
-
-/**
- * The rows, declared rather than written into the band, so the band below can
- * be held to them.
- *
- * **The fourth-from-last row is why the band is worth the space.** Every other
- * row is reassuring and this one is not entirely: the page itself goes, and the
- * words on the page are part of the page. Leaving that out would make the rest
- * worth nothing, since a reader who discovered it later would be right to
- * assume the others were shaded too.
- *
- * The three marked *sent* at the top are the three things a reader writes in
- * their own code that do leave, and they sit together above the one that reads
- * like them and does not: what you will and will not allow is weighed after the
- * answer comes back, and is never part of the question.
- */
-export const CRITERIA: readonly Criterion[] = [
-  { heading: "The code your pieces are made of", marks: ["yes", "no", "no"] },
-  { heading: "What you said each piece is for", marks: ["yes", "no", "yes"] },
-  { heading: "The looks you built for it to wear", marks: ["yes", "no", "yes"] },
-  {
-    heading: "Whose pages you let inside yours",
-    marks: ["yes", "no", "yes"],
-    note: "The names of the sites only. Which page you show inside yours stays in the page.",
-  },
-  {
-    heading: "What you will and will not allow",
-    marks: ["yes", "no", "no"],
-    note: "Weighed after the answer comes back, never sent with the question.",
-  },
-  { heading: "The pages themselves, and the words on them", marks: ["no", "yes", "yes"] },
-  { heading: "What changed, who asked, and which rule allowed it", marks: ["no", "yes", "no"] },
-  { heading: "What a visitor typed into the box", marks: ["no", "yes", "yes"] },
-]
-
-/** The rows whose last column says the thing leaves. */
-export const sentCriteria = (criteria: readonly Criterion[] = CRITERIA): readonly string[] =>
-  criteria.filter((row) => row.marks[row.marks.length - 1] === "yes").map((row) => row.heading)
-
-const criterion = (ids: IdFactory, row: Criterion): LoomNode =>
-  buildElement(ids, {
-    type: "loom.comparison-row",
-    props: { heading: row.heading, ...(row.note === undefined ? {} : { note: row.note }) },
-    children: row.marks.map((verdict) => mark(ids, verdict)),
-  })
-
-/**
- * Where each thing a reader owns ends up, in one glance.
- *
- * A matrix rather than three lists, because the question is not *what is in my
- * code* — it is *and is that the same thing that goes to the model*, which is a
- * question about two columns at once. `loom.comparison-table` is a real table
- * with real row and column headers, so the answer in the third column of the
- * fourth row can be found by somebody arriving from either edge, including
- * somebody using a screen reader.
- *
- * The rows are `CRITERIA`, which is what lets `partsOf` hold this band's last
- * column to the measured one below it rather than to a comment saying they
- * agree.
- */
-const whereItLives = (ids: IdFactory): LoomNode =>
+const whatLeaves = (ids: IdFactory): LoomNode =>
   section(
     ids,
-    { tone: "surface", width: "wide", eyebrow: "Where everything ends up" },
-    "What stays with you, and the one thing that goes out",
+    { width: "wide", eyebrow: "What leaves your server" },
+    "One request, and only when somebody asks",
     [
       prose(
         ids,
-        "Three places a thing can be. Read along a row to find out where yours is, and down the last column to see the whole of what ever leaves.",
-        { size: "lead", measured: true }
+        "When a person asks for a change in their own words, your server sends the model you chose an outline of the page and the list of pieces it may use. It does not send your code, your data, or anything about who is reading.",
+        { measured: true }
       ),
-      buildElement(ids, {
-        type: "loom.comparison-table",
-        props: {
-          density: "tight",
-          caption:
-            "Where each part of a site ends up, and which of them are ever sent out of it.",
-        },
-        children: [
-          buildSlot(ids, "columns", [
-            buildElement(ids, {
-              type: "loom.comparison-row",
-              props: {},
-              children: PLACES.map((place) => subject(ids, place)),
-            }),
-          ]),
-          ...CRITERIA.map((row) => criterion(ids, row)),
-        ],
-      }),
+      prose(
+        ids,
+        "The ready-made changes on the front door do not send anything at all: they are worked out on your own server, which is why they still work on a deployment with no model configured.",
+        { tone: "muted", measured: true }
+      ),
     ]
   )
 
 /**
- * The last column of the band above, measured rather than asserted.
+ * What this deployment counts, which is a disclosure rather than a pitch.
  *
- * This is the proof the page is built on. The numbers are taken by the function
- * a host calls to price a request — on the page this site publishes at `/`, with
- * the library and the palettes it really renders with, for the request the front
- * door leads with. So a reader who does not believe the column can read the size
- * of every part of it, and see for themselves that there is no part called
- * *your code*.
+ * It was a page of its own until 26 September and the footer of every page
+ * linked to it. The page is gone; the collection is not, so the disclosure
+ * moved here rather than going with it, and the footer now points at this
+ * band's anchor. A site that quietly stopped saying what it counts while
+ * carrying on counting would be failing at the one thing it sells.
  */
-const whatLeaves = (ids: IdFactory, context: PageContext): LoomNode => {
-  const measurement = measured(context)
-  const parts = partsOf(measurement)
-
-  return section(
+const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
+  section(
     ids,
-    { width: "wide", eyebrow: "The last column, in full" },
-    "Everything that leaves, measured on this page",
+    { tone: "surface", width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
+    "Which parts you reach, and never who you are",
     [
       prose(
         ids,
-        "When somebody asks this site's own front door for a change, this is the whole of what is sent and how big each part of it is. It was measured as this page was built, not written down beside it.",
-        { size: "lead", measured: true }
+        "This site counts which parts of a page people reach, how long they stay, and what they press. It does not know who you are, set a cookie, or send any of it anywhere but the server you are already talking to.",
+        { measured: true }
       ),
-      buildElement(ids, {
-        type: "loom.table",
-        props: {
-          tone: "panel",
-          rules: "rows",
-          density: "comfortable",
-          caption:
-            "One request about this site's front door, part by part, counted in characters.",
-        },
-        children: [
-          columns(ids, ["What goes", "What it is", "Characters"]),
-          ...parts.map((part) =>
-            row(ids, [
-              cell(ids, part.what),
-              cell(ids, part.detail),
-              cell(ids, NUMBER.format(part.characters)),
-            ])
-          ),
-          row(ids, [
-            cell(ids, "All of it"),
-            cell(ids, "The whole request, which is the whole of what ever goes out."),
-            cell(ids, NUMBER.format(measurement.total)),
-          ]),
-        ],
-      }),
+      /**
+       * Whether it is on *here*, which is the half a reader cannot check.
+       *
+       * The retired `/what-readers-do` said this and it is the reason the
+       * disclosure is worth anything: a site that describes what it might
+       * collect, on a deployment collecting nothing, is describing somebody
+       * else. It is read off the same switch that decides whether the
+       * broadcaster is mounted at all, so the sentence and the behavior cannot
+       * disagree.
+       */
       prose(
         ids,
-        "There is no row for the code your pieces are made of, no row for your database, and no row for anybody who uses your site. Not because they are left out of this table — because they are never in the request.",
-        { measured: true, tone: "muted" }
+        context.counting === true
+          ? "Everything above is happening on the page you are reading — counting is on here."
+          : "It is switched off on this deployment, so nobody reading this page has been counted.",
+        { tone: "muted", measured: true }
+      ),
+      prose(
+        ids,
+        "It is there because a page that adapts should be able to tell whether the change helped, and that is a question about parts of a page rather than about people.",
+        { tone: "muted", measured: true }
       ),
     ]
   )
-}
 
-/**
- * The sentence the page exists to let a reader believe, said once, plainly.
- *
- * Deliberately about **what the software is** and not about what this project
- * may or may not sell one day. That second question was raised for the
- * maintainer on 10 September and is still open, so this band says only the thing
- * that is true of the code in the repository and would stay true whatever the
- * answer turns out to be.
- */
-const noMiddle = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: "What is in the middle" }, "Nothing is in the middle", [
-    buildElement(ids, {
-      type: "loom.callout",
-      props: { tone: "accent", title: "There is no machine of ours between you and your visitor" },
-      children: [
-        prose(
-          ids,
-          "What you install is code that runs inside your own application, on your own hardware, at your own address. A visitor asking your page for a change is talking to your server and nothing else, and the one thing that goes anywhere is the request above — to the model you chose, from your server, only when somebody asks for something. There is nothing here that has to be reachable for your site to stay up.",
-        ),
-      ],
-    }),
+const closing = (ids: IdFactory, context: PageContext): LoomNode =>
+  section(ids, { width: "wide", eyebrow: "Next" }, "Have a look at the rest", [
     prose(
       ids,
-      "The site you are reading is one of them. It is an ordinary application with this installed, built out of the same ready-made pieces anybody gets, and everything you have watched it do on these pages it did on the machine it is served from.",
-      { measured: true, tone: "muted" }
+      "The site you are reading is one of these. It is an ordinary application with the package installed, built from the starter pieces anybody gets, and everything you have watched it do it did on the machine it is served from.",
+      { measured: true }
     ),
-  ])
-
-const asked = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "surface", width: "wide", eyebrow: "Questions" }, "The ones people ask before they install anything", [
-    buildElement(ids, {
-      type: "loom.faq-list",
-      props: { columns: "one", width: "readable" },
-      children: [
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "Is this something I point my site at?",
-            answer:
-              "No. It is a package you install into an application you already run, the way you would install anything else. There is nothing to point at and nothing in front of your site.",
-            open: true,
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "Do my pages have to move somewhere?",
-            answer:
-              "The pages that are allowed to rearrange themselves are kept as data rather than as files, and they are kept by your application, in your own storage, beside everything else it keeps. Every other page of your site carries on being whatever it already is.",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "What happens if I unplug the model?",
-            answer:
-              "Your pages carry on being served exactly as they are. The only thing that stops is turning a sentence into a change, because that is the one step with a guess in it — everything after it is your rules and your record, and neither of those needs anything outside your application.",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "How much of my application does this touch?",
-            answer:
-              "Only the pages you decide to make adaptable. There is no step where anything is scanned, imported or converted, and a page nobody has asked to be adaptable is a page none of this reaches.",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "Who can see what changed?",
-            answer:
-              "Whoever you let in. The record is kept by your application, and the place it is reviewed comes with the package and runs at your address — so the list of who may open it is a list you write.",
-          },
-        }),
-      ],
-    }),
-    stack(ids, { direction: "row", gap: "snug", wrap: true }, [
+    stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
       action(
         ids,
-        "What the record holds",
-        internalHref(context.origin, THE_RECORD.path, context.theme),
-        { variant: "secondary", scale: "medium" }
+        "How a change travels",
+        internalHref(context.origin, HOW_IT_WORKS.path, context.theme),
+        { variant: "primary" }
       ),
+      action(ids, "Read the docs", surfaceHref(context.origin, DOCS), { variant: "secondary" }),
+      action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), { variant: "quiet" }),
+      action(ids, "Read the source", REPOSITORY_URL, { variant: "quiet", external: true }),
     ]),
   ])
 
-const closing = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(
-    ids,
-    { tone: "accent", width: "full" },
-    "It is a package, and the next step is installing it",
-    [
-      prose(
-        ids,
-        `Everything on this site is built out of the ${FACTS.primitives} pieces that come with it, on an application no different from the one you already have. The documentation starts where this page stops.`,
-        { size: "lead", align: "center", measured: true }
-      ),
-      stack(ids, { direction: "row", gap: "snug", wrap: true, align: "center", justify: "center" }, [
-        action(ids, "How to install it", surfaceHref(context.origin, DOCS), {
-          variant: "primary",
-          scale: "large",
-        }),
-        action(ids, "Watch one that is running", surfaceHref(context.origin, DEMO), {
-          variant: "secondary",
-          scale: "large",
-        }),
-      ]),
-    ],
-    { align: "center" }
-  )
-
 export const whatYouRunPageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("run")
-  const chrome: ChromeContext = {
-    origin: context.origin,
-    theme: context.theme,
-    current: WHAT_YOU_RUN,
-    counting: context.counting === true,
-  }
+  const chrome: ChromeContext = { ...context, current: WHAT_YOU_RUN }
 
   return createTree(
     buildElement(ids, {
@@ -753,12 +196,10 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
-        hero(ids, context),
-        whatYouBring(ids, context),
-        whereItLives(ids),
-        whatLeaves(ids, context),
-        noMiddle(ids),
-        asked(ids, context),
+        hero(ids),
+        whatYouBring(ids),
+        whatLeaves(ids),
+        whatIsCounted(ids, context),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),
@@ -767,10 +208,3 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
     ids
   )
 }
-
-/** The measurement the band prints, for the tests that hold it to the runtime. */
-export const WHAT_LEAVES = {
-  ask: MEASURED_ASK,
-  measure: (context: PageContext): PromptMeasurement => measured(context),
-  parts: (context: PageContext) => partsOf(measured(context)),
-} as const

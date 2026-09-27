@@ -1,6 +1,7 @@
 import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import type { AskId } from "./adapt/asks"
+import { COUNTED_ANCHOR } from "./bands"
 import { PLACEHOLDER_COPY } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
@@ -11,12 +12,12 @@ import {
   otherThemes,
   PORTAL,
   PRODUCT_SURFACES,
-  readingNeighbours,
+  readingNeighbors,
   REPOSITORY_URL,
   SITE_ROUTES,
   SITE_THEMES,
   surfaceHref,
-  WHAT_READERS_DO,
+  WHAT_YOU_RUN,
   type SiteRoute,
   type SiteThemeName,
 } from "./site"
@@ -211,7 +212,7 @@ const linkGroup = (
  * anything that joins one visit to another (0146), so *never who you are* is a
  * property of the record rather than a setting somebody left switched on.
  *
- * The link is the page that says the rest of it, labelled with its own route
+ * The link is the page that says the rest of it, labeled with its own route
  * label so the two cannot drift apart.
  */
 const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
@@ -223,8 +224,8 @@ const countingNote = (ids: IdFactory, context: ChromeContext): LoomNode =>
     ),
     link(
       ids,
-      WHAT_READERS_DO.label,
-      internalHref(context.origin, WHAT_READERS_DO.path, context.theme),
+      "What is counted",
+      `${internalHref(context.origin, WHAT_YOU_RUN.path, context.theme)}#${COUNTED_ANCHOR}`,
       { tone: "muted", scale: "small" }
     ),
   ])
@@ -275,7 +276,7 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         link(ids, "Decisions", DECISIONS_URL, { tone: "muted", scale: "small", external: true }),
       ]),
       buildSlot(ids, "note", [
-        prose(ids, PLACEHOLDER_COPY.licence, { size: "small", tone: "muted" }),
+        prose(ids, PLACEHOLDER_COPY.license, { size: "small", tone: "muted" }),
         ...(context.counting === true ? [countingNote(ids, context)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link
@@ -366,7 +367,7 @@ const wayOn = (
  *
  * So this takes nothing away from a page. It adds the one link a page cannot
  * make for itself, because *what comes next* is a fact about the site's order
- * rather than about the page: `readingNeighbours` reads it off `SITE_ROUTES`,
+ * rather than about the page: `readingNeighbors` reads it off `SITE_ROUTES`,
  * and neither this function nor any page builder knows which page it is.
  *
  * **It is a grid of cards and it was meant to be `loom.link-pager`**, which is
@@ -392,7 +393,7 @@ export const siteReadingBand = (
   ids: IdFactory,
   context: ChromeContext
 ): readonly LoomNode[] => {
-  const { before, after, onward } = readingNeighbours(context.current)
+  const { before, after, onward } = readingNeighbors(context.current)
 
   /**
    * **Nothing on the front door**, which is the one page with no page before

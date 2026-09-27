@@ -1,6 +1,7 @@
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
+import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
 
@@ -19,7 +20,20 @@ const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchP
     theme: readThemeName(params["theme"]),
   })
 
-  return rendered.element
+  /**
+   * The graph beside the tree, which is what a crawler and an assistant read.
+   *
+   * A fragment rather than a wrapper, so the page's own markup is unchanged and
+   * the tree is still the whole of what a visitor sees. See
+   * `_components/structured-data.tsx` for why this surface renders a tag of its
+   * own at all.
+   */
+  return (
+    <>
+      <StructuredData route={WHAT_YOU_RUN} origin={siteOrigin()} />
+      {rendered.element}
+    </>
+  )
 }
 
 export default WhatYouRunPage

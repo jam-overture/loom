@@ -25,7 +25,7 @@ import { FRONT_DOOR_POLICY, SITE_PROPS_VOCABULARY } from "./run"
  * panel's fifth rung is headed *Putting it back* and reads out how many pieces
  * the reversing change carries; the questions band promises that *undoing is
  * checked against your rules and written down like anything else*; and the
- * control under all of it — labelled *Put it back* — was a link to `/`. It
+ * control under all of it — labeled *Put it back* — was a link to `/`. It
  * dropped `?ask=` from the address and the page was rebuilt from the source.
  *
  * The result looked identical, which is exactly why nothing caught it. It was

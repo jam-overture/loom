@@ -117,7 +117,7 @@ const isTarget = (node: ElementNode): boolean => {
  * the declaration otherwise — so *which of my primitives can a reader open* is
  * answerable of `loom.nav` and of anything else built that way. It is not
  * answerable of `loom.faq`, which is a native `details` and declares neither the
- * behaviour nor `interactive`. So a host asking its registry that question is
+ * behavior nor `interactive`. So a host asking its registry that question is
  * told about its menu and misses the only thing on the page anybody actually
  * opens, which is the questions.
  *

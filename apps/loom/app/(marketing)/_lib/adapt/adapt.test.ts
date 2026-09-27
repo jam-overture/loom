@@ -15,7 +15,7 @@ import {
 import { ASKS, askById, readAskId, type AskId } from "./asks"
 import { RECORD_VOCABULARY } from "./record"
 import { FRONT_DOOR_POLICY, PROTECTED_IN_PLAIN_WORDS, protectedInPlainWords, runAsk } from "./run"
-import { unhonoured } from "../frames"
+import { unhonored } from "../frames"
 
 /**
  * The band where the front door stops describing itself and does it.
@@ -190,7 +190,7 @@ describe("the address is the whole of the state", () => {
     expect(url.searchParams.get("approve")).toBe("1")
   })
 
-  it("treats an address it does not recognise as the plain page", async () => {
+  it("treats an address it does not recognize as the plain page", async () => {
     expect(readAskId("something-else")).toBeUndefined()
     expect(await askRunFor(contextFor())).toBeUndefined()
   })
@@ -243,12 +243,12 @@ describe("the page a choice leaves behind", () => {
     ...ASKS.map((ask) => [`${ask.id}, approved`, contextFor(ask.id, true)] as const),
   ]
 
-  it.each(states)("%s renders with nothing the runtime could not honour", async (_name, context) => {
+  it.each(states)("%s renders with nothing the runtime could not honor", async (_name, context) => {
     for (const theme of SITE_THEME_NAMES) {
       const run = await askRunFor({ ...context, theme })
       const page = run === undefined ? treeFor(HOME, { ...context, theme }) : run.page
 
-      expect(unhonoured(renderTree(page, { origin: ORIGIN }).diagnostics)).toEqual([])
+      expect(unhonored(renderTree(page, { origin: ORIGIN }).diagnostics)).toEqual([])
     }
   })
 

@@ -32,12 +32,12 @@ const png = async (card: ShareCard, theme: ResolvedTheme): Promise<ArrayBuffer> 
 type Drawn = { readonly props?: { readonly style?: Record<string, unknown>; readonly children?: unknown } }
 
 /**
- * Every colour the drawing actually names, read off the element it returns.
+ * Every color the drawing actually names, read off the element it returns.
  *
  * Read from the drawing rather than from `CARD_PAIRINGS`, and that is the whole
  * point of it: a check that compares the card against the same list the card was
  * built from is the card agreeing with itself, and it passes a mutation that
- * changes both. This side is derived from the element tree, so a colour written
+ * changes both. This side is derived from the element tree, so a color written
  * into the file is caught whether or not anybody updated a list.
  */
 const coloursIn = (node: unknown): readonly string[] => {
@@ -80,14 +80,14 @@ describe.each(SITE_THEME_NAMES)("under the %s palette", (name) => {
 
   /**
    * The site's standing rule, on the one surface of it that is not a tree: no
-   * colour is hard-coded anywhere. Below the root of a page that is enforced by
+   * color is hard-coded anywhere. Below the root of a page that is enforced by
    * the renderer — a primitive can only emit `var(--loom-…)` — and here there is
    * no renderer to enforce it, so it is enforced by measurement instead.
    */
   it.each([
     ["the front door", publishedCard(HOME, "https://loom.example")],
     ["a page somebody rearranged", undefined],
-  ])("names no colour of its own on %s", async (_what, given) => {
+  ])("names no color of its own on %s", async (_what, given) => {
     const card =
       given ??
       askedCard(
@@ -98,7 +98,7 @@ describe.each(SITE_THEME_NAMES)("under the %s palette", (name) => {
     const drawn = coloursIn(shareCardImage(card, theme))
 
     expect(drawn.length).toBeGreaterThan(0)
-    expect([...new Set(drawn)].filter((colour) => !slots.includes(colour))).toEqual([])
+    expect([...new Set(drawn)].filter((color) => !slots.includes(color))).toEqual([])
   })
 
   /**
