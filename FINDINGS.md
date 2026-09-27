@@ -248,8 +248,19 @@ yet known is necessary.
 ## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:** open —
-**a gap, not a defect**, and the second of this shape. The 17 September entry
+(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:**
+**closed** 26 September, `framework-56-the-states-a-shot-could-not-reach` —
+`{ "scrollTo": "<selector>" }` is the fifth `do` step, strict like `click`
+because which of two matches is brought into view decides what the picture is
+of. `scrollBy: <pixels>` was **declined** and the reason is in
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md):
+a distance is a position chosen against a scroller the list does not name, it
+means something different at `phone` and at `wide`, and the two lanes that
+would write it mean *the controls* rather than *four hundred pixels*. It needs
+no record of its own — it is a fifth member of a set 0159 and 0182 already
+decided the shape of, and 0159 listed scrolling to a position by name as a
+reach it had not been asked for yet. Originally filed as: **a gap, not a
+defect**, and the second of this shape. The 17 September entry
 below asked for a state the browser holds *before* the load; this asks for one
 the visitor reaches *after* it.
 
@@ -2302,7 +2313,18 @@ neither motion nor navigation is one.**
 ## 2026-09-17 — a shot list can click and wait, and cannot photograph a state that lives in the browser before the page loads
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — **a gap, not a defect**; the harness does exactly what it says
+**closed** 26 September, `framework-56-the-states-a-shot-could-not-reach` — a
+shot may carry a `start`, and the two questions this entry said were worth
+deciding rather than assuming are decided in
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md).
+**Both** cases, not the safe half: `{ "storage": { … } }` seeds keys before the
+first paint and `{ "storageBlocked": true }` makes `window.localStorage` throw a
+`SecurityError` on access. The `initScript` this entry was right to distrust is
+**refused**, permanently — the JavaScript that applies a start state is written
+in `tools/specimen/start-state.ts`, in this repository, and a lane supplies an
+argument and never a body, which is what keeps every field of a shot list
+checkable. Originally filed as: **a gap, not a defect**; the harness does
+exactly what it says
 
 `tools/screenshot/plan.ts` takes a `do` list of two steps, `click` and `wait`,
 and the docblock on `stepSchema` is right about why they are `strict`. What

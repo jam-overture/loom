@@ -277,3 +277,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0191](0191-the-harness-may-start-the-application-because-there-is-now-only-one.md) | The harness may start the application, because there is now only one | Accepted — partially supersedes 0117 | §1 (process) |
 | [0192](0192-a-region-a-primitive-places-is-a-region-it-may-ground.md) | A region a primitive places is a region it may ground | Accepted | §4b |
 | [0193](0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md) | A status line is data: its opener is a closed set, and a supersession is written at both ends | Accepted | §1 (process) |
+| 0194 | *No record on this branch* | — | — |
+| [0195](0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md) | A shot may say what the browser started with, and it says it as data | Accepted | §1 (process) |

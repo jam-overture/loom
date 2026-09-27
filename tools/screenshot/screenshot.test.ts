@@ -404,3 +404,148 @@ describe("reaching a state that is not photographed", () => {
     expect(!parsed.success && parsed.error.issues[0]?.message).toContain("cannot set both")
   })
 })
+
+describe("reaching a state a press cannot produce", () => {
+  /**
+   * The second gap of this shape and the first that is about position. A rail
+   * that pins a caution to its scroller has a state — *the visitor scrolled
+   * back to the controls* — that is a fact about scroll position and nothing
+   * else, and the lane that needed it took the picture with a scratch driver
+   * in `/tmp`.
+   */
+  it("carries a scroll through beside the presses, in the order it was written", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/demo",
+            out: "back-at-the-controls",
+            do: [{ click: "[data-ask]" }, { waitFor: "[data-answered]" }, { scrollTo: "[data-controls]" }],
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.do).toEqual([
+      { click: "[data-ask]" },
+      { waitFor: "[data-answered]" },
+      { scrollTo: "[data-controls]" },
+    ])
+  })
+
+  it("refuses a misspelled scroll, an empty selector, and a scroll that is also a press", () => {
+    const step = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", do: [value] }] }).success
+
+    expect(step({ scrollTo: "[data-controls]" })).toBe(true)
+    expect(step({ scrolTo: "[data-controls]" })).toBe(false)
+    expect(step({ scrollTo: "" })).toBe(false)
+    expect(step({ scrollTo: 400 })).toBe(false)
+    expect(step({ scrollTo: "[data-controls]", click: "[data-ask]" })).toBe(false)
+  })
+})
+
+describe("what the browser started with", () => {
+  it("carries a seeded record through, and omits the key when a shot asks for nothing", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/lessons/3",
+            out: "unreadable-record",
+            start: { storage: { "loom.lessons.progress.v1": "{{{" } },
+          },
+          { path: "/lessons/3", out: "ordinary" },
+        ],
+      })
+    )
+
+    expect(planned[0]?.start).toEqual({ storage: { "loom.lessons.progress.v1": "{{{" } })
+    expect(planned[1] && "start" in planned[1]).toBe(false)
+  })
+
+  it("carries blocked storage through, which is the state no map of keys can reach", () => {
+    const planned = planShots(
+      listOf({ shots: [{ path: "/lessons/3", out: "blocked", start: { storageBlocked: true } }] })
+    )
+
+    expect(planned[0]?.start).toEqual({ storageBlocked: true })
+  })
+
+  /**
+   * The union is what refuses the pair, and it refuses it by construction
+   * rather than by a refinement written afterwards: *seed this key* and *make
+   * storage throw* are opposite instructions and the pair has no meaning.
+   */
+  it("refuses a shot that both seeds storage and blocks it", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [{ path: "/x", out: "x", start: { storage: { a: "1" }, storageBlocked: true } }],
+      }).success
+    ).toBe(false)
+  })
+
+  /**
+   * 0195's whole content, as a test: a shot list is data, and the one field
+   * that could have carried code does not exist.
+   */
+  it("has no way to run a script, however it is spelled", () => {
+    const start = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", start: value }] }).success
+
+    expect(start({ initScript: "window.x = 1" })).toBe(false)
+    expect(start({ script: "window.x = 1" })).toBe(false)
+    expect(start({ storage: { a: "1" }, initScript: "window.x = 1" })).toBe(false)
+  })
+
+  it("refuses a misspelled member rather than starting an ordinary browser", () => {
+    const start = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", start: value }] }).success
+
+    expect(start({ storeage: { a: "1" } })).toBe(false)
+    expect(start({ storageBloked: true })).toBe(false)
+    expect(start({})).toBe(false)
+  })
+
+  /**
+   * An empty map parses, runs, writes nothing and photographs the page an
+   * ordinary load produces — the silent wrong picture, arriving through the
+   * one field added to reach a state a load cannot.
+   */
+  it("refuses an empty map, an empty key and a value that is not a string", () => {
+    const start = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", start: value }] }).success
+
+    expect(start({ storage: {} })).toBe(false)
+    expect(start({ storage: { "": "1" } })).toBe(false)
+    expect(start({ storage: { a: 1 } })).toBe(false)
+    expect(start({ storage: { a: "" } })).toBe(true)
+  })
+
+  /**
+   * `false` is a field that reads as a decision and means nothing, and a lane
+   * that writes it has said something it will believe later.
+   */
+  it("refuses storage that is declared unblocked", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [{ path: "/x", out: "x", start: { storageBlocked: false } }],
+      }).success
+    ).toBe(false)
+  })
+
+  /**
+   * It is the shot's, not the approach's: the state belongs to the context,
+   * and the context is what a shot gets one of. A `before` carrying its own
+   * would be two answers to *what did the browser start with*.
+   */
+  it("refuses a before that tries to bring its own start state", () => {
+    expect(
+      shotListSchema.safeParse({
+        shots: [
+          { path: "/x", out: "x", before: { path: "/sign-in", start: { storageBlocked: true } } },
+        ],
+      }).success
+    ).toBe(false)
+  })
+})
