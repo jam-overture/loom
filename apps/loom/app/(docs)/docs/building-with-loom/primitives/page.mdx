@@ -128,12 +128,29 @@ passed to the render.
 
 ## Start from the starter library
 
-`@jam-overture/loom/primitives` ships a library covering the structural range — pages
+`@jam-overture/loom-primitives` is a library covering the structural range — pages
 and sections, headings and prose, containers over repeated children, a hero, a
 pricing table. Every example on this site is built from it.
 
 ```ts
-import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
+```
+
+It is a **separate package** from the framework, installed beside it, and that
+is the same argument this page has been making from the top: the framework does
+not know which primitives exist, so it cannot ship them. A vocabulary is
+somebody's choice, and the starter library is one choice rather than the
+language itself.
+
+Register a slice rather than all of it when you only want part — a smaller
+registry is a smaller prompt on every request, and the library is a set to
+choose from:
+
+```ts
+import { STARTER_PRIMITIVES } from "@jam-overture/loom-primitives"
+import { selectPrimitives } from "@jam-overture/loom/sdk"
+
+const chosen = selectPrimitives(STARTER_PRIMITIVES, ["loom.hero", "loom.prose"])
 ```
 
 It is a good place to begin and a better place to read: each primitive is a

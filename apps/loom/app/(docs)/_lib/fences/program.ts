@@ -1,5 +1,7 @@
 import ts from "typescript"
 
+import { workspaceSpecifier } from "../packages"
+
 import { isCheckable, type Fence } from "./model"
 
 /**
@@ -131,8 +133,30 @@ const specifierText = (element: ts.ImportSpecifier): string =>
     ? element.name.text
     : `${element.propertyName.text} as ${element.name.text}`
 
+/**
+ * One import, collected — under the name **this workspace** can resolve.
+ *
+ * The only edit this pipeline makes to a reader's code, and the reason it is
+ * here rather than in the page: a page teaches the package somebody can install,
+ * and one of those packages is a door this repository does not have. The starter
+ * library ships as `@jam-overture/loom-primitives` and is reached here at
+ * `@jam-overture/loom/primitives` — the same module, two true names, and
+ * `_lib/packages.ts` carries the whole argument for why.
+ *
+ * Rewriting it is what keeps §4c's rule intact. The alternative is a page whose
+ * example is **illustrated rather than executed**: either it teaches the
+ * published name and stops compiling, so the block is dropped from the checked
+ * set and nothing notices when it rots, or it teaches the name that resolves
+ * here and every reader who copies it gets `ERR_PACKAGE_PATH_NOT_EXPORTED`. The
+ * rewrite is the only one of the three where the block a reader copies is also
+ * the block this repository runs.
+ *
+ * It is a closed set of one, derived from the framework's own two manifests and
+ * tested there, so this cannot quietly start rewriting anything else — and the
+ * page text is never touched, only the module built from it.
+ */
 const collectImport = (declaration: ts.ImportDeclaration, into: Map<string, Imported>): void => {
-  const specifier = (declaration.moduleSpecifier as ts.StringLiteral).text
+  const specifier = workspaceSpecifier((declaration.moduleSpecifier as ts.StringLiteral).text)
   const entry = into.get(specifier) ?? emptyImported()
   const clause = declaration.importClause
 

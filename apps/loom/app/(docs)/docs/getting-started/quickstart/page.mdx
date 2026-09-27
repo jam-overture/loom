@@ -1,4 +1,4 @@
-import { QuickstartFile, QuickstartOutput } from "@/app/(docs)/_components/quickstart"
+import { QuickstartFile, QuickstartInstall, QuickstartOutput } from "@/app/(docs)/_components/quickstart"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 
 export const metadata = pageMetadata("getting-started", "quickstart")
@@ -24,15 +24,16 @@ is worth your afternoon.
 
 A directory with nothing in it, and Node. Then one install:
 
-```bash
-pnpm add @jam-overture/loom react react-dom zod
-```
+<QuickstartInstall />
+
+Two packages: the framework, and the starter library the file registers a
+primitive alongside. [Installation](/docs/getting-started/installation) says
+what each is for.
 
 <Callout kind="warning">
-  Pre-production alpha, and the package is not on a public registry yet — see
-  [Installation](/docs/getting-started/installation) for how it is consumed
-  today. Everything below is real and runs; where you get the package from is
-  the part that is still moving.
+  Pre-production alpha. Both packages are on npm at `0.1.0` and neither is
+  stable yet — the tree schema is still allowed to change. Everything below is
+  real and runs.
 </Callout>
 
 ## The file

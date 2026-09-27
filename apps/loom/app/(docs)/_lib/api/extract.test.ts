@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest"
 
 import { entryPoints } from "../entry-points"
 import { docsHref, docsLandingOf, docsPagesIn, docsSections } from "../nav"
+import { publishedSpecifier } from "../packages"
+
 import {
   DECISION_NUMBER,
   extractReference,
@@ -42,16 +44,40 @@ const missingBuild =
   "loom: dist/ is not built, so there are no published declarations to read. Run `pnpm build` at the repository root — `pnpm verify` already does."
 
 describe("the published entry points", () => {
-  it("are read from the package's own exports map", () => {
+  /**
+   * One door per entry in the map, in the map's order — and each named as a
+   * reader would have to type it.
+   *
+   * The two can differ, and since 0194 one of them does. The declarations are
+   * read through the door **this workspace** opens, because that is the map on
+   * disk beside the `dist/` they are in; the specifier is the door a **reader**
+   * opens, because a reference page is a thing somebody copies an import out of.
+   * `_lib/packages.ts` is the one place that pairing is stated, and its own test
+   * holds it against both halves of the manifest.
+   */
+  it("are read from the package's own exports map, under the names they ship as", () => {
     const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")) as {
       readonly exports: Readonly<Record<string, unknown>>
     }
 
     expect(publishedEntries().map((entry) => entry.specifier)).toEqual(
       Object.keys(manifest.exports).map((subpath) =>
-        subpath === "." ? "@jam-overture/loom" : `@jam-overture/loom${subpath.slice(1)}`
+        publishedSpecifier(subpath === "." ? "@jam-overture/loom" : `@jam-overture/loom${subpath.slice(1)}`)
       )
     )
+  })
+
+  /**
+   * And the declarations really are read through the workspace's door, which is
+   * the half the assertion above cannot see: a `types` path that had been
+   * rewritten along with the specifier would point at a file that is not there.
+   */
+  it("reads each door's declarations from a file that exists", () => {
+    if (!built) return
+
+    for (const entry of publishedEntries()) {
+      expect(existsSync(join(packageRoot, entry.types)), entry.specifier).toBe(true)
+    }
   })
 
   /**

@@ -5182,7 +5182,7 @@
       ]
     },
     {
-      "specifier": "@jam-overture/loom/primitives",
+      "specifier": "@jam-overture/loom-primitives",
       "slug": "primitives",
       "types": "./dist/primitives/index.d.ts",
       "requires": [

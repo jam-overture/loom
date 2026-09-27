@@ -5,7 +5,7 @@
 // so. Named `quickstart.ts` in a new directory, this stops before it runs with
 // an error about top-level await that explains nothing.
 //
-//     pnpm add @jam-overture/loom react react-dom zod
+//     pnpm add @jam-overture/loom @jam-overture/loom-primitives react react-dom zod
 //     npx tsx quickstart.mts
 //
 // It registers a component of your own, writes a page down as data, draws that

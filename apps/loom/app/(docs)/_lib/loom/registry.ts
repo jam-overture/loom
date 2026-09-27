@@ -14,6 +14,15 @@ import { describeRegistryError, type PrimitiveRegistry } from "@jam-overture/loo
  * A refused registry throws at module scope, which is the right time: it means
  * the library the docs describe does not load, and every page on the site is
  * about to be wrong.
+ *
+ * **The import is deliberately not the one the pages teach.** A reader installs
+ * `@jam-overture/loom-primitives`; this repository reaches the same module at
+ * `@jam-overture/loom/primitives`, because the library is published from
+ * `dist/` rather than resolved from `node_modules` here. `_lib/packages.ts` is
+ * the one statement of that, and the two seams where a reader's name is turned
+ * into this one — the fence pipeline and the quickstart — go through it. This
+ * file is the site's own code rather than something a reader copies, so it
+ * simply uses what resolves.
  */
 
 const built = createStarterPrimitiveRegistry()

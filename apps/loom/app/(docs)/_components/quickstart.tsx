@@ -54,6 +54,30 @@ export const QuickstartFile = () => (
 )
 
 /**
+ * The install line, from the one list that decides it.
+ *
+ * It was typed into the page as a fenced block, and that block was a **third**
+ * copy of a command stated in `program.ts` and again in the quickstart file's
+ * own header comment. On 27 September the library became its own package, two
+ * of the three copies were updated, and the page went on showing the one a
+ * reader reads — which is the failure mode a second copy always has, arriving
+ * here as a screenshot that came back byte-identical to the one before the
+ * change.
+ *
+ * `QUICKSTART_DEPENDENCIES` is what `quickstart.test.ts` holds the file's own
+ * imports against, and this renders the command built from it, so the block a
+ * reader copies and the list the test checks cannot be different lists.
+ */
+export const QuickstartInstall = () => (
+  <div className="border-edge bg-surface-sunken my-6 rounded-lg border px-3 py-3">
+    <span className="text-ink font-mono text-xs">
+      <span className="text-ink-faint select-none">$ </span>
+      {QUICKSTART_COMMANDS[0]}
+    </span>
+  </div>
+)
+
+/**
  * The run, as a terminal.
  *
  * The three answers carry the same three colours the propose-a-change box uses

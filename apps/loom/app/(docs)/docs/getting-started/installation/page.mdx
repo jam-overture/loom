@@ -4,18 +4,28 @@ export const metadata = pageMetadata("getting-started", "installation")
 
 # Installation
 
-Loom is a single package with several entry points. Install it, and a React
-renderer to mount what it produces.
+Loom is **two packages**. `@jam-overture/loom` is the framework — the tree, the
+change model and the Gate — with several entry points behind it.
+`@jam-overture/loom-primitives` is the starter library: the ninety-eight
+primitives every example on this site is built from.
+
+Install both, and a React renderer to mount what they produce.
 
 ```bash
-pnpm add @jam-overture/loom react react-dom
+pnpm add @jam-overture/loom @jam-overture/loom-primitives react react-dom
 ```
 
+You can skip the second one. The framework has no opinion about which
+primitives exist — it is a vocabulary you register, and the starter library is
+one somebody already wrote. Every page here uses it because a book about a
+language needs words in it.
+
 <Callout kind="warning">
-  Pre-production alpha. Nothing here is stable yet, the package is not on a
-  public registry, and the tree schema is still allowed to change. Today it is
-  consumed from within this repository's workspace as `"@jam-overture/loom":
-  "workspace:*"`.
+  Pre-production alpha. Both packages are on npm at `0.1.0`, and neither is
+  stable yet: the tree schema is still allowed to change, and before 1.0 a minor
+  release may break a prop or a region on a primitive. The four operations and
+  the shape of a tree are the framework's promise; the library's vocabulary is
+  not yet.
 </Callout>
 
 ## What you actually need
@@ -29,6 +39,7 @@ usable without any of it:
 | Peer | You need it when |
 | --- | --- |
 | `react` | you are rendering. The tree itself has no opinion about React. |
+| `@jam-overture/loom-primitives` | you want the starter library rather than a vocabulary of your own. |
 | `drizzle-orm` + `postgres` | you are persisting trees rather than holding them in memory. |
 | `@anthropic-ai/sdk` | you want a model to interpret a sentence into a proposal. |
 
@@ -44,6 +55,13 @@ The split is the important part. `@jam-overture/loom` is the tree and the change
 model and knows nothing about React, storage or any model provider. Each of the
 others is one of those things, behind its own door, so that importing the core
 never drags a database driver into your bundle.
+
+The last row is the one that is not a door but a **second package**, and the
+reason is the same split one step out: the framework does not depend on the
+library, so the library does not ship inside it. It takes
+`@jam-overture/loom` as a peer, which is a package's way of saying *there must
+be exactly one copy of this in your tree* — two would be two registries that
+reject each other's entries.
 
 The table above is the map you need to write your first import. The
 [API reference](/docs/api-reference) lists the same doors with the number of
@@ -68,7 +86,7 @@ difference matters.
 Nothing throws across a seam. Functions that can fail return a `Result`:
 
 ```ts
-import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
 import { describeRegistryError } from "@jam-overture/loom/sdk"
 
 const built = createStarterPrimitiveRegistry()

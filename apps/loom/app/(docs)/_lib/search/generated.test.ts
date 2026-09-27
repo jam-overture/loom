@@ -93,7 +93,9 @@ describe("the front door of the reference", () => {
   })
 
   it("carries each door's own sentence, and the specifier it is about", () => {
-    expect(front()).toContain("@jam-overture/loom/primitives")
+    /* The starter library, under the package it ships as rather than the
+       subpath this workspace reaches it through — `_lib/packages.ts`. */
+    expect(front()).toContain("@jam-overture/loom-primitives")
     expect(front()).toContain("The starter library")
   })
 })
