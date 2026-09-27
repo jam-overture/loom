@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type ProposalId } from "../ids.js"
-import { assessChange } from "../runtime/assessment.js"
+import { primitiveTypeSchema } from "../primitive-type.js"
+import { assessChange, type ChangeAssessment } from "../runtime/assessment.js"
 import type { RuntimeEvent } from "../runtime/events.js"
 import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
-import { defaultGatePolicy, gatePolicySchema } from "../runtime/policy.js"
+import { defaultGatePolicy, gatePolicySchema, type GatePolicy } from "../runtime/policy.js"
 import type { ProposedChange } from "../runtime/proposal.js"
+import { stakeFactor, type StakeFactorCode } from "../runtime/stakes.js"
 import { buildIntent, buildProposal, FIXED_INSTANT } from "../testing/doubles.js"
 import { sampleTree } from "../testing/fixtures.js"
+import { buildElement } from "../tree/builders.js"
 import type { TreeDelta } from "../tree/delta.js"
 
 import {
@@ -36,6 +39,57 @@ const proposal: ProposedChange = buildProposal(ids, { intentId: intent.intentId,
 const assessed = assessChange(tree, proposal, defaultGatePolicy, ids.deltaId())
 if (!assessed.ok) throw new Error("the fixture delta must assess")
 const assessment = assessed.value
+
+/** The same footer removal, under a host that declared the footer protected. */
+const assessUnder = (policy: GatePolicy, change: ProposedChange = proposal): ChangeAssessment => {
+  const result = assessChange(tree, change, policy, ids.deltaId())
+  if (!result.ok) throw new Error("the fixture delta must assess")
+
+  return result.value
+}
+
+const assessedUnderProtection = assessUnder(
+  gatePolicySchema.parse({ protectedPrimitiveTypes: ["loom.footer"] })
+)
+
+/**
+ * A different critical: a change that adds a node this deployment has no
+ * primitive for. Both refusals sit at the top of the scale and nothing but the
+ * codes separates them.
+ */
+/** A change that trips no rule at all: one node reconfigured, deep and small. */
+const assessedQuietly = assessUnder(
+  defaultGatePolicy,
+  buildProposal(ids, {
+    intentId: intent.intentId,
+    delta: {
+      deltaId: ids.deltaId(),
+      treeId: tree.treeId,
+      baseRevision: 0,
+      operations: [{ op: "configure", nodeId: nodes.card, set: { variant: "filled" }, unset: [] }],
+    },
+  })
+)
+
+const assessedAsUndrawable = assessUnder(
+  gatePolicySchema.parse({ registeredPrimitiveTypes: ["loom.page", "loom.header", "loom.card"] }),
+  buildProposal(ids, {
+    intentId: intent.intentId,
+    delta: {
+      deltaId: ids.deltaId(),
+      treeId: tree.treeId,
+      baseRevision: 0,
+      operations: [
+        {
+          op: "insert",
+          parentId: nodes.card,
+          index: 0,
+          node: buildElement(ids, { type: primitiveTypeSchema.parse("app.nonesuch") }),
+        },
+      ],
+    },
+  })
+)
 
 const disposition = {
   kind: "accepted",
@@ -246,7 +300,7 @@ describe("recordOf", () => {
     })
   })
 
-  it("retains the types a change destroyed, which drive the only critical factor", () => {
+  it("retains the types a change destroyed, which is the half a rule's name cannot say", () => {
     const record = recordOf(envelopeOf({ type: "change-assessed", assessment }))
 
     expect(record.event.type === "change-assessed" && record.event.assessment).toMatchObject({
@@ -255,6 +309,74 @@ describe("recordOf", () => {
       relocatedPrimitiveTypes: [],
       relocatedNodeCount: 0,
     })
+  })
+
+  /**
+   * The reason this is a field and not a derivation: `stakes` is the highest
+   * level anything reached, which is what the Gate compares against a ceiling
+   * and is not what a reader of the corpus is asking. Three rules are
+   * `critical`, so without the codes every one of them is the same row.
+   */
+  it("records which rules the Gate raised, not merely how high they reached", () => {
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment: assessedUnderProtection }))
+
+    expect(record.event.type === "change-assessed" && record.event.assessment).toMatchObject({
+      stakes: "critical",
+      stakeFactorCodes: [
+        "protected-type-removed",
+        "protected-type-touched",
+        "shallow-structural-change",
+      ],
+    })
+  })
+
+  it("tells a refusal for an invented part from a refusal for a risky one", () => {
+    const codesOf = (change: ChangeAssessment): readonly StakeFactorCode[] | undefined => {
+      const { event } = recordOf(envelopeOf({ type: "change-assessed", assessment: change }))
+
+      return event.type === "change-assessed" ? event.assessment.stakeFactorCodes : undefined
+    }
+
+    expect(assessedUnderProtection.stakes.level).toBe("critical")
+    expect(assessedAsUndrawable.stakes.level).toBe("critical")
+
+    expect(codesOf(assessedAsUndrawable)).toEqual(["unknown-primitive"])
+    expect(codesOf(assessedUnderProtection)).not.toContain("unknown-primitive")
+  })
+
+  /**
+   * The codes cross and the sentences do not (0023). A factor's `detail` names
+   * the nodes and types it found, which is content — the same content the
+   * summary is a narrowing of.
+   */
+  it("keeps the sentence a factor wrote out of the record", () => {
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment: assessedUnderProtection }))
+
+    expect(stakeFactor(assessedUnderProtection.stakes, "protected-type-removed")?.detail).toBe(
+      "destroys protected loom.footer"
+    )
+    expect(JSON.stringify(record)).not.toContain("destroys protected")
+  })
+
+  /**
+   * An empty list is a fact — the Gate looked and raised nothing — and absent
+   * is a different fact, that the record predates the field. Defaulting the
+   * second to the first would put a finding in the mouth of a record that
+   * never made one (0045).
+   */
+  it("distinguishes a change that raised no rule from a record written before the field", () => {
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment: assessedQuietly }))
+    const stored = JSON.parse(JSON.stringify(record)) as {
+      event: { assessment: Record<string, unknown> }
+    }
+
+    expect(record.event.type === "change-assessed" && record.event.assessment.stakeFactorCodes).toEqual([])
+
+    delete stored.event.assessment.stakeFactorCodes
+    const parsed = telemetryRecordSchema.parse(stored)
+    if (parsed.event.type !== "change-assessed") throw new Error("the fixture is an assessment")
+
+    expect(parsed.event.assessment.stakeFactorCodes).toBeUndefined()
   })
 
   it("reads a record written before those fields existed rather than defaulting them", () => {
