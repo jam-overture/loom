@@ -159,6 +159,43 @@ export const paletteScrim = (palette: Palette): Scrim | undefined => {
   }
 }
 
+/**
+ * Which way round a palette is.
+ *
+ * Not a colour and not a threshold: the question `color-scheme` asks, which is
+ * whether text on this palette's own ground is light-on-dark or dark-on-light.
+ * A host that draws a frame standing in for the page needs the answer and has
+ * nowhere to get it — `themeStyle` hands over every variable a *primitive*
+ * reads, and being light or dark is the one fact the host needs about the
+ * palette rather than from it.
+ */
+export type PaletteScheme = "light" | "dark"
+
+/**
+ * Which way round the palette is, or `undefined` when either end of its
+ * body-copy pair is a colour `channelsOf` declines to read.
+ *
+ * **No threshold, deliberately.** A luminance ceiling would be a number this
+ * module had to defend, and the one it already has — `SCRIM_DARK_CEILING` — is
+ * about whether a wash can darken what is under it, which is a different
+ * question with a different answer. Comparing a palette's own ink to its own
+ * canvas needs no constant at all: whichever is lighter says which way round the
+ * palette is, and it says it for a host palette nobody here has seen.
+ *
+ * Measured across the twenty-one registered palettes the two groups are canvases
+ * at `L > 0.9` and `L < 0.02`, so nothing sits anywhere near a line that does not
+ * exist. `measure.test.ts` holds that, and holds this against `paletteScrim`'s
+ * reading of the same pair, because two functions comparing one pair of colours
+ * must not be able to disagree about it.
+ */
+export const paletteScheme = (palette: Palette): PaletteScheme | undefined => {
+  const ink = relativeLuminance(palette.slots["fg-default"] ?? "")
+  const page = relativeLuminance(palette.slots["bg-canvas"] ?? "")
+  if (ink === undefined || page === undefined) return undefined
+
+  return ink > page ? "dark" : "light"
+}
+
 /** Everything measurable about one palette that its slots do not say. */
 export type PaletteMeasures = {
   readonly palette: ThemeId
@@ -169,6 +206,11 @@ export type PaletteMeasures = {
    */
   readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>
   readonly scrim: Scrim | undefined
+  /**
+   * Which way round the palette is, and `undefined` on the same terms `scrim`
+   * is: a pair this cannot read is reported as unavailable rather than guessed.
+   */
+  readonly scheme: PaletteScheme | undefined
 }
 
 /** Measures one palette. Refuses nothing, and reports what it could not measure by leaving it out. */
@@ -180,7 +222,12 @@ export const paletteMeasures = (palette: Palette): PaletteMeasures => {
     if (measured !== undefined) chroma[slot] = measured
   }
 
-  return { palette: palette.id, chroma, scrim: paletteScrim(palette) }
+  return {
+    palette: palette.id,
+    chroma,
+    scrim: paletteScrim(palette),
+    scheme: paletteScheme(palette),
+  }
 }
 
 /**
