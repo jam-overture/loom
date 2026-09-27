@@ -5,13 +5,17 @@ import { proposalIdSchema, intentIdSchema, treeIdSchema } from "@jam-overture/lo
 import { CALIBRATION_BUCKET_COUNT, type ConfidenceBucket } from "@jam-overture/loom/telemetry"
 
 import type { ContradictedBand, MissCause, MissedClaim, MissGroup } from "@/app/(portal)/_lib/calibration-misses"
+import type { PageName } from "@/app/(portal)/_lib/page-name"
 
 import { MissedClaims } from "./missed-claims"
+
+const named = (treeId: string, name: string): PageName => ({ name, treeId, derived: true })
 
 const claim = ({
   id,
   confidence,
   cause,
+  treeId = "t_1",
   rationale = "add a second pricing tier",
   verdict = "rejected",
   detail,
@@ -22,6 +26,7 @@ const claim = ({
   id: string
   confidence: number
   cause: MissCause
+  treeId?: string
   rationale?: string
   verdict?: MissedClaim["verdict"]
   detail?: string
@@ -31,7 +36,7 @@ const claim = ({
 }): MissedClaim => ({
   proposalId: proposalIdSchema.parse(id),
   intentId: intentIdSchema.parse("i_1"),
-  treeId: treeIdSchema.parse("t_1"),
+  treeId: treeIdSchema.parse(treeId),
   confidence,
   verdict,
   direction: verdict === "survived" ? "underconfident" : "overconfident",
@@ -64,11 +69,19 @@ const bucket = (lower: number): ConfidenceBucket => ({
 
 const renderMisses = (
   groups: readonly MissGroup[],
-  contradicted: readonly ContradictedBand[] = []
+  contradicted: readonly ContradictedBand[] = [],
+  names?: ReadonlyMap<string, PageName>
 ) => {
   const total = groups.reduce((sum, one) => sum + one.claims.length, 0)
 
-  render(<MissedClaims groups={groups} contradicted={contradicted} total={total} />)
+  render(
+    <MissedClaims
+      groups={groups}
+      contradicted={contradicted}
+      total={total}
+      {...(names === undefined ? {} : { names })}
+    />
+  )
 }
 
 describe("MissedClaims", () => {
@@ -201,6 +214,118 @@ describe("MissedClaims", () => {
     ])
 
     expect(screen.getByText(/^3 changes went the opposite way/)).toBeTruthy()
+  })
+
+
+  /**
+   * The fact `MissedClaim` has carried since it was written and this screen had
+   * never rendered. Six wrong claims about one page and six about six pages want
+   * opposite next moves, and the screen looked identical either way.
+   */
+  it("says which page a wrong claim was made about", () => {
+    renderMisses(
+      [group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible", treeId: "t_pricing" })])],
+      [],
+      new Map([["t_pricing", named("t_pricing", "Autumn prices")]])
+    )
+
+    expect(screen.getByText("Autumn prices")).toBeTruthy()
+    /*
+     * Twice, and both are right: beside the name on the surface, because identity
+     * is not technical detail, and again in the record, because that is where
+     * something else is matched against it.
+     */
+    expect(screen.getAllByText("t_pricing")).toHaveLength(2)
+  })
+
+  /**
+   * The page names the page and does not offer to go there, which is a decision a
+   * screenshot made: a bare link in this portal is drawn as plain text, and a
+   * repeated inline link on every row of a group is three presses to one
+   * destination. `WrongPages` is that destination, once per page.
+   */
+  it("names the page without making the row a second way to the same place", () => {
+    renderMisses(
+      [group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible", treeId: "t_pricing" })])],
+      [],
+      new Map([["t_pricing", named("t_pricing", "Autumn prices")]])
+    )
+
+    expect(screen.queryByRole("link")).toBeNull()
+  })
+
+  /**
+   * A page the store would not name is still named — untitled, beside the id it
+   * was asked about. `namesOf` answers for every id, so a failed read costs the
+   * words and never the row.
+   */
+  it("still names a page the store could not read", () => {
+    renderMisses(
+      [group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible", treeId: "t_gone" })])],
+      [],
+      new Map()
+    )
+
+    expect(screen.getByText("Untitled page")).toBeTruthy()
+    expect(screen.getAllByText("t_gone")).toHaveLength(2)
+  })
+
+  /**
+   * On a screen already scoped to one page every row would name the same page,
+   * competing with the sentence the row exists to show. The id is one click down
+   * either way, which keeps this a layout decision rather than a dropped fact.
+   */
+  it("leaves the page off the row when the screen is already about one page", () => {
+    renderMisses([
+      group("irreversible", [claim({ id: "p_1", confidence: 0.9, cause: "irreversible", treeId: "t_pricing" })]),
+    ])
+
+    expect(screen.getAllByText("t_pricing")).toHaveLength(1)
+  })
+
+  /**
+   * The other half of the governing principle, in the direction this row had
+   * backwards: every id the claim carries is reachable, and none of it is on the
+   * surface. `/portal/activity` is found by id, so a row that dropped them was
+   * the one screen naming a change nobody could then go and read.
+   */
+  it("keeps every id the record holds, one click down", () => {
+    renderMisses([
+      group("irreversible", [
+        claim({ id: "p_1", confidence: 0.9, cause: "irreversible", treeId: "t_pricing", repairedBy: "p_2" }),
+      ]),
+    ])
+
+    const record = screen.getByText("What the record says about this one").closest("details")!
+
+    expect(record.textContent).toContain("p_1")
+    expect(record.textContent).toContain("i_1")
+    expect(record.textContent).toContain("t_pricing")
+    expect(record.textContent).toContain("irreversible")
+    expect(record.textContent).toContain("0.90")
+    expect(record.textContent).toContain("p_2")
+  })
+
+  /**
+   * The Gate's own sentence carries node ids and the value a schema turned down.
+   * It was on the surface in italics, which is the technical record out in front
+   * of the plain one — the inversion the whole redirection turns on.
+   */
+  it("puts the Gate's own sentence under the disclosure and not on the row", () => {
+    renderMisses([
+      group("irreversible", [
+        claim({
+          id: "p_1",
+          confidence: 0.9,
+          cause: "irreversible",
+          detail: "removing 4 nodes cannot be undone from this log",
+        }),
+      ]),
+    ])
+
+    const record = screen.getByText("What the record says about this one").closest("details")!
+
+    expect(record.textContent).toContain("removing 4 nodes cannot be undone from this log")
   })
 
   it("says claim rather than claims when there is one", () => {

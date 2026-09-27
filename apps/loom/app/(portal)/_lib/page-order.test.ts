@@ -7,6 +7,7 @@ import {
   byName,
   inPageOrder,
   mostChangedRank,
+  mostWrongRank,
   needsYouRank,
   ORDER_LEAD,
   readyToCheckRank,
@@ -25,6 +26,7 @@ const RANKED: readonly PageOrder[] = [
   "needs-you-first",
   "ready-to-check-first",
   "most-changed-first",
+  "most-wrong-first",
   "worst-first",
 ]
 
@@ -261,5 +263,49 @@ describe("what a list says about its own order", () => {
   it("does not promise recency from a count", () => {
     expect(ORDER_LEAD["most-changed-first"]).toContain("most changes")
     expect(ORDER_LEAD["most-changed-first"]).not.toMatch(/recent|latest|newest/iu)
+  })
+})
+
+describe("mostWrongRank — /portal/trust's list of pages the AI misjudged", () => {
+  it("puts the page with the most wrong claims first", () => {
+    expect(mostWrongRank({ claims: [1, 2, 3] })).toBeLessThan(mostWrongRank({ claims: [1] }))
+  })
+
+  /**
+   * The rung is the count and nothing else, so two pages holding the same number
+   * of wrong claims reach the tiebreak. That is the rule this module is written
+   * under — every order here ends on the shared tiebreak — and it is what a second
+   * numeric key in front of the name would break.
+   */
+  it("leaves two pages with equal counts to the shared tiebreak", () => {
+    expect(mostWrongRank({ claims: [1, 2] })).toBe(mostWrongRank({ claims: ["a", "b"] }))
+
+    expect(
+      inPageOrder(
+        [
+          { claims: [1, 2], page: page("Pricing") },
+          { claims: [1, 2], page: page("About") },
+        ],
+        (row) => ({ rank: mostWrongRank(row), page: row.page })
+      ).map((row) => row.page.name)
+    ).toEqual(["About", "Pricing"])
+  })
+
+  /**
+   * A page with nothing wrong on it is not in this list at all — unlike the four
+   * ranks above it, which each have a rung for *nothing here* because their
+   * screens list every page. An empty group reaching this would rank above a page
+   * with one wrong claim, which is the one arrangement that would be a lie.
+   */
+  it("ranks a page with more wrong claims above one with fewer, at every size", () => {
+    const ranks = [1, 2, 3, 6, 12].map((size) => mostWrongRank({ claims: Array(size).fill(0) }))
+
+    expect([...ranks].sort((left, right) => left - right)).toEqual([...ranks].reverse())
+  })
+
+  /** The sentence names pages rather than what is on them, which is the claim it may make. */
+  it("says the AI got the page wrong rather than that the page is wrong", () => {
+    expect(ORDER_LEAD["most-wrong-first"]).toContain("AI")
+    expect(ORDER_LEAD["most-wrong-first"]).not.toMatch(/broken|bad|failing/iu)
   })
 })

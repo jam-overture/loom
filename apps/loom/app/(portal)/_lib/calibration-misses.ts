@@ -272,3 +272,80 @@ export const contradictedBands = (
     return claims.length === 0 ? [] : [{ bucket, claims }]
   })
 }
+
+/**
+ * The misses that happened on one page.
+ *
+ * ## The fact this page dropped
+ *
+ * `MissedClaim` has carried `treeId` since it was written and no part of
+ * `/portal/trust` has ever rendered it. So a reader who opened this screen and
+ * found six overconfident claims could read what each one was trying to do, how
+ * far out it was and which rule caught it — and could not find out whether all
+ * six were on one page or spread across six. Those are opposite situations with
+ * opposite next moves, and the screen looked identical either way.
+ *
+ * It is also the only fact on this screen a reader can act on *today*. A class
+ * of change the AI keeps misjudging is something to watch; a page it keeps
+ * misjudging is something to open.
+ *
+ * ## Why this groups and does not order
+ *
+ * An order over pages needs each page's **name**, and a name is a read against
+ * the store (`page-name.ts`). This module is a pure fold over the record and
+ * gets no store, which is deliberate: `missesOf` and `calibrationOf` start from
+ * the same fold and cannot be allowed to disagree, and a function that reached
+ * for a store could not be called beside one that cannot.
+ *
+ * So the arrangement is the screen's, through `_lib/page-order.ts` like every
+ * other list of pages in this portal. What is here is the grouping and the two
+ * numbers a row needs, and the insertion order is `missesOf`'s own — worst claim
+ * first — which is what makes `worstSurprise` the first claim's without a second
+ * scan.
+ */
+export type MissedPage = {
+  readonly treeId: TreeId
+  /** Worst first, inherited from `missesOf`. */
+  readonly claims: readonly MissedClaim[]
+  /**
+   * How far the worst claim on this page sat from what happened.
+   *
+   * Kept beside the count because the two answer different questions and a row
+   * showing only the count would flatten them: four claims that were each barely
+   * over the line is a different page from one claim that was 0.95 wrong.
+   */
+  readonly worstSurprise: number
+}
+
+export const pagesInMisses = (misses: readonly MissedClaim[]): readonly MissedPage[] => {
+  const pages = new Map<TreeId, MissedClaim[]>()
+
+  for (const miss of misses) {
+    const existing = pages.get(miss.treeId)
+    if (existing) existing.push(miss)
+    else pages.set(miss.treeId, [miss])
+  }
+
+  return Array.from(pages, ([treeId, claims]) => ({
+    treeId,
+    claims,
+    /*
+     * The first claim's, and not a `Math.max`. `missesOf` sorts worst first and
+     * a group built by walking that list keeps the order, so the head is the
+     * worst by construction — and a second reduction here would be a second
+     * definition of "worst" that could drift from the sort.
+     */
+    worstSurprise: claims[0]!.surprise,
+  }))
+}
+
+/**
+ * Every page a miss happened on, once each, for the one read this adds.
+ *
+ * Separate from `pagesInMisses` because a screen needs the ids *before* it has
+ * the names and the names before it can arrange the groups, and a screen that
+ * mapped over the groups to get the ids would be holding two lists that have to
+ * stay in step.
+ */
+export const pagesWithMisses = (misses: readonly MissedClaim[]): readonly TreeId[] =>
+  Array.from(new Set(misses.map((miss) => miss.treeId)))

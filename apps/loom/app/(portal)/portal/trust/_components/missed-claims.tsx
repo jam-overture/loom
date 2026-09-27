@@ -1,6 +1,7 @@
 import type { ContradictedBand, MissGroup } from "@/app/(portal)/_lib/calibration-misses"
 import { formatRange, formatRate, MISS_CAUSE_LABELS, MISS_CAUSE_NOTES } from "@/app/(portal)/_lib/calibration-view"
 import { toneClasses } from "@/app/(portal)/_lib/outcome"
+import { nameFrom, type PageName } from "@/app/(portal)/_lib/page-name"
 
 import { MissedClaimRow } from "./missed-claim"
 
@@ -17,10 +18,20 @@ export const MissedClaims = ({
   groups,
   contradicted,
   total,
+  names,
 }: {
   readonly groups: readonly MissGroup[]
   readonly contradicted: readonly ContradictedBand[]
   readonly total: number
+  /**
+   * The pages these claims were made against, named — or absent when the screen
+   * is scoped to one page and every row would name the same one.
+   *
+   * Read once by the screen and handed down, the rule every list in this portal
+   * follows: a row that read a store would turn one listing into one read per
+   * claim, and a group of six claims on one page would read that page six times.
+   */
+  readonly names?: ReadonlyMap<string, PageName>
 }) => (
   <section className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
@@ -75,7 +86,11 @@ export const MissedClaims = ({
 
         <ul className="flex flex-col">
           {group.claims.map((claim) => (
-            <MissedClaimRow key={claim.proposalId} claim={claim} />
+            <MissedClaimRow
+              key={claim.proposalId}
+              claim={claim}
+              {...(names === undefined ? {} : { page: nameFrom(names, claim.treeId) })}
+            />
           ))}
         </ul>
       </div>
