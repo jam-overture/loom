@@ -1447,6 +1447,64 @@ second one is only prose* — is wrong, and noticing why is worth the whole set.
 
 ---
 
+## Set AH — two days after lesson 29
+
+Interleaved with 12, 15, 20, 24, 25 and 28. Heavy on 25, because the population
+rule arrives here for the third time and is the reason six of lesson 29's seven
+rows say nothing about the library; and heavy on 12, because *what the model is
+told it may write* is what turns an unread declaration from untidiness into a
+fault.
+
+1. Name the property every promise `auditRegistry` can check has in common, and
+   use it to say why an unread prop is not among them. Then name one other fact
+   about a component the same argument rules out, and say what instrument would
+   be needed instead. *(29)*
+2. A primitive's props schema has at least six readers. Name five, say for each
+   what it does that no other one does, and then say which of the five a
+   deployment could remove entirely without the schema becoming pointless. *(15,
+   29)*
+3. The registry refuses a `frames`, a `copy`, an `interactive` or a `reads`
+   declaration that names a prop the schema does not declare, and the three
+   refusal messages describe one drift. State the drift in a sentence. Then say
+   why the component — the place where that rename is actually typed — is the one
+   writing of a prop name not held to the schema. *(29)*
+4. Reading a prop a schema does not declare is caught. Declaring a prop nothing
+   reads is not. Say exactly what catches the first, and then say why no type
+   system can catch the second — the answer is about what a type may require of a
+   function *body*, not about how clever the checker is. *(29)*
+5. `loom.recording` closes over exactly one choice, `shape`; the probe renders it
+   once per value of `shape`; the component reads `shape` in none of those
+   renders. Explain how all three are true at once, then state the rule in a form
+   that would apply to a primitive you have never seen. *(29)*
+6. State the rule about the population a check runs over. Give three instances
+   from this course — one where the population was a union's members, one where it
+   was a shape in prose, and one where it was the states a function could be
+   called in — and say for each what the remedy closed and what it left open.
+   *(25, 28, 29)*
+7. `loom.embed`'s `src` is declared, validated, put in the catalogue, resolved
+   against an allowlist, and never read by its component. Say what would break if
+   the component read the prop instead of the verdict, and be specific: the answer
+   is two strings that are one thing to one reader and two to another. Then say
+   which earlier lesson's sentence that is an instance of. *(20, 29)*
+8. A reading that cannot answer owes its caller a way to say so, and a sweep that
+   finds seven candidates owes its caller something too. Say what each owes, and
+   then say which of lesson 29's seven rows would be reported by a check that was
+   honest about its own population — and what the report would have to say beside
+   the row. *(24, 29)*
+9. Lesson 28 asks *where is the second copy*. Lesson 29 has two copies, no
+   obstacle, and a correct answer, and is still wrong. Say what it was wrong
+   about, state the general rule in a form that mentions neither props nor
+   primitives, and then apply it to one claim `decisions/` makes about itself.
+   *(28, 29)*
+
+Question 9 is the point of the set. Question 4 is where a confident half-answer
+is most likely: an answer that says *TypeScript does not look at bodies* has
+described the mechanism and stopped — what transfers is why a language that did
+look would still be wrong to require it. Question 2 is the one where the fifth
+reader is the one that matters and is the one people leave out.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1494,3 +1552,4 @@ renders this file rather than restating it.
 | AE | 2 days after L26 | | |
 | AF | 2 days after L27 | | |
 | AG | 2 days after L28 | | |
+| AH | 2 days after L29 | | |

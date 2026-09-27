@@ -74,7 +74,17 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 111 since lesson 28 (corroboration), which added nine — seven exercises, two
+ * 118 since lesson 29 (readership), which added seven — one per exercise, each a
+ * whole transcript in a single block. Exercise B's second fence is a `tsc`
+ * diagnostic and is marked `text` rather than left plain, on lesson 25's
+ * precedent: no program in this course prints a compiler error, so a plain fence
+ * there would be a transcript nothing could match. That lesson's exercise C is
+ * also the one block in the course that is deliberately a second copy of a fact
+ * about `src/primitives/` — the set of primitives with a conditionally-read prop —
+ * and is expected to go red when a primitive joins it, which is the point of the
+ * lesson rather than a cost it forgot to count.
+ *
+ * It was 111 after lesson 28 (corroboration), which added nine — seven exercises, two
  * of which split their output across two fences so that the half about the
  * check and the half about the people writing the records are not read as one
  * thing. Every one of them prints a verdict rather than a total, and the lesson
@@ -99,7 +109,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 111
+const RECOGNISED_TRANSCRIPTS = 118
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
