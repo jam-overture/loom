@@ -1,9 +1,5 @@
-import {
-  relativeLuminance,
-  type Palette,
-  type PaletteSlot,
-  type ResolvedTheme,
-} from "@jam-overture/loom"
+import { type Palette, type PaletteSlot, type ResolvedTheme } from "@jam-overture/loom"
+import { themeGround, type ThemeGround } from "@jam-overture/loom/react"
 
 import { DEMO_STARTING_THEME } from "./page-tree"
 import { demoThemes } from "./registry"
@@ -76,64 +72,18 @@ export const pageColour = (slot: PaletteSlot): string => {
 /**
  * The ground and the ink a frame standing in for the page must paint.
  *
- * `bg-canvas` rather than `bg-surface` because that is what the root primitive
- * paints and therefore what is behind any band excerpted out of the page; a
- * band that paints a surface of its own paints it over this, exactly as it does
- * out on the stage.
+ * **`themeGround` is the runtime's now**, and this is the one line of demo left
+ * around it. The derivation was written here on 26 September, filed the same day
+ * because it is not demo-specific, and landed in `src/render/theme.ts` on the
+ * 27th — so what survives here is the demo's own signature, which takes the
+ * `ResolvedTheme | undefined` a render hands back rather than the `ResolvedTheme`
+ * the runtime asks for.
  *
- * `color` is here as well as `backgroundColor` because a frame that set only
- * the ground would leave anything inheriting its colour reading the *rail's*
- * ink — Loom's voice, on the clinic's page. The page's primitives already read
- * `--loom-fg-default` for their own text, so this changes nothing they draw and
- * catches everything they do not.
- */
-export type PageGround = {
-  readonly backgroundColor: string
-  readonly color: string
-  /**
-   * Absent when either end of the pair is a colour `channelsOf` cannot read, in
-   * which case the stylesheet's own `color-scheme` stands rather than this file
-   * guessing. Every registered palette declares both as hex and resolves.
-   */
-  readonly colorScheme?: "light" | "dark"
-}
-
-/**
- * Which way round the palette is, without a threshold.
- *
- * A luminance ceiling would be a number this file had to defend — and the one
- * the runtime has (`SCRIM_DARK_CEILING`) is about whether a wash darkens what
- * is under it, which is a different question. Comparing the palette's own ink
- * to its own canvas asks the only question `color-scheme` answers: is text on
- * this ground light-on-dark, or dark-on-light. Measured across all twenty-one
- * registered palettes the two groups are canvases at L > 0.9 and L < 0.02, so
- * nothing sits near the line.
- */
-const schemeOf = (palette: Palette): "light" | "dark" | undefined => {
-  const canvas = palette.slots["bg-canvas"]
-  const ink = palette.slots["fg-default"]
-  if (canvas === undefined || ink === undefined) return undefined
-
-  const canvasLuminance = relativeLuminance(canvas)
-  const inkLuminance = relativeLuminance(ink)
-  if (canvasLuminance === undefined || inkLuminance === undefined) return undefined
-
-  return inkLuminance > canvasLuminance ? "dark" : "light"
-}
-
-/**
  * Undefined when the tree names no theme, which is the case the renderer has no
  * fallback for either (`theme.ts`: there is no default theme, deliberately). An
  * unthemed excerpt then inherits the same nothing an unthemed stage does.
  */
-export const pageGround = (theme: ResolvedTheme | undefined): PageGround | undefined => {
-  if (theme === undefined) return undefined
+export type PageGround = ThemeGround
 
-  const backgroundColor = theme.palette.slots["bg-canvas"]
-  const color = theme.palette.slots["fg-default"]
-  if (backgroundColor === undefined || color === undefined) return undefined
-
-  const colorScheme = schemeOf(theme.palette)
-
-  return { backgroundColor, color, ...(colorScheme === undefined ? {} : { colorScheme }) }
-}
+export const pageGround = (theme: ResolvedTheme | undefined): PageGround | undefined =>
+  theme === undefined ? undefined : themeGround(theme)

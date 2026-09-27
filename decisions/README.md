@@ -279,3 +279,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0193](0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md) | A status line is data: its opener is a closed set, and a supersession is written at both ends | Accepted | §1 (process) |
 | [0194](0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md) | The framework is the package, and everything that uses it ships separately | Accepted | §1 (process), §4 (SDK) |
 | [0195](0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md) | A shot may say what the browser started with, and it says it as data | Accepted | §1 (process) |
+| 0196 | *No record on this branch* | — | — |
+| [0197](0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md) | A host may ask which way round a palette is, and a frame standing in for the page is handed both ends | Accepted | §4b |
