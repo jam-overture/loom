@@ -8,6 +8,281 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-27 — the words-in-props finding has been carried in three portal reports under the name of three primitives that do not have the problem
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the declaration),
+with a second half for `Loom primitives` (filling it) · **Corrects:** this lane's
+own recommendation in the 19, 26 and 27 September reports · **Status:** open, and
+the 10 September entry it points at is still the live one
+
+Three consecutive reports from this lane have carried a recommendation reading:
+
+> **`copy` on `loom.action`, `loom.button` and `loom.link`**, in
+> `Loom primitives`. Three declarations, and they are the difference between *the
+> action* and *the button "Start free"* in every sentence this portal writes about
+> a part.
+
+**Checked today against the library, and those three do not have the problem.**
+Every one of them takes its label as child text and says so in its own
+description:
+
+| | |
+| --- | --- |
+| `loom.action` | *"A call to action: a link styled as a button. Its label is child text."* |
+| `loom.button` | *"The control that submits a loom.form. Its label is child text."* |
+| `loom.link` | *"A plain text link. Its label is child text"* — and its comment calls that 0059 exactly |
+
+A label held as a `text` child is exactly what `part-name.ts` and `textIn` already
+read, so those three are named by what they say today. Whatever was true in
+mid-September, the recommendation as written is asking for a declaration on the
+three primitives that need it least, and a lane picking it up would find nothing
+to do and might reasonably conclude the whole thing was stale.
+
+**It is not stale. The primitives are wrong.** The live finding is the second half
+of the 10 September entry *the plain reading of a change prints registered type
+ids, and misses copy held in props*, filed by `Loom demo` and owned by this lane,
+and what it actually names is:
+
+- **`loom.stat`** — `figure`, `label` and `caption`, all props
+- **`loom.quote`** — `quote`, `author` and `role`, all props
+- **and every primitive that follows 0052's rule**, which is the library's whole
+  direction, so the set widens rather than narrows
+
+A proposal to delete a band of three headline numbers reports **no words at all**
+in the review queue's *words it takes away*, because `textIn` walks for children of
+kind `text` and there are none. The reviewer sees `3 pieces` where the page says
+*"3,400 · appointments last year"*.
+
+`page-name.ts` reached the same wall from the other side and wrote it down at the
+time:
+
+> **a primitive has no way to declare that it carries a page's title** — filed as a
+> finding, since the framework is the only place that could offer one, and until it
+> does every host deriving a page name writes this array again.
+
+That array is `TITLE_BEARING` in this lane, hard-coded, four types long, and
+correct only for the four primitives this portal registers.
+
+### Why this is two lanes and not one
+
+The **declaration** is the framework's: a field on a primitive definition saying
+which of its props hold copy a person reads, and whether any of them is the part's
+title. Nothing in `src/primitives/` can invent a field the definition shape does
+not have. **Filling it** is the primitives lane's, across however many primitives
+0052 has produced.
+
+It is a schema addition to the primitive definition rather than to a tree, so it
+is not `ARCHITECTURAL` on this lane's reading — but it is the framework's call and
+**no record was written by this lane.**
+
+### What it would close
+
+Three open items in one field, which is why it is worth the correction rather than
+a fourth repetition:
+
+1. the review queue reporting no words for a change that removes most of a band's
+   copy (10 September, this lane's);
+2. `TITLE_BEARING` — every host deriving a page name re-writing a list of types
+   (`page-name.ts`, this lane's);
+3. `part-name.ts` naming a props-only part *the stat* where the page says
+   *3,400 appointments last year*.
+
+**This lane's omission, said plainly:** the recommendation was repeated three times
+without once being filed against the lane it named, and when it was finally checked
+it turned out to name the wrong primitives. The check cost ten minutes. That is the
+argument for filing rather than recommending, and it is the fourth time this lane
+has written some version of that sentence.
+
+---
+## 2026-09-27 — the plain-language sweep parses the words a screen writes, and cannot see a runtime sentence that arrives as a value
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**the class, not the instance.** The one instance found today is fixed by
+`portal-37-which-page-the-ai-was-wrong-about`; the hole it came through is not
+
+Since 24 September this lane has held the governing principle as a property over
+every `.tsx` in the route group — `every-screen.test.ts`, 312 cases and counting,
+one per sentence. It closed the defect it was written for: a sentence a component
+*writes* cannot contain a word from the runtime's vocabulary.
+
+**It has never been able to see a sentence a component merely *passes on*.**
+
+`_test/surface-text.ts` walks the TypeScript AST and collects `JsxText` nodes,
+which is exactly right and is the reason it beats a regex — a type argument is not
+a text node, and a sentence broken across an expression is still one. But
+`{claim.detail}` is a `JsxExpression`, not a `JsxText`, so the sweep does not read
+it. That is also deliberate and stated: *the record is not swept*, because a
+`<TechnicalDetail>` subtree is supposed to say `revision` and `delta` and `fold`.
+
+The two decisions compose into a blind spot neither of them intended: **a runtime
+string put on the surface through a value is invisible to the rule.**
+
+### What it cost, photographed on `main` this morning
+
+`/portal/trust`'s missed-claim row rendered the Gate's own sentence, in italics,
+on the surface, unasked:
+
+> *removing 9 nodes cannot be undone from this log: loom.card at n_prices7*
+
+`nodes` and `log` are both on `RUNTIME_WORDS`. Three of the six rows in the
+picture carried one. It had been there since the row was written and every
+assertion in the lane passed the whole time — including the one that exists to
+catch precisely this sentence, one screen over, where it is written as text.
+
+The fix in that branch moves the string behind the disclosure, which is where it
+always belonged. **The hole is still open**: nothing stops the next component
+rendering `{error.detail}`, `{describeStoreError(…)}` or
+`{disposition.reason.detail}` on a surface.
+
+### Why this is not simply "sweep the expressions too"
+
+Because most of them are correct. `{claim.rationale}` is what a person typed and
+must be on the surface; `{page.name}` is a heading a page gave itself. A rule that
+flagged every value would be a rule with fifty exemptions, which is the state the
+45 hand-written assertions were in before the sweep existed.
+
+**The recommendation is to sweep the callers rather than the values.** The
+runtime's own describers are a closed and short list — `describeStoreError`,
+`describeHoldError`, `describeTelemetryError`, `describeWriteOutcome`,
+`describeAudit`'s technical halves — and so are the two fields that carry the
+Gate's prose, `disposition.reason.detail` and a `TelemetryFailure`'s `detail`.
+Each is a *named* expression, so the AST already has what a rule needs: **a
+reference to one of those, outside a `<TechnicalDetail>` subtree, is the
+defect.** That is a list of about eight names and one ancestor check, it needs no
+exemptions, and it would have failed on `main` this morning.
+
+Filed rather than built in the same branch: the branch is about what a reader is
+shown on one screen, and a lane-wide guard is not.
+
+---
+## 2026-09-27 — a refusal read back out of the record can name the rule and never the reason, because the factors are not stored
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— **`ARCHITECTURAL — needs review`**, because the answer is a field on
+`dispositionSchema` or `assessmentSummarySchema` and both are the framework's
+
+`_lib/refusal.ts` exists for one sentence in its own header, and the sentence is
+right:
+
+> A refusal has three answers stacked inside it and the portal was showing the
+> first and third.
+
+| | | where it comes from |
+| --- | --- | --- |
+| what happened | *Not allowed* | `CHANGE_STATES` |
+| **why** | *it asks for a kind of part this site has nothing to draw it with* | **`STAKE_FACTORS`** |
+| which rule decided | *This project does not allow changes this risky at all* | `RULE_SENTENCES` |
+
+The middle row is the one a person acts on. **It is shown on exactly two screens,
+and neither of them is the record.**
+
+`ChangeReasoning` is rendered by `prompt-box.tsx` and `undo-button.tsx` — the
+outcome of a write the reader has just performed, where the live
+`ChangeAssessment` is still in hand and its `factors` with it. Every screen that
+reads a refusal *back* has only what was stored:
+
+- `Disposition` carries `reason.code`, a prose `reason.detail`, `stakes`,
+  `reversible`, `confidence`, `policyId` and a fingerprint. **No factors.**
+- `AssessmentSummary` — what the journal keeps of an assessment — carries nine
+  counts and `irreversibilityReasons`. **No factors.**
+- `HeldProposal` carries the intent, the proposal and the disposition. **No
+  factors**, though its own comment says it keeps the disposition *"so a reviewer
+  sees the reason rather than a verdict"*.
+
+So `/portal/activity`'s `ProposalLine`, the front door's waiting cards and the
+review queue all answer *why did this stop* with `ruleSentence(code)` — which
+`refusal.ts` itself describes as *"true of every refusal this deployment can
+produce, which is another way of saying neither is about the change in front of
+you"*. The front door's waiting card labels it **Why it stopped**.
+
+### The half of it that is a live hazard rather than a missing nicety
+
+`cannotBeDrawn`. 0173 and 0179 built two floors — `unknown-primitive` and
+`invalid-props` — describing a change that **cannot be made at all**, and both
+arrive under the same reason code as a change that is merely too risky
+(`stakes-at-refusal-floor`, because both reach `critical`). `refusal.ts` says what
+follows:
+
+> a screen reading the code alone cannot tell them apart and tells the reader
+> their settings blocked it. That sends somebody to `/portal/rules` to loosen a
+> rule which, loosened, would commit a broken page.
+
+On a refusal read back out of the journal, **every screen in this portal is that
+screen**, because the code is all that was stored. The one module written to stop
+this cannot run on a record.
+
+### What the portal cannot do about it
+
+Re-deriving the factors is available and is worse than nothing. The delta is on
+the episode and the tree is in the store, so the portal could assess the change
+again — against *today's* tree and *today's* policy, neither of which is what
+judged it. A reason presented as a record but computed from the present is the
+same defect `auditSnapshot` refuses to commit when it declines to fold a tree from
+its own snapshot (0028): an answer that agrees with itself. Parsing
+`reason.detail` is the other route and it is a consumer reading the runtime's
+prose, which 0018 and the 28 August finding settled.
+
+### Recommendation
+
+`factors: readonly StakeFactor[]` on `AssessmentSummary`, optional and never
+defaulted, for 0045's reason: absent on a record written before the field existed
+reads as the unknown it is, and a defaulted empty array would claim the Gate
+weighed nothing. That puts it in the journal, and `episodesOf` already carries the
+assessment onto every `ProposalEpisode`.
+
+A hold wants the same thing and has a second option — `assessment` beside
+`disposition` on `HeldProposal` — and that is the framework's call rather than
+this lane's. Both are schema changes to Accepted records' subject matter, so this
+is filed as `Proposed`-shaped work for the lane that owns them and **no record was
+written by this lane.**
+
+What the portal ships in the meantime: nothing that depends on it. The 27
+September branch names the page a wrong claim was made about and keeps every id
+the record does hold, which is the half that needs no new field.
+
+---
+## 2026-09-27 — the portal has been photographed by a hand-written preload for the eighth consecutive run, and this one had to seed two carriers
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**re-filed by reference.** The 14, 19, 20, 21 and 24 September entries stand
+unchanged; this adds the number, one measurement and one trap
+
+**The number: eight.** Every picture of this portal since 15 September has been
+taken with a preload written from scratch at the start of the run and deleted
+before the diff.
+
+**The measurement, and it is why this is getting worse rather than staying
+level.** Every previous run staged the **store** — trees, revisions, holds. This
+one photographed `/portal/trust`, which reads the **journal**, so the preload had
+to build a second carrier from scratch: `intent-received`, `change-proposed`,
+`change-assessed`, `disposition-decided` and, per outcome, `proposal-held` plus
+`hold-confirmed`/`hold-discarded`/`change-applied`/`change-committed` — **30
+records for 6 claims**, each field hand-typed against `telemetryEventSchema`, on
+top of the three trees. Roughly double the previous runs' and thrown away at the
+end of this one. Three of the twelve screens in this lane read the journal and
+none of them has ever had a reusable way to be populated.
+
+**The trap this run hit**, worth writing down beside the harness recipe:
+`NODE_OPTIONS="--import ./stage.mjs"` **fails**. The harness spawns `next start`
+with the served application as its `cwd` but `NODE_OPTIONS` is inherited from the
+shoot process, whose cwd is the repository root — so a relative specifier is
+resolved against the wrong directory and the server dies with
+`ERR_MODULE_NOT_FOUND` before serving anything. An absolute path works. This is
+the sibling of the 24 September detail that the preload cannot live outside the
+repository, and the two together are the whole of why this is fiddly rather than
+merely wasteful.
+
+**The recommendation is unchanged and now has a second half.** A committed
+`app/(portal)/_test/staging/` with a small CLI, holding the seeded store **and a
+journal builder** — the second is the part that would have saved this run, and it
+is the part every future run that photographs `/portal/trust`, `/portal/activity`
+or the front door's second half will otherwise write again. It is this lane's, it
+is roughly 200 lines now rather than 120, and it would have saved seven runs.
+
+It is not in `portal-37` for the same reason it was not in `portal-36`: that
+branch is about what a reader is shown, and a staging harness is not.
+
+---
 ## 2026-09-27 — a `loom.backdrop` clips, so every band inside one is invisible to the only automated visual check this repository has
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`),
