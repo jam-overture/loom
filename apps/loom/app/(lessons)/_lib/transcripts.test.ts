@@ -104,9 +104,14 @@ const RECOGNISED_TRANSCRIPTS = 111
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
  *
- * Fifty blocks: nine in lesson 05, eight in 09, six each in 06, 08, 10 and 11,
- * five in 07 and four in 04. Lessons 02 and 03 print nothing and 01 has no
- * exercises, so they contribute none and always did.
+ * Fifty-one blocks: nine in lesson 05, eight in 09, seven in 11, six each in 06,
+ * 08 and 10, five in 07 and four in 04. Lessons 02 and 03 print nothing and 01
+ * has no exercises, so they contribute none and always did.
+ *
+ * It was 50 until 26 September, when lesson 11 gained a seventh: the exercise
+ * that hangs a client and gets an answer anyway, written the same day the
+ * declaration check found that lesson printing a `ModelClient.complete` the
+ * runtime had stopped having.
  *
  * It is pinned for the reason the other one is, and with one extra failure mode
  * worth naming: these fences sit under a heading the reader is meant to reach
@@ -114,7 +119,7 @@ const RECOGNISED_TRANSCRIPTS = 111
  * matching would take this from 50 to 0 and, without the pin, read as a clean
  * sheet.
  */
-const RECOGNISED_ANSWERS = 50
+const RECOGNISED_ANSWERS = 51
 
 /**
  * Lines under `## Answers` that are the author speaking rather than the program

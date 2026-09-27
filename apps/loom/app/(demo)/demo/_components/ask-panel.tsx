@@ -183,9 +183,15 @@ export const AskPanel = ({
             <button
               type="submit"
               disabled={pending}
-              className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-4 py-3 text-md font-medium transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="bg-affirm text-affirm-ink border-affirm-edge group flex items-center justify-between gap-3 rounded-md border px-4 py-3.5 text-md font-semibold tracking-tight transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {pending ? "Asking…" : leading.label}
+              <span
+                aria-hidden="true"
+                className="shrink-0 transition-transform group-hover:translate-x-0.5"
+              >
+                →
+              </span>
             </button>
             {/*
               * Under the button rather than inside it, at every width. What the
@@ -283,7 +289,7 @@ export const AskPanel = ({
 
       {rest.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-ink-muted text-2xs tracking-wide uppercase">
+          <p className="text-ink-muted font-mono text-2xs tracking-[0.16em] uppercase">
             {waiting === undefined ? ASKS_HEADING : ASKS_HEADING_WHILE_WAITING}
           </p>
           <ul className="flex flex-col gap-1">
@@ -295,7 +301,7 @@ export const AskPanel = ({
                   <button
                     type="submit"
                     disabled={pending}
-                    className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3 py-2 text-left transition-colors disabled:opacity-60"
+                    className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3.5 py-2.5 text-left transition-colors disabled:opacity-60"
                   >
                     <span className="text-sm">{preset.label}</span>
                     <span className="text-ink-muted text-2xs">{preset.promise}</span>
@@ -324,7 +330,7 @@ export const AskPanel = ({
         * the browser gives it keyboard and screen-reader semantics free.
         */}
       <details className="group">
-        <summary className="text-ink-muted hover:text-ink cursor-pointer list-none text-2xs tracking-wide uppercase transition-colors select-none">
+        <summary className="text-ink-muted hover:text-ink cursor-pointer list-none font-mono text-2xs tracking-wide uppercase transition-colors select-none">
           <span className="inline-flex items-center gap-1.5">
             <svg
               viewBox="0 0 12 12"

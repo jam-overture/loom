@@ -77,3 +77,46 @@ export const ANSWER_ARRIVES = "start" satisfies ScrollLogicalPosition
  */
 export const clearanceFor = (block: ScrollLogicalPosition): string =>
   block === "start" ? "" : "scroll-mt-28"
+
+/**
+ * The travel the rail's scroller needs for `ANSWER_ARRIVES` to be a landing
+ * rather than an intention — **the third half of the same decision**, and it
+ * was missing.
+ *
+ * A scroller carries an element to its top only if it has that much scroll
+ * left below it. Everything above assumed it always would, which was true for
+ * as long as the rail was tall: a card at `start` left the panel behind, so no
+ * caution could pin over it.
+ *
+ * **Folding the explainer took about three hundred pixels out of the rail**
+ * (`what-happens.tsx`, 26 September, and it was right to — it cost a phone
+ * screen that is nothing but rail). Measured on a production build at
+ * 1280 × 900 immediately afterwards, with a question open:
+ *
+ * | | |
+ * | --- | --- |
+ * | the rail's scroll position after the press | **612** |
+ * | the furthest it can scroll | **612** |
+ * | where that leaves the card's top | **−404** — it never arrives |
+ * | the caution, pinned, in amber | **43 → 146**, back on the frame |
+ *
+ * So the whole table at the top of this file came back, by a route neither of
+ * the two constants above could see: nothing about the landing changed, and
+ * the scroller stopped being able to honour it. `ANSWER_ARRIVES` is a promise
+ * about where a card goes, and a promise the layout can quietly withdraw is
+ * the exact failure this file was written to stop.
+ *
+ * **Only while a question is open, and only where the rail is a scroller.** On
+ * arrival the rail is a screen and a half of content and this would make it
+ * scroll into emptiness — the default state, which is the one a stranger
+ * judges. On a phone the document scrolls and the card reaches the top by
+ * ordinary means.
+ *
+ * `70vh` rather than a fixed length because the shortfall is
+ * `viewport − card − what follows it`: it grows with the screen, so a rem
+ * value correct on a laptop is short on a monitor. The cost is a band of empty
+ * rail below the footer, reachable only by scrolling past the end of the
+ * record while a question is waiting, and it buys the frame the demo's one
+ * invited press produces.
+ */
+export const roomToLand = (waiting: boolean): string => (waiting ? "lg:pb-[70vh]" : "")

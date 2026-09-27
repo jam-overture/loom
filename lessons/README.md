@@ -86,13 +86,26 @@ time. Lesson 05 is what it cost, and that story is [in the lesson
 itself](05-purity-at-the-seams.md#what-this-lesson-got-wrong-and-for-how-long)
 rather than here, because it is the better half of what that lesson now teaches.
 
-One thing it still does not reach, said here rather than discovered later. A
+**And since 26 September a type printed in a lesson is held against the
+declaration it claims to be.** A fence that opens `export type MarkedHolds = {`
+is not making a claim about the code, it *is* the code, quoted — so the second
+copy was already there and nobody had written the comparison. Each fence is held
+to every member it names, and a fence that prints a declaration *whole* is held
+to it staying whole, which is read off the fence rather than declared beside it.
+That check was written because of lesson 11: it printed the network boundary
+taking one argument for six days after [0140] gave it a second one, in the lesson
+whose subject is that boundary, with every exercise in it green — because an
+exercise calls the seam through a double and a double satisfies both signatures.
+The paragraph that used to sit here named exactly that fault as the kind nothing
+would reach.
+
+Two things it still does not reach, said here rather than discovered later. A
 count is the cheapest second copy a sentence can carry and **most of what a
-lesson says carries none** — rungs numbered one too low, a type signature the
-runtime had stopped having, and an argument about which of two places a
-guarantee lives in are all prose about the code, and none of them is a count or
-a transcript. Lesson 05's was wrong for seven weeks in a file two other checks
-were passing over every day. If you find one, it will be by reading.
+lesson says carries none** — rungs numbered one too low, and an argument about
+which of two places a guarantee lives in, are prose about the code and neither is
+a count, a transcript or a declaration. Lesson 05's was wrong for seven weeks in
+a file two other checks were passing over every day. If you find one, it will be
+by reading.
 
 ## The spaced review schedule
 
