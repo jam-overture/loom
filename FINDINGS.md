@@ -34236,3 +34236,72 @@ they describe did not exist yet.
 
 **What would close it for the next split**: nothing to do here. The pattern is
 `manifest.ts` reading `../../package.json`, and it is four lines.
+
+---
+
+## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`apps/loom/package.json` is the application shell) · **Status:** open —
+**root cause identified, fix written and proven, waiting on its owner.** The
+change is one line in another lane's file and it is the merge gate for four
+surfaces, so it is offered on a branch rather than merged · **Sharpens:** the
+23 September entry *a three-day-old `.next` survives a
+checkout and fails the gate in another lane's name*
+
+That entry called this a stale artifact surviving a checkout, which is the
+symptom. The cause is an ordering in the application's own scripts:
+
+```
+verify:    pnpm typecheck && pnpm test && pnpm build
+typecheck: pnpm --filter @jam-overture/loom build && tsc --noEmit
+```
+
+`apps/loom/tsconfig.json` includes `.next/types/**/*.ts`, and **only
+`next build` writes those files.** `typecheck` runs *before* `build`, so
+`tsc --noEmit` reads the route validator the **previous** build generated —
+every run, on every machine, not only a stale one. It passes whenever the
+routes have not moved since that build, which is most of the time, which is
+why it has taken three occurrences to see.
+
+**It costs a release morning.** The maintainer hit it on 27 September while
+publishing: six `TS2307` errors naming marketing and documentation routes.
+All six were files deleted by other lanes' merged work — five by the
+cliff-notes change, and `(docs)/docs/search-index/prose/route.ts` by **#357**,
+which is old enough that the generated validator had been wrong for days.
+
+**Why it is worse than a slow gate.** The errors name `(marketing)` and
+`(docs)` paths, so a reader concludes another lane broke the build. The lane
+they are actually in is blameless, the lanes named are blameless, and the file
+is generated. Three different people can look at that output and none of them
+is looking at the cause.
+
+### The fix, and why it is not applied here
+
+```diff
+- "verify": "pnpm typecheck && pnpm test && pnpm build"
++ "verify": "pnpm build && pnpm typecheck && pnpm test"
+```
+
+Build first and `.next/types` is current, so the validator checks what the
+routes are rather than what they were. It is one line, it needs no new tooling,
+and it makes the check meaningful instead of merely quiet.
+
+**It is on a branch rather than in this file as a suggestion**, because the
+case it fixes had never been tested and a one-line change to four surfaces'
+merge gate should arrive with the evidence:
+
+| | |
+| --- | --- |
+| a route added, `next build` run, then the route removed | the validator now names a file that is gone — the maintainer's exact state |
+| `verify` at the current order, on that tree | **fails**, `TS2307`, naming `(marketing)/scratch-route/page.js` |
+| `verify` at the reordered gate, same tree | **passes**, exit 0, 5,381 tests |
+| `pnpm verify` at the root, reordered | **green**, 3,200 + 5,381, 112 prerendered pages |
+
+The middle two rows are the point: one tree, one state, two orders, two
+answers. That is the case the 23 September entry described and nobody could
+reproduce, because reproducing it needs the routes to move *between* a build
+and a gate.
+
+**What would close it**: merging it, or a reason not to. The workaround stays
+one command (`rm -rf apps/loom/.next`) for anybody who hits it first.
