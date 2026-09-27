@@ -4,6 +4,7 @@ import { askById, readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { type PageSearchParams as SearchParams, pageMetadata } from "@/app/(marketing)/_lib/share"
 import { HOME, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
+import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 /**
  * What this address unfurls as when somebody sends it to somebody else.
@@ -69,7 +70,20 @@ const HomePage = async ({ searchParams }: { readonly searchParams: SearchParams 
         }),
   })
 
-  return rendered.element
+  /**
+   * The graph beside the tree, which is what a crawler and an assistant read.
+   *
+   * A fragment rather than a wrapper, so the page's own markup is unchanged and
+   * the tree is still the whole of what a visitor sees. See
+   * `_components/structured-data.tsx` for why this surface renders a tag of its
+   * own at all.
+   */
+  return (
+    <>
+      <StructuredData route={HOME} origin={siteOrigin()} />
+      {rendered.element}
+    </>
+  )
 }
 
 export default HomePage

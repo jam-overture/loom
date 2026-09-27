@@ -33360,3 +33360,75 @@ time** remains the rule, and it is the rule that caught this.
 should ever be quoted, in a table cell or anywhere else. Until then the three
 entries together say all a lane needs — link rather than embed, keep the link out
 of a table, and read the body back.
+
+---
+## 2026-09-27 — a preview deployment now carries a full structured-data graph, and nothing tells a crawler to ignore it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — **a sharpening of the `noindex` question this lane has carried as an
+open item since 8 September**, not a new one, and now worth more than it was
+
+Every preview deployment serves `/sitemap.xml`, `/robots.txt` with
+`allow: /`, per-page canonicals, Open Graph cards — and as of today a
+`schema.org` graph on every page and an `/llms.txt` listing the site. None of it
+says *this is a preview*.
+
+The canonical is the honest part and it is what has kept this harmless so far:
+`pageMetadata` sets it to the address the page is served from, so a preview
+page's canonical is the preview's own URL rather than production's. That stops a
+preview competing with production for the same address. It does not stop the
+preview being indexed **as itself**, and there is one per pull request.
+
+What changed today is the value of indexing one. A page with a `FAQPage` and a
+`SoftwareApplication` node is a page a search engine can present as a rich
+result and an assistant can quote as fact. Thirty preview deployments of a
+product, each stating it is that product, is a worse thing to have crawled than
+thirty copies of some HTML.
+
+**The fix is one line in the shell** and it is the shell's because
+[0190](decisions/0190-a-route-group-may-contribute-a-sitemap-and-may-not-contribute-a-robots-txt.md)
+put `robots.ts` at the application root: `VERCEL_ENV !== "production"` →
+`rules: { userAgent: "*", disallow: "/" }`. The same signal could set
+`robots: { index: false }` in `pageMetadata`, which is this lane's file and this
+lane will make that change on a word from the maintainer — it is held here
+rather than taken because turning indexing off on the wrong deployment is a
+silent, total SEO failure, and *which* deployments are production is a
+deployment question rather than a marketing one.
+
+---
+## 2026-09-27 — structured data is the one text on this site nobody proofreads, and a fabricated rating in it would have passed every test this repository had
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-37` — recorded for the shape, which the other surfaces will
+meet the moment any of them emits schema
+
+A JSON-LD graph does not render. A wrong field in one breaks no page, fails no
+render diagnostic, changes no screenshot and reads as the same green as a
+correct one. It is also the only text on this site with a **non-human reader**,
+which means a wrong claim in it is repeated by a machine to somebody who never
+opens the page.
+
+The fields that make this dangerous rather than merely untidy are the ones that
+make a graph look more complete, each of which is one line:
+
+| field | what adding it would claim |
+| --- | --- |
+| `offers` / `price: "0"` | a price nobody has set, on a product whose licensing is explicitly unsettled |
+| `aggregateRating` | that people have rated this. Nobody has |
+| `review` | reviews that do not exist |
+| `publisher` as an `Organization` | that somebody in particular publishes this, which is positioning |
+| `dateModified` | a date nothing at serve time knows — the sitemap's own recorded argument |
+
+**`UNMADE_CLAIMS` in `_lib/schema.ts` is a denylist of exactly those**, swept
+over every node of every page's graph, plus a second assertion from the other
+side that no value anywhere in it is a bare number or a currency code — because
+a price can arrive as a value rather than as a key. Both were checked red by
+planting `offers: { price: "0", priceCurrency: "USD" }` and an
+`aggregateRating` of 4.8 from 37 reviews: **six assertions failed.** Before
+today, that plant would have passed the entire suite.
+
+The general shape, offered to any lane that adds structured data later:
+**a comment explaining why a field is absent is not a mechanism.** The reasoning
+reads as settled and a later run adds the field in good faith, because the
+schema looked incomplete and nothing said otherwise. The absence has to be the
+thing that is asserted.
