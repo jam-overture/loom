@@ -40,6 +40,49 @@ describe("the front door's reading order", () => {
   })
 
   /**
+   * **The pages come before what has happened to them.**
+   *
+   * The 27 September direction, as a property. `/portal` opened on a queue, so a
+   * person arriving with nothing waiting met an empty one — on the surface whose
+   * whole subject is pages that exist nowhere else they could be looked at. The
+   * fix is only a fix if the pages are *first*: a grid of them under two queues
+   * is the same screen with a picture at the bottom.
+   */
+  it("shows the pages themselves before anything that happened to them", () => {
+    const markup = source.slice(source.indexOf("<h1"))
+
+    expect(markup.indexOf("<PageCardLink")).toBeGreaterThan(-1)
+    expect(markup.indexOf("<PageCardLink")).toBeLessThan(markup.indexOf("<WaitingCard"))
+    expect(markup.indexOf("<PageCardLink")).toBeLessThan(markup.indexOf("<UnattendedCard"))
+  })
+
+  /**
+   * A card is a summary and never the queue with pictures.
+   *
+   * The two sections answer different questions — *what is my site* and *what
+   * needs me* — and the moment a card carries a change's own account of itself,
+   * the second is answered twice and the first not at all. What is waiting is a
+   * **mark** on a card and a **row** in the queue.
+   */
+  it("keeps the change out of the card and leaves it in the queue", () => {
+    const card = source.slice(source.indexOf("<PageCardLink"), source.indexOf("<WaitingCard"))
+
+    expect(card).not.toContain("effect")
+    expect(card).not.toContain("answers")
+  })
+
+  /**
+   * The grid is absent with no pages rather than an empty heading, and this is a
+   * guard's finding rather than a judgement that was made well the first time.
+   * The section shipped its own `tone="empty"` notice — a second dashed box
+   * saying what the one below it already said, with a second link to the same
+   * demo — and the two assertions above caught it.
+   */
+  it("draws no pages section at all when there are no pages", () => {
+    expect(source).toContain("cards.length > 0 &&")
+  })
+
+  /**
    * Two states with no queue on screen, and this guard is here because they are
    * not the same state.
    *
@@ -166,36 +209,66 @@ describe("the front door's reading order", () => {
    * Every assertion passed, because each half was correct on its own; what was
    * wrong was the pair, and only the whole screen has one.
    *
-   * The two states are mutually exclusive, so the check is per branch rather
-   * than over the file: the no-pages state and the caught-up state never appear
-   * together, and counting their hrefs as one screen would report a repeat that
-   * no reader can see.
+   * ## Why this is now stated over the screen rather than over a strip
+   *
+   * It used to compare the strip's hrefs against each mutually-exclusive empty
+   * branch's, because those were the only two places this screen linked
+   * anywhere. **The strip is gone** — 27 September put the pages themselves on
+   * this screen, which is the question the strip's own comment said it existed
+   * to answer, so the link to the paged index moved into that section and the
+   * orphan at the bottom was removed rather than left to say `Your pages` a
+   * second time.
+   *
+   * So the rule is read off the whole file instead: every literal `href`
+   * outside the two branches must be unique, and neither branch may repeat one
+   * of them. That is the property the original comment describes and it is
+   * strictly more than the strip version could see — a repeat between two
+   * ordinary sections was invisible to it, and that is exactly the repeat this
+   * run would have shipped.
    */
   it("never sends a reader to the same place twice on one screen", () => {
     const hrefsIn = (text: string): readonly string[] =>
       Array.from(text.matchAll(/href="([^"{]+)"/gu), (match) => match[1] ?? "")
 
-    const strip = hrefsIn(source.slice(source.indexOf("<nav")))
-    const branches = [
-      ...source.split('tone="empty"').slice(1),
-      ...source.split('tone="settled"').slice(1),
-    ].map((chunk) => hrefsIn(chunk.slice(0, chunk.indexOf("</StateNotice>"))))
+    /**
+     * Every notice on the screen, whole, so a tone is read off the block it
+     * belongs to rather than off a split that can run past the end of one.
+     */
+    const notices = [...source.matchAll(/<StateNotice[\s\S]*?<\/StateNotice>/gu)].map(
+      (match) => match[0]
+    )
+
+    const branchChunks = notices.filter(
+      (notice) => notice.includes('tone="empty"') || notice.includes('tone="settled"')
+    )
+
+    const branches = branchChunks.map(hrefsIn)
 
     /**
-     * Guards the guard: an empty slice would pass this trivially.
-     *
-     * One, not two. The strip carried "Everything anyone has asked for →" until
-     * 8 September, which was a fourth wording for a screen the rail called
-     * `Activity` and the strip on every scoped screen called "What's been
-     * asked". That destination is named once now, under this screen's heading,
-     * where it arrives as the scope of what a reader is about to read.
+     * Everything the screen links to that is *not* inside one of the two
+     * mutually-exclusive states. Those two never appear together, so counting
+     * their hrefs as one screen would report a repeat no reader can see.
      */
-    expect(strip.length).toBe(1)
+    const always = hrefsIn(
+      branchChunks.reduce((rest, chunk) => rest.replace(chunk, ""), source)
+    )
+
+    /**
+     * Guards the guard, at both ends. An empty extraction would pass every
+     * assertion below trivially, which is how this lane disarmed a demo guard
+     * once by renaming the thing it looked for.
+     */
     expect(branches.length).toBe(2)
     for (const branch of branches) expect(branch.length).toBeGreaterThan(0)
+    expect(always).toContain("/portal/pages")
+    expect(hrefsIn('<a href="/x">')).toEqual(["/x"])
 
+    /** The unconditional half of the screen may not repeat itself. */
+    expect(new Set(always).size, always.join(" ")).toBe(always.length)
+
+    /** And neither branch may lead somewhere the screen already leads. */
     for (const branch of branches) {
-      const onScreen = [...branch, ...strip]
+      const onScreen = [...branch, ...always]
 
       expect(new Set(onScreen).size, onScreen.join(" ")).toBe(onScreen.length)
     }
