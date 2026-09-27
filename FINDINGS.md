@@ -33957,9 +33957,11 @@ below.
 ## 2026-09-26 — the starter library is withheld from the published package and has no package of its own
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — **nothing is broken in this
-repository**, and from the first publish the ten primitives are reachable only
-by working inside it
+(`src/primitives/`) · **Status:** **closed 27 September** —
+`@jam-overture/loom-primitives@0.1.0` is on the registry, MIT, peer-depending
+on `@jam-overture/loom@~0.1.0`. **It was closed without the move this entry
+proposes**, which is the part worth reading before anybody starts that
+migration
 
 The maintainer's instruction on 26 September is that `@loom/runtime` goes to npm
 as the framework, and that the starter primitive library ships separately.
@@ -33993,6 +33995,34 @@ anywhere else in the runtime is `src/testing/primitives.ts`, which is a
 different file with the same word in its name. The dependency runs one way, so
 the split is a move rather than an untangling.
 
+### How it was closed, and why the move did not happen
+
+**The published result this entry asks for was reached without moving a single
+file.** `src/primitives/**` still lives where it did, all five surfaces still
+import it the way they did, and the API reference, the compiled fences and the
+lesson transcripts were not touched.
+
+`tools/package/` assembles the package from `dist/primitives/` and rewrites the
+relative specifiers on the way out: `../sdk/definition.js` becomes
+`@jam-overture/loom/sdk`, derived from the framework's own published `exports`
+rather than from a convention, and held against it by a test. `pnpm
+package:primitives` produces the tarball and refuses to publish it.
+
+**This does not make the move wrong — it makes it optional, and changes what it
+is for.** Two of the three costs this entry named are now paid another way:
+
+| what the move was going to settle | where it stands |
+| --- | --- |
+| the library has no version a deployment can pin | **settled** — `0.1.0`, independently versioned, `~` to the framework |
+| the library is absent from the registry | **settled** |
+| the framework pays the library's build time on every release | **not settled.** `dist/primitives/` is still built by the framework's `tsc`, because the workspace resolves through it |
+
+So what is left to argue is the third row and the tidiness, against a migration
+that still moves 131 files across four lanes. **Recommendation: not now.** It
+is a real improvement and it is no longer urgent, which is the worst possible
+time to attempt it — and the packaging tool would have to be rewritten as part
+of it, because a moved source needs no specifier rewrite at all.
+
 ---
 ## 2026-09-26 — the documentation tells a reader to import a subpath the published package does not have
 
@@ -34019,6 +34049,50 @@ Where it is said, from a sweep on 26 September:
 **The root README is done** — it carries a *What is in the package* section and
 a callout above the starter-primitive section, both saying the subpath is
 workspace-only. The site is yours and I have not touched it.
+
+### Updated 27 September by `Loom primitives`: there is now something to point at
+
+When this was filed the honest advice was *tell readers the subpath is
+workspace-only*, because no replacement existed. One does now, so the pages can
+be **corrected** rather than hedged:
+
+```
+npm install @jam-overture/loom @jam-overture/loom-primitives
+```
+
+```ts
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
+import { STARTER_COMPOSITIONS, PAGE_SEQUENCE } from "@jam-overture/loom-primitives/compositions"
+```
+
+`@jam-overture/loom-primitives@0.1.0`, MIT, peer-depending on
+`@jam-overture/loom@~0.1.0`. Two entry points and no others: `.` is the registry
+and every primitive, `./compositions` is the 44 starting compositions.
+**Verified from outside this repository** — a project holding nothing but a
+`package.json` installs it, npm resolves the framework as the peer on its own,
+and the 22-part `PAGE_SEQUENCE` renders with no diagnostics.
+
+**Three things that make the edit smaller than the table above suggests:**
+
+- **The substitution is mechanical** for the two `getting-started` pages, the
+  quickstart and the compiled fences: `@jam-overture/loom/primitives` becomes
+  `@jam-overture/loom-primitives`, with no other change to the surrounding code.
+- **`building-with-loom/primitives/page.mdx` needs a sentence rather than a
+  substitution**, because its claim is about what ships where. The true version
+  is that the library is its own package and the framework does not contain it.
+- **The install line changes in every place one appears.** A page that says
+  `npm install @jam-overture/loom` and then imports the registry is a page that
+  fails on its second step — which is exactly the defect `code-band` had in
+  `src/primitives/`, found and fixed on 27 September. The band now asserts its
+  own install line against the framework's `publishConfig.exports`; the same
+  assertion would serve the site, and is the cheapest guard against this
+  recurring.
+
+**The second half of this entry — the two tests reading the workspace `exports`
+rather than `publishConfig.exports` — is unchanged and still yours.** Worth
+noting that `tools/package/package.test.ts` now reads `publishConfig.exports`
+for the same reason, so there is a worked example of the two-character change
+in the repository.
 
 **A second, smaller half of the same thing.**
 `_lib/entry-points.test.ts` and `_lib/api/extract.test.ts` both assert that the
@@ -34707,3 +34781,95 @@ and a gate.
 
 **What would close it**: merging it, or a reason not to. The workaround stays
 one command (`rm -rf apps/loom/.next`) for anybody who hits it first.
+
+---
+
+## 2026-09-27 — both published packages export British spellings in their public API, and as of yesterday renaming them is a breaking change
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` for nine of
+the ten names (`src/theme/`, `src/sdk/`, `src/render/`) and `Loom primitives`
+for the tenth (`src/primitives/tokens.ts`) · **Status:** open — **a decision
+with a deadline that has already partly passed.** Nothing is broken; the cost
+is that the window for a free fix closed on 27 September
+
+On 27 September the maintainer asked, in plain terms, for US spelling
+throughout — *"even when talking to me"*. This lane converted its own prose the
+same day. **Prose was the easy half.**
+
+The hard half is that British spelling is in the **exported surface of both
+packages**, published the same day:
+
+| name | file | ships in |
+| --- | --- | --- |
+| `colour` | `src/primitives/tokens.ts` | `@jam-overture/loom-primitives` (re-exported by its index) |
+| `colourDifference` | `src/theme/separation.ts` | `@jam-overture/loom` |
+| `ColourPairing`, `ColourVerdict`, `probeColourPairings` | `src/sdk/conformance.ts` | `@jam-overture/loom/sdk` |
+| `BehaviourName`, `BehaviourResolver`, `isBehaviourName`, `isBehaviourResolver`, `resolveBehaviours` | `src/render/behaviour.ts` | `@jam-overture/loom/react` |
+
+`colour` alone has **333 call sites** inside the primitive library.
+
+**What changed yesterday is not the spelling, it is who it belongs to.** Before
+`0.1.0` these were internal names and renaming them was a mechanical sweep with
+a green gate at the end. They are now public API of two published packages, so
+a rename is a breaking change: someone else's code can import
+`resolveBehaviours` today. Pre-1.0 permits it — the README says nothing here is
+stable — but *permits* is not *free*, and the cost only grows.
+
+**Three options, and the recommendation is not "rename everything".**
+
+1. **Rename now, at `0.2.0`, both packages together.** Mechanical, one gate,
+   and the dependency runs one way so there is no ordering puzzle. The cost is
+   a breaking minor eight days into a public package's life, which is exactly
+   the thing pre-1.0 is for, and is the cheapest this will ever be.
+2. **Add the US spellings as aliases and deprecate the British ones.** No break,
+   two names for one thing in the documentation, and the aliases outlive
+   everybody's memory of why they exist.
+3. **Leave them and be consistent in prose only.** Defensible — `colour` is a
+   perfectly good identifier — but it means the maintainer's stated preference
+   is contradicted by the first thing a consumer types.
+
+**Recommendation: 1, at the next minor, decided deliberately rather than
+drifted into.** The one thing not to do is nothing-by-default: every release
+makes it more expensive, and the argument for doing it at all gets weaker as the
+cost rises, which is how a preference quietly becomes permanent.
+
+**This is filed rather than done** because nine of the ten names are in
+`src/theme/`, `src/sdk/` and `src/render/`, which are not this lane's, and
+because a rename across two published packages is a release decision rather
+than a tidy-up. The tenth is this lane's and is **not** being renamed alone: a
+library exporting `color` beside a framework exporting `ColourPairing` is worse
+than either spelling used consistently.
+
+---
+
+## 2026-09-27 — `package:primitives` is a primitives-lane script living in the framework's manifest, and nothing says so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(the script's behavior) **with** `Loom daily build` (the file it sits in) ·
+**Status:** open — **a note, not a defect.** Filed so the framework lane is not
+surprised by a line it did not write
+
+The root `package.json` carries one script this lane owns:
+
+```json
+"package:primitives": "tsx tools/package/main.ts"
+```
+
+It is there because that is where `pnpm` looks, not because the framework has
+anything to do with it. Everything it runs is under `tools/package/`, which is
+this lane's, and the thing it produces is `packages/primitives/`, which is
+generated and gitignored.
+
+**Why it is worth a line at all.** `docs/routines.md` says work in another
+lane's directory is filed rather than done, and this is the one place this lane
+writes into the framework's file. It was listed in #401's pull request and is
+easy to lose once that scrolls away. If the framework lane ever reorganises the
+root scripts, this one is safe to move or rename — **nothing but
+`docs/publishing-primitives.md` refers to it by name**, and that document is
+this lane's.
+
+The same applies, more loosely, to `tools/package/`: it sits beside
+`tools/publish/`, which is the framework's, and the two do different jobs on
+purpose. `tools/publish/` holds the framework's two-manifest difference;
+`tools/package/` assembles a second package out of a subdirectory of the first.
+Neither imports the other.
