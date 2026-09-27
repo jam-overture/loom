@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
+import {
+  DEMO_LEADING_PRESET,
+  DEMO_PRESETS,
+  leadingAsk,
+  type DemoPresetId,
+} from "@/app/(demo)/_lib/presets"
 import {
   ASKS_HEADING,
   ASKS_HEADING_WHILE_WAITING,
@@ -36,9 +41,31 @@ const ALL = DEMO_PRESETS.map((preset) => preset.id)
 
 const labelOf = (id: DemoPresetId): string => DEMO_PRESETS.find((preset) => preset.id === id)!.label
 
+/**
+ * What `rail.ts` hands this panel when nothing is waiting, built the way the
+ * rail builds it.
+ *
+ * **The nomination is no longer the panel's**, and that is the point of the
+ * helper rather than a spelling of `{ leading: { preset: "trim" } }`: the rail
+ * calls `leadingAsk` and so does this, so a change to which ask is primary
+ * moves both without either being edited. What the tests below assert is the
+ * half that is still the panel's — that it gives the green button to the ask it
+ * is handed, and lays everything else out around it.
+ *
+ * No `part`, because a preview is an element the server rendered through the
+ * registry and this is a render test of the panel. `part-in-question.test.tsx`
+ * holds the excerpt; the one assertion here is that whatever it is handed is
+ * put on the page.
+ */
+const led = (available: readonly DemoPresetId[]) => {
+  const preset = leadingAsk(available)
+
+  return preset === undefined ? {} : { leading: { preset: preset.id } }
+}
+
 describe("the ask panel", () => {
   it("gives the primary slot to the preset the table nominates", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     const buttons = screen.getAllByRole("button")
 
@@ -63,7 +90,7 @@ describe("the ask panel", () => {
    * one of them — and the two together are the whole of this run.
    */
   it("says some asks will wait for you, before offering anything to press", () => {
-    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     const frame = screen.getByText(/won’t make without asking you/i)
     const primary = screen.getAllByRole("button")[0]
@@ -94,7 +121,7 @@ describe("the ask panel", () => {
    * a `flex-col` typed by habit would silently put the wall of prose back.
    */
   it("puts the press above the sentence on a narrow screen, and below it on a wide one", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     const opening = screen.getByText(/won’t make without asking you/i).parentElement
 
@@ -109,7 +136,7 @@ describe("the ask panel", () => {
    * under the button it is about at both widths.
    */
   it("keeps each button's promise welded to the button", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     const lead = DEMO_PRESETS.find((preset) => preset.id === DEMO_LEADING_PRESET)!
     const promise = screen.getByText(lead.promise)
@@ -119,7 +146,7 @@ describe("the ask panel", () => {
   })
 
   it("tells a visitor what pressing each one will do to the page", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     for (const preset of DEMO_PRESETS) {
       expect(screen.getByText(preset.promise)).toBeTruthy()
@@ -132,7 +159,7 @@ describe("the ask panel", () => {
    * rendering the whole table and hoping.
    */
   it("offers only the asks this tree can honour", () => {
-    render(<AskPanel revision={0} available={["palette", "trim"]} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={["palette", "trim"]} modelConfigured={false} {...led(["palette", "trim"])} />)
 
     /*
      * The labels are read off the table rather than written out here — see
@@ -153,7 +180,7 @@ describe("the ask panel", () => {
    * submit, on a deployment where every other control on the panel worked.
    */
   it("says why free text is off with no model, and keeps every preset working", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={false} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
 
     expect(screen.queryByRole("button", { name: /send it to the model/i })).toBeNull()
     expect(screen.getByPlaceholderText(/No model is configured/)).toBeTruthy()
@@ -164,7 +191,7 @@ describe("the ask panel", () => {
   })
 
   it("offers the model when there is one", () => {
-    render(<AskPanel revision={0} available={ALL} modelConfigured={true} />)
+    render(<AskPanel revision={0} available={ALL} modelConfigured={true} {...led(ALL)} />)
 
     expect(screen.getByRole("button", { name: "Send it to the model" })).toBeTruthy()
     expect(screen.getByLabelText(/what would you like changed/i)).toBeTruthy()
@@ -178,7 +205,7 @@ describe("the ask panel", () => {
    * does open it needs the field named, not the section.
    */
   it("keeps free text behind a disclosure, closed until it is asked for", () => {
-    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={true} />)
+    const { container } = render(<AskPanel revision={0} available={ALL} modelConfigured={true} {...led(ALL)} />)
 
     const disclosure = container.querySelector("details")
     if (!disclosure) throw new Error("free text is not behind a disclosure")
@@ -196,8 +223,79 @@ describe("the ask panel", () => {
    * change aimed at a page that has moved — and a form that forgot it would
    * send an ask with no such protection and look identical.
    */
+  /**
+   * **What the press is about, on the screen the press is on.**
+   *
+   * *Take the numbers off* names a part of the page a stranger arriving has
+   * never seen — below the fold at 1280×900, about four thousand pixels down at
+   * 390×844. The rail renders the excerpt through the registry and hands it
+   * over; what is the panel's is putting it on the page and putting it in the
+   * right place.
+   */
+  it("shows what the press is about, when it is handed one", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        leading={{ preset: DEMO_LEADING_PRESET, part: <p>the band itself</p> }}
+      />
+    )
+
+    expect(screen.getByText("the band itself")).toBeTruthy()
+  })
+
+  /**
+   * **After the opening block, not inside it**, and this is the assertion the
+   * placement needs rather than the rendering.
+   *
+   * Inside, the excerpt would ride the `flex-col-reverse` above and push
+   * `WHAT_EVERY_ASK_MEETS` down by the height of a band — off the narrow first
+   * screen, which is the one property that block exists to hold. A stranger who
+   * has not read that sentence and presses a change the Gate holds has watched
+   * a button do nothing.
+   */
+  it("keeps the frame sentence ahead of the excerpt, at every width", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        leading={{ preset: DEMO_LEADING_PRESET, part: <p>the band itself</p> }}
+      />
+    )
+
+    const frame = screen.getByText(/won’t make without asking you/i)
+    const excerpt = screen.getByText("the band itself")
+
+    expect(frame.parentElement?.contains(excerpt)).toBe(false)
+    expect(
+      frame.compareDocumentPosition(excerpt) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  /**
+   * A re-theme is one configure against the page root, and an excerpt of the
+   * root is the whole page rendered a second time inside the rail beside it. It
+   * comes over absent, and absent has to render as nothing rather than as an
+   * empty frame under a lead sentence about it.
+   */
+  it("shows no excerpt for an ask that has none", () => {
+    const { container } = render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        leading={{ preset: DEMO_LEADING_PRESET }}
+      />
+    )
+
+    expect(container.querySelector(".demo-part")).toBeNull()
+    expect(screen.getByRole("button", { name: labelOf(DEMO_LEADING_PRESET) })).toBeTruthy()
+  })
+
   it("carries the revision the visitor was looking at on every form", () => {
-    const { container } = render(<AskPanel revision={7} available={ALL} modelConfigured={true} />)
+    const { container } = render(<AskPanel revision={7} available={ALL} modelConfigured={true} {...led(ALL)} />)
 
     const forms = [...container.querySelectorAll("form")]
 
@@ -242,7 +340,7 @@ describe("the ask panel, while a question is waiting", () => {
   })
 
   it("keeps its green button when nothing is waiting", () => {
-    const { container } = render(<AskPanel revision={3} available={ALL} modelConfigured={true} />)
+    const { container } = render(<AskPanel revision={3} available={ALL} modelConfigured={true} {...led(ALL)} />)
 
     expect(container.querySelector(".bg-affirm")).toBeTruthy()
   })
@@ -340,7 +438,7 @@ describe("the ask panel, while a question is waiting", () => {
   })
 
   it("says nothing of the kind when nothing is waiting", () => {
-    render(<AskPanel revision={3} available={ALL} modelConfigured={true} />)
+    render(<AskPanel revision={3} available={ALL} modelConfigured={true} {...led(ALL)} />)
 
     expect(screen.queryByText(WAITING.sentence)).toBeNull()
     expect(screen.queryByRole("link", { name: /answer it first/i })).toBeNull()

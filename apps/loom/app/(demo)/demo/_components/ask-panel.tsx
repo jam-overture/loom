@@ -1,8 +1,9 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useActionState } from "react"
 
-import { DEMO_LEADING_PRESET, DEMO_PRESETS, type DemoPresetId } from "@/app/(demo)/_lib/presets"
+import { offeredPresets, presetById, type DemoPresetId } from "@/app/(demo)/_lib/presets"
 import { toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
 import {
   ASKS_HEADING,
@@ -88,6 +89,7 @@ export const AskPanel = ({
   available,
   modelConfigured,
   waiting,
+  leading,
 }: {
   readonly revision: number
   readonly available: readonly DemoPresetId[]
@@ -100,11 +102,31 @@ export const AskPanel = ({
    * store and the tree's revision together, and the panel has neither.
    */
   readonly waiting?: SetAside
+  /**
+   * The ask that gets the green button, and the part of the page it would
+   * touch — both decided by `rail.ts`, and absent together.
+   *
+   * **The nomination used to be computed here and it was the same answer to the
+   * same question, twice.** Showing a stranger what the press would do means
+   * rendering a part of the tree through the registry, which is the server's
+   * job; choosing which ask is primary was this file's. Two copies of one
+   * choice is how a panel comes to preview one ask and offer another, and there
+   * is no test that would fail while they agreed.
+   *
+   * Its absence is also how this panel knows a question is open, which it used
+   * to work out from `waiting`. The rule is unchanged and stated in one place
+   * now: the green on this rail belongs to the demo's next step, and once a
+   * question exists that step is *Apply this change*, down inside the card.
+   */
+  readonly leading?: {
+    readonly preset: DemoPresetId
+    /** Absent when the ask names the page itself, which the re-theme does. */
+    readonly part?: ReactNode
+  }
 }) => {
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
-  const offered = DEMO_PRESETS.filter((preset) => available.includes(preset.id))
-  const nominated = offered.find((preset) => preset.id === DEMO_LEADING_PRESET) ?? offered[0]
+  const offered = offeredPresets(available)
 
   /**
    * The green button, and it steps aside while a question is open.
@@ -136,8 +158,8 @@ export const AskPanel = ({
    * page move twice should be allowed to — which is the shape of this fix this
    * lane argued against (`set-aside.ts`), and it is still argued against.
    */
-  const leading = waiting === undefined ? nominated : undefined
-  const rest = offered.filter((preset) => preset.id !== leading?.id)
+  const lead = leading === undefined ? undefined : presetById(leading.preset)
+  const rest = offered.filter((preset) => preset.id !== lead?.id)
 
   return (
     <div id="ask" className="flex flex-col gap-4">
@@ -176,16 +198,16 @@ export const AskPanel = ({
       <div className="flex flex-col-reverse gap-4 lg:flex-col">
         <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
 
-        {leading && (
+        {lead && (
           <form action={submit} className="flex flex-col gap-1.5">
             <input type="hidden" name="baseRevision" value={revision} />
-            <input type="hidden" name="presetId" value={leading.id} />
+            <input type="hidden" name="presetId" value={lead.id} />
             <button
               type="submit"
               disabled={pending}
               className="bg-affirm text-affirm-ink border-affirm-edge group flex items-center justify-between gap-3 rounded-md border px-4 py-3.5 text-md font-semibold tracking-tight transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {pending ? "Asking…" : leading.label}
+              {pending ? "Asking…" : lead.label}
               <span
                 aria-hidden="true"
                 className="shrink-0 transition-transform group-hover:translate-x-0.5"
@@ -203,10 +225,36 @@ export const AskPanel = ({
               * above honest: the promise is a fact about this button and it
               * stays welded to it rather than being reordered away from it.
               */}
-            <p className="text-ink-muted text-xs">{leading.promise}</p>
+            <p className="text-ink-muted text-xs">{lead.promise}</p>
           </form>
         )}
       </div>
+
+      {/*
+        * What that press is about, as the thing itself.
+        *
+        * **The one control this surface invites names a part of the page a
+        * stranger has never seen.** *Take the numbers off* promises "the
+        * appointments, the years and the waiting time", and on arrival there
+        * are no appointments, years or waiting time on the screen: the band is
+        * below the fold at 1280×900 and about four thousand pixels down at
+        * 390×844. `before-the-press.ts` argues it and the rail computes it.
+        *
+        * **After the block, not inside it**, and that is the one placement
+        * decision here. Inside, it would ride the `flex-col-reverse` above and
+        * push `WHAT_EVERY_ASK_MEETS` down by the height of a band — off the
+        * narrow first screen, which is the exact property that block was built
+        * to hold. A stranger who has not read that sentence and presses a
+        * change the Gate holds has watched a button do nothing. That outranks
+        * adjacency, so the sentence keeps its place and the preview takes the
+        * one after it.
+        *
+        * What it costs, measured rather than assumed, is in the report: on a
+        * wide screen it is on the arrival screen and the secondary asks move
+        * down; on a phone it is the first thing below the fold, which is also
+        * where the page it is about is.
+        */}
+      {leading?.part}
 
       {/*
         * What the next press would cost, above everything it is true of — and

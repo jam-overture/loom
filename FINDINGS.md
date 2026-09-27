@@ -8,6 +8,73 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-27 — the demo shows a stranger the change and the record, and the inverse is the one third of the claim sixty seconds does not reach
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — named
+here so the next run of this lane does not have to re-derive it, and filed rather
+than done because this run's unit was the press and not the undo
+
+This lane's brief says what the demo has to show, in one sentence with three
+parts:
+
+> the page adapting; what was asked for; the stakes and reversibility in the
+> Gate's own language; which rule fired under which policy; **and the inverse, as
+> a button that really puts it back.**
+
+Everything before the word *inverse* is now on the arrival screen or one press
+from it. The excerpt under the green button shows the band; the press produces
+the Gate's question in plain words with the technical record one click down; the
+answer moves the page and marks it. **The inverse is three presses in**, and the
+count is the whole of the problem rather than the button, which exists, works,
+and is gated like any other change (0032).
+
+The sequence a stranger with sixty seconds actually runs:
+
+| press | what they meet | seconds |
+| --- | --- | --- |
+| 1 — *Take the numbers off* | the Gate's question, about the band they have just been shown | ~15 |
+| 2 — *Apply this change* | the band goes, the page is marked, the card becomes a receipt | ~35 |
+| 3 — *Put it back* | the band returns, node for node, with the ids it had | **past the minute** |
+
+So the claim the record exists to support — *nothing is ever removed, and the
+exact opposite of every change already exists* — is the one a visitor is told
+rather than shown. The card says it in the Gate's own language before the second
+press (*"The 4 pieces it takes off the page are kept, so the exact opposite of
+this change already exists"*), which is the right sentence in the right place and
+is still a sentence.
+
+**What this is not a request for.** Not a fourth control on the arrival screen,
+and not an animation. The rail is at its budget: the excerpt this run added takes
+336px of it, and the four secondary asks are now below the fold at 1280×900.
+Anything that closes this has to be **the same presses, rearranged** rather than
+another one.
+
+**Two shapes worth weighing, neither started here:**
+
+1. **The undo is the payoff frame rather than a row on the card.** `arrival.ts`
+   already carries a card to the top of the rail's scroller after a press; the
+   applied card could land with *Put it back* as its own green, which is what the
+   panel does for *Apply this change* and for the same reason — the green belongs
+   to the demo's next step, and after an application the next step is the only one
+   that proves the claim.
+2. **The excerpt outlives the change.** This run's preview is computed from the
+   plan against the live tree, so it is gone the moment the band is. An applied
+   card holding the band it removed — *this is what came off, and it is still
+   here* — would be the inverse made visible without a press at all.
+
+   **Checked before offering it, and it does not come free:** `ChangeRecord`
+   carries `inverseOperations` as `readonly string[]`, which is
+   `describeOperation` over the inverse rather than the inverse — a sentence for
+   the disclosure, not a delta to render. `partFromOperations` needs operations.
+   So the shape is *keep the inverse's operations on the record beside the
+   sentences about them*, in this lane's own `record.ts`, and it is worth a line
+   of thought about whether a surface should hold a delta it will never propose
+   before anybody writes it.
+
+Recorded with the measurement rather than an opinion: **the demo's best moment is
+its third press, and a stranger's sixty seconds end on the second.**
+
+---
 ## 2026-09-27 — the preview deploys and a routine cannot reach it: `*.vercel.app` is denied by the environment's network policy
 
 **Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` (an environment
