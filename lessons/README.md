@@ -301,6 +301,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 | [27](27-scale.md) | Scale: the fact a sibling holds and a renderer may not reach | Why a container cannot read its own children and what the obvious way round it spends; what you inherit when you hand a computation to a different machine, and which ordinary chart features that machine's data model forbids; why the number the whole design was built to deliver is computed by nobody and is not supposed to be — and what it costs that a record's argument for authoring it is implemented as an optional prop with a default. |
 | [28](28-corroboration.md) | Corroboration: the claim that exists only once | What a check actually is, and why that rules out most of what a repository writes down; the three places a second copy of a fact can come from and what each one costs; why a bare citation cannot be held to its own meaning and a linked one can — and what you take on the moment you manufacture a second copy, given that the bill goes to somebody who has never read your file. |
+| [29](29-readership.md) | Readership: the declaration with more than one reader | Why the registry can hold four of a primitive's declarations against its props schema and cannot hold the schema against its own component; what property a dropped slot has that an unread prop does not, and what that rules out for any check built on watching output; how to make a read observable, and why the seven suspects that turns up include no defects and one security boundary working exactly as designed — and what it means that *does the component read this* was a question about the wrong party. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -447,6 +448,27 @@ with no idea the copy exists. Three of this course's lessons have been edited
 from outside this lane for exactly that reason. It is why derivation wins: not
 because it catches more, but because it is the only one of the three whose
 obligation is discharged by a program rather than by somebody remembering.
+
+Lesson 29 took that instruction literally — go and find a fact this repository
+already writes twice and has never compared — and found one in the most ordinary
+place there is. A primitive declares which props it accepts; its component reads
+props out of a bag; 0009 states the invariant between them in a clause of its
+Decision section, and nothing compares the two. The seam is not that nobody got
+round to it. **Every promise the conformance audit can check is one whose keeping
+shows up in what the component returned**, and reading a prop produces no output,
+so a checker built on watching output cannot see this one however hard it looks. A
+`Proxy` can, which makes the remedy a third kind: not reaching further and not
+manufacturing a second copy, but instrumenting a place.
+
+And then the part that makes it a lesson rather than a check. Run it and seven
+declared props come back unread — of which six are the *population* the probe can
+derive (lesson 25's rule, third instance) and the seventh is a URL its component is
+forbidden to read, because 0095 gave it to the frame seam. The instrument answered
+correctly and found nothing, because the question named one reader as *the* reader
+and a props schema has six. So the question to carry forward is not lesson 28's
+*where is the second copy* but **who is this declaration for** — and when its
+audiences live in packages you cannot see, the honest deliverable is a list of
+candidates for a person to classify rather than a gate.
 
 ## Pacing
 
