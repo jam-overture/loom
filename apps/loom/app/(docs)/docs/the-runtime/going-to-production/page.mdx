@@ -36,9 +36,9 @@ the same contract by the same tests, so choosing between them is a line of
 wiring rather than a rewrite.
 
 ```ts
-import { memoryTreeStore } from "@loom/runtime/store"
-import { memoryHoldStore } from "@loom/runtime/write"
-import { memoryTelemetryJournal } from "@loom/runtime/telemetry"
+import { memoryTreeStore } from "@jam-overture/loom/store"
+import { memoryHoldStore } from "@jam-overture/loom/write"
+import { memoryTelemetryJournal } from "@jam-overture/loom/telemetry"
 
 // This site, and `pnpm dev`.
 const trees = memoryTreeStore()
@@ -47,8 +47,8 @@ const journal = memoryTelemetryJournal()
 ```
 
 ```ts alternative
-import { postgresTreeStore, postgresHoldStore } from "@loom/runtime/postgres"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { postgresTreeStore, postgresHoldStore } from "@jam-overture/loom/postgres"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 // A deployment.
 const trees = postgresTreeStore(db)
@@ -129,8 +129,8 @@ the log is the truth. If they ever disagree, the log is what is right, and
 ## Creating them is one call, and running it twice is a no-op
 
 ```ts
-import { ensureTreeStoreSchema, ensureHoldStoreSchema } from "@loom/runtime/postgres"
-import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
+import { ensureTreeStoreSchema, ensureHoldStoreSchema } from "@jam-overture/loom/postgres"
+import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 await ensureTreeStoreSchema(db)
 await ensureHoldStoreSchema(db)

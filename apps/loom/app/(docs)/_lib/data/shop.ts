@@ -13,7 +13,7 @@ import {
   type LoomTree,
   type NodeId,
   type SourceEntry,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { z } from "zod"
 
 /**

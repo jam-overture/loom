@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode } from "@loom/runtime"
+import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 

@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
-import { treeIdSchema } from "@loom/runtime"
-import { revertRevision } from "@loom/runtime/write"
+import { treeIdSchema } from "@jam-overture/loom"
+import { revertRevision } from "@jam-overture/loom/write"
 
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { revertReportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"

@@ -157,7 +157,7 @@ wears reached by hand before the derivation existed.
 ## Registering your own
 
 ```ts
-import { createThemeRegistry } from "@loom/runtime"
+import { createThemeRegistry } from "@jam-overture/loom"
 
 const themes = createThemeRegistry({
   palettes: [ourLightPalette, ourDarkPalette],
@@ -176,7 +176,7 @@ plus twenty-one others is a menu, not a design system. Spread `STARTER_PALETTES`
 in if you want both.
 
 ```ts
-import { STARTER_PALETTES } from "@loom/runtime"
+import { STARTER_PALETTES } from "@jam-overture/loom"
 
 createThemeRegistry({ palettes: [...STARTER_PALETTES, ourLightPalette] })
 ```

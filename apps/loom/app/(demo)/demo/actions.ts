@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
-import { proposalIdSchema, randomIdFactory, systemClock } from "@loom/runtime"
-import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@loom/runtime/write"
+import { proposalIdSchema, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { commitIntent, confirmHeld, discardHeld, describeHoldError, revertRevision } from "@jam-overture/loom/write"
 
 import { demoModelInterpreter } from "@/app/(demo)/_lib/interpreter"
 import { settingsOf } from "@/app/(demo)/_lib/plain-change"

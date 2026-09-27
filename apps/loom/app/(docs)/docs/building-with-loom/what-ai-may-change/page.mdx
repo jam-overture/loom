@@ -18,7 +18,7 @@ write, after the registry, and it is the shortest interesting file in a Loom
 deployment.
 
 ```ts
-import { gatePolicySchema } from "@loom/runtime"
+import { gatePolicySchema } from "@jam-overture/loom"
 
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
@@ -122,7 +122,7 @@ answers "which of them do I have at all?", which is the registry, written down
 a second time.
 
 ```ts alternative
-import { interactiveTypesFor, registeredTypesFor } from "@loom/runtime/sdk"
+import { interactiveTypesFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
@@ -158,8 +158,8 @@ A policy is a value, so something has to give it to the runtime. That is
 serving two kinds of page may not want to judge them the same way.
 
 ```ts
-import { fixedPolicy } from "@loom/runtime"
-import type { CompositionRuntime } from "@loom/runtime"
+import { fixedPolicy } from "@jam-overture/loom"
+import type { CompositionRuntime } from "@jam-overture/loom"
 
 const runtime: CompositionRuntime = {
   interpreter,

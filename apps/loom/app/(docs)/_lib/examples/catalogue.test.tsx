@@ -1,4 +1,4 @@
-import { renderLoomTree } from "@loom/runtime/react"
+import { renderLoomTree } from "@jam-overture/loom/react"
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 

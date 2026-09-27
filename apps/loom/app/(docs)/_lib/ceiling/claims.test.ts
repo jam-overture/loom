@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { describeCeiling } from "@loom/runtime"
+import { describeCeiling } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { produceDefaults, produceDoors, produceRegions } from "./page"

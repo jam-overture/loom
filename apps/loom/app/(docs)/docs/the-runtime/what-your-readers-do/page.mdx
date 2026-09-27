@@ -114,7 +114,7 @@ on an element that says nothing about which node it belongs to.
 `addressed: true` asks for the identity and nothing else edit mode means:
 
 ```ts
-import { renderLoomTree } from "@loom/runtime/react"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 const rendered = renderLoomTree(tree, {
   resolver: registry,
@@ -135,7 +135,7 @@ already assigned — neither is content.
 ```tsx
 "use client"
 
-import { broadcastReaderSignals } from "@loom/runtime/signals/broadcast"
+import { broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
 import { useEffect, useRef } from "react"
 
 export const Measured = ({ children }: { readonly children: React.ReactNode }) => {
@@ -167,12 +167,12 @@ export const Measured = ({ children }: { readonly children: React.ReactNode }) =
 ```
 
 <Callout>
-  **Import it from `@loom/runtime/signals/broadcast`, not from
-  `@loom/runtime/signals`.** They both have the broadcaster in them and the
+  **Import it from `@jam-overture/loom/signals/broadcast`, not from
+  `@jam-overture/loom/signals`.** They both have the broadcaster in them and the
   difference is what comes with it: the plain entry point also carries the
   schemas, and once a bundler has seen those it cannot leave the schema library
   out — about 66 KB against about 5 KB for the broadcaster alone. Use
-  `@loom/runtime/signals` on the server that *receives* batches, where the
+  `@jam-overture/loom/signals` on the server that *receives* batches, where the
   schemas are the thing you came for.
 </Callout>
 
@@ -236,7 +236,7 @@ A batch arrives at your endpoint as JSON from a browser, which is to say from
 somebody you have never met. Parse it:
 
 ```ts
-import { parseReaderSignalBatch } from "@loom/runtime/signals"
+import { parseReaderSignalBatch } from "@jam-overture/loom/signals"
 
 export const POST = async (request: Request): Promise<Response> => {
   const read = parseReaderSignalBatch(await request.json())

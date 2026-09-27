@@ -11,8 +11,8 @@ import {
   treeIdSchema,
   type Disposition,
   type TreeDelta,
-} from "@loom/runtime"
-import type { HeldProposal } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import {
   answerOutcomes,

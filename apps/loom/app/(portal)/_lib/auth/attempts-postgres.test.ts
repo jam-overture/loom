@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 import { describeAttemptLogContract } from "./attempts.contract"
 import {

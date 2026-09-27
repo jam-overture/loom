@@ -1,5 +1,5 @@
-import type { LoomTree, TreeDelta } from "@loom/runtime"
-import type { CopyDeclarations } from "@loom/runtime/sdk"
+import type { LoomTree, TreeDelta } from "@jam-overture/loom"
+import type { CopyDeclarations } from "@jam-overture/loom/sdk"
 
 import { inertNote, plainEffect, plainObstacle } from "./effect-view"
 import { describeProposalEffect, type ProposalEffect } from "./proposal-effect"

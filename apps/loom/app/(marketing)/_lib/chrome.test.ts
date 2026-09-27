@@ -1,4 +1,4 @@
-import { sequentialIdFactory, type ElementNode, type LoomNode } from "@loom/runtime"
+import { sequentialIdFactory, type ElementNode, type LoomNode } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import {

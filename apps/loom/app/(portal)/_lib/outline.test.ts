@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } from "@loom/runtime"
-import type { DecorationLookup } from "@loom/runtime/react"
+import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } from "@jam-overture/loom"
+import type { DecorationLookup } from "@jam-overture/loom/react"
 
 import { portalDecoration } from "./addressing"
 import { outlineRows } from "./outline"

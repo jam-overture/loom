@@ -5,7 +5,7 @@ import type {
   DispositionReasonCode,
   StakeFactorCode,
   StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import type { Ask, AskId } from "./asks"
 

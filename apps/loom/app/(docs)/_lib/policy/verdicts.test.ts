@@ -1,4 +1,4 @@
-import { defaultGatePolicy } from "@loom/runtime"
+import { defaultGatePolicy } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { docsGatePolicy } from "../propose/policy"

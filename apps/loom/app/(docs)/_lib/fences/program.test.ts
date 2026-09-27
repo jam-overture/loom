@@ -154,11 +154,11 @@ describe("the story a page assumes", () => {
   it("reads what a context file offers, declarations and re-exports alike", () => {
     const offered = contextExportsIn(
       [
-        'import type { LoomTree } from "@loom/runtime"',
+        'import type { LoomTree } from "@jam-overture/loom"',
         "export declare const page: LoomTree",
         "const hidden = 1",
-        'export { buildElement } from "@loom/runtime"',
-        'export type { EditIntent } from "@loom/runtime"',
+        'export { buildElement } from "@jam-overture/loom"',
+        'export type { EditIntent } from "@jam-overture/loom"',
       ].join("\n"),
       "a-page.ts"
     )

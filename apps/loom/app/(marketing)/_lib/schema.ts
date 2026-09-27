@@ -1,4 +1,4 @@
-import type { JsonObject } from "@loom/runtime"
+import type { JsonObject } from "@jam-overture/loom"
 
 import { siteQuestions } from "./questions"
 import { WORDMARK } from "./share"

@@ -8,7 +8,7 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { postgresHoldStore } from "@loom/runtime/postgres"
+import { postgresHoldStore } from "@jam-overture/loom/postgres"
 
 import { db, store, treeId } from "../context/the-runtime--answering-a-held-change"
 

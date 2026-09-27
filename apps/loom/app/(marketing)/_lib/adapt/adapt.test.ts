@@ -1,4 +1,4 @@
-import { applyDelta, type ElementNode, type LoomNode, type LoomTree } from "@loom/runtime"
+import { applyDelta, type ElementNode, type LoomNode, type LoomTree } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 

@@ -10,7 +10,7 @@ import * as testing from "./index.js"
 /**
  * The two things a published entry point promises that a type cannot state.
  *
- * `@loom/runtime/testing` exists so the course can load `sampleTree()` in a
+ * `@jam-overture/loom/testing` exists so the course can load `sampleTree()` in a
  * reader's browser and a host can register a primitive without writing its own
  * fixture (0104). Both of those break the moment a test framework appears
  * anywhere in the import graph — not loudly, but as a resolution failure in

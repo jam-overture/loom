@@ -1,5 +1,5 @@
-import { HOLD_STORE_DDL, TREE_STORE_DDL } from "@loom/runtime/postgres"
-import { TELEMETRY_DDL } from "@loom/runtime/telemetry/postgres"
+import { HOLD_STORE_DDL, TREE_STORE_DDL } from "@jam-overture/loom/postgres"
+import { TELEMETRY_DDL } from "@jam-overture/loom/telemetry/postgres"
 
 /**
  * What a deployment's database ends up holding, read from the statements that
@@ -262,11 +262,11 @@ export const storageSeams: readonly StorageSeam[] = [
       "Every page you have, plus the ordered list of changes that produced each one.",
     without:
       "A change applies, the screen updates, and the page is back as it was on the next request.",
-    specifier: "@loom/runtime/postgres",
+    specifier: "@jam-overture/loom/postgres",
     ensure: "ensureTreeStoreSchema",
     postgres: "postgresTreeStore",
     memory: "memoryTreeStore",
-    memorySpecifier: "@loom/runtime/store",
+    memorySpecifier: "@jam-overture/loom/store",
     tables: tablesIn(TREE_STORE_DDL),
   },
   {
@@ -276,11 +276,11 @@ export const storageSeams: readonly StorageSeam[] = [
       "A change the Gate would not wave through, kept intact until somebody answers it.",
     without:
       "A change that needs an answer is gone before the answer arrives, unless one server process handles both requests.",
-    specifier: "@loom/runtime/postgres",
+    specifier: "@jam-overture/loom/postgres",
     ensure: "ensureHoldStoreSchema",
     postgres: "postgresHoldStore",
     memory: "memoryHoldStore",
-    memorySpecifier: "@loom/runtime/write",
+    memorySpecifier: "@jam-overture/loom/write",
     tables: tablesIn(HOLD_STORE_DDL),
   },
   {
@@ -290,11 +290,11 @@ export const storageSeams: readonly StorageSeam[] = [
       "What was asked for, what was planned, what was decided and how it ended — including the asks that changed nothing.",
     without:
       "You can still see what your pages are; you cannot see what anybody tried to do to them.",
-    specifier: "@loom/runtime/telemetry/postgres",
+    specifier: "@jam-overture/loom/telemetry/postgres",
     ensure: "ensureTelemetrySchema",
     postgres: "postgresTelemetryJournal",
     memory: "memoryTelemetryJournal",
-    memorySpecifier: "@loom/runtime/telemetry",
+    memorySpecifier: "@jam-overture/loom/telemetry",
     tables: tablesIn(TELEMETRY_DDL),
   },
 ]

@@ -11,8 +11,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { postgresHoldStore, postgresTreeStore } from "@loom/runtime/postgres"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { postgresHoldStore, postgresTreeStore } from "@jam-overture/loom/postgres"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 import { db } from "../context/the-runtime--going-to-production"
 

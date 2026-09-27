@@ -6,7 +6,7 @@
 
    Every value below is taken from the registered `minimal` theme —
    the `minimal` palette, the `minimal-sans` font pack and the
-   `precise` style preset in `@loom/runtime`'s theme library. It is
+   `precise` style preset in `@jam-overture/loom`'s theme library. It is
    copied here as literals rather than read through `var(--loom-*)`,
    and that is deliberate: the preview pane mounts the *previewed
    tree's* theme on the tree root (0050), so a chrome token defined as

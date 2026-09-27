@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 
-import type { TreeId } from "@loom/runtime"
-import { describeRenderDiagnostic, type RenderDiagnostic } from "@loom/runtime/react"
+import type { TreeId } from "@jam-overture/loom"
+import { describeRenderDiagnostic, type RenderDiagnostic } from "@jam-overture/loom/react"
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

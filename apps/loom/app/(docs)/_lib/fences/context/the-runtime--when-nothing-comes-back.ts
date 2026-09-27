@@ -1,4 +1,4 @@
-import type { DataRegistry, EditIntent, LoomTree, ModelClient } from "@loom/runtime"
+import type { DataRegistry, EditIntent, LoomTree, ModelClient } from "@jam-overture/loom"
 
 /**
  * When nothing comes back.

@@ -1,5 +1,5 @@
-import { describeCeiling, planTreeData, resolveTreeData } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { describeCeiling, planTreeData, resolveTreeData } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 import { describe, expect, it } from "vitest"
 
 import { DOCS_CEILING_MS } from "../ceiling/page"

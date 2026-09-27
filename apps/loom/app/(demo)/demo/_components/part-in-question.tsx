@@ -1,5 +1,5 @@
-import type { ResolvedTheme } from "@loom/runtime"
-import { renderLoomTree, themeStyle } from "@loom/runtime/react"
+import type { ResolvedTheme } from "@jam-overture/loom"
+import { renderLoomTree, themeStyle } from "@jam-overture/loom/react"
 
 import { pageGround } from "@/app/(demo)/_lib/ground"
 import type { PartInQuestion } from "@/app/(demo)/_lib/in-question"

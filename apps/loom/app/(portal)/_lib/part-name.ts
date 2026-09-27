@@ -1,4 +1,4 @@
-import { walkTree, type LoomNode, type LoomTree, type TreeDelta } from "@loom/runtime"
+import { walkTree, type LoomNode, type LoomTree, type TreeDelta } from "@jam-overture/loom"
 
 /**
  * What to call one part of a page, in words a person recognises — and the id,

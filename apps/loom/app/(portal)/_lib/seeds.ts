@@ -1,4 +1,4 @@
-import type { LoomTree, TreeId } from "@loom/runtime"
+import type { LoomTree, TreeId } from "@jam-overture/loom"
 
 import { seedTree } from "./seed"
 

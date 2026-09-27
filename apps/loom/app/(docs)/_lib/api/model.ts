@@ -62,7 +62,7 @@ export type ApiRequirement = {
  * `ApiRequirement` answers *will my import run*; this answers the question a
  * reader asks next, and which nothing on the site could answer before: *should
  * I be importing this one at all*. A reader who wants the broadcaster and finds
- * `@loom/runtime/signals` first — the shorter specifier, and the one the rail
+ * `@jam-overture/loom/signals` first — the shorter specifier, and the one the rail
  * lists first — gets the schema library in their browser bundle along with it,
  * and nothing they did was wrong.
  *
@@ -72,12 +72,12 @@ export type ApiRequirement = {
  * declaration**. Both halves are load-bearing and the second is the one that is
  * easy to leave out: two doors can each be a strict subset of the other's
  * packages and still be two doors to two different places, which is what
- * `@loom/runtime/telemetry` and `@loom/runtime/telemetry/postgres` are. A rule
+ * `@jam-overture/loom/telemetry` and `@jam-overture/loom/telemetry/postgres` are. A rule
  * that compared only packages would send a reader from the journal to the
  * Postgres journal and lose them sixty exports.
  */
 export type ApiNarrowerDoor = {
-  /** Exactly as it is written in an import: `@loom/runtime/signals/broadcast`. */
+  /** Exactly as it is written in an import: `@jam-overture/loom/signals/broadcast`. */
   readonly specifier: string
   /** The last path segment of the page that documents it, so the band can link. */
   readonly slug: string
@@ -108,8 +108,8 @@ export type ApiOverlappingDoor = {
  * One name, two doors, two different things.
  *
  * The case this exists for is real rather than defensive: `horizonOf` is a
- * function about reader signals behind `@loom/runtime/signals` and a function
- * about telemetry retention behind `@loom/runtime/telemetry`, and the two share
+ * function about reader signals behind `@jam-overture/loom/signals` and a function
+ * about telemetry retention behind `@jam-overture/loom/telemetry`, and the two share
  * nothing but four syllables. A reader who searches the name gets two results
  * and, until a page says otherwise, has every reason to think one of them is a
  * re-export of the other.
@@ -165,7 +165,7 @@ export type ApiGroup = {
 }
 
 export type ApiEntry = {
-  /** Exactly as it is written in an import: `@loom/runtime/react`. */
+  /** Exactly as it is written in an import: `@jam-overture/loom/react`. */
   readonly specifier: string
   /** The last path segment of the page that documents it. */
   readonly slug: string
@@ -217,20 +217,20 @@ export type ApiReference = {
 /**
  * The page slug for an entry point.
  *
- * `@loom/runtime` is the root door and gets the plainest name; the others are
- * their subpath with the separator flattened, so `@loom/runtime/telemetry/postgres`
+ * `@jam-overture/loom` is the root door and gets the plainest name; the others are
+ * their subpath with the separator flattened, so `@jam-overture/loom/telemetry/postgres`
  * is one segment rather than two directories deep. The reference is a flat list
  * of doors and the URL says so.
  */
 export const apiSlugFor = (specifier: string): string => {
-  const subpath = specifier.replace(/^@loom\/runtime\/?/, "")
+  const subpath = specifier.replace(/^@jam-overture\/loom\/?/, "")
 
   return subpath === "" ? "runtime" : subpath.replace(/\//g, "-")
 }
 
 /** What the rail shows: the specifier without the package name it repeats. */
 export const apiNavLabelFor = (specifier: string): string =>
-  specifier.replace(/^@loom\//, "")
+  specifier.replace(/^@jam-overture\//, "")
 
 /** The id an export is linked to on its page. Names are unique within an entry. */
 export const apiAnchorFor = (name: string): string => `s-${name}`

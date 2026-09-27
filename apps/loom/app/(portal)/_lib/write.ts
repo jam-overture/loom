@@ -4,10 +4,10 @@ import {
   systemClock,
   type EventSink,
   type StakeFactor,
-} from "@loom/runtime"
-import { postgresHoldStore } from "@loom/runtime/postgres"
-import { collectTelemetry } from "@loom/runtime/telemetry"
-import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import { postgresHoldStore } from "@jam-overture/loom/postgres"
+import { collectTelemetry } from "@jam-overture/loom/telemetry"
+import { memoryHoldStore, type HoldStore, type WritePath } from "@jam-overture/loom/write"
 
 import { portalDatabase } from "./database"
 import { portalInterpreter, portalRepairer } from "./interpreter"

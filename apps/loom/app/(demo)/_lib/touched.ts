@@ -1,4 +1,4 @@
-import type { LoomNode, NodeId, TreeDelta, TreeOperation } from "@loom/runtime"
+import type { LoomNode, NodeId, TreeDelta, TreeOperation } from "@jam-overture/loom"
 
 import { wordsOfNode, type PlainChange } from "./plain-change"
 

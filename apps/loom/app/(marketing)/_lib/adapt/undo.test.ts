@@ -5,7 +5,7 @@ import {
   type EditIntent,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 

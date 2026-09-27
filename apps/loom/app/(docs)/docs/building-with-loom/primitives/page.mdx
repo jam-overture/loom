@@ -17,8 +17,8 @@ primitives; it cannot invent one, and it cannot reach past a schema.
 import { createElement } from "react"
 import { z } from "zod"
 
-import { definePrimitive } from "@loom/runtime/sdk"
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
+import { definePrimitive } from "@jam-overture/loom/sdk"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
 
 const props = z
   .object({
@@ -109,7 +109,7 @@ key at render time.
 ## Registering
 
 ```ts
-import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
+import { createPrimitiveRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
 
 const built = createPrimitiveRegistry([stat, statGrid, heading])
 
@@ -128,12 +128,12 @@ passed to the render.
 
 ## Start from the starter library
 
-`@loom/runtime/primitives` ships a library covering the structural range — pages
+`@jam-overture/loom/primitives` ships a library covering the structural range — pages
 and sections, headings and prose, containers over repeated children, a hero, a
 pricing table. Every example on this site is built from it.
 
 ```ts
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
 ```
 
 It is a good place to begin and a better place to read: each primitive is a

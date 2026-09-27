@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { auditRegistry, describeRegistryAudit } from "@loom/runtime/sdk"
+import { auditRegistry, describeRegistryAudit } from "@jam-overture/loom/sdk"
 
 import { registry } from "./registry.js"
 

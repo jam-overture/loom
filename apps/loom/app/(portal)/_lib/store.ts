@@ -1,5 +1,5 @@
-import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
-import { postgresTreeStore } from "@loom/runtime/postgres"
+import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
+import { postgresTreeStore } from "@jam-overture/loom/postgres"
 
 import { portalDatabase } from "./database"
 import { seedTree } from "./seed"

@@ -132,7 +132,7 @@ The brief's wording is "running it on the page". This runs at build and shows
 the reader the output; it does not let them edit a line and re-run. Doing that
 means executing in the browser, and three facts prevent it — `src/testing/**`
 is excluded from `tsconfig.build.json`, so `dist/testing/` does not exist;
-`@loom/runtime` has no `./testing` export; and `zod` is a dependency of the
+`@jam-overture/loom` has no `./testing` export; and `zod` is a dependency of the
 runtime and not of the application. The first decides it on its own:
 `./testing/fixtures.js` is the most-imported specifier in the entire course,
 seventeen fences, ahead of `./ids.js`, because `sampleTree()` is the tree every

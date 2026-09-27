@@ -56,7 +56,7 @@ node on the page is the one that put it there.
 That is one call:
 
 ```ts
-import { attributeTree } from "@loom/runtime/store"
+import { attributeTree } from "@jam-overture/loom/store"
 
 const attributed = await attributeTree(store, page)
 ```
@@ -115,7 +115,7 @@ right](/docs/the-runtime/the-history-of-a-page) — and the function that finds
 out is:
 
 ```ts
-import { auditSnapshot } from "@loom/runtime/store"
+import { auditSnapshot } from "@jam-overture/loom/store"
 
 const audited = await auditSnapshot(store, treeId, seed)
 ```

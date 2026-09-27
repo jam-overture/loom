@@ -7,7 +7,7 @@ import {
   type NodeId,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { partInQuestion } from "./in-question"
 import { demoPageTree } from "./page-tree"

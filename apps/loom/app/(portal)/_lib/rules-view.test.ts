@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { dispositionReasonCodeSchema, gatePolicySchema, primitiveTypeSchema } from "@loom/runtime"
+import { dispositionReasonCodeSchema, gatePolicySchema, primitiveTypeSchema } from "@jam-overture/loom"
 
 import { asPercent, rulesOf, WHEN_IT_FIRES, type PlainRule } from "./rules-view"
 

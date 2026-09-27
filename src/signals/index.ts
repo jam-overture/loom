@@ -7,13 +7,13 @@
  * server that merely parses batches (0136).
  *
  * **In a browser bundle, import the broadcaster from
- * `@loom/runtime/signals/broadcast` instead.** This entry also carries the
+ * `@jam-overture/loom/signals/broadcast` instead.** This entry also carries the
  * schemas, and a bundler cannot leave the schema library out once it is
  * imported — about 60 KB of it, against a broadcaster of about 5 KB.
  *
  * **Postgres is not re-exported here.** It reaches Drizzle and a database
  * driver, and a route handler that only ingests should not load either;
- * `@loom/runtime/signals/postgres` is where a deployment picks it up, exactly
+ * `@jam-overture/loom/signals/postgres` is where a deployment picks it up, exactly
  * as the store and the journal do it.
  */
 

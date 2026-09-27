@@ -13,7 +13,7 @@ import { docsRehypePlugins, docsRemarkPlugins } from "./app/(docs)/_lib/mdx"
  * parsed in is the same decision and is stated in `(docs)/_lib/mdx.ts`, next to
  * the pages it governs; this file only hands it to the loader.
  *
- * `@loom/runtime` is compiled to `dist/` before this app builds, so it is an
+ * `@jam-overture/loom` is compiled to `dist/` before this app builds, so it is an
  * ordinary Node package here — no `transpilePackages`, no `extensionAlias`, and
  * no reason to pin the bundler. All three were workarounds for consuming
  * TypeScript source whose relative imports carry `.js` specifiers, which is

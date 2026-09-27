@@ -3,7 +3,7 @@ import {
   type Palette,
   type PaletteSlot,
   type ResolvedTheme,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { DEMO_STARTING_THEME } from "./page-tree"
 import { demoThemes } from "./registry"

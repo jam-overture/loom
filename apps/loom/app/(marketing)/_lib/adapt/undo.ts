@@ -12,7 +12,7 @@ import {
   type EventSink,
   type LoomTree,
   type TreeDelta,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import type { Ask } from "./asks"
 import { nothingHappened, recordOf, type ChangeRecord, type Request } from "./record"
@@ -42,7 +42,7 @@ import { FRONT_DOOR_POLICY, SITE_PROPS_VOCABULARY } from "./run"
  *
  * ## Why it does not call `revertRevision`
  *
- * `@loom/runtime/write` already assembles this and the demonstration at `/demo`
+ * `@jam-overture/loom/write` already assembles this and the demonstration at `/demo`
  * uses it. It plans an undo by replaying a **store**: given a revision number it
  * finds the delta, inverts it, and reports what has been built on top since
  * ([0035](../../../../../../decisions/0035-an-undo-whose-target-was-built-on-is-offered-rather-than-refused.md)).

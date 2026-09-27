@@ -1,4 +1,4 @@
-import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } from "@loom/runtime"
+import { buildElement, buildSlot, buildText, createTree, sequentialIdFactory } from "@jam-overture/loom"
 
 /**
  * A page about buying ski kit, as a `LoomTree`.

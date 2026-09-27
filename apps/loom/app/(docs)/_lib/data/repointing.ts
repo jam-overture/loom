@@ -16,7 +16,7 @@ import {
   type LoomTree,
   type NodeId,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { boundPage } from "./shop"
 

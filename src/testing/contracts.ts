@@ -1,6 +1,6 @@
 /**
  * The suites a host runs against its own implementation, published as
- * `@loom/runtime/testing/contracts`.
+ * `@jam-overture/loom/testing/contracts`.
  *
  * A `TreeStore`, a `HoldStore` and a `TelemetryJournal` are seams: Loom ships
  * an in-memory implementation of each and a Postgres one, and a host is

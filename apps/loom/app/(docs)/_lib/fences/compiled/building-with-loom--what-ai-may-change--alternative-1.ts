@@ -11,8 +11,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { interactiveTypesFor, registeredTypesFor } from "@loom/runtime/sdk"
-import { gatePolicySchema } from "@loom/runtime"
+import { interactiveTypesFor, registeredTypesFor } from "@jam-overture/loom/sdk"
+import { gatePolicySchema } from "@jam-overture/loom"
 
 import { registry } from "../context/building-with-loom--what-ai-may-change"
 

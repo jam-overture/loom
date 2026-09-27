@@ -1,4 +1,4 @@
-import { parseTree } from "@loom/runtime"
+import { parseTree } from "@jam-overture/loom"
 import type { ReactNode } from "react"
 
 import { renderTree } from "./loom"

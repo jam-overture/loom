@@ -4,7 +4,7 @@ import type {
   EpisodeTally,
   IntentEpisode,
   ProposalEpisode,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import type { OutcomeTone } from "./outcome"
 import { ANSWERS, ASK_ORIGINS, ASK_OUTCOMES, FAILURE_STAGES, type PlainState } from "./vocabulary"

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { treeIdSchema } from "@loom/runtime"
+import { treeIdSchema } from "@jam-overture/loom"
 
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 

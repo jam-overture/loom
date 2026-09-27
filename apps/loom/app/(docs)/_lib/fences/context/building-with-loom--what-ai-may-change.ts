@@ -1,5 +1,5 @@
-import type { Clock, ChangeInterpreter, EventSink, IdFactory } from "@loom/runtime"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+import type { Clock, ChangeInterpreter, EventSink, IdFactory } from "@jam-overture/loom"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * What AI may change.

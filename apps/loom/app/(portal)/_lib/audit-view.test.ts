@@ -8,7 +8,7 @@ import {
   type IdReturn,
   type LoomTree,
   type NodeId,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import {
   describeAudit,

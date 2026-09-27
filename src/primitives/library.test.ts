@@ -3148,7 +3148,7 @@ const technicalPage = (theme: Record<string, string>, idFactory: IdFactory = seq
         }),
       ]),
       buildSlot(idFactory, "actions", [
-        code({ tone: "terminal", density: "compact", language: "bash" }, "pnpm add @loom/runtime"),
+        code({ tone: "terminal", density: "compact", language: "bash" }, "pnpm add @jam-overture/loom"),
       ]),
     ],
   })
@@ -3393,7 +3393,7 @@ describe("the technical vocabulary", () => {
     expect(diagnostics).toEqual([])
     expect(markup).toContain("<pre")
     expect(markup).toContain("<kbd")
-    expect(markup).toContain("pnpm add @loom/runtime")
+    expect(markup).toContain("pnpm add @jam-overture/loom")
     expect(markup).toContain("and four thousand others")
   })
 

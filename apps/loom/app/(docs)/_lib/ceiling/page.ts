@@ -15,8 +15,8 @@ import {
   resolveTreeSubmissions,
   sequentialIdFactory,
   type EndpointRegistry,
-} from "@loom/runtime"
-import { buildIntent, fixedClock, formTree, hangingModelClient } from "@loom/runtime/testing"
+} from "@jam-overture/loom"
+import { buildIntent, fixedClock, formTree, hangingModelClient } from "@jam-overture/loom/testing"
 
 import { boundPage, shopWithASilentSource } from "@/app/(docs)/_lib/data/shop"
 
@@ -71,7 +71,7 @@ export type Door = {
 /**
  * Asking a model what to change, with a client that never replies.
  *
- * `hangingModelClient` is published by `@loom/runtime/testing` for exactly this:
+ * `hangingModelClient` is published by `@jam-overture/loom/testing` for exactly this:
  * every surface with a prompt box has an "it did not come back" state to show,
  * and this is the only way to reach it without waiting three minutes. It also
  * reports what the abort said, which is the half of the ceiling nothing else can

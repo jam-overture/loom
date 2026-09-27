@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import { renderCatalogue } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+import { renderCatalogue } from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

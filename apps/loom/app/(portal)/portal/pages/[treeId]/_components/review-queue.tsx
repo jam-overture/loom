@@ -1,4 +1,4 @@
-import type { HeldProposal } from "@loom/runtime/write"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

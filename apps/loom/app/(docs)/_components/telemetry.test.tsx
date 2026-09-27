@@ -1,4 +1,4 @@
-import { EPISODE_RESOLUTION_KINDS } from "@loom/runtime/telemetry"
+import { EPISODE_RESOLUTION_KINDS } from "@jam-overture/loom/telemetry"
 import { render, screen, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 

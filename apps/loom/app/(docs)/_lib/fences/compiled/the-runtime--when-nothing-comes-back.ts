@@ -8,9 +8,15 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { defineSource, modelInterpreter, randomIdFactory, resolveTreeData, systemClock } from "@loom/runtime"
+import {
+  defineSource,
+  modelInterpreter,
+  randomIdFactory,
+  resolveTreeData,
+  systemClock,
+} from "@jam-overture/loom"
 import { z } from "zod"
-import { hangingModelClient } from "@loom/runtime/testing"
+import { hangingModelClient } from "@jam-overture/loom/testing"
 
 import { client, db, intent, registry, tree } from "../context/the-runtime--when-nothing-comes-back"
 

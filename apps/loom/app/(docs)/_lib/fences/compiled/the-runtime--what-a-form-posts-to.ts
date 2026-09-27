@@ -13,8 +13,8 @@ import {
   defineEndpoint,
   describeEndpointRegistryError,
   resolveTreeSubmissions,
-} from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { resolver, themes, tokens, tree, validator } from "../context/the-runtime--what-a-form-posts-to"
 

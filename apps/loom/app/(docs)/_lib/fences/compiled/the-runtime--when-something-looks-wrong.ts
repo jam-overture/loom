@@ -8,7 +8,7 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { attributeTree, auditSnapshot } from "@loom/runtime/store"
+import { attributeTree, auditSnapshot } from "@jam-overture/loom/store"
 
 import { holds, page, seed, store, treeId } from "../context/the-runtime--when-something-looks-wrong"
 

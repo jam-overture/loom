@@ -8,8 +8,8 @@ import {
   type JsonObject,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 /**
  * The page the demo changes, and it belongs to somebody else.

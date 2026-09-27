@@ -6,7 +6,7 @@ import {
   STARTER_PALETTES,
   TEXT_CONTRAST_MINIMUM,
   type ResolvedTheme,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { demoPagePalette, pageColour, pageGround } from "./ground"
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME } from "./page-tree"

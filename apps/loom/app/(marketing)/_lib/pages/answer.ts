@@ -1,4 +1,4 @@
-import { buildElement, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
+import { buildElement, buildText, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"

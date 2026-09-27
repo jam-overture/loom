@@ -4,7 +4,7 @@ import {
   PALETTE_TEXT_PAIRINGS,
   STARTER_PALETTES,
   TEXT_CONTRAST_MINIMUM,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * The bar, run for real against every palette the runtime registers.

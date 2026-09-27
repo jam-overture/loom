@@ -1,4 +1,4 @@
-import type { LoomNode, NodeId, PrimitiveType } from "@loom/runtime"
+import type { LoomNode, NodeId, PrimitiveType } from "@jam-overture/loom"
 import {
   READER_SIGNAL_KINDS,
   parseReaderSignalBatch,
@@ -6,7 +6,7 @@ import {
   type ReaderSignal,
   type ReaderSignalBatch,
   type ReaderSignalKind,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 

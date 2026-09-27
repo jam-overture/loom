@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { seedTree } from "./seed"
 import { isAuditable, seedFor } from "./seeds"

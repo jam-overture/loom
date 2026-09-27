@@ -47,7 +47,7 @@ export const COURSE_DIR = join(REPOSITORY_ROOT, "lessons")
  * worth being explicit about why it is a read and only a read. An exercise says
  * `import { applyDelta } from "./tree/apply.js"` because the reader is told to
  * paste it into `src/scratch.test.ts`; those specifiers name files in this
- * checkout and resolve nowhere else. `@loom/runtime` cannot stand in for them —
+ * checkout and resolve nowhere else. `@jam-overture/loom` cannot stand in for them —
  * the single most-used import in the course is `./testing/fixtures.js`, and
  * `src/testing/**` is excluded from the published build on purpose. So the
  * runner reads the files the reader would have imported, which is also the only

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type MouseEvent, type ReactNode } from "react"
 
-import { addressedNodeId, LOOM_NODE_ATTRIBUTE } from "@loom/runtime/react"
+import { addressedNodeId, LOOM_NODE_ATTRIBUTE } from "@jam-overture/loom/react"
 
 import { useSelection } from "./selection-context"
 

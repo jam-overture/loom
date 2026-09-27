@@ -9,9 +9,9 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk"
-import { modelInterpreter, randomIdFactory, systemClock } from "@loom/runtime"
-import { anthropicModelClient } from "@loom/runtime/anthropic"
-import { catalogueOf } from "@loom/runtime/sdk"
+import { modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { anthropicModelClient } from "@jam-overture/loom/anthropic"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { registry, themes } from "../context/the-runtime--connecting-a-model"
 import type {

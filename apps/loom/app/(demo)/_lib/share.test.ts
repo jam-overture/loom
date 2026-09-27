@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { plainState } from "@/app/(portal)/_lib/vocabulary"
 
-import { randomIdFactory } from "@loom/runtime"
+import { randomIdFactory } from "@jam-overture/loom"
 
 import { demoPageTree } from "./page-tree"
 import { DEMO_LEADING_PRESET, elementsOf, firstOfType, presetById } from "./presets"

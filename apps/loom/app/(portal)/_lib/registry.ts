@@ -1,4 +1,4 @@
-import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
+import { createPrimitiveRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
 
 import { loomCard } from "./primitives/loom.card"
 import { loomHeading } from "./primitives/loom.heading"

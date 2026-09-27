@@ -1,7 +1,7 @@
 import { createServer } from "node:http"
 
 import { build } from "esbuild"
-import { parseReaderSignalBatch } from "@loom/runtime/signals"
+import { parseReaderSignalBatch } from "@jam-overture/loom/signals"
 
 import { buildPage } from "./page.mjs"
 import { renderPage } from "./render.mjs"
@@ -11,7 +11,7 @@ import { renderPage } from "./render.mjs"
  *
  * It does three things. It renders the tree. It bundles `rail.client.mjs` —
  * which imports the framework's broadcaster — once at startup, because a
- * browser cannot resolve `@loom/runtime/signals` on its own. And it receives
+ * browser cannot resolve `@jam-overture/loom/signals` on its own. And it receives
  * every batch the broadcaster sends, parses it the way a real receiver must, and
  * prints what arrived. It stores nothing.
  */

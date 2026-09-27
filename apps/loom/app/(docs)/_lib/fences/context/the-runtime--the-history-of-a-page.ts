@@ -1,6 +1,6 @@
-import type { CompositionRuntime } from "@loom/runtime"
-import type { HoldStore } from "@loom/runtime/write"
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import type { CompositionRuntime } from "@jam-overture/loom"
+import type { HoldStore } from "@jam-overture/loom/write"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 /**
  * The history of a page.

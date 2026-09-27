@@ -27,7 +27,7 @@ regenerates the registry from the directory's contents.
 
 A type is dot-namespaced kebab-case: ${HOST_NAMESPACE}.card, commerce.product-card.
 ${FRAMEWORK_NAMESPACE}.* is the framework's own namespace and is refused — those
-names belong to the primitives @loom/runtime already registers.`
+names belong to the primitives @jam-overture/loom already registers.`
 
 export type CliReport = {
   readonly written: readonly string[]
@@ -48,7 +48,7 @@ export const describeCliError = (error: CliError): string => {
     case "reserved-primitive-type":
       return `"${error.type}" is reserved: its module would overwrite the generated registry`
     case "framework-namespace":
-      return `"${error.type}" is in the framework's namespace — @loom/runtime registers ${FRAMEWORK_NAMESPACE}.* and a registry refuses two definitions with one type. Try "${hostAlternativeFor(error.type)}"`
+      return `"${error.type}" is in the framework's namespace — @jam-overture/loom registers ${FRAMEWORK_NAMESPACE}.* and a registry refuses two definitions with one type. Try "${hostAlternativeFor(error.type)}"`
     case "already-registered":
       return `"${error.type}" is already declared — edit its definition rather than regenerating it`
     case "file-exists":

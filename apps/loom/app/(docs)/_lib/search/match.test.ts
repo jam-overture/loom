@@ -113,7 +113,7 @@ describe("what the prose is worth", () => {
    */
   it("never lets a page's words outrank the export somebody typed exactly", () => {
     const index = of(
-      entry({ href: "/a", title: "definePrimitive", kind: "export", context: "@loom/runtime/sdk" }),
+      entry({ href: "/a", title: "definePrimitive", kind: "export", context: "@jam-overture/loom/sdk" }),
       entry({ href: "/b", title: "Primitives and the registry", kind: "page", body: "You define a primitive." })
     )
 
@@ -213,7 +213,7 @@ describe("the sentence a result is shown with", () => {
   })
 
   it("is nothing at all for an entry with no prose and no code", () => {
-    expect(excerpt({ title: "planReverts", kind: "export", context: "@loom/runtime" }, "planreverts")).toBe("")
+    expect(excerpt({ title: "planReverts", kind: "export", context: "@jam-overture/loom" }, "planreverts")).toBe("")
   })
 
   /**
@@ -226,12 +226,12 @@ describe("the sentence a result is shown with", () => {
    */
   it("is the one line of code a name was found on", () => {
     const code = [
-      'import { commitIntent } from "@loom/runtime/write"',
+      'import { commitIntent } from "@jam-overture/loom/write"',
       "",
       "const outcome = await commitIntent(path, intent)",
     ].join("\n")
 
-    expect(excerpt({ code }, "commitintent")).toBe('import { commitIntent } from "@loom/runtime/write"')
+    expect(excerpt({ code }, "commitintent")).toBe('import { commitIntent } from "@jam-overture/loom/write"')
     expect(hit({ code }, "commitintent")?.excerptIsCode).toBe(true)
   })
 
@@ -300,8 +300,8 @@ describe("what comes first", () => {
      * buried inside one.
      */
     const index = of(
-      entry({ href: "/a", title: "isUnrevertable", kind: "export", context: "@loom/runtime" }),
-      entry({ href: "/b", title: "planReverts", kind: "export", context: "@loom/runtime" })
+      entry({ href: "/a", title: "isUnrevertable", kind: "export", context: "@jam-overture/loom" }),
+      entry({ href: "/b", title: "planReverts", kind: "export", context: "@jam-overture/loom" })
     )
 
     expect(titles(index, "revert")).toEqual(["planReverts", "isUnrevertable"])
@@ -309,7 +309,7 @@ describe("what comes first", () => {
 
   it("puts a page above an export where the two would otherwise tie", () => {
     const index = of(
-      entry({ href: "/a", title: "Themes and tokens", kind: "export", context: "@loom/runtime" }),
+      entry({ href: "/a", title: "Themes and tokens", kind: "export", context: "@jam-overture/loom" }),
       entry({ href: "/b", title: "Themes and tokens", kind: "page", context: "The runtime" })
     )
 
@@ -318,7 +318,7 @@ describe("what comes first", () => {
 
   it("prefers prose to a name where the two tie", () => {
     const index = of(
-      entry({ href: "/a", title: "render", kind: "export", context: "@loom/runtime/react" }),
+      entry({ href: "/a", title: "render", kind: "export", context: "@jam-overture/loom/react" }),
       entry({ href: "/b", title: "render", kind: "heading", context: "Rendering a tree" })
     )
 
@@ -333,8 +333,8 @@ describe("what comes first", () => {
    */
   it("puts prose above a name even when the name matches exactly and the page does not", () => {
     const index = of(
-      entry({ href: "/a", title: "gate", kind: "export", context: "@loom/runtime" }),
-      entry({ href: "/b", title: "GatePolicy", kind: "export", context: "@loom/runtime" }),
+      entry({ href: "/a", title: "gate", kind: "export", context: "@jam-overture/loom" }),
+      entry({ href: "/b", title: "GatePolicy", kind: "export", context: "@jam-overture/loom" }),
       entry({ href: "/c", title: "What the Gate decides", kind: "page", context: "The runtime" })
     )
 
@@ -344,7 +344,7 @@ describe("what comes first", () => {
   it("still puts a name first when no page or section matches at all", () => {
     const index = of(
       entry({ href: "/a", title: "Primitives and the registry", kind: "page", context: "Building" }),
-      entry({ href: "/b", title: "definePrimitive", kind: "export", context: "@loom/runtime/sdk" })
+      entry({ href: "/b", title: "definePrimitive", kind: "export", context: "@jam-overture/loom/sdk" })
     )
 
     expect(titles(index, "definePrimitive")).toEqual(["definePrimitive"])

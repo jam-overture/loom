@@ -1,4 +1,4 @@
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 /**
  * Going to production.

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { draftSchemaByteSize, DEFAULT_DRAFT_DEPTH, GRAMMAR_BUDGET_BYTES } from "@loom/runtime"
+import { draftSchemaByteSize, DEFAULT_DRAFT_DEPTH, GRAMMAR_BUDGET_BYTES } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { docsBareRequest, docsModelRequest } from "./request"

@@ -6,7 +6,7 @@ import {
   memoryReaderSignalJournal,
   type IntakePolicy,
   type ReaderSignalJournal,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 
 import { describeIntake, readerSignalStatus, receiveReaderSignals, type Intake } from "./receive"
 import { readIntakeSwitch } from "./settings"

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@loom/runtime"
-import type { StoredTally } from "@loom/runtime/signals"
+import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@jam-overture/loom"
+import type { StoredTally } from "@jam-overture/loom/signals"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 import type { PartName } from "./part-name"

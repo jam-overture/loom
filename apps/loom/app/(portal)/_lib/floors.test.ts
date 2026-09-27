@@ -22,7 +22,7 @@ import {
   type StakeFactorCode,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { portalPolicy, portalPropsVocabulary } from "./policy"
 

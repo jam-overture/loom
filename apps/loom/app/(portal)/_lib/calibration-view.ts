@@ -1,10 +1,10 @@
-import { rulesetContinuityOf, UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
+import { rulesetContinuityOf, UNATTRIBUTED_POLICY_ID } from "@jam-overture/loom"
 import type {
   CalibrationReport,
   CalibrationScore,
   PolicyCalibration,
   UnjudgedReason,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import type { MissCause } from "./calibration-misses"
 import type { OutcomeTone } from "./outcome"

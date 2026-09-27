@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 
-import { LOOM_NODE_ATTRIBUTE } from "@loom/runtime/react"
+import { LOOM_NODE_ATTRIBUTE } from "@jam-overture/loom/react"
 
 /**
  * Bring the marked node into view.

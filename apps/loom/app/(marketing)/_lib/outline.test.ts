@@ -1,4 +1,4 @@
-import type { LoomTree } from "@loom/runtime"
+import type { LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { askById, type AskId } from "./adapt/asks"

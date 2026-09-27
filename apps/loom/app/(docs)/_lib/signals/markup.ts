@@ -1,11 +1,11 @@
-import type { ElementNode, LoomNode, LoomTree } from "@loom/runtime"
+import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 import {
   LOOM_NODE_ATTRIBUTE,
   LOOM_REVISION_ATTRIBUTE,
   LOOM_TREE_ATTRIBUTE,
   LOOM_TYPE_ATTRIBUTE,
   editableAttributes,
-} from "@loom/runtime/react"
+} from "@jam-overture/loom/react"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
 

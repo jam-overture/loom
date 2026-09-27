@@ -118,7 +118,7 @@ const IMPORT_CLOSES = /from[\t ]*["']|^[\t ]*\}[\t ]*;?[\t ]*$/
 /**
  * Import lists out, and this is the whole of why the check is not vacuous.
  *
- * `import { type ChangeInterpreter, fixedPolicy } from "@loom/runtime"` puts the
+ * `import { type ChangeInterpreter, fixedPolicy } from "@jam-overture/loom"` puts the
  * words `type ChangeInterpreter` at the start of a line, and the first version of
  * this module read seventeen of them as declarations — including one in a lesson
  * fence, which it then "compared" against an import in `src/` and reported as a

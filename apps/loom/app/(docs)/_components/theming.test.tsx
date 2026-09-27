@@ -4,7 +4,7 @@ import {
   PALETTE_SLOTS,
   PALETTE_TEXT_PAIRINGS,
   STARTER_PALETTES,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
@@ -17,7 +17,7 @@ import { PaletteSlots } from "./palette-slots"
  *
  * The page's argument is that a palette is checkable rather than asserted, so
  * these tests are written against the runtime rather than against the markup:
- * every expectation below recomputes what it wants from `@loom/runtime` and
+ * every expectation below recomputes what it wants from `@jam-overture/loom` and
  * compares. A slot added to the palette schema, a palette whose contrast
  * regresses, or a derivation that stops solving all show up here as a diff,
  * which is the only reason the page is allowed to print numbers at all.

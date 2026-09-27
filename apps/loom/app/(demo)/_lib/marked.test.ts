@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { NodeId } from "@loom/runtime"
+import type { NodeId } from "@jam-overture/loom"
 
 import { markedPage, MARKED_APPLIED, MARKED_AWAITING, MARKED_MANY } from "./marked"
 import type { Spotlight } from "./spotlight"

@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema } from "@loom/runtime"
-import { calibrationOf, describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
+import { treeIdSchema } from "@jam-overture/loom"
+import { calibrationOf, describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"

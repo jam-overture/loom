@@ -1,5 +1,5 @@
-import type { JsonObject, LoomTree } from "@loom/runtime"
-import type { RenderOptions } from "@loom/runtime/react"
+import type { JsonObject, LoomTree } from "@jam-overture/loom"
+import type { RenderOptions } from "@jam-overture/loom/react"
 
 /**
  * What a form posts to.

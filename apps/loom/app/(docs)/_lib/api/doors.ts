@@ -95,7 +95,7 @@ export type ApiDoorway = {
  * two doors publish with the same declaration, so a door that shares all of its
  * names with one other door is a door that other door contains. Loom has
  * exactly one — the reader-signal broadcaster, which is the browser-sized half
- * of `@loom/runtime/signals` — and a page that claimed *no import is part of a
+ * of `@jam-overture/loom/signals` — and a page that claimed *no import is part of a
  * bigger one* would be false on precisely that door's row.
  */
 const insideOf = (entry: ApiEntry): string | undefined =>

@@ -75,7 +75,7 @@ and gets it.
 
 ```ts
 import { z } from "zod"
-import { createDataRegistry, defineSource, describeDataRegistryError } from "@loom/runtime"
+import { createDataRegistry, defineSource, describeDataRegistryError } from "@jam-overture/loom"
 
 const services = defineSource({
   id: "catalogue.services",
@@ -137,8 +137,8 @@ So the asking happens **before** the walk, and it is two lines in whatever
 already loads the page:
 
 ```ts
-import { resolveTreeData } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { resolveTreeData } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 const data = await resolveTreeData(page, { registry: sources })
 
@@ -231,8 +231,8 @@ whoever runs the deployment.
 ```tsx
 import { createElement } from "react"
 import { z } from "zod"
-import { definePrimitive } from "@loom/runtime/sdk"
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
+import { definePrimitive } from "@jam-overture/loom/sdk"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
 
 const rows = z.array(z.object({ name: z.string(), price: z.string() }))
 

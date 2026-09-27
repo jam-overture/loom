@@ -47,7 +47,7 @@ looks identical to a value that has been set. Vercel's default is an empty Root
 Directory, meaning the repository root.
 
 That default fails in the worst possible way: **it does not error.** The repo root
-is `@loom/runtime`, which has no framework and no `build` script, so Vercel finds
+is `@jam-overture/loom`, which has no framework and no `build` script, so Vercel finds
 nothing to do, produces an empty output, and reports a green deployment. Every
 path then returns `404: NOT_FOUND` from the edge.
 
@@ -87,7 +87,7 @@ lives where nobody reviews it.
 
 ### The workspace link, which you do not have to do anything about
 
-`apps/loom` depends on `@loom/runtime` as `workspace:*`, which resolves to the
+`apps/loom` depends on `@jam-overture/loom` as `workspace:*`, which resolves to the
 **repository root package**. An install scoped to `apps/loom` alone would have
 nothing to link against.
 
@@ -97,7 +97,7 @@ in the Build Step"**, in the same settings section as Root Directory above. It i
 already has it — do not go looking for it during the import.
 
 Unlike Root Directory, this one fails loudly: the build stops at install or
-compile with `Cannot find module '@loom/runtime'` or pnpm's
+compile with `Cannot find module '@jam-overture/loom'` or pnpm's
 `ERR_PNPM_WORKSPACE_PKG_NOT_FOUND`. That error, and nothing else, is what this
 setting causes.
 
@@ -243,7 +243,7 @@ Once, from a machine with `.env.local` in place. Idempotent — every statement 
 and `loom_revisions` for the store, `loom_holds` for the changes the Gate held
 back, `loom_telemetry` for the journal §6 records into, and
 `loom_signin_attempts` for the sign-in throttle. The last of those belongs to the
-portal rather than to `@loom/runtime` — the runtime takes an actor and never asks
+portal rather than to `@jam-overture/loom` — the runtime takes an actor and never asks
 how a host established one.
 
 **Re-run it whenever the schema changes, not only on a new database.**

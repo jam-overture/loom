@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { contrastRatio, TEXT_CONTRAST_MINIMUM, type ResolvedTheme } from "@loom/runtime"
+import { contrastRatio, TEXT_CONTRAST_MINIMUM, type ResolvedTheme } from "@jam-overture/loom"
 import { ImageResponse } from "next/og"
 import { describe, expect, it } from "vitest"
 

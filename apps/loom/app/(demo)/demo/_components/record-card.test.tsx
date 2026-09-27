@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { REVERT_INTERPRETER } from "@loom/runtime/write"
+import { REVERT_INTERPRETER } from "@jam-overture/loom/write"
 
 import { ruleSentence } from "@/app/(portal)/_lib/vocabulary"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"

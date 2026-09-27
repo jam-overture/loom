@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode, LoomTree } from "@loom/runtime"
+import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 
 /**
  * The front door, band by band, and what a run of changes did to it.

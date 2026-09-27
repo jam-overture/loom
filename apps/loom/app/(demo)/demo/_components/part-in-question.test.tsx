@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { randomIdFactory, type LoomTree, type TreeDelta } from "@loom/runtime"
-import { LOOM_NODE_ATTRIBUTE, renderLoomTree } from "@loom/runtime/react"
+import { randomIdFactory, type LoomTree, type TreeDelta } from "@jam-overture/loom"
+import { LOOM_NODE_ATTRIBUTE, renderLoomTree } from "@jam-overture/loom/react"
 
 import { pageGround } from "@/app/(demo)/_lib/ground"
 import { partInQuestion, type PartInQuestion } from "@/app/(demo)/_lib/in-question"
