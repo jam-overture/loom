@@ -302,3 +302,22 @@ already tested.
 ## Open questions
 
 Nothing blocking.
+
+- **The secondary asks are below the fold now, at both widths**, and that is the
+  one thing in this change somebody could reasonably want back. The alternative
+  is a shorter window, and a shorter window shows *3,400* and fades out before
+  *24* and *92%* under a button promising all three — which is a preview of one
+  number. Recorded as a trade this lane made knowingly rather than filed.
+- **The excerpt is a column where the page is a row.** At rail width
+  `loom.stat-grid` falls to one column, so a stranger sees the three figures
+  stacked in the rail and side by side on the stage. It is the same nodes
+  responding to the width they are given, which is the correct behaviour and is
+  also a thing nobody has looked at on purpose. Filed nothing: asking for a
+  compact form would be asking the excerpt to stop being the band.
+- **A sixth data point on the backtick business**, for whoever is still keeping
+  count. This pull request's body carries five markdown **image** links, all of
+  them inside table cells — the shape the 22 September entry named as the cause
+  — and read back from the API **all five are clean**. Consistent with the 26
+  September entry's conclusion that the table cell is not the boundary either.
+  No theory offered, and none of this lane's business: it is recorded because
+  the entry that measured it asked for measurements rather than explanations.
