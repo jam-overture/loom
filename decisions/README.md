@@ -281,3 +281,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0195](0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md) | A shot may say what the browser started with, and it says it as data | Accepted | §1 (process) |
 | [0196](0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md) | A paint is sized by the box it is given, and says so when it cannot be | Accepted | §4b |
 | [0197](0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md) | A host may ask which way round a palette is, and a frame standing in for the page is handed both ends | Accepted | §4b |
+| [0198](0198-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md) | The portal may place a lever beside the evidence, and a model may never pull one | Proposed | §5 |
+| [0199](0199-the-outline-may-render-what-it-addresses-and-a-hand-may-yet-move-a-node.md) | The outline may render what it addresses, and a hand may yet move a node | Proposed | §5 |
