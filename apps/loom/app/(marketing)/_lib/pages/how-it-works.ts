@@ -12,7 +12,7 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 import type { PaperTrail } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { JOURNEY, STEPS_CAPITALISED } from "../journey"
-import { action, heading, prose, section, stack } from "../nodes"
+import { action, heading, prose, section, splitSection, stack } from "../nodes"
 import { DEMO, DOCS, HOW_IT_WORKS, SITE_THEMES, surfaceHref } from "../site"
 
 import type { PageContext } from "./home"
@@ -140,15 +140,10 @@ export const SHORT_ANSWERS: readonly ShortAnswer[] = [
 ]
 
 const shortAnswer = (ids: IdFactory, answer: ShortAnswer): LoomNode =>
-  section(
-    ids,
-    { width: "wide", eyebrow: answer.eyebrow },
-    answer.heading,
-    [
-      prose(ids, answer.body, { measured: true }),
-      prose(ids, answer.example, { tone: "muted", measured: true }),
-    ]
-  )
+  splitSection(ids, { width: "wide", eyebrow: answer.eyebrow }, answer.heading, [
+    prose(ids, answer.body),
+    prose(ids, answer.example, { tone: "muted" }),
+  ])
 
 /**
  * Who is asking, which is the one thing from `/who-can-ask` that belongs on a
@@ -159,15 +154,14 @@ const shortAnswer = (ids: IdFactory, answer: ShortAnswer): LoomNode =>
  * page of it; what a visitor needs is the sentence.
  */
 const whoAsks = (ids: IdFactory): LoomNode =>
-  section(
+  splitSection(
     ids,
     { tone: "surface", width: "wide", eyebrow: "Who is asking" },
     "The same request can get a different answer",
     [
       prose(
         ids,
-        "Your rules can tell the difference between you, a colleague, a visitor and the page reacting on its own. The same words from a stranger and from you do not have to mean the same thing.",
-        { measured: true }
+        "Your rules can tell the difference between you, a colleague, a visitor and the page reacting on its own. The same words from a stranger and from you do not have to mean the same thing."
       ),
     ]
   )
