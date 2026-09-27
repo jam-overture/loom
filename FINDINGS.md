@@ -32230,9 +32230,29 @@ none would fingerprint as having none, which is a fact rather than a guess.
 
 ## 2026-09-23 — the two `critical` factors the floors raise are dropped by the telemetry summary, so a refused-because-undrawable change is indistinguishable from a refused-because-risky one in the record
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— found while building `portal-35-what-it-objected-to`; nothing is broken, and it
-is the reason that unit reads events rather than the journal
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/event.ts`, `src/runtime/stakes.ts`) · **Status:** **closed by
+`framework-58-the-thirteen-rules-in-the-record`**
+([0198](decisions/0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md))
+— the recommendation as filed. `stakeFactorCodes` joins `AssessmentSummary`,
+optional and never defaulted, carrying every factor the Gate raised in the order
+it raised them. The codes and nothing else: `detail` is a sentence naming nodes
+and types, which is the content 0023 keeps out, and a factor's `level` is
+recoverable — twelve of the thirteen are fixed at their code, and `large-removal`
+is decided by `removedNodeCount`, already on the summary, against the
+`removalThresholds` of the policy `policyFingerprint` already names.
+
+`StakeFactorCode` became `stakeFactorCodeSchema` on the way, because the codes
+now leave the process, and `STAKE_FACTOR_CODES` is its `options` rather than a
+second list. **A note for `Loom portal` and `Loom marketing`, whose files these
+are not:** both surfaces walk their plain-language table with
+`Object.keys(STAKE_FACTORS) as StakeFactorCode[]`, which is a cast standing in
+for a list that now exists. Nothing is broken either way — the tables are total
+over the union — and the cast can go whenever either lane is next in the file.
+
+*Original status: open — found while building `portal-35-what-it-objected-to`;
+nothing is broken, and it is the reason that unit reads events rather than the
+journal.*
 
 `summariseAssessment` in `src/telemetry/event.ts` narrows a `ChangeAssessment`
 for the journal (0023, correctly — an event carries whole trees and a record must

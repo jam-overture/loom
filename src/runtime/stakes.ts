@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 import type { ChangeAnalysis } from "./analysis.js"
 import { describeNestedTarget } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
@@ -24,20 +26,50 @@ import { highestStake, type StakeLevel } from "./stake-level.js"
  * computed from, which no amount of looking at the delta can recover (0035).
  */
 
-export type StakeFactorCode =
-  | "protected-type-removed"
-  | "protected-type-touched"
-  | "protected-type-relocated"
-  | "protected-prop-configured"
-  | "large-removal"
-  | "broad-change"
-  | "shallow-structural-change"
-  | "discards-later-work"
-  | "nested-target"
-  | "unknown-primitive"
-  | "invalid-props"
-  | "redirected-submission"
-  | "repointed-binding"
+/**
+ * Which rule a factor is, as a closed vocabulary rather than a bare union.
+ *
+ * A schema because the codes leave the process. A telemetry record carries them
+ * so that a corpus can group refusals by the rule that caused one, and anything
+ * crossing that boundary has to be parsed on the way back in. This is the same
+ * bargain `stakeLevelSchema` and `dispositionReasonSchema` already make, and it
+ * is deliberately *not* the bargain `telemetryFailureSchema.code` makes: an
+ * error taxonomy is open because adding a code elsewhere in the codebase must
+ * not invalidate yesterday's records, whereas this list is the Gate's own
+ * vocabulary and a record naming a rule this version has never heard of is a
+ * record it genuinely cannot interpret.
+ *
+ * The order is the order `FACTORS` evaluates in, which is severity-ish and not
+ * arithmetic: nothing reads an index here, unlike `STAKE_ORDER` (0166).
+ */
+export const stakeFactorCodeSchema = z.enum([
+  "protected-type-removed",
+  "protected-type-touched",
+  "protected-type-relocated",
+  "protected-prop-configured",
+  "large-removal",
+  "broad-change",
+  "shallow-structural-change",
+  "discards-later-work",
+  "nested-target",
+  "unknown-primitive",
+  "invalid-props",
+  "redirected-submission",
+  "repointed-binding",
+])
+
+export type StakeFactorCode = z.infer<typeof stakeFactorCodeSchema>
+
+/**
+ * Every rule the Gate can raise, walkable.
+ *
+ * Derived rather than declared: the members come from a schema, so a second
+ * hand-written list would be the copy `closed-set.ts` exists to avoid. Two
+ * surfaces hold a plain-language table keyed by this union and both reached for
+ * `Object.keys(...) as StakeFactorCode[]` to walk it, which is a cast standing
+ * in for a list.
+ */
+export const STAKE_FACTOR_CODES: readonly StakeFactorCode[] = stakeFactorCodeSchema.options
 
 export type StakeFactor = {
   readonly code: StakeFactorCode
