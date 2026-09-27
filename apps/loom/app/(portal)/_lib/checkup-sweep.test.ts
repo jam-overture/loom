@@ -5,6 +5,8 @@ import type { StoreError } from "@jam-overture/loom/store"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 
+import type { PageName } from "./page-name"
+
 import type { AuditReport } from "./audit-view"
 import {
   inWorstFirstOrder,
@@ -111,36 +113,63 @@ describe("plainStanding", () => {
   })
 })
 
+/** The names the sweep reads alongside the checks, as the rows take them. */
+const named = (entries: readonly (readonly [string, string])[]): ReadonlyMap<string, PageName> =>
+  new Map(entries.map(([treeId, name]) => [treeId, { name, treeId, derived: true }]))
+
+const NO_NAMES: ReadonlyMap<string, PageName> = new Map()
+
 describe("inWorstFirstOrder", () => {
   it("puts the page somebody opened this screen for at the top", () => {
-    const ordered = inWorstFirstOrder([
-      check("t_a", "adds-up"),
-      check("t_b", "nothing-to-check-against"),
-      check("t_c", "does-not-add-up"),
-      check("t_d", "could-not-be-read"),
-      check("t_e", "could-not-be-finished"),
-    ])
+    const ordered = inWorstFirstOrder(
+      [
+        check("t_a", "adds-up"),
+        check("t_b", "nothing-to-check-against"),
+        check("t_c", "does-not-add-up"),
+        check("t_d", "could-not-be-read"),
+        check("t_e", "could-not-be-finished"),
+      ],
+      NO_NAMES
+    )
 
     expect(ordered.map((entry) => entry.treeId)).toEqual(["t_c", "t_e", "t_d", "t_b", "t_a"])
   })
 
   /**
-   * A press that reshuffled the quiet half of the screen would make two
-   * consecutive checks look like two different deployments.
+   * The tail of this order, and it used to be the order the store listed them
+   * in. That was defended on the ground that *a press that reshuffled the quiet
+   * half of the screen would make two consecutive checks look like two different
+   * deployments* — which is still true and still held, because the name order is
+   * total. What it also does now is agree with every other list of pages in this
+   * portal, which a cursor order cannot: see `_lib/page-order.ts`.
    */
-  it("keeps pages of one standing in the order they were listed", () => {
-    const ordered = inWorstFirstOrder([
-      check("t_1", "adds-up"),
-      check("t_2", "adds-up"),
-      check("t_3", "adds-up"),
-    ])
+  it("arranges pages of one standing by name, not by the order they were listed", () => {
+    const ordered = inWorstFirstOrder(
+      [check("t_1", "adds-up"), check("t_2", "adds-up"), check("t_3", "adds-up")],
+      named([
+        ["t_1", "Pricing"],
+        ["t_2", "About"],
+        ["t_3", "Home"],
+      ])
+    )
 
-    expect(ordered.map((entry) => entry.treeId)).toEqual(["t_1", "t_2", "t_3"])
+    expect(ordered.map((entry) => entry.treeId)).toEqual(["t_2", "t_3", "t_1"])
+  })
+
+  /** Two presses against one store produce one list, which a screenshot depends on. */
+  it("is a total order, so a page with no name still lands in one place", () => {
+    const checks = [check("t_c", "adds-up"), check("t_a", "adds-up"), check("t_b", "adds-up")]
+
+    expect(inWorstFirstOrder(checks, NO_NAMES).map((entry) => entry.treeId)).toEqual([
+      "t_a",
+      "t_b",
+      "t_c",
+    ])
   })
 
   it("does not modify what it was given", () => {
     const checks = [check("t_a", "adds-up"), check("t_b", "does-not-add-up")]
-    inWorstFirstOrder(checks)
+    inWorstFirstOrder(checks, NO_NAMES)
 
     expect(checks.map((entry) => entry.treeId)).toEqual(["t_a", "t_b"])
   })

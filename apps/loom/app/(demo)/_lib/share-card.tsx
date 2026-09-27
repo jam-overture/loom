@@ -1,7 +1,7 @@
-import { editorialPalette, type PaletteSlot } from "@jam-overture/loom"
 import type { ReactElement } from "react"
 
 import { CHROME, CHROME_RADIUS } from "./chrome"
+import { pageColour } from "./ground"
 import type { DemoShareCard } from "./share"
 import { SPOT_COLOURS } from "./spotlight"
 
@@ -31,22 +31,37 @@ import { SPOT_COLOURS } from "./spotlight"
  * **No colour below is chosen here, and the two halves take theirs from
  * different places on purpose.** The rail's are `chrome.ts`'s, which are
  * `globals.css`'s. The stage's are the registered palette the demo tree
- * carries — `editorial`, named by `DEMO_STARTING_THEME` — because the page
- * being changed wears its own theme (0050) and always has. That division is the
- * running surface's, and copying it is what stops the card being a picture of a
- * page this deployment does not serve.
+ * carries, because the page being changed wears its own theme (0050) and always
+ * has. That division is the running surface's, and copying it is what stops the
+ * card being a picture of a page this deployment does not serve.
+ *
+ * **That last sentence was false for a day**, and it is why `pageColour` is
+ * imported rather than a palette. This file named `editorialPalette` directly
+ * and said in a comment that it was doing so because that is what
+ * `DEMO_STARTING_THEME` names. It was — and on 26 September the starting theme
+ * became `midnight`, so the card went on unfurling a cream page with navy
+ * figures for a link that lands on a navy page with cyan ones. Nothing failed:
+ * every pair below still cleared 4.5:1, because a picture of the wrong page can
+ * be a perfectly legible one. `_lib/ground.ts` resolves the id the tree carries,
+ * so the card cannot be of a page this deployment does not serve.
  *
  * `share-card.test.tsx` measures every ink-on-ground pair below and holds it to
  * 4.5:1. An unreadable card is a failure only a stranger would ever see.
  */
 
-/** The page's own ink, off the theme its tree names. */
-const page = (slot: PaletteSlot): string => {
-  const colour = editorialPalette.slots[slot]
-  if (colour === undefined) throw new Error(`loom: the editorial palette has no ${slot}`)
-
-  return colour
-}
+/**
+ * The four of the page's colours this picture draws with, named once.
+ *
+ * `pageColour` resolves them off the palette the tree carries; this is only the
+ * shorthand, so the pairings list below and the elements that draw them cannot
+ * be reading two different slots.
+ */
+const PAGE = {
+  canvas: pageColour("bg-canvas"),
+  ink: pageColour("fg-default"),
+  muted: pageColour("fg-muted"),
+  accent: pageColour("accent"),
+} as const
 
 /**
  * Every pairing the card draws, exported so the contrast test measures what is
@@ -59,10 +74,10 @@ export const CARD_PAIRINGS: readonly {
 }[] = [
   { what: "the wordmark", foreground: CHROME.inkPrimary, background: CHROME.page },
   { what: "the eyebrow", foreground: CHROME.accent, background: CHROME.page },
-  { what: "the page's eyebrow", foreground: page("fg-muted"), background: page("bg-canvas") },
-  { what: "the page's headline", foreground: page("fg-default"), background: page("bg-canvas") },
-  { what: "a figure", foreground: page("accent"), background: page("bg-canvas") },
-  { what: "a figure's label", foreground: page("fg-muted"), background: page("bg-canvas") },
+  { what: "the page's eyebrow", foreground: PAGE.muted, background: PAGE.canvas },
+  { what: "the page's headline", foreground: PAGE.ink, background: PAGE.canvas },
+  { what: "a figure", foreground: PAGE.accent, background: PAGE.canvas },
+  { what: "a figure's label", foreground: PAGE.muted, background: PAGE.canvas },
   { what: "the mark's chip", foreground: SPOT_COLOURS.awaiting.ink, background: SPOT_COLOURS.awaiting.fill },
   { what: "the badge", foreground: CHROME.awaitingInk, background: CHROME.awaitingGround },
   { what: "the ask", foreground: CHROME.inkSecondary, background: CHROME.page },
@@ -140,10 +155,10 @@ const band = (card: DemoShareCard): ReactElement => (
           key={figure.value}
           style={{ display: "flex", flexDirection: "column", maxWidth: 160, marginRight: 12 }}
         >
-          <div style={{ display: "flex", fontSize: 44, fontWeight: 700, color: page("accent") }}>
+          <div style={{ display: "flex", fontSize: 44, fontWeight: 700, color: PAGE.accent }}>
             {figure.value}
           </div>
-          <div style={{ display: "flex", marginTop: 4, fontSize: 16, color: page("fg-muted") }}>
+          <div style={{ display: "flex", marginTop: 4, fontSize: 16, color: PAGE.muted }}>
             {figure.label}
           </div>
         </div>
@@ -160,9 +175,24 @@ const stage = (card: DemoShareCard): ReactElement => (
       flexDirection: "column",
       justifyContent: "center",
       width: STAGE_WIDTH,
-      backgroundColor: page("bg-canvas"),
+      backgroundColor: PAGE.canvas,
       paddingLeft: GUTTER,
       paddingRight: GUTTER,
+      /*
+       * The split, stated rather than left to the palettes.
+       *
+       * It used to be carried by luminance alone — a cream page against a
+       * near-black rail — which is a fact about `editorial` and not about this
+       * composition. On `midnight` the two grounds are `#111827` and `#0a0a0a`,
+       * and at the 360 pixels an unfurled card is actually seen at that is one
+       * rectangle with some text in it. The same hairline the bar already draws
+       * makes the split survive a palette going either way.
+       *
+       * Inside the pane's own width: the box is border-box here as it is in any
+       * flex layout, so this costs the stage a pixel of its gutter rather than
+       * the image a pixel of its width.
+       */
+      borderRight: `1px solid ${CHROME.edge}`,
     }}
   >
     <div
@@ -171,7 +201,7 @@ const stage = (card: DemoShareCard): ReactElement => (
         fontSize: 17,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        color: page("fg-muted"),
+        color: PAGE.muted,
       }}
     >
       {card.pageEyebrow}
@@ -184,7 +214,7 @@ const stage = (card: DemoShareCard): ReactElement => (
         fontWeight: 700,
         lineHeight: 1.1,
         letterSpacing: "-0.02em",
-        color: page("fg-default"),
+        color: PAGE.ink,
       }}
     >
       {card.pageHeadline}

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { nameFrom, type PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
+import { inPageOrder } from "@/app/(portal)/_lib/page-order"
 import type { UnreadablePage } from "@/app/(portal)/_lib/waiting"
 
 /**
@@ -42,6 +43,22 @@ import type { UnreadablePage } from "@/app/(portal)/_lib/waiting"
  * second source for something `page-name.ts` keeps in one. `nameFrom` answers
  * for a page that would not read, which is exactly the page most likely to be
  * in this list.
+ *
+ * ## The one list of pages in this portal that does not say what order it is in
+ *
+ * Every other one does, above itself, in a sentence (`_lib/page-order.ts`). This
+ * list is exempt and the exemption is an argument rather than an oversight:
+ * **every row here needs the same thing from a reader, which is to go and look at
+ * it.** An order sentence names the *top* of a list, so a list with no top would
+ * be claiming a priority it does not have — and on a failure notice, a reader
+ * concluding that the second row matters less is the one wrong conclusion
+ * available.
+ *
+ * It takes the shared tiebreak anyway, and that half is not optional. The rows
+ * arrived in whatever order a fan-out resolved in, so the same two failures could
+ * be drawn either way round on two consecutive loads of one screen — and the
+ * disclosure below pairs each row with its own account of what the store said, by
+ * position. Both lists are now built from the same ordered rows.
  */
 export const UnreadablePages = ({
   pages,
@@ -49,44 +66,51 @@ export const UnreadablePages = ({
 }: {
   readonly pages: readonly UnreadablePage[]
   readonly names: ReadonlyMap<string, PageNameValue>
-}) => (
-  <div className="flex flex-col gap-3">
-    <ul className="flex flex-col gap-3">
-      {pages.map((page) => (
-        <li key={page.treeId} className="border-edge-subtle flex flex-col gap-1 border-l-2 pl-3">
-          <PageName page={nameFrom(names, page.treeId)} />
-          <span className="text-ink-muted">{page.why}</span>
-          <Link href={page.href} className="w-fit">
-            Open this page →
-          </Link>
-        </li>
-      ))}
-    </ul>
+}) => {
+  const inOrder = inPageOrder(pages, (page) => ({
+    rank: 0,
+    page: nameFrom(names, page.treeId),
+  }))
 
-    <TechnicalDetail summary="What the store said about each of them">
-      <ul className="flex flex-col gap-2">
-        {pages.map((page) => (
-          <li key={page.treeId}>
-            <span className="font-mono">{page.treeId}</span>
-            <span className="text-ink-muted mt-1 block font-mono">{page.technical}</span>
+  return (
+    <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
+        {inOrder.map((page) => (
+          <li key={page.treeId} className="border-edge-subtle flex flex-col gap-1 border-l-2 pl-3">
+            <PageName page={nameFrom(names, page.treeId)} />
+            <span className="text-ink-muted">{page.why}</span>
+            <Link href={page.href} className="w-fit">
+              Open this page →
+            </Link>
           </li>
         ))}
       </ul>
-      {/*
-       * The thing this screen cannot tell a reader, said where the codes are.
-       *
-       * A hold store answers one error code for every reason a read can fail, so
-       * a database that did not respond and a change record this deployment
-       * cannot read arrive here identically — and those want opposite next
-       * moves. Saying so is better than a plain sentence that guesses, and it
-       * belongs beside the account rather than on the surface, because it is a
-       * fact about the runtime rather than about the reader's page.
-       */}
-      <p className="text-ink-muted">
-        This does not say whether the page could not be reached or whether Loom could not read
-        something it holds. Those want different things from you and the store reports them the
-        same way; a read that failed for either reason is the account above.
-      </p>
-    </TechnicalDetail>
-  </div>
-)
+
+      <TechnicalDetail summary="What the store said about each of them">
+        <ul className="flex flex-col gap-2">
+          {inOrder.map((page) => (
+            <li key={page.treeId}>
+              <span className="font-mono">{page.treeId}</span>
+              <span className="text-ink-muted mt-1 block font-mono">{page.technical}</span>
+            </li>
+          ))}
+        </ul>
+        {/*
+         * The thing this screen cannot tell a reader, said where the codes are.
+         *
+         * A hold store answers one error code for every reason a read can fail, so
+         * a database that did not respond and a change record this deployment
+         * cannot read arrive here identically — and those want opposite next
+         * moves. Saying so is better than a plain sentence that guesses, and it
+         * belongs beside the account rather than on the surface, because it is a
+         * fact about the runtime rather than about the reader's page.
+         */}
+        <p className="text-ink-muted">
+          This does not say whether the page could not be reached or whether Loom could not read
+          something it holds. Those want different things from you and the store reports them the
+          same way; a read that failed for either reason is the account above.
+        </p>
+      </TechnicalDetail>
+    </div>
+  )
+}

@@ -51,6 +51,7 @@ import {
   type LaunchOptions,
 } from "./playwright.js"
 import { describeRenderError, renderSpecimen } from "./render.js"
+import { BLOCK_STORAGE_SCRIPT, seedStorageScript } from "./start-state.js"
 import { contentTypeFor, resolveServedPath, serveDirectory } from "./serve.js"
 import { defineSpecimen, PHONE, WIDE, type Specimen } from "./specimen.js"
 
@@ -263,6 +264,7 @@ const fakeBrowser = (
   measurements: readonly { scrollWidth: number; innerWidth: number }[]
 ): {
   browser: SpecimenBrowser
+  /** Every address opened, and every start state applied before one. */
   visited: string[]
   written: string[]
   /** Every step, and every measurement, in the order the loop reached them. */
@@ -279,6 +281,19 @@ const fakeBrowser = (
       opened += 1
 
       return {
+        /**
+         * Recorded into `visited` and not into `journal`, because the property
+         * worth asserting is *before which navigation* rather than *between
+         * which steps* — and `visited` is the list that has the navigations in
+         * it.
+         */
+        start: async (state) => {
+          visited.push(
+            "storage" in state
+              ? `start storage ${JSON.stringify(state.storage)}`
+              : "start storageBlocked"
+          )
+        },
         goto: async (url, waitFor, frame) => {
           const after = waitFor === undefined ? "" : ` after ${waitFor}`
           visited.push(`${url}${after}${frame === undefined ? "" : ` in ${frame}`}`)
@@ -288,6 +303,7 @@ const fakeBrowser = (
           for (const step of steps) {
             if ("click" in step) journal.push(`click ${step.click}${where}`)
             else if ("fill" in step) journal.push(`fill ${step.fill}${where} "${step.text}"`)
+            else if ("scrollTo" in step) journal.push(`scrollTo ${step.scrollTo}${where}`)
             else if ("waitFor" in step) journal.push(`waitFor ${step.waitFor}${where}`)
             else journal.push(`wait ${step.wait}`)
           }
@@ -359,6 +375,7 @@ describe("taking the shots", () => {
     let closed = 0
     const browser: SpecimenBrowser = {
       open: async () => ({
+        start: async () => {},
         goto: async () => {
           throw new Error("net::ERR_CONNECTION_REFUSED")
         },
@@ -515,6 +532,131 @@ describe("taking the shots", () => {
     ])
   })
 
+  /**
+   * The ask behind this: three screens in one lane whose whole subject is
+   * what the browser arrived with, all three photographed by a hand-written
+   * driver in a scratch directory, because by the time there is something to
+   * click the page has already read the record and decided what to say.
+   */
+  it("puts the browser in its start state before the address is opened", async () => {
+    const { browser, visited } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({
+          url: "http://127.0.0.1:1234/lessons/3",
+          start: { storage: { "loom.lessons.progress.v1": "{{{" } },
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(visited).toEqual([
+      'start storage {"loom.lessons.progress.v1":"{{{"}',
+      "http://127.0.0.1:1234/lessons/3",
+    ])
+  })
+
+  /**
+   * Before the `before`, not between it and the shot. A shot that signs in and
+   * then reads a record wants the record there for both loads, and this is the
+   * only ordering that gives it that.
+   */
+  it("starts the browser before the before, not after it", async () => {
+    const { browser, visited } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({
+          url: "http://127.0.0.1:1234/portal/lessons",
+          start: { storageBlocked: true },
+          before: { url: "http://127.0.0.1:1234/portal/sign-in", do: [] },
+        }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(visited).toEqual([
+      "start storageBlocked",
+      "http://127.0.0.1:1234/portal/sign-in",
+      "http://127.0.0.1:1234/portal/lessons",
+    ])
+  })
+
+  it("leaves the browser alone for a shot that asks for no start state", async () => {
+    const { browser, visited } = fakeBrowser([])
+
+    await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(visited).toEqual(["http://127.0.0.1:1234/page"])
+  })
+
+  /**
+   * A fresh context per shot is what keeps one picture from depending on the
+   * one before it, and a start state is part of a context rather than of a
+   * run: the shot that does not ask for one must not inherit it.
+   */
+  it("does not carry one shot's start state into the next shot", async () => {
+    const { browser, visited } = fakeBrowser([])
+
+    await captureShots(
+      [
+        shotAt({ url: "http://127.0.0.1:1234/a", start: { storageBlocked: true } }),
+        shotAt({ url: "http://127.0.0.1:1234/b" }),
+      ],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(visited).toEqual([
+      "start storageBlocked",
+      "http://127.0.0.1:1234/a",
+      "http://127.0.0.1:1234/b",
+    ])
+  })
+
+  it("drives a scroll among the steps, in the order it was written", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ do: [{ click: "[data-ask]" }, { scrollTo: "[data-controls]" }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["click [data-ask]", "scrollTo [data-controls]", "measure"])
+  })
+
+  /**
+   * A scroll changes how much of the page is in view and nothing about how
+   * wide it is, but it is a step like any other and the measurement is taken
+   * after the steps — so the assertion worth having is that the order did not
+   * quietly become *measure, then scroll*.
+   */
+  it("measures after the scroll, as it does after every other step", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots([shotAt({ do: [{ scrollTo: "[data-controls]" }] })], browser, {
+      outDir: "reports",
+    })
+
+    expect(journal).toEqual(["scrollTo [data-controls]", "measure"])
+  })
+
+  it("resolves a scroll against the frame a shot names, like every other selector", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ frame: "iframe#demo", do: [{ scrollTo: "[data-controls]" }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["scrollTo [data-controls] in iframe#demo", "measure"])
+  })
+
   it("points the shutter at one element when a shot clips", async () => {
     const { browser, written } = fakeBrowser([])
 
@@ -552,6 +694,8 @@ describe("the browser adapter", () => {
     /** Steps and evaluations, in the order the adapter reached them. */
     journal: string[]
     elementShots: { selector: string; path: string }[]
+    /** The source registered to run before the first paint, verbatim. */
+    initScripts: string[]
   } => {
     const launches: LaunchOptions[] = []
     const contexts: ContextOptions[] = []
@@ -560,6 +704,7 @@ describe("the browser adapter", () => {
     const selectors: string[] = []
     const journal: string[] = []
     const elementShots: { selector: string; path: string }[] = []
+    const initScripts: string[] = []
 
     return {
       launches,
@@ -569,6 +714,7 @@ describe("the browser adapter", () => {
       selectors,
       journal,
       elementShots,
+      initScripts,
       launcher: {
         launch: async (options) => {
           launches.push(options)
@@ -602,6 +748,9 @@ describe("the browser adapter", () => {
                         journal.push(`waitFor ${where}`)
                         selectors.push(where)
                       },
+                      scrollIntoViewIfNeeded: async () => {
+                        journal.push(`scrollTo ${where}`)
+                      },
                       screenshot: async (options: { path: string }) => {
                         elementShots.push({ selector: where, path: options.path })
                       },
@@ -615,6 +764,16 @@ describe("the browser adapter", () => {
                     evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
                       journal.push(`evaluate ${body.name}`)
                       return { scrollWidth: 390, innerWidth: 390 } as TValue
+                    },
+                    /**
+                     * The source, verbatim. It is a string by the time it
+                     * reaches here — `start-state.ts` says why a compiled
+                     * function was the wrong thing to hand a browser — so the
+                     * assertion a test can make is the exact one that matters:
+                     * *this is what the page will run*.
+                     */
+                    addInitScript: async (script: string) => {
+                      initScripts.push(script)
                     },
                     waitForTimeout: async (ms: number) => {
                       journal.push(`wait ${ms}`)
@@ -705,6 +864,85 @@ describe("the browser adapter", () => {
     await page.capture(file, { fullPage: false })
 
     expect(recorder.screenshots).toEqual([{ path: file, fullPage: false }])
+  })
+
+  /**
+   * `addInitScript` and not `evaluate`, and the difference is the whole
+   * feature: `evaluate` runs against a document that already exists, and by
+   * then the page has read the record and decided what to say.
+   */
+  it("registers the seeding source before the first paint, with the keys in it", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.start({ storage: { "loom.lessons.progress.v1": "{{{" } })
+
+    expect(recorder.initScripts).toEqual([
+      seedStorageScript({ "loom.lessons.progress.v1": "{{{" }),
+    ])
+    /** Registered, not evaluated: `evaluate` would be one document too late. */
+    expect(recorder.journal).toEqual([])
+  })
+
+  it("registers the blocking source", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.start({ storageBlocked: true })
+
+    expect(recorder.initScripts).toEqual([BLOCK_STORAGE_SCRIPT])
+  })
+
+  it("registers nothing at all until a shot asks for a start state", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+
+    await browser.open(WIDE)
+
+    expect(recorder.initScripts).toEqual([])
+  })
+
+  /**
+   * Strict, like `click` and `fill` and unlike `waitFor`: which of two matches
+   * is brought into view decides what the picture is of, exactly as which of
+   * two buttons is pressed does.
+   */
+  it("scrolls to the element a step names, without taking the first of several", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ scrollTo: "[data-controls]" }])
+
+    expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls]"])
+    expect(recorder.selectors).toEqual([])
+  })
+
+  it("resolves a scroll through the frame an approach named", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ scrollTo: "[data-controls]" }], "iframe#demo")
+
+    expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls] in iframe#demo"])
+  })
+
+  /**
+   * A scroll is a step, so the page is held still before it for the same
+   * reason every other step is: a `do` list is a sequence against one page by
+   * construction.
+   */
+  it("holds the page still before a scroll, as it does before a press", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ scrollTo: "[data-controls]" }])
+
+    expect(recorder.journal).toEqual(["evaluate pinNavigation", "scrollTo [data-controls]"])
   })
 
   it("drives the steps in the order they were written", async () => {

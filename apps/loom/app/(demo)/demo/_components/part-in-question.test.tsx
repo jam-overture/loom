@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { randomIdFactory, type LoomTree, type TreeDelta } from "@jam-overture/loom"
 import { LOOM_NODE_ATTRIBUTE, renderLoomTree } from "@jam-overture/loom/react"
 
+import { pageGround } from "@/app/(demo)/_lib/ground"
 import { partInQuestion, type PartInQuestion } from "@/app/(demo)/_lib/in-question"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { presetById } from "@/app/(demo)/_lib/presets"
@@ -47,6 +48,17 @@ const partFor = (presetId: string, against: LoomTree): PartInQuestion => {
   if (part === undefined) throw new Error(`${presetId} has no part to preview`)
 
   return part
+}
+
+/**
+ * A hex as the DOM reports it back. `style.backgroundColor` is serialised by the
+ * browser, so asserting against the palette's own `#111827` compares a colour to
+ * a spelling of it.
+ */
+const hexToRgb = (hex: string): string => {
+  const channels = [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16))
+
+  return `rgb(${channels.join(", ")})`
 }
 
 /** The page's own resolved theme, taken the way the page takes it. */
@@ -103,6 +115,51 @@ describe("the part in question", () => {
     const frame = container.querySelector(".demo-part-stage")
 
     expect(frame?.getAttribute("style")).toContain("--loom-")
+  })
+
+  /**
+   * **The ground, and this is the assertion the unit was built for.**
+   *
+   * `.loom-stage` paints `--surface-stage`, which is the demo chrome's white.
+   * With the page on a dark palette the frame kept painting it and kept taking
+   * its ink from the theme, so the one picture of what a stranger is about to
+   * lose was `#f3f4f7` on `#ffffff` — 1.10:1, measured on a production build.
+   * The pair is now read off one palette in `_lib/ground.ts`, and the contrast
+   * sweep over all of them lives in `ground.test.ts`.
+   */
+  it("paints the page's own ground, not the demo's", () => {
+    const tree = page()
+    const theme = themeOf(tree)
+    const ground = pageGround(theme)
+
+    expect(ground).toBeDefined()
+
+    const { container } = render(
+      <PartInQuestionView part={partFor("trim", tree)} {...(theme ? { theme } : {})} />
+    )
+    const frame = container.querySelector<HTMLElement>(".demo-part-stage")
+
+    expect(frame?.style.backgroundColor).toBe(hexToRgb(ground?.backgroundColor ?? ""))
+    expect(frame?.style.color).toBe(hexToRgb(ground?.color ?? ""))
+    expect(frame?.style.colorScheme).toBe(ground?.colorScheme)
+  })
+
+  /**
+   * Inline rather than a class or a variable, because the rule it has to beat
+   * is `.loom-stage`'s in `@layer base` and a layer beats an unlayered
+   * declaration only when nothing inline is competing. A later run that moves
+   * this into the stylesheet gets a white excerpt back and a red test.
+   */
+  it("sets the ground inline, so the stylesheet's own cannot win", () => {
+    const tree = page()
+    const theme = themeOf(tree)
+    const { container } = render(
+      <PartInQuestionView part={partFor("trim", tree)} {...(theme ? { theme } : {})} />
+    )
+
+    expect(container.querySelector(".demo-part-stage")?.getAttribute("style")).toContain(
+      "background-color"
+    )
   })
 
   it("renders without a theme, the way the stage would", () => {

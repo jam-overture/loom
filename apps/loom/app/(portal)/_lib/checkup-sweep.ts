@@ -3,6 +3,8 @@ import type { StoreError } from "@jam-overture/loom/store"
 
 import type { AuditReport } from "./audit-view"
 import type { OutcomeTone } from "./outcome"
+import { nameFrom, type PageName } from "./page-name"
+import { inPageOrder } from "./page-order"
 
 /**
  * One press, every page: whether the deployment as a whole still adds up.
@@ -177,13 +179,33 @@ const SEVERITY: Readonly<Record<StandingState, number>> = {
   "adds-up": 4,
 }
 
+/** Where one standing sits before the tiebreak, for `inPageOrder`. */
+export const worstFirstRank = (state: StandingState): number => SEVERITY[state]
+
 /**
- * Stable within a rank: two pages that add up stay in the order the store
- * listed them, so pressing the button twice cannot reshuffle the quiet half of
- * the screen under a reader.
+ * Worst first, and then by name like every other list of pages in this portal.
+ *
+ * The tail used to be the order the store listed them in, defended on the
+ * ground that *two pages that add up stay in the order the store listed them,
+ * so pressing the button twice cannot reshuffle the quiet half of the screen
+ * under a reader.* That reason was right and is kept — `byName` is a total
+ * order, so two presses against one store still produce one list — and it was
+ * one screen's answer to a question five screens were answering differently. A
+ * cursor order is what a store needs to resume a listing, not an arrangement
+ * anybody chose, so the quiet half of this screen disagreed with the quiet half
+ * of both choosers for no reason a reader could find. See `_lib/page-order.ts`.
+ *
+ * The names are a parameter because they are read alongside the checks and this
+ * module must not read anything.
  */
-export const inWorstFirstOrder = (checks: readonly PageCheck[]): readonly PageCheck[] =>
-  [...checks].sort((a, b) => SEVERITY[a.standing.state] - SEVERITY[b.standing.state])
+export const inWorstFirstOrder = (
+  checks: readonly PageCheck[],
+  names: ReadonlyMap<string, PageName>
+): readonly PageCheck[] =>
+  inPageOrder(checks, (check) => ({
+    rank: worstFirstRank(check.standing.state),
+    page: nameFrom(names, check.treeId),
+  }))
 
 /** One page's standing, read off the report its own checkup would show. */
 export const standingOf = (report: AuditReport): PageStanding => {

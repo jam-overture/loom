@@ -157,7 +157,10 @@ Below `ChangeInterpreter` there is a second boundary, and it is the whole networ
 
 ```ts
 export interface ModelClient {
-  readonly complete: (request: ModelRequest) => Promise<Result<ModelCompletion, ModelClientError>>
+  readonly complete: (
+    request: ModelRequest,
+    options?: ModelCallOptions
+  ) => Promise<Result<ModelCompletion, ModelClientError>>
 }
 ```
 
@@ -194,6 +197,55 @@ present. Everything it covers is covered offline; what it adds is proof that the
 schema Loom hands a real model is one a real model can satisfy, which no fixture
 can establish. That test is affordable *because* the seam is low: there is only
 one thing left that a fixture genuinely cannot check.
+
+### The second argument, and the difference between a courtesy and a hole
+
+Read the signature again. Two arguments, and only the first is the question being
+asked. `ModelRequest` is *what* — the model, the effort, the token ceiling, the
+system prompt, the schema the reply must satisfy. The second is *how the call is
+being made*, and it is a separate type with one field in it:
+
+```ts
+export type ModelCallOptions = {
+  readonly signal?: AbortSignal
+}
+```
+
+Before reading on: a deadline is a fact about the call, and this seam had a
+perfectly good place to put one. Why is it not a field of `ModelRequest`?
+
+Because the request is the thing the record is *of*. Exercise F hashes it, and two
+proposals sharing a `promptHash` are answering a question about whether two
+changes came from the same ask. How long the caller happened to be prepared to
+wait is not part of that question, and a field that made the same ask hash
+differently on a busy afternoon would quietly stop it being answerable. What is
+being asked and how it is being asked are two different objects because they have
+two different lifetimes in the record.
+
+Then the half worth more, and it is lesson 05 arriving as a parameter. The signal
+is aborted when the runtime has stopped waiting — and **the runtime does not
+depend on the client noticing.** [0140](../decisions/0140-a-call-into-foreign-code-has-a-ceiling-and-the-runtime-owns-it.md)
+puts the ceiling in `modelInterpreter`, one level *above* this boundary rather
+than inside the vendor adapter below it, so a call that never answers is reported
+as `unavailable` by the caller's own clock. An implementation that ignores
+`signal` altogether cannot delay the answer by a millisecond. What it loses is the
+connection it is still holding, which nobody is going to read.
+
+Lesson 05 gave you the test for telling an obligation from a guarantee: *whether a
+stranger can violate it.* Apply it here and the answer is the interesting one. A
+stranger **can** violate this, and nothing breaks — which is precisely what
+entitles the runtime to ask:
+
+> **Ask across a seam for what you would like. Keep on your own side of it what
+> you cannot do without.** Which of the two a parameter is has nothing to do with
+> how it is typed and everything to do with where the enforcement was put.
+
+Move that enforcement down into `anthropic.ts` and the signature does not change
+by one character, while the property inverts: correct for the one vendor somebody
+wrote an adapter for, and a page that never finishes loading for the host that
+brought its own client. Exercise G is both halves of that — the same hang, once
+through a client that honours the signal and once through one that has never heard
+of it — and the line that differs between them is not the outcome.
 
 ### What may not cross, one: identity
 
@@ -376,6 +428,7 @@ counter, and what recording both halves is for.
 | Where the runtime names what the model built | [`src/interpretation/materialize.ts`](../src/interpretation/materialize.ts) |
 | The exact bytes, kept a value rather than a side effect | [`src/interpretation/prompt.ts`](../src/interpretation/prompt.ts) |
 | The one vendor adapter, and its status classification | [`src/interpretation/anthropic.ts`](../src/interpretation/anthropic.ts) |
+| The ceiling, and the abort nobody is obliged to honour | [`src/deadline.ts`](../src/deadline.ts) |
 | The one test that may touch the network | [`src/interpretation/anthropic.smoke.test.ts`](../src/interpretation/anthropic.smoke.test.ts) |
 | A deterministic interpreter that ships | [`src/write/revert.ts`](../src/write/revert.ts) |
 
@@ -392,7 +445,7 @@ Shared preamble:
 import { describe, it } from "vitest"
 
 import { sequentialIdFactory } from "./ids.js"
-import type { ModelClientError } from "./interpretation/client.js"
+import type { ModelClient, ModelClientError } from "./interpretation/client.js"
 import { modelInterpreter } from "./interpretation/interpreter.js"
 import { err, ok, type Result } from "./result.js"
 import type { EditIntent } from "./runtime/intent.js"
@@ -737,6 +790,54 @@ describe("F", () => {
 //     of the reply would establish, and why nothing needs it.
 ```
 
+**G — the call that never answers.** Predict both rows, and predict whether they
+differ, before running. The second client is the one to think about: it has never
+heard of an `AbortSignal`.
+
+```ts
+describe("G", () => {
+  it("answers on time for a call that never answers, and tells the client to stop", async () => {
+    let aborted = 0
+
+    /** A client that takes the request and never comes back. */
+    const hangs: ModelClient = {
+      complete: (_request, options) => {
+        options?.signal?.addEventListener("abort", () => {
+          aborted += 1
+        })
+
+        return new Promise(() => {})
+      },
+    }
+
+    /** The same, by an implementation that has never heard of a signal. */
+    const deaf: ModelClient = { complete: () => new Promise(() => {}) }
+
+    for (const [label, client] of [
+      ["honours the signal", hangs],
+      ["ignores it", deaf],
+    ] as const) {
+      const { tree } = sampleTree()
+      const intent = buildIntent(spare, { treeId: tree.treeId, baseRevision: tree.revision })
+      const interpreter = modelInterpreter({
+        client, idFactory: sequentialIdFactory("h"), clock: fixedClock(), ceilingMs: 5,
+      })
+
+      const result = await interpreter.interpret(intent, tree)
+      console.log(label.padEnd(20), "->", result.ok
+        ? "a proposal"
+        : `${result.error.code} · ${result.error.detail}`)
+    }
+
+    console.log("")
+    console.log("connections released:", aborted)
+  })
+})
+// Q7: the two rows are identical. Say what the second client actually lost by
+//     ignoring the signal and who pays for it, then say which of lesson 05's two
+//     readings the signal is — and what would have made it the other one.
+```
+
 ---
 
 ## It could have been otherwise
@@ -854,6 +955,11 @@ ones that quietly break your model later.
    pair establishes and what it does not. Then say which *other* provenance field
    a calibration report needs before it may count either of them.
 
+6. `complete` takes a second argument carrying an `AbortSignal`. Say why that is
+   not a field of `ModelRequest`, and say what a client that ignores the signal
+   entirely costs the runtime. Then name the one change that would turn the same
+   signature from a courtesy into a hole.
+
 ---
 
 ## Reflect
@@ -897,6 +1003,7 @@ ones that quietly break your model later.
 - [`decisions/0005`](../decisions/0005-model-access-is-an-optional-adapter.md) — the two cuts, the optional adapter, and the one test that may touch the network
 - [`decisions/0040`](../decisions/0040-a-failure-names-the-actor-who-must-clear-it.md) — five codes, five actors, and the regex that proved the type was wrong
 - [`decisions/0057`](../decisions/0057-a-preset-is-a-deterministic-interpreter.md) — the seam is about non-determinism, not about models
+- [`decisions/0140`](../decisions/0140-a-call-into-foreign-code-has-a-ceiling-and-the-runtime-owns-it.md) — the ceiling, and why it is enforced above this boundary rather than inside the adapter
 - [`decisions/0014`](../decisions/0014-the-reply-schema-must-fit-a-grammar-budget.md) — why props cross as a JSON string, which lesson 12 takes
 - Next: [12 — Projection](12-projection.md)
 
@@ -1144,3 +1251,38 @@ And note what is *not* in any of it: the utterance, the tree, the prompt. The
 hash is there so provenance can carry no user content and still identify the ask.
 `interpretedAt` is the injected clock (lesson 05), which is why it is the same
 string in both runs and why a replayed run reproduces it.
+
+**Q7** The call that never answers:
+
+```
+honours the signal   -> interpreter-unavailable · no reply in 5ms
+ignores it           -> interpreter-unavailable · no reply in 5ms
+
+connections released: 1
+```
+
+Two clients, one of which reads the signal and one of which has never heard of it,
+and **the rows are the same** — same code, same sentence, same 5ms. That is the
+whole point of where the ceiling lives. `withCeiling` races the client's promise
+against a timer it owns, so the answer is the caller's to give and no
+implementation can take it away.
+
+What the second client lost is not visible in its own output, which is why the
+third line is there. `aborted` is 1 across two hangs: the client that listened was
+told to stop and released what it was holding; the client that did not is still
+holding a socket for a reply nobody will read. Under load that is the failure mode
+— a deployment leaking exactly the connections it has already given up on — and it
+is paid by the host running it, not by the caller who moved on.
+
+Then lesson 05's test, applied to a parameter rather than a comment. A stranger
+**can** violate this: ignoring `signal` is allowed, costs the runtime nothing, and
+is what the second row does. So it is an obligation, and the runtime is entitled
+to place it precisely because it does not need it honoured — the guarantee (an
+answer within the ceiling) is kept on the runtime's own side of the seam.
+
+The one change that inverts it is moving the ceiling down: enforce it in
+`anthropic.ts` and the signature is identical, while the guarantee becomes an
+obligation on every client anybody ever writes. Nothing in the type would have
+changed, and nothing in the type ever says which of the two you have. That is
+lesson 05's sentence again, and it is now about a parameter instead of a comment:
+*you find out at the call sites, never in the declaration.*

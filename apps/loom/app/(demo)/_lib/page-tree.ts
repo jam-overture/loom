@@ -65,16 +65,16 @@ export const DEMO_THEME_NODE_PROP = THEME_PROP_KEY
 
 /** The theme a visitor arrives on, and the one a preset re-themes away from. */
 export const DEMO_STARTING_THEME: JsonObject = {
-  palette: "editorial",
-  fontPack: "editorial-serif",
-  stylePreset: "comfortable",
+  palette: "midnight",
+  fontPack: "geometric",
+  stylePreset: "technical",
 }
 
 /** Where the presets re-theme to: the same tree, three different ids (0049). */
 export const DEMO_ALTERNATE_THEME: JsonObject = {
-  palette: "bold",
-  fontPack: "bold-sans",
-  stylePreset: "airy-modern",
+  palette: "editorial",
+  fontPack: "editorial-serif",
+  stylePreset: "comfortable",
 }
 
 const heading = (ids: IdFactory, level: number, text: string, balance = false): LoomNode =>

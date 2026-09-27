@@ -8,6 +8,195 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-26 — `prettier` has no configuration here, so running it on an existing file rewrites the whole file
+
+**Filed by:** `Loom portal` · **Owned by:** whoever owns the repository's tooling
+· **Status:** open, with the settings that come closest and the measurement that
+they are not exact
+
+There is no `.prettierrc` at any level, no `format` script in either
+`package.json`, and no lint or format step in `pnpm verify`. The gate is
+`build && typecheck && test && findings:check && app verify && prerender:check`,
+and none of those reads formatting.
+
+**What that costs a lane that reaches for the obvious tool.** `npx prettier
+--write` on four files in `app/(portal)/` during this run reformatted **all of
+them end to end** — semicolons added to every statement, an 80-column wrap where
+the repository sits near 98, and `trailingComma: all` where the repository has
+`es5`. A change of about 200 lines came back as 1,100, and **the gate stays green
+throughout**, because nothing checks. It was caught by reading the diff; a run
+that trusted its own tooling would have opened an unreviewable pull request with
+a correct green verify beside it.
+
+**What was measured, on `app/(portal)/_lib/page-name.ts`**, an untouched file:
+
+| settings | lines differing from the file on disk |
+| --- | --- |
+| prettier defaults | the whole file |
+| `--no-semi --print-width 100 --trailing-comma es5` | 6 |
+| `--no-semi --print-width 98 --trailing-comma es5` | **0** |
+
+So the house style is close to `--no-semi --print-width 98 --trailing-comma es5`
+— and **it is not that**, which is the part worth having written down. The same
+settings over three other files in this lane leave 40, 80 and 17 lines differing.
+Some of those are hand-wrapped for reading rather than for width.
+
+**The recommendation is one of two things, and either beats the present state:**
+
+- a `.prettierrc` with those settings, a `format` script, and a `--check` step in
+  the gate — after one commit that reformats everything, which is a whole-repo
+  diff and is the maintainer's call rather than a lane's; **or**
+- one line in `docs/routines.md` saying **formatting in this repository is by
+  hand and no lane may run a formatter over a file it did not create**, which
+  costs nothing and is what every lane needs to know today.
+
+**What this lane did in the meantime**, recorded so the next run does not have to
+work it out: reverted the eight reformatted files with `git checkout --`, redid
+every edit by hand, and used those settings **only on the five files this branch
+created**, where there is no diff to corrupt.
+
+---
+## 2026-09-26 — `revisionReadings` groups a page's versions with a collation, and a collation is not the same in two deployments
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+the *screen's* order is fixed; this is the grouping underneath it
+
+`app/(portal)/_lib/reading-view.ts` ends `revisionReadings` with:
+
+```ts
+.sort((left, right) => left.treeId.localeCompare(right.treeId) || right.revision - left.revision)
+```
+
+The second half is right and is why the sort exists: a page's own versions have
+to come out newest-first and adjacent, because `pageReadings` groups on the first
+key it meets. The first half is a **tree id compared through a collation**, and it
+is the thing `_lib/page-order.ts` is now written against:
+`String.prototype.localeCompare` resolves against the runtime's locale and the ICU
+data it was built with, so two deployments of one portal can order the same two
+ids two ways.
+
+**Nothing visible is broken today** and `/portal/readers` no longer renders this
+order — the screen sorts the grouped readings by name through `inPageOrder`. What
+is left is that the *grouping* is keyed on a comparison that is not guaranteed to
+be the same twice, which means the set of groups is stable and the order the
+groups are built in is not.
+
+**Not fixed here** because it is a different subject from this unit and the safe
+replacement is not the obvious one: swapping in a codepoint compare would also
+change the order `pageReadings` returns, which four assertions in
+`reading-view.test.ts` pin and at least one of them for a reason about adjacency
+rather than about order. It wants its own read. The shape of the answer is a
+grouping that does not depend on a sort at all — a `Map` keyed on the tree id,
+which `pageReadings` already builds one line later.
+
+---
+## 2026-09-26 — `loom.action`, `loom.button` and `loom.link` still cannot carry their own label, and this is the third report to say so and the first to file it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open
+
+The 19 and 25 September portal reports both close with *"`copy` on
+`loom.action`, `loom.button` and `loom.link`, in `Loom primitives` — the cheapest
+thing on this list"*, and neither run filed it. A recommendation in a report this
+lane writes reaches this lane and nobody else; the channel between routines is
+this file. So it is filed, and the omission is this lane's rather than that one's.
+
+**Measured just now:** none of `src/primitives/loom.action.ts`,
+`loom.button.ts` or `loom.link.ts` contains the string `copy`.
+
+**Why the portal keeps asking.** Every other text-bearing primitive in the
+registry takes its words as data, which is the demo's own argument made on the
+demo — *every colour and typeface on this page is data*. These three take theirs
+from children, so the one thing a reviewer most wants to change about a call to
+action — what it says — is the one thing a change has to restructure the tree to
+reach. It is also the shape the portal's own screens keep wanting and cannot use.
+
+This is a note about a gap rather than a request for a particular design, and the
+sizing is that lane's. Filed at this size because three mentions in three reports
+is evidence that it is worth somebody's judgement rather than another mention.
+## 2026-09-26 — the demo's best available device is a photograph, and nothing in this repository can hold one
+
+**Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
+open — **a decision rather than a defect**, and it is the maintainer's because
+every way out of it is a licence or a domain.
+
+The maintainer asked for a more modern default state and supplied an
+inspiration image. Its devices are few and this run took all but one of them:
+dark ground, a large tightly-tracked display line with one accent word,
+monospace micro-labels, quiet chips, depth from hairlines. The one left is the
+**photograph behind the hero**, and it is doing more work than any other single
+element in that image.
+
+It is not a thing a routine can add:
+
+| route | what stops it |
+| --- | --- |
+| an inline asset | `mediaUrlSchema` refuses `data:` deliberately, so it is not expressible in a tree |
+| a same-origin path | names a file in `apps/loom/public/`, and there is no such file |
+| a hosted URL | a live third-party link in a tree a page might publish, on a domain nobody here controls |
+| fetching stock photography | a licence, over an egress allowlist, committed to the repository by a scheduled session |
+
+`loom.hero`'s own `aurora` backdrop is what the demo ships instead — drawn from
+the palette, no asset, and it is why the new arrival screen has any depth at
+all. **This is not a request to change `loom.media`**, whose refusal of `data:`
+is right, and the `hero-band` composition already records the same gap in its
+own words: *"the slot stays empty for whoever has a screenshot."*
+
+**Three ways out, and picking one is the whole finding:** an image committed
+under `apps/loom/public/` with a licence you have read; a URL on a domain you
+control; or a decision that this surface is type-led and the hero's media slot
+stays empty for good. The third is a legitimate answer and would let this lane
+stop reaching for the first two.
+
+---
+## 2026-09-26 — a host cannot ask a resolved theme which way round it is, so every surface that frames part of a tree computes it again
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`src/theme/`, `src/render/theme.ts`) · **Status:** open — **a gap, and it cost
+this lane a 1.10:1 contrast ratio on the demo's decisive frame.**
+
+`themeStyle(theme)` hands a host every custom property a primitive reads. What
+it cannot hand a host is the one fact the host itself needs to draw *around* the
+tree: **is this palette light or dark.** Two things follow, and the second is
+the expensive one:
+
+| a host drawing… | needs | gets from the runtime |
+| --- | --- | --- |
+| a page, whole | nothing — the root primitive paints `bg-canvas` | fine |
+| an **excerpt** rooted below the root | the ground the excerpt would have sat on | **nothing** — `loom.stat-grid` never reads `loom.theme` |
+| the frame's `color-scheme` | light or dark | **nothing** |
+
+So a host writes its own ground into a stylesheet, and the stylesheet is a
+constant while the theme is data. This lane had exactly that: `.loom-stage`
+carried `background-color: var(--surface-stage)` and `color-scheme: light`,
+correct for as long as the demo tree named a light palette. It named a dark one
+on 26 September and the excerpt inside the Gate's question — *"This is what
+would come off the page"* — went on painting white under `#f3f4f7` ink.
+**1.10:1**, measured on a production build at 390 × 844: not low contrast, no
+contrast. Nothing errored and no test could see it.
+
+**Closed here for this lane only** (`apps/loom/app/(demo)/_lib/ground.ts`), and
+the reason it is filed rather than left closed is that the derivation is not
+demo-specific and the next host to draw a partial tree will write it a third
+time. It is eight lines and it is arguably the runtime's:
+
+```ts
+relativeLuminance(palette.slots["fg-default"]) > relativeLuminance(palette.slots["bg-canvas"])
+```
+
+**Two shapes, and the second is the smaller ask.** A field on `ResolvedTheme`
+— the palette already measures itself for `paletteScrim`, so this is a third
+derived reading beside `chroma` and `scrim` and would re-theme with everything
+else. Or a `themeGround(theme)` beside `themeStyle(theme)` in
+`@loom/runtime/react`, returning `{ backgroundColor, color, colorScheme }`,
+which is the shape a host applies and needs no schema change at all.
+
+No threshold is wanted in either: comparing a palette's own ink to its own
+canvas needs none, and across the twenty-one registered palettes the two groups
+are canvases at **L > 0.9** and **L < 0.02**, so nothing sits near a line that
+does not exist.
+
+---
 ## 2026-09-26 — a bulleted list of markdown links is not a workaround: five of six were backticked, outside any table
 
 **Filed by:** `Loom demo` · **Owned by:** whoever owns the pull-request tooling
@@ -59,8 +248,19 @@ yet known is necessary.
 ## 2026-09-25 — a shot list can press and wait and cannot scroll, so a lane that pins something to a scroller can only photograph where a press lands
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:** open —
-**a gap, not a defect**, and the second of this shape. The 17 September entry
+(`tools/screenshot/plan.ts`, `tools/specimen/capture.ts`) · **Status:**
+**closed** 26 September, `framework-56-the-states-a-shot-could-not-reach` —
+`{ "scrollTo": "<selector>" }` is the fifth `do` step, strict like `click`
+because which of two matches is brought into view decides what the picture is
+of. `scrollBy: <pixels>` was **declined** and the reason is in
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md):
+a distance is a position chosen against a scroller the list does not name, it
+means something different at `phone` and at `wide`, and the two lanes that
+would write it mean *the controls* rather than *four hundred pixels*. It needs
+no record of its own — it is a fifth member of a set 0159 and 0182 already
+decided the shape of, and 0159 listed scrolling to a position by name as a
+reach it had not been asked for yet. Originally filed as: **a gap, not a
+defect**, and the second of this shape. The 17 September entry
 below asked for a state the browser holds *before* the load; this asks for one
 the visitor reaches *after* it.
 
@@ -2113,7 +2313,18 @@ neither motion nor navigation is one.**
 ## 2026-09-17 — a shot list can click and wait, and cannot photograph a state that lives in the browser before the page loads
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — **a gap, not a defect**; the harness does exactly what it says
+**closed** 26 September, `framework-56-the-states-a-shot-could-not-reach` — a
+shot may carry a `start`, and the two questions this entry said were worth
+deciding rather than assuming are decided in
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md).
+**Both** cases, not the safe half: `{ "storage": { … } }` seeds keys before the
+first paint and `{ "storageBlocked": true }` makes `window.localStorage` throw a
+`SecurityError` on access. The `initScript` this entry was right to distrust is
+**refused**, permanently — the JavaScript that applies a start state is written
+in `tools/specimen/start-state.ts`, in this repository, and a lane supplies an
+argument and never a body, which is what keeps every field of a shot list
+checkable. Originally filed as: **a gap, not a defect**; the harness does
+exactly what it says
 
 `tools/screenshot/plan.ts` takes a `do` list of two steps, `click` and `wait`,
 and the docblock on `stepSchema` is right about why they are `strict`. What
@@ -31454,7 +31665,15 @@ maintainer can see it is not.
 
 ## 2026-09-25 — three screens count the same pages under three different rules
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-36-one-order-for-one-set-of-pages` (26 September).** There were six,
+not three — `/portal/readers` was arranging pages by tree id through
+`localeCompare`, and the failure list on the front door had no order at all. All
+six now share one tiebreak (the page's derived name, then its id, so the order is
+total) and five of the six say which order they are in above themselves; the
+sixth's exemption is stated where it applies. This entry's own recommendation was
+the right one and is a property rather than a sentence somebody remembers to
+write: `every-page-list.test.ts` finds the lists from the filesystem.
 
 The 22 September entry filed two of these and said the argument belonged to the
 run that took it. There are three now, so it is re-filed with the third and a
@@ -33523,3 +33742,69 @@ the publish — the instruction was explicit and the framework is what is being
 released — but it is your lane's problem that my lane's change created, and it
 is the sharpest cost 0194 has.
 
+## 2026-09-26 — three declaration fences in `decisions/` simplify a type that has since become more precise, and nothing in the repository says whether that is allowed
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`decisions/README.md`, and `tools/decisions/` if a check is wanted) ·
+**Status:** open — **not a defect list.** Three of them are correct-as-of-their-date
+and the question is whether that reading is written down anywhere; it is not.
+
+Found while building a check over the course's own type fences and then pointing
+the same reader at `decisions/` and `docs/`, which took four minutes and is the
+whole reason this entry exists rather than a paragraph in a report.
+
+**What was measured.** Ten fences across `decisions/` and `docs/` open with a
+`type` or `interface` whose name `src/` also declares exactly once. Five of the
+ten say something the declaration does not. Two of those five are the reader's
+own limit and are named below. The other three are real:
+
+| record | date | what the fence says | what `src/` says |
+| --- | --- | --- | --- |
+| [0009](decisions/0009-primitives-receive-props-in-a-bag.md) | 29 Jul | `loom: LoomRenderContext`, `props: JsonObject` | `LoomRenderContext<TText, TBehaviour>`, `props: TProps` |
+| [0090](decisions/0090-a-probe-that-declines-says-whether-it-got-as-far-as-calling.md) | 24 Aug | `cause: "not-callable" \| "threw"` | `cause: NotProbeableCause` |
+| [0184](decisions/0184-a-primitive-may-read-under-whichever-name-a-prop-gives.md) | 23 Sep | `default: string` | `default: Name` |
+
+**Every one of the three is a simplification rather than an error**, and in each
+case the declaration became *more* precise afterwards: a generic where there was a
+concrete type, a named union where there was an inline one, a branded string where
+there was a string. A reader following any of the three writes code that compiles.
+0184 is the one worth looking at twice — it is three days old, and the fence was
+already a simplification on the day it was written.
+
+**So the finding is not the drift. It is that two readings of a record's code
+fence are both defensible and the repository picks neither.**
+
+- **A fence is a snapshot as of the record's date.** Then all three are correct,
+  a reader who copies one and finds `src/` more precise has learned something
+  true about the history, and nothing needs doing except saying so.
+- **A fence is a quotation of current code.** Then all three are stale, and the
+  bill falls on whoever next makes a declaration more precise — a person with no
+  reason to know which of 195 records quoted it.
+
+The second reading is the one a reader arriving from the generated index will
+assume, because the index lists records by status and `Accepted` reads as
+*current*. `decisions/README.md` requires a status, a date, four headings and a
+citation, and says nothing at all about code.
+
+**Recommended: the first reading, written down.** One sentence in
+`decisions/README.md` — *a code fence in a record is as of the record's date; the
+declaration in `src/` is the authority* — costs nothing, is true of all 195
+records today, and makes every future simplification correct rather than owed.
+This is lesson 28's own order of preference applied to somebody else's directory:
+a second copy you did not have to manufacture is cheapest, and the cheapest way
+to stop owing one is to say out loud that it was never a copy.
+
+**If a check is wanted instead**, the reader exists and transfers directly:
+`apps/loom/app/(lessons)/_lib/declarations.ts` on this branch, 250 lines, no
+dependency on anything under `app/`. It holds a fence to every member it names
+and to nothing it leaves out, treats `…` as a wildcard, and reads completeness off
+the fence rather than from a list beside it. **Do not take it without the limit**:
+it does not follow a declaration assembled from others, so `RevisionPage =
+PageEnds & { revisions }` reports `older` and `newer` as members that do not
+exist. That is both of 0026's rows above and is a false red rather than a false
+green, which is the direction to be wrong in, but it would land on a lane that did
+not write it.
+
+**Nothing here is a defect in code and `src/` was read only.** The three records
+are well argued and the two that are oldest are the two that have drifted most,
+which is exactly what a dated document is supposed to do.
