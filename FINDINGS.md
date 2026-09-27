@@ -34510,9 +34510,17 @@ and the check is one line of thought: **name a defect that would move both sides
 equally.** If one exists, the test cannot see it.
 ## 2026-09-27 — `pnpm shoot --serve` photographs the front door's embedded demonstration as a broken-document icon, and has since the flag existed
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — one line in the harness; nothing is wrong with the site and nothing is
-wrong on a deployment, which is why no test of any lane could report it
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**wrong, and closed by the 27 September entry at the foot of this file.** The
+observations below are accurate; the conclusion is not. The maintainer reported
+the same broken box on a **preview deployment** hours after this was written,
+and the cause is this lane's rather than the harness's — `siteOrigin()` names
+the deployment-unique host while a reader is on the branch alias. Nothing is
+asked of `Loom daily build`.
+
+**Kept rather than rewritten**, on the precedent `docs/routines.md` sets for
+its own superseded section: what this got wrong is worth reading once, and the
+corrected entry is about how it got there.
 
 The front door's `Now type one of your own` band frames `/demo` through
 `loom.embed`, and the frame's `src` is `surfaceHref(origin, DEMO)` — an absolute
@@ -34759,3 +34767,72 @@ command that exits non-zero into a newline has told nobody anything. Where a
 document hands somebody a sequence whose steps guard each other, the chaining
 is part of the instruction rather than formatting — and a sequence written as
 separate lines is a sequence that will be run as separate lines.
+
+---
+## 2026-09-27 — the framed demonstration points at a host the reader is not on, and a preview deployment answers that frame with a sign-in page
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-41-the-origin-a-request-arrived-on` — **corrects the
+27 September entry above, which this lane filed against the wrong owner with
+the wrong conclusion the same day**
+
+The front door's `Now type one of your own` band frames `/demo`. The `src` is
+absolute, built from `siteOrigin()`, which answers **where this page lives**
+from the environment. What a frame needs is **where this request arrived**, and
+on a preview deployment those are two different hosts:
+
+| | |
+| --- | --- |
+| `VERCEL_URL`, so `siteOrigin()` | `loom-9kd3jf-….vercel.app` — the deployment-unique host |
+| what the reader is on | `loom-git-<branch>-….vercel.app` — the branch alias |
+
+So the frame is cross-origin. A preview sits behind Vercel's deployment
+protection, the framed request arrives without the reader's cookie, it is
+answered with a sign-in page that refuses to be framed, and the visitor gets
+the browser's **broken-document glyph** where the one band that proves this
+product works should be.
+
+**The maintainer reported seeing it. This lane had already looked straight at
+it and written it off** — as a screenshot-harness quirk, with the status
+*"nothing is wrong with the site and nothing is wrong on a deployment."*
+
+What produced that reading is the part worth keeping, because it was not
+carelessness and it will recur:
+
+- The symptom was **first met through a local tool**, where the second host is
+  an ephemeral port rather than a protected preview. *My tooling is wrong* is a
+  smaller and more familiar story than *the site is wrong*, and it fit every
+  fact in hand.
+- It was **confirmed by a fix that worked.** Serving on port 3000 by hand made
+  the frame render, which proves the *mechanism* — the frame's host must match
+  the page's — and was then read as proving the *diagnosis*. The mechanism
+  holds on any host, Vercel's included.
+- **Nothing disagreed.** The shot exits 0, `scrollWidth` equals `innerWidth`,
+  the tree is right, and the frame-origin allowlist cannot fire because the
+  registry and the `src` are both built from `siteOrigin()` — they agree with
+  each other and are both wrong about the reader.
+
+**The fix is in this lane and nothing is asked of the harness.**
+`originFromHost` in `_lib/site.ts` reads the authority off `x-forwarded-host`;
+`servedOrigin()` in `_lib/serving.ts` hands it to the three page renders. The
+canonical link, the sitemap, the share image and the structured-data graph stay
+on `siteOrigin()`, because those declare where a page *lives* and a preview
+announcing itself under whichever host a reader typed would be worse than one
+announcing the deployment.
+
+That single change closes the harness half too: `pnpm shoot --serve` sets the
+`Host` header to its own ephemeral origin, so the frame follows it and renders
+live. **It had never once been photographed working.**
+
+### The rule
+
+**An absolute URL in a tree answers one of two questions and they are not the
+same question.** *Where does this page live* is the environment's; *where did
+this request arrive* is the header's. They agree on a laptop and on a pinned
+production domain — which is every environment a routine develops in — and they
+differ on every preview, which is the only environment the maintainer looks at.
+
+**For the other surface lanes**: anything you render with an absolute
+same-origin URL that the browser will **re-fetch** — a frame, a form action, a
+fetch from a client component, a preload — has this on previews today. An
+`href` merely moves the reader to a host that works; a subresource fails.

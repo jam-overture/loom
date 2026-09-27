@@ -525,6 +525,90 @@ export const siteOrigin = (env: Environment = process.env): string => {
 }
 
 /**
+ * The origin the **browser is actually on**, which is not the same question
+ * `siteOrigin` answers and was assumed to be for a month.
+ *
+ * `VERCEL_URL` is the *deployment-unique* hostname —
+ * `loom-9kd3jf-…vercel.app`. A visitor reading a preview is on the *branch
+ * alias*, `loom-git-<branch>-…vercel.app`, and on production they are on the
+ * production domain. Those are different hosts, so a tree built from
+ * `siteOrigin()` and served to a browser on any of the other two carries
+ * absolute addresses pointing **somewhere else**.
+ *
+ * For an `href` that costs a host change nobody notices. For the front door's
+ * framed demonstration it is fatal and visible: a preview deployment sits
+ * behind Vercel's deployment protection, so a frame pointing at the
+ * deployment-unique host is an unauthenticated request, is answered with a
+ * sign-in page that refuses to be framed, and the visitor gets the browser's
+ * broken-document glyph where the one band that proves this product works
+ * should be. **The maintainer reported seeing exactly that**, on 27 September,
+ * after this lane had written the symptom off as a screenshot artifact.
+ *
+ * It is not. The screenshot artifact — `pnpm shoot --serve` on an ephemeral
+ * port — is the *same fault* with a different host in the second position, and
+ * treating it as a harness quirk is what kept it out of the site's own code for
+ * a week.
+ *
+ * So the rule this splits out is: **the tree's addresses follow the browser,
+ * and the document's declared identity stays pinned.** A canonical link, a
+ * sitemap entry, an Open Graph image and the structured-data graph all say
+ * *this is where this page lives*, and must keep answering `siteOrigin()` —
+ * a preview announcing itself under whichever host a reader happened to type
+ * would be worse than one announcing the deployment. Everything the browser is
+ * going to *re-fetch* answers this instead.
+ *
+ * `undefined` rather than a fallback, because the caller knows what to fall
+ * back to and there is exactly one thing to fall back to.
+ */
+export const originFromHost = (
+  host: string | null | undefined,
+  proto?: string | null | undefined
+): string | undefined => {
+  /**
+   * Both headers are comma-separated lists when more than one proxy has
+   * appended to them, and the **first** entry is the client-facing one.
+   */
+  const authority = host?.split(",")[0]?.trim()
+
+  if (authority === undefined || authority.length === 0) {
+    return undefined
+  }
+
+  const scheme = proto?.split(",")[0]?.trim()
+
+  /**
+   * A `Host` header is attacker-controlled on a deployment that does not pin
+   * one, and what it reaches here is an address the visitor's own page tells
+   * their browser to load. So it is **parsed rather than interpolated**, and
+   * anything that does not come back as a bare authority — a path, credentials,
+   * a second scheme, a space — is refused and the caller falls back to the
+   * environment. On Vercel this never fires: the platform sets
+   * `x-forwarded-host` itself and does not pass a client's through.
+   */
+  const guess = scheme !== undefined && scheme.length > 0 ? scheme : localScheme(authority)
+
+  try {
+    const url = new URL(`${guess}://${authority}`)
+
+    return url.host === authority && url.username === "" && url.pathname === "/"
+      ? url.origin
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * The scheme to assume when nothing in front of us said.
+ *
+ * `next start` on a laptop sets no `x-forwarded-proto`, and guessing `https`
+ * there would point the frame at a port serving plain HTTP. Every other case is
+ * behind a proxy that does set it.
+ */
+const localScheme = (authority: string): string =>
+  /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(authority) ? "http" : "https"
+
+/**
  * Whether this deployment is the one the public is meant to find.
  *
  * Approved on 27 September, answering a finding this lane filed the same day:
