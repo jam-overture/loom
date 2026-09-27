@@ -34873,3 +34873,52 @@ The same applies, more loosely, to `tools/package/`: it sits beside
 purpose. `tools/publish/` holds the framework's two-manifest difference;
 `tools/package/` assembles a second package out of a subdirectory of the first.
 Neither imports the other.
+## 2026-09-27 — the publish gate printed BLOCKED, exited 1, and the next line published anyway, because a shell does not read the previous line's verdict
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`docs/publishing-primitives.md`) · **Status:** **closed in the same run** —
+the documented sequence is chained. Filed because the tool was right, the
+instructions were wrong, and that combination is the one nobody looks for
+
+`pnpm package:primitives` exists to answer *is this publishable*. It queries
+npm for auth and for the peer, prints a table, withholds the publish command
+while anything is blocked, and **exits non-zero**. All of that worked.
+
+The instructions — in this file and in the message that handed them over — put
+each step on its own line:
+
+```
+pnpm build && pnpm package:primitives
+cd packages/primitives && npm pack --dry-run && npm publish --access public
+```
+
+A shell does not care what the previous *line* returned. The table printed
+`BLOCKED npm auth`, the command exited 1, and the publish ran regardless:
+
+```
+npm error 404 Not Found - PUT https://registry.npmjs.org/@jam-overture%2floom-primitives
+npm error 404  The requested resource could not be found or you do not have permission to access it.
+```
+
+**Two things made this expensive out of proportion to the cause.**
+
+`npm whoami` returned `E401` — the machine was not logged in — but the *publish*
+said **404**, not 401 and not "log in". That is deliberate: npm answers an
+unauthorized create with a not-found so the registry does not leak whether a
+name is taken. A reader looking at that output reasonably concludes the name is
+gone, or the scope is wrong, or the package is malformed. None of it is true,
+and the one line that said so scrolled past a screen earlier.
+
+And the gate had already caught it. The information was on screen, correct,
+thirty seconds before the failure.
+
+**The fix is one `&&` per line**, which is now how the document writes it. The
+tool needed no change: it was the only thing in the chain that did its job.
+
+### The rule
+
+**A gate's exit code is worth exactly as much as the thing that reads it.** A
+command that exits non-zero into a newline has told nobody anything. Where a
+document hands somebody a sequence whose steps guard each other, the chaining
+is part of the instruction rather than formatting — and a sequence written as
+separate lines is a sequence that will be run as separate lines.
