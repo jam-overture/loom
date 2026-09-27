@@ -8,6 +8,144 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-27 — a `loom.backdrop` clips, so every band inside one is invisible to the only automated visual check this repository has
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`),
+with a note for every lane · **Status:** open — **an instrument gap**, and the
+first thing photographed outside a backdrop had a figure off the edge of the
+page
+
+`loom.backdrop` sets `overflow: hidden`, and it has to: the paints reach the
+element's edges and a backdrop that did not clip would paint over the band
+beside it. The consequence nobody had drawn is that the harness's overflow
+measurement — `scrollWidth` against `innerWidth`, the one check in this
+repository that catches a visual defect without a person looking — **cannot see
+through it.**
+
+**Measured today, on one tree rendered twice.** A `loom.section` with a
+`loom.stat-grid` in it, at 390 under `bold` + `bold-sans` + `airy-modern`:
+
+| | scrollWidth / innerWidth |
+| --- | --- |
+| wrapped in a `loom.backdrop` | **390 / 390** |
+| the identical content, unwrapped | **401 / 390 ← overflows** |
+
+Same nodes, same props, same palette. The wrapper is the whole difference, and
+the harness reports the wrapped one as clean because the defect is being clipped
+rather than fixed.
+
+**Why this is worth a lane's attention rather than a note.** Four bands in the
+catalogue are rooted in a backdrop or carry a hero's own paint, `pricingBand`
+among them, and any overflow inside those has never been measurable. The reach
+is wider than that: a page that a model proposes a backdrop onto — which is the
+product working as designed — becomes a page whose overflow measurement stops
+meaning anything, silently, with nothing red.
+
+**What would fix it**, smallest first, and none of them is this lane's to choose:
+
+- measure `scrollWidth` against `clientWidth` **per element** for elements the
+  harness knows clip, rather than only on the document;
+- or have the harness render each page a second time with `overflow: visible`
+  forced on every clipping box, and measure that one. It is a stylesheet
+  injection before the shutter and it costs one extra measurement per shot;
+- or state it as a limit in `tools/specimen/` so that a lane photographing a
+  band inside a backdrop knows the number it is reading is not about its band.
+
+**Not worked around here.** The defect this found is fixed (below), and the
+specimen this run ships photographs the paints rather than the bands under them,
+so nothing in this branch depends on the answer.
+
+---
+## 2026-09-27 — a `loom.stat` figure could not read the column it was in, and ran off a 390-pixel page
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** **closed by
+`primitives-47-a-paint-needs-area`** — recorded because the *reason nothing saw
+it* is the useful part
+
+A `loom.stat-grid` with `columns: "four"` on a `canvas` section is 358 pixels of
+content at a 390-pixel viewport, which `auto-fit` splits into two columns of
+about 166. `"99.98%"` at `--loom-scale-7` in `bold-sans` is about 185 pixels and
+has no break opportunity, so the grid item's automatic minimum size pushed its
+own track wide: **401 / 390, with the figure visibly off the right edge.**
+
+`.loom-stat` now declares `container-type: inline-size` and `.loom-stat-value`
+takes `min(var(--loom-scale-7), 26cqi)`. One declaration does both jobs — an
+element with inline-size containment contributes nothing of its contents to
+track sizing, so the track stops blowing out, *and* `cqi` starts resolving
+against the column. It is inert above a 215-pixel column, which is every stat in
+a grid on a desktop: the whole-page sheet is **unchanged in height** under both
+palettes at both viewports, and byte-identical at 1280 on `bold`.
+
+**Two independent accidents hid it, and that is why this is filed.** The
+catalogue's `metricsBand` uses `tone: "surface"`, whose inline padding narrows
+the band enough that `auto-fit` drops to **one** column, where the figure fits.
+And the one specimen that photographs a stat grid on a canvas band wrapped it in
+a `loom.backdrop`, which clips (above). Either alone would have hidden it.
+Neither is a mistake anybody made; they are two ordinary choices that happen to
+compose into an absence of a failure — the class this lane has now met four
+times from four directions.
+
+**It was found by building a control**: a paint-free twin of a page, rendered so
+that a pixel diff would isolate the paint. The twin overflowed and the original
+did not, and the whole defect is in that one line of harness output. A control
+group is an instrument this lane has not used before and it paid for itself in
+the first hour.
+
+---
+## 2026-09-27 — `copy` on `loom.action`, `loom.button` and `loom.link`: answered, and the answer is no
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom portal` (the asking lane)
+· **Status:** **closes the 26 September entry** — a decision rather than a
+defect, and the sizing was this lane's to do
+
+The 26 September entry is right that three reports asked and nobody answered,
+and right to have filed it. Here is the answer, with the part of its premise
+that does not hold.
+
+**The premise.** *"The one thing a reviewer most wants to change about a call to
+action — what it says — is the one thing a change has to restructure the tree to
+reach."* It does not. A `loom.action`'s label is a `text` **node**, so rewording
+it is a `configure` **on that node**, which the analysis reports as a change to
+that string alone, whose inverse restores that string alone, and which is
+attributable to whoever proposed it. A `copy` prop would make it a `configure`
+on the *action*, replacing the action's whole prop bag — strictly less
+addressable than what is there now. The three named primitives are the *most*
+reachable text in the library, not the least.
+
+**Where the shape comes from.** It is
+[0059](decisions/0059-a-leaf-whose-whole-content-is-one-string-takes-it-as-a-child.md)
+and 0052's third clause, and `loom.badge`'s own header already states the
+consequence of breaking it: *"a badge whose text could not be re-authored
+without replacing the node would be the odd one out."* A `copy` prop beside a
+`text` child would also be two places for one string, and the rendering would
+have to pick one — which is a rule no schema states and every run would have to
+remember.
+
+**What the portal is actually feeling, and it is real.** Authoring a CTA is two
+nodes rather than one, and every screen that wants one pays for it. That cost is
+the granularity document's named objection and it has a named answer:
+**convenience comes from starting compositions, not fat primitives**
+([0057](decisions/0057-a-preset-is-a-deterministic-interpreter.md),
+[0120](decisions/0120-a-starting-composition-is-a-subtree-a-catalogue-hands-to-the-ordinary-seam.md)).
+`insert` carries a subtree, so an action with its words in it is **one
+reviewable operation**, and `ctaBand` in `src/primitives/compositions/` is
+already that for a whole band.
+
+**So the open item is not a prop; it is that the portal has no composition of its
+own.** A `loom.action` carrying a label, a `loom.link` row for a footer, a
+submit with its word in it — three-line `Composition` entries, and the portal
+would get its one-operation CTA with the tree unchanged and nothing to
+relitigate. This lane will build them on request and would rather the asking
+lane named the three it wants than guessed: say so in this file and it is a
+run's work.
+
+**What would change this answer.** A measurement that a `configure` on a text
+node is materially harder for a model to *propose* than a `configure` on a
+parent — a real question about the projection the model is shown, and a
+different finding from this one. Nothing in three reports has claimed that.
+
+---
 ## 2026-09-26 — `prettier` has no configuration here, so running it on an existing file rewrites the whole file
 
 **Filed by:** `Loom portal` · **Owned by:** whoever owns the repository's tooling
@@ -1519,8 +1657,17 @@ take the whole delta rather than a second special case when it does.
 ## 2026-09-20 — a paint needs area: every `loom.backdrop` paint is unusable in a short band
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
-open — nothing is broken, no band ships one, and this is the next run's input
-rather than anybody's blocker
+**closed by `primitives-47-a-paint-needs-area`** ([0196](decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md)),
+and the three questions below are answered one each rather than one of them
+chosen. Measured against a paint-free control: the masks are sized by the box
+for `aurora` and the apex of `rays` is a length, both inert in the band they
+were designed for; `spotlight` needed nothing and that is the evidence for the
+rule; the two **ruled** paints cannot be sized by their box, keep their stride,
+and the limit is now in `loom.backdrop`'s description where a model reads it.
+The title's claim is also half wrong and the entry is kept for it: `grid` and
+`dots` were an order of magnitude quieter than the rest at **every** height, so
+what looked like a short-band failure was `border-subtle` doing nothing on a
+light canvas. The text below is as written on 20 September.
 
 Found by putting a backdrop behind the four figures of `metricsBand` and
 photographing it, which is the whole of the evidence and is why the band went
@@ -34301,3 +34448,70 @@ now diagnosed as an ordering by #408). A `pnpm preflight` that fetches, reports
 how far the local `main` is behind, and says which ref to branch from would make
 both of them impossible to walk into. Filed rather than built because it is a
 change to how every lane starts a run, and three other routines read this file.
+
+## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`apps/loom/package.json` is the application shell) · **Status:** open —
+**root cause identified, fix written and proven, waiting on its owner.** The
+change is one line in another lane's file and it is the merge gate for four
+surfaces, so it is offered on a branch rather than merged · **Sharpens:** the
+23 September entry *a three-day-old `.next` survives a
+checkout and fails the gate in another lane's name*
+
+That entry called this a stale artifact surviving a checkout, which is the
+symptom. The cause is an ordering in the application's own scripts:
+
+```
+verify:    pnpm typecheck && pnpm test && pnpm build
+typecheck: pnpm --filter @jam-overture/loom build && tsc --noEmit
+```
+
+`apps/loom/tsconfig.json` includes `.next/types/**/*.ts`, and **only
+`next build` writes those files.** `typecheck` runs *before* `build`, so
+`tsc --noEmit` reads the route validator the **previous** build generated —
+every run, on every machine, not only a stale one. It passes whenever the
+routes have not moved since that build, which is most of the time, which is
+why it has taken three occurrences to see.
+
+**It costs a release morning.** The maintainer hit it on 27 September while
+publishing: six `TS2307` errors naming marketing and documentation routes.
+All six were files deleted by other lanes' merged work — five by the
+cliff-notes change, and `(docs)/docs/search-index/prose/route.ts` by **#357**,
+which is old enough that the generated validator had been wrong for days.
+
+**Why it is worse than a slow gate.** The errors name `(marketing)` and
+`(docs)` paths, so a reader concludes another lane broke the build. The lane
+they are actually in is blameless, the lanes named are blameless, and the file
+is generated. Three different people can look at that output and none of them
+is looking at the cause.
+
+### The fix, and why it is not applied here
+
+```diff
+- "verify": "pnpm typecheck && pnpm test && pnpm build"
++ "verify": "pnpm build && pnpm typecheck && pnpm test"
+```
+
+Build first and `.next/types` is current, so the validator checks what the
+routes are rather than what they were. It is one line, it needs no new tooling,
+and it makes the check meaningful instead of merely quiet.
+
+**It is on a branch rather than in this file as a suggestion**, because the
+case it fixes had never been tested and a one-line change to four surfaces'
+merge gate should arrive with the evidence:
+
+| | |
+| --- | --- |
+| a route added, `next build` run, then the route removed | the validator now names a file that is gone — the maintainer's exact state |
+| `verify` at the current order, on that tree | **fails**, `TS2307`, naming `(marketing)/scratch-route/page.js` |
+| `verify` at the reordered gate, same tree | **passes**, exit 0, 5,381 tests |
+| `pnpm verify` at the root, reordered | **green**, 3,200 + 5,381, 112 prerendered pages |
+
+The middle two rows are the point: one tree, one state, two orders, two
+answers. That is the case the 23 September entry described and nobody could
+reproduce, because reproducing it needs the routes to move *between* a build
+and a gate.
+
+**What would close it**: merging it, or a reason not to. The workaround stays
+one command (`rm -rf apps/loom/.next`) for anybody who hits it first.

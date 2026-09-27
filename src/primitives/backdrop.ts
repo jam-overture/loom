@@ -64,10 +64,30 @@ import { colour, motion } from "./tokens.js"
  *
  * So: **a paint is brightest at the middle of its band and reaches nothing at
  * every edge**, because a backdrop cannot know whether its band is the top of a
- * page or the fifth thing down it. `circle closest-side` rather than the
- * default ellipse is the same rule for the fields — a circle sized by the
- * *shorter* side stays a glow at any aspect the band happens to have, where an
- * ellipse becomes the box.
+ * page or the fifth thing down it.
+ *
+ * ## The aspect, which is the same rule one turn further and was got wrong
+ *
+ * That rule was written against a band's *height* and the fields were sized by
+ * `circle closest-side`, on the argument that *a circle sized by the shorter
+ * side stays a glow at any aspect the band happens to have, where an ellipse
+ * becomes the box*. The argument is sound and the choice it names is not: the
+ * ellipse it was rejecting is the **default** one, which is `farthest-corner`
+ * and does become the box. `ellipse closest-side` is a third thing nobody tried
+ * — an ellipse inscribed in the field, reaching zero at all four sides and
+ * transparent well before either corner — and it is what the rule was asking
+ * for. A circle in a wide short field is a circle with the field empty either
+ * side of it, which is the defect
+ * [0196](../../decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md) was
+ * filed for: two small round smudges floating in a strip, nowhere near the
+ * corners they are anchored to.
+ *
+ * Measured on 27 September against a control that renders this same wrapper
+ * painting nothing: `aurora` put **6.0 units of ink per unit area** into a
+ * 468-pixel band and **1.8** into a 135-pixel strip of the same width, under
+ * `editorial`; `spotlight`, whose pool is already written in percentages of the
+ * box, went 6.7 to 5.9 across the same pair. The paint that lost two-thirds of
+ * itself is the one sized by a side rather than by the box.
  */
 
 export const PAINT_NAMES = ["aurora", "grid", "dots", "rays", "spotlight"] as const
@@ -76,8 +96,13 @@ export type PaintName = (typeof PAINT_NAMES)[number]
 /**
  * A radial fade to nothing, used as a mask rather than as a gradient. See the
  * first trap above for why this is not `… , transparent 100%` in a background.
+ *
+ * **`ellipse`, not `circle`**, and the aspect section above is the argument. It
+ * is inert where the field is square — a hero at 1280 gives a 736 by 736 field
+ * and the two keywords compute the same radii — and it is the whole of the fix
+ * everywhere else.
  */
-const CLOSEST_SIDE_FADE = "radial-gradient(circle closest-side, black 0%, transparent 100%)"
+const CLOSEST_SIDE_FADE = "radial-gradient(ellipse closest-side, black 0%, transparent 100%)"
 
 const LAYER: CSSProperties = {
   position: "absolute",
@@ -136,21 +161,74 @@ const auroraField = (slot: typeof GLOW | typeof GLOW_SECOND, position: CSSProper
   })
 
 /**
+ * How far above the band the beams of `rays` come from.
+ *
+ * **A length, and it used to be `-20%`**, which is the one measurement in this
+ * file that was written against the wrong box dimension in the other direction
+ * from the fields. A percentage in a conic gradient's position resolves against
+ * the element, so the apex of the fan sat 160 pixels above a hero and 34 pixels
+ * above a 170-pixel strip — and an apex that close to a band 1280 pixels wide
+ * fans its beams out almost horizontally. Photographed on 27 September it is a
+ * vanishing point rather than light: the finding that named it *"a grey
+ * starburst that reads as an artifact"* was describing the geometry rather than
+ * the palette, which is why it read as a fault on `bold` too, where there is
+ * plenty of chroma.
+ *
+ * `10rem` is **the hero's own value**, not a new one: `-20%` of the 800-pixel
+ * band these beams were drawn in is 160 pixels. So the case the paint was
+ * designed for is unchanged to the pixel, and every shorter band now gets the
+ * fan the hero gets instead of a flatter one. That is the whole of the hero-only
+ * assumption this file's own header warns about, found in the last place it was
+ * still hiding.
+ */
+const RAYS_APEX = "-10rem"
+
+/**
  * A ruled ground — lines or points — fading out before it reaches the copy.
  *
  * Both are one repeating gradient under a mask centred on the band, which is
  * what keeps them decoration: a lattice that ran edge to edge at full strength
- * would compete with every word set on it. `5rem` and `1.5rem` are the two
+ * would compete with every word set on it.
+ *
+ * **`core` is where that mask stops being a point.** The fade was
+ * `black 0%, transparent <reach>`, which is fully opaque at the centre pixel and
+ * nowhere else, so the strongest line a blueprint ever drew was three quarters
+ * of its own colour and the rest fell away from there. A core holds the mask
+ * open over the middle of the band and then fades on the same reach — still
+ * brightest at the middle and still nothing at every edge, which is this file's
+ * rule unchanged, with a plateau where it had a peak. Measured over a
+ * text-free thousand-pixel square of a 468-pixel band under `editorial`, the
+ * grid's strongest line went from 11 values of a channel to 21, which is its
+ * token's full contrast against the canvas and the most a mask can honestly
+ * give it.
+ *
+ * The lattice takes **no core**, and that is the asymmetry rather than an
+ * oversight: its points are `border-strong` and already land at 88 values, so
+ * the same change would take a texture that is *"legible but noisy"* over a
+ * band of figures and make it noisier. One knob, two settings, because the two
+ * paints are carrying very different amounts of ink to begin with. `5rem` and `1.5rem` are the two
  * rhythms rather than one scaled twice, because a blueprint reads at a stride
  * you can count and a lattice reads as texture.
+ *
+ * **These two are the paints that cannot read their box, and the vocabulary now
+ * says so.** A stride is a length: a band 170 pixels tall holds two rules of a
+ * five-rem grid, and two rules are not a blueprint however much contrast they
+ * are given. No mask fixes that, and sizing the stride to the band would make
+ * the blueprint a different blueprint at every height — the one thing a ruled
+ * ground may not be, because what it is *for* is a stride a reader can count.
+ * So the limit is stated rather than engineered around
+ * ([0196](../../decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md)),
+ * it is in the primitive's own description where a model reads it, and the
+ * three paints that *can* adapt were fixed instead.
  */
 const ruled = (
   key: string,
   background: string,
   tile: string | undefined,
+  core: string,
   reach: string
 ): ReactNode => {
-  const fade = `radial-gradient(ellipse at 50% 50%, black 0%, transparent ${reach})`
+  const fade = `radial-gradient(ellipse at 50% 50%, black 0%, black ${core}, transparent ${reach})`
 
   return createElement("div", {
     key,
@@ -184,13 +262,34 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
   }
 
   if (paint === "grid") {
-    const line = colour("border-subtle")
+    /**
+     * **`border-default`, and it used to be `border-subtle`.** The same mistake
+     * the `dots` comment below names, made one step earlier and left standing
+     * for sixteen days: a token correct for a different amount of ink.
+     *
+     * Measured against the blank-wrapper control on 27 September, `grid` put
+     * **0.25 units of ink per unit area** into a 468-pixel band under
+     * `editorial` where `aurora` put 6.0 and `spotlight` 6.7 — an order of
+     * magnitude quieter than everything else in the vocabulary, at every height
+     * and under both starter palettes. `border-subtle` on `editorial` is
+     * `#efefe9` against a `#fafaf7` canvas, which is eleven values of one
+     * channel, and that is a blueprint nobody has ever seen.
+     *
+     * This is the 26 September audit's rule arriving at its first case: **a
+     * border beside a fill may be subtle; a border that is the whole mark takes
+     * `border-default`.** A ruled ground is nothing but its lines. `strong` is
+     * the wrong end of the same ramp — near-black on `editorial` — which is why
+     * the lattice takes it and the blueprint does not: a point covers a
+     * fraction of the area a line does.
+     */
+    const line = colour("border-default")
 
     return [
       ruled(
         "grid",
         `repeating-linear-gradient(to right, ${line} 0 1px, transparent 1px 5rem), repeating-linear-gradient(to bottom, ${line} 0 1px, transparent 1px 5rem)`,
         undefined,
+        "30%",
         "72%"
       ),
     ]
@@ -210,6 +309,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
         "dots",
         `radial-gradient(${colour("border-strong")} 1px, transparent 1px)`,
         "1.5rem 1.5rem",
+        "0%",
         "68%"
       ),
     ]
@@ -222,7 +322,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
      * down the page so the beams dissolve rather than ending, and the second
      * pass narrows them to the middle so the band's own corners stay clean.
      */
-    const beams = `repeating-conic-gradient(from 200deg at 50% -20%, ${colour(GLOW)} 0deg 4deg, transparent 4deg 11deg)`
+    const beams = `repeating-conic-gradient(from 200deg at 50% ${RAYS_APEX}, ${colour(GLOW)} 0deg 4deg, transparent 4deg 11deg)`
     const fade = "linear-gradient(to bottom, black 0%, transparent 85%)"
     const narrow = "radial-gradient(ellipse at 50% 30%, black 0%, transparent 78%)"
 

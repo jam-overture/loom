@@ -8556,6 +8556,62 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
   })
 
   /**
+   * A figure that could not read the column it was in, which is the same class
+   * of defect as a paint that could not read its band and was found in the same
+   * hour.
+   *
+   * A `loom.stat-grid` with `columns: "four"` on a `canvas` section at a
+   * 390-pixel viewport is two columns of about 166 pixels. `"99.98%"` at
+   * `--loom-scale-7` in `bold-sans` is about 185 and does not break, so the grid
+   * item's automatic minimum size pushed its own track wide and the figure went
+   * off the right edge of the page — measured at `scrollWidth 401 /
+   * innerWidth 390` on 27 September.
+   *
+   * **Both declarations are asserted because neither works alone.** The cap is
+   * written in `cqi`, and a grid styles its children rather than wrapping them,
+   * so there is no ancestor to query — the stat declares the containment for
+   * itself. The containment is also what stops the track blowing out, because an
+   * element with inline-size containment contributes nothing of its contents to
+   * track sizing. Delete either line and the figure is off the page again, by
+   * two different routes.
+   */
+  it("makes a stat its own container and caps its figure against the column", () => {
+    const { stylesheet } = splitStylesheet(render(marketingPage(EDITORIAL)).markup)
+
+    /**
+     * Read out of `.loom-stat`'s own block rather than looked for anywhere in
+     * the sheet, and that is this assertion's whole content. Eleven rules in
+     * this stylesheet declare `container-type: inline-size`, so the obvious
+     * `expect(stylesheet).toContain(...)` stayed green with the declaration
+     * deleted from the one rule that needed it — found by restoring the defect
+     * rather than by reading the test.
+     */
+    const statRule = /\n\.loom-stat \{([^}]*)\}/.exec(stylesheet)?.[1] ?? ""
+
+    expect(statRule).toContain("container-type: inline-size")
+    expect(stylesheet).toContain("font-size: min(var(--loom-scale-7), 26cqi)")
+  })
+
+  /**
+   * The cap is a ceiling rather than a size, and this is the assertion that says
+   * so. A run that replaced `min(...)` with a flat `cqi` would make every figure
+   * on a desktop a fraction of its column instead of the ramp step, which looks
+   * deliberate in one screenshot and is the type ramp being thrown away.
+   *
+   * It is asserted on the stylesheet being **identical** under both palettes,
+   * which is the bargain 0055 already holds this file to: nothing a prop or a
+   * theme supplies may reach a rule, so a cap that had been written per-theme
+   * would show up here rather than in a photograph.
+   */
+  it("caps the figure with the ramp still in it, and the same way under both palettes", () => {
+    const editorial = splitStylesheet(render(marketingPage(EDITORIAL)).markup).stylesheet
+    const bold = splitStylesheet(render(marketingPage(BOLD)).markup).stylesheet
+
+    expect(editorial).toBe(bold)
+    expect(editorial).not.toContain("font-size: 26cqi")
+  })
+
+  /**
    * The claim that makes this a second container rather than a second pair: a
    * grid and a chart take the *same* children, so re-plotting a metrics band is
    * one `configure` on the container and no change to the numbers. If the two
@@ -8767,6 +8823,114 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
         layersOf({ type: "loom.backdrop", props: { paint } })
       )
     }
+  })
+
+  /**
+   * The layers of one paint, under one palette, as the string a diff would see.
+   * Every assertion below reads a paint's *geometry* rather than its colour,
+   * which is why one palette is enough for them and why the pair that does read
+   * colour states both.
+   */
+  const paintLayers = (paint: string, theme: JsonObject = EDITORIAL): string => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: theme },
+        children: [buildElement(idFactory, { type: "loom.backdrop", props: { paint }, children: [] })],
+      }),
+      idFactory
+    )
+
+    return [...splitStylesheet(render(tree).markup).tree.matchAll(/<div [^>]*aria-hidden="true"[^>]*>/g)]
+      .map((match) => match[0])
+      .join("")
+  }
+
+  /**
+   * [0196](../../decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md)'s
+   * first consequence, and the one that is easiest to undo by reading the
+   * original comment and believing it.
+   *
+   * That comment argued for `circle closest-side` on the grounds that *an
+   * ellipse becomes the box*, which is true of the **default** ellipse —
+   * `farthest-corner` — and false of `closest-side`, an ellipse inscribed in
+   * the field. So the assertion is written as a pair: the ellipse is there, and
+   * the circle is nowhere, because a run that "restored" the circle would leave
+   * every other assertion in this file green and put the aurora back to two
+   * round smudges in any band that is not square.
+   */
+  it("fades an aurora field by an ellipse inscribed in it, never by a circle", () => {
+    const aurora = paintLayers("aurora")
+
+    expect(aurora).toContain("radial-gradient(ellipse closest-side, black 0%, transparent 100%)")
+    expect(aurora).not.toContain("circle closest-side")
+  })
+
+  /**
+   * The apex of `rays` is a length and not a fraction of the band, which is the
+   * whole of that paint's fix: `-20%` resolved against the element, so a strip
+   * put the apex 34 pixels above a band 1280 pixels wide and the beams fanned
+   * out almost horizontally.
+   *
+   * The second assertion is the one worth having. `10rem` is not a new number —
+   * it is `-20%` of the 800-pixel hero these beams were drawn in — so a run that
+   * reverted it would be changing nothing about the hero and everything about
+   * every band under it.
+   */
+  it("strikes the beams from a point a fixed distance above the band", () => {
+    const rays = paintLayers("rays")
+
+    expect(rays).toContain("repeating-conic-gradient(from 200deg at 50% -10rem")
+    expect(rays).not.toContain("at 50% -20%")
+  })
+
+  /**
+   * The ruled paints read colour rather than geometry, so this one is asserted
+   * under both starter palettes: `border-subtle` is eleven values of a channel
+   * against `editorial`'s canvas and the blueprint had been invisible there
+   * since it shipped.
+   *
+   * The lattice is asserted in the same test rather than a second one because
+   * the *pair* is the claim — a line and a point are different amounts of ink,
+   * so they take different ends of the same ramp, and a run that unified them
+   * would be undoing the reasoning rather than a value.
+   */
+  it("rules the grid in border-default and the lattice in border-strong, under both palettes", () => {
+    for (const theme of [EDITORIAL, BOLD]) {
+      const grid = paintLayers("grid", theme)
+
+      expect(grid).toContain("var(--loom-border-default)")
+      expect(grid).not.toContain("var(--loom-border-subtle)")
+      expect(paintLayers("dots", theme)).toContain("var(--loom-border-strong)")
+    }
+  })
+
+  /**
+   * The mask's core, and the asymmetry is the assertion: a blueprint whose
+   * strongest line was three quarters of its own colour gets a plateau, and a
+   * lattice already landing at 88 values of a channel does not, because the same
+   * change would make a texture that is legible-but-noisy noisier.
+   *
+   * Both halves are pinned. A run that gave the lattice a core to match would
+   * pass a test written only about the grid.
+   */
+  it("holds the blueprint's mask open over the middle of the band, and the lattice's at a point", () => {
+    expect(paintLayers("grid")).toContain("ellipse at 50% 50%, black 0%, black 30%, transparent 72%")
+    expect(paintLayers("dots")).toContain("ellipse at 50% 50%, black 0%, black 0%, transparent 68%")
+  })
+
+  /**
+   * 0196's third consequence: the two paints that cannot be sized by their box
+   * say so where a model reads it. A doc comment reaches nobody at
+   * interpretation time — the description is the whole of what a proposal is
+   * told — so the limit is asserted on the string that actually ships.
+   */
+  it("names the two paints that need a tall band, in the description a model is given", () => {
+    const backdrop = STARTER_PRIMITIVES.find((entry) => entry.type === "loom.backdrop")
+
+    expect(backdrop?.description).toContain("grid and dots need a band")
+    expect(backdrop?.description).toContain("work at any height")
   })
 
   /**
