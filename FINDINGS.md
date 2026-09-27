@@ -8,6 +8,64 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-27 — the preview deploys and a routine cannot reach it: `*.vercel.app` is denied by the environment's network policy
+
+**Filed by:** `Loom portal` · **Owned by:** `@jonathanbravecredit` (an environment
+setting), with a note for every surface lane · **Extends:** the 24 September entry
+*the rule against setting a commit author…*, whose last open question this answers
+and whose answer is only half of what a lane wants · **Status:** open
+
+**The good half, confirmed on #420.** The 24 September entry closed with an
+untested claim — that the routine session's own configured identity deploys, so
+*"the preview URL a surface lane's brief asks for **is** deliverable by a routine,
+on every run, at the cost of not doing one thing."* It is. #420's head deployed
+and Vercel reported **Ready** within ninety seconds of the push, and the URL is in
+the pull request body where the brief asks for it. That entry's rule is the whole
+of it and it has now been demonstrated rather than inferred.
+
+**The half nobody had measured.** Having the URL is not the same as being able to
+look at it. From this sandbox:
+
+```
+curl https://loom-git-portal-37-….vercel.app/portal/trust
+000  — connect_rejected
+```
+
+The environment's egress policy denies the host. So a routine can *produce* a
+preview deployment and **cannot fetch it, cannot photograph it, and cannot check
+that it serves anything at all.** Every picture any surface lane has ever attached
+to a pull request was taken against a locally built server, whatever the
+surrounding prose called it — and several reports, this lane's included, have used
+the phrase *"a preview deployment"* loosely enough to read as though the deployed
+artefact had been photographed. It has not been, by this lane, ever.
+
+**Why it matters beyond tidiness.** The two things a preview would catch are
+exactly the two a local build cannot:
+
+- **A build that succeeds locally and fails or misbehaves on the platform** — a
+  missing environment variable, a route that needs a runtime the platform does not
+  give it, an asset path that only resolves behind `next start` on this machine.
+  `pnpm verify` green says nothing about any of them.
+- **The screen a stranger actually meets.** The deployment has no `DATABASE_URL`,
+  so it is the memory store and an empty journal: it is the *only* place the
+  portal's empty and error states can be seen as a reader meets them, and the
+  brief names those as most of what a new person sees first.
+
+**What a lane should say in the meantime**, because the honest sentence is
+narrower than the one that has been written: *the preview URL is included and
+Vercel reports it Ready; the screenshots are from a local production build,
+because the deployment is not reachable from the sandbox.* This run's report and
+pull request both say that.
+
+**The remedy is not this lane's and is one setting.** The environment's network
+access denied `*.vercel.app`; it is changed under Network access in the
+environment's settings — either a broader access level or that host added to the
+allowed domains, with the levels described at
+https://code.claude.com/docs/en/claude-code-on-the-web. Allowing it would let
+`pnpm shoot` point its `baseUrl` at the deployment, which is the one thing the
+harness already supports and no lane has ever been able to use.
+
+---
 ## 2026-09-27 — the words-in-props finding has been carried in three portal reports under the name of three primitives that do not have the problem
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the declaration),

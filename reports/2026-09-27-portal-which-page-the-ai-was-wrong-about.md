@@ -227,6 +227,27 @@ all.**
    of the row rather than the size of a name. There is a test asserting the
    count and the figure are *inside* the link.
 
+## The preview, and the sentence this lane has been writing loosely
+
+**The preview deployed.** `https://loom-git-portal-37-which-pag-33f1e0-jpizzolato36-6341s-projects.vercel.app`,
+reported **Ready** by Vercel within ninety seconds of the push, and it is in the
+pull request body where the brief asks for it. That settles the 24 September
+entry's one open question: the routine session's own identity deploys, and the
+preview a surface lane's brief asks for is deliverable on every run.
+
+**And a routine cannot look at it.** `curl` against that host returns `000` —
+`connect_rejected`; the environment's network policy denies `*.vercel.app`. So the
+pictures in this report are from a **local production build** against a staged
+journal, which is what every picture any lane has attached has always been,
+whatever the prose around it said. Several reports including this lane's have
+written *"a preview deployment"* loosely enough to read as though the deployed
+artefact were the subject. It never has been.
+
+Filed, with the two things only a preview can catch — a build that passes locally
+and misbehaves on the platform, and the empty states, which are the only thing the
+deployment can show since it has no `DATABASE_URL`. The remedy is one environment
+setting and it is not this lane's.
+
 ## The author rule, fourth instance, and the check that caught it
 
 Worth a section rather than a line, because it is the clearest case yet for why
@@ -271,7 +292,7 @@ September findings).
 | `pnpm install && pnpm verify` | — | **green, exit 0** |
 | `@jam-overture/loom` | 165 files / 3,216 tests | **165 / 3,216** — `src/` was not opened |
 | `@loom/app` | 312 files / 5,425 tests | **313 / 5,467** |
-| findings | 847, 0 malformed | **851**, 0 malformed |
+| findings | 847, 0 malformed | **852**, 0 malformed |
 | prerender | — | 114 pages, 1,300 junctions, 0 run together; 3 metadata conventions, 0 unserved |
 | overflow, measured | — | 1280 vs 1280 wide, 390 vs 390 phone |
 
@@ -325,7 +346,7 @@ failing on a fact.
 
 ## Findings
 
-**Filed four. Closed none** — nothing this lane owns was closed by this unit, and
+**Filed five. Closed none** — nothing this lane owns was closed by this unit, and
 saying so is cheaper than stretching one.
 
 1. **The plain-language sweep cannot see a runtime sentence that arrives as a
@@ -361,7 +382,14 @@ saying so is cheaper than stretching one.
    would close, including `page-name.ts`'s hard-coded `TITLE_BEARING`. The
    declaration is the framework's; filling it is the primitives lane's; **no
    record was written by this lane.**
-4. **The staging preload, eighth consecutive run** — re-filed by reference with
+4. **The preview deploys and a routine cannot reach it.** The 24 September
+   entry's last open question is answered — the session's own identity deploys,
+   Vercel reported #420 **Ready** in ninety seconds — and the half nobody had
+   measured is that `*.vercel.app` is denied by the environment's egress policy,
+   so a lane can produce a preview and cannot fetch, photograph or verify it.
+   Every picture any lane has attached has always been a local build. Owned by the
+   maintainer; it is one setting under Network access.
+5. **The staging preload, eighth consecutive run** — re-filed by reference with
    one measurement and one trap. The measurement: this run had to seed a **second**
    carrier, 30 hand-built journal records for 6 claims, because `/portal/trust`
    reads the journal rather than the store. The cost of not having this is growing.
@@ -403,12 +431,17 @@ twice.
    review surface that can explain a refusal and one that can only name a rule,
    and it is the brief's own first value area — *the review queue: what is waiting,
    **why***. It is the framework's to write.
-3. **The staging harness, finding 3.** Eighth run. Roughly 200 lines now.
+3. **The staging harness, finding 5.** Eighth run. Roughly 200 lines now.
 4. **A `copy` declaration on a primitive definition, finding 3.** Not the
    recommendation this lane has been carrying — that one named the three
    primitives that do not have the problem, which is what checking it turned up.
    One field closes three open items across two lanes, and it is the framework's
    to offer.
+5. **Allow `*.vercel.app` from the routine sandbox, finding 4.** One environment
+   setting, and it would let `pnpm shoot` point at the deployment — the one thing
+   the harness already supports and no lane has ever been able to use. It is the
+   only way the empty states get photographed as a reader meets them, since the
+   deployment has no database and is therefore the only place they exist.
 
 **On that last one.** The previous three reports listed it as a recommendation and
 none of them filed it. It is filed now, corrected, and the ten minutes it took to
