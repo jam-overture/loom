@@ -72,6 +72,22 @@ export type SearchEntry = {
    * finding the install command and being told the site has never heard of it.
    */
   readonly code: string
+  /**
+   * What this page is one of, plural, where it is one of a set of pages built
+   * from one template — `"imports"` for the reference's sixteen doors, and the
+   * empty string for everything else.
+   *
+   * It is the one field here that is not about what an entry *says*. It is about
+   * what it is a **copy** of, and the search box needs it because a query whose
+   * words are in a band those pages share matches all sixteen of them for one
+   * reason. `match.ts` folds such a run into a single row and this word is what
+   * the row calls them; `nav.ts` is where a section declares it and why.
+   *
+   * Empty for a heading, for an export, and for a page nobody templated —
+   * including the reference's own front door, which is a page of its own and not
+   * one of the sixteen.
+   */
+  readonly family: string
 }
 
 export type SearchIndex = {
@@ -88,13 +104,17 @@ export type SearchIndex = {
  * `"summary":"","body":"","code":""` was a fifth of the file a reader waits for
  * and said nothing at all.
  *
+ * `family` joined the four on the same terms and for a sharper version of the
+ * same reason: sixteen entries out of 207 have one, so writing it down for the
+ * other 191 would be the field's own cost paid twelve times over to say nothing.
+ *
  * Nothing downstream notices, because `parseSearchIndex` fills an absent field
  * with the empty string it would have carried. That tolerance is not new: it is
  * what `code` has always had, for a browser holding an index cached from a
  * deployment made before the code file existed.
  */
-export type TravellingEntry = Omit<SearchEntry, "summary" | "body" | "code"> &
-  Partial<Pick<SearchEntry, "summary" | "body" | "code">>
+export type TravellingEntry = Omit<SearchEntry, "summary" | "body" | "code" | "family"> &
+  Partial<Pick<SearchEntry, "summary" | "body" | "code" | "family">>
 
 export type TravellingIndex = {
   readonly entries: readonly TravellingEntry[]
@@ -206,8 +226,11 @@ const isArrivingEntry = (value: unknown): value is Readonly<Record<string, unkno
   typeof value.context === "string" &&
   KINDS.includes(value.kind as SearchKind)
 
-/** One of the three text fields, or the empty string it stands in for. */
-const textAt = (value: Readonly<Record<string, unknown>>, key: "summary" | "body" | "code"): string => {
+/** One of the four fields that may be left out, or the empty string it stands in for. */
+const textAt = (
+  value: Readonly<Record<string, unknown>>,
+  key: "summary" | "body" | "code" | "family"
+): string => {
   const text = value[key]
 
   return typeof text === "string" ? text : ""
@@ -236,6 +259,7 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
       summary: textAt(entry, "summary"),
       body: textAt(entry, "body"),
       code: textAt(entry, "code"),
+      family: textAt(entry, "family"),
     })),
   }
 }
@@ -363,6 +387,7 @@ export const namesToEntries = (names: SearchNames): readonly SearchEntry[] =>
       summary: "",
       body: "",
       code: "",
+      family: "",
     }))
   )
 

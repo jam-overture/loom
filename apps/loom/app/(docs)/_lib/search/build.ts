@@ -1,5 +1,5 @@
 import { apiEntries } from "../api/reference"
-import { docsHref, docsSections, writtenDocsSections } from "../nav"
+import { DOCS_LANDING_SLUG, docsHref, docsSections, writtenDocsSections } from "../nav"
 
 import { readPageCode } from "./code"
 import { generatedPageWords } from "./generated"
@@ -84,6 +84,13 @@ const codeAt = (href: string, anchor: string): string => codeByHref.get(href)?.g
  * scrolled to. A generated page has no file to read, so what sits here for one
  * is every word it renders, in one body — `generated.ts` says why it is not cut
  * up by heading the way a written page's is.
+ *
+ * **And what it is one of**, where its section says its pages are variations of
+ * one page. A landing page is excluded, and that exclusion is the whole of the
+ * rule: `/docs/api-reference` is the section rather than one of the sixteen
+ * doors inside it, it says things none of them says, and a fold that swallowed
+ * it would hide the page most likely to be the right answer. `nav.ts` carries
+ * the argument for the field; this line is where it stops at the front door.
  */
 const pageEntries = (): readonly SearchEntry[] =>
   docsSections.flatMap((section) =>
@@ -98,6 +105,7 @@ const pageEntries = (): readonly SearchEntry[] =>
         summary: page.summary,
         body: bodyAt(href, ""),
         code: codeAt(href, ""),
+        family: page.slug === DOCS_LANDING_SLUG ? "" : (section.family ?? ""),
       }
     })
   )
@@ -122,6 +130,7 @@ const headingEntries = (): readonly SearchEntry[] =>
         summary: "",
         body: bodyAt(docsHref(section.slug, page.slug), heading.anchor),
         code: codeAt(docsHref(section.slug, page.slug), heading.anchor),
+        family: "",
       }))
     )
   )
@@ -196,6 +205,13 @@ export const buildSearchIndex = (): SearchIndex => ({
  * for had stopped being a number about this site at all. `SEARCH_NAMES_PATH`
  * carries the argument; `build.test.ts` carries what each file now costs.
  *
+ * **`family` travels in this file and not in the others**, which is the one
+ * thing about it worth knowing here. It is not a band of the ranking; it is what
+ * a row *is one of*, and the fold that uses it has to happen before the list is
+ * cut to ten. So it arrives with the contents, for sixteen of the 207 entries,
+ * and costs 336 raw bytes — 41 compressed, because it is one string written
+ * sixteen times.
+ *
  * The text fields are **left out** rather than emptied, and so is a summary
  * nobody wrote. They were emptied until 14 September, when the raw cap failed
  * at 200,286 bytes against 200,000 — of which 38,156 were the three fields
@@ -212,6 +228,7 @@ export const searchContents = (): TravellingIndex => ({
       context: entry.context,
       kind: entry.kind,
       ...(entry.summary === "" ? {} : { summary: entry.summary }),
+      ...(entry.family === "" ? {} : { family: entry.family }),
     })),
 })
 

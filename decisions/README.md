@@ -280,3 +280,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0194](0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md) | The framework is the package, and everything that uses it ships separately | Accepted | §1 (process), §4 (SDK) |
 | [0195](0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md) | A shot may say what the browser started with, and it says it as data | Accepted | §1 (process) |
 | [0196](0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md) | A paint is sized by the box it is given, and says so when it cannot be | Accepted | §4b |
+| [0197](0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md) | A host may ask which way round a palette is, and a frame standing in for the page is handed both ends | Accepted | §4b |

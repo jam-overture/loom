@@ -83,6 +83,75 @@ export const section = (
     ],
   })
 
+/**
+ * The same band with its heading **beside** the answer rather than above it,
+ * and the measurement that says why the two interior pages need one.
+ *
+ * `loom.section` lays its heading region, then its content, in a column. That
+ * is right for a band whose content fills the width — a grid of figures, a
+ * table, the framed demonstration — and it is wrong for the nine bands on
+ * `/how-it-works` and `/what-you-run` whose content is two short paragraphs,
+ * because a paragraph is capped at the reading measure and a band is not:
+ *
+ * | | |
+ * | --- | --- |
+ * | the band, `width: "wide"` | 1120px, less the page's own padding |
+ * | a `measured` paragraph in it | `READABLE_MEASURE`, 68ch |
+ * | what is left over at 1280 | **roughly half the band, empty, on every one of them** |
+ *
+ * Nine bands in a row of heading-over-half-empty-band is not spareness, which
+ * is what the 26 September cut was for. It is a page that looks like it did not
+ * finish loading, and it was invisible to every test this surface has: each
+ * band is correct, the overflow measurement only ever reports a page that is
+ * too *wide*, and a screenshot is the only instrument that sees it.
+ *
+ * So the heading goes in the space the paragraph was not using. Three things
+ * fall out of that, and all three are why this is a composition rather than a
+ * finding for `loom.section`:
+ *
+ * - **The column becomes the measure.** Each half is ≈ 540px, which is the
+ *   reading measure to within a few characters, so the prose inside one sets no
+ *   `measured` of its own — `loom.prose`'s own schema says a paragraph in a
+ *   narrow column is already measured.
+ * - **The heading is held to its column.** `loom.split` declares inline-size
+ *   containment per column and `loom.heading` caps its top two steps in `cqi`
+ *   for exactly this case — its comment names *one half of a `loom.split`* as
+ *   the composition that made the unit change from `vw`.
+ * - **A phone keeps the order and loses a little height.** The columns wrap
+ *   below ≈ 600px, so at 390 the heading is above the paragraphs exactly as it
+ *   was. It is not byte-identical and the report says so: a split column's own
+ *   gap is one step tighter than a section's content region, which takes about
+ *   44px off each band — 220px off `/how-it-works` and 204px off
+ *   `/what-you-run`, measured at 390 against `main`.
+ *
+ * The eyebrow stays on the section rather than moving into the column with the
+ * heading: it is the band's name, `outline.ts` reads it off the band, and it
+ * already sits directly above the heading once the heading is left-aligned.
+ */
+export const splitSection = (
+  ids: IdFactory,
+  props: JsonObject,
+  headingText: string,
+  children: readonly LoomNode[],
+  headingProps: JsonObject = {}
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.section",
+    props,
+    children: [
+      buildElement(ids, {
+        type: "loom.split",
+        props: { ratio: "even", align: "start" },
+        children: [
+          buildSlot(ids, "start", [
+            heading(ids, 2, headingText, { balance: true, ...headingProps }),
+          ]),
+          buildSlot(ids, "end", [...children]),
+        ],
+      }),
+    ],
+  })
+
 export const stack = (ids: IdFactory, props: JsonObject, children: readonly LoomNode[]): LoomNode =>
   buildElement(ids, { type: "loom.stack", props, children: [...children] })
 

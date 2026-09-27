@@ -11,7 +11,7 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { COUNTED_ANCHOR } from "../bands"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
-import { action, heading, prose, section, stack } from "../nodes"
+import { action, heading, prose, section, splitSection, stack } from "../nodes"
 import {
   DEMO,
   DOCS,
@@ -67,20 +67,19 @@ const hero = (ids: IdFactory): LoomNode =>
   })
 
 const whatYouBring = (ids: IdFactory): LoomNode =>
-  section(
+  splitSection(
     ids,
     { tone: "surface", width: "wide", eyebrow: "What you bring" },
     "Your own components, never rewritten",
     [
       prose(
         ids,
-        "You hand over the pieces your site is already built from and say what each one can be told. From then on the AI can arrange those pieces and set those options — and nothing else. It cannot write new code into your page, because code is not a thing a change is allowed to carry.",
-        { measured: true }
+        "You hand over the pieces your site is already built from and say what each one can be told. From then on the AI can arrange those pieces and set those options — and nothing else. It cannot write new code into your page, because code is not a thing a change is allowed to carry."
       ),
       prose(
         ids,
         "If you would rather not build any, a starter set comes with it and this site is made out of that set.",
-        { tone: "muted", measured: true }
+        { tone: "muted" }
       ),
     ]
   )
@@ -99,20 +98,19 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
  * the repository for anyone who wants to run it.
  */
 const whatLeaves = (ids: IdFactory): LoomNode =>
-  section(
+  splitSection(
     ids,
     { width: "wide", eyebrow: "What leaves your server" },
     "One request, and only when somebody asks",
     [
       prose(
         ids,
-        "When a person asks for a change in their own words, your server sends the model you chose an outline of the page and the list of pieces it may use. It does not send your code, your data, or anything about who is reading.",
-        { measured: true }
+        "When a person asks for a change in their own words, your server sends the model you chose an outline of the page and the list of pieces it may use. It does not send your code, your data, or anything about who is reading."
       ),
       prose(
         ids,
         "The ready-made changes on the front door do not send anything at all: they are worked out on your own server, which is why they still work on a deployment with no model configured.",
-        { tone: "muted", measured: true }
+        { tone: "muted" }
       ),
     ]
   )
@@ -127,15 +125,14 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
  * carrying on counting would be failing at the one thing it sells.
  */
 const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(
+  splitSection(
     ids,
     { tone: "surface", width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
     "Which parts you reach, and never who you are",
     [
       prose(
         ids,
-        "This site counts which parts of a page people reach, how long they stay, and what they press. It does not know who you are, set a cookie, or send any of it anywhere but the server you are already talking to.",
-        { measured: true }
+        "This site counts which parts of a page people reach, how long they stay, and what they press. It does not know who you are, set a cookie, or send any of it anywhere but the server you are already talking to."
       ),
       /**
        * Whether it is on *here*, which is the half a reader cannot check.
@@ -152,12 +149,12 @@ const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
         context.counting === true
           ? "Everything above is happening on the page you are reading — counting is on here."
           : "It is switched off on this deployment, so nobody reading this page has been counted.",
-        { tone: "muted", measured: true }
+        { tone: "muted" }
       ),
       prose(
         ids,
         "It is there because a page that adapts should be able to tell whether the change helped, and that is a question about parts of a page rather than about people.",
-        { tone: "muted", measured: true }
+        { tone: "muted" }
       ),
     ]
   )

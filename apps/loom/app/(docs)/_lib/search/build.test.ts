@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 
 import { apiSlugFor } from "../api/model"
 import { apiEntries } from "../api/reference"
-import { docsHref, docsOrder, docsSections, writtenDocsSections } from "../nav"
+import { DOCS_LANDING_SLUG, docsHref, docsOrder, docsSections, writtenDocsSections } from "../nav"
 
 import {
   buildSearchIndex,
@@ -227,6 +227,67 @@ describe("what the index contains", () => {
     expect(written).not.toContain('"body"')
     expect(written).not.toContain('"code"')
     expect(written).not.toContain('"summary":""')
+    expect(written).not.toContain('"family":""')
+  })
+
+  /**
+   * What a page is **one of**, where its section says its pages are variations of
+   * one page.
+   *
+   * Read off `nav.ts` rather than written here, so that a section which stops
+   * being generated from a template — or a second one that starts — changes what
+   * the search box folds in the same commit that changes the pages.
+   *
+   * The two halves of the claim are equally load-bearing, and the second is the
+   * one that could regress silently: **the landing page is not a member.**
+   * `/docs/api-reference` is the section, it says things none of the sixteen
+   * doors says, and a fold that took it would hide the page most likely to be the
+   * right answer to the query that reached the whole family.
+   */
+  it("says what a page is one of, and not for the page that is the section", () => {
+    const pages = buildSearchIndex().entries.filter((entry) => entry.kind === "page")
+
+    for (const section of docsSections) {
+      for (const page of section.pages) {
+        const entry = pages.find((found) => found.href === docsHref(section.slug, page.slug))
+
+        expect(entry, docsHref(section.slug, page.slug)).toBeDefined()
+        expect(entry?.family, entry?.href).toBe(
+          page.slug === DOCS_LANDING_SLUG ? "" : (section.family ?? "")
+        )
+      }
+    }
+
+    /* And the reference really is such a section, so the assertion above is not
+       vacuously true of a site where nobody declares a family. */
+    expect(pages.filter((entry) => entry.family === "imports").length).toBe(apiEntries.length)
+    expect(pages.find((entry) => entry.href === docsHref("api-reference", DOCS_LANDING_SLUG))?.family).toBe("")
+  })
+
+  it("says it for a page and never for a heading or a name", () => {
+    for (const entry of withNames(buildSearchIndex(), searchNames()).entries) {
+      if (entry.kind !== "page") expect(entry.family, entry.href).toBe("")
+    }
+  })
+
+  /**
+   * It travels in the file a reader **waits for**, which is the one thing about
+   * it that costs anybody anything — the fold has to happen before the list is
+   * cut to ten, so it cannot arrive with the words.
+   *
+   * Sixteen entries out of 207 carry it and it is one string written sixteen
+   * times, so what it adds is tens of bytes compressed. Asserted rather than
+   * argued, because a field on the payload a reader sits in front of is exactly
+   * the kind of thing that is free once and is not at the fifth one.
+   */
+  it("costs the file a reader waits for almost nothing", () => {
+    const written = JSON.stringify(searchContents())
+    const without = JSON.stringify({
+      entries: searchContents().entries.map(({ family: _family, ...rest }) => rest),
+    })
+
+    expect(written.length - without.length).toBeLessThan(600)
+    expect(gzipSync(written).length - gzipSync(without).length).toBeLessThan(200)
   })
 
   /**

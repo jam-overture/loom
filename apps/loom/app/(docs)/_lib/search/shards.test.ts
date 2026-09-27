@@ -27,6 +27,7 @@ const entry = (href: string): SearchEntry => ({
   summary: "",
   body: "",
   code: "",
+  family: "",
 })
 
 const indexOf = (...hrefs: readonly string[]): SearchIndex => ({ entries: hrefs.map(entry) })

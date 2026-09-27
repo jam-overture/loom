@@ -290,8 +290,16 @@ stop reaching for the first two.
 ## 2026-09-26 — a host cannot ask a resolved theme which way round it is, so every surface that frames part of a tree computes it again
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`src/theme/`, `src/render/theme.ts`) · **Status:** open — **a gap, and it cost
-this lane a 1.10:1 contrast ratio on the demo's decisive frame.**
+(`src/theme/`, `src/render/theme.ts`) · **Status:** **closed by
+`framework-57-which-way-round-a-theme-is`** ([0197](decisions/0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md))
+— **both shapes, because they are different things.** `paletteScheme(palette)`
+joins `chroma` and `scrim` on `PaletteMeasures` as a third derived reading, and
+`themeGround(theme)` sits beside `themeStyle(theme)` in
+`@jam-overture/loom/react` returning `{ backgroundColor, color, colorScheme }`.
+No threshold, for the reason this entry gives. It takes a `ResolvedTheme` rather
+than a `ThemeResolution`, so *the tree names no theme* stays the host's to answer
+— which is the one line of demo left in `_lib/ground.ts`, whose 29 tests pass
+unchanged against the moved implementation.
 
 `themeStyle(theme)` hands a host every custom property a primitive reads. What
 it cannot hand a host is the one fact the host itself needs to draw *around* the
@@ -33380,8 +33388,12 @@ which trades a real cost (a readable branch) for a smaller saving.
 ## 2026-09-26 — a generated page's words are the words it renders, and sixteen pages saying one sentence are sixteen results
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`app/(docs)/_lib/search/`) · **Status:** open — a cost this run created and
-measured, with the three ways out and a recommendation
+(`app/(docs)/_lib/search/`) · **Status:** **closed 27 September** by
+`docs-37-a-row-that-stands-for-sixteen`, which took the recommended remedy —
+the siblings are folded into one row reading *the closest of 9 imports*, and
+*peer dependency* answers with the Installation heading second rather than
+tenth. Filed as a cost this run created and measured, with the three ways out
+and a recommendation
 
 Yesterday's entry — *the site cannot search a sentence a component renders* — is
 **closed** by `docs-36-the-words-a-component-renders`: the seventeen reference
@@ -34385,6 +34397,249 @@ they describe did not exist yet.
 `manifest.ts` reading `../../package.json`, and it is four lines.
 
 ---
+## 2026-09-27 — a result list that scrolls inside a fixed height is photographed from the top, and a before and an after came back byte-identical
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(the recipe is this lane's; the class is everybody's) · **Status:** **closed in
+the same run** — the remedy is three lines of a shot list and it is written down
+below, because the next lane to photograph a scrolling region will meet this
+
+The search dialog's results are a `ul` with `max-h-96 overflow-y-auto`. Four
+rows fit. This run changed rows **eight, nine and ten** of the answer to
+*install* — three reference doors became three getting-started sections — and
+photographed the dialog before and after, on two production builds, from two
+checkouts of two different trees.
+
+**The two files have the same `md5`.** `849fc8f042e452ff18faaa84e31f4fb3`, both.
+Every automated signal was correct and said nothing: the shots succeeded, the
+exit was 0, and `scrollWidth 1280 / innerWidth 1280` held on both.
+
+### Why this is not the same as the overflow blind spot, and why it is worse
+
+`Loom marketing` filed the neighbouring shape on 27 September (#411): the
+overflow measurement can only fail in one direction, so **a band using half the
+space it was given is silent forever**, and it asked the other four surfaces
+*which of your bands are this, and what in your lane would ever tell you?*
+
+This lane's answer is that a scrolling region is a third case and a nastier one.
+A half-empty band is at least *in the picture*. A row below the scroll of an
+element that scrolls is **not in the picture at all**, so the photograph is not
+merely uninformative — it is a correct picture of a screen that changed, which
+reads as evidence that nothing changed. A run that had shipped that pair would
+have illustrated "the freed slots go to other results" with two identical
+images, and every number beside it would still have been true.
+
+### The remedy, which is three lines
+
+Scroll it before the shutter, to an id rather than to a position, and let the
+list settle first:
+
+```json
+{ "waitFor": "#loom-search-result-9" },
+{ "wait": 2000 },
+{ "scrollTo": "#loom-search-result-9" }
+```
+
+**`:last-child` does not work here and the failure is worth knowing**, because
+it is not about this list:
+
+```
+locator.scrollIntoViewIfNeeded: Element is not attached to the DOM
+```
+
+The dialog's four index files land one after another and each one re-renders the
+list, so the element `:last-child` resolved to is replaced between the resolve
+and the scroll. A stable `id` survives the re-render; a positional selector does
+not. That is the same rule `docs/routines.md` already gives for a `before` —
+*wait on a selector, not on the network* — applied to a list that changes under
+a selector that was correct when it was written.
+
+**What would close this for good**: nothing in this repository can see it. The
+honest version is the one above — a lane photographing a region that scrolls
+inside itself has to say so in the shot, and the two identical files are the
+only thing that ever says it did not.
+
+---
+## 2026-09-27 — a test whose expected value comes from the code under test cannot see a defect that moves both sides of it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the same run** — recorded because the *shape* is general and the test read
+beautifully while proving nothing
+
+The fold added by `docs-37` keeps one row per family: **the one that ranked
+highest**. The first test of that claim was written differentially, which is the
+way it wants to be written:
+
+```ts
+const hits = searchDocs(doors, "peer dependency", LIMIT)
+const unfolded = searchDocs(withoutFamilies(doors), "peer dependency", LIMIT)
+
+expect(hits.find((hit) => hit.folded !== undefined)?.entry.href)
+  .toBe(unfolded.find(isADoor)?.entry.href)
+```
+
+*The row the fold kept is the one the unfolded search put first.* It reads as
+exactly the claim. It is green against the implementation, and **it is green
+against an implementation that folds over the index instead of the ranking** —
+because the mutation reorders `searchDocs`, and `unfolded` is `searchDocs`. Both
+sides move together and the equality survives.
+
+Caught by mutation rather than by reading: `foldFamilies([...ranked].sort(byPosition))`
+turned **eleven** other tests red — every ranking assertion in the file — and not
+this one, which is the only one written about the fold's choice. Eleven red and
+the twelfth green is the shape that says the twelfth is not asserting what its
+name says.
+
+The fix is to spell the answer out. `@jam-overture/loom` is the shortest of the
+three door titles, it wins the tie-break, the fixture now lists it **last**, and
+the assertion names it and the whole expected order. Same mutation: that test
+red, alone among the fold's.
+
+### The class, which is the part worth keeping
+
+**A test is only as strong as the independence of its expected value.** A fixture
+is independent. A hand-written list is independent. A second call of the function
+under test is not, and neither is a second implementation of it — the 26
+September entry on the excerpt made the neighbouring point about a rule with an
+undeclared premise, and this is the same failure one level up: *the premise was
+that the two calls could disagree.*
+
+It is easy to write because the differential form is genuinely the clearer
+sentence. The tell is that the expected value is computed rather than written,
+and the check is one line of thought: **name a defect that would move both sides
+equally.** If one exists, the test cannot see it.
+## 2026-09-27 — `pnpm shoot --serve` photographs the front door's embedded demonstration as a broken-document icon, and has since the flag existed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — one line in the harness; nothing is wrong with the site and nothing is
+wrong on a deployment, which is why no test of any lane could report it
+
+The front door's `Now type one of your own` band frames `/demo` through
+`loom.embed`, and the frame's `src` is `surfaceHref(origin, DEMO)` — an absolute
+address built from `siteOrigin()`. With no `LOOM_SITE_ORIGIN` and no
+`VERCEL_URL`, that resolves to `http://localhost:3000`.
+
+`pnpm shoot --serve apps/loom` starts the application on an **ephemeral port**
+on purpose, so it runs beside a `next dev`
+([0191](decisions/0191-the-harness-may-start-the-application-because-there-is-now-only-one.md)).
+The page is therefore served from `127.0.0.1:40473` while the frame inside it
+points at `localhost:3000`, which is not listening. Chromium draws its
+broken-document glyph in a 1078 × 673 grey box, and the shot comes back with a
+hole where the one band that proves the product works should be.
+
+**It is invisible from inside the run.** The shot succeeds, the exit code is 0,
+`scrollWidth` equals `innerWidth`, and every test of the band passes — the tree
+is right, the `src` is right for the origin it was given, and the origin is
+right for the default. Only the picture is wrong, and only a person looking at
+the picture can tell. This run photographed it twice before recognising it, and
+then reproduced the correct frame by serving on port 3000 by hand.
+
+**The one line.** `--serve` already knows the origin it started on — it prints
+it — so passing that origin to the child as `LOOM_SITE_ORIGIN` makes every
+absolute link in the tree point at the deployment being photographed, which is
+what the flag already implies. It is the harness's rather than this lane's
+because `siteOrigin()` cannot know a port chosen after the module loaded, and
+because the same fault applies to any surface whose tree holds an absolute
+internal link.
+
+**Worth doing soon for a reason beyond one band**: this lane ships a full-page
+shot of the front door in most pull requests, and the maintainer judges this
+surface by eye. Every one of those taken with `--serve` has had a broken box in
+the middle of it.
+
+---
+## 2026-09-27 — the only automated visual instrument here reports a page that is too wide, and nine bands were half empty
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-40-a-band-that-faces-its-answer` — recorded because the
+blind spot is every surface's, not this lane's
+
+`loom.section` lays out eyebrow, heading, content in a column, and `loom.prose`
+with `measured` is capped at `READABLE_MEASURE` — 68ch. A band whose content is
+nothing but paragraphs is therefore a full-width heading above a reading column
+inside a 1120px band, with **roughly half the band empty**, and `/how-it-works`
+and `/what-you-run` were nine of those in a row.
+
+**Nothing in this repository could have reported it, and the reason generalises.**
+
+| instrument | what it reads | why it is silent here |
+| --- | --- | --- |
+| the tree's own tests | structure | every band is correct on its own |
+| the renderer's diagnostics | what the runtime could not honor | nothing was unhonored |
+| `voice.test.ts` | the words | layout is not words |
+| **`scrollWidth` vs `innerWidth`** | **a page too wide** | **this is a page with too much room, which is the opposite, and has no alarm** |
+
+The overflow measurement is the one automated eye this repository has on a
+rendered page, and it can only fail in one direction. A band that spills off a
+phone screams; a band using half the space it was given is silent forever. Both
+are the same class of defect — a box whose contents and whose width disagree —
+and only one of them is reportable.
+
+This branch's answer is a rule stated over the served trees rather than another
+picture: **no band whose content is only paragraphs may stack its heading above
+them**, swept over both pages, naming the offending band by its eyebrow. It
+checked red against the band it was written for.
+
+**The question for `Loom docs`, `Loom lessons`, `Loom portal` and `Loom demo`**
+is the one the 26 September entry asked about depth, one turn along: *which of
+your bands are a heading over a reading column in a band twice as wide, and what
+in your lane would ever tell you?* The answer here was nine, and the instrument
+was a screenshot and a person.
+## 2026-09-27 — the stale-`main` trap has a second half: `git status` reports the stale branch as up to date with `origin/main`, and it is the sentence that would stop you checking
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **sharpening the 20 September entry rather than replacing it**, which was
+right about the fault and does not name the thing that makes it convincing.
+
+The 20 September entry says `main` in a fresh session clone can be far behind
+`origin/main` while the procedure says to branch off it. That happened again
+today: this session's clone arrived with `HEAD` **detached** at `207e450` and a
+local `main` branch ref at `cc462bd`, **ten commits behind**.
+
+**What is new is what `git` says about it.** `git checkout main` printed:
+
+```
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+```
+
+It is up to date with the *remote-tracking ref in this clone*, which was also
+stale. Both were, so the two agreed, and the sentence a person reads as *you have
+the latest `main`* is emitted at the exact moment they do not. Nothing is lying;
+the sentence means something narrower than it reads, and it means it most
+confidently when it is least useful.
+
+**What it would have cost this run.** The branch was cut, and the first thing
+read on it was `decisions/`, where `0194` was **absent** — a record the 26
+September framework report says it added and whose number the index carried as
+*No record on this branch*. So the visible symptom of a ten-commit-stale
+checkout was **a decision record missing from a merged pull request**, which is
+one of the more alarming things this repository can show you and had nothing to
+do with what was actually wrong. Two other symptoms sat beside it: the package
+name read `@loom/runtime` where `main` has said `@jam-overture/loom` since #402,
+and `LICENSE` behaved as though the licensing question were still open.
+
+Caught by noticing that `git log` before the checkout and `ls decisions/` after
+it disagreed — that is, by accident, and after ten minutes spent tracing a
+deletion that never happened.
+
+**The remedy, one line, and it is not `git status`:**
+
+```bash
+git fetch origin main && git checkout -B <branch> origin/main
+```
+
+`origin/main` **after a fetch** is the only ref in a fresh clone worth branching
+from. Never `main`, and never a local branch's report of its own freshness — a
+tracking ref is a cached answer, and the cache is what is stale.
+
+**What would close it:** the check belongs in whatever a run does first, not in a
+run's memory of a finding. `tools/` has no session-preflight step and this is the
+second candidate for one (the first is the three-day-old `.next`, 23 September,
+now diagnosed as an ordering by #408). A `pnpm preflight` that fetches, reports
+how far the local `main` is behind, and says which ref to branch from would make
+both of them impossible to walk into. Filed rather than built because it is a
+change to how every lane starts a run, and three other routines read this file.
 
 ## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
 

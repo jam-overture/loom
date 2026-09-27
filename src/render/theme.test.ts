@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -6,15 +7,17 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { ok } from "../result.js"
 import { testPrimitiveResolver } from "../testing/primitives.js"
+import { contrastRatio, TEXT_CONTRAST_MINIMUM } from "../theme/contrast.js"
+import { editorialPalette, STARTER_PALETTES } from "../theme/library.js"
 import { createThemeRegistry } from "../theme/registry.js"
-import type { ThemeSelection } from "../theme/theme.js"
+import { paletteSchema, type ResolvedTheme, type ThemeSelection } from "../theme/theme.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
 import type { PropsValidator, PropsVerdict } from "./props.js"
 import { renderLoomTree } from "./render.js"
 import { renderRequest, type TreeSource } from "./request.js"
-import { partitionReservedProps, THEME_PROP_KEY } from "./theme.js"
+import { partitionReservedProps, themeGround, THEME_PROP_KEY } from "./theme.js"
 
 /**
  * The render root mounting what 0049 put in the tree.
@@ -252,5 +255,92 @@ describe("renderRequest", () => {
 
     expect(rendered.value.theme?.palette.id).toBe("bold")
     expect(renderToStaticMarkup(rendered.value.element)).toContain("--loom-bg-canvas:#0a0a0a")
+  })
+})
+
+describe("themeGround", () => {
+  const resolve = (selection: ThemeSelection): ResolvedTheme => {
+    const resolved = themes.resolve(selection)
+    if (!resolved.ok) throw new Error(`the registry refused ${selection.palette}`)
+
+    return resolved.value
+  }
+
+  /**
+   * The pair is the palette's own body copy, both ends of it, which is what makes
+   * a frame standing in for the page re-theme with the page rather than beside it.
+   */
+  it("paints the ground the root primitive would have painted, and the ink that reads on it", () => {
+    const light = resolve(editorial)
+    const dark = resolve(bold)
+
+    expect(themeGround(light)).toEqual({
+      backgroundColor: light.palette.slots["bg-canvas"],
+      color: light.palette.slots["fg-default"],
+      colorScheme: "light",
+    })
+    expect(themeGround(dark)).toEqual({
+      backgroundColor: dark.palette.slots["bg-canvas"],
+      color: dark.palette.slots["fg-default"],
+      colorScheme: "dark",
+    })
+  })
+
+  /**
+   * The defect this exists for, in the shape it had.
+   *
+   * A host held the frame's ground as a stylesheet constant and took the ink from
+   * the tree. That is legible for exactly as long as the tree names a palette the
+   * constant was written for; the moment it names the other kind, the frame is a
+   * light ground under light ink and nothing errors. Here the ground moves with
+   * the ink, so the pair is the one the contrast bar already asserts (0074).
+   */
+  it("moves both ends together, so the frame is legible under every registered palette", () => {
+    const grounds = STARTER_PALETTES.map((palette) =>
+      themeGround({ ...resolve(editorial), palette })
+    )
+
+    expect(grounds).toHaveLength(21)
+    expect(new Set(grounds.map((ground) => ground?.backgroundColor)).size).toBeGreaterThan(1)
+
+    for (const ground of grounds) {
+      expect(contrastRatio(ground?.color ?? "", ground?.backgroundColor ?? "")).toBeGreaterThan(
+        TEXT_CONTRAST_MINIMUM
+      )
+    }
+  })
+
+  /**
+   * It is a style object, and the reason to say so in a test is that its one job
+   * is to be spread into one. A named type rather than `CSSProperties` because a
+   * host reads the fields as well as applying them — the demo's share card hands
+   * them to `ImageResponse`, which resolves no custom properties.
+   */
+  it("is a style object a frame can be handed whole", () => {
+    const style: CSSProperties = { ...themeGround(resolve(bold)) }
+
+    expect(style.colorScheme).toBe("dark")
+  })
+
+  it("leaves color-scheme out rather than guessing, when the pair cannot be read", () => {
+    const hsl = createThemeRegistry({
+      palettes: [
+        paletteSchema.parse({
+          ...editorialPalette,
+          id: "unreadable",
+          slots: Object.fromEntries(
+            Object.keys(editorialPalette.slots).map((slot) => [slot, "hsl(210 30% 40%)"])
+          ),
+        }),
+      ],
+    }).resolve({ ...editorial, palette: "unreadable" } as ThemeSelection)
+
+    expect(hsl.ok).toBe(true)
+    if (!hsl.ok) return
+
+    const ground = themeGround(hsl.value)
+
+    expect(ground).toEqual({ backgroundColor: "hsl(210 30% 40%)", color: "hsl(210 30% 40%)" })
+    expect("colorScheme" in (ground ?? {})).toBe(false)
   })
 })

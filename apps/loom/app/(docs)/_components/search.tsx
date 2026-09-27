@@ -48,6 +48,12 @@ import { docsSectionOfPath, proseSectionsIn } from "@/app/(docs)/_lib/search/sha
  *   its prose rather than its name. A heading offered for a word that is not in
  *   the heading looks like a bug until the reader can see the words that earned
  *   it.
+ * - **It does not show one page sixteen times.** The reference's doors are one
+ *   page rendered per import, so a sentence they share matches all of them; such
+ *   a run arrives as one row saying how many there were, and the nine slots it
+ *   gives back go to the rest of the site. `match.ts` folds them — nothing here
+ *   decides it, because what a list of ten *contains* is a ranking question and
+ *   this file only draws it.
  */
 
 const KIND_LABEL: Readonly<Record<SearchKind, string>> = {
@@ -151,6 +157,25 @@ const Results = ({
                     <span key={at}>{part.text}</span>
                   )
                 )}
+              </span>
+            )}
+
+            {/*
+             * What else the query reached, where this row is standing in for a
+             * set of pages built from one template. Sixteen reference pages are
+             * one page rendered per import, so a sentence in a band they share
+             * matches all sixteen — and nine rows saying one thing about nine
+             * doors used to fill a list ten rows long, pushing the page a reader
+             * actually wanted off the bottom of it.
+             *
+             * It is worded over the total rather than the remainder — *the
+             * closest of 9* rather than *and 8 more* — so the noun is always
+             * plural and one spelling of it does every case. A folded row always
+             * stands for at least two, which is what makes that safe.
+             */}
+            {hit.folded !== undefined && (
+              <span className="text-ink-faint mt-1 block text-xs">
+                {`the closest of ${hit.folded.matched} ${hit.folded.noun}`}
               </span>
             )}
           </span>
