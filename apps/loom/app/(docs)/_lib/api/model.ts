@@ -12,6 +12,8 @@
  * directory that exists.
  */
 
+import { workspaceSpecifier } from "../packages"
+
 /**
  * What kind of thing an export is, in the words a reader would use.
  *
@@ -221,9 +223,16 @@ export type ApiReference = {
  * their subpath with the separator flattened, so `@jam-overture/loom/telemetry/postgres`
  * is one segment rather than two directories deep. The reference is a flat list
  * of doors and the URL says so.
+ *
+ * **A separate package is slugged by the door this workspace opens it through**,
+ * which is what keeps `/docs/api-reference/primitives` the address it has always
+ * been. The starter library became its own package on 27 September and the page
+ * about it did not move; a reader who bookmarked it, and the four surfaces that
+ * link to it, should not pay for a change in how it is packaged.
+ * `_lib/packages.ts` is where the two names for that one module are stated.
  */
 export const apiSlugFor = (specifier: string): string => {
-  const subpath = specifier.replace(/^@jam-overture\/loom\/?/, "")
+  const subpath = workspaceSpecifier(specifier).replace(/^@jam-overture\/loom\/?/, "")
 
   return subpath === "" ? "runtime" : subpath.replace(/\//g, "-")
 }

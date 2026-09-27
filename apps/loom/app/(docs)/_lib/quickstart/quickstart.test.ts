@@ -7,6 +7,7 @@ import { promisify } from "node:util"
 import { afterAll, describe, expect, it } from "vitest"
 
 import { REPOSITORY_ROOT } from "../architecture/source"
+import { asThisWorkspaceResolves } from "../packages"
 import { readPageSource } from "../search/headings"
 
 import {
@@ -225,7 +226,16 @@ const variant = async (
 ): Promise<{ readonly stdout: string; readonly stderr: string }> => {
   const file = `${name}.mts`
 
-  writeFileSync(join(workspace, file), edit(readQuickstartSource()))
+  /*
+   * Edited as the page shows it and run as this repository resolves it. The
+   * substitution the page describes is made against the reader's text, because
+   * that is the text the page describes it against; the one name a scratch
+   * directory here cannot resolve goes back before `tsx` sees it, because the
+   * separately published library is not in this repository's `node_modules`.
+   * `_lib/packages.ts` carries both directions and the round trip is asserted
+   * against this very file.
+   */
+  writeFileSync(join(workspace, file), asThisWorkspaceResolves(edit(readQuickstartSource())))
 
   return run(TSX, [file], { cwd: workspace, encoding: "utf8" })
 }

@@ -2,9 +2,18 @@
  * The published entry points, and one line each on what you reach through them.
  *
  * The list is not the authority — `package.json` is — and this file will drift
- * the day someone adds an export. `entry-points.test.ts` reads the runtime's
- * `exports` map off disk and fails on any difference in either direction, so
- * the drift is a red test rather than a page that quietly stops being true.
+ * the day someone adds an export. `entry-points.test.ts` reads the manifest off
+ * disk and fails on any difference in either direction, so the drift is a red
+ * test rather than a page that quietly stops being true.
+ *
+ * **Two packages, and the doors are listed together.** Loom published as one
+ * package until 27 September; `@jam-overture/loom-primitives` is now the starter
+ * library's own package, and inside this workspace the same module is reached at
+ * `@jam-overture/loom/primitives`, which is a door the registry does not have
+ * (`_lib/packages.ts` carries that whole argument). A reader does not care which
+ * of the two `npm install` lines a name is behind until they write the import,
+ * and then they care very much — so the table shows the specifier they would
+ * type, and `audience` is what actually groups it.
  *
  * The generated API reference §4c plans will describe what is *inside* each of
  * these. This is only the map of doors.
@@ -30,8 +39,9 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "app",
   },
   {
-    specifier: "@jam-overture/loom/primitives",
-    summary: "The starter library — the primitives every example on this site is built from.",
+    specifier: "@jam-overture/loom-primitives",
+    summary:
+      "The starter library — the primitives every example on this site is built from. Its own package, installed beside the framework.",
     audience: "app",
   },
   {

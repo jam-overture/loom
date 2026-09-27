@@ -33997,8 +33997,15 @@ the split is a move rather than an untangling.
 ## 2026-09-26 — the documentation tells a reader to import a subpath the published package does not have
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/`) · **Status:** open — **true from the first publish**,
-and the only part of that change with a cost a stranger pays
+(`apps/loom/app/(docs)/`) · **Status:** **closed 27 September** by
+`docs-38-the-name-the-library-ships-under`, at the maintainer's instruction the
+same day, once `@jam-overture/loom-primitives@0.1.0` was on the registry. The
+site teaches the package rather than the subpath; the entry-point table and the
+generated reference carry it under the name it ships as; both tests that were
+reading `exports` now read `publishConfig.exports`; and a new sweep over
+everything the site *shows* — pages, quickstart block, table, reference — fails
+on any door the published manifest withholds. Filed as **true from the first
+publish**, and the only part of that change with a cost a stranger pays
 
 [0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)
 publishes `@loom/runtime` without `./primitives`. Inside this workspace nothing
@@ -34759,3 +34766,82 @@ command that exits non-zero into a newline has told nobody anything. Where a
 document hands somebody a sequence whose steps guard each other, the chaining
 is part of the instruction rather than formatting — and a sequence written as
 separate lines is a sequence that will be run as separate lines.
+
+---
+## 2026-09-27 — one install command written down three times, and the test guarded the copy a reader never sees
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/quickstart/`) · **Status:** **closed in the same
+run** — the page renders the command from the list now, and there is a test for
+the absence of a copy rather than for the agreement of two
+
+*Quickstart* is the page this site's exit condition rests on: a whole file a
+reader saves and runs. Its install command was stated in **three** places —
+`QUICKSTART_COMMANDS` in `_lib/quickstart/program.ts`, a header comment inside
+`quickstart.ts` itself, and a hand-typed ` ```bash ` fence in `page.mdx`.
+
+Renaming the starter library updated two of them. The third was the one a reader
+reads.
+
+**Nothing failed**, and the reason is the shape worth keeping. `quickstart.test.ts`
+has a test called *tells the reader to install every one of them*, and it reads
+`QUICKSTART_COMMANDS` — the copy in the module, not the fence on the page. So
+the assertion that the page's command is complete was made against a string the
+page does not print.
+
+It was caught by a **photograph**: the before and after of the quickstart page
+came back with the same `md5`. That is the second time in one day this lane has
+found something that way, and the first is filed above.
+
+The block is now rendered from `QUICKSTART_COMMANDS` by a component, beside the
+two that already render the file and its output, so there are two statements of
+the command and the second is a comment inside the file the first installs.
+
+**What would close the class**: nothing general. The specific guard is a test
+asserting the page has **no fenced install command at all**, which is a claim
+about absence — and that is the only kind of claim a third copy cannot satisfy
+by agreeing with the second.
+
+---
+## 2026-09-27 — a check named "imports only what the install line installs" cannot see a subpath the package does not export
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/quickstart/`) · **Status:** open as a **shape worth
+knowing**; the specific hole is covered by `_lib/teaches.test.ts`, and the check
+itself is left as it is because it is right about what it does check
+
+The quickstart's file is held to its install line by this:
+
+```ts
+const packageOf = (specifier: string): string =>
+  specifier.startsWith("@") ? segments.slice(0, 2).join("/") : segments[0]
+
+for (const specifier of imported) {
+  expect(QUICKSTART_DEPENDENCIES, specifier).toContain(packageOf(specifier))
+}
+```
+
+It collapses a subpath to its package and asks whether the package is installed.
+So `@jam-overture/loom/primitives` became `@jam-overture/loom`, which *is* on the
+install line, and the check passed for the whole fortnight during which that
+subpath was not on the registry at all.
+
+The test is not wrong about its own claim — *every module this file imports comes
+from a package the reader was told to install* — and that claim is worth keeping.
+It simply cannot make the next claim along, which is the one that mattered: **the
+specifier resolves.** No amount of reading the file settles that; it needs the
+published manifest, which is what `_lib/packages.ts` and `_lib/teaches.test.ts`
+now read.
+
+### The class, which is the third instance today
+
+A check that normalises its input before comparing has **thrown away the
+distinction it is being asked about**, and the normalisation is usually the
+sensible-looking line. This is the same family as this morning's entry on a
+differential assertion whose two sides move together: in both, the test is green
+because the step that makes it readable is the step that removes the defect from
+view.
+
+The tell is the same in both, and it is worth saying once: **name a defect the
+check would not survive.** If naming one is hard, the check is weaker than its
+title.

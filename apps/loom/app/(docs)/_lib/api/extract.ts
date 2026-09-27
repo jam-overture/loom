@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url"
 
 import ts from "typescript"
 
+import { publishedSpecifier } from "../packages"
+
 import { moduleTitle } from "./groups"
 import { apiSlugFor, type ApiGroup, type ApiKind, type ApiReference, type ApiSymbol } from "./model"
 import { narrowerDoorsBySpecifier, type DoorFacts } from "./narrower"
@@ -115,7 +117,15 @@ export const publishedEntries = (root: string = packageRoot): readonly Published
 
     return [
       {
-        specifier: subpath === "." ? name : `${name}${subpath.slice(1)}`,
+        /*
+         * The name a reader could install, which is not always the name this
+         * workspace resolves. The starter library is reached here at
+         * `@jam-overture/loom/primitives` and ships as
+         * `@jam-overture/loom-primitives`; the declarations behind the two are
+         * one file, so the reference is read from the door the workspace has and
+         * titled with the door a reader has. `_lib/packages.ts` carries why.
+         */
+        specifier: publishedSpecifier(subpath === "." ? name : `${name}${subpath.slice(1)}`),
         types,
         runtime: condition.default,
       },

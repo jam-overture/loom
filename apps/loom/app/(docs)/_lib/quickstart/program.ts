@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
+import { asAReaderWouldWrite } from "../packages"
+
 import { REPOSITORY_ROOT } from "../architecture/source"
 
 /**
@@ -60,7 +62,7 @@ export const QUICKSTART_OUTPUT_FILE = "quickstart.html"
  * three, which is a bad first minute.
  */
 export const QUICKSTART_COMMANDS: readonly string[] = [
-  "pnpm add @jam-overture/loom react react-dom zod",
+  "pnpm add @jam-overture/loom @jam-overture/loom-primitives react react-dom zod",
   "npx tsx quickstart.mts",
 ]
 
@@ -74,6 +76,7 @@ export const QUICKSTART_COMMANDS: readonly string[] = [
  */
 export const QUICKSTART_DEPENDENCIES: readonly string[] = [
   "@jam-overture/loom",
+  "@jam-overture/loom-primitives",
   "react",
   "react-dom",
   "zod",
@@ -149,9 +152,23 @@ export const quickstartTranscriptLines = (): readonly TranscriptLine[] =>
     return outcome === undefined ? { text } : { text, verdict: QUICKSTART_VERDICTS[outcome] }
   })
 
-/** The file, verbatim. Read at build time; the browser only gets the text. */
+/**
+ * The file, as a reader would write it. Read at build time; the browser only
+ * gets the text.
+ *
+ * Verbatim but for one line. The file imports the starter library at
+ * `@jam-overture/loom/primitives`, which is the door **this workspace** has, and
+ * it must — `quickstart.test.ts` runs this exact module. A reader has
+ * `@jam-overture/loom-primitives`, which is the package the same library ships
+ * as; `_lib/packages.ts` carries why the two names exist and is the only place
+ * either is written down.
+ *
+ * This is the one file on the site where that reconciliation is a text
+ * substitution rather than a compiler pass, and the reason is what makes the
+ * page worth having: the block is **the file**, not a transcription of it.
+ */
 export const readQuickstartSource = (): string =>
-  readFileSync(join(REPOSITORY_ROOT, ...QUICKSTART_PATH), "utf8")
+  asAReaderWouldWrite(readFileSync(join(REPOSITORY_ROOT, ...QUICKSTART_PATH), "utf8"))
 
 /**
  * The three sentences somebody asks the running page for, lifted out of the
