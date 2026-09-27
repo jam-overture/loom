@@ -290,8 +290,16 @@ stop reaching for the first two.
 ## 2026-09-26 — a host cannot ask a resolved theme which way round it is, so every surface that frames part of a tree computes it again
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`src/theme/`, `src/render/theme.ts`) · **Status:** open — **a gap, and it cost
-this lane a 1.10:1 contrast ratio on the demo's decisive frame.**
+(`src/theme/`, `src/render/theme.ts`) · **Status:** **closed by
+`framework-57-which-way-round-a-theme-is`** ([0197](decisions/0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md))
+— **both shapes, because they are different things.** `paletteScheme(palette)`
+joins `chroma` and `scrim` on `PaletteMeasures` as a third derived reading, and
+`themeGround(theme)` sits beside `themeStyle(theme)` in
+`@jam-overture/loom/react` returning `{ backgroundColor, color, colorScheme }`.
+No threshold, for the reason this entry gives. It takes a `ResolvedTheme` rather
+than a `ThemeResolution`, so *the tree names no theme* stays the host's to answer
+— which is the one line of demo left in `_lib/ground.ts`, whose 29 tests pass
+unchanged against the moved implementation.
 
 `themeStyle(theme)` hands a host every custom property a primitive reads. What
 it cannot hand a host is the one fact the host itself needs to draw *around* the
@@ -34385,6 +34393,61 @@ they describe did not exist yet.
 `manifest.ts` reading `../../package.json`, and it is four lines.
 
 ---
+## 2026-09-27 — the stale-`main` trap has a second half: `git status` reports the stale branch as up to date with `origin/main`, and it is the sentence that would stop you checking
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **sharpening the 20 September entry rather than replacing it**, which was
+right about the fault and does not name the thing that makes it convincing.
+
+The 20 September entry says `main` in a fresh session clone can be far behind
+`origin/main` while the procedure says to branch off it. That happened again
+today: this session's clone arrived with `HEAD` **detached** at `207e450` and a
+local `main` branch ref at `cc462bd`, **ten commits behind**.
+
+**What is new is what `git` says about it.** `git checkout main` printed:
+
+```
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+```
+
+It is up to date with the *remote-tracking ref in this clone*, which was also
+stale. Both were, so the two agreed, and the sentence a person reads as *you have
+the latest `main`* is emitted at the exact moment they do not. Nothing is lying;
+the sentence means something narrower than it reads, and it means it most
+confidently when it is least useful.
+
+**What it would have cost this run.** The branch was cut, and the first thing
+read on it was `decisions/`, where `0194` was **absent** — a record the 26
+September framework report says it added and whose number the index carried as
+*No record on this branch*. So the visible symptom of a ten-commit-stale
+checkout was **a decision record missing from a merged pull request**, which is
+one of the more alarming things this repository can show you and had nothing to
+do with what was actually wrong. Two other symptoms sat beside it: the package
+name read `@loom/runtime` where `main` has said `@jam-overture/loom` since #402,
+and `LICENSE` behaved as though the licensing question were still open.
+
+Caught by noticing that `git log` before the checkout and `ls decisions/` after
+it disagreed — that is, by accident, and after ten minutes spent tracing a
+deletion that never happened.
+
+**The remedy, one line, and it is not `git status`:**
+
+```bash
+git fetch origin main && git checkout -B <branch> origin/main
+```
+
+`origin/main` **after a fetch** is the only ref in a fresh clone worth branching
+from. Never `main`, and never a local branch's report of its own freshness — a
+tracking ref is a cached answer, and the cache is what is stale.
+
+**What would close it:** the check belongs in whatever a run does first, not in a
+run's memory of a finding. `tools/` has no session-preflight step and this is the
+second candidate for one (the first is the three-day-old `.next`, 23 September,
+now diagnosed as an ordering by #408). A `pnpm preflight` that fetches, reports
+how far the local `main` is behind, and says which ref to branch from would make
+both of them impossible to walk into. Filed rather than built because it is a
+change to how every lane starts a run, and three other routines read this file.
 
 ## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
 

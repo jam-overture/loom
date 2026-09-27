@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -3134,9 +3134,23 @@
               "summary": "The palette's scrim pair, or `undefined` when either end is a colour this cannot measure — `undefined` rather than a guess, so a host whose palette is written in `hsl()` is told the wash is unavailable instead of being handed a pair that might be the wrong way round."
             },
             {
+              "name": "PaletteScheme",
+              "kind": "type",
+              "signature": "type PaletteScheme = \"light\" | \"dark\";",
+              "truncated": false,
+              "summary": "Which way round a palette is."
+            },
+            {
+              "name": "paletteScheme",
+              "kind": "function",
+              "signature": "const paletteScheme: (palette: Palette) => PaletteScheme | undefined",
+              "truncated": false,
+              "summary": "Which way round the palette is, or `undefined` when either end of its body-copy pair is a colour `channelsOf` declines to read."
+            },
+            {
               "name": "PaletteMeasures",
               "kind": "type",
-              "signature": "type PaletteMeasures = {\n    readonly palette: ThemeId;\n    /**\n     * Chroma per slot, normalised, for the slots that carry colour. A slot whose\n     * colour could not be measured is **absent** rather than zero: zero is a real\n     * answer meaning grey, and `graphite`'s accent really is 0.000.\n     */\n    readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>;\n    readonly scrim: Scrim | undefined;\n};",
+              "signature": "type PaletteMeasures = {\n    readonly palette: ThemeId;\n    /**\n     * Chroma per slot, normalised, for the slots that carry colour. A slot whose\n     * colour could not be measured is **absent** rather than zero: zero is a real\n     * answer meaning grey, and `graphite`'s accent really is 0.000.\n     */\n    readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>;\n    readonly scrim: Scrim | undefined;\n    /**\n     * Which way round the palette is, and `undefined` on the same terms `scrim`\n     * is: a pair this cannot read is reported as unavailable rather than guessed.\n     */\n    readonly scheme: PaletteScheme | undefined;\n};",
               "truncated": false,
               "summary": "Everything measurable about one palette that its slots do not say."
             },
@@ -4293,7 +4307,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4339,7 +4353,7 @@
       "files": 56,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5106,6 +5120,20 @@
               "signature": "const themeStyle: (theme: ResolvedTheme) => CSSProperties",
               "truncated": false,
               "summary": "A resolved theme as a style object the root primitive applies."
+            },
+            {
+              "name": "ThemeGround",
+              "kind": "type",
+              "signature": "type ThemeGround = {\n    readonly backgroundColor: string;\n    readonly color: string;\n    /**\n     * Absent — rather than guessed — when either end of the palette's body-copy\n     * pair is a colour `channelsOf` declines to read, in which case whatever\n     * `color-scheme` the host's own stylesheet sets stands. Every registered\n     * palette declares both as hex and resolves.\n     */\n    readonly colorScheme?: PaletteScheme;\n};",
+              "truncated": false,
+              "summary": "The ground a host paints when it draws a frame standing in for the page."
+            },
+            {
+              "name": "themeGround",
+              "kind": "function",
+              "signature": "const themeGround: (theme: ResolvedTheme) => ThemeGround | undefined",
+              "truncated": false,
+              "summary": "A resolved theme as the three declarations a host's own frame applies."
             }
           ]
         },
@@ -5168,7 +5196,7 @@
       "files": 179,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5620,7 +5648,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6211,7 +6239,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6439,7 +6467,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6856,7 +6884,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7210,7 +7238,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7343,7 +7371,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8106,7 +8134,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8249,7 +8277,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8309,7 +8337,7 @@
       "files": 25,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8843,7 +8871,7 @@
       "files": 21,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8917,7 +8945,7 @@
       "files": 84,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9333,7 +9361,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1077,
+        "packageNames": 1081,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
