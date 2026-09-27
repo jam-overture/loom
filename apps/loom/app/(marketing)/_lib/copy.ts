@@ -112,9 +112,24 @@ export const FACTS = {
  * that this product has not decided what it is. An absent band says nothing at
  * all, which is a great deal better than that.
  */
-export const PLACEHOLDER_COPY = {
-  license: "Licensing is not settled, and this line is where it will be stated.",
-} as const
+export const PLACEHOLDER_COPY = {} as const
+
+/**
+ * The licence, which stopped being a placeholder on 27 September.
+ *
+ * It was this site's last one and it had been there since the footer was
+ * written: *"Licensing is not settled, and this line is where it will be
+ * stated."* `docs/rollout.md` had it as the one hard gate on Phase 4 —
+ * *undecided, and it gates whether the repository can be public at all.* The
+ * maintainer settled it as MIT.
+ *
+ * **Nothing here is typed from a decision somebody reported.** The repository
+ * states it in two places already — `LICENSE` at the root and `license` in the
+ * package manifest, both added by #402 when the framework went to npm — and
+ * `license.test.ts` holds this sentence against the manifest, so the site
+ * cannot go on saying MIT if the package ever stops.
+ */
+export const LICENSE_NOTICE = "Loom is open source under the MIT license."
 
 export type PlaceholderKey = keyof typeof PLACEHOLDER_COPY
 

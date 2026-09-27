@@ -34096,8 +34096,10 @@ written, for six weeks.
 ## 2026-09-27 — a preview deployment now carries a full structured-data graph, and nothing tells a crawler to ignore it
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — **a sharpening of the `noindex` question this lane has carried as an
-open item since 8 September**, not a new one, and now worth more than it was
+**closed** by `marketing-39-settled` — the maintainer approved it on
+27 September and this lane took it, because `robots.ts` is at the application
+root for Next's sake and everything in it is this lane's by content
+(`docs/routines.md`, *the lane follows the content and not the location*)
 
 Every preview deployment serves `/sitemap.xml`, `/robots.txt` with
 `allow: /`, per-page canonicals, Open Graph cards — and as of today a
@@ -34165,6 +34167,34 @@ schema looked incomplete and nothing said otherwise. The absence has to be the
 thing that is asserted.
 
 ---
+## 2026-09-27 — licensing is settled and `docs/rollout.md` still calls it the one thing nothing unblocks
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` ·
+**Status:** open — one paragraph, and nothing is blocked by it standing
+
+The maintainer settled licensing as **MIT** on 27 September. `#402` had already
+put it in `LICENSE` and in the package manifest when the framework went to npm,
+and `marketing-39-settled` takes the last placeholder off the marketing site's
+footer — the site now states it and links to the file.
+
+`docs/rollout.md` has not caught up. Phase 2 still reads:
+
+> **Licensing** — undecided, and it gates whether the repository can be public
+> at all. **This one is the maintainer's and nothing unblocks it but a
+> decision.**
+
+And the *What would move these dates* list still carries **licensing** as a hard
+gate on Phase 4.
+
+It is filed rather than fixed because `docs/rollout.md` is the plan every lane
+reads to find its position, and a lane editing another lane's statement of what
+is blocked is how two routines end up disagreeing about what the project is
+waiting for. The change is a paragraph: the item is done, and Phase 4's gate is
+one item shorter.
+
+**Worth doing soon rather than eventually.** A routine reading that file today
+is told the repository may not be public, which is no longer true, and the whole
+purpose of the file is to be the thing a run with no memory can trust.
 
 ## 2026-09-27 — a package's promises about its neighbor cannot be checked until the neighbor is published, and two of this one's were wrong
 

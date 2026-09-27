@@ -50,3 +50,55 @@ describe("robots", () => {
     expect(rules).toMatchObject({ userAgent: "*", allow: "/" })
   })
 })
+
+/**
+ * Which deployments get crawled at all, approved by the maintainer on
+ * 27 September.
+ *
+ * `isPublicDeployment` is asserted on its own in
+ * `(marketing)/_lib/crawling.test.ts`; what this holds is the thing that file
+ * cannot — **that the file Next actually serves changes with it**, and changes
+ * the way round that is safe. A preview is told to go away and is handed no
+ * sitemap, because pointing a crawler that has just been refused at a map of
+ * where to go is a contradiction it resolves in whichever order it read them.
+ */
+describe("robots, on a deployment that is not for finding", () => {
+  const withEnv = <T,>(value: string | undefined, read: () => T): T => {
+    const before = process.env["VERCEL_ENV"]
+
+    if (value === undefined) delete process.env["VERCEL_ENV"]
+    else process.env["VERCEL_ENV"] = value
+
+    try {
+      return read()
+    } finally {
+      if (before === undefined) delete process.env["VERCEL_ENV"]
+      else process.env["VERCEL_ENV"] = before
+    }
+  }
+
+  it("keeps a preview out of the index entirely", () => {
+    const served = withEnv("preview", robots)
+
+    expect(served.rules).toEqual({ userAgent: "*", disallow: "/" })
+  })
+
+  it("hands a preview no sitemap to follow", () => {
+    expect(withEnv("preview", robots).sitemap).toBeUndefined()
+  })
+
+  it("crawls production as it always did", () => {
+    const served = withEnv("production", robots)
+
+    expect(served.rules).toEqual({ userAgent: "*", allow: "/", disallow: [...disallowedPaths] })
+    expect(served.sitemap).toBeDefined()
+  })
+
+  /**
+   * The negative case this rule exists to get right: a self-hosted Loom site
+   * has no `VERCEL_ENV` and keeps exactly the behaviour it had before.
+   */
+  it("leaves a deployment Vercel says nothing about alone", () => {
+    expect(withEnv(undefined, robots).sitemap).toBeDefined()
+  })
+})

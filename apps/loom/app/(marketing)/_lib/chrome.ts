@@ -2,7 +2,7 @@ import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-ove
 
 import type { AskId } from "./adapt/asks"
 import { COUNTED_ANCHOR } from "./bands"
-import { PLACEHOLDER_COPY } from "./copy"
+import { LICENSE_NOTICE } from "./copy"
 import { action, link, prose, stack } from "./nodes"
 import {
   askHref,
@@ -14,6 +14,7 @@ import {
   PRODUCT_SURFACES,
   readingNeighbors,
   REPOSITORY_URL,
+  LICENSE_URL,
   SITE_ROUTES,
   SITE_THEMES,
   surfaceHref,
@@ -276,7 +277,19 @@ export const siteFooter = (ids: IdFactory, context: ChromeContext): LoomNode =>
         link(ids, "Decisions", DECISIONS_URL, { tone: "muted", scale: "small", external: true }),
       ]),
       buildSlot(ids, "note", [
-        prose(ids, PLACEHOLDER_COPY.license, { size: "small", tone: "muted" }),
+        /**
+         * The licence, stated rather than deferred, as of 27 September. It is a
+         * link as well as a sentence because a reader who cares which licence
+         * wants the text of it, and the text is in the repository.
+         */
+        stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
+          prose(ids, LICENSE_NOTICE, { size: "small", tone: "muted" }),
+          link(ids, "Read the license", LICENSE_URL, {
+            tone: "muted",
+            scale: "small",
+            external: true,
+          }),
+        ]),
         ...(context.counting === true ? [countingNote(ids, context)] : []),
         /**
          * The re-theme, offered rather than described. Each is an ordinary link

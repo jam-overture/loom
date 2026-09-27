@@ -524,6 +524,32 @@ export const siteOrigin = (env: Environment = process.env): string => {
     : "http://localhost:3000"
 }
 
+/**
+ * Whether this deployment is the one the public is meant to find.
+ *
+ * Approved on 27 September, answering a finding this lane filed the same day:
+ * every preview deployment served a sitemap, a `robots.txt` saying *crawl
+ * everything*, per-page canonicals, and — since #406 — a full `schema.org`
+ * graph and an `/llms.txt`. There is one preview per pull request and each of
+ * them states, in the format a machine reads as fact, that it is this product.
+ *
+ * **The rule is deliberately narrow: not production means Vercel said so.**
+ * A deployment with no `VERCEL_ENV` at all is left exactly as it was, and that
+ * is the important half. This file ships in the repository, so the obvious
+ * spelling — *index only when we are sure this is production* — would silently
+ * de-index the site of anybody running their own Loom deployment outside
+ * Vercel, which is the failure that cannot be noticed from here and is far
+ * worse than a preview being crawled.
+ *
+ * So: on Vercel and not production → keep it out of the index. Anywhere else,
+ * including a local `next start` and a self-hosted site, nothing changes.
+ */
+export const isPublicDeployment = (env: Environment = process.env): boolean => {
+  const vercel = env["VERCEL_ENV"]
+
+  return vercel === undefined || vercel.length === 0 || vercel === "production"
+}
+
 /** An internal link, as the tree has to hold it: absolute, and origin-qualified. */
 export const internalHref = (origin: string, path: string, theme?: SiteThemeName): string => {
   const url = new URL(path, `${origin}/`)
@@ -621,6 +647,8 @@ export const surfaceHref = (origin: string, surface: Surface): string =>
 
 /** Where the site points when it points at the project itself. */
 export const REPOSITORY_URL = "https://github.com/jam-overture/loom"
+/** The licence itself, which the footer links to beside the sentence naming it. */
+export const LICENSE_URL = "https://github.com/jam-overture/loom/blob/main/LICENSE"
 export const DECISIONS_URL = "https://github.com/jam-overture/loom/tree/main/decisions"
 
 /**
