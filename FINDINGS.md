@@ -34393,44 +34393,81 @@ they describe did not exist yet.
 `manifest.ts` reading `../../package.json`, and it is four lines.
 
 ---
-## 2026-09-27 — `pnpm shoot --serve` photographs the front door's embedded demonstration as a broken-document icon, and has since the flag existed
+## 2026-09-27 — the framed demonstration points at a host the reader is not on, and a preview deployment answers that frame with a sign-in page
 
-**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
-open — one line in the harness; nothing is wrong with the site and nothing is
-wrong on a deployment, which is why no test of any lane could report it
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-40-a-band-that-faces-its-answer` — **filed wrong first,
+and the wrong version is the part worth reading**
 
-The front door's `Now type one of your own` band frames `/demo` through
-`loom.embed`, and the frame's `src` is `surfaceHref(origin, DEMO)` — an absolute
-address built from `siteOrigin()`. With no `LOOM_SITE_ORIGIN` and no
-`VERCEL_URL`, that resolves to `http://localhost:3000`.
+The front door's `Now type one of your own` band frames `/demo`. The `src` is
+absolute, built from `siteOrigin()`, which answers **where this page lives**
+from the environment. What a frame needs is **where this request arrived**, and
+on a preview deployment those are two different hosts:
 
-`pnpm shoot --serve apps/loom` starts the application on an **ephemeral port**
-on purpose, so it runs beside a `next dev`
-([0191](decisions/0191-the-harness-may-start-the-application-because-there-is-now-only-one.md)).
-The page is therefore served from `127.0.0.1:40473` while the frame inside it
-points at `localhost:3000`, which is not listening. Chromium draws its
-broken-document glyph in a 1078 × 673 grey box, and the shot comes back with a
-hole where the one band that proves the product works should be.
+| | |
+| --- | --- |
+| `VERCEL_URL`, so `siteOrigin()` | `loom-9kd3jf-….vercel.app` — the deployment-unique host |
+| what the reader is on | `loom-git-<branch>-….vercel.app` — the branch alias |
 
-**It is invisible from inside the run.** The shot succeeds, the exit code is 0,
-`scrollWidth` equals `innerWidth`, and every test of the band passes — the tree
-is right, the `src` is right for the origin it was given, and the origin is
-right for the default. Only the picture is wrong, and only a person looking at
-the picture can tell. This run photographed it twice before recognising it, and
-then reproduced the correct frame by serving on port 3000 by hand.
+So the frame is cross-origin. A preview sits behind Vercel's deployment
+protection, the framed request arrives without the reader's cookie, it is
+answered with a sign-in page that refuses to be framed, and the visitor gets
+the browser's **broken-document glyph** where the one band that proves this
+product works should be.
 
-**The one line.** `--serve` already knows the origin it started on — it prints
-it — so passing that origin to the child as `LOOM_SITE_ORIGIN` makes every
-absolute link in the tree point at the deployment being photographed, which is
-what the flag already implies. It is the harness's rather than this lane's
-because `siteOrigin()` cannot know a port chosen after the module loaded, and
-because the same fault applies to any surface whose tree holds an absolute
-internal link.
+**The maintainer reported seeing it. This lane had already looked straight at
+it and written it off.**
 
-**Worth doing soon for a reason beyond one band**: this lane ships a full-page
-shot of the front door in most pull requests, and the maintainer judges this
-surface by eye. Every one of those taken with `--serve` has had a broken box in
-the middle of it.
+Earlier the same day this entry existed in a different form — *"`pnpm shoot
+--serve` photographs the front door as a broken-document icon"*, owned by
+`Loom daily build`, status *"nothing is wrong with the site and nothing is
+wrong on a deployment, which is why no test of any lane could report it."*
+Every observation in it was accurate. The conclusion was wrong, and it was
+wrong in the most expensive available direction: **a real defect on every
+preview was filed as somebody else's tooling quirk.**
+
+What produced that reading is worth naming, because it is not carelessness and
+it will happen again:
+
+- The symptom was first met **through the screenshot harness**, where the
+  second host is an ephemeral port rather than a protected preview. A local
+  tool being wrong is a smaller and more familiar story than the site being
+  wrong, and it fit every fact.
+- **It was confirmed by a fix that worked.** Serving on port 3000 by hand made
+  the frame render, which proved the mechanism — *the frame's host must match
+  the page's host* — and was then read as proving the diagnosis. It proves the
+  mechanism on any host, including Vercel's.
+- **No instrument disagreed.** The shot exits 0, `scrollWidth` equals
+  `innerWidth`, the tree is right, the seam resolves `self`, the registry and
+  the `src` agree because both come from `siteOrigin()`, so not even the
+  frame-origin allowlist fires. The only thing that says anything is a person
+  looking at the page.
+
+**The fix is in this lane and nothing is asked of the harness.** The tree's
+addresses now follow the browser — `originFromHost` in `_lib/site.ts`,
+`servedOrigin()` in `_lib/serving.ts`, read off `x-forwarded-host` — while the
+canonical link, the sitemap, the share image and the structured-data graph stay
+on `siteOrigin()`, because those declare where a page *lives* and a preview
+announcing itself under whichever host a reader typed would be worse than one
+announcing the deployment.
+
+That single change closes the harness half too: `pnpm shoot --serve` sets the
+`Host` header to its own ephemeral origin, so the frame follows it and renders
+live. **It had never once been photographed working.**
+
+### The rule
+
+**An absolute URL in a tree answers one of two questions and they are not the
+same question.** *Where does this page live* is the environment's; *where did
+this request arrive* is the header's. They agree on a laptop and on a pinned
+production domain, which is every environment a routine develops in, and they
+differ on every preview — which is the only environment the maintainer looks
+at.
+
+**For the other surface lanes**: anything you render with an absolute
+same-origin URL that the browser will re-fetch — a frame, a form action, a
+fetch from a client component, a preload — has this bug on previews today. An
+`href` merely moves the reader to a host that works; a subresource fails.
 
 ---
 ## 2026-09-27 — the only automated visual instrument here reports a page that is too wide, and nine bands were half empty

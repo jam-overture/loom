@@ -1,5 +1,6 @@
 import { readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
+import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { HOW_IT_WORKS, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
@@ -19,7 +20,7 @@ const HowItWorksPage = async ({ searchParams }: { readonly searchParams: SearchP
   const params = await searchParams
   const ask = readAskId(params["ask"])
   const rendered = await renderSitePage(HOW_IT_WORKS, {
-    origin: siteOrigin(),
+    origin: await servedOrigin(),
     theme: readThemeName(params["theme"]),
     ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
   })
