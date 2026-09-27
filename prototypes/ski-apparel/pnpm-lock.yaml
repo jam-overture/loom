@@ -9,8 +9,11 @@ importers:
   .:
     dependencies:
       '@jam-overture/loom':
-        specifier: file:../..
-        version: file:../..(react@19.3.0)
+        specifier: ^0.1.0
+        version: 0.1.0(react@19.3.0)
+      '@jam-overture/loom-primitives':
+        specifier: ^0.1.0
+        version: 0.1.0(@jam-overture/loom@0.1.0(react@19.3.0))(react@19.3.0)
       react:
         specifier: ^19.2.0
         version: 19.3.0
@@ -180,8 +183,16 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@jam-overture/loom@file:../..':
-    resolution: {directory: ../.., type: directory}
+  '@jam-overture/loom-primitives@0.1.0':
+    resolution: {integrity: sha512-iFudqh8hS8SsChRxooZ2FmjpZjWXTUspOiYk5TLCx+fZVTPZum/RKvNtxyYT/IY765EjOc/kadHkIzezw7SVhQ==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      '@jam-overture/loom': ~0.1.0
+      react: ^19.0.0
+
+  '@jam-overture/loom@0.1.0':
+    resolution: {integrity: sha512-JDwEPqtwt1x/J5hbD4srrYYVGwKRJfjMbP5BDmWTUdKonS2ut8iH99uLL5oAe7FESNmqXy2sTxye7ICLh7c42Q==}
+    engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
       '@anthropic-ai/sdk': ^0.115.0
@@ -298,7 +309,13 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@jam-overture/loom@file:../..(react@19.3.0)':
+  '@jam-overture/loom-primitives@0.1.0(@jam-overture/loom@0.1.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@jam-overture/loom': 0.1.0(react@19.3.0)
+      react: 19.3.0
+      zod: 3.25.76
+
+  '@jam-overture/loom@0.1.0(react@19.3.0)':
     dependencies:
       zod: 3.25.76
     optionalDependencies:

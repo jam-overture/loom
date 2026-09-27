@@ -1,5 +1,5 @@
 import { createThemeRegistry } from "@jam-overture/loom"
-import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
 import { renderLoomTree } from "@jam-overture/loom/react"
 import { renderToStaticMarkup } from "react-dom/server"
 
