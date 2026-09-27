@@ -122,7 +122,7 @@ describe("how much of the package a door goes through", () => {
 
   it("is nothing at all for a door with no implementation behind it", () => {
     const reach = doorReach(
-      { specifier: "@loom/runtime/typesonly", types: "/dist/door.d.ts", runtime: undefined },
+      { specifier: "@jam-overture/loom/typesonly", types: "/dist/door.d.ts", runtime: undefined },
       files({ "/dist/door.d.ts": `import type A from "@anthropic-ai/sdk";` })
     )
 
@@ -175,7 +175,7 @@ describe("what one door needs", () => {
   }
 
   const door = (types: string, runtime: string | undefined): PublishedEntry => ({
-    specifier: "@loom/runtime/invented",
+    specifier: "@jam-overture/loom/invented",
     types,
     runtime,
   })

@@ -24,7 +24,7 @@ const manifestOf = (source: unknown) => {
 }
 
 const base = {
-  name: "@loom/runtime",
+  name: "@jam-overture/loom",
   version: "0.1.0",
   license: "MIT",
   repository: { url: "git+https://github.com/jam-overture/loom.git" },

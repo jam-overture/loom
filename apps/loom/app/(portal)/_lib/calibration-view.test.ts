@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { dispositionReasonCodeSchema, UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
+import { dispositionReasonCodeSchema, UNATTRIBUTED_POLICY_ID } from "@jam-overture/loom"
 import type {
   CalibrationReport,
   CalibrationScore,
   PolicyCalibration,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import type { MissCause } from "./calibration-misses"
 import {

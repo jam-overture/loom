@@ -10,7 +10,7 @@ import type {
   StakeFactor,
   StakeLevel,
   TreeDelta,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { plainChange, type PlainChange } from "./plain-change"
 import { reversesTheLastChange, settingsMoved, type SettingMove } from "./put-back"

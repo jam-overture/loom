@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { NodeId } from "@loom/runtime"
+import type { NodeId } from "@jam-overture/loom"
 
 import type { Restoration, Reversal } from "@/app/(portal)/_lib/reversal"
 

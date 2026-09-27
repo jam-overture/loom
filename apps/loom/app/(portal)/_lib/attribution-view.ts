@@ -1,5 +1,5 @@
-import { assertNever, type AuthorKind } from "@loom/runtime"
-import type { NodeChange, NodeAttribution, NodeTouch, TreeAttribution } from "@loom/runtime/store"
+import { assertNever, type AuthorKind } from "@jam-overture/loom"
+import type { NodeChange, NodeAttribution, NodeTouch, TreeAttribution } from "@jam-overture/loom/store"
 
 /**
  * Who put a node here, in the words a reviewer reads.

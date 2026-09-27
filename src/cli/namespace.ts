@@ -1,7 +1,7 @@
 /**
  * The one namespace the CLI will not write into, and the one it writes instead.
  *
- * `loom.` is the framework's. Every primitive `@loom/runtime/primitives`
+ * `loom.` is the framework's. Every primitive `@jam-overture/loom/primitives`
  * registers is named under it, and a registry refuses two definitions with one
  * type — so a host primitive called `loom.page` is not a shadow or an override,
  * it is a registry that cannot be built at all. The failure lands on whoever

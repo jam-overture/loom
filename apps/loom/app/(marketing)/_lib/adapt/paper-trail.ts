@@ -1,4 +1,4 @@
-import type { LoomTree, RuntimeEvent, RuntimeEventEnvelope } from "@loom/runtime"
+import type { LoomTree, RuntimeEvent, RuntimeEventEnvelope } from "@jam-overture/loom"
 
 import { askById, type Ask, type AskId } from "./asks"
 import { runAsk } from "./run"

@@ -8,7 +8,7 @@ import {
   type NodeId,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * Whether a change put a setting back where the change before it moved it from.

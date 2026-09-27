@@ -1,4 +1,4 @@
-import type { HoldError, RevertOutcome, WriteOutcome } from "@loom/runtime/write"
+import type { HoldError, RevertOutcome, WriteOutcome } from "@jam-overture/loom/write"
 import type {
   DispositionKind,
   DispositionReasonCode,
@@ -7,17 +7,17 @@ import type {
   NodeKind,
   StakeFactorCode,
   StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import type {
   EpisodeAnswer,
   EpisodeResolutionKind,
   FailureStage,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 import {
   describeAddressing,
   type Addressing,
   type UnaddressableReason,
-} from "@loom/runtime/react"
+} from "@jam-overture/loom/react"
 
 import { capitalised, partReading, type PartName } from "./part-name"
 

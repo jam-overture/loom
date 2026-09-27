@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { describeStoreError } from "@loom/runtime/store"
+import { describeStoreError } from "@jam-overture/loom/store"
 
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"

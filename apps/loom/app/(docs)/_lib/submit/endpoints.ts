@@ -8,7 +8,7 @@ import {
   type EndpointRegistry,
   type SubmissionFailure,
   type SubmissionTarget,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * The deployment behind *What a form posts to*.

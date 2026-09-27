@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { REVERT_INTERPRETER } from "@loom/runtime/write"
+import { REVERT_INTERPRETER } from "@jam-overture/loom/write"
 
 import type { ChangeRecord, InterpretationView } from "./record"
 import {

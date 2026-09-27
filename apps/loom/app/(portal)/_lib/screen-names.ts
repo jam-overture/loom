@@ -1,4 +1,4 @@
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 /**
  * The one place a screen is named — and the one place it says what it is *not*.

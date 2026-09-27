@@ -62,7 +62,7 @@ const index: SearchIndex = {
     {
       href: "/docs/api-reference/runtime#s-evaluateGate",
       title: "evaluateGate",
-      context: "@loom/runtime",
+      context: "@jam-overture/loom",
       kind: "export",
       summary: "",
       body: "",
@@ -77,7 +77,7 @@ const index: SearchIndex = {
      */
     {
       href: "/docs/api-reference/runtime",
-      title: "@loom/runtime",
+      title: "@jam-overture/loom",
       context: "API reference",
       kind: "page",
       summary: "",
@@ -110,7 +110,7 @@ const contents = {
     .map((entry) => ({ ...entry, body: "", code: "" })),
 }
 
-const names = { entryPoints: [{ specifier: "@loom/runtime", names: ["evaluateGate"] }] }
+const names = { entryPoints: [{ specifier: "@jam-overture/loom", names: ["evaluateGate"] }] }
 
 /**
  * The words, **one file per section**, which is how they really travel.

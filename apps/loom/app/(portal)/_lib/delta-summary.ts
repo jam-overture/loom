@@ -1,4 +1,4 @@
-import type { TreeDelta } from "@loom/runtime"
+import type { TreeDelta } from "@jam-overture/loom"
 
 import { partNameOf, subjectFor, type PartName } from "./part-name"
 import { namedList, type PlainLine } from "./vocabulary"

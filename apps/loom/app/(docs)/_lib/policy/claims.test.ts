@@ -27,7 +27,7 @@ const page = readFileSync(
   "utf8"
 )
 
-const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@loom\/[^"]+)"/g
+const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@jam-overture\/[^"]+)"/g
 
 type ImportLine = {
   readonly specifier: string

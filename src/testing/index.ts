@@ -1,5 +1,5 @@
 /**
- * The fixtures and doubles a host can import, published as `@loom/runtime/testing`.
+ * The fixtures and doubles a host can import, published as `@jam-overture/loom/testing`.
  *
  * Everything in this directory existed already and was reachable only from
  * inside the repository: `src/testing/**` was excluded from the build, so

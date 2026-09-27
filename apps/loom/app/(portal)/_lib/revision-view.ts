@@ -1,4 +1,4 @@
-import type { StoredRevision } from "@loom/runtime/store"
+import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { plainOperation } from "./delta-summary"
 import type { PartName } from "./part-name"

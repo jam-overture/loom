@@ -1,4 +1,4 @@
-import { renderCatalogue, type CataloguedPrimitive, type CataloguedProp } from "@loom/runtime"
+import { renderCatalogue, type CataloguedPrimitive, type CataloguedProp } from "@jam-overture/loom"
 
 import { namedList } from "./vocabulary"
 

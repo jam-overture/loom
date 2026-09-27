@@ -1,4 +1,4 @@
-import type { LoomTree, NodeId, PrimitiveType } from "@loom/runtime"
+import type { LoomTree, NodeId, PrimitiveType } from "@jam-overture/loom"
 import {
   mintViewKey,
   rollUp,
@@ -9,7 +9,7 @@ import {
   type ReaderSignalBatch,
   type ReaderTally,
   type Rollup,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 
 import { bandsOf, type Band } from "../outline"
 

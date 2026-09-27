@@ -5,7 +5,7 @@ import {
   type CompositionRuntime,
   type EditIntent,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import {
   calibrationOf,
   collectTelemetry,
@@ -20,8 +20,8 @@ import {
   type RecordedTelemetry,
   type RetentionPlan,
   type RetentionPolicy,
-} from "@loom/runtime/telemetry"
-import { commitIntent, confirmHeld, discardHeld } from "@loom/runtime/write"
+} from "@jam-overture/loom/telemetry"
+import { commitIntent, confirmHeld, discardHeld } from "@jam-overture/loom/write"
 
 import { docsExamples } from "../examples/catalogue"
 import { docsGatePolicy } from "../propose/policy"

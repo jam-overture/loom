@@ -1,4 +1,4 @@
-import { auditRegistry, decorationFromAudit } from "@loom/runtime/sdk"
+import { auditRegistry, decorationFromAudit } from "@jam-overture/loom/sdk"
 
 import { portalRegistry } from "./registry"
 

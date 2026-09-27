@@ -156,8 +156,8 @@ describe("a name at two doors", () => {
   })
 
   /**
-   * One door can be both at once, which is the shape `@loom/runtime/signals`
-   * takes against `@loom/runtime/telemetry`: they share `ForgetOutcome`, which
+   * One door can be both at once, which is the shape `@jam-overture/loom/signals`
+   * takes against `@jam-overture/loom/telemetry`: they share `ForgetOutcome`, which
    * is the same type, and `horizonOf`, which is not the same function. A rule
    * that let either reading win would say one of two true things and hide the
    * other.

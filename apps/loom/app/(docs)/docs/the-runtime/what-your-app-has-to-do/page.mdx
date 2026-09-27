@@ -28,9 +28,9 @@ the **write path**, and it is the three things that have to exist before a page
 can change at all:
 
 ```ts
-import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
-import { postgresHoldStore, postgresTreeStore } from "@loom/runtime/postgres"
-import { commitIntent, type WritePath } from "@loom/runtime/write"
+import { fixedPolicy, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { postgresHoldStore, postgresTreeStore } from "@jam-overture/loom/postgres"
+import { commitIntent, type WritePath } from "@jam-overture/loom/write"
 
 const path: WritePath = {
   store: postgresTreeStore(db),
@@ -136,7 +136,7 @@ and the answer arrives later — from a different person, in a different request
 possibly on a different server. So your app needs a second door:
 
 ```ts
-import { confirmHeld, discardHeld } from "@loom/runtime/write"
+import { confirmHeld, discardHeld } from "@jam-overture/loom/write"
 
 const yes = await confirmHeld(path, { proposalId, actor: reviewer.id })
 const no = await discardHeld(path, { proposalId, actor: reviewer.id })

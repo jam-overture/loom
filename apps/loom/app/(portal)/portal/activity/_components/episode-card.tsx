@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { IntentEpisode } from "@loom/runtime/telemetry"
+import type { IntentEpisode } from "@jam-overture/loom/telemetry"
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

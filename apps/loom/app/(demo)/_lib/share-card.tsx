@@ -1,4 +1,4 @@
-import { editorialPalette, type PaletteSlot } from "@loom/runtime"
+import { editorialPalette, type PaletteSlot } from "@jam-overture/loom"
 import type { ReactElement } from "react"
 
 import { CHROME, CHROME_RADIUS } from "./chrome"

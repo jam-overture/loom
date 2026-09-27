@@ -16,8 +16,8 @@ import {
   type StakeFactorCode,
   type StakeLevel,
   type TreeDelta,
-} from "@loom/runtime"
-import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import type { RevertOutcome, WriteOutcome } from "@jam-overture/loom/write"
 
 import { reportOf, revertReportOf, toneClasses, type OutcomeTone, type WeighedAgainst } from "./outcome"
 import { CANNOT_BE_DRAWN, CHANGE_STATES } from "./vocabulary"

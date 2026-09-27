@@ -299,9 +299,9 @@ describe("a rendered tree", () => {
    * the button itself is `behaviour-copy.test.ts`.
    */
   it("places a declared control without emitting a button before it can work", () => {
-    const markup = markupOf(treeWith("loom.code", "pnpm add @loom/runtime"), [codeDefinition])
+    const markup = markupOf(treeWith("loom.code", "pnpm add @jam-overture/loom"), [codeDefinition])
 
-    expect(markup).toContain("pnpm add @loom/runtime")
+    expect(markup).toContain("pnpm add @jam-overture/loom")
     expect(markup).not.toContain("<button")
   })
 

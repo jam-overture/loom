@@ -8,8 +8,8 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { askById, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"

@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 import { resolveConnectionString } from "./connection"
 

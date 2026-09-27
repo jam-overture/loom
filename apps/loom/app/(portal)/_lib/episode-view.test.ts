@@ -6,14 +6,14 @@ import {
   nodeIdSchema,
   proposalIdSchema,
   treeIdSchema,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import {
   EPISODE_RESOLUTION_KINDS,
   type EpisodeResolution,
   type EpisodeTally,
   type IntentEpisode,
   type ProposalEpisode,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import {
   askOutcome,

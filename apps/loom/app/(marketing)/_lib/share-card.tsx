@@ -1,4 +1,4 @@
-import type { PaletteSlot, ResolvedTheme } from "@loom/runtime"
+import type { PaletteSlot, ResolvedTheme } from "@jam-overture/loom"
 import type { ReactElement } from "react"
 
 import type { ShareCard } from "./share"

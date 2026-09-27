@@ -10,8 +10,8 @@ import {
   type LoomTree,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
-import type { CopyDeclarations } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import type { CopyDeclarations } from "@jam-overture/loom/sdk"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 import { describeProposalEffect } from "./proposal-effect"

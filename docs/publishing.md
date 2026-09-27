@@ -1,6 +1,6 @@
 # Publishing the framework
 
-**`@loom/runtime` is the only thing this repository publishes.** The marketing
+**`@jam-overture/loom` is the only thing this repository publishes.** The marketing
 site, the documentation, the lessons, the demonstration and the portal are one
 deployed application and are not packages; the starter primitive library is a
 package and is not this one
@@ -10,12 +10,22 @@ package and is not this one
 
 Two things this repository cannot contain and no routine can do:
 
-1. **Own the `@loom` scope on npm.** As of 26 September 2026 the scope holds no
-   published package and `@loom/runtime` is unregistered, which means it is
-   *available* rather than *yours*. Publishing into a scope requires the npm org
-   or user of that name. If `@loom` cannot be had, the fallback costs one field:
-   set `name` to `loom-runtime`, which is also unregistered, and change nothing
-   else — every entry point is a subpath and none of them names the scope.
+1. **Own the scope.** This publishes as `@jam-overture/loom` — the org is the
+   house, the product keeps its name. `@loom` was tried first and could not be
+   had: npm orgs and users share one namespace, so a scope with nothing
+   published under it is still not a free one, and `loom` and `loomjs` are both
+   held by users. Searching the registry for packages under a scope tells you
+   nothing about whether you can have it. The only reliable check is the org
+   creation form at `npmjs.com/org/create` — there is **no** `npm org create`
+   subcommand, and reaching for one returns a usage error that reads like an
+   availability answer and is not one.
+
+   **Changing the name later is not one field.** `publishConfig` can rewrite
+   `exports` and cannot rewrite `name`, so the published name is the workspace
+   name and every import site moves with it — 466 files for this rename, 409 of
+   them in `apps/loom`. The `reports/` and `decisions/` that name the old scope
+   are deliberately **not** rewritten: they are the record of what was true on
+   the day, and `pnpm verify` does not read them.
 2. **Provide a credential.** There is none in this repository and none in the
    routines' container. For a local publish, `npm login` once. For a publish
    from a cloud session, add `NPM_TOKEN` in the environment's settings — the
@@ -80,8 +90,8 @@ everything. Install it somewhere that resolves nothing:
 mkdir /tmp/cleanroom && cd /tmp/cleanroom
 npm init -y && npm pkg set type=module
 npm install /path/to/loom-runtime-<version>.tgz
-node -e "import('@loom/runtime').then(m => console.log(typeof m.createTree))"   # function
-node -e "import('@loom/runtime/primitives').catch(e => console.log(e.code))"    # ERR_PACKAGE_PATH_NOT_EXPORTED
+node -e "import('@jam-overture/loom').then(m => console.log(typeof m.createTree))"   # function
+node -e "import('@jam-overture/loom/primitives').catch(e => console.log(e.code))"    # ERR_PACKAGE_PATH_NOT_EXPORTED
 npx loom --help
 ```
 

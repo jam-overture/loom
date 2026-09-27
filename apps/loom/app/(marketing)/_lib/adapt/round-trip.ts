@@ -1,4 +1,4 @@
-import type { LoomTree } from "@loom/runtime"
+import type { LoomTree } from "@jam-overture/loom"
 
 import { piecesIn } from "../measure"
 import { ASKS, type Ask, type AskId } from "./asks"

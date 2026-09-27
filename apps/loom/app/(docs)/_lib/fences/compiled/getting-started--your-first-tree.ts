@@ -8,7 +8,7 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { buildElement, buildText, createTree, parseTree, sequentialIdFactory } from "@loom/runtime"
+import { buildElement, buildText, createTree, parseTree, sequentialIdFactory } from "@jam-overture/loom"
 
 import { reject, request } from "../context/getting-started--your-first-tree"
 

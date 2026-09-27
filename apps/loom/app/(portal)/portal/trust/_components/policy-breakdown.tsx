@@ -1,4 +1,4 @@
-import type { CalibrationReport } from "@loom/runtime/telemetry"
+import type { CalibrationReport } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { poolsMoreThanOneGate } from "@/app/(portal)/_lib/calibration-view"

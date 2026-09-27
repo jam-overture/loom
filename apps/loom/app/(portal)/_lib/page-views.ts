@@ -1,4 +1,4 @@
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { nameReading, type PageName } from "./page-name"
 import { screenName } from "./screen-names"

@@ -1,4 +1,4 @@
-import { REVERT_INTERPRETER } from "@loom/runtime/write"
+import { REVERT_INTERPRETER } from "@jam-overture/loom/write"
 
 import type { ChangeRecord } from "./record"
 

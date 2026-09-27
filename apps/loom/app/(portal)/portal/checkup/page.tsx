@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { collectNodeIds, treeIdSchema } from "@loom/runtime"
-import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
+import { collectNodeIds, treeIdSchema } from "@jam-overture/loom"
+import { auditSnapshot, describeStoreError } from "@jam-overture/loom/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"

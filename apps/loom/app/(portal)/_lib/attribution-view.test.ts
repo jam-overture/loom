@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import type { DeltaId, NodeId, ProposalId, TreeDelta, TreeId } from "@loom/runtime"
-import type { NodeAttribution, NodeChange, NodeTouch, StoredRevision } from "@loom/runtime/store"
+import type { DeltaId, NodeId, ProposalId, TreeDelta, TreeId } from "@jam-overture/loom"
+import type { NodeAttribution, NodeChange, NodeTouch, StoredRevision } from "@jam-overture/loom/store"
 
 import { creditFor, nodeCredits, TOUCH_LIMIT } from "./attribution-view"
 

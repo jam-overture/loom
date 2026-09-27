@@ -8,13 +8,13 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { memoryTreeStore } from "@loom/runtime/store"
-import { memoryHoldStore } from "@loom/runtime/write"
-import { memoryTelemetryJournal } from "@loom/runtime/telemetry"
+import { memoryTreeStore } from "@jam-overture/loom/store"
+import { memoryHoldStore } from "@jam-overture/loom/write"
+import { memoryTelemetryJournal } from "@jam-overture/loom/telemetry"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@loom/runtime/postgres"
-import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
+import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@jam-overture/loom/postgres"
+import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 // page.mdx:38 — a program
 // This site, and `pnpm dev`.

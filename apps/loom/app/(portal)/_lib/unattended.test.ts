@@ -7,8 +7,8 @@ import {
   proposalIdSchema,
   treeIdSchema,
   type TreeDelta,
-} from "@loom/runtime"
-import type { IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
+} from "@jam-overture/loom"
+import type { IntentEpisode, ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import { unattendedIn, unattendedSummary } from "./unattended"
 import { readingOf } from "./vocabulary"

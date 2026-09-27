@@ -15,7 +15,7 @@ import { readPageSource } from "./headings"
  * on each and is the reason many readers are here at all.
  *
  * The failure was specific and silent. A reader who had seen
- * `commitIntent` in a snippet, or typed `pnpm add @loom/runtime`
+ * `commitIntent` in a snippet, or typed `pnpm add @jam-overture/loom`
  * from *Installation*, got *the site says nothing about that* — from a site
  * whose blocks say it plainly. Worse, it was the reverse of what a reader
  * assumes: prose is the vaguer half and was searchable, code is the exact half

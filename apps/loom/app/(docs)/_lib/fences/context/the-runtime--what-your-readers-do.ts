@@ -1,6 +1,6 @@
-import type { LoomTree, ThemeRegistry } from "@loom/runtime"
-import type { ReaderSignalBatch } from "@loom/runtime/signals"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+import type { LoomTree, ThemeRegistry } from "@jam-overture/loom"
+import type { ReaderSignalBatch } from "@jam-overture/loom/signals"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * What your readers do.

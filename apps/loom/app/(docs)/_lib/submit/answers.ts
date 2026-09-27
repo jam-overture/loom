@@ -13,7 +13,7 @@ import {
   type LoomTree,
   type NodeId,
   type SubmissionOutcome,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { contactExampleTree } from "@/app/(docs)/_lib/examples/catalogue"
 import { docsRegistry } from "@/app/(docs)/_lib/loom/registry"

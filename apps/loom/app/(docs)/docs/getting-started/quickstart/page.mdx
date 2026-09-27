@@ -25,7 +25,7 @@ is worth your afternoon.
 A directory with nothing in it, and Node. Then one install:
 
 ```bash
-pnpm add @loom/runtime react react-dom zod
+pnpm add @jam-overture/loom react react-dom zod
 ```
 
 <Callout kind="warning">
@@ -73,7 +73,7 @@ healthy render that list is empty, which is why you saw none.
 
 **4 — You gave the page somewhere to live.** A tree store keeps the page and its
 history; a hold store keeps changes that are waiting for a person. Both are in
-memory here. `@loom/runtime/postgres` implements the same two contracts, and
+memory here. `@jam-overture/loom/postgres` implements the same two contracts, and
 nothing after that line in the file would change.
 
 **5 — You filled the seam where a model goes.** An *interpreter* turns a

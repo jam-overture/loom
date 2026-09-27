@@ -7,7 +7,7 @@ import {
   type StakeFactor,
   type StakeFactorCode,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 

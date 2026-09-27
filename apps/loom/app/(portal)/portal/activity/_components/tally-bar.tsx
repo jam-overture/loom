@@ -1,4 +1,4 @@
-import { EPISODE_RESOLUTION_KINDS, type EpisodeTally } from "@loom/runtime/telemetry"
+import { EPISODE_RESOLUTION_KINDS, type EpisodeTally } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { askOutcome, tallySummary } from "@/app/(portal)/_lib/episode-view"

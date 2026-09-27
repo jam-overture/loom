@@ -93,7 +93,7 @@ describe("the front door of the reference", () => {
   })
 
   it("carries each door's own sentence, and the specifier it is about", () => {
-    expect(front()).toContain("@loom/runtime/primitives")
+    expect(front()).toContain("@jam-overture/loom/primitives")
     expect(front()).toContain("The starter library")
   })
 })

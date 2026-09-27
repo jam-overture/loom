@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { proposalIdSchema } from "@loom/runtime"
-import type { UnreadableHold } from "@loom/runtime/write"
+import { proposalIdSchema } from "@jam-overture/loom"
+import type { UnreadableHold } from "@jam-overture/loom/write"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 

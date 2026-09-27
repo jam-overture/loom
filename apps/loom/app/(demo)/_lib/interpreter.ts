@@ -1,8 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk"
 
-import { modelInterpreter, randomIdFactory, systemClock, type ChangeInterpreter } from "@loom/runtime"
-import { anthropicModelClient } from "@loom/runtime/anthropic"
-import { catalogueOf } from "@loom/runtime/sdk"
+import { modelInterpreter, randomIdFactory, systemClock, type ChangeInterpreter } from "@jam-overture/loom"
+import { anthropicModelClient } from "@jam-overture/loom/anthropic"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { demoRegistry, demoThemes } from "./registry"
 

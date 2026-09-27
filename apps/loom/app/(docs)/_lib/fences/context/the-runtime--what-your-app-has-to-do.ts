@@ -1,5 +1,5 @@
-import type { ChangeInterpreter, EventSink, GatePolicy, LoomTree, ProposalId } from "@loom/runtime"
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import type { ChangeInterpreter, EventSink, GatePolicy, LoomTree, ProposalId } from "@jam-overture/loom"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 /**
  * What your app has to do.
@@ -31,4 +31,4 @@ export declare const reviewer: { readonly id: string }
 /** The proposal a person was asked about. */
 export declare const proposalId: ProposalId
 
-export type { EditIntent } from "@loom/runtime"
+export type { EditIntent } from "@jam-overture/loom"

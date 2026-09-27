@@ -1,8 +1,8 @@
 import { createElement } from "react"
 import { z } from "zod"
 
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
-import { definePrimitive } from "@loom/runtime/sdk"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
+import { definePrimitive } from "@jam-overture/loom/sdk"
 
 /**
  * Every prop a tree may set on this primitive. The render seam refuses a node

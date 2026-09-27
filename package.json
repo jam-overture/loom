@@ -1,5 +1,5 @@
 {
-  "name": "@loom/runtime",
+  "name": "@jam-overture/loom",
   "version": "0.1.0",
   "description": "Loom \u2014 an AI-powered adaptive UI runtime",
   "license": "MIT",

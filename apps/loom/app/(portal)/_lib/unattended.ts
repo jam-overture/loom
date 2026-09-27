@@ -1,5 +1,5 @@
-import type { ProposalId, TreeId } from "@loom/runtime"
-import type { IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
+import type { ProposalId, TreeId } from "@jam-overture/loom"
+import type { IntentEpisode, ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import { describeOperation, plainOperation, type OperationDescription } from "./delta-summary"
 import { plainMoment } from "./when"

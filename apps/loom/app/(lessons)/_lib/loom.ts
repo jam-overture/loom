@@ -12,10 +12,10 @@ import {
   type LoomNode,
   type LoomTree,
   type ThemeRegistry,
-} from "@loom/runtime"
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { renderLoomTree, resolveTheme, themeStyle, THEME_PROP_KEY } from "@loom/runtime/react"
-import { describeRegistryError, type PrimitiveRegistry } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { renderLoomTree, resolveTheme, themeStyle, THEME_PROP_KEY } from "@jam-overture/loom/react"
+import { describeRegistryError, type PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * The course, composed rather than marked up.

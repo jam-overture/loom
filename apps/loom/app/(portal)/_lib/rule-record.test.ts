@@ -8,8 +8,8 @@ import {
   type DispositionKind,
   type DispositionReasonCode,
   type TreeDelta,
-} from "@loom/runtime"
-import type { EpisodeFold, IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
+} from "@jam-overture/loom"
+import type { EpisodeFold, IntentEpisode, ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import {
   APPROVAL_RUN,

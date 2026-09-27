@@ -1,5 +1,5 @@
-import { randomIdFactory } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { randomIdFactory } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
-import type { StoreError } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import type { StoreError } from "@jam-overture/loom/store"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 

@@ -67,7 +67,7 @@ An endpoint is a name, a line about itself, and a function that says where the
 form should post.
 
 ```ts
-import { createEndpointRegistry, defineEndpoint, describeEndpointRegistryError } from "@loom/runtime"
+import { createEndpointRegistry, defineEndpoint, describeEndpointRegistryError } from "@jam-overture/loom"
 
 const enquiry = defineEndpoint({
   id: "contact.enquiry",
@@ -136,8 +136,8 @@ wait is a render that can hang halfway down a page.
 So the asking happens first, in its own step:
 
 ```ts
-import { renderLoomTree } from "@loom/runtime/react"
-import { resolveTreeSubmissions } from "@loom/runtime"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import { resolveTreeSubmissions } from "@jam-overture/loom"
 
 const submissions = await resolveTreeSubmissions(tree, { registry: endpoints })
 

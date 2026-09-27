@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { minimalSansFontPack } from "@loom/runtime"
+import { minimalSansFontPack } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { docsExamples } from "./examples/catalogue"

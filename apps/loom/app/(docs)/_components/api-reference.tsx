@@ -298,7 +298,7 @@ const BeforeItWillRun = ({ entry }: { readonly entry: ApiEntry }) => {
           <span className="font-semibold">Nothing to install first.</span>{" "}
           <span className="text-ink-muted">
             Everything this import loads arrives with{" "}
-            <code className="code-chip font-mono text-xs">@loom/runtime</code> itself.
+            <code className="code-chip font-mono text-xs">@jam-overture/loom</code> itself.
           </span>
         </p>
       ) : null}
@@ -396,7 +396,7 @@ const NarrowerDoors = ({ entry }: { readonly entry: ApiEntry }) =>
  * is so ordinary that a reader has no reason to doubt it: **the short specifier
  * is the whole library and the longer ones are slices of it.**
  *
- * It is wrong here. `@loom/runtime` is the largest of the sixteen doors and
+ * It is wrong here. `@jam-overture/loom` is the largest of the sixteen doors and
  * publishes less than half the names the package publishes; thirteen of the
  * fifteen others publish not one name it does. The sixteen do not nest. A
  * reader holding the ordinary belief looks for a name behind the root import,
@@ -423,8 +423,8 @@ const OverlappingDoors = ({
     <p className="text-ink-muted mt-3 text-sm leading-relaxed">
       {/*
        * "Every one" is measured rather than assumed, and it is the sentence
-       * `@loom/runtime/signals/broadcast` needs: all fourteen of its names are
-       * behind `@loom/runtime/signals` as well, so a headline claiming this
+       * `@jam-overture/loom/signals/broadcast` needs: all fourteen of its names are
+       * behind `@jam-overture/loom/signals` as well, so a headline claiming this
        * import is nobody's slice would be false on exactly that page.
        */}
       {total === publishes ? "Every one of these names is published" : "Some of these names are published"}{" "}

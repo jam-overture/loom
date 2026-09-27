@@ -31,7 +31,7 @@ call.
 ## The signal rail
 
 `pnpm dev` serves the page with a rail down the right-hand side, driven by the
-framework's own broadcaster, `@loom/runtime/signals`. There is no hand-written
+framework's own broadcaster, `@jam-overture/loom/signals`. There is no hand-written
 collector.
 
 What happens, end to end:

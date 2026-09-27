@@ -4,8 +4,8 @@ import {
   type FrameOriginRegistry,
   type FrameOriginRegistryError,
   type Result,
-} from "@loom/runtime"
-import type { RenderDiagnostic } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import type { RenderDiagnostic } from "@jam-overture/loom/react"
 
 /**
  * The one origin this site is willing to put inside a frame: its own.

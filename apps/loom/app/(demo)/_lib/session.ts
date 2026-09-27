@@ -9,9 +9,9 @@ import {
   type ChangeInterpreter,
   type LoomTree,
   type RuntimeEventEnvelope,
-} from "@loom/runtime"
-import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
-import { memoryHoldStore, type HoldStore, type WritePath } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
+import { memoryHoldStore, type HoldStore, type WritePath } from "@jam-overture/loom/write"
 
 import { fullBucket, PER_INSTANCE_MODEL_CALLS, PER_SESSION_MODEL_CALLS, spendToken, type Bucket } from "./budget"
 import { demoPageTree } from "./page-tree"

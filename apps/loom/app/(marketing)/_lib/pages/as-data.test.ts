@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import type { ElementNode, LoomNode } from "@loom/runtime"
+import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { ASKS } from "../adapt/asks"

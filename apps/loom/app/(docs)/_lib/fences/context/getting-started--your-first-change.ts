@@ -1,5 +1,5 @@
-import type { EditIntent, ProposalId } from "@loom/runtime"
-import type { WritePath } from "@loom/runtime/write"
+import type { EditIntent, ProposalId } from "@jam-overture/loom"
+import type { WritePath } from "@jam-overture/loom/write"
 
 /**
  * Your first change.

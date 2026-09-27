@@ -3,9 +3,9 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import type { LoomDatabase } from "@loom/runtime/postgres"
-import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@loom/runtime/postgres"
-import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
+import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@jam-overture/loom/postgres"
+import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 import { storageSeams } from "./schema"
 

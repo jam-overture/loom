@@ -1,5 +1,5 @@
-import type { NodeId, PrimitiveType, TreeId } from "@loom/runtime"
-import type { StoredTally } from "@loom/runtime/signals"
+import type { NodeId, PrimitiveType, TreeId } from "@jam-overture/loom"
+import type { StoredTally } from "@jam-overture/loom/signals"
 
 import { nounOf, type PartName } from "./part-name"
 import { versionMention } from "./version"

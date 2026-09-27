@@ -63,7 +63,7 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.115.0
         version: 0.115.0(zod@3.25.76)
-      '@loom/runtime':
+      '@jam-overture/loom':
         specifier: workspace:*
         version: link:../..
       '@mdx-js/loader':

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { proposalIdSchema } from "@loom/runtime"
+import { proposalIdSchema } from "@jam-overture/loom"
 
 import { unreadableChange } from "@/app/(portal)/_lib/unreadable-change"
 

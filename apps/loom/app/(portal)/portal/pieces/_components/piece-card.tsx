@@ -1,4 +1,4 @@
-import type { CataloguedPrimitive } from "@loom/runtime"
+import type { CataloguedPrimitive } from "@jam-overture/loom"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { catalogueLineFor, plainPieceName, settingsOf, spacesReading } from "@/app/(portal)/_lib/piece-view"

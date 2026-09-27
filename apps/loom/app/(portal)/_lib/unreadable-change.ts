@@ -1,4 +1,4 @@
-import type { UnreadableHold } from "@loom/runtime/write"
+import type { UnreadableHold } from "@jam-overture/loom/write"
 
 import { plainMoment } from "./when"
 

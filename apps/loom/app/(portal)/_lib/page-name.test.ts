@@ -9,8 +9,8 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { memoryTreeStore } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import { memoryTreeStore } from "@jam-overture/loom/store"
 
 import { seedTree } from "./seed"
 

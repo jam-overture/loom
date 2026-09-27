@@ -8,7 +8,7 @@ import {
   type DispositionReasonCode,
   type ProposalId,
   type TreeDelta,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import {
   calibrationOf,
   type ConfidenceBucket,
@@ -16,7 +16,7 @@ import {
   type EpisodeFold,
   type IntentEpisode,
   type ProposalEpisode,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import {
   contradictedBands,

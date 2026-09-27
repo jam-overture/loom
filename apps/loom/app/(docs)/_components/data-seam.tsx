@@ -1,4 +1,4 @@
-import type { DispositionKind } from "@loom/runtime"
+import type { DispositionKind } from "@jam-overture/loom"
 
 import {
   produceAnswers,

@@ -1,4 +1,4 @@
-import type { ReaderSignalBatch } from "@loom/runtime/signals"
+import type { ReaderSignalBatch } from "@jam-overture/loom/signals"
 import { render } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { buildElement, sequentialIdFactory, type NodeId, type TreeDelta } from "@loom/runtime"
+import { buildElement, sequentialIdFactory, type NodeId, type TreeDelta } from "@jam-overture/loom"
 
 import { settingsOf } from "./plain-change"
 import { demoRegistry } from "./registry"

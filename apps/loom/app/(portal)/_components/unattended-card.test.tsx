@@ -7,8 +7,8 @@ import {
   nodeIdSchema,
   proposalIdSchema,
   treeIdSchema,
-} from "@loom/runtime"
-import type { IntentEpisode } from "@loom/runtime/telemetry"
+} from "@jam-overture/loom"
+import type { IntentEpisode } from "@jam-overture/loom/telemetry"
 
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 import { unattendedIn, type UnattendedChange } from "@/app/(portal)/_lib/unattended"

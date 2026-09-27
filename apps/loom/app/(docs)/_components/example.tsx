@@ -1,7 +1,7 @@
 "use client"
 
-import { type LoomTree } from "@loom/runtime"
-import { describeRenderDiagnostic, renderLoomTree } from "@loom/runtime/react"
+import { type LoomTree } from "@jam-overture/loom"
+import { describeRenderDiagnostic, renderLoomTree } from "@jam-overture/loom/react"
 import { useState } from "react"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"

@@ -1,4 +1,4 @@
-import { applyDelta, buildElement, createTree, sequentialIdFactory, type LoomTree } from "@loom/runtime"
+import { applyDelta, buildElement, createTree, sequentialIdFactory, type LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { piecesIn } from "../measure"

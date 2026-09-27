@@ -8,9 +8,9 @@ import {
   type ProposalId,
   type TreeDelta,
   type TreeId,
-} from "@loom/runtime"
-import type { IntentEpisode } from "@loom/runtime/telemetry"
-import type { StoredRevision } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import type { IntentEpisode } from "@jam-overture/loom/telemetry"
+import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { describeAsk } from "./episode-view"
 import { changesOf, revisionView, surenessOf, whoAllowed, whoAsked } from "./revision-view"

@@ -1,5 +1,5 @@
-import { describeRenderDiagnostic, renderLoomTree } from "@loom/runtime/react"
-import { resolveTreeSubmissions } from "@loom/runtime"
+import { describeRenderDiagnostic, renderLoomTree } from "@jam-overture/loom/react"
+import { resolveTreeSubmissions } from "@jam-overture/loom"
 
 import { produceActions } from "@/app/(docs)/_lib/submit/actions"
 import {

@@ -12,7 +12,7 @@ import {
   type LoomNode,
   type LoomTree,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * The changes a reader can ask for on this site, and what each of them plans.

@@ -1,4 +1,4 @@
-import type { FontPack, Palette, StylePreset } from "@loom/runtime"
+import type { FontPack, Palette, StylePreset } from "@jam-overture/loom"
 
 /**
  * Making it look like yours.

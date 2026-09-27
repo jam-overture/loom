@@ -1,5 +1,5 @@
-import type { DispositionReasonCode } from "@loom/runtime"
-import type { EpisodeFold, IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
+import type { DispositionReasonCode } from "@jam-overture/loom"
+import type { EpisodeFold, IntentEpisode, ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import type { PlainRule } from "./rules-view"
 

@@ -35,7 +35,7 @@ They are easy to confuse and they answer completely different questions.
 
 | | The log | The journal |
 | --- | --- | --- |
-| Kept by | `@loom/runtime/store` | `@loom/runtime/telemetry` |
+| Kept by | `@jam-overture/loom/store` | `@jam-overture/loom/telemetry` |
 | One entry per | change that was **applied** | thing that was **asked** |
 | Holds a refusal | never | always |
 | What it is for | rebuilding the page | understanding the asking |
@@ -59,9 +59,9 @@ turning it on.
 ## Turning it on is six lines and one decision
 
 ```ts
-import { commitIntent } from "@loom/runtime/write"
-import { collectTelemetry } from "@loom/runtime/telemetry"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { commitIntent } from "@jam-overture/loom/write"
+import { collectTelemetry } from "@jam-overture/loom/telemetry"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 const telemetry = collectTelemetry(postgresTelemetryJournal(db))
 
@@ -236,7 +236,7 @@ A journal only grows. Retention is how it is allowed to shrink, and it is the
 only destructive operation anywhere in Loom's storage.
 
 ```ts
-import { applyRetention } from "@loom/runtime/telemetry"
+import { applyRetention } from "@jam-overture/loom/telemetry"
 
 const pruned = await applyRetention(journal, { policy: { maxAgeMs: 30 * 24 * 60 * 60 * 1000 } })
 ```

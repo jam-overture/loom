@@ -1,4 +1,4 @@
-import { buildElement, buildText, type IdFactory, type JsonObject, type LoomNode } from "@loom/runtime"
+import { buildElement, buildText, type IdFactory, type JsonObject, type LoomNode } from "@jam-overture/loom"
 
 import { card, heading, link, prose, stack } from "./loom"
 import type { Block, TableRow } from "./markdown"

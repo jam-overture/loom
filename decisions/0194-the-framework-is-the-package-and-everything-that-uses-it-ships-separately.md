@@ -77,9 +77,17 @@ them down:
 - **Two manifests can now disagree.** That is the cost of the `publishConfig`
   seam, paid down by the test rather than avoided. The alternative that avoids
   it entirely is a real package split, below.
-- **The name is not secured.** `@loom/runtime` is unregistered, which is not the
-  same as owned; `docs/publishing.md` names the fallback and the one field it
-  costs.
+- **The name is settled, and settling it was not one field.** The package is
+  `@jam-overture/loom`: the org is the house, the product keeps its name.
+  `@loom` could not be had — npm orgs and users share one namespace, so a scope
+  with nothing published under it is still not a free one, and `loom` and
+  `loomjs` are both held. An earlier draft of this record said changing the name
+  cost one field. That was read off the `exports` map, where no subpath names the
+  scope, and it was wrong about the repository: `publishConfig` can rewrite
+  `exports` and cannot rewrite `name`, so the published name *is* the workspace
+  name and every import site moves with it — **466 files**, 409 of them in
+  `apps/loom`, which depends on the runtime as `workspace:*`. Recorded because
+  the next name question, under §7, should start from the real number.
 
 ## Alternatives considered
 

@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { UNATTRIBUTED_POLICY_ID } from "@loom/runtime"
+import { UNATTRIBUTED_POLICY_ID } from "@jam-overture/loom"
 import {
   CALIBRATION_BUCKET_COUNT,
   type CalibrationReport,
   type CalibrationScore,
   type PolicyCalibration,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import { PolicyBreakdown } from "./policy-breakdown"
 

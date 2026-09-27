@@ -11,8 +11,8 @@ import {
   type IdFactory,
   type LoomTree,
   type RuntimeEventEnvelope,
-} from "@loom/runtime"
-import { planReverts, type RevertPlan, type StoredRevision } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import { planReverts, type RevertPlan, type StoredRevision } from "@jam-overture/loom/store"
 import {
   commitIntent,
   confirmHeld,
@@ -20,7 +20,7 @@ import {
   type RevertOutcome,
   type WriteOutcome,
   type WritePath,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 import { docsGatePolicy } from "./policy"
 import { docsPresetInterpreter, type DocsPreset } from "./presets"

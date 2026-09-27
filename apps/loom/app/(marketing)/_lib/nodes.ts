@@ -5,7 +5,7 @@ import {
   type IdFactory,
   type JsonObject,
   type LoomNode,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * The three nodes every page builds by the dozen, as functions.

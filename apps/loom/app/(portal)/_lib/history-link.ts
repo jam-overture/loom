@@ -1,5 +1,5 @@
-import type { TreeId } from "@loom/runtime"
-import { FIRST_REVISION, type RevisionReadRequest } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import { FIRST_REVISION, type RevisionReadRequest } from "@jam-overture/loom/store"
 
 import { versionHeading, versionMention } from "./version"
 

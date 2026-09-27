@@ -15,7 +15,7 @@ import {
   type ElementNode,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { askById, askInterpreter, ASKS, type Ask } from "../adapt/asks"
@@ -39,7 +39,7 @@ import {
  *
  * Every other page of this site argues from sentences somebody wrote. This one
  * says **there are exactly five ways an ask can end and four of them leave your
- * page alone**, which is either a fact about `@loom/runtime` or the most
+ * page alone**, which is either a fact about `@jam-overture/loom` or the most
  * embarrassing sentence on the site. So the assertions below do not read the
  * copy and agree with it — they put requests through the real sequence, catch
  * which ending comes back, and hold the page's claim to what happened.

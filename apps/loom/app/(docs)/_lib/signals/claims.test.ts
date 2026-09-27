@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
+import { READER_SIGNAL_KINDS } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
 import { produceAddressedMarkup } from "./markup"
@@ -206,16 +206,16 @@ describe("the two entry points", () => {
   )
 
   it("tells a reader to import the broadcaster from the browser entry", () => {
-    expect(flowed).toContain("Import it from `@loom/runtime/signals/broadcast`")
+    expect(flowed).toContain("Import it from `@jam-overture/loom/signals/broadcast`")
   })
 
   it("is followed by this page's own live block, which imports it that way", () => {
-    expect(live).toContain('from "@loom/runtime/signals/broadcast"')
-    expect(live).not.toMatch(/^import \{[^}]*\} from "@loom\/runtime\/signals"$/m)
+    expect(live).toContain('from "@jam-overture/loom/signals/broadcast"')
+    expect(live).not.toMatch(/^import \{[^}]*\} from "@jam-overture\/loom\/signals"$/m)
   })
 
   it("sends the reader to the plain entry for parsing", () => {
-    expect(flowed).toContain('import { parseReaderSignalBatch } from "@loom/runtime/signals"')
+    expect(flowed).toContain('import { parseReaderSignalBatch } from "@jam-overture/loom/signals"')
   })
 
   /**

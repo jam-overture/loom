@@ -13,7 +13,7 @@ import type { ApiRequirement } from "./model"
  * and it is the one a reader meets first — as a stack trace, if nothing on the
  * site told them.
  *
- * On 20 September somebody importing `@loom/runtime/testing/contracts` from a
+ * On 20 September somebody importing `@jam-overture/loom/testing/contracts` from a
  * plain Node script got this:
  *
  *     Error: Vitest failed to access its internal state.
@@ -31,7 +31,7 @@ import type { ApiRequirement } from "./model"
  * door either loads a peer dependency or it does not. Reading the second means
  * a page that cannot fall out of step with the package the way a quoted
  * paragraph can, and it means the page is right about doors whose author never
- * wrote the sentence — `@loom/runtime/testing/contracts` reaches `drizzle-orm`
+ * wrote the sentence — `@jam-overture/loom/testing/contracts` reaches `drizzle-orm`
  * as well as `vitest`, which its comment mentions in passing at the very
  * bottom and no reader would take as an install instruction.
  */
@@ -178,7 +178,7 @@ export const doorReach = (entry: PublishedEntry, read: ReadFile, root = ""): Doo
  *
  * **`declared`** is the weak one and it is deliberately shallow — the door's
  * own declaration file names the package, and nothing the door loads does.
- * `@loom/runtime/anthropic` is the case: `import type Anthropic from
+ * `@jam-overture/loom/anthropic` is the case: `import type Anthropic from
  * "@anthropic-ai/sdk"` disappears at compile time, so the adapter runs in a
  * project that has never installed the SDK. It cannot be *used* in one, because
  * the client it adapts is the thing the host passes in, and a reader whose

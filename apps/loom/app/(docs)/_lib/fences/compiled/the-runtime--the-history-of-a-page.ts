@@ -8,8 +8,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { memoryTreeStore } from "@loom/runtime/store"
-import { postgresTreeStore } from "@loom/runtime/postgres"
+import { memoryTreeStore } from "@jam-overture/loom/store"
+import { postgresTreeStore } from "@jam-overture/loom/postgres"
 
 import { db, holds, runtime } from "../context/the-runtime--the-history-of-a-page"
 

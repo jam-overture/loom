@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { parseTree, primitiveTypeSchema } from "@loom/runtime"
-import { renderRequest } from "@loom/runtime/react"
-import { auditRegistry } from "@loom/runtime/sdk"
-import { memoryTreeStore, treeSourceFromStore } from "@loom/runtime/store"
+import { parseTree, primitiveTypeSchema } from "@jam-overture/loom"
+import { renderRequest } from "@jam-overture/loom/react"
+import { auditRegistry } from "@jam-overture/loom/sdk"
+import { memoryTreeStore, treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { portalRegistry } from "./registry"
 import { seedTree } from "./seed"

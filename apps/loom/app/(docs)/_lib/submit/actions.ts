@@ -7,7 +7,7 @@ import {
   resolveTreeSubmissions,
   walkTree,
   type SubmissionTarget,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { contactExampleTree } from "@/app/(docs)/_lib/examples/catalogue"
 

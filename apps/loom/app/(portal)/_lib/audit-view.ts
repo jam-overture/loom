@@ -4,8 +4,8 @@ import {
   type IdReturn,
   type NodeFacet,
   type TreeDifference,
-} from "@loom/runtime"
-import type { ReplayMismatch, SnapshotAudit } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import type { ReplayMismatch, SnapshotAudit } from "@jam-overture/loom/store"
 
 import { capitalised, firstNamed, namesInTree, nounOf, type PartName } from "./part-name"
 

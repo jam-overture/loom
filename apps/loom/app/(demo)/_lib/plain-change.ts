@@ -6,8 +6,8 @@ import {
   type LoomTree,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * What a change would do to the page, in the words on the page.

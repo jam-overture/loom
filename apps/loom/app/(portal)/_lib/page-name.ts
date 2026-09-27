@@ -1,5 +1,5 @@
-import { outlineTree, type LoomTree, type TreeId } from "@loom/runtime"
-import type { TreeReader } from "@loom/runtime/store"
+import { outlineTree, type LoomTree, type TreeId } from "@jam-overture/loom"
+import type { TreeReader } from "@jam-overture/loom/store"
 
 import { leadOf } from "./part-name"
 

@@ -12,7 +12,7 @@ import {
   type LoomNode,
   type LoomTree,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME, DEMO_THEME_NODE_PROP } from "./page-tree"
 import type { ChangeRecord } from "./record"

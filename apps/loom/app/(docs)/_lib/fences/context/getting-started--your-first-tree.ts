@@ -1,4 +1,4 @@
-import type { TreeError } from "@loom/runtime"
+import type { TreeError } from "@jam-overture/loom"
 
 /**
  * Your first tree.

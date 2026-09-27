@@ -1,5 +1,5 @@
-import { err, ok } from "@loom/runtime"
-import { describeCliError, runCli, type CliError, type FileSystem } from "@loom/runtime/cli"
+import { err, ok } from "@jam-overture/loom"
+import { describeCliError, runCli, type CliError, type FileSystem } from "@jam-overture/loom/cli"
 
 /**
  * The scaffolding page's commands, actually run.
@@ -196,7 +196,7 @@ const REFUSAL_SPECS: Record<CliError["code"], RefusalSpec> = {
   "framework-namespace": {
     argv: ["add", "primitive", "loom.card"],
     protects:
-      "@loom/runtime registers the loom.* types itself, and a registry refuses two definitions of one type — so a primitive scaffolded there would be unreachable in the app that wrote it.",
+      "@jam-overture/loom registers the loom.* types itself, and a registry refuses two definitions of one type — so a primitive scaffolded there would be unreachable in the app that wrote it.",
   },
   "already-registered": {
     argv: ["add", "primitive", "app.page"],

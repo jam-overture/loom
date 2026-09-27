@@ -2,7 +2,7 @@ import {
   DEFAULT_ENDPOINT_CEILING_MS,
   DEFAULT_INTERPRETER_CEILING_MS,
   DEFAULT_SOURCE_CEILING_MS,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { DOCS_CEILING_MS, produceDefaults, produceDoors, produceRegions } from "./page"

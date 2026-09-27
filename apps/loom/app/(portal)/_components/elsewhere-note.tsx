@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import {
   elsewhereFrom,

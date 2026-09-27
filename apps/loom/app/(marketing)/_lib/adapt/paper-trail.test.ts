@@ -1,4 +1,4 @@
-import { applyDelta, type JsonValue, type LoomTree, type RuntimeEventEnvelope } from "@loom/runtime"
+import { applyDelta, type JsonValue, type LoomTree, type RuntimeEventEnvelope } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { homePageTree } from "../pages/home"

@@ -1,6 +1,6 @@
-import { createThemeRegistry, type ThemeRegistry } from "@loom/runtime"
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { describeRegistryError, type PrimitiveRegistry } from "@loom/runtime/sdk"
+import { createThemeRegistry, type ThemeRegistry } from "@jam-overture/loom"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { describeRegistryError, type PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * What the demo may build from: the starter library, registered through the
