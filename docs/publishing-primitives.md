@@ -58,15 +58,31 @@ memory, so the table it prints is the current answer. As of 27 September:
 The command exits non-zero while anything is blocked and withholds the publish
 line, so it cannot be pasted out of a table that is not ready.
 
+**Chain it with `&&`, which is why the block above is written that way.** On
+27 September the maintainer ran the same steps as separate lines. The table
+printed `BLOCKED npm auth` and the command exited 1 — correctly — and the next
+line ran anyway, because a shell does not care what the previous line returned.
+`npm publish` then failed with:
+
+```
+npm error 404 Not Found - PUT https://registry.npmjs.org/@jam-overture%2floom-primitives
+npm error 404  The requested resource could not be found or you do not have permission to access it.
+```
+
+**That 404 is npm's answer to an unauthorized *create*.** It is not 403 and it
+does not say "log in", because the registry will not leak whether a name
+exists to somebody who may not have it. `npm whoami` returned `E401`: the
+machine was not logged in at all. A gate whose verdict nothing reads is not a
+gate, and the fix is one `&&` per line.
+
 ## The order
 
 ```bash
-pnpm install && pnpm verify        # the merge gate, green, before anything
-pnpm build                         # dist/ — package:primitives reads it and will not make it
-
-pnpm package:primitives            # assembles packages/primitives, prints readiness
-cd packages/primitives
-npm pack --dry-run                 # read the file list before it is permanent
+pnpm install && pnpm verify &&
+pnpm build &&
+pnpm package:primitives &&
+cd packages/primitives &&
+npm pack --dry-run                 # read the file list, then:
 npm publish --access public
 ```
 
@@ -115,9 +131,8 @@ end-to-end check is a real install and is worth re-running before any publish
 that changes the shape of the package:
 
 ```bash
-npm pack --pack-destination /tmp/smoke                      # the runtime
 cd packages/primitives && npm pack --pack-destination /tmp/smoke
-cd /tmp/smoke && npm install ./loom-runtime-*.tgz ./loom-primitives-*.tgz react react-dom
+cd /tmp/smoke && npm install ./jam-overture-loom-primitives-*.tgz react react-dom
 node -e 'import("@jam-overture/loom-primitives").then((m) => console.log(m.STARTER_PRIMITIVES.length))'
 ```
 
