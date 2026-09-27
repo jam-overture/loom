@@ -8578,7 +8578,17 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
   it("makes a stat its own container and caps its figure against the column", () => {
     const { stylesheet } = splitStylesheet(render(marketingPage(EDITORIAL)).markup)
 
-    expect(stylesheet).toContain("container-type: inline-size")
+    /**
+     * Read out of `.loom-stat`'s own block rather than looked for anywhere in
+     * the sheet, and that is this assertion's whole content. Eleven rules in
+     * this stylesheet declare `container-type: inline-size`, so the obvious
+     * `expect(stylesheet).toContain(...)` stayed green with the declaration
+     * deleted from the one rule that needed it — found by restoring the defect
+     * rather than by reading the test.
+     */
+    const statRule = /\n\.loom-stat \{([^}]*)\}/.exec(stylesheet)?.[1] ?? ""
+
+    expect(statRule).toContain("container-type: inline-size")
     expect(stylesheet).toContain("font-size: min(var(--loom-scale-7), 26cqi)")
   })
 
