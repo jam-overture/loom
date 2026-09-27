@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { randomIdFactory, systemClock, type LoomTree } from "@jam-overture/loom"
-import { commitIntent, type HeldProposal } from "@jam-overture/loom/write"
+import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@jam-overture/loom"
+import { commitIntent, confirmHeld, type HeldProposal } from "@jam-overture/loom/write"
 
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"
@@ -126,6 +126,8 @@ const railOf = async (session: DemoSession) => {
 
       return part
     },
+    /** The same substitution for the ask's preview, which has no id to record. */
+    showAsk: (part) => part,
   })
 
   return { tree, view, shown }
@@ -449,5 +451,93 @@ describe("a visitor who has done nothing", () => {
     expect(view.about).toBeUndefined()
     expect(shown).toEqual([])
     expect(view.spotlightToken).toBe("0:")
+  })
+})
+
+/**
+ * **The arrival screen's one invited press, and what it is about.**
+ *
+ * Both halves are here because both are wiring, and wiring is the one thing
+ * four runs of this lane kept losing. The nomination used to be computed in
+ * `ask-panel.tsx` and the preview could not be — an excerpt has to be rendered
+ * through the registry, which does not cross a client boundary — so the two
+ * could only meet here. A page that previewed one ask and offered another would
+ * render, build, and pass every component test in this lane.
+ */
+describe("the ask the arrival screen leads with", () => {
+  it("nominates an ask, and shows the part of the page it would touch", async () => {
+    const fresh = await sessionFor("leading")
+    const { view } = await railOf(fresh)
+
+    expect(view.leading?.preset).toBe(DEMO_LEADING_PRESET)
+    expect(view.leading?.part).toBeDefined()
+    expect(view.leading?.part?.tree.root.type).toBe("loom.stat-grid")
+    expect(view.leading?.part?.lead).toBe("This is what would come off the page.")
+
+    /**
+     * And it is an ask's excerpt rather than a question's, which is the rule
+     * that draws it at 1280×900. The two are one function and one type apart,
+     * so this is the only place the rail's two callbacks can be told apart.
+     */
+    expect(view.leading?.part?.where).toBe("ask")
+  })
+
+  /**
+   * The green belongs to the demo's next step, and once a question exists that
+   * step is *Apply this change* down inside the card. The panel used to work
+   * this out from `waiting`; it is one value now, so the button and the preview
+   * cannot come apart — a preview of a sixth thing that could happen, over a
+   * question about the fifth, is the panel competing with itself.
+   */
+  it("nominates nothing while a question is waiting, so nothing is previewed either", async () => {
+    const fresh = await sessionFor("leading-waiting")
+    const asked = await ask(fresh, DEMO_LEADING_PRESET)
+    const { view } = await railOf(asked.session)
+
+    expect(view.waiting).toBeDefined()
+    expect(view.leading).toBeUndefined()
+  })
+
+  /**
+   * **The ask it leads with is one it is also offering.** A nomination read
+   * from a different list than the one the panel filters would put a green
+   * button above four secondary asks and the same ask in both, or a green
+   * button for something the tree cannot do.
+   */
+  it("leads with an ask that is on the list it hands over", async () => {
+    const fresh = await sessionFor("leading-offered")
+    const { view } = await railOf(fresh)
+
+    expect(view.leading).toBeDefined()
+    expect(view.available).toContain(view.leading!.preset)
+  })
+
+  /**
+   * A press moves the page, and the next nomination is read against the page as
+   * it now stands. Answering the lead's question takes the stat grid off, so
+   * the lead has nothing left to do and the rail leads with something else —
+   * without a preview only if that something names the page itself.
+   */
+  it("re-reads the nomination against the page after it has moved", async () => {
+    const fresh = await sessionFor("leading-after")
+    const first = await ask(fresh, DEMO_LEADING_PRESET)
+    const held = await holdsOf(first.session, await headOf(first.session))
+
+    expect(held.length).toBe(1)
+
+    /** Answered the way `actions.ts` answers it, through the real write path. */
+    const outcome = await confirmHeld(beginDemoWrite(first.session).path, {
+      proposalId: proposalIdSchema.parse(held[0]!.proposalId),
+      actor: "a demo visitor",
+    })
+
+    expect(outcome.kind).toBe("committed")
+
+    const { view, tree } = await railOf(first.session)
+
+    expect(tree.revision).toBeGreaterThan(0)
+    expect(view.available).not.toContain(DEMO_LEADING_PRESET)
+    expect(view.leading?.preset).not.toBe(DEMO_LEADING_PRESET)
+    expect(view.available).toContain(view.leading!.preset)
   })
 })

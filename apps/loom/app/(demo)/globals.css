@@ -230,22 +230,32 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   THE PART IN QUESTION — the band, brought to the question
+   THE PART OF THE PAGE, BROUGHT TO THE RAIL
 
-   Stacked, the band a held change is about is roughly five screens
-   below the two buttons deciding its fate: measured on the built page
-   at 390×844, *Apply this change* lands at y≈646 and the marked band
-   at y≈4,620. `SpotlightScroll` declines to carry a visitor there and
-   is right to. So the part comes to the question instead, rendered
-   from the same tree through the same registry.
+   Twice now, and the second time is one step earlier than the first.
 
-   **Wide screens are exempt, in the stylesheet.** There the stage and
-   the rail are two scrollers side by side and the band is ringed in
-   amber forty pixels away, so a second rendering of it inside the
-   card would be the surface talking for its own sake. In CSS rather
-   than a `matchMedia` read at mount, for the reason the record bar
-   gives: a media query is right between a resize and a re-render and
-   a mount-time read is not.
+   **In a question.** Stacked, the band a held change is about is
+   roughly five screens below the two buttons deciding its fate:
+   measured on the built page at 390×844, *Apply this change* lands at
+   y≈646 and the marked band at y≈4,620. `SpotlightScroll` declines to
+   carry a visitor there and is right to. So the part comes to the
+   question instead, rendered from the same tree through the same
+   registry.
+
+   **In the ask, before it is pressed.** The same argument about the
+   same band, made about the press rather than the answer: *Take the
+   numbers off* names a part of the page a stranger arriving has never
+   seen, below the fold at 1280×900 and four thousand pixels down at
+   390×844. `before-the-press.ts` has that one.
+
+   **Wide screens are exempt from the first and not the second**, which
+   is why the rule is on `.demo-part--question`. Beside an open
+   question the band is ringed in amber forty pixels away, so a second
+   rendering of it would be the surface talking for its own sake;
+   before any press nothing is ringed anywhere, because a ring is what
+   a press produces. In CSS rather than a `matchMedia` read at mount,
+   for the reason the record bar gives: a media query is right between
+   a resize and a re-render and a mount-time read is not.
    ══════════════════════════════════════════════════════════════════ */
 
 @layer components {
@@ -262,8 +272,17 @@
     gap: 6px;
   }
 
+  /*
+   * The exemption is the *question's*, and it is on the modifier rather
+   * than on `.demo-part` because an ask has no ring to be redundant
+   * with. Nothing is marked on the stage before the press — that is
+   * what a press is for — so at 1280×900 the band *Take the numbers
+   * off* is about sits below the fold of a page a stranger has not
+   * scrolled, and the preview under the button is the only place it is.
+   * `before-the-press.ts` has the measurement.
+   */
   @media (min-width: 1024px) {
-    .demo-part {
+    .demo-part--question {
       display: none;
     }
   }
@@ -300,6 +319,27 @@
      * page they are looking at.
      */
     pointer-events: none;
+  }
+
+  /*
+   * The ask's window is taller than the question's, and the difference is
+   * what is under each of them.
+   *
+   * A question's preview has two buttons below it that a visitor has to
+   * reach, so 13rem is the largest window that keeps *Apply this change*
+   * on a 390×844 screen. An ask's preview has a list of alternatives under
+   * it and nothing waiting on an answer, so the ceiling can be what the
+   * content needs instead: at rail width the clinic's stat grid falls to
+   * one column and its three figures stand about 330px, and a window that
+   * showed 3,400 and faded out before 24 and 92% would be previewing one
+   * number under a button promising three.
+   *
+   * It is still a window. 21rem shows the three figures and their labels
+   * and runs the fade through whatever follows, which is the honest shape:
+   * this is a part of a page, and a part of a page continues.
+   */
+  .demo-part--ask .demo-part-stage {
+    max-height: 21rem;
   }
 }
 

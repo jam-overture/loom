@@ -38,6 +38,15 @@ import { demoRegistry } from "@/app/(demo)/_lib/registry"
  * errored; the labels simply were not there. `_lib/ground.ts` reads both ends
  * of the pair off the one palette, so they cannot disagree again.
  *
+ * **Which of the two moments it is standing in comes with the part**, not as a
+ * prop of this component. `in-question.ts` sets it from the caller that asked —
+ * a hold, or a press nobody has made — and `globals.css` hangs the wide-screen
+ * `display: none` and the window height off it. The reason it is not a prop is
+ * measured rather than argued: with it a prop, the only place the answer could
+ * be written was `page.tsx`, and a `where="question"` typed by habit on the
+ * ask's callback hid the arrival screen's excerpt at the one width this surface
+ * is judged at with **every test in this lane still passing**.
+ *
  * **Edit mode is off**, which is load-bearing rather than tidy. The mark on the
  * stage is a stylesheet keyed on `data-loom-node` (`_lib/spotlight.ts`), so an
  * excerpt rendered with edit mode on would carry the same attribute, match the
@@ -59,14 +68,25 @@ export const PartInQuestionView = ({
   const rendered = renderLoomTree(part.tree, { resolver: demoRegistry, validator: demoRegistry })
 
   return (
-    <section className="demo-part">
+    <section className={`demo-part demo-part--${part.where}`}>
       {/*
-        * A heading rather than a label, and the same size as the card's other
+        * **In a card, a heading**, and the same size as the card's other
         * heading, so the two readings of the change — what it would do, and what
         * it would do it to — read as siblings rather than as a section and its
         * caption.
+        *
+        * **In the ask panel, a paragraph.** There is no second reading for it to
+        * be a sibling of, and the only heading on that rail is the `h1` three
+        * inches above it — so an `h4` there announces a level four subsection of
+        * nothing, two levels below the nearest real one, to every visitor
+        * navigating by headings. The words and the size are identical either
+        * way; what changes is the claim the markup makes about the document.
         */}
-      <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
+      {part.where === "question" ? (
+        <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
+      ) : (
+        <p className="text-ink-secondary text-xs">{part.lead}</p>
+      )}
 
       {/*
         * `loom-stage` for the same reason the stage has it: the excerpt is the
