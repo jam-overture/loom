@@ -238,3 +238,55 @@ describe("the spelling a reader meets", () => {
     })
   })
 })
+
+/**
+ * No price, anywhere, until there is one.
+ *
+ * **The maintainer's instruction of 27 September**, given in the same breath as
+ * settling the licence: *no reference to pricing should remain, we haven't
+ * figured that out yet.* There was none to remove — the front door's pricing
+ * band went on 21 August and the site has been silent since — so this is the
+ * instruction held rather than obeyed once.
+ *
+ * It is worth holding precisely because the site is silent. A page nobody is
+ * editing does not drift; a page being rewritten weekly by a routine with no
+ * memory of this conversation does, and the sentence that would do it — *free
+ * to start*, *from $0*, *per seat* — is the kind a run writes without thinking
+ * because every other marketing site has one.
+ *
+ * The structured data is covered separately and more strictly by
+ * `UNMADE_CLAIMS`, which denies `offers` and `price` as fields. This is the
+ * half a reader sees.
+ *
+ * **`cost` is deliberately not caught.** `PRODUCT_SURFACES` prices each
+ * destination in *attention* — *Costs you a click*, *Costs you an afternoon* —
+ * which is the most useful thing that band says and is not a price.
+ */
+const PRICED = new RegExp(
+  [
+    "[$£€]\\s?\\d",
+    "\\b\\d+\\s?(usd|eur|gbp)\\b",
+    "\\bper (seat|user|month|year|developer)\\b",
+    "\\b(a|per) month\\b",
+    "/mo\\b",
+    "\\bpricing\\b",
+    "\\bsubscription\\b",
+    "\\b(free|paid|pro|starter|enterprise|premium) (tier|plan)\\b",
+    "\\bfree forever\\b",
+    "\\bstarts? at\\b",
+    "\\bbilled\\b",
+    "\\btrial\\b",
+  ].join("|"),
+  "gi"
+)
+
+describe("what the site says about what it costs", () => {
+  it.each(SITE_ROUTES)("$path names no price and no plan", async (route) => {
+    const found = [...(await pageWords(route)).matchAll(PRICED)].map((match) => match[0])
+
+    expect({ route: route.path, priced: [...new Set(found)] }).toEqual({
+      route: route.path,
+      priced: [],
+    })
+  })
+})

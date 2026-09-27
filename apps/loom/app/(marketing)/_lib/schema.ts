@@ -2,7 +2,14 @@ import type { JsonObject } from "@jam-overture/loom"
 
 import { siteQuestions } from "./questions"
 import { WORDMARK } from "./share"
-import { HOME, internalHref, REPOSITORY_URL, SITE_ROUTES, type SiteRoute } from "./site"
+import {
+  HOME,
+  internalHref,
+  LICENSE_URL,
+  REPOSITORY_URL,
+  SITE_ROUTES,
+  type SiteRoute,
+} from "./site"
 
 /**
  * What this site tells a machine that is not a browser.
@@ -88,6 +95,16 @@ const software = (origin: string): JsonObject => ({
   description: HOME.description,
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Any",
+  /**
+   * A fact as of 27 September, and stated for the same reason `sameAs` is:
+   * it is the field an assistant answering *can I use this* reaches for, and
+   * the answer is checkable in two places in the repository.
+   *
+   * It is derived rather than typed — `LICENSE_URL` is the file itself — and
+   * `license.test.ts` holds the site's sentence against the package manifest,
+   * so this cannot go on saying MIT if the package stops.
+   */
+  license: LICENSE_URL,
   sameAs: [REPOSITORY_URL],
 })
 

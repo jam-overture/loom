@@ -326,19 +326,22 @@ describe("the words that are not engineering's to write", () => {
     }
   })
 
-  it("is down to the footer's license line, and nothing else", () => {
-    /**
-     * The count is asserted so that adding placeholder copy is a deliberate act
-     * with a test to change, rather than something that accumulates unnoticed
-     * between reviews. It went 8 → 1 on 21 August: seven of the eight were the
-     * pricing band, and the maintainer took pricing off the front door.
-     *
-     * One is the right number to still be here. Licensing is genuinely
-     * undecided, it gates whether this repository can be public at all, and the
-     * footer is the one place a reader looks for it — so the line stays, marked,
-     * rather than the page quietly implying an answer by omission.
-     */
-    expect(PLACEHOLDER_STRINGS).toHaveLength(1)
+  /**
+   * **There are none left, as of 27 September.**
+   *
+   * The count is asserted so that adding placeholder copy is a deliberate act
+   * with a test to change, rather than something that accumulates unnoticed
+   * between reviews. It went 8 → 1 on 21 August, when the maintainer took
+   * pricing off the front door, and 1 → 0 today, when he settled licensing as
+   * MIT — the one thing `docs/rollout.md` had as a hard gate on Phase 4.
+   *
+   * The mechanism stays at zero rather than being deleted with its last entry.
+   * The next question this site cannot answer for itself will want it, and a
+   * site that has forgotten how to mark an unanswered question is a site that
+   * answers one quietly instead.
+   */
+  it("is down to nothing, now that licensing is settled", () => {
+    expect(PLACEHOLDER_STRINGS).toHaveLength(0)
   })
 })
 

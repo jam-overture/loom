@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 
 import {
   internalHref,
+  isPublicDeployment,
   PRODUCT_SURFACES,
   siteOrigin,
 } from "@/app/(marketing)/_lib/site"
@@ -42,9 +43,33 @@ export const disallowedPaths: readonly string[] = PRODUCT_SURFACES.filter(
   (surface) => surface.guarded
 ).map((surface) => surface.path)
 
-const robots = (): MetadataRoute.Robots => ({
-  rules: { userAgent: "*", allow: "/", disallow: [...disallowedPaths] },
-  sitemap: internalHref(siteOrigin(), "/sitemap.xml"),
-})
+/**
+ * What a preview deployment says instead, which is *nothing here is for you*.
+ *
+ * Approved by the maintainer on 27 September. Every pull request gets a
+ * deployment, and since #406 each one serves a `schema.org` graph naming this
+ * product and an `/llms.txt` describing it — so an indexed preview is not a
+ * stray copy of some HTML, it is a second thing on the internet stating, in the
+ * format a machine reads as fact, that it is Loom.
+ *
+ * The canonical has always pointed at each deployment's own address, so a
+ * preview never competed with production for one URL. That is what kept this
+ * harmless and it is not the same as staying out of the index.
+ *
+ * **No sitemap line on a disallowed deployment.** Pointing a crawler that has
+ * just been told to go away at a map of where to go is the kind of
+ * contradiction a crawler resolves in whichever order it read them.
+ */
+const NOT_FOR_CRAWLING: MetadataRoute.Robots = {
+  rules: { userAgent: "*", disallow: "/" },
+}
+
+const robots = (): MetadataRoute.Robots =>
+  isPublicDeployment()
+    ? {
+        rules: { userAgent: "*", allow: "/", disallow: [...disallowedPaths] },
+        sitemap: internalHref(siteOrigin(), "/sitemap.xml"),
+      }
+    : NOT_FOR_CRAWLING
 
 export default robots

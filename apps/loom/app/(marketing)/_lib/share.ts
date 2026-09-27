@@ -6,6 +6,7 @@ import { toneFor } from "./pages/answer"
 import {
   HOME,
   internalHref,
+  isPublicDeployment,
   readThemeName,
   siteOrigin,
   type SiteRoute,
@@ -234,6 +235,20 @@ export const pageMetadata = (route: SiteRoute, context: ShareContext): Metadata 
     title,
     description,
     alternates: { canonical },
+    /**
+     * The other half of the preview's `noindex`, approved 27 September.
+     *
+     * `robots.txt` is a request a well-behaved crawler honours; this is the
+     * instruction on the page itself, which is what an assistant fetching one
+     * address without reading the root file sees. Both are needed and neither
+     * is a substitute — the same distinction `robots.ts` already draws about
+     * `Disallow` not being what keeps the portal shut.
+     *
+     * Omitted entirely on a public deployment rather than written as
+     * `index: true`, because the default is index and a page saying so out loud
+     * is a page with an opinion nobody needs to maintain.
+     */
+    ...(isPublicDeployment() ? {} : { robots: { index: false, follow: false } }),
     openGraph: {
       type: "website",
       siteName: WORDMARK,
