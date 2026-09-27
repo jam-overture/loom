@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { createThemeRegistry } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { createThemeRegistry } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME, DEMO_THEME_NODE_PROP, demoPageTree } from "./page-tree"
 import { demoRegistry } from "./registry"

@@ -1,8 +1,8 @@
-import type { ChangeInterpreter, Clock, EditIntent, IdFactory, PolicySource } from "@loom/runtime"
-import type { LoomDatabase } from "@loom/runtime/postgres"
-import type { TreeStore } from "@loom/runtime/store"
-import type { TelemetryJournal } from "@loom/runtime/telemetry"
-import type { HoldStore } from "@loom/runtime/write"
+import type { ChangeInterpreter, Clock, EditIntent, IdFactory, PolicySource } from "@jam-overture/loom"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
+import type { TreeStore } from "@jam-overture/loom/store"
+import type { TelemetryJournal } from "@jam-overture/loom/telemetry"
+import type { HoldStore } from "@jam-overture/loom/write"
 
 /**
  * What every ask leaves behind.

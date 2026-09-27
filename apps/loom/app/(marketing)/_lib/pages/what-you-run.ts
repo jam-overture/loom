@@ -12,9 +12,9 @@ import {
   type LoomNode,
   type LoomTree,
   type PromptMeasurement,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
-import { catalogueOf } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { askById } from "../adapt/asks"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"

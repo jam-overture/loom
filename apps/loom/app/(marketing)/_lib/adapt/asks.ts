@@ -11,7 +11,7 @@ import {
   type LoomNode,
   type LoomTree,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { BAND } from "../bands"
 import { REPOSITORY_URL } from "../site"

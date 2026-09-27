@@ -1,6 +1,6 @@
-import type { LoomTree, TreeId } from "@loom/runtime"
-import type { TreeStore } from "@loom/runtime/store"
-import type { HoldStore } from "@loom/runtime/write"
+import type { LoomTree, TreeId } from "@jam-overture/loom"
+import type { TreeStore } from "@jam-overture/loom/store"
+import type { HoldStore } from "@jam-overture/loom/write"
 
 /**
  * When something looks wrong.

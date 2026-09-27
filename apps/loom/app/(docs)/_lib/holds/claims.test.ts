@@ -91,7 +91,7 @@ describe("the counts this page writes out", () => {
  * a *different* door than the line says, which compiles and still sends a reader
  * to the wrong import.
  */
-const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@loom\/[^"]+)"/g
+const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@jam-overture\/[^"]+)"/g
 
 const publishedNames = (specifier: string): ReadonlySet<string> => {
   const entry = apiEntries.find((candidate) => candidate.specifier === specifier)
@@ -132,7 +132,7 @@ describe("the calls this page teaches", () => {
   })
 
   it("finds confirmHeld and discardHeld on the write door", () => {
-    const published = publishedNames("@loom/runtime/write")
+    const published = publishedNames("@jam-overture/loom/write")
 
     expect(published.has("confirmHeld")).toBe(true)
     expect(published.has("discardHeld")).toBe(true)

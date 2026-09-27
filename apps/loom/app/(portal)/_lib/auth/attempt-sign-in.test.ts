@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { err, type Result } from "@loom/runtime"
+import { err, type Result } from "@jam-overture/loom"
 
 import { attemptSignIn } from "./attempt-sign-in"
 import { memoryAttemptLog, type AttemptLog, type AttemptLogError } from "./attempts"

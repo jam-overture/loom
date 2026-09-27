@@ -1,4 +1,4 @@
-import type { StoreError } from "@loom/runtime/store"
+import type { StoreError } from "@jam-overture/loom/store"
 
 /**
  * The five ways storing something can fail, in the words a page can use.

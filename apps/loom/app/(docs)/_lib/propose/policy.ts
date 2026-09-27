@@ -1,5 +1,5 @@
-import { gatePolicySchema, type GatePolicy } from "@loom/runtime"
-import { interactiveTypesFor } from "@loom/runtime/sdk"
+import { gatePolicySchema, type GatePolicy } from "@jam-overture/loom"
+import { interactiveTypesFor } from "@jam-overture/loom/sdk"
 
 import { docsRegistry } from "../loom/registry"
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@loom/runtime"
-import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@loom/runtime/write"
+import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@jam-overture/loom"
+import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@jam-overture/loom/write"
 
 import { answerNote } from "./answer"
 import { movedOn } from "./moved"

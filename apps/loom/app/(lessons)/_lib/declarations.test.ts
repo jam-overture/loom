@@ -234,7 +234,7 @@ describe("reading a declaration", () => {
       parseDeclarations(`import {
   type ChangeInterpreter,
   fixedPolicy,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import type { LoomNode } from "./node.js"
 

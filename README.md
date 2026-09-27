@@ -6,6 +6,61 @@ applies what survives and renders the result.
 
 Pre-production alpha. Nothing here is stable yet.
 
+```bash
+npm install @jam-overture/loom
+```
+
+## What is in the package, and what is not
+
+`@jam-overture/loom` is the **framework**: the tree and its deltas, the Gate, the
+interpretation seam, the render seam, the store, the write path, signals,
+telemetry, the SDK, the testing contracts and the `loom` CLI. Fifteen entry
+points, listed under [Entry points](#entry-points).
+
+Four things that live in this repository are deliberately **not** in it, and
+each is somebody's product rather than the framework's plumbing
+(`decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md`):
+
+| not published here | what it is |
+| --- | --- |
+| the starter primitive library | ten primitives a deployment may adopt — a library to choose from, with its own release rhythm |
+| the marketing site, the documentation, the lessons | `apps/loom`, one Next.js application, deployed rather than packaged |
+| the demonstration | a surface, not an import |
+| the portal | a tool over a deployment's own tree |
+
+So `@jam-overture/loom/primitives` resolves inside this workspace and **is not a
+subpath of the published package.** Everything the README says about the
+starter primitives below is about this repository; a separate package for them
+is the next step and does not exist yet.
+
+## Entry points
+
+Fifteen, each a subpath of the one package. Everything after `.` is there so a
+host can take a part of Loom without the rest; the optional peers are optional
+because the core is usable without any of them.
+
+| import | what it is |
+| --- | --- |
+| `@jam-overture/loom` | the tree, the deltas, the Gate, the runtime pipeline, the vocabularies |
+| `@jam-overture/loom/anthropic` | the interpretation seam against Anthropic's API — needs `@anthropic-ai/sdk` |
+| `@jam-overture/loom/react` | tree to React, per request — needs `react` |
+| `@jam-overture/loom/sdk` | the primitive registration contract, registries and audits — needs `react` |
+| `@jam-overture/loom/cli` | the `loom` scaffolding command, as a library |
+| `@jam-overture/loom/store` | tree storage, in memory |
+| `@jam-overture/loom/write` | the write path: intent in, disposition out |
+| `@jam-overture/loom/postgres` | the same store over Postgres — needs `drizzle-orm` |
+| `@jam-overture/loom/signals` | reader signals, parsed and reduced |
+| `@jam-overture/loom/signals/broadcast` | the browser half: a published page reporting what readers did |
+| `@jam-overture/loom/signals/postgres` | signal storage — needs `drizzle-orm` |
+| `@jam-overture/loom/telemetry` | proposal, provenance, disposition and outcome |
+| `@jam-overture/loom/telemetry/postgres` | telemetry storage — needs `drizzle-orm` |
+| `@jam-overture/loom/testing` | fixtures and sample trees |
+| `@jam-overture/loom/testing/contracts` | the conformance suites a primitive must pass — needs `vitest`, and only loads inside a test run |
+
+`@jam-overture/loom` itself depends only on `zod`. `react`, `@anthropic-ai/sdk`,
+`drizzle-orm` and `vitest` are optional peer dependencies: install the ones the
+subpaths you use name, and nothing else.
+
 ## Why a tree and a delta, not generated code
 
 AI that emits UI code cannot be reviewed, gated, or reverted at a useful
@@ -32,7 +87,7 @@ in a README is a thing that goes stale quietly.
 
 The part of adaptation that happens on a live page. A render with
 `addressed: true` puts node ids on published markup, and
-`@loom/runtime/signals/broadcast` reports four closed kinds of signal from it —
+`@jam-overture/loom/signals/broadcast` reports four closed kinds of signal from it —
 `viewed`, `dwelled`, `activated`, `disclosed` — naming nodes and never content,
 filed under the tree and revision the page was rendered from
 ([0136](decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md)).
@@ -332,7 +387,7 @@ src/
 
 ## The workspace
 
-The repo is a pnpm workspace with two packages. `@loom/runtime` is the root;
+The repo is a pnpm workspace with two packages. `@jam-overture/loom` is the root;
 `@loom/app` is `apps/loom`, and it depends on the runtime as `workspace:*` so it
 can only reach the published entry points — a deep import into `src/` does not
 resolve. When a surface needs something the public API does not expose, that is a
@@ -370,8 +425,8 @@ then runs the application's typecheck, tests and build. The build is part of it
 because prerendering is what proves the surfaces render.
 
 **The build comes first, and that order is load-bearing.** `src/cli/scaffold-fixture/`
-is checked-in scaffold output, and it imports `@loom/runtime/react` and
-`@loom/runtime/sdk` the way a consumer does — through the `exports` map, which
+is checked-in scaffold output, and it imports `@jam-overture/loom/react` and
+`@jam-overture/loom/sdk` the way a consumer does — through the `exports` map, which
 points at `dist/`. Typechecking before the build fails on a clean clone with four
 `TS2307`s, so the build has to have run. Keeping it in this order rather than
 mapping those specifiers back to `src/` means the typecheck also proves the
@@ -427,8 +482,8 @@ pnpm add @anthropic-ai/sdk   # optional peer dependency
 
 ```ts
 import Anthropic from "@anthropic-ai/sdk"
-import { modelInterpreter, randomIdFactory, systemClock } from "@loom/runtime"
-import { anthropicModelClient } from "@loom/runtime/anthropic"
+import { modelInterpreter, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { anthropicModelClient } from "@jam-overture/loom/anthropic"
 
 const interpreter = modelInterpreter({
   client: anthropicModelClient(new Anthropic().messages),
@@ -458,7 +513,7 @@ pnpm add react   # optional peer dependency
 ```
 
 ```ts
-import { renderRequest, staticPrimitiveResolver } from "@loom/runtime/react"
+import { renderRequest, staticPrimitiveResolver } from "@jam-overture/loom/react"
 
 const rendered = await renderRequest(
   { treeId, editMode: false },
@@ -501,8 +556,8 @@ carried on the root node under the runtime's reserved prop key, so changing one
 is an ordinary `configure` the Gate weighs like any other change (0049):
 
 ```ts
-import { createThemeRegistry } from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
+import { createThemeRegistry } from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 const root = {
   kind: "element",
@@ -541,7 +596,7 @@ renderer's resolver and its prop validator, because a component's narrowed prop
 type is only sound when the same object vetted the props:
 
 ```ts
-import { catalogueOf, createPrimitiveRegistry, definePrimitive } from "@loom/runtime/sdk"
+import { catalogueOf, createPrimitiveRegistry, definePrimitive } from "@jam-overture/loom/sdk"
 
 const card = definePrimitive({
   type: "loom.card",
@@ -582,8 +637,8 @@ not carry — which a `filter` would not, and a deployment that quietly lost a
 primitive finds out when a page fails to draw:
 
 ```ts
-import { createPrimitiveRegistry, describeSelectionError, selectPrimitives } from "@loom/runtime/sdk"
-import { STARTER_PRIMITIVES } from "@loom/runtime/primitives"
+import { createPrimitiveRegistry, describeSelectionError, selectPrimitives } from "@jam-overture/loom/sdk"
+import { STARTER_PRIMITIVES } from "@jam-overture/loom/primitives"
 
 const chosen = selectPrimitives(STARTER_PRIMITIVES, ["loom.page", "loom.section", "loom.prose"])
 if (!chosen.ok) throw new Error(describeSelectionError(chosen.error))
@@ -602,12 +657,17 @@ latency you will accept, and both are yours.
 
 ## The starter primitives
 
-A deployment does not have to start from an empty registry. `@loom/runtime/primitives`
+> **Not in the published package.** `@jam-overture/loom/primitives` is a subpath of
+> this workspace only. Installing `@jam-overture/loom` from the registry gets you the
+> framework and none of what follows in this section; the starter library ships
+> separately (0194). This is written for somebody working in this repository.
+
+A deployment does not have to start from an empty registry. `@jam-overture/loom/primitives`
 ships ten, ported from the Hermes predecessor and chosen to cover the primitive
 contract rather than the catalogue:
 
 ```ts
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
 
 const registry = createStarterPrimitiveRegistry([myOwnPrimitive])   // Result, like any other
 ```
@@ -676,7 +736,7 @@ the executable rather than a convenience. When a build step exists, `bin` should
 point at the emitted entry and the shebang should go.
 
 The CLI is usable as library code too: `runCli(argv, nodeFileSystem)` from
-`@loom/runtime/cli`, which is what its tests drive.
+`@jam-overture/loom/cli`, which is what its tests drive.
 
 ## Daily reports
 

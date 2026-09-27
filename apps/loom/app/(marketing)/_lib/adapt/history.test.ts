@@ -1,4 +1,4 @@
-import { applyDelta, type LoomTree } from "@loom/runtime"
+import { applyDelta, type LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { treeFor } from "../render"

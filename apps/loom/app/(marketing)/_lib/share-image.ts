@@ -1,4 +1,4 @@
-import type { ResolvedTheme } from "@loom/runtime"
+import type { ResolvedTheme } from "@jam-overture/loom"
 
 import { readAskId } from "./adapt/asks"
 import { siteThemes } from "./registry"

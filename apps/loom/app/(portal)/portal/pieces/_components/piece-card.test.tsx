@@ -5,7 +5,7 @@ import {
   primitiveTypeSchema,
   slotNameSchema,
   type CataloguedPrimitive,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { PieceCard } from "./piece-card"
 

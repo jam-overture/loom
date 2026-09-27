@@ -1,5 +1,5 @@
-import { assertNever, type TreeId } from "@loom/runtime"
-import type { StoreError } from "@loom/runtime/store"
+import { assertNever, type TreeId } from "@jam-overture/loom"
+import type { StoreError } from "@jam-overture/loom/store"
 
 import type { AuditReport } from "./audit-view"
 import type { OutcomeTone } from "./outcome"

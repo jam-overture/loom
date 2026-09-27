@@ -1,4 +1,4 @@
-import type { IdFactory, LoomNode } from "@loom/runtime"
+import type { IdFactory, LoomNode } from "@jam-overture/loom"
 
 /**
  * Children and slots.
@@ -27,6 +27,6 @@ export declare const secondaryAction: LoomNode
 export declare const heading: (ids: IdFactory, level: number, text: string) => LoomNode
 export declare const prose: (ids: IdFactory, text: string) => LoomNode
 
-export { buildElement, buildSlot } from "@loom/runtime"
+export { buildElement, buildSlot } from "@jam-overture/loom"
 export { createElement } from "react"
-export type { LoomPrimitiveProps } from "@loom/runtime/react"
+export type { LoomPrimitiveProps } from "@jam-overture/loom/react"

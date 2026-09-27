@@ -3,7 +3,7 @@ import {
   parseReaderSignalBatch,
   readerSignalBatchSchema,
   readerSignalSchema,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
 import { produceAddressedMarkup } from "./markup"

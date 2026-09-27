@@ -1,4 +1,4 @@
-import { ok, type Result } from "@loom/runtime"
+import { ok, type Result } from "@jam-overture/loom"
 
 import { afterFailure, type AttemptRecord } from "./throttle"
 

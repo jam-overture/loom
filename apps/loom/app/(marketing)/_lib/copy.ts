@@ -1,5 +1,5 @@
-import { TREE_OPERATIONS } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+import { TREE_OPERATIONS } from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { siteRegistry } from "./registry"
 
@@ -32,7 +32,7 @@ import { siteRegistry } from "./registry"
  * edit two repositories' worth of meaning in step.
  *
  * `Loom daily build` filed that on 30 August, when `TREE_OPERATIONS` became an
- * export of `@loom/runtime`, and named the reason it is worth doing even though
+ * export of `@jam-overture/loom`, and named the reason it is worth doing even though
  * this number genuinely does not move: **a number nobody expects to move is the
  * one nobody re-checks.** A fifth operation would be a change to what Loom is,
  * and the front door should find that out by being rebuilt rather than by being

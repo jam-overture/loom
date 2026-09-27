@@ -1,8 +1,30 @@
 {
-  "name": "@loom/runtime",
-  "version": "0.0.1",
-  "description": "Loom — an AI-powered adaptive UI runtime",
-  "private": true,
+  "name": "@jam-overture/loom",
+  "version": "0.1.0",
+  "description": "Loom \u2014 an AI-powered adaptive UI runtime",
+  "license": "MIT",
+  "author": "jam-overture",
+  "homepage": "https://github.com/jam-overture/loom#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jam-overture/loom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jam-overture/loom/issues"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "ui",
+    "react",
+    "runtime",
+    "adaptive-ui",
+    "tree",
+    "delta"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -89,7 +111,8 @@
     "prerender:check": "tsx tools/prerender/main.ts",
     "queue": "tsx tools/queue/main.ts",
     "shoot": "tsx tools/screenshot/shoot.ts",
-    "specimen": "tsx tools/specimen/main.ts"
+    "specimen": "tsx tools/specimen/main.ts",
+    "prepack": "pnpm build"
   },
   "dependencies": {
     "zod": "^3.24.1"
@@ -134,6 +157,73 @@
   "packageManager": "pnpm@10.31.0",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
-  ]
+    "dist",
+    "!dist/primitives",
+    "!dist/**/*.map"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./anthropic": {
+        "types": "./dist/interpretation/anthropic.d.ts",
+        "default": "./dist/interpretation/anthropic.js"
+      },
+      "./react": {
+        "types": "./dist/render/index.d.ts",
+        "default": "./dist/render/index.js"
+      },
+      "./sdk": {
+        "types": "./dist/sdk/index.d.ts",
+        "default": "./dist/sdk/index.js"
+      },
+      "./cli": {
+        "types": "./dist/cli/index.d.ts",
+        "default": "./dist/cli/index.js"
+      },
+      "./store": {
+        "types": "./dist/store/index.d.ts",
+        "default": "./dist/store/index.js"
+      },
+      "./write": {
+        "types": "./dist/write/index.d.ts",
+        "default": "./dist/write/index.js"
+      },
+      "./postgres": {
+        "types": "./dist/store/postgres.d.ts",
+        "default": "./dist/store/postgres.js"
+      },
+      "./signals": {
+        "types": "./dist/signals/index.d.ts",
+        "default": "./dist/signals/index.js"
+      },
+      "./signals/broadcast": {
+        "types": "./dist/signals/broadcast.d.ts",
+        "default": "./dist/signals/broadcast.js"
+      },
+      "./signals/postgres": {
+        "types": "./dist/signals/postgres.d.ts",
+        "default": "./dist/signals/postgres.js"
+      },
+      "./telemetry": {
+        "types": "./dist/telemetry/index.d.ts",
+        "default": "./dist/telemetry/index.js"
+      },
+      "./telemetry/postgres": {
+        "types": "./dist/telemetry/postgres.d.ts",
+        "default": "./dist/telemetry/postgres.js"
+      },
+      "./testing": {
+        "types": "./dist/testing/index.d.ts",
+        "default": "./dist/testing/index.js"
+      },
+      "./testing/contracts": {
+        "types": "./dist/testing/contracts.d.ts",
+        "default": "./dist/testing/contracts.js"
+      }
+    }
+  }
 }

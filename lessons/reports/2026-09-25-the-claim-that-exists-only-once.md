@@ -106,7 +106,7 @@ program rather than by somebody remembering.
 Seven exercises, written into `src/scratch.test.ts`, run with
 `pnpm vitest run src/scratch.test.ts`, and the transcripts in the lesson are that
 run's. The file was also typechecked by hand (`pnpm typecheck`, which reported
-only the four pre-existing `@loom/runtime/*` resolution errors in
+only the four pre-existing `@jam-overture/loom/*` resolution errors in
 `src/cli/scaffold-fixture/`, and nothing from the exercise file). It was deleted
 before committing.
 

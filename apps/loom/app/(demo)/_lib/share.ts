@@ -1,4 +1,4 @@
-import type { LoomNode } from "@loom/runtime"
+import type { LoomNode } from "@jam-overture/loom"
 import type { Metadata } from "next"
 
 import { siteOrigin } from "@/app/(marketing)/_lib/site"

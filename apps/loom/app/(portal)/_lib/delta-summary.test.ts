@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema, primitiveTypeSchema, type LoomNode, type TreeDelta } from "@loom/runtime"
+import { nodeIdSchema, primitiveTypeSchema, type LoomNode, type TreeDelta } from "@jam-overture/loom"
 
 import { describeOperation, plainOperation, summariseOperations } from "./delta-summary"
 import { partNameOf } from "./part-name"

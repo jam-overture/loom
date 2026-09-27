@@ -1,4 +1,4 @@
-import { EPISODE_RESOLUTION_KINDS, TELEMETRY_EVENT_TYPES } from "@loom/runtime/telemetry"
+import { EPISODE_RESOLUTION_KINDS, TELEMETRY_EVENT_TYPES } from "@jam-overture/loom/telemetry"
 import { describe, expect, it } from "vitest"
 
 import { docsTelemetry, DOCS_RETENTION } from "./corpus"

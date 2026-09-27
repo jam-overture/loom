@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
-import { minimalPalette } from "@loom/runtime"
+import { minimalPalette } from "@jam-overture/loom"
 
 const css = readFileSync(fileURLToPath(new URL("./globals.css", import.meta.url)), "utf8")
 

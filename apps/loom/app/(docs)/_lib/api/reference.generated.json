@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "specifier": "@loom/runtime",
+      "specifier": "@jam-overture/loom",
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
@@ -14,12 +14,12 @@
         "widest": true,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime/react",
+            "specifier": "@jam-overture/loom/react",
             "slug": "react",
             "names": 5
           },
           {
-            "specifier": "@loom/runtime/sdk",
+            "specifier": "@jam-overture/loom/sdk",
             "slug": "sdk",
             "names": 8
           }
@@ -4279,7 +4279,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/anthropic",
+      "specifier": "@jam-overture/loom/anthropic",
       "slug": "anthropic",
       "types": "./dist/interpretation/anthropic.d.ts",
       "requires": [
@@ -4325,7 +4325,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/react",
+      "specifier": "@jam-overture/loom/react",
       "slug": "react",
       "types": "./dist/render/index.d.ts",
       "requires": [
@@ -4345,7 +4345,7 @@
         "widest": false,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime",
+            "specifier": "@jam-overture/loom",
             "slug": "runtime",
             "names": 5
           }
@@ -5154,7 +5154,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/primitives",
+      "specifier": "@jam-overture/loom/primitives",
       "slug": "primitives",
       "types": "./dist/primitives/index.d.ts",
       "requires": [
@@ -5606,7 +5606,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/sdk",
+      "specifier": "@jam-overture/loom/sdk",
       "slug": "sdk",
       "types": "./dist/sdk/index.d.ts",
       "requires": [
@@ -5626,7 +5626,7 @@
         "widest": false,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime",
+            "specifier": "@jam-overture/loom",
             "slug": "runtime",
             "names": 8
           }
@@ -6204,7 +6204,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/cli",
+      "specifier": "@jam-overture/loom/cli",
       "slug": "cli",
       "types": "./dist/cli/index.d.ts",
       "requires": [],
@@ -6339,7 +6339,7 @@
             {
               "name": "CLI_USAGE",
               "kind": "value",
-              "signature": "const CLI_USAGE = \"loom \\u2014 scaffolding for the Loom primitive registry\\n\\nUsage:\\n  loom init [--dir <directory>]\\n  loom add primitive <type> [--dir <directory>]\\n  loom --help\\n\\nOptions:\\n  --dir <directory>   Where the Loom source lives (default: loom)\\n\\ninit writes a starter primitive, a generated registry, and a conformance test\\ninto <directory>/primitives. add primitive declares one more and\\nregenerates the registry from the directory's contents.\\n\\nA type is dot-namespaced kebab-case: app.card, commerce.product-card.\\nloom.* is the framework's own namespace and is refused \\u2014 those\\nnames belong to the primitives @loom/runtime already registers.\"",
+              "signature": "const CLI_USAGE = \"loom \\u2014 scaffolding for the Loom primitive registry\\n\\nUsage:\\n  loom init [--dir <directory>]\\n  loom add primitive <type> [--dir <directory>]\\n  loom --help\\n\\nOptions:\\n  --dir <directory>   Where the Loom source lives (default: loom)\\n\\ninit writes a starter primitive, a generated registry, and a conformance test\\ninto <directory>/primitives. add primitive declares one more and\\nregenerates the registry from the directory's contents.\\n\\nA type is dot-namespaced kebab-case: app.card, commerce.product-card.\\nloom.* is the framework's own namespace and is refused \\u2014 those\\nnames belong to the primitives @jam-overture/loom already registers.\"",
               "truncated": false,
               "summary": ""
             },
@@ -6432,7 +6432,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/store",
+      "specifier": "@jam-overture/loom/store",
       "slug": "store",
       "types": "./dist/store/index.d.ts",
       "requires": [],
@@ -6849,7 +6849,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/write",
+      "specifier": "@jam-overture/loom/write",
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
@@ -7196,7 +7196,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/postgres",
+      "specifier": "@jam-overture/loom/postgres",
       "slug": "postgres",
       "types": "./dist/store/postgres.d.ts",
       "requires": [
@@ -7326,14 +7326,14 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/signals",
+      "specifier": "@jam-overture/loom/signals",
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
       "files": 23,
       "narrower": [
         {
-          "specifier": "@loom/runtime/signals/broadcast",
+          "specifier": "@jam-overture/loom/signals/broadcast",
           "slug": "signals-broadcast",
           "avoids": [
             "zod"
@@ -7349,12 +7349,12 @@
         "widest": false,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime/signals/broadcast",
+            "specifier": "@jam-overture/loom/signals/broadcast",
             "slug": "signals-broadcast",
             "names": 14
           },
           {
-            "specifier": "@loom/runtime/telemetry",
+            "specifier": "@jam-overture/loom/telemetry",
             "slug": "telemetry",
             "names": 1
           }
@@ -7362,7 +7362,7 @@
         "collisions": [
           {
             "name": "horizonOf",
-            "specifier": "@loom/runtime/telemetry",
+            "specifier": "@jam-overture/loom/telemetry",
             "slug": "telemetry"
           }
         ]
@@ -8099,7 +8099,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/signals/broadcast",
+      "specifier": "@jam-overture/loom/signals/broadcast",
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
@@ -8112,7 +8112,7 @@
         "widest": false,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime/signals",
+            "specifier": "@jam-overture/loom/signals",
             "slug": "signals",
             "names": 14
           }
@@ -8235,7 +8235,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/signals/postgres",
+      "specifier": "@jam-overture/loom/signals/postgres",
       "slug": "signals-postgres",
       "types": "./dist/signals/postgres.d.ts",
       "requires": [
@@ -8302,7 +8302,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/telemetry",
+      "specifier": "@jam-overture/loom/telemetry",
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
@@ -8315,7 +8315,7 @@
         "widest": false,
         "sharedWith": [
           {
-            "specifier": "@loom/runtime/signals",
+            "specifier": "@jam-overture/loom/signals",
             "slug": "signals",
             "names": 1
           }
@@ -8323,7 +8323,7 @@
         "collisions": [
           {
             "name": "horizonOf",
-            "specifier": "@loom/runtime/signals",
+            "specifier": "@jam-overture/loom/signals",
             "slug": "signals"
           }
         ]
@@ -8829,7 +8829,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/telemetry/postgres",
+      "specifier": "@jam-overture/loom/telemetry/postgres",
       "slug": "telemetry-postgres",
       "types": "./dist/telemetry/postgres.d.ts",
       "requires": [
@@ -8903,7 +8903,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/testing",
+      "specifier": "@jam-overture/loom/testing",
       "slug": "testing",
       "types": "./dist/testing/index.d.ts",
       "requires": [
@@ -9313,7 +9313,7 @@
       ]
     },
     {
-      "specifier": "@loom/runtime/testing/contracts",
+      "specifier": "@jam-overture/loom/testing/contracts",
       "slug": "testing-contracts",
       "types": "./dist/testing/contracts.d.ts",
       "requires": [

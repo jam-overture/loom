@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { DispositionKind, StakeFactor, StakeFactorCode } from "@loom/runtime"
+import type { DispositionKind, StakeFactor, StakeFactorCode } from "@jam-overture/loom"
 
 import { reasoningOf } from "@/app/(portal)/_lib/refusal"
 import { NOTHING_WEIGHED, STAKE_FACTORS, WEIGHING } from "@/app/(portal)/_lib/vocabulary"

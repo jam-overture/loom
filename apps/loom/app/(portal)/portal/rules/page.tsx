@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import { policyFingerprintOf } from "@loom/runtime"
-import { describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
+import { policyFingerprintOf } from "@jam-overture/loom"
+import { describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

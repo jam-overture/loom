@@ -7,9 +7,9 @@ import {
   systemClock,
   type ChangeInterpreter,
   type ChangeRepairer,
-} from "@loom/runtime"
-import { anthropicModelClient } from "@loom/runtime/anthropic"
-import { catalogueOf } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { anthropicModelClient } from "@jam-overture/loom/anthropic"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { portalRegistry } from "./registry"
 

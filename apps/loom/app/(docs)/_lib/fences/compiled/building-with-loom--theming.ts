@@ -8,7 +8,7 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { STARTER_PALETTES, createThemeRegistry } from "@loom/runtime"
+import { STARTER_PALETTES, createThemeRegistry } from "@jam-overture/loom"
 
 import {
   ourDarkPalette,

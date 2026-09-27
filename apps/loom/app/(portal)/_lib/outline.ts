@@ -1,5 +1,5 @@
-import { assertNever, outlineTree, type LoomNode, type LoomTree, type NodeKind } from "@loom/runtime"
-import { addressNode, type Addressing, type DecorationLookup } from "@loom/runtime/react"
+import { assertNever, outlineTree, type LoomNode, type LoomTree, type NodeKind } from "@jam-overture/loom"
+import { addressNode, type Addressing, type DecorationLookup } from "@jam-overture/loom/react"
 
 import { nounOf } from "./part-name"
 

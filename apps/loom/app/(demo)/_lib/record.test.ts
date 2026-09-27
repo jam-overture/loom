@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { EditIntent, RuntimeEvent, RuntimeEventEnvelope } from "@loom/runtime"
+import type { EditIntent, RuntimeEvent, RuntimeEventEnvelope } from "@jam-overture/loom"
 
 import { recordFromEvents, type ChangeRecord } from "./record"
 

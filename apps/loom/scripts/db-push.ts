@@ -2,9 +2,9 @@ import nextEnv from "@next/env"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@loom/runtime/postgres"
-import { ensureReaderSignalsSchema } from "@loom/runtime/signals/postgres"
-import { ensureTelemetrySchema } from "@loom/runtime/telemetry/postgres"
+import { ensureHoldStoreSchema, ensureTreeStoreSchema } from "@jam-overture/loom/postgres"
+import { ensureReaderSignalsSchema } from "@jam-overture/loom/signals/postgres"
+import { ensureTelemetrySchema } from "@jam-overture/loom/telemetry/postgres"
 
 import { ensureSignInAttemptsSchema } from "../app/(portal)/_lib/auth/attempts-postgres"
 import { resolveConnectionString } from "../app/(portal)/_lib/connection"

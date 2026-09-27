@@ -8,10 +8,10 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { renderLoomTree } from "@loom/runtime/react"
-import { broadcastReaderSignals } from "@loom/runtime/signals/broadcast"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import { broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
 import { useEffect, useRef } from "react"
-import { parseReaderSignalBatch } from "@loom/runtime/signals"
+import { parseReaderSignalBatch } from "@jam-overture/loom/signals"
 
 import { registry, store, themes, tree } from "../context/the-runtime--what-your-readers-do"
 

@@ -1,5 +1,5 @@
-import { defaultGatePolicy, type GatePolicy, type PropsVocabulary } from "@loom/runtime"
-import { propsVocabularyFor, registeredTypesFor } from "@loom/runtime/sdk"
+import { defaultGatePolicy, type GatePolicy, type PropsVocabulary } from "@jam-overture/loom"
+import { propsVocabularyFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 
 import { portalRegistry } from "./registry"
 

@@ -7,8 +7,8 @@ import {
   collectReaderSignals,
   describeCollection,
   readerSignalWindowSchema,
-} from "@loom/runtime/signals"
-import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@loom/runtime/signals/postgres"
+} from "@jam-overture/loom/signals"
+import { postgresReaderSignalJournal, postgresReaderTallyStore } from "@jam-overture/loom/signals/postgres"
 
 import { resolveConnectionString } from "../app/(portal)/_lib/connection"
 

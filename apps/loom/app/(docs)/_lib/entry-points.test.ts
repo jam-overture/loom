@@ -23,7 +23,7 @@ const runtimeManifest = (): { readonly exports: Record<string, unknown> } => {
 
 const published = (): readonly string[] =>
   Object.keys(runtimeManifest().exports)
-    .map((subpath) => (subpath === "." ? "@loom/runtime" : `@loom/runtime${subpath.slice(1)}`))
+    .map((subpath) => (subpath === "." ? "@jam-overture/loom" : `@jam-overture/loom${subpath.slice(1)}`))
     .sort()
 
 describe("the documented entry points", () => {
@@ -45,6 +45,6 @@ describe("the documented entry points", () => {
   })
 
   it("leads with the one an application starts from", () => {
-    expect(entryPoints[0]?.specifier).toBe("@loom/runtime")
+    expect(entryPoints[0]?.specifier).toBe("@jam-overture/loom")
   })
 })

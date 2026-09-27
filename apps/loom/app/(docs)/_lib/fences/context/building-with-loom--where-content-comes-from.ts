@@ -1,5 +1,5 @@
-import type { LoomTree } from "@loom/runtime"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+import type { LoomTree } from "@jam-overture/loom"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * Where the content comes from.

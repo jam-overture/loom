@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
-import type { SubmissionUnavailable } from "@loom/runtime"
+import type { SubmissionUnavailable } from "@jam-overture/loom"
 
 import { docsEntryAt } from "@/app/(docs)/_lib/nav"
 

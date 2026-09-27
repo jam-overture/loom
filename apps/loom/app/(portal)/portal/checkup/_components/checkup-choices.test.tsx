@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
-import type { TreeListing } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import type { TreeListing } from "@jam-overture/loom/store"
 
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 

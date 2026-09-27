@@ -344,7 +344,7 @@ Exercise E prints the whole mapping.
 ### The vendor is optional, and that is a fact about the import graph
 
 `@anthropic-ai/sdk` is an **optional peer dependency**, and the adapter is a
-separate entry point — `@loom/runtime/anthropic` — that the package root does not
+separate entry point — `@jam-overture/loom/anthropic` — that the package root does not
 re-export. A host that brings its own model never loads it and never installs it.
 
 The argument is not packaging hygiene. A front-end framework whose core imports a

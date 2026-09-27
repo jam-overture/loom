@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
-import { nodeIdSchema, proposalIdSchema, randomIdFactory, systemClock, treeIdSchema } from "@loom/runtime"
-import { commitIntent, confirmHeld, describeHoldError, discardHeld } from "@loom/runtime/write"
+import { nodeIdSchema, proposalIdSchema, randomIdFactory, systemClock, treeIdSchema } from "@jam-overture/loom"
+import { commitIntent, confirmHeld, describeHoldError, discardHeld } from "@jam-overture/loom/write"
 
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { reportOf, type WriteReport } from "@/app/(portal)/_lib/outcome"

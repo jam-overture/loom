@@ -1,4 +1,4 @@
-import { describeInterpretationError, interpretationFault } from "@loom/runtime"
+import { describeInterpretationError, interpretationFault } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { faultActors, faultExamples, faultRows } from "./faults"

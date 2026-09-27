@@ -3,13 +3,13 @@ import {
   type DispositionReasonCode,
   type GatePolicy,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import {
   describeWriteOutcome,
   type HeldProposal,
   type WriteOutcome,
   type WriteOutcomeKind,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 import { addASentence, demoteTheHeading, quietenTheSentence } from "../bench/changes"
 import { applied, DANA, heldIn, nodeOfType, openBench, plans, RAVI, type Bench } from "../bench/page"

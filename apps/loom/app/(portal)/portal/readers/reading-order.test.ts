@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
+import { READER_SIGNAL_KINDS } from "@jam-overture/loom/signals"
 
 import { portalFile, screenSource } from "@/app/(portal)/_lib/screen-source"
 

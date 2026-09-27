@@ -1,10 +1,10 @@
-import type { StakeFactor } from "@loom/runtime"
+import type { StakeFactor } from "@jam-overture/loom"
 import {
   describeRevertOutcome,
   describeWriteOutcome,
   type RevertOutcome,
   type WriteOutcome,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 import { reasoningOf, refusalState, type Reasoning } from "./refusal"
 import { CANNOT_UNDO, plainState, stateOfWrite, type OutcomeTone } from "./vocabulary"

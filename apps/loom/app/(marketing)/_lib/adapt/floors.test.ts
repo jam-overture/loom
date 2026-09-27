@@ -15,7 +15,7 @@ import {
   type CompositionRuntime,
   type EditIntent,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { homePageTree } from "../pages/home"

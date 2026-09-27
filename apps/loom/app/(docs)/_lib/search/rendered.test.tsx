@@ -185,7 +185,7 @@ describe("what the walker does with a tree", () => {
   })
 
   it("leaves no space in front of the punctuation a missing name left behind", () => {
-    expect(renderedWords(<p>published for <code>@loom/runtime</code>.</p>)).toBe("published for ….")
+    expect(renderedWords(<p>published for <code>@jam-overture/loom</code>.</p>)).toBe("published for ….")
   })
 
   it("has nothing to say about an empty tree, rather than something", () => {

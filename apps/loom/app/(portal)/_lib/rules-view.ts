@@ -5,7 +5,7 @@ import {
   type GatePolicy,
   type IntentOrigin,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { STAKES, type PlainWord } from "./vocabulary"
 

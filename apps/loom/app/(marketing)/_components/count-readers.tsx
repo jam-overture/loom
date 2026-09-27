@@ -1,7 +1,7 @@
 "use client"
 
-import { broadcastReaderSignals, deliverReaderSignals } from "@loom/runtime/signals/broadcast"
-import type { ReaderSignalBatch } from "@loom/runtime/signals"
+import { broadcastReaderSignals, deliverReaderSignals } from "@jam-overture/loom/signals/broadcast"
+import type { ReaderSignalBatch } from "@jam-overture/loom/signals"
 import { useEffect } from "react"
 
 import { SITE_SIGNAL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
@@ -35,8 +35,8 @@ import { SITE_SIGNAL_TYPES } from "@/app/(marketing)/_lib/readers/asked"
  * anywhere else. Nothing about the response is read, because a page has no
  * retry to attempt and no reader to tell.
  *
- * The import is `@loom/runtime/signals/broadcast` rather than
- * `@loom/runtime/signals`: about 5 KB in a browser bundle rather than about
+ * The import is `@jam-overture/loom/signals/broadcast` rather than
+ * `@jam-overture/loom/signals`: about 5 KB in a browser bundle rather than about
  * 66 KB, because the second carries the schemas (0136). `ReaderSignalBatch`
  * comes from the heavier entry point as a **type**, which is erased before a
  * bundler sees it.

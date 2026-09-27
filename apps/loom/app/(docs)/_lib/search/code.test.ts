@@ -37,9 +37,9 @@ describe("the code under a heading", () => {
   })
 
   it("gives a block above the first heading to the page itself", () => {
-    const source = ["# A page", "", "```bash", "pnpm add @loom/runtime", "```"].join("\n")
+    const source = ["# A page", "", "```bash", "pnpm add @jam-overture/loom", "```"].join("\n")
 
-    expect(codeSectionsIn(source)).toEqual([{ anchor: "", code: "pnpm add @loom/runtime" }])
+    expect(codeSectionsIn(source)).toEqual([{ anchor: "", code: "pnpm add @jam-overture/loom" }])
   })
 
   /**
@@ -75,11 +75,11 @@ describe("the code under a heading", () => {
       "",
       "```bash",
       "## not a section",
-      "pnpm add @loom/runtime",
+      "pnpm add @jam-overture/loom",
       "```",
       "",
       "```ts",
-      "import { buildElement } from '@loom/runtime'",
+      "import { buildElement } from '@jam-overture/loom'",
       "```",
     ].join("\n")
 
@@ -94,7 +94,7 @@ describe("the code under a heading", () => {
       "## Getting it",
       "",
       "```bash",
-      "pnpm add @loom/runtime",
+      "pnpm add @jam-overture/loom",
       "```",
       "",
       "```ts sketch",
@@ -103,7 +103,7 @@ describe("the code under a heading", () => {
     ].join("\n")
 
     expect(codeSectionsIn(source).map((section) => section.code)).toEqual([
-      "pnpm add @loom/runtime",
+      "pnpm add @jam-overture/loom",
       "const store = …",
     ])
   })
@@ -160,6 +160,6 @@ describe("the code of a page, keyed by anchor", () => {
   it("holds the install command off the page that gives it", () => {
     const code = [...readPageCode("getting-started", "installation").values()].join("\n")
 
-    expect(code).toContain("@loom/runtime")
+    expect(code).toContain("@jam-overture/loom")
   })
 })

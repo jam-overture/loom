@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { sequentialIdFactory, type LoomTree } from "@loom/runtime"
+import { sequentialIdFactory, type LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { docsExamples } from "./examples/catalogue"

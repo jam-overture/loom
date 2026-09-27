@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { deltaIdSchema, intentIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@loom/runtime"
-import type { IntentEpisode, ProposalEpisode } from "@loom/runtime/telemetry"
+import { deltaIdSchema, intentIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@jam-overture/loom"
+import type { IntentEpisode, ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import { EpisodeCard } from "./episode-card"
 

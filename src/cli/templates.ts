@@ -42,8 +42,8 @@ export const namesFor = (type: string): PrimitiveNames => ({
 export const primitiveModule = (names: PrimitiveNames): string => `import { createElement } from "react"
 import { z } from "zod"
 
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
-import { definePrimitive } from "@loom/runtime/sdk"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
+import { definePrimitive } from "@jam-overture/loom/sdk"
 
 /**
  * Every prop a tree may set on this primitive. The render seam refuses a node
@@ -95,7 +95,7 @@ export const registryModule = (primitives: readonly PrimitiveNames[]): string =>
  * rewritten from the contents of this directory every time a primitive is added.
  */
 
-import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
+import { createPrimitiveRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
 ${imports === "" ? "" : `\n${imports}\n`}
 const built = createPrimitiveRegistry([
 ${registered}
@@ -117,7 +117,7 @@ export const registry = built.value
  */
 export const conformanceTest = (): string => `import { describe, expect, it } from "vitest"
 
-import { auditRegistry, describeRegistryAudit } from "@loom/runtime/sdk"
+import { auditRegistry, describeRegistryAudit } from "@jam-overture/loom/sdk"
 
 import { registry } from "./registry.js"
 

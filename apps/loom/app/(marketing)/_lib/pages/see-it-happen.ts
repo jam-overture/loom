@@ -1,4 +1,4 @@
-import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@loom/runtime"
+import { buildElement, buildSlot, buildText, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import { whatTheChoicesDo, worthWatching } from "../adapt/answers"
 import { ASKS, type AskId } from "../adapt/asks"

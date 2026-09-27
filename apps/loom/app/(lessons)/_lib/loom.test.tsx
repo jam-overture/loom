@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { primitiveTypeSchema } from "@loom/runtime"
+import { primitiveTypeSchema } from "@jam-overture/loom"
 
 import { COURSE_THEME_STYLE, courseRegistry, heading, prose, renderFragment } from "./loom"
 

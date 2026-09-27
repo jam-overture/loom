@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
-import type { StoreError } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import type { StoreError } from "@jam-overture/loom/store"
 
 import type { AuditReport } from "@/app/(portal)/_lib/audit-view"
 import type { PageCheck, StandingState } from "@/app/(portal)/_lib/checkup-sweep"

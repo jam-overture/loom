@@ -10,8 +10,8 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { EXCEPTIONS_SPELLED } from "../adapt/answers"
 import { ASKERS, ceilingOf } from "../adapt/askers"
@@ -73,7 +73,7 @@ import type { PageContext } from "./home"
  * that constant was not exported, and a reordering there would have left this
  * page listing the right eight questions in a stale order. Filed for
  * `Loom daily build` on 28 August and answered by #181 — `ESCALATION_LADDER` is
- * exported from `@loom/runtime`, **derived from the rules themselves rather than
+ * exported from `@jam-overture/loom`, **derived from the rules themselves rather than
  * declared beside them**, so it cannot disagree with the order it describes.
  *
  * The finding recorded that this file *"still writes the order by hand and can

@@ -115,7 +115,7 @@ fixed.
 Every seam takes the number, and none of them takes "forever":
 
 ```ts
-import { modelInterpreter, randomIdFactory, resolveTreeData, systemClock } from "@loom/runtime"
+import { modelInterpreter, randomIdFactory, resolveTreeData, systemClock } from "@jam-overture/loom"
 
 /** An interpretation you know is long. Ten minutes instead of three. */
 export const interpreter = modelInterpreter({
@@ -147,7 +147,7 @@ model client's `complete`. Pass it to whatever does the IO and your connection
 pool gets the socket back:
 
 ```ts
-import { defineSource } from "@loom/runtime"
+import { defineSource } from "@jam-overture/loom"
 import { z } from "zod"
 
 export const deliveries = defineSource({
@@ -177,7 +177,7 @@ reach by waiting for it, which is how it ends up being the one nobody has
 designed. So the runtime publishes a client that never replies:
 
 ```ts
-import { hangingModelClient } from "@loom/runtime/testing"
+import { hangingModelClient } from "@jam-overture/loom/testing"
 
 const neverReplies = hangingModelClient()
 

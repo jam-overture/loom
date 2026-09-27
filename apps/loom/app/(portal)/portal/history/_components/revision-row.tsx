@@ -1,4 +1,4 @@
-import type { StoredRevision } from "@loom/runtime/store"
+import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

@@ -4,7 +4,7 @@ import type {
   StakeFactor,
   StakeFactorCode,
   StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import {
   CANNOT_BE_DRAWN,

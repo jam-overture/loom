@@ -1,4 +1,4 @@
-import { ceilingFor, isAbove } from "@loom/runtime"
+import { ceilingFor, isAbove } from "@jam-overture/loom"
 
 import { ASK_ORIGINS, STAKES } from "@/app/(portal)/_lib/vocabulary"
 

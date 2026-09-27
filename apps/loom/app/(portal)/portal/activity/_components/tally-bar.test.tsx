@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { EPISODE_RESOLUTION_KINDS, type EpisodeTally } from "@loom/runtime/telemetry"
+import { EPISODE_RESOLUTION_KINDS, type EpisodeTally } from "@jam-overture/loom/telemetry"
 
 import { TallyBar } from "./tally-bar"
 

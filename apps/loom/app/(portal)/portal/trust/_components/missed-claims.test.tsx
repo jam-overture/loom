@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { proposalIdSchema, intentIdSchema, treeIdSchema } from "@loom/runtime"
-import { CALIBRATION_BUCKET_COUNT, type ConfidenceBucket } from "@loom/runtime/telemetry"
+import { proposalIdSchema, intentIdSchema, treeIdSchema } from "@jam-overture/loom"
+import { CALIBRATION_BUCKET_COUNT, type ConfidenceBucket } from "@jam-overture/loom/telemetry"
 
 import type { ContradictedBand, MissCause, MissedClaim, MissGroup } from "@/app/(portal)/_lib/calibration-misses"
 

@@ -1,5 +1,5 @@
-import { childrenOf, findNode, type LoomNode, type LoomTree, type NodeId } from "@loom/runtime"
-import { LOOM_NODE_ATTRIBUTE } from "@loom/runtime/react"
+import { childrenOf, findNode, type LoomNode, type LoomTree, type NodeId } from "@jam-overture/loom"
+import { LOOM_NODE_ATTRIBUTE } from "@jam-overture/loom/react"
 
 import type { PlainChange } from "./plain-change"
 import type { ChangeRecord } from "./record"

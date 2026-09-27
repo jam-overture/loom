@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { CALIBRATION_BUCKET_COUNT, type CalibrationReport } from "@loom/runtime/telemetry"
+import { CALIBRATION_BUCKET_COUNT, type CalibrationReport } from "@jam-overture/loom/telemetry"
 
 import { TrustSummary } from "./trust-summary"
 

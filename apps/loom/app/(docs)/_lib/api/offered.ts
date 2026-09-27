@@ -24,7 +24,7 @@ import type { ApiEntry, ApiKind } from "./model"
  * resolved that star for the generator walked into the target module and
  * reported everything it found there, `export const` included. The reference
  * then told a reader to import `catalogueFields` and `closedChoices` from
- * `@loom/runtime/sdk`. Both are `undefined` on that entry point. Nothing on
+ * `@jam-overture/loom/sdk`. Both are `undefined` on that entry point. Nothing on
  * this site could have caught it: the page was produced by the generator, and
  * the only test over it asks whether the generator produced it.
  *

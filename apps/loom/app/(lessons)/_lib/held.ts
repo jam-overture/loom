@@ -1,4 +1,4 @@
-import type { LoomTree } from "@loom/runtime"
+import type { LoomTree } from "@jam-overture/loom"
 
 /**
  * What the page is not allowed to be carrying.

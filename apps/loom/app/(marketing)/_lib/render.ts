@@ -1,5 +1,5 @@
-import type { LoomTree } from "@loom/runtime"
-import { renderLoomTree, type RenderOutput } from "@loom/runtime/react"
+import type { LoomTree } from "@jam-overture/loom"
+import { renderLoomTree, type RenderOutput } from "@jam-overture/loom/react"
 
 import { askById, type Ask } from "./adapt/asks"
 import { runHistory, type ChangeHistory } from "./adapt/history"

@@ -10,7 +10,7 @@ import {
   type LoomTree,
   type NodeId,
   type TreeId,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
 

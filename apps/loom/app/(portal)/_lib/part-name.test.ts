@@ -10,7 +10,7 @@ import {
   type LoomTree,
   type SlotNode,
   type TreeDelta,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import {
   capitalised,

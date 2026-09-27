@@ -6,14 +6,14 @@ import type {
   TreeDelta,
   TreeId,
   TreeOperation,
-} from "@loom/runtime"
-import { childrenOf } from "@loom/runtime"
+} from "@jam-overture/loom"
+import { childrenOf } from "@jam-overture/loom"
 import {
   planRevert,
   type RevertPlan,
   type TreeReader,
   type UnrevertablePlan,
-} from "@loom/runtime/store"
+} from "@jam-overture/loom/store"
 
 import {
   firstNamed,

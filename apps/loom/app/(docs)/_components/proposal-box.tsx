@@ -6,9 +6,9 @@ import {
   sequentialIdFactory,
   type LoomTree,
   type StakeLevel,
-} from "@loom/runtime"
-import { describeRevertPlan } from "@loom/runtime/store"
-import { describeWriteOutcome } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import { describeRevertPlan } from "@jam-overture/loom/store"
+import { describeWriteOutcome } from "@jam-overture/loom/write"
 import { useRef, useState, useTransition, type ReactNode } from "react"
 
 import {

@@ -8,8 +8,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { fixedPolicy, gatePolicySchema } from "@loom/runtime"
-import type { CompositionRuntime } from "@loom/runtime"
+import { fixedPolicy, gatePolicySchema } from "@jam-overture/loom"
+import type { CompositionRuntime } from "@jam-overture/loom"
 
 import { clock, events, idFactory, interpreter } from "../context/building-with-loom--what-ai-may-change"
 

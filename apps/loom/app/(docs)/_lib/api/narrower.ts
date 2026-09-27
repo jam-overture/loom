@@ -9,9 +9,9 @@ import type { ApiEntry, ApiNarrowerDoor } from "./model"
  * show: two of those doors can open onto the same code, and one of them can
  * cost a reader a library they will never call.
  *
- * `@loom/runtime/signals` is the case. It publishes the broadcaster *and* the
+ * `@jam-overture/loom/signals` is the case. It publishes the broadcaster *and* the
  * schemas that describe what the broadcaster sends, so importing it loads
- * `zod`. `@loom/runtime/signals/broadcast` publishes the broadcaster and
+ * `zod`. `@jam-overture/loom/signals/broadcast` publishes the broadcaster and
  * nothing else, and loads no package at all. A reader who wants to send reader
  * signals from a browser and reaches for the shorter specifier — which is also
  * the one the rail lists first — pays for schemas their browser never parses.
@@ -58,8 +58,8 @@ const isStrictSubset = (inner: ReadonlySet<string>, outer: ReadonlySet<string>):
  * something from their bundle.
  *
  * **And every export accounted for.** Without this half the pair that qualifies
- * is not a narrower door but a different one: `@loom/runtime/telemetry/postgres`
- * loads a strict subset of `@loom/runtime/telemetry`'s packages, and it
+ * is not a narrower door but a different one: `@jam-overture/loom/telemetry/postgres`
+ * loads a strict subset of `@jam-overture/loom/telemetry`'s packages, and it
  * publishes four names, none of which are among that door's sixty-four. A rule
  * of packages alone would have sent a reader from the journal to the Postgres
  * journal and lost them everything they came for.

@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { auditRegistry, describeRegistryError } from "@loom/runtime/sdk"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { auditRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
 import {

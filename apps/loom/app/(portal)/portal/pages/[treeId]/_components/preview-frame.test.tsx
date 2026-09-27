@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { primitiveTypeSchema, treeIdSchema, type NodeId } from "@loom/runtime"
-import type { RenderDiagnostic } from "@loom/runtime/react"
+import { primitiveTypeSchema, treeIdSchema, type NodeId } from "@jam-overture/loom"
+import type { RenderDiagnostic } from "@jam-overture/loom/react"
 
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 

@@ -7,8 +7,8 @@ import {
   proposalIdSchema,
   treeIdSchema,
   type TreeDelta,
-} from "@loom/runtime"
-import type { HeldProposal } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { answerOutcomes } from "@/app/(portal)/_lib/waiting"

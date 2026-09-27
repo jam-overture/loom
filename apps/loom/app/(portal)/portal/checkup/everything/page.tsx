@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import type { TreeId } from "@loom/runtime"
-import { auditSnapshot, describeStoreError } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import { auditSnapshot, describeStoreError } from "@jam-overture/loom/store"
 
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

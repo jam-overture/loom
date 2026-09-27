@@ -12,7 +12,7 @@ import {
   type IntentOrigin,
   type LoomTree,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { docsExamples } from "../examples/catalogue"
 import { docsGatePolicy } from "../propose/policy"

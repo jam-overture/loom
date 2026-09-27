@@ -106,18 +106,18 @@ import type { Composition } from "./composition.js"
  * prop does nothing. It is there for the phone.
  */
 const STEPS = [
-  { before: "Install it beside your app — it is a library, not a service, and it ships no runtime of its own: ", code: "@loom/runtime" },
+  { before: "Install it beside your app — it is a library, not a service, and it ships no runtime of its own: ", code: "@jam-overture/loom" },
   { before: "Register the primitives your pages are allowed to be made of, plus any of your own: ", code: "createStarterPrimitiveRegistry" },
   { before: "Hand an instruction and the current tree to the seam, and read back a proposal: ", code: "commitIntent" },
 ] as const
 
-const INSTALL = "pnpm add @loom/runtime"
+const INSTALL = "pnpm add @jam-overture/loom"
 
 /**
  * Every line is under 63 characters, which is a constraint the screenshot
  * imposed rather than a preference. See the note on `wrap` below.
  */
-const SOURCE = `import { createStarterPrimitiveRegistry } from "@loom/runtime"
+const SOURCE = `import { createStarterPrimitiveRegistry } from "@jam-overture/loom"
 
 const registry = createStarterPrimitiveRegistry()
 
@@ -177,7 +177,7 @@ export const codeBand: Composition = {
                     props: { size: "lead", tone: "muted", measured: true },
                     children: [
                       buildText(ids, "There is no build step and no hosted runtime. "),
-                      buildElement(ids, { type: "loom.code-span", children: [buildText(ids, "@loom/runtime")] }),
+                      buildElement(ids, { type: "loom.code-span", children: [buildText(ids, "@jam-overture/loom")] }),
                       buildText(ids, " is an ordinary dependency, and the page it changes is the page you already have."),
                     ],
                   }),

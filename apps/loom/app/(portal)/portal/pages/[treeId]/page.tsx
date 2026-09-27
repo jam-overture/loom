@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema } from "@loom/runtime"
-import { renderRequest } from "@loom/runtime/react"
-import { attributeTree, treeSourceFromStore } from "@loom/runtime/store"
+import { treeIdSchema } from "@jam-overture/loom"
+import { renderRequest } from "@jam-overture/loom/react"
+import { attributeTree, treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"

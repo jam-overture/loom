@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
-import * as runtime from "@loom/runtime"
-import * as telemetry from "@loom/runtime/telemetry"
-import * as write from "@loom/runtime/write"
+import * as runtime from "@jam-overture/loom"
+import * as telemetry from "@jam-overture/loom/telemetry"
+import * as write from "@jam-overture/loom/write"
 import { describe, expect, it } from "vitest"
 
 import { REPOSITORY_ROOT } from "../architecture/source"
@@ -36,9 +36,9 @@ const PAGE = join(
 )
 
 const MODULES: Readonly<Record<string, Readonly<Record<string, unknown>>>> = {
-  "@loom/runtime": runtime,
-  "@loom/runtime/telemetry": telemetry,
-  "@loom/runtime/write": write,
+  "@jam-overture/loom": runtime,
+  "@jam-overture/loom/telemetry": telemetry,
+  "@jam-overture/loom/write": write,
 }
 
 /** Named imports only — `import Anthropic from …` has no names to check. */
@@ -72,7 +72,7 @@ describe("the code blocks on What every ask leaves behind", () => {
 
     for (const { specifier } of imports) {
       expect(
-        specifier in MODULES || specifier === "@loom/runtime/telemetry/postgres"
+        specifier in MODULES || specifier === "@jam-overture/loom/telemetry/postgres"
       ).toBe(true)
     }
   })

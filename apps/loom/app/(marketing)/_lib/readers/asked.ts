@@ -1,4 +1,4 @@
-import type { ReaderSignalTypes } from "@loom/runtime/signals/broadcast"
+import type { ReaderSignalTypes } from "@jam-overture/loom/signals/broadcast"
 
 /**
  * What this site asks to be told about the people reading it.

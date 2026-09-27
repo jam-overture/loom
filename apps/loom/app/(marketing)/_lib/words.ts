@@ -1,4 +1,4 @@
-import type { LoomNode } from "@loom/runtime"
+import type { LoomNode } from "@jam-overture/loom"
 
 /**
  * What a reader actually reads, pulled off a page.

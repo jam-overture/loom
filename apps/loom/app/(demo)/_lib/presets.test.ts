@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { applyDelta, sequentialIdFactory, systemClock, type LoomTree, type TreeOperation } from "@loom/runtime"
+import { applyDelta, sequentialIdFactory, systemClock, type LoomTree, type TreeOperation } from "@jam-overture/loom"
 
 import { DEMO_ALTERNATE_THEME, DEMO_THEME_NODE_PROP, demoPageTree } from "./page-tree"
 import type { ChangeRecord } from "./record"

@@ -5,7 +5,7 @@ import {
   sequentialIdFactory,
   type FrameOriginRegistry,
   type PromptMeasurement,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "../copy"

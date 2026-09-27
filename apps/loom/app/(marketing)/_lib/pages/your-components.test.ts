@@ -1,5 +1,5 @@
-import type { LoomNode } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+import type { LoomNode } from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
 import { BAND } from "../bands"

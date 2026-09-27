@@ -1,4 +1,4 @@
-import { defaultGatePolicy, gatePolicySchema } from "@loom/runtime"
+import { defaultGatePolicy, gatePolicySchema } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { KNOB_GROUPS, KNOB_ORDER, knobsInGroup, policyKnobs } from "./knobs"

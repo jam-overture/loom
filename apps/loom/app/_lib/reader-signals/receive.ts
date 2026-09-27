@@ -3,7 +3,7 @@ import {
   ingestReaderSignals,
   type IntakeGate,
   type ReaderSignalJournal,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 
 import { describeIntakeSwitch, type IntakeSettings } from "./settings"
 

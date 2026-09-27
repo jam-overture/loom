@@ -1,4 +1,4 @@
-import { defaultGatePolicy, type GatePolicy } from "@loom/runtime"
+import { defaultGatePolicy, type GatePolicy } from "@jam-overture/loom"
 
 /**
  * Every knob a Gate policy has, with the sentence a reader needs about it.

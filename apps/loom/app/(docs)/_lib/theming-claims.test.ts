@@ -7,7 +7,7 @@ import {
   RAMP_STEPS,
   STARTER_PALETTES,
   TEXT_CONTRAST_MINIMUM,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 /**
@@ -92,7 +92,7 @@ describe("what the theming page shows in its code blocks", () => {
 
   it("imports the two runtime functions it tells a reader to call", () => {
     for (const named of ["createThemeRegistry", "STARTER_PALETTES"]) {
-      expect(page).toContain(`import { ${named} } from "@loom/runtime"`)
+      expect(page).toContain(`import { ${named} } from "@jam-overture/loom"`)
     }
   })
 })

@@ -37,7 +37,7 @@ const withoutClipboard = (): void => {
 let container: HTMLDivElement
 let root: Root
 
-const mount = async (value = "pnpm add @loom/runtime"): Promise<void> => {
+const mount = async (value = "pnpm add @jam-overture/loom"): Promise<void> => {
   await act(async () => {
     root.render(createElement(CopyControl, { value, label: "Copy", copiedLabel: "Copied" }))
   })
@@ -102,10 +102,10 @@ describe("the copy control", () => {
   it("writes what it was given, and says so", async () => {
     const writeText = vi.fn(async () => undefined)
     withClipboard(writeText)
-    await mount("pnpm add @loom/runtime")
+    await mount("pnpm add @jam-overture/loom")
     await click()
 
-    expect(writeText).toHaveBeenCalledWith("pnpm add @loom/runtime")
+    expect(writeText).toHaveBeenCalledWith("pnpm add @jam-overture/loom")
     expect(button()?.textContent).toBe("Copied")
   })
 

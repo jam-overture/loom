@@ -8,8 +8,8 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { describeRegistryError } from "@loom/runtime/sdk"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { describeRegistryError } from "@jam-overture/loom/sdk"
 
 // page.mdx:70 — a program
 const built = createStarterPrimitiveRegistry()

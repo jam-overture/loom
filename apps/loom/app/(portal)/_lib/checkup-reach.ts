@@ -1,4 +1,4 @@
-import type { LoomTree, TreeId } from "@loom/runtime"
+import type { LoomTree, TreeId } from "@jam-overture/loom"
 
 /**
  * How much of this deployment a checkup could speak for, from a listing already

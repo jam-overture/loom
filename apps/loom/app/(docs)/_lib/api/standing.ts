@@ -5,12 +5,12 @@ import { surfaceOf, type DoorSurface } from "./narrower"
  * Where a door sits among the sixteen — which is to say, what it does *not*
  * have behind it.
  *
- * A reader meets this package as a list of sixteen imports with `@loom/runtime`
+ * A reader meets this package as a list of sixteen imports with `@jam-overture/loom`
  * at the top of it, described as the one to start with. The belief that forms
  * is the one almost every package would have earned: that the short specifier
  * is the whole library and the longer ones are slices of it, kept separate as a
  * convenience. A reader holding it looks for `renderTree` behind
- * `@loom/runtime`, does not find it, and concludes the name does not exist.
+ * `@jam-overture/loom`, does not find it, and concludes the name does not exist.
  *
  * **It is wrong here, and by a long way.** The sixteen doors barely overlap.
  * The root door is the biggest of them and publishes less than half of what the

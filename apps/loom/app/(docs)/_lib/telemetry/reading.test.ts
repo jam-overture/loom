@@ -4,7 +4,7 @@ import {
   type EpisodeFold,
   type RecordedTelemetry,
   type TelemetryEvent,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 import { describe, expect, it } from "vitest"
 
 import { docsTelemetry } from "./corpus"

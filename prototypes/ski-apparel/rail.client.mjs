@@ -1,4 +1,4 @@
-import { broadcastReaderSignals, READER_SIGNALS_EVENT } from "@loom/runtime/signals/broadcast"
+import { broadcastReaderSignals, READER_SIGNALS_EVENT } from "@jam-overture/loom/signals/broadcast"
 
 import { RAIL_TYPES } from "./legend.mjs"
 import { emptyReadings, fold, questionsOpened, summarise } from "./readings.mjs"

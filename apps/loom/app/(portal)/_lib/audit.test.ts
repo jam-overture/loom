@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { ok, sequentialIdFactory, type ProposalId, type TreeDelta } from "@loom/runtime"
+import { ok, sequentialIdFactory, type ProposalId, type TreeDelta } from "@jam-overture/loom"
 import {
   auditSnapshot,
   memoryTreeStore,
   type AppendRequest,
   type TreeReader,
-} from "@loom/runtime/store"
+} from "@jam-overture/loom/store"
 
 import { describeAudit } from "./audit-view"
 import { seedTree } from "./seed"
