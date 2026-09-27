@@ -13,7 +13,6 @@ import type { AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { BAND } from "../bands"
 import {
-  SIGN_IN_LABEL,
   siteFooter,
   siteHeader,
   siteReadingBand,
@@ -21,6 +20,7 @@ import {
 } from "../chrome"
 import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
+import { siteQuestions } from "../questions"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
 import { inYourOwnWordsBand } from "./in-your-own-words"
@@ -429,76 +429,34 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
     ]),
   ])
 
+/**
+ * The questions band, rendered from `questions.ts`.
+ *
+ * The five were written inline here until 27 September, when the structured
+ * data this site hands a search engine grew a `FAQPage` built from the same
+ * answers. Two readers, one list: an answer reworded on the page and not in the
+ * schema would be the site telling a person one thing and an assistant another,
+ * and nothing on any screen would say so.
+ *
+ * Nothing a visitor sees changed. The `open` on the first is the band's
+ * business rather than the schema's, so it rides along on the data and the
+ * schema ignores it.
+ */
 const questions = (ids: IdFactory): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.questions }, "The ones worth asking first", [
     buildElement(ids, {
       type: "loom.faq-list",
       props: { columns: "two" },
-      children: [
+      children: siteQuestions().map((entry) =>
         buildElement(ids, {
           type: "loom.faq",
           props: {
-            question: "Can the AI write code into my page?",
-            answer:
-              "No. It can only use the pieces you handed it, and only set options those pieces already have. The worst it can ask for is something your page already knows how to do.",
-            open: true,
+            question: entry.question,
+            answer: entry.answer,
+            ...(entry.open === true ? { open: true } : {}),
           },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "What stops a bad change from landing?",
-            answer:
-              "Your rules do. Each request is weighed on how much it moves and whether it can be taken back, then allowed, held for a person, or refused.",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "Is this a page builder?",
-            answer:
-              "It is the part a page builder would be built on. No editor to learn, nothing hosted with us — you keep your own components.",
-          },
-        }),
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "What happens when a change is wrong?",
-            answer:
-              "You put it back. Every change is stored together with the change that reverses it, and undoing is checked against your rules and written down like anything else. Nothing is erased to make room for it.",
-          },
-        }),
-        /**
-         * The question the bar at the top of this page has been asking on the
-         * reader's behalf since the site was written, and the fifth in a band
-         * that had four.
-         *
-         * *Sign in*, top right, on a site a stranger has never used, is an
-         * offer — and this site has nothing to offer them. A portal belongs to
-         * the Loom site it is part of. Until this run the site said the word
-         * *account* in exactly two places, the bar's button and a cost line,
-         * and explained it in neither.
-         *
-         * It is a description of code and not a position: it says what a portal
-         * is and who decides its list, and nothing about whether anybody sells
-         * one. The band's other four answer *what can it do to my page*; this is
-         * the first that answers *what would I be signing up to*, which is the
-         * question a bar with a sign-in button puts in a reader's head before
-         * they have read a word of the rest.
-         *
-         * Both halves are composed rather than typed: `PORTAL.door` is the same
-         * sentence the band of cards below carries, and `SIGN_IN_LABEL` is the
-         * button's own word, so re-wording either cannot leave this answer
-         * describing a page that no longer exists.
-         */
-        buildElement(ids, {
-          type: "loom.faq",
-          props: {
-            question: "Do I need an account to use this?",
-            answer: `No. Loom runs inside your own application, and the portal is part of what you put there rather than a service you join. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page is that door on this site's own portal — on a site of yours it would be your list, and you would be on it.`,
-          },
-        }),
-      ],
+        })
+      ),
     }),
   ])
 

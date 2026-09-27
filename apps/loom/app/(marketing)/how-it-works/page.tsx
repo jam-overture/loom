@@ -2,6 +2,7 @@ import { readAskId } from "@/app/(marketing)/_lib/adapt/asks"
 import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { HOW_IT_WORKS, readThemeName, siteOrigin } from "@/app/(marketing)/_lib/site"
+import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 export const generateMetadata = routeMetadata(HOW_IT_WORKS)
 
@@ -23,7 +24,20 @@ const HowItWorksPage = async ({ searchParams }: { readonly searchParams: SearchP
     ...(ask === undefined ? {} : { ask, approve: params["approve"] === "1" }),
   })
 
-  return rendered.element
+  /**
+   * The graph beside the tree, which is what a crawler and an assistant read.
+   *
+   * A fragment rather than a wrapper, so the page's own markup is unchanged and
+   * the tree is still the whole of what a visitor sees. See
+   * `_components/structured-data.tsx` for why this surface renders a tag of its
+   * own at all.
+   */
+  return (
+    <>
+      <StructuredData route={HOW_IT_WORKS} origin={siteOrigin()} />
+      {rendered.element}
+    </>
+  )
 }
 
 export default HowItWorksPage
