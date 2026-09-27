@@ -34236,3 +34236,82 @@ they describe did not exist yet.
 
 **What would close it for the next split**: nothing to do here. The pattern is
 `manifest.ts` reading `../../package.json`, and it is four lines.
+
+---
+## 2026-09-27 — `pnpm shoot --serve` photographs the front door's embedded demonstration as a broken-document icon, and has since the flag existed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**
+open — one line in the harness; nothing is wrong with the site and nothing is
+wrong on a deployment, which is why no test of any lane could report it
+
+The front door's `Now type one of your own` band frames `/demo` through
+`loom.embed`, and the frame's `src` is `surfaceHref(origin, DEMO)` — an absolute
+address built from `siteOrigin()`. With no `LOOM_SITE_ORIGIN` and no
+`VERCEL_URL`, that resolves to `http://localhost:3000`.
+
+`pnpm shoot --serve apps/loom` starts the application on an **ephemeral port**
+on purpose, so it runs beside a `next dev`
+([0191](decisions/0191-the-harness-may-start-the-application-because-there-is-now-only-one.md)).
+The page is therefore served from `127.0.0.1:40473` while the frame inside it
+points at `localhost:3000`, which is not listening. Chromium draws its
+broken-document glyph in a 1078 × 673 grey box, and the shot comes back with a
+hole where the one band that proves the product works should be.
+
+**It is invisible from inside the run.** The shot succeeds, the exit code is 0,
+`scrollWidth` equals `innerWidth`, and every test of the band passes — the tree
+is right, the `src` is right for the origin it was given, and the origin is
+right for the default. Only the picture is wrong, and only a person looking at
+the picture can tell. This run photographed it twice before recognising it, and
+then reproduced the correct frame by serving on port 3000 by hand.
+
+**The one line.** `--serve` already knows the origin it started on — it prints
+it — so passing that origin to the child as `LOOM_SITE_ORIGIN` makes every
+absolute link in the tree point at the deployment being photographed, which is
+what the flag already implies. It is the harness's rather than this lane's
+because `siteOrigin()` cannot know a port chosen after the module loaded, and
+because the same fault applies to any surface whose tree holds an absolute
+internal link.
+
+**Worth doing soon for a reason beyond one band**: this lane ships a full-page
+shot of the front door in most pull requests, and the maintainer judges this
+surface by eye. Every one of those taken with `--serve` has had a broken box in
+the middle of it.
+
+---
+## 2026-09-27 — the only automated visual instrument here reports a page that is too wide, and nine bands were half empty
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-40-a-band-that-faces-its-answer` — recorded because the
+blind spot is every surface's, not this lane's
+
+`loom.section` lays out eyebrow, heading, content in a column, and `loom.prose`
+with `measured` is capped at `READABLE_MEASURE` — 68ch. A band whose content is
+nothing but paragraphs is therefore a full-width heading above a reading column
+inside a 1120px band, with **roughly half the band empty**, and `/how-it-works`
+and `/what-you-run` were nine of those in a row.
+
+**Nothing in this repository could have reported it, and the reason generalises.**
+
+| instrument | what it reads | why it is silent here |
+| --- | --- | --- |
+| the tree's own tests | structure | every band is correct on its own |
+| the renderer's diagnostics | what the runtime could not honor | nothing was unhonored |
+| `voice.test.ts` | the words | layout is not words |
+| **`scrollWidth` vs `innerWidth`** | **a page too wide** | **this is a page with too much room, which is the opposite, and has no alarm** |
+
+The overflow measurement is the one automated eye this repository has on a
+rendered page, and it can only fail in one direction. A band that spills off a
+phone screams; a band using half the space it was given is silent forever. Both
+are the same class of defect — a box whose contents and whose width disagree —
+and only one of them is reportable.
+
+This branch's answer is a rule stated over the served trees rather than another
+picture: **no band whose content is only paragraphs may stack its heading above
+them**, swept over both pages, naming the offending band by its eyebrow. It
+checked red against the band it was written for.
+
+**The question for `Loom docs`, `Loom lessons`, `Loom portal` and `Loom demo`**
+is the one the 26 September entry asked about depth, one turn along: *which of
+your bands are a heading over a reading column in a band twice as wide, and what
+in your lane would ever tell you?* The answer here was nine, and the instrument
+was a screenshot and a person.
