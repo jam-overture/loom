@@ -55,8 +55,8 @@ Leave those checks on. If one fires, the tree is telling you something.
 `pnpm pack` writes the exact tarball. Three things are worth looking at:
 
 ```bash
-tar tzf loom-runtime-<version>.tgz | grep primitives   # only dist/testing/primitives.*
-tar xzOf loom-runtime-<version>.tgz package/package.json | grep -A20 '"exports"'
+tar tzf jam-overture-loom-<version>.tgz | grep primitives   # only dist/testing/primitives.*
+tar xzOf jam-overture-loom-<version>.tgz package/package.json | grep -A20 '"exports"'
 ```
 
 - **`dist/primitives/` is not in it.** `files` carries `"!dist/primitives"`,
@@ -103,7 +103,7 @@ everything. Install it somewhere that resolves nothing:
 ```bash
 mkdir /tmp/cleanroom && cd /tmp/cleanroom
 npm init -y && npm pkg set type=module
-npm install /path/to/loom-runtime-<version>.tgz
+npm install /path/to/jam-overture-loom-<version>.tgz
 node -e "import('@jam-overture/loom').then(m => console.log(typeof m.createTree))"   # function
 node -e "import('@jam-overture/loom/primitives').catch(e => console.log(e.code))"    # ERR_PACKAGE_PATH_NOT_EXPORTED
 npx loom --help
