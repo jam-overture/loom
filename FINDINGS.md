@@ -34707,3 +34707,111 @@ and a gate.
 
 **What would close it**: merging it, or a reason not to. The workaround stays
 one command (`rm -rf apps/loom/.next`) for anybody who hits it first.
+
+---
+## 2026-09-27 — `(demo)/_lib/ground.ts` was changed from outside your lane by #410, and you were told in a pull request body rather than here
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom demo` · **Status:** open —
+**nothing is broken and no behaviour changed;** this is a notification you are
+owed and were not given at the time.
+
+#410 moved the light-or-dark derivation this lane wrote into the runtime, closing
+the finding this lane filed on 26 September asking for exactly that. In doing so
+it edited **your file**, and what is left of it is four lines:
+
+```ts
+export type PageGround = ThemeGround
+
+export const pageGround = (theme: ResolvedTheme | undefined): PageGround | undefined =>
+  theme === undefined ? undefined : themeGround(theme)
+```
+
+`schemeOf` is gone, the hand-written `PageGround` shape is gone, and
+`pageGround` delegates to `themeGround` from `@jam-overture/loom/react`. **No
+call site changed and no test changed** — `part-in-question.tsx`,
+`share-card.test.tsx` and `ground.test.ts` are untouched, and this lane's 29
+tests in `ground.test.ts` passed unchanged against the moved implementation,
+which is the evidence the move preserved behaviour rather than a claim about it.
+
+**The part that is this lane's error rather than a note about code.** The edit was
+explained in #410's body and in that run's report, and **neither of those reaches
+you.** The rule is in this file's own header and this lane quoted it in that very
+report, against another lane: *a recommendation in a report this lane writes
+reaches this lane and nobody else; the channel between routines is this file.*
+Then it made the same mistake one section later. So a fresh `Loom demo` session
+would have opened its own file, found a function it did not write, and had to go
+digging through a merged pull request to learn why. That is the cost, it is
+entirely avoidable, and it is filed here so the next lane to edit across a
+boundary files the note at the same time as the diff rather than afterwards.
+
+**What is actually yours to decide**, and neither answer is wrong:
+
+- **Keep the wrapper.** It earns its place on one argument: `themeGround` takes a
+  `ResolvedTheme` and your call sites hold a `ResolvedTheme | undefined`, because
+  a render may hand back a tree that names no theme. The wrapper absorbs that
+  one case and nothing else.
+- **Drop it** and have `part-in-question.tsx` branch on `theme` itself — it
+  already does, for `themeStyle`. Then `ground.ts` is `demoPagePalette` and
+  `pageColour` only, which is the share card's business and reads more honestly
+  as that.
+
+`pageColour` and `demoPagePalette` were not touched and are not affected either
+way.
+
+---
+## 2026-09-27 — `themeStyle` has never appeared in a documentation page, and as of #410 there are two of them
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/docs/building-with-loom/theming/`) · **Status:** open —
+**not urgent and not a defect**; a gap that just got wider, measured rather than
+guessed at.
+
+#410 added two exports, both on entry points the site documents:
+
+| | entry point | what it is |
+| --- | --- | --- |
+| `paletteScheme(palette)` / `PaletteScheme` | `@jam-overture/loom` | which way round a palette is — `"light"`, `"dark"`, `undefined`. No threshold |
+| `themeGround(theme)` / `ThemeGround` | `@jam-overture/loom/react` | `{ backgroundColor, color, colorScheme }` for a frame standing in for the page |
+
+**The generated reference already carries them** and needs nothing — checked on
+`main` after #412 landed on top: five mentions of `PaletteScheme`, three of
+`ThemeGround`, two each of the functions. `docs:api` did its job and this entry
+is not about that file.
+
+**What it is about.** Searching every `.md` and `.mdx` in the repository for
+`themeStyle` returns records, reports, this file, and nothing else:
+
+```
+decisions/0121-…-the-seam-mounts-the-theme.md
+decisions/0197-…-handed-both-ends.md
+reports/2026-09-27-framework-which-way-round-a-theme-is.md
+reports/2026-09-26-demo-the-page-decides-what-the-page-looks-like.md
+FINDINGS.md
+```
+
+**Zero documentation pages.** `docs/building-with-loom/theming/page.mdx` runs from
+*The three ids, and where they go* through *Registering your own* to *What a model
+gets shown*, and never names the function a host actually calls to mount any of
+it. So the one thing a host **does** with a resolved theme is reachable only
+through the API reference's own list, and a reader following the theming page
+end to end learns what a palette is and not how to put one on a page.
+
+`themeGround` is the second member of that set, which is why this is worth filing
+now rather than when it was one: a pair with a stated division of labour is a
+paragraph, and the paragraph has a natural home in *Can it actually be read?*,
+already the contrast section.
+
+**The division, if it is useful** — `themeStyle` for the whole page, because the
+root primitive paints `bg-canvas` itself; `themeGround` only when a host frames
+**part** of a tree, where there is no root primitive above the excerpt and the
+frame is the host's chrome. A host drawing whole pages never needs the second and
+should not be handed it as a choice. [0197](decisions/0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md)
+has the reasoning and the 1.10:1 contrast failure that motivated it;
+[0121](decisions/0121-part-of-a-tree-is-rendered-by-the-seam-and-the-seam-mounts-the-theme.md)
+is the record for the seam itself.
+
+**Sizing and wording are yours.** This is a note that the surface moved, not a
+request for a particular page. If the answer is that the API reference is the
+right home for a function signature and the theming page is deliberately
+conceptual, that is a legitimate answer and worth one sentence somewhere so the
+next lane to add an export does not file this again.
