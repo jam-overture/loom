@@ -33644,6 +33644,157 @@ entries together say all a lane needs — link rather than embed, keep the link 
 of a table, and read the body back.
 
 ---
+
+## 2026-09-26 — `@loom/primitives` cannot be installed beside `@loom/runtime@0.0.1`, and npm refuses it rather than warning
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`package.json` at the root is its file) · **Status:** **closed 26 September**
+— the maintainer chose the recommendation the same evening. Both packages are
+`0.1.0`, `private: true` is lifted from the runtime, and the install that
+produced the error below now succeeds
+
+`@loom/primitives` is built to take the runtime as a **peer** dependency, which
+is the right shape: two copies of the runtime in a host's tree would be two
+`PrimitiveType` brands and a registry that refuses its own entries.
+
+The peer range is `~0.1.0`. The root `package.json` says `0.0.1`. Packing both
+and installing them into an empty project:
+
+```
+npm error code ERESOLVE
+npm error Found: @loom/runtime@0.0.1
+npm error Could not resolve dependency:
+npm error peer @loom/runtime@"~0.1.0" from @loom/primitives@0.1.0
+```
+
+**This is a refusal, not a warning.** `npm install` exits non-zero and installs
+nothing, so it is not something a host works around — it is the package being
+uninstallable.
+
+**One of the two numbers has to move**, and the recommendation is that they go
+out together at `0.1.0`: it is the first release either has had, `0.0.1` reads
+as a placeholder because it is one, and the two are compiled against each other
+so an independent version would be a promise nothing tests. `docs/rollout.md`
+Phase 2 asks for *"a version number that means something"*, and a pair that
+moves together is the smallest thing that does.
+
+**Why this lane did not just change it.** The root `package.json` is the
+framework's, its `version` is a claim about what the framework promises, and
+`private: true` sits four lines above it — lifting that is the same decision in
+the same file and it is not this lane's to take. The primitives' peer range is
+one constant (`RUNTIME_RANGE` in `tools/package/manifest.ts`) and moves in
+whichever direction is chosen.
+
+**What closed it**: the two versions agreeing at `0.1.0`, and the install check
+re-run against the real tarballs rather than a repacked one — both packages
+resolve, 98 primitives import, a hero band renders to 48KB with no diagnostics.
+The entry stays as the record of *why* npm refuses rather than warns, because
+the next pair of packages this repository publishes will have the same shape.
+
+---
+
+## 2026-09-26 — there is no LICENSE, and for npm that is not a soft blocker
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** **closed 26 September** — MIT, chosen by the maintainer the same
+evening. `LICENSE` is at the repository root, both manifests carry
+`"license": "MIT"`, and `docs/rollout.md` Phase 2's licensing item is
+discharged with it
+
+`docs/rollout.md` says licensing *"gates whether the repository can be public at
+all"* and is *"the maintainer's and nothing unblocks it but a decision."* That
+is true and it understates the publishing case.
+
+**A published npm package with no license is a package nobody may legally
+use.** It is not a missing badge: npm displays it as UNLICENSED, every corporate
+dependency scanner flags it, and the default in the absence of a license is
+exclusive copyright — a reader who installs it has no permission to use, copy or
+modify it. Publishing without one and adding it later means the first release
+anybody sees is the one they are told not to depend on.
+
+So `pnpm package:primitives` **exits non-zero** until `LICENSE` exists at the
+repository root, and the readiness table calls it BLOCKED and attributes it. The
+generated manifest reads the file rather than asserting anything: an SPDX
+identifier on the first line (`MIT`) becomes the `license` field, and anything
+else becomes `SEE LICENSE IN LICENSE`, which is correct and tells a reader
+nothing.
+
+**This run deliberately did not choose one.** A license is a legal commitment
+about a body of work, made by whoever owns it; a routine picking `MIT` because
+it is the common answer would be a routine making that commitment on somebody
+else's behalf. The path was tested with a temporary `LICENSE` and the file was
+removed.
+
+**What closed it**: `LICENSE` at the root, MIT, with the SPDX identifier on the
+first line so the generated manifest reads it rather than asserting it. **One
+field is worth a second look and is not a routine's to get right:** the
+copyright holder reads `Jam Overture`, taken from the GitHub organization that
+owns the repository. If the entity that holds the copyright is a person or a
+differently-named company, that line is the one to correct, and correcting it
+after a publish means a new version rather than an edit.
+
+---
+
+## 2026-09-26 — the same library will be on npm behind two doors, and every documentation page teaches the older one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(the runtime's `exports` map) **with** `Loom docs` (what the site teaches) ·
+**Status:** **closed 27 September by [0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)**,
+which took the third option below rather than the first — the framework
+withholds `./primitives` from the published package outright, at `0.1.0`, so
+there was never a day with two doors open. The docs half of it is **not**
+closed and is 0194's own filed consequence
+
+`@loom/runtime` exports `./primitives`, and its tarball carries all 620 files of
+the library: 1.1MB against the 350KB of `@loom/primitives`, which carries the
+same files again.
+
+Nothing breaks. A host reaching through either door gets the same registry, and
+a host that uses `@loom/runtime/primitives` never installs the second package —
+so there is no double-registry hazard of the kind two *runtimes* would create.
+What there is instead is **two published ways to say one thing on the first day
+anybody looks**, and the new one is the one nothing documents:
+
+| | teaches `@loom/runtime/primitives` |
+| --- | --- |
+| the docs site's entry-point reference | yes — it is listed as an entry point |
+| the quickstart | yes |
+| three compiled fences under `(docs)/_lib/fences/` | yes |
+| the marketing and demo registries | yes |
+
+**Why this lane did not change it.** Closing the runtime's door is a breaking
+change to four other lanes' files and to published teaching material, and
+`Loom docs` would have to move with it in the same release. It is also
+genuinely arguable either way: a single package that carries a usable default
+vocabulary is a simpler first install, and a host that wants to swap the
+vocabulary is exactly who the second package is for.
+
+**The three options, so whoever takes it does not re-derive them:**
+
+1. **Keep both, say which is canonical.** One paragraph in the docs and a line
+   in each README. Cheapest, and leaves 620 duplicated files in the runtime's
+   tarball forever.
+2. **Runtime re-exports the package.** `@loom/runtime/primitives` becomes a
+   thin re-export of `@loom/primitives`, which makes it a dependency rather
+   than a copy — every import keeps working, the duplication goes, and the
+   runtime grows a dependency on a package that peer-depends on it.
+3. **Close the door at 1.0.** Deprecate the subpath now, drop it at the major.
+   The cleanest end state and the most work, and it needs `Loom docs` in the
+   same release.
+
+**Recommendation at the time: 1 before publishing, 3 planned for 1.0.** What
+happened was **3, immediately**, and it is the better call for the reason 0194
+gives and this entry missed: *"a subpath that exists in `0.1.0` and vanishes in
+`0.2.0` breaks every consumer who used it"* — the option this entry called
+cheapest was the one that could not be taken back.
+
+**What is still open is the half this entry was right about.** The published
+framework documents a subpath it does not ship: the site, the README and the
+quickstart all teach `@jam-overture/loom/primitives`, and from the first publish
+it resolves for nobody. 0194 names that as the sharpest cost of the decision and
+files it for `Loom docs`. The package that makes those pages correct again is
+`@jam-overture/loom-primitives`, and one of the pages was this lane's own —
+below.
 ## 2026-09-26 — the starter library is withheld from the published package and has no package of its own
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
@@ -33808,6 +33959,59 @@ not write it.
 **Nothing here is a defect in code and `src/` was read only.** The three records
 are well argued and the two that are oldest are the two that have drifted most,
 which is exactly what a dated document is supposed to do.
+
+---
+
+## 2026-09-27 — the one band that prints executable instructions was renamed correctly into an import that cannot resolve
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/compositions/`) · **Status:** **closed in the same run** —
+fixed and asserted. Filed because the *shape* of it will recur, and because it
+is the first instance of a class this catalogue has no general guard for
+
+`code-band` is the only composition in the phrasebook whose content is **code a
+visitor copies**. The 26 September framework rename moved its copy from
+`@loom/runtime` to `@jam-overture/loom` — correctly, in all four places, by a
+routine doing exactly the right thing to the file.
+
+**One of those four places was an import statement, and the same day
+[0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)
+withheld `./primitives` from the published framework.** So the band printed:
+
+```
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom"
+```
+
+`createStarterPrimitiveRegistry` is not exported from that package's root and
+never will be — the whole point of 0194 is that the starter library is not in
+it. The line resolves in this workspace, where `dist/primitives` exists, and
+throws `ERR_PACKAGE_PATH_NOT_EXPORTED` for every reader who copies it.
+
+**Nothing could see it.** Both routines were correct locally: the rename was
+right about the name, and 0194 was right about the subpath. The defect is in
+the space between them, it satisfied every schema, it rendered, and it is on the
+marketing page's own code panel.
+
+**Fixed here**: the band installs both packages and imports the registry from
+`@jam-overture/loom-primitives`. Asserted in `compositions.test.ts` against the
+runtime's `publishConfig.exports` — the map that reaches the registry — rather
+than against a package name written down a second time.
+
+### The class, which is the part worth keeping
+
+**A composition may contain a claim that is checkable against something outside
+itself, and the catalogue has no general way to find those.** Every other band's
+copy is marketing prose: wrong is a matter of taste. This one's is a program.
+Three more of the same kind exist and none is currently checked:
+
+- `code-session-band` prints a terminal transcript naming a CLI invocation;
+- `conversation-band` quotes an exchange about what the product does;
+- `changelog-band` lists dated claims about what shipped when.
+
+**What would close it**: not a sweep. The rule, offered for whoever writes the
+next band of this kind — *a composition that prints something a reader will run
+asserts it against the thing that runs it, in the same commit.* The one
+assertion added here is the pattern.
 ---
 ## 2026-09-26 — the marketing site was four surfaces' worth of documentation, and the instruction that cut it was one paragraph
 
@@ -33991,3 +34195,44 @@ one item shorter.
 **Worth doing soon rather than eventually.** A routine reading that file today
 is told the repository may not be public, which is no longer true, and the whole
 purpose of the file is to be the thing a run with no memory can trust.
+
+## 2026-09-27 — a package's promises about its neighbor cannot be checked until the neighbor is published, and two of this one's were wrong
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`tools/package/`) · **Status:** **closed in the same run** — both corrected
+and asserted against the framework's own manifest. Filed for the shape, which
+will recur at every future package split
+
+`@jam-overture/loom-primitives` declares three things about packages that are
+not it: a peer range on the framework, a React range, and a `zod` dependency.
+All three were written before the framework was published, which means all
+three were written against a guess.
+
+An audit against the published package found two of them wrong. Neither would
+have failed a test in this repository, and neither is visible in a workspace,
+where one `node_modules` satisfies everything:
+
+| | was | is | why it mattered |
+| --- | --- | --- | --- |
+| `react` | `>=19.0.0` | `^19.0.0` | The framework declares `^19.0.0`. A library advertising React 20 beside a framework that refuses it advertises a tree npm cannot build — both peers resolve against one `node_modules` — and the only thing the wider range could buy is a major nothing here has been run against |
+| `repository.directory` | `packages/primitives` | `src/primitives` | npm turns this into a *view source* link. The package root is assembled by `pnpm package:primitives` and everything in it but the README is generated and gitignored, so the link landed a reader in an almost empty directory |
+
+`zod` was already right — `^3.24.1` in both — and is now asserted rather than
+coincidental, because two majors of it in one tree is two `ZodType` identities
+and a registry that refuses schemas it built itself.
+
+**What the assertions do that the values do not.** All three now read the
+framework's own manifest instead of restating a range. A framework that moves
+to React 20 or a `zod` major drags this package with it or fails the gate here;
+neither can drift silently, which is the only property worth having, because the
+symptom otherwise appears in a stranger's `npm install` and nowhere else.
+
+### The rule
+
+**A declaration about another package is checked against that package, not
+written down twice.** The three facts above are cheap to assert and were wrong
+within a day of being written — not through carelessness, but because the thing
+they describe did not exist yet.
+
+**What would close it for the next split**: nothing to do here. The pattern is
+`manifest.ts` reading `../../package.json`, and it is four lines.
