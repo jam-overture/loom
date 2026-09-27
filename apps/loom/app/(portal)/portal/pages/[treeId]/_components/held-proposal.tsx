@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 
-import type { HeldProposal } from "@loom/runtime/write"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { ProposalEffectView } from "@/app/(portal)/_components/proposal-effect"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

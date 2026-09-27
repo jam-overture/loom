@@ -1,5 +1,5 @@
-import { memoryTelemetryJournal, type TelemetryJournal } from "@loom/runtime/telemetry"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { memoryTelemetryJournal, type TelemetryJournal } from "@jam-overture/loom/telemetry"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 import { portalDatabase } from "./database"
 

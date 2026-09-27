@@ -51,7 +51,7 @@ const TSX = join(REPOSITORY_ROOT, "apps", "loom", "node_modules", ".bin", "tsx")
 
 /** Where each package really is, from a directory that is not in this workspace. */
 const INSTALLED: Readonly<Record<string, string>> = {
-  "@loom": join(REPOSITORY_ROOT, "apps", "loom", "node_modules", "@loom"),
+  "@jam-overture": join(REPOSITORY_ROOT, "apps", "loom", "node_modules", "@jam-overture"),
   react: join(REPOSITORY_ROOT, "apps", "loom", "node_modules", "react"),
   "react-dom": join(REPOSITORY_ROOT, "apps", "loom", "node_modules", "react-dom"),
   zod: join(REPOSITORY_ROOT, "node_modules", "zod"),
@@ -167,7 +167,7 @@ describe("what the page says about the file", () => {
 
     expect(imported.length).toBeGreaterThan(0)
 
-    /** `@loom/runtime/write` is the `@loom/runtime` package; `react-dom/server` is `react-dom`. */
+    /** `@jam-overture/loom/write` is the `@jam-overture/loom` package; `react-dom/server` is `react-dom`. */
     const packageOf = (specifier: string): string => {
       const segments = specifier.split("/")
 

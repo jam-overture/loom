@@ -14,8 +14,8 @@ import {
   type NodeId,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
-import { copyIn, type CopyDeclarations } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { copyIn, type CopyDeclarations } from "@jam-overture/loom/sdk"
 
 import { partNameOf, placeNameOf, type PartName } from "./part-name"
 

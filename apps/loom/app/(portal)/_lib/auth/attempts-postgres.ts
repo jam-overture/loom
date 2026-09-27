@@ -2,8 +2,8 @@ import { and, desc, eq, gte, lt, ne, sql } from "drizzle-orm"
 import { bigint, integer, pgTable, text } from "drizzle-orm/pg-core"
 import { z } from "zod"
 
-import { err, ok } from "@loom/runtime"
-import type { LoomDatabase } from "@loom/runtime/postgres"
+import { err, ok } from "@jam-overture/loom"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
 
 import type { AttemptLog, AttemptLogError } from "./attempts"
 
@@ -14,7 +14,7 @@ import type { AttemptLog, AttemptLogError } from "./attempts"
  * This table belongs to the portal rather than to the runtime, and so does its
  * DDL. The runtime knows nothing about sign-in: it takes an actor on an intent
  * and never asks how a host established it. A `loom_signin_attempts` table
- * shipped from `@loom/runtime` would be the framework asserting that its
+ * shipped from `@jam-overture/loom` would be the framework asserting that its
  * consumers authenticate people, which 0018 spent a record saying it does not
  * get to do.
  *

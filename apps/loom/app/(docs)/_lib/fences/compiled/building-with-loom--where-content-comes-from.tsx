@@ -9,11 +9,16 @@
  */
 
 import { z } from "zod"
-import { createDataRegistry, defineSource, describeDataRegistryError, resolveTreeData } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
+import {
+  createDataRegistry,
+  defineSource,
+  describeDataRegistryError,
+  resolveTreeData,
+} from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
 import { createElement } from "react"
-import { definePrimitive } from "@loom/runtime/sdk"
+import { definePrimitive } from "@jam-overture/loom/sdk"
 
 import { db, page, primitives } from "../context/building-with-loom--where-content-comes-from"
 

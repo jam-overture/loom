@@ -36,7 +36,7 @@ import { INTAKE_KEY, readIntakeSwitch } from "@/app/_lib/reader-signals/settings
  *
  * **Read on the server, passed down as a boolean.** Nothing here may reach a
  * browser bundle: `settings.ts` reaches the portal's proxy-hop resolver, and
- * `@loom/runtime/signals` carries the schemas — about 66 KB of them (0136). What
+ * `@jam-overture/loom/signals` carries the schemas — about 66 KB of them (0136). What
  * the browser gets is this answer, as one `true`, and the kinds and types in
  * `asked.ts`, which import nothing at runtime.
  */

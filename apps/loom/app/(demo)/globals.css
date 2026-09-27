@@ -19,7 +19,7 @@
    values differ.
 
    Every value is taken from the registered `minimal` palette in
-   `@loom/runtime`'s theme library, used the way that palette's own dark
+   `@jam-overture/loom`'s theme library, used the way that palette's own dark
    half is defined, and `globals.test.ts` pins the ones that carry a
    decision back to the registry so the two cannot drift apart quietly.
 

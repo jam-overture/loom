@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { createThemeRegistry } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { createThemeRegistry } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME, DEMO_THEME_NODE_PROP, demoPageTree } from "./page-tree"
 import { demoRegistry } from "./registry"
@@ -117,7 +117,21 @@ describe("the demo page", () => {
     const { diagnostics, theme } = render(DEMO_ALTERNATE_THEME as Record<string, string>)
 
     expect(diagnostics).toEqual([])
-    expect(theme?.palette.id).toBe("bold")
+    expect(theme?.palette.id).toBe(DEMO_ALTERNATE_THEME["palette"])
+  })
+
+  /**
+   * The re-theme preset's promise is *every colour and typeface on the page
+   * changes at once*, and it is only true if the two themes disagree about all
+   * three. They were `editorial`/`bold` and are now `midnight`/`editorial` —
+   * a dark page going light, which is the most legible version of that promise
+   * this registry can make. Asserted as *different* rather than as two ids, so
+   * the next run to re-pick them is stopped only if it picks the same one twice.
+   */
+  it("re-themes to something that disagrees about all three", () => {
+    for (const key of ["palette", "fontPack", "stylePreset"] as const) {
+      expect(DEMO_ALTERNATE_THEME[key], key).not.toBe(DEMO_STARTING_THEME[key])
+    }
   })
 
   /**
@@ -211,9 +225,18 @@ describe("the demo page", () => {
     expect(JSON.stringify(demoPageTree())).toBe(JSON.stringify(demoPageTree()))
   })
 
+  /**
+   * Named rather than resolved is the failure worth catching: a palette id this
+   * deployment has not registered renders with no theme at all and no error, so
+   * the page comes back in the runtime's own defaults and looks merely plain
+   * rather than broken. Asserted against the constant, because what must hold is
+   * that the arrival theme *resolves* — not that it is any particular one.
+   */
   it("names a palette this deployment registered", () => {
     const { theme } = render(DEMO_STARTING_THEME as Record<string, string>)
 
-    expect(theme?.palette.id).toBe("editorial")
+    expect(theme?.palette.id).toBe(DEMO_STARTING_THEME["palette"])
+    expect(theme?.fontPack.id).toBe(DEMO_STARTING_THEME["fontPack"])
+    expect(theme?.stylePreset.id).toBe(DEMO_STARTING_THEME["stylePreset"])
   })
 })

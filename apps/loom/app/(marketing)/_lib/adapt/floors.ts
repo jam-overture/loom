@@ -14,7 +14,7 @@ import {
   type StakeFactorCode,
   type StakeLevel,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { plannedInterpreter } from "./asks"
 import { RAISED_BY, WEIGHT } from "./record"

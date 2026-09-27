@@ -5,7 +5,7 @@
 // so. Named `quickstart.ts` in a new directory, this stops before it runs with
 // an error about top-level await that explains nothing.
 //
-//     pnpm add @loom/runtime react react-dom zod
+//     pnpm add @jam-overture/loom react react-dom zod
 //     npx tsx quickstart.mts
 //
 // It registers a component of your own, writes a page down as data, draws that
@@ -34,11 +34,11 @@ import {
   type ChangeInterpreter,
   type LoomTree,
   type TreeOperation,
-} from "@loom/runtime"
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { renderLoomTree, THEME_PROP_KEY, type LoomPrimitiveProps } from "@loom/runtime/react"
-import { definePrimitive, describeRegistryError } from "@loom/runtime/sdk"
-import { memoryTreeStore } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { renderLoomTree, THEME_PROP_KEY, type LoomPrimitiveProps } from "@jam-overture/loom/react"
+import { definePrimitive, describeRegistryError } from "@jam-overture/loom/sdk"
+import { memoryTreeStore } from "@jam-overture/loom/store"
 import {
   commitIntent,
   confirmHeld,
@@ -46,7 +46,7 @@ import {
   memoryHoldStore,
   type WriteOutcome,
   type WritePath,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 /** Node ids. Sequential here so that two runs of this file produce the same page. */
 const ids = sequentialIdFactory("quickstart")
@@ -136,7 +136,7 @@ const draw = (tree: LoomTree): string => {
 // ── 4. Where the page lives ──────────────────────────────────────────────────
 //
 // A tree store keeps the page and its history; a hold store keeps changes that
-// are waiting for a person. Both are in memory here. `@loom/runtime/postgres`
+// are waiting for a person. Both are in memory here. `@jam-overture/loom/postgres`
 // implements the same two contracts, and nothing below this line would change.
 
 const store = memoryTreeStore()

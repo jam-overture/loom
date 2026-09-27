@@ -8,13 +8,13 @@ Loom is a single package with several entry points. Install it, and a React
 renderer to mount what it produces.
 
 ```bash
-pnpm add @loom/runtime react react-dom
+pnpm add @jam-overture/loom react react-dom
 ```
 
 <Callout kind="warning">
   Pre-production alpha. Nothing here is stable yet, the package is not on a
   public registry, and the tree schema is still allowed to change. Today it is
-  consumed from within this repository's workspace as `"@loom/runtime":
+  consumed from within this repository's workspace as `"@jam-overture/loom":
   "workspace:*"`.
 </Callout>
 
@@ -40,7 +40,7 @@ centre.
 
 <EntryPoints />
 
-The split is the important part. `@loom/runtime` is the tree and the change
+The split is the important part. `@jam-overture/loom` is the tree and the change
 model and knows nothing about React, storage or any model provider. Each of the
 others is one of those things, behind its own door, so that importing the core
 never drags a database driver into your bundle.
@@ -51,7 +51,7 @@ names behind each, and says the thing this table cannot: they do not nest, so
 none of them has the whole package behind it.
 
 <Callout kind="note">
-  Reach for `@loom/runtime/sdk` the moment you want a primitive of your own — it
+  Reach for `@jam-overture/loom/sdk` the moment you want a primitive of your own — it
   is where `definePrimitive` and the registry live. Everything on the
   [Building with Loom](/docs/building-with-loom/primitives) pages goes through
   it.
@@ -68,8 +68,8 @@ difference matters.
 Nothing throws across a seam. Functions that can fail return a `Result`:
 
 ```ts
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
-import { describeRegistryError } from "@loom/runtime/sdk"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
+import { describeRegistryError } from "@jam-overture/loom/sdk"
 
 const built = createStarterPrimitiveRegistry()
 

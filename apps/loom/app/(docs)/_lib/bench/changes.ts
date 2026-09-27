@@ -1,4 +1,4 @@
-import { buildElement, buildText } from "@loom/runtime"
+import { buildElement, buildText } from "@jam-overture/loom"
 
 import { nodeOfType, plans } from "./page"
 

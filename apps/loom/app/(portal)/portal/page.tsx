@@ -1,8 +1,8 @@
 import Link from "next/link"
 
-import type { TreeId } from "@loom/runtime"
-import { describeStoreError } from "@loom/runtime/store"
-import { describeTelemetryError, episodesOf } from "@loom/runtime/telemetry"
+import type { TreeId } from "@jam-overture/loom"
+import { describeStoreError } from "@jam-overture/loom/store"
+import { describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
 import { CheckupInvitation } from "@/app/(portal)/_components/checkup-invitation"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"

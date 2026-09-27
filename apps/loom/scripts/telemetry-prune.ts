@@ -2,8 +2,8 @@ import nextEnv from "@next/env"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 
-import { applyRetention, describeRetention, retentionPolicySchema } from "@loom/runtime/telemetry"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { applyRetention, describeRetention, retentionPolicySchema } from "@jam-overture/loom/telemetry"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 import { resolveConnectionString } from "../app/(portal)/_lib/connection"
 

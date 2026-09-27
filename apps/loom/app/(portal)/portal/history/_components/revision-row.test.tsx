@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { DeltaId, NodeId, ProposalId, TreeDelta, TreeId } from "@loom/runtime"
-import type { StoredRevision } from "@loom/runtime/store"
+import type { DeltaId, NodeId, ProposalId, TreeDelta, TreeId } from "@jam-overture/loom"
+import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { RevisionRow } from "./revision-row"
 

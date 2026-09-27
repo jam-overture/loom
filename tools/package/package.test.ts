@@ -3,11 +3,11 @@ import { readFile } from "node:fs/promises"
 import { describe, expect, it } from "vitest"
 
 import { rewrite, licenseIdOf, withoutMapComment } from "./build.js"
-import { describeError, describeReadiness } from "./report.js"
+import { describeError, describeReadiness, type Readiness } from "./report.js"
 import { ENTRY_POINTS, manifest, publishedSpecifier, runtimeTarget, RUNTIME_RANGE, VERSION } from "./manifest.js"
 
 /**
- * What has to be true for `@loom/primitives` to resolve in somebody else's
+ * What has to be true for `@jam-overture/loom-primitives` to resolve in somebody else's
  * `node_modules`, held here because none of it is visible from inside this
  * repository.
  *
@@ -37,8 +37,8 @@ describe("where a specifier points once it is published", () => {
   it("resolves a primitive's and a band's view of the same module to one place", () => {
     expect(runtimeTarget("", "../tree/builders.js")).toBe("tree/builders.js")
     expect(runtimeTarget("compositions", "../../tree/builders.js")).toBe("tree/builders.js")
-    expect(publishedSpecifier("", "../tree/builders.js")).toBe("@loom/runtime")
-    expect(publishedSpecifier("compositions", "../../tree/builders.js")).toBe("@loom/runtime")
+    expect(publishedSpecifier("", "../tree/builders.js")).toBe("@jam-overture/loom")
+    expect(publishedSpecifier("compositions", "../../tree/builders.js")).toBe("@jam-overture/loom")
   })
 
   /**
@@ -62,10 +62,10 @@ describe("where a specifier points once it is published", () => {
 
   /** The two subpaths, which are the only reason this is a map and not a constant. */
   it("sends the two subpath modules to their own doors", () => {
-    expect(publishedSpecifier("", "../sdk/definition.js")).toBe("@loom/runtime/sdk")
-    expect(publishedSpecifier("", "../sdk/registry.js")).toBe("@loom/runtime/sdk")
-    expect(publishedSpecifier("", "../render/primitive.js")).toBe("@loom/runtime/react")
-    expect(publishedSpecifier("", "../render/text.js")).toBe("@loom/runtime/react")
+    expect(publishedSpecifier("", "../sdk/definition.js")).toBe("@jam-overture/loom/sdk")
+    expect(publishedSpecifier("", "../sdk/registry.js")).toBe("@jam-overture/loom/sdk")
+    expect(publishedSpecifier("", "../render/primitive.js")).toBe("@jam-overture/loom/react")
+    expect(publishedSpecifier("", "../render/text.js")).toBe("@jam-overture/loom/react")
   })
 
   /**
@@ -76,13 +76,20 @@ describe("where a specifier points once it is published", () => {
    * runtime actually opens.
    */
   it("names only entry points the runtime publishes", async () => {
-    const root: { exports?: Record<string, unknown> } = JSON.parse(
-      await readFile(new URL("../../package.json", import.meta.url), "utf8")
-    )
-    const published = Object.keys(root.exports ?? {})
+    /**
+     * **`publishConfig.exports`, not `exports`.** 0194 gave the runtime two
+     * manifests that differ in one stated way: the workspace map still carries
+     * `./primitives`, which five surfaces import, and the map that reaches the
+     * registry does not. A consumer of this package resolves against the
+     * second one, so the second one is what this has to be true of — reading
+     * the workspace map here would pass on a door npm never opens.
+     */
+    const root: { exports?: Record<string, unknown>; publishConfig?: { exports?: Record<string, unknown> } } =
+      JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"))
+    const published = Object.keys(root.publishConfig?.exports ?? root.exports ?? {})
 
     for (const { specifier } of ENTRY_POINTS) {
-      const subpath = specifier === "@loom/runtime" ? "." : `.${specifier.slice("@loom/runtime".length)}`
+      const subpath = specifier === "@jam-overture/loom" ? "." : `.${specifier.slice("@jam-overture/loom".length)}`
 
       expect(published, `the runtime does not export ${subpath}`).toContain(subpath)
     }
@@ -100,12 +107,12 @@ describe("what the rewrite does to a file", () => {
 
     const out = rewrite("", source)
 
-    expect(out).toContain(`from "@loom/runtime/sdk"`)
+    expect(out).toContain(`from "@jam-overture/loom/sdk"`)
     expect(out).toContain(`import "./stylesheet.js"`)
-    expect(out).toContain(`import("@loom/runtime")`)
+    expect(out).toContain(`import("@jam-overture/loom")`)
     /**
      * The fourth line is the one that matters. `code-band.ts` ships the literal
-     * text `@loom/runtime` inside a marketing band, and several primitives hold
+     * text `@jam-overture/loom` inside a marketing band, and several primitives hold
      * paths in their copy — a blunter rewrite would edit the library's
      * *content* while every other assertion here stayed green.
      */
@@ -124,7 +131,7 @@ describe("what the manifest promises", () => {
     const peers = built["peerDependencies"] as Record<string, string>
 
     expect(built["version"]).toBe(VERSION)
-    expect(peers["@loom/runtime"]).toBe(RUNTIME_RANGE)
+    expect(peers["@jam-overture/loom"]).toBe(RUNTIME_RANGE)
     expect(RUNTIME_RANGE).toContain(VERSION)
     /**
      * A dependency rather than a peer would put a second runtime in a host's
@@ -132,7 +139,7 @@ describe("what the manifest promises", () => {
      * own entries. Asserted because it is one word's difference in a generated
      * file nobody reads.
      */
-    expect(built["dependencies"]).not.toHaveProperty("@loom/runtime")
+    expect(built["dependencies"]).not.toHaveProperty("@jam-overture/loom")
     expect(built["dependencies"]).not.toHaveProperty("react")
   })
 
@@ -145,11 +152,26 @@ describe("what the manifest promises", () => {
    * manifest has to carry whatever the file says — including the honest answer
    * when it says something this cannot reduce to an identifier.
    */
-  it("says what the LICENSE says", () => {
-    expect(licenseIdOf("MIT\n\nCopyright (c) 2026")).toBe("MIT")
-    expect(licenseIdOf("Apache-2.0")).toBe("Apache-2.0")
-    expect(licenseIdOf("All rights reserved. Contact us.")).toBe("SEE LICENSE IN LICENSE")
+  it("says what the runtime's own manifest says, so the two cannot disagree", () => {
+    expect(licenseIdOf(`{"license":"MIT"}`)).toBe("MIT")
+    expect(licenseIdOf(`{"license":"Apache-2.0"}`)).toBe("Apache-2.0")
+    expect(licenseIdOf(`{}`)).toBe("SEE LICENSE IN LICENSE")
     expect(manifest("MIT")["license"]).toBe("MIT")
+  })
+
+  /**
+   * The published runtime is the thing this package is compiled against, so
+   * the two facts it has to agree with are read off the real manifest rather
+   * than restated here.
+   */
+  it("agrees with the runtime on the license and the floor it runs on", async () => {
+    const root: { license?: string; engines?: { node?: string } } = JSON.parse(
+      await readFile(new URL("../../package.json", import.meta.url), "utf8")
+    )
+    const built: Record<string, unknown> = manifest(root.license ?? "")
+
+    expect(built["license"]).toBe(root.license)
+    expect(built["engines"]).toEqual(root.engines)
   })
 
   /** Only what is built, plus the two files a reader opens first. */
@@ -168,34 +190,52 @@ describe("what the manifest promises", () => {
  * stated as a consequence rather than as a preference.
  */
 describe("what the command tells whoever runs it", () => {
-  it("calls the license blocked, and says whose decision it is", () => {
-    const lines = describeReadiness({ files: 620, rewritten: 310, license: false }).join("\n")
-
-    expect(lines).toContain("BLOCKED")
-    expect(lines).toContain("maintainer")
-    expect(lines).not.toContain("  ready     license")
-  })
-
-  it("stops calling it blocked once there is one", () => {
-    const lines = describeReadiness({ files: 620, rewritten: 310, license: true }).join("\n")
-
-    expect(lines).not.toContain("BLOCKED")
-    expect(lines).toContain("ready     license")
+  const state = (over: Partial<Readiness>): Readiness => ({
+    files: 620,
+    rewritten: 310,
+    license: true,
+    packageName: "@jam-overture/loom-primitives",
+    version: "0.1.0",
+    peer: "@jam-overture/loom",
+    peerRange: "~0.1.0",
+    account: "someone",
+    peerPublished: "0.1.0",
+    ...over,
   })
 
   /**
-   * The three nobody in this repository can clear are listed whether or not the
-   * license is there, because they are the reason "ready" is a table rather
-   * than a boolean.
+   * **The table reports rather than asserts, and this is the test for it.** An
+   * earlier version listed the same three preconditions as flat text; within a
+   * day two of the three were done and it still said they were not. Each line
+   * now moves with the fact behind it.
    */
-  it("always names the three that are not this repository's to satisfy", () => {
-    for (const license of [true, false]) {
-      const lines = describeReadiness({ files: 1, rewritten: 1, license }).join("\n")
+  it("reads ready on the three facts it is given, and blocked without them", () => {
+    expect(describeReadiness(state({})).join("\n")).not.toContain("BLOCKED")
 
-      expect(lines).toContain("npm auth")
-      expect(lines).toContain("@loom scope")
-      expect(lines).toContain("published first")
+    for (const missing of [{ license: false }, { account: undefined }, { peerPublished: undefined }] as const) {
+      expect(describeReadiness(state(missing)).join("\n"), JSON.stringify(missing)).toContain("BLOCKED")
     }
+  })
+
+  /**
+   * The peer is the one a reader is most likely to get wrong, so the line says
+   * the version the registry actually serves rather than that it is fine.
+   */
+  it("names the peer version the registry serves, and the range it satisfies", () => {
+    const lines = describeReadiness(state({})).join("\n")
+
+    expect(lines).toContain("@jam-overture/loom@0.1.0")
+    expect(lines).toContain("~0.1.0")
+  })
+
+  it("names the scope an account has to be able to publish under", () => {
+    expect(describeReadiness(state({ account: undefined })).join("\n")).toContain("@jam-overture")
+  })
+
+  /** A blocked table does not print a publish command somebody can paste. */
+  it("withholds the publish line until nothing is blocked", () => {
+    expect(describeReadiness(state({ account: undefined })).join("\n")).not.toContain("npm publish")
+    expect(describeReadiness(state({})).join("\n")).toContain("npm publish")
   })
 
   it("names the command that makes a build when there is none", () => {

@@ -2,6 +2,9 @@ import type { ReactElement } from "react"
 import { describe, expect, it } from "vitest"
 
 import { CHROME } from "./chrome"
+import { pageColour, pageGround } from "./ground"
+import { DEMO_STARTING_THEME } from "./page-tree"
+import { demoThemes } from "./registry"
 import { demoShareCard, SHARE_IMAGE_SIZE } from "./share"
 import { CARD_PAIRINGS, PANE_WIDTHS, shareCardImage } from "./share-card"
 
@@ -40,6 +43,33 @@ const widths = (node: unknown): readonly number[] => {
   return [
     ...(typeof here === "number" ? [here] : []),
     ...widths(element.props?.children),
+  ]
+}
+
+/**
+ * Every value declared under one border property, in document order.
+ *
+ * By property and not by prefix, and that is the second version of this
+ * helper: the first collected anything starting with `border`, which the bar
+ * has had from the start, so the assertion below passed with the pane's own
+ * line deleted. A collector that cannot tell two declarations apart measures
+ * neither.
+ */
+const bordersOn = (which: string, node: unknown): readonly string[] => {
+  if (Array.isArray(node)) return node.flatMap((child) => bordersOn(which, child))
+  if (node === null || typeof node !== "object") return []
+
+  const element = node as {
+    readonly props?: {
+      readonly children?: unknown
+      readonly style?: Readonly<Record<string, unknown>>
+    }
+  }
+  const here = element.props?.style?.[which]
+
+  return [
+    ...(typeof here === "string" ? [here] : []),
+    ...bordersOn(which, element.props?.children),
   ]
 }
 
@@ -141,5 +171,48 @@ describe("the card a shared link unfurls as", () => {
    */
   it.each(CARD_PAIRINGS)("keeps $what readable", ({ foreground, background }) => {
     expect(contrast(foreground, background)).toBeGreaterThan(4.5)
+  })
+
+  /**
+   * **Readable was never enough**, and this is the test that says so.
+   *
+   * Until 26 September the stage half drew from `editorialPalette`, imported by
+   * name, with a comment explaining that this was the palette the tree carries.
+   * The tree then started carrying `midnight` and every assertion above stayed
+   * green — a cream page with navy figures is a perfectly legible picture of a
+   * page this deployment does not serve. What a stranger got was a link that
+   * unfurled as one page and opened as another.
+   *
+   * So the claim is identity rather than legibility: the ground this picture
+   * paints **is** the ground the running page paints, read off the same id.
+   */
+  it("draws the page in the palette the page is actually wearing", () => {
+    const theme = demoThemes.resolve(DEMO_STARTING_THEME)
+
+    expect(theme.ok).toBe(true)
+    if (!theme.ok) return
+
+    const ground = pageGround(theme.value)
+    const stageGrounds = new Set(
+      CARD_PAIRINGS.filter(({ what }) => what.startsWith("the page") || what.startsWith("a figure"))
+        .map(({ background }) => background)
+    )
+
+    expect(stageGrounds).toEqual(new Set([ground?.backgroundColor]))
+    expect(pageColour("bg-canvas")).toBe(ground?.backgroundColor)
+  })
+
+  /**
+   * The split is the composition (`share-card.tsx`), and until this branch it
+   * was carried by luminance alone: a white stage beside a near-black rail. A
+   * dark palette makes the two grounds `#111827` and `#0a0a0a`, which at the
+   * 360px an unfurled card is actually seen at is one rectangle. The hairline
+   * is what makes the split a fact about the picture rather than about which
+   * palette the tree happens to name.
+   */
+  it("draws a line between the two halves, whichever way the palette goes", () => {
+    const card = demoShareCard()
+
+    expect(bordersOn("borderRight", shareCardImage(card))).toEqual([`1px solid ${CHROME.edge}`])
   })
 })

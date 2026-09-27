@@ -1,5 +1,5 @@
-import { describeInterpretationError } from "@loom/runtime"
-import { describeStoreError } from "@loom/runtime/store"
+import { describeInterpretationError } from "@jam-overture/loom"
+import { describeStoreError } from "@jam-overture/loom/store"
 import { describe, expect, it } from "vitest"
 
 import { docsExamples } from "../examples/catalogue"

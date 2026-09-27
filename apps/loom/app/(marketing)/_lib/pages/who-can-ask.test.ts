@@ -6,7 +6,7 @@ import {
   type ElementNode,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import {

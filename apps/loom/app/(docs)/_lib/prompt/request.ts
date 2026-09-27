@@ -8,8 +8,8 @@ import {
   type EditIntent,
   type LoomTree,
   type PromptMeasurement,
-} from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 
 import { docsExamples } from "../examples/catalogue"
 import { docsRegistry, docsThemes } from "../loom/registry"

@@ -8,9 +8,9 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { commitIntent } from "@loom/runtime/write"
-import { applyRetention, collectTelemetry } from "@loom/runtime/telemetry"
-import { postgresTelemetryJournal } from "@loom/runtime/telemetry/postgres"
+import { commitIntent } from "@jam-overture/loom/write"
+import { applyRetention, collectTelemetry } from "@jam-overture/loom/telemetry"
+import { postgresTelemetryJournal } from "@jam-overture/loom/telemetry/postgres"
 
 import {
   clock,

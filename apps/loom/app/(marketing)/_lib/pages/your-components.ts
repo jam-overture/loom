@@ -7,12 +7,12 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
-import { catalogueOf } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 /**
  * Two entry points for one idea, which is a seam rather than a mistake on this
- * page's part: `@loom/runtime/sdk` exports `catalogueOf` and not the type of
+ * page's part: `@jam-overture/loom/sdk` exports `catalogueOf` and not the type of
  * what it hands back, so the function comes from the SDK and the shape of its
  * answer from the root. Filed for `Loom daily build` on 8 September; both are
  * published entry points, so nothing here is reaching inside anything (0018).

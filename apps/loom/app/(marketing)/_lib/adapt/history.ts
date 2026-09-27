@@ -1,4 +1,4 @@
-import { sequentialIdFactory, type LoomTree, type TreeDelta } from "@loom/runtime"
+import { sequentialIdFactory, type LoomTree, type TreeDelta } from "@jam-overture/loom"
 
 import { ASKS, askById, type Ask, type AskId } from "./asks"
 import type { ChangeRecord } from "./record"

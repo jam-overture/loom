@@ -1,7 +1,7 @@
 import { readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { PALETTE_SLOTS, type ElementNode, type LoomNode } from "@loom/runtime"
+import { PALETTE_SLOTS, type ElementNode, type LoomNode } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 

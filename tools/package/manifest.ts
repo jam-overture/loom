@@ -1,7 +1,7 @@
 import { posix } from "node:path"
 
 /**
- * What `@loom/primitives` is, as data rather than as a file somebody edits by
+ * What `@jam-overture/loom-primitives` is, as data rather than as a file somebody edits by
  * hand — and the one transformation that makes the library publishable apart
  * from the runtime it is compiled against.
  *
@@ -28,7 +28,7 @@ import { posix } from "node:path"
  * sitting in `dist/primitives/`, which resolves inside the runtime's own build
  * and nowhere else.
  *
- * The published files have to say `@loom/runtime/sdk` instead. TypeScript
+ * The published files have to say `@jam-overture/loom/sdk` instead. TypeScript
  * deliberately does not rewrite import specifiers on emit, so something has to
  * — and the something is deliberately **not** a bundler. Bundling would inline
  * the runtime into this package, which is exactly the duplicate-copy failure
@@ -53,11 +53,11 @@ export const ENTRY_POINTS: ReadonlyArray<{ readonly prefix: string; readonly spe
    * the root. `sdk/` and `render/` are the only directories the runtime puts
    * behind a subpath; everything else the library touches — `ids`, `result`,
    * `tree/`, `theme/`, `data/`, `runtime/`, `submit/` — is re-exported from the
-   * root barrel and reached as `@loom/runtime`.
+   * root barrel and reached as `@jam-overture/loom`.
    */
-  { prefix: "sdk/", specifier: "@loom/runtime/sdk" },
-  { prefix: "render/", specifier: "@loom/runtime/react" },
-  { prefix: "", specifier: "@loom/runtime" },
+  { prefix: "sdk/", specifier: "@jam-overture/loom/sdk" },
+  { prefix: "render/", specifier: "@jam-overture/loom/react" },
+  { prefix: "", specifier: "@jam-overture/loom" },
 ]
 
 /**
@@ -104,7 +104,7 @@ export const publishedSpecifier = (fileDir: string, specifier: string): string =
 /**
  * The version both packages go out at, together.
  *
- * `@loom/primitives` is compiled against a specific runtime and its peer range
+ * `@jam-overture/loom-primitives` is compiled against a specific runtime and its peer range
  * says so. They are not independently versioned until there is a reason for
  * them to be, and pre-1.0 they move as a pair: the library cannot promise
  * anything the runtime has not, and a host that upgrades one and not the other
@@ -129,7 +129,7 @@ export type Manifest = Readonly<Record<string, unknown>>
  * without one is a package nobody may legally use.
  */
 export const manifest = (license: string): Manifest => ({
-  name: "@loom/primitives",
+  name: "@jam-overture/loom-primitives",
   version: VERSION,
   description:
     "The starter primitive library for Loom — 98 registered primitives and 44 starting compositions, themed from the palette and renderable on a server.",
@@ -156,8 +156,8 @@ export const manifest = (license: string): Manifest => ({
    * each in a host's tree or nothing works.
    */
   dependencies: { zod: "^3.24.1" },
-  peerDependencies: { "@loom/runtime": RUNTIME_RANGE, react: ">=19.0.0" },
-  engines: { node: ">=20.9.0" },
+  peerDependencies: { "@jam-overture/loom": RUNTIME_RANGE, react: ">=19.0.0" },
+  engines: { node: ">=22.0.0" },
   publishConfig: { access: "public" },
   repository: { type: "git", url: "git+https://github.com/jam-overture/loom.git", directory: "packages/primitives" },
   keywords: ["loom", "primitives", "ui", "react", "server-components", "design-system", "ai"],

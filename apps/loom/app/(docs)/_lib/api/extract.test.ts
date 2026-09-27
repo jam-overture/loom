@@ -49,7 +49,7 @@ describe("the published entry points", () => {
 
     expect(publishedEntries().map((entry) => entry.specifier)).toEqual(
       Object.keys(manifest.exports).map((subpath) =>
-        subpath === "." ? "@loom/runtime" : `@loom/runtime${subpath.slice(1)}`
+        subpath === "." ? "@jam-overture/loom" : `@jam-overture/loom${subpath.slice(1)}`
       )
     )
   })
@@ -278,7 +278,7 @@ describe("what the generated file says a door needs installed", () => {
       parseReference({
         entries: [
           {
-            specifier: "@loom/runtime",
+            specifier: "@jam-overture/loom",
             slug: "runtime",
             types: "./dist/index.d.ts",
             requires: [{ package: "vitest", range: "^3.0.5", optional: true, reach: "imagined" }],
@@ -302,12 +302,12 @@ describe("what the generated file says a door needs installed", () => {
       parseReference({
         entries: [
           {
-            specifier: "@loom/runtime",
+            specifier: "@jam-overture/loom",
             slug: "runtime",
             types: "./dist/index.d.ts",
             requires: [],
             files: 91,
-            narrower: [{ specifier: "@loom/runtime/x", slug: "x", avoids: [], shared: 2, files: 1 }],
+            narrower: [{ specifier: "@jam-overture/loom/x", slug: "x", avoids: [], shared: 2, files: 1 }],
             groups: [],
           },
         ],
@@ -320,7 +320,7 @@ describe("what the generated file says a door needs installed", () => {
       parseReference({
         entries: [
           {
-            specifier: "@loom/runtime",
+            specifier: "@jam-overture/loom",
             slug: "runtime",
             types: "./dist/index.d.ts",
             requires: [],
@@ -337,7 +337,7 @@ describe("what the generated file says a door needs installed", () => {
       parseReference({
         entries: [
           {
-            specifier: "@loom/runtime",
+            specifier: "@jam-overture/loom",
             slug: "runtime",
             types: "./dist/index.d.ts",
             requires: [],
@@ -346,13 +346,13 @@ describe("what the generated file says a door needs installed", () => {
           },
         ],
       })
-    ).toThrow(/has no @loom\/runtime\.files/)
+    ).toThrow(/has no @jam-overture\/loom\.files/)
   })
 
   it("refuses a reference that does not say what a door needs at all", () => {
     expect(() =>
       parseReference({
-        entries: [{ specifier: "@loom/runtime", slug: "runtime", types: "./dist/index.d.ts", groups: [] }],
+        entries: [{ specifier: "@jam-overture/loom", slug: "runtime", types: "./dist/index.d.ts", groups: [] }],
       })
     ).toThrow(/does not say what it needs installed/)
   })
@@ -362,7 +362,7 @@ describe("which door a reader should have gone through instead", () => {
   it("sends a reader of the signals door to the broadcaster, which is the pair the package has", () => {
     expect(apiEntryAt("signals")?.narrower).toEqual([
       {
-        specifier: "@loom/runtime/signals/broadcast",
+        specifier: "@jam-overture/loom/signals/broadcast",
         slug: "signals-broadcast",
         avoids: ["zod"],
         shared: 14,
@@ -388,7 +388,7 @@ describe("which door a reader should have gone through instead", () => {
   it("finds exactly one pair in the whole package, so the band is rare rather than decorative", () => {
     const offering = apiEntries.filter((entry) => entry.narrower.length > 0).map((entry) => entry.specifier)
 
-    expect(offering).toEqual(["@loom/runtime/signals"])
+    expect(offering).toEqual(["@jam-overture/loom/signals"])
   })
 
   it("counts every door's reach, so the band always has both halves of its comparison", () => {
@@ -416,7 +416,7 @@ describe("how much of the package is behind one door", () => {
   /**
    * The belief this band exists to correct, stated as a number. Thirteen of
    * the fifteen other doors publish not one name the root door publishes, so a
-   * reader who reads `@loom/runtime` as the door with everything behind it is
+   * reader who reads `@jam-overture/loom` as the door with everything behind it is
    * wrong about almost the whole package.
    */
   it("finds that thirteen of the other fifteen doors share nothing with the root door", () => {
@@ -438,8 +438,8 @@ describe("how much of the package is behind one door", () => {
 
   it("names the two doors the root door overlaps, and says how much", () => {
     expect(apiEntryAt("runtime")?.standing.sharedWith).toEqual([
-      { specifier: "@loom/runtime/react", slug: "react", names: 5 },
-      { specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 },
+      { specifier: "@jam-overture/loom/react", slug: "react", names: 5 },
+      { specifier: "@jam-overture/loom/sdk", slug: "sdk", names: 8 },
     ])
   })
 
@@ -447,7 +447,7 @@ describe("how much of the package is behind one door", () => {
     const broadcast = apiEntryAt("signals-broadcast")
 
     expect(broadcast?.standing.sharedWith).toEqual([
-      { specifier: "@loom/runtime/signals", slug: "signals", names: 14 },
+      { specifier: "@jam-overture/loom/signals", slug: "signals", names: 14 },
     ])
     expect(broadcast?.standing.sharedWith[0]?.names).toBe(broadcast === undefined ? -1 : apiSymbolCount(broadcast))
   })
@@ -471,10 +471,10 @@ describe("one name that means two things", () => {
    */
   it("finds horizonOf at the signals door and at the telemetry door", () => {
     expect(apiEntryAt("signals")?.standing.collisions).toEqual([
-      { name: "horizonOf", specifier: "@loom/runtime/telemetry", slug: "telemetry" },
+      { name: "horizonOf", specifier: "@jam-overture/loom/telemetry", slug: "telemetry" },
     ])
     expect(apiEntryAt("telemetry")?.standing.collisions).toEqual([
-      { name: "horizonOf", specifier: "@loom/runtime/signals", slug: "signals" },
+      { name: "horizonOf", specifier: "@jam-overture/loom/signals", slug: "signals" },
     ])
   })
 
@@ -483,7 +483,7 @@ describe("one name that means two things", () => {
       .filter((entry) => entry.standing.collisions.length > 0)
       .map((entry) => entry.specifier)
 
-    expect(colliding).toEqual(["@loom/runtime/signals", "@loom/runtime/telemetry"])
+    expect(colliding).toEqual(["@jam-overture/loom/signals", "@jam-overture/loom/telemetry"])
   })
 
   /**
@@ -493,7 +493,7 @@ describe("one name that means two things", () => {
    */
   it("leaves the name the two doors really do share as an overlap", () => {
     expect(apiEntryAt("signals")?.standing.sharedWith).toContainEqual({
-      specifier: "@loom/runtime/telemetry",
+      specifier: "@jam-overture/loom/telemetry",
       slug: "telemetry",
       names: 1,
     })
@@ -504,7 +504,7 @@ describe("a reference file that says nothing usable about where a door stands", 
   const entry = (standing: unknown): unknown => ({
     entries: [
       {
-        specifier: "@loom/runtime",
+        specifier: "@jam-overture/loom",
         slug: "runtime",
         types: "./dist/index.d.ts",
         requires: [],
@@ -531,7 +531,7 @@ describe("a reference file that says nothing usable about where a door stands", 
     otherDoors: 1,
     doorsSharingNothing: 0,
     widest: false,
-    sharedWith: [{ specifier: "@loom/runtime/react", slug: "react", names: 1 }],
+    sharedWith: [{ specifier: "@jam-overture/loom/react", slug: "react", names: 1 }],
     collisions: [],
   }
 
@@ -554,7 +554,7 @@ describe("a reference file that says nothing usable about where a door stands", 
 
   it("is refused when a door is listed as an overlap and overlaps in nothing", () => {
     expect(() =>
-      parseReference(entry({ ...sound, sharedWith: [{ specifier: "@loom/runtime/react", slug: "react", names: 0 }] }))
+      parseReference(entry({ ...sound, sharedWith: [{ specifier: "@jam-overture/loom/react", slug: "react", names: 0 }] }))
     ).toThrow(/is listed as sharing names and shares 0/)
   })
 
@@ -666,17 +666,17 @@ describe("the headings a module gets", () => {
 
 describe("where an entry point lands", () => {
   it("puts the root at the plainest slug", () => {
-    expect(apiSlugFor("@loom/runtime")).toBe("runtime")
-    expect(apiNavLabelFor("@loom/runtime")).toBe("runtime")
+    expect(apiSlugFor("@jam-overture/loom")).toBe("runtime")
+    expect(apiNavLabelFor("@jam-overture/loom")).toBe("loom")
   })
 
   it("flattens a subpath rather than nesting it", () => {
-    expect(apiSlugFor("@loom/runtime/telemetry/postgres")).toBe("telemetry-postgres")
-    expect(apiNavLabelFor("@loom/runtime/telemetry/postgres")).toBe("runtime/telemetry/postgres")
+    expect(apiSlugFor("@jam-overture/loom/telemetry/postgres")).toBe("telemetry-postgres")
+    expect(apiNavLabelFor("@jam-overture/loom/telemetry/postgres")).toBe("loom/telemetry/postgres")
   })
 
   it("finds the entry a page slug documents", () => {
-    expect(apiEntryAt("react")?.specifier).toBe("@loom/runtime/react")
+    expect(apiEntryAt("react")?.specifier).toBe("@jam-overture/loom/react")
     expect(apiEntryAt("nowhere")).toBeUndefined()
   })
 })

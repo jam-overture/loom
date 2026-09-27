@@ -6,7 +6,24 @@ import type { Assembled, AssemblyError } from "./build.js"
  * build happening as a side effect of the import. That is not a hypothetical
  * tidiness: the first version of this tool put its work at the top level of the
  * module a test imported, and the suite failed by *assembling the package*.
+ *
+ * **Everything here is reported, not asserted.** The first version of this
+ * table listed three preconditions as flat text — own the scope, log in, publish
+ * the runtime first — and within a day two of the three were done and the table
+ * still said they were not. A checklist that cannot tell whether its own items
+ * are finished is a checklist people stop reading, so the facts arrive as
+ * arguments and the caller is what goes and looks.
  */
+
+export type Readiness = Assembled & {
+  readonly packageName: string
+  readonly peer: string
+  readonly peerRange: string
+  /** Who npm answers as, or `undefined` when this machine is not logged in. */
+  readonly account: string | undefined
+  /** The peer version the registry actually serves for the declared range. */
+  readonly peerPublished: string | undefined
+}
 
 export const describeError = (error: AssemblyError): string => {
   switch (error.code) {
@@ -17,23 +34,46 @@ export const describeError = (error: AssemblyError): string => {
   }
 }
 
+const line = (ready: boolean, label: string, detail: string): string =>
+  `  ${ready ? "ready  " : "BLOCKED"}   ${label} — ${detail}`
+
 /**
- * The readiness table.
- *
- * Every line that is not `ready` names **who** can clear it and **why it
- * matters**, because a checklist that only says a thing is missing is a
+ * The table. Every line that is not `ready` says **who** can clear it and **why
+ * it matters**, because a checklist that only names a missing thing is a
  * checklist somebody clears by deleting the line.
  */
-export const describeReadiness = ({ files, rewritten, license }: Assembled): readonly string[] => [
-  `packages/primitives assembled — ${String(files)} files, ${String(rewritten)} rewritten`,
-  ``,
-  license
-    ? `  ready     license — LICENSE copied into the package`
-    : `  BLOCKED   license — there is no LICENSE at the repository root. A public package without one is a package nobody may legally use, and docs/rollout.md names this as the maintainer's decision and nothing else's`,
-  `  yours     npm auth — this machine is not logged in. \`npm whoami\` must answer before a publish`,
-  `  yours     the @loom scope must exist and be owned by the publishing account`,
-  `  yours     @loom/runtime must be published first, at a version this package's peer range accepts — it is a peer dependency, so this resolves to nothing without it`,
-  ``,
-  `  verify    cd packages/primitives && npm pack --dry-run`,
-  `  publish   cd packages/primitives && npm publish --access public`,
-]
+export const describeReadiness = (state: Readiness): readonly string[] => {
+  const scope = state.packageName.startsWith("@") ? state.packageName.split("/")[0] ?? "" : ""
+  const blocked = [state.license, state.account !== undefined, state.peerPublished !== undefined].some(
+    (ready) => !ready
+  )
+
+  return [
+    `${state.packageName}@${state.version} assembled — ${String(state.files)} files, ${String(state.rewritten)} rewritten`,
+    ``,
+    line(
+      state.license,
+      "license",
+      state.license
+        ? "LICENSE copied into the package, and the id read from the framework's own manifest so the two cannot disagree"
+        : "there is no LICENSE at the repository root. A public package without one is a package nobody may legally use"
+    ),
+    line(
+      state.peerPublished !== undefined,
+      "the peer",
+      state.peerPublished === undefined
+        ? `${state.peer}@${state.peerRange} is not on the registry. It is a peer dependency, so this package resolves to nothing without it — and it has to go out first`
+        : `${state.peer}@${state.peerPublished} is on the registry and satisfies ${state.peerRange}`
+    ),
+    line(
+      state.account !== undefined,
+      "npm auth",
+      state.account === undefined
+        ? `this machine is not logged in. \`npm whoami\` must answer, from an account that can publish under ${scope}`
+        : `logged in as ${state.account}, which must be able to publish under ${scope}`
+    ),
+    ``,
+    blocked ? `  not publishable yet — the BLOCKED lines above` : `  verify    cd packages/primitives && npm pack --dry-run`,
+    blocked ? `` : `  publish   cd packages/primitives && npm publish --access public`,
+  ].filter((text, index, all) => !(text === "" && all[index - 1] === ""))
+}

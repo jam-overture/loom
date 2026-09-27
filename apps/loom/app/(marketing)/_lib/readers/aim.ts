@@ -1,6 +1,6 @@
-import type { ElementNode, LoomNode, LoomTree, NodeId, PrimitiveType } from "@loom/runtime"
-import { isInteractiveWith } from "@loom/runtime"
-import { interactiveTypesFor } from "@loom/runtime/sdk"
+import type { ElementNode, LoomNode, LoomTree, NodeId, PrimitiveType } from "@jam-overture/loom"
+import { isInteractiveWith } from "@jam-overture/loom"
+import { interactiveTypesFor } from "@jam-overture/loom/sdk"
 
 import { siteRegistry } from "../registry"
 

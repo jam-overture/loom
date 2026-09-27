@@ -8,10 +8,10 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { fixedPolicy, randomIdFactory, systemClock } from "@loom/runtime"
-import { postgresHoldStore, postgresTreeStore } from "@loom/runtime/postgres"
-import { commitIntent, confirmHeld, discardHeld } from "@loom/runtime/write"
-import type { WritePath } from "@loom/runtime/write"
+import { fixedPolicy, randomIdFactory, systemClock } from "@jam-overture/loom"
+import { postgresHoldStore, postgresTreeStore } from "@jam-overture/loom/postgres"
+import { commitIntent, confirmHeld, discardHeld } from "@jam-overture/loom/write"
+import type { WritePath } from "@jam-overture/loom/write"
 
 import {
   db,

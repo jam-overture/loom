@@ -15,7 +15,7 @@ import { ApiEntryReference, apiGroupAnchor, Prose } from "./api-reference"
  */
 
 const entry: ApiEntry = {
-  specifier: "@loom/runtime/react",
+  specifier: "@jam-overture/loom/react",
   slug: "react",
   types: "./dist/render/index.d.ts",
   requires: [{ package: "react", range: "^19.0.0", optional: true, reach: "loaded" }],
@@ -311,7 +311,7 @@ describe("what to install before the import will run", () => {
 
 describe("the narrower door", () => {
   const broadcast = {
-    specifier: "@loom/runtime/signals/broadcast",
+    specifier: "@jam-overture/loom/signals/broadcast",
     slug: "signals-broadcast",
     avoids: ["zod"],
     shared: 14,
@@ -328,7 +328,7 @@ describe("the narrower door", () => {
     const text = band()?.textContent ?? ""
 
     expect(text).toContain("A narrower door opens onto part of this one")
-    expect(text).toContain("@loom/runtime/signals/broadcast")
+    expect(text).toContain("@jam-overture/loom/signals/broadcast")
     expect(text).toContain("publishes 14 of the 2 exports below")
     expect(text).toContain("It does not load")
     expect(text).toContain("zod")
@@ -378,7 +378,7 @@ describe("the narrower door", () => {
   it("counts the doors in its own heading when there is more than one", () => {
     render(
       <ApiEntryReference
-        entry={wide([broadcast, { ...broadcast, specifier: "@loom/runtime/other", slug: "other" }])}
+        entry={wide([broadcast, { ...broadcast, specifier: "@jam-overture/loom/other", slug: "other" }])}
         prose={noProse}
       />
     )
@@ -446,7 +446,7 @@ describe("what is not behind this door", () => {
       <ApiEntryReference
         entry={standing({
           doorsSharingNothing: 13,
-          sharedWith: [{ specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 }],
+          sharedWith: [{ specifier: "@jam-overture/loom/sdk", slug: "sdk", names: 8 }],
         })}
         prose={noProse}
       />
@@ -461,8 +461,8 @@ describe("what is not behind this door", () => {
         entry={standing({
           doorsSharingNothing: 13,
           sharedWith: [
-            { specifier: "@loom/runtime/react", slug: "react", names: 5 },
-            { specifier: "@loom/runtime/sdk", slug: "sdk", names: 8 },
+            { specifier: "@jam-overture/loom/react", slug: "react", names: 5 },
+            { specifier: "@jam-overture/loom/sdk", slug: "sdk", names: 8 },
           ],
         })}
         prose={noProse}
@@ -478,7 +478,7 @@ describe("what is not behind this door", () => {
   })
 
   /**
-   * `@loom/runtime/signals/broadcast` is the page this is for: every one of
+   * `@jam-overture/loom/signals/broadcast` is the page this is for: every one of
    * its fourteen names is behind the wider signals door as well. A band that
    * said *some* of them there would be understating a fact a reader deciding
    * between two imports needs exactly.
@@ -488,7 +488,7 @@ describe("what is not behind this door", () => {
       <ApiEntryReference
         entry={standing({
           doorsSharingNothing: 14,
-          sharedWith: [{ specifier: "@loom/runtime/signals", slug: "signals", names: 2 }],
+          sharedWith: [{ specifier: "@jam-overture/loom/signals", slug: "signals", names: 2 }],
         })}
         prose={noProse}
       />
@@ -502,7 +502,7 @@ describe("what is not behind this door", () => {
       <ApiEntryReference
         entry={standing({
           doorsSharingNothing: 14,
-          collisions: [{ name: "horizonOf", specifier: "@loom/runtime/telemetry", slug: "telemetry" }],
+          collisions: [{ name: "horizonOf", specifier: "@jam-overture/loom/telemetry", slug: "telemetry" }],
         })}
         prose={noProse}
       />
@@ -553,7 +553,7 @@ describe("what is not behind this door", () => {
         entry={{
           ...standing(),
           narrower: [
-            { specifier: "@loom/runtime/x", slug: "x", avoids: ["zod"], shared: 1, files: 1 },
+            { specifier: "@jam-overture/loom/x", slug: "x", avoids: ["zod"], shared: 1, files: 1 },
           ],
         }}
         prose={noProse}

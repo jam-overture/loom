@@ -8,7 +8,7 @@
  * typechecker reads the code the site invites people to copy.
  */
 
-import { commitIntent, confirmHeld } from "@loom/runtime/write"
+import { commitIntent, confirmHeld } from "@jam-overture/loom/write"
 
 import { intent, path, proposalId, reviewer } from "../context/getting-started--your-first-change"
 

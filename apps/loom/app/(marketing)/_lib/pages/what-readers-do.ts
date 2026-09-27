@@ -6,9 +6,9 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
-import { READER_SIGNAL_KINDS, type ReaderSignalKind } from "@loom/runtime/signals"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
+import { READER_SIGNAL_KINDS, type ReaderSignalKind } from "@jam-overture/loom/signals"
 
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import { action, heading, prose, section, stack } from "../nodes"

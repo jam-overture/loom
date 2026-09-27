@@ -3,7 +3,7 @@
  * rewritten from the contents of this directory every time a primitive is added.
  */
 
-import { createPrimitiveRegistry, describeRegistryError } from "@loom/runtime/sdk"
+import { createPrimitiveRegistry, describeRegistryError } from "@jam-overture/loom/sdk"
 
 import { appPage } from "./app.page.js"
 

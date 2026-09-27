@@ -5,7 +5,8 @@ import { pathToFileURL } from "node:url"
 
 import { err, ok, type Result } from "../../src/result.js"
 
-import type { Overflow, SpecimenBrowser, SpecimenPage } from "./capture.js"
+import type { Overflow, SpecimenBrowser, SpecimenPage, StartState } from "./capture.js"
+import { scriptFor } from "./start-state.js"
 import type { SpecimenViewport } from "./specimen.js"
 
 /**
@@ -49,6 +50,14 @@ export type LaunchedLocator = {
    * picture, and there the ambiguity is the lane's to resolve.
    */
   readonly first: () => LaunchedLocator
+  /**
+   * Strict, like `click` and `fill` and unlike `waitFor`.
+   *
+   * Which of two matches is brought into view decides what the picture is of,
+   * exactly as which of two buttons is pressed does, so the ambiguity is the
+   * lane's to resolve rather than the driver's to settle by taking the first.
+   */
+  readonly scrollIntoViewIfNeeded: () => Promise<unknown>
   readonly screenshot: (options: { readonly path: string }) => Promise<unknown>
 }
 
@@ -60,6 +69,18 @@ export type LaunchedFrame = {
 export type LaunchedPage = {
   readonly goto: (url: string, options: { readonly waitUntil: "load" }) => Promise<unknown>
   readonly evaluate: <TValue>(body: () => TValue) => Promise<TValue>
+  /**
+   * Registered before a navigation and run in every document that follows.
+   *
+   * `evaluate` is the wrong tool for a start state and the difference is the
+   * whole point: it runs against a document that already exists, and by then
+   * the page has read what it reads. This runs first.
+   *
+   * Source rather than a function, and `start-state.ts` says why at length:
+   * a compiled function arrives carrying its compiler's helpers, which do not
+   * exist in the page.
+   */
+  readonly addInitScript: (script: string) => Promise<unknown>
   readonly waitForTimeout: (ms: number) => Promise<unknown>
   readonly locator: (selector: string) => LaunchedLocator
   readonly frameLocator: (selector: string) => LaunchedFrame
@@ -180,6 +201,9 @@ export const chromiumBrowser = async (
           frame === undefined ? page.locator(selector) : page.frameLocator(frame).locator(selector)
 
       return {
+        start: async (state: StartState) => {
+          await page.addInitScript(scriptFor(state))
+        },
         goto: async (url, waitFor, frame) => {
           await page.goto(url, { waitUntil: "load" })
           if (waitFor !== undefined) await locatorFor(frame)(waitFor).first().waitFor()
@@ -190,6 +214,7 @@ export const chromiumBrowser = async (
           for (const step of steps) {
             if ("click" in step) await at(step.click).click()
             else if ("fill" in step) await at(step.fill).fill(step.text)
+            else if ("scrollTo" in step) await at(step.scrollTo).scrollIntoViewIfNeeded()
             else if ("waitFor" in step) await at(step.waitFor).first().waitFor()
             else await page.waitForTimeout(step.wait)
           }

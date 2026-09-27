@@ -1,6 +1,6 @@
 import { Fragment } from "react"
 
-import type { PolicyCalibration } from "@loom/runtime/telemetry"
+import type { PolicyCalibration } from "@jam-overture/loom/telemetry"
 
 import { describePolicy, formatRate, readGap, readRuleset } from "@/app/(portal)/_lib/calibration-view"
 import { toneClasses } from "@/app/(portal)/_lib/outcome"

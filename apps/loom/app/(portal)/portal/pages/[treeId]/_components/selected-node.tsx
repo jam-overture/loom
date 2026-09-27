@@ -1,7 +1,7 @@
 "use client"
 
-import type { TreeId } from "@loom/runtime"
-import { addressedNodeId } from "@loom/runtime/react"
+import type { TreeId } from "@jam-overture/loom"
+import { addressedNodeId } from "@jam-overture/loom/react"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { NodeCredit } from "@/app/(portal)/_lib/attribution-view"

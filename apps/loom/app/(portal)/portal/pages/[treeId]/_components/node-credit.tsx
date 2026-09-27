@@ -1,4 +1,4 @@
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { RevisionLink } from "@/app/(portal)/_components/revision-link"
 import type { NodeCredit } from "@/app/(portal)/_lib/attribution-view"

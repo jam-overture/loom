@@ -11,8 +11,8 @@ import {
   systemClock,
   type LoomTree,
   type NodeId,
-} from "@loom/runtime"
-import { commitIntent, confirmHeld, revertRevision } from "@loom/runtime/write"
+} from "@jam-overture/loom"
+import { commitIntent, confirmHeld, revertRevision } from "@jam-overture/loom/write"
 
 import { markedPage, MARKED_AWAITING, MARKED_MANY } from "./marked"
 import { demoPageTree } from "./page-tree"

@@ -12,7 +12,7 @@ import {
   type LoomTree,
   type NodeId,
   type TreeDifference,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import {
   attributeTree,
   auditSnapshot,
@@ -21,8 +21,8 @@ import {
   type RevisionPage,
   type SnapshotAudit,
   type TreeReader,
-} from "@loom/runtime/store"
-import { describeHoldError, type WriteOutcome } from "@loom/runtime/write"
+} from "@jam-overture/loom/store"
+import { describeHoldError, type WriteOutcome } from "@jam-overture/loom/write"
 
 import {
   addASentence,

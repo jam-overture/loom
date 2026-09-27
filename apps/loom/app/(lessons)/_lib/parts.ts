@@ -1,4 +1,4 @@
-import type { LoomTree } from "@loom/runtime"
+import type { LoomTree } from "@jam-overture/loom"
 import type { ReactNode } from "react"
 
 import type {

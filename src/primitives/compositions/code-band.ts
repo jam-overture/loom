@@ -106,18 +106,28 @@ import type { Composition } from "./composition.js"
  * prop does nothing. It is there for the phone.
  */
 const STEPS = [
-  { before: "Install it beside your app — it is a library, not a service, and it ships no runtime of its own: ", code: "@loom/runtime" },
+  { before: "Install it beside your app — it is a library, not a service, and it ships no runtime of its own: ", code: "@jam-overture/loom" },
   { before: "Register the primitives your pages are allowed to be made of, plus any of your own: ", code: "createStarterPrimitiveRegistry" },
   { before: "Hand an instruction and the current tree to the seam, and read back a proposal: ", code: "commitIntent" },
 ] as const
 
-const INSTALL = "pnpm add @loom/runtime"
+const INSTALL = "pnpm add @jam-overture/loom @jam-overture/loom-primitives"
 
 /**
  * Every line is under 63 characters, which is a constraint the screenshot
  * imposed rather than a preference. See the note on `wrap` below.
+ *
+ * **The registry comes from the second package, and that is not a detail this
+ * band may get wrong.** The framework rename on 26 September moved this copy
+ * to `@jam-overture/loom` correctly and left the import line pointing at the
+ * same package — but 0194 withholds `./primitives` from the published
+ * framework, and `createStarterPrimitiveRegistry` is only in there. The line
+ * this band prints is the first line of code a visitor copies, and as written
+ * it threw `ERR_PACKAGE_PATH_NOT_EXPORTED` for anybody outside this
+ * workspace. Asserted in `compositions.test.ts` against the runtime's
+ * published export map rather than remembered.
  */
-const SOURCE = `import { createStarterPrimitiveRegistry } from "@loom/runtime"
+const SOURCE = `import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"
 
 const registry = createStarterPrimitiveRegistry()
 
@@ -177,7 +187,7 @@ export const codeBand: Composition = {
                     props: { size: "lead", tone: "muted", measured: true },
                     children: [
                       buildText(ids, "There is no build step and no hosted runtime. "),
-                      buildElement(ids, { type: "loom.code-span", children: [buildText(ids, "@loom/runtime")] }),
+                      buildElement(ids, { type: "loom.code-span", children: [buildText(ids, "@jam-overture/loom")] }),
                       buildText(ids, " is an ordinary dependency, and the page it changes is the page you already have."),
                     ],
                   }),

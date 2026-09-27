@@ -10,14 +10,14 @@ import {
   type NodeId,
   type NodeKind,
   type StakeFactorCode,
-} from "@loom/runtime"
-import { EPISODE_RESOLUTION_KINDS, type FailureStage } from "@loom/runtime/telemetry"
+} from "@jam-overture/loom"
+import { EPISODE_RESOLUTION_KINDS, type FailureStage } from "@jam-overture/loom/telemetry"
 import {
   describeAddressing,
   type Addressing,
   type UnaddressableReason,
-} from "@loom/runtime/react"
-import type { RevertOutcome, WriteOutcome } from "@loom/runtime/write"
+} from "@jam-overture/loom/react"
+import type { RevertOutcome, WriteOutcome } from "@jam-overture/loom/write"
 
 import { runtimeWordsIn } from "../_test/plain-language"
 

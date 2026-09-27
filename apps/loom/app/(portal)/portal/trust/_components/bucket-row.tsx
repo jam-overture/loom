@@ -1,4 +1,4 @@
-import type { ConfidenceBucket } from "@loom/runtime/telemetry"
+import type { ConfidenceBucket } from "@jam-overture/loom/telemetry"
 
 import { formatRange, formatRate, NO_VALUE } from "@/app/(portal)/_lib/calibration-view"
 

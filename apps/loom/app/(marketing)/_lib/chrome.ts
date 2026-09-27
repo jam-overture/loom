@@ -1,4 +1,4 @@
-import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@loom/runtime"
+import { buildElement, buildSlot, type IdFactory, type LoomNode } from "@jam-overture/loom"
 
 import type { AskId } from "./adapt/asks"
 import { PLACEHOLDER_COPY } from "./copy"

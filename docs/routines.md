@@ -357,6 +357,7 @@ That is the whole of how a signed-in screen gets photographed — there is no
 | `{ "fill": "<selector>", "text": "…" }` | type into it. `""` clears it |
 | `{ "waitFor": "<selector>" }` | wait for it to appear. The **first** match; several is fine |
 | `{ "wait": <ms> }` | let it settle. 30 seconds is the ceiling and there is no way past it |
+| `{ "scrollTo": "<selector>" }` | bring it into view without pressing it. **One** element, like `click` |
 
 `before` is one approach — a `path`, an optional `waitFor`, an optional `frame`,
 and a `do` list — made in the shot's own browser context before its own address
@@ -386,10 +387,32 @@ navigation is pinned in the **top** document only, so a link pressed inside a
 frame still navigates that frame, and a `waitFor` step is how the shot
 re-synchronises.
 
+**`start`** says what the browser already holds when the first document loads —
+the shot's own and its `before`'s alike
+([0195](../decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)):
+
+```json
+{ "path": "/lessons/3", "out": "…", "start": { "storage": { "loom.lessons.progress.v1": "{{{" } } }
+{ "path": "/lessons/3", "out": "…", "start": { "storageBlocked": true } }
+```
+
+Two members and no third. A `do` list runs after the page has read what it reads
+and decided what to say, so a screen whose whole subject is the state the browser
+arrived with — a record that will not parse, one carried from another machine,
+storage the reader has blocked — is unreachable by any step. `storage` writes the
+keys before the first paint; `storageBlocked` makes `window.localStorage` throw a
+`SecurityError` on access, which is the one of the three no map of keys can reach.
+They are opposite instructions, so asking for both is refused rather than
+resolved. It is on the shot and never on a `before`: the state belongs to the
+context, and the context is what a shot gets one of.
+
 **What a shot list still cannot do**, so nobody spends a run finding out: run a
-script of its own, hover, scroll to a position, or read anything back out of the
-page. The first is refused (0159, 0182); the middle two are simply not asked for
-yet and would be a finding rather than an argument; the last is the line itself.
+script of its own, hover, scroll *by* a number of pixels, or read anything back
+out of the page. The first is refused (0159, 0182, 0195) — `start` is the closed
+set of named states that exists instead of it, and there will not be an
+`initScript`. Hovering is simply not asked for yet and would be a finding rather
+than an argument. Scrolling by a distance was asked for and declined: scroll to
+the element you mean. The last is the line itself.
 
 ### The three files every lane writes to
 

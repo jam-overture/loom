@@ -1,4 +1,4 @@
-import { findNode, type LoomNode, type LoomTree, type TreeDelta, type TreeOperation } from "@loom/runtime"
+import { findNode, type LoomNode, type LoomTree, type TreeDelta, type TreeOperation } from "@jam-overture/loom"
 
 /**
  * The part of the page a held change is about, as something that can be shown.

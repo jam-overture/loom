@@ -1,6 +1,6 @@
-import type { IdFactory, LoomTree } from "@loom/runtime"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
-import type { HeldProposal } from "@loom/runtime/write"
+import type { IdFactory, LoomTree } from "@jam-overture/loom"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
+import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 

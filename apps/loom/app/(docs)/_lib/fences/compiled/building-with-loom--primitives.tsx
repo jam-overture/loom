@@ -10,9 +10,9 @@
 
 import { createElement } from "react"
 import { z } from "zod"
-import { createPrimitiveRegistry, definePrimitive, describeRegistryError } from "@loom/runtime/sdk"
-import type { LoomPrimitiveProps } from "@loom/runtime/react"
-import { createStarterPrimitiveRegistry } from "@loom/runtime/primitives"
+import { createPrimitiveRegistry, definePrimitive, describeRegistryError } from "@jam-overture/loom/sdk"
+import type { LoomPrimitiveProps } from "@jam-overture/loom/react"
+import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
 
 import { heading, statGrid } from "../context/building-with-loom--primitives"
 

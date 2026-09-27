@@ -1,4 +1,4 @@
-import { buildElement, buildText, createTree, sequentialIdFactory, type LoomTree } from "@loom/runtime"
+import { buildElement, buildText, createTree, sequentialIdFactory, type LoomTree } from "@jam-overture/loom"
 
 /**
  * A tree to look at. Built through the public builders rather than written as a

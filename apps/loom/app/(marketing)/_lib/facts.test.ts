@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { TREE_OPERATIONS, type ElementNode, type LoomNode } from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+import { TREE_OPERATIONS, type ElementNode, type LoomNode } from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
 import { DECISIONS_AT_LEAST, FACTS } from "./copy"

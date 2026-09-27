@@ -17,8 +17,8 @@ import {
   type ProposedChange,
   type Result,
   type TreeOperation,
-} from "@loom/runtime"
-import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
 import {
   commitIntent,
   confirmHeld,
@@ -30,7 +30,7 @@ import {
   type HoldStore,
   type WriteOutcome,
   type WritePath,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 import { docsExamples } from "../examples/catalogue"
 import { docsGatePolicy } from "../propose/policy"

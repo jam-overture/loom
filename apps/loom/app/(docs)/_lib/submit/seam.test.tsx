@@ -3,8 +3,8 @@ import {
   resolveTreeSubmissions,
   type LoomTree,
   type SubmissionResolution,
-} from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 

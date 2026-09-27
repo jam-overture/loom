@@ -3,7 +3,7 @@ import {
   describeWriteOutcome,
   type RevertOutcome,
   type WriteOutcome,
-} from "@loom/runtime/write"
+} from "@jam-overture/loom/write"
 
 import {
   CANNOT_UNDO,

@@ -3,11 +3,11 @@ import {
   memoryReaderTallyStore,
   type ReaderSignalJournal,
   type ReaderTallyStore,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 import {
   postgresReaderSignalJournal,
   postgresReaderTallyStore,
-} from "@loom/runtime/signals/postgres"
+} from "@jam-overture/loom/signals/postgres"
 
 import { portalDatabase } from "./database"
 
@@ -40,8 +40,8 @@ import { portalDatabase } from "./database"
  *
  * ## The portal is a consumer (0018)
  *
- * Both implementations come through published entry points — `@loom/runtime/signals`
- * for the memory pair and `@loom/runtime/signals/postgres` for the durable one,
+ * Both implementations come through published entry points — `@jam-overture/loom/signals`
+ * for the memory pair and `@jam-overture/loom/signals/postgres` for the durable one,
  * exactly as the tree store and the telemetry journal pick theirs up. Nothing
  * here reaches into `src/`, and a gap in what those entry points expose is a
  * finding rather than a deep import.

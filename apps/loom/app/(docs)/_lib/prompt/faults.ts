@@ -3,7 +3,7 @@ import {
   interpretationFault,
   type InterpretationError,
   type InterpretationFault,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * The seven ways interpretation fails, and who would have to do something about

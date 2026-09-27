@@ -7,7 +7,7 @@ import {
   type ElementNode,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { BECAUSE, NOT_A_RULE, WEIGHT } from "../adapt/record"

@@ -6,7 +6,7 @@ import {
   type LoomTree,
   type TreeDelta,
   type TreeOperation,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { demoPageTree } from "./page-tree"
 import { plainChange, settingsOf } from "./plain-change"

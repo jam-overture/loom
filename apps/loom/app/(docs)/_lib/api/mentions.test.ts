@@ -199,7 +199,7 @@ describe("what one reference page is told about the prose", () => {
   ])
 
   const entry: ApiEntry = {
-    specifier: "@loom/runtime",
+    specifier: "@jam-overture/loom",
     slug: "runtime",
     types: "./dist/index.d.ts",
     requires: [],

@@ -5,7 +5,7 @@ import {
   hslHex,
   TEXT_CONTRAST_MINIMUM,
   type PaletteSpec,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 /**
  * What happens to a brand colour when you ask the runtime to build a palette

@@ -13,7 +13,7 @@ import {
   type IntentOrigin,
   type LoomTree,
   type StakeLevel,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { askById, askInterpreter, type Ask, type AskId } from "./asks"
 import { NOT_A_RULE, WEIGHT } from "./record"

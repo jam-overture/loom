@@ -1,4 +1,4 @@
-import { UNJUDGED_REASONS, type CalibrationReport } from "@loom/runtime/telemetry"
+import { UNJUDGED_REASONS, type CalibrationReport } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import {

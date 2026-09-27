@@ -1,137 +1,134 @@
-# Publishing
+# Publishing the framework
 
-`docs/rollout.md` Phase 2 names publishing as *"npm, a version number that means
-something, and a public commitment about what may break."* This is that, for
-`@loom/primitives`, written so it can be done from a standing start.
+**`@jam-overture/loom` is the only thing this repository publishes.** The marketing
+site, the documentation, the lessons, the demonstration and the portal are one
+deployed application and are not packages; the starter primitive library is a
+package and is not this one
+([0194](../decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md)).
 
-**Nothing here publishes anything.** `pnpm package:primitives` assembles the
-package and prints what is ready; the last step is a person typing one line.
+## Before the first publish, and only you can do these
 
-## What ships, and what does not
+Two things this repository cannot contain and no routine can do:
 
-Two packages, from one repository, deliberately separate.
+1. **Own the scope.** This publishes as `@jam-overture/loom` — the org is the
+   house, the product keeps its name. `@loom` was tried first and could not be
+   had: npm orgs and users share one namespace, so a scope with nothing
+   published under it is still not a free one, and `loom` and `loomjs` are both
+   held by users. Searching the registry for packages under a scope tells you
+   nothing about whether you can have it. The only reliable check is the org
+   creation form at `npmjs.com/org/create` — there is **no** `npm org create`
+   subcommand, and reaching for one returns a usage error that reads like an
+   availability answer and is not one.
 
-| | what it is | who owns getting it out |
-| --- | --- | --- |
-| `@loom/runtime` | the tree, the delta model, the Gate, the render seam, the data seam, the SDK | `Loom daily build` |
-| `@loom/primitives` | the 98 registered primitives and the 44 starting compositions | `Loom primitives` |
+   **Changing the name later is not one field.** `publishConfig` can rewrite
+   `exports` and cannot rewrite `name`, so the published name is the workspace
+   name and every import site moves with it — 466 files for this rename, 409 of
+   them in `apps/loom`. The `reports/` and `decisions/` that name the old scope
+   are deliberately **not** rewritten: they are the record of what was true on
+   the day, and `pnpm verify` does not read them.
+2. **Provide a credential.** There is none in this repository and none in the
+   routines' container. For a local publish, `npm login` once. For a publish
+   from a cloud session, add `NPM_TOKEN` in the environment's settings — the
+   cloud environment menu in the session title bar, then Edit, under API
+   credentials where that section is offered and otherwise as an environment
+   variable — and a new session picks it up. Never paste a token into a chat, a
+   commit, a report or a pull request.
 
-**Not published, and not intended to be:** the marketing site, the
-documentation site, the demo, the portal and the lessons. They are `@loom/app`,
-they are `private: true`, and they are a deployment rather than a dependency.
+## The publish
 
-`@loom/primitives` takes the runtime as a **peer** dependency. There must be
-exactly one copy of it in a host's tree — two would be two `PrimitiveType`
-brands and a registry that refuses its own entries — and a peer dependency is
-how a package says that.
-
-## Before the first publish
-
-**Two of the four are settled.** The maintainer chose MIT and the paired
-`0.1.0` on 26 September; `LICENSE` is at the root and both manifests carry it.
-What is left is the two that need an npm account.
-
-1. **A license — done.** MIT, at the repository root, with the SPDX identifier
-   on the first line so the generated manifest reads it rather than asserting
-   it. `pnpm package:primitives` exits non-zero if it ever goes missing. The one
-   field worth a second look is the copyright holder, which reads
-   `Jam Overture`: correcting it after a publish means a new version rather than
-   an edit.
-2. **The `@loom` scope, owned by the publishing account.** Both
-   `@loom/runtime` and `@loom/primitives` were unregistered when this was
-   written, so the names are available — but a scope belongs to an npm user or
-   org, and a scoped package's first publish needs `--access public` or npm
-   treats it as private and refuses on a free account. The manifest sets
-   `publishConfig.access` so the flag cannot be forgotten.
-3. **npm auth on whatever machine publishes.** `npm whoami` must answer. A cloud
-   routine session is not logged in and should not be: publishing is a
-   deliberate act by a person, and a token that can publish is a token worth
-   protecting more carefully than a routine's environment protects anything.
-4. **The runtime still goes out first** — that part does not change, because it
-   is a peer dependency and a package whose peer is not on the registry is a
-   package that installs with a warning and imports nothing. The version
-   mismatch that used to make this a hard error is fixed: both are `0.1.0`. The
-   error is kept here because it is what the failure looks like if the two ever
-   drift again:
-
-   ```
-   npm error code ERESOLVE
-   npm error Found: @loom/runtime@0.0.1
-   npm error Could not resolve dependency:
-   npm error peer @loom/runtime@"~0.1.0" from @loom/primitives@0.1.0
-   ```
-
-   `npm install` exits non-zero and installs nothing — it is a refusal, not a
-   warning, so it is not something a host works around.
-
-## The order
+From a clean checkout of `main`, with `pnpm install` done:
 
 ```bash
-pnpm install && pnpm verify        # the merge gate, green, before anything
-pnpm build                         # dist/ — package:primitives reads it and will not make it
-
-# 1. the runtime
-npm publish --access public        # from the repository root
-
-# 2. the primitives
-pnpm package:primitives            # assembles packages/primitives, prints readiness
-cd packages/primitives
-npm pack --dry-run                 # read the file list before it is permanent
-npm publish --access public
+pnpm verify                      # the gate: build, typecheck, 3000+ tests, four surfaces
+pnpm pack --pack-destination /tmp # what would go out, without going out
+pnpm publish --access public     # the irreversible line
 ```
 
-`npm publish` cannot be undone. `npm unpublish` is allowed within 72 hours and
-only when nothing depends on the package, and a republished version number is
-refused forever after — so **`npm pack --dry-run` and reading the list is the
-step to not skip.**
+`prepack` runs `pnpm build`, so a tarball can never carry a stale `dist` — but
+`pnpm verify` is still the gate, because `prepack` does not run the tests.
 
-## What the version means
+`pnpm publish` refuses a dirty tree and a branch behind its remote by default.
+Leave those checks on. If one fires, the tree is telling you something.
 
-Pre-1.0, the two packages move as a pair and the peer range is `~`, deliberately
-narrow. A minor release may break: what breaks, when it does, is a prop or a
-region on a primitive. The four operations and the shape of a tree are the
-runtime's promise rather than the library's.
+## What goes out, and how to see it before it does
 
-That promise is worth making explicit before 1.0 rather than after, and it is
-not made here — this file records what the packages currently claim, and the
-claim is `README.md`'s to state.
-
-## What is in the package
-
-620 files: every primitive and every composition, as `.js` with a `.d.ts`
-beside it. No tests, no specimens — `tsconfig.build.json` has excluded both from
-the build since September, so they never reach `dist/` to be copied.
-
-**No source maps.** `tsc` emits them beside every file and they name their
-sources as `../../src/primitives/…`, a path that exists in this repository and
-in no published package. A map whose sources are not shipped is broken rather
-than degraded, so `pnpm package:primitives` drops the maps and the
-`sourceMappingURL` comments that name them. The doc comments — which is where
-this library's documentation actually lives — are in the declaration files and
-are shipped. Shipping sources as well is an additive change if somebody wants
-the jump-to-definition back.
-
-## How it is verified
-
-The thing that cannot be checked from inside this repository is whether the
-published package resolves in somebody else's `node_modules`, because every
-import in `src/primitives/**` resolves perfectly well here by relative path. The
-published files have to say `@loom/runtime` instead.
-
-`tools/package/` holds that rewrite and `package.test.ts` holds it to the
-runtime's own `exports` field, so a runtime that stops exporting one of the
-three entry points fails the gate here rather than in a host's install. The
-end-to-end check is a real install and is worth re-running before any publish
-that changes the shape of the package:
+`pnpm pack` writes the exact tarball. Three things are worth looking at:
 
 ```bash
-npm pack --pack-destination /tmp/smoke                      # the runtime
-cd packages/primitives && npm pack --pack-destination /tmp/smoke
-cd /tmp/smoke && npm install ./loom-runtime-*.tgz ./loom-primitives-*.tgz react react-dom
-node -e 'import("@loom/primitives").then((m) => console.log(m.STARTER_PRIMITIVES.length))'
+tar tzf jam-overture-loom-<version>.tgz | grep primitives   # only dist/testing/primitives.*
+tar xzOf jam-overture-loom-<version>.tgz package/package.json | grep -A20 '"exports"'
 ```
 
-Done on 26 September against both tarballs: **98 primitives, 44 compositions, a
-22-part page sequence, a hero band rendered to 48KB of markup, zero
-diagnostics, and no literal colour below the root** — the re-theme guarantee
-holding in a package installed from a tarball by a project that is not this one.
+- **`dist/primitives/` is not in it.** `files` carries `"!dist/primitives"`,
+  which is the only thing keeping it back — `publishConfig` cannot exclude
+  files, only rewrite fields, and that was measured rather than assumed.
+- **The published `exports` has fifteen subpaths and not `./primitives`.** That
+  comes from `publishConfig.exports`, which pnpm applies at publish time. The
+  manifest in the repository keeps `./primitives` because five surfaces in
+  `apps/loom` import it.
+- **`dist/testing/primitives.*` is in it and belongs there.** It is the testing
+  fixture, not the starter library — the same word, two different files.
+- **No `.map` files.** The build emits them and the workspace wants them; the
+  tarball does not carry them, because they name `../src/*.ts` and carry no
+  `sourcesContent`. From a consumer's `node_modules/@jam-overture/loom/dist/`
+  that path resolves to `node_modules/@jam-overture/src/*.ts`, which does not
+  exist and never will — so they were 396 files and 42% of the package
+  resolving to nothing.
+
+  **A public repository does not change this**, and an earlier draft of this
+  section implied it did. The maps carry no source text and the relative path
+  is wrong wherever the package is installed; whether the source is readable on
+  GitHub is irrelevant to a debugger resolving a path inside `node_modules`.
+  Two things would make them useful, and both are a decision about the build
+  rather than about the repository:
+
+  - `"inlineSources": true` in `tsconfig.build.json`, which puts the source
+    text inside each map. Self-contained, works for every consumer, and the
+    ordinary answer. It makes the maps larger.
+  - shipping `src/` in the tarball beside `dist/`, so `../src/*.ts` resolves.
+
+  Either one is paired with dropping `"!dist/**/*.map"` from `files`. Doing
+  only the drop ships 396 files that still resolve to nothing.
+
+`tools/publish/manifest.test.ts` holds all of that as assertions and runs in
+`pnpm verify`, including the drift that is otherwise invisible: a subpath added
+to `exports` and forgotten in `publishConfig.exports` ships as a subpath
+consumers cannot import.
+
+## Proving it works before believing it
+
+The tarball loading in this repository proves nothing — the workspace resolves
+everything. Install it somewhere that resolves nothing:
+
+```bash
+mkdir /tmp/cleanroom && cd /tmp/cleanroom
+npm init -y && npm pkg set type=module
+npm install /path/to/jam-overture-loom-<version>.tgz
+node -e "import('@jam-overture/loom').then(m => console.log(typeof m.createTree))"   # function
+node -e "import('@jam-overture/loom/primitives').catch(e => console.log(e.code))"    # ERR_PACKAGE_PATH_NOT_EXPORTED
+npx loom --help
+```
+
+Run on 26 September against `0.1.0`: all fifteen entry points load with their
+optional peers installed; nine of them load with **no** peers at all; `./sdk`
+and `./testing` need `react`; `./testing/contracts` loads only inside a `vitest`
+run, by design; `npx loom init` scaffolds a working registry.
+
+## Versions
+
+`0.1.0` is the first public number. Pre-1.0 is the signal that nothing is
+stable, which is what the README has said since the beginning — there is no need
+for an `alpha` dist-tag on top of it, and a package whose only version is behind
+a tag is a package nobody installs by accident *or* on purpose.
+
+A published version is permanent. npm allows unpublishing for 72 hours and
+discourages it; after that the only remedies are `npm deprecate` and a new
+number. Everything above exists so the first number does not need either.
+
+## What is not set up, deliberately
+
+There is no `.github/workflows` in this repository and this adds none. A publish
+is a person deciding to publish; wiring it to a branch push means the credential
+lives in the repository's secrets and every merge is one misconfiguration away
+from a release. When that changes, it is a decision worth recording rather than
+a file worth adding quietly.

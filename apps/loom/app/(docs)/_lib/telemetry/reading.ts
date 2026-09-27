@@ -9,8 +9,8 @@ import {
   type IntentEpisode,
   type RecordedTelemetry,
   type RetentionPlan,
-} from "@loom/runtime/telemetry"
-import type { IntentId } from "@loom/runtime"
+} from "@jam-overture/loom/telemetry"
+import type { IntentId } from "@jam-overture/loom"
 
 /**
  * The sentences the page puts around the runtime's numbers.

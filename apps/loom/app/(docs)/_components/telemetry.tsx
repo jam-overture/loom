@@ -2,7 +2,7 @@ import type {
   EpisodeResolutionKind,
   IntentEpisode,
   RecordedTelemetry,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 import { docsTelemetry, DOCS_RETENTION } from "@/app/(docs)/_lib/telemetry/corpus"
 import {

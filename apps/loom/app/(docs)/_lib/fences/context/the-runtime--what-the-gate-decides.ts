@@ -1,4 +1,4 @@
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * What the Gate decides.
@@ -14,5 +14,5 @@ import type { PrimitiveRegistry } from "@loom/runtime/sdk"
 
 export declare const docsRegistry: PrimitiveRegistry
 
-export { gatePolicySchema } from "@loom/runtime"
-export { interactiveTypesFor } from "@loom/runtime/sdk"
+export { gatePolicySchema } from "@jam-overture/loom"
+export { interactiveTypesFor } from "@jam-overture/loom/sdk"

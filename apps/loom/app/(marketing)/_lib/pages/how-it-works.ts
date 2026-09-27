@@ -7,8 +7,8 @@ import {
   type IdFactory,
   type LoomNode,
   type LoomTree,
-} from "@loom/runtime"
-import { THEME_PROP_KEY } from "@loom/runtime/react"
+} from "@jam-overture/loom"
+import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import type { PaperTrail, TrailLine } from "../adapt/paper-trail"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"

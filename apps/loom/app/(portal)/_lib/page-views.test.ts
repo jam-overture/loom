@@ -3,7 +3,7 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { UNTITLED, type PageName } from "./page-name"
 import {

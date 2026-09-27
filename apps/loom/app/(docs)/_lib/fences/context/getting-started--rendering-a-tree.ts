@@ -1,5 +1,5 @@
-import type { LoomTree } from "@loom/runtime"
-import type { RenderOptions, RenderRequest, TreeSource } from "@loom/runtime/react"
+import type { LoomTree } from "@jam-overture/loom"
+import type { RenderOptions, RenderRequest, TreeSource } from "@jam-overture/loom/react"
 
 /**
  * Rendering a tree.
@@ -29,4 +29,4 @@ export declare const request: RenderRequest
 /** The framework's own. In Next it ends the request rather than returning. */
 export declare const notFound: () => never
 
-export { renderRequest } from "@loom/runtime/react"
+export { renderRequest } from "@jam-overture/loom/react"

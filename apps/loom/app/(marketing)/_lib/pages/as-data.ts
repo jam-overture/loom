@@ -4,7 +4,7 @@ import {
   buildText,
   type IdFactory,
   type LoomNode,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { BAND } from "../bands"
 import { code, prose, section } from "../nodes"

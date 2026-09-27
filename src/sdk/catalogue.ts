@@ -14,7 +14,7 @@ import type { PrimitiveRegistry } from "./registry.js"
  * The shape of what `catalogueOf` hands back, carried by the same entry point.
  *
  * Without this a host writing a function over the answer imports the function
- * from `@loom/runtime/sdk` and the type of its result from `@loom/runtime`. Both
+ * from `@jam-overture/loom/sdk` and the type of its result from `@jam-overture/loom`. Both
  * are public doors and nothing was blocked, but it is a paper cut met in the
  * first hour — found writing a page that prints one catalogue entry.
  *

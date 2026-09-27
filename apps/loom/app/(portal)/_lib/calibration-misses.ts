@@ -1,4 +1,4 @@
-import type { DispositionReasonCode, IntentId, ProposalId, TreeId } from "@loom/runtime"
+import type { DispositionReasonCode, IntentId, ProposalId, TreeId } from "@jam-overture/loom"
 import {
   verdictOf,
   type CalibrationVerdict,
@@ -6,7 +6,7 @@ import {
   type EpisodeFold,
   type IntentEpisode,
   type ProposalEpisode,
-} from "@loom/runtime/telemetry"
+} from "@jam-overture/loom/telemetry"
 
 /**
  * The claims the calibration table counted and then threw away.

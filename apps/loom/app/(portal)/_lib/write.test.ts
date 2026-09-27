@@ -203,7 +203,7 @@ describe("portalHolds", () => {
       storeIsDurable: database !== undefined,
     }))
 
-    vi.doMock("@loom/runtime/postgres", () => ({
+    vi.doMock("@jam-overture/loom/postgres", () => ({
       postgresHoldStore: (handle: unknown) => {
         built.push(`holds:${String((handle as { marker?: string }).marker)}`)
 
@@ -221,7 +221,7 @@ describe("portalHolds", () => {
 
   afterEach(() => {
     vi.doUnmock("./database")
-    vi.doUnmock("@loom/runtime/postgres")
+    vi.doUnmock("@jam-overture/loom/postgres")
     vi.resetModules()
     forget()
   })

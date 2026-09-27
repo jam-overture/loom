@@ -1,6 +1,7 @@
-import { randomIdFactory } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
+import { randomIdFactory } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
 
+import { roomToLand } from "@/app/(demo)/_lib/arrival"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { whatTheRailShows } from "@/app/(demo)/_lib/rail"
@@ -50,6 +51,11 @@ import { WhatHappens } from "./_components/what-happens"
  * be unwired by deleting a single argument with the whole suite green; the
  * finding that counted them is closed by that move rather than by this comment.
  */
+/** The rail, less the one class that depends on whether a question is open. */
+const RAIL =
+  "border-edge bg-surface-page order-1 flex w-full shrink-0 flex-col gap-6 border-b p-5" +
+  " lg:order-2 lg:w-[27rem] lg:overflow-y-auto lg:border-b-0 lg:border-l"
+
 const DemoPage = async () => {
   const visitorId = await readVisitorId()
   const session = visitorId === undefined ? undefined : await demoSession(visitorId)
@@ -136,7 +142,12 @@ const DemoPage = async () => {
         * order a screen reader wants too.
         */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <aside className="border-edge bg-surface-page order-1 flex w-full shrink-0 flex-col gap-6 border-b p-5 lg:order-2 lg:w-[27rem] lg:overflow-y-auto lg:border-b-0 lg:border-l">
+        {/*
+          * The trailing room the card needs to reach the top of this scroller,
+          * and it is `arrival.ts`'s decision rather than a layout choice made
+          * here — `roomToLand` says what it measured and why it is conditional.
+          */}
+        <aside className={`${RAIL} ${roomToLand(rail.waiting !== undefined)}`}>
           {/*
             * The claim, at the size of a claim — and a component rather than
             * four paragraphs written here.
@@ -221,9 +232,18 @@ const DemoPage = async () => {
             */}
           <footer className="border-edge-subtle text-ink-muted mt-auto flex flex-col gap-3 border-t pt-4 text-2xs">
             <ReadTheDocs />
+            {/*
+              * **The clause about accounts is gone from here and it was not
+              * dropped.** `RailHeader` carries *No sign-in* and *Nothing kept*
+              * as chips, three inches up and above the fold at both sizes, which
+              * is where a visitor deciding whether to press anything actually
+              * is. Saying it twice on one screen is how a footer stops being
+              * read at all — and this half, what becomes of the page they
+              * change, is the half the chips cannot fit.
+              */}
             <p>
               Your copy of this page lives in memory for as long as you are here, and belongs to
-              nobody else. No account, no sign-in, nothing kept.
+              nobody else.
             </p>
           </footer>
         </aside>

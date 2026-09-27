@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { randomIdFactory, systemClock, type LoomTree } from "@loom/runtime"
-import { commitIntent, type HeldProposal } from "@loom/runtime/write"
+import { randomIdFactory, systemClock, type LoomTree } from "@jam-overture/loom"
+import { commitIntent, type HeldProposal } from "@jam-overture/loom/write"
 
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"

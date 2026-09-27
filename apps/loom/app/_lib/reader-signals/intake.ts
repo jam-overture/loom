@@ -2,8 +2,8 @@ import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
   memoryReaderSignalJournal,
-} from "@loom/runtime/signals"
-import { postgresReaderSignalJournal } from "@loom/runtime/signals/postgres"
+} from "@jam-overture/loom/signals"
+import { postgresReaderSignalJournal } from "@jam-overture/loom/signals/postgres"
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
 

@@ -430,7 +430,7 @@ And a third, about ownership. 0031:
 > learn from, reachable from outside the runtime.
 
 That last clause is a constraint on the code, not a description of it:
-`calibrationOf` reads only what `@loom/runtime/telemetry` already exports. The
+`calibrationOf` reads only what `@jam-overture/loom/telemetry` already exports. The
 report is the *reference consumer* — if it needed private access, no third-party
 consumer could reproduce it, and the framework would have kept the interesting
 part for itself.

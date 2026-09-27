@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { TreeId } from "@loom/runtime"
-import type { StoreError } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import type { StoreError } from "@jam-overture/loom/store"
 
 import type { AuditReport } from "@/app/(portal)/_lib/audit-view"
 import type { PageCheck, StandingState } from "@/app/(portal)/_lib/checkup-sweep"
@@ -201,12 +201,21 @@ describe("what a row says beyond its standing", () => {
     expect(container.textContent).toContain("Something here is unexplained. 4 parts disagree.")
   })
 
+  /**
+   * Scoped to the row, which is what the assertion is about. It read the whole
+   * container until the list grew a sentence saying what order it is in, whose
+   * disclosure explains that two screens listing the same pages used to disagree
+   * — so a rule about a *row* was being decided by prose that is not on any row.
+   * The subject was always the `<li>`; nothing about a clean row is now unchecked.
+   */
   it("adds nothing to a row with nothing to add", () => {
     const { container } = render(
       <SweepRows checks={[check("t_ok", "adds-up")]} names={named(["t_ok", "A page"])} />
     )
 
-    expect(container.textContent).toContain("Adds up")
-    expect(container.textContent).not.toContain("disagree")
+    const row = container.querySelector("li")?.textContent ?? ""
+
+    expect(row).toContain("Adds up")
+    expect(row).not.toContain("disagree")
   })
 })

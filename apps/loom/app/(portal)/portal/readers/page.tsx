@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema, type TreeId } from "@loom/runtime"
-import { describeReaderSignalStoreError } from "@loom/runtime/signals"
+import { treeIdSchema, type TreeId } from "@jam-overture/loom"
+import { describeReaderSignalStoreError } from "@jam-overture/loom/signals"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
+import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -13,6 +14,7 @@ import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-nam
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
 import { portalReaderSignals, portalReaderTallies, signalsAreDurable } from "@/app/(portal)/_lib/reader-signals"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
+import { inPageOrder } from "@/app/(portal)/_lib/page-order"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
 import { PageReadingCard } from "./_components/page-reading"
@@ -134,6 +136,23 @@ const ReadersPage = async ({
 
   const names = served.names
 
+  /*
+   * By name, and it used to be by identifier.
+   *
+   * `revisionReadings` sorts on `treeId.localeCompare(treeId)` so a page's own
+   * versions stay together and newest-first, which is right and is untouched.
+   * What reached the screen was that arrangement — a list of pages ordered by the
+   * runtime's names for them, with a collation deciding ties on a value no reader
+   * can see. This screen has no rung to lead with: one page's readers are not
+   * more urgent than another's. So the tiebreak every other list here ends with
+   * is the whole order, and the sentence above the list says so. No read is added
+   * — `names` is three lines up. See `_lib/page-order.ts`.
+   */
+  const inOrder = inPageOrder(readings, (reading) => ({
+    rank: 0,
+    page: names.get(reading.treeId) ?? unnamed(reading.treeId),
+  }))
+
   /**
    * The scoped screen names its page whether or not it has a reading, because a
    * page with nothing to show is exactly the page somebody arrived here asking
@@ -206,20 +225,24 @@ const ReadersPage = async ({
           </TechnicalDetail>
         </StateNotice>
       ) : (
-        readings.map((reading) => (
-          <PageReadingCard
-            key={reading.treeId}
-            reading={reading}
-            page={names.get(reading.treeId) ?? unnamed(reading.treeId)}
-            /*
-             * Absent when the page itself could not be read, which the card
-             * says out loud rather than reporting as current. A screen that
-             * treated a failed read as "these numbers are live" would be making
-             * the one claim this surface refuses to make without evidence.
-             */
-            live={served.revisions.get(reading.treeId)}
-          />
-        ))
+        <>
+          <ListOrder order="by-name" />
+
+          {inOrder.map((reading) => (
+            <PageReadingCard
+              key={reading.treeId}
+              reading={reading}
+              page={names.get(reading.treeId) ?? unnamed(reading.treeId)}
+              /*
+               * Absent when the page itself could not be read, which the card
+               * says out loud rather than reporting as current. A screen that
+               * treated a failed read as "these numbers are live" would be making
+               * the one claim this surface refuses to make without evidence.
+               */
+              live={served.revisions.get(reading.treeId)}
+            />
+          ))}
+        </>
       )}
 
       {signalsAreDurable ? null : (

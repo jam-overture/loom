@@ -67,7 +67,7 @@ describe("holding a page against the door it describes", () => {
    */
   it("catches a page offering a value the module never carried", () => {
     const faults = disagreements(
-      page("@loom/runtime/sdk", [
+      page("@jam-overture/loom/sdk", [
         ["PrimitiveCatalogue", "type"],
         ["catalogueFields", "function"],
         ["closedChoices", "function"],
@@ -80,12 +80,12 @@ describe("holding a page against the door it describes", () => {
       ["closedChoices", "not-offered"],
       ["catalogueOf", "not-listed"],
     ])
-    expect(faults[0]?.sentence).toContain("importing catalogueFields from @loom/runtime/sdk gives nothing")
+    expect(faults[0]?.sentence).toContain("importing catalogueFields from @jam-overture/loom/sdk gives nothing")
   })
 
   it("catches a page calling something a function that cannot be called", () => {
     const faults = disagreements(
-      page("@loom/runtime", [["applyDelta", "function"]]),
+      page("@jam-overture/loom", [["applyDelta", "function"]]),
       door({ applyDelta: "object" })
     )
 
@@ -94,7 +94,7 @@ describe("holding a page against the door it describes", () => {
   })
 
   it("catches a door handing back something no page mentions", () => {
-    const faults = disagreements(page("@loom/runtime/store", []), door({ memoryStore: "function" }))
+    const faults = disagreements(page("@jam-overture/loom/store", []), door({ memoryStore: "function" }))
 
     expect(faults.map((fault) => [fault.name, fault.kind])).toEqual([["memoryStore", "not-listed"]])
   })
@@ -110,20 +110,20 @@ describe("holding a page against the door it describes", () => {
    * invisibly.
    */
   it("catches a page calling something a type when the door hands back a value", () => {
-    const faults = disagreements(page("@loom/runtime", [["Revision", "type"]]), door({ Revision: "function" }))
+    const faults = disagreements(page("@jam-overture/loom", [["Revision", "type"]]), door({ Revision: "function" }))
 
     expect(faults.map((fault) => fault.kind)).toEqual(["offered-as-a-value"])
   })
 
   it("expects nothing behind a type and is content when there is nothing", () => {
-    expect(disagreements(page("@loom/runtime", [["TreeDelta", "type"], ["LoomTree", "interface"]]), door({}))).toEqual(
+    expect(disagreements(page("@jam-overture/loom", [["TreeDelta", "type"], ["LoomTree", "interface"]]), door({}))).toEqual(
       []
     )
   })
 
   /** A class is a function once the types are gone, and the door reports it as one. */
   it("is content with a class the door hands back as a function", () => {
-    expect(disagreements(page("@loom/runtime", [["HoldError", "class"]]), door({ HoldError: "function" }))).toEqual([])
+    expect(disagreements(page("@jam-overture/loom", [["HoldError", "class"]]), door({ HoldError: "function" }))).toEqual([])
   })
 
   /**
@@ -133,14 +133,14 @@ describe("holding a page against the door it describes", () => {
    */
   it("asks of a schema only that it is there", () => {
     expect(
-      disagreements(page("@loom/runtime", [["treeSchema", "schema"]]), door({ treeSchema: "object" }))
+      disagreements(page("@jam-overture/loom", [["treeSchema", "schema"]]), door({ treeSchema: "object" }))
     ).toEqual([])
   })
 
   it("says nothing about a page and a door that agree", () => {
     expect(
       disagreements(
-        page("@loom/runtime", [
+        page("@jam-overture/loom", [
           ["applyDelta", "function"],
           ["TreeDelta", "type"],
           ["treeSchema", "schema"],
@@ -218,7 +218,7 @@ describe("every published door", () => {
   it("offers applyDelta from the root, as the root's page says", async () => {
     if (!built) throw new Error(missingBuild)
 
-    const root = publishedEntries().find((entry) => entry.specifier === "@loom/runtime")
+    const root = publishedEntries().find((entry) => entry.specifier === "@jam-overture/loom")
     const offered = await offeredBy(root as NonNullable<typeof root>)
 
     expect(offered.get("applyDelta")).toBe("function")

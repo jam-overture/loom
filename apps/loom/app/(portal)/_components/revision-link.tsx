@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { isReachableRevision, revisionHref } from "@/app/(portal)/_lib/history-link"
 import { versionMention } from "@/app/(portal)/_lib/version"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import type { LoomTree, TreeId } from "@loom/runtime"
+import type { LoomTree, TreeId } from "@jam-overture/loom"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 

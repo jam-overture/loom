@@ -11,8 +11,8 @@ import {
   type TreeError,
   type TreeId,
   type TreeOperation,
-} from "@loom/runtime"
-import { memoryTreeStore, type AppendRequest, type RevertPlan } from "@loom/runtime/store"
+} from "@jam-overture/loom"
+import { memoryTreeStore, type AppendRequest, type RevertPlan } from "@jam-overture/loom/store"
 
 import { describeRestoration, previewReversal, reversalOf } from "./reversal"
 import { readingOf } from "./vocabulary"

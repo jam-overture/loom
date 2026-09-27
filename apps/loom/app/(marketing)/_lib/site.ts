@@ -1,4 +1,4 @@
-import type { JsonObject } from "@loom/runtime"
+import type { JsonObject } from "@jam-overture/loom"
 
 /**
  * What the site is, as data: its routes, its navigation, its palettes, and

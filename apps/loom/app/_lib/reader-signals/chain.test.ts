@@ -7,9 +7,9 @@ import {
   describeCollection,
   memoryReaderSignalJournal,
   memoryReaderTallyStore,
-} from "@loom/runtime/signals"
+} from "@jam-overture/loom/signals"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { receiveReaderSignals, type Intake } from "./receive"
 

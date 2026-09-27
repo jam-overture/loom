@@ -1,4 +1,4 @@
-import { parseReaderSignalBatch } from "@loom/runtime/signals"
+import { parseReaderSignalBatch } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
 import { bandsOf } from "../outline"

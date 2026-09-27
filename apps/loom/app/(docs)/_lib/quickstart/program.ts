@@ -60,7 +60,7 @@ export const QUICKSTART_OUTPUT_FILE = "quickstart.html"
  * three, which is a bad first minute.
  */
 export const QUICKSTART_COMMANDS: readonly string[] = [
-  "pnpm add @loom/runtime react react-dom zod",
+  "pnpm add @jam-overture/loom react react-dom zod",
   "npx tsx quickstart.mts",
 ]
 
@@ -73,7 +73,7 @@ export const QUICKSTART_COMMANDS: readonly string[] = [
  * module-not-found.
  */
 export const QUICKSTART_DEPENDENCIES: readonly string[] = [
-  "@loom/runtime",
+  "@jam-overture/loom",
   "react",
   "react-dom",
   "zod",

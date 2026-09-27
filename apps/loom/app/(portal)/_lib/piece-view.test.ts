@@ -3,8 +3,8 @@ import {
   renderCatalogue,
   slotNameSchema,
   type CataloguedPrimitive,
-} from "@loom/runtime"
-import { catalogueOf } from "@loom/runtime/sdk"
+} from "@jam-overture/loom"
+import { catalogueOf } from "@jam-overture/loom/sdk"
 import { describe, expect, it } from "vitest"
 
 import { catalogueLineFor, plainPieceName, settingsOf, spacesReading } from "./piece-view"

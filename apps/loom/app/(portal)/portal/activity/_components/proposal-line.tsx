@@ -1,4 +1,4 @@
-import type { ProposalEpisode } from "@loom/runtime/telemetry"
+import type { ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { summariseOperations } from "@/app/(portal)/_lib/delta-summary"

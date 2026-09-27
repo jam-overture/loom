@@ -1,5 +1,5 @@
-import type { ThemeRegistry } from "@loom/runtime"
-import type { PrimitiveRegistry } from "@loom/runtime/sdk"
+import type { ThemeRegistry } from "@jam-overture/loom"
+import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
  * Connecting a model.
@@ -17,4 +17,4 @@ import type { PrimitiveRegistry } from "@loom/runtime/sdk"
 export declare const registry: PrimitiveRegistry
 export declare const themes: ThemeRegistry
 
-export type { EditIntent, InterpretationError, LoomTree, ProposedChange, Result } from "@loom/runtime"
+export type { EditIntent, InterpretationError, LoomTree, ProposedChange, Result } from "@jam-overture/loom"

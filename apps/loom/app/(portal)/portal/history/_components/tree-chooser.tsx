@@ -1,11 +1,13 @@
 import Link from "next/link"
 
-import { describeStoreError } from "@loom/runtime/store"
+import { describeStoreError } from "@jam-overture/loom/store"
 
+import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
+import { inPageOrder, mostChangedRank } from "@/app/(portal)/_lib/page-order"
 import { portalStore } from "@/app/(portal)/_lib/store"
 
 /**
@@ -67,14 +69,31 @@ export const TreeChooser = async () => {
     )
   }
 
+  /*
+   * The longest history first, and not the order the store listed them in.
+   *
+   * This is a chooser in front of a log reader, so a page with nothing in its
+   * history has nothing to open — and it could sit above one with forty changes
+   * in it. `revision` is on every listing already and is printed on every row
+   * here, so the order costs no read. The sentence above the list says *most
+   * changes* rather than *most recent*, because that is what this number is: a
+   * listing carries no time at all. See `_lib/page-order.ts`.
+   */
+  const ordered = inPageOrder(trees, (listing) => ({
+    rank: mostChangedRank(listing),
+    page: nameFrom(names, listing.treeId),
+  }))
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-ink-muted text-sm">
         Each page keeps its own history. Pick one to read what has been changed on it.
       </p>
 
+      <ListOrder order="most-changed-first" />
+
       <ul className="flex flex-col gap-2">
-        {trees.map((listing) => (
+        {ordered.map((listing) => (
           <li key={listing.treeId}>
             <Link
               href={`/portal/history?tree=${encodeURIComponent(listing.treeId)}`}

@@ -46,7 +46,7 @@ type ImportLine = {
   readonly values: readonly string[]
 }
 
-const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@loom\/[^"]+)"/g
+const IMPORT_LINE = /import\s+\{([^}]+)\}\s+from\s+"(@jam-overture\/[^"]+)"/g
 
 const importLines = (): readonly ImportLine[] =>
   [...page.matchAll(IMPORT_LINE)].map((match) => ({
@@ -88,7 +88,7 @@ describe("the imports this page prints", () => {
    * list from the page would be agreeing with the page about itself.
    */
   it("names the four functions a host calls, and all four are functions", async () => {
-    const write: Readonly<Record<string, unknown>> = await import("@loom/runtime/write")
+    const write: Readonly<Record<string, unknown>> = await import("@jam-overture/loom/write")
 
     for (const name of ["commitIntent", "confirmHeld", "discardHeld", "revertRevision"]) {
       expect(page, `the page does not mention ${name}`).toContain(name)

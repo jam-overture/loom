@@ -1,14 +1,14 @@
 "use client"
 
-import { type LoomTree } from "@loom/runtime"
-import { renderLoomTree } from "@loom/runtime/react"
-import { READER_SIGNALS_EVENT, broadcastReaderSignals } from "@loom/runtime/signals/broadcast"
+import { type LoomTree } from "@jam-overture/loom"
+import { renderLoomTree } from "@jam-overture/loom/react"
+import { READER_SIGNALS_EVENT, broadcastReaderSignals } from "@jam-overture/loom/signals/broadcast"
 /**
  * A `type` import, which is erased before a bundler sees it — so naming the
  * schema-carrying entry point here costs the browser nothing. The value import
  * above is the one the page's callout is about.
  */
-import type { ReaderSignalBatch } from "@loom/runtime/signals"
+import type { ReaderSignalBatch } from "@jam-overture/loom/signals"
 import { useEffect, useRef, useState } from "react"
 
 import { docsExamples } from "@/app/(docs)/_lib/examples/catalogue"
@@ -23,8 +23,8 @@ import { docsRegistry, docsThemes } from "@/app/(docs)/_lib/loom/registry"
  * is to start a real one on a real addressed tree and print whatever it says.
  *
  * **It is the runtime's broadcaster, imported the way the page tells you to
- * import it** — from `@loom/runtime/signals/broadcast` rather than from
- * `@loom/runtime/signals`, which is the difference between about 5 KB and about
+ * import it** — from `@jam-overture/loom/signals/broadcast` rather than from
+ * `@jam-overture/loom/signals`, which is the difference between about 5 KB and about
  * 66 KB in a browser bundle (0136). The page makes that point in prose two
  * paragraphs up, and this file is where it would be caught lying.
  *

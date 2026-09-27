@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { treeIdSchema, type NodeId } from "@loom/runtime"
+import { treeIdSchema, type NodeId } from "@jam-overture/loom"
 
 import type { NodeCredit } from "@/app/(portal)/_lib/attribution-view"
 import type { OutlineRow } from "@/app/(portal)/_lib/outline"

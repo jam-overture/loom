@@ -153,8 +153,8 @@ and will not outlive the page.
 A deployment swaps the store and changes nothing else:
 
 ```ts
-import { memoryTreeStore } from "@loom/runtime/store"
-import { postgresTreeStore } from "@loom/runtime/postgres"
+import { memoryTreeStore } from "@jam-overture/loom/store"
+import { postgresTreeStore } from "@jam-overture/loom/postgres"
 
 const onThisSite = { store: memoryTreeStore(), holds, runtime }
 

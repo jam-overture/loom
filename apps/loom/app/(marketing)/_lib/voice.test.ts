@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode } from "@loom/runtime"
+import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "./copy"

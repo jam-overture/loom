@@ -1,5 +1,5 @@
-import type { Disposition } from "@loom/runtime"
-import { describeHoldError, type HeldProposal, type HoldError } from "@loom/runtime/write"
+import type { Disposition } from "@jam-overture/loom"
+import { describeHoldError, type HeldProposal, type HoldError } from "@jam-overture/loom/write"
 
 import { screenName } from "./screen-names"
 import { unreadableClause, type UnreadableChange } from "./unreadable-change"

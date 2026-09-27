@@ -1,4 +1,4 @@
-import { READER_SIGNAL_KINDS } from "@loom/runtime/signals"
+import { READER_SIGNAL_KINDS } from "@jam-overture/loom/signals"
 import { describe, expect, it } from "vitest"
 
 import { RESERVED_VOCABULARY } from "../copy"

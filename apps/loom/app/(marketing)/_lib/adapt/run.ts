@@ -13,9 +13,9 @@ import {
   type GatePolicy,
   type LoomTree,
   type TreeDelta,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
-import { propsVocabularyFor, registeredTypesFor } from "@loom/runtime/sdk"
+import { propsVocabularyFor, registeredTypesFor } from "@jam-overture/loom/sdk"
 
 import { siteRegistry } from "../registry"
 

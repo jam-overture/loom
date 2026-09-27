@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 
-import type { TreeId } from "@loom/runtime"
+import type { TreeId } from "@jam-overture/loom"
 
 import { ChangeReasoning } from "@/app/(portal)/_components/change-reasoning"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"

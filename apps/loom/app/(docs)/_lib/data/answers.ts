@@ -10,7 +10,7 @@ import {
   type JsonValue,
   type LoomTree,
   type NodeId,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 
 import { DOCS_CEILING_MS } from "@/app/(docs)/_lib/ceiling/page"
 

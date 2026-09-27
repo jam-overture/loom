@@ -1,11 +1,13 @@
 import Link from "next/link"
 
-import type { TreeListing } from "@loom/runtime/store"
+import type { TreeListing } from "@jam-overture/loom/store"
 
+import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { nameFrom, type PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
+import { inPageOrder, readyToCheckRank } from "@/app/(portal)/_lib/page-order"
 
 /**
  * The pages this deployment can check, and the ones it cannot.
@@ -25,6 +27,19 @@ import { nameFrom, type PageName as PageNameValue } from "@/app/(portal)/_lib/pa
  * There is exactly one thing to do here — pick a page and check it — so a row
  * says so in the imperative, and a row that cannot be pressed says why in the
  * same place a pressable row says what pressing it does.
+ *
+ * ## The rows that can be pressed come first, and that is new
+ *
+ * The rows arrived in the order the store listed them, which is a cursor order,
+ * so on the deployment this lane photographs **the one page you can check was
+ * listed fourth, below three you cannot** — on a screen with exactly one action
+ * on it. It was filed on 22 September and re-filed on the 25th, and it is fixed
+ * here rather than in the chooser because the order belongs to the rows and this
+ * is the file a test can render.
+ *
+ * Nothing is hidden and nothing is moved to a second list. A page that cannot be
+ * checked is still on this screen and still says why; it is now last, which is
+ * the whole of the change.
  */
 export const CheckupChoices = ({
   trees,
@@ -66,40 +81,49 @@ export const CheckupChoices = ({
     )
   }
 
+  const ordered = inPageOrder(trees, (listing) => ({
+    rank: readyToCheckRank({ canBeChecked: checkable(listing.treeId) }),
+    page: nameFrom(names, listing.treeId),
+  }))
+
   return (
-    <ul className="flex flex-col gap-2">
-      {trees.map((listing) =>
-        checkable(listing.treeId) ? (
-          <li key={listing.treeId}>
-            <Link
-              href={`/portal/checkup?tree=${encodeURIComponent(listing.treeId)}`}
-              className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
-            >
-              <span className="flex min-w-0 flex-col gap-1">
-                <PageName page={nameFrom(names, listing.treeId)} />
-                <span className="text-ink-muted text-xs">
-                  {listing.revision} {listing.revision === 1 ? "change" : "changes"} to replay
+    <div className="flex flex-col gap-3">
+      <ListOrder order="ready-to-check-first" />
+
+      <ul className="flex flex-col gap-2">
+        {ordered.map((listing) =>
+          checkable(listing.treeId) ? (
+            <li key={listing.treeId}>
+              <Link
+                href={`/portal/checkup?tree=${encodeURIComponent(listing.treeId)}`}
+                className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
+              >
+                <span className="flex min-w-0 flex-col gap-1">
+                  <PageName page={nameFrom(names, listing.treeId)} />
+                  <span className="text-ink-muted text-xs">
+                    {listing.revision} {listing.revision === 1 ? "change" : "changes"} to replay
+                  </span>
                 </span>
+                <span className="text-affirm-ink bg-affirm border-affirm-edge shrink-0 rounded-sm border px-2 py-1 text-xs">
+                  Check this page →
+                </span>
+              </Link>
+            </li>
+          ) : (
+            <li
+              key={listing.treeId}
+              className="border-edge-subtle flex flex-col gap-1 rounded-md border border-dashed p-4"
+            >
+              <PageName page={nameFrom(names, listing.treeId)} />
+              <span className="text-ink-muted text-xs">
+                This one can&rsquo;t be checked here: this deployment doesn&rsquo;t know the shape
+                the page started as, and a check that started from the page being served would agree
+                with itself.
               </span>
-              <span className="text-affirm-ink bg-affirm border-affirm-edge shrink-0 rounded-sm border px-2 py-1 text-xs">
-                Check this page →
-              </span>
-            </Link>
-          </li>
-        ) : (
-          <li
-            key={listing.treeId}
-            className="border-edge-subtle flex flex-col gap-1 rounded-md border border-dashed p-4"
-          >
-            <PageName page={nameFrom(names, listing.treeId)} />
-            <span className="text-ink-muted text-xs">
-              This one can&rsquo;t be checked here: this deployment doesn&rsquo;t know the shape
-              the page started as, and a check that started from the page being served would agree
-              with itself.
-            </span>
-          </li>
-        )
-      )}
-    </ul>
+            </li>
+          )
+        )}
+      </ul>
+    </div>
   )
 }

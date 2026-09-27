@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode, LoomTree } from "@loom/runtime"
+import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { BAND } from "../bands"

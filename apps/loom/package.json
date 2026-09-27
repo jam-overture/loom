@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter @loom/runtime build && next build",
+    "build": "pnpm --filter @jam-overture/loom build && next build",
     "start": "next start",
-    "typecheck": "pnpm --filter @loom/runtime build && tsc --noEmit",
+    "typecheck": "pnpm --filter @jam-overture/loom build && tsc --noEmit",
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm test && pnpm build",
     "docs:api": "tsx \"app/(docs)/_lib/api/generate.ts\"",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
-    "@loom/runtime": "workspace:*",
+    "@jam-overture/loom": "workspace:*",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.2.12",

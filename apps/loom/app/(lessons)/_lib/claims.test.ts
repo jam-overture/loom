@@ -5,7 +5,7 @@ import {
   dispositionReasonCodeSchema,
   ESCALATION_LADDER,
   treeOperationSchema,
-} from "@loom/runtime"
+} from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
 import { COURSE_DIR } from "./source"

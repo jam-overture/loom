@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import type { NodeId } from "@loom/runtime"
-import { LOOM_NODE_ATTRIBUTE } from "@loom/runtime/react"
+import type { NodeId } from "@jam-overture/loom"
+import { LOOM_NODE_ATTRIBUTE } from "@jam-overture/loom/react"
 
 import type { Spotlight } from "@/app/(demo)/_lib/spotlight"
 

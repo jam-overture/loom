@@ -1,6 +1,6 @@
-import { type LoomTree, type TreeId } from "@loom/runtime"
-import { memoryTreeStore, type TreeStore } from "@loom/runtime/store"
-import { memoryHoldStore, type HoldStore } from "@loom/runtime/write"
+import { type LoomTree, type TreeId } from "@jam-overture/loom"
+import { memoryTreeStore, type TreeStore } from "@jam-overture/loom/store"
+import { memoryHoldStore, type HoldStore } from "@jam-overture/loom/write"
 
 /**
  * Where an example's history lives while a reader is reading.
@@ -17,7 +17,7 @@ import { memoryHoldStore, type HoldStore } from "@loom/runtime/write"
  * So each example opens one of these: the reference `TreeStore`, the reference
  * `HoldStore`, and the tree at revision 0 to replay from. Both are the
  * in-memory implementations the runtime ships for tests, and they are the same
- * two interfaces `@loom/runtime/postgres` implements — a deployment swaps the
+ * two interfaces `@jam-overture/loom/postgres` implements — a deployment swaps the
  * pair and nothing above this line changes.
  *
  * **It is memory in a browser tab, and it is gone on reload.** That is a real

@@ -1,6 +1,6 @@
-import type { TreeId } from "@loom/runtime"
-import type { LoomDatabase } from "@loom/runtime/postgres"
-import type { TreeStore } from "@loom/runtime/store"
+import type { TreeId } from "@jam-overture/loom"
+import type { LoomDatabase } from "@jam-overture/loom/postgres"
+import type { TreeStore } from "@jam-overture/loom/store"
 
 /**
  * Answering a held change.

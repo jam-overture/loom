@@ -1,4 +1,4 @@
-import type { PrimitiveEntry } from "@loom/runtime/sdk"
+import type { PrimitiveEntry } from "@jam-overture/loom/sdk"
 
 /**
  * Primitives and the registry.

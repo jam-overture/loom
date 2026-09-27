@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@loom/runtime"
-import type { StoredTally } from "@loom/runtime/signals"
+import { nodeIdSchema, primitiveTypeSchema, treeIdSchema } from "@jam-overture/loom"
+import type { StoredTally } from "@jam-overture/loom/signals"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 import { revisionReadings, type CountingStanding } from "@/app/(portal)/_lib/reading-view"

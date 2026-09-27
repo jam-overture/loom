@@ -1,4 +1,4 @@
-import { PALETTE_SLOTS, STARTER_PALETTES, type Palette, type PaletteSlot } from "@loom/runtime"
+import { PALETTE_SLOTS, STARTER_PALETTES, type Palette, type PaletteSlot } from "@jam-overture/loom"
 
 /**
  * Every slot a palette owes, and what three registered palettes put in each.

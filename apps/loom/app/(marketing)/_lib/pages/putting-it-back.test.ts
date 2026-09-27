@@ -1,4 +1,4 @@
-import type { ElementNode, LoomNode, LoomTree } from "@loom/runtime"
+import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
 import type { RoundTrip } from "../adapt/round-trip"
