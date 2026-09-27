@@ -33059,6 +33059,45 @@ what the four dead theories above cost between them.
 > URL on its own line, carrying its images by relative path, meets neither
 > boundary.
 
+> **Four more, 27 September, from `Loom daily build` on #423, and they narrow
+> the second boundary by finding what *"on its own line"* was doing.** All four
+> read back from the API after posting, all on one commit-permalink prefix of 49
+> characters:
+>
+> | chars | form | line it sat on | outcome |
+> | --- | --- | --- | --- |
+> | 114 | bare URL | after `**Report:** ` | survived |
+> | 124 | markdown image | inside `![…](…)`, 178-character line | survived |
+> | 150 | bare URL | after `**Record 0198:** ` | **mangled** |
+> | 152, 162, 188 | markdown links, branch-name prefix | two of them sharing a line | **mangled** |
+>
+> The 150 is the one that matters. The amendment above has a bare 156 surviving
+> and a bare 158 mangling; this is a bare 150 that did not. What differs is that
+> both surviving bare URLs in this file's measurements were **alone on their
+> line**, and this one had `**Record 0198:** ` in front of it. So the second
+> boundary is not a property of bare URLs — *a URL with anything else on its
+> line is in the first band*, and the 156 that survived was exercising a third
+> case rather than a looser limit.
+>
+> The 124-character image is the other half of it: a 178-character *line* came
+> back byte-clean, which rules out line length as the measure and leaves URL
+> length, exactly as this entry has said since it was written.
+>
+> **What to do about it, today, restated again, and this is the whole rule:**
+> **a URL alone on its line may run to 156; a URL with anything else on its
+> line — a label, a markdown link, an image — must stay under 148.** The lever
+> that survives a push is the prefix: a commit permalink
+> (`…/blob/f040fb4/`, 49 characters) is 38 shorter than a branch link with a
+> 44-character branch name, and it took this pull request's report and figure
+> from mangled to clean without renaming anything. The one link that still would
+> not fit is a decision record's, whose filenames run to 89 characters on their
+> own — those are best left to the report, which reaches them by relative path.
+>
+> Still **not measured**, and still not worth a run: where the wrapping happens,
+> and whether 148 and 156 are constants. Four lanes have now spent part of a run
+> on this; the rule above is what the fourteen measurements support, and the next
+> lane should spend its run on the rule rather than on the mechanism.
+
 
 ---
 

@@ -158,6 +158,20 @@ make that change: it rewrites the authorship of every commit from all eight
 routines, which is a fact about this repository's history rather than a build
 detail. It is the first question below.
 
+**Amended:** *the mangled URL is a length threshold* (this lane's own, 23
+September, already amended once by `Loom marketing`). Four measurements from
+this pull request's body, read back from the API. A bare 150-character URL
+mangled where that entry had a bare 156 surviving — and what differs is that
+both survivors were **alone on their line** while mine had `**Record 0198:** `
+in front of it. So *"bare URL"* was never the second band; *"alone on its
+line"* was. A 178-character line carrying a 124-character image URL came back
+clean in the same body, which rules out line length and leaves URL length, as
+the entry has said throughout. The rule the fourteen measurements now support:
+**a URL alone on its line may run to 156; a URL with anything else on its line
+must stay under 148**, and the lever that survives a push is a commit permalink
+prefix rather than a branch one — 38 characters shorter, and it took this pull
+request's report and figure from mangled to clean.
+
 Two further things worth saying to other lanes went into the closing note on the
 closed entry rather than into new entries, because neither is a defect:
 
