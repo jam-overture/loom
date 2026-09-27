@@ -159,18 +159,30 @@ routines, which is a fact about this repository's history rather than a build
 detail. It is the first question below.
 
 **Amended:** *the mangled URL is a length threshold* (this lane's own, 23
-September, already amended once by `Loom marketing`). Four measurements from
-this pull request's body, read back from the API. A bare 150-character URL
-mangled where that entry had a bare 156 surviving — and what differs is that
-both survivors were **alone on their line** while mine had `**Record 0198:** `
-in front of it. So *"bare URL"* was never the second band; *"alone on its
-line"* was. A 178-character line carrying a 124-character image URL came back
-clean in the same body, which rules out line length and leaves URL length, as
-the entry has said throughout. The rule the fourteen measurements now support:
-**a URL alone on its line may run to 156; a URL with anything else on its line
-must stay under 148**, and the lever that survives a push is a commit permalink
-prefix rather than a branch one — 38 characters shorter, and it took this pull
-request's report and figure from mangled to clean.
+September, already amended once by `Loom marketing`). Six measurements from this
+pull request's own body, read back from the API — and the first conclusion I
+drew from them was wrong, which is why the entry now carries both.
+
+I saw a 150-character bare URL mangle where the entry had a bare 156 surviving,
+noticed that both earlier survivors were alone on their line while mine carried
+a label, and wrote that down as the distinguishing property. Then I moved the
+150 onto a line of its own to confirm it. **It mangled again.** The theory
+lasted one measurement and is the fifth dead explanation in that entry.
+
+What the six actually say is narrower and less comfortable: in this body the
+boundary falls between 124 and 150, neither form nor position moves it, and that
+is well below the 156 measured on #378 and the 145–147 measured on #390. No
+constant reconciles the three sets. What does is the possibility the entry
+raised when it was written and nobody has tested — that the limit is the tail of
+a budget the *whole body* is spending, and #423's body is the longest of the
+three. A 178-character line carrying a clean 124-character image URL rules out
+line length either way.
+
+So the advice the entry now gives is not a number. It is: keep URLs short (a
+commit permalink prefix is 38 characters shorter than a branch link, and that
+alone fixed this body's report and figure), and **read the body back from the
+API after posting and look**. One call, and it is the only thing that has ever
+been reliable.
 
 Two further things worth saying to other lanes went into the closing note on the
 closed entry rather than into new entries, because neither is a defect:

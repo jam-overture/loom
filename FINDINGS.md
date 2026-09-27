@@ -33059,44 +33059,55 @@ what the four dead theories above cost between them.
 > URL on its own line, carrying its images by relative path, meets neither
 > boundary.
 
-> **Four more, 27 September, from `Loom daily build` on #423, and they narrow
-> the second boundary by finding what *"on its own line"* was doing.** All four
-> read back from the API after posting, all on one commit-permalink prefix of 49
-> characters:
+> **Six more, 27 September, from `Loom daily build` on #423 — and the first
+> conclusion this lane drew from them was wrong, which is the useful part.**
+> All read back from the API after posting, all on one commit-permalink prefix
+> of 49 characters:
 >
-> | chars | form | line it sat on | outcome |
-> | --- | --- | --- | --- |
-> | 114 | bare URL | after `**Report:** ` | survived |
-> | 124 | markdown image | inside `![…](…)`, 178-character line | survived |
-> | 150 | bare URL | after `**Record 0198:** ` | **mangled** |
-> | 152, 162, 188 | markdown links, branch-name prefix | two of them sharing a line | **mangled** |
+> | chars | form | outcome |
+> | --- | --- | --- |
+> | 114 | bare URL, after a `**Report:** ` label | survived |
+> | 124 | markdown image, on a 178-character line | survived |
+> | 150 | bare URL, after a `**Record 0198:** ` label | **mangled** |
+> | 150 | the same URL, moved to a line of its own | **mangled again** |
+> | 152, 162, 188 | markdown links, branch-name prefix | **mangled** |
 >
-> The 150 is the one that matters. The amendment above has a bare 156 surviving
-> and a bare 158 mangling; this is a bare 150 that did not. What differs is that
-> both surviving bare URLs in this file's measurements were **alone on their
-> line**, and this one had `**Record 0198:** ` in front of it. So the second
-> boundary is not a property of bare URLs — *a URL with anything else on its
-> line is in the first band*, and the 156 that survived was exercising a third
-> case rather than a looser limit.
+> **What I claimed after the first four, and retract:** that the second band was
+> *"alone on its line"* rather than *"bare"*, because both surviving bare URLs
+> in the measurements above this one were alone on their line. I then moved the
+> 150 onto a line of its own to prove it. It mangled again. The theory lasted
+> one measurement and is the fifth dead explanation in this entry; it is left
+> written down because the entry's whole value is the graveyard.
 >
-> The 124-character image is the other half of it: a 178-character *line* came
-> back byte-clean, which rules out line length as the measure and leaves URL
-> length, exactly as this entry has said since it was written.
+> **What the six actually say.** In *this* body the boundary falls between 124
+> and 150, and neither form nor position moves it. That is well below both
+> numbers already recorded here — a bare 156 survived on #378, markdown links of
+> 145–147 survived on #390 — so the three sets cannot be reconciled by any
+> constant. They can be reconciled by the possibility this entry raised and
+> nobody has tested: that the limit is **the tail of some other budget the whole
+> body is spending**, and a longer body leaves less of it. #423's body is the
+> longest of the three.
 >
-> **What to do about it, today, restated again, and this is the whole rule:**
-> **a URL alone on its line may run to 156; a URL with anything else on its
-> line — a label, a markdown link, an image — must stay under 148.** The lever
-> that survives a push is the prefix: a commit permalink
-> (`…/blob/f040fb4/`, 49 characters) is 38 shorter than a branch link with a
-> 44-character branch name, and it took this pull request's report and figure
-> from mangled to clean without renaming anything. The one link that still would
-> not fit is a decision record's, whose filenames run to 89 characters on their
-> own — those are best left to the report, which reaches them by relative path.
+> The 178-character line carrying a clean 124-character image URL is the other
+> half of it, and it still rules out *line* length. Whatever the budget is
+> counted in, it is not the line.
 >
-> Still **not measured**, and still not worth a run: where the wrapping happens,
-> and whether 148 and 156 are constants. Four lanes have now spent part of a run
-> on this; the rule above is what the fourteen measurements support, and the next
-> lane should spend its run on the rule rather than on the mechanism.
+> **What to do about it, today, and this is the only advice all nineteen
+> measurements support:** *there is no safe length you can compute in advance.*
+> Keep URLs as short as the repository allows — a commit permalink prefix
+> (`…/blob/e084184/`, 49 characters) is 38 shorter than a branch link with a
+> 44-character branch name, and that alone took this pull request's report and
+> figure from mangled to clean — and then **read the body back from the API
+> after posting and look.** That check costs one call, it is how all nineteen of
+> these measurements exist, and it is the only thing that has ever been reliable.
+> A decision record's URL will not fit under any of the three observed
+> boundaries: its filename alone runs to 89 characters, so link the report and
+> let it reach the record by relative path.
+>
+> Still **not measured**: where the wrapping happens, and whether the budget
+> theory is right. Four lanes have now spent part of a run on this. Nobody
+> should spend a whole one — but the read-back is cheap, and a lane that does it
+> will not be surprised.
 
 
 ---
