@@ -33388,8 +33388,12 @@ which trades a real cost (a readable branch) for a smaller saving.
 ## 2026-09-26 — a generated page's words are the words it renders, and sixteen pages saying one sentence are sixteen results
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`
-(`app/(docs)/_lib/search/`) · **Status:** open — a cost this run created and
-measured, with the three ways out and a recommendation
+(`app/(docs)/_lib/search/`) · **Status:** **closed 27 September** by
+`docs-37-a-row-that-stands-for-sixteen`, which took the recommended remedy —
+the siblings are folded into one row reading *the closest of 9 imports*, and
+*peer dependency* answers with the Installation heading second rather than
+tenth. Filed as a cost this run created and measured, with the three ways out
+and a recommendation
 
 Yesterday's entry — *the site cannot search a sentence a component renders* — is
 **closed** by `docs-36-the-words-a-component-renders`: the seventeen reference
@@ -34393,6 +34397,117 @@ they describe did not exist yet.
 `manifest.ts` reading `../../package.json`, and it is four lines.
 
 ---
+## 2026-09-27 — a result list that scrolls inside a fixed height is photographed from the top, and a before and an after came back byte-identical
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(the recipe is this lane's; the class is everybody's) · **Status:** **closed in
+the same run** — the remedy is three lines of a shot list and it is written down
+below, because the next lane to photograph a scrolling region will meet this
+
+The search dialog's results are a `ul` with `max-h-96 overflow-y-auto`. Four
+rows fit. This run changed rows **eight, nine and ten** of the answer to
+*install* — three reference doors became three getting-started sections — and
+photographed the dialog before and after, on two production builds, from two
+checkouts of two different trees.
+
+**The two files have the same `md5`.** `849fc8f042e452ff18faaa84e31f4fb3`, both.
+Every automated signal was correct and said nothing: the shots succeeded, the
+exit was 0, and `scrollWidth 1280 / innerWidth 1280` held on both.
+
+### Why this is not the same as the overflow blind spot, and why it is worse
+
+`Loom marketing` filed the neighbouring shape on 27 September (#411): the
+overflow measurement can only fail in one direction, so **a band using half the
+space it was given is silent forever**, and it asked the other four surfaces
+*which of your bands are this, and what in your lane would ever tell you?*
+
+This lane's answer is that a scrolling region is a third case and a nastier one.
+A half-empty band is at least *in the picture*. A row below the scroll of an
+element that scrolls is **not in the picture at all**, so the photograph is not
+merely uninformative — it is a correct picture of a screen that changed, which
+reads as evidence that nothing changed. A run that had shipped that pair would
+have illustrated "the freed slots go to other results" with two identical
+images, and every number beside it would still have been true.
+
+### The remedy, which is three lines
+
+Scroll it before the shutter, to an id rather than to a position, and let the
+list settle first:
+
+```json
+{ "waitFor": "#loom-search-result-9" },
+{ "wait": 2000 },
+{ "scrollTo": "#loom-search-result-9" }
+```
+
+**`:last-child` does not work here and the failure is worth knowing**, because
+it is not about this list:
+
+```
+locator.scrollIntoViewIfNeeded: Element is not attached to the DOM
+```
+
+The dialog's four index files land one after another and each one re-renders the
+list, so the element `:last-child` resolved to is replaced between the resolve
+and the scroll. A stable `id` survives the re-render; a positional selector does
+not. That is the same rule `docs/routines.md` already gives for a `before` —
+*wait on a selector, not on the network* — applied to a list that changes under
+a selector that was correct when it was written.
+
+**What would close this for good**: nothing in this repository can see it. The
+honest version is the one above — a lane photographing a region that scrolls
+inside itself has to say so in the shot, and the two identical files are the
+only thing that ever says it did not.
+
+---
+## 2026-09-27 — a test whose expected value comes from the code under test cannot see a defect that moves both sides of it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the same run** — recorded because the *shape* is general and the test read
+beautifully while proving nothing
+
+The fold added by `docs-37` keeps one row per family: **the one that ranked
+highest**. The first test of that claim was written differentially, which is the
+way it wants to be written:
+
+```ts
+const hits = searchDocs(doors, "peer dependency", LIMIT)
+const unfolded = searchDocs(withoutFamilies(doors), "peer dependency", LIMIT)
+
+expect(hits.find((hit) => hit.folded !== undefined)?.entry.href)
+  .toBe(unfolded.find(isADoor)?.entry.href)
+```
+
+*The row the fold kept is the one the unfolded search put first.* It reads as
+exactly the claim. It is green against the implementation, and **it is green
+against an implementation that folds over the index instead of the ranking** —
+because the mutation reorders `searchDocs`, and `unfolded` is `searchDocs`. Both
+sides move together and the equality survives.
+
+Caught by mutation rather than by reading: `foldFamilies([...ranked].sort(byPosition))`
+turned **eleven** other tests red — every ranking assertion in the file — and not
+this one, which is the only one written about the fold's choice. Eleven red and
+the twelfth green is the shape that says the twelfth is not asserting what its
+name says.
+
+The fix is to spell the answer out. `@jam-overture/loom` is the shortest of the
+three door titles, it wins the tie-break, the fixture now lists it **last**, and
+the assertion names it and the whole expected order. Same mutation: that test
+red, alone among the fold's.
+
+### The class, which is the part worth keeping
+
+**A test is only as strong as the independence of its expected value.** A fixture
+is independent. A hand-written list is independent. A second call of the function
+under test is not, and neither is a second implementation of it — the 26
+September entry on the excerpt made the neighbouring point about a rule with an
+undeclared premise, and this is the same failure one level up: *the premise was
+that the two calls could disagree.*
+
+It is easy to write because the differential form is genuinely the clearer
+sentence. The tell is that the expected value is computed rather than written,
+and the check is one line of thought: **name a defect that would move both sides
+equally.** If one exists, the test cannot see it.
 ## 2026-09-27 — `pnpm shoot --serve` photographs the front door's embedded demonstration as a broken-document icon, and has since the flag existed
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build` · **Status:**

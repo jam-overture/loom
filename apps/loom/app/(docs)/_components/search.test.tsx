@@ -40,6 +40,7 @@ const index: SearchIndex = {
       summary: "Yes, ask a person, or no.",
       body: "",
       code: "",
+      family: "",
     },
     {
       href: "/docs/the-runtime/what-the-gate-decides#the-two-questions-it-asks",
@@ -49,6 +50,7 @@ const index: SearchIndex = {
       summary: "",
       body: "How much damage could this do, and could it be taken back afterwards.",
       code: "",
+      family: "",
     },
     {
       href: "/docs/getting-started/your-first-tree#a-tree-is-more-than-its-root",
@@ -58,6 +60,7 @@ const index: SearchIndex = {
       summary: "",
       body: "",
       code: 'const page = buildElement({ type: "stack" })\nconst next = applyDelta(page, delta)',
+      family: "",
     },
     {
       href: "/docs/api-reference/runtime#s-evaluateGate",
@@ -67,6 +70,7 @@ const index: SearchIndex = {
       summary: "",
       body: "",
       code: "",
+      family: "",
     },
     /*
      * A page of the generated section, which is here so the fixture has a
@@ -83,6 +87,23 @@ const index: SearchIndex = {
       summary: "",
       body: "",
       code: "",
+      family: "imports",
+    },
+    /*
+     * A **second** door, which is here so the fixture has a family rather than a
+     * lone member. Two pages of one family is the smallest fixture in which the
+     * fold is visible at all, and the fold is the only thing about a result row
+     * that a browser decides anything about.
+     */
+    {
+      href: "/docs/api-reference/react",
+      title: "@jam-overture/loom/react",
+      context: "API reference",
+      kind: "page",
+      summary: "",
+      body: "",
+      code: "",
+      family: "imports",
     },
   ],
 }
@@ -678,5 +699,45 @@ describe("moving through the results", () => {
     for (const option of screen.getAllByRole("option")) {
       expect(option.querySelector("a")?.getAttribute("href")).toMatch(/^\/docs\//)
     }
+  })
+})
+
+describe("a row that stands for a set of pages", () => {
+  /**
+   * The one thing about a *result* this file is the right place to hold.
+   *
+   * Which page a query ought to answer with is a claim about the documentation
+   * and lives in `search/match.test.ts` against the real index. Whether a reader
+   * can *see* that a row is standing in for eight others is a claim about the
+   * screen, and there is nowhere else to make it.
+   */
+  it("says how many of the family the query reached", async () => {
+    render(<Search />)
+
+    await open()
+    await type("loom")
+
+    await waitFor(() => expect(screen.getByText("the closest of 2 imports")).toBeTruthy())
+
+    /* One row for the two doors, and it is the first of them — the second is not
+       on the screen at all, which is the whole of what the fold does. */
+    const doors = screen
+      .getAllByRole("option")
+      .filter((option) => option.textContent?.includes("API reference"))
+
+    expect(doors).toHaveLength(1)
+    expect(doors[0]?.querySelector("a")?.getAttribute("href")).toBe("/docs/api-reference/runtime")
+    expect(screen.queryByText("@jam-overture/loom/react")).toBeNull()
+  })
+
+  it("says nothing of the kind on a row that stands for itself", async () => {
+    render(<Search />)
+
+    await open()
+    await type("damage")
+
+    await waitFor(() => expect(screen.getByText("The two questions it asks")).toBeTruthy())
+
+    expect(screen.queryByText(/the closest of/i)).toBeNull()
   })
 })

@@ -24,6 +24,7 @@ const entry = (over: Partial<SearchEntry>): SearchEntry => ({
   summary: "",
   body: "",
   code: "",
+  family: "",
   ...over,
 })
 
@@ -363,6 +364,134 @@ describe("what comes first", () => {
   })
 })
 
+/**
+ * The fold, on a fixture where the right answer is arithmetic, and then on the
+ * site where the right answer is a reader's.
+ *
+ * The fixture half is about the rule: one row per family, the one that ranked
+ * highest, the count over the whole family, and nothing said about a family of
+ * one. The site half is the regression this exists to end — somebody who types
+ * *peer dependency* three minutes after installing was handed nine import pages
+ * and found *Installation → What you actually need* tenth.
+ */
+describe("a family folded to one row", () => {
+  const door = (slug: string, title: string, body: string): SearchEntry =>
+    entry({
+      href: `/docs/api-reference/${slug}`,
+      title,
+      context: "API reference",
+      family: "imports",
+      body,
+    })
+
+  const shared = "It needs a peer dependency and nothing else."
+
+  /**
+   * The doors are **not** in rank order here, and that is deliberate.
+   *
+   * All three match the same two words in the same band, so the ranking falls to
+   * the tie-break — the shorter title — and `@jam-overture/loom` wins it. Listing
+   * it last is what makes *keeps the one that ranked highest* a claim a fold over
+   * the index would fail; with the three in rank order the two are the same
+   * assertion and one of them is free.
+   */
+  const doors = of(
+    entry({ href: "/docs/api-reference", title: "All 16 imports", context: "API reference", body: shared }),
+    door("react", "@jam-overture/loom/react", shared),
+    door("sdk", "@jam-overture/loom/sdk", shared),
+    door("runtime", "@jam-overture/loom", shared),
+    entry({ href: "/docs/getting-started/installation", title: "Installation", context: "Getting started", body: shared })
+  )
+
+  it("shows one of them and counts the rest", () => {
+    const hits = searchDocs(doors, "peer dependency", SEARCH_RESULT_LIMIT)
+
+    expect(hits.filter((hit) => hit.entry.family === "imports")).toHaveLength(1)
+    expect(hits.find((hit) => hit.entry.family === "imports")?.folded).toEqual({
+      matched: 3,
+      noun: "imports",
+    })
+  })
+
+  /**
+   * Which of the three survives, written out rather than compared against another
+   * call of the same function.
+   *
+   * A differential assertion — *the folded row is the one the unfolded search put
+   * first* — reads better and proves nothing, because a fold that ran over the
+   * index instead of the ranking would move both sides of it together. So the
+   * answer is spelled: `@jam-overture/loom` is the shortest of the three titles,
+   * it wins the tie-break, it is listed **last**, and it is the row that is left.
+   */
+  it("keeps the one that ranked highest, and leaves it where it ranked", () => {
+    const hits = searchDocs(doors, "peer dependency", SEARCH_RESULT_LIMIT)
+
+    expect(hits.find((hit) => hit.folded !== undefined)?.entry.href).toBe("/docs/api-reference/runtime")
+    expect(hits.map((hit) => hit.entry.title)).toEqual([
+      "Installation",
+      "All 16 imports",
+      "@jam-overture/loom",
+    ])
+  })
+
+  /**
+   * The section's own front door is not one of the doors behind it.
+   *
+   * It says things none of them says — that the imports do not nest, which of
+   * them is biggest — and it is usually the best answer to the query that
+   * reaches the whole family. A fold that swallowed it would hide the page most
+   * likely to be right.
+   */
+  it("does not fold the page that is the section", () => {
+    const hits = searchDocs(doors, "peer dependency", SEARCH_RESULT_LIMIT)
+
+    expect(hits.map((hit) => hit.entry.title)).toContain("All 16 imports")
+    expect(hits.find((hit) => hit.entry.title === "All 16 imports")?.folded).toBeUndefined()
+  })
+
+  it("says nothing about a family the query reached once", () => {
+    const hits = searchDocs(doors, "react", SEARCH_RESULT_LIMIT)
+
+    expect(hits[0]?.entry.title).toBe("@jam-overture/loom/react")
+    expect(hits[0]?.folded).toBeUndefined()
+  })
+
+  it("leaves every page that is one of nothing alone", () => {
+    for (const hit of searchDocs(doors, "peer dependency", SEARCH_RESULT_LIMIT)) {
+      if (hit.entry.family === "") expect(hit.folded, hit.entry.title).toBeUndefined()
+    }
+  })
+
+  /**
+   * **The fold happens before the list is cut**, which is the half of this that
+   * a reader feels. Folding afterwards would turn a list of ten into a list of
+   * one; folding first gives nine slots back to the rest of the site.
+   */
+  it("gives the slots it frees to the rest of the site", () => {
+    const crowd = of(
+      ...Array.from({ length: 12 }, (_, at) => door(`d${at}`, `@jam-overture/loom/d${at}`, shared)),
+      entry({ href: "/docs/getting-started/installation", title: "Installation", context: "Getting started", body: shared })
+    )
+
+    const hits = searchDocs(crowd, "peer dependency", 3)
+
+    expect(hits).toHaveLength(2)
+    expect(hits.map((hit) => hit.entry.title)).toContain("Installation")
+    expect(hits.find((hit) => hit.folded !== undefined)?.folded?.matched).toBe(12)
+  })
+
+  /**
+   * And the count is about the site rather than about the top ten, which is the
+   * other thing that ordering buys. A reader told *the closest of 12 imports*
+   * was told how many there are, not how many happened to fit.
+   */
+  it("counts the whole family, not the part that fitted", () => {
+    const crowd = of(...Array.from({ length: 12 }, (_, at) => door(`d${at}`, `@jam-overture/loom/d${at}`, shared)))
+
+    expect(searchDocs(crowd, "peer dependency", 1)[0]?.folded?.matched).toBe(12)
+  })
+})
+
 describe("the queries a stranger arrives with", () => {
   const index = withProse(buildSearchIndex(), searchProse())
 
@@ -461,5 +590,46 @@ describe("the queries a stranger arrives with", () => {
 
     expect(hit?.entry.kind).toBe("heading")
     expect(hit?.entry.href).toContain("#prop-or-child")
+  })
+
+  /**
+   * The regression the fold exists to end, asserted on the site rather than on a
+   * fixture.
+   *
+   * *peer dependency* is what somebody types three minutes after installing. Its
+   * words are in a band every reference page renders, so before the fold it
+   * answered with nine import pages and put the heading that actually answers —
+   * *Installation → What you actually need* — tenth. The assertion is about the
+   * reader's experience and not about a number: **one** row for the doors, and
+   * the written heading in the first handful.
+   */
+  it("answers 'peer dependency' with the page about installing rather than nine imports", () => {
+    const ranked = searchDocs(index, "peer dependency", SEARCH_RESULT_LIMIT)
+
+    expect(ranked.filter((hit) => hit.entry.family === "imports")).toHaveLength(1)
+    expect(ranked.map((hit) => hit.entry.title).indexOf("What you actually need")).toBeLessThan(3)
+  })
+
+  /**
+   * And the row it left says how many it stands for, with a real count off the
+   * real index — so a reader is told the other doors exist rather than having
+   * them quietly dropped, which is the whole reason this remedy was preferred to
+   * indexing a shared band once.
+   */
+  it("tells that reader how many imports it is standing in for", () => {
+    const folded = searchDocs(index, "peer dependency", SEARCH_RESULT_LIMIT).find(
+      (hit) => hit.folded !== undefined
+    )
+
+    expect(folded?.folded?.noun).toBe("imports")
+    expect(folded?.folded?.matched).toBeGreaterThan(1)
+  })
+
+  /**
+   * A sentence that is on every door is still findable, which is the property the
+   * other two remedies would have given up.
+   */
+  it("still finds a sentence that only the doors say", () => {
+    expect(searchDocs(index, "the import itself fails", SEARCH_RESULT_LIMIT).length).toBeGreaterThan(0)
   })
 })
