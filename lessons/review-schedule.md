@@ -1505,6 +1505,59 @@ reader is the one that matters and is the one people leave out.
 
 ---
 
+## Set AI — two days after lesson 30
+
+Interleaved with 09, 18, 22, 24, 28 and 29. Heavy on 28, because lesson 30 is its
+three-sources rule applied until only one source was left; and on 24, because
+*absence is not emptiness* is what let the declaration ship into a library where
+nothing had declared.
+
+1. A binding has three parts. Name them, say for each which party holds the other
+   end of it, and then say why two of the three can be refused before anything is
+   drawn and the third cannot. Your answer to the third must not use the word
+   "harder". *(18, 30)*
+2. A page binds a source correctly and spells the binding *name* one letter
+   wrong. Say what the source does, what the reader sees, what the render
+   reports, and what the Gate does with the insert — four answers, and one of
+   them is the reason this seam was worth a lesson. *(09, 18, 30)*
+3. `reads` has three answers and the catalogue writes only two of them out. Say
+   what the third is, how a model is meant to recognise it, and why spending
+   words on it would have been the wrong trade — the answer is about which
+   answer is common, not about which one matters. *(12, 24, 30)*
+4. An entry in `reads` may be a name or a prop that gives one. Give the two nodes
+   that show a plain list of names is wrong in *both* directions, say which of the
+   two errors you would rather a checker made, and then state the general rule
+   about what a declaration must be when the fact it states varies per use. *(30)*
+5. `bindingsReadBy` hands back an unresolved declaration and the render walk
+   resolves it. Say what argument the registry would have had to accept in order
+   to resolve it itself, and state the rule about seams and scopes that follows.
+   Then name one earlier lesson where the same question was answered the other
+   way, and say what made the difference. *(27, 30)*
+6. Lesson 28 gives three places a second copy of a fact can come from. Apply all
+   three to a binding name in turn, say why the first two were unavailable, and
+   then name the thing the third one bought that is worth more than the check it
+   made possible. *(28, 30)*
+7. A primitive that has declared nothing is handed a binding no component will
+   read, and the runtime says nothing at all. Defend that decision in one
+   sentence, attack it in one sentence, and then say what would have to become
+   true of a library for the defence to expire. *(24, 30)*
+8. Two questions about the same word. A tree names a *primitive type* that does
+   not exist and a tree names a *binding name* that nothing reads. Say what each
+   costs, which is refused where, and then say why one of them is a reference and
+   the other is an agreement — in a form that would let somebody classify a
+   third case they have never seen. *(22, 30)*
+9. Lesson 29 asked *who is this declaration for*. Lesson 30 has a declaration
+   with two parties, both inside one page, and it still went two months
+   unchecked. Say what made it uncheckable, and then find one thing in this
+   repository's own writing — not its code — that has the same shape, and say who
+   would find out if it stopped being true. *(28, 29, 30)*
+
+Question 9 is the point of the set, and question 4 is where a confident
+half-answer is most likely: the node a fixed list accuses wrongly comes to mind
+easily, and the node it waves through is the one that matters.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1553,3 +1606,4 @@ renders this file rather than restating it.
 | AF | 2 days after L27 | | |
 | AG | 2 days after L28 | | |
 | AH | 2 days after L29 | | |
+| AI | 2 days after L30 | | |
