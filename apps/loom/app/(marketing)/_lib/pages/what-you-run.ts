@@ -69,7 +69,13 @@ const hero = (ids: IdFactory): LoomNode =>
 const whatYouBring = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
-    { tone: "surface", width: "wide", eyebrow: "What you bring" },
+    /**
+     * Plain, on `nodes.ts`'s reason and on this page's own: its three body
+     * bands are three answers to one question, and two of the three were plated
+     * while the middle one was not. On the house theme that is a left margin
+     * that steps in, back out and in again down the length of the page.
+     */
+    { width: "wide", eyebrow: "What you bring" },
     "Your own components, never rewritten",
     [
       prose(
@@ -127,7 +133,7 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
 const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
   splitSection(
     ids,
-    { tone: "surface", width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
+    { width: "wide", eyebrow: "What this page counts", anchor: COUNTED_ANCHOR },
     "Which parts you reach, and never who you are",
     [
       prose(

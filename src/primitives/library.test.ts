@@ -8832,6 +8832,135 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
   })
 
   /**
+   * Every band that paints behind itself, and the one assertion that says the
+   * paint is *behind*.
+   *
+   * A layer here is `position: absolute`, and a positioned element paints after
+   * its static siblings however the source is ordered — so emitting the paints
+   * first and the words second gets the paints on top of the words. It is not a
+   * subtle wash: `grid`'s 1px rules crossed a 72px headline and read as
+   * strikethrough on the marketing front door for as long as that band had a
+   * backdrop.
+   *
+   * `loom.backdrop` and `loom.halo` each worked this out privately and each
+   * wrote a comment saying source order was enough *today*. `loom.hero` — where
+   * the paints were written, and for three weeks the only band that had them —
+   * never worked it out at all. So the assertion is over all three by name
+   * rather than on the one that was broken: a fourth band reaching for
+   * `backdropLayers` and forgetting `ABOVE_BACKDROP` is the same defect again,
+   * and nothing else in this file would see it.
+   *
+   * It reads the content rather than the layers deliberately. Asserting a
+   * `z-index` on the layers would pass for a band that lifted nothing, which is
+   * precisely the state being tested against.
+   */
+  it("lifts a band's own words above the paint behind them", () => {
+    const bands: readonly { readonly type: string; readonly props: JsonObject }[] = [
+      { type: "loom.hero", props: { backdrop: "grid" } },
+      { type: "loom.backdrop", props: { paint: "grid" } },
+      { type: "loom.halo", props: { light: "glow" } },
+    ]
+
+    for (const band of bands) {
+      for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
+        const idFactory = sequentialIdFactory()
+        const tree = createTree(
+          buildElement(idFactory, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: theme },
+            children: [
+              buildElement(idFactory, {
+                ...band,
+                children: [
+                  buildElement(idFactory, {
+                    type: "loom.prose",
+                    children: [buildText(idFactory, "Above the paint")],
+                  }),
+                ],
+              }),
+            ],
+          }),
+          idFactory
+        )
+
+        const { tree: body } = splitStylesheet(render(tree).markup)
+        const words = body.indexOf("Above the paint")
+
+        expect(words).toBeGreaterThan(-1)
+
+        /**
+         * The lift is on an ancestor of the words, so the last element opened
+         * before them carries it. Slicing at the text rather than matching a
+         * whole element keeps this readable against three primitives whose
+         * wrappers are otherwise nothing alike.
+         */
+        const enclosing = body.slice(0, words)
+
+        expect(enclosing).toContain("z-index:1")
+        expect(enclosing.lastIndexOf("z-index:1")).toBeGreaterThan(
+          enclosing.lastIndexOf('aria-hidden="true"')
+        )
+      }
+    }
+  })
+
+  /**
+   * The two measures of
+   * [0201](../../decisions/0201-a-display-line-and-a-reading-line-are-two-measures.md),
+   * asserted as *two* rather than as their values.
+   *
+   * A hero held its heading slot and its lead paragraph to one `44rem`, which is
+   * 52 characters of a 20px lead and nineteen of a 72px headline. The number is
+   * not the interesting part and will be tuned again; what must not come back is
+   * **one** number, so the assertion is that the two caps differ and that the
+   * display cap is the wider. A future run that re-merges them fails here with
+   * the reason in the test name rather than in a photograph eight days later.
+   */
+  it("caps a hero's headline and its prose with two different measures", () => {
+    const idFactory = sequentialIdFactory()
+    const tree = createTree(
+      buildElement(idFactory, {
+        type: "loom.page",
+        props: { [THEME_PROP_KEY]: MINIMAL },
+        children: [
+          buildElement(idFactory, {
+            type: "loom.hero",
+            props: { align: "center" },
+            children: [
+              buildSlot(idFactory, "heading", [
+                buildElement(idFactory, {
+                  type: "loom.heading",
+                  props: { level: 1 },
+                  children: [buildText(idFactory, "A display line")],
+                }),
+              ]),
+              buildElement(idFactory, {
+                type: "loom.prose",
+                children: [buildText(idFactory, "A reading line")],
+              }),
+            ],
+          }),
+        ],
+      }),
+      idFactory
+    )
+
+    const { tree: body } = splitStylesheet(render(tree).markup)
+    const capBefore = (needle: string): number => {
+      const caps = [...body.slice(0, body.indexOf(needle)).matchAll(/max-width:(\d+(?:\.\d+)?)rem/g)]
+      const last = caps[caps.length - 1]?.[1]
+
+      expect(last).toBeDefined()
+      return Number(last)
+    }
+
+    const display = capBefore("A display line")
+    const reading = capBefore("A reading line")
+
+    expect(display).toBeGreaterThan(reading)
+  })
+
+  /**
    * The layers of one paint, under one palette, as the string a diff would see.
    * Every assertion below reads a paint's *geometry* rather than its colour,
    * which is why one palette is enough for them and why the pair that does read

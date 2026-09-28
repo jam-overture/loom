@@ -284,3 +284,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0198](0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md) | A refusal records which rules it broke, and the rules' names are a closed vocabulary | Accepted | §6 (telemetry), binding on §2 |
 | [0199](0199-the-outline-may-render-what-it-addresses-and-a-hand-may-yet-move-a-node.md) | The outline may render what it addresses, and a hand may yet move a node | Proposed | §5 |
 | [0200](0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md) | The portal may place a lever beside the evidence, and a model may never pull one | Proposed | §5 |
+| [0201](0201-a-display-line-and-a-reading-line-are-two-measures.md) | A display line and a reading line are two measures | Accepted | §4b |
+| [0202](0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md) | The harness measures the content a clip hides, and it is not `scrollWidth` | Accepted | §1 (process) |

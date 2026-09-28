@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
+import { ABOVE_BACKDROP } from "./backdrop.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, radius } from "./tokens.js"
 
@@ -286,15 +287,16 @@ export const loomHalo = definePrimitive({
       libraryStylesheet(),
       layer(light, rootRadius),
       /**
-       * Lifted out of the lights' stacking order explicitly rather than by
-       * source order, which stops being enough the moment a child positions
-       * itself — a class of defect that shows up only on the one page that does
-       * it.
+       * Lifted out of the lights' stacking order. The correction this file's
+       * earlier note needed is in `ABOVE_BACKDROP`: source order never held a
+       * positioned layer back, so this was load-bearing from the day it was
+       * written rather than a precaution against a child that might position
+       * itself later.
        *
        * It is a grid for the reason above: the stretch has two levels to cross,
        * and a block here would absorb it one short of the child.
        */
-      createElement("div", { style: { position: "relative", zIndex: 1, display: "grid" } }, children)
+      createElement("div", { style: { ...ABOVE_BACKDROP, display: "grid" } }, children)
     )
   },
 })

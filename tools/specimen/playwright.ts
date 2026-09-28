@@ -5,7 +5,14 @@ import { pathToFileURL } from "node:url"
 
 import { err, ok, type Result } from "../../src/result.js"
 
-import type { Overflow, SpecimenBrowser, SpecimenPage, StartState } from "./capture.js"
+import {
+  clippedFrom,
+  type ClippingBox,
+  type Overflow,
+  type SpecimenBrowser,
+  type SpecimenPage,
+  type StartState,
+} from "./capture.js"
 import { scriptFor } from "./start-state.js"
 import type { SpecimenViewport } from "./specimen.js"
 
@@ -141,10 +148,152 @@ export const contextOptionsFor = (viewport: SpecimenViewport): ContextOptions =>
 })
 
 /** Run in the page: the overflow check four reports quote, at the source. */
-const measureOverflow = (): Overflow => ({
+const measureDocument = (): { scrollWidth: number; innerWidth: number } => ({
   scrollWidth: document.documentElement.scrollWidth,
   innerWidth: window.innerWidth,
 })
+
+/**
+ * Run in the page: every box that clips horizontally, and how much it is
+ * hiding.
+ *
+ * The document measurement above cannot see through a clip, and four bands in
+ * the starter catalogue are rooted in one. A `loom.backdrop` sets
+ * `overflow: hidden` and has to — its paints reach the element's edges — so a
+ * band that overflows inside one reports `390 / 390` while a figure sits off
+ * the edge of the page. Measured on one tree rendered twice on 27 September:
+ * wrapped, 390 / 390; the identical content unwrapped, 401 / 390.
+ *
+ * Every reading it can take, unfiltered. Which of them is a defect is decided
+ * by `clippedFrom` in Node, because that part is arithmetic and this part needs
+ * a laid-out page.
+ *
+ * `overflow-x` only, and only `hidden` or `clip`. A box with `auto` or
+ * `scroll` gets a scrollbar, which is the box telling the reader there is more
+ * — the opposite of the thing being looked for. A `loom.code` block that
+ * scrolls sideways is working.
+ *
+ * **Not one named helper inside it**, and the flat loop below is that rule
+ * rather than a style. Playwright serialises this function with `toString`, and
+ * the compiler wraps every named inner function in a `__name` call that exists
+ * in this process and not in the page — `ReferenceError: __name is not defined`,
+ * thrown from a line number in generated source. It is the same trap
+ * `start-state.ts` states for a start script, met from the other direction, and
+ * the two sibling functions here happen to have no inner functions to lose.
+ */
+const readClippingBoxes = (): readonly ClippingBox[] => {
+  const boxes: {
+    element: string
+    reach: number
+    width: number
+    contentWidth: number
+    contentHeight: number
+  }[] = []
+
+  for (const element of Array.from(document.querySelectorAll("*"))) {
+    const style = window.getComputedStyle(element)
+    if (style.overflowX !== "hidden" && style.overflowX !== "clip") continue
+
+    /**
+     * How far the box's own in-flow content reaches, walked rather than read
+     * off `scrollWidth`.
+     *
+     * Two things `scrollWidth` counts that are not content being hidden, and
+     * both are in the starter library. A `loom.halo` is an absolutely
+     * positioned rim drawn four pixels outside the box it lights and clipped on
+     * purpose; and a box that scrolls sideways inside this one — a comparison
+     * table on a phone — is wide by design and says so with a scrollbar. So the
+     * walk skips anything out of flow, and stops at anything that clips or
+     * scrolls on its own account: a scroller's own box is in this box's flow,
+     * and what is inside it is that scroller's business.
+     */
+    const edge = element.getBoundingClientRect().right - parseFloat(style.borderRightWidth)
+    const ink = document.createRange()
+    let reach = element.clientWidth
+    const pending: Element[] = Array.from(element.children)
+    while (pending.length > 0) {
+      const child = pending.pop()
+      if (child === undefined) continue
+      const childStyle = window.getComputedStyle(child)
+      if (childStyle.position === "absolute" || childStyle.position === "fixed") continue
+
+      const overBox = child.getBoundingClientRect().right - edge
+      if (overBox > 0) reach = Math.max(reach, element.clientWidth + overBox)
+
+      /**
+       * Stop here if the child handles its own overflow.
+       *
+       * Its box is in this box's flow and has been counted; what is inside it
+       * is its own business, and it is measured on its own account when the
+       * outer loop reaches it. Before this line was above the two measurements
+       * below rather than beneath them, the documentation site's quickstart
+       * reported a code block as hiding 905 pixels in a 348-pixel box — the
+       * `pre` scrolls sideways, which is the feature.
+       */
+      if (childStyle.overflowX !== "visible") continue
+
+      /**
+       * The words, not the box that holds them.
+       *
+       * A heading is a block: its box is the width it was given, and one long
+       * word inside it paints past that edge while the box's own rectangle
+       * says nothing at all. That is the commonest shape of this defect and it
+       * is invisible to every rectangle on the way down, so the text itself is
+       * measured — a range over each run of characters, which is the only
+       * thing that reports where the ink actually ends.
+       */
+      for (const node of Array.from(child.childNodes)) {
+        if (node.nodeType !== Node.TEXT_NODE) continue
+        ink.selectNodeContents(node)
+        const overInk = ink.getBoundingClientRect().right - edge
+        if (overInk > 0) reach = Math.max(reach, element.clientWidth + overInk)
+      }
+
+      for (const grandchild of Array.from(child.children)) pending.push(grandchild)
+    }
+
+    /**
+     * A path short enough for a report line and long enough to find the
+     * element in a file: the box and up to two ancestors, each as tag plus id
+     * plus its first two classes.
+     */
+    const trail: string[] = []
+    let node: Element | null = element
+    while (node !== null && trail.length < 3) {
+      let label = node.localName
+      if (node.id !== "") label += `#${node.id}`
+      for (const one of Array.from(node.classList).slice(0, 2)) label += `.${one}`
+      trail.unshift(label)
+      node = node.parentElement
+    }
+
+    /**
+     * The box's first few words, which on a page of registered primitives is
+     * the only thing that identifies it at all.
+     *
+     * A surface written in Tailwind hands over a usable path — the
+     * documentation site's skip link came back as `a.bg-surface-page.text-ink`
+     * — and a tree rendered through the seam does not: every primitive is a
+     * `div` carrying inline styles and no class, so three of them in a row
+     * print `div > div > div` and a lane has nothing to search for. What it
+     * says is what a lane recognises.
+     */
+    const words = (element.textContent ?? "").replace(/\s+/g, " ").trim()
+    const excerpt = words.length > 48 ? `${words.slice(0, 47)}…` : words
+
+    boxes.push({
+      element: trail.join(" > ") + (excerpt === "" ? "" : `  "${excerpt}"`),
+      reach: Math.round(reach),
+      width: element.clientWidth,
+      contentWidth:
+        element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      contentHeight:
+        element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom),
+    })
+  }
+
+  return boxes
+}
 
 /**
  * Run in the top document before the first step of a `do` list: hold it still.
@@ -219,7 +368,10 @@ export const chromiumBrowser = async (
             else await page.waitForTimeout(step.wait)
           }
         },
-        measure: () => page.evaluate(measureOverflow),
+        measure: async (): Promise<Overflow> => ({
+          ...(await page.evaluate(measureDocument)),
+          clipped: clippedFrom(await page.evaluate(readClippingBoxes)),
+        }),
         /**
          * The directory is made here rather than in the capture loop, because
          * this is the file that writes and the loop is exercised against a

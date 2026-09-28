@@ -552,7 +552,13 @@ export const seeItHappenBand = (ids: IdFactory, context: SeeItHappenContext): Lo
      * this is how they get back to where it happened, without scrolling and
      * guessing. See `ANCHOR`, and `answer.ts` for the control itself.
      */
-    props: { tone: "surface", width: "wide", eyebrow: BAND.seeItHappen, anchor: ANCHOR.seeItHappen },
+    /**
+     * No `tone`, on the reason in `nodes.ts`. This band is the one that lost
+     * most by it — it is a stage rather than a paragraph, and a stage wants an
+     * edge — and it is also the band the loss is least visible on, because the
+     * card holding the record draws its own outline in the middle of it.
+     */
+    props: { width: "wide", eyebrow: BAND.seeItHappen, anchor: ANCHOR.seeItHappen },
     children: [
       buildSlot(ids, "heading", [
         heading(ids, 2, "Ask this page to rearrange itself", { balance: true }),

@@ -156,7 +156,14 @@ const shortAnswer = (ids: IdFactory, answer: ShortAnswer): LoomNode =>
 const whoAsks = (ids: IdFactory): LoomNode =>
   splitSection(
     ids,
-    { tone: "surface", width: "wide", eyebrow: "Who is asking" },
+    /**
+     * Plain, like the four above it, and for a second reason on top of the one
+     * in `nodes.ts`: this **is** the fifth of those four. It is one more short
+     * answer in the same shape — an eyebrow, a heading beside a paragraph — and
+     * plating the last item in a run of five says *this one is different* about
+     * the one thing on the page that is not.
+     */
+    { width: "wide", eyebrow: "Who is asking" },
     "The same request can get a different answer",
     [
       prose(
