@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
-import { backdropLayers, PAINT_NAMES } from "./backdrop.js"
+import { ABOVE_BACKDROP, backdropLayers, PAINT_NAMES } from "./backdrop.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, motion, radius, size, space } from "./tokens.js"
 
@@ -68,9 +68,69 @@ type Props = z.infer<typeof props>
 /**
  * A hero's text column stops well short of the page's measure: a headline set
  * across 68 characters reads as a paragraph. This is layout, not theme — no
- * palette or preset would ever vary it — so it stays a constant here.
+ * palette or preset would ever vary it — so these stay constants here.
+ *
+ * **There are two of them, and for eleven weeks there was one.** A single
+ * `44rem` capped the heading slot and the lead paragraph together, on the
+ * reasoning above, which is a reasoning about *reading*. A display line and a
+ * reading line do not want the same measure and never did
+ * ([0201](../../decisions/0201-a-display-line-and-a-reading-line-are-two-measures.md)):
+ * 704px is 52 characters of a 20px lead and **nineteen** characters of a 72px
+ * headline, so the one number that made the paragraph right made the headline
+ * a column. The front door's forty-five-character headline set three lines at
+ * 1280 and four at 390, and the two actions under it fell below the fold.
+ *
+ * The clearest evidence that the number was load-bearing in the wrong
+ * direction is that another lane compensated for it. `minimal-sans` caps its
+ * top step at 72px and says so in its own comment — *"`loom.hero` holds its
+ * text to a 44rem measure, so an ambitious top step does not produce a bigger
+ * headline, it produces the same headline on four lines"*. A font pack was
+ * tuned around a constant in this file. Filed, so the pack's owner can retune
+ * now that the constraint has moved.
  */
-const TEXT_MEASURE = "44rem"
+
+/**
+ * The column, and the headline in it.
+ *
+ * **A backstop, not a setting**, and that is the whole difference from the
+ * number it replaces. A `wide` page gives this band about 980px between its own
+ * padding, so at `64rem` — 1024px — the band's edges arrive first and this
+ * constant decides nothing there. It bites on a `width: "full"` page and on a
+ * viewport wider than the wide page, which are the two places a display line
+ * genuinely does run away: 1024px is around 28 characters of a 72px headline,
+ * and 28 is a display measure where the 19 the old constant allowed was a
+ * column.
+ *
+ * Every narrower value was tried against the render, because the point of a
+ * number here is the line count it produces and that cannot be derived. `56rem`
+ * fixes the two 72px packs and leaves `bold-sans`, whose top step is 88px, on
+ * three lines — a cap that has stopped binding for two packs and still binds
+ * for the third, which is the old defect with a better number in it. `60rem`
+ * fixes all three and is still inside the band. `64rem` is the first value that
+ * is not the constraint on a `wide` page at all, and it is the one that makes
+ * this a measure rather than a layout decision taken on the font pack's behalf.
+ *
+ * It is still absolute, and the unit is the honest part of the compromise. The
+ * right unit for a display measure is the headline's own characters, and this
+ * element cannot count them: the cap sits on a wrapper around the `heading`
+ * slot, the slot's content is any node at all, and its size is
+ * `loom.heading`'s business rather than this primitive's. A `ch` here would be
+ * the *body* font's character, which is a worse lie than a length.
+ */
+const DISPLAY_MEASURE = "64rem"
+
+/**
+ * The lead paragraph, and it is the old number kept deliberately.
+ *
+ * `44rem` is 52 to 56 characters of a lead across the three starter packs,
+ * which is inside the range a reading measure wants — so the one constant was
+ * accidentally correct for the one of its two jobs that nobody complained
+ * about. Re-expressing it in `ch`, which is the unit this half genuinely could
+ * use, would narrow the lead by 120px under `minimal-sans` and move pixels on
+ * every page in the repository to fix nothing that is wrong. Left as a length,
+ * and noted rather than changed.
+ */
+const READING_MEASURE = "44rem"
 
 /** Each row of content enters one `--loom-motion-fast` after the row above it. */
 const stagger = (order: number): CSSProperties =>
@@ -125,7 +185,9 @@ export const loomHero = definePrimitive({
           textAlign: centred ? "center" : "start",
           gap: space(4),
           flex: `1 1 ${media === undefined ? "100%" : "26rem"}`,
-          maxWidth: media === undefined && centred ? TEXT_MEASURE : "100%",
+          maxWidth: media === undefined && centred ? DISPLAY_MEASURE : "100%",
+          /** The paints are positioned, so nothing static sits above them. */
+          ...ABOVE_BACKDROP,
         },
       },
       given.eyebrow === undefined
@@ -150,8 +212,8 @@ export const loomHero = definePrimitive({
               given.eyebrow
             )
           ),
-      rise(1, loom.slots["heading"], { maxWidth: TEXT_MEASURE }),
-      rise(2, children, { maxWidth: TEXT_MEASURE, color: colour("fg-muted"), fontSize: size(4) }),
+      rise(1, loom.slots["heading"], { maxWidth: DISPLAY_MEASURE }),
+      rise(2, children, { maxWidth: READING_MEASURE, color: colour("fg-muted"), fontSize: size(4) }),
       rise(3, loom.slots["actions"], {
         display: "flex",
         flexWrap: "wrap",
@@ -191,7 +253,7 @@ export const loomHero = definePrimitive({
       text,
       media === undefined
         ? null
-        : rise(3, media, { flex: "1 1 22rem", minWidth: "min(100%, 18rem)" })
+        : rise(3, media, { flex: "1 1 22rem", minWidth: "min(100%, 18rem)", ...ABOVE_BACKDROP })
     )
   },
 })
