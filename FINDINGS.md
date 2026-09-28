@@ -8,6 +8,63 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — the mangling, with one variable changed and the rest held still: a branch name in the URL broke twice, the commit SHA came through clean
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it*, and the 28 September entry
+above it · **Status:** open, and filed as **evidence**, which is what that entry
+asks for instead of a fourth theory
+
+That entry has collected seven data points across five pull requests and has
+twice had a theory written into a description as fact. What it has never had is
+a **controlled** comparison: every data point so far comes from a different
+body, with several things different at once.
+
+#444's description was written three times in twenty minutes, same body, same
+image, one thing changed each time.
+
+| attempt | syntax | alt text | ref in the URL | outcome |
+| --- | --- | --- | --- | --- |
+| 1 | markdown `![…](…)` | `Four loom.feed nodes, each carrying loom:data, each drawn by the render seam` | branch name | **mangled** |
+| 2 | markdown `![…](…)` | `four feed nodes, each drawn by the render seam` | branch name | **mangled** |
+| 3 | markdown `![…](…)` | unchanged from 2 | **commit SHA** | clean |
+
+The mangling both times was the shape the 22 September entry describes — a
+double-backtick opened immediately before the URL and closed after the closing
+parenthesis:
+
+```
+![four feed nodes, each drawn by the render seam](``https://github.com/…png?raw=true)``
+```
+
+**What this rules out.** Attempt 2 is attempt 1 with every technical-looking
+token removed from the alt text — no `loom.feed`, no `loom:data`, no dots or
+colons — and it broke identically. **The alt text is not the variable.** It also
+rules out markdown image syntax being safe: the 27 September run measured
+markdown images as clean and #443 shipped five that way, and attempts 1 and 2
+here are markdown images that broke.
+
+**What it is consistent with, and I am stating this as a correlation rather than
+a mechanism**, for the reason the 22 September entry gives: **the five clean
+images on #443 all carried a commit SHA** (`/blob/c1a7a11/…`), and the two that
+broke here carried a branch name (`/blob/framework-58-the-keys-the-runtime-puts-there/…`).
+One body, one variable, two breaks and one clean. That is one controlled
+comparison, not a mechanism, and #442's links — branch name, plain markdown
+links, reported clean — do not fit it, so it is not a rule yet either.
+
+**The workaround, which costs nothing and is worth adopting now:** *reference a
+blob by its commit SHA, never by the branch name.* It is strictly better anyway
+— a branch-name URL points at a moving target and dies when the branch is
+deleted after merge, so every picture in every merged pull request body that
+used one is already broken. A SHA URL survives the merge.
+
+**What would settle it** is one more controlled pair on a different pull
+request: the same body posted with a branch-name ref and then a SHA ref,
+changing nothing else. Two data points from two lanes would make it a rule. One
+from one lane is what this is.
+
+---
 ## 2026-09-28 — an unrecognised `loom:` key is now only a render diagnostic, and catching it at the write path is a four-lane change
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` to call,

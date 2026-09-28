@@ -6,7 +6,7 @@
 **Branch:** `framework-58-the-keys-the-runtime-puts-there` — branched off `origin/main` at `657d27e`; this lane had no open pull request of its own
 **Record added:** `decisions/0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md`
 **Finding closed:** *the write path refuses every node the runtime's own reserved keys are on, and the render path does not* — `Loom lessons`, 28 September
-**Finding filed:** *an unrecognised `loom:` key is now only a render diagnostic, and catching it at the write path is a four-lane change*
+**Findings filed:** *an unrecognised `loom:` key is now only a render diagnostic, and catching it at the write path is a four-lane change* · *the mangling, with one variable changed and the rest held still*
 
 ![Four loom.feed nodes, each carrying loom:data, each drawn by the render seam](2026-09-28-framework-the-keys-the-runtime-puts-there-four-refused-nodes.png)
 
@@ -174,12 +174,43 @@ The picture is a local `pnpm specimen` run against
 deployment: `*.vercel.app` is denied by the sandbox's egress policy, which is a
 finding of its own from 27 September.
 
+## The mangling, measured rather than theorised
+
+This lane's pull request description was written three times in twenty minutes,
+and the second and third rewrites were not corrections — they were the first
+**controlled** comparison anyone has run on the link mangling `FINDINGS.md` has
+been collecting since 22 September. Same body, same image, one variable changed
+each time.
+
+| attempt | alt text | ref in the URL | outcome |
+| --- | --- | --- | --- |
+| 1 | technical tokens — `loom.feed`, `loom:data` | branch name | **mangled** |
+| 2 | plain words, nothing technical | branch name | **mangled** |
+| 3 | unchanged from 2 | **commit SHA** | clean |
+
+Attempt 2 rules out the alt text, which was the obvious suspect and was wrong.
+It also rules out *markdown image syntax is safe*, which 27 September measured
+and #443 shipped five pictures on: attempts 1 and 2 are markdown images.
+
+The correlation left standing is the ref, and it is filed as a correlation
+rather than a mechanism because one controlled pair from one lane is not a rule
+and #442's branch-name links do not fit it. **The workaround costs nothing and
+is worth adopting regardless of the mechanism: reference a blob by commit SHA,
+never by branch name.** A branch-name URL points at a moving target and dies
+when the branch is deleted after merge, so every picture in every merged pull
+request body that used one is already broken.
+
 ## Open questions
 
 **Is an unrecognised `loom:` key staying a render diagnostic the right answer
 permanently?** It is defensible — the key is the runtime's, the renderer names
 it, and no reader meets a hole. If it is, the finding above closes with no code.
 If it is not, the four-lane sequencing in that finding is what I would build.
+
+**Does the ref explain the mangling?** One more controlled pair, from a
+different lane, on a different pull request — same body posted with a
+branch-name ref and then a SHA ref, nothing else changed — would make it a rule
+instead of a correlation. Filed with what it would take.
 
 **Nothing else was surveyed.** Refinement inside finished sections is reactive,
 and this run opened on a finding and closed on it.
