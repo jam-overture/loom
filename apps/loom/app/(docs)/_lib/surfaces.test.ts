@@ -1,10 +1,11 @@
-import { readdirSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
-import { DOCS_HOME, HOME, OTHER_SURFACES } from "./surfaces"
+import { REPOSITORY_ROOT } from "./architecture/source"
+import { DOCS_HOME, HOME, LICENSE_NOTICE, OTHER_SURFACES } from "./surfaces"
 
 /**
  * The list of surfaces, held to the application rather than to a memory of it.
@@ -94,5 +95,23 @@ describe("the other surfaces of this application", () => {
       expect(surface.label.length, surface.path).toBeGreaterThan(0)
       expect(surface.blurb.split(" ").length, surface.path).toBeGreaterThan(4)
     }
+  })
+})
+
+/**
+ * The one sentence in the chrome that is a claim about a file.
+ *
+ * "Loom is open source under the MIT license" is the answer a reader comes to a
+ * footer for, and it is the only thing this site says that a reader could act on
+ * without reading a page. It was true on the day it was written — the licence
+ * was chosen on 26 September — and nothing on this surface could have noticed if
+ * the file it describes were replaced tomorrow.
+ */
+describe("the licence the footer names", () => {
+  it("is the licence the repository carries", () => {
+    const licence = readFileSync(join(REPOSITORY_ROOT, "LICENSE"), "utf8")
+
+    expect(licence).toContain("MIT License")
+    expect(LICENSE_NOTICE).toContain("MIT license")
   })
 })
