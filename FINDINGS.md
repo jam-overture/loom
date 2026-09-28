@@ -8,6 +8,95 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — a `reports/*.md` link in a pull request body was mangled too, so the `decisions/` correlation is not the rule
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it* · **Status:** open, and filed
+as **evidence rather than a fourth theory**, which that entry explicitly asks for
+
+That entry's table records six links across three pull requests and concludes:
+
+> Every mangled link has pointed at `decisions/`; every link pointing at
+> `reports/` has come through clean, including two in the same description as a
+> mangled one.
+
+**#434 breaks that.** Its body carried one link to a `reports/*.md` file and it
+came back wrapped exactly the way the entry describes, with the `>` escaped:
+
+```
+<a href="``https://github.com/.../reports/2026-09-28-marketing-….md"&gt;the`` report on this branch</a>
+```
+
+So a run following the recorded correlation — *link to `reports/` freely, only
+`decisions/` is cursed* — gets a broken link and no warning, which is the cost
+the entry was written to prevent.
+
+**What was different about the four links that survived in the same body**, which
+is the only new information here and is offered as a table rather than as a
+mechanism:
+
+| the link | form | ends in | outcome |
+| --- | --- | --- | --- |
+| the report | `<a href="…">` | `.md` | **mangled** |
+| the preview deployment | `<a href="…">` | `.app` | clean |
+| four screenshots | `<img src="…">` | `.png` | clean |
+
+The one that broke is the only `.md` in the body. It is also inside an HTML `<a>`,
+which #361 blamed — but so is the preview link, and that survived. Both of the
+entry's discarded theories (HTML tags, proximity to `**`) stay discarded; what
+this adds is that the **target directory is not the variable**, and that on this
+one body the `.md` extension separated the mangled link from the clean ones.
+
+**One body is one data point and I am not proposing a mechanism**, for the reason
+the 22 September entry gives: two guesses have already been written into a pull
+request description as fact.
+
+**The workaround, widened.** That entry's remedy — name the file in an
+inline-code span and do not make it a link — works for `reports/` as well as
+`decisions/`, and is what #434's body was corrected to use before it merged. It
+costs a reader nothing: the path is as useful to somebody who can open the
+repository, and there is nothing in a code span for anything to inject into.
+
+---
+## 2026-09-28 — a branch pushed while its pull request was being merged loses that push, and the squash makes it silent
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+closed by `marketing-47-the-corrections-that-missed-the-merge`, and recorded
+because the *silent* half is a thing any lane can hit
+
+#434 was pushed at 11:39, `Loom merge` brought `main` into it twice at 15:40 and
+15:48, this lane pushed a correction commit at about 16:12, and the pull request
+**merged at 16:03** — squashed at the head it had before that push.
+
+The commit is not lost: it is on the branch, and the branch is still there. What
+is lost is that **nothing says so**. A squash merge produces a commit on `main`
+whose parent is not any commit of the branch, so `git merge-base --is-ancestor`
+answers *no* for the head that merged as well as for the one that did not, and a
+lane that checks whether its work landed by looking for its own SHA gets the same
+answer either way. The only reliable check is **reading the file on `main`**,
+which is how this was caught: the corrected number was still the old one.
+
+What it cost here was two things that a report and a pull request comment both
+claimed were filed and were not — a measurement corrected from 11,751px to
+11,012px, and the link-mangling entry above.
+
+**Two things worth doing rather than a fix**, neither of which is a change to
+`Loom merge`:
+
+- **A lane that pushes after opening a pull request should confirm the content on
+  `main` afterwards**, not the SHA. One `git show origin/main:<file> | grep` is
+  the whole of it.
+- **Better, do not push twice.** The correction here was small enough to be worth
+  a second push and would have been safer as part of the first; a lane that has
+  already opened a pull request is racing a merge routine that runs on a
+  schedule it does not know.
+
+`Loom merge`'s behaviour is correct and this is not a request to change it. It
+merged a green head and the head it merged was green. Recorded so the next lane
+that finds its own commit missing spends a minute on it rather than a run.
+
+---
 ## 2026-09-28 — the write path refuses every node the runtime's own reserved keys are on, and the render path does not
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
@@ -192,7 +281,7 @@ Measured on the published front door at 390 × 844, on `minimal`:
 | the headline | **5 lines** |
 | the lead | **9 lines**, of which 4 are above the fold |
 | the first control | **~1114px down** — 270px below an 844px fold |
-| the whole page | **11,751px — thirteen phone screens** |
+| the whole page | **11,012px — thirteen phone screens** |
 
 So a stranger arriving on a phone gets a badge, a headline, and half a paragraph.
 No button, no proof, and nothing to press without scrolling. Marketing sites are
