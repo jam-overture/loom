@@ -35881,3 +35881,50 @@ the **wrong** address, under a note explaining that it is wrong. A reader skimmi
 for a command finds the command before the note. Moving the block into the
 superseding section, or into a fenced quote, costs nothing — but `docs/routines.md`
 is governance and I would rather ask than edit it under my own authority.
+
+---
+## 2026-09-28 — a deployment cannot render its own mark beside its own wordmark, because `loom.logo`'s image is a wall mark
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — **nothing is broken and nothing is blocked**; the site's tab icon
+shipped without it and the header is unchanged
+
+The marketing site got a mark on 28 September at the maintainer's request —
+`apps/loom/app/icon.svg`, a pinwheel interlock. The obvious second move is to
+set it beside the wordmark in the bar, and it cannot be done.
+
+`chrome.ts`'s `wordmark` is a `loom.logo` with `name: "Loom"`, and `loom.logo`
+takes an optional `image`. Passing the mark there renders it — and
+`stylesheet.ts` puts every `.loom-mark` behind:
+
+```css
+.loom-mark { filter: grayscale(1); opacity: 0.72 }
+.loom-mark:hover, a:hover > .loom-mark { filter: none; opacity: 1 }
+```
+
+**That is right and it is right for the wrong logo.** The primitive's own
+comment says why it exists — *"twelve brand palettes at full strength fight
+both the page's theme and each other"* — which is a rule about **somebody
+else's** marks on a wall. A deployment's own mark in its own bar is the one
+logo on the page that should be at full strength, and it would render at 72%
+grey until a visitor happened to hover the wordmark.
+
+`surface: "card"` does not help: it plates the mark, it does not un-grey it.
+
+**What this lane did instead: nothing.** The header still renders the wordmark
+as text, which `loom.logo`'s comment correctly calls *"a perfectly good logo"*.
+The tab icon is a static file outside the tree and needed none of this.
+
+**The shape, offered rather than specified**, since the owning lane will know
+better. The distinction the primitive is missing is *whose mark is this* —
+`loom.logo` has one rendering and two uses. Either a prop naming the second
+(`own: true`, or the existing `surface` growing a third member), or the
+greyscale moving from the mark to the **wall** so a mark outside a
+`loom.logo-cloud` is never dimmed. The second is the tidier reading of the
+primitive's own argument: the fight it describes is between twelve marks, and
+one mark on its own has nobody to fight.
+
+**Worth knowing before it is built:** whether the site's bar should carry a
+glyph at all is the maintainer's, and he has not been asked. This entry only
+records that the library currently answers *no* by accident rather than on
+purpose.
