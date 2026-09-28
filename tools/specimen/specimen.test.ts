@@ -20,9 +20,14 @@ import {
 } from "./browser.js"
 import {
   captureShots,
+  clippedFrom,
+  clips,
+  CLIPPED_SHOWN,
   describeShot,
   overflows,
   type CaptureTarget,
+  type ClippingBox,
+  type Overflow,
   type Shot,
   type SpecimenBrowser,
   type SpecimenPage,
@@ -261,7 +266,7 @@ const describeTarget = (file: string, target: CaptureTarget): string => {
 }
 
 const fakeBrowser = (
-  measurements: readonly { scrollWidth: number; innerWidth: number }[]
+  measurements: readonly Overflow[]
 ): {
   browser: SpecimenBrowser
   /** Every address opened, and every start state applied before one. */
@@ -277,7 +282,7 @@ const fakeBrowser = (
 
   const browser: SpecimenBrowser = {
     open: async (): Promise<SpecimenPage> => {
-      const measurement = measurements[opened] ?? { scrollWidth: 390, innerWidth: 390 }
+      const measurement = measurements[opened] ?? { scrollWidth: 390, innerWidth: 390, clipped: [] }
       opened += 1
 
       return {
@@ -359,7 +364,7 @@ describe("taking the shots", () => {
   })
 
   it("flags the page that is wider than the phone, and still takes its picture", async () => {
-    const { browser, written } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390 }])
+    const { browser, written } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390, clipped: [] }])
 
     const [phone] = await captureShots(
       shotsAt("http://127.0.0.1:1234", planShots(specimenOf({ viewports: [PHONE] }))),
@@ -380,7 +385,7 @@ describe("taking the shots", () => {
           throw new Error("net::ERR_CONNECTION_REFUSED")
         },
         act: async () => {},
-        measure: async () => ({ scrollWidth: 0, innerWidth: 0 }),
+        measure: async () => ({ scrollWidth: 0, innerWidth: 0, clipped: [] }),
         capture: async () => {},
         close: async () => {
           closed += 1
@@ -414,7 +419,7 @@ describe("taking the shots", () => {
    * would report the width of something nobody is looking at.
    */
   it("measures the page the steps produced, not the one the load did", async () => {
-    const { browser, journal } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390 }])
+    const { browser, journal } = fakeBrowser([{ scrollWidth: 1420, innerWidth: 390, clipped: [] }])
 
     const [result] = await captureShots(
       [shotAt({ viewport: PHONE, do: [{ click: "[data-open]" }] })],
@@ -671,15 +676,174 @@ describe("taking the shots", () => {
         name: "a-band-editorial-phone",
         file: "reports/a-band-editorial-phone.png",
         viewport: PHONE,
-        overflow: { scrollWidth: 1420, innerWidth: 390 },
+        overflow: { scrollWidth: 1420, innerWidth: 390, clipped: [] },
         overflowed: true,
+        clipped: false,
       })
     ).toBe("a-band-editorial-phone  390x844@2x  scrollWidth 1420 / innerWidth 390  ← overflows")
   })
 
   it("calls a page wider than its viewport an overflow and nothing narrower", () => {
-    expect(overflows({ scrollWidth: 391, innerWidth: 390 })).toBe(true)
-    expect(overflows({ scrollWidth: 390, innerWidth: 390 })).toBe(false)
+    expect(overflows({ scrollWidth: 391, innerWidth: 390, clipped: [] })).toBe(true)
+    expect(overflows({ scrollWidth: 390, innerWidth: 390, clipped: [] })).toBe(false)
+  })
+})
+
+/**
+ * The measurement the document one cannot take.
+ *
+ * Filed by `Loom primitives` on 27 September: a `loom.backdrop` sets
+ * `overflow: hidden`, so the identical tree measures 390 / 390 wrapped in one
+ * and 401 / 390 outside it. The harness reported the wrapped page as clean
+ * because the defect was being clipped rather than fixed.
+ */
+describe("the boxes a page hides content inside", () => {
+  const box = (overrides: Partial<ClippingBox> = {}): ClippingBox => ({
+    element: "div.loom-backdrop",
+    reach: 401,
+    width: 390,
+    contentWidth: 390,
+    contentHeight: 400,
+    ...overrides,
+  })
+
+  it("names a clipping box whose content reaches past it", () => {
+    expect(clippedFrom([box()])).toEqual([
+      { element: "div.loom-backdrop", reach: 401, width: 390 },
+    ])
+  })
+
+  it("says nothing about a clipping box whose content fits", () => {
+    expect(clippedFrom([box({ reach: 390 })])).toEqual([])
+  })
+
+  /**
+   * Layout is fractional and these readings are not, so a box whose content is
+   * a third of a pixel too wide reports a shortfall of one and every page has a
+   * dozen of them. Nothing is hidden at that size.
+   */
+  it("ignores a one-pixel shortfall and reports a two-pixel one", () => {
+    expect(clippedFrom([box({ reach: 391 })])).toEqual([])
+    expect(clippedFrom([box({ reach: 392 })])).toHaveLength(1)
+  })
+
+  /**
+   * The one exclusion that is about intent. A visually-hidden announcement is
+   * `width:1px; height:1px; overflow:hidden` holding a sentence, which is a
+   * clipping box hiding a sentence by construction — the pattern working, not a
+   * defect, and the library uses it.
+   */
+  it("leaves out a box with no room for content in it", () => {
+    expect(
+      clippedFrom([box({ contentWidth: 1, contentHeight: 1, width: 1, reach: 240 })])
+    ).toEqual([])
+    expect(clippedFrom([box({ contentHeight: 1 })])).toEqual([])
+  })
+
+  /**
+   * The documentation site's skip link, as the first run of this instrument
+   * found it: `sr-only` gives it `width: 1px`, and the `px-3 py-2` beside that
+   * class puts 24 pixels of padding back on. The client box says 24 and the
+   * content box says 1, and only the second number says what the element is.
+   */
+  it("reads the content box and not the client box, so padding cannot disguise it", () => {
+    expect(
+      clippedFrom([
+        box({
+          element: "a.bg-surface-page.text-ink",
+          reach: 142,
+          width: 24,
+          contentWidth: 1,
+          contentHeight: 1,
+        }),
+      ])
+    ).toEqual([])
+  })
+
+  it("puts the widest shortfall first, and breaks a tie by name", () => {
+    expect(
+      clippedFrom([
+        box({ element: "div.b", reach: 400 }),
+        box({ element: "div.c", reach: 500 }),
+        box({ element: "div.a", reach: 400 }),
+      ]).map((one) => one.element)
+    ).toEqual(["div.c", "div.a", "div.b"])
+  })
+
+  /**
+   * Two facts, two fields. A page can be clean on the document measurement and
+   * hiding a figure inside a backdrop, which is exactly the case that was
+   * filed.
+   */
+  it("is independent of whether the document is wider than the viewport", () => {
+    const measurement: Overflow = {
+      scrollWidth: 390,
+      innerWidth: 390,
+      clipped: [{ element: "div.loom-backdrop", reach: 401, width: 390 }],
+    }
+
+    expect(overflows(measurement)).toBe(false)
+    expect(clips(measurement)).toBe(true)
+  })
+
+  it("prints each box under the shot's own line, indented", () => {
+    expect(
+      describeShot({
+        name: "a-band-bold-phone",
+        file: "reports/a-band-bold-phone.png",
+        viewport: PHONE,
+        overflow: {
+          scrollWidth: 390,
+          innerWidth: 390,
+          clipped: [{ element: "section > div.loom-backdrop", reach: 401, width: 390 }],
+        },
+        overflowed: false,
+        clipped: true,
+      })
+    ).toBe(
+      "a-band-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content\n" +
+        "    section > div.loom-backdrop  content reaches 401 in 390"
+    )
+  })
+
+  /**
+   * A page with forty of them has one cause, and forty lines is a wall a lane
+   * scrolls past. The count stays exact.
+   */
+  it("shows the worst five and counts the rest", () => {
+    const many = Array.from({ length: 8 }, (_unused, index) => ({
+      element: `div.n${index}`,
+      reach: 500 - index,
+      width: 390,
+    }))
+
+    const lines = describeShot({
+      name: "a-page",
+      file: "reports/a-page.png",
+      viewport: PHONE,
+      overflow: { scrollWidth: 390, innerWidth: 390, clipped: many },
+      overflowed: false,
+      clipped: true,
+    }).split("\n")
+
+    expect(lines[0]).toContain("← 8 clipping boxes hide content")
+    expect(lines).toHaveLength(1 + CLIPPED_SHOWN + 1)
+    expect(lines[lines.length - 1]).toBe("    …and 3 more")
+  })
+
+  it("carries the verdict onto every shot the loop takes", async () => {
+    const { browser } = fakeBrowser([
+      {
+        scrollWidth: 390,
+        innerWidth: 390,
+        clipped: [{ element: "div.loom-backdrop", reach: 401, width: 390 }],
+      },
+    ])
+
+    const results = await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(results[0]?.clipped).toBe(true)
+    expect(results[0]?.overflowed).toBe(false)
   })
 })
 
@@ -763,7 +927,7 @@ describe("the browser adapter", () => {
                     },
                     evaluate: async <TValue,>(body: () => TValue): Promise<TValue> => {
                       journal.push(`evaluate ${body.name}`)
-                      return { scrollWidth: 390, innerWidth: 390 } as TValue
+                      return { scrollWidth: 390, innerWidth: 390, clipped: [] } as TValue
                     },
                     /**
                      * The source, verbatim. It is a string by the time it

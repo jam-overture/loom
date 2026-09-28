@@ -14,9 +14,51 @@ import type { SpecimenViewport } from "./specimen.js"
  * file in this directory that knows the word.
  */
 
+/**
+ * One box that clips, with content reaching past the edge of it.
+ *
+ * The document measurement below cannot see any of these, and that is the
+ * whole reason this type exists. `overflow: hidden` is not a defect — the
+ * library's paints reach their element's edges and a backdrop that did not
+ * clip would paint over the band beside it — but it means the page stops being
+ * wide when its content gets too wide, so `scrollWidth` against `innerWidth`
+ * comes back clean on a page with a word cut in half inside it.
+ */
+export type ClippedOverflow = {
+  /** A short path to the box and its first words: what a lane recognises it by. */
+  readonly element: string
+  /**
+   * How far the box's own in-flow content reaches across it, in the same units
+   * as `width`.
+   *
+   * **In-flow, and `scrollWidth` deliberately is not this number.** A
+   * `loom.halo` is an absolutely positioned rim drawn four pixels outside the
+   * box it lights, on purpose, and a backdrop clips it on purpose; the
+   * browser counts it in `scrollWidth` all the same. Two of eighteen committed
+   * specimens reported four pixels of clipped rim on the first run of this
+   * instrument and neither was hiding anything. Decoration that is clipped is
+   * decoration working. Content that is clipped is a defect, and they have to
+   * be told apart or the measurement is noise.
+   */
+  readonly reach: number
+  /** How much room the box gives it: `clientWidth`, padding included. */
+  readonly width: number
+}
+
 export type Overflow = {
   readonly scrollWidth: number
   readonly innerWidth: number
+  /**
+   * Every clipping box on the page whose content does not fit it, widest
+   * shortfall first.
+   *
+   * A second reading rather than a second interpretation of the first: the
+   * document is either wider than the viewport or it is not, and separately
+   * some boxes inside it are hiding what they could not fit. The two are
+   * independent — a page can be clean on both, clean on one, or clean on
+   * neither — so they are two fields and not one verdict.
+   */
+  readonly clipped: readonly ClippedOverflow[]
 }
 
 /**
@@ -27,6 +69,85 @@ export type Overflow = {
  */
 export const overflows = (measurement: Overflow): boolean =>
   measurement.scrollWidth > measurement.innerWidth
+
+/**
+ * One box that clips, as the page reports it, before anything has been decided
+ * about whether it is worth a line in a report.
+ *
+ * The split is where the DOM stops. Reading which elements clip needs a laid-out
+ * page and a computed style, so it happens in the browser; deciding which of
+ * those readings is a defect is arithmetic, so it happens here where it can be
+ * tested without one. Before this split the only way to check the rule that
+ * drops a visually-hidden label was to take a photograph and read the output.
+ */
+export type ClippingBox = ClippedOverflow & {
+  /**
+   * The box's own room for content, its padding taken off.
+   *
+   * Used only to recognise a box that is *being hidden* rather than clipping,
+   * and it is the content box rather than `width` because the pattern that does
+   * the hiding writes `width: 1px` and then something else puts padding back
+   * on: the documentation site's skip link measures 24 × 17 as a client box and
+   * 1 × 1 as a content box, and only the second number says what it is.
+   */
+  readonly contentWidth: number
+  readonly contentHeight: number
+}
+
+/**
+ * How far past its box content has to reach before it counts.
+ *
+ * Layout is fractional and these readings are not, so a box whose content is a
+ * third of a pixel too wide reports a shortfall of one. Nothing is hidden at
+ * that size and every page has a dozen of them.
+ */
+export const CLIP_TOLERANCE = 1
+
+/**
+ * How much room for content a box needs before it is clipping rather than
+ * *being* hidden.
+ *
+ * `position:absolute; width:1px; height:1px; overflow:hidden` is how a
+ * visually-hidden announcement is written, here and everywhere else, and it is
+ * a clipping box holding a sentence by construction. It is the pattern working,
+ * so it is the one exclusion that is about intent rather than about arithmetic
+ * — and the first page this instrument was pointed at found one, `sr-only` with
+ * `px-3 py-2` on top of it, reported as a 142-pixel reach in a 24-pixel box
+ * until the rule was measured on the content box instead.
+ */
+export const CLIP_VISIBLE_MINIMUM = 2
+
+const shortfall = (box: ClippedOverflow): number => box.reach - box.width
+
+/**
+ * The boxes worth naming, widest shortfall first.
+ *
+ * Only `overflow-x: hidden` and `overflow-x: clip` reach here — `auto` and
+ * `scroll` are left out in the page, because a scrollbar is the box telling the
+ * reader there is more and that is the opposite of the defect being looked for.
+ */
+export const clippedFrom = (boxes: readonly ClippingBox[]): readonly ClippedOverflow[] =>
+  boxes
+    .filter(
+      (box) =>
+        box.contentWidth >= CLIP_VISIBLE_MINIMUM &&
+        box.contentHeight >= CLIP_VISIBLE_MINIMUM &&
+        shortfall(box) > CLIP_TOLERANCE
+    )
+    .map((box) => ({ element: box.element, reach: box.reach, width: box.width }))
+    .sort((a, b) => shortfall(b) - shortfall(a) || a.element.localeCompare(b.element))
+
+/**
+ * Deliberately **not** folded into `overflows`.
+ *
+ * A clipped box and a wide document are different facts with different
+ * remedies, and one of them decides the exit code of every screenshot run in
+ * this repository. Folding them would have turned a measurement that had never
+ * been taken into a merge-gate failure on every page it happened to find one
+ * on, in the same change that first made it visible — which is how an
+ * instrument gets switched off rather than fixed.
+ */
+export const clips = (measurement: Overflow): boolean => measurement.clipped.length > 0
 
 /**
  * One thing to do to a page before the shutter.
@@ -261,6 +382,8 @@ export type ShotResult = {
   readonly viewport: SpecimenViewport
   readonly overflow: Overflow
   readonly overflowed: boolean
+  /** Whether any box on the page hid content it could not fit. */
+  readonly clipped: boolean
 }
 
 export type CaptureOptions = {
@@ -325,6 +448,7 @@ export const captureShots = async (
         viewport: shot.viewport,
         overflow,
         overflowed: overflows(overflow),
+        clipped: clips(overflow),
       })
     } finally {
       await page.close()
@@ -334,8 +458,37 @@ export const captureShots = async (
   return results
 }
 
-/** One line per shot, which is what a report pastes. */
-export const describeShot = (result: ShotResult): string =>
-  `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x  ` +
-  `scrollWidth ${result.overflow.scrollWidth} / innerWidth ${result.overflow.innerWidth}` +
-  (result.overflowed ? "  ← overflows" : "")
+/**
+ * The most a single shot prints about the boxes it found clipping.
+ *
+ * A page with forty of them is a page with one cause, and forty lines is a
+ * wall a lane scrolls past. The count is always exact; the list is the worst
+ * offenders, which is where the cause is.
+ */
+export const CLIPPED_SHOWN = 5
+
+/**
+ * One line per shot, which is what a report pastes — and one indented line per
+ * clipping box under it, when there are any.
+ *
+ * Indented rather than appended, because the document measurement is about the
+ * page and each of these is about one element: a reader scanning the left
+ * margin sees one line per picture, exactly as before this existed.
+ */
+export const describeShot = (result: ShotResult): string => {
+  const head =
+    `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x  ` +
+    `scrollWidth ${result.overflow.scrollWidth} / innerWidth ${result.overflow.innerWidth}` +
+    (result.overflowed ? "  ← overflows" : "")
+
+  const { clipped } = result.overflow
+  if (clipped.length === 0) return head
+
+  const shown = clipped.slice(0, CLIPPED_SHOWN)
+  const rest = clipped.length - shown.length
+  return [
+    `${head}  ← ${clipped.length} clipping ${clipped.length === 1 ? "box hides" : "boxes hide"} content`,
+    ...shown.map((box) => `    ${box.element}  content reaches ${box.reach} in ${box.width}`),
+    ...(rest > 0 ? [`    …and ${rest} more`] : []),
+  ].join("\n")
+}

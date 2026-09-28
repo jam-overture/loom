@@ -22,6 +22,42 @@ example-editorial-wide   1280x900@2x  scrollWidth 1280 / innerWidth 1280
 One `.png` per theme per viewport, named `<specimen>-<theme>-<viewport>.png`.
 The exit code is non-zero if any shot overflowed its viewport.
 
+## The two measurements every shot takes
+
+The line above is the first one: the **document** against the viewport, which is
+"the page is wider than the phone" and is the single most-reported visual defect
+in this repository.
+
+The second is about the boxes inside it, and it exists because the first cannot
+see through a clip
+([0202](../../decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md)).
+A `loom.backdrop` sets `overflow: hidden` and has to, so a band that overflows
+inside one measures `390 / 390` while a word sits off the edge of the page:
+
+```
+a-clip-hides-an-overflow-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
+    div > div > div  "ReferencethemeSelectionSchemaThe heading above …"  content reaches 370 in 346
+```
+
+One indented line per box, worst first, five at most and then a count. Each
+names the box — its path, and its first words, which on a tree of registered
+primitives is the only thing that identifies it — then how far its own content
+reaches and how much room it has.
+
+**What it counts is in-flow content, and not `scrollWidth`.** A `loom.halo` is
+an absolutely positioned rim drawn four pixels outside its box on purpose, and a
+`loom.code` block scrolls sideways on purpose; the browser counts both, so a
+reading taken off `scrollWidth` reports two features as defects. What is counted
+is the boxes and the text of everything in flow, stopping at anything that
+handles its own overflow.
+
+**It does not change the exit code.** A clipped box and a wide document have
+different remedies — often in different lanes — so the verdict a run exits on is
+still the document measurement alone.
+
+`tools/specimen/a-clip-hides-an-overflow.specimen.ts` is the subject this was
+built against, committed so it can be pointed at again.
+
 ## Writing a specimen
 
 A specimen is data, not a script: **what** to look at, committed beside the lane
