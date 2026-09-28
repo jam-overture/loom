@@ -35886,8 +35886,11 @@ is governance and I would rather ask than edit it under my own authority.
 ## 2026-09-28 — a deployment cannot render its own mark beside its own wordmark, because `loom.logo`'s image is a wall mark
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — **nothing is broken and nothing is blocked**; the site's tab icon
-shipped without it and the header is unchanged
+**superseded by the 28 September entry at the foot of this file**, which was
+written after building the thing and finding two further limits — one of them
+decisive. This entry names only the greying, and fixing only the greying
+produces a mark that is invisible on `bold`. Kept because its reading of what
+`.loom-mark` is *for* is still right.
 
 The marketing site got a mark on 28 September at the maintainer's request —
 `apps/loom/app/icon.svg`, a pinwheel interlock. The obvious second move is to
@@ -35928,3 +35931,83 @@ one mark on its own has nobody to fight.
 glyph at all is the maintainer's, and he has not been asked. This entry only
 records that the library currently answers *no* by accident rather than on
 purpose.
+
+---
+## 2026-09-28 — there is no way to draw the deployment's own mark in its own chrome, and an image file can never be one
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — **sharpens and supersedes** the 28 September entry above, which named
+only the first of these three. Nothing is broken today: the bar still renders
+the wordmark as text and the tab icon is a static file that needs none of this
+
+The maintainer asked for the new mark to go in the marketing site's top bar.
+**It was built as a throwaway spike, photographed, and thrown away** — the
+composition is not shippable, and what the spike found is worth more than the
+feature.
+
+### 1. `loom.logo` renders its image *instead of* its name
+
+```ts
+given.image === undefined ? createElement("span", …, given.name) : createElement("img", …)
+```
+
+It is one or the other, and `name` becomes the image's `alt`. **There is no
+mark-beside-wordmark shape in the library at all.** Correct for a wall, where
+one company is one mark; wrong for the one place a site names itself.
+
+The spike composed around it with two `loom.logo` nodes in a `loom.stack` —
+one for the image, one for the word. It renders correctly and it is a hack: two
+logos where there is one brand, and the accessible name is now "Loom" twice.
+
+### 2. `.loom-mark` greys every image, wherever it is
+
+`stylesheet.ts`: `filter: grayscale(1); opacity: 0.72` until hover. This is the
+earlier entry's finding and it is still true. **Worth knowing before it is
+changed: no production tree in this repository passes `image` to `loom.logo`.**
+The only three call sites that do are in `library.test.ts`. Every real usage —
+the marketing header, the demo's wall, four starter compositions — is a text
+wordmark, so the rule currently greys **nothing that anybody renders**, and
+scoping it to `.loom-logo-cloud .loom-mark` would change no existing pixel.
+
+### 3. The decisive one: an `<img>` cannot follow the Loom palette
+
+The spike pointed the mark at `/icon.svg`, the tab icon that shipped in #429.
+That file carries its own colour and swaps it on `prefers-color-scheme` — the
+**operating system's** setting.
+
+**A Loom palette is a different axis.** `bold` is a dark palette on a machine
+in light mode, so the mark rendered `#0a0a0a` on `bg-surface` `#1a1a1a`:
+
+| | |
+| --- | --- |
+| `minimal` | ![](../reports/2026-09-28-marketing-bar-glyph-minimal.png) |
+| `bold` | ![](../reports/2026-09-28-marketing-bar-glyph-bold.png) |
+
+An image is opaque to the cascade. No custom property reaches inside one, so a
+mark delivered as a file is blind to the only thing that decides what colour it
+should be in the page.
+
+**This is why 1 and 2 must not be fixed on their own.** Un-greying the image and
+letting it sit beside the word produces exactly the right bar on two palettes
+and an invisible one on the third — which is worse than today, because today's
+wordmark is a theme token and is correct everywhere.
+
+### What this asks for
+
+**A way to render the deployment's own mark as themed vector**, so it takes
+`currentColor` or a colour slot like every other primitive does. A file cannot;
+inline SVG can. Offered rather than specified, since the owning lane will know
+better:
+
+- a `loom.logo` mode where the mark is drawn rather than fetched — a named
+  shape, or a path the host registers once, coloured from the slots; or
+- a small `loom.brand`-shaped primitive whose whole job is *this site, in this
+  bar*, with the word and the mark as one node and one accessible name.
+
+Either closes 1 and 3 together. 2 is then a two-line scope change with no
+rendered pixel behind it.
+
+**Not asked for, and worth saying**: the marketing lane is not blocked and does
+not need this to ship anything. The bar is correct as it stands. This is filed
+because the maintainer asked for the mark in the chrome, the library cannot
+express it, and the *reason* is a real hole rather than a missing convenience.
