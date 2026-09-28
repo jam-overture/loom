@@ -36618,3 +36618,93 @@ happen to the runs that were being careful.
 **Not worked around here.** This run's own loss was recovered by a second pull
 request carrying the two documentation files, which is the remedy available
 today and is not a fix.
+
+---
+
+## 2026-09-28 — every portal screenshot reports a clipping box, and it is the sidebar doing exactly what it was built to do
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the harness) ·
+**Status:** open — **a true measurement with no false-positive channel**,
+measured on both sides of one change
+
+#433 added a clipping-box measurement to every shot on 28 September, which is a
+real instrument and has already found real defects. It reports this on **every
+portal screen**, and this run measured it on `main` and on its own branch with
+identical numbers:
+
+```
+1 clipping box hides content
+  aside.loom-rail.group  "What Loom has been doingPagesDemoPiecesRules…"
+  content reaches 209 in 55
+```
+
+That box is `_components/shell/sidebar.tsx`: a 56px icon rail that widens to
+275px on hover or focus, with `overflow-hidden` because it animates its own
+width and a focus ring drawn outside a nav item would be cut off at the left
+edge. **The content is hidden on purpose and is one hover away**, which is the
+whole design — and no screenshot can ever show it, because a shot list cannot
+hover (`docs/routines.md`).
+
+**So the finding is not the rail.** It is that the instrument has no way to be
+told *this clip is the point*, and the consequence is the one that matters: a
+line that appears on every shot of a surface is a line that stops being read.
+The next portal screen with a genuine clip will print the same sentence with a
+second entry under it, and the run that took it will have learned to scroll past.
+
+**What would fix it**, and the choice is the harness's rather than this lane's:
+
+- an attribute a component may carry — `data-clip="intended"` — that the
+  measurement honours and the shot output counts separately, so a deliberate
+  clip is *declared* rather than silently tolerated. It is one selector in the
+  measurement and one attribute on the rail, and a lane adding it has to say so
+  in a diff somebody reads;
+- a shot-list member listing selectors to exclude, which puts the exemption in
+  the shot list where it is invisible to the component and gets copied between
+  lanes by paste;
+- nothing, and every lane learns the rail's line by heart. This is what happens
+  by default and it is why this is filed.
+
+The first is recommended. The second is the one this lane would have reached for
+and it is worse: an exemption belongs beside the thing it exempts, which is the
+same argument `_test/plain-language.ts` makes about its own `except` list.
+
+---
+
+## 2026-09-28 — a part the page cannot be clicked to reach is picked, and the page says nothing at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**known and deliberately not solved** by the change that surfaced it
+
+`docs/portal.md` phase 2 made selection a set, so the preview now outlines every
+picked part rather than one. A part whose addressing is `unaddressable` has no
+box on the page to outline, and the preview correctly marks nothing for it.
+
+What that costs: a reader who picks *Every change is a delta* — a text row, in
+the list — watches the page not react. The rail beside it says why, in words
+(*"Words and named spaces have no box of their own on the page, so there is
+nothing there to click"*), and the part is drawn on its own under the page as
+of this change, so the reader is not left with nothing. But **the page itself is
+silent at the moment of the click**, and a silent page after a click is the
+shape of a broken one.
+
+**Why it was not solved here.** The obvious fix is to outline the part around it
+— the one a click would land on — and that is precisely the silent fallback 0019
+refuses: a selection performing a widening rather than stating it. The portal
+already does state it, twice, in words. Drawing it would be the third statement
+and the only one a reader could mistake for *this is what you picked*.
+
+Three directions, none obviously right, and all of them are this lane's:
+
+- **mark the ancestor differently** — a dashed rather than solid outline, with
+  the legend saying what dashed means. Honest, and it adds a third meaning to a
+  visual channel that currently carries two;
+- **scroll the addressed ancestor into view without outlining it**, so the page
+  moves even when nothing on it lights up. Cheap, and it answers *did my click
+  do anything* without claiming anything about what was picked;
+- **nothing on the page, and a line in the excerpt pane** saying this part has
+  no box on the page — which is the disclosure this lane reaches for by reflex
+  and the one that leaves the click itself unanswered.
+
+The second is what this lane would build next. It is filed rather than built
+because it is a behaviour change to the preview pane rather than a part of the
+inspector, and phase 2 is already the largest diff this surface has taken.
