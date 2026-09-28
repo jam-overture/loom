@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { backdropLayers, PAINT_NAMES } from "./backdrop.js"
+import { ABOVE_BACKDROP, backdropLayers, PAINT_NAMES } from "./backdrop.js"
 import { libraryStylesheet } from "./stylesheet.js"
 import { radius } from "./tokens.js"
 
@@ -142,11 +142,14 @@ export const loomBackdrop = definePrimitive({
       libraryStylesheet(),
       ...backdropLayers(given.paint ?? "aurora"),
       /**
-       * The content is lifted out of the layers' stacking order explicitly
-       * rather than relying on source order. Source order is enough today and
-       * stops being enough the moment a child positions itself, which is a
-       * class of bug that only shows up on the one page that does it.
+       * The content is lifted out of the layers' stacking order. This file used
+       * to say source order was enough today and would stop being enough the
+       * moment a child positioned itself; that was wrong, and `ABOVE_BACKDROP`
+       * carries the correction — an absolutely positioned layer paints after
+       * every static sibling, so source order was never doing anything. The
+       * style is shared now because `loom.hero` had the same layers and not
+       * this line.
        */
-      createElement("div", { style: { position: "relative", zIndex: 1 } }, children)
+      createElement("div", { style: ABOVE_BACKDROP }, children)
     ),
 })
