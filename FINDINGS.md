@@ -36529,3 +36529,46 @@ happen to the runs that were being careful.
 **Not worked around here.** This run's own loss was recovered by a second pull
 request carrying the two documentation files, which is the remedy available
 today and is not a fix.
+
+### Second occurrence, four hours later, on the pull request that filed this
+
+It happened again to the same run, and it took the fix for itself with it. The
+second time has a **different mechanism and the same silence**, and the pair is
+the reason this entry is worth its length:
+
+| | first | second |
+| --- | --- | --- |
+| the push | **15:47**, before the merge | **16:52 and 16:58**, after it |
+| the merge | 15:48, at a SHA read earlier | 16:49, at `c42b33c` |
+| what was lost | one commit of measurements | the commit that **fixed the decaying wording**, and a third measurement |
+| what the lane saw | `git push` succeeded | `git push` succeeded |
+
+So it is not one race. **A push is silently dropped both when it arrives just
+before the merge and when it arrives just after it**, and in the second case the
+pull request is already closed, the branch ref still moves, and git reports
+success because pushing to the branch of a merged pull request is a perfectly
+ordinary push.
+
+**The check this entry recommended does not catch the second one**, and that is
+the correction worth having. This run ran it, watched it pass, and had already
+lost the commits:
+
+```bash
+# what this entry said, and it is not enough:
+git merge-base --is-ancestor HEAD origin/<branch>   # passes — the branch did move
+
+# what actually answers the question:
+git fetch origin main && git merge-base --is-ancestor HEAD origin/main
+```
+
+The branch is not the thing to check. `main` is, because `main` is the only
+place a commit has actually arrived.
+
+**What this does to the remedies above.** The third one — *a lane checks the
+pull request is still open before it pushes* — was listed last and is the one
+that catches this half; it was named in this entry and then not followed by the
+run that wrote it, twenty minutes later. The second — *`Loom merge` re-reads the
+head immediately before merging* — catches the first half and not this one.
+**Neither alone is sufficient; the pair is.** That is a stronger recommendation
+than this entry could make when it had one occurrence, and it is the reason the
+second one is written up rather than shrugged at.
