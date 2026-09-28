@@ -8,6 +8,108 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — the write path refuses every node the runtime's own reserved keys are on, and the render path does not
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — found by executing an exercise for lesson 30, reproduced three ways,
+**not fixed**: `src/` is not this lane's and a lessons branch that changes
+behaviour is a lessons branch nobody can review
+
+On a deployment that wires 0179's props floor — `propsVocabularyFor(registry)`
+into the pipeline's `propsVocabulary` — a change that gives a node one of the
+runtime's own reserved keys is `invalid-props`, **critical**, and rejected by the
+Gate. Including a node with nothing whatever wrong with it.
+
+```
+  the registered types wired, and nothing checking props
+    the name misspelled  unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
+    neither misspelled   unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
+  and propsVocabularyFor(registry) wired as well
+    the name misspelled  unknown types: 0  invalid props: 1  stakes: critical gate: rejected
+      Unrecognized key(s) in object: 'loom:data'
+    neither misspelled   unknown types: 0  invalid props: 1  stakes: critical gate: rejected
+      Unrecognized key(s) in object: 'loom:data'
+```
+
+*(The insert is one `loom.feed` carrying `{"loom:data":{"entries":{"source":…,"params":{"limit":3}}}}`,
+against a base tree of one `loom.page`. It is exercise D of
+[lesson 30](lessons/30-rendezvous.md), where the whole program is printed.)*
+
+### The two halves of it
+
+**The render path splits reserved keys off before it validates.**
+`render.ts`'s `reportUnreadReservedProps` carries the sentence: *"Reserved keys
+are removed from every node's props, whether or not anything reads them here; a
+key that reaches a primitive is a key that primitive has to know about."* Every
+schema in the starter library is `.strict()` on the strength of that.
+
+**The write path does not.** `invalidPropsIn` in `src/runtime/vocabulary.ts`
+walks the resulting tree and hands `current.props` to the vocabulary **as they
+are**. `propsVocabularyFor` is a one-line adapter onto `registry.validateProps`,
+which is the same strict schema. So the floor refuses the key the runtime itself
+put there, and its own doc comment names the hazard it has: *"a deployment whose
+Gate and whose renderer disagree about which props are acceptable has a hole that
+no test of either seam alone finds."*
+
+### Measured, not reasoned
+
+| | |
+| --- | --- |
+| starter primitives that refuse a node carrying `loom:anchor` | **99 of 99** |
+| the same for `loom:data`, `loom:submit`, `loom:theme` | the same, and for the same reason |
+| **insert** a node carrying a reserved key | `invalid-props`, critical, **rejected** |
+| **configure** a node that had none into carrying one | `invalid-props`, critical, **rejected** |
+| **configure** a node that already carried one | 0 invalid props, `high`, `requires-confirmation` |
+
+The deployments in this repository that wire the floor are `(portal)`
+(`portalPropsVocabulary`, and `settingsAreChecked` is derived off it) and
+`(marketing)`'s adapt path (`SITE_PROPS_VOCABULARY`).
+
+### Why nothing has noticed
+
+The last row. `introducedInvalidProps` counts only nodes that were **not**
+already failing before the change, which is a good rule and is stated well
+(a half-repair should not be refused for the hole it did not make). Its effect
+here is that the only changes on bound nodes that pass are the ones on nodes
+this check had already condemned — so a deployment repointing existing bindings
+sees nothing, and the first thing to hit it is the first *new* binding anybody
+proposes.
+
+Which is the part that makes this worth an entry rather than a note.
+`src/interpretation/prompt.ts` teaches a model to write
+`{"loom:data":{"<binding name>":{"source":"<id>","params":{…}}}}` in a node's
+props, in those words, and 0181 and 0184 spent two records making the binding
+names *available* to it so it could write new ones. On a deployment with the
+floor wired, the write path refuses at its highest stakes the exact JSON the
+prompt asks for.
+
+### What this is not
+
+Not a claim that 0179 was wrong, and not a request to loosen the floor. The
+floor is right and the asymmetry is one line of scope: whatever splits reserved
+keys from props is knowledge that exists once, in the render walk, and the write
+path reimplements *validate this node's props* without it. Lesson 28's shape
+exactly — one fact, two implementations, no comparison between them, and the
+copy that is wrong is the one no rendering test executes.
+
+**Two things a fix would want to decide** and this lane has no standing to:
+
+1. **Where the split lives.** It is currently private to `render.ts`. A shared
+   `withoutReservedProps` that both seams take would make the agreement a fact
+   rather than a coincidence — which is the only version of this that stays
+   fixed when a fifth reserved key lands.
+2. **Whether a reserved key on the wrong node should still be refusable at the
+   write path.** `loom:theme` on a non-root is a render diagnostic
+   (`theme-misplaced`) and an unrecognised `loom:` key is
+   `reserved-prop-unrecognised`. Those are real faults the floor could catch if
+   it knew the namespace — so *strip and ignore* is probably not the whole
+   answer, and *strip, then check the reserved ones against the rules that
+   govern them* is the shape worth weighing.
+
+A test that would have caught it, and would catch the next one: assess a change
+that inserts a node carrying each reserved key in turn, against a policy with
+`propsVocabularyFor` wired, and assert the analysis reports no invalid props.
+Four rows, derived from `reserved-props.ts` rather than listed.
 ## 2026-09-28 — `loom.section` plates with a fill and no outline, so on the house palette a toned band is thirty-two pixels of padding and nothing else
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
