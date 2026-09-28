@@ -393,7 +393,7 @@ const problems = (ids: IdFactory): LoomNode =>
  * count is held as a floor it can never exceed. See `FACTS` in `copy.ts`.
  */
 const facts = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "surface", width: "wide", eyebrow: BAND.facts }, "Built in the open", [
+  section(ids, { width: "wide", eyebrow: BAND.facts }, "Built in the open", [
     prose(
       ids,
       "Not one of these numbers was typed from memory. Each is checked against the code it describes.",
@@ -601,7 +601,7 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * rule and four words, all registered before this run started.
  */
 const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
-  section(ids, { tone: "surface", width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
+  section(ids, { width: "wide", eyebrow: BAND.waysIn }, "Where to go from here", [
     buildElement(ids, {
       type: "loom.grid",
       props: { columns: "four", gap: "snug" },

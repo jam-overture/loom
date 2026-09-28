@@ -8,6 +8,122 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — `loom.section` plates with a fill and no outline, so on the house palette a toned band is thirty-two pixels of padding and nothing else
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
+
+Two primitives carry a tone called `surface`, read the same palette slot, and
+only one of them draws the thing the house palette's whole design depends on:
+
+| | `loom.card` (`loom.card.ts:92`) | `loom.section` (`loom.section.ts:34`) |
+| --- | --- | --- |
+| fill | `bg-surface` | `bg-surface` |
+| outline | `1px solid` `border-subtle` | **nothing** |
+| radius | `radius("lg")` | `radius("lg")` |
+| padding | yes | yes — `space(5)` inline, `space(6)` block |
+
+`minimal` sets `bg-surface` to `#ffffff`, which is exactly its own `bg-canvas`,
+and it does that **deliberately**. Its comment in `src/theme/library.ts` is the
+clearest statement of it in the repository:
+
+> **`bg-surface` is the canvas white, and that is the whole outline-first
+> decision.** It is the fill behind a card, a nav, a footer, a hero panel and a
+> `tone: "surface"` section — so setting it to the page colour means every one of
+> those is defined by its border instead of by a change of background, without a
+> single primitive being touched.
+
+The palette then pays for that: `border-subtle` is *"a step darker here than the
+palettes that back their borders with a fill"*, and says so. **A card collects on
+that bargain. A section cannot**, because it never reads a border token at all.
+So on the one palette that sentence was written for, a toned band renders as a
+fill the same colour as the page, a radius clipping nothing, and an inset with no
+edge around it.
+
+What that looked like, measured at 1280 on the three marketing pages:
+
+| page | bands | toned | what a reader saw |
+| --- | --- | --- | --- |
+| `/how-it-works` | 5 short answers | the 5th | four on the left rule, the last stepped in ~32px |
+| `/what-you-run` | 3 answers | the 1st and 3rd | a left margin stepping in, out, and in again |
+| `/` | 9 bands | 3 of them | three inset, six not, no visible reason for either |
+
+It is invisible in review and invisible in a test, and it is visible in a
+thumbnail — which is how it was found. It also reads as **completely correct** on
+`bold` and `editorial`, where the fill is a real change of colour, so a run that
+photographs one palette and moves on will not see it.
+
+**The fix looks like one line**, and it is offered rather than specified:
+`loom.section`'s `TONES` taking the `borderColor` entries `loom.card`'s already
+have, with the `border: "1px solid"` beside them. The `accent` tone has the same
+shape and does not have the same problem — `accent-subtle` is `#effbf5` on
+`minimal`, so that one is visible — but it would want the same treatment for the
+same reason rather than by luck.
+
+**What this lane did in the meantime, and it is a retreat rather than a fix.**
+All six `tone: "surface"` bands on the marketing site are now plain, `nodes.ts`
+carries the reasoning, and `pages.test.ts` holds the rule and names this entry.
+The day the outline lands, the bands that genuinely are a different kind of thing
+— the front door's figures, its four ways on, and the stage the demonstration
+runs in — should take the tone back, and that test is what should fail to say so.
+
+**Two things worth knowing before anybody scopes it.** Three other route groups
+already ask for this tone and are presumably showing the same inset on the same
+palette: `(docs)/_lib/examples/catalogue.ts` (three bands),
+`(docs)/_lib/operations/checks.ts`, and `(demo)/_lib/presets.ts`. And nothing in
+the repository currently checks the pairing: a tone that fills with a palette's
+`bg-surface` on a palette where that equals `bg-canvas` is a region with no
+boundary, and the same is true of any future primitive that plates without an
+outline.
+
+---
+## 2026-09-28 — the front door's first control is 270 pixels below the fold on a phone, and nothing a composition can set moves it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` ·
+**Extends:** the 27 September *reimagining* report, which recorded this in
+passing and did not file it · **Status:** open
+
+Measured on the published front door at 390 × 844, on `minimal`:
+
+| | |
+| --- | --- |
+| above the eyebrow | **~220px** of empty band — `loom.hero`'s `paddingBlock: space(8)`, which does not scale with the viewport |
+| the headline | **5 lines** |
+| the lead | **9 lines**, of which 4 are above the fold |
+| the first control | **~1114px down** — 270px below an 844px fold |
+| the whole page | **11,751px — thirteen phone screens** |
+
+So a stranger arriving on a phone gets a badge, a headline, and half a paragraph.
+No button, no proof, and nothing to press without scrolling. Marketing sites are
+read on phones more than on anything else, and this is the one screen the whole
+surface exists to win.
+
+**It was checked for a composition answer first and there is not one.** The props
+`loom.hero` exposes are `backdrop`, `align`, `stature`, `eyebrow` and the words:
+
+- `stature: "tall"` sets `minHeight: 78vh` — 658px at this height, against ~1100px
+  of content, so it is **already not binding** and standing it down changes
+  nothing. (#432 establishes the same thing from the other side at 1280.)
+- `align` does not change height.
+- `paddingBlock: space(8)` is a constant and is a fifth of the fold on a phone.
+- The type ramp decides the 5 lines and the 9, and it is the font pack's.
+
+**And the words are not available.** The headline and the lead are the
+maintainer's own direction of 27 September, and both clauses in the lead were
+added by him; cutting them to buy back a fold would be this lane editing
+positioning, which is not its to edit.
+
+That leaves the two numbers a composition cannot reach, which is what makes this a
+finding: **the block padding and the display step want to be smaller on a narrow
+viewport than on a wide one.** #432's answer — that `stature` should not add
+padding at 1280 because the content already overflows the floor — is right there
+and is about the opposite end of the range. This is the narrow end, where the
+padding is a fixed 220px against an 844px screen.
+
+Filed with the measurement rather than a proposal, because which of the two to
+move, and whether a primitive in this library should respond to viewport at all,
+is a question for the lane that owns the ramp.
+
+---
 ## 2026-09-27 — the demo shows a stranger the change and the record, and the inverse is the one third of the claim sixty seconds does not reach
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — named
