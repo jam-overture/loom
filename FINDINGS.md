@@ -36168,3 +36168,57 @@ the property that makes a ramp comparison meaningful again.
 
 **Not filed for `Loom primitives`.** `src/primitives/` no longer contains
 anything that constrains a ramp, which is the point.
+
+---
+## 2026-09-28 — a push during `Loom merge`'s window is silently dropped, and the pull request still closes as merged
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **a race with no symptom**, measured
+once on this lane's own #433, and written down because every lane can hit it and
+nothing would tell them
+
+`Loom merge` runs at 15:00 UTC. For each open pull request it merges `main` into
+the branch, fixes what the merge made stale, and merges on a green `pnpm verify`.
+`docs/routines.md` tells every lane what that means for them — *"your branch gets
+merge commits you did not write; fetch before you push to a branch you left
+open"* — and that sentence covers the conflict it was written for and not this.
+
+**What happened, with times.** On #433, on 28 September:
+
+| time (UTC) | what | who |
+| --- | --- | --- |
+| 15:32 | `main` merged into the branch, decisions index regenerated | `Loom merge` |
+| 15:40 | the lane wakes on the push event and re-verifies on the merged head | this lane |
+| ~15:47 | `cb512a3` pushed — the re-taken measurements | this lane |
+| 15:48 | **#433 merged**, at `f9ae085` | `Loom merge` |
+
+`cb512a3` is not on `main` and never will be. The pull request's own page says
+merged, the branch says merged, and one commit on it is simply gone from the
+history. **Nothing reports this**: no conflict, no red check, no comment. The
+only way to find it is to ask `git merge-base --is-ancestor <sha> origin/main`
+after the merge, which nothing tells a lane to do.
+
+**Why it is worth an entry rather than a shrug.** The window is not the minute
+at 15:00 — it is however long that routine takes to work through the queue,
+which on this day was at least sixteen minutes and grows with the number of open
+pull requests. And the lane most likely to be pushing inside it is precisely the
+lane that just woke up *because* `Loom merge` pushed to its branch: the merge
+event is what tells a lane its numbers are stale, and re-taking them is work that
+lands inside the window by construction. This will happen again, and it will
+happen to the runs that were being careful.
+
+**What would fix it**, smallest first, and none is obviously right:
+
+- a line in `docs/routines.md` saying what the window is and that a lane woken by
+  a merge commit should check `git merge-base --is-ancestor` after pushing —
+  cheapest, and relies on the lane remembering;
+- `Loom merge` re-reading the head immediately before it merges, and skipping a
+  pull request whose head moved since it verified — correct, and it is that
+  routine's file rather than this one's;
+- a lane that pushes to a branch with an open pull request checking whether the
+  pull request is still open first, which catches the tail of the race and not
+  the middle of it.
+
+**Not worked around here.** This run's own loss was recovered by a second pull
+request carrying the two documentation files, which is the remedy available
+today and is not a fix.

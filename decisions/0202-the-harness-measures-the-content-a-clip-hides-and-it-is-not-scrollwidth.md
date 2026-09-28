@@ -77,10 +77,12 @@ still exit non-zero on a document wider than its viewport, and only on that.
 - A lane photographing a band inside a backdrop no longer has to know that the
   number it is reading is not about its band.
 - **Measured across the whole of what this repository can photograph today, it
-  is silent**: 32 shots over four surfaces at both viewports, and every
-  committed specimen in `src/primitives/` and `tools/specimen/`, report no
-  clipping box. The one subject that reports one is the specimen written to be
-  found. An instrument that fires on a healthy tree is an instrument that gets
+  is silent**: 32 shots over four surfaces at both viewports, and all 94 shots
+  of every committed specimen in `src/primitives/` and `tools/specimen/`, report
+  no clipping box. The one subject that reports one is the specimen written to
+  be found. Taken twice — once before `Loom merge` brought 0201's changes to
+  `loom.hero` and the backdrop layering into this branch, and once after — and
+  unchanged across both. An instrument that fires on a healthy tree is an instrument that gets
   ignored, so this is the property that matters most and it is the one that will
   need re-checking when it next fires.
 - The exit code is where this decision is most likely to be revisited, and the

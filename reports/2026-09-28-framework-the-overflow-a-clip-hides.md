@@ -3,8 +3,16 @@
 **Routine:** `Loom daily build` (framework, `src/` except `src/primitives/`, and the application shell)
 **Date:** 2026-09-28
 **Section:** §1 (process)
-**Branch:** `framework-58-the-overflow-a-clip-hides` — branched off `origin/main` at `809a970`; this lane had no open pull request of its own
+**Branch:** `framework-58-the-overflow-a-clip-hides` — branched off `origin/main` at `809a970`; this lane had no open pull request of its own. `Loom merge` brought `main` in at 15:32 and regenerated the decisions index, which is its documented behaviour; everything measured below was re-taken afterwards
 **Record added:** [0202](../decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md)
+
+> **This correction arrived a second time, and the reason is worth one line.**
+> The code landed in #433. These re-taken numbers were pushed four minutes
+> before that merge and missed it, because `Loom merge` had already read the
+> head — so the report and 0202 landed on `main` quoting the tree they were
+> first measured on rather than the tree that shipped. Nothing in the code
+> differs. The finding at the foot of this run's entries says what the race is
+> and how a lane avoids it.
 
 ![The page the old measurement called clean](2026-09-28-framework-a-clip-hides-an-overflow-phone.png)
 
@@ -79,13 +87,25 @@ the element is.
 ## The numbers this rests on
 
 Everything below was run against this branch, on a production build, with the
-harness starting the application itself (`built 2026-09-28T09:18:53.866Z`).
+harness starting the application itself.
+
+**Taken twice, and the second time is the one that counts.** `Loom merge`
+brought `main` into this branch at 15:32, and `main` had meanwhile gained #432 —
+which changes `loom.hero`'s two measures and lifts a band's content above its
+own paint. That is the corner of the library this instrument is most about, so
+the whole table was re-taken on the merged tree (`built
+2026-09-28T15:45:53.661Z`) rather than left standing on a tree that no longer
+exists.
 
 | subject | shots | clipping boxes reported |
 | --- | --- | --- |
 | four surfaces — 16 public pages at `phone` and `wide` | 32 | **0** |
-| every committed specimen in `src/primitives/` (18) and `tools/specimen/` (4) | 88 | **0** |
-| `a-clip-hides-an-overflow`, written to be found | 2 | **1**, at `phone` only |
+| every committed specimen in `src/primitives/` (19) and `tools/specimen/` (4) | 94 | **0** |
+| `a-clip-hides-an-overflow`, written to be found | 2 | **1**, at `phone` only, unchanged at `content reaches 370 in 346` |
+
+The corpus grew by six shots between the two runs, because #432 committed a
+specimen of its own. Nothing else moved: zero before the merge and zero after
+it, with the hero's measures changed underneath.
 
 **The zeroes are the number that matters.** An instrument that fires on a
 healthy tree is an instrument that gets ignored, and the first three builds of
@@ -95,9 +115,11 @@ own tree, committed at
 again — and photographed at `wide` as well, where the content fits and the line
 is clean, which is the control.
 
-`pnpm verify` green: **3248 + 5560 tests** (166 + 320 files), 862 findings 0
-malformed, 114 prerendered pages, 1304 text junctions 0 run together. The
-framework suite is 8 tests up on `main`'s 3240, which is this change.
+`pnpm verify` green on the merged head: **3250 + 5560 tests** (166 + 320 files),
+864 findings 0 malformed, 114 prerendered pages, 1304 text junctions 0 run
+together. Before the merge it was 3248 + 5560 and 862 findings; the two extra
+tests and one of the extra findings are #432's, not this branch's; the other is
+the merge-window race this run hit and filed. Eight of the 3250 are this change.
 
 ## The exit code, left alone deliberately
 
