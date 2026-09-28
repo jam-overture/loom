@@ -69,7 +69,7 @@ which 0031 refuses:
 | a person reads a rate and moves a floor | a person | **what 0031 asks for** |
 | a rate moves a floor | the runtime | **what 0031 refuses** |
 
-0198 draws that line, and its fourth clause is the one to quote at anything that
+0200 draws that line (written as 0198 and renumbered — see below), and its fourth clause is the one to quote at anything that
 later looks like automation: **no measurement in this system may write a policy, a
 delta or an intent.** A signal does not become an intent; a gap does not move a
 floor; an A/B result does not promote a variant. Every one of those is a button.
@@ -182,7 +182,7 @@ switch, and arranging several excerpts in their page positions.
 than discovers, which is the honest description: neither existed as a problem
 until the plan committed to something that needs them.
 
-1. **A policy can be changed and there is nowhere to record it.** 0198 requires a
+1. **A policy can be changed and there is nowhere to record it.** 0200 requires a
    policy change to carry who, when and what it was before. `policyFingerprint`
    proves two judgments used different rules and cannot say how they differed — a
    hash is not a history. Blocking phase 7 entirely, blocking nothing before it.
@@ -207,7 +207,7 @@ would be a plan nobody reviewed.
 
 ## Recommendations
 
-1. **Accept or amend 0198 and 0199.** Phases 1–4 need neither; phases 5–7 need
+1. **Accept or amend 0200 and 0199.** Phases 1–4 need neither; phases 5–7 need
    both. Nothing is blocked today.
 2. **Phase 1 next, as one pull request.** It is the thing he actually complained
    about, and until there is a front door every screen this lane has built is

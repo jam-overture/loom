@@ -282,9 +282,39 @@ shown on one screen, and a lane-wide guard is not.
 ---
 ## 2026-09-27 — a refusal read back out of the record can name the rule and never the reason, because the factors are not stored
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— **`ARCHITECTURAL — needs review`**, because the answer is a field on
-`dispositionSchema` or `assessmentSummarySchema` and both are the framework's
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by
+[0198](decisions/0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md)
+and #428, the night it was filed. Filed as `ARCHITECTURAL — needs review`,
+because the answer was a field on `dispositionSchema` or
+`assessmentSummarySchema` and both are the framework's
+
+> **Closed 28 September, and the answer is narrower than what was asked for in
+> exactly the way that matters.** This entry recommended
+> `factors: readonly StakeFactor[]` — the whole factor, clause and detail and
+> level. 0198 ships **`stakeFactorCodes`**: the codes only, optional and never
+> defaulted (0045), with `detail` deliberately withheld because it is a sentence
+> naming nodes and types, and `level` withheld because it is recoverable from
+> what the summary already carries.
+>
+> **That is enough for the hazard this entry was actually about.** `cannotBeDrawn`
+> is a test over `UNDRAWABLE = ["unknown-primitive", "invalid-props"]`, which is a
+> set of **codes** — so every screen that reads a refusal back can now tell *this
+> cannot be drawn at all* from *your rules turned this down*, and stop sending a
+> reader to `/portal/rules` to loosen a rule that, loosened, would commit a broken
+> page. `factorClause(code)` supplies the reader's sentence without the runtime's
+> own `detail`.
+>
+> **What is still not recoverable** is the Gate's per-factor account — *"adds a
+> node no primitive is registered for: app.gallery at n_7"* — which stays in the
+> joined `disposition.reason.detail` and cannot be put beside the clause it
+> belongs to. That is a smaller thing than this entry claimed and it is the right
+> trade: 0023 keeps content out of the record, and a node id is content.
+>
+> **The portal's half is not built.** `ProposalLine`, the waiting cards and the
+> review queue all still answer *why did this stop* with the rule. That is a
+> portal unit now rather than a framework gap, and it is the first thing in this
+> lane that 0198 unblocks.
 
 `_lib/refusal.ts` exists for one sentence in its own header, and the sentence is
 right:
@@ -411,11 +441,11 @@ branch is about what a reader is shown, and a staging harness is not.
 ## 2026-09-27 — a policy can be changed and there is nowhere for that change to be recorded
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
-[0198](decisions/0198-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
+[0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
 (`Proposed`) and `docs/portal.md` phase 7 · **Status:** open — **not blocking
 phases 1–4**, and blocking phase 7 entirely
 
-0198 decides that the portal may put a policy control next to the measurement
+0200 decides that the portal may put a policy control next to the measurement
 arguing for it, and that **a change to policy is a change a person made, recorded
 as one** — who, when, and what it was before.
 

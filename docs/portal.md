@@ -45,11 +45,22 @@ Two things are genuinely absent: **A/B serving**, and the `completed` signal kin
 (step 2 of `signals.md`, approved and unbuilt) without which the portal can
 measure attention and **not conversion**.
 
+**One thing stopped being absent overnight.** This lane filed on 27 September that
+a refusal read back out of the record can name the rule and never the reason,
+because the stake factors were not stored;
+[0198](../decisions/0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md)
+and #428 landed `stakeFactorCodes` on `AssessmentSummary` the same night. So
+**explaining a refusal you come back to tomorrow is now a portal unit**, not a
+framework gap — `cannotBeDrawn` tests a set of codes, and the codes now cross.
+It is not in the phases below because it belongs to whichever of them touches
+the review queue first, and it is worth doing before phase 7 rather than after:
+a lever beside the evidence is worth less when the evidence cannot say why.
+
 ## The two records this plan rests on
 
 Both written 27 September, both `Proposed`, both the maintainer's to accept.
 
-- **[0198](../decisions/0198-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)**
+- **[0200](../decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)**
   — the portal may put a control next to the measurement that argues for it; a
   person always pulls it; **no measurement in this system may write a policy, a
   delta or an intent.** It also records that the portal routine's first reading
@@ -170,16 +181,16 @@ refuses a visitor id, and a split that persists across visits is exactly one);
 whether a variant is a revision or something else; what happens to a variant when
 the Gate accepts a change underneath it.
 
-### 7. Results, and the levers · `Loom portal` · **after 6, under 0198**
+### 7. Results, and the levers · `Loom portal` · **after 6, under 0200**
 
 Read a test's results, and — beside them — the controls that act on what they
-say. Under 0198: the person pulls the lever, the result never does, and the
+say. Under 0200: the person pulls the lever, the result never does, and the
 portal says which of the two happened. A policy change is recorded like any other
 change, which needs a **policy history the framework does not have** — filed.
 
 ## Still not in scope
 
-- **A measurement writing anything.** 0198 clause 4. A signal does not become an
+- **A measurement writing anything.** 0200 clause 4. A signal does not become an
   intent, a gap does not move a floor, an A/B result does not promote a variant.
   Every one of those is a button.
 - **Moving a node by hand.** 0199 clause 4 — an open question with the

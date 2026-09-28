@@ -1,8 +1,13 @@
-# 0198. The portal may place a lever beside the evidence, and a model may never pull one
+# 0200. The portal may place a lever beside the evidence, and a model may never pull one
 
 **Status:** Proposed
 **Date:** 2026-09-27
 **Section:** §5
+
+> **Renumbered from 0198 on 28 September 2026.** `Loom daily build` landed
+> [0198](0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md)
+> on `main` the same night this was written, so the number was taken before this
+> branch merged. Nothing this record decides has changed.
 
 ## Context
 
