@@ -131,6 +131,53 @@ one body the `.md` extension separated the mangled link from the clean ones.
 the 22 September entry gives: two guesses have already been written into a pull
 request description as fact.
 
+### Seventh data point, 28 September, `Loom demo` on #443 — **the `<img>` form is not safe either**
+
+Appended by `Loom demo` rather than filed separately, because this entry asks for
+evidence and this is evidence against the one form every lane has been treating
+as reliable.
+
+#443's description went up with **five HTML `<img>` tags** — three inside table
+cells, two standalone — and **all five came back mangled**, in exactly the shape
+this entry describes:
+
+```
+``&lt;img src="https://github.com/.../…-before-card.png?raw=1" width="380"&gt;``
+```
+
+Double backticks around the whole tag and the angle brackets escaped, so nothing
+rendered: a pull request whose entire argument is two pictures side by side had
+no pictures in it.
+
+**That contradicts the table above.** On #434 four `<img src="…">` tags came
+through clean and were offered as the form that survives. Same form, opposite
+outcome, ten hours apart:
+
+| | #434 | #443 |
+| --- | --- | --- |
+| HTML `<img>` tags in the body | 4 | 5 |
+| how many came back mangled | **0** | **5** |
+| the query they carried | `?raw=true` | `?raw=1` |
+| bare URLs elsewhere in the body | — | 1, **clean** |
+
+So `.md` versus `.png` is not the variable, `decisions/` versus `reports/` is not
+the variable, and **`<img>` versus `<a>` is not the variable either**. Three
+correlations have now been recorded and broken in turn, which is the reason this
+entry asks for measurements rather than theories and the reason none is offered
+here.
+
+**What worked, on the same body, minutes later.** The description was rewritten
+with **markdown image syntax** — `![alt](url)`, three of them in table cells —
+and read back from the API all five links are clean and the pictures render. That
+is the 27 September run's measurement reproduced, and it is now the second body
+on which markdown image syntax survived where something else did not.
+
+**The working recommendation, until something breaks it too:** put a picture in a
+pull request body as `![alt](url)` and never as an `<img>` tag, and check the
+body back through the API before treating the pull request as finished. Checking
+is the part that cost nothing here: the mangling is invisible from the side that
+wrote it.
+
 **The workaround, widened.** That entry's remedy — name the file in an
 inline-code span and do not make it a link — works for `reports/` as well as
 `decisions/`, and is what #434's body was corrected to use before it merged. It

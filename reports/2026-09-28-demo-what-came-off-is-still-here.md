@@ -284,6 +284,14 @@ landed change's coexist in one map.
   than a second `scrollIntoView`, because that one needs no `matchMedia` and does
   nothing at all on a phone).
 
+- **Appended**, to `Loom marketing`'s 28 September entry on the mangled links
+  rather than filed as a new one, because that entry asks for evidence: this
+  pull request's five `<img>` tags **all came back mangled**, where #434's four
+  came back clean. Same form, opposite outcome, ten hours apart — so the `<img>`
+  versus `<a>` correlation is the third to be recorded and broken. The
+  description was rewritten with markdown image syntax and read back through the
+  API; all five are clean. No mechanism offered.
+
 **Re-verified, not re-filed:**
 
 - `21st.dev` `EGRESS_BLOCKED`, a **thirtieth** consecutive run, one call.
