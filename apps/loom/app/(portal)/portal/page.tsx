@@ -5,6 +5,8 @@ import { describeStoreError } from "@jam-overture/loom/store"
 import { describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
 import { CheckupInvitation } from "@/app/(portal)/_components/checkup-invitation"
+import { ListOrder } from "@/app/(portal)/_components/list-order"
+import { MIN_CARD_WIDTH, PageCardLink, type PageCard } from "@/app/(portal)/_components/page-card"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
@@ -15,6 +17,7 @@ import { WaitingCard } from "@/app/(portal)/_components/waiting-card"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { checkupReach } from "@/app/(portal)/_lib/checkup-reach"
 import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
+import { inPageOrder, needsYouRank } from "@/app/(portal)/_lib/page-order"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { screenName } from "@/app/(portal)/_lib/screen-names"
 import { isAuditable } from "@/app/(portal)/_lib/seeds"
@@ -249,6 +252,46 @@ const PortalHome = async () => {
    */
   const rows = inQueueOrder(changes, unreadableChanges, waitingSince)
 
+  /**
+   * The person's pages, as the front door's first section.
+   *
+   * ## Every fact here was already read
+   *
+   * This is the whole reason phase 1 leads with it. `trees` is the listing this
+   * screen has always opened with; `perPage` is the per-page hold read it has
+   * always fanned out; `heads` is the read kept since 17 September so a waiting
+   * change could be described against the page it is waiting on. A card adds
+   * **no store read at all** — it renders a tree that is already in memory.
+   *
+   * A page whose head would not read is absent from `heads` rather than
+   * standing in for itself, and the card says so instead of drawing an empty
+   * frame: a page that could not be read and a page with nothing on it look
+   * identical drawn and are opposite facts.
+   *
+   * ## The order is the portal's, and it is `/portal/pages`'
+   *
+   * `needsYouRank`, so a page with changes waiting leads — the same rung, on the
+   * same facts, as the screen this section links to. Two screens listing one set
+   * of pages in two arrangements is the defect `_lib/page-order.ts` exists to
+   * remove, and a dashboard that disagreed with the index it is a summary of
+   * would be the sharpest instance of it yet.
+   */
+  const cards: readonly PageCard[] = inPageOrder(
+    trees.map((listing, index): PageCard => {
+      const holds = perPage[index]
+
+      return {
+        page: nameFrom(names, listing.treeId),
+        treeId: listing.treeId,
+        waiting: holds?.ok ? holds.value.held.length : null,
+        unreadable: holds?.ok ? holds.value.unreadable.length : 0,
+        version: listing.revision,
+        tree: heads.get(listing.treeId),
+      }
+    }),
+    (card) => ({ rank: needsYouRank(card), page: card.page })
+  )
+
   /*
    * What this screen did *not* look at, carried beside what it found.
    *
@@ -327,6 +370,82 @@ const PortalHome = async () => {
        * arguing with itself.
        */}
       <ElsewhereNote from="/portal" />
+
+      {/*
+       * The pages themselves, first — which is phase 1 of `docs/portal.md` and
+       * the maintainer's verdict of 27 September answered in one section.
+       *
+       * Before this, `/portal` opened on a queue. A queue answers *what needs
+       * me* and a person arriving with nothing waiting met an empty one, on the
+       * one surface whose whole subject is pages that exist nowhere else they
+       * could be looked at. So the pages lead, drawn, and the two queues below
+       * are demoted to what they always were: the things that have happened to
+       * them.
+       *
+       * It is above `Waiting on you` and not folded into it, because the two
+       * answer different questions and a card that also carried a change's
+       * account of itself would be the review queue with pictures. What is
+       * waiting is a *mark* here and a *row* there.
+       */}
+      {/*
+       * Nothing at all when there are no pages, and that is a guard's finding
+       * rather than a choice I made well.
+       *
+       * The first draft of this section carried its own `tone="empty"` notice
+       * headed *"You don't have any pages yet."* with its own link to the demo.
+       * `reading-order.test.ts` failed twice and was right both times: this
+       * screen **already has** that state — *"You don't have any pages yet, so
+       * nothing can be waiting."*, with the same action and a disclosure saying
+       * how a page arrives — and two dashed boxes saying overlapping things with
+       * two links to one destination is precisely the stutter the caught-up
+       * state was fixed for on 17 September.
+       *
+       * So the no-pages state stays where it was, said once, and this section
+       * is absent rather than empty. A heading over nothing is the same defect
+       * one size smaller.
+       */}
+      {cards.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <header className="flex flex-col gap-1">
+            <h2 className="text-lg tracking-tight">Your pages</h2>
+            {/*
+              * What this section is, and deliberately **not** how much is
+              * waiting. That count is a mark on each card and the whole subject
+              * of the section below, and saying it a third time here is the
+              * stutter above in its other spelling.
+              */}
+            <p className="text-ink-muted text-xs">
+              {cards.length} {cards.length === 1 ? "page" : "pages"}, each drawn from what Loom
+              has stored for it.
+            </p>
+          </header>
+
+          <ListOrder order="needs-you-first" />
+
+          <ul
+            className="grid gap-3"
+            style={{
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${MIN_CARD_WIDTH}px), 1fr))`,
+            }}
+          >
+            {cards.map((card) => (
+              <li key={card.treeId} className="flex">
+                <PageCardLink card={card} />
+              </li>
+            ))}
+          </ul>
+
+          {/*
+            * The way out of the summary and into the paged index, at the end of
+            * the list — `page-views.ts`' rule for every other "show me all of
+            * these" in this portal, and the position the strip this replaced
+            * could not have had.
+            */}
+          <Link href="/portal/pages" className="self-start text-xs">
+            See all your pages &rarr;
+          </Link>
+        </section>
+      )}
 
       <section className="flex flex-col gap-4">
         <header className="flex flex-col gap-1">
@@ -613,26 +732,21 @@ const PortalHome = async () => {
       {trees.length > 0 && <CheckupInvitation reach={reach} />}
 
       {/*
-       * Every screen in the portal is a view of the same deployment, and this
-       * one is where somebody arrives. The way out says what the other question
-       * is: which pages there are.
+       * The strip that used to sit here is gone, and its own argument is why.
        *
-       * It was two links, and the second read "Everything anyone has asked for
-       * →" — a fourth wording for `/portal/activity`, which the rail called
-       * `Activity`, its own heading called `Activity`, and the strip called
-       * "What's been asked". That destination is named once now, in the line
-       * under this screen's heading, where it arrives as the scope of what a
-       * reader is about to read rather than as an afterthought at the bottom.
+       * It was one link — `Your pages →` — and its comment said the question it
+       * answered was *"which pages there are"*. That question is answered above
+       * now, on the screen, by the pages themselves; the link to the paged index
+       * moved into that section, where the list it pages through is, which is
+       * `page-views.ts`' rule for every other way out in this portal.
        *
-       * Withheld when there are no pages, because it leads to an empty screen
-       * and a dead end under an empty state is worse than no link. The one
-       * thing to do then is the empty state's own action.
+       * Leaving it would have put `Your pages` on this screen twice — once as the
+       * heading over the actual pages and once as a link at the bottom, six
+       * sections apart. That is the exact defect a screenshot found on
+       * 17 September and which `reading-order.test.ts` has guarded since; the
+       * guard is now stated over the whole screen rather than over this strip,
+       * which is strictly more than it could check from here.
        */}
-      {trees.length > 0 && (
-        <nav className="text-ink-muted flex flex-wrap gap-4 text-xs">
-          <Link href="/portal/pages">Your pages →</Link>
-        </nav>
-      )}
 
       {holdsAreDurable ? null : (
         <StateNotice tone="notice">

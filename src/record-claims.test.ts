@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 import { ESCALATION_LADDER } from "./runtime/gate.js"
+import { STAKE_FACTOR_CODES } from "./runtime/stakes.js"
 import { treeOperationSchema } from "./tree/delta.js"
 
 /**
@@ -58,6 +59,7 @@ const NUMBER_WORDS = [
   "ten",
   "eleven",
   "twelve",
+  "thirteen",
 ] as const
 
 const wordFor = (count: number): string => {
@@ -98,6 +100,12 @@ const CLAIMS: readonly RecordClaim[] = [
     sentence: /The operation count is held at (\w+)/,
     count: treeOperationSchema.options.length,
     matters: "the limit that makes everything AI produces gateable",
+  },
+  {
+    record: "0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md",
+    sentence: /one of (\w+) fixed strings/,
+    count: STAKE_FACTOR_CODES.length,
+    matters: "the argument for letting the codes into a retained corpus is that the set is closed and small",
   },
 ]
 

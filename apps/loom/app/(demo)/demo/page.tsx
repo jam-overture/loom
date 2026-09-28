@@ -118,6 +118,18 @@ const DemoPage = async () => {
         {...(rendered.theme ? { theme: rendered.theme } : {})}
       />
     ),
+    /**
+     * And the same rendering one step earlier, for the ask nobody has pressed
+     * yet. Same callback shape and the same reason it is a callback: the
+     * registry stays on the server and what crosses the client boundary is an
+     * element that has already been rendered with it.
+     */
+    showAsk: (part) => (
+      <PartInQuestionView
+        part={part}
+        {...(rendered.theme ? { theme: rendered.theme } : {})}
+      />
+    ),
   })
 
   return (
@@ -165,6 +177,7 @@ const DemoPage = async () => {
             available={rail.available}
             modelConfigured={isDemoModelConfigured}
             {...(rail.waiting === undefined ? {} : { waiting: rail.waiting })}
+            {...(rail.leading === undefined ? {} : { leading: rail.leading })}
           />
 
           {rendered.diagnostics.length > 0 && (
