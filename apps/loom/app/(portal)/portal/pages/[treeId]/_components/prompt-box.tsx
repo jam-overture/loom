@@ -6,6 +6,7 @@ import { ChangeReasoning } from "@/app/(portal)/_components/change-reasoning"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { toneClasses, type WriteReport } from "@/app/(portal)/_lib/outcome"
+import { scopeNodeIdOf, scopeWords } from "@/app/(portal)/_lib/selection-scope"
 
 import { proposeChange } from "../actions"
 import { useSelection } from "./selection-context"
@@ -39,6 +40,27 @@ import { useSelection } from "./selection-context"
  * headline and sentence on the surface, the runtime's own account of the write
  * behind a disclosure. It used to print `report.detail` — `describeWriteOutcome`,
  * with its error codes — as the body text under the headline.
+ *
+ * ## What phase 2 changed here, and it is the load-bearing half of it
+ *
+ * A reader can now pick several parts, and a scope is one subtree. So the box no
+ * longer reads the selection: it reads `_lib/selection-scope.ts`, which works
+ * out the smallest part holding everything picked — and **this is the screen
+ * where that widening is said out loud.**
+ *
+ * 0019 is explicit that a selection resolving to something other than what was
+ * picked is stated rather than performed silently, and the only place a
+ * statement of it is worth anything is beside the button that acts on it. Two
+ * cards picked at either end of a page means Loom is asked about the page; two
+ * bands inside one card means it is asked about the card, and it may change the
+ * rest of the card's contents on the way. Both of those are facts a person needs
+ * *before* pressing `Ask Loom`, not in the report afterwards.
+ *
+ * The line is therefore two strings rather than one. The short one sits where
+ * `Just this part: …` always sat, and the sentence saying what it costs sits
+ * under the box — on the surface and not behind a disclosure, because a
+ * consequence a reader has to open something to find is a consequence they meet
+ * for the first time in their page's history.
  */
 export const PromptBox = ({
   treeId,
@@ -49,11 +71,19 @@ export const PromptBox = ({
   readonly revision: number
   readonly configured: boolean
 }) => {
-  const { selected } = useSelection()
+  const { scope } = useSelection()
+  const words = scopeWords(scope)
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(
     proposeChange,
     null
   )
+
+  /**
+   * The part a change would be about, when there is one to name. `nothing` and
+   * `spread` both come back as no scope at all, and naming a part there would be
+   * naming one the reader did not pick.
+   */
+  const named = scope.kind === "part" || scope.kind === "around" ? scope.row : null
 
   return (
     <section className="flex flex-col gap-3">
@@ -68,22 +98,30 @@ export const PromptBox = ({
             * every part now, so the name leads and the id follows it, quieter,
             * in the order 6 September settled.
             */}
-          {selected ? (
+          {words.label}
+          {named && (
             <>
-              Just this part: {selected.label}{" "}
-              <span className="font-mono">{selected.nodeId}</span>
+              : {named.label} <span className="font-mono">{named.nodeId}</span>
             </>
-          ) : (
-            "Anywhere on this page"
           )}
         </span>
       </div>
+
+      {/*
+        * Under the heading and above the box, which is the one place a reader
+        * passes through on the way to typing. `data-scope` is for the shot list
+        * and for a test: the sentence is the thing being asserted, and finding
+        * it by its words would break the moment somebody improves them.
+        */}
+      <p className="text-ink-muted text-xs" data-scope={scope.kind}>
+        {words.meaning}
+      </p>
 
       {configured ? (
         <form action={submit} className="flex flex-col gap-3">
           <input type="hidden" name="treeId" value={treeId} />
           <input type="hidden" name="baseRevision" value={revision} />
-          <input type="hidden" name="scopeNodeId" value={selected?.nodeId ?? ""} />
+          <input type="hidden" name="scopeNodeId" value={scopeNodeIdOf(scope)} />
 
           <textarea
             name="utterance"

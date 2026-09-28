@@ -33,6 +33,22 @@ describe("outlineRows", () => {
   })
 
   /**
+   * Dropped until phase 2 needed it. The smallest part of a page that holds
+   * everything a reader picked is worked out from these, and a view model that
+   * forgot which part a part sits in left `_lib/selection-scope.ts` inferring
+   * nesting from a run of depths — the same answer derived from a weaker fact.
+   */
+  it("says which part each row sits inside, and nothing for the page itself", () => {
+    const rows = outlineRows(treeWith("Title"), everything)
+
+    expect(rows.map((row) => row.parentId)).toEqual([
+      null,
+      rows[0]?.nodeId,
+      rows[1]?.nodeId,
+    ])
+  })
+
+  /**
    * The rail printed `loom.page` over `loom.heading` over the words, which is
    * the registry describing itself to somebody who has a page with a heading on
    * it. A row is a place, and a place is named by what it is.
