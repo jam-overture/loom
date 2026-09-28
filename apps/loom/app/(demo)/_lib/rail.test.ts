@@ -624,12 +624,18 @@ describe("what a landed change is still holding", () => {
   })
 
   /**
-   * The fold, rather than the overwrite. Three loops write one map and the
-   * third is this one; a `set` that replaced the entry would take the
-   * question's preview, its plain reading and its effect with it, and the way
-   * a map written by three loops fails is silently.
+   * Two records, two kinds of reading, one map — a landed change holding what
+   * it took, above a question that still has its preview, its plain reading
+   * and its effect.
+   *
+   * **It is not a test of the fold, and the defect matrix is what settled
+   * that.** Replace the third loop's spread with a bare `set` and nothing goes
+   * red, because the only entries it writes are landed records and a landed
+   * record has no other reading to lose. The spread stays — three loops write
+   * one map and the way that fails is silently — and the claim tested here is
+   * the one that can fail: that the two kinds of reading coexist at all.
    */
-  it("adds to a record's reading rather than replacing it", async () => {
+  it("keeps a question's readings and a landed change's side by side", async () => {
     const session = await sessionFor("kept-fold")
     const asked = await ask(session, DEMO_LEADING_PRESET)
     const landed = await allow(asked.session, asked.record)

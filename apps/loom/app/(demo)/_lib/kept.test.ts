@@ -215,6 +215,35 @@ describe("the part a landed change is still holding", () => {
   })
 
   /**
+   * **And still nothing when the page has lost the band some other way**,
+   * which is the only state in which the outcome is doing any work — and the
+   * defect matrix is what said so: restore `outcome !== "applied"` and the
+   * case above goes on passing, because a hold nobody has answered leaves the
+   * band exactly where it is and `partFromOperations` refuses a node the page
+   * still has.
+   *
+   * `moved.ts` is the state this is about: a hold whose page moved under it.
+   * The Gate weighed a removal, the visitor left it open, something else took
+   * the band off, and the record is still `awaiting-you` with an inverse
+   * describing a node this tree does not have. Drawn, it would say *this is
+   * what came off the page* on the one card whose whole subject is a change
+   * that never happened.
+   *
+   * The record is the real one with its outcome put back, which is the shape a
+   * hold has. Nothing about the inverse is invented — that is the point of
+   * every other case in this file and it is the point of this one.
+   */
+  it("shows nothing for a change that is still waiting on a page that has lost the band", async () => {
+    const { record, tree } = await landedRemoval("stale-hold")
+
+    expect(partTheRecordKept(tree, record)).toBeDefined()
+
+    const waiting: ChangeRecord = { ...record, outcome: "awaiting-you", heldProposalId: "p_1" }
+
+    expect(partTheRecordKept(tree, waiting)).toBeUndefined()
+  })
+
+  /**
    * And nothing for the changes whose inverse names something still on the
    * page. A re-theme's inverse is one configure against the root, a move's is
    * a move, and an added band's is a remove — in all three the subject is on

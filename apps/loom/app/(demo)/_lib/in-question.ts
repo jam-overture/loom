@@ -113,11 +113,12 @@ const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
  * happened and the thing is still here.
  *
  * **One string rather than a table, because this moment is only ever reached
- * for one operation** — see the refusal in `partFromOperations`. An inverse
- * that removes, moves or configures names a node the visitor can already see on
- * the stage, and an excerpt of that proves nothing; an inverse that *inserts*
- * names a node the page does not have, which is the only case where showing it
- * is showing something the record alone is holding.
+ * for one operation**, and `partFromOperations` is where that is made true. An
+ * inverse that removes, moves or configures reads its subject out of the tree
+ * on the stage, so its subject is by construction a thing the visitor can
+ * already see — and the refusal that withdraws a spent undo refuses those in
+ * the same line. An inverse that *inserts* carries its node, which is the only
+ * case where drawing it is drawing something the record alone is holding.
  */
 const KEPT_LEAD = "This is what came off the page. The record is still holding it."
 
@@ -174,15 +175,14 @@ export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion
  * - **There are no operations**, which no interpreter should produce and
  *   nothing downstream should assume it cannot.
  *
- * And two are the `kept` moment's alone, because that moment makes a claim in
+ * And one is the `kept` moment's alone, because that moment makes a claim in
  * the past tense and the other two make theirs in the conditional:
  *
- * - **The operation is not an insert.** `KEPT_LEAD` says *this is what came
- *   off the page*, and the inverse of a configure or a move names a node that
- *   is still on it.
- * - **The tree already has the node.** An undo puts a node back with the id it
- *   had (0032), so this is what withdraws the excerpt the moment the visitor
- *   spends it — without the excerpt having to be told.
+ * - **The tree already has the node.** It withdraws the excerpt the moment a
+ *   visitor spends the undo, because the nodes come back with the ids they had
+ *   (0032) — and it is also what keeps the sentence off an operation that
+ *   could not have removed anything, since every operation but an insert reads
+ *   its subject out of this tree.
  */
 export const partFromOperations = (
   tree: LoomTree,
@@ -192,25 +192,25 @@ export const partFromOperations = (
   const operation = operations[FIRST]
   if (operation === undefined) return undefined
 
-  /*
-   * **Kept is an insert, or it is nothing**, and this is where that is made
-   * true rather than left to the caller to remember. `KEPT_LEAD` says *this is
-   * what came off the page*, and a configure or a move reaching this branch
-   * would put that sentence over a part of the page that is still on it.
-   * `kept.ts` chooses which records get here; this is what stops a fifth
-   * caller from choosing wrong.
-   */
-  if (where === "kept" && operation.op !== "insert") return undefined
-
   const subject = subjectOf(tree, operation)
 
   /*
-   * And the node it carries must not be on the page. An inverse is computed
-   * against the tree the change was judged against, so once an undo has landed
-   * the node is back — with the id it had (0032) — and an excerpt captioned
-   * *came off the page* would be pointing at a band three inches away on the
-   * stage. The refusal is what withdraws the excerpt at the moment it stops
-   * being true, and it needs no state of its own to do it.
+   * **Kept draws a node the page does not have, or it draws nothing**, and
+   * that one refusal is the whole of what keeps `KEPT_LEAD` honest.
+   *
+   * It does two jobs and they looked like two conditions. *This is what came
+   * off the page* must not stand over something still on it — so once an undo
+   * has landed and the nodes are back with the ids they had (0032), the
+   * excerpt goes, with no flag and nothing to remember to clear. And the
+   * sentence must not stand over an operation that could not have taken
+   * anything off at all.
+   *
+   * **The second was written as its own `op !== "insert"` line and the defect
+   * matrix caught it by nothing**, which is the useful kind of nothing: for
+   * every operation but an insert, `subjectOf` is `findNode` against this very
+   * tree, so a subject that exists is a subject the page has and this refusal
+   * has already fired. A guard no restoration can make fail is a claim no test
+   * can check, so it is gone and the reasoning is here instead.
    */
   if (where === "kept" && subject !== undefined && findNode(tree.root, subject.id) !== null) {
     return undefined
