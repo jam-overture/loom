@@ -302,6 +302,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [27](27-scale.md) | Scale: the fact a sibling holds and a renderer may not reach | Why a container cannot read its own children and what the obvious way round it spends; what you inherit when you hand a computation to a different machine, and which ordinary chart features that machine's data model forbids; why the number the whole design was built to deliver is computed by nobody and is not supposed to be — and what it costs that a record's argument for authoring it is implemented as an optional prop with a default. |
 | [28](28-corroboration.md) | Corroboration: the claim that exists only once | What a check actually is, and why that rules out most of what a repository writes down; the three places a second copy of a fact can come from and what each one costs; why a bare citation cannot be held to its own meaning and a linked one can — and what you take on the moment you manufacture a second copy, given that the bill goes to somebody who has never read your file. |
 | [29](29-readership.md) | Readership: the declaration with more than one reader | Why the registry can hold four of a primitive's declarations against its props schema and cannot hold the schema against its own component; what property a dropped slot has that an unread prop does not, and what that rules out for any check built on watching output; how to make a read observable, and why the seven suspects that turns up include no defects and one security boundary working exactly as designed — and what it means that *does the component read this* was a question about the wrong party. |
+| [30](30-rendezvous.md) | Rendezvous: the name two parties have to spell the same | Why two of the three parts of a binding can be refused before anything is drawn and the third could not be; what a system does when the fact it wants to check exists in exactly one place, and who pays for the second copy; why the declaration that closes the seam is a rule rather than a list, and how a plain list of names turns out to be silent on the broken page and loud on the working one — and what it meant that the write path, asked about the same node, refused a page with nothing wrong with it. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -469,6 +470,27 @@ and a props schema has six. So the question to carry forward is not lesson 28's
 *where is the second copy* but **who is this declaration for** — and when its
 audiences live in packages you cannot see, the honest deliverable is a list of
 candidates for a person to classify rather than a gate.
+
+Lesson 30 is the first Part V seam whose fact was never written down twice at
+all. A binding has three parts and two of them are **references** — a source id
+into a registry, params into the source's own schema — so each can be refused by
+asking whoever holds the other end. The third is the *name* the answer is filed
+under, which the tree writes and a component looks up, with no third party
+holding a copy. So the two cheap mistakes are loud and refused before anything is
+drawn, and the expensive one — a query paid for in full and then dropped on the
+floor — renders an empty region and says nothing, because looking up a key that
+is not there is not an event in JavaScript.
+
+With nothing to compare to and nothing able to derive a second copy, the only
+source left is lesson 28's third: **ask an author to write it down.** What
+decides that it was worth the rot is that the declaration is not only the input
+to a check — it is what a model is shown, so the prompt's instruction went from
+*do not invent a binding name* to *here are the names that exist*, which is a
+capability rather than a guard. And the shape of the declaration is the part to
+carry: the obvious version, a list of names, is not a weaker form of the right
+answer but an inverted one — silent on the broken page and loud on the working
+one — because the name can itself come from a prop. When you write a fact down so
+that something can check it, ask what the fact is a *function of* first.
 
 ## Pacing
 
