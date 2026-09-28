@@ -123,17 +123,19 @@ own tree, committed at
 again — and photographed at `wide` as well, where the content fits and the line
 is clean, which is the control.
 
-`pnpm verify` green on every head this run produced. The last of them, at 16:46:
-**3250 + 5579 tests** (166 + 323 files), 868 findings 0 malformed, 114
-prerendered pages, 1304 text junctions 0 run together. It was 3248 + 5560 and
-862 findings on the branch as written; everything between those two readings and
-these belongs to the four pull requests that merged underneath, except **eight
-framework tests and two findings**, which are this run's.
+`pnpm verify` was green on every head this run produced, the last included.
 
-Quoted as *the last head this run produced* rather than as a fact about `main`,
-deliberately. A count in a dated report that is worded as a standing claim has
-to be chased every time anything merges, which is a treadmill and was already
-half a lap in when this sentence was rewritten.
+**The framework suite is 3250 tests, and eight of them are this change.** That
+is the figure this run owns, and no other lane's merge moves it. Everything else
+in the gate climbed while this was open — the application suite 5560 → 5582, the
+findings 862 → 869, the prerendered pages 114 → 116 — because five other pull
+requests landed underneath, and none of that movement is this run's. Two of the
+findings are: the halo's clipped rim, and the merge-window race below.
+
+Written that way after the third rewrite of this paragraph. A count in a dated
+report, phrased as a standing fact about the repository, has to be chased every
+time anything merges; this one was chased twice before it was worth admitting
+that the sentence was the defect rather than the number in it.
 
 ## The exit code, left alone deliberately
 
