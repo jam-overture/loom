@@ -6,20 +6,49 @@ inspector.**
 **Branch:** `portal-40-the-parts-you-picked` (→ `main`), cut from `main` at
 `777baf6`. Not stacked. `main` was not pushed to.
 
-**No open pull request of this lane's.** #424 (the plan) and #425 (phase 1, the
-front door) are both merged, so `docs/routines.md` step 3's *push onto the branch
-you already have open* does not apply: there is nothing open to push onto.
+**No open pull request of this lane's** when this was cut. #424 (the plan) and
+#425 (phase 1, the front door) were both merged, so `docs/routines.md` step 3's
+*push onto the branch you already have open* did not apply.
 
-**No maintainer comments to address.** The one open pull request in the
-repository is `Loom daily build`'s #439 and it is not this lane's.
+**No maintainer comments to address**, and no review comments on this branch.
+
+### `main` moved under it, twice, and one of them was this lane's
+
+`origin/main` went `777baf6 → 657d27e` between the push and the deployment, and
+GitHub reported the pull request `dirty`. `main` was merged in and resolved
+cleanly — **no conflicted file**, which is what the three-files table in
+`docs/routines.md` predicts for a branch whose only shared file is the
+append-only `FINDINGS.md`.
+
+What matters more than the conflict is what arrived. **#441 is the portal
+lane's**, cut from `73559cc` and landed while this was being built — two defects
+the maintainer found on the deployed portal, one of them *the rail stayed
+expanded after a pointer click*. It touches `_components/shell/sidebar-nav.tsx`
+and `portal/sign-in/`; this branch touches neither, and `git diff` between the
+two changed no file twice.
+
+Two consequences, both taken:
+
+- **Every picture in this report was re-taken on the merged head**, because #441
+  changed a shell component that appears in every portal screenshot. The ones
+  below are from `built 2026-09-28T18:25:19.232Z`, with #441 in them.
+- **The clipping-box finding was re-measured after it**, since #441's subject
+  *was* that rail. Identical numbers. Recorded in the finding as a third tree
+  rather than left as a two-sided claim that had gone stale.
+
+Two portal branches open at once is the thing `docs/routines.md` step 3 exists to
+prevent, and it happened here. It cost nothing — the files do not overlap — and
+it is worth naming rather than passing over: this run checked for an open pull
+request of its lane at the start and there was none, so the check is not the
+thing that failed. Two runs of one lane overlapped in time.
 
 ---
 
 ## Visuals
 
-A production build, photographed by a server the harness started after it
-(`built 2026-09-28T18:05:33.648Z`), in a signed-in browser against the seeded
-page `t_seed1`.
+A production build **on the merged head**, photographed by a server the harness
+started after it (`built 2026-09-28T18:25:19.232Z`), in a signed-in browser
+against the seeded page `t_seed1`.
 
 | | |
 | --- | --- |
@@ -185,17 +214,25 @@ its own line, on a `.next` deleted first — `docs/routines.md`'s rule, and the
 compound-command trap it names is the reason nothing follows the gate on that
 line.
 
-| | `main` at `777baf6` | this branch |
+Taken on the merged head, after `origin/main` moved to `657d27e`.
+
+| | `main` at `657d27e` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` | 166 files / 3,250 | **166 / 3,250** — untouched |
-| `@loom/app` | 323 / 5,589 | **326 / 5,638** |
+| `@loom/app` | 323 / 5,595 | **326 / 5,644** |
 | findings | 871, 0 malformed | **873**, 0 malformed |
 | prerender | 116 pages, 1,304 junctions | **116 / 1,304**, 0 run together |
 
-**49 tests added, none weakened, none skipped.** The `main` figures for the app
-suite are this branch's measurement less the 49 this diff adds and the 3 files it
-adds — arithmetic rather than a second reading, and said so rather than presented
-as one. Everything else in the table was read from the run.
+**49 tests added, none weakened, none skipped.** The findings figure for `main`
+was read from the file (`grep -c '^## '` over `git show origin/main:FINDINGS.md`)
+and the two are this diff's. The `main` app figures are this branch's
+measurement less the 49 this diff adds and the 3 files it adds — **arithmetic
+rather than a second reading, and said so rather than presented as one.**
+
+It is arithmetic that survived a moving base, which is some evidence it is
+right: before the merge this branch read 5,638 against a `main` of 5,589, #441
+added 6 to `main`, and 5,595 + 49 is the 5,644 measured afterwards. Everything
+else in the table was read from the run.
 
 Where they went:
 
@@ -226,13 +263,20 @@ reading it.
 **Filed two, closed none.**
 
 1. **Every portal screenshot reports a clipping box, and it is the sidebar doing
-   what it was built to do.** Measured on both sides of this change with
-   identical numbers, so it is not this diff's. The rail is 56px with
+   what it was built to do.** Measured on three trees with identical numbers —
+   `main` at `777baf6`, this branch, and the head merging #441, whose subject
+   was that rail — so it is neither this diff's nor something #441 fixed. The rail is 56px with
    `overflow-hidden` and widens on hover, which no shot list can do. The finding
    is not the rail — it is that the instrument #433 added has no way to be told
    *this clip is the point*, and a line printed on every shot of a surface is a
    line that stops being read. `Loom daily build`'s, with a recommendation:
    an attribute the component declares, not an exclusion list in the shot list.
+   **It is also 0202's own re-check**, arriving where that record could not look:
+   its silent sweep was 32 shots over four surfaces, and the portal is in none of
+   them because every screen but the sign-in needs a session and is reachable
+   only through a `before` (0182). The first shot taken of this surface with the
+   instrument attached fired, on something deliberate — the case 0202 says *"will
+   need re-checking when it next fires."*
 2. **A part the page cannot be clicked to reach is picked, and the page says
    nothing at all.** Known and deliberately not solved here. Outlining the part
    around it is the silent widening 0019 refuses; three directions are written

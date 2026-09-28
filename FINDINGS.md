@@ -36625,12 +36625,13 @@ today and is not a fix.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the harness) ·
 **Status:** open — **a true measurement with no false-positive channel**,
-measured on both sides of one change
+measured on three trees
 
 #433 added a clipping-box measurement to every shot on 28 September, which is a
 real instrument and has already found real defects. It reports this on **every
-portal screen**, and this run measured it on `main` and on its own branch with
-identical numbers:
+portal screen**, and this run measured it on `main` at `777baf6`, on its own
+branch, and again on the head that merges #441 — whose subject was this very
+rail — with the same numbers all three times:
 
 ```
 1 clipping box hides content
@@ -36650,6 +36651,19 @@ told *this clip is the point*, and the consequence is the one that matters: a
 line that appears on every shot of a surface is a line that stops being read.
 The next portal screen with a genuine clip will print the same sentence with a
 second entry under it, and the run that took it will have learned to scroll past.
+
+**This is 0202's own re-check, arriving where that record could not look.** It
+says the measurement was silent across *"32 shots over four surfaces at both
+viewports"* and — as of the wording landed this afternoon — that this is
+**dated rather than a standing claim**, with *"whether it is still silent a
+question for whoever next runs it"* and *"the property that matters most … the
+one that will need re-checking when it next fires."* This is that firing, and
+the reason it was not in the 32 is structural rather than an oversight: **every
+portal screen except the sign-in needs a session**, so the portal is reachable
+only through a `before` that signs in (0182) and is absent from any sweep that
+photographs addresses without one. The first shot anyone took of this surface
+with the instrument attached fired, and it fired on something deliberate — which
+is precisely the case 0202 anticipated and left open.
 
 **What would fix it**, and the choice is the harness's rather than this lane's:
 
