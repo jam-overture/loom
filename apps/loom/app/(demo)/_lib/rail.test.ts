@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { proposalIdSchema, randomIdFactory, systemClock, type LoomTree } from "@jam-overture/loom"
+import {
+  findNode,
+  proposalIdSchema,
+  randomIdFactory,
+  systemClock,
+  type LoomTree,
+} from "@jam-overture/loom"
 import { commitIntent, confirmHeld, type HeldProposal } from "@jam-overture/loom/write"
 
 import { partInQuestion, type PartInQuestion } from "./in-question"
@@ -101,6 +107,35 @@ const ask = async (
 }
 
 /**
+ * Yes, on the one hold this session is carrying — through the real write path
+ * and folded back onto the record that was waiting, which is the half the
+ * other cases in this file do not need and this one cannot do without.
+ *
+ * A confirmation that moved the head but left `session.records` holding the
+ * `awaiting-you` version would be a rail reading a history that does not
+ * describe the page under it, and the reading being tested below is the one
+ * computed only for a record that has landed.
+ */
+const allow = async (
+  session: DemoSession,
+  held: ChangeRecord
+): Promise<{ readonly session: DemoSession; readonly record: ChangeRecord }> => {
+  const proposalId = held.heldProposalId
+  if (!proposalId) throw new Error("nothing was held")
+
+  const write = beginDemoWrite(session)
+  await confirmHeld(write.path, {
+    proposalId: proposalIdSchema.parse(proposalId),
+    actor: "a demo visitor",
+  })
+
+  const record = recordFromEvents(write.narrated(), held)
+  if (!record) throw new Error("the runtime narrated nothing")
+
+  return { session: rememberRecord(session, record), record }
+}
+
+/**
  * The rail, read the way the page reads it — except that the preview comes back
  * as the part itself rather than as an element.
  *
@@ -128,6 +163,8 @@ const railOf = async (session: DemoSession) => {
     },
     /** The same substitution for the ask's preview, which has no id to record. */
     showAsk: (part) => part,
+    /** And for the part a landed change is holding, which is keyed by its record. */
+    showKept: (part) => part,
   })
 
   return { tree, view, shown }
@@ -539,5 +576,73 @@ describe("the ask the arrival screen leads with", () => {
     expect(view.available).not.toContain(DEMO_LEADING_PRESET)
     expect(view.leading?.preset).not.toBe(DEMO_LEADING_PRESET)
     expect(view.available).toContain(view.leading!.preset)
+  })
+})
+
+/**
+ * The reading that belongs to a change which has already happened.
+ *
+ * It is the sixth row of the table this file opens with, waiting to be
+ * written: `kept.ts` is a pure function with nine tests of its own, and the
+ * only way it reaches a visitor is a loop in `whatTheRailShows` and a callback
+ * in `page.tsx`. Delete either and the excerpt is gone from the demo's payoff
+ * screen with every one of those nine still green.
+ */
+describe("what a landed change is still holding", () => {
+  it("puts the removed band on the reading of the record that removed it", async () => {
+    const session = await sessionFor("kept")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const landed = await allow(asked.session, asked.record)
+
+    expect(landed.record.outcome).toBe("applied")
+
+    const { view, tree } = await railOf(landed.session)
+    const reading = view.readings.get(landed.record.recordId)
+
+    expect(reading?.kept).toBeDefined()
+    expect(reading?.kept?.where).toBe("kept")
+    expect(reading?.kept?.tree.root.type).toBe("loom.stat-grid")
+    /** And it is not on the page, which is the whole of why it is worth drawing. */
+    expect(findNode(tree.root, reading!.kept!.tree.root.id)).toBeNull()
+  })
+
+  /**
+   * **And nothing on a change still waiting**, which is the reading that would
+   * put two copies of one band on one card: the question's excerpt says *this
+   * is what would come off*, and a second under it saying *this is what came
+   * off* would be the card arguing with itself across one press.
+   */
+  it("holds nothing for a change the Gate has not been answered on", async () => {
+    const session = await sessionFor("kept-held")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+
+    const { view } = await railOf(asked.session)
+    const reading = view.readings.get(asked.record.recordId)
+
+    expect(reading?.inQuestion).toBeDefined()
+    expect(reading?.kept).toBeUndefined()
+  })
+
+  /**
+   * The fold, rather than the overwrite. Three loops write one map and the
+   * third is this one; a `set` that replaced the entry would take the
+   * question's preview, its plain reading and its effect with it, and the way
+   * a map written by three loops fails is silently.
+   */
+  it("adds to a record's reading rather than replacing it", async () => {
+    const session = await sessionFor("kept-fold")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const landed = await allow(asked.session, asked.record)
+    const second = await ask(landed.session, "band")
+
+    const { view } = await railOf(second.session)
+    const held = view.readings.get(second.record.recordId)
+
+    /** The newer question keeps everything a question has. */
+    expect(held?.inQuestion).toBeDefined()
+    expect(held?.effect).toBeDefined()
+    expect(held?.plain?.length).toBeGreaterThan(0)
+    /** And the landed removal still holds what it took. */
+    expect(view.readings.get(landed.record.recordId)?.kept).toBeDefined()
   })
 })
