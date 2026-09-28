@@ -145,8 +145,8 @@ own line, on a `.next` and a `dist` deleted first.
 | --- | --- |
 | runtime | **3,223 passed** in 165 files — untouched |
 | application | **5,559 passed** — 4 added |
-| findings | **858**, 0 malformed |
-| prerender | 114 pages, 1,302 junctions, 0 run together, **0 unserved** |
+| findings | **860**, 0 malformed |
+| prerender | 114 pages, 1,304 junctions, 0 run together, **0 unserved** |
 
 ## Findings
 
