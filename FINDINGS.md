@@ -570,9 +570,19 @@ one of them has been photographing an unstated state.
 ## 2026-09-27 — a `loom.backdrop` clips, so every band inside one is invisible to the only automated visual check this repository has
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`),
-with a note for every lane · **Status:** open — **an instrument gap**, and the
-first thing photographed outside a backdrop had a figure off the edge of the
-page
+with a note for every lane · **Status:** **closed 28 September** by
+`framework-58-the-overflow-a-clip-hides`
+([0202](decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md))
+— the first of the three shapes below, with one correction the entry could not
+have known: **`scrollWidth` against `clientWidth` is the wrong reading.** Built
+that way first, it reported a `loom.halo`'s deliberate four-pixel rim on two
+committed specimens and the quickstart's code block as hiding 905 pixels, both
+of which are the library working. What ships walks the in-flow content instead —
+boxes and the ink of their text, stopping at anything that handles its own
+overflow — and is silent across 32 page shots and every committed specimen,
+firing only on `tools/specimen/a-clip-hides-an-overflow.specimen.ts`, which is
+that entry's tree committed so it can be pointed at again. The exit code is
+unchanged and the reason is in 0202.
 
 `loom.backdrop` sets `overflow: hidden`, and it has to: the paints reach the
 element's edges and a backdrop that did not clip would paint over the band
@@ -36073,6 +36083,50 @@ because the maintainer asked for the mark in the chrome, the library cannot
 express it, and the *reason* is a real hole rather than a missing convenience.
 
 ---
+## 2026-09-28 — a `loom.halo` inside a `loom.backdrop` has four pixels of its rim cut off, and the comment that says it cannot says so about the halo alone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **four pixels, found by an instrument
+rather than by an eye**, and filed for the sentence rather than for the number
+
+`loom.halo` draws its light as an absolutely positioned layer at a negative
+inset, and `loom.halo.ts` states why that is right:
+
+> negative insets render as a rectangle with two hard sides. Here negative
+> insets are exactly right, for the same reason read backwards: **there is no
+> clip**
+
+True of a halo on its own, and not true of a halo inside a `loom.backdrop`,
+which sets `overflow: hidden` and must. The rim the offset buys is then cut at
+the backdrop's edge, on every side.
+
+**Measured**, by the clipped-content measurement `pnpm specimen` now takes on
+every shot (0202), before that measurement learned to tell decoration from
+content:
+
+| specimen | palette | the box | its content reached |
+| --- | --- | --- | --- |
+| `the-whole-page` (pricing band) | editorial | 350 | **354** |
+| `the-whole-page` (pricing band) | bold | 346 | **350** |
+| `catches-the-eye` | editorial | 350 | **354** |
+| `catches-the-eye` | bold | 346 | **350** |
+
+Four pixels each time, at 390. `catches-the-eye`'s own caption is *"A halo
+inside a backdrop, which is…"*, so the combination is deliberate and the
+clipping was not noticed.
+
+**Why this is filed rather than fixed, and why it is small.** Four pixels of a
+soft rim is not a defect anyone would report from a screenshot, and the
+instrument that found it now excludes it by design — decoration that is clipped
+is decoration working, which is 0202's rule. What is worth the entry is the
+**comment**, which a reader will take as a statement about the primitive and
+which is a statement about one of its two contexts. Whether the rim should be
+inset instead when the halo is inside something that clips is this lane's
+question and not the framework's; if the answer is *leave it*, the fix is the
+sentence.
+
+**Nothing is blocked.** No page changes, no test fails, and the framework's
+measurement is correct either way.
 ## 2026-09-28 — a font pack's top step was tuned around a layout constant in another lane's file, and that constant has moved
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
