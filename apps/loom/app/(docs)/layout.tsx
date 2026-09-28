@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next"
-import Link from "next/link"
 
 import { Search } from "@/app/(docs)/_components/search"
+import { SiteFooter } from "@/app/(docs)/_components/site-footer"
 import { ThemeScript } from "@/app/(docs)/_components/theme-script"
 import { ThemeToggle } from "@/app/(docs)/_components/theme-toggle"
+import { Wordmark } from "@/app/(docs)/_components/wordmark"
+import { REPOSITORY_URL } from "@/app/(docs)/_lib/surfaces"
 
 import "./globals.css"
 
@@ -39,17 +41,13 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
       <header className="border-edge bg-surface-page/85 sticky top-0 z-40 border-b backdrop-blur">
         <div className="mx-auto flex h-14 max-w-[100rem] items-center justify-between gap-4 px-5">
           {/*
-           * `/docs`, not `/`. This wordmark went to the first page of the
-           * documentation when the docs were their own application and `/` was
-           * their redirect; `/` is the marketing site's now (0070), so the same
-           * href would quietly have turned "back to the docs" into "leave the
-           * docs". Whether the wordmark should offer the front door instead is
-           * this surface's call, not the migration's.
+           * Two links, not one — the migration left this surface to decide
+           * whether the wordmark should offer the front door, and `wordmark.tsx`
+           * is the decision and the reasoning behind it. The short version: a
+           * corner mark meaning "back to the docs" and a corner mark meaning
+           * "back to the project" are both right, so each word gets one.
            */}
-          <Link href="/docs" className="flex items-baseline gap-2">
-            <span className="text-ink text-base font-semibold tracking-tight">Loom</span>
-            <span className="text-ink-faint text-xs">docs</span>
-          </Link>
+          <Wordmark />
 
           <div className="flex items-center gap-3">
             {/*
@@ -68,7 +66,7 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
               pre-production alpha
             </span>
             <a
-              href="https://github.com/jam-overture/loom"
+              href={REPOSITORY_URL}
               className="text-ink-muted hover:text-ink hidden text-sm transition-colors sm:inline"
             >
               GitHub
@@ -79,6 +77,8 @@ const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
       </header>
 
       {children}
+
+      <SiteFooter />
     </body>
   </html>
 )
