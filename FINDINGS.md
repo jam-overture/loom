@@ -8,6 +8,57 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — a `reports/*.md` link in a pull request body was mangled too, so the `decisions/` correlation is not the rule
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it* · **Status:** open, and filed
+as **evidence rather than a fourth theory**, which that entry explicitly asks for
+
+That entry's table records six links across three pull requests and concludes:
+
+> Every mangled link has pointed at `decisions/`; every link pointing at
+> `reports/` has come through clean, including two in the same description as a
+> mangled one.
+
+**#434 breaks that.** Its body carried one link to a `reports/*.md` file and it
+came back wrapped exactly the way the entry describes, with the `>` escaped:
+
+```
+<a href="``https://github.com/.../reports/2026-09-28-marketing-….md"&gt;the`` report on this branch</a>
+```
+
+So a run following the recorded correlation — *link to `reports/` freely, only
+`decisions/` is cursed* — gets a broken link and no warning, which is the cost
+the entry was written to prevent.
+
+**What was different about the four links that survived in the same body**, which
+is the only new information here and is offered as a table rather than as a
+mechanism:
+
+| the link | form | ends in | outcome |
+| --- | --- | --- | --- |
+| the report | `<a href="…">` | `.md` | **mangled** |
+| the preview deployment | `<a href="…">` | `.app` | clean |
+| four screenshots | `<img src="…">` | `.png` | clean |
+
+The one that broke is the only `.md` in the body. It is also inside an HTML `<a>`,
+which #361 blamed — but so is the preview link, and that survived. Both of the
+entry's discarded theories (HTML tags, proximity to `**`) stay discarded; what
+this adds is that the **target directory is not the variable**, and that on this
+one body the `.md` extension separated the mangled link from the clean ones.
+
+**One body is one data point and I am not proposing a mechanism**, for the reason
+the 22 September entry gives: two guesses have already been written into a pull
+request description as fact.
+
+**The workaround, widened.** That entry's remedy — name the file in an
+inline-code span and do not make it a link — works for `reports/` as well as
+`decisions/`, and is what #434's body now does. It costs a reader nothing: the
+path is as useful to somebody who can open the repository, and there is nothing
+in a code span for anything to inject into.
+
+---
 ## 2026-09-28 — `loom.section` plates with a fill and no outline, so on the house palette a toned band is thirty-two pixels of padding and nothing else
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
@@ -90,7 +141,7 @@ Measured on the published front door at 390 × 844, on `minimal`:
 | the headline | **5 lines** |
 | the lead | **9 lines**, of which 4 are above the fold |
 | the first control | **~1114px down** — 270px below an 844px fold |
-| the whole page | **11,751px — thirteen phone screens** |
+| the whole page | **11,012px — thirteen phone screens** |
 
 So a stranger arriving on a phone gets a badge, a headline, and half a paragraph.
 No button, no proof, and nothing to press without scrolling. Marketing sites are
