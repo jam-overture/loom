@@ -31,7 +31,13 @@ Two consequences, both taken:
 
 - **Every picture in this report was re-taken on the merged head**, because #441
   changed a shell component that appears in every portal screenshot. The ones
-  below are from `built 2026-09-28T18:25:19.232Z`, with #441 in them.
+  below are from `built 2026-09-28T18:25:19.232Z`, with #441 in them. **They came
+  back byte-identical** — `git status` reports no change to any of the three —
+  which is the right answer rather than a failed re-take: #441's fix is a blur on
+  a pointer press, so it changes what the rail does after a click and not what an
+  un-hovered rail looks like. Worth stating, because a reader diffing this branch
+  will see no image change and should not have to wonder whether the claim above
+  is true.
 - **The clipping-box finding was re-measured after it**, since #441's subject
   *was* that rail. Identical numbers. Recorded in the finding as a third tree
   rather than left as a two-sided claim that had gone stale.
