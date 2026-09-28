@@ -97,6 +97,108 @@ merged a green head and the head it merged was green. Recorded so the next lane
 that finds its own commit missing spends a minute on it rather than a run.
 
 ---
+## 2026-09-28 — the write path refuses every node the runtime's own reserved keys are on, and the render path does not
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
+open — found by executing an exercise for lesson 30, reproduced three ways,
+**not fixed**: `src/` is not this lane's and a lessons branch that changes
+behaviour is a lessons branch nobody can review
+
+On a deployment that wires 0179's props floor — `propsVocabularyFor(registry)`
+into the pipeline's `propsVocabulary` — a change that gives a node one of the
+runtime's own reserved keys is `invalid-props`, **critical**, and rejected by the
+Gate. Including a node with nothing whatever wrong with it.
+
+```
+  the registered types wired, and nothing checking props
+    the name misspelled  unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
+    neither misspelled   unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
+  and propsVocabularyFor(registry) wired as well
+    the name misspelled  unknown types: 0  invalid props: 1  stakes: critical gate: rejected
+      Unrecognized key(s) in object: 'loom:data'
+    neither misspelled   unknown types: 0  invalid props: 1  stakes: critical gate: rejected
+      Unrecognized key(s) in object: 'loom:data'
+```
+
+*(The insert is one `loom.feed` carrying `{"loom:data":{"entries":{"source":…,"params":{"limit":3}}}}`,
+against a base tree of one `loom.page`. It is exercise D of
+[lesson 30](lessons/30-rendezvous.md), where the whole program is printed.)*
+
+### The two halves of it
+
+**The render path splits reserved keys off before it validates.**
+`render.ts`'s `reportUnreadReservedProps` carries the sentence: *"Reserved keys
+are removed from every node's props, whether or not anything reads them here; a
+key that reaches a primitive is a key that primitive has to know about."* Every
+schema in the starter library is `.strict()` on the strength of that.
+
+**The write path does not.** `invalidPropsIn` in `src/runtime/vocabulary.ts`
+walks the resulting tree and hands `current.props` to the vocabulary **as they
+are**. `propsVocabularyFor` is a one-line adapter onto `registry.validateProps`,
+which is the same strict schema. So the floor refuses the key the runtime itself
+put there, and its own doc comment names the hazard it has: *"a deployment whose
+Gate and whose renderer disagree about which props are acceptable has a hole that
+no test of either seam alone finds."*
+
+### Measured, not reasoned
+
+| | |
+| --- | --- |
+| starter primitives that refuse a node carrying `loom:anchor` | **99 of 99** |
+| the same for `loom:data`, `loom:submit`, `loom:theme` | the same, and for the same reason |
+| **insert** a node carrying a reserved key | `invalid-props`, critical, **rejected** |
+| **configure** a node that had none into carrying one | `invalid-props`, critical, **rejected** |
+| **configure** a node that already carried one | 0 invalid props, `high`, `requires-confirmation` |
+
+The deployments in this repository that wire the floor are `(portal)`
+(`portalPropsVocabulary`, and `settingsAreChecked` is derived off it) and
+`(marketing)`'s adapt path (`SITE_PROPS_VOCABULARY`).
+
+### Why nothing has noticed
+
+The last row. `introducedInvalidProps` counts only nodes that were **not**
+already failing before the change, which is a good rule and is stated well
+(a half-repair should not be refused for the hole it did not make). Its effect
+here is that the only changes on bound nodes that pass are the ones on nodes
+this check had already condemned — so a deployment repointing existing bindings
+sees nothing, and the first thing to hit it is the first *new* binding anybody
+proposes.
+
+Which is the part that makes this worth an entry rather than a note.
+`src/interpretation/prompt.ts` teaches a model to write
+`{"loom:data":{"<binding name>":{"source":"<id>","params":{…}}}}` in a node's
+props, in those words, and 0181 and 0184 spent two records making the binding
+names *available* to it so it could write new ones. On a deployment with the
+floor wired, the write path refuses at its highest stakes the exact JSON the
+prompt asks for.
+
+### What this is not
+
+Not a claim that 0179 was wrong, and not a request to loosen the floor. The
+floor is right and the asymmetry is one line of scope: whatever splits reserved
+keys from props is knowledge that exists once, in the render walk, and the write
+path reimplements *validate this node's props* without it. Lesson 28's shape
+exactly — one fact, two implementations, no comparison between them, and the
+copy that is wrong is the one no rendering test executes.
+
+**Two things a fix would want to decide** and this lane has no standing to:
+
+1. **Where the split lives.** It is currently private to `render.ts`. A shared
+   `withoutReservedProps` that both seams take would make the agreement a fact
+   rather than a coincidence — which is the only version of this that stays
+   fixed when a fifth reserved key lands.
+2. **Whether a reserved key on the wrong node should still be refusable at the
+   write path.** `loom:theme` on a non-root is a render diagnostic
+   (`theme-misplaced`) and an unrecognised `loom:` key is
+   `reserved-prop-unrecognised`. Those are real faults the floor could catch if
+   it knew the namespace — so *strip and ignore* is probably not the whole
+   answer, and *strip, then check the reserved ones against the rules that
+   govern them* is the shape worth weighing.
+
+A test that would have caught it, and would catch the next one: assess a change
+that inserts a node carrying each reserved key in turn, against a policy with
+`propsVocabularyFor` wired, and assert the analysis reports no invalid props.
+Four rows, derived from `reserved-props.ts` rather than listed.
 ## 2026-09-28 — `loom.section` plates with a fill and no outline, so on the house palette a toned band is thirty-two pixels of padding and nothing else
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:** open
@@ -36462,3 +36564,57 @@ the property that makes a ramp comparison meaningful again.
 
 **Not filed for `Loom primitives`.** `src/primitives/` no longer contains
 anything that constrains a ramp, which is the point.
+
+---
+## 2026-09-28 — a push during `Loom merge`'s window is silently dropped, and the pull request still closes as merged
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **a race with no symptom**, measured
+once on this lane's own #433, and written down because every lane can hit it and
+nothing would tell them
+
+`Loom merge` runs at 15:00 UTC. For each open pull request it merges `main` into
+the branch, fixes what the merge made stale, and merges on a green `pnpm verify`.
+`docs/routines.md` tells every lane what that means for them — *"your branch gets
+merge commits you did not write; fetch before you push to a branch you left
+open"* — and that sentence covers the conflict it was written for and not this.
+
+**What happened, with times.** On #433, on 28 September:
+
+| time (UTC) | what | who |
+| --- | --- | --- |
+| 15:32 | `main` merged into the branch, decisions index regenerated | `Loom merge` |
+| 15:40 | the lane wakes on the push event and re-verifies on the merged head | this lane |
+| ~15:47 | `cb512a3` pushed — the re-taken measurements | this lane |
+| 15:48 | **#433 merged**, at `f9ae085` | `Loom merge` |
+
+`cb512a3` is not on `main` and never will be. The pull request's own page says
+merged, the branch says merged, and one commit on it is simply gone from the
+history. **Nothing reports this**: no conflict, no red check, no comment. The
+only way to find it is to ask `git merge-base --is-ancestor <sha> origin/main`
+after the merge, which nothing tells a lane to do.
+
+**Why it is worth an entry rather than a shrug.** The window is not the minute
+at 15:00 — it is however long that routine takes to work through the queue,
+which on this day was at least sixteen minutes and grows with the number of open
+pull requests. And the lane most likely to be pushing inside it is precisely the
+lane that just woke up *because* `Loom merge` pushed to its branch: the merge
+event is what tells a lane its numbers are stale, and re-taking them is work that
+lands inside the window by construction. This will happen again, and it will
+happen to the runs that were being careful.
+
+**What would fix it**, smallest first, and none is obviously right:
+
+- a line in `docs/routines.md` saying what the window is and that a lane woken by
+  a merge commit should check `git merge-base --is-ancestor` after pushing —
+  cheapest, and relies on the lane remembering;
+- `Loom merge` re-reading the head immediately before it merges, and skipping a
+  pull request whose head moved since it verified — correct, and it is that
+  routine's file rather than this one's;
+- a lane that pushes to a branch with an open pull request checking whether the
+  pull request is still open first, which catches the tail of the race and not
+  the middle of it.
+
+**Not worked around here.** This run's own loss was recovered by a second pull
+request carrying the two documentation files, which is the remedy available
+today and is not a fix.
