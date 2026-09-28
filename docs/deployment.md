@@ -104,6 +104,67 @@ setting causes.
 Verified by clean clone → `pnpm install --frozen-lockfile` → `pnpm build`, not by
 reasoning about it.
 
+## The domain, and going public
+
+A fresh project is private: Vercel's Deployment Protection puts a login in front
+of every path, which is right while nothing is meant to be found. Going public is
+three things, and the first is the one that is silently wrong if you skip it.
+
+### 1. Pin the origin
+
+Add the domain in Vercel → Settings → Domains, create the DNS records it asks
+for, and wait for the certificate. Then set, for Production:
+
+```
+LOOM_SITE_ORIGIN=https://your-domain
+```
+
+Nothing fails without it. The site answers on the domain, looks correct in a
+browser, and quietly tells every machine that reads it that it lives somewhere
+else: `siteOrigin()` falls back to `VERCEL_URL`, so the canonical of every page,
+every entry in `sitemap.xml`, the OG tags an unfurler reads and every internal
+link in the page tree name the deployment's `*.vercel.app` host. A search engine
+takes that as the address of the site.
+
+### 2. Decide what becomes public, because it is not only the marketing site
+
+**Deployment Protection is per deployment, not per path.** One application serves
+four surfaces (0067), so lifting it publishes `/`, `/docs`, `/lessons` and
+`/demo` in the same instant.
+
+The portal is the exception and does not depend on that setting: every page under
+`/portal` calls `requireActor` for itself, and `guarded-pages.test.ts` sweeps the
+directory so a page added later cannot quietly skip it. A public deployment still
+admits nobody to the portal who has no key.
+
+Reader signals are unaffected too: intake is off unless `LOOM_SIGNAL_INTAKE=on`,
+so `/api/reader-signals` answers `404` on a deployment that never asked for them.
+
+### 3. Lift the protection, and redeploy
+
+Settings → Deployment Protection → **Only Preview Deployments**. Previews stay
+behind the login, which is what keeps one pull request's preview from being found
+before it is merged.
+
+Then redeploy, so the build carries the origin.
+
+### Check it from outside
+
+From a browser or shell with no Vercel session — the point is to see what a
+stranger sees:
+
+```bash
+curl -sI https://your-domain/ | head -1          # 200, no login redirect
+curl -s  https://your-domain/robots.txt          # Allow: /, /portal disallowed
+curl -s  https://your-domain/sitemap.xml | head  # every URL on your domain
+curl -sI https://your-domain/portal | head -1    # still sends you to sign-in
+```
+
+Indexing needs nothing further. `isPublicDeployment()` reads `VERCEL_ENV`, so
+production serves a crawlable `robots.txt` and a preview serves *disallow
+everything* — which is what stops one preview per pull request each announcing
+itself, in the format a machine reads as fact, as this product.
+
 ## Environment
 
 `apps/loom/.env.example` is the full list with the commentary. Five variables,
@@ -116,6 +177,7 @@ two of which are required:
 | `LOOM_ANTHROPIC_API_KEY`         | no       | Falls back to `ANTHROPIC_API_KEY`       |
 | `DATABASE_URL`                   | no       | Absent means memory — see below         |
 | `LOOM_PORTAL_TRUSTED_PROXY_HOPS` | no       | Proxies in front. 1 unless you added one |
+| `LOOM_SITE_ORIGIN`               | in production | The domain, pinned. See [The domain](#the-domain-and-going-public) |
 
 **Never prefix any of them `NEXT_PUBLIC_`.** 0017 exists partly to keep the model
 key off the client, and a public prefix would undo the whole record in one
