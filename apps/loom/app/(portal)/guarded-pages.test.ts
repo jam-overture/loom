@@ -111,6 +111,60 @@ describe("every page", () => {
   })
 
   /**
+   * **Every screen a stranger can reach says the portal is unfinished.**
+   *
+   * The banner was added on 28 September and put on `/portal` — which is behind
+   * the sign-in. A person following *Portal* from the marketing site's menu or
+   * its footer never reaches that screen: they land on `/portal/sign-in`, read a
+   * page describing a working review surface in the present tense, and have no
+   * way to know most of it is unbuilt. **The warning was behind the door it was
+   * warning about**, and the maintainer found it by opening the live site.
+   *
+   * This is the rule stated where it can be checked rather than a second place
+   * to remember. It is one page today, and the list it sweeps is the same
+   * `UNGUARDED_BY_DESIGN` the assertions above hold to rendering nothing — so a
+   * second public portal screen is inside this rule the moment somebody exempts
+   * one, which is exactly when it would otherwise be forgotten.
+   *
+   * It reads the page's whole directory rather than the page file, because a
+   * page in this lane is a shell: `portal/sign-in/page.tsx` gathers config and
+   * hands it to `SignInHero`, and everything a visitor reads is in the
+   * component. A rule that only read the page file would pass on a screen that
+   * says nothing.
+   */
+  it("says the portal is unfinished on every unguarded page that renders a screen", () => {
+    const sourcesBeside = (page: string): string => {
+      const directory = join(APP, page, "..")
+
+      const walk = (at: string): readonly string[] =>
+        readdirSync(at, { withFileTypes: true }).flatMap((entry) => {
+          const path = join(at, entry.name)
+
+          if (entry.isDirectory()) return walk(path)
+
+          return entry.name.endsWith(".tsx") && !entry.name.includes(".test.")
+            ? [readFileSync(path, "utf8")]
+            : []
+        })
+
+      return walk(directory).join("\n")
+    }
+
+    const rendering = UNGUARDED_BY_DESIGN.filter(
+      (page) => !readFileSync(join(APP, page), "utf8").includes("permanentRedirect(")
+    )
+
+    /** Guards the guard: an empty list would make the rule below vacuous. */
+    expect(rendering).toEqual(["portal/sign-in/page.tsx"])
+
+    for (const page of rendering) {
+      expect(sourcesBeside(page), `${page} does not say the portal is unfinished`).toContain(
+        "<UnderConstruction />"
+      )
+    }
+  })
+
+  /**
    * The exemption is only defensible while it stays true. An unguarded page that
    * reached the portal's store, its telemetry journal or its identity would be
    * an open door to the very things the guard exists for — and it would look

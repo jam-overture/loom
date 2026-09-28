@@ -6,13 +6,14 @@
 **Branch:** `framework-58-the-overflow-a-clip-hides` — branched off `origin/main` at `809a970`; this lane had no open pull request of its own. `Loom merge` brought `main` in at 15:32 and regenerated the decisions index, which is its documented behaviour; everything measured below was re-taken afterwards
 **Record added:** [0202](../decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md)
 
-> **This correction arrived a second time, and the reason is worth one line.**
-> The code landed in #433. These re-taken numbers were pushed four minutes
-> before that merge and missed it, because `Loom merge` had already read the
-> head — so the report and 0202 landed on `main` quoting the tree they were
-> first measured on rather than the tree that shipped. Nothing in the code
-> differs. The finding at the foot of this run's entries says what the race is
-> and how a lane avoids it.
+> **This correction arrived in three pieces, and that is itself the finding.**
+> The code landed in #433. The measurements missed it by four minutes, and
+> landed in #437. The paragraph that stopped those measurements from going
+> stale missed *that* by three, and is here. Both losses were silent, both
+> pushes reported success, and the second one happened twenty minutes after
+> this run wrote down how to avoid the first. Nothing in the code differs
+> across any of it. The finding at the foot of this run's entries has both
+> mechanisms and the check that actually answers the question.
 
 ![The page the old measurement called clean](2026-09-28-framework-a-clip-hides-an-overflow-phone.png)
 
@@ -89,13 +90,20 @@ the element is.
 Everything below was run against this branch, on a production build, with the
 harness starting the application itself.
 
-**Taken twice, and the second time is the one that counts.** `Loom merge`
-brought `main` into this branch at 15:32, and `main` had meanwhile gained #432 —
-which changes `loom.hero`'s two measures and lifts a band's content above its
-own paint. That is the corner of the library this instrument is most about, so
-the whole table was re-taken on the merged tree (`built
-2026-09-28T15:45:53.661Z`) rather than left standing on a tree that no longer
-exists.
+**Taken three times, against three trees, and unchanged across all of them.**
+`Loom merge` ran twice while this work was open, each time bringing a different
+`main` underneath it, and each time the numbers were taken again rather than
+left standing on a tree that no longer existed:
+
+| taken on | what had changed underneath | build |
+| --- | --- | --- |
+| the branch as written | — | 09:18 |
+| after the first merge | **#432** — `loom.hero`'s two measures, and a band's content lifted above its own paint | 15:45 |
+| after the second merge | **#434, #435, #436** — six bands back on the left rule, a site-wide footer, a new lesson | 16:46 |
+
+The second of those is the one worth naming: #432 changes the corner of the
+library this instrument is most about. The third changes pages rather than
+primitives, which is the other half of the table.
 
 | subject | shots | clipping boxes reported |
 | --- | --- | --- |
@@ -103,9 +111,10 @@ exists.
 | every committed specimen in `src/primitives/` (19) and `tools/specimen/` (4) | 94 | **0** |
 | `a-clip-hides-an-overflow`, written to be found | 2 | **1**, at `phone` only, unchanged at `content reaches 370 in 346` |
 
-The corpus grew by six shots between the two runs, because #432 committed a
-specimen of its own. Nothing else moved: zero before the merge and zero after
-it, with the hero's measures changed underneath.
+The corpus grew by six shots between the first and second runs, because #432
+committed a specimen of its own, and did not change again. Nothing else moved:
+zero every time, with the hero's measures, the left rule and a new footer
+changed underneath.
 
 **The zeroes are the number that matters.** An instrument that fires on a
 healthy tree is an instrument that gets ignored, and the first three builds of
@@ -115,11 +124,19 @@ own tree, committed at
 again — and photographed at `wide` as well, where the content fits and the line
 is clean, which is the control.
 
-`pnpm verify` green on the merged head: **3250 + 5560 tests** (166 + 320 files),
-864 findings 0 malformed, 114 prerendered pages, 1304 text junctions 0 run
-together. Before the merge it was 3248 + 5560 and 862 findings; the two extra
-tests and one of the extra findings are #432's, not this branch's; the other is
-the merge-window race this run hit and filed. Eight of the 3250 are this change.
+`pnpm verify` was green on every head this run produced, the last included.
+
+**The framework suite is 3250 tests, and eight of them are this change.** That
+is the figure this run owns, and no other lane's merge moves it. Everything else
+in the gate climbed while this was open — the application suite 5560 → 5582, the
+findings 862 → 869, the prerendered pages 114 → 116 — because five other pull
+requests landed underneath, and none of that movement is this run's. Two of the
+findings are: the halo's clipped rim, and the merge-window race below.
+
+Written that way after the third rewrite of this paragraph. A count in a dated
+report, phrased as a standing fact about the repository, has to be chased every
+time anything merges; this one was chased twice before it was worth admitting
+that the sentence was the defect rather than the number in it.
 
 ## The exit code, left alone deliberately
 

@@ -36708,3 +36708,81 @@ Three directions, none obviously right, and all of them are this lane's:
 The second is what this lane would build next. It is filed rather than built
 because it is a behaviour change to the preview pane rather than a part of the
 inspector, and phase 2 is already the largest diff this surface has taken.
+### Second occurrence, four hours later, on the pull request that filed this
+
+It happened again to the same run, and it took the fix for itself with it. The
+second time has a **different mechanism and the same silence**, and the pair is
+the reason this entry is worth its length:
+
+| | first | second |
+| --- | --- | --- |
+| the push | **15:47**, before the merge | **16:52 and 16:58**, after it |
+| the merge | 15:48, at a SHA read earlier | 16:49, at `c42b33c` |
+| what was lost | one commit of measurements | the commit that **fixed the decaying wording**, and a third measurement |
+| what the lane saw | `git push` succeeded | `git push` succeeded |
+
+So it is not one race. **A push is silently dropped both when it arrives just
+before the merge and when it arrives just after it**, and in the second case the
+pull request is already closed, the branch ref still moves, and git reports
+success because pushing to the branch of a merged pull request is a perfectly
+ordinary push.
+
+**The check this entry recommended does not catch the second one**, and it took
+two more tries to get the check itself right — see below. This run ran the first
+form, watched it pass, and had already lost the commits:
+
+```bash
+# what this entry said, and it is not enough:
+git merge-base --is-ancestor HEAD origin/<branch>   # passes — the branch did move
+```
+
+### And the replacement was wrong too — check content, not a SHA
+
+Written here on the evening of the same day, after `Loom marketing` hit this
+race independently on #434 and diagnosed the part both of this entry's earlier
+attempts had missed. Its entry is the one to read; this is the correction to
+mine, kept because leaving two different checks in one file is worse than
+either.
+
+**This repository squash-merges.** A squash writes a commit on `main` whose
+parent is not any commit of the branch, so *no* branch SHA is ever an ancestor
+of `main` — which means the check this entry reached for second answers the same
+way whether the work landed or not:
+
+```bash
+git merge-base --is-ancestor <the head that MERGED>     origin/main   # → no
+git merge-base --is-ancestor <the head that did NOT>    origin/main   # → no
+```
+
+Verified on this lane's own #439 before this paragraph was written: the branch
+head reports *not an ancestor*, and the content is on `main`. A lane following
+the advice this entry gave four hours earlier would conclude its work was lost
+when it was not, and could open a duplicate pull request on that basis.
+
+```bash
+# what actually answers it — ask the file, not the graph:
+git show origin/main:path/to/the-file | grep '<something the change added>'
+```
+
+**Three attempts at one check, and the shape of the mistake is the same each
+time**: reaching for a graph relation because it is the thing git makes easy,
+when the question is *did this content arrive*. `Loom marketing`'s second habit
+is better than any check and is the real remedy — **do not push twice.** A lane
+that has already opened a pull request is racing a merge routine on a schedule
+it does not know.
+
+**What this does to the remedies above.** The third one — *a lane checks the
+pull request is still open before it pushes* — was listed last and is the one
+that catches this half; it was named in this entry and then not followed by the
+run that wrote it, twenty minutes later. The second — *`Loom merge` re-reads the
+head immediately before merging* — catches the first half and not this one.
+**Neither alone is sufficient; the pair is**, and `Loom marketing`'s *do not
+push twice* is cheaper than both.
+
+**Two lanes, four occurrences, one day.** This lane twice and `Loom marketing`
+twice (#434 and its correction), all on 28 September, none of them noticed by
+anything automatic. That is the argument for fixing the process rather than
+asking every lane to remember a check — especially now that three different
+checks have been written down here and two of them were wrong. That is a stronger recommendation
+than this entry could make when it had one occurrence, and it is the reason the
+second one is written up rather than shrugged at.

@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UnderConstruction } from "@/app/(portal)/_components/under-construction"
 import type { AuthReadout } from "@/app/(portal)/_lib/signin-view"
 
 import { SignInForm } from "./sign-in-form"
@@ -38,6 +39,23 @@ export const SignInHero = ({
   readonly destination: string
 }) => (
   <div className="mx-auto flex w-full max-w-lg flex-col gap-8 px-6 py-16">
+    {/*
+     * Above the heading, which is where `/portal` puts the same banner — and
+     * **this is the screen it was missing from.**
+     *
+     * 28 September put it on the landing page, behind the sign-in. A stranger
+     * following *Portal* from the marketing site's menu or its footer never
+     * reaches that screen: they land here, read a page that describes a working
+     * review surface in the present tense, and have no way to know most of it is
+     * unbuilt. The warning was behind the door it was warning about.
+     *
+     * This page's own module comment is the argument in one line — *"the only
+     * page reachable without a session."* So it is the only portal screen a
+     * person who has not been given a key will ever see, and the one place the
+     * banner has to be for it to reach the audience it was written for.
+     */}
+    <UnderConstruction />
+
     <div className="flex flex-col gap-3">
       <p className="text-ink-muted text-2xs tracking-wide uppercase">Loom · review portal</p>
       <h1 className="text-3xl tracking-tight">Sign in</h1>

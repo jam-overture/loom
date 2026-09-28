@@ -105,4 +105,43 @@ describe("SignInHero", () => {
     const hidden = container.querySelector('input[name="from"]') as HTMLInputElement | null
     expect(hidden?.value).toBe("/portal/pages/t_1?tab=held")
   })
+
+  /**
+   * **The one screen a stranger can actually reach**, and the one the banner was
+   * missing from. 28 September put it on `/portal`, which is behind this page —
+   * so a person following *Portal* from the marketing site read a page
+   * describing a working review surface and never met the warning written for
+   * them. The maintainer found it by opening the live site.
+   */
+  it("says the portal is still being built", () => {
+    render(<SignInHero readout={okReadout} destination="/portal" />)
+
+    expect(screen.getByText("The portal is still being built.")).toBeTruthy()
+    expect(screen.getByRole("status")).toBeTruthy()
+  })
+
+  /**
+   * Above the heading, which is where `/portal` puts it. A reader needs to have
+   * seen it **before** they judge anything else on the screen — and on this page
+   * the thing they would otherwise judge is a sentence written in the present
+   * tense about a surface that is mostly unbuilt.
+   */
+  it("puts the banner before the page says what the portal is", () => {
+    const { container } = render(<SignInHero readout={okReadout} destination="/portal" />)
+    const text = container.textContent ?? ""
+
+    expect(text.indexOf("The portal is still being built.")).toBeGreaterThan(-1)
+    expect(text.indexOf("The portal is still being built.")).toBeLessThan(text.indexOf("Sign in"))
+  })
+
+  /**
+   * Including the path where the deployment is misconfigured. A visitor who
+   * arrives at a portal that cannot accept a key at all is the *most* likely to
+   * conclude the product is broken rather than unfinished.
+   */
+  it("says it on the path where the deployment cannot accept a key", () => {
+    render(<SignInHero readout={brokenReadout} destination="/portal" />)
+
+    expect(screen.getByText("The portal is still being built.")).toBeTruthy()
+  })
 })
