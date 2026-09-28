@@ -156,14 +156,30 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
        * The third is the only one that mentions Loom, and it carries the two
        * facts the rest of the page is about: the rules, and the record.
        *
-       * **One em-dash, and it is at the end rather than the middle.** The first
+       * **Two things the maintainer added on 27 September, and both are real
+       * gaps rather than polish.**
+       *
+       * *What your page becomes* and *how it feels to use* are **not the same
+       * claim**, and the line before this one only made the first. A page can
+       * rearrange correctly and still be worse to use; the whole argument for
+       * doing this at all is the second one, and it was missing from the
+       * sentence that exists to state it.
+       *
+       * And the closing clause was two properties where the product has three.
+       * *On your rules, with every change written down* is the record and the
+       * rules; it leaves out the thing the page is named for — that the
+       * arrangement **adapts to the person reading it**. The triad states all
+       * three in the order they matter to a buyer: what it does for their
+       * readers, what it will not do without permission, and that it is safe to
+       * put near production.
+       *
+       * **One em-dash, and it is at the end rather than the middle.** An earlier
        * draft set the second sentence's subject off with a pair of them, which
        * reads fine ranged left and badly here: this band is `align: "center"`,
        * so both edges are ragged, and an interruption inside a centred sentence
-       * costs a reader the thread exactly where the argument turns. Photographed
-       * both ways at 1280 — the pair also pushed the paragraph to five lines,
-       * and a five-line centred block under a three-line headline is the first
-       * screen asking for more patience than a stranger has.
+       * costs a reader the thread exactly where the argument turns. The comma
+       * pair that survives in the second sentence is six words long rather than
+       * twelve, and was kept only after photographing it at 1280 and 390.
        *
        * No contraction, on the house style every other line of this site
        * follows; each sentence is inside the thirty-word ceiling
@@ -173,7 +189,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
        */
       prose(
         ids,
-        "AI already writes the components. What your page becomes for the person in front of it is the part still left to build. Loom is where you and the AI build it — on your rules, with every change written down.",
+        "AI already writes the components. What your page becomes, and how it feels to use, is still to be built. Loom is where you and the AI build it — adaptive to your users, answerable to your rules, and secure.",
         { size: "lead", measured: true, align: "center" }
       ),
       buildSlot(ids, "actions", [
