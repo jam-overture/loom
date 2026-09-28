@@ -10,6 +10,7 @@ import { MIN_CARD_WIDTH, PageCardLink, type PageCard } from "@/app/(portal)/_com
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UnderConstruction } from "@/app/(portal)/_components/under-construction"
 import { UnattendedCard } from "@/app/(portal)/_components/unattended-card"
 import { UnreadableChangeCard } from "@/app/(portal)/_components/unreadable-change-card"
 import { UnreadablePages } from "@/app/(portal)/_components/unreadable-pages"
@@ -126,6 +127,7 @@ const PortalHome = async () => {
   if (!listed.ok) {
     return (
       <div className="flex max-w-2xl flex-col gap-4 p-8">
+        <UnderConstruction />
         <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
         <StateNotice tone="failure" title="We couldn't check what's waiting.">
           <p>
@@ -341,6 +343,8 @@ const PortalHome = async () => {
 
   return (
     <div className="flex max-w-2xl flex-col gap-6 p-8">
+      <UnderConstruction />
+
       {/*
        * The screen names both of its subjects, then takes them one at a time.
        *
