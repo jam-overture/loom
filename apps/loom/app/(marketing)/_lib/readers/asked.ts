@@ -81,7 +81,7 @@ export const CONTROL_TYPES = [
   "loom.action",
   "loom.card",
   "loom.link",
-  "loom.logo",
+  "loom.brand",
 ] as const
 
 /**

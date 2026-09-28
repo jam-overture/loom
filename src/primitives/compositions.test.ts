@@ -1203,7 +1203,7 @@ describe("what the assembled page says about itself", () => {
     expect(footer).toBeDefined()
     if (nav === undefined || footer === undefined) return
 
-    const marks = elementsOfType(nav.build(sequentialIdFactory()), "loom.logo")
+    const marks = elementsOfType(nav.build(sequentialIdFactory()), "loom.brand")
 
     expect(marks).toHaveLength(1)
 
@@ -1260,7 +1260,7 @@ describe("what the assembled page says about itself", () => {
     expect(nav).toBeDefined()
     if (nav === undefined) return
 
-    const site = elementsOfType(nav.build(sequentialIdFactory()), "loom.logo")[0]?.props["name"]
+    const site = elementsOfType(nav.build(sequentialIdFactory()), "loom.brand")[0]?.props["name"]
 
     expect(typeof site).toBe("string")
     if (typeof site !== "string") return

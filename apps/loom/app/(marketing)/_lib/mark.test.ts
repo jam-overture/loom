@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest"
 
 import { boldPalette, minimalPalette } from "@jam-overture/loom"
 
+import { MARK_PATH } from "./chrome"
+
 /**
  * The browser-tab mark, held against the palettes it borrows its two colours
  * from.
@@ -74,5 +76,45 @@ describe("the tab mark", () => {
   it("says what it is to something that cannot see it", () => {
     expect(ICON).toContain('role="img"')
     expect(ICON).toContain('aria-label="Loom"')
+  })
+})
+
+/**
+ * The tab icon and the bar mark are the same four arms and deliberately not the
+ * same artefact — a file for the browser's chrome, path data for the page,
+ * because the two answer to different colour axes (`prefers-color-scheme`
+ * against the Loom palette). Two copies of one shape is a thing that drifts,
+ * and this is the cheapest guard against it: derive the path from the file's
+ * own rectangles and fail if they disagree.
+ */
+describe("the mark in the bar and the mark in the tab", () => {
+  const RECT = /<rect x="(-?[\d.]+)" y="(-?[\d.]+)" width="([\d.]+)" height="([\d.]+)"\s*\/>/g
+
+  /**
+   * `rect(x, y, w, h)` as the four moves a path makes to draw the same box.
+   *
+   * One closing form — `H{x}` — so the two copies are written the same way. A
+   * box can be closed with `h-{w}` too, and an arm spelled that way drew an
+   * identical shape and failed this test, which is the right outcome for a
+   * guard whose whole job is that two copies do not drift.
+   */
+  const asPath = (x: number, y: number, w: number, h: number): string =>
+    `M${x} ${y}h${w}v${h}H${x}z`
+
+  it("draws the same four arms", () => {
+    const fromFile = [...ICON.matchAll(RECT)].map(([, x, y, w, h]) =>
+      asPath(Number(x), Number(y), Number(w), Number(h))
+    )
+
+    expect(fromFile).toHaveLength(4)
+
+    /**
+     * Compared as a set of arms rather than as one string, because the order
+     * the file lists them in and the order the path draws them in are both
+     * arbitrary and neither is worth pinning.
+     */
+    expect(new Set(MARK_PATH.split(" M").map((arm, index) => (index === 0 ? arm : `M${arm}`)))).toEqual(
+      new Set(fromFile)
+    )
   })
 })

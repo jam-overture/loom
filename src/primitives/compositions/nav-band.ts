@@ -68,21 +68,34 @@ const MENU = [
   { text: "FAQ", href: "#faq" },
 ] as const
 
+/**
+ * A neutral mark, and it is deliberately not a good one.
+ *
+ * A starting composition is content a host replaces, and the one thing it must
+ * not do is ship somebody else's identity as a default nobody notices. Two
+ * offset bars in a square read as a placeholder at a glance, which is what a
+ * host should see before they swap in their own path.
+ */
+const PLACEHOLDER_MARK = "M6 7h20v6H6z M6 19h14v6H6z"
+
 export const navBand: Composition = {
   id: "nav",
   part: "nav",
   label: "Navigation bar",
   promise: "A sticky bar across the top: a wordmark, four links into this page, and one action.",
   rationale:
-    "A header is a loom.nav with a loom.logo in its brand slot, loom.link children as the menu, and a loom.action in its actions slot. Each link is a node, so the menu can be reordered or extended without touching the bar, and each menu item names a band of this page rather than a route of a site that may not have one.",
-  uses: ["loom.nav", "loom.logo", "loom.link", "loom.action"],
+    "A header is a loom.nav with a loom.brand in its brand slot, loom.link children as the menu, and a loom.action in its actions slot. The brand is loom.brand rather than loom.logo because this is the site naming itself rather than one mark in a wall of somebody else's: its mark is drawn from path data, so it takes the page's ink on every palette, and it is never dimmed. Each link is a node, so the menu can be reordered or extended without touching the bar, and each menu item names a band of this page rather than a route of a site that may not have one.",
+  uses: ["loom.nav", "loom.brand", "loom.link", "loom.action"],
   build: (ids: IdFactory): ElementNode =>
     buildElement(ids, {
       type: "loom.nav",
       props: { position: "sticky", tone: "surface", align: "start" },
       children: [
         buildSlot(ids, "brand", [
-          buildElement(ids, { type: "loom.logo", props: { name: "Overture", href: "#top" } }),
+          buildElement(ids, {
+            type: "loom.brand",
+            props: { name: "Overture", mark: PLACEHOLDER_MARK, href: "#top" },
+          }),
         ]),
         ...MENU.map((item) =>
           buildElement(ids, {

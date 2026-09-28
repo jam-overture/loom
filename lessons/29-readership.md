@@ -38,7 +38,7 @@ Nothing in Loom compares them.
 
 That sounds like an oversight, and the first half of this lesson is about why it
 is not one. The second half is about what happens when you write the comparison
-anyway — which this lesson did, and the answer it gave was seven rows, not one of
+anyway — which this lesson did, and the answer it gave was eight rows, not one of
 which was the thing it was looking for.
 
 ---
@@ -315,23 +315,24 @@ three things the audit already checks:
   declared slots no component placed:      0
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
-  primitives with a declared prop nothing read: 4
+  primitives with a declared prop nothing read: 5
     loom.tally       prefix, suffix
     loom.recording   shape
+    loom.brand       viewBox
     loom.feed        density, meta, separators
     loom.embed       src
 ```
 
 Every promise the audit can observe is kept, everywhere, by every primitive. The
-first promise it cannot observe has seven exceptions.
+first promise it cannot observe has eight exceptions.
 
 If you are holding a number from Predict 3, this is the moment to compare it. But
 the number is the least interesting thing here, and the rows are why. **Read them
-before reading on and decide, for each, what you would do.** Three of these four
+before reading on and decide, for each, what you would do.** Four of these five
 primitives are in the same situation as each other and it is not the situation the
 sweep was looking for.
 
-### Six of the seven are the measurement, not the code
+### Seven of the eight are the measurement, not the code
 
 `loom.feed` draws a list of entries read from a data binding. Its component starts
 like this:
@@ -364,7 +365,7 @@ in a sentence worth having twice:
 > guess — or one it cannot, in which case every bound primitive reports its failure
 > region as the only one it places.
 
-`loom.recording` is the sharpest of the three, and it is the one to read twice,
+`loom.recording` is the sharpest of them, and it is the one to read twice,
 because it defeats the obvious fix. Its `shape` prop is a closed enum, so the
 probe *does* set it — `{ shape: "wide" }`, `{ shape: "square" }`, and so on, one
 render each. And the component still never reads it:
@@ -382,10 +383,29 @@ for the same reason it cannot make up an answer. **Probing a prop's own values d
 not make that prop read.** Exercise E supplies one artwork URL and the row
 disappears.
 
-So six of the seven rows say nothing about the library and everything about the
-instrument. Which brings us to the seventh.
+`loom.brand` is the same shape arriving from outside this lesson, which is the
+useful thing about it. It was registered on 28 September, after this transcript was
+first written, and it joined the set on its first run:
 
-### The seventh is real, and it is correct
+```ts
+given.mark === undefined
+  ? null
+  : createElement("svg", { viewBox: given.viewBox ?? DEFAULT_VIEW_BOX, /* … */ })
+```
+
+`viewBox` is the field a mark is drawn in, so it is read only where there is a mark
+to draw. `mark` is SVG path data — an open string the probe cannot invent, for the
+third time on this page — so every probe takes the `null` arm and the read never
+happens. Nothing about the primitive is wrong: it is `loom.recording` with
+`artwork` spelled `mark`, written by somebody who had not read this lesson, which
+is the nearest thing to evidence available that the pattern is ordinary rather than
+a peculiarity of the three primitives that happened to be in the library on the day
+the sweep was written.
+
+So seven of the eight rows say nothing about the library and everything about the
+instrument. Which brings us to the eighth.
+
+### The eighth is real, and it is correct
 
 `loom.embed` declares five props. Its component reads four of them. The one it
 does not read is `src` — the URL of the document being framed, which is to say the
@@ -422,7 +442,7 @@ security boundary as a defect.
 
 ### And then the turn: the question had the wrong subject
 
-Seven rows, six of them artefacts of the measurement, one of them right. Score it
+Eight rows, seven of them artefacts of the measurement, one of them right. Score it
 as a bug-finding exercise and the instrument found nothing, which after two
 lessons about how expensive a check is might read as a reason not to have built it.
 
@@ -785,9 +805,10 @@ describe("C", () => {
   declared slots no component placed:      0
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
-  primitives with a declared prop nothing read: 4
+  primitives with a declared prop nothing read: 5
     loom.tally       prefix, suffix
     loom.recording   shape
+    loom.brand       viewBox
     loom.feed        density, meta, separators
     loom.embed       src
 ```
@@ -839,7 +860,7 @@ describe("D", () => {
   loom.tally, answered           (nothing unread)
 ```
 
-Five of exercise C's seven rows, removed by one line of data each. Notice what had
+Five of exercise C's eight rows, removed by one line of data each. Notice what had
 to happen for that: somebody who knows what `loom.feed` reads had to write
 `{ entries: { status: "ready", value: [{ title: "A post" }] } }` — a binding name,
 an outcome shape, and a row shape that matches an internal schema. The probe could
@@ -1128,10 +1149,10 @@ Write for two minutes, then move on.
   about effort, difficulty, or nobody having got round to it, write down what you
   now think the answer is in six words.
 - Predict 3 and your confidence. Two separate things to mark. First the number —
-  most people write 0 or 1, and 7 is nearer. Then, more usefully, go back to what
+  most people write 0 or 1, and 8 is nearer. Then, more usefully, go back to what
   you said you would *do* about each primitive you named. If you wrote "fix it" for
-  any of them, that is the line to keep: five of the seven needed nothing done, and
-  the sixth needed a security boundary left exactly as it was.
+  any of them, that is the line to keep: seven of the eight needed nothing done, and
+  the eighth needed a security boundary left exactly as it was.
 - Predict 4 asked what a red build from your assertion would mean. Compare it with
   the answer this lesson arrived at — *a candidate for a person to classify* — and
   write down whether your version would have been a gate. A gate on this would have
@@ -1155,7 +1176,7 @@ Write for two minutes, then move on.
 
 Set AH in [`review-schedule.md`](review-schedule.md), two days after this lesson.
 Interleaved with 12, 15, 20, 24, 25 and 28 — heavy on 25, because the population
-rule arrives here for the third time and is the reason six of seven rows are
+rule arrives here for the third time and is the reason seven of eight rows are
 noise; and heavy on 12, because *what the model is told it may write* is what makes
 an unread declaration a fault rather than a tidiness problem.
 

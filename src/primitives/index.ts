@@ -13,6 +13,7 @@ import { loomBanner } from "./loom.banner.js"
 import { loomBeforeAfter } from "./loom.before-after.js"
 import { loomBook } from "./loom.book.js"
 import { loomBookGrid } from "./loom.book-grid.js"
+import { loomBrand } from "./loom.brand.js"
 import { loomButton } from "./loom.button.js"
 import { loomCallout } from "./loom.callout.js"
 import { loomCard } from "./loom.card.js"
@@ -443,6 +444,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomEvent,
   loomLogoCloud,
   loomLogo,
+  loomBrand,
   loomCredentialGrid,
   loomCredential,
   loomFaqList,

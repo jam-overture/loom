@@ -803,12 +803,14 @@ const CSS = `
 details[open] > summary .loom-marker {
   transform: rotate(45deg);
 }
-.loom-mark {
+.loom-logo-cloud .loom-mark {
   filter: grayscale(1);
   opacity: 0.72;
   transition: filter var(--loom-motion-medium) ease, opacity var(--loom-motion-medium) ease;
 }
-.loom-mark:hover, a:hover > .loom-mark, a:focus-visible > .loom-mark {
+.loom-logo-cloud .loom-mark:hover,
+.loom-logo-cloud a:hover > .loom-mark,
+.loom-logo-cloud a:focus-visible > .loom-mark {
   filter: none;
   opacity: 1;
 }

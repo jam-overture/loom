@@ -104,7 +104,7 @@ describe("the header", () => {
     const brand = slot(header(), "brand")
 
     expect(brand).toBeDefined()
-    expect(ofType(brand as LoomNode, "loom.logo")).toHaveLength(1)
+    expect(ofType(brand as LoomNode, "loom.brand")).toHaveLength(1)
   })
 
   /**

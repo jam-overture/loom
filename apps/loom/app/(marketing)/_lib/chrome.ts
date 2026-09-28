@@ -125,10 +125,33 @@ const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): Loo
     ...(route.path === context.current.path ? { current: true } : {}),
   })
 
+/**
+ * The mark, as the geometry the tab icon is drawn from rather than as a link to
+ * the file.
+ *
+ * `app/icon.svg` and this are the same four arms, and they are deliberately not
+ * the same artefact. **A favicon and a bar mark answer different questions.**
+ * The file carries its own colour and swaps it on `prefers-color-scheme`, which
+ * is the operating system's axis and is exactly right for a browser tab. A
+ * Loom palette is a different axis: `bold` is dark on a machine in light mode,
+ * and an image is opaque to the cascade, so a file in the bar renders `#0a0a0a`
+ * on a `#1a1a1a` surface. That was built as a spike on 28 September,
+ * photographed, and thrown away; `loom.brand` is what came of it, and the path
+ * below is drawn inline so it takes the page's ink on every palette.
+ *
+ * Two copies of one shape is a thing that can drift, and the cheapest guard is
+ * the one `mark.test.ts` keeps: it reads both and fails if the arms disagree.
+ */
+export const MARK_PATH = "M5 5h14v6H5z M21 5h6v14H21z M13 21h14v6H13z M5 13h6v14H5z"
+
 const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
   buildElement(ids, {
-    type: "loom.logo",
-    props: { name: "Loom", href: internalHref(context.origin, HOME.path, context.theme) },
+    type: "loom.brand",
+    props: {
+      name: "Loom",
+      mark: MARK_PATH,
+      href: internalHref(context.origin, HOME.path, context.theme),
+    },
   })
 
 /**

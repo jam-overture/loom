@@ -193,8 +193,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 98 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(98)
+  it("registers as 99 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(99)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -257,6 +257,7 @@ describe("the starter library", () => {
       "loom.event",
       "loom.logo-cloud",
       "loom.logo",
+      "loom.brand",
       "loom.credential-grid",
       "loom.credential",
       "loom.faq-list",
@@ -431,6 +432,7 @@ describe("the starter library", () => {
       "loom.recording",
       "loom.event",
       "loom.logo",
+      "loom.brand",
       "loom.credential",
       "loom.faq",
       /**
@@ -2054,8 +2056,12 @@ const chromePage = (theme: Record<string, string>, idFactory: IdFactory = sequen
       link("Docs", "https://example.com/docs", { scale: "small" }),
       buildSlot(idFactory, "brand", [
         buildElement(idFactory, {
-          type: "loom.logo",
-          props: { name: "Loom", href: "https://example.com/" },
+          type: "loom.brand",
+          props: {
+            name: "Loom",
+            mark: "M5 5h14v6H5z M21 5h6v14h-6z M13 21h14v6H13z M5 13h6v14H5z",
+            href: "https://example.com/",
+          },
         }),
       ]),
       buildSlot(idFactory, "actions", [
