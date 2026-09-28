@@ -111,6 +111,38 @@ const LAYER: CSSProperties = {
 }
 
 /**
+ * What a caller puts on the content it draws **over** these layers.
+ *
+ * Every layer above is `position: absolute`, and a positioned element paints
+ * after its non-positioned siblings however the source is ordered. So a band
+ * that emits its paints first and its words second gets the paints *on top of
+ * the words* — which is not a subtle wash, it is `grid`'s 1px rules crossing a
+ * 72px headline and reading as strikethrough. Source order looks like it is
+ * doing the work and is not doing any.
+ *
+ * This is here rather than in each caller because it had already been
+ * rediscovered twice. `loom.backdrop` and `loom.halo` each worked it out
+ * independently and each left a comment saying source order *"stops being
+ * enough the moment a child positions itself"* — and both were wrong about
+ * when: it was never enough. `loom.hero`, which is where these paints were
+ * written and the only band that had them for three weeks, never got the
+ * wrapper at all, and shipped the defect for as long as it has had a backdrop.
+ *
+ * A style rather than a wrapping helper, because the three callers put it in
+ * three different places: `loom.backdrop` and `loom.halo` have one content
+ * element to lift, and `loom.hero` has two — its text column and its media
+ * region are flex siblings, and a wrapper round the pair would collapse the
+ * two-column layout the whole primitive exists to lay out.
+ *
+ * `z-index: 1` rather than `-1` on the layers: a negative index would put the
+ * paint behind the caller's own background as well, which is the difference
+ * between a hero's `panel` surface having atmosphere behind it and having
+ * none. Every caller already declares `isolation: isolate`, so the 1 cannot
+ * escape the band it belongs to.
+ */
+export const ABOVE_BACKDROP: CSSProperties = { position: "relative", zIndex: 1 }
+
+/**
  * A third of an opacity is what a hero's fields have carried since they
  * shipped, and it is too much once the same paint is a band rather than a
  * screen: the field is smaller, so the colour is concentrated, and under a
