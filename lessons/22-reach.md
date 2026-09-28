@@ -473,7 +473,7 @@ a target and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 98
+  primitives registered: 99
   of those, declaring a target: 12
     loom.nav         "always"
     loom.card        {"whenProps":["href"]}
