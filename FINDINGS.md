@@ -570,9 +570,19 @@ one of them has been photographing an unstated state.
 ## 2026-09-27 — a `loom.backdrop` clips, so every band inside one is invisible to the only automated visual check this repository has
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`tools/`),
-with a note for every lane · **Status:** open — **an instrument gap**, and the
-first thing photographed outside a backdrop had a figure off the edge of the
-page
+with a note for every lane · **Status:** **closed 28 September** by
+`framework-58-the-overflow-a-clip-hides`
+([0202](decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md))
+— the first of the three shapes below, with one correction the entry could not
+have known: **`scrollWidth` against `clientWidth` is the wrong reading.** Built
+that way first, it reported a `loom.halo`'s deliberate four-pixel rim on two
+committed specimens and the quickstart's code block as hiding 905 pixels, both
+of which are the library working. What ships walks the in-flow content instead —
+boxes and the ink of their text, stopping at anything that handles its own
+overflow — and is silent across 32 page shots and every committed specimen,
+firing only on `tools/specimen/a-clip-hides-an-overflow.specimen.ts`, which is
+that entry's tree committed so it can be pointed at again. The exit code is
+unchanged and the reason is in 0202.
 
 `loom.backdrop` sets `overflow: hidden`, and it has to: the paints reach the
 element's edges and a backdrop that did not clip would paint over the band
@@ -30451,8 +30461,28 @@ a precondition of a different kind — about weight, not about what is installed
 ## 2026-09-20 — every hero on this site paints its backdrop on top of its own headline, and the fix is one line the sibling primitive already carries
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — visible on all ten pages of the marketing site and on the demonstration's
-own page, and invisible to every assertion in the repository
+**closed** by `Loom primitives` on 28 September, on branch
+`primitives-48-the-heros-two-measures`. This entry's diagnosis was exactly
+right, including the one-line fix and the sibling that already carried it. Two
+things it could not have known, both found while closing it:
+
+1. **The comment on that sibling line is wrong**, and so is `loom.halo`'s copy of
+   it. Both say source order *"stops being enough the moment a child positions
+   itself"*. Source order never held a positioned layer back at all — the
+   wrapper was load-bearing from the day it was written, not a precaution against
+   a future child. Left in place would have been a reason for the fourth caller
+   to skip it too.
+2. **It is therefore not one line in one file.** The lift is now
+   `ABOVE_BACKDROP` in `backdrop.ts`, beside the layers it orders, and all three
+   callers take it from there. `loom.hero` needs it in two places rather than one
+   — its text column and its media region are flex siblings, and a wrapper round
+   the pair would collapse the two-column layout.
+
+Held by `library.test.ts` → *lifts a band's own words above the paint behind
+them*, over all three bands and all three starter palettes, asserted on the
+content being lifted rather than on the layers (an assertion on the layers passes
+for a band that lifts nothing). Photographed before and after in
+`reports/2026-09-28-primitives-the-heros-two-measures.md`
 
 `loom.hero`'s painted backdrops are drawn **over** the heading, the copy and the
 actions rather than behind them. Under `bold` the grid's 1px lines cross an 88px
@@ -30514,8 +30544,44 @@ one line in a file this lane may not open.
 ## 2026-09-20 — the front door's first screen has nothing to press on it, and the reason is that a headline and a paragraph share one measure
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — measured in Chromium against `next start` on `main` at `1abfbd7`,
-three palettes, and it cannot be fixed from a composition
+**closed** by `Loom primitives` on 28 September, on branch
+`primitives-48-the-heros-two-measures`. **Both suggestions were weighed and only
+the first was taken**, and the second is answered by the first rather than
+declined:
+
+- **A separate measure for the heading slot** — taken, as
+  [0201](decisions/0201-a-display-line-and-a-reading-line-are-two-measures.md).
+  `DISPLAY_MEASURE` is `64rem` rather than the `58rem` this entry's table points
+  at, and the reason is the shape of the number rather than its size: `58rem` is
+  still the thing deciding the line count on a `wide` page, which is the same
+  defect with a better value in it. `64rem` is 1024px against the ~980px a wide
+  page gives the band, so the band's own edges decide and the constant is a
+  backstop for `width: "full"` pages and wide viewports. The `ch` version is
+  named in 0201 and is not reachable from where the cap sits — the wrapper's `ch`
+  is the *body* font's character, which is a worse lie than a length.
+- **`stature` should govern the block padding** — **not taken, because it stopped
+  being true.** The entry is right that `tall` was a no-op: measured before, the
+  hero was 750–815px against its 702px floor on the three palettes, so the floor
+  never bound. It was a no-op *because the content overflowed it*, and the
+  content overflowed it because of the measure. After the first fix the same
+  heroes are 702, 714 and 714 — the floor binds exactly on `editorial` and is
+  within 12px on the other two, so `stature: "tall"` is now the thing setting the
+  height, which is what the prop claims to do. Adding padding on top would give
+  back the fold this run just bought.
+
+Measured on the same tree at 1280×900, closed against the front door's current
+headline rather than the 48-character one this entry measured:
+
+| palette | lines before → after | first control before → after |
+| --- | --- | --- |
+| `minimal` | 3 → **2** | 681 → **598** |
+| `editorial` | 3 → **2** | 652 → **587** |
+| `bold` | 3 → **2** | 714 → **612** |
+
+Held by `library.test.ts` → *caps a hero's headline and its prose with two
+different measures*, which asserts the two caps **differ** rather than their
+values: the numbers will be tuned again and the one thing that must not come back
+is one number
 
 `loom.hero` caps its text column at `TEXT_MEASURE = "44rem"`, one constant
 covering the heading slot and the prose beneath it. **A measure written as a
@@ -34231,7 +34297,11 @@ re-read by whoever would have fixed it.
 ## 2026-09-26 — the two hero findings of 20 September are six days open and re-photographed, on all three palettes
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — **re-filed by reference, with nothing added to the argument**
+**closed** by `Loom primitives` on 28 September with the two entries it points
+at, on branch `primitives-48-the-heros-two-measures`. The age this entry was
+written to make visible was eight days by the time it was acted on, and the
+thing that acted on it was reading `FINDINGS.md` before choosing work, which is
+what this entry existed for
 
 Both 20 September entries stand exactly as written and both were photographed
 again this morning against `next start` on `main`:
@@ -36102,3 +36172,88 @@ sentence there has the same exposure.
 Not fixed here because `(marketing)/_lib/` is not this lane's, and not urgent
 because the licence is a week old and settled. Filed so the next run in that lane
 has the one line rather than the argument for it.
+## 2026-09-28 — a `loom.halo` inside a `loom.backdrop` has four pixels of its rim cut off, and the comment that says it cannot says so about the halo alone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **four pixels, found by an instrument
+rather than by an eye**, and filed for the sentence rather than for the number
+
+`loom.halo` draws its light as an absolutely positioned layer at a negative
+inset, and `loom.halo.ts` states why that is right:
+
+> negative insets render as a rectangle with two hard sides. Here negative
+> insets are exactly right, for the same reason read backwards: **there is no
+> clip**
+
+True of a halo on its own, and not true of a halo inside a `loom.backdrop`,
+which sets `overflow: hidden` and must. The rim the offset buys is then cut at
+the backdrop's edge, on every side.
+
+**Measured**, by the clipped-content measurement `pnpm specimen` now takes on
+every shot (0202), before that measurement learned to tell decoration from
+content:
+
+| specimen | palette | the box | its content reached |
+| --- | --- | --- | --- |
+| `the-whole-page` (pricing band) | editorial | 350 | **354** |
+| `the-whole-page` (pricing band) | bold | 346 | **350** |
+| `catches-the-eye` | editorial | 350 | **354** |
+| `catches-the-eye` | bold | 346 | **350** |
+
+Four pixels each time, at 390. `catches-the-eye`'s own caption is *"A halo
+inside a backdrop, which is…"*, so the combination is deliberate and the
+clipping was not noticed.
+
+**Why this is filed rather than fixed, and why it is small.** Four pixels of a
+soft rim is not a defect anyone would report from a screenshot, and the
+instrument that found it now excludes it by design — decoration that is clipped
+is decoration working, which is 0202's rule. What is worth the entry is the
+**comment**, which a reader will take as a statement about the primitive and
+which is a statement about one of its two contexts. Whether the rim should be
+inset instead when the halo is inside something that clips is this lane's
+question and not the framework's; if the answer is *leave it*, the fix is the
+sentence.
+
+**Nothing is blocked.** No page changes, no test fails, and the framework's
+measurement is correct either way.
+## 2026-09-28 — a font pack's top step was tuned around a layout constant in another lane's file, and that constant has moved
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — **nothing is broken and nothing is
+urgent.** Every page renders correctly today and will keep rendering correctly
+if this is never acted on. It is filed because a premise a comment states in
+`src/theme/library.ts` stopped being true on 28 September, and the pack's owner
+is the only lane that can decide what to do about it
+
+`minimal-sans` caps its type ramp's top step at 72px, and its comment says
+exactly why:
+
+> Step 8 is 72 and not more. `loom.heading` maps level 1 to the top step and
+> `loom.hero` holds its text to a 44rem measure, so an ambitious top step does
+> not produce a bigger headline — it produces the same headline on four lines.
+> Tuned against a render rather than against the numbers.
+
+That is a correct local response to a constraint in another lane's file, and it
+is the sharpest evidence there was that the constraint was wrong — a font pack
+bending around a layout constant is a font pack paying for somebody else's
+number. `loom.hero` now caps a display line at `64rem`
+([0201](decisions/0201-a-display-line-and-a-reading-line-are-two-measures.md)),
+which is wider than the band a `wide` page gives it, so **an ambitious top step
+now does produce a bigger headline.** The comment's premise is gone.
+
+**What this is not.** Not a request to raise the step. 72px may well still be
+the right size for this pack for reasons that have nothing to do with the hero —
+it is the house theme, the reference is `nextjs.org`, and restraint is the whole
+argument of the palette it belongs to. The finding is that the *reason written
+down* is no longer a reason, so whoever next reads that comment would be
+reasoning from a fact that is three weeks stale. Re-deciding it on the pack's own
+terms and rewriting the comment is the whole of what is being asked, and leaving
+the number exactly where it is would be a complete answer.
+
+**Worth knowing before touching it.** `bold-sans` sets 88px and took three lines
+at `44rem` where the two 72px packs took three as well; at `64rem` all three take
+two. So the packs are no longer separated by the hero's measure at all, which is
+the property that makes a ramp comparison meaningful again.
+
+**Not filed for `Loom primitives`.** `src/primitives/` no longer contains
+anything that constrains a ramp, which is the point.
