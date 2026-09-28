@@ -739,3 +739,61 @@ describe("the panels that print data", () => {
     }
   })
 })
+
+/**
+ * The plate the house theme cannot draw, held against every band of the site.
+ *
+ * `loom.section`'s `surface` tone is a fill and a radius and `space(5)` of
+ * inline padding, and **no border** — where `loom.card`'s tone of the same name
+ * is the same fill plus `1px solid border-subtle`. `minimal` sets `bg-surface`
+ * to its own `bg-canvas` deliberately, so that a component there is defined by
+ * its outline; a card collects on that and a section does not. What a reader on
+ * the house theme gets from `tone: "surface"` is therefore an inset with no edge
+ * around it, and six bands were stepped in from the left rule the rest of the
+ * site sits on.
+ *
+ * The full reasoning, with the measurement and both palettes, is on `section` in
+ * `nodes.ts`. This is the guard, and it is worth having rather than trusting the
+ * six call sites because the tone is the obvious thing to reach for the next
+ * time a band wants to look like a region — it is named for exactly that, it is
+ * correct on two of the three palettes, and the one it is wrong on is the one
+ * nobody re-photographs after a copy change.
+ *
+ * **Reversing it is meant to be cheap.** The finding of 28 September asks
+ * `Loom primitives` for the outline; the day it lands this test is what should
+ * fail, and the bands that are genuinely a different kind of thing — the front
+ * door's figures, its four ways on, and the stage the demonstration runs in —
+ * are the ones to give it back to first.
+ */
+describe("the bands, and the plate the house palette draws as padding", () => {
+  const everySection = async (): Promise<readonly ElementNode[]> => {
+    const found = (node: LoomNode): readonly ElementNode[] =>
+      node.kind === "text"
+        ? []
+        : [
+            ...(node.kind === "element" && node.type === "loom.section" ? [node] : []),
+            ...node.children.flatMap(found),
+          ]
+
+    const trees = await Promise.all(
+      SITE_ROUTES.map((route) => pageTreeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }))
+    )
+
+    return trees.flatMap((tree) => found(tree.root))
+  }
+
+  /**
+   * Counted rather than assumed, for the reason the panel sweep above is: a
+   * sweep that silently walks nothing passes forever. Held as a floor rather
+   * than an exact number so that adding a band to a page is not a test edit.
+   */
+  it("walks every band on the site", async () => {
+    expect((await everySection()).length).toBeGreaterThanOrEqual(12)
+  })
+
+  it("asks none of them for a tone the house palette renders as bare padding", async () => {
+    const plated = (await everySection()).filter((band) => band.props["tone"] === "surface")
+
+    expect(plated.map((band) => band.props["eyebrow"])).toEqual([])
+  })
+})

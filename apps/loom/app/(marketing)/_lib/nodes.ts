@@ -66,7 +66,44 @@ export const link = (
     children: [buildText(ids, label)],
   })
 
-/** A band with its heading in the region the section places it in (0051). */
+/**
+ * A band with its heading in the region the section places it in (0051).
+ *
+ * ## Why no band on this site asks for `tone: "surface"`
+ *
+ * Six of them did until 28 September, and on the palette a visitor arrives on
+ * the tone draws **nothing at all except its own padding**. Photographed on all
+ * three, which is the only way it is visible:
+ *
+ * | | `loom.card`, tone `surface` | `loom.section`, tone `surface` |
+ * | --- | --- | --- |
+ * | fill | `bg-surface` | `bg-surface` |
+ * | outline | `1px solid border-subtle` | **none** |
+ * | padding | yes | yes, `space(5)` inline |
+ *
+ * `minimal` sets `bg-surface` to `#ffffff`, which is exactly its `bg-canvas`,
+ * and does it **on purpose** — its own comment in `src/theme/library.ts` says
+ * components there are "defined by its border instead of by a change of
+ * background", and the palette pays for that by making `border-subtle` a step
+ * darker than a fill-backed palette needs. A card collects on that bargain. A
+ * section does not read a border token at all, so what survives on the house
+ * theme is thirty-two pixels of inset with no edge drawn around it: one band in
+ * five on `/how-it-works`, two in three on `/what-you-run`, and three of nine on
+ * the front door, each stepped in from the left rule every other band sits on,
+ * for a reason a reader cannot see because there is nothing there to see.
+ *
+ * It reads as deliberate on `bold` and `editorial`, where the fill is a real
+ * change of colour. That is the trap: the tone is correct on two palettes and is
+ * a ragged left margin on the one every screenshot and every visitor gets.
+ *
+ * So the site stops asking for a plate the house theme cannot draw. **This is a
+ * composition change and not a verdict on the tone** — the finding of
+ * 28 September is filed for `Loom primitives`, and the day `loom.section`
+ * outlines its tones the way `loom.card` already does, the bands that genuinely
+ * are a different kind of thing should take it back. `pages.test.ts` holds the
+ * rule and names the finding, so putting one back is a line of code and a line
+ * of test rather than an argument.
+ */
 export const section = (
   ids: IdFactory,
   props: JsonObject,
