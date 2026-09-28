@@ -282,3 +282,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0196](0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md) | A paint is sized by the box it is given, and says so when it cannot be | Accepted | §4b |
 | [0197](0197-a-host-may-ask-which-way-round-a-palette-is-and-a-frame-standing-in-for-the-page-is-handed-both-ends.md) | A host may ask which way round a palette is, and a frame standing in for the page is handed both ends | Accepted | §4b |
 | [0198](0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md) | A refusal records which rules it broke, and the rules' names are a closed vocabulary | Accepted | §6 (telemetry), binding on §2 |
+| [0199](0199-the-outline-may-render-what-it-addresses-and-a-hand-may-yet-move-a-node.md) | The outline may render what it addresses, and a hand may yet move a node | Proposed | §5 |
+| [0200](0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md) | The portal may place a lever beside the evidence, and a model may never pull one | Proposed | §5 |

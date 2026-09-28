@@ -282,9 +282,39 @@ shown on one screen, and a lane-wide guard is not.
 ---
 ## 2026-09-27 — a refusal read back out of the record can name the rule and never the reason, because the factors are not stored
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
-— **`ARCHITECTURAL — needs review`**, because the answer is a field on
-`dispositionSchema` or `assessmentSummarySchema` and both are the framework's
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed** by
+[0198](decisions/0198-a-refusal-records-which-rules-it-broke-and-the-rules-names-are-a-closed-vocabulary.md)
+and #428, the night it was filed. Filed as `ARCHITECTURAL — needs review`,
+because the answer was a field on `dispositionSchema` or
+`assessmentSummarySchema` and both are the framework's
+
+> **Closed 28 September, and the answer is narrower than what was asked for in
+> exactly the way that matters.** This entry recommended
+> `factors: readonly StakeFactor[]` — the whole factor, clause and detail and
+> level. 0198 ships **`stakeFactorCodes`**: the codes only, optional and never
+> defaulted (0045), with `detail` deliberately withheld because it is a sentence
+> naming nodes and types, and `level` withheld because it is recoverable from
+> what the summary already carries.
+>
+> **That is enough for the hazard this entry was actually about.** `cannotBeDrawn`
+> is a test over `UNDRAWABLE = ["unknown-primitive", "invalid-props"]`, which is a
+> set of **codes** — so every screen that reads a refusal back can now tell *this
+> cannot be drawn at all* from *your rules turned this down*, and stop sending a
+> reader to `/portal/rules` to loosen a rule that, loosened, would commit a broken
+> page. `factorClause(code)` supplies the reader's sentence without the runtime's
+> own `detail`.
+>
+> **What is still not recoverable** is the Gate's per-factor account — *"adds a
+> node no primitive is registered for: app.gallery at n_7"* — which stays in the
+> joined `disposition.reason.detail` and cannot be put beside the clause it
+> belongs to. That is a smaller thing than this entry claimed and it is the right
+> trade: 0023 keeps content out of the record, and a node id is content.
+>
+> **The portal's half is not built.** `ProposalLine`, the waiting cards and the
+> review queue all still answer *why did this stop* with the rule. That is a
+> portal unit now rather than a framework gap, and it is the first thing in this
+> lane that 0198 unblocks.
 
 `_lib/refusal.ts` exists for one sentence in its own header, and the sentence is
 right:
@@ -408,6 +438,86 @@ It is not in `portal-37` for the same reason it was not in `portal-36`: that
 branch is about what a reader is shown, and a staging harness is not.
 
 ---
+## 2026-09-27 — a policy can be changed and there is nowhere for that change to be recorded
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
+[0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
+(`Proposed`) and `docs/portal.md` phase 7 · **Status:** open — **not blocking
+phases 1–4**, and blocking phase 7 entirely
+
+0200 decides that the portal may put a policy control next to the measurement
+arguing for it, and that **a change to policy is a change a person made, recorded
+as one** — who, when, and what it was before.
+
+**There is nowhere to record it.** A `Disposition` carries `policyId` and, since
+the fingerprint was added, `policyFingerprint` — so the record can say *which*
+policy judged a change and *that its contents differed*. Neither answers the
+question a reader of a changed policy has, which is **what changed, when, and who
+did it.** A fingerprint is a hash: it can prove two judgments were made under
+different rules and cannot say how they differed.
+
+That is the same relationship 0016 already settled one level up — the log is the
+truth and the snapshot is a view — applied to the thing doing the judging rather
+than to the thing being judged. A system whose entire premise is that changes to a
+page are logged, judged and reversible cannot have **the policy** be the one
+object that can change silently.
+
+**Why it is the framework's.** A policy is §2's object. The portal can build the
+screen; it cannot invent the log, and a portal-side history of policy edits would
+be a second source of truth that disagrees with whatever the framework does later.
+0018 applies in its usual direction.
+
+**The shape, offered rather than specified**, since the lane that owns it will
+know better: the smallest thing that works is what a tree already has — an
+append-only log of policy revisions with the actor and instant on each, and the
+fingerprint already on a `Disposition` becoming the join key between *this
+judgment* and *the policy text it was made under*. That would make a calibration
+window that straddles a policy change legible for the first time, which
+`/portal/trust`'s own policy breakdown currently warns about and cannot explain.
+
+---
+## 2026-09-27 — an A/B split needs a reader assigned to an arm, and 0146 refuses every mechanism for remembering which arm
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
+`docs/portal.md` phase 6 · **Status:** open — **a question for the record that
+phase authorises, not a defect**
+
+The maintainer asked for A/B testing on 27 September. `docs/portal.md` puts the
+serving half in the framework, because choosing which tree answers a request is
+§1's business, and notes that the measuring half is nearly free: reader signals
+are already filed per node **per revision**, so *revision 4's hero against
+revision 5's* is close to a query against counters that exist.
+
+**The serving half has an unresolved conflict with
+[0146](decisions/0146-a-reader-signal-stays-anonymous-and-a-funnel-is-correlated-inside-one-page-view.md),
+and it is worth stating before anybody designs around it.** An A/B test
+conventionally needs a reader to stay in one arm across visits. Every ordinary way
+of doing that is a stable per-reader identifier, and 0146 refuses all of them by
+name: no visitor id, no device id, no fingerprint, no cross-page stitching. The
+`view` key that makes funnels answerable is explicitly one page view, never
+persisted, never derived from anything about the reader.
+
+So a straightforward implementation would be the first thing in this repository to
+breach 0146, and it would do it quietly — a cookie is a small change.
+
+**Three directions, none chosen**, offered so the record starts from something:
+
+1. **Do not remember.** Assign per page view, at random. The arms stay anonymous
+   and the measurement stays honest for *per-view* questions — which is what all
+   four existing signal kinds already are, and what `completed` will be. What is
+   lost is any question spanning visits, and it is worth asking whether Loom has
+   one.
+2. **Split by something that is not a reader.** Time window, or request, or a
+   share of traffic. Coarser, and it confounds with anything else that varies over
+   time — but it acquires nothing.
+3. **Decide that A/B is worth an identifier**, and supersede 0146's first rule
+   deliberately, at both ends (0193). This is a real option and it is the
+   maintainer's call, not a lane's. It should not be reached by accident, which is
+   the whole reason this is filed before the work rather than during it.
+
+**The portal has no stake in which.** It reads counters either way. The reason
+this is filed by this lane is that the ask came here and the conflict is not
+visible from the framework side until somebody writes the assignment code.
 ## 2026-09-27 — a shot leaves the pointer where it last clicked, so a `before` that signs in can photograph a hover state
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`tools/`), with a
