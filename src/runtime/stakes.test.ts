@@ -8,7 +8,13 @@ import { endpointIdSchema } from "../submit/endpoint.js"
 import type { ChangeAnalysis } from "./analysis.js"
 import { defaultGatePolicy, gatePolicySchema } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
-import { assessStakes, stakeFactor, type StakeAssessment } from "./stakes.js"
+import {
+  assessStakes,
+  stakeFactor,
+  stakeFactorCodeSchema,
+  STAKE_FACTOR_CODES,
+  type StakeAssessment,
+} from "./stakes.js"
 
 const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => ({
   operationCount: 1,
@@ -530,5 +536,81 @@ describe("assessStakes on a repointed binding", () => {
     )
 
     expect(assessment.level).toBe("critical")
+  })
+})
+
+/**
+ * The list exists so that something can walk the rules — a table of
+ * plain-language sentences, a telemetry corpus grouping refusals by cause, a
+ * dashboard that needs thirteen buckets before the first request arrives. A
+ * list that names a rule nothing can raise costs a row that is permanently
+ * zero with no explanation, and a rule missing from the list costs a bucket
+ * that silently never appears. Neither is visible from a `switch`.
+ */
+describe("STAKE_FACTOR_CODES", () => {
+  /** One change that trips every rule at once, which is what makes the set checkable. */
+  const guilty = analysisOf({
+    touchedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
+    removedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
+    relocatedPrimitiveTypes: [primitiveTypeSchema.parse("commerce.cart")],
+    configuredPropKeys: ["href"],
+    removedNodeCount: 40,
+    insertedNodeCount: 1,
+    affectedNodeIds: Array.from({ length: 40 }, (_unused, index) =>
+      nodeIdSchema.parse(`n_touched${index}`)
+    ),
+    shallowestAffectedDepth: 0,
+    nestedTargets: [
+      {
+        nodeId: nodeIdSchema.parse("n_inner"),
+        type: primitiveTypeSchema.parse("loom.action"),
+        ancestorId: nodeIdSchema.parse("n_card"),
+        ancestorType: primitiveTypeSchema.parse("loom.card"),
+      },
+    ],
+    unknownPrimitives: [
+      { nodeId: nodeIdSchema.parse("n_new"), type: primitiveTypeSchema.parse("app.nonesuch") },
+    ],
+    invalidProps: [
+      {
+        nodeId: nodeIdSchema.parse("n_bad"),
+        type: primitiveTypeSchema.parse("loom.card"),
+        issues: [{ path: "variant", message: "received invented" }],
+      },
+    ],
+    redirectedSubmissions: [
+      {
+        nodeId: nodeIdSchema.parse("n_form"),
+        from: endpointIdSchema.parse("newsletter.subscribe"),
+        to: endpointIdSchema.parse("contact.enquiry"),
+      },
+    ],
+    repointedBindings: [
+      {
+        nodeId: nodeIdSchema.parse("n_card"),
+        name: bindingNameSchema.parse("items"),
+        kind: "source" as const,
+        from: "catalogue.services",
+        to: "orders.mine",
+      },
+    ],
+  })
+
+  const policy = gatePolicySchema.parse({
+    protectedPrimitiveTypes: ["commerce.cart"],
+    protectedPropKeys: ["href"],
+  })
+
+  it("names every rule the Gate can raise, in the order it raises them", () => {
+    const raised = assessStakes(
+      { analysis: guilty, discards: [{ revision: 4, nodeIds: [nodeIdSchema.parse("n_body")] }] },
+      policy
+    )
+
+    expect(raised.factors.map((factor) => factor.code)).toEqual(STAKE_FACTOR_CODES)
+  })
+
+  it("is the schema's own members rather than a second copy of them", () => {
+    expect(STAKE_FACTOR_CODES).toEqual(stakeFactorCodeSchema.options)
   })
 })

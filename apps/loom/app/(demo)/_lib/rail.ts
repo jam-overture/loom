@@ -5,11 +5,12 @@ import type { HeldProposal } from "@jam-overture/loom/write"
 import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 
 import { stillToAsk } from "./already-asked"
+import { partTheAskWouldTouch } from "./before-the-press"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { markedPage, type MarkedPage } from "./marked"
 import { movedOn, type MovedNote } from "./moved"
 import { plainChange, settingsOf, type PlainChange } from "./plain-change"
-import { availablePresets, type DemoPresetId } from "./presets"
+import { availablePresets, leadingAsk, type DemoPresetId } from "./presets"
 import type { ChangeRecord } from "./record"
 import { setAside, type SetAside } from "./set-aside"
 import { spotlightsAcross, spotlitChanges, type Spotlight, type SpotlitChange } from "./spotlight"
@@ -81,6 +82,20 @@ export type RailView<TPart> = {
   readonly marked: MarkedPage
   /** The caution at the controls, when a question is still open. */
   readonly waiting?: SetAside
+  /**
+   * The ask that gets the green button, and the part of the page it would
+   * touch — absent while a question is open, because the green on this rail
+   * belongs to the answer then rather than to a new ask.
+   *
+   * The nomination is here rather than in `ask-panel.tsx` so that the panel
+   * offering an ask and the preview showing what it would do are one answer to
+   * one question. `presets.ts` owns the answer; this is where it is asked.
+   */
+  readonly leading?: {
+    readonly preset: DemoPresetId
+    /** Absent when the ask names the page itself, which the re-theme does. */
+    readonly part?: TPart
+  }
   /** Per record, the readings a card cannot work out for itself. */
   readonly readings: ReadonlyMap<string, RailReading<TPart>>
   /** The one change the page is currently about — the marks, the legend and the way back are all about this one. */
@@ -105,6 +120,16 @@ export type RailInput<TPart> = {
    * preserved.
    */
   readonly showPart: (part: PartInQuestion, proposalId: string) => TPart
+  /**
+   * How to show the part of the page the leading ask would touch.
+   *
+   * A second callback rather than a second use of `showPart`, and the reason is
+   * the argument `showPart` takes: a question has a proposal id and an ask has
+   * not been made, so there is nothing to key it by. Handing it a fabricated
+   * one would put an id nothing minted into the one part of this surface whose
+   * whole subject is that every id is real.
+   */
+  readonly showAsk: (part: PartInQuestion) => TPart
 }
 
 export const whatTheRailShows = <TPart>({
@@ -114,6 +139,7 @@ export const whatTheRailShows = <TPart>({
   registry,
   ids,
   showPart,
+  showAsk,
 }: RailInput<TPart>): RailView<TPart> => {
   /**
    * The holds the page has moved past, by the record they belong to.
@@ -275,12 +301,34 @@ export const whatTheRailShows = <TPart>({
 
   const about = spotlit[0]
   const waiting = setAside(records, openQuestions)
+  const available = stillToAsk(availablePresets(tree, ids), records, openQuestions)
+
+  /**
+   * Which ask is primary, and what it would touch.
+   *
+   * **Nothing while a question is open**, which is the panel's own rule read
+   * off the one value that knows: the green belongs to *Apply this change*
+   * then, and a preview of a sixth thing that could happen belongs nowhere near
+   * a visitor deciding about the fifth. `ask-panel.tsx` argues the green; this
+   * is the same claim with the preview attached to it, so the two cannot come
+   * apart.
+   */
+  const nominated = waiting === undefined ? leadingAsk(available) : undefined
+  const askPart = nominated === undefined ? undefined : partTheAskWouldTouch(tree, ids, nominated)
 
   return {
-    available: stillToAsk(availablePresets(tree, ids), records, openQuestions),
+    available,
     spots: drawn.flat(),
     marked,
     ...(waiting === undefined ? {} : { waiting }),
+    ...(nominated === undefined
+      ? {}
+      : {
+          leading: {
+            preset: nominated.id,
+            ...(askPart === undefined ? {} : { part: showAsk(askPart) }),
+          },
+        }),
     readings,
     ...(about === undefined ? {} : { about }),
     /**

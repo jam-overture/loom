@@ -117,23 +117,79 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
     children: [
       buildSlot(ids, "heading", [
         /**
-         * The maintainer's line, 21 August, verbatim.
+         * **The frame, and it is the maintainer's of 27 September.**
          *
-         * It is the first headline on this site that says what Loom *is* rather
-         * than what it does to a page, and the contrast is the whole
-         * positioning: everything else with an AI in it hands you parts, and
-         * the argument is that parts are not the hard bit. Written as he wrote
-         * it, comma and all — positioning is his, and a routine that "improved"
-         * the punctuation of a line it was given would be rewriting the one
-         * thing it was told not to invent.
+         * The headline this replaces was his line of 21 August, verbatim —
+         * *"AI creates components, Loom creates experiences."* His verdict on
+         * it was that it does not grab you: it is the *conclusion* of an
+         * argument nobody has been given yet, so a stranger meets a contrast
+         * between two words before they have any reason to care about either.
+         *
+         * His direction was to open on the reimagining — *we need to rethink
+         * how we build web apps in the AI age* — and to make the components
+         * line the **explanation underneath it** rather than the claim itself.
+         * That is what this is. The 21 August line is not gone; it is the first
+         * two sentences of the paragraph below, unpacked.
+         *
+         * It is a claim about the world rather than about this product, which
+         * is the point of a manifesto opening and is also its risk: a visitor
+         * who disagrees with the premise is gone. The paragraph under it has
+         * one job — earn the premise in three sentences — and that is why it
+         * leads with what AI already does rather than with what Loom is.
+         *
+         * **Positioning is the maintainer's**, so the alternatives were offered
+         * on the pull request rather than chosen here. This wording is a draft
+         * of his direction, not an invention of it.
          */
-        heading(ids, 1, "AI creates components, Loom creates experiences.", {
+        heading(ids, 1, "The AI age needs a new way to build web apps.", {
           balance: true,
         }),
       ]),
+      /**
+       * The why, in the order a stranger needs it: what has already changed,
+       * what that leaves, and only then what we are.
+       *
+       * The first sentence is five words and concedes the thing a reader
+       * already believes — **AI writes the parts** — because an opening that
+       * argues with what somebody knows spends its credit before it has any.
+       * The second names what is left over, in their terms rather than ours.
+       * The third is the only one that mentions Loom, and it carries the two
+       * facts the rest of the page is about: the rules, and the record.
+       *
+       * **Two things the maintainer added on 27 September, and both are real
+       * gaps rather than polish.**
+       *
+       * *What your page becomes* and *how it feels to use* are **not the same
+       * claim**, and the line before this one only made the first. A page can
+       * rearrange correctly and still be worse to use; the whole argument for
+       * doing this at all is the second one, and it was missing from the
+       * sentence that exists to state it.
+       *
+       * And the closing clause was two properties where the product has three.
+       * *On your rules, with every change written down* is the record and the
+       * rules; it leaves out the thing the page is named for — that the
+       * arrangement **adapts to the person reading it**. The triad states all
+       * three in the order they matter to a buyer: what it does for their
+       * readers, what it will not do without permission, and that it is safe to
+       * put near production.
+       *
+       * **One em-dash, and it is at the end rather than the middle.** An earlier
+       * draft set the second sentence's subject off with a pair of them, which
+       * reads fine ranged left and badly here: this band is `align: "center"`,
+       * so both edges are ragged, and an interruption inside a centred sentence
+       * costs a reader the thread exactly where the argument turns. The comma
+       * pair that survives in the second sentence is six words long rather than
+       * twelve, and was kept only after photographing it at 1280 and 390.
+       *
+       * No contraction, on the house style every other line of this site
+       * follows; each sentence is inside the thirty-word ceiling
+       * `voice.test.ts` holds the opening band to; and *your page* and *your
+       * rules* are both here, which is the one habit from the maintainer's
+       * reference that a test can check — the reader is in the sentence.
+       */
       prose(
         ids,
-        "Ask for a change in your own words and the page rearranges itself. Nothing lands until it has been checked against your rules — and every change keeps a record of who asked, what moved, and how to put it back.",
+        "AI already writes the components. What your page becomes, and how it feels to use, is still to be built. Loom is where you and the AI build it — adaptive to your users, answerable to your rules, and secure.",
         { size: "lead", measured: true, align: "center" }
       ),
       buildSlot(ids, "actions", [
