@@ -74,7 +74,16 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 118 since lesson 29 (readership), which added seven — one per exercise, each a
+ * 125 since lesson 30 (rendezvous), which added seven — one per exercise, each a
+ * whole transcript in a single block. Two of them print an empty string as the
+ * whole of what a page says, which is the lesson's subject rather than a fence
+ * that lost its content: a binding answered under a name nothing reads draws the
+ * primitive's empty region, and a transcript that elided that would be eliding
+ * the finding. None of them prints the size of the primitive library; exercise G
+ * prints it on a line of its own and the prose under it declines to repeat the
+ * number, on lessons 22 and 24's precedent.
+ *
+ * It was 118 after lesson 29 (readership), which added seven — one per exercise, each a
  * whole transcript in a single block. Exercise B's second fence is a `tsc`
  * diagnostic and is marked `text` rather than left plain, on lesson 25's
  * precedent: no program in this course prints a compiler error, so a plain fence
@@ -109,7 +118,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 118
+const RECOGNISED_TRANSCRIPTS = 125
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
