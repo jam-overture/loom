@@ -148,7 +148,7 @@ The front door on a phone. Photographed at 390 × 844 while looking for this:
 | headline | 5 lines |
 | lead | 9 lines, 4 of them above the fold |
 | **the first control** | **~1114px down — 270px below the fold** |
-| the whole page | 11,751px, **thirteen phone screens** |
+| the whole page | 11,012px, **thirteen phone screens** |
 
 A stranger on a phone gets a badge, a headline and half a paragraph. Checked for
 a composition answer and there is not one: `stature: "tall"` sets a 78vh floor
