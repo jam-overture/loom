@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, radius, size, space } from "./tokens.js"
+import { colour, family, hairline, radius, size, space } from "./tokens.js"
 
 /**
  * The strip a site runs above everything else: one short thing to say, and one
@@ -81,11 +81,11 @@ const TONES: Readonly<Record<NonNullable<Props["tone"]>, CSSProperties>> = {
   },
   surface: {
     background: colour("bg-surface-muted"),
-    borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+    borderBlockEnd: `1px solid ${hairline()}`,
   },
   plain: {
     background: "transparent",
-    borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+    borderBlockEnd: `1px solid ${hairline()}`,
   },
 }
 
