@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -4321,7 +4321,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4367,7 +4367,7 @@
       "files": 56,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5210,7 +5210,7 @@
       "files": 180,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5669,7 +5669,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6260,7 +6260,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6488,7 +6488,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6905,7 +6905,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7259,7 +7259,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7392,7 +7392,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8155,7 +8155,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8298,7 +8298,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8358,7 +8358,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8892,7 +8892,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8963,10 +8963,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 84,
+      "files": 85,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9153,6 +9153,27 @@
               "signature": "const buildProposal: (idFactory: IdFactory, draft: ProposalDraft) => ProposedChange",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "HangingSeam",
+              "kind": "type",
+              "signature": "type HangingSeam<TEntry> = {\n    readonly entry: TEntry;\n    /** Whether the runtime's ceiling aborted the call, and what it said. */\n    readonly abortedWith: () => string | undefined;\n};",
+              "truncated": false,
+              "summary": "What a hanging seam double reports, beside the entry a registry takes."
+            },
+            {
+              "name": "hangingSource",
+              "kind": "function",
+              "signature": "const hangingSource: (id: string, description: string) => HangingSeam<SourceEntry>",
+              "truncated": false,
+              "summary": "A source that never answers — the sibling of `hangingModelClient` at the data seam, published for the same reason."
+            },
+            {
+              "name": "hangingEndpoint",
+              "kind": "function",
+              "signature": "const hangingEndpoint: (id: string, description: string) => HangingSeam<EndpointEntry>",
+              "truncated": false,
+              "summary": "An endpoint that never says where a form posts — the same double at the submission seam."
             }
           ]
         },
@@ -9379,10 +9400,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 48,
+      "files": 50,
       "narrower": [],
       "standing": {
-        "packageNames": 1084,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
