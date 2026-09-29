@@ -1,16 +1,21 @@
+import type { ReactElement } from "react"
 import { describe, expect, it } from "vitest"
 
 import { createStarterPrimitiveRegistry } from "../primitives/index.js"
+import { libraryStylesheet } from "../primitives/stylesheet.js"
 import { registryPairings } from "../sdk/pairings.js"
 import type { PrimitiveRegistry } from "../sdk/registry.js"
 
 import { contrastRatio, PALETTE_TEXT_GROUNDS } from "./contrast.js"
 import { minimalPalette, STARTER_PALETTES } from "./library.js"
 import {
+  auditMarkGroundings,
   auditSeparation,
   colourDifference,
+  describeMarkAudit,
   describeSeparationAudit,
   JUST_NOTICEABLE_DIFFERENCE,
+  PALETTE_MARK_GROUNDINGS,
   PALETTE_PEER_PAIRINGS,
 } from "./separation.js"
 import { paletteSchema, type Palette } from "./theme.js"
@@ -230,5 +235,143 @@ describe("auditSeparation", () => {
 
     expect(editorial).toBeDefined()
     expect(describeSeparationAudit(auditSeparation(editorial as Palette))).toBe("")
+  })
+})
+
+/**
+ * What the library really draws, as text. `libraryStylesheet` is typed as a
+ * `ReactElement` with unknown props, so the children are named here rather than
+ * asserted away at each use.
+ */
+const emittedStylesheet = (): string =>
+  (libraryStylesheet() as ReactElement<{ readonly children: string }>).props.children
+
+describe("PALETTE_MARK_GROUNDINGS", () => {
+  /**
+   * Every slot named here is one the emitted stylesheet really reads, which is
+   * the same guard the peer list has and for the same reason: a grounding
+   * nobody draws is a row that can only ever fail for its own sake.
+   */
+  it("names only slots the library's stylesheet actually reads", () => {
+    const css = emittedStylesheet()
+
+    for (const grounding of PALETTE_MARK_GROUNDINGS) {
+      for (const slot of [grounding.mark, ...grounding.grounds]) {
+        expect(css, `${slot} (${grounding.where})`).toContain(`var(--loom-${slot})`)
+      }
+    }
+  })
+
+  /** A line measured against itself is a line measured against nothing. */
+  it("never grounds a mark on itself, and says where each one is drawn", () => {
+    for (const grounding of PALETTE_MARK_GROUNDINGS) {
+      expect(grounding.grounds, grounding.where).not.toContain(grounding.mark)
+      expect(grounding.grounds.length, grounding.mark).toBeGreaterThan(0)
+      expect(new Set(grounding.grounds).size, grounding.mark).toBe(grounding.grounds.length)
+      expect(grounding.where.length, grounding.mark).toBeGreaterThan(0)
+    }
+  })
+
+  /** One row per mark, so which grounds it answers to is not a matter of which row you read. */
+  it("lists each mark once", () => {
+    const marks = PALETTE_MARK_GROUNDINGS.map((grounding) => grounding.mark)
+
+    expect(marks).toHaveLength(new Set(marks).size)
+  })
+})
+
+describe("auditMarkGroundings", () => {
+  /**
+   * The gate, and what it cost to be able to write it. Eight of the palettes
+   * below shipped a `border-subtle` edge within a just-noticeable difference of
+   * a fill it is drawn on — `linen` drew it in the well's own colour, ΔE 0.00,
+   * and `clay` at 0.37 — and every test in this file was green throughout,
+   * because the only thing that ever measured a border measured it as a defence
+   * for a pair of fills that were not in trouble.
+   */
+  it("finds no line the library declares and a starter palette does not draw", () => {
+    for (const palette of STARTER_PALETTES) {
+      expect(describeMarkAudit(auditMarkGroundings(palette)), palette.id).toBe("")
+    }
+  })
+
+  it("measures every declared mark against every ground it is drawn on", () => {
+    const expected = PALETTE_MARK_GROUNDINGS.reduce((total, grounding) => total + grounding.grounds.length, 0)
+
+    for (const palette of STARTER_PALETTES) {
+      expect(auditMarkGroundings(palette).measured.length, palette.id).toBe(expected)
+    }
+  })
+
+  /**
+   * The blind spot this function exists for, planted deliberately: a well that
+   * is plainly a different colour from the surface around it, outlined in the
+   * well's own colour. `auditSeparation` passes the pair — the fills tell a
+   * reader the two apart and it never has to ask about the mark — and the border
+   * the primitive declares draws nothing. This is the shape of what eight
+   * starter palettes were doing.
+   */
+  it("does not let a visible fill difference stand in for a line that is not there", () => {
+    const mutedWell = minimalPalette.slots["bg-surface-muted"] ?? ""
+    const palette = withSlots({ "border-subtle": mutedWell })
+    const pair = auditSeparation(palette).measured.find(
+      (entry) => entry.pairing.where === "loom.code panel inside a card"
+    )
+
+    expect(mutedWell).toMatch(/^#[0-9a-f]{6}$/)
+    expect(pair?.difference ?? 0).toBeGreaterThan(JUST_NOTICEABLE_DIFFERENCE)
+    expect(pair?.separated).toBe(true)
+    expect(auditSeparation(palette).unmarked).toEqual([])
+
+    const marks = auditMarkGroundings(palette)
+
+    expect(marks.invisible.map((entry) => entry.ground)).toEqual(["bg-surface-muted"])
+    expect(describeMarkAudit(marks)).toContain("the line is not there")
+    expect(describeMarkAudit(marks)).toContain("loom.card")
+  })
+
+  /**
+   * A line whose colour cannot be measured is reported rather than passed. The
+   * safe direction, and the same one `MeasuredPeer` takes for a mark it cannot
+   * read: a defence that cannot be measured is not counted as one.
+   */
+  it("counts a colour it cannot measure as a line it cannot find", () => {
+    const marks = auditMarkGroundings(withSlots({ "border-default": "rgb(200, 200, 200)" }))
+
+    expect(marks.invisible.map((entry) => entry.grounding.mark)).toEqual([
+      "border-default",
+      "border-default",
+      "border-default",
+    ])
+    expect(marks.invisible.every((entry) => entry.difference === undefined)).toBe(true)
+    expect(describeMarkAudit(marks)).toContain("could not be measured")
+  })
+})
+
+describe("the border ramp", () => {
+  /**
+   * The gap 0204 relies on, guarded because this run narrowed it. Eight palettes
+   * had `border-subtle` moved off the fill it had collapsed onto, and on two of
+   * them — `clay` and `linen` — the move was toward `border-default`, taking the
+   * gap between the two tiers from about 5.9 to 2.97 and 2.70.
+   *
+   * What is asserted is the floor and not the ramp's intended size. Whether the
+   * tier ought to offer something between `border-default` (ΔE 4 to 15 from its
+   * grounds) and `border-strong` (74 to 98) is the open half of the 29 September
+   * finding and is the palette author's call; that two tiers a table puts on one
+   * page are not the same colour is not.
+   */
+  it("keeps the three border tiers a just-noticeable difference apart", () => {
+    for (const palette of STARTER_PALETTES) {
+      for (const [lower, upper] of [
+        ["border-subtle", "border-default"],
+        ["border-default", "border-strong"],
+      ] as const) {
+        expect(
+          colourDifference(palette.slots[lower] ?? "", palette.slots[upper] ?? "") ?? 0,
+          `${palette.id}: ${lower} against ${upper}`
+        ).toBeGreaterThanOrEqual(JUST_NOTICEABLE_DIFFERENCE)
+      }
+    }
   })
 })

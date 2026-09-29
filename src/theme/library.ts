@@ -46,7 +46,7 @@ export const editorialPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#34425a",
     "border-default": "#e5e5e5",
     "border-strong": "#0a0a0a",
-    "border-subtle": "#efefe9",
+    "border-subtle": "#e8e8df",
     "border-accent": "#4a5b78",
   },
 })

@@ -37354,10 +37354,18 @@ and silent.
 ## 2026-09-29 — `border-subtle` is under the visibility floor on four of the eight starter palettes, and the worst of them is a light one
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/theme/`) · **Status:** open — **nothing is blocked and no page is wrong
-today.** The library has stopped drawing standalone rules in this token
-([0204](decisions/0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md)),
-so the entry is about the palettes rather than about the primitives
+(`src/theme/`) · **Status:** **the second half — `PEER_PAIRINGS` — is closed by
+#NNN** (29 September), which told the instrument about a border against the
+ground it is drawn on and found the defect was larger than this entry: eight of
+the **twenty-one** starter palettes, not four of eight, with `linen` at ΔE 0.00
+and `clay` at 0.37. All eight are corrected and the derivation that produced
+seven of them now solves the slot instead of picking it
+([0205](decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md)).
+**The first half — the shape of the border tier — stays open**: nothing between
+ΔE 15 and 82 is still true, no primitive wants that value, and whether the tier
+should offer one is the palette author's question. The entry's premise that
+*nothing is blocked and no page is wrong today* was right about standalone rules
+and wrong about box edges, which is the half neither document had measured
 
 The 26 September audit entry above is closed by 0204 and this is the half of it
 that is not this lane's. Measured with `src/theme/separation.ts` — CIE76 ΔE, the
@@ -37514,3 +37522,53 @@ was under-informed rather than wrong: it was written without having read the
 nineteen measurements already in this file, which had gone considerably further.
 Corrected on that comment as well as here, since a wrong conclusion left in a
 thread is the thing the 25 September entry spent a run undoing.)*
+
+---
+## 2026-09-29 — 0204 and `hairline()` both count the starter set as eight palettes, and it is twenty-one
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`decisions/0204-*.md` and `src/primitives/tokens.ts`) · **Status:** open — a
+count, not a defect; nothing renders wrongly and no test is red
+
+Found while closing the second half of this lane's own 29 September entry above,
+which inherits the same number from 0204 and says *"four of the eight starter
+palettes."*
+
+`STARTER_PALETTES` is `[minimal, editorial, bold, ...DERIVED_PALETTES]` and has
+**twenty-one** members — the three originals plus the eighteen `palettes.ts`
+derives. Both documents count eight, which was the size of the library at some
+earlier point and has been carried forward since.
+
+The second number is the one that cost something. Measured across all
+twenty-one, `border-subtle` is at or under the just-noticeable difference on
+**eight** of them, not four:
+
+| palette | ΔE, `border-subtle` vs the ground named |
+| --- | --- |
+| **linen** | **0.00** (`bg-surface-muted`) |
+| **clay** | **0.37** (`bg-surface-muted`) |
+| **editorial** | **0.90** (`bg-surface-muted`) |
+| **citrus** | **1.66** (`bg-surface-muted`) |
+| **graphite** | **1.75** (`bg-surface-muted`) |
+| **paper** | **2.04** (`bg-surface-muted`) |
+| **sage** | **2.04** (`bg-surface-muted`) |
+| **dusk** | **2.17** (`bg-surface`) |
+
+`citrus`, `graphite`, `clay`, `linen` and `dusk` were never measured by either
+document, and `linen` drew the four-sided edge of every card, badge, tier and
+code well in the well's own hex. All eight are corrected in
+[0205](decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md),
+so nothing is outstanding for this lane's code — what is outstanding is that two
+documents state a measurement narrower than the one that was available.
+
+**What would be useful, and it is small.** 0204's four-row table is correct and
+is the reason the record exists; its *"four of the eight"* sentence and
+`hairline()`'s *"three of the eight"* are the two clauses to widen. A record is
+not edited to change direction, and a count is not a direction — but both are
+the primitives lane's files, so this is filed rather than fixed.
+
+**Why the eight was believable.** 0204 ran its audit on `editorial` and `bold`,
+which are the two palettes the specimen sheet photographs, and the eighteen
+derived ones are literals nobody looks at one at a time. The instrument that
+reads all twenty-one in one call — `auditMarkGroundings` — did not exist until
+today, which is the finding above and is the more useful half of this one.

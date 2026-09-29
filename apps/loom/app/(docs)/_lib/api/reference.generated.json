@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -2714,6 +2714,13 @@
           "summary": "Builds a palette that clears the bar, from three hues and a mode.",
           "symbols": [
             {
+              "name": "MARK_SEPARATION_TARGET",
+              "kind": "value",
+              "signature": "const MARK_SEPARATION_TARGET: number",
+              "truncated": false,
+              "summary": ""
+            },
+            {
               "name": "PaletteMode",
               "kind": "type",
               "signature": "type PaletteMode = \"light\" | \"dark\";",
@@ -2747,6 +2754,13 @@
               "signature": "const solveLightness: (hue: number, saturation: number, on: string, target: number, darkening: boolean) => string",
               "truncated": false,
               "summary": "The lightest ink (or darkest, on a dark palette) at this hue that still clears `target` against `on`."
+            },
+            {
+              "name": "solveMarkLightness",
+              "kind": "function",
+              "signature": "const solveMarkLightness: (hue: number, saturation: number, from: number, grounds: readonly string[], target: number) => string",
+              "truncated": false,
+              "summary": "The lightness *nearest* `from` at this hue whose colour clears `target` ΔE against every one of `grounds`."
             },
             {
               "name": "derivePalette",
@@ -3426,6 +3440,48 @@
               "signature": "const PALETTE_PEER_PAIRINGS: readonly PeerPairing[]",
               "truncated": false,
               "summary": "The pairs the library actually asks a reader to distinguish."
+            },
+            {
+              "name": "MarkGrounding",
+              "kind": "type",
+              "signature": "type MarkGrounding = {\n    readonly mark: PaletteSlot;\n    readonly grounds: readonly PaletteSlot[];\n    /** Where the library draws it, so a failure names a primitive. */\n    readonly where: string;\n};",
+              "truncated": false,
+              "summary": "A slot the library draws as a line, and the grounds it is drawn against."
+            },
+            {
+              "name": "PALETTE_MARK_GROUNDINGS",
+              "kind": "value",
+              "signature": "const PALETTE_MARK_GROUNDINGS: readonly MarkGrounding[]",
+              "truncated": false,
+              "summary": "Every slot the library draws as a line, with the grounds it lands on."
+            },
+            {
+              "name": "MeasuredMark",
+              "kind": "type",
+              "signature": "type MeasuredMark = {\n    readonly grounding: MarkGrounding;\n    readonly ground: PaletteSlot;\n    /** `undefined` when either colour is a form `channelsOf` declines to guess at. */\n    readonly difference: number | undefined;\n    /** False for a difference this could not measure: an undefended line is not a defended one. */\n    readonly visible: boolean;\n};",
+              "truncated": false,
+              "summary": "One slot against one of the grounds it is drawn on."
+            },
+            {
+              "name": "MarkAudit",
+              "kind": "type",
+              "signature": "type MarkAudit = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredMark[];\n    /**\n     * The lines a reader cannot find. A border the library declares and the\n     * palette does not draw — the list a host asserts empty.\n     */\n    readonly invisible: readonly MeasuredMark[];\n};",
+              "truncated": false,
+              "summary": "What one palette does with the lines the library draws in it."
+            },
+            {
+              "name": "auditMarkGroundings",
+              "kind": "function",
+              "signature": "const auditMarkGroundings: (palette: Palette, groundings?: readonly MarkGrounding[]) => MarkAudit",
+              "truncated": false,
+              "summary": "Measures every declared mark against every ground it is drawn on. Refuses nothing, decides nothing — the same bargain `auditSeparation` makes."
+            },
+            {
+              "name": "describeMarkAudit",
+              "kind": "function",
+              "signature": "const describeMarkAudit: (audit: MarkAudit) => string",
+              "truncated": false,
+              "summary": "One line per invisible mark, for a CLI or a failing test's message. Empty when clean."
             },
             {
               "name": "MeasuredPeer",
@@ -4321,7 +4377,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4367,7 +4423,7 @@
       "files": 56,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5210,7 +5266,7 @@
       "files": 180,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5669,7 +5725,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6260,7 +6316,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6488,7 +6544,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6905,7 +6961,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7259,7 +7315,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7392,7 +7448,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8155,7 +8211,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8298,7 +8354,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8358,7 +8414,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8892,7 +8948,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8966,7 +9022,7 @@
       "files": 85,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9403,7 +9459,7 @@
       "files": 50,
       "narrower": [],
       "standing": {
-        "packageNames": 1087,
+        "packageNames": 1095,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,

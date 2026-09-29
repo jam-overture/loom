@@ -58,7 +58,7 @@ export const paperPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#ac7515",
     "border-default": "#e7dbcf",
     "border-strong": "#291f14",
-    "border-subtle": "#f1ebe4",
+    "border-subtle": "#efe8e0",
     "border-accent": "#d67551",
   },
 })
@@ -108,7 +108,7 @@ export const sagePalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#56952d",
     "border-default": "#d5e2d5",
     "border-strong": "#192419",
-    "border-subtle": "#e7eee7",
+    "border-subtle": "#e4ece4",
     "border-accent": "#5ccc90",
   },
 })
@@ -183,7 +183,7 @@ export const citrusPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#b6830c",
     "border-default": "#e9e6ce",
     "border-strong": "#2a2813",
-    "border-subtle": "#f2f1e3",
+    "border-subtle": "#f0efde",
     "border-accent": "#b4d058",
   },
 })
@@ -233,7 +233,7 @@ export const graphitePalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#675b5b",
     "border-default": "#dddada",
     "border-strong": "#201d1d",
-    "border-subtle": "#ebeaea",
+    "border-subtle": "#e8e6e6",
     "border-accent": "#949494",
   },
 })
@@ -258,7 +258,7 @@ export const clayPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#348d6a",
     "border-default": "#e6ddd1",
     "border-strong": "#282015",
-    "border-subtle": "#f1ece5",
+    "border-subtle": "#ebe4db",
     "border-accent": "#d27356",
   },
 })
@@ -283,7 +283,7 @@ export const linenPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#32708f",
     "border-default": "#e5dfd1",
     "border-strong": "#272216",
-    "border-subtle": "#f0ede5",
+    "border-subtle": "#eae6da",
     "border-accent": "#b49274",
   },
 })
@@ -433,7 +433,7 @@ export const duskPalette: Palette = paletteSchema.parse({
     "brand-secondary-strong": "#752acb",
     "border-default": "#2d2c44",
     "border-strong": "#e1e0eb",
-    "border-subtle": "#232234",
+    "border-subtle": "#252437",
     "border-accent": "#de5e73",
   },
 })
