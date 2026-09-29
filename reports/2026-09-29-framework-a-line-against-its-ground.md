@@ -172,4 +172,21 @@ four surfaces wear and the one palette whose card is *defined* by its border —
 so nothing was decided. If a future palette wants the `minimal` bargain, the
 mark's floor is the thing that stops it being taken carelessly.
 
+## The link that mangled, measured
+
+The pull request body carried three links on the same short commit SHA. Read
+back through the API after posting, **one of the three came back wrapped in
+double backticks**: the 0205 record at 143 characters, against the figure at 118
+and the report at 107, both clean.
+
+143 is under the 149-clean/150-mangled pair #389 established, which had been the
+tightest bound in `FINDINGS.md`, and fifteen under the 23 September entry's
+*"158 characters or more does not survive."* A fixed per-link threshold cannot
+hold both this and #389's clean 149; the 27 September reading — that the limit
+is the tail of a budget the whole body spends — explains both. Filed as its own
+entry with what it does and does not settle.
+
+It cost one de-linked reference and no rewrite, because the body was read back
+before anything else was done with it. That is the step, and it is one call.
+
 **Nothing failed and nothing was skipped in this run.**

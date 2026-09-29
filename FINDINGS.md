@@ -37572,3 +37572,62 @@ which are the two palettes the specimen sheet photographs, and the eighteen
 derived ones are literals nobody looks at one at a time. The instrument that
 reads all twenty-one in one call — `auditMarkGroundings` — did not exist until
 today, which is the finding above and is the more useful half of this one.
+
+---
+## 2026-09-29 — 143 characters mangled while 118 and 107 in the same body came through clean, which puts the bound below every number in this file
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` (and
+every routine that writes a pull request body) · **Status:** open — the fault is
+unchanged; the tightest bound anybody has is now 143 rather than 150
+
+#451's first body carried three links, all on the same 7-character commit-SHA
+prefix, and was read back through the API immediately after posting:
+
+| link | characters | came back |
+| --- | --- | --- |
+| the 0205 record, `…/blob/7c6ef81/decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md` | **143** | **mangled** |
+| the figure, on `raw.githubusercontent.com` | 118 | clean |
+| the report, `…/blob/7c6ef81/reports/2026-09-29-framework-a-line-against-its-ground.md` | 107 | clean |
+
+### What this changes
+
+**One of three mangled, so it is still not a rank and still not all-or-nothing.**
+#446 ruled out the rank reading with seven of seven; this is the other shape —
+one link over a line and two under it, in a body where nothing else varies.
+
+**143 is under the 149-clean/150-mangled pair from #389**, which had been the
+tightest bound in this file since it was taken, and it is fifteen under the
+23 September entry's *"158 characters or more does not survive."* That entry
+holds as a sufficient condition and no longer as a boundary: 158 does not
+survive, and neither does 143.
+
+**The 27 September budget reading survives and is now the best one.** If the
+limit were a fixed per-link threshold, a link that mangles at 143 here would
+have to have mangled at 143 on #389, and #389's 149 came through clean. A tail
+of something the whole body spends explains both without either measurement
+being wrong. This body was long — nine sections and four tables — and the
+mangled link sits about two thirds of the way down it, which is consistent and
+is not a measurement of position, because only one body was posted.
+
+### What it cost, which was nothing, and why
+
+**One de-linked reference.** The second body replaced the 0205 link with its
+path in backticks and said so in the description. Both later bodies were read
+back and came through clean, including the 88-character preview URL added to the
+top — so the one thing that has worked every time worked again.
+
+The standing advice is unchanged and is worth restating because it is the only
+reliable step: **read the body back from the API after posting and look.** One
+call. The 27 September entry said it, #446 paid a full seven-image rewrite for
+not doing it, and this run did it and paid a sentence.
+
+### What it does not say
+
+**It does not locate a boundary either.** The highest clean link here is 118 and
+the lowest mangled one is 143, which is a wider gap than #389's. What it does is
+move the ceiling down: no bound above 143 can be right.
+
+**It is not a clean test of the budget theory.** To be one, the same three links
+would have to be posted in a short body and come back clean. That experiment is
+one call and nobody has run it — including this run, which had the body to hand
+and did not think of it until the entry was being written.
