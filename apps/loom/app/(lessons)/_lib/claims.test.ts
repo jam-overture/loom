@@ -6,6 +6,7 @@ import {
   ESCALATION_LADDER,
   treeOperationSchema,
 } from "@jam-overture/loom"
+import { BEHAVIOUR_NAMES } from "@jam-overture/loom/react"
 import { describe, expect, it } from "vitest"
 
 import { COURSE_DIR } from "./source"
@@ -161,6 +162,16 @@ const CLAIMS: readonly CourseClaim[] = [
     count: dispositionReasonCodeSchema.options.length,
     occurrences: 1,
     matters: "lesson 09's In the code row, which is where a reader goes to find the vocabulary",
+  },
+  {
+    what: "the members of the behaviour vocabulary",
+    phrase: /behaviour vocabulary has (\w+) members/,
+    count: BEHAVIOUR_NAMES.length,
+    occurrences: 3,
+    matters:
+      "the sentence lesson 31 states the closed set in, its self-check, and Set AJ — and the " +
+      "reason it is registered is that `loom.before-after` carries the same count in `src/`, " +
+      "has carried it since the vocabulary had one member, and nothing compares it to anything",
   },
   {
     what: "the operations a delta may contain",

@@ -104,6 +104,12 @@ const ANSWERS = "Answers"
  * which is what the size of the primitive library has already done to lessons
  * 22, 23 and 24.
  *
+ * It was 125 after lesson 30 (rendezvous), which added seven — one per
+ * exercise, every one a whole transcript in a single block. Lesson 31
+ * (behaviour) added eight for seven exercises: its exercise F prints in two
+ * blocks, because the line that compares its two pages to each other is a claim
+ * about the two transcripts above it rather than part of either.
+ *
  * It was 102 after lesson 27 (scale), which added seven — one per exercise, every one
  * of them a whole transcript in a single block, and two of them carrying a line
  * of CSS read out of the library's own stylesheet rather than computed. It was
@@ -118,7 +124,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 125
+const RECOGNISED_TRANSCRIPTS = 133
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
