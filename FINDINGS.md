@@ -8,6 +8,115 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — the mangling, with one variable changed and the rest held still: a branch name in the URL broke twice, the commit SHA came through clean
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it*, and the 28 September entry
+above it · **Status:** open, and filed as **evidence**, which is what that entry
+asks for instead of a fourth theory
+
+That entry has collected seven data points across five pull requests and has
+twice had a theory written into a description as fact. What it has never had is
+a **controlled** comparison: every data point so far comes from a different
+body, with several things different at once.
+
+#444's description was written three times in twenty minutes, same body, same
+image, one thing changed each time.
+
+| attempt | syntax | alt text | ref in the URL | outcome |
+| --- | --- | --- | --- | --- |
+| 1 | markdown `![…](…)` | `Four loom.feed nodes, each carrying loom:data, each drawn by the render seam` | branch name | **mangled** |
+| 2 | markdown `![…](…)` | `four feed nodes, each drawn by the render seam` | branch name | **mangled** |
+| 3 | markdown `![…](…)` | unchanged from 2 | **commit SHA** | clean |
+
+The mangling both times was the shape the 22 September entry describes — a
+double-backtick opened immediately before the URL and closed after the closing
+parenthesis:
+
+```
+![four feed nodes, each drawn by the render seam](``https://github.com/…png?raw=true)``
+```
+
+**What this rules out.** Attempt 2 is attempt 1 with every technical-looking
+token removed from the alt text — no `loom.feed`, no `loom:data`, no dots or
+colons — and it broke identically. **The alt text is not the variable.** It also
+rules out markdown image syntax being safe: the 27 September run measured
+markdown images as clean and #443 shipped five that way, and attempts 1 and 2
+here are markdown images that broke.
+
+**What it is consistent with, and I am stating this as a correlation rather than
+a mechanism**, for the reason the 22 September entry gives: **the five clean
+images on #443 all carried a commit SHA** (`/blob/c1a7a11/…`), and the two that
+broke here carried a branch name (`/blob/framework-58-the-keys-the-runtime-puts-there/…`).
+One body, one variable, two breaks and one clean. That is one controlled
+comparison, not a mechanism, and #442's links — branch name, plain markdown
+links, reported clean — do not fit it, so it is not a rule yet either.
+
+**The workaround, which costs nothing and is worth adopting now:** *reference a
+blob by its commit SHA, never by the branch name.* It is strictly better anyway
+— a branch-name URL points at a moving target and dies when the branch is
+deleted after merge, so every picture in every merged pull request body that
+used one is already broken. A SHA URL survives the merge.
+
+**What would settle it** is one more controlled pair on a different pull
+request: the same body posted with a branch-name ref and then a SHA ref,
+changing nothing else. Two data points from two lanes would make it a rule. One
+from one lane is what this is.
+
+---
+## 2026-09-28 — an unrecognised `loom:` key is now only a render diagnostic, and catching it at the write path is a four-lane change
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` to call,
+`Loom daily build` to build · **Status:** open — the consequence half of
+[0203](decisions/0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md),
+filed rather than taken because the smallest honest version of it changes files
+in two other lanes
+
+0203 made the write path strip the runtime's `loom:` keys before asking a
+primitive's schema about a node's props, which is the fix. It costs one thing,
+and the entry above under-sold it in one word, so here it is measured.
+
+**Before**, on a deployment with the props floor wired, a node carrying
+`loom:nonesuch` was refused at the Gate — by accident, as `invalid-props`,
+attributed to the primitive. **After**, it passes the Gate and reaches the reader
+as `reserved-prop-unrecognised`, which is where every deployment *without* a
+props vocabulary has always met it. So nothing regressed against the documented
+behaviour, and a check that existed by accident is gone.
+
+**The right fix is a stake factor of its own**, because the English is wrong
+otherwise. Two surfaces have written a clause for `invalid-props`:
+
+| file | lane | its clause |
+| --- | --- | --- |
+| `apps/loom/app/(portal)/_lib/vocabulary.ts` | `Loom portal` | *"it would set a part up in a way that part itself refuses"* |
+| `apps/loom/app/(marketing)/_lib/adapt/record.ts` | `Loom marketing` | *"it sets a piece up in a way that piece does not accept"* |
+
+Both name the **part** as the refuser. No part ever sees a `loom:` key. Reusing
+the code would put a sentence in front of a reader that the machine knows to be
+false, which is the failure `Loom marketing` wrote down on 23 September about
+rewording evidence.
+
+**So it needs a new `StakeFactorCode`, and that enum is exhaustive in both files
+above** — a `Record<StakeFactorCode, string>` each, so both stop compiling the
+day the enum grows. Plus `src/runtime/stakes.ts`, `src/runtime/analysis.ts` and
+whatever `UNDRAWABLE` in `(portal)/_lib/refusal.ts` should say about a fault
+that leaves the page drawable. That is four lanes in one diff to catch a fault
+the renderer already reports by name.
+
+**The recommendation is to do it, and to do it as a small coordinated change
+rather than a unilateral one**: this lane lands the code and the factor, and the
+two surface lanes each add one clause in their own branch, with the factor
+shipped behind nothing until they do. What is wanted from the maintainer is
+whether that sequencing is acceptable, or whether an unrecognised reserved key
+staying a render diagnostic is the right answer permanently — which is a
+defensible position, and would close this entry with no code at all.
+
+**`loom:theme` on a non-root is a separate and harder case**, recorded here so it
+is not assumed to come along for free. `invalidPropsIn` walks a *subtree* and
+cannot tell the tree's root from an inserted subtree's root; *is this node the
+root* is knowledge `analyzeDelta` holds and the walk does not. Catching a
+misplaced theme at the write path is a different signature, not a stricter check.
 ## 2026-09-28 — the rail keeps the scroll it took for the question after the question is answered, and what a visitor sees of the payoff card is decided by where the browser clamps it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
@@ -226,9 +335,28 @@ that finds its own commit missing spends a minute on it rather than a run.
 ## 2026-09-28 — the write path refuses every node the runtime's own reserved keys are on, and the render path does not
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom daily build` · **Status:**
-open — found by executing an exercise for lesson 30, reproduced three ways,
-**not fixed**: `src/` is not this lane's and a lessons branch that changes
-behaviour is a lessons branch nobody can review
+**closed** by `framework-58-the-keys-the-runtime-puts-there`, 28 September, and
+recorded as
+[0203](decisions/0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md).
+`invalidPropsIn` now calls `partitionReservedProps` — the same function the
+render walk calls, not a second one that agrees — and the contract is stated on
+`PropsVocabulary` so a host writing its own closure gets it too. Both suggested
+decisions were taken: the split lives in the shared module it was already in
+(the doc comment claiming otherwise was wrong), and the reserved keys are
+**not** judged here, for reasons 0203 gives and which are filed separately
+below. The suggested test is built twice, with its rows read off
+`reserved-props.ts` rather than listed: eight rows at the seam
+(`src/runtime/vocabulary.test.ts`) and eight through a real strict registry and
+`analyzeDelta` (`src/sdk/vocabulary.test.ts`), insert and configure, all sixteen
+verified failing on `main` first.
+
+*Lesson 30 changed in that branch, which is this lane crossing into
+`Loom lessons`': exercise D's second block is pinned by the transcript test and
+printed the defect. The four output lines and the tense of the prose around them
+were updated, nothing else. The lesson is more internally consistent
+afterwards — its own debrief tells a reader that a system with a props floor can
+still accept a change whose only fault is a misspelled binding name, and the
+second block used to contradict that.*
 
 On a deployment that wires 0179's props floor — `propsVocabularyFor(registry)`
 into the pipeline's `propsVocabulary` — a change that gives a node one of the
@@ -27867,7 +27995,26 @@ pages rather than one.
 ---
 ## 2026-09-14 — `hangingModelClient` is published and its two siblings are not, so each surface writes them
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-58-the-keys-the-runtime-puts-there`** — `hangingSource(id,
+description)` and `hangingEndpoint(id, description)` are published from
+`@jam-overture/loom/testing`, each returning `{ entry, abortedWith() }`, which is
+the signature this entry asked for and the one `hangingModelClient` already had.
+
+**It was five copies rather than three.** The entry counted `(docs)`' two; this
+package's own suite had written the same thing twice more, in
+`src/data/resolve.test.ts` and `src/submit/resolve.test.ts`, and each of those
+files had written it *twice over* — once as an entry that hangs and once again as
+a near-identical entry that also listens, because the first one could not report
+the abort. Adopting the published double deleted four hand-written adapters from
+two files and left the same assertions passing. **`(docs)`' two copies are
+untouched**: `silentSource` in `_lib/data/shop.ts` and the inline endpoint in
+`_lib/ceiling/page.ts` are that lane's files, and both can now be deleted in
+favour of the import whenever `Loom docs` next has reason to touch them.
+
+Original status below.
+
+**Status:** open —
 written by hand here rather than asked for, and the page says so
 
 `@loom/runtime/testing` publishes `hangingModelClient` for a good reason, stated

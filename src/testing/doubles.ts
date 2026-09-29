@@ -1,3 +1,7 @@
+import { z } from "zod"
+
+import { defineSource, type SourceEntry } from "../data/adapter.js"
+import type { JsonValue } from "../json.js"
 import type {
   ModelClient,
   ModelClientError,
@@ -15,6 +19,7 @@ import type {
   RepairRequest,
 } from "../runtime/interpreter.js"
 import type { AuthorKind, ProposedChange } from "../runtime/proposal.js"
+import { defineEndpoint, type EndpointEntry } from "../submit/endpoint.js"
 import type { TreeDelta } from "../tree/delta.js"
 
 /**
@@ -227,3 +232,95 @@ export const buildProposal = (idFactory: IdFactory, draft: ProposalDraft): Propo
     interpretedAt: FIXED_INSTANT,
   },
 })
+
+/**
+ * What a hanging seam double reports, beside the entry a registry takes.
+ *
+ * The `abortedWith` half is the reason these are published rather than written
+ * out per surface: reaching a ceiling is observable in the seam's own
+ * vocabulary, but the *abort* the runtime sends afterwards is not observable
+ * anywhere except from inside the adapter, and it is the half a hand-written
+ * double leaves out (0140).
+ */
+export type HangingSeam<TEntry> = {
+  readonly entry: TEntry
+  /** Whether the runtime's ceiling aborted the call, and what it said (0140). */
+  readonly abortedWith: () => string | undefined
+}
+
+/**
+ * Records what an abort said, in the one shape all three seams hand it over in.
+ */
+const abortRecorder = () => {
+  let aborted: string | undefined
+
+  return {
+    read: () => aborted,
+    listen: (signal: AbortSignal | undefined) => {
+      signal?.addEventListener("abort", () => {
+        const { reason } = signal
+
+        aborted = reason instanceof Error ? reason.message : "unnamed"
+      })
+    },
+  }
+}
+
+/**
+ * A source that never answers — the sibling of `hangingModelClient` at the data
+ * seam, published for the same reason.
+ *
+ * Every surface that renders a bound region has an "it did not come back" state
+ * to show, and a promise that is never resolved is the only honest imitation of
+ * an integration nobody is going to answer. Use it with a small `ceilingMs`;
+ * the default is ten seconds and a test that waits it out is a test nobody runs.
+ *
+ * Its params schema accepts anything, because a double whose whole job is to
+ * not answer must never be the thing that refuses first: a binding written
+ * against the real source it stands in for has to reach the adapter unchanged.
+ */
+export const hangingSource = (id: string, description: string): HangingSeam<SourceEntry> => {
+  const abort = abortRecorder()
+
+  return {
+    entry: defineSource({
+      id,
+      description,
+      params: z.object({}).passthrough(),
+      answers: z.custom<JsonValue>(),
+      adapter: {
+        fetch: ({ signal }) =>
+          new Promise(() => {
+            abort.listen(signal)
+          }),
+      },
+    }),
+    abortedWith: abort.read,
+  }
+}
+
+/**
+ * An endpoint that never says where a form posts — the same double at the
+ * submission seam.
+ *
+ * A form's target is resolved while the page is being served, so this is the
+ * state a token store having a very bad afternoon puts a page into, and the one
+ * a ceiling exists to bound (0140).
+ */
+export const hangingEndpoint = (id: string, description: string): HangingSeam<EndpointEntry> => {
+  const abort = abortRecorder()
+
+  return {
+    entry: defineEndpoint({
+      id,
+      description,
+      endpoint: {
+        target: ({ signal }) =>
+          new Promise(() => {
+            abort.listen(signal)
+          }),
+      },
+    }),
+    abortedWith: abort.read,
+  }
+}
