@@ -5,6 +5,7 @@ import { addressedNodeId } from "@jam-overture/loom/react"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { NodeCredit } from "@/app/(portal)/_lib/attribution-view"
+import type { OutlineRow } from "@/app/(portal)/_lib/outline"
 import { PART_KINDS, pointingWords } from "@/app/(portal)/_lib/vocabulary"
 
 import { NodeCreditLine } from "./node-credit"
@@ -48,6 +49,20 @@ import { useSelection } from "./selection-context"
  * Selection is a click, and a click that costs a round trip to the log would make
  * the outline feel like it was loading something; the whole tree's attribution is
  * one bounded read on the page the reviewer already waited for.
+ *
+ * ## One block per picked part, stacked, as of phase 2
+ *
+ * A reader can pick several, and the honest treatment of that is the one that
+ * loses nothing: every picked part gets the same block it got when it was the
+ * only one. The alternative was a compact list with the detail collapsed behind
+ * a row, and it fails the rule this whole surface is held to — a screen made
+ * simpler by removing what it used to say. A reader who picks six parts gets a
+ * long rail, which is the honest consequence of picking six parts.
+ *
+ * The blocks are in the order the page holds them, because `picked` is the
+ * outline filtered rather than the clicks remembered. A rail that listed them in
+ * the order they were clicked would disagree with the pictures under the page
+ * about what "these three parts" means.
  */
 export const SelectedNode = ({
   credits,
@@ -56,20 +71,40 @@ export const SelectedNode = ({
   readonly credits: Record<string, NodeCredit>
   readonly treeId: TreeId
 }) => {
-  const { selected } = useSelection()
+  const { picked } = useSelection()
 
-  if (!selected) {
+  if (picked.length === 0) {
     return (
       <div className="border-edge-subtle bg-surface-base flex flex-col gap-1 rounded-md border border-dashed p-3">
         <p className="text-sm">Nothing picked yet.</p>
         <p className="text-ink-muted text-xs">
           Click any part of the page above, or choose one from the list — then you can ask for a
-          change to just that part, and see who put it there.
+          change to just that part, and see who put it there. Pick more than one and they are
+          drawn together under the page.
         </p>
       </div>
     )
   }
 
+  return (
+    <div className="flex flex-col gap-3">
+      {picked.map((row) => (
+        <PickedDetail key={row.nodeId} row={row} credit={credits[row.nodeId]} treeId={treeId} />
+      ))}
+    </div>
+  )
+}
+
+/** One picked part, in full. Everything this pane has ever said about one node. */
+const PickedDetail = ({
+  row: selected,
+  credit,
+  treeId,
+}: {
+  readonly row: OutlineRow
+  readonly credit: NodeCredit | undefined
+  readonly treeId: TreeId
+}) => {
   const kind = PART_KINDS[selected.kind]
   const pointing = pointingWords(selected.addressing)
   const addressed = addressedNodeId(selected.addressing)
@@ -111,7 +146,7 @@ export const SelectedNode = ({
         </div>
       )}
 
-      <NodeCreditLine credit={credits[selected.nodeId]} treeId={treeId} />
+      <NodeCreditLine credit={credit} treeId={treeId} />
 
       <TechnicalDetail summary="What this addresses">
         <dl className="flex flex-col gap-1">

@@ -148,6 +148,39 @@ describe("a preset asked for through the demo's write path", () => {
     expect(record.stakes?.factors.map((factor) => factor.code)).toContain("large-removal")
   })
 
+  /**
+   * **And carries them as operations, not only as sentences about them.**
+   *
+   * `inverseOperations` is `describeOperation` over the inverse — evidence for
+   * the disclosure, and for as long as it was the only thing kept, the
+   * retained content was counted on this surface and thrown away. The card's
+   * best sentence is *"The 4 pieces it takes off the page are kept, so the
+   * exact opposite of this change already exists"*, and until the pieces were
+   * on the record there was no way to show them inside a visitor's minute
+   * (`kept.ts`).
+   *
+   * The count and the content are asserted against each other rather than
+   * against a number: `retainedNodeCount` is what the sentence prints, and the
+   * insert has to be carrying that many nodes for the sentence to be true.
+   */
+  it("keeps the inverse itself beside the sentences about it", async () => {
+    const session = await sessionFor("inverse")
+    const record = await ask(session, "trim")
+
+    const inverse = record.reversibility?.inverse ?? []
+    const first = inverse[0]
+
+    expect(inverse.length).toBe(record.reversibility?.inverseOperations.length)
+    expect(first?.op).toBe("insert")
+
+    if (first?.op !== "insert") throw new Error("the inverse of a removal is an insert")
+
+    const count = (node: typeof first.node): number =>
+      node.kind === "element" ? 1 + node.children.reduce((total, child) => total + count(child), 0) : 1
+
+    expect(count(first.node)).toBe(record.reversibility?.retainedNodeCount)
+  })
+
   it("reports every field the demo puts on screen, for every preset", async () => {
     for (const presetId of ["palette", "backdrop", "band", "trim", "promote"]) {
       const session = await sessionFor(presetId)
