@@ -75,6 +75,7 @@ export const RecordCard = ({
   offer = "offer",
   asked,
   mark,
+  kept,
   reasoning = "open",
 }: {
   readonly record: ChangeRecord
@@ -156,6 +157,16 @@ export const RecordCard = ({
    * mark the page is not carrying.
    */
   readonly mark?: { readonly label: string; readonly tone: SpotTone }
+  /**
+   * The part this change took off the page, already rendered — the record's own
+   * inverse, drawn, on the card that offers to spend it.
+   *
+   * The mirror of `inQuestion` and present under the opposite condition: that
+   * one is the band before a change, this one is the band after it, and the
+   * page has it in exactly one of the two cases. `_lib/kept.ts` says why it is
+   * the proof of the card's own best sentence rather than a decoration on it.
+   */
+  readonly kept?: React.ReactNode
 }) => {
   const [answerReport, answer, answering] = useActionState<WriteReport | null, FormData>(answerHeld, null)
   const [undoReport, undo, undoing] = useActionState<WriteReport | null, FormData>(undoRevision, null)
@@ -528,17 +539,44 @@ export const RecordCard = ({
         * visitor who had turned their own undo down.
         */}
       {record.revision && offer === "offer" && (
-        <form action={undo} className="flex flex-col gap-1.5">
-          <input type="hidden" name="revision" value={record.revision.produced} />
-          <button
-            type="submit"
-            disabled={undoing}
-            className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
-          >
-            {undoing ? "Undoing…" : applied.label}
-          </button>
-          <p className="text-ink-muted text-2xs">{UNDO_CAUTION}</p>
-        </form>
+        <>
+          {/*
+            * What came off, over the button that puts it back — and **one gate
+            * for the two of them**, which is the placement decision here.
+            *
+            * The card already says *"The 4 pieces it takes off the page are
+            * kept, so the exact opposite of this change already exists"*, which
+            * is the most persuasive sentence on this surface and was the one a
+            * stranger had no way to check inside a minute: the only proof was a
+            * third press, past the end of it. This is the four pieces.
+            *
+            * It shares the offer's condition rather than carrying one of its
+            * own because the excerpt and the button are one claim — *here is
+            * what is kept, and here is what spends it*. Split into two
+            * conditions they could come apart, and the way they would is an
+            * excerpt of a band standing over no button, or a card claiming to
+            * hold something it had already given back. The rail has the same
+            * rule about the leading ask's preview for the same reason.
+            *
+            * Outside the form rather than inside it. Nothing in an excerpt is
+            * operable — `globals.css` sees to that — but the excerpt is a page,
+            * a page may hold a `loom.form`, and a form inside a form is invalid
+            * markup whatever the pointer events say.
+            */}
+          {kept}
+
+          <form action={undo} className="flex flex-col gap-1.5">
+            <input type="hidden" name="revision" value={record.revision.produced} />
+            <button
+              type="submit"
+              disabled={undoing}
+              className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover w-full rounded-md border px-3 py-1.5 text-xs transition-colors disabled:opacity-60"
+            >
+              {undoing ? "Undoing…" : applied.label}
+            </button>
+            <p className="text-ink-muted text-2xs">{UNDO_CAUTION}</p>
+          </form>
+        </>
       )}
 
       {/*

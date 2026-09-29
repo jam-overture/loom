@@ -9,7 +9,7 @@ import {
   type TreeOperation,
 } from "@jam-overture/loom"
 
-import { partInQuestion } from "./in-question"
+import { partFromOperations, partInQuestion } from "./in-question"
 import { demoPageTree } from "./page-tree"
 import { presetById } from "./presets"
 
@@ -39,6 +39,21 @@ const deltaFor = (presetId: string, against: LoomTree): TreeDelta => {
     baseRevision: against.revision,
     operations,
   }
+}
+
+/**
+ * The node the demo's leading ask is about, found the way the preset finds it.
+ *
+ * Read off the tree rather than written down, for the reason the file opens
+ * with: an id in a fixture is an id that stops being the band the moment
+ * `page-tree.ts` is edited, and every assertion about it goes on passing.
+ */
+const statsId = (against: LoomTree): NodeId => {
+  const operations = deltaFor("trim", against).operations
+  const first = operations[0]
+  if (first === undefined || first.op !== "remove") throw new Error("trim is not a removal")
+
+  return first.nodeId
 }
 
 const wrap = (against: LoomTree, operations: readonly TreeOperation[]): TreeDelta => ({
@@ -158,6 +173,81 @@ describe("the part a held change is about", () => {
 
       /** Conditional throughout: nothing here has happened, and it is still refusable. */
       expect(words).toContain("would")
+    }
+  })
+})
+
+/**
+ * And the third moment, which is the same walk with two refusals of its own.
+ *
+ * The lead here is in the past tense and makes a claim about the page — *this
+ * came off it* — where the other two are conditional and make a claim about a
+ * proposal. Two things have to be true for that sentence to be honest, and
+ * both are checked here rather than left to the caller that chose the moment.
+ * `kept.test.ts` has the same properties over the real write path; these are
+ * the refusals themselves, reachable with one hand-written operation each.
+ */
+describe("the part a change is still holding", () => {
+  /** An insert carrying a node the page does not have: the only honest case. */
+  it("draws an insert of a node the tree has never had", () => {
+    const page = tree()
+    const stats = findNode(page.root, statsId(page))
+
+    expect(stats).not.toBeNull()
+
+    const elsewhere: LoomTree = {
+      ...page,
+      root: {
+        ...page.root,
+        children: page.root.children.filter((child) => child !== stats),
+      },
+    }
+
+    const part = partFromOperations(
+      elsewhere,
+      [{ op: "insert", parentId: elsewhere.root.id, index: 0, node: stats! }],
+      "kept"
+    )
+
+    expect(part?.tree.root.id).toBe(stats!.id)
+    expect(part?.where).toBe("kept")
+    expect(part?.lead).toBe("This is what came off the page. The record is still holding it.")
+  })
+
+  /**
+   * **And refuses the same operation when the node is on the page**, which is
+   * what withdraws the excerpt the moment an undo lands: the nodes come back
+   * with the ids they had (0032), and nothing has to be told.
+   */
+  it("refuses to draw a node the page already has", () => {
+    const page = tree()
+    const stats = findNode(page.root, statsId(page))
+
+    expect(stats).not.toBeNull()
+    expect(
+      partFromOperations(page, [{ op: "insert", parentId: page.root.id, index: 0, node: stats! }], "kept")
+    ).toBeUndefined()
+  })
+
+  /**
+   * **And refuses every operation that is not an insert**, which is what makes
+   * one lead string correct rather than merely usual. The inverse of a
+   * configure or a move names a node still on the stage, and *this is what
+   * came off the page* over a band three inches away is the card contradicting
+   * the page.
+   */
+  it("refuses a moment whose operation could not have taken anything off", () => {
+    const page = tree()
+    const id = statsId(page)
+
+    for (const operation of [
+      { op: "remove", nodeId: id },
+      { op: "move", nodeId: id, parentId: page.root.id, index: 0 },
+      { op: "configure", nodeId: id, set: { columns: 2 }, unset: [] },
+    ] as const satisfies readonly TreeOperation[]) {
+      expect(partFromOperations(page, [operation], "kept"), operation.op).toBeUndefined()
+      /** And the same operation in either conditional moment still draws. */
+      expect(partFromOperations(page, [operation], "question"), operation.op).toBeDefined()
     }
   })
 })

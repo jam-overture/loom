@@ -10,6 +10,7 @@ import type {
   StakeFactor,
   StakeLevel,
   TreeDelta,
+  TreeOperation,
 } from "@jam-overture/loom"
 
 import { plainChange, type PlainChange } from "./plain-change"
@@ -71,6 +72,30 @@ export type ReversibilityView = {
   readonly retainedNodeCount: number
   readonly reasons: readonly string[]
   readonly inverseOperations: readonly string[]
+  /**
+   * The inverse itself, beside the sentences about it.
+   *
+   * `inverseOperations` is `describeOperation` over the inverse — a line of
+   * evidence for the disclosure, and the only thing this record kept of the
+   * one field on the assessment that is *content* rather than an account of
+   * content. `assessReversibility` computes the inverse whether or not anybody
+   * undoes anything, and an inverse that puts a removal back carries the
+   * removed nodes: that is what `retainedNodeCount` counts, and until now this
+   * surface printed the count and threw the nodes away.
+   *
+   * **Which made the demo's third claim the one it could only assert.** The
+   * card says *"The 4 pieces it takes off the page are kept, so the exact
+   * opposite of this change already exists"*, which is true, and a stranger's
+   * only way to check it was a third press past the end of their minute
+   * (`_lib/kept.ts` has the sequence, measured). The pieces are right here.
+   * Kept as operations rather than as a rendered anything, because this module
+   * has no React in it and the one thing a surface may not do is hold a second
+   * copy of a page.
+   *
+   * Nothing is removed: `inverseOperations` stays exactly as it was, and the
+   * disclosure goes on printing it.
+   */
+  readonly inverse: readonly TreeOperation[]
 }
 
 export type DispositionView = {
@@ -289,6 +314,13 @@ const reversibilityOf = (assessment: ChangeAssessment): ReversibilityView => ({
   retainedNodeCount: assessment.reversibility.retainedNodeCount,
   reasons: assessment.reversibility.reasons.map(describeIrreversibility),
   inverseOperations: assessment.reversibility.inverse.operations.map(describeOperation),
+  /*
+   * The same operations, undescribed. Read from the one field `touched` two
+   * lines down already reads — the inverse is where a removed node's parent,
+   * position and words survive — so this is the third reader of one value
+   * rather than a second source for it.
+   */
+  inverse: assessment.reversibility.inverse.operations,
 })
 
 const dispositionOf = (disposition: Disposition): DispositionView => ({

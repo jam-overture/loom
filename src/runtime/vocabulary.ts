@@ -2,6 +2,7 @@ import type { NodeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
+import { partitionReservedProps } from "../reserved-props.js"
 import { walkTree } from "../tree/navigation.js"
 import type { LoomNode } from "../tree/node.js"
 
@@ -100,6 +101,12 @@ export const describeUnknownPrimitive = (unknown: UnknownPrimitive): string =>
  * Reusing the type also means the two seams cannot drift: what the renderer
  * would decline to draw is, by construction, what the write path declines to
  * write.
+ *
+ * **A vocabulary is handed a node's own props, with the runtime's reserved keys
+ * already removed** — the same bag `renderElement` hands the validator, and the
+ * same bag the primitive itself is handed. That is the whole of the contract
+ * and it is stated here rather than left to each implementation, because the
+ * one thing this type exists to guarantee is that the two seams agree.
  */
 
 export type PropsVocabulary = (type: PrimitiveType, props: JsonObject) => PropsVerdict
@@ -130,13 +137,24 @@ export type InvalidProps = {
  * gives: an inserted band carries its own children, and a node three levels
  * down that will not draw is the same hole.
  *
- * Reserved props are not partitioned off first, unlike `renderElement`. A
- * validator is handed what the node carries, and a schema that rejects a
- * reserved key is a schema declaring something about a key the renderer never
- * passes it — which is a fault in the declaration rather than in the change,
- * and not one this seam is positioned to tell apart. `partitionReservedProps`
- * lives behind the render boundary and importing it here would make the write
- * path depend on the renderer's internals to answer a question about a tree.
+ * Reserved props are split off first, exactly as `renderElement` does, and the
+ * split is the same function rather than a second one that agrees. A `loom:`
+ * key is the runtime's own — it never reaches a primitive, so no primitive's
+ * schema has any business being asked about it, and every schema in the starter
+ * library is `.strict()` on the strength of that. A walk that handed the raw
+ * props over refused, at the write path's highest stakes, the very JSON
+ * `interpretation/prompt.ts` teaches a model to write.
+ *
+ * `partitionReservedProps` is not behind the render boundary: it lives in
+ * `reserved-props.ts` beside `json.ts`, for the reason that module gives — a
+ * reserved key is a property of a node's props rather than of rendering. Both
+ * seams reading the one copy is what makes their agreement a fact instead of a
+ * coincidence when a fifth key lands.
+ *
+ * What this does **not** do is judge the reserved keys themselves. A key the
+ * runtime does not recognise, or `loom:theme` somewhere other than the root,
+ * are real faults that the render seam reports and this seam stays silent
+ * about; 0203 records why, and what catching them here would cost.
  */
 export const invalidPropsIn = (
   node: LoomNode,
@@ -145,7 +163,8 @@ export const invalidPropsIn = (
   Array.from(walkTree(node)).flatMap((current) => {
     if (current.kind !== "element") return []
 
-    const verdict = checkProps(current.type, current.props)
+    const { props } = partitionReservedProps(current.props)
+    const verdict = checkProps(current.type, props)
 
     return verdict.outcome === "invalid"
       ? [{ nodeId: current.id, type: current.type, issues: verdict.issues }]
