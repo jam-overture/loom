@@ -33,4 +33,15 @@ describe("the page screen's reading order", () => {
   it("puts what a reader can act on before what they have not picked yet", () => {
     expect(source.indexOf("<PromptBox")).toBeLessThan(source.indexOf("<SelectedNode"))
   })
+
+  /**
+   * Phase 2's order, and it is the flow the screen is for: find the part on the
+   * page, look at it on its own, then ask for the change. The pictures have to
+   * come before the box, because the sentence saying what a change would cover
+   * is *in* the box and a reader who has already typed is not reading it.
+   */
+  it("draws the parts a reader picked between the page and the box that acts on them", () => {
+    expect(source.indexOf("<PickedParts")).toBeGreaterThan(source.indexOf("<PreviewFrame"))
+    expect(source.indexOf("<PickedParts")).toBeLessThan(source.indexOf("<PromptBox"))
+  })
 })
