@@ -24,16 +24,32 @@ import { useSelection } from "./selection-context"
  * know it — and what they mean now sits under the list rather than in nobody's
  * head. The same disclosure carries the arrow, which is the marker that would
  * otherwise leave a reader thinking a row was broken.
+ *
+ * ## The one line phase 2 added, and why it is not an instruction
+ *
+ * Rows toggle, so a reader can end up with more picked than they meant, and the
+ * count is what tells them. `2 of 42 picked` beside the heading answers it
+ * without a sentence, in the place the total already was — and the way out sits
+ * next to it rather than being something to work out.
+ *
+ * What is deliberately *not* here is *"click another part to pick it too"*.
+ * Clicking a second row and having it join the first is the behaviour a person
+ * discovers by doing it once; a line of instructions above a list is what a
+ * surface writes when its behaviour needs explaining, and this one does not.
+ * The legend below says what a picked part is *for*, which is the thing nobody
+ * discovers.
  */
 export const TreeOutline = () => {
-  const { rows, selected, select } = useSelection()
+  const { rows, picked, pick, clear } = useSelection()
 
   return (
     <nav aria-label="Parts of this page" className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm tracking-tight">Parts of this page</h2>
         <span className="text-ink-placeholder text-2xs">
-          {rows.length} {rows.length === 1 ? "part" : "parts"}
+          {picked.length === 0
+            ? `${rows.length} ${rows.length === 1 ? "part" : "parts"}`
+            : `${picked.length} of ${rows.length} picked`}
         </span>
       </div>
 
@@ -42,11 +58,21 @@ export const TreeOutline = () => {
           <OutlineRowButton
             key={row.nodeId}
             row={row}
-            isSelected={selected?.nodeId === row.nodeId}
-            onSelect={select}
+            isPicked={picked.some((one) => one.nodeId === row.nodeId)}
+            onPick={pick}
           />
         ))}
       </ul>
+
+      {picked.length > 0 && (
+        <button
+          type="button"
+          onClick={clear}
+          className="text-ink-muted hover:text-ink self-start text-2xs underline"
+        >
+          Let go of {picked.length === 1 ? "it" : "all of them"}
+        </button>
+      )}
 
       <TechnicalDetail summary="What the marks mean">
         <dl className="flex flex-col gap-1">
@@ -84,6 +110,8 @@ export const TreeOutline = () => {
           */}
         <p className="text-ink-secondary">
           Pick a row to see its registered type, its id and what a click on the page would reach.
+          Pick more than one and they are drawn together under the page, in the order the page
+          holds them.
         </p>
       </TechnicalDetail>
     </nav>

@@ -23,22 +23,34 @@ const KIND_MARK = {
 const titleFor = (row: OutlineRow): string =>
   `${PART_KINDS[row.kind].label} — ${pointingWords(row.addressing).label.toLowerCase()}`
 
+/**
+ * `aria-pressed` rather than `aria-selected`, and it is the change phase 2
+ * forced.
+ *
+ * A row used to be one of a set of which exactly one could be current, which is
+ * what `aria-selected` means. It is now a toggle a reader turns on and off
+ * independently of every other row, which is what `aria-pressed` means — and the
+ * difference is what a screen reader says when the second row is picked. With
+ * the wrong one it announces that the first row is no longer selected, which is
+ * the behaviour this phase exists to remove.
+ */
 export const OutlineRowButton = ({
   row,
-  isSelected,
-  onSelect,
+  isPicked,
+  onPick,
 }: {
   readonly row: OutlineRow
-  readonly isSelected: boolean
-  readonly onSelect: (nodeId: string) => void
+  readonly isPicked: boolean
+  readonly onPick: (nodeId: string) => void
 }) => (
   <li>
     <button
       type="button"
-      onClick={() => onSelect(row.nodeId)}
+      onClick={() => onPick(row.nodeId)}
+      aria-pressed={isPicked}
       title={titleFor(row)}
       className={`flex w-full items-center gap-2 rounded-sm py-1 pr-2 text-left text-xs ${
-        isSelected ? "bg-surface-active text-ink" : "text-ink-secondary hover:bg-surface-hover"
+        isPicked ? "bg-surface-active text-ink" : "text-ink-secondary hover:bg-surface-hover"
       }`}
       style={{ paddingLeft: 8 + row.depth * INDENT_PER_LEVEL }}
     >
