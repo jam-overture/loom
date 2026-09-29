@@ -31,6 +31,7 @@ const ASSESSED: ChangeRecord = {
     retainedNodeCount: 0,
     reasons: [],
     inverseOperations: ["configure n_1: loom.theme"],
+    inverse: [],
   },
   repaired: false,
   touched: [],
@@ -50,6 +51,7 @@ const REMOVAL: ChangeRecord = {
     retainedNodeCount: 4,
     reasons: [],
     inverseOperations: ["insert loom.stat-grid into n_51 at 4"],
+    inverse: [],
   },
 }
 
@@ -137,6 +139,7 @@ describe("can it be taken back", () => {
       retainedNodeCount: 1,
       reasons: [],
       inverseOperations: ["insert loom.quote into n_51 at 4"],
+      inverse: [],
     }
     const [, reversal] = weighedOf({ ...REMOVAL, reversibility: one }) ?? []
 
@@ -188,6 +191,7 @@ describe("can it be taken back", () => {
           retainedNodeCount: 40,
           reasons: ["the inverse would carry 40 nodes, past a budget of 24"],
           inverseOperations: [],
+          inverse: [],
         },
       }) ?? []
 
@@ -260,6 +264,7 @@ describe("the pair in one line", () => {
         retainedNodeCount: 40,
         reasons: ["the inverse would carry 40 nodes, past a budget of 24"],
         inverseOperations: [],
+        inverse: [],
       },
     }
     const [, reversal] = weighedOf(irreversible) ?? []

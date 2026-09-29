@@ -39,7 +39,7 @@ const HELD: ChangeRecord = {
   actor: "a demo visitor",
   outcome: "awaiting-you",
   stakes: { level: "medium", factors: [] },
-  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [] },
+  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [], inverse: [] },
   disposition: HELD_BY_THE_CEILING,
   heldProposalId: "p_1",
   repaired: false,

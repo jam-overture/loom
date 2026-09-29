@@ -7,6 +7,7 @@ import { describeProposalEffect, type ProposalEffect } from "@/app/(portal)/_lib
 import { stillToAsk } from "./already-asked"
 import { partTheAskWouldTouch } from "./before-the-press"
 import { partInQuestion, type PartInQuestion } from "./in-question"
+import { partTheRecordKept } from "./kept"
 import { markedPage, type MarkedPage } from "./marked"
 import { movedOn, type MovedNote } from "./moved"
 import { plainChange, settingsOf, type PlainChange } from "./plain-change"
@@ -71,6 +72,17 @@ export type RailReading<TPart> = {
   readonly inQuestion?: TPart
   readonly plain?: readonly PlainChange[]
   readonly moved?: MovedNote
+  /**
+   * And the one reading here that belongs to a change which has already
+   * happened: the part it took off the page, which the record is still holding.
+   *
+   * Every other field above is absent on a landed card and says why — an
+   * applied change describes a tree that is gone. This one is the opposite and
+   * for the same reason: the content it draws is not in the tree, it is in the
+   * record's own inverse, and the tree is consulted only to confirm that the
+   * page does not have it. `kept.ts` has the argument.
+   */
+  readonly kept?: TPart
 }
 
 export type RailView<TPart> = {
@@ -130,6 +142,15 @@ export type RailInput<TPart> = {
    * whole subject is that every id is real.
    */
   readonly showAsk: (part: PartInQuestion) => TPart
+  /**
+   * How to show the part a landed change took off the page.
+   *
+   * A third callback for the reason there is a second: what it is keyed by. A
+   * question has a proposal id, an ask has nothing, and this has a record —
+   * and the record is what the map is keyed by already, so passing the key in
+   * would be handing the caller back the thing it is about to be given.
+   */
+  readonly showKept: (part: PartInQuestion) => TPart
 }
 
 export const whatTheRailShows = <TPart>({
@@ -140,6 +161,7 @@ export const whatTheRailShows = <TPart>({
   ids,
   showPart,
   showAsk,
+  showKept,
 }: RailInput<TPart>): RailView<TPart> => {
   /**
    * The holds the page has moved past, by the record they belong to.
@@ -298,6 +320,31 @@ export const whatTheRailShows = <TPart>({
    * about this change except that it can no longer happen.
    */
   for (const [recordId, moved] of movedNotes) readings.set(recordId, { moved })
+
+  /**
+   * And what each landed change is still holding, which is the one reading
+   * computed for a record that is *not* waiting on anything.
+   *
+   * It is folded onto whatever the record already has rather than set over it.
+   * Nothing can collide today — a record with a live hold has no revision, and
+   * the two loops above are both keyed off `held` — but the three loops write
+   * one map, and the way a map written by three loops fails is silently.
+   *
+   * No filter on whether the undo is still on offer, and that is deliberate
+   * rather than an omission. Which cards may *show* this is one gate in one
+   * place, in the markup, beside the button it stands over — the same rule the
+   * leading ask's preview is built to, and for the same reason: the nomination
+   * and the preview have to be one value or the panel previews one thing and
+   * offers another. What stops a spent undo drawing anything here is not a
+   * condition at all, it is that the node is back on the page and
+   * `partFromOperations` will not draw a part the tree already has.
+   */
+  for (const record of records) {
+    const part = partTheRecordKept(tree, record)
+    if (part === undefined) continue
+
+    readings.set(record.recordId, { ...readings.get(record.recordId), kept: showKept(part) })
+  }
 
   const about = spotlit[0]
   const waiting = setAside(records, openQuestions)

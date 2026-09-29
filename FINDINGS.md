@@ -8,6 +8,85 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-28 — the rail keeps the scroll it took for the question after the question is answered, and what a visitor sees of the payoff card is decided by where the browser clamps it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
+by measuring the frame this run's own unit produces, **not caused by it**, and
+recommended as a unit of its own because the honest fix has a design question in
+it that a screenshot fix would paper over
+
+Measured on a production build at 1280 × 900, running the demo's three presses
+with reduced motion, reading the rail's `scrollTop` and the card's box out of
+the browser rather than off a picture:
+
+| | after press 1 | after press 2 |
+| --- | --- | --- |
+| the rail's scroll | **788** — `AnswerInView` put the held card at the top | **788**, unchanged |
+| the card's top, in the rail's content | 831 | **740** |
+| so the card's top, on screen | 43 | **−48** |
+| the rail's furthest scroll | 1,223 | 993 |
+
+**The 91px is the panel, and the 48px is what is left over.** Answering the
+question takes the caution out of `AskPanel` and puts the green button back, and
+the two do not cancel: everything above the card ends up 91px shorter than it
+was when the scroll was taken. Nothing re-reads that scroll, so the visitor is
+left 48px into a card whose first two lines are the badge saying **Applied** and
+the sentence they asked for in quotation marks.
+
+**On `main` the same arithmetic ends about +117 and it is not because anything
+is right.** The applied card there is **606px** and this run's is **976px** —
+both read off the clipped portraits attached to the pull request, which are the
+element and nothing else. At 606px the rail's furthest scroll after the answer
+is 623, *below* the 788 it is holding, so the browser clamps and the card lands
+just under the section heading; the wide `before` screenshot agrees to within a
+pixel or two. At 976px the clamp no longer bites and the residue shows. **So
+what a stranger sees of the demo's payoff frame is currently decided by whether
+the card is taller or shorter than the rail**, which is not a decision anybody
+made. That is worth an entry whatever is done about it.
+
+### Why it is not fixed here
+
+The component that would fix it says in its own comment why it does not, and the
+reason is good:
+
+> **Only when something is actually waiting.** An applied change has already
+> moved the page, which is its own announcement, and its *Put it back* is an
+> offer rather than a question — dragging the rail to it would be the surface
+> moving for its own reasons.
+
+That is about a change that lands *on its own* — half the presets do — and it is
+right about those. It does not cover the card the visitor was looking at when
+they pressed the button on it, which is the case measured above.
+
+**And the obvious fix collides on a phone**, which is the design question. The
+same comment closes with the property that makes the current state safe:
+
+> the two never act at once — on a narrow screen a held change is exactly the
+> case `SpotlightScroll` sits out, and an applied one is the case this component
+> does not render for. One scroller, one opinion, in every state.
+
+Make `AnswerInView` render for an answered card and a phone gets two opinions
+about one scroller: `SpotlightScroll` carrying the visitor to the mark on the
+stage — measured this run at `scrollY` **4,685**, with the card's top at
+**−3,863** — and this carrying them back to the card. So the fix is wide-only,
+and wide-only in this lane means a `matchMedia` read at mount, which
+`globals.css` already argues against by name: *a media query is right between a
+resize and a re-render and a mount-time read is not*.
+
+**Three shapes, none started:**
+
+1. **Re-land the answered card**, wide only, and pay the `matchMedia` cost with
+   a resize listener rather than a mount-time read.
+2. **Do not take the scroll back.** `roomToLand` gives the rail `70vh` of
+   trailing room *while a question is open* so the card can reach the top; the
+   scroll it enables outlives the room. Keeping the room while the newest record
+   is the one that just landed would make the position survive rather than
+   need re-taking — no `matchMedia`, because the padding is already a `lg:`
+   utility, and no scroll at all on a phone, where the rail is not a scroller.
+   **This is the one worth trying first.**
+3. **Accept it and say so**, which is what this run does.
+
+---
 ## 2026-09-28 — a `reports/*.md` link in a pull request body was mangled too, so the `decisions/` correlation is not the rule
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` ·
@@ -51,6 +130,53 @@ one body the `.md` extension separated the mangled link from the clean ones.
 **One body is one data point and I am not proposing a mechanism**, for the reason
 the 22 September entry gives: two guesses have already been written into a pull
 request description as fact.
+
+### Seventh data point, 28 September, `Loom demo` on #443 — **the `<img>` form is not safe either**
+
+Appended by `Loom demo` rather than filed separately, because this entry asks for
+evidence and this is evidence against the one form every lane has been treating
+as reliable.
+
+#443's description went up with **five HTML `<img>` tags** — three inside table
+cells, two standalone — and **all five came back mangled**, in exactly the shape
+this entry describes:
+
+```
+``&lt;img src="https://github.com/.../…-before-card.png?raw=1" width="380"&gt;``
+```
+
+Double backticks around the whole tag and the angle brackets escaped, so nothing
+rendered: a pull request whose entire argument is two pictures side by side had
+no pictures in it.
+
+**That contradicts the table above.** On #434 four `<img src="…">` tags came
+through clean and were offered as the form that survives. Same form, opposite
+outcome, ten hours apart:
+
+| | #434 | #443 |
+| --- | --- | --- |
+| HTML `<img>` tags in the body | 4 | 5 |
+| how many came back mangled | **0** | **5** |
+| the query they carried | `?raw=true` | `?raw=1` |
+| bare URLs elsewhere in the body | — | 1, **clean** |
+
+So `.md` versus `.png` is not the variable, `decisions/` versus `reports/` is not
+the variable, and **`<img>` versus `<a>` is not the variable either**. Three
+correlations have now been recorded and broken in turn, which is the reason this
+entry asks for measurements rather than theories and the reason none is offered
+here.
+
+**What worked, on the same body, minutes later.** The description was rewritten
+with **markdown image syntax** — `![alt](url)`, three of them in table cells —
+and read back from the API all five links are clean and the pictures render. That
+is the 27 September run's measurement reproduced, and it is now the second body
+on which markdown image syntax survived where something else did not.
+
+**The working recommendation, until something breaks it too:** put a picture in a
+pull request body as `![alt](url)` and never as an `<img>` tag, and check the
+body back through the API before treating the pull request as finished. Checking
+is the part that cost nothing here: the mangling is invisible from the side that
+wrote it.
 
 **The workaround, widened.** That entry's remedy — name the file in an
 inline-code span and do not make it a link — works for `reports/` as well as
@@ -317,9 +443,19 @@ is a question for the lane that owns the ramp.
 ---
 ## 2026-09-27 — the demo shows a stranger the change and the record, and the inverse is the one third of the claim sixty seconds does not reach
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — named
-here so the next run of this lane does not have to re-derive it, and filed rather
-than done because this run's unit was the press and not the undo
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-32-what-came-off-is-still-here`** (28 September) — shape **(2)** taken,
+*the excerpt outlives the change*, and taken because it is the one of the two
+that costs no press. The record now keeps
+`reversibility.inverse` as operations beside the sentences about them, and an
+applied card draws the part the change took off, over the button that spends
+it. The check this entry named as the one that kills the cheaper shape is the
+reason the field was added rather than worked around: `inverseOperations` is
+`describeOperation` over the inverse, and `partFromOperations` needs operations.
+Shape **(1)** — the undo as the payoff card's own green — was **not** taken and
+is not needed: what makes the button the next step is the band standing over it,
+and a second green on a rail whose one green means *the answer to a question* is
+a vocabulary this surface has spent five runs keeping straight.
 
 This lane's brief says what the demo has to show, in one sentence with three
 parts:
