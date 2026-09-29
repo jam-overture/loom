@@ -58,6 +58,7 @@ const ASKED: Omit<ChangeRecord, "outcome" | "revision"> = {
     retainedNodeCount: 0,
     reasons: [],
     inverseOperations: ["configure n_1: loom.theme"],
+    inverse: [],
   },
   disposition: {
     kind: "accepted",
@@ -719,6 +720,55 @@ describe("what the payoff card offers", () => {
 
     expect(screen.queryByRole("button", { name: "Put it back" })).toBeNull()
     expect(screen.queryByText(UNDO_WAITING)).toBeNull()
+  })
+
+  /**
+   * **And what it is offering to put back, over the button that would.**
+   *
+   * The card's best sentence is *"The 4 pieces it takes off the page are
+   * kept, so the exact opposite of this change already exists"*, and the only
+   * way a visitor could check it was a third press past the end of their
+   * minute. `kept.ts` computes the excerpt; this is the half that puts it on
+   * the screen.
+   */
+  it("shows what the change took off, above the button that puts it back", () => {
+    render(<RecordCard record={APPLIED} offer="offer" kept={<p>the numbers band</p>} />)
+
+    expect(screen.getByText("the numbers band")).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Put it back" })).toBeTruthy()
+  })
+
+  /**
+   * **One gate for the two of them**, which is the placement decision and the
+   * property worth a test rather than a comment.
+   *
+   * The excerpt and the button are one claim — *here is what is kept, and here
+   * is what spends it*. Split into two conditions they can come apart, and the
+   * two ways they would are both on the screen: a band held out over no
+   * button, or a card claiming to hold something it has already given back.
+   */
+  it("withdraws the excerpt with the button, in both states that withdraw it", () => {
+    for (const offer of ["waiting", "spent"] as const) {
+      const { unmount } = render(
+        <RecordCard record={APPLIED} offer={offer} kept={<p>the numbers band</p>} />
+      )
+
+      expect(screen.queryByText("the numbers band"), offer).toBeNull()
+      expect(screen.queryByRole("button", { name: "Put it back" }), offer).toBeNull()
+      unmount()
+    }
+  })
+
+  /**
+   * And it belongs to a landed change. A held one has taken nothing off the
+   * page and already shows the band in the conditional, above the two buttons
+   * deciding it — a second copy saying *came off* would be the card
+   * contradicting itself across one press.
+   */
+  it("shows no such excerpt on a change that has not happened", () => {
+    render(<RecordCard record={HELD} offer="offer" kept={<p>the numbers band</p>} />)
+
+    expect(screen.queryByText("the numbers band")).toBeNull()
   })
 })
 

@@ -73,7 +73,14 @@ export const PartInQuestionView = ({
         * **In a card, a heading**, and the same size as the card's other
         * heading, so the two readings of the change — what it would do, and what
         * it would do it to — read as siblings rather than as a section and its
-        * caption.
+        * caption. Both cards: the question's, and the landed one holding what it
+        * took off.
+        *
+        * Which is why the condition names the **ask** rather than the question.
+        * It named the question when there were two moments, and a third moment
+        * that is also in a card would have silently taken the panel's markup —
+        * the failure being a level-four heading demoted to a paragraph on the
+        * one card where it has a sibling to be level with.
         *
         * **In the ask panel, a paragraph.** There is no second reading for it to
         * be a sibling of, and the only heading on that rail is the `h1` three
@@ -82,10 +89,10 @@ export const PartInQuestionView = ({
         * navigating by headings. The words and the size are identical either
         * way; what changes is the claim the markup makes about the document.
         */}
-      {part.where === "question" ? (
-        <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
-      ) : (
+      {part.where === "ask" ? (
         <p className="text-ink-secondary text-xs">{part.lead}</p>
+      ) : (
+        <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
       )}
 
       {/*

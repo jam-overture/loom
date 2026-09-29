@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, radius, space } from "./tokens.js"
+import { colour, hairline, radius, space } from "./tokens.js"
 
 /**
  * The bar across the top of a page: a mark, the menu, and the one thing the
@@ -100,7 +100,7 @@ const TONES: Readonly<Record<"plain" | "surface" | "floating", CSSProperties>> =
   plain: { background: "transparent" },
   surface: {
     background: colour("bg-surface"),
-    borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+    borderBlockEnd: `1px solid ${hairline()}`,
   },
   floating: {
     background: colour("bg-surface"),

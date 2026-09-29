@@ -232,7 +232,8 @@
 /* ══════════════════════════════════════════════════════════════════
    THE PART OF THE PAGE, BROUGHT TO THE RAIL
 
-   Twice now, and the second time is one step earlier than the first.
+   Three times now: one step earlier than the question, and one step
+   later than it.
 
    **In a question.** Stacked, the band a held change is about is
    roughly five screens below the two buttons deciding its fate:
@@ -248,8 +249,14 @@
    seen, below the fold at 1280×900 and four thousand pixels down at
    390×844. `before-the-press.ts` has that one.
 
-   **Wide screens are exempt from the first and not the second**, which
-   is why the rule is on `.demo-part--question`. Beside an open
+   **On the card of a change that has landed.** The part it took off,
+   drawn from the inverse the record is holding. `kept.ts` has that one,
+   and it is the only one of the three whose subject is on no screen at
+   any width — the change has happened, so the band is not on the stage
+   to be a second rendering of.
+
+   **Wide screens are exempt from the first and from neither of the
+   others**, which is why the rule is on `.demo-part--question`. Beside an open
    question the band is ringed in amber forty pixels away, so a second
    rendering of it would be the surface talking for its own sake;
    before any press nothing is ringed anywhere, because a ring is what
@@ -280,6 +287,14 @@
    * off* is about sits below the fold of a page a stranger has not
    * scrolled, and the preview under the button is the only place it is.
    * `before-the-press.ts` has the measurement.
+   *
+   * And it is not the kept excerpt's either, for the same reason said
+   * the other way round: after a removal there is no band on the stage
+   * for a wide screen to prefer. A ring is drawn where the band *was*
+   * (`spotlight.ts`), which is a gap with a chip on it — so the wide
+   * screen is where this excerpt is the only place the removed content
+   * exists at all, and hiding it there would hide the whole argument on
+   * the one width this surface is judged at.
    */
   @media (min-width: 1024px) {
     .demo-part--question {
@@ -339,6 +354,22 @@
    * this is a part of a page, and a part of a page continues.
    */
   .demo-part--ask .demo-part-stage {
+    max-height: 21rem;
+  }
+
+  /*
+   * The kept excerpt's window is the ask's, and it is the same band being
+   * measured: *Take the numbers off* is what the arrival screen previews
+   * and what the landed card is holding, so a shorter window here would
+   * show a stranger three figures before the press and one after it.
+   *
+   * What is under it is one button rather than two, and nothing is
+   * waiting on an answer — the change has already happened, and *Put it
+   * back* is an offer rather than a question. So the question's 13rem
+   * ceiling, which exists to keep two buttons on a 390×844 screen, is not
+   * this moment's constraint.
+   */
+  .demo-part--kept .demo-part-stage {
     max-height: 21rem;
   }
 }

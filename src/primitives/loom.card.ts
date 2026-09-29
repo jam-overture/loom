@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { GAP_NAMES, GAPS } from "./layout.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, radius, space } from "./tokens.js"
+import { colour, hairline, radius, space } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -192,7 +192,7 @@ export const loomCard = definePrimitive({
               gap: BODY_GAP,
               padding,
               marginTop: "auto",
-              borderTop: `1px solid ${colour("border-subtle")}`,
+              borderTop: `1px solid ${hairline()}`,
             },
             footer
           )

@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space, weight } from "./tokens.js"
+import { colour, family, hairline, size, space, weight } from "./tokens.js"
 
 /**
  * One question and its answer, as a disclosure that needs no JavaScript.
@@ -50,7 +50,7 @@ export const loomFaq = definePrimitive({
         ...loom.editable,
         ...(given.open === true ? { open: true } : {}),
         style: {
-          borderBlockStart: `1px solid ${colour("border-subtle")}`,
+          borderBlockStart: `1px solid ${hairline()}`,
           paddingBlock: space(3),
           width: "100%",
         },

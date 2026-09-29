@@ -219,6 +219,15 @@ describe("the part in question", () => {
     for (const selector of hidden) {
       expect(selector).not.toMatch(/\.demo-part(?![-\w])/)
       expect(selector).not.toContain(".demo-part--ask")
+      /*
+       * **And never the kept excerpt**, which is the exemption read the other
+       * way round. The question's rule exists because the band is ringed on
+       * the stage forty pixels away; after a removal there is no band on the
+       * stage, so a wide screen is the *only* place this excerpt is what the
+       * removed content looks like. Hiding it there hides the whole argument
+       * at the one width this surface is judged at.
+       */
+      expect(selector).not.toContain(".demo-part--kept")
     }
   })
 
@@ -243,6 +252,27 @@ describe("the part in question", () => {
 
     expect(question).toBeGreaterThan(0)
     expect(ask).toBeGreaterThan(question)
+  })
+
+  /**
+   * And the kept excerpt's window is the ask's, because it is the same band.
+   *
+   * *Take the numbers off* is what the arrival screen previews and what the
+   * landed card is holding, so a window shorter here would show a stranger
+   * three figures before the press and one after it. What sits under it is one
+   * button and nothing waiting on an answer, so the question's 13rem ceiling —
+   * which exists to keep two buttons on a 390×844 screen — is not this
+   * moment's constraint.
+   */
+  it("gives the kept excerpt the same window as the ask's, for the same band", () => {
+    const rem = (from: string): number =>
+      Number.parseFloat(/max-height:\s*([\d.]+)rem/.exec(from)?.[1] ?? "0")
+
+    const ask = rem(/\.demo-part--ask \.demo-part-stage\s*\{([^}]*)\}/.exec(css)?.[1] ?? "")
+    const kept = rem(/\.demo-part--kept \.demo-part-stage\s*\{([^}]*)\}/.exec(css)?.[1] ?? "")
+
+    expect(kept).toBeGreaterThan(0)
+    expect(kept).toBe(ask)
   })
 
   /**
