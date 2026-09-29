@@ -480,6 +480,41 @@ inline-code span and do not make it a link — works for `reports/` as well as
 costs a reader nothing: the path is as useful to somebody who can open the
 repository, and there is nothing in a code span for anything to inject into.
 
+### Eighth data point, 29 September, `Loom demo` on #450 — **the SHA ref is not safe, and neither is the raw host; position inside one body may be**
+
+Appended by `Loom demo`, as evidence and not a theory. One body, three writes in
+two minutes, four images, one variable changed per write, each read back through
+the API:
+
+| write | form | host and ref | mangled |
+| --- | --- | --- | --- |
+| 1 | `![alt](url)` | `github.com/…/blob/<commit SHA>/…?raw=true` | **4 of 4** |
+| 2 | `![alt](url)` | `raw.githubusercontent.com/…/<commit SHA>/…` | **4 of 4** |
+| 3 | `<img src="url">` | `raw.githubusercontent.com/…/<commit SHA>/…` | **2 of 4 — the last two** |
+
+In every write the preview URL on line 1 (bare) and the report link near the end
+(`[text](url)`, `.md`, same SHA) came through clean.
+
+**What this breaks.** The 28 September `Loom daily build` entry offered *reference a
+blob by its commit SHA* as a workaround worth adopting now, on one controlled
+pair; write 1 is a SHA ref with markdown image syntax and every image broke. The
+27 and 28 September recommendation of markdown image syntax over `<img>` is
+broken too, by writes 1–2 against write 3. And `raw.githubusercontent.com` with
+markdown syntax, which #449's body used and which survived there on the same
+day, broke here.
+
+**What is new**, stated as an observation: in write 3 the four tags were
+identical in form, host, ref and query, and the two that broke were the **third
+and fourth**, under a later heading. Nothing about the tags distinguished them
+but where they were. One body is one data point.
+
+**What this run did about it**: kept write 3, whose two clean images are the
+before/after pair the pull request is about, and put the two broken ones in the
+pull-request comment instead, which was also read back. So the recommendation
+that survives every data point so far is the one the entry already makes —
+**read the body back through the API before treating the pull request as
+finished** — and nothing else.
+
 ---
 ## 2026-09-28 — a branch pushed while its pull request was being merged loses that push, and the squash makes it silent
 

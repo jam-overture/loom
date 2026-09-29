@@ -264,6 +264,14 @@ wire.
   last unwirable line in this lane.* Pre-existing, not caused here, and the
   shape of the fix is named.
 
+- **Appended**, to the 28 September entry on mangled links, as its eighth data
+  point: this pull request's body was written three times and read back each
+  time. A commit-SHA ref did not protect markdown images (4 of 4 broke), the
+  raw host did not either (4 of 4), and `<img>` tags broke 2 of 4 — the last
+  two, identical in form to the first two. The two clean ones are the
+  before/after pair; the other two are in the pull-request comment. No mechanism
+  offered.
+
 **Re-verified, not re-filed:**
 
 - `21st.dev` `EGRESS_BLOCKED`, a **thirty-first** consecutive run, one call.
