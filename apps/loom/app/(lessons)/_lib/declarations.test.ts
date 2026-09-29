@@ -45,7 +45,7 @@ type Held = {
 }
 
 /**
- * The nineteen fences this check reaches, and what each claims.
+ * The twenty fences this check reaches, and what each claims.
  *
  * `members` is the non-vacuity pin. A parser that stopped splitting members
  * would take every row to `0` and compare nothing while passing; a fence that
@@ -79,6 +79,7 @@ const HELD: readonly Held[] = [
   { lesson: "26-liveness.md", name: "MarkedHolds", members: 2, whole: true },
   { lesson: "27-scale.md", name: "LoomPrimitiveProps", members: 3, whole: true },
   { lesson: "30-rendezvous.md", name: "BindingDeclaration", members: 2, whole: true },
+  { lesson: "31-behaviour.md", name: "Behaviour", members: 5, whole: true },
 ]
 
 /**

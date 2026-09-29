@@ -1558,6 +1558,59 @@ easily, and the node it waves through is the one that matters.
 
 ---
 
+## Set AJ — two days after lesson 31
+
+Interleaved with 01, 14, 15, 22, 24 and 27. Heavy on 22, because the
+`interactive` check is that lesson's predicate arriving from a direction it could
+not have anticipated; and on 27, because *hand the work to a different machine,
+then live inside that machine's data model* is what decides where a control
+publishes a number.
+
+1. A code panel needs a copy button. Name the three shapes the answer could have
+   taken, and for each of the two that were rejected give a page — an actual
+   page, and what a visitor sees on it — where it goes wrong. *(01, 31)*
+2. "A primitive's props are JSON, and a function is not expressible in JSON."
+   That reads like a fact about a serialisation format. Say what it is actually a
+   consequence of, in a sentence about what a reviewer of a change has to be able
+   to do. *(01, 31)*
+3. A behaviour is handed to a primitive as a node with nothing left to
+   configure, rather than as a component it may pass props to. Give the argument
+   for that, and then say what a primitive *does* still decide. *(15, 31)*
+4. A primitive that takes a copy control must declare itself `interactive`, and
+   the registry refuses it otherwise. Say what that check is protecting, whose
+   declaration `interactive` normally is, and why a control the primitive did not
+   write changes the answer. *(22, 31)*
+5. One control publishes a boolean and another publishes a number, and they
+   publish them on different elements. Say where each goes and why they cannot
+   swap. Your answer must contain the word "inheritance" and must not contain the
+   word "CSS". *(27, 31)*
+6. A deployment wires the registered primitive types into its Gate policy and
+   nothing else. A model proposes setting `copyable: true` on a code panel. Give
+   two answers and keep them apart: what the Gate does, and what the page does.
+   Then say which of the two is the reason this seam is safe. *(09, 31)*
+7. A page with a copy button on it, rendered to static markup, contains no
+   button. Say what that buys, what it costs, and then say what it implies about
+   *where* a behaviour can be checked at all — the last part is the one the four
+   registration checks are an answer to. *(14, 31)*
+8. Two controls of one primitive have to agree about one boolean and the seam
+   that built them gives them no way to. Say what they use instead, what the
+   rejected alternative would have guaranteed, and why a channel that fails by
+   not reaching is the right kind of failure. Then compare it with lesson 30's
+   answer to a very similar problem, and say what made the verdicts differ.
+   *(30, 31)*
+9. The behaviour vocabulary has five members and two primitives in the starter
+   library declare one. Say what the healthy reading of that is and what the
+   unhealthy one is, and then state the general rule about what a word like
+   *closed* on a finding is worth when nothing compares it to anything. *(24, 28,
+   31)*
+
+Question 5 is the point of the set, and question 6 is where a confident
+half-answer is most likely: the Gate's verdict is guessed wrongly far more often
+than the page's, and the reason is that a reader expects a rule to be doing the
+work.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1607,3 +1660,4 @@ renders this file rather than restating it.
 | AG | 2 days after L28 | | |
 | AH | 2 days after L29 | | |
 | AI | 2 days after L30 | | |
+| AJ | 2 days after L31 | | |

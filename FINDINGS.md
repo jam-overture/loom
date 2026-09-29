@@ -8,6 +8,119 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-29 — `adjust` was built for `loom.before-after` twenty-eight days ago, the entry that asked for it is marked closed, and the primitive still says the mechanism does not exist
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.before-after.ts`) · **Status:** open · **Found by** writing
+lesson 31 and running its exercise G, which is nine lines
+
+Not a bug — nothing is broken and no test is red. It is a seam that was built,
+paid for with a decision record, marked closed in this file, and never wired to
+the one primitive it was built for.
+
+### The measurement
+
+Exercise G of [lesson 31](lessons/31-behaviour.md) asks the starter registry
+which of its primitives declare a behaviour, and then asks each member of the
+vocabulary whether anything declares *it*:
+
+```
+  primitives in the starter library: 99
+    loom.nav         ["disclose"]
+    loom.code        ["copy"]
+  behaviours with a declaring primitive in the library:
+    copy      loom.code
+    disclose  loom.nav
+    adjust    nothing declares it
+    present   nothing declares it
+    dismiss   nothing declares it
+```
+
+### Why `adjust` is the sharp one
+
+[0096](decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
+was written for this primitive and says so. Its Context names
+`loom.before-after` in the second paragraph, its worked example is a `clip-path`
+on an `.after` layer, and `ADJUST_PROPERTY`'s docstring says the `var()` fallback
+*"should be the position the primitive's own props declared"* — which is
+`position`, a prop this primitive already has, bounded 5 to 95.
+
+The primitive's own doc comment still argues the feature is impossible:
+
+> A draggable wipe needs a pointer handler, and a handler is a function — not
+> something a tree's JSON props can carry, and not something this library may
+> implement for itself: 0086 settled that a behaviour is a control the runtime
+> builds and a primitive places, and the vocabulary has one member. So this is
+> filed as a second member rather than built, and what ships is the still
+> version.
+
+Every clause of that is true except the count, and the count is what the
+paragraph turns on. The vocabulary reached two members on 25 August (0092) and
+the third — the one this primitive asked for — landed on 1 September.
+
+### And this file says it is closed
+
+The 25 August entry *a wipe cannot be dragged, and the behaviour vocabulary has
+one member* is marked **closed by `framework-24-a-behaviour-that-hands-back-a-number`**, the branch that landed 0096, with a closing note that reads:
+
+> **Placing it is `Loom primitives`' and it is three lines** — declare `adjust`
+> in `behaviours` and an `adjust` text key, place `loom.behaviours.adjust` inside
+> the element that should read the value, and put `var(--loom-adjust, …)` into
+> the clip `loom.before-after` already writes. The primitive must also declare
+> `interactive`, which the registry enforces rather than assumes.
+
+Those three lines were never written. So the repository currently holds a closed
+finding, a built mechanism, a decision record, a primitive whose docstring says
+the mechanism does not exist, and no page anywhere that can be dragged.
+
+In lesson 28's vocabulary this is the plainest specimen there is: **"closed" is a
+claim with no second copy.** Nothing compares the word against whether any
+primitive declares `adjust`, and the comparison is the nine lines above.
+
+### What would close it
+
+1. The three lines 0096's closure names, on `loom.before-after`.
+2. The docstring paragraph quoted above, rewritten — it is wrong in its count
+   and wrong in its conclusion, and it is the first thing an author of a new
+   primitive reads when they want a control.
+3. A check, if one is wanted, and the shape is exercise G: a member of
+   `BEHAVIOUR_NAMES` that no registered primitive declares is either a gap or a
+   member nothing needs, and a list of them is worth printing whether or not it
+   is worth failing on.
+
+**Not this lane's to fix.** `src/primitives/` is `Loom primitives`', and the
+lesson that found this teaches the seam rather than changing it.
+
+---
+## 2026-09-29 — `present` and `dismiss` unblocked four Tier B primitives nine days ago, and the document that gates them still says Tier B is one decision
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
+(`docs/primitive-gap-inventory.md`) · **Status:** open · **Related:** the entry
+above, same measurement, smaller and newer
+
+`docs/primitive-gap-inventory.md`, last edited 25 September, says:
+
+> ## Tier B — blocked on the behaviour vocabulary
+>
+> **Roughly nine**, and they arrive together or not at all, because they are one
+> framework decision rather than nine.
+
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md),
+20 September, splits those nine into three groups by what each actually needs,
+and says of the first — dialog, dropdown, lightbox, tooltip — **"This record
+settles the first."** The second group is the container-shape question and is
+explicitly not settled; the third is one primitive.
+
+So Tier B has not been one decision since 20 September. It has been two
+outstanding decisions and four primitives with nothing in front of them, and the
+document a lane reads before deciding what to build says otherwise. Exercise G
+of lesson 31 shows the consequence from the other end: `present` and `dismiss`
+are in the vocabulary and nothing in the library declares either.
+
+This is smaller than the entry above and is nine days old rather than
+twenty-eight, which is why it is filed as a correction to a document rather than
+as a gap. **What would close it**: the Tier B section split the way 0176 splits
+it, so that *blocked* names what is actually blocking.
 ## 2026-09-28 — the mangling, with one variable changed and the rest held still: a branch name in the URL broke twice, the commit SHA came through clean
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·

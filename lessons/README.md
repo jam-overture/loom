@@ -303,6 +303,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [28](28-corroboration.md) | Corroboration: the claim that exists only once | What a check actually is, and why that rules out most of what a repository writes down; the three places a second copy of a fact can come from and what each one costs; why a bare citation cannot be held to its own meaning and a linked one can — and what you take on the moment you manufacture a second copy, given that the bill goes to somebody who has never read your file. |
 | [29](29-readership.md) | Readership: the declaration with more than one reader | Why the registry can hold four of a primitive's declarations against its props schema and cannot hold the schema against its own component; what property a dropped slot has that an unread prop does not, and what that rules out for any check built on watching output; how to make a read observable, and why the seven suspects that turns up include no defects and one security boundary working exactly as designed — and what it means that *does the component read this* was a question about the wrong party. |
 | [30](30-rendezvous.md) | Rendezvous: the name two parties have to spell the same | Why two of the three parts of a binding can be refused before anything is drawn and the third could not be; what a system does when the fact it wants to check exists in exactly one place, and who pays for the second copy; why the declaration that closes the seam is a rule rather than a list, and how a plain list of names turns out to be silent on the broken page and loud on the working one — and what it meant that the write path, asked about the same node, refused a page with nothing wrong with it. |
+| [31](31-behaviour.md) | Behaviour: the thing a page does | Why a copy button cannot be a prop, and why that is the thesis of this system in its smallest form; what a control is handed, who names it, and what the primitive is left to decide; why the four things a registry can check about a behaviour are all checked at registration; where a control that hands back a boolean writes it and why a control that hands back a number cannot write it in the same place — and what it means that a page with a copy button on it, rendered to static markup, contains no button. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -491,6 +492,36 @@ carry: the obvious version, a list of names, is not a weaker form of the right
 answer but an inverted one — silent on the broken page and loud on the working
 one — because the name can itself come from a prop. When you write a fact down so
 that something can check it, ask what the fact is a *function of* first.
+
+Lesson 31 is the one that breaks the family properly, and it is why Part V has a
+fourteenth seam rather than stopping at thirteen. Every seam above is a **fact**
+somewhere a checker cannot reach it, cannot interpret it, cannot compare it, or
+is asked the wrong question about it — and every one of them has, somewhere, a
+value that is either right or wrong. A copy button on a code panel has no value
+anywhere. It is a **verb**, and a tree of JSON has no verbs in it: there is
+nothing to put in a node, nothing for the Gate to refuse for being the wrong
+thing, and no declaration for anything to hold against anything, because nothing
+has been said.
+
+So the remedy is the one Part V has not used. Not reach further, not manufacture
+a second copy, not instrument a place, not ask an author — **close a set.** The
+things a Loom page may *do* are five entries in one file, and adding one is a
+name, an implementation, its strings and a decision record. What the closure buys
+is the sentence the lesson's third exercise executes: a model cannot give a page
+a capability, because capability is not in the language a model writes. There is
+no rule in the Gate doing that work, and the exercise shows the Gate accepting
+`copyable: true` at low stakes on a page that then does nothing at all.
+
+And the lesson ends somewhere this course has not had to go before. A behaviour
+leaves **no trace in a pure function of the tree** — a page with a copy button on
+it, rendered to static markup, contains no button, because every control in the
+vocabulary renders nothing until it knows it will work. That is the one seam in
+Loom for which *run it and print what it says* is not a complete method, which is
+why all four of the registry's checks happen at registration: registration is the
+last moment at which a behaviour is visible to anything that is not a browser. So
+the question to carry into a fifteenth seam is not lesson 28's *where is the
+second copy*, but **what is the last moment at which this is still visible, and
+is anything checking it there?**
 
 ## Pacing
 
