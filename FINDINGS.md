@@ -37328,3 +37328,76 @@ at-rules out and reported three duplicates instead of five.
 duplication is not attributable to one commit by reading. Two merges of branches
 that each added the trail rules is the obvious guess and it is a guess. The test
 makes the question retrospective.
+
+---
+## 2026-09-29 — seven links over the boundary in one body all mangled, which settles rank versus length and nothing else
+
+**Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Answers:** the experiment the 25
+September entry named as *"the one still worth running"* · **Status:** open —
+the fault is unchanged; one dead hypothesis fewer
+
+The 25 September entry ended by naming the experiment nobody had run:
+
+> post a body with two links at 150 and nothing longer. If both mangle, it is a
+> length. If neither does, it is a **rank**, and every earlier number in this
+> file is an artefact of whichever link happened to be longest.
+
+#446's first body ran it by accident. It carried **seven** image URLs, all on
+one full 40-character commit-SHA prefix, and **all seven came back wrapped in
+double backticks.** Read back from the API after posting:
+
+| image | characters | came back |
+| --- | --- | --- |
+| `…-after-bold-wide.png` | 173 | **mangled** |
+| `…-before-phone.png` | 170 | **mangled** |
+| `…-before-facts.png` | 170 | **mangled** |
+| `…-before-wide.png` | 169 | **mangled** |
+| `…-after-phone.png` | 169 | **mangled** |
+| `…-after-facts.png` | 169 | **mangled** |
+| `…-after-wide.png` | 168 | **mangled** |
+
+**Under the rank reading, exactly one of these — the 173 — would have come back
+backticked. Seven did.** So it is not a rank, the earlier numbers in this file
+are not artefacts of whichever link was longest, and the measurements above can
+go on being read as measurements. That is the whole of what this adds.
+
+**The second body, posted twenty minutes later, changed the SHAs to short ones
+and all seven came back clean**, at 135–140 characters.
+
+### What this does not say, stated because the entry above it is a graveyard
+
+**It does not locate a boundary.** The lowest mangled link here is 168 and the
+highest clean one is 140. The 149-versus-150 pair on #389 is still the tightest
+bound anybody has, and nothing here narrows it.
+
+**It is not a clean test of the budget theory, and it has a confound.** The
+second body was not the first body with shorter URLs in it: the images were also
+moved out of table cells onto lines of their own in the same edit, and the prose
+around them changed, so the whole body got shorter too. Either variable could
+have carried it, and this run cannot separate them. The 27 September entry's
+possibility — that the limit is the tail of some budget the whole body spends —
+survives this untouched.
+
+**It confirms the standing advice rather than replacing it.** A full 40-character
+SHA costs 33 characters over a short one for nothing: `…/blob/6e9c68ca8064789bc9680996460be54ce2736932/`
+against `…/blob/c4a004b/`. This run used the long form for no reason beyond
+having the full SHA to hand, and paid one complete body rewrite for it.
+
+### What it cost, and the check that would have caught it first
+
+**One rewrite of a seven-image body**, and the pictures were the point of that
+pull request — a marketing PR whose figures are backticked is a PR the
+maintainer cannot judge by eye, which is the one thing its brief asks of it.
+
+The 27 September entry's advice is the one that works and this run did not
+follow it until after the fact: **read the body back from the API after posting
+and look.** One call. This lane now has it as a step rather than as a thing to
+remember, and the measurements above are why.
+
+*(A comment on #446 posted before this entry was written offered a weaker
+reading — that short-SHA-versus-long-SHA was the surviving hypothesis — which
+was under-informed rather than wrong: it was written without having read the
+nineteen measurements already in this file, which had gone considerably further.
+Corrected on that comment as well as here, since a wrong conclusion left in a
+thread is the thing the 25 September entry spent a run undoing.)*
