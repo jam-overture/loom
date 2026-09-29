@@ -37095,6 +37095,149 @@ checks have been written down here and two of them were wrong. That is a stronge
 than this entry could make when it had one occurrence, and it is the reason the
 second one is written up rather than shrugged at.
 
+---
+## 2026-09-29 — `loom.hero`'s `align: "center"` centres the boxes and not the words, so the front door's headline shipped ranged left
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — the composition's half is fixed on
+`marketing-48-the-headline-in-the-centred-band`; the prop is still a trap
+
+`loom.hero` declares `align: z.enum(["start", "center"])` and spends it on one
+thing:
+
+```ts
+const centred = given.align === "center"
+// …
+alignItems: centred ? "center" : "flex-start",
+maxWidth: media === undefined && centred ? TEXT_MEASURE : "100%",
+```
+
+`alignItems` centres each child's **box** in the column the hero lays out. The
+text inside a box is ranged left until the node holding that text says
+otherwise, and `loom.heading` and `loom.prose` both default to
+`textAlign: "start"`. So a band declared `align: "center"` is centred only to
+the extent that every node put into it separately says `align: "center"` too.
+
+**What that cost, on the most-loaded page this project has.** The front door's
+hero is the one centred band on the site. Its `loom.prose` set `align: "center"`
+and its `loom.heading` set `balance` and nothing else. Measured on a production
+`next start`, before the fix:
+
+| | the headline | the eyebrow, the paragraph, the two buttons |
+| --- | --- | --- |
+| 1280 × 900 | `text-align: start`, 984px block from x=148, optical centre **139px left of the page's** | centred |
+| 390 × 844 | `text-align: start`, five hard-left lines in a 254px column | centred |
+
+The largest words on the site were the one thing on the first screen that was
+not centred, and the ragged right edge under a centred eyebrow reads as a broken
+page rather than as a choice.
+
+**Nothing was red and nothing could have been.** Both alignments are valid
+values of valid props. The page renders, the props validate, the markup names no
+colour, `pnpm shoot` measures no overflow, and every existing assertion passes
+on both arrangements. The only instrument that could see it is a camera. That is
+this lane's **third finding of that shape in five days** — `wrap` on `loom.code`
+on the 25th, the stale limit comment on the 26th, this — and the generalisation
+is in the third entry below.
+
+**What would close it.** Either `align: "center"` also emitting `textAlign:
+"center"` on the band, so the enum means what its name says and children
+inherit unless they override; or the prop being renamed to something that only
+claims the axis it governs. The first is a change a reader would see on any
+deployment whose hero is centred and whose children are not — which, in this
+repository, is the arrangement that was wrong anyway. **This is a judgement call
+about a published prop's meaning and is `Loom primitives`' to make**, which is
+why the composition's fix is one prop on one node rather than a workaround
+waiting on this.
+
+Whatever is decided, the composition's half stays correct: a heading that says
+where it stands does not change meaning when the band around it learns to say
+the same thing.
+
+---
+## 2026-09-29 — a `loom.section` with an eyebrow cannot be centred at all, and the front door has one that wanted to be
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — worked around by centring nothing rather than by centring most of it
+
+`loom.section` has **no `align` prop**: its schema is `tone`, `width`, `eyebrow`
+and `anchor`. A composition can still centre a section's heading and its
+paragraphs, because those are separate nodes with their own `align` — but the
+**eyebrow is not a node**. It is a string prop the primitive renders itself, and
+it renders it with no `textAlign`:
+
+```ts
+createElement("p", { style: { margin: "0", fontSize: size(1), letterSpacing: "0.18em",
+  textTransform: "uppercase", color: colour("accent") } }, given.eyebrow)
+```
+
+So the eyebrow inherits `start` from the page and there is no prop, on the
+section or anywhere else, that moves it.
+
+**Where that bit.** The front door's *Built in the open* band holds a centred
+`loom.stat-grid`, a centred row of links, a left eyebrow (`WHERE IT IS TODAY`),
+a left heading and — until this run — a centred caption. A reader met the
+heading hard against the left edge with 700px of nothing beside it and the
+sentence belonging to it floating in the middle of the band.
+
+Two readings were available and **only one of them is expressible**: range the
+caption left with the heading and the eyebrow, which is what shipped; or centre
+the whole band the way the hero and the closing band are centred, which would
+have left `WHERE IT IS TODAY` alone on the left and swapped one disagreement for
+a worse-looking one.
+
+The closing band on the same page is fully centred and works — because it has
+no eyebrow. That is the whole of the difference.
+
+**What would close it.** `align` on `loom.section`, governing the eyebrow at
+minimum, and ideally meaning for a section what the entry above asks it to mean
+for a hero. Until then, a band with an eyebrow is a band that must be ranged
+left, and that is a layout decision the library is making on the composition's
+behalf without saying so.
+
+---
+## 2026-09-29 — a prop with a safe default is invisible to every instrument in this repository except a camera, and that is now three in five days
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and every
+routine that composes · **Status:** closed by
+`marketing-48-the-headline-in-the-centred-band` — recorded because three is a
+pattern and the remedy generalises
+
+Three consecutive findings by this lane have the same shape, and it is not the
+shape any of them looked like at the time:
+
+| | the prop | what it was worth |
+| --- | --- | --- |
+| 25 Sept | `wrap` on `loom.code`, unset on all eight panels for three weeks | a data panel losing its right-hand end |
+| 26 Sept | `anchor`, believed impossible by a comment in the file beside it | no way back to the band that ran the change |
+| 29 Sept | `align` on `loom.heading`, unset in the site's one centred band | the largest words on the site ranged left |
+
+Each is **an optional prop with a sensible default**, unset. That is precisely
+the class of mistake nothing here can catch, and the reason is not a missing
+test — it is arithmetic. A prop that is optional has a default; a default that
+is sensible produces a page that renders, validates, emits no diagnostic and
+measures no overflow. There is no assertion to write against *the author did not
+consider this prop*, because the page is well-formed either way.
+
+**What worked, and it is not a check.** Photographing the surface and looking at
+it. All three were found by eye on a production build and none of them by a
+suite that was, in each case, green.
+
+**What this run did differently, and what is worth copying.** The fix was one
+prop, and one prop is not a unit — so the rule behind it was written down as a
+sweep instead: `alignment.test.ts` states *a band and the words in it stand in
+the same place* over every route in `SITE_ROUTES` and every palette in
+`SITE_THEME_NAMES`, rather than pinning the front door's heading. It found a
+**second** instance on the same page within a minute of first running, which the
+run that fixed the headline would otherwise have walked past.
+
+The generalisation, for any lane composing registered primitives: **when a
+camera finds an unset prop, the deliverable is the invariant, not the prop.** A
+prop set is one page fixed; an invariant stated over the routes is every page
+fixed, including the ones nobody has written yet. And write it so it cannot pass
+vacuously — this one carries an assertion that the site still *has* a centred
+band, because deleting the last one would otherwise turn the whole sweep green
+and silent.
 ## 2026-09-29 — `border-subtle` is under the visibility floor on four of the eight starter palettes, and the worst of them is a light one
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
