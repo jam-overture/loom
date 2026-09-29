@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -4321,7 +4321,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4367,7 +4367,7 @@
       "files": 56,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5210,7 +5210,7 @@
       "files": 180,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5623,6 +5623,13 @@
               "summary": ""
             },
             {
+              "name": "hairline",
+              "kind": "function",
+              "signature": "const hairline: () => string",
+              "truncated": false,
+              "summary": "The colour a line takes when the line is the only thing being drawn."
+            },
+            {
               "name": "READABLE_MEASURE",
               "kind": "value",
               "signature": "const READABLE_MEASURE = \"68ch\"",
@@ -5662,7 +5669,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6253,7 +6260,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6481,7 +6488,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6898,7 +6905,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7252,7 +7259,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7385,7 +7392,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8148,7 +8155,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8291,7 +8298,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8351,7 +8358,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8885,7 +8892,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8959,7 +8966,7 @@
       "files": 85,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9396,7 +9403,7 @@
       "files": 50,
       "narrower": [],
       "standing": {
-        "packageNames": 1086,
+        "packageNames": 1087,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,

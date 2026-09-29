@@ -80,6 +80,55 @@ export const MONOSPACE_STACK =
 export const monospace = (): string => `var(--loom-mono-family, ${MONOSPACE_STACK})`
 
 /**
+ * The colour a line takes when the line is the only thing being drawn.
+ *
+ * `border-subtle` is the right slot for the **edge of a box**: a card is mostly
+ * fill, the fill is what tells a reader it is a card, and the edge only has to
+ * stop the fill. It is the wrong slot for a rule between two table rows, the
+ * rail down a timeline, the hairline under a top bar, or a scrollbar thumb —
+ * anything with no fill of its own to be read by. That distinction was written
+ * down on 26 September as the rule an audit should be run against, and this is
+ * the audit's answer in one place rather than in forty.
+ *
+ * **Measured with `src/theme/separation.ts`, whose ΔE is the metric this
+ * repository already decided is the right question for "can a reader tell these
+ * two apart" (0089).** CIE76 difference between the slot and the ground it is
+ * drawn on, across the two starter palettes, against a just-noticeable
+ * difference of 2.3:
+ *
+ * | palette · ground | `border-subtle` | `border-default` |
+ * | --- | --- | --- |
+ * | editorial · `bg-surface` | 6.48 | 9.06 |
+ * | editorial · `bg-surface-muted` | **0.90** | 4.15 |
+ * | bold · `bg-surface` | **2.49** | 7.80 |
+ * | bold · `bg-canvas` | 9.02 | 14.32 |
+ *
+ * Two things in that table are why this helper exists rather than a note.
+ *
+ * **`border-subtle` falls under the just-noticeable difference on a muted
+ * ground, and the palette it does that on is a light one.** 0.90 on
+ * `editorial`'s `bg-surface-muted` is the worst pair in the starter set — worse
+ * than anything on `bold` — so the 26 September framing, that this is a thing
+ * the dark palette does, is not what is happening. It is a thing the token does
+ * wherever the ground it lands on happens to be near it, and three of the eight
+ * starter palettes put it under the floor on some ground.
+ *
+ * **A contrast ratio says the opposite and is the wrong instrument.** WCAG
+ * contrast puts every one of these between 1.005 and 1.38, which reads as "all
+ * four cells are equally invisible, so changing the slot buys nothing." That is
+ * the error `separation.ts` was written to stop: a ratio compares luminance, and
+ * these are neutrals a few values apart where luminance is the least sensitive
+ * thing about the comparison. ΔE says the change is a three-to-fourfold
+ * increase in separation, and ΔE is the metric with a published threshold
+ * behind it.
+ *
+ * `border-strong` is the wrong end of the same ramp — 87 to 98, near-black on a
+ * light palette — which is why `loom.table` and `loom.comparison-table` keep it
+ * for the one rule under a header and take this for the rules between rows.
+ */
+export const hairline = (): string => colour("border-default")
+
+/**
  * The reading measure, as a length rather than a palette slot.
  *
  * Line length is a typographic constant — around 65 characters — not something a

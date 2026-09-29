@@ -5774,6 +5774,12 @@ That run worked to the fallback standard and said so in its report. Noting the
 date here rather than opening a second finding, so the gap between "answered"
 and "in effect" is visible without reading two entries.
 
+**Re-verified 29 September 2026** by `primitives-49-the-lines-that-were-not-there`:
+still `EGRESS_BLOCKED`, identical message, forty-four days after the maintainer
+said he could add it. That run worked to the fallback standard and said so in its
+report. Appended here rather than opened as a sixteenth entry, per the line
+above.
+
 ---
 
 ## 2026-08-16 — a render that omits `options.text` loses an accessible name silently
@@ -34915,9 +34921,14 @@ measure that lives inside the primitive.
 ## 2026-09-26 — a hairline drawn in `border-subtle` does not exist on the bold palette, and both places found so far were a band's whole argument
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — **two fixed here, the rest of the
-library unaudited.** It is an audit rather than a defect, and it needs a
-photograph per primitive rather than a grep
+(`src/primitives/`) · **Status:** **closed 29 September** on branch
+`primitives-49-the-lines-that-were-not-there`. The audit ran, the sheet this
+entry asked for exists, and eighteen lines changed token —
+[0204](decisions/0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md).
+The rule below was right; **the reason given for it was measured with the wrong
+instrument**, and the correction is in 0204's Context. The palette half is a new
+entry at the foot of this file: `border-subtle` is under the floor on three
+*light* palettes too, so this was never a `bold` problem
 
 `border-subtle` is the right token for the edge of a **card**: a card is mostly
 fill, the fill is what tells a reader it is a card, and the edge only has to
@@ -37083,3 +37094,94 @@ asking every lane to remember a check — especially now that three different
 checks have been written down here and two of them were wrong. That is a stronger recommendation
 than this entry could make when it had one occurrence, and it is the reason the
 second one is written up rather than shrugged at.
+
+## 2026-09-29 — `border-subtle` is under the visibility floor on four of the eight starter palettes, and the worst of them is a light one
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/theme/`) · **Status:** open — **nothing is blocked and no page is wrong
+today.** The library has stopped drawing standalone rules in this token
+([0204](decisions/0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md)),
+so the entry is about the palettes rather than about the primitives
+
+The 26 September audit entry above is closed by 0204 and this is the half of it
+that is not this lane's. Measured with `src/theme/separation.ts` — CIE76 ΔE, the
+metric that module argues at length is the right question for *can a reader tell
+these two apart*, against its published just-noticeable difference of **2.3**:
+
+| palette | `border-subtle` vs `bg-surface-muted` |
+| --- | --- |
+| **editorial** | **0.90** |
+| **paper** | **2.04** |
+| **sage** | **2.04** |
+| bold (vs `bg-surface`) | **2.49** |
+
+Three starter palettes put `border-subtle` **below** the floor on their muted
+ground, and a fourth clears it by eight per cent. `editorial` at 0.90 is the
+worst pair in the starter set, which is the thing worth the entry: the
+26 September finding framed this as something the dark palette does, and that
+framing is what left the other three unmeasured for three days. It is not a
+property of `bold`. It is a property of a token that sits a couple of values from
+whichever ground it happens to land on.
+
+**Why this is filed rather than fixed.** `border-subtle` is *correct* for the two
+thirds of its uses that are the edge of a box — a card is read by its fill and the
+edge only has to stop it — so raising the slot to suit the rules would coarsen
+every card in the library. The two uses want different values. 0204 takes the
+other route and sends standalone rules to `border-default`, which measures 4.15
+to 14.32 across the same grounds, so **the library needs nothing from this
+entry.**
+
+**What is actually being reported.** The border tier has `subtle` (ΔE 0.9–9),
+`default` (4–15) and `strong` (82–98), and there is nothing between 15 and 82.
+A rule that should be *seen* rather than merely *not missed* has `border-default`
+and then a cliff. No primitive wants that value today. Whether the tier is the
+right shape is the palette author's call, and this is the measurement it would be
+taken against.
+
+**A second, smaller thing for the same owner.** `PEER_PAIRINGS` in
+`separation.ts` declares the pairs a reader is meant to tell apart, and **not one
+of them is a border against the ground it is drawn on.** The instrument that
+would have caught all of this by itself has existed since 23 August; it was never
+told about the pair. Adding `border-subtle`/`bg-surface-muted` as a `colour-only`
+peer would have failed on `editorial` the day `paper` and `sage` were registered.
+That list lives in `src/theme/` and its `where` fields name primitives, so it is
+theme-owned code carrying this lane's knowledge — which is probably why nobody
+owned the gap.
+
+## 2026-09-29 — a fifty-four line region of the library stylesheet was in the sheet twice, and the second copy is the one that wins
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** **closed the same day**, by the deduplication
+and the test below. Recorded because of what it nearly cost rather than because
+of what it was
+
+`src/primitives/stylesheet.ts` emitted `.loom-trail-crumb`, the four
+`.loom-trail-*` separator rules, the five `.loom-carousel*` rules and the two
+`.loom-meter-*` rules **twice, byte for byte**, fifty-four lines apart-ish; and
+inside `@media (prefers-reduced-motion: reduce)`, `.loom-carousel` and
+`.loom-recording:hover .loom-recording-play` twice more.
+
+**Nothing rendered differently for it.** Every duplicated block set every
+property its twin set, to the same value, so the cascade produced identical
+computed styles and no picture in this repository was ever wrong. That is exactly
+what makes it worth an entry rather than a tidy.
+
+**What it nearly cost.** This run's work was changing the colour of a handful of
+lines, and one of them is `.loom-trail-chevron`'s `::before` — a duplicated
+block. Editing the first copy changes nothing a browser applies: the second copy
+is later at equal specificity and wins. A lane doing that would have watched a
+correct fix fail to appear, and the available conclusions are all wrong ones —
+*the token is not the problem*, *the chevron does not use that property*, *the
+specimen is stale*. It was found by counting blocks before editing, not by
+editing and looking.
+
+**Fixed and guarded.** The duplicates are gone and `library.test.ts` now asserts
+that no selector-plus-body appears twice in the emitted sheet. The guard walks
+into at-rules rather than stopping at the top level, which is how the two
+reduced-motion copies were found at all — the first draft of the test filtered
+at-rules out and reported three duplicates instead of five.
+
+**Not investigated: how they got there.** `git log` on that file is long and the
+duplication is not attributable to one commit by reading. Two merges of branches
+that each added the trail rules is the obvious guess and it is a guess. The test
+makes the question retrospective.

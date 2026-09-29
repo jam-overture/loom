@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, monospace, radius, size, space, weight } from "./tokens.js"
+import { colour, hairline, monospace, radius, size, space, weight } from "./tokens.js"
 
 /**
  * A snippet, set in monospace on a tinted surface — or a terminal, which is the
@@ -171,7 +171,7 @@ export const loomCode = definePrimitive({
           gap: space(2),
           paddingBlock: space(2),
           paddingInline: space(3),
-          borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+          borderBlockEnd: `1px solid ${hairline()}`,
           background: colour("bg-surface"),
         },
       },
