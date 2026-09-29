@@ -61,7 +61,7 @@
  * member that does not exist — a false red, not a false green, which is the
  * direction to be wrong in. The same goes for `Pick<TreeStore, "head">` and
  * anything else that names its members somewhere other than its own braces.
- * Every one of the course's nineteen fences prints a declaration that spells its
+ * Every one of the course's twenty fences prints a declaration that spells its
  * members out, so nothing in `lessons/` is affected today; a lesson that wants to
  * print an intersection will find this out immediately and loudly, which is the
  * arrangement this file would have chosen anyway.
