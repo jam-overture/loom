@@ -27861,7 +27861,26 @@ pages rather than one.
 ---
 ## 2026-09-14 — `hangingModelClient` is published and its two siblings are not, so each surface writes them
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-58-the-keys-the-runtime-puts-there`** — `hangingSource(id,
+description)` and `hangingEndpoint(id, description)` are published from
+`@jam-overture/loom/testing`, each returning `{ entry, abortedWith() }`, which is
+the signature this entry asked for and the one `hangingModelClient` already had.
+
+**It was five copies rather than three.** The entry counted `(docs)`' two; this
+package's own suite had written the same thing twice more, in
+`src/data/resolve.test.ts` and `src/submit/resolve.test.ts`, and each of those
+files had written it *twice over* — once as an entry that hangs and once again as
+a near-identical entry that also listens, because the first one could not report
+the abort. Adopting the published double deleted four hand-written adapters from
+two files and left the same assertions passing. **`(docs)`' two copies are
+untouched**: `silentSource` in `_lib/data/shop.ts` and the inline endpoint in
+`_lib/ceiling/page.ts` are that lane's files, and both can now be deleted in
+favour of the import whenever `Loom docs` next has reason to touch them.
+
+Original status below.
+
+**Status:** open —
 written by hand here rather than asked for, and the page says so
 
 `@loom/runtime/testing` publishes `hangingModelClient` for a good reason, stated

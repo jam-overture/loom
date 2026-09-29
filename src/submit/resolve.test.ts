@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { sequentialIdFactory, type NodeId } from "../ids.js"
 import { SUBMIT_PROP_KEY } from "../reserved-props.js"
 import { err, ok } from "../result.js"
+import { hangingEndpoint } from "../testing/doubles.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
@@ -287,17 +288,10 @@ describe("resolveTreeSubmissions", () => {
  * tests did not finish.
  */
 describe("an endpoint that does not answer", () => {
-  const hangingEndpoint = (id: string): EndpointEntry =>
-    defineEndpoint({
-      id,
-      description: "never answers",
-      endpoint: { target: () => new Promise(() => undefined) },
-    })
-
   it("is reported as unavailable rather than waited out", async () => {
     const tree = posting({ to: "contact.enquiry" })
     const resolution = await resolveTreeSubmissions(tree, {
-      registry: registryOf(hangingEndpoint("contact.enquiry")),
+      registry: registryOf(hangingEndpoint("contact.enquiry", "never answers").entry),
       ceilingMs: 5,
     })
 
@@ -315,7 +309,7 @@ describe("an endpoint that does not answer", () => {
 
     const resolution = await resolveTreeSubmissions(tree, {
       registry: registryOf(
-        hangingEndpoint("contact.enquiry"),
+        hangingEndpoint("contact.enquiry", "never answers").entry,
         countingEndpoint("newsletter.subscribe", "/api/newsletter")
       ),
       ceilingMs: 5,
@@ -326,27 +320,14 @@ describe("an endpoint that does not answer", () => {
   })
 
   it("is aborted, so the token store is not left holding a connection", async () => {
-    let aborted: string | undefined
-
-    const listening = defineEndpoint({
-      id: "contact.enquiry",
-      description: "never answers, but listens",
-      endpoint: {
-        target: ({ signal }) =>
-          new Promise(() => {
-            signal?.addEventListener("abort", () => {
-              aborted = signal.reason instanceof Error ? signal.reason.message : "unnamed"
-            })
-          }),
-      },
-    })
+    const silent = hangingEndpoint("contact.enquiry", "never answers")
 
     await resolveTreeSubmissions(posting({ to: "contact.enquiry" }), {
-      registry: registryOf(listening),
+      registry: registryOf(silent.entry),
       ceilingMs: 5,
     })
 
-    expect(aborted).toBe("no answer in 5ms")
+    expect(silent.abortedWith()).toBe("no answer in 5ms")
   })
 
   it("does not bound an endpoint that answers inside the ceiling", async () => {
