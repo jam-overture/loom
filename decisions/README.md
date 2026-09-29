@@ -286,3 +286,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0200](0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md) | The portal may place a lever beside the evidence, and a model may never pull one | Proposed | §5 |
 | [0201](0201-a-display-line-and-a-reading-line-are-two-measures.md) | A display line and a reading line are two measures | Accepted | §4b |
 | [0202](0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md) | The harness measures the content a clip hides, and it is not `scrollWidth` | Accepted | §1 (process) |
+| [0203](0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md) | A props vocabulary is handed the props a primitive is handed | Accepted | §2 |
+| [0204](0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md) | A rule with no fill beside it is measured in ΔE, not in contrast ratio | Accepted | §4b |

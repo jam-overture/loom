@@ -41,7 +41,7 @@ const ASKED: Omit<ChangeRecord, "outcome" | "revision"> = {
     operations: ["remove n_7"],
   },
   stakes: { level: "medium", factors: [] },
-  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [] },
+  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [], inverse: [] },
   disposition: {
     kind: "requires-confirmation",
     ruleCode: "stakes-above-ceiling",

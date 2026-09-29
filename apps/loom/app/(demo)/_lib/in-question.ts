@@ -58,14 +58,19 @@ export type PartInQuestion = {
    * told everything they need for.
    *
    * Written in Loom's voice, because the rail is Loom's voice and the stage is
-   * the clinic's — and deliberately in the conditional throughout: nothing here
-   * has happened, and the whole point of the frame is that it is still the
-   * visitor's to refuse.
+   * the clinic's — and in the conditional for both moments where nothing has
+   * happened yet, because the whole point of that frame is that it is still
+   * the visitor's to refuse.
+   *
+   * The third moment is the exception and earns it: a change that has landed
+   * is a thing that happened, so `KEPT_LEAD` is in the past tense. It is the
+   * only sentence here making a claim about the page rather than about a
+   * proposal, and the two refusals below are what keep it honest.
    */
   readonly lead: string
   /**
-   * Which of the two moments this excerpt stands in, decided here rather than
-   * where it is rendered.
+   * Which of the three moments this excerpt stands in, decided here rather
+   * than where it is rendered.
    *
    * **It is a field because the alternative put the decision in `page.tsx`.**
    * The moment governs two rules in `globals.css` — whether a wide screen draws
@@ -78,11 +83,17 @@ export type PartInQuestion = {
    * table `rail.ts` opens with, and it was measured on this run rather than
    * imagined — the defect was restored and **caught by nothing.**
    *
-   * The two callers already know. `partInQuestion` is called for a hold and
-   * `partTheAskWouldTouch` for a press nobody has made, so the answer is the
+   * The three callers already know. `partInQuestion` is called for a hold,
+   * `partTheAskWouldTouch` for a press nobody has made, and
+   * `partTheRecordKept` for a change that has landed, so the answer is the
    * function you are in rather than a prop somebody remembers to pass.
+   *
+   * `kept` is the one of the three a wide screen must draw, and for the
+   * question's own reason read forwards: the question is exempt because the
+   * band is ringed on the stage forty pixels away, and after a removal the
+   * band is not on the stage at all.
    */
-  readonly where: "question" | "ask"
+  readonly where: "question" | "ask" | "kept"
 }
 
 const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
@@ -91,6 +102,25 @@ const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
   move: "This is the part that would move.",
   configure: "This is the part that would change.",
 }
+
+/**
+ * And the one sentence for the moment after — the same words in the tense the
+ * change has earned, with the claim they are evidence for attached.
+ *
+ * It is `LEADS.remove` with *would come* in the past and one clause added.
+ * Deliberately not a new voice: the visitor read that sentence under the button
+ * before they pressed it, and the whole of what this moment adds is that it has
+ * happened and the thing is still here.
+ *
+ * **One string rather than a table, because this moment is only ever reached
+ * for one operation**, and `partFromOperations` is where that is made true. An
+ * inverse that removes, moves or configures reads its subject out of the tree
+ * on the stage, so its subject is by construction a thing the visitor can
+ * already see — and the refusal that withdraws a spent undo refuses those in
+ * the same line. An inverse that *inserts* carries its node, which is the only
+ * case where drawing it is drawing something the record alone is holding.
+ */
+const KEPT_LEAD = "This is what came off the page. The record is still holding it."
 
 /**
  * The node an operation is about, read against the tree on the stage — except
@@ -130,7 +160,8 @@ export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion
  * because a question is a thing that has not happened. Neither has an ask
  * nobody has pressed.
  *
- * The three cases, each one where a preview would be worse than none:
+ * The refusals, each one a case where a preview would be worse than none.
+ * Three of them are about any moment:
  *
  * - **The operation names the page itself.** The demo's re-theme is exactly
  *   this — one configure against the root — and an excerpt of the root is the
@@ -143,6 +174,15 @@ export const partInQuestion = (tree: LoomTree, delta: TreeDelta): PartInQuestion
  *   part isn't on this page any more" and would have nothing to draw.
  * - **There are no operations**, which no interpreter should produce and
  *   nothing downstream should assume it cannot.
+ *
+ * And one is the `kept` moment's alone, because that moment makes a claim in
+ * the past tense and the other two make theirs in the conditional:
+ *
+ * - **The tree already has the node.** It withdraws the excerpt the moment a
+ *   visitor spends the undo, because the nodes come back with the ids they had
+ *   (0032) — and it is also what keeps the sentence off an operation that
+ *   could not have removed anything, since every operation but an insert reads
+ *   its subject out of this tree.
  */
 export const partFromOperations = (
   tree: LoomTree,
@@ -155,6 +195,28 @@ export const partFromOperations = (
   const subject = subjectOf(tree, operation)
 
   /*
+   * **Kept draws a node the page does not have, or it draws nothing**, and
+   * that one refusal is the whole of what keeps `KEPT_LEAD` honest.
+   *
+   * It does two jobs and they looked like two conditions. *This is what came
+   * off the page* must not stand over something still on it — so once an undo
+   * has landed and the nodes are back with the ids they had (0032), the
+   * excerpt goes, with no flag and nothing to remember to clear. And the
+   * sentence must not stand over an operation that could not have taken
+   * anything off at all.
+   *
+   * **The second was written as its own `op !== "insert"` line and the defect
+   * matrix caught it by nothing**, which is the useful kind of nothing: for
+   * every operation but an insert, `subjectOf` is `findNode` against this very
+   * tree, so a subject that exists is a subject the page has and this refusal
+   * has already fired. A guard no restoration can make fail is a claim no test
+   * can check, so it is gone and the reasoning is here instead.
+   */
+  if (where === "kept" && subject !== undefined && findNode(tree.root, subject.id) !== null) {
+    return undefined
+  }
+
+  /*
    * Elements only. A slot is a named position rather than a thing on the page,
    * and a bare text node renders as a string with no ground under it — both
    * would be a preview of something a visitor cannot see the edges of.
@@ -162,5 +224,9 @@ export const partFromOperations = (
   if (subject === undefined || subject.kind !== "element") return undefined
   if (subject.id === tree.root.id) return undefined
 
-  return { tree: { ...tree, root: subject }, lead: LEADS[operation.op], where }
+  return {
+    tree: { ...tree, root: subject },
+    lead: where === "kept" ? KEPT_LEAD : LEADS[operation.op],
+    where,
+  }
 }

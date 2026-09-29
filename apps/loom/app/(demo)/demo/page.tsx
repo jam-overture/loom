@@ -130,6 +130,17 @@ const DemoPage = async () => {
         {...(rendered.theme ? { theme: rendered.theme } : {})}
       />
     ),
+    /**
+     * And the same rendering one step *later*, for a change that has already
+     * happened — the part it took off the page, drawn from the inverse the
+     * record is holding rather than from the tree, which no longer has it.
+     */
+    showKept: (part) => (
+      <PartInQuestionView
+        part={part}
+        {...(rendered.theme ? { theme: rendered.theme } : {})}
+      />
+    ),
   })
 
   return (

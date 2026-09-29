@@ -7,7 +7,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space, weight } from "./tokens.js"
+import { colour, family, hairline, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -294,7 +294,7 @@ const entryOf = (entry: Entry, index: number, given: Props): ReactNode => {
         flexDirection: "column",
         gap: space(2),
         paddingBlockStart: ruled ? space(gap) : "0",
-        ...(ruled ? { borderBlockStart: `1px solid ${colour("border-subtle")}` } : {}),
+        ...(ruled ? { borderBlockStart: `1px solid ${hairline()}` } : {}),
       },
     },
     heading,

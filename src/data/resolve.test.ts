@@ -4,6 +4,7 @@ import { z } from "zod"
 import { sequentialIdFactory, type NodeId } from "../ids.js"
 import { DATA_PROP_KEY } from "../reserved-props.js"
 import { err, ok } from "../result.js"
+import { hangingSource } from "../testing/doubles.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
@@ -204,15 +205,6 @@ describe("resolveDataPlan", () => {
  * since the seam shipped.
  */
 describe("a source that does not answer", () => {
-  const hangingSource = (id: string): SourceEntry =>
-    defineSource({
-      id,
-      description: "never answers",
-      params: z.object({}).partial(),
-      answers: z.string(),
-      adapter: { fetch: () => new Promise(() => undefined) },
-    })
-
   const outcomeOf = async (
     entries: readonly SourceEntry[],
     bindings: Record<string, unknown>,
@@ -228,7 +220,11 @@ describe("a source that does not answer", () => {
   }
 
   it("is reported as unavailable rather than waited out", async () => {
-    const answers = await outcomeOf([hangingSource("slow")], { bio: { source: "slow" } }, 5)
+    const answers = await outcomeOf(
+      [hangingSource("slow", "never answers").entry],
+      { bio: { source: "slow" } },
+      5
+    )
     const outcome = answers["bio"]
 
     expect(outcome?.status).toBe("unavailable")
@@ -239,31 +235,16 @@ describe("a source that does not answer", () => {
   })
 
   it("is aborted, so the connection it holds is let go", async () => {
-    let aborted: string | undefined
+    const silent = hangingSource("slow", "never answers")
 
-    const listening = defineSource({
-      id: "slow",
-      description: "never answers, but listens",
-      params: z.object({}).partial(),
-      answers: z.string(),
-      adapter: {
-        fetch: ({ signal }) =>
-          new Promise(() => {
-            signal?.addEventListener("abort", () => {
-              aborted = signal.reason instanceof Error ? signal.reason.message : "unnamed"
-            })
-          }),
-      },
-    })
+    await outcomeOf([silent.entry], { bio: { source: "slow" } }, 5)
 
-    await outcomeOf([listening], { bio: { source: "slow" } }, 5)
-
-    expect(aborted).toBe("no answer in 5ms")
+    expect(silent.abortedWith()).toBe("no answer in 5ms")
   })
 
   it("costs its own region and not the page", async () => {
     const answers = await outcomeOf(
-      [hangingSource("slow"), countingSource("profile", "Ada")],
+      [hangingSource("slow", "never answers").entry, countingSource("profile", "Ada")],
       { bio: { source: "slow" }, name: { source: "profile" } },
       5
     )

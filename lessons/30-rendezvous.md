@@ -751,10 +751,8 @@ describe("D", () => {
     neither misspelled   unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
   and propsVocabularyFor(registry) wired as well
     the type misspelled  unknown types: 1  invalid props: 0  stakes: critical gate: rejected
-    the name misspelled  unknown types: 0  invalid props: 1  stakes: critical gate: rejected
-      Unrecognized key(s) in object: 'loom:data'
-    neither misspelled   unknown types: 0  invalid props: 1  stakes: critical gate: rejected
-      Unrecognized key(s) in object: 'loom:data'
+    the name misspelled  unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
+    neither misspelled   unknown types: 0  invalid props: 0  stakes: medium   gate: accepted
 ```
 
 The first block is the lesson's answer to Predict 1(d), and it is the point of
@@ -764,8 +762,14 @@ delta shape, one character wrong in each. The difference is not importance — a
 page with a hole in it and a page with an empty region are about equally bad —
 it is that `loom.feeed` is a reference into a registry and `entires` is not.
 
-The second block is not about this lesson's subject at all, and it is the more
-serious thing on the page. See below.
+The second block is the same three rows, and that is the point of running it
+twice: **wiring the props floor changes nothing here.** *Nothing* is the correct
+reading — a binding lives under `loom:data`, which is the runtime's key rather
+than the primitive's, so no primitive's schema has any business being asked
+about it, and a floor that fired would be refusing the change for a key the
+runtime itself put there. This lesson first printed a second block that did
+exactly that, and it took a fix to `src/` to make these two blocks agree. See
+below.
 
 ### Exercise E — absence is not emptiness
 
@@ -960,18 +964,24 @@ reason to keep it is entirely about what it prevents the runtime from asserting.
 
 ---
 
-## Found by running it: the write path and the render path disagree about props
+## Found by running it: the write path and the render path disagreed about props
 
-This is not this lesson's subject, it is filed rather than fixed, and it is the
-most consequential thing the exercises turned up.
+This is not this lesson's subject and it is the most consequential thing the
+exercises turned up. It was filed rather than fixed when this lesson was
+written; `Loom daily build` has since fixed it, and
+[0203](../decisions/0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md)
+records what was decided. The account below is kept because the *shape* of the
+defect is the part worth learning, and the transcript above is what the exercise
+prints now.
 
-Look again at the second block of exercise D. The node with *nothing wrong with
-it* — a `loom.feed` carrying a correctly spelled binding to a registered source
-with valid params — is `invalid props: 1`, critical, **rejected**.
+Look again at the second block of exercise D, as it read before the fix. The
+node with *nothing wrong with it* — a `loom.feed` carrying a correctly spelled
+binding to a registered source with valid params — came back `invalid props: 1`,
+critical, **rejected**.
 
-The reason is in the message: `Unrecognized key(s) in object: 'loom:data'`.
+The reason was in the message: `Unrecognized key(s) in object: 'loom:data'`.
 
-Here are the two halves of the disagreement.
+Here were the two halves of the disagreement.
 
 **The render path splits reserved keys off before it validates.** `loom:data`,
 `loom:submit`, `loom:anchor` and `loom:theme` are the runtime's own namespace;
@@ -979,41 +989,44 @@ Here are the two halves of the disagreement.
 schema, and reports anything reserved that nothing read. Every props schema in
 the starter library is `.strict()` precisely because it never sees those keys.
 
-**The write path does not.** 0179 gave the Gate a props floor — a node carrying
+**The write path did not.** 0179 gave the Gate a props floor — a node carrying
 props its own primitive refuses is `invalid-props`, critical, and cannot be
-written. `invalidPropsIn` walks the resulting tree and hands each node's props
-to the vocabulary **as they are**, reserved keys included. `propsVocabularyFor`
-is a one-line adapter onto the same strict schemas. So the floor refuses the
-key the runtime itself put there.
+written. `invalidPropsIn` walked the resulting tree and handed each node's props
+to the vocabulary **as they were**, reserved keys included. `propsVocabularyFor`
+is a one-line adapter onto the same strict schemas. So the floor refused the key
+the runtime itself put there. It now splits them off first, with the same
+function the render walk calls.
 
 Measured rather than reasoned: of the primitives the starter library registers,
-**every one** refuses a node carrying `loom:anchor`, and the same holds for the
+**every one** refused a node carrying `loom:anchor`, and the same held for the
 other three reserved keys. And the deployments in this repository that wire the
 floor are the portal and the marketing site's adapt path.
 
 Three more things I checked before writing that down, because each one would
 have changed the size of it:
 
-- **Inserting** a bound node is refused. **Configuring** a node that had no
-  binding into one is refused. **Re-pointing a node that was already bound is
-  not** — it comes back `high` and `requires-confirmation`.
-- That last row is why nothing has noticed. The analysis counts *introduced*
+- **Inserting** a bound node was refused. **Configuring** a node that had no
+  binding into one was refused. **Re-pointing a node that was already bound was
+  not** — it came back `high` and `requires-confirmation`.
+- That last row is why nothing had noticed. The analysis counts *introduced*
   invalid props and treats a node that was already failing as inherited, which
-  is a good rule (lesson 08's half-repair argument) and here means the only
-  changes that pass are the ones on nodes this check had already condemned.
+  is a good rule (lesson 08's half-repair argument) and there meant the only
+  changes that passed were the ones on nodes this check had already condemned.
 - The interpreter's prompt teaches a model to write `{"loom:data":{…}}` inside a
   node's props, in those words. So on a deployment with the floor wired, the
-  write path refuses, at its highest stakes, the exact JSON the prompt asks for.
+  write path refused, at its highest stakes, the exact JSON the prompt asks for.
 
 What makes it a *lesson's* finding rather than a bug report is the shape, and
 the shape is lesson 28's: **the knowledge that reserved keys are not props
-exists in exactly one place** — the split in `render.ts` — and the write path
-reimplements the sentence *validate this node's props* without it. Two
-implementations of one rule, no comparison between them, and the one that is
-wrong is the one that never runs in the tests that render a page.
+existed in exactly one place** — the split behind `render.ts` — and the write
+path reimplemented the sentence *validate this node's props* without it. Two
+implementations of one rule, no comparison between them, and the one that was
+wrong was the one that never runs in the tests that render a page.
 
-Filed for the lane that owns `src/`, with the reproduction above. This lane does
-not change behaviour.
+The repair is the shape rather than the symptom: both seams now call
+`partitionReservedProps`, so their agreement is a fact rather than a
+coincidence, and the test that holds it derives its rows from the namespace's
+own module instead of listing four keys — a fifth one grows the rows with it.
 
 ---
 

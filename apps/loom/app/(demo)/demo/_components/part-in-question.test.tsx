@@ -1,11 +1,12 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { randomIdFactory, type LoomTree, type TreeDelta } from "@jam-overture/loom"
+import { findNode, randomIdFactory, type LoomTree, type TreeDelta } from "@jam-overture/loom"
 import { LOOM_NODE_ATTRIBUTE, renderLoomTree } from "@jam-overture/loom/react"
 
 import { pageGround } from "@/app/(demo)/_lib/ground"
 import { partInQuestion, type PartInQuestion } from "@/app/(demo)/_lib/in-question"
+import { partTheRecordKept } from "@/app/(demo)/_lib/kept"
 import { partTheAskWouldTouch } from "@/app/(demo)/_lib/before-the-press"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { presetById } from "@/app/(demo)/_lib/presets"
@@ -67,6 +68,50 @@ const askFor = (presetId: string, against: LoomTree): PartInQuestion => {
   if (part === undefined) throw new Error(`${presetId} has no part to preview`)
 
   return part
+}
+
+/**
+ * And the part a landed change is holding, taken from the function the rail
+ * takes it from — for the reason `askFor` gives about the ask's.
+ *
+ * The tree it is read against is one the band has been taken off, because that
+ * is the only tree the reading is allowed to answer for: `partTheRecordKept`
+ * refuses a node the page still has.
+ */
+const keptFor = (against: LoomTree): { readonly part: PartInQuestion; readonly tree: LoomTree } => {
+  const operations = deltaFor("trim", against).operations
+  const first = operations[0]
+  if (first?.op !== "remove") throw new Error("trim is not a removal")
+
+  const band = findNode(against.root, first.nodeId)
+  if (band === null) throw new Error("this page has no numbers band")
+
+  const without: LoomTree = {
+    ...against,
+    revision: against.revision + 1,
+    root: { ...against.root, children: against.root.children.filter((child) => child !== band) },
+  }
+
+  const part = partTheRecordKept(without, {
+    recordId: "i_kept",
+    askedAt: "2026-09-28T09:00:00.000Z",
+    utterance: "Take the numbers band off the page.",
+    origin: "user-instruction",
+    outcome: "applied",
+    revision: { produced: 1, replaced: 0 },
+    repaired: false,
+    touched: [],
+    reversibility: {
+      reversible: true,
+      retainedNodeCount: 4,
+      reasons: [],
+      inverseOperations: [],
+      inverse: [{ op: "insert", parentId: without.root.id, index: 0, node: band }],
+    },
+  })
+  if (part === undefined) throw new Error("the record kept nothing to draw")
+
+  return { part, tree: without }
 }
 
 /**
@@ -268,6 +313,44 @@ describe("the moment it is standing in", () => {
     const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
 
     expect(questioned.container.querySelector("h4")?.textContent).toBe(lead)
+  })
+
+  /**
+   * **And the kept excerpt takes the card's markup, not the panel's** — which
+   * is the assertion that made the condition name the ask.
+   *
+   * It read `where === "question" ? h4 : p` while there were two moments, and
+   * a third that is also in a card would have silently inherited the panel's
+   * paragraph: a level-four heading demoted on the one card where it has a
+   * sibling to be level with, with nothing else going red.
+   */
+  it("says what came off as a heading, because it is in a card too", () => {
+    const { part } = keptFor(page())
+    const { container } = render(<PartInQuestionView part={part} />)
+
+    expect(container.querySelector(".demo-part.demo-part--kept")).not.toBeNull()
+    expect(container.querySelector("h4")?.textContent).toBe(
+      "This is what came off the page. The record is still holding it."
+    )
+  })
+
+  /**
+   * And it is the band, in full, after the page has stopped having it. This is
+   * the one excerpt on this surface whose content is on no screen at any
+   * width, which is why no rule may hide it.
+   */
+  it("draws the band the page no longer has, word for word", () => {
+    const tree = page()
+    const { part } = keptFor(tree)
+
+    const kept = render(<PartInQuestionView part={part} />)
+    const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    expect(kept.container.querySelector(".demo-part-stage")?.textContent).toBe(
+      questioned.container.querySelector(".demo-part-stage")?.textContent
+    )
+    expect(kept.container.querySelector(".demo-part--question")).toBeNull()
+    expect(kept.container.querySelector(".demo-part--ask")).toBeNull()
   })
 
   /** Neither moment is operable: it is a second rendering of somebody else's page. */

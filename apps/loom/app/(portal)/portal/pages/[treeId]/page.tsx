@@ -20,6 +20,7 @@ import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
+import { PickedParts } from "./_components/picked-parts"
 import { PreviewFrame } from "./_components/preview-frame"
 import { PreviewSurface } from "./_components/preview-surface"
 import { PromptBox } from "./_components/prompt-box"
@@ -173,6 +174,19 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
           >
             <PreviewSurface>{rendered.value.element}</PreviewSurface>
           </PreviewFrame>
+
+          {/*
+            * The parts a reader picked, between the page and the box that acts
+            * on them, and it renders nothing at all until something is picked.
+            *
+            * It takes the tree rather than a map of rendered excerpts, which is
+            * the one interesting decision on this line: the excerpt is drawn in
+            * the browser from data this screen sends once, instead of the server
+            * pre-rendering one excerpt per part and shipping the page's markup
+            * down once per level of nesting. `picked-parts.tsx` has the three
+            * options and why this is the cheapest of them.
+            */}
+          <PickedParts tree={rendered.value.tree} />
 
           <PromptBox
             treeId={rendered.value.tree.treeId}

@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { colour, family, hairline, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -222,7 +222,7 @@ export const loomMilestone = definePrimitive({
           className: LIBRARY_CLASS.railLine,
           "aria-hidden": true,
           /** Its thickness is the arrangement's — 2px wide down a rail, 2px tall across a row. */
-          style: { background: colour("border-subtle") },
+          style: { background: hairline() },
         })
       ),
       /**

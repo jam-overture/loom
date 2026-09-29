@@ -22,7 +22,7 @@ const ASKED: Omit<ChangeRecord, "outcome"> = {
   origin: "user-instruction",
   actor: "a demo visitor",
   stakes: { level: "medium", factors: [] },
-  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [] },
+  reversibility: { reversible: true, retainedNodeCount: 4, reasons: [], inverseOperations: [], inverse: [] },
   repaired: false,
   touched: [],
 }

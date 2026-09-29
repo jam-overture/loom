@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import type { NodeId } from "@jam-overture/loom"
@@ -23,7 +23,15 @@ const row = (
   label: string,
   technical: string | null,
   addressing: OutlineRow["addressing"]
-): OutlineRow => ({ nodeId, depth: 0, kind, label, technical, addressing })
+): OutlineRow => ({
+  nodeId: nodeId as NodeId,
+  parentId: null,
+  depth: 0,
+  kind,
+  label,
+  technical,
+  addressing,
+})
 
 const addressable = (nodeId: string): OutlineRow["addressing"] => ({
   outcome: "addressable",
@@ -71,6 +79,76 @@ describe("TreeOutline", () => {
   })
 
   /**
+   * Rows toggle, so a reader can end up with more picked than they meant. The
+   * count is what tells them, in the place the total already was — and it is a
+   * count rather than a line of instructions, because clicking a second row and
+   * having it join the first is a thing a person discovers by doing it.
+   */
+  it("says how many are picked, once any are", () => {
+    outline()
+
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+
+    expect(document.body.textContent).toContain("1 of 3 picked")
+
+    fireEvent.click(screen.getByRole("button", { name: /Hello there/ }))
+
+    expect(document.body.textContent).toContain("2 of 3 picked")
+  })
+
+  it("picks a second part rather than replacing the first", () => {
+    outline()
+
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Hello there/ }))
+
+    expect(screen.getByRole("button", { name: /Card/ }).getAttribute("aria-pressed")).toBe("true")
+    expect(screen.getByRole("button", { name: /Hello there/ }).getAttribute("aria-pressed")).toBe(
+      "true"
+    )
+  })
+
+  /**
+   * The one behaviour a toggling selection needs no instructions for, and the
+   * reason there is no modifier key anywhere on this screen.
+   */
+  it("lets a part go when it is picked a second time", () => {
+    outline()
+
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+
+    expect(screen.getByRole("button", { name: /Card/ }).getAttribute("aria-pressed")).toBe("false")
+    expect(document.body.textContent).toContain("3 parts")
+  })
+
+  /**
+   * `aria-pressed` and not `aria-selected`: a row is a toggle a reader turns on
+   * independently of every other row. With the wrong one, picking a second part
+   * is announced as the first one being dropped.
+   */
+  it("announces every row as a toggle rather than as one of a single choice", () => {
+    outline()
+
+    for (const button of screen.getAllByRole("button")) {
+      expect(button.getAttribute("aria-selected")).toBeNull()
+      expect(button.getAttribute("aria-pressed")).toBe("false")
+    }
+  })
+
+  it("offers a way to let all of them go, and only once some are picked", () => {
+    outline()
+
+    expect(screen.queryByRole("button", { name: /Let go of/ })).toBeNull()
+
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Hello there/ }))
+    fireEvent.click(screen.getByRole("button", { name: "Let go of all of them" }))
+
+    expect(document.body.textContent).toContain("3 parts")
+  })
+
+  /**
    * 0019: a row that cannot be pointed at in the DOM is still a row, because a
    * text node is a node the runtime can move and re-author. Hiding them would
    * be the wrong kind of honesty.
@@ -79,6 +157,15 @@ describe("TreeOutline", () => {
     outline()
 
     expect(screen.getAllByRole("button")).toHaveLength(3)
+  })
+
+  /** Every row, and nothing else, before anything has been picked. */
+  it("adds no controls to the list until there is something to let go of", () => {
+    outline()
+
+    fireEvent.click(screen.getByRole("button", { name: /Card/ }))
+
+    expect(screen.getAllByRole("button")).toHaveLength(4)
   })
 
   it("marks the ones a click cannot reach rather than dropping them", () => {
@@ -152,6 +239,18 @@ describe("TreeOutline", () => {
     const { container } = outline()
 
     expect(container.querySelector("details")?.textContent).toContain("registered type")
+  })
+
+  /**
+   * What a reader does not discover by clicking: that several picks are drawn
+   * together, and in the order the page holds them rather than the order they
+   * were clicked.
+   */
+  it("says what picking more than one is for", () => {
+    const { container } = outline()
+
+    expect(container.querySelector("details")?.textContent).toContain("Pick more than one")
+    expect(container.querySelector("details")?.textContent).toContain("order the page")
   })
 
   it("says in a person's words what each row is and whether it can be clicked", () => {

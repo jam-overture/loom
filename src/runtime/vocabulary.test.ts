@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory } from "../ids.js"
+import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import * as reservedProps from "../reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 
 import {
@@ -204,5 +206,95 @@ describe("invalidPropsIn", () => {
     ).toBe(
       `loom.card at ${node.id} (variant: expected outlined or filled; elevation: expected number)`
     )
+  })
+})
+
+/**
+ * The four `loom:` keys, read off the module that owns them rather than listed
+ * here. A fifth one lands as a constant in `reserved-props.ts` and the rows
+ * below grow with it, which is the only version of this test that stays true —
+ * the asymmetry it guards against was invisible for as long as it was because
+ * nothing compared the two seams over the whole namespace.
+ */
+const RESERVED_KEYS = Object.entries(reservedProps).flatMap(([name, value]) =>
+  name.endsWith("_PROP_KEY") && typeof value === "string" ? [value] : []
+)
+
+/**
+ * `.strict()` is what every primitive in the starter library declares, so a
+ * stand-in that tolerated an unknown key would be testing a library nobody
+ * ships. `loom.card` takes one prop and refuses everything else.
+ */
+const strictlyAccepts: PropsVocabulary = (type, props) => {
+  if (type !== typed("loom.card")) return { outcome: "undeclared" }
+
+  const unknown = Object.keys(props).filter((key) => key !== "variant")
+
+  return unknown.length === 0
+    ? { outcome: "valid" }
+    : {
+        outcome: "invalid",
+        issues: unknown.map((key) => ({ path: key, message: `unrecognized key ${key}` })),
+      }
+}
+
+describe("invalidPropsIn, on the runtime's own keys", () => {
+  it("derives the namespace from the module that owns it", () => {
+    expect(RESERVED_KEYS.length).toBe(4)
+    expect(RESERVED_KEYS.every((key) => reservedProps.isReservedPropKey(key))).toBe(true)
+  })
+
+  /**
+   * The bug this closes. `interpretation/prompt.ts` teaches a model to write
+   * `loom:data` into a node's props in those words, and on a deployment with
+   * 0179's floor wired the write path refused exactly that, as `invalid-props`,
+   * critical — a node with nothing whatever wrong with it, rejected by the Gate
+   * (`Loom lessons`, 28 September).
+   */
+  it.each(RESERVED_KEYS)("says nothing about a node carrying %s", (key) => {
+    const node = buildElement(ids, {
+      type: "loom.card",
+      props: { variant: "filled", [key]: { anything: true } },
+    })
+
+    expect(invalidPropsIn(node, strictlyAccepts)).toEqual([])
+  })
+
+  /**
+   * Stripping the runtime's keys must not strip the primitive's own, or the
+   * floor would pass a node the renderer omits — which is the same hole facing
+   * the other way.
+   */
+  it("still refuses a key the primitive does not know, beside a reserved one", () => {
+    const node = buildElement(ids, {
+      type: "loom.card",
+      props: { [reservedProps.DATA_PROP_KEY]: {}, invented: 1 },
+    })
+
+    expect(invalidPropsIn(node, strictlyAccepts)).toEqual([
+      {
+        nodeId: node.id,
+        type: typed("loom.card"),
+        issues: [{ path: "invented", message: "unrecognized key invented" }],
+      },
+    ])
+  })
+
+  /**
+   * The seam is asserted against the renderer's own split rather than against a
+   * second copy of the rule, which is the point: one fact, one implementation.
+   */
+  it("hands the vocabulary what the render walk hands the primitive", () => {
+    const props = { variant: "filled", [reservedProps.THEME_PROP_KEY]: { palette: "dusk" } }
+    const node = buildElement(ids, { type: "loom.card", props })
+    const seen: JsonObject[] = []
+
+    invalidPropsIn(node, (_type, given) => {
+      seen.push(given)
+
+      return { outcome: "valid" }
+    })
+
+    expect(seen).toEqual([reservedProps.partitionReservedProps(props).props])
   })
 })
