@@ -13,6 +13,7 @@ import { resolveTreeData } from "../data/resolve.js"
 import { sequentialIdFactory } from "../ids.js"
 import { DATA_PROP_KEY } from "../reserved-props.js"
 import { ok } from "../result.js"
+import { unreadBindingsIn } from "../runtime/vocabulary.js"
 import { definePrimitive } from "../sdk/definition.js"
 import { createPrimitiveRegistry, type PrimitiveRegistry } from "../sdk/registry.js"
 import { buildElement, buildText } from "../tree/builders.js"
@@ -248,6 +249,63 @@ describe("a binding on a primitive that takes its name from a prop", () => {
     const rendered = await renderWith(tree, registryOf(page, boundFeed))
 
     expect(rendered.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["data-unread"])
+  })
+})
+
+/**
+ * The claim that made `BindingReader` the write path's vocabulary too rather
+ * than a second shape beside it (0208): what the walk reports as `data-unread`
+ * is, on the same tree and the same registry, exactly what the write path
+ * refuses. Asserted by running both over one tree rather than by reading the two
+ * implementations and agreeing they look alike.
+ *
+ * A registry is handed to `unreadBindingsIn` directly, with nothing wrapping it,
+ * because a registry already satisfies the interface — which is the other half
+ * of the same claim.
+ */
+describe("the two seams, over one tree", () => {
+  const unreadNamesRendered = (rendered: Awaited<ReturnType<typeof renderWith>>) =>
+    rendered.diagnostics
+      .flatMap((diagnostic) => (diagnostic.code === "data-unread" ? [diagnostic.name] : []))
+      .sort()
+
+  it("agree on a name the primitive does not read", async () => {
+    const tree = treeBinding("loom.feed", { entires: { source: "catalogue.entries" } })
+    const registry = registryOf(page, feed)
+
+    expect(unreadBindingsIn(tree.root, registry).map((unread) => unread.name)).toEqual(
+      unreadNamesRendered(await renderWith(tree, registry))
+    )
+  })
+
+  it("agree on a prop-named declaration the node redirected", async () => {
+    const tree = treeBinding(
+      "loom.listing",
+      { entries: { source: "catalogue.entries" } },
+      { binding: "rows" }
+    )
+    const registry = registryOf(page, boundFeed)
+
+    expect(unreadBindingsIn(tree.root, registry).map((unread) => unread.name)).toEqual(
+      unreadNamesRendered(await renderWith(tree, registry))
+    )
+  })
+
+  it("agree that there is nothing to say about a primitive whose author has not declared", async () => {
+    const tree = treeBinding("loom.panel", { anything: { source: "catalogue.entries" } })
+    const registry = registryOf(page, undeclared)
+
+    expect(unreadBindingsIn(tree.root, registry)).toEqual([])
+    expect(unreadNamesRendered(await renderWith(tree, registry))).toEqual([])
+  })
+
+  it("agree on a binding that is both unavailable and unread", async () => {
+    const tree = treeBinding("loom.feed", { entires: { source: "nowhere" } })
+    const registry = registryOf(page, feed)
+
+    expect(unreadBindingsIn(tree.root, registry).map((unread) => unread.name)).toEqual(
+      unreadNamesRendered(await renderWith(tree, registry))
+    )
   })
 })
 

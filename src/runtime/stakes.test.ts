@@ -31,6 +31,7 @@ const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => 
   nestedTargets: [],
   unknownPrimitives: [],
   invalidProps: [],
+  unreadBindings: [],
   redirectedSubmissions: [],
   repointedBindings: [],
   shallowestAffectedDepth: 5,
@@ -398,6 +399,43 @@ describe("assessStakes on a node its own primitive refuses", () => {
   })
 })
 
+describe("assessStakes on a question nothing reads", () => {
+  const unread = (count: number) =>
+    Array.from({ length: count }, (_unused, index) => ({
+      nodeId: nodeIdSchema.parse(`n_ask${index}`),
+      type: primitiveTypeSchema.parse("loom.feed"),
+      name: bindingNameSchema.parse(`rows${index}`),
+    }))
+
+  /**
+   * Ranked with the two undrawable factors, and the point of asserting it is
+   * that the *reason* is different: the page draws. It is critical because the
+   * only answer a person could give is no, and because the declaration holds the
+   * correct name — so a refusal is the one disposition that tells a repairer what
+   * to do instead. A drift to `high` would put it to somebody as a question.
+   */
+  it("is critical, which under the default floor is a refusal rather than a question", () => {
+    const assessment = stakesOf(analysisOf({ unreadBindings: unread(1) }), defaultGatePolicy)
+
+    expect(assessment.level).toBe("critical")
+    expect(stakeFactor(assessment, "unread-binding")?.detail).toBe(
+      'asks a question no primitive reads, so the answer is fetched and dropped: n_ask0 asks under "rows0", which loom.feed does not read'
+    )
+  })
+
+  it("names every node and the name it asked under, because that is the string a repairer rewrites", () => {
+    const assessment = stakesOf(analysisOf({ unreadBindings: unread(2) }), defaultGatePolicy)
+
+    expect(stakeFactor(assessment, "unread-binding")?.detail).toBe(
+      'asks 2 questions no primitive reads, so the answers are fetched and dropped: n_ask0 asks under "rows0", which loom.feed does not read; n_ask1 asks under "rows1", which loom.feed does not read'
+    )
+  })
+
+  it("says nothing about a change that leaves none", () => {
+    expect(stakeFactor(stakesOf(analysisOf(), defaultGatePolicy), "unread-binding")).toBeUndefined()
+  })
+})
+
 describe("assessStakes on a redirected submission", () => {
   const redirected = (count: number) =>
     Array.from({ length: count }, (_unused, index) => ({
@@ -576,6 +614,13 @@ describe("STAKE_FACTOR_CODES", () => {
         nodeId: nodeIdSchema.parse("n_bad"),
         type: primitiveTypeSchema.parse("loom.card"),
         issues: [{ path: "variant", message: "received invented" }],
+      },
+    ],
+    unreadBindings: [
+      {
+        nodeId: nodeIdSchema.parse("n_ask"),
+        type: primitiveTypeSchema.parse("loom.feed"),
+        name: bindingNameSchema.parse("rows"),
       },
     ],
     redirectedSubmissions: [

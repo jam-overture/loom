@@ -6,7 +6,11 @@ import type { GatePolicy } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import { describeRedirectedSubmission } from "./redirection.js"
 import { describeRepointedBinding } from "./repointing.js"
-import { describeInvalidProps, describeUnknownPrimitive } from "./vocabulary.js"
+import {
+  describeInvalidProps,
+  describeUnknownPrimitive,
+  describeUnreadBinding,
+} from "./vocabulary.js"
 import { highestStake, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -54,6 +58,7 @@ export const stakeFactorCodeSchema = z.enum([
   "nested-target",
   "unknown-primitive",
   "invalid-props",
+  "unread-binding",
   "redirected-submission",
   "repointed-binding",
 ])
@@ -353,6 +358,48 @@ const invalidProps = ({ analysis }: StakeInput): StakeFactor | null => {
 }
 
 /**
+ * A question nothing will read, as damage.
+ *
+ * `critical`, which ranks it with `unknown-primitive` and `invalid-props`, and
+ * the argument is **not** theirs. Those two are `critical` because the damage is
+ * identical — `renderElement` returns `null` and the page has a hole — and a
+ * level that separated them would be ranking the explanation rather than the
+ * harm. This harm is a different thing: the page draws, nothing is missing from
+ * the markup, and what is wrong is that the region shows its empty state while
+ * the host pays a round trip to its own source on every render to fill it.
+ *
+ * It is ranked with them because of the **available answer** rather than the
+ * damage, which is worth stating plainly rather than filed under a family
+ * resemblance. A refusal is the disposition a repairer is offered, and
+ * *`loom.feed` reads `entries`, and this node asked under `rows`* is close to
+ * the most actionable thing a model can be told: the declaration holds the
+ * correct name, so the repair is one string. Confirmation is the wrong rung for
+ * the same reason it is wrong for invalid props — it puts a change to a person
+ * whose only sensible answer is no, and the one thing it could not tell them is
+ * what to do instead.
+ *
+ * The one case it ranks too high is the node somebody meant to leave asking
+ * ahead of a primitive that will read it next week. That change is honestly
+ * refusable today: the round trip is real now and the reader nobody wrote is
+ * not, so a host that wants it declares no reader and this never fires — which
+ * is the default, and 0002's answer to every knob that was not built.
+ */
+const unreadBinding = ({ analysis }: StakeInput): StakeFactor | null => {
+  const { unreadBindings: unread } = analysis
+  if (unread.length === 0) return null
+
+  const one = unread.length === 1
+
+  return {
+    code: "unread-binding",
+    level: "critical",
+    detail: `asks ${one ? "a question" : `${unread.length} questions`} no primitive reads, so the ${
+      one ? "answer is" : "answers are"
+    } fetched and dropped: ${unread.map(describeUnreadBinding).join("; ")}`,
+  }
+}
+
+/**
  * A form pointed somewhere else, as damage.
  *
  * `high` rather than `critical`, and the comparison with `nested-target` above
@@ -429,6 +476,7 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   nestedTarget,
   unknownPrimitive,
   invalidProps,
+  unreadBinding,
   redirectedSubmission,
   repointedBinding,
 ]
