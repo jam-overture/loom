@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useActionState } from "react"
 
 import type { HeldProposal } from "@jam-overture/loom/write"
@@ -44,9 +45,21 @@ import { confirmProposal, discardProposal } from "../actions"
 export const HeldProposalCard = ({
   held,
   effect,
+  pictureHref,
 }: {
   readonly held: HeldProposal
   readonly effect: ProposalEffect
+  /**
+   * Where the two pictures of this change are, when they are somewhere else.
+   *
+   * Absent means *the reader is already looking at them* — this card is rendered
+   * on the screen that draws them as well as in the queue that does not, and a
+   * link to the screen you are on is the one link a reader can reasonably feel
+   * cheated by. Passed in rather than derived here for the reason the page
+   * screen's own reading-order test gives: an address built inside a component is
+   * one the route rename does not reach.
+   */
+  readonly pictureHref?: string
 }) => {
   const [confirmReport, confirm, confirming] = useActionState<WriteReport | null, FormData>(
     confirmProposal,
@@ -91,6 +104,20 @@ export const HeldProposalCard = ({
       </div>
 
       <ProposalEffectView effect={effect} />
+
+      {/*
+        * Between the account of the change and the buttons, which is the order
+        * this card has argued for since it was rewritten: what it would do, then
+        * what each answer sets in motion, then the answer. A picture of the page
+        * is a stronger form of the first of those and belongs at its altitude —
+        * putting it under the buttons would offer a reviewer the evidence after
+        * the decision.
+        */}
+      {pictureHref !== undefined && (
+        <p className="text-xs">
+          <Link href={pictureHref}>See what it would look like →</Link>
+        </p>
+      )}
 
       {/*
         * What each button would set in motion, said before either is pressed.

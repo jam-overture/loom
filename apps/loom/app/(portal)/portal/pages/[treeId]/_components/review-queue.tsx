@@ -4,6 +4,7 @@ import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnreadableChangeCard } from "@/app/(portal)/_components/unreadable-change-card"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+import { proposedHref } from "@/app/(portal)/_lib/proposed-view"
 import {
   inQueueOrder,
   unreadableClause,
@@ -125,6 +126,7 @@ export const ReviewQueue = ({
                   key={row.change.held.proposalId}
                   held={row.change.held}
                   effect={row.change.effect}
+                  pictureHref={proposedHref(row.change.held.treeId, row.change.held.proposalId)}
                 />
               ) : (
                 <UnreadableChangeCard key={row.row.proposalId} change={row.row} />
