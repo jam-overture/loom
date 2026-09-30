@@ -12,7 +12,7 @@ Every picture below is a production `next build` of a real commit, served with
 390 × 844 with reduced motion. The `before` pair is the same harness run against
 `main` at `f4eca0d`, built separately. Every number is read off the same builds
 by driving them and measuring the boxes, not estimated from a picture.
-**The preview deployment is not photographed and has never been by this lane**:
+**Preview:** https://loom-git-demo-34-put-it-back-4d03f4-jpizzolato36-6341s-projects.vercel.app/demo, which Vercel reports Ready. **It is not photographed and has never been by this lane**:
 the URL is on the pull request and Vercel reports it Ready, and `*.vercel.app`
 is denied by the environment's egress policy (`Loom portal`, 27 September).
 
