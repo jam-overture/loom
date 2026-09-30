@@ -50,7 +50,7 @@ const wordFor = (value: number): string => {
 }
 
 /** The same word where the page's sentence starts with it. */
-const capitalised = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
+const capitalized = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
 
 describe("the counts this page writes out", () => {
   it("names as many waiting changes as the queue it shows has", async () => {
@@ -69,14 +69,14 @@ describe("the counts this page writes out", () => {
 
     expect(queue.dead).toBe(1)
     expect(flowed).toContain(
-      `**${capitalised(wordFor(queue.dead))} of those ${wordFor(queue.waiting.length)} changes can never be applied`
+      `**${capitalized(wordFor(queue.dead))} of those ${wordFor(queue.waiting.length)} changes can never be applied`
     )
   })
 
   it("counts the answers it prints", async () => {
     const answers = await produceAnswers()
 
-    expect(flowed).toContain(`${capitalised(wordFor(answers.length))} answers, given in one sitting`)
+    expect(flowed).toContain(`${capitalized(wordFor(answers.length))} answers, given in one sitting`)
   })
 })
 

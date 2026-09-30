@@ -160,7 +160,7 @@ export const docsModelRequest = (exampleId: string): DocsModelRequest => {
       id: "themes",
       title: "What it may theme with",
       summary:
-        "Palettes, font packs and style presets by id and description — never a colour, which is the whole of the theming bargain.",
+        "Palettes, font packs and style presets by id and description — never a color, which is the whole of the theming bargain.",
       ...previewOf(renderThemeCatalogue(themes), "lines"),
       characters: measurement.themes,
     },

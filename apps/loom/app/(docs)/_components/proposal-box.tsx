@@ -37,7 +37,7 @@ import { openDocsSession, type DocsSession } from "@/app/(docs)/_lib/propose/ses
  * and nothing to wait for — which is also why this works on a preview
  * deployment, in a clone with no API key, and offline.
  *
- * Three things are shown rather than summarised, in the order a reader needs
+ * Three things are shown rather than summarized, in the order a reader needs
  * them: **what was asked**, **what the runtime made of it**, and **what the
  * Gate said**. A box that showed only the third would be asking the reader to
  * take the interesting half on trust, and the interesting half is the reason

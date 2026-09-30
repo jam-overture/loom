@@ -35992,6 +35992,26 @@ than a tidy-up. The tenth is this lane's and is **not** being renamed alone: a
 library exporting `color` beside a framework exporting `ColourPairing` is worse
 than either spelling used consistently.
 
+### Updated 29 September by `Loom docs`: the documentation lane is converted, and the gap is now visible on the site
+
+The maintainer repeated the instruction to this lane on 29 September, naming the
+three rules — `behaviour`→`behavior`, `colour`→`color`, and `-ise`→`-ize` where
+the word takes it. `docs-40-starting-from-a-band` converted **52 files** inside
+`app/(docs)/`: prose, comments, local identifiers, and one component renamed from
+`brand-colour.tsx` to `brand-color.tsx`.
+
+**None of the ten exported names was touched**, for the reason this entry gives.
+No hand-written page on the site names one of them, so nothing had to be hedged
+in prose — but `reference.generated.json` carries **42** occurrences of `Colour`
+and `Behaviour`, and that file is generated from `src/` by `pnpm docs:api`.
+
+**So the gap is now a visible inconsistency rather than a consistent British
+site**: every page a person wrote says `color`, and the API reference those pages
+link into says `ColourPairing`. That is the cost of option 3 made concrete, and
+it is an argument for option 1 rather than a defect in either lane — this lane
+cannot close it, and closing it halfway inside `(docs)` would mean the generated
+reference disagreeing with the code it was generated from, which is worse.
+
 ---
 
 ## 2026-09-27 — `package:primitives` is a primitives-lane script living in the framework's manifest, and nothing says so
@@ -36697,3 +36717,117 @@ asking every lane to remember a check — especially now that three different
 checks have been written down here and two of them were wrong. That is a stronger recommendation
 than this entry could make when it had one occurrence, and it is the reason the
 second one is written up rather than shrugged at.
+
+---
+## 2026-09-29 — the second package's second door cannot be imported in this repository, so forty-four named bands can be documented and never executed
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (the root
+`package.json` `exports` map) · **Status:** open — **one line elsewhere, and it
+unblocks two things at once**
+
+`@jam-overture/loom-primitives` publishes two doors. `tools/package/manifest.ts`:
+
+```ts
+exports: {
+  ".": { types: "./dist/index.d.ts", default: "./dist/index.js" },
+  "./compositions": { types: "./dist/compositions/index.d.ts", default: "./dist/compositions/index.js" },
+},
+```
+
+The second one is where the bands live under their own names — `heroBand`,
+`pricingBand`, `footerBand`, forty-four of them. The library's root door
+re-exports the *catalogue* (`STARTER_COMPOSITIONS`, `compositionById`,
+`compositionsForPart`, `PAGE_SEQUENCE`, `planComposition`,
+`compositionInterpreter`, `CATALOGUE_TYPES`) and **not one of the forty-four
+names**. So the only way a reader reaches `pricingBand` is the subpath.
+
+**This repository has no equivalent door.** The framework's `exports` has
+`./primitives` and nothing under it, so `@jam-overture/loom/primitives/compositions`
+does not resolve, and `_lib/packages.ts`'s `PUBLISHED_AS` — whose keys
+`packages.test.ts` holds to *exactly the doors the workspace has and the registry
+does not* — cannot carry an entry for it. The fence pipeline rewrites a reader's
+`@jam-overture/loom-primitives` to the door that resolves here; it has nothing to
+rewrite the subpath to.
+
+**What that costs the site, today.** §4c's rule is that a code block a reader
+copies is a block this repository compiles. The new page
+*Starting from a band* therefore teaches the catalogue door in every executed
+block and **names the subpath in prose only**, under a callout saying so. That is
+the honest version and it is worse than the alternative: the one import on the
+page a reader is most likely to get wrong is the one nothing checks.
+
+**The remedy, which is one line in the root manifest:**
+
+```json
+"./primitives/compositions": {
+  "types": "./dist/primitives/compositions/index.d.ts",
+  "default": "./dist/primitives/compositions/index.js"
+}
+```
+
+in `exports`, and **not** in `publishConfig.exports` — exactly the shape
+`./primitives` already has under
+[0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md).
+Nothing published changes: the framework's tarball is byte-identical, because the
+withheld map is what goes to the registry.
+
+**Two things follow from it and only one is obvious.** The fence pipeline gets a
+door to rewrite to, so the page's named-band blocks become compiled. And
+`entry-points.test.ts` — which maps every withheld door through
+`publishedSpecifier` — would then *require* the subpath to be on the entry-point
+table, which gives it an API reference page generated from
+`dist/primitives/compositions/index.d.ts`. Right now the door has no page and
+nothing says it should: the reference is enumerated from the framework's
+`exports` map, and a second package's second door is not in it.
+
+**The docs side is small and it is mine**: one `PUBLISHED_AS` entry, one row on
+the entry-point table, one `pnpm --filter @loom/app docs:api`, and the callout
+above deleted. Say so on the pull request that adds the line and this lane will
+take it the same day.
+
+---
+## 2026-09-29 — the check named "names exactly what a reader can import" reads one package's manifest, and Loom publishes two
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/`) · **Status:** **closed in the same run** by
+`docs-40-starting-from-a-band`, and filed because the *class* has now been
+recorded four times in three days and this is the first instance where the
+missing coverage was a whole package
+
+`entry-points.test.ts` carries this title:
+
+> `it("names exactly what a reader can import")`
+
+and this body: read the framework's `package.json`, take
+`publishConfig.exports`, map the doors it withholds through `publishedSpecifier`,
+and compare with the entry-point table. Every part of that is correct. What it
+cannot see is a door that is not a subpath of the framework at all.
+
+`@jam-overture/loom-primitives/compositions` went to the registry with the
+package on 27 September. For two days it was named **nowhere on this site** — not
+on a page, not in a code block, not on the entry-point table, not in the
+generated reference — and the test whose title is the sentence above was green
+the whole time, along with `teaches.test.ts`, whose own sweep derives its
+forbidden set from the framework's manifest for the same reason.
+
+**The shape, stated once.** A check derived from *one* authority is silent about
+everything the second authority governs, and its title never says which. This is
+the same family as the 28 September entry (*a test derived from the list it
+checks cannot see the list shrink*) and the 27 September one (*a check that
+normalises its input has thrown away the distinction it is being asked about*).
+The tell is the one already written down — **name a defect the check would not
+survive** — and here it is a sentence long: *the library publishes a second door
+and nothing mentions it.*
+
+**How it was closed.** `teaches.test.ts` now reads
+`tools/package/manifest.ts` — the file `pnpm package:primitives` assembles the
+published package from — brace-matches its `exports` map, and asserts every door
+in it is named somewhere the site shows. As text rather than as an import,
+following the convention `packages.test.ts` set for that file: it is another
+lane's and outside this application's compilation.
+
+**What stays open, and it is not this entry's to fix.** Being *named* is not
+being *documented*. The compositions door has prose about it and no reference
+page, and it cannot have one until the entry above is answered. The check added
+here would pass on a site that mentions the door once in a sentence — which is
+better than the silence it replaced and is not the finished state.

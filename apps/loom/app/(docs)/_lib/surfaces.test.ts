@@ -80,7 +80,7 @@ describe("the other surfaces of this application", () => {
   /**
    * The rule the module is written under, made checkable. A path with two
    * segments in it is a link into another lane's interior, which is the kind
-   * that breaks silently when that lane reorganises.
+   * that breaks silently when that lane reorganizes.
    */
   it("knows each surface by its front door and nothing deeper", () => {
     const deeper = OTHER_SURFACES.filter(

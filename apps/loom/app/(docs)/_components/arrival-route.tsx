@@ -1,10 +1,4 @@
-import {
-  ARRIVAL_ROUTE,
-  ARRIVAL_SHORTCUT_HREF,
-  ARRIVAL_TOTALS,
-  WORDS_A_MINUTE,
-  type ArrivalStep,
-} from "@/app/(docs)/_lib/arrival/route"
+import { ARRIVAL_ROUTE, type ArrivalStep } from "@/app/(docs)/_lib/arrival/route"
 
 /**
  * The next hour, as six numbered stops.
@@ -18,6 +12,14 @@ import {
  * the top, because somebody walking the route is meant to read it from the
  * beginning. The **checkpoint** jumps to the heading where that name is actually
  * used, for the reader who is already through it once and wants the line back.
+ *
+ * **The steps and nothing else.** A footer under them used to add up the pages,
+ * the blocks and the minutes, explain that the hour was the typing rather than
+ * the reading, and offer the way past the first three steps. The maintainer's
+ * instruction on 29 September is that the section is unnecessary, so it is gone.
+ * The totals themselves are not — `ARRIVAL_TOTALS` still holds the route to the
+ * hour the heading over it promises, and does it at import time rather than on
+ * the screen.
  */
 
 const Step = ({ step, position }: { readonly step: ArrivalStep; readonly position: number }) => (
@@ -67,33 +69,5 @@ export const ArrivalRoute = () => (
         <Step key={step.id} step={step} position={position + 1} />
       ))}
     </ol>
-
-    <div className="border-edge text-ink-faint mt-6 border-t pt-6 text-sm">
-      <p>
-        <strong className="text-ink-muted font-semibold">
-          {ARRIVAL_TOTALS.steps} pages of the {ARRIVAL_TOTALS.sitePages} on this site,{" "}
-          {ARRIVAL_TOTALS.blocks} code blocks, about {ARRIVAL_TOTALS.minutes} minutes of reading
-        </strong>{" "}
-        — so the hour is the typing, not the pages. The minutes are prose at {WORDS_A_MINUTE} words
-        a minute, which is the one figure here nobody counted; the pages, the blocks and the order
-        are read off the site as this page builds, and every step is further down the sidebar than
-        the one before it.
-      </p>
-
-      <p className="mt-3">
-        {ARRIVAL_TOTALS.compiled}{" "}
-        of those blocks are TypeScript, and this repository&rsquo;s own typechecker compiles every
-        one of them — a snippet that stopped working is a failing build rather than your bad
-        afternoon. The others are shell commands, or marked abridged. If you would rather start
-        from a project that already runs than assemble one,{" "}
-        <a
-          href={ARRIVAL_SHORTCUT_HREF}
-          className="text-accent-strong font-medium underline underline-offset-2"
-        >
-          scaffolding a project
-        </a>{" "}
-        does the first three steps for you.
-      </p>
-    </div>
   </div>
 )

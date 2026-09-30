@@ -272,7 +272,7 @@ export const parseSearchIndex = (value: unknown): SearchIndex => {
  * page by its path, a heading by its fragment — so the prose file is a list of
  * `[href, words]` and nothing else. That is about a fifth of what repeating the
  * entries would cost, and it cannot drift from the index, because an href it
- * does not recognise is simply dropped.
+ * does not recognize is simply dropped.
  */
 export type SearchProse = {
   readonly bodies: readonly (readonly [string, string])[]

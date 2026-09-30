@@ -55,7 +55,7 @@ const SectionTitle = ({
  * documentation without navigating to find out.
  *
  * The current page is marked with `aria-current` first and a tint second. A
- * rail that says "you are here" only in colour says nothing to a screen reader
+ * rail that says "you are here" only in color says nothing to a screen reader
  * and nothing to anyone who cannot tell those two greys apart.
  */
 export const Sidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) => {

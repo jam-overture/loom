@@ -20,7 +20,7 @@ import { REPOSITORY_ROOT } from "./architecture/source"
  * Parsing CSS with a regular expression is usually a mistake, and it is not one
  * here for a narrow reason: this is a stylesheet in this repository, in this
  * lane, with no nesting inside `@layer components` and no `@media` within it.
- * The parser refuses anything it does not recognise rather than guessing, so a
+ * The parser refuses anything it does not recognize rather than guessing, so a
  * sheet that grew a construct this cannot read fails loudly instead of quietly
  * reporting that every rule is fine.
  */
@@ -114,7 +114,7 @@ export const BARRIER = ":not(.not-prose *)"
  * Whether a selector can match an element inside a `.not-prose` region.
  *
  * The question is only about **descendant steps**, because that is the only way
- * a selector reaches past a region's own element. A selector is normalised to
+ * a selector reaches past a region's own element. A selector is normalized to
  * its compounds — `>`, `+` and `~` bind them together, whitespace separates
  * them — and one compound cannot be inside anything.
  *

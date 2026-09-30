@@ -249,6 +249,12 @@ const orderedSections: readonly DocsSection[] = [
           "How a primitive holds other primitives: an ordered list of children, and named regions the primitive places itself.",
       },
       {
+        slug: "starting-from-a-band",
+        title: "Starting from a band",
+        summary:
+          "A whole section of a page — an opening headline, a price list, a list of questions — built by the library and arriving as one change you can review.",
+      },
+      {
         slug: "where-content-comes-from",
         title: "Where the content comes from",
         summary:
@@ -258,7 +264,7 @@ const orderedSections: readonly DocsSection[] = [
         slug: "theming",
         title: "Making it look like yours",
         summary:
-          "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand colour into one without shipping a page nobody can read.",
+          "A palette, a font pack and a style preset, named by id on the root — and how to get your own brand color into one without shipping a page nobody can read.",
       },
       {
         slug: "what-ai-may-change",

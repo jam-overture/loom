@@ -1,0 +1,239 @@
+import { pageMetadata } from "@/app/(docs)/_lib/metadata"
+import { BandCount, BandDesigns, BandNodes, BandParts, LargestBandPart } from "@/app/(docs)/_components/bands"
+
+export const metadata = pageMetadata("building-with-loom", "starting-from-a-band")
+
+# Starting from a band
+
+A pricing table is not one thing. It is a table holding a plan for each tier;
+each plan holds a name, a price, a button and a list of what it includes. Written
+out as a tree that is <BandNodes part="pricing" /> nodes, and every one of them
+is a node on purpose — *"move the second plan's button above its perks"* is a
+real change only because the button is a real node.
+
+So the vocabulary is right and writing it out by hand is miserable. That is what
+a **band** is for.
+
+A band is a whole section of a page, ready-made: an opening headline, a row of
+logos, a list of questions, a footer. You do not get a new primitive and you do
+not get a shortcut past anything. You get all the nodes, built for you, arriving
+as **one change** that goes through the same Gate as every other change.
+
+<Example id="a-band-dropped-in-whole" />
+
+## Ask for one by name
+
+The starter library ships <BandCount of="bands" /> bands. Each has an id, and
+asking for one gives you a small object describing it — what it is called, what
+it promises to put on the page, and a `build` function that makes the nodes.
+
+```ts
+import { sequentialIdFactory } from "@jam-overture/loom"
+import { compositionById } from "@jam-overture/loom-primitives"
+
+const ids = sequentialIdFactory("page")
+const pricing = compositionById("pricing")
+
+if (pricing === undefined) throw new Error("this library has no pricing band")
+
+/* The whole band, with freshly minted ids, and nothing on a page yet. */
+const subtree = pricing.build(ids)
+```
+
+`build` is a plain function from an id factory to a subtree. It touches no
+store, renders nothing and registers nothing. Every node it makes is a primitive
+you already have — a band cannot smuggle in a type your registry has not
+allowed, and the library has a test that says so.
+
+<Callout kind="note">
+  A band mints new ids every time you call it. Two calls give you two bands, not
+  the same band twice — which is what you want, because a page with two feature
+  grids on it has two of them.
+</Callout>
+
+## It goes on the page as one insert
+
+A subtree on its own is not a change. Ask where it should go and you get a plan:
+
+```ts
+import { buildElement, createTree } from "@jam-overture/loom"
+import { planComposition } from "@jam-overture/loom-primitives"
+
+const tree = createTree(buildElement(ids, { type: "loom.page" }), ids)
+
+const plan = planComposition(pricing, tree, ids)
+
+/* One `insert`, carrying the whole subtree — not one operation per node. */
+const operations = plan.outcome === "planned" ? plan.operations : []
+```
+
+One operation, because [an insert carries a
+subtree](/docs/the-runtime/proposing-a-change) rather than a single node. That is
+the whole of why a band is cheap to review: a person answering it reads *a
+pricing band was added at the end of the page*, not one line per node.
+
+Two things the plan does that are worth knowing, because they are the difference
+between a plan and a recording:
+
+- **Where it goes is worked out against the tree you hand it**, not against the
+  page the button was drawn on. A band planned against a page that has since
+  grown two more bands goes after them.
+- **A parent that is no longer in the tree is refused**, as
+  `outcome: "no-such-parent"`. It does not quietly land at the root instead. A
+  band that went somewhere other than where you asked is worse than one that did
+  not go anywhere, because you would not have noticed.
+
+## Nothing gets to skip the Gate
+
+The tempting shortcut is to build the subtree and write it to the store. Do not,
+and the library does not give you a way to: a band is handed over as an ordinary
+**interpreter**, the same seam a model plugs into.
+
+```ts
+import { systemClock } from "@jam-overture/loom"
+import { compositionInterpreter } from "@jam-overture/loom-primitives"
+
+const interpreter = compositionInterpreter(pricing, ids, systemClock)
+```
+
+Hand that to the runtime wherever you would hand it
+[a model](/docs/the-runtime/connecting-a-model). Everything downstream is unable
+to tell the difference: the band is assessed, gated, held for a person if your
+policy says so, written to the log, and revertable. Its undo is a `remove` of
+one node, which is the cheapest undo in the system.
+
+It reports `authoredBy: "runtime"` and a confidence of `1`, and that is honesty
+rather than swagger. A computed subtree has no opinion about itself to be right
+or wrong about, so
+[calibration](/docs/the-runtime/what-every-ask-leaves-behind) keeps these out of
+a model's record instead of letting a catalogue of bands walk it to a perfect
+score nobody earned.
+
+## Parts and designs are two different words
+
+There are <BandCount of="bands" /> bands and only <BandCount of="parts" />
+places on a page to put one. The difference is the vocabulary worth learning.
+
+A **part** is a region of a page: the strip above the navigation, the opening,
+the price list, the closing pitch. A **design** is one way of drawing a part.
+`hero` and `hero-split` are two designs of one part — you would not put both on
+a page, because they both want the same space.
+
+<BandDesigns />
+
+Ask for the designs of a part rather than trying to remember which ids exist:
+
+```ts
+import { compositionsForPart } from "@jam-overture/loom-primitives"
+
+/* Canonical design first. A part nobody has drawn yet gives you an empty list. */
+const heroes = compositionsForPart("hero")
+```
+
+The test for whether something is a second design or a second part is **the
+space it takes**: if the two could stand in for each other, they are designs of
+one part. If there is somewhere on a page one of them goes and the other does
+not, it is a part of its own.
+
+And the test for whether a design earns a place at all is **the nodes it
+builds**. A centred hero and a left-aligned hero are the same band — the
+difference is a prop, and setting a prop is already a change anybody can make. A
+hero with a product shot beside it is a different band, because it has a subtree
+the other one does not.
+
+## Every part, in the order a page uses them
+
+<BandParts />
+
+The biggest of them is the <LargestBandPart /> band, at <BandCount of="largest" />
+nodes. It is the clearest single answer to *why bother*: that one band is a page
+you would otherwise be building a node at a time.
+
+## A whole page to start from
+
+The parts are in page order, so one design of each, taken in sequence, is a
+complete document with nothing missing and nothing repeated.
+
+```ts
+import { PAGE_SEQUENCE } from "@jam-overture/loom-primitives"
+
+const wholePage = PAGE_SEQUENCE.map((composition) => composition.build(ids))
+```
+
+That list is worked out rather than kept by hand: the canonical design of a part
+is the one whose id *is* the part's name, so adding a second hero to the library
+cannot quietly change what a new page starts as.
+
+Offer the whole catalogue when somebody is picking a band. Offer this when
+somebody is starting a page.
+
+<Example id="a-page-that-started-from-bands" />
+
+## What is left behind is ordinary nodes
+
+This is the part that matters most and is easiest to miss.
+
+**Nothing in the tree records that a band put those nodes there.** There is no
+`loom.pricing-band` node, no marker, no group. What landed is ordinary nodes,
+indistinguishable from the same nodes written one at a time — so every one of
+them can be moved, reworded, removed or replaced afterwards, by you or by a
+proposal, with no band having an opinion about it.
+
+A band is a starting point, not a component. It is in the tree for exactly as
+long as it takes to build, and then it is gone and the nodes are yours.
+
+<Callout kind="note">
+  The other way round would have been a `loom.pricing-band` primitive with a
+  `tierNames` prop. It would draw the same pixels and it would put the whole band
+  back behind a prop bag nobody can address into — which is the one thing this
+  library is arranged to avoid.
+</Callout>
+
+## Registering only what the bands need
+
+Your deployment does not have to register the whole library
+([it is a set to choose from](/docs/building-with-loom/primitives)), and if you
+want the bands you need to know which primitives they reach for. The library
+says:
+
+```ts
+import { createPrimitiveRegistry, selectPrimitives } from "@jam-overture/loom/sdk"
+import { CATALOGUE_TYPES, STARTER_PRIMITIVES } from "@jam-overture/loom-primitives"
+
+const chosen = selectPrimitives(STARTER_PRIMITIVES, CATALOGUE_TYPES)
+
+const registry = chosen.ok ? createPrimitiveRegistry(chosen.value) : chosen
+```
+
+`CATALOGUE_TYPES` is <BandCount of="catalogue" /> of the library's
+<BandCount of="registered" /> primitives: the smallest registry that can build
+every band. It cannot refuse, because the library tests that every type in it is
+registered.
+
+The gap is the honest half. <BandCount of="registered" /> minus
+<BandCount of="catalogue" /> primitives are registered and no band uses them —
+usually because a primitive exists before a band that wants it. They are still
+there for you and for a model to reach; they are just not reachable by dropping
+in a band.
+
+## Where the names live
+
+Everything on this page is on the library's own door:
+
+```ts
+import { CATALOGUE_TYPES, compositionById, compositionsForPart, PAGE_SEQUENCE } from "@jam-overture/loom-primitives"
+```
+
+The <BandCount of="bands" /> bands also each have a name of their own —
+`heroBand`, `pricingBand`, `footerBand` — behind a second door,
+`@jam-overture/loom-primitives/compositions`. Reach for that one when you want a
+particular band as a value rather than as the answer to a lookup. Everything
+else is the same object.
+
+<Callout kind="warning">
+  The examples on this page are built by the library through the door above,
+  which is the door this site can execute. The per-band names are the one thing
+  here you are taking on trust — this repository has no way to compile an import
+  of that second door yet, and that is written down as an open finding rather
+  than dressed up.
+</Callout>

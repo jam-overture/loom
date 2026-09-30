@@ -97,7 +97,7 @@ const KNOBS: Record<keyof GatePolicy, Knob> = {
     group: "name",
     plain: "The name this policy answers to when a recorded decision is asked what judged it.",
     yourMove:
-      "Pick a name you will still recognise in a year. Then treat it as naming the contents rather than the file: if you change what is protected, give the policy a new name, because every decision already written under the old one claims to have been judged by what that name meant then.",
+      "Pick a name you will still recognize in a year. Then treat it as naming the contents rather than the file: if you change what is protected, give the policy a new name, because every decision already written under the old one claims to have been judged by what that name meant then.",
   },
 
   protectedPrimitiveTypes: {
@@ -129,7 +129,7 @@ const KNOBS: Record<keyof GatePolicy, Knob> = {
     group: "vocabulary",
     plain: "Every primitive your deployment can actually draw.",
     yourMove:
-      "Do not write this one either. registeredTypesFor(registry) reads the same list the renderer resolves against, so the two cannot disagree. Declaring it turns a proposal naming a primitive you do not have into a refusal the model can act on, instead of a revision that renders a hole; leave it out and you keep the older behaviour, where the change lands and the page reports it at render.",
+      "Do not write this one either. registeredTypesFor(registry) reads the same list the renderer resolves against, so the two cannot disagree. Declaring it turns a proposal naming a primitive you do not have into a refusal the model can act on, instead of a revision that renders a hole; leave it out and you keep the older behavior, where the change lands and the page reports it at render.",
   },
 
   autoApplyCeiling: {

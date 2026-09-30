@@ -7,7 +7,7 @@ import { produceDefaults, produceDoors, produceRegions } from "@/app/(docs)/_lib
  * milliseconds so the build does not spend the real ten seconds. Nothing here is
  * a description of what the runtime would do: the sentences in these tables were
  * written by the runtime, at build time, about promises that are still
- * unresolved as the page is serialised.
+ * unresolved as the page is serialized.
  *
  * Furniture in 0067's sense, like every other generated table on this site — it
  * presents something the repository knows. What a reader is shown *as a page* is

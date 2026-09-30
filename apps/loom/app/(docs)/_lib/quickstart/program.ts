@@ -112,12 +112,12 @@ export const QUICKSTART_TRANSCRIPT: readonly string[] = [
 
 /**
  * The three answers the Gate can give, as the transcript spells them against
- * the three colours this site already uses for them.
+ * the three colors this site already uses for them.
  *
  * The runtime's word for a change that landed is `committed` and the site's
- * colour for it is `accepted`; the other two agree. Mapped here rather than in
+ * color for it is `accepted`; the other two agree. Mapped here rather than in
  * the component because it is a fact about the runtime's vocabulary, and
- * because a colour picked by eye off a string is the sort of thing that quietly
+ * because a color picked by eye off a string is the sort of thing that quietly
  * stops matching.
  */
 export const QUICKSTART_VERDICTS = {
@@ -130,7 +130,7 @@ export type QuickstartVerdict = (typeof QUICKSTART_VERDICTS)[keyof typeof QUICKS
 
 export type TranscriptLine = {
   readonly text: string
-  /** Present when this line is the Gate answering, which is what gets colour. */
+  /** Present when this line is the Gate answering, which is what gets color. */
   readonly verdict?: QuickstartVerdict
 }
 

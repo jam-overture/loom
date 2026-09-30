@@ -4,7 +4,7 @@ import type { FontPack, Palette, StylePreset } from "@jam-overture/loom"
  * Making it look like yours.
  *
  * Four things a deployment wrote, declared rather than written out. A palette
- * is fifty colours and the page is not about their values — it is about the one
+ * is fifty colors and the page is not about their values — it is about the one
  * line that registers them, and that line is checked against
  * `createThemeRegistry`'s real signature either way.
  */
