@@ -130,6 +130,17 @@ const DemoPage = async () => {
         {...(rendered.theme ? { theme: rendered.theme } : {})}
       />
     ),
+    /**
+     * And the same rendering one step *later*, for a change that has already
+     * happened — the part it took off the page, drawn from the inverse the
+     * record is holding rather than from the tree, which no longer has it.
+     */
+    showKept: (part) => (
+      <PartInQuestionView
+        part={part}
+        {...(rendered.theme ? { theme: rendered.theme } : {})}
+      />
+    ),
   })
 
   return (
@@ -157,9 +168,11 @@ const DemoPage = async () => {
         {/*
           * The trailing room the card needs to reach the top of this scroller,
           * and it is `arrival.ts`'s decision rather than a layout choice made
-          * here — `roomToLand` says what it measured and why it is conditional.
+          * here — `roomToLand` says what it measured, and why it is given for
+          * both moments a card has to reach this scroller's top: a question
+          * waiting on an answer, and the change that answer landed.
           */}
-        <aside className={`${RAIL} ${roomToLand(rail.waiting !== undefined)}`}>
+        <aside className={`${RAIL} ${roomToLand(rail)}`}>
           {/*
             * The claim, at the size of a claim — and a component rather than
             * four paragraphs written here.
@@ -205,6 +218,7 @@ const DemoPage = async () => {
             marked={rail.marked}
             held={rail.readings}
             revision={tree.revision}
+            {...(rail.landing === undefined ? {} : { landing: rail.landing })}
           />
 
           {/*

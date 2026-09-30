@@ -35,7 +35,15 @@ const row = (
   label: string,
   technical: string | null,
   addressing: OutlineRow["addressing"]
-): OutlineRow => ({ nodeId, depth: 0, kind, label, technical, addressing })
+): OutlineRow => ({
+  nodeId: nodeId as NodeId,
+  parentId: null,
+  depth: 0,
+  kind,
+  label,
+  technical,
+  addressing,
+})
 
 const rows: readonly OutlineRow[] = [
   row("n_card", "element", "Card", "loom.card", {
@@ -283,5 +291,52 @@ describe("SelectedNode", () => {
 
     expect(document.body.textContent).toContain("n_words")
     expect(document.body.textContent).not.toContain("the model wrote it")
+  })
+
+  /**
+   * Phase 2. A reader can pick several parts, and the honest treatment of that
+   * is the one that loses nothing: every picked part gets the block it got when
+   * it was the only one. A compact list with the detail collapsed behind a row
+   * would be a screen made simpler by removing what it used to say, which is
+   * the one thing this surface is not allowed to do.
+   */
+  it("gives every picked part the same block, in full", () => {
+    const { container } = pane({ n_words: credit })
+
+    pick(/Card/)
+    pick(/Hello there/)
+
+    expect(container.textContent).toContain("n_card")
+    expect(container.textContent).toContain("n_words")
+    expect(container.textContent).toContain("the model wrote it")
+    expect(container.querySelectorAll("[title='Card']").length).toBe(1)
+  })
+
+  /**
+   * In the order the page holds them, not the order they were clicked. A rail
+   * that remembered the clicks would disagree with the pictures under the page
+   * about what "these two parts" means, and a set of parts has no arrangement
+   * of its own to remember (0199).
+   */
+  it("keeps them in the order the page holds them, however they were picked", () => {
+    const { container } = pane()
+
+    pick(/Mystery/)
+    pick(/Card/)
+
+    const ids = [...container.querySelectorAll("p")]
+      .map((line) => line.textContent ?? "")
+      .filter((text) => text === "n_card" || text === "n_lost")
+
+    expect(ids).toEqual(["n_card", "n_lost"])
+  })
+
+  it("goes back to the empty state when the last one is let go of", () => {
+    pane()
+
+    pick(/Card/)
+    pick(/Card/)
+
+    expect(document.body.textContent).toContain("Nothing picked yet.")
   })
 })

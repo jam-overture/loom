@@ -1012,7 +1012,7 @@ details[open] > summary .loom-marker {
   scroll-snap-type: inline proximity;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--loom-border-subtle) transparent;
+  scrollbar-color: var(--loom-border-default) transparent;
 }
 /*
  * The ring is drawn *inside* the region, which is the one place this differs
@@ -1101,7 +1101,7 @@ details[open] > summary .loom-marker {
   border-block-end: 1px solid var(--loom-border-strong);
 }
 .loom-compare tbody > tr + tr > * {
-  border-block-start: 1px solid var(--loom-border-subtle);
+  border-block-start: 1px solid var(--loom-border-default);
 }
 .loom-compare-key {
   position: sticky;
@@ -1172,10 +1172,10 @@ details[open] > summary .loom-marker {
   border-block-end: 1px solid var(--loom-border-strong);
 }
 .loom-table tbody > tr + tr > * {
-  border-block-start: 1px solid var(--loom-border-subtle);
+  border-block-start: 1px solid var(--loom-border-default);
 }
 .loom-table-grid tr > * + * {
-  border-inline-start: 1px solid var(--loom-border-subtle);
+  border-inline-start: 1px solid var(--loom-border-default);
 }
 .loom-table-flush thead > tr > *, .loom-table-flush tbody > tr + tr > * {
   border-block: 0;
@@ -1403,7 +1403,7 @@ details[open] > summary .loom-marker {
   .loom-event-when {
     inline-size: 9rem;
     align-self: stretch;
-    border-inline-end: 1px solid var(--loom-border-subtle);
+    border-inline-end: 1px solid var(--loom-border-default);
     padding-inline-end: var(--loom-spacing-5);
   }
   .loom-event-action {
@@ -1713,60 +1713,6 @@ details[open] > summary .loom-marker {
     transform: none;
   }
 }
-.loom-trail-crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--loom-spacing-2);
-}
-.loom-trail > .loom-trail-crumb + .loom-trail-crumb::before {
-  flex: 0 0 auto;
-  color: var(--loom-fg-subtle);
-}
-.loom-trail-chevron > .loom-trail-crumb + .loom-trail-crumb::before {
-  content: "";
-  width: 0.3em;
-  height: 0.3em;
-  border-block-start: 1px solid var(--loom-border-subtle);
-  border-inline-end: 1px solid var(--loom-border-subtle);
-  transform: rotate(45deg);
-}
-.loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {
-  content: "/";
-}
-.loom-trail-dot > .loom-trail-crumb + .loom-trail-crumb::before {
-  content: "\\00B7";
-}
-.loom-carousel {
-  display: flex;
-  align-items: stretch;
-  overflow-x: auto;
-  scroll-snap-type: inline mandatory;
-  scroll-behavior: smooth;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--loom-border-subtle) transparent;
-  padding-block: var(--loom-spacing-2);
-}
-.loom-carousel:focus-visible {
-  outline: 2px solid var(--loom-accent);
-  outline-offset: 2px;
-}
-.loom-carousel-cell {
-  display: flex;
-  scroll-snap-align: start;
-}
-.loom-carousel-cell > * {
-  width: 100%;
-}
-.loom-carousel-centred > .loom-carousel-cell {
-  scroll-snap-align: center;
-}
-.loom-meter-fill {
-  width: var(--loom-meter-sweep);
-}
-.loom-meter-fill, .loom-meter-arc {
-  animation: loom-meter-sweep calc(var(--loom-motion-slow) * 2) cubic-bezier(0.22, 1, 0.36, 1) both;
-}
 @keyframes loom-pin-pulse {
   0% { transform: scale(1); opacity: 0.5; }
   70%, 100% { transform: scale(2.2); opacity: 0; }
@@ -1779,7 +1725,7 @@ details[open] > summary .loom-marker {
   flex-direction: column;
   gap: var(--loom-spacing-2);
   padding: var(--loom-spacing-3);
-  border-block-start: 1px solid var(--loom-border-subtle);
+  border-block-start: 1px solid var(--loom-border-default);
 }
 .loom-frame-pins:empty {
   display: none;
@@ -1947,8 +1893,8 @@ details[open] > summary .loom-marker {
   content: "";
   width: 0.3em;
   height: 0.3em;
-  border-block-start: 1px solid var(--loom-border-subtle);
-  border-inline-end: 1px solid var(--loom-border-subtle);
+  border-block-start: 1px solid var(--loom-border-default);
+  border-inline-end: 1px solid var(--loom-border-default);
   transform: rotate(45deg);
 }
 .loom-trail-slash > .loom-trail-crumb + .loom-trail-crumb::before {
@@ -1965,7 +1911,7 @@ details[open] > summary .loom-marker {
   scroll-behavior: smooth;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--loom-border-subtle) transparent;
+  scrollbar-color: var(--loom-border-default) transparent;
   padding-block: var(--loom-spacing-2);
 }
 .loom-carousel:focus-visible {
@@ -2153,12 +2099,6 @@ details[open] > summary .loom-marker {
   }
   .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
     transform: translate(-50%, -50%);
-  }
-  .loom-recording:hover .loom-recording-play, .loom-recording:focus-within .loom-recording-play {
-    transform: translate(-50%, -50%);
-  }
-  .loom-carousel {
-    scroll-behavior: auto;
   }
 }
 `.trim()

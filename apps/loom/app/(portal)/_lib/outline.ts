@@ -1,4 +1,11 @@
-import { assertNever, outlineTree, type LoomNode, type LoomTree, type NodeKind } from "@jam-overture/loom"
+import {
+  assertNever,
+  outlineTree,
+  type LoomNode,
+  type LoomTree,
+  type NodeId,
+  type NodeKind,
+} from "@jam-overture/loom"
 import { addressNode, type Addressing, type DecorationLookup } from "@jam-overture/loom/react"
 
 import { nounOf } from "./part-name"
@@ -32,7 +39,30 @@ import { nounOf } from "./part-name"
  */
 
 export type OutlineRow = {
-  readonly nodeId: string
+  /**
+   * The node's own id, branded.
+   *
+   * It was widened to `string` while this was only ever read back as a label,
+   * and the widening was never true: the id comes out of the tree. What it cost
+   * is that a row could not be handed to anything in the published API that
+   * asks for a `NodeId` without a cast at the call site — `renderLoomExcerpt`
+   * being the one the inspector needs. `addressing` has carried branded ids
+   * across the same boundary since this file was written, which is the proof
+   * that a brand survives the wire: it is a compile-time fact and there is
+   * nothing of it left at runtime to serialise.
+   */
+  readonly nodeId: NodeId
+  /**
+   * The row this one is nested inside, and null at the root.
+   *
+   * `outlineTree` knows it and this view model was dropping it. Recovering it
+   * afterwards means a second traversal per row, and the thing that needs it —
+   * the smallest part holding everything a reader picked — would otherwise
+   * have to infer ancestry from `depth`, which is the same answer derived from
+   * a weaker fact. A depth run is a shape that happens to imply nesting; a
+   * parent is the nesting itself.
+   */
+  readonly parentId: NodeId | null
   readonly depth: number
   readonly kind: NodeKind
   /** What this part is, in a person's words. Never a registered type. */
@@ -111,6 +141,7 @@ export const outlineRows = (
 ): readonly OutlineRow[] =>
   outlineTree(tree.root).map((entry) => ({
     nodeId: entry.node.id,
+    parentId: entry.parentId,
     depth: entry.depth,
     kind: entry.node.kind,
     label: labelOf(entry.node),

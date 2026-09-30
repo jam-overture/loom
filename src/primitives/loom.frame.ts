@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, monospace, radius, size, space } from "./tokens.js"
+import { colour, family, hairline, monospace, radius, size, space } from "./tokens.js"
 
 /**
  * The chrome a product screenshot sits in: a browser window, an app window, or
@@ -144,7 +144,7 @@ const BAR_BASE = {
   paddingBlock: space(2),
   paddingInline: space(3),
   background: colour("bg-surface-muted"),
-  borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+  borderBlockEnd: `1px solid ${hairline()}`,
 } as const
 
 const chromeBar = (chrome: NonNullable<Props["chrome"]>, label: string | undefined): ReactNode => {

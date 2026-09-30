@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, space, WIDTHS } from "./tokens.js"
+import { hairline, space, WIDTHS } from "./tokens.js"
 
 /**
  * The questions band: a stack of `loom.faq` disclosures.
@@ -59,7 +59,7 @@ export const loomFaqList = definePrimitive({
            * right before.
            */
           marginInline: "auto",
-          borderBlockEnd: `1px solid ${colour("border-subtle")}`,
+          borderBlockEnd: `1px solid ${hairline()}`,
           alignContent: "start",
         },
       },

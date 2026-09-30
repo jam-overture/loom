@@ -79,6 +79,7 @@ export const TheRecord = ({
   marked,
   held,
   revision,
+  landing,
 }: {
   readonly records: readonly ChangeRecord[]
   /**
@@ -95,6 +96,14 @@ export const TheRecord = ({
    * putting back in front of them when the page under it has moved.
    */
   readonly revision: number
+  /**
+   * The card the visitor's own answer just landed, when there is one. Read by
+   * `rail.ts` rather than worked out here, because the rail asks the same
+   * reading for the trailing room that landing needs — and a room given on one
+   * answer and a scroll taken on another is the pair of half-decisions this
+   * whole unit exists to stop.
+   */
+  readonly landing?: string
 }) => {
   if (records.length === 0) return null
 
@@ -177,8 +186,8 @@ export const TheRecord = ({
       </ul>
 
       {/*
-        * The rail's own scroll, and only when the demo has asked the visitor a
-        * question it cannot proceed without.
+        * The rail's own scroll, at the two moments this demonstration turns on:
+        * the question it cannot proceed without, and the answer to it.
         *
         * The stage scrolls itself (`ChangeSpotlight`); on a wide screen that is a
         * different scroller, so a marked band arriving in view says nothing about
@@ -186,8 +195,27 @@ export const TheRecord = ({
         * 1440×800 they were not — sixty-nine pixels under the fold, on the first
         * press of the primary ask. Stacked, it is further still: the whole panel
         * of secondary asks sits between the button and the question it raised.
+        *
+        * And the same scroller, one press later, for the opposite reason: the
+        * card the answer landed was already at the top of this rail when the
+        * visitor pressed the button on it, and answering makes the panel above
+        * it 91px shorter, so it drifts up under the fold on its own. Putting it
+        * back is the rail holding still rather than moving — `landed.ts` names
+        * the card, `arrival.ts` carries the numbers.
+        *
+        * **One at a time, and a waiting question wins.** A visitor may leave
+        * one question open and answer another, and two components hauling one
+        * scroller to two cards is settled by whichever effect ran last. A
+        * question the demo cannot proceed without outranks a card that has
+        * already landed.
         */}
-      {awaiting && <AnswerInView recordId={awaiting.recordId} token={`${revision}`} />}
+      {awaiting ? (
+        <AnswerInView recordId={awaiting.recordId} token={`${revision}`} />
+      ) : (
+        landing !== undefined && (
+          <AnswerInView recordId={landing} token={`${revision}`} onlyWhereTheRailScrolls />
+        )
+      )}
     </section>
   )
 }

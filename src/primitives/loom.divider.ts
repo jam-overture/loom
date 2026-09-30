@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, space, type RampStep } from "./tokens.js"
+import { colour, hairline, space, type RampStep } from "./tokens.js"
 
 /**
  * The enum-driven one: `ornament` selects between three genuinely different
@@ -82,7 +82,7 @@ const ORNAMENTS = {
       { style: { display: "flex", flex: "1 1 auto", alignItems: "center", gap: space(3) } },
       createElement("span", {
         key: "before",
-        style: { flex: "1 1 0", height: "1px", background: colour("border-subtle") },
+        style: { flex: "1 1 0", height: "1px", background: hairline() },
       }),
       createElement("span", {
         key: "mark",
@@ -95,7 +95,7 @@ const ORNAMENTS = {
       }),
       createElement("span", {
         key: "after",
-        style: { flex: "1 1 0", height: "1px", background: colour("border-subtle") },
+        style: { flex: "1 1 0", height: "1px", background: hairline() },
       })
     ),
 } as const

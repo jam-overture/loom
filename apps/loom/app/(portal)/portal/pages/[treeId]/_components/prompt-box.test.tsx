@@ -21,15 +21,35 @@ import { TreeOutline } from "./tree-outline"
  * type in.
  */
 
+/**
+ * A card holding a heading and a space, under a page — the smallest shape in
+ * which the scope can be something other than what was picked.
+ *
+ * It grew from one row when the box stopped reading the selection and started
+ * reading `_lib/selection-scope.ts`: the sentence under test is the one a reader
+ * gets when their two picks do not have a single part between them, and one row
+ * cannot produce it.
+ */
+const row = (
+  nodeId: string,
+  parentId: string | null,
+  label: string,
+  kind: OutlineRow["kind"] = "element"
+): OutlineRow => ({
+  nodeId: nodeId as NodeId,
+  parentId: parentId === null ? null : (parentId as NodeId),
+  depth: 0,
+  kind,
+  label,
+  technical: null,
+  addressing: { outcome: "addressable", nodeId: nodeId as NodeId },
+})
+
 const rows: readonly OutlineRow[] = [
-  {
-    nodeId: "n_shot2",
-    depth: 0,
-    kind: "element",
-    label: "Heading",
-    technical: "loom.heading",
-    addressing: { outcome: "addressable", nodeId: "n_shot2" as NodeId },
-  },
+  row("n_page", null, "Page"),
+  row("n_card", "n_page", "Card"),
+  row("n_shot2", "n_card", "Heading"),
+  row("n_space", "n_card", "Body space", "slot"),
 ]
 
 const box = (configured: boolean) =>
@@ -117,6 +137,61 @@ describe("PromptBox", () => {
       .find((text) => text.startsWith("Just this part:"))
 
     expect(line).toBe("Just this part: Heading n_shot2")
+  })
+
+  /**
+   * 0019's promise, applied to a set: the selection resolves to something other
+   * than what was picked, and the screen says so beside the button rather than
+   * performing it silently.
+   */
+  it("names the part that holds both when two are picked inside one", () => {
+    const { container } = box(true)
+
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Body space/ }))
+
+    expect(document.body.textContent).toContain("The part that holds all of them: Card")
+    expect(container.querySelector('input[name="scopeNodeId"]')).toHaveProperty(
+      "value",
+      "n_card"
+    )
+  })
+
+  it("says what a widened ask costs, on the surface and not behind a disclosure", () => {
+    const { container } = box(true)
+
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Body space/ }))
+
+    const surface = container.cloneNode(true) as HTMLElement
+    for (const details of surface.querySelectorAll("details")) details.remove()
+
+    expect(surface.textContent).toContain("may change other things inside it too")
+  })
+
+  /**
+   * Two parts with nothing smaller than the page between them. The ask becomes
+   * the whole page, and it is posted the way an unpicked page always was — one
+   * encoding, not two spellings of it.
+   */
+  it("falls back to the whole page, and posts no scope at all", () => {
+    const { container } = box(true)
+
+    fireEvent.click(screen.getByRole("button", { name: /^Page/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+
+    expect(document.body.textContent).toContain("The whole page")
+    expect(container.querySelector('input[name="scopeNodeId"]')).toHaveProperty("value", "")
+  })
+
+  it("stops naming a part once it has been let go of again", () => {
+    const { container } = box(true)
+
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+    fireEvent.click(screen.getByRole("button", { name: /Heading/ }))
+
+    expect(document.body.textContent).toContain("Anywhere on this page")
+    expect(container.querySelector('input[name="scopeNodeId"]')).toHaveProperty("value", "")
   })
 
   it("posts the page and the revision it was looking at, and never a delta", () => {

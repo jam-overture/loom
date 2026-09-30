@@ -20,8 +20,23 @@ const TREE = "t_seed1" as TreeId
 /** A page as every caller of `scopedLead` now holds one: named, with its id kept. */
 const NAMED: PageName = { name: "Autumn arrivals", treeId: TREE, derived: true }
 
-const KEYS: readonly PageViewKey[] = ["page", "asked", "changed", "readers", "trust", "checkup"]
-const SCOPED: readonly ScopedView[] = ["asked", "changed", "readers", "trust", "checkup"]
+const KEYS: readonly PageViewKey[] = [
+  "page",
+  "asked",
+  "changed",
+  "versions",
+  "readers",
+  "trust",
+  "checkup",
+]
+const SCOPED: readonly ScopedView[] = [
+  "asked",
+  "changed",
+  "versions",
+  "readers",
+  "trust",
+  "checkup",
+]
 
 describe("pageViewsFor", () => {
   it("offers every view of the page, in a fixed order", () => {
@@ -33,6 +48,7 @@ describe("pageViewsFor", () => {
       "/portal/pages/t_seed1",
       "/portal/activity?tree=t_seed1",
       "/portal/history?tree=t_seed1",
+      "/portal/pages/t_seed1/versions",
       "/portal/readers?tree=t_seed1",
       "/portal/trust?tree=t_seed1",
       "/portal/checkup?tree=t_seed1",
@@ -77,13 +93,18 @@ const GROUPS = (): readonly string[] =>
     .map((entry) => join(APP, entry.name))
 
 /**
- * `/portal/pages/t_seed1` is served by `portal/pages/[treeId]`, so the last
- * segment of a scoped page link is a value rather than a directory. Everything
- * else keeps its tree in the query string, which contributes no segment at all.
+ * `/portal/pages/t_seed1` is served by `portal/pages/[treeId]`, so a scoped page
+ * link has a *value* where the directory has a dynamic segment — and the
+ * progression has one more segment after it. Everything else keeps its tree in
+ * the query string, which contributes no segment at all.
+ *
+ * The substitution is bounded on the left and followed by either the end of the
+ * path or a `/`, so it cannot turn `/portal/pages` itself into a dynamic
+ * segment and report the list of pages as a page that does not exist.
  */
 const routeExists = (href: string): boolean => {
   const path = href.split("?")[0]!
-  const onDisk = path.replace(/^\/portal\/pages\/t_[0-9a-z]+$/u, "/portal/pages/[treeId]")
+  const onDisk = path.replace(/^\/portal\/pages\/t_[0-9a-z]+(?=$|\/)/u, "/portal/pages/[treeId]")
 
   return GROUPS().some((group) => existsSync(join(group, onDisk.replace(/^\//, ""), "page.tsx")))
 }
@@ -102,6 +123,7 @@ describe("where the strip points", () => {
       "/portal/pages",
       "/portal/activity",
       "/portal/history",
+      "/portal/pages",
       "/portal/readers",
       "/portal/trust",
       "/portal/checkup",
@@ -116,6 +138,8 @@ describe("where the strip points", () => {
   it("detects a route that does not exist", () => {
     expect(routeExists("/portal/nowhere")).toBe(false)
     expect(routeExists("/portal/pages/t_seed1")).toBe(true)
+    expect(routeExists("/portal/pages/t_seed1/versions")).toBe(true)
+    expect(routeExists("/portal/pages/t_seed1/nowhere")).toBe(false)
   })
 })
 
@@ -197,6 +221,7 @@ const SCREENS: Readonly<Record<PageViewKey, readonly string[]>> = {
   page: ["portal", "pages", "[treeId]", "page.tsx"],
   asked: ["portal", "activity", "page.tsx"],
   changed: ["portal", "history", "page.tsx"],
+  versions: ["portal", "pages", "[treeId]", "versions", "page.tsx"],
   readers: ["portal", "readers", "page.tsx"],
   trust: ["portal", "trust", "page.tsx"],
   checkup: ["portal", "checkup", "page.tsx"],

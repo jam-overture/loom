@@ -66,9 +66,30 @@ describe("where the answer arrives", () => {
  * back on the frame the demo's one invited press produces. A landing the
  * layout can silently withdraw is not a landing.
  */
+/**
+ * Stands in for the caution the rail pins while a question is open. `roomToLand`
+ * reads whether the field is there and never what is in it, which is what lets
+ * it be handed the rail itself rather than a boolean a Server Component works
+ * out where no test can see it.
+ */
+const SET_ASIDE = { line: "One question is still waiting on you." }
+
 describe("the room the card needs to land in", () => {
   it("is given while a question is waiting", () => {
-    expect(roomToLand(true)).toBe("lg:pb-[70vh]")
+    expect(roomToLand({ waiting: SET_ASIDE })).toBe("lg:pb-[70vh]")
+  })
+
+  /**
+   * **And for one press longer**, which is the half that was missing. The room
+   * was taken back the moment the question was answered — the press that
+   * produces the frame the whole demonstration is for — and with it gone the
+   * rail may no longer be able to put the payoff card at its own top: at 606px
+   * of card the furthest the rail can scroll is 623 against a card top of 740,
+   * so the landing is a clamp. What a stranger saw of that frame was decided by
+   * whether the card was taller or shorter than the rail.
+   */
+  it("is given for the change the visitor's answer just landed", () => {
+    expect(roomToLand({ landing: "i_2" })).toBe("lg:pb-[70vh]")
   })
 
   /**
@@ -76,8 +97,17 @@ describe("the room the card needs to land in", () => {
    * so trailing room would make the demo's default state — the one a stranger
    * judges — scroll into emptiness.
    */
-  it("is nothing at all when nothing is waiting", () => {
-    expect(roomToLand(false)).toBe("")
+  it("is nothing at all when nothing is waiting and nothing just landed", () => {
+    expect(roomToLand({})).toBe("")
+  })
+
+  /**
+   * A change that applied on its own is not a landing this file owes room to:
+   * nothing is being carried to the top of the rail for it, because nobody was
+   * asked anything (`landed.ts`).
+   */
+  it("is nothing at all for a change nobody answered", () => {
+    expect(roomToLand({ waiting: undefined, landing: undefined })).toBe("")
   })
 
   /**
@@ -87,7 +117,11 @@ describe("the room the card needs to land in", () => {
    * with the least of it to spare.
    */
   it("applies only where the rail is a scroller of its own", () => {
-    expect(roomToLand(true).split(" ").every((token) => token.startsWith("lg:"))).toBe(true)
+    expect(
+      roomToLand({ waiting: SET_ASIDE })
+        .split(" ")
+        .every((token) => token.startsWith("lg:"))
+    ).toBe(true)
   })
 
   /**
@@ -96,6 +130,6 @@ describe("the room the card needs to land in", () => {
    * rem value measured on a laptop is short on a monitor.
    */
   it("is measured against the viewport", () => {
-    expect(roomToLand(true)).toContain("vh")
+    expect(roomToLand({ waiting: SET_ASIDE })).toContain("vh")
   })
 })

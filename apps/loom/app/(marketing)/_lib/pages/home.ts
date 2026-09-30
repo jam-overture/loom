@@ -141,8 +141,28 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
          * on the pull request rather than chosen here. This wording is a draft
          * of his direction, not an invention of it.
          */
+        /**
+         * **`align` is set here because the hero's own `align` does not reach
+         * the words.** `loom.hero`'s `align: "center"` sets `alignItems` on the
+         * column it lays out, which centres each child's *box*; the text inside
+         * a box is still ranged left until the node holding it says otherwise.
+         * `loom.prose` below has said so since the band was written and
+         * `loom.heading` had not, so the largest words on the site were the one
+         * thing on the first screen that was not centred: at 1280 a two-line
+         * headline sat 140px left of the page's centre line under a centred
+         * eyebrow, and at 390 it was five hard-left lines in a 254px column
+         * between a centred eyebrow and a centred paragraph.
+         *
+         * Filed for `Loom primitives` as well, because a band prop named
+         * `align` that aligns the boxes and not the text is a trap every
+         * composition walks into once. This is the composition's half of it,
+         * and it is correct whatever that prop grows into: a heading that says
+         * where it stands does not change meaning when the band around it
+         * learns to say the same thing.
+         */
         heading(ids, 1, "The AI age needs a new way to build web apps.", {
           balance: true,
+          align: "center",
         }),
       ]),
       /**
@@ -394,10 +414,33 @@ const problems = (ids: IdFactory): LoomNode =>
  */
 const facts = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { width: "wide", eyebrow: BAND.facts }, "Built in the open", [
+    /**
+     * **Ranged left, as of this run, because it is the only alignment this band
+     * can actually hold all the way through.**
+     *
+     * It was centred, under an eyebrow and a heading that are not — so a
+     * stranger met *Built in the open* hard against the left edge with 700px of
+     * nothing beside it and the sentence belonging to it floating in the middle
+     * of the band. Caught by `alignment.test.ts`, which was written for the
+     * headline above and found this on the same page.
+     *
+     * The other reading — centre the whole band, the way the hero and the
+     * closing band are centred — is **not available to a composition**, and
+     * that is a finding rather than a preference. `loom.section` has no `align`
+     * of its own, and it renders its own eyebrow with no `textAlign`, so
+     * `WHERE IT IS TODAY` stays left whatever the nodes inside the band say.
+     * Centring the heading here would have swapped one disagreement for a
+     * worse-looking one. Filed for `Loom primitives`; if `align` arrives on
+     * `loom.section`, this band is the first place worth reconsidering.
+     *
+     * The three stats keep their own `align: "center"`, and that is not the
+     * same claim: a stat centred inside its column is one of three marks laid
+     * out across a row, not a line of the band's running text.
+     */
     prose(
       ids,
       "Not one of these numbers was typed from memory. Each is checked against the code it describes.",
-      { align: "center", tone: "muted", measured: true }
+      { tone: "muted", measured: true }
     ),
     buildElement(ids, {
       type: "loom.stat-grid",

@@ -1332,7 +1332,7 @@ describe("the compose-and-arrange layer", () => {
 
     expect(markup.slice(cardOpensAt, mediaAt)).not.toContain("padding:")
     expect(markup).toContain("margin-top:auto")
-    expect(markup).toContain("border-top:1px solid var(--loom-border-subtle)")
+    expect(markup).toContain("border-top:1px solid var(--loom-border-default)")
 
     /** And the clip that lets it be flush without a negative margin. */
     expect(markup).toContain("overflow:hidden")
@@ -5446,7 +5446,7 @@ describe("the band that moves", () => {
      * whitespace is its content, so the bar arrives with the button — and a
      * copyable panel now always has somewhere to say what it is.
      */
-    const bars = [...markup.matchAll(/border-block-end:1px solid var\(--loom-border-subtle\)/g)]
+    const bars = [...markup.matchAll(/border-block-end:1px solid var\(--loom-border-default\)/g)]
     expect([...markup.matchAll(/<pre/g)]).toHaveLength(3)
     expect(bars).toHaveLength(3)
   })
@@ -10103,5 +10103,172 @@ describe("what a picture found under the bands", () => {
 
     expect(stylesheet).toContain("border: 1px dashed var(--loom-border-default)")
     expect(stylesheet).toContain("border-block-start: 1px dashed var(--loom-border-default)")
+  })
+})
+
+/**
+ * The 26 September audit, as two assertions rather than as a photograph.
+ *
+ * That entry asked for *"a sheet that draws every primitive using
+ * `border-subtle` under `bold`, and whatever it shows"*, and named the rule to
+ * audit against: **a border beside a fill may be subtle; a border that is the
+ * whole mark takes `border-default`.** The sheet exists
+ * (`the-lines-that-were-not-there.specimen.ts`) and a sheet cannot fail a
+ * build, so what keeps the rule is here.
+ *
+ * Both tests were run against the unfixed library before being kept.
+ */
+describe("the lines that were the whole mark", () => {
+  /**
+   * The library's emitted CSS, parsed into its top-level blocks.
+   *
+   * Taken from a rendered page rather than by importing the string, so what is
+   * asserted is what a browser is served.
+   */
+  const libraryCss = (): string => {
+    const ids = sequentialIdFactory()
+
+    return splitStylesheet(
+      render(
+        createTree(
+          buildElement(ids, {
+            type: "loom.page",
+            props: { [THEME_PROP_KEY]: EDITORIAL },
+            children: [buildElement(ids, { type: "loom.table", props: {} })],
+          }),
+          ids
+        )
+      ).markup
+    ).stylesheet
+  }
+
+  /**
+   * The sheet is emitted by a primitive that asks for it, so the page above has
+   * to hold one that does. Asserted rather than assumed: the first draft of this
+   * block used a `loom.divider`, which asks for nothing, and two of the three
+   * tests below passed against an empty string — a sweep for offenders finds
+   * none in no CSS at all.
+   */
+  it("reads a stylesheet that is actually there, which the first draft of this block did not", () => {
+    expect(libraryCss().length).toBeGreaterThan(10_000)
+    expect(rulesIn(libraryCss()).length).toBeGreaterThan(200)
+  })
+
+  /**
+   * Every rule block in the sheet, with the at-rules it sits inside carried in
+   * its selector rather than swallowing it.
+   *
+   * The nesting is the reason this is a walk and not a regex. `.loom-event-when`
+   * draws its rule inside a `@container (min-width: 40rem)`, and the first draft
+   * of this helper stopped at depth zero — so that offender was reported as
+   * `@container (min-width: 40rem)`, which names the width at which a line is
+   * wrong and not the line. A test whose failure message is a media query costs
+   * the reader the search it was written to save.
+   */
+  const rulesIn = (css: string): readonly { selector: string; body: string }[] => {
+    const rules: { selector: string; body: string }[] = []
+
+    const walk = (source: string, enclosing: readonly string[]): void => {
+      let depth = 0
+      let selector = ""
+      let body = ""
+
+      for (const character of source) {
+        if (character === "{") {
+          depth += 1
+          if (depth > 1) body += character
+        } else if (character === "}") {
+          depth -= 1
+          if (depth > 0) body += character
+          else {
+            const head = selector.trim().replace(/\s+/g, " ")
+            if (head.startsWith("@") && body.includes("{")) walk(body, [...enclosing, head])
+            else rules.push({ selector: [...enclosing, head].join(" "), body: body.trim() })
+            selector = ""
+            body = ""
+          }
+        } else if (depth === 0) selector += character
+        else body += character
+      }
+    }
+
+    walk(css.replace(/\/\*[\s\S]*?\*\//g, ""), [])
+
+    return rules
+  }
+
+  /**
+   * A one-sided border is the shape a **rule** has; a four-sided one is the
+   * shape a **box** has, and a box is read by the fill inside it. So the sweep
+   * is over the side-specific longhands only, and `border-color` on an element
+   * that also sets a `background-color` in the same block is left alone — which
+   * is the one exemption, and `.loom-pager`'s hover state is the one user of it.
+   *
+   * `scrollbar-color` is in the list because a thumb is drawn over a track this
+   * library keeps transparent, so it is a mark with no fill of its own either.
+   */
+  const RULE_PROPERTIES =
+    /(?:border-(?:block|inline)-(?:start|end)|border-(?:top|bottom|left|right)|scrollbar)-color?\s*:[^;]*|(?:border-(?:block|inline)-(?:start|end)|border-(?:top|bottom|left|right))\s*:[^;]*|scrollbar-color\s*:[^;]*/g
+
+  it("draws no standalone rule in border-subtle, anywhere in the library's own stylesheet", () => {
+    const offenders = rulesIn(libraryCss()).flatMap((block) => {
+      const declarations = block.body.match(RULE_PROPERTIES) ?? []
+      const subtle = declarations.filter((d) => d.includes("--loom-border-subtle"))
+
+      return subtle.length === 0 ? [] : [`${block.selector} { ${subtle.join("; ")} }`]
+    })
+
+    /**
+     * Named rather than counted. A count tells the next person how many there
+     * were; the selector tells them which line on which band, which is the
+     * only half that shortens the search.
+     */
+    expect(offenders).toEqual([])
+  })
+
+  it("keeps a table's row rules separable from the one rule under its header", () => {
+    const css = libraryCss()
+
+    /**
+     * The pair is the point, and it is why `border-strong` is not the answer to
+     * this audit. A table draws one loud rule under its header and quiet ones
+     * between its rows; collapsing them to one token loses the hierarchy in
+     * whichever direction it collapses.
+     */
+    expect(css).toContain(".loom-table thead > tr > * {\n  border-block-end: 1px solid var(--loom-border-strong);")
+    expect(css).toContain(
+      ".loom-table tbody > tr + tr > * {\n  border-block-start: 1px solid var(--loom-border-default);"
+    )
+  })
+
+  it("emits each of its rule blocks once, so editing the first copy is not a silent no-op", () => {
+    /**
+     * No filter. `rulesIn` flattens the at-rules into each rule's selector, so
+     * a `@media` block is not itself a candidate and the rules inside one are
+     * checked like any other — which is where the first draft of this test let
+     * them escape.
+     */
+    const blocks = rulesIn(libraryCss())
+    const byKey = new Map<string, number>()
+
+    for (const block of blocks) {
+      const key = `${block.selector}||${block.body}`
+      byKey.set(key, (byKey.get(key) ?? 0) + 1)
+    }
+
+    const duplicated = [...byKey.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([key, count]) => `${count}x ${key.split("||")[0]}`)
+
+    /**
+     * A fifty-four line region covering `loom.link-trail`, `loom.carousel` and
+     * `loom.meter` was in the sheet twice, byte for byte, until 29 September.
+     * Nothing rendered differently for it — the second copy set every property
+     * the first had, to the same value — and that is exactly what made it worth
+     * a test rather than a tidy: a lane changing the chevron's colour in the
+     * first copy would have watched the second one win and concluded the token
+     * was not the problem.
+     */
+    expect(duplicated).toEqual([])
   })
 })
