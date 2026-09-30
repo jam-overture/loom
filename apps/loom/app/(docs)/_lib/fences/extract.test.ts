@@ -7,7 +7,7 @@ import { ELLIPSIS, isCheckable } from "./model"
  * Reading the code out of a page.
  *
  * The scanner is the one place a mistake would be silent. A word it did not
- * recognise could plausibly be treated as a program, or as "leave this one
+ * recognize could plausibly be treated as a program, or as "leave this one
  * alone", and both are wrong in a way nobody would notice: the first buries a
  * real failure in noise on a block that was never meant to compile, the second
  * stops the check looking at a block that was.

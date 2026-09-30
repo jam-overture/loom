@@ -125,7 +125,7 @@
     /*
      * A note is the site's one recurring highlight, so it is where the green
      * belongs: a tinted ground, a mint ring, and the mid stop for its label.
-     * It was blue, which was a fourth colour the theme does not have.
+     * It was blue, which was a fourth color the theme does not have.
      */
     --note-surface: #effbf5;
     --note-edge: #72e3ad;
@@ -133,7 +133,7 @@
 
     /*
      * The three things a Gate can say. Three tones and no more, because there
-     * are exactly three dispositions and a fourth colour here would be
+     * are exactly three dispositions and a fourth color here would be
      * inventing a verdict the runtime does not have.
      *
      * **Two of them keep a hue the theme does not name, and that is deliberate.**
@@ -141,7 +141,7 @@
      * would be restrained and unreadable, and the distinction between "applied"
      * and "refused" is information rather than decoration. So the grounds are
      * pulled back to near-whites — shades of white, which is what the theme
-     * asks for — and the colour is spent on the ring and the label alone.
+     * asks for — and the color is spent on the ring and the label alone.
      */
     --verdict-accepted-surface: #f4fdf8;
     --verdict-accepted-edge: #72e3ad;
@@ -198,7 +198,7 @@
     --ink-inverse: #0a0a0a;
 
     --accent: #f4f4f5;
-    /** The same mint. It is the one colour that does not need inverting. */
+    /** The same mint. It is the one color that does not need inverting. */
     --accent-ring: #72e3ad;
     --accent-strong: #72e3ad;
     --accent-subtle: #0e1f17;
@@ -379,7 +379,7 @@
    * not, and the `!` is gone.
    *
    * `:not(.not-prose *)` is the same guard #155 put on the table rules for the
-   * same reason, generalised to the rest of the block. It is preferred over
+   * same reason, generalized to the rest of the block. It is preferred over
    * resetting inside `.not-prose` because a reset needs to outrank what it
    * undoes, which would then also outrank the component's own declarations —
    * a rule that never matches leaves them unopposed. `prose-barrier.test.ts`
@@ -540,7 +540,7 @@
    * backtick span with no chip are losses rather than wins, so the region asks
    * for exactly those two back.
    *
-   * They come back in the callout's own colour rather than prose's.
+   * They come back in the callout's own color rather than prose's.
    * `currentColor` is what makes that work: the amber callout gets an amber
    * chip and the green one a green chip, where the shared `--code-surface` grey
    * sat on both and belonged to neither.
@@ -560,7 +560,7 @@
   }
 
   /*
-   * Colour is the one thing the barrier cannot keep out, because it is
+   * Color is the one thing the barrier cannot keep out, because it is
    * inherited rather than matched: `.prose` sets `--ink-muted` on the container
    * and every descendant takes it, `.not-prose` or not. So the region says what
    * its own default ink is and its components override from there.

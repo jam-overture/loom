@@ -127,7 +127,7 @@ describe("finding what is unguarded", () => {
     expect(unguardedProseSelectors(css).map((rule) => rule.selector)).toEqual([".prose h2"])
   })
 
-  it("recognises the barrier before a pseudo-element as well as after a type", () => {
+  it("recognizes the barrier before a pseudo-element as well as after a type", () => {
     expect(hasBarrier(".prose li:not(.not-prose *)::marker")).toBe(true)
   })
 })

@@ -7,12 +7,13 @@ import {
 } from "@/app/(docs)/_lib/quickstart/program"
 
 import { CodeBlock } from "./code-block"
+import { LongCode } from "./long-code"
 
 /**
  * Written out rather than composed.
  *
  * Tailwind reads source text, so a class name built as `text-verdict-${kind}`
- * is a class nothing generates and a line that silently loses its colour. The
+ * is a class nothing generates and a line that silently loses its color. The
  * three are spelled here in full, once.
  */
 const VERDICT_INK = {
@@ -34,24 +35,42 @@ const VERDICT_INK = {
  * written down.
  */
 
-/** The whole file, in one copyable block, named the way the page says to save it. */
-export const QuickstartFile = () => (
-  /*
-   * `CodeBlock` owns its own margin and rounding — it was written for a fenced
-   * block standing alone, and here it is the bottom half of a labelled panel.
-   * Neither is a prop it takes (`className` reaches the `pre` inside it, not the
-   * frame), so the two are cancelled from the parent on the one child, and the
-   * panel keeps the block's copy button, which is the whole reason to use it.
-   */
-  <div className="my-6 [&>div]:my-0 [&>div]:rounded-t-none">
-    <div className="border-edge bg-surface-sunken text-ink-faint flex items-center justify-between gap-3 rounded-t-lg border border-b-0 px-3 py-2 font-mono text-xs">
-      <span className="text-ink">{QUICKSTART_FILENAME}</span>
-      <span className="tracking-wide uppercase">read from the repository as this page built</span>
-    </div>
+/**
+ * The whole file, in one copyable block, named the way the page says to save it
+ * — and folded down to a readable height, because it is three hundred lines.
+ *
+ * The source is read here, on the server, and handed to a client component as a
+ * string; `LongCode` changes the height of the box and never the block inside
+ * it, so *the whole file* stays literally true of what a reader copies.
+ *
+ * The line count is counted rather than written, for the reason every number on
+ * this site is: the file is read off disk as the page builds and grows whenever
+ * somebody edits it.
+ */
+export const QuickstartFile = () => {
+  const source = readQuickstartSource()
 
-    <CodeBlock>{readQuickstartSource()}</CodeBlock>
-  </div>
-)
+  return (
+    /*
+     * `CodeBlock` owns its own margin and rounding — it was written for a fenced
+     * block standing alone, and here it is the middle of a labelled panel with a
+     * button under it. Neither is a prop it takes (`className` reaches the `pre`
+     * inside it, not the frame), so both are cancelled from the parent on the one
+     * child, and the panel keeps the block's copy button, which is the whole
+     * reason to use it.
+     */
+    <div className="my-6 [&_div.not-prose]:my-0 [&_div.not-prose]:rounded-none">
+      <div className="border-edge bg-surface-sunken text-ink-faint flex items-center justify-between gap-3 rounded-t-lg border border-b-0 px-3 py-2 font-mono text-xs">
+        <span className="text-ink">{QUICKSTART_FILENAME}</span>
+        <span className="tracking-wide uppercase">read from the repository as this page built</span>
+      </div>
+
+      <LongCode lines={source.split("\n").length} label={QUICKSTART_FILENAME}>
+        <CodeBlock>{source}</CodeBlock>
+      </LongCode>
+    </div>
+  )
+}
 
 /**
  * The install line, from the one list that decides it.
@@ -80,9 +99,9 @@ export const QuickstartInstall = () => (
 /**
  * The run, as a terminal.
  *
- * The three answers carry the same three colours the propose-a-change box uses
+ * The three answers carry the same three colors the propose-a-change box uses
  * under every example on this site, because they are the same three answers —
- * a reader who has pressed a chip should recognise them without being told.
+ * a reader who has pressed a chip should recognize them without being told.
  */
 export const QuickstartOutput = () => (
   <div className="border-edge my-6 overflow-hidden rounded-lg border">

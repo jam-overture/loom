@@ -40,7 +40,7 @@ const asJson = (value: JsonValue): string => JSON.stringify(value)
 
 /**
  * The same value over several lines, for the one place a reader is meant to read
- * the answer rather than recognise it. A list of rows on one line is a line that
+ * the answer rather than recognize it. A list of rows on one line is a line that
  * scrolls out of the box it is in, and an answer nobody can see the end of makes
  * a poor demonstration of what came back.
  */
@@ -49,7 +49,7 @@ const asReadableJson = (value: JsonValue): string => JSON.stringify(value, null,
 /** One question the tree produced, and everybody who is waiting on it. */
 export type Question = {
   readonly source: string
-  /** The params, canonicalised by the planner rather than by this file. */
+  /** The params, canonicalized by the planner rather than by this file. */
   readonly params: string
   /** The bound nodes sharing this answer, by the name each reads it under. */
   readonly askedBy: readonly string[]

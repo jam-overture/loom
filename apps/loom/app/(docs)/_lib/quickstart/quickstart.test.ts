@@ -274,7 +274,7 @@ describe("the three edits the page invites", () => {
   })
 })
 
-describe("the transcript, as the page colours it", () => {
+describe("the transcript, as the page colors it", () => {
   const lines = quickstartTranscriptLines()
 
   it("finds all three of the Gate's answers in it", () => {
@@ -283,7 +283,7 @@ describe("the transcript, as the page colours it", () => {
     expect([...found].sort()).toEqual([...new Set(Object.values(QUICKSTART_VERDICTS))].sort())
   })
 
-  it("colours a line only where the Gate answered on it", () => {
+  it("colors a line only where the Gate answered on it", () => {
     for (const line of lines) {
       const answered = /\b(committed|held|refused)\b/u.test(line.text)
 

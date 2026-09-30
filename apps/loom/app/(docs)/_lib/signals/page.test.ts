@@ -25,7 +25,7 @@ import {
  * these are not re-checking the schema. They are checking the things a producer
  * cannot notice about itself: that the vocabulary it walked is the runtime's
  * whole vocabulary, that the addresses it prints belong to nodes on the page
- * above, that the page's central privacy claim is the parser's behaviour rather
+ * above, that the page's central privacy claim is the parser's behavior rather
  * than this repository's opinion, and that the markup comparison would fail if
  * addressing ever started doing more than it says.
  */
@@ -172,7 +172,7 @@ describe("what addressing costs", () => {
  *
  * The page's handler parses and then either answers 400 with the issues or 204.
  * The fence beside it is compiled but never executed, so this is the only place
- * that behaviour is actually exercised — and the issues a caller would be handed
+ * that behavior is actually exercised — and the issues a caller would be handed
  * are the ones the block above prints.
  */
 describe("the endpoint the page shows", () => {
@@ -205,7 +205,7 @@ describe("the endpoint the page shows", () => {
  * `completed` is announced, that the schema refuses it — and pinning those is
  * the same mistake as pinning the number four, one file further back. So each
  * one below asserts either an invariant that does not care, or the correct
- * behaviour *for whichever state the runtime is in*.
+ * behavior *for whichever state the runtime is in*.
  *
  * This was checked by adding the kind and its schema member locally and running
  * the suite, not by reasoning about it.

@@ -5,7 +5,7 @@ import type { SearchEntry, SearchIndex } from "./model"
  *
  * The rule in one sentence: **an entry has to match every word you typed
  * somewhere, and it is ranked by the best place each word was found.** Typing
- * two words narrows; it never widens. That is the behaviour a person expects
+ * two words narrows; it never widens. That is the behavior a person expects
  * from a search box without being told, and it is the reason a query like
  * `gate reversible` finds the one heading rather than everything about either.
  *
@@ -337,7 +337,7 @@ const lineOf = (code: string, at: number): string => {
  *
  * So each place is scored by how many of their words a window centred on it
  * would contain, and the best wins. **Ties go to the earliest**, which keeps
- * the old behaviour wherever the terms are as together at the top as anywhere
+ * the old behavior wherever the terms are as together at the top as anywhere
  * else, and keeps the same query answering with the same line every time.
  */
 const answeredAt = (text: string, carried: readonly string[]): number | undefined => {

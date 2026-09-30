@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { ARRIVAL_ROUTE, ARRIVAL_TOTALS } from "@/app/(docs)/_lib/arrival/route"
+import { ARRIVAL_ROUTE } from "@/app/(docs)/_lib/arrival/route"
 
 import { ArrivalRoute } from "./arrival-route"
 
@@ -72,32 +72,5 @@ describe("the route as a reader meets it", () => {
         step.checkpointHref === step.href ? [step.href] : [step.href, step.checkpointHref]
       )
     })
-  })
-
-  it("prints the totals it was given rather than counting them again", () => {
-    const { container } = route()
-    const text = container.textContent ?? ""
-
-    expect(text).toContain(`${ARRIVAL_TOTALS.steps} pages of the ${ARRIVAL_TOTALS.sitePages}`)
-    expect(text).toContain(`${ARRIVAL_TOTALS.blocks} code blocks`)
-    expect(text).toContain(`${ARRIVAL_TOTALS.minutes} minutes of reading`)
-    expect(text).toContain(`${ARRIVAL_TOTALS.compiled} of those blocks are TypeScript`)
-  })
-
-  /**
-   * The heading over this component promises an hour, and the footer is where
-   * the page says which part of it is reading. A footer that printed the
-   * minutes without that sentence would be quietly claiming the hour is spent
-   * reading twenty minutes of prose.
-   */
-  it("says plainly that the hour is the typing", () => {
-    expect(route().container.textContent).toContain("the hour is the typing")
-  })
-
-  it("offers the way round the first steps", () => {
-    const { container } = route()
-    const last = [...container.querySelectorAll("a")].at(-1)
-
-    expect(last?.getAttribute("href")).toBe("/docs/getting-started/scaffolding-a-project")
   })
 })

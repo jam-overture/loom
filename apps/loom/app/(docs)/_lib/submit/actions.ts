@@ -50,7 +50,7 @@ type Candidate = {
  * The middle two are the pair the schema exists for, and they are the reason a
  * leading-slash check is not enough. `//forms.example.net` is scheme-relative
  * and reaches another origin; `/\forms.example.net` is the same thing written
- * with a backslash, which browsers normalise to the first. Both begin with a
+ * with a backslash, which browsers normalize to the first. Both begin with a
  * slash. Both look like paths.
  */
 const CANDIDATES: readonly Candidate[] = [

@@ -113,7 +113,7 @@ describe("a record's one-line summary", () => {
     }
   })
 
-  it("summarises every record the corpus produced without saying undefined", async () => {
+  it("summarizes every record the corpus produced without saying undefined", async () => {
     const { records } = await docsTelemetry()
 
     for (const record of records) {

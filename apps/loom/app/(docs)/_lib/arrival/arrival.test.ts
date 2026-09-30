@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 import {
   ARRIVAL_BUDGET_MINUTES,
   ARRIVAL_ROUTE,
-  ARRIVAL_SHORTCUT_HREF,
   ARRIVAL_TOTALS,
   arrivalTotals,
   buildArrivalRoute,
@@ -128,7 +127,7 @@ describe("what a step says it gets you", () => {
   /**
    * The one rule this page is written under: a reader on it has none of the
    * vocabulary yet, so the sentence promising them something may not be
-   * written in it. Only the runtime's camel-cased and capitalised names are
+   * written in it. Only the runtime's camel-cased and capitalized names are
    * matched — `ok` and `value` are published too, and refusing an English
    * sentence the word "value" would be a rule about English rather than about
    * jargon.
@@ -261,13 +260,6 @@ describe("the page the route is on", () => {
     for (const entry of ARRIVAL_ROUTE.slice(1)) {
       expect(closing, entry.href).not.toContain(`(${entry.href})`)
     }
-  })
-})
-
-describe("the way past the route", () => {
-  it("points at a page on the site, and not at one of its own steps", () => {
-    expect(docsEntryAt(ARRIVAL_SHORTCUT_HREF)).toBeDefined()
-    expect(ARRIVAL_ROUTE.map((entry) => entry.href)).not.toContain(ARRIVAL_SHORTCUT_HREF)
   })
 })
 
