@@ -37321,8 +37321,21 @@ second one is written up rather than shrugged at.
 ## 2026-09-29 — `loom.hero`'s `align: "center"` centres the boxes and not the words, so the front door's headline shipped ranged left
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — the composition's half is fixed on
-`marketing-48-the-headline-in-the-centred-band`; the prop is still a trap
+**closed** by `primitives-42-the-band-that-said-centre`
+([0205](decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md))
+— **and the diagnosis below is wrong in a way worth keeping.** The remedy this
+entry asks for was already shipped: `loom.hero` has emitted `textAlign: centred
+? "center" : "start"` on its text column since #403 on 26 September, three days
+before this was filed, and the headline was still ranged left. The code block
+quoted below is missing that line. What was actually wrong is one level down —
+`loom.heading` and `loom.prose` read `given.align ?? "start"`, and an inline
+`start` is not a default, it is an override. The band said centre, and the two
+nodes it was handed overruled it. The tell was inside the entry's own evidence
+and nobody read it that way: the eyebrow, which `loom.hero` renders itself and
+therefore states no alignment for, was centred in the same column as the
+headline that was not. **The measurement in this entry was right and only the
+line of source it blamed was wrong**, which is the argument for photographing a
+render rather than reading a file, made against the entry that makes it
 
 `loom.hero` declares `align: z.enum(["start", "center"])` and spends it on one
 thing:
@@ -37380,7 +37393,13 @@ the same thing.
 ## 2026-09-29 — a `loom.section` with an eyebrow cannot be centred at all, and the front door has one that wanted to be
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
-open — worked around by centring nothing rather than by centring most of it
+**closed** by `primitives-42-the-band-that-said-centre` — `loom.section` takes an
+`align`, and it governs **the words and not the boxes**, which is why one prop is
+enough: `text-align` on the band reaches the eyebrow, the heading region and the
+children together by inheritance, while an `align-items: center` would have
+shrink-wrapped every full-width grid and table in the band to its content. The
+entry's two readings are now both expressible and the third one it wanted is the
+one that shipped
 
 `loom.section` has **no `align` prop**: its schema is `tone`, `width`, `eyebrow`
 and `anchor`. A composition can still centre a section's heading and its
@@ -37772,3 +37791,55 @@ deployment has a second version. The pictures of it in
 screen's own components, rendered outside Next with a fixture record and wearing
 the deployment's own stylesheet — stated there in those words rather than
 presented as a screenshot of the product.
+
+---
+## 2026-09-30 — a misalignment is invisible on any text that does not wrap, so the specimen built to photograph one passed against the broken library
+
+**Filed by:** `Loom primitives` · **Owned by:** every routine that photographs a
+surface · **Status:** open — a method, not a defect, and there is nothing to fix
+
+`Loom marketing` filed the generalisation on 29 September and it is correct as
+far as it goes: *"when a camera finds an unset prop, the deliverable is the
+invariant, not the prop"*, because a prop with a safe default renders, validates
+and measures clean, and only a photograph can see it.
+
+**This run found the half that sentence is missing, by nearly shipping it.** A
+camera pointed at the defect does not see it either, unless the text wraps.
+
+The sheet built to photograph the alignment defect has a `loom.banner` band on
+it, and its first draft carried a one-line message. A one-line message inside a
+`justify-content: center` strip is a flex item shrink-wrapped to its own text,
+so `text-align: start` and `text-align: center` produce **identical pixels**.
+The band was photographed under both palettes at both viewports, against the
+unfixed library, and came back looking exactly like the fix. Four images, no
+difference, and the only reason it was caught is that the emitted markup was
+read afterwards and said `text-align:center` where the picture said nothing had
+happened.
+
+The same mechanism is the whole reason the original defect survived. In the
+hero, every one of `align: "center"`'s children was shrink-wrapped by
+`align-items: center` and therefore centred-looking whatever its own
+`text-align` said — every one except the headline, which is held to a display
+measure, wraps to three lines at 1280 and five at 390, and was the only element
+on the page wide enough to show which way its glyphs were set. One element in
+the band was capable of reporting the bug.
+
+| | wraps | showed the defect |
+| --- | --- | --- |
+| hero headline (`max-width: 64rem`, 3–5 lines) | yes | **yes** |
+| hero eyebrow, lead paragraph, actions | no | no — shrink-wrapped, centred either way |
+| banner message, one line | no | no — photographed as a pass |
+| banner message, three lines at 390px | yes | **yes** |
+
+**What to do with it.** When photographing a defect in how something is
+*aligned*, *justified* or *measured*, the subject has to be wider than its
+content or the photograph is not evidence. Concretely: give the band text that
+takes at least two lines at the viewport being shot, and prefer the phone
+viewport, where everything wraps. And when a before-and-after comes back
+identical, that is a result to explain rather than a fix to celebrate — this run
+had four such images and they were a bug in the instrument, not a no-op in the
+change.
+
+The cheap confirmation, worth doing either way: read the emitted markup for the
+property under test. It costs one assertion and it does not depend on anything
+having been wide enough.

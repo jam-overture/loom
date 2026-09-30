@@ -101,7 +101,23 @@ export const loomHeading = definePrimitive({
           fontSize: headingSize(STEP_FOR_LEVEL[given.level] ?? 5),
           lineHeight: 1.15,
           color: colour("fg-default"),
-          textAlign: given.align ?? "start",
+          /**
+           * **Absent means inherit, not `start`.**
+           *
+           * For as long as this prop has existed it read `given.align ?? "start"`,
+           * and an inline `start` is not a default — it is an override of every
+           * ancestor that had an opinion. `loom.hero` sets `text-align: center`
+           * on the column it lays its content out in, and a heading dropped into
+           * that column answered it with a hard `start`, so the one centred band
+           * on the marketing site shipped with the largest words on the site
+           * ranged left ([0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)).
+           *
+           * The tell was in the same column: the eyebrow `loom.hero` renders
+           * itself declares no alignment, so it inherited and sat centred above a
+           * headline that did not. A band cannot be contradicted by a node it was
+           * handed and still mean what its prop says.
+           */
+          ...(given.align === undefined ? {} : { textAlign: given.align }),
           ...(given.balance === true ? { textWrap: "balance" } : {}),
         },
       },

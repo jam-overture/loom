@@ -22,6 +22,35 @@ const props = z
   .object({
     tone: z.enum(["canvas", "surface", "accent"]).optional(),
     width: z.enum(["full", "wide", "readable"]).optional(),
+    /**
+     * Where this band's words sit. Absent inherits, `center` centres.
+     *
+     * It is the one prop a fully centred band could not be built without, and
+     * for five weeks this schema was `tone`, `width`, `eyebrow` and `anchor`.
+     * A composition can give its own `align` to a heading and to a paragraph,
+     * because those are nodes — but **the eyebrow is not a node.** It is a fixed
+     * field this primitive renders itself (0052), it was rendered with no
+     * alignment at all, and there was no prop anywhere that could move it. So a
+     * band with an eyebrow was a band that had to be ranged left, and the
+     * marketing site's *Built in the open* band shipped with a left eyebrow and
+     * a left heading beside a centred stat grid because the alternative —
+     * centring the heading and the caption and leaving `WHERE IT IS TODAY` alone
+     * on the left — looked worse. That is a layout decision the library was
+     * making on a composition's behalf without saying so.
+     *
+     * No operation reorders glyphs, so this is a real prop rather than a delta in
+     * disguise, and it is the example the granularity doc uses.
+     *
+     * **It governs the words and not the boxes**, which is the whole reason one
+     * prop closes the case. A section's children are full-width regions — a
+     * grid, a table, a band of cards — and an `align-items: center` here would
+     * shrink-wrap every one of them to its content. Setting `text-align` on the
+     * band instead reaches the eyebrow, the heading region and the children
+     * together, by inheritance, because under
+     * [0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)
+     * none of them overrides an alignment it was not given.
+     */
+    align: z.enum(["start", "center"]).optional(),
     /** Above the heading region: the small uppercase label Hermes called an eyebrow. */
     eyebrow: z.string().min(1).max(60).optional(),
     /** The name this band answers to, so a link on the page can point at it. */
@@ -62,6 +91,14 @@ export const loomSection = definePrimitive({
           boxSizing: "border-box",
           width: "100%",
           maxWidth: WIDTHS[width],
+          /**
+           * Emitted only when asked, so a band inside an already-centred region
+           * does not quietly range itself left (0205). This is the only
+           * alignment this primitive sets: the inner wrappers keep flex's
+           * `stretch`, so the regions stay full width and their words follow
+           * this line down.
+           */
+          ...(given.align === undefined ? {} : { textAlign: given.align }),
           /**
            * A band narrower than the page sits in the middle of it.
            *
