@@ -171,9 +171,9 @@ const wordmark = (ids: IdFactory, context: ChromeContext): LoomNode =>
  * one than it can sign you in to somebody else's. Ten seconds is the whole span
  * this bar is for and none of that fits in it, which is an argument for saying
  * it somewhere with room rather than for leaving it unsaid: `PORTAL.door` is
- * the sentence, the front door's questions band and its band of cards carry it,
- * and `SIGN_IN_LABEL` is exported so the question can name this button without
- * spelling it a second time.
+ * the sentence, the front door's questions band carries it, and `SIGN_IN_LABEL`
+ * is exported so the question can name this button without spelling it a second
+ * time.
  *
  * It used to take *every unguarded surface*, which is a rule about permissions
  * deciding a question about attention, and it grew by one every time another
@@ -365,28 +365,13 @@ export const READ_NEXT_EYEBROW = "What to read next"
  * inside an anchor. Both lines are therefore prose — which is right anyway,
  * because neither of them is separately clickable.
  */
-const wayOn = (
-  ids: IdFactory,
-  label: string,
-  destination: string,
-  href: string,
-  blurb?: string
-): LoomNode =>
+const wayOn = (ids: IdFactory, label: string, destination: string, href: string): LoomNode =>
   buildElement(ids, {
     type: "loom.card",
     props: { href, tone: "outline" },
     children: [
       prose(ids, label, { size: "small", tone: "muted" }),
       prose(ids, destination),
-      /**
-       * Only the hand-off carries one, and the asymmetry is the point: every
-       * other card names a page of an argument the reader is in the middle of,
-       * and this one names a different surface. A reader who has read all nine
-       * and meets a card saying *Docs* has been handed a fourth navigation link;
-       * the same card saying what is behind the door has been handed the next
-       * thing to do.
-       */
-      ...(blurb === undefined ? [] : [prose(ids, blurb, { size: "small", tone: "muted" })]),
     ],
   })
 
@@ -424,6 +409,20 @@ const wayOn = (
  * landmark the pager announces itself as; the cards still read as *Before this,
  * How it works*, which is the fact a reader needs and the landmark was only
  * going to label.
+ *
+ * **Every card in it now says the same amount, as of 30 September, and until
+ * then one of them said five times what its neighbour did.** The hand-off card
+ * — the one naming a surface rather than a page — carried that surface's blurb
+ * on the argument that a card saying *Docs* is a fourth navigation link while a
+ * card saying what is behind the door is the next thing to do. The argument is
+ * good and the band is a row: a grid stretches both cards to the taller, so at
+ * the foot of `/what-you-run` a card holding two words stood beside a card
+ * holding twenty-five and carried the difference as empty space. Chrome is
+ * short, `balance.test.ts` states the rule over every row of cards on the site,
+ * and `DOCS.blurb` is still rendered in full on the front door's own *Keep
+ * going* card — which is the one place on this site that offers a surface with
+ * room for a sentence, and is where a reader met it before they ever reached
+ * the foot of a page.
  */
 export const siteReadingBand = (
   ids: IdFactory,
@@ -473,7 +472,7 @@ export const siteReadingBand = (
      */
     ...(onward === undefined
       ? []
-      : [wayOn(ids, NEXT_LABEL, onward.label, surfaceHref(context.origin, onward), onward.blurb)]),
+      : [wayOn(ids, NEXT_LABEL, onward.label, surfaceHref(context.origin, onward))]),
   ]
 
   return [

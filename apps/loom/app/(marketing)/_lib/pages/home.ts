@@ -29,7 +29,6 @@ import {
   DECISIONS_URL,
   DEMO,
   DOCS,
-  doorOf,
   HOME,
   HOW_IT_WORKS,
   internalHref,
@@ -733,10 +732,12 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * reading this site can obtain one by deciding to — so the card had not merely
  * gone quiet about the door, it had started describing it wrongly.
  *
- * `doorOf` puts it back, in the body rather than the blurb, and the type makes
- * it structural: a guarded surface without a `door` no longer compiles. The
- * note is checked rather than promised now — `pages.test.ts` renders this band
- * and holds the sentence to it.
+ * **What says it now is the cost line, and it is four words rather than a
+ * paragraph.** *Costs you an invitation* is the honest word for a door somebody
+ * else opens, it sits on the one line a reader compares the four destinations
+ * along, and `site.test.ts` holds it there. `PORTAL.door` says the rest — who
+ * writes the list — in the questions band two bands above, which is where a
+ * reader who wants that answer goes looking for it.
  *
  * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
  * pointed at the repository, which was fine while there were three of them and
@@ -753,17 +754,27 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * reason is the bottom of the cards.** `loom.feature`'s interior is its props —
  * a glyph, a title, a sentence — stacked from the top, so four cards holding
  * four sentences of four different lengths are four cards that stop at four
- * different heights inside one row that stretches them all to the tallest. Two
- * of the four were running better than a third empty, and the band that exists
- * to send a visitor onward was the worst-composed thing on the page.
+ * different heights inside one row that stretches them all to the tallest.
+ * `loom.card`'s `footer` is *pinned to the bottom and ruled off*, so the four
+ * costs land on a single line across the row whatever the bodies above them do
+ * — which is also the line a reader comparing four destinations reads along.
  *
- * Evening the sentences up would have been treating the symptom, and it does
- * not survive the next surface anyway. `loom.card`'s `footer` is *pinned to the
- * bottom and ruled off* — the region exists for exactly this, and its own note
- * says so: a row of cards of unequal length still has its footers on one line.
- * So the sentence may be whatever length it honestly needs to be, and the four
- * costs land on a single line across the row, which is also the line a reader
- * comparing four destinations is actually reading along.
+ * **That fixed the footers and it did not fix the band**, which is the whole of
+ * what this run changed and is worth writing down because the note here said
+ * otherwise for five weeks. It said evening the sentences up would be treating
+ * the symptom. Photographed on a production build at 1280, the symptom was the
+ * band: the portal's card said forty-eight words where its three neighbours
+ * said twenty-two, so every card was stretched to the tallest and three of the
+ * four carried **166px of nothing** between the last line of the sentence and
+ * the rule above the cost — taller than the sentence itself. A pinned footer
+ * puts the four costs on one line; it cannot put anything above them.
+ *
+ * So the sentences are evened up after all, by taking one away rather than
+ * writing three. What made the note's objection reasonable — that hand-tuning
+ * four strings does not survive a fifth surface — is answered by
+ * `balance.test.ts` rather than by leaving the band as it was: the ratio is
+ * stated over every row of cards on every route, so a blurb written at twice
+ * its neighbours' length is red on the run that writes it.
  *
  * Nothing was added to the library to do it. A card, a heading, a sentence, a
  * rule and four words, all registered before this run started.
@@ -780,22 +791,12 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
           throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
         }
 
-        const door = doorOf(surface)
-
         return buildElement(ids, {
           type: "loom.card",
           props: { href: surfaceHref(context.origin, surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
-            /**
-             * The one card with a door says so here, in the body, and not in
-             * the footer where the cost is. The costs are read along one line
-             * across the row — that is the whole reason they are pinned — and a
-             * sentence dropped into that line would be read as a fourth cost
-             * and would break the line for the other three.
-             */
-            ...(door === undefined ? [] : [prose(ids, door, { size: "small", tone: "muted" })]),
             buildSlot(ids, "footer", [prose(ids, surface.cost, { size: "small", tone: "muted" })]),
           ],
         })
