@@ -48,7 +48,7 @@ describe("PageViews", () => {
     const out = screen.getByText("Every page →")
 
     expect(out.getAttribute("href")).toBe("/portal/trust")
-    expect(links(container)).toHaveLength(7)
+    expect(links(container)).toHaveLength(8)
   })
 
   it("names itself, so the strip is not six unexplained links", () => {
@@ -69,6 +69,7 @@ describe("PageViews", () => {
       "The page",
       screenName("/portal/activity"),
       screenName("/portal/history"),
+      "How did it get here?",
       "What did people do?",
       "Can you trust it?",
       "Does it add up?",

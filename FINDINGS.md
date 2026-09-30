@@ -37514,3 +37514,152 @@ was under-informed rather than wrong: it was written without having read the
 nineteen measurements already in this file, which had gone considerably further.
 Corrected on that comment as well as here, since a wrong conclusion left in a
 thread is the thing the 25 September entry spent a run undoing.)*
+
+---
+## 2026-09-29 — a sentence about a change can name one part and the second one is always a bare id, because `PlainLine` has one subject
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/vocabulary.ts` and `_lib/delta-summary.ts`) ·
+**Status:** open — **a plain-language gap with a name, not a defect.** Nothing
+is wrong on any screen and no test is red. Filed rather than fixed because
+closing it means widening a type six components render through, which is a unit
+of its own and not a line inside a screen.
+
+Found by looking at the first screenshot of `/portal/pages/[treeId]/versions`,
+which draws the same sentences `/portal/history` has drawn for weeks — a new
+screen is how a sentence gets read again.
+
+### The measurement
+
+The sentence under a version that added something reads, verbatim, off the
+deployment:
+
+> Added the prose *“New season, new pieces — in stores from…”* `n_fix3` inside
+> `n_seed10`.
+
+**The part that was added is named. The part it was added *into* is an
+identifier**, and that is every `insert` and every `move` this portal has ever
+described. `_lib/delta-summary.ts` is explicit about it in the code and not
+about why:
+
+```ts
+case "insert":
+  return {
+    before: PLAIN_VERBS.insert,
+    subject: partNameOf(operation.node),
+    after: ` inside ${operation.parentId}.`,
+  }
+```
+
+### Why it is not a one-line fix
+
+The name of the parent **is already in hand** on both screens. `/portal/history`
+builds `namesInTree(head)`; the progression builds a merged map of the version
+before the change and the version after it, so the parent is named there twice
+over. Neither can use it, because `PlainLine` is
+
+```ts
+{ before: string; subject: string | PartName; after: string }
+```
+
+— **one subject, by construction**, and the whole reason that shape exists is
+that a subject is the one thing a component must not reword and must render
+through `PlainSentence`. Interpolating a second `PartName` into `after` would
+put the words of a name into a plain string, which is precisely the failure
+`PlainSentence` was written to prevent: a `PartName` is *words and an id* and
+only the id is monospace, and an `after` string has no way to say that.
+
+So the honest shapes are two, and both are real changes:
+
+1. **A second subject.** `PlainLine` grows an optional `object: string | PartName`
+   and a `between: string`, and `PlainSentence` renders four pieces instead of
+   three. `readingOf` and every one of its assertions move with it.
+2. **A line becomes a list of pieces.** `readonly (string | PartName)[]`, which
+   is the general answer and throws away the property that makes the current
+   shape safe — a three-part line cannot be assembled in the wrong order and a
+   list can.
+
+I would build the first. It is bounded, it keeps the invariant, and the
+`between` is what carries the preposition — *inside*, *out of*, *before* — which
+is the thing a list would leave to whoever set the pieces side by side.
+
+### What it costs while it is open
+
+One bare id in one clause of two of the four sentences the portal writes about a
+change. A reader is never lost — the *thing that happened* is named, and the id
+is a real address they can paste into a URL — but it is the 18 August
+redirection's own example of the problem, sitting in the middle of a sentence
+that is otherwise exactly what that redirection asked for.
+
+---
+## 2026-09-29 — the deployed portal has no page with a history, so six of its seven screens are empty by construction and the newest one cannot be photographed at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with a decision in it
+for the maintainer · **Status:** open — **the reason this run's best picture is
+of a fixture and not of the deployment**, said out loud rather than left for a
+reviewer to notice
+
+### The measurement
+
+`ensureSeeded` calls `portalStore.create(seedTree())` and nothing else. The
+deployment therefore holds exactly one page, at version 0, with an empty record
+and no waiting change. Every screen that reads the record is correspondingly
+empty on the preview anybody actually opens:
+
+| screen | what a visitor sees on the deployment |
+| --- | --- |
+| What's been asked | nothing has been asked |
+| What's changed | nothing has changed |
+| **How did it get here?** | one version, and nothing to play |
+| What did people do? | no reader has been counted |
+| Can you trust it? | no claim has been graded |
+| the review queue on the page screen | nothing is waiting |
+
+The front door's *"A person arriving with nothing waiting meets an empty queue"*
+(`docs/portal.md`) is the same observation from one screen's side. This is it
+from all of them.
+
+### Why this run did not simply seed a history
+
+It is the obvious fix and it is the wrong one, for a reason worth writing down
+rather than rediscovering:
+
+**A revision carries provenance.** A seeded change would have to claim an origin,
+an actor, a confidence and an `interpretedAt` — *who asked for this, how sure the
+model was, who said yes* — and none of those would be true. The portal's entire
+argument is that its record is trustworthy; a deployment whose record is partly
+invented is the one thing that cannot be allowed, and it would be invented in
+exactly the fields a reviewer is being taught to rely on. It is the same class as
+the fabricated rating `Loom marketing` caught in structured data on 27 September,
+with a worse blast radius.
+
+**And it would be a second caller of `portalStore.append`.** `_lib/write.ts`
+states the convention 0017 could not make structural: *"`portalStore.append` has
+exactly one caller in the app"*. Seeding through it puts a second one there, in
+the module whose whole job is that there is only one.
+
+### The three honest ways out, none of them this lane's to choose
+
+1. **A deployment whose demonstration page is genuinely used.** The public
+   `/demo` runs the real pipeline; if it wrote to the same store the portal
+   reads, every record screen would fill with changes that actually happened,
+   asked for by real visitors. It is the truest answer and it crosses two lanes
+   (`Loom demo` and this one) and needs the maintainer's call on whether the
+   reviewed tree and the demonstration tree are the same tree.
+2. **A one-off script the maintainer runs**, through the real write path with the
+   real interpreter, against a real `DATABASE_URL`. The record is then true
+   because the changes really were proposed, judged and accepted. It costs a few
+   model calls once and nothing after that. **This is my recommendation.**
+3. **Nothing**, and the portal's record screens stay empty on every preview. That
+   is defensible and it is what is happening now, and its cost is that the one
+   thing the portal has that no other tool has is the one thing nobody can see.
+
+### What it cost this run, precisely
+
+The progression screen's empty state was photographed on the served application
+and is real. **The playable progression could not be**, because no page on the
+deployment has a second version. The pictures of it in
+[the report](reports/2026-09-29-portal-how-it-got-here.md) were taken of the
+screen's own components, rendered outside Next with a fixture record and wearing
+the deployment's own stylesheet — stated there in those words rather than
+presented as a screenshot of the product.
