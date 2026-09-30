@@ -15,7 +15,7 @@ decisions/README.md merge=ours
 *.generated.json merge=ours
 
 # Every source file is text, even the one holding a NUL as a key separator.
-# `src/data/plan.ts` spent weeks diffing as `Bin 4378 -> 5050 bytes` because it
+# `src/data/plan.ts` spent weeks diffing as a pair of byte counts because it
 # held the byte literally; the escape fixes that file, and `diff` here fixes the
 # class — git calls a file binary when it finds a NUL unless an attribute says
 # otherwise.

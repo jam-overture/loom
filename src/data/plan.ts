@@ -88,8 +88,8 @@ const canonical = (value: JsonValue): string => {
  *
  * Written as an escape rather than as the byte itself. A literal NUL in the
  * source makes `git` call this module binary, which costs nothing at runtime
- * and costs a reviewer the whole diff — every change to this file printed as
- * `Bin 4378 -> 5050 bytes`. Named as well as escaped, because a bare
+ * and costs a reviewer the whole diff: every change to this file printed as a
+ * pair of byte counts instead. Named as well as escaped, because a bare
  * `"\u0000"` inside a template literal reads like a typo at the one place
  * somebody might delete it.
  */
