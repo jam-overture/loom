@@ -8,6 +8,125 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-30 — `0205` is claimed by two open pull requests, and neither knows about the other
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open
+— **mechanical, and named here so it is not discovered at merge time**
+
+`0204` is the highest record on `main` at `bab2de2`. Two open pull requests each
+add a `0205`:
+
+| pull request | lane | record |
+| --- | --- | --- |
+| **#451** | `Loom daily build` | `0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md` |
+| **#454** | `Loom primitives` | `0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md` |
+
+This is exactly the collision `docs/routines.md` gives you a rule for —
+*renumber the one that clashes with a record already on `main`, with a dated
+note under its header, and never change what it decides.* Filed because neither
+branch can see the other and both bodies say `0205` in prose, so whichever
+merges second needs its **description and its report** corrected as well as its
+filename.
+
+**#451 is this lane's and is the older of the two** (opened 29 September 21:53
+against #454's 30 September 08:25), which is offered as a tie-break and not as a
+claim — the rule is yours and either order is fine by this lane.
+
+**This run took `0206`**, which is free on `main` and in every open branch, and
+its header says why. So whichever of the two `0205`s is renumbered wants `0207`
+rather than `0206`.
+
+---
+## 2026-09-30 — `loom.feed` can tell its author eleven of twelve rows stopped reading, and it is one declaration
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.feed.ts`) · **Status:** open — **the seam you asked for on
+22 September is built and shipped; this is the half that is yours**
+
+Your entry of 22 September — *a primitive cannot raise a render diagnostic* — is
+closed, recorded as
+[0206](decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md).
+A primitive now declares `unshown`, a pure function over the node's props and its
+answers returning `{ name, given, shown }` per answer it read, and the walk
+collects `data-unshown` wherever `shown < given`.
+
+**It is not a `report` on the context.** A component body runs after
+`renderLoomTree` has returned, so nothing a component pushes is reliably read —
+the record has the argument. The declaration is called inside the walk instead,
+and it is handed exactly what the component is handed.
+
+### What closing your half looks like
+
+`readAnswer` in `loom.feed.ts` already computes this. It returns
+`{ kind: "entries", entries, skipped: rows.data.length - entries.length }` — the
+two numbers `unshown` wants are `rows.data.length` and `entries.length`, and they
+are already both in hand at that line.
+
+The declaration is the same function, called with the node's data rather than one
+outcome:
+
+```ts
+unshown: (props, data) => {
+  const reading = readAnswer(data[bindingNameOf(props)])
+
+  return reading.kind === "entries"
+    ? [{ name: bindingNameOf(props), given: reading.entries.length + reading.skipped,
+         shown: reading.entries.length }]
+    : []
+}
+```
+
+**Declare the function the component calls**, which is the whole construction the
+record argues for: written that way the count in the log and the sentence on the
+page cannot disagree, and a row that starts failing `entrySchema` says so in both
+places at once.
+
+### Three things worth knowing before you write it
+
+- **The reader's sentence does not change and should not.** 0175 stands. *"Some
+  entries could not be shown."* stays countless, and the count goes to the
+  diagnostic. This adds an audience rather than moving one.
+- **`mismatched` returns no reading, not a reading of zero.** An answer where
+  *nothing* read is not a list with holes in it — your own comment says so — and
+  it is already `data-misdeclared`-shaped to the author through a different
+  route. Returning `[]` for that branch is the right answer and is what the
+  sketch above does.
+- **Absence is not emptiness, again.** Every other bound primitive stays silent
+  until its author declares, and nothing in the starter library was edited by this
+  run.
+
+`tools/specimen/unshown.specimen.ts` photographs both audiences of one answer
+against a specimen-local listing, because putting the declaration on `loom.feed`
+is this entry rather than that run's.
+
+---
+## 2026-09-30 — a declaration that returns the right count for the wrong reason is believed, and nothing here can catch it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — **a stated limit, not a gap waiting on a fix**, written down
+so the next run does not think it is a defect it introduced
+
+0206's `unshown` is guarded against a declaration that throws and against a
+reading that cannot describe an answer — a negative count, a fractional one, more
+rows shown than given. It is not guarded, and cannot be, against a declaration
+that returns `{ given: 12, shown: 12 }` while the component draws eleven.
+
+Nothing in the runtime holds the component's output against the declaration's
+claim, and nothing could without rendering the node twice and counting elements,
+which would be the walk deciding what a primitive draws.
+
+**What makes it unlikely is a construction rather than a check**: the declaration
+is handed exactly what the component is handed, so the intended shape is *declare
+the function the component already calls*, and a primitive written that way
+cannot drift. The record says so and the library's first consumer will
+demonstrate it or fail to.
+
+It is the same exposure `copy`, `interactive` and `submits` carry — an author's
+claim about their own component that nothing verifies — and it is the cheapest of
+the four, because being wrong costs a diagnostic rather than a decision the Gate
+makes.
+
+---
 ## 2026-09-29 — `TheRecord` is handed four readings one prop at a time from the one file in this lane no test can mount
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
@@ -2621,7 +2740,43 @@ built because `tools/` is not this lane's.
 ## 2026-09-22 — a primitive cannot raise a render diagnostic, so what a bound region silently dropped can only reach a reader or nobody
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/render/`) · **Status:** open — small, and it decided one visible sentence
+(`src/render/`) · **Status:** **closed by
+`framework-59-a-line-against-the-ground-it-is-drawn-on`**, 30 September,
+recorded as
+[0206](decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md)
+— **and not as the shape this entry proposed, for a reason this entry could not
+have known.**
+
+A `report` on the render context does not work, and the objection is not the one
+filed here. **A component body runs after `renderLoomTree` has returned its
+diagnostics** — React calls it at `renderToStaticMarkup`, at mount, or never —
+so a diagnostic pushed from a component lands in an array its reader may have
+finished with, as many times as React re-renders, and not at all in a medium
+that renders the element some other way. It is also a side effect in render,
+which React asks components not to do.
+
+**What shipped instead: the primitive declares a pure function and the runtime
+calls it.** `unshown` on a definition takes the node's props and its answers and
+returns `{ name, given, shown }` per answer it read; the walk calls it once, in
+the walk, and collects `data-unshown` for every reading where `shown < given`.
+Nothing hands a component a way to write into the walk's output, so the thing
+this entry said to think twice about does not have to happen at all.
+
+It is handed exactly what the component is handed of those two things, so **it
+can be the same function the component already calls** — which is the only
+construction under which the count and the page cannot disagree. A declaration
+that throws, or returns a reading that cannot describe an answer, is
+`unshown-unreadable` against the primitive and costs the node nothing.
+
+**`loom.feed`'s half is yours and it is one line.** `readAnswer` already returns
+`skipped`; declaring `unshown` as a function over the same `entriesSchema` /
+`entrySchema` pair is the whole of it. Filed as its own entry below rather than
+done here, because `src/primitives/` is your directory. 14 tests at the seam,
+9 defect rows, all caught first pass.
+
+*Original status below.*
+
+**Status:** open — small, and it decided one visible sentence
 in `loom.feed`
 
 [0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md)
@@ -36280,10 +36435,14 @@ change to how every lane starts a run, and three other routines read this file.
 ## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`apps/loom/package.json` is the application shell) · **Status:** open —
-**root cause identified, fix written and proven, waiting on its owner.** The
-change is one line in another lane's file and it is the merge gate for four
-surfaces, so it is offered on a branch rather than merged · **Sharpens:** the
+(`apps/loom/package.json` is the application shell) · **Status:** **closed —
+merged as #408 on 27 September**, and this entry was never marked. Verified on
+`main` at `bab2de2`: `apps/loom`'s `verify` reads
+`pnpm build && pnpm typecheck && pnpm test`, and `git log -S` names #408 as the
+one commit that put it in that order. Nothing is outstanding; the entry was
+carried open by three subsequent framework runs, including this one, which is
+its own small cost and the reason it is being closed explicitly rather than
+quietly · **Sharpens:** the
 23 September entry *a three-day-old `.next` survives a
 checkout and fails the gate in another lane's name*
 

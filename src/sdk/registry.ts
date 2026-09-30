@@ -21,6 +21,7 @@ import {
 } from "../render/behaviour.js"
 import type { FrameResolver } from "../render/frame.js"
 import type { BindingDeclaration, BindingReader } from "../render/reads.js"
+import type { UnshownDeclaration, UnshownReader } from "../render/unshown.js"
 import type { LoomPrimitive, PrimitiveResolver } from "../render/primitive.js"
 import type { PropsValidator, PropsVerdict } from "../render/props.js"
 import { NO_TEXT, type PrimitiveText, type TextResolver } from "../render/text.js"
@@ -86,6 +87,14 @@ export type RegisteredPrimitive = {
    * walk reports under the first and stays quiet under the second.
    */
   readonly reads: readonly BindingDeclaration<BindingName>[] | undefined
+  /**
+   * Its own reading of the answers it was given (0206). `undefined` where the
+   * author has not said, which here is the same answer as declaring one that
+   * reports nothing — unlike `copy` and `reads`, because there is no emptiness
+   * to distinguish: a reading is made per answer at render time, and a primitive
+   * that has said nothing about its answers is reported on by nothing.
+   */
+  readonly unshown: UnshownDeclaration | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -132,6 +141,7 @@ export type PrimitiveRegistry = PrimitiveResolver &
   BehaviourResolver &
   FrameResolver &
   BindingReader &
+  UnshownReader &
   CopyDeclarations & {
     /** In registration order, so a catalogue and an audit read predictably. */
     readonly primitives: readonly RegisteredPrimitive[]
@@ -440,6 +450,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     role: role.value,
     copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
     reads: reads.value,
+    unshown: entry.unshown,
     validate: entry.validate,
   })
 }
@@ -516,6 +527,14 @@ export const createPrimitiveRegistry = (
      * words would under-report the same way this exists to stop.
      */
     copyFor: (type: PrimitiveType): readonly string[] | undefined => byType.get(type)?.copy,
+    /**
+     * `undefined` for a type nobody registered as well as for one that declared
+     * nothing, and here the two mean the same thing: a walk that could not find
+     * the primitive has said so as `unknown-primitive` and rendered nothing, so
+     * there is no node whose answers anybody could have a reading of.
+     */
+    unshownBy: (type: PrimitiveType): UnshownDeclaration | undefined =>
+      byType.get(type)?.unshown,
     typesWithRole: (role: PrimitiveRole): readonly PrimitiveType[] =>
       byRole.get(role) ?? NO_TYPES,
   })

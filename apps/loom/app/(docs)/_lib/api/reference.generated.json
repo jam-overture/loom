@@ -8,7 +8,7 @@
       "files": 91,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -4377,7 +4377,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4420,10 +4420,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 56,
+      "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -4725,7 +4725,7 @@
             {
               "name": "RenderDiagnostic",
               "kind": "type",
-              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /**\n     * A node asks for data and this render has no answers for it — neither a\n     * value nor a named reason there is none.\n     *\n     * There are two ways to arrive here and they are fixed in the same place\n     * by the same person, which is why they are one code carrying which:\n     * `absent`, a render given no resolution at all, and `unrelated`, a render\n     * given one built from a different tree's plan. The second is the one that\n     * used to say nothing: `EMPTY_DATA_RESOLUTION` answers `NO_DATA` for every\n     * node, so a composition root that reached for it as a neutral \"no data\"\n     * value got a page whose every binding vanished in silence.\n     */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n    readonly resolution: UnresolvedResolution;\n} | {\n    /**\n     * A binding the node asked under a name this primitive says it does not\n     * read. The answer arrived and nothing will ever look at it.\n     *\n     * The quietest of the three ways a binding can be wrong, and until the\n     * primitive declared its names it was the only one nothing could see: an\n     * unregistered source is refused as `no-such-source`, params the source\n     * did not declare are refused by its own schema, and a name nothing reads\n     * resolves perfectly and is then dropped on the floor. The node renders —\n     * the binding cost it nothing but a round trip — and what is reported is\n     * that somebody asked a question whose answer has no reader.\n     *\n     * Only ever reported for a primitive whose author has declared `reads`.\n     * Absence is not emptiness, so a primitive that has said nothing\n     * says nothing about the names it is given.\n     */\n    readonly code: \"data-unread\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n} | {\n    /**\n     * `loom:submit` that is not an endpoint id under `to`. The node renders —\n     * its props are its own and are still valid — with no target, which is\n     * what a form primitive's unavailable path is for.\n     */\n    readonly code: \"submit-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: SubmissionError;\n} | {\n    /**\n     * A form whose endpoint could not give a target: nobody registered it,\n     * it refused this visitor, or it answered with something the seam refuses.\n     * The page still renders, because a page lost to one form is worse than a\n     * form that says it cannot be sent right now.\n     */\n    readonly code: \"submit-unavailable\";\n    readonly nodeId: NodeId;\n    readonly to: EndpointId;\n    readonly unavailable: SubmissionUnavailable;\n} | {\n    /**\n     * A node names an endpoint and this render has no target for it — neither\n     * one nor a named reason there is none. `absent` and `unrelated` are the\n     * two routes the data seam's twin describes, for the same reasons:\n     * `EMPTY_SUBMISSION_RESOLUTION` answers `undefined` for every node, and a\n     * form whose target went missing that way rendered a submit button\n     * pointing nowhere with nothing said about it.\n     */\n    readonly code: \"submit-unresolved\";\n    readonly nodeId: NodeId;\n    readonly resolution: UnresolvedResolution;\n} | {\n    /**\n     * A framable prop whose URL will not be framed: no allowlist was wired,\n     * nobody registered its ori\n…",
+              "signature": "type RenderDiagnostic = {\n    readonly code: \"unknown-primitive\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    readonly code: \"invalid-props\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly issues: readonly PropsIssue[];\n} | {\n    /**\n     * The resolver knows this type and the validator does not, which is a\n     * composition-root fault rather than anything the tree did. The node\n     * still renders — one seam not recognising a type the other resolved is\n     * no reason to blank the page — but the props went unchecked, and that is\n     * worth saying out loud.\n     */\n    readonly code: \"props-undeclared\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n} | {\n    /**\n     * The root names a theme and the registry refused it — an id nobody\n     * registered, or a selection that is not three ids. The page renders\n     * unstyled rather than not at all, which is the same bargain every other\n     * diagnostic here makes.\n     */\n    readonly code: \"theme-unresolved\";\n    readonly nodeId: NodeId;\n    readonly error: ThemeError;\n} | {\n    /** The root names a theme and this render was given no registry. */\n    readonly code: \"theme-unregistered\";\n    readonly nodeId: NodeId;\n} | {\n    /**\n     * A theme below the root, which is not mounted: the variables are\n     * mounted once, at the render root, so a nested selection would be read\n     * by nothing. Reported rather than dropped, because someone meant it.\n     */\n    readonly code: \"theme-misplaced\";\n    readonly nodeId: NodeId;\n} | {\n    /** A key in the runtime's reserved namespace that the runtime does not read. */\n    readonly code: \"reserved-prop-unrecognised\";\n    readonly nodeId: NodeId;\n    readonly key: string;\n} | {\n    /**\n     * `loom:data` that is not a map of binding names to registered sources.\n     * The node renders — its props are its own and are still valid — with no\n     * data at all, which is what a primitive's unavailable path is for.\n     */\n    readonly code: \"data-misdeclared\";\n    readonly nodeId: NodeId;\n    readonly error: BindingError;\n} | {\n    /**\n     * A binding that could not be answered: no such source, params the source\n     * refuses, an answer that fails its own schema, or an adapter that could\n     * not reach what it wraps. One region of the page is short of data; the\n     * page still renders, because the alternative is a whole page lost to one\n     * integration being down.\n     */\n    readonly code: \"data-unavailable\";\n    readonly nodeId: NodeId;\n    readonly name: BindingName;\n    readonly source: SourceId;\n    readonly unavailable: DataUnavailable;\n} | {\n    /**\n     * A node asks for data and this render has no answers for it — neither a\n     * value nor a named reason there is none.\n     *\n     * There are two ways to arrive here and they are fixed in the same place\n     * by the same person, which is why they are one code carrying which:\n     * `absent`, a render given no resolution at all, and `unrelated`, a render\n     * given one built from a different tree's plan. The second is the one that\n     * used to say nothing: `EMPTY_DATA_RESOLUTION` answers `NO_DATA` for every\n     * node, so a composition root that reached for it as a neutral \"no data\"\n     * value got a page whose every binding vanished in silence.\n     */\n    readonly code: \"data-unresolved\";\n    readonly nodeId: NodeId;\n    readonly resolution: UnresolvedResolution;\n} | {\n    /**\n     * A binding the node asked under a name this primitive says it does not\n     * read. The answer arrived and nothing will ever look at it.\n     *\n     * The quietest of the three ways a binding can be wrong, and until the\n     * primitive declared its names it was the only one nothing could see: an\n     * unregistered source is refused as `no-such-source`, params the source\n     * did not declare are refused by its own schema, and a name nothing reads\n     * resolves perfectly and is then dropped on the floor. The node renders —\n     * the binding cost it nothing but a round trip — and what is reported is\n     * that somebody asked a question whose answer has no reader.\n     *\n     * Only ever reported for a primitive whose author has declared `reads`.\n     * Absence is not emptiness, so a primitive that has said nothing\n     * says nothing about the names it is given.\n     */\n    readonly code: \"data-unread\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n} | {\n    /**\n     * An answer arrived, under a name the primitive reads, and the primitive\n     * placed some of its rows and not the rest.\n     *\n     * The one way a binding can be wrong that is invisible from outside the\n     * component: each row has a shape only the primitive knows, so only the\n     * primitive can say that eleven of twelve stopped reading. A listing skips\n     * the row it cannot read and names it to the reader without a count\n     *. There was nowhere else for it to say the count.\n     *\n     * Both counts rather than the difference, because the sentence the author\n     * needs is *eleven of twelve*. Never the rows: a diagnostic is logged and\n     * a row is the host's data, the same line `data-unavailable` holds.\n     *\n     * Reported only when `shown < given`. An answer read whole is the ordinary\n     * case and would be one line per bound region in every log.\n     */\n    readonly code: \"data-unshown\";\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly name: string;\n    readonly given: number;\n    readonly shown: number;\n} | {\n    /**\n     * A primitive declares what it could not show and its declaration could\n     * not be believed: it threw, or it returned a reading that cannot describe\n     * an answer.\n     *\n     * The node renders exactly as it would have. A declaration is bookkeeping\n     * about an answer, not part of drawing it, and a page lost to bookkeeping\n     * is the worst trade avail\n…",
               "truncated": true,
               "summary": ""
             },
@@ -5208,6 +5208,69 @@
           ]
         },
         {
+          "module": "render/unshown",
+          "title": "Unshown",
+          "summary": "What a primitive could not show of an answer it was given, and how the walk is told.",
+          "symbols": [
+            {
+              "name": "UnshownReading",
+              "kind": "type",
+              "signature": "type UnshownReading = {\n    /** The binding name the answer arrived under. */\n    readonly name: string;\n    /** Rows in the answer as the primitive found it. */\n    readonly given: number;\n    /** Rows the primitive placed on the page. */\n    readonly shown: number;\n};",
+              "truncated": false,
+              "summary": "What a primitive made of one answer: the rows it was given, and the rows it placed."
+            },
+            {
+              "name": "UnshownDeclaration",
+              "kind": "type",
+              "signature": "type UnshownDeclaration = (props: JsonObject, data: NodeData) => readonly UnshownReading[];",
+              "truncated": false,
+              "summary": "What a primitive declares: its own reading of this node's answers."
+            },
+            {
+              "name": "UnshownReader",
+              "kind": "interface",
+              "signature": "interface UnshownReader {\n    readonly unshownBy: (type: PrimitiveType) => UnshownDeclaration | undefined;\n}",
+              "truncated": false,
+              "summary": "Which primitive declares a reading, asked per type."
+            },
+            {
+              "name": "isUnshownReader",
+              "kind": "function",
+              "signature": "const isUnshownReader: (value: object) => value is UnshownReader",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "UnshownFault",
+              "kind": "type",
+              "signature": "type UnshownFault = {\n    /**\n     * The declaration threw. Rendering is total (see `diagnostics.ts`) and a\n     * declaration is not a licence to make it otherwise — a page lost to a\n     * primitive's *bookkeeping* would be the worst trade in this package.\n     */\n    readonly kind: \"threw\";\n    readonly detail: string;\n} | {\n    /**\n     * A reading that cannot describe anything: an unnamed answer, a count that\n     * is not a whole number of rows, or more rows shown than given. Refused\n     * rather than clamped, because a diagnostic saying *thirteen of twelve*\n     * sends the author to look for a defect that is in the primitive telling\n     * them about it.\n     */\n    readonly kind: \"impossible\";\n    readonly detail: string;\n};",
+              "truncated": false,
+              "summary": "Why a declaration's readings could not be believed."
+            },
+            {
+              "name": "describeUnshownFault",
+              "kind": "function",
+              "signature": "const describeUnshownFault: (fault: UnshownFault) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readUnshown",
+              "kind": "function",
+              "signature": "const readUnshown: (declaration: UnshownDeclaration, props: JsonObject, data: NodeData) => Result<readonly UnshownReading[], UnshownFault>",
+              "truncated": false,
+              "summary": "The readings one declaration makes of this node, or the fault that means there are none to be had."
+            },
+            {
+              "name": "unshownRows",
+              "kind": "function",
+              "signature": "const unshownRows: (readings: readonly UnshownReading[]) => readonly UnshownReading[]",
+              "truncated": false,
+              "summary": "The readings worth reporting, in the order the walk reports them."
+            }
+          ]
+        },
+        {
           "module": "reserved-props",
           "title": "The loom: namespace",
           "summary": "The runtime's own corner of a node's props.",
@@ -5266,7 +5329,7 @@
       "files": 180,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5725,7 +5788,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6076,7 +6139,7 @@
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
@@ -6160,7 +6223,7 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6174,7 +6237,7 @@
             {
               "name": "PrimitiveRegistry",
               "kind": "type",
-              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
+              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6316,7 +6379,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6544,7 +6607,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6961,7 +7024,7 @@
       "files": 52,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7315,7 +7378,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7448,7 +7511,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8211,7 +8274,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8354,7 +8417,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8414,7 +8477,7 @@
       "files": 39,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8948,7 +9011,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9022,7 +9085,7 @@
       "files": 85,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9459,7 +9522,7 @@
       "files": 50,
       "narrower": [],
       "standing": {
-        "packageNames": 1095,
+        "packageNames": 1103,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,

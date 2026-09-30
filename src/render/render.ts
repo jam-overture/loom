@@ -45,6 +45,12 @@ import {
 import type { PropsValidator } from "./props.js"
 import { isBindingReader, unreadBindings, type BindingReader } from "./reads.js"
 import {
+  isUnshownReader,
+  readUnshown,
+  unshownRows,
+  type UnshownReader,
+} from "./unshown.js"
+import {
   isTextResolver,
   NO_TEXT,
   overlayText,
@@ -186,6 +192,11 @@ type RenderContext = {
   readonly frames: FrameResolver | undefined
   /** Absent for the same reason `frames` is: a plain map declares nothing. */
   readonly reads: BindingReader | undefined
+  /**
+   * Absent for the same reason `reads` may be: a plain map has registered
+   * nothing that could declare a reading. See `unshown.ts`.
+   */
+  readonly unshown: UnshownReader | undefined
   readonly text: TextResolver | undefined
   /**
    * Absent when the resolver is not a registry, which is also the only way to
@@ -381,6 +392,7 @@ const nodeDataFor = (node: ElementNode, declared: unknown, context: RenderContex
   }
 
   reportUnreadBindings(node, data, context)
+  reportUnshownRows(node, data, context)
 
   return data
 }
@@ -418,6 +430,58 @@ const reportUnreadBindings = (
 
   for (const name of unreadBindings(asked, declared, node.props)) {
     context.collect({ code: "data-unread", nodeId: node.id, type: node.type, name })
+  }
+}
+
+/**
+ * A diagnostic for every answer this node's primitive was given whole and drew
+ * part of.
+ *
+ * The one report in this walk the walk cannot make for itself: whether a row can
+ * be read is a question about a shape only the primitive holds, so the primitive
+ * declares the reading and this is where it is called (0206). Called with the
+ * node's props and its answers because those are what the component gets, so the
+ * declaration can be the same function the component calls and the count cannot
+ * disagree with the page.
+ *
+ * Silent unless the primitive has declared, the same bargain `reads` makes: a
+ * primitive whose author has said nothing is not a primitive claiming it shows
+ * everything it is given.
+ *
+ * A declaration that cannot be believed is reported as itself and costs the node
+ * nothing — it renders exactly as it would have, because a count is bookkeeping
+ * about an answer rather than part of drawing it.
+ */
+const reportUnshownRows = (
+  node: ElementNode,
+  data: NodeData,
+  context: RenderContext
+): void => {
+  const declaration = context.unshown?.unshownBy(node.type)
+  if (declaration === undefined) return
+
+  const readings = readUnshown(declaration, node.props, data)
+
+  if (!readings.ok) {
+    context.collect({
+      code: "unshown-unreadable",
+      nodeId: node.id,
+      type: node.type,
+      fault: readings.error,
+    })
+
+    return
+  }
+
+  for (const reading of unshownRows(readings.value)) {
+    context.collect({
+      code: "data-unshown",
+      nodeId: node.id,
+      type: node.type,
+      name: reading.name,
+      given: reading.given,
+      shown: reading.shown,
+    })
   }
 }
 
@@ -858,6 +922,7 @@ const renderFrom = (
     origins: options.origins,
     frames: isFrameResolver(options.resolver) ? options.resolver : undefined,
     reads: isBindingReader(options.resolver) ? options.resolver : undefined,
+    unshown: isUnshownReader(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
     behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
     anchors: createAnchorLedger(),
