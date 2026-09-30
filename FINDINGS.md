@@ -36557,9 +36557,28 @@ way.
 ## 2026-09-27 — `themeStyle` has never appeared in a documentation page, and as of #410 there are two of them
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
-(`apps/loom/app/(docs)/docs/building-with-loom/theming/`) · **Status:** open —
-**not urgent and not a defect**; a gap that just got wider, measured rather than
-guessed at.
+(`apps/loom/app/(docs)/docs/building-with-loom/theming/`) · **Status:**
+**closed 30 September** by `docs-40-starting-from-a-band` — *Making it look like
+yours* now has a section called *Putting it on a page* that names both functions,
+states the division of labour, and shows it: the same band in two frames, one of
+which kept its own ground. Was open as **not urgent and not a defect**; a gap
+that just got wider, measured rather than guessed at.
+
+**What the answer to the last paragraph turned out to be.** The entry offered
+*the API reference is the right home for a signature and the theming page is
+deliberately conceptual* as a legitimate answer. It is not the one taken, and the
+reason is worth a sentence for the next lane that adds an export. The two
+functions are not a signature a reader looks up; they are the **one thing the
+page never said you do**. A reader could finish *Making it look like yours*
+knowing what a palette is, what every slot means, and whether it can be read —
+and still not know that an excerpt has to be handed its ground, because there is
+no root primitive above it. That is not reference material, it is the missing
+last step, and a reference entry a reader has no reason to look for does not
+supply it.
+
+The division the entry proposed is the one the section teaches, unchanged:
+`themeStyle` around any excerpt, `themeGround` only for a frame standing in for
+the page, and a host drawing whole pages needing neither.
 
 #410 added two exports, both on entry points the site documents:
 
@@ -38296,3 +38315,55 @@ this lane's alone: `(docs)`, `(lessons)`, `(demo)` and `(portal)` all lay cards
 out in grids, and none of them has a rule of this kind. The check is ten lines
 over a tree and needs no camera once it exists — which is the point, because
 finding it needed one.
+## 2026-09-30 — a demonstration can measure one ink and show a different one, and every check stays green
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/mounting.ts`, `_components/theme-mount.tsx`) ·
+**Status:** open — **fixed in the instance, unenforced as a class.** Nothing on
+the site is wrong today; what is open is that nothing would have caught it and
+nothing would catch the next one
+
+The new *Putting it on a page* section shows a band in two frames and prints the
+contrast ratio under each. The ratio is measured between the palette's
+`fg-default` and the ground the frame painted, which is the right measurement.
+
+**The first band chosen sets none of its words in `fg-default`.** `proof` is the
+logo wall — six customer names and a line of introduction, all of it `fg-muted`,
+which is a lighter ink and clears the host's light ground comfortably. So the
+page rendered six names a reader could read perfectly well, over a caption
+saying, truthfully, **1.1:1 — fails the 4.5:1 bar body text has to meet**.
+
+Every check was green, in both versions, and they were the right checks:
+
+| what was asserted | on the logo wall |
+| --- | --- |
+| the broken frame's ratio is under the bar | passed — it is |
+| the fixed frame's ratio clears it | passed — it does |
+| the two frames hold the same band | passed |
+| the two frames have different grounds | passed |
+| the printed ratios are the computed ones | passed |
+
+It was caught by **looking at the screenshot**, and it is the only way it could
+have been. Swapping to `steps`, whose headline and step titles are `fg-default`,
+made the picture and the number agree.
+
+**Why this is not the same as the classes already filed here.** The three
+previous entries are all *a check derived from the thing it checks cannot see the
+thing shrink*. This one is different and, I think, harder: **every assertion was
+true, of the right quantity, computed the right way.** What was wrong was the
+relationship between the measurement and the picture beside it, and neither half
+was defective. A test can verify that a number is correct; there is no obvious
+test that it is *about* what the reader is looking at.
+
+The narrow remedy, which this section now has as a comment rather than as a
+check: **a figure printed under a picture has to be a figure about something
+visible in that picture.** For this section that means the excerpt must contain
+text in the slot the ratio measures — checkable, in principle, by rendering the
+excerpt and asking which palette slots its markup actually resolves to, which is
+more machinery than one section justifies and is exactly what would be needed to
+make the rule general.
+
+Filed rather than built because the general version is a real piece of work and
+would want deciding rather than assuming: it is the difference between *this
+number is right* and *this number is the one you are looking at*, and the second
+is the property a documentation site actually needs.
