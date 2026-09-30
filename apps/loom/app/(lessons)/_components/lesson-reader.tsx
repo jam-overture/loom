@@ -3,13 +3,16 @@
 import type { ReactNode } from "react"
 
 import {
+  explanationsFor,
   lessonWorkedThrough,
   predictionsFor,
   setProgress,
   withAttempt,
+  withExplanation,
   withLessonWorkedThrough,
   withPrediction,
   type Confidence,
+  type Explanation,
   type Grade,
   type Prediction,
 } from "../_lib/progress"
@@ -57,6 +60,31 @@ export type PromptQuestion = {
   readonly body: ReactNode
   /** Where to check, for a question that has somewhere to check. */
   readonly checkIn: readonly CheckPointer[]
+}
+
+/**
+ * An earlier lesson an elaboration prompt says it builds on, and where the
+ * reader's own words about it are filed.
+ *
+ * Not a `CheckPointer`, though it carries the same three fields, and the
+ * difference is the reason this type exists. A check pointer is *where the answer
+ * is*. This is where a lesson is, next to a key in the reader's record — and
+ * whether there is anything under that key is a fact about them rather than about
+ * the course, which is the whole of what makes the comparison below worth
+ * building.
+ */
+export type ElaborationSource = {
+  readonly lesson: number
+  readonly title: string
+  readonly href: string
+  /** The record slug that lesson's own explanations are filed under. */
+  readonly slug: string
+}
+
+export type ElaborationPrompt = {
+  readonly number: number
+  readonly body: ReactNode
+  readonly reaches: readonly ElaborationSource[]
 }
 
 /** What has to have happened before a printed answer is on the screen. */
@@ -135,6 +163,27 @@ export type LessonPart =
       readonly questions: readonly PromptQuestion[]
     }
   | {
+      /**
+       * Elaboration: say it in your own words, with nothing to reveal.
+       *
+       * The only section on this page that gates nothing and holds nothing,
+       * because there is nothing to hold: no printed answer exists for *explain
+       * the ladder to somebody who wrote the OR-of-predicates version*, and the
+       * value of the prompt is that the words have to be the reader's. What it
+       * enforces is the one thing its own text asks for and paper cannot check —
+       * that something was written before the reader moved on — and what it adds
+       * afterwards is the one thing paper cannot offer: *then compare*, against
+       * their own explanation of the lesson this one says it derives from.
+       */
+      readonly kind: "elaborate"
+      readonly id: string
+      readonly heading: ReactNode
+      readonly slug: string
+      readonly intro: ReactNode
+      readonly outro: ReactNode
+      readonly questions: readonly ElaborationPrompt[]
+    }
+  | {
       readonly kind: "answers"
       readonly id: string
       readonly heading: ReactNode
@@ -193,6 +242,11 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
   const hold = (slug: string, prediction: Omit<Prediction, "on">) =>
     update((state) => withPrediction(state, slug, { ...prediction, on: today }))
 
+  const explained = (slug: string): readonly Explanation[] => explanationsFor(progress, slug)
+
+  const keep = (slug: string, explanation: Omit<Explanation, "on">) =>
+    update((state) => withExplanation(state, slug, { ...explanation, on: today }))
+
   /**
    * The one gate that closes over the whole page. Everything after Predict is
    * the answer to Predict, in the sense that matters: it is the material the
@@ -250,6 +304,154 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
             {part.outro}
           </div>
         )}
+      </section>
+    )
+  }
+
+  /**
+   * Explain it back, and then the part paper cannot do.
+   *
+   * Two things happen here and only the first is a gate. Each prompt takes
+   * something written before the next one appears, which is what "closed book"
+   * has always asked for and never been able to check. No rating is taken — there
+   * is no answer to be right about, so a number here would be a measure of how
+   * fluent the explaining felt, and fluency is the illusion this course opens by
+   * naming.
+   *
+   * The second thing is the reason this is stored rather than merely required.
+   * Every lesson but the first has a prompt that says *derive this from lesson
+   * NN*, and the useful comparison is not against that lesson's text — the reader
+   * can reread that any time, and rereading is the study method the course exists
+   * to talk them out of. It is against **what they wrote about lesson NN when
+   * they were in it**: the same model, in their words, months older. That
+   * document exists nowhere but their own browser, so the page cannot contain it
+   * and no address could serve it. It arrives after the writing, never before,
+   * because arriving before would be reading your notes.
+   *
+   * When there is nothing there, the section says which nothing it is — no
+   * explanation was ever written, or one was written and said it could not be
+   * given — because those are different facts about the reader and only the
+   * second is about their understanding. That distinction is lesson 24's, applied
+   * one floor down from where it is taught.
+   */
+  const renderElaborate = (part: Extract<LessonPart, { kind: "elaborate" }>): ReactNode => {
+    const kept = explained(part.slug)
+    const done = new Set(kept.map((each) => each.question))
+    const current = part.questions.find((question) => !done.has(question.number))
+
+    const earlier = (source: ElaborationSource): ReactNode => {
+      const theirs = explained(source.slug).filter((each) => each.answer.trim() !== "")
+      const anything = explained(source.slug).length > 0
+
+      if (theirs.length === 0) {
+        return (
+          <p key={source.slug} style={style.note}>
+            You have nothing written about{" "}
+            <a href={source.href} style={{ color: style.ink }}>
+              lesson {String(source.lesson).padStart(2, "0")} — {source.title}
+            </a>
+            {anything
+              ? ", beyond saying at the time that you could not explain it yet. That is worth knowing here rather than being shown as a blank: the derivation you have just written is the second attempt, and it went further."
+              : ". Nothing is missing from the course — this is the one thing here that only you can have put there, and writing it in that lesson's Explain it back is what makes this comparison possible the next time a prompt sends you back to it."}
+          </p>
+        )
+      }
+
+      return (
+        <div key={source.slug} style={style.column(2)}>
+          <p style={style.label}>
+            What you wrote about lesson {String(source.lesson).padStart(2, "0")} — {source.title}
+          </p>
+          {theirs.map((each) => (
+            <blockquote
+              key={each.question}
+              style={{
+                ...style.note,
+                margin: 0,
+                borderInlineStart: `2px solid ${style.edge}`,
+                paddingInlineStart: "var(--loom-spacing-3)",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {each.answer}
+              <span style={{ display: "block", color: style.inkSubtle }}>
+                prompt {each.question}, {each.on}
+              </span>
+            </blockquote>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <section key={part.id} style={style.column(4)}>
+        {part.heading}
+        {part.intro}
+
+        {current !== undefined ? (
+          <Answer
+            key={current.number}
+            question={current.number}
+            total={part.questions.length}
+            body={current.body}
+            resolve={{
+              kind: "explain",
+              note: "Nothing is revealed by this and nothing grades it. It is kept so that the next lesson to tell you to derive something from this one can show you what you said here — which is the only comparison in this course that no printed answer could supply.",
+              onWrite: ({ answer }) => keep(part.slug, { question: current.number, answer }),
+            }}
+          />
+        ) : (
+          <div style={{ ...style.panel, ...style.column(4) }}>
+            <p style={style.note}>
+              {part.questions.length === 1
+                ? "Written. Now compare it against the words you had for the lesson this one builds on."
+                : `${part.questions.length} written. Now compare them against the words you had for the lessons these build on.`}
+            </p>
+
+            {part.questions.map((question) => {
+              const mine = kept.find((each) => each.question === question.number)
+
+              return (
+                <div key={question.number} style={style.column(2)}>
+                  <p style={style.label}>
+                    Prompt {question.number}
+                    {mine === undefined ? "" : ` — written ${mine.on}`}
+                  </p>
+
+                  {question.body}
+
+                  <blockquote
+                    style={{
+                      ...style.note,
+                      margin: 0,
+                      borderInlineStart: `2px solid ${style.edge}`,
+                      paddingInlineStart: "var(--loom-spacing-3)",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {mine === undefined || mine.answer === ""
+                      ? "Nothing written — you said you could not explain this one yet."
+                      : mine.answer}
+                  </blockquote>
+
+                  {question.reaches.map(earlier)}
+                </div>
+              )
+            })}
+
+            {part.outro}
+          </div>
+        )}
+
+        <p style={style.note}>
+          What you write here goes into this browser and nowhere else, and what it shows you came
+          from the same place — so nobody but you can read either, and nothing on this page was ever
+          in the page you loaded. That is also why{" "}
+          <a href="/lessons/record" style={{ color: style.ink }}>
+            keeping a copy
+          </a>{" "}
+          is yours to do.
+        </p>
       </section>
     )
   }
@@ -499,6 +701,8 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
           case "recall":
           case "predict":
             return renderRun(part)
+          case "elaborate":
+            return renderElaborate(part)
           case "answers":
             return renderAnswers(part)
           case "exercises":

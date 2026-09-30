@@ -148,7 +148,7 @@ what it adds is only the part paper cannot do:
   that is a belief rather than a gap.
 
 The lessons themselves run there too, at `/lessons/04` and so on, and reading
-one there differs from reading the file in exactly three ways — all of them
+one there differs from reading the file in exactly five ways — all of them
 things this document asks you to do and cannot check:
 
 - **The lesson does not exist until your predictions are written.** Everything
@@ -164,6 +164,20 @@ things this document asks you to do and cannot check:
   you gave them beforehand — which is what makes "which were you most
   confidently wrong about" a question with an answer rather than a memory of
   one.
+- **Explain it back takes what you write, and no confidence rating.** It is the
+  elaboration section, it is one of the seven principles above, and on paper it is
+  a list of instructions you can read and move past. There, each prompt takes
+  something written before the next one appears — and nothing is revealed,
+  because there is no answer to reveal and there should not be. It is also the
+  one place on the surface that asks for **no rating**: a confidence is a
+  prediction about an outcome, this has none, so the number would measure how
+  fluent the explaining felt, which is the first thing this document tells you not
+  to trust. What arrives instead, once you have written, is *then compare* — your
+  own explanation of the lesson this prompt says it derives from, as you wrote it
+  at the time, with the date on it. That document is in your browser and nowhere
+  else, so the page cannot contain it and no address could serve it; when there is
+  nothing there it says which nothing it is, because never having written one and
+  having written that you could not are different facts about you.
 - **The exercises have already run, and what they printed is not in the page.**
   Every fence in Try it that prints something takes a prediction first, one at a
   time, and every transcript appears at once when the last one is committed —
@@ -194,11 +208,13 @@ the version you can read on a train, and the honour system is the cost.
 
 **Your record is yours, and that means keeping it is yours too.** Everything the
 surface computes — what is due, which questions come back, how often you were
-sure and wrong — comes from one value stored in your browser and sent nowhere.
+sure and wrong, and every word you have written explaining something back —
+comes from one value stored in your browser and sent nowhere.
 So clearing site data deletes it, and a second machine starts from zero. There is
 a page for that: `/lessons/record` saves the record as a file and merges one
 back in — later answers win, a lesson
-keeps the earlier day you did it, re-answers add up rather than overwrite, and
+keeps the earlier day you did it, re-answers add up rather than overwrite, an
+explanation replaces the older one rather than sitting beside it as a draft, and
 importing the same file twice does nothing the second time. Save a copy the day
 you have something worth losing.
 

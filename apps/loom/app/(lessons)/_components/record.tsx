@@ -61,6 +61,7 @@ const bringing = (report: MergeReport): readonly string[] =>
     [report.lessons.added, "lesson", "lessons"],
     [report.attempts.added, "answer", "answers"],
     [report.predictions.added, "prediction", "predictions"],
+    [report.explanations.added, "explanation", "explanations"],
     [report.corrections.added, "correction", "corrections"],
   ])
 
@@ -69,6 +70,7 @@ const alreadyHere = (report: MergeReport): readonly string[] =>
     [report.lessons.alreadyHeld, "lesson", "lessons"],
     [report.attempts.alreadyHeld, "answer", "answers"],
     [report.predictions.alreadyHeld, "prediction", "predictions"],
+    [report.explanations.alreadyHeld, "explanation", "explanations"],
     [report.corrections.alreadyHeld, "re-answer", "re-answers"],
   ])
 
@@ -189,7 +191,8 @@ export const StudyRecord = () => {
               </strong>
               , {plural(summary.sets, "review sitting", "review sittings")},{" "}
               {plural(summary.attempts, "written answer", "written answers")},{" "}
-              {plural(summary.predictions, "prediction", "predictions")} and{" "}
+              {plural(summary.predictions, "prediction", "predictions")},{" "}
+              {plural(summary.explanations, "explanation", "explanations")} and{" "}
               {plural(summary.corrections, "re-answer", "re-answers")} — across{" "}
               {plural(summary.days, "day", "days")}, between {day(summary.firstDay)} and{" "}
               {day(summary.lastDay)}.
