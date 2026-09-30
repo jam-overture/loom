@@ -132,6 +132,20 @@ export const loomBanner = definePrimitive({
           flexWrap: "wrap",
           alignItems: "center",
           justifyContent: centred ? "center" : "space-between",
+          /**
+           * The third instance of the trap 0207 is about, found by auditing the
+           * library rather than by a camera. This strip arranges its two boxes on
+           * the inline axis, so it has to state the text alignment they agree
+           * with: `space-between` puts the message hard against the start edge,
+           * where centred words inside it would read as a mistake, and `center`
+           * keeps the pair together in the middle, where ranged-left words do.
+           *
+           * Both branches are stated, unlike the leaves above, and that is the
+           * rule rather than an inconsistency: whoever arranges the boxes owns
+           * the alignment of the words in them, because `justify-content` does
+           * not inherit and half an inherited agreement is worse than none.
+           */
+          textAlign: centred ? "center" : "start",
           gap: space(3),
           paddingBlock: space(2),
           paddingInline: space(4),
