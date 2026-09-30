@@ -2,6 +2,7 @@ import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { BrandColor } from "@/app/(docs)/_components/brand-color"
 import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
 import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
+import { MountedGround, ThemeMount } from "@/app/(docs)/_components/theme-mount"
 
 export const metadata = pageMetadata("building-with-loom", "theming")
 
@@ -186,6 +187,82 @@ createThemeRegistry({ palettes: [...STARTER_PALETTES, ourLightPalette] })
   says so in a `theme-unresolved` diagnostic and renders unstyled — less than
   was asked for, and never silently.
 </Callout>
+
+## Putting it on a page
+
+A theme is registered and a tree names it. Something still has to put the colors
+on the screen, and **which something depends on how much of the tree you are
+drawing.**
+
+**Drawing a whole page? You do nothing.** The root primitive mounts the theme on
+its own element, every primitive under it inherits the properties through the
+cascade, and there is no line for you to write. That is the ordinary case and
+this section is not about it.
+
+**Drawing part of a tree?** One band on its own, inside your layout — a preview,
+a card, a page-builder's canvas. There is no root primitive above an excerpt, so
+the two jobs it was quietly doing are now yours, and there is one function for
+each.
+
+| you call | it hands you | you need it |
+| --- | --- | --- |
+| `themeStyle(theme)` | every `--loom-*` property a primitive reads, as a React `style` object | around **any** excerpt |
+| `themeGround(theme)` | the paper: a background color, a text color and a `color-scheme` | only when your frame is **standing in for the page** |
+
+Here is the difference, drawn. It is the same band, rendered once and placed in
+two frames. **Both** frames call `themeStyle`, so the words are set in the tree's
+ink in both. Only one of them asked what paper that ink was meant for.
+
+<ThemeMount />
+
+The left frame is not a mistake anybody makes on purpose. It is what a frame
+looks like the day after the tree's palette moves: the chrome's background was
+decided once, in a stylesheet, in a place the tree cannot reach — so it kept
+painting the light ground it was written with, while the ink underneath it
+became a dark palette's ink. Nothing errors. Nothing warns. The words are simply
+not there.
+
+<Callout kind="note">
+  This is a real one. A frame in this repository carried its ground as a
+  constant, a tree moved to a dark palette, and the screen whose whole job was
+  to show a stranger what they were about to lose rendered at that first ratio
+  for three weeks ([0197](/docs/architecture/decision-records)).
+</Callout>
+
+`themeGround` is the fix, and it is a fix rather than a workaround because both
+ends come out of the **same palette**. A frame cannot be legible under one theme
+and invisible under another when the paper and the ink were read off one object:
+
+<MountedGround />
+
+`bg-canvas` rather than a surface, because the canvas is what the root primitive
+paints and therefore what any excerpt would have been sitting on. A band that
+paints a surface of its own paints it over this, exactly as it does in place.
+
+That is the whole of it:
+
+```tsx
+import type { LoomTree, ResolvedTheme } from "@jam-overture/loom"
+import { renderLoomTree, themeGround, themeStyle } from "@jam-overture/loom/react"
+
+const Excerpt = ({ tree, theme }: { tree: LoomTree; theme: ResolvedTheme }) => (
+  <div style={{ ...themeStyle(theme), ...themeGround(theme) }}>
+    {renderLoomTree(tree, { resolver: registry, validator: registry }).element}
+  </div>
+)
+```
+
+<Callout kind="warning">
+  Both take a resolved theme, not a selection — and neither has a fallback,
+  which is the same bargain the rest of this page makes. A tree that names no
+  theme is a case **your** chrome has to answer, because a runtime that handed
+  back a default would be choosing an appearance nobody put in the tree. An
+  unthemed excerpt inherits the same nothing an unthemed page does.
+</Callout>
+
+If you are drawing whole pages, you will never need the second one. Reach for
+`themeGround` when there is no `loom.page` above what you are rendering, and not
+before.
 
 ## What a model gets shown
 
