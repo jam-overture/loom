@@ -52,7 +52,14 @@ import type { PlainLine } from "./vocabulary"
  * on the run that rewrites its screen.
  */
 
-export type PageViewKey = "page" | "asked" | "changed" | "trust" | "checkup" | "readers"
+export type PageViewKey =
+  | "page"
+  | "asked"
+  | "changed"
+  | "versions"
+  | "trust"
+  | "checkup"
+  | "readers"
 
 export type PageView = {
   readonly key: PageViewKey
@@ -83,10 +90,48 @@ const VIEWS: readonly {
   readonly label: string
   /** The route with no page in mind — the same view, across every page. */
   readonly path: string
+  /**
+   * Where this view of **one** page lives, when it is not `${path}?tree=…`.
+   *
+   * Two of the seven name their page in the path rather than in a query, and they
+   * are the two that draw the page itself: `/portal/pages/t_seed1` and the
+   * progression under it. Neither has an unscoped form that is the same screen —
+   * `/portal/pages` is a list of pages, not every page's preview at once — so
+   * `path` is where a reader goes when they leave the scope, and this is where
+   * they go when they are in it.
+   *
+   * A function per view rather than a flag, because the shape of the exception is
+   * not "the id goes in the path": it is a different address, and the second one
+   * has a segment after the id. A boolean would have needed a second boolean the
+   * moment this view existed.
+   */
+  readonly scoped?: (treeId: TreeId) => string
 }[] = [
-  { key: "page", label: "The page", path: "/portal/pages" },
+  {
+    key: "page",
+    label: "The page",
+    path: "/portal/pages",
+    scoped: (treeId) => `/portal/pages/${encodeURIComponent(treeId)}`,
+  },
   { key: "asked", label: screenName("/portal/activity"), path: "/portal/activity" },
   { key: "changed", label: screenName("/portal/history"), path: "/portal/history" },
+  {
+    /**
+     * Between what changed and what readers did, and the position is the
+     * argument. It is the same record as `changed` — read as pictures rather
+     * than as sentences — so it belongs beside it; and it comes after, because
+     * a reader who has met the sentences knows what the pictures are of.
+     *
+     * The label is a question a person actually asks about a page they did not
+     * write, and it is deliberately not *"Old versions"*: a list of old
+     * versions is a filing cabinet, and what is on the screen is the page
+     * becoming itself.
+     */
+    key: "versions",
+    label: "How did it get here?",
+    path: "/portal/pages",
+    scoped: (treeId) => `/portal/pages/${encodeURIComponent(treeId)}/versions`,
+  },
   { key: "readers", label: "What did people do?", path: "/portal/readers" },
   { key: "trust", label: "Can you trust it?", path: "/portal/trust" },
   { key: "checkup", label: "Does it add up?", path: "/portal/checkup" },
@@ -104,10 +149,25 @@ const viewFor = (key: PageViewKey) => VIEWS.find((view) => view.key === key)!
  * a query, because it is the only one that cannot be asked about every page at
  * once — `/portal/pages` is a list, not the same screen unscoped.
  */
-const hrefFor = (key: PageViewKey, treeId: TreeId): string =>
-  key === "page"
-    ? `/portal/pages/${encodeURIComponent(treeId)}`
-    : `${viewFor(key).path}?tree=${encodeURIComponent(treeId)}`
+const hrefFor = (key: PageViewKey, treeId: TreeId): string => {
+  const view = viewFor(key)
+
+  return view.scoped === undefined
+    ? `${view.path}?tree=${encodeURIComponent(treeId)}`
+    : view.scoped(treeId)
+}
+
+/**
+ * What one view is called, for the screen that *is* that view.
+ *
+ * A screen has one name and the strip is where these seven are written, so a
+ * heading that typed its own would be the defect `screen-names.ts` was written
+ * for in the one place that module does not reach. `screen-names.ts` holds the
+ * three screens whose names are synonyms of each other's subjects and needs an
+ * `Elsewhere` for each; a view of one page has no such neighbour and no route of
+ * its own to name, so the label stays here and the heading reads it.
+ */
+export const pageViewLabel = (key: PageViewKey): string => viewFor(key).label
 
 /**
  * Every view of one page, with the reader's own marked.
@@ -202,6 +262,11 @@ const SCOPED_LEADS: Readonly<Record<ScopedView, { readonly before: string; reado
       before: "Everything anyone has asked Loom to change on ",
       after:
         ", newest first — including the changes it wasn’t allowed to make and the requests it didn’t understand. Those leave no other trace anywhere.",
+    },
+    versions: {
+      before: "Every version of ",
+      after:
+        ", drawn as it actually looked, from the day it was created to right now. Step through them one at a time, or watch the whole thing play.",
     },
     changed: {
       before: "Every change that has actually been made to ",

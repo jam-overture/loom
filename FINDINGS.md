@@ -8,6 +8,57 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-29 — `TheRecord` is handed four readings one prop at a time from the one file in this lane no test can mount
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+pre-existing and **not caused by** the run that filed it, which added the fourth
+prop and noticed the shape while pricing its own defect matrix
+
+`rail.ts` exists because eight readings were computed inline in `page.tsx`, and
+`page.tsx` is an `async` Server Component that reads a cookie and opens a store
+— a boundary no `vitest` run can cross. Extracting them turned up **five**
+readings that could be unwired by deleting a single argument with the whole
+suite green, and the finding that asked for the extraction is closed.
+
+**The last hop is still inline.** What `whatTheRailShows` returns is handed to
+the list one prop at a time, in `page.tsx`:
+
+```tsx
+<TheRecord
+  records={records}
+  marked={rail.marked}
+  held={rail.readings}
+  revision={tree.revision}
+  {...(rail.landing === undefined ? {} : { landing: rail.landing })}
+/>
+```
+
+Delete any one of those lines and the reading is computed, returned, tested, and
+never shown. `rail.test.ts` goes on passing because the value is in the view;
+`the-record.test.tsx` goes on passing because it is handed the prop directly.
+Nothing in this repository joins the two, and nothing can, because the join is
+in the file that cannot be mounted.
+
+This run measured it rather than assuming it: **the row of the defect matrix
+that removes `landing` from the view is caught by exactly one assertion**, and
+it is caught there only because `rail.test.ts` asserts the positive case. The
+prop-passing line below it is caught by nothing at all.
+
+### What would close it
+
+**Hand the list the view rather than four of its fields.** `TheRecord` already
+takes three readings off `RailView` and one value off the tree; taking
+`rail` and `revision` would make the wiring one expression, and a field added to
+`RailView` that the list forgets to read becomes a type error rather than a
+silent absence. It is a props change across one component and its test file,
+which is why it is filed rather than done in a run whose unit was the landing.
+
+**What it does not fix**, and this is worth writing down so a later run does not
+over-claim: `roomToLand(rail)` has the same exposure and was moved this run for
+the same reason — from a boolean the page worked out to the rail itself — and
+*that* one is now asserted in `arrival.test.ts`. The general answer is the same
+both times: **a Server Component may pass a value and may not decide one.**
+
 ## 2026-09-29 — `adjust` was built for `loom.before-after` twenty-eight days ago, the entry that asked for it is marked closed, and the primitive still says the mechanism does not exist
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -232,10 +283,33 @@ root* is knowledge `analyzeDelta` holds and the walk does not. Catching a
 misplaced theme at the write path is a different signature, not a stricter check.
 ## 2026-09-28 — the rail keeps the scroll it took for the question after the question is answered, and what a visitor sees of the payoff card is decided by where the browser clamps it
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
-by measuring the frame this run's own unit produces, **not caused by it**, and
-recommended as a unit of its own because the honest fix has a design question in
-it that a screenshot fix would paper over
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-33-room-that-outlives-the-question`** — found by measuring the frame that
+run's own unit produces, **not caused by it**, and recommended as a unit of its
+own because the honest fix has a design question in it that a screenshot fix
+would paper over
+
+> **Closed, 29 September.** Both halves shipped, and the first of them is not
+> sufficient alone: keeping the room makes the landing *reachable*, and the
+> drift is the panel above the card getting shorter rather than the scroll being
+> clamped, so the card is re-landed as well. `roomToLand` is now given for the
+> landing as well as for the question, and `AnswerInView` puts the answered card
+> back at the top of the rail it was already at the top of (`landed.ts` names
+> which card, and it is neither *the newest* nor `answeredBy` alone).
+>
+> **The design question below was answered by refusing its premise.** *Wide
+> only* is not the fact; **the rail is a scroller of its own** is, and a width is
+> a proxy for it. So there is no `matchMedia`, no mount-time read and no resize
+> listener: the component walks up from the card to the first ancestor whose
+> `overflow-y` scrolls, at the moment the scroll would happen. A wide viewport
+> whose rail does not scroll gets nothing, and there is a test that says so.
+>
+> **What it costs is recorded rather than talked past.** The applied card is
+> 976px in an 857px rail, so one end is always off screen: this puts the top on
+> — the **Applied** badge and the visitor's own sentence, where `main` opened on
+> the words *"undoes it."* — and `Put it back` is now about 120px below the
+> fold. `ANSWER_ARRIVES` is the one constant either landing reads if that is the
+> wrong end.
 
 Measured on a production build at 1280 × 900, running the demo's three presses
 with reduced motion, reading the rail's `scrollTop` and the card's box out of
@@ -405,6 +479,41 @@ inline-code span and do not make it a link — works for `reports/` as well as
 `decisions/`, and is what #434's body was corrected to use before it merged. It
 costs a reader nothing: the path is as useful to somebody who can open the
 repository, and there is nothing in a code span for anything to inject into.
+
+### Eighth data point, 29 September, `Loom demo` on #450 — **the SHA ref is not safe, and neither is the raw host; position inside one body may be**
+
+Appended by `Loom demo`, as evidence and not a theory. One body, three writes in
+two minutes, four images, one variable changed per write, each read back through
+the API:
+
+| write | form | host and ref | mangled |
+| --- | --- | --- | --- |
+| 1 | `![alt](url)` | `github.com/…/blob/<commit SHA>/…?raw=true` | **4 of 4** |
+| 2 | `![alt](url)` | `raw.githubusercontent.com/…/<commit SHA>/…` | **4 of 4** |
+| 3 | `<img src="url">` | `raw.githubusercontent.com/…/<commit SHA>/…` | **2 of 4 — the last two** |
+
+In every write the preview URL on line 1 (bare) and the report link near the end
+(`[text](url)`, `.md`, same SHA) came through clean.
+
+**What this breaks.** The 28 September `Loom daily build` entry offered *reference a
+blob by its commit SHA* as a workaround worth adopting now, on one controlled
+pair; write 1 is a SHA ref with markdown image syntax and every image broke. The
+27 and 28 September recommendation of markdown image syntax over `<img>` is
+broken too, by writes 1–2 against write 3. And `raw.githubusercontent.com` with
+markdown syntax, which #449's body used and which survived there on the same
+day, broke here.
+
+**What is new**, stated as an observation: in write 3 the four tags were
+identical in form, host, ref and query, and the two that broke were the **third
+and fourth**, under a later heading. Nothing about the tags distinguished them
+but where they were. One body is one data point.
+
+**What this run did about it**: kept write 3, whose two clean images are the
+before/after pair the pull request is about, and put the two broken ones in the
+pull-request comment instead, which was also read back. So the recommendation
+that survives every data point so far is the one the entry already makes —
+**read the body back through the API before treating the pull request as
+finished** — and nothing else.
 
 ---
 ## 2026-09-28 — a branch pushed while its pull request was being merged loses that push, and the squash makes it silent
@@ -37631,3 +37740,150 @@ move the ceiling down: no bound above 143 can be right.
 would have to be posted in a short body and come back clean. That experiment is
 one call and nobody has run it — including this run, which had the body to hand
 and did not think of it until the entry was being written.
+## 2026-09-29 — a sentence about a change can name one part and the second one is always a bare id, because `PlainLine` has one subject
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_lib/vocabulary.ts` and `_lib/delta-summary.ts`) ·
+**Status:** open — **a plain-language gap with a name, not a defect.** Nothing
+is wrong on any screen and no test is red. Filed rather than fixed because
+closing it means widening a type six components render through, which is a unit
+of its own and not a line inside a screen.
+
+Found by looking at the first screenshot of `/portal/pages/[treeId]/versions`,
+which draws the same sentences `/portal/history` has drawn for weeks — a new
+screen is how a sentence gets read again.
+
+### The measurement
+
+The sentence under a version that added something reads, verbatim, off the
+deployment:
+
+> Added the prose *“New season, new pieces — in stores from…”* `n_fix3` inside
+> `n_seed10`.
+
+**The part that was added is named. The part it was added *into* is an
+identifier**, and that is every `insert` and every `move` this portal has ever
+described. `_lib/delta-summary.ts` is explicit about it in the code and not
+about why:
+
+```ts
+case "insert":
+  return {
+    before: PLAIN_VERBS.insert,
+    subject: partNameOf(operation.node),
+    after: ` inside ${operation.parentId}.`,
+  }
+```
+
+### Why it is not a one-line fix
+
+The name of the parent **is already in hand** on both screens. `/portal/history`
+builds `namesInTree(head)`; the progression builds a merged map of the version
+before the change and the version after it, so the parent is named there twice
+over. Neither can use it, because `PlainLine` is
+
+```ts
+{ before: string; subject: string | PartName; after: string }
+```
+
+— **one subject, by construction**, and the whole reason that shape exists is
+that a subject is the one thing a component must not reword and must render
+through `PlainSentence`. Interpolating a second `PartName` into `after` would
+put the words of a name into a plain string, which is precisely the failure
+`PlainSentence` was written to prevent: a `PartName` is *words and an id* and
+only the id is monospace, and an `after` string has no way to say that.
+
+So the honest shapes are two, and both are real changes:
+
+1. **A second subject.** `PlainLine` grows an optional `object: string | PartName`
+   and a `between: string`, and `PlainSentence` renders four pieces instead of
+   three. `readingOf` and every one of its assertions move with it.
+2. **A line becomes a list of pieces.** `readonly (string | PartName)[]`, which
+   is the general answer and throws away the property that makes the current
+   shape safe — a three-part line cannot be assembled in the wrong order and a
+   list can.
+
+I would build the first. It is bounded, it keeps the invariant, and the
+`between` is what carries the preposition — *inside*, *out of*, *before* — which
+is the thing a list would leave to whoever set the pieces side by side.
+
+### What it costs while it is open
+
+One bare id in one clause of two of the four sentences the portal writes about a
+change. A reader is never lost — the *thing that happened* is named, and the id
+is a real address they can paste into a URL — but it is the 18 August
+redirection's own example of the problem, sitting in the middle of a sentence
+that is otherwise exactly what that redirection asked for.
+
+---
+## 2026-09-29 — the deployed portal has no page with a history, so six of its seven screens are empty by construction and the newest one cannot be photographed at all
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with a decision in it
+for the maintainer · **Status:** open — **the reason this run's best picture is
+of a fixture and not of the deployment**, said out loud rather than left for a
+reviewer to notice
+
+### The measurement
+
+`ensureSeeded` calls `portalStore.create(seedTree())` and nothing else. The
+deployment therefore holds exactly one page, at version 0, with an empty record
+and no waiting change. Every screen that reads the record is correspondingly
+empty on the preview anybody actually opens:
+
+| screen | what a visitor sees on the deployment |
+| --- | --- |
+| What's been asked | nothing has been asked |
+| What's changed | nothing has changed |
+| **How did it get here?** | one version, and nothing to play |
+| What did people do? | no reader has been counted |
+| Can you trust it? | no claim has been graded |
+| the review queue on the page screen | nothing is waiting |
+
+The front door's *"A person arriving with nothing waiting meets an empty queue"*
+(`docs/portal.md`) is the same observation from one screen's side. This is it
+from all of them.
+
+### Why this run did not simply seed a history
+
+It is the obvious fix and it is the wrong one, for a reason worth writing down
+rather than rediscovering:
+
+**A revision carries provenance.** A seeded change would have to claim an origin,
+an actor, a confidence and an `interpretedAt` — *who asked for this, how sure the
+model was, who said yes* — and none of those would be true. The portal's entire
+argument is that its record is trustworthy; a deployment whose record is partly
+invented is the one thing that cannot be allowed, and it would be invented in
+exactly the fields a reviewer is being taught to rely on. It is the same class as
+the fabricated rating `Loom marketing` caught in structured data on 27 September,
+with a worse blast radius.
+
+**And it would be a second caller of `portalStore.append`.** `_lib/write.ts`
+states the convention 0017 could not make structural: *"`portalStore.append` has
+exactly one caller in the app"*. Seeding through it puts a second one there, in
+the module whose whole job is that there is only one.
+
+### The three honest ways out, none of them this lane's to choose
+
+1. **A deployment whose demonstration page is genuinely used.** The public
+   `/demo` runs the real pipeline; if it wrote to the same store the portal
+   reads, every record screen would fill with changes that actually happened,
+   asked for by real visitors. It is the truest answer and it crosses two lanes
+   (`Loom demo` and this one) and needs the maintainer's call on whether the
+   reviewed tree and the demonstration tree are the same tree.
+2. **A one-off script the maintainer runs**, through the real write path with the
+   real interpreter, against a real `DATABASE_URL`. The record is then true
+   because the changes really were proposed, judged and accepted. It costs a few
+   model calls once and nothing after that. **This is my recommendation.**
+3. **Nothing**, and the portal's record screens stay empty on every preview. That
+   is defensible and it is what is happening now, and its cost is that the one
+   thing the portal has that no other tool has is the one thing nobody can see.
+
+### What it cost this run, precisely
+
+The progression screen's empty state was photographed on the served application
+and is real. **The playable progression could not be**, because no page on the
+deployment has a second version. The pictures of it in
+[the report](reports/2026-09-29-portal-how-it-got-here.md) were taken of the
+screen's own components, rendered outside Next with a fixture record and wearing
+the deployment's own stylesheet — stated there in those words rather than
+presented as a screenshot of the product.

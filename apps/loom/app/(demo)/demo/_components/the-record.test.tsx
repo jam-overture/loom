@@ -104,6 +104,24 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn()
 })
 
+/**
+ * A rail that scrolls by itself, because the re-landing asks the card whether it
+ * is in one and jsdom's default answer for a bare `<div>` is no.
+ */
+const scrollingRail = (): HTMLElement => {
+  const rail = document.createElement("div")
+  rail.style.overflowY = "auto"
+  document.body.append(rail)
+
+  return rail
+}
+
+/** Which card the rail was carried to, by the id on the element it scrolled. */
+const carriedTo = (): readonly (string | undefined)[] =>
+  (Element.prototype.scrollIntoView as ReturnType<typeof vi.fn>).mock.instances.map(
+    (element) => (element as HTMLElement).id
+  )
+
 const cardsIn = (container: HTMLElement): readonly HTMLElement[] => [
   ...container.querySelectorAll<HTMLElement>("li[id]"),
 ]
@@ -369,5 +387,84 @@ describe("the record, once it repeats itself", () => {
     )
 
     expect(foldedIn(container)).toEqual([false])
+  })
+})
+
+/**
+ * Which card the rail is carried to, and it is a list-level fact: the two
+ * moments that move this scroller are a question arriving and the answer to one
+ * landing, and the way they fail is by both firing at once or by the wrong one
+ * firing.
+ *
+ * The drift itself is `arrival.ts`'s measurement and the scroller rule is
+ * `answer-in-view.test.tsx`'s; what is asserted here is that this list mounts
+ * one of them, for the right card, with the right rule attached.
+ */
+describe("the card the rail is carried to", () => {
+  it("is the card the visitor's answer just landed, once nothing is waiting", () => {
+    render(
+      <TheRecord
+        records={[APPLIED]}
+        marked={NOTHING_MARKED}
+        held={NO_READINGS}
+        revision={1}
+        landing={APPLIED.recordId}
+      />,
+      { container: scrollingRail() }
+    )
+
+    expect(carriedTo()).toEqual([APPLIED.recordId])
+  })
+
+  /**
+   * **A waiting question outranks a landed answer**, and this is the ordering
+   * that makes it one movement rather than two. A visitor may leave one
+   * question open and answer another; two components hauling one scroller to
+   * two cards is settled by whichever effect happened to run last, which is not
+   * a decision anybody made.
+   */
+  it("is the open question, when a question is open and an answer has also just landed", () => {
+    render(
+      <TheRecord
+        records={[HELD, APPLIED]}
+        marked={NOTHING_MARKED}
+        held={NO_READINGS}
+        revision={1}
+        landing={APPLIED.recordId}
+      />,
+      { container: scrollingRail() }
+    )
+
+    expect(carriedTo()).toEqual([HELD.recordId])
+  })
+
+  /**
+   * And the rule travels with it: on a stacked layout the rail is not a
+   * scroller of its own, `SpotlightScroll` is already carrying the visitor to
+   * the mark the change left on the page, and this yields rather than fighting
+   * it for the one scroller there is.
+   */
+  it("holds still for a landed answer where the rail does not scroll by itself", () => {
+    render(
+      <TheRecord
+        records={[APPLIED]}
+        marked={NOTHING_MARKED}
+        held={NO_READINGS}
+        revision={1}
+        landing={APPLIED.recordId}
+      />
+    )
+
+    expect(carriedTo()).toEqual([])
+  })
+
+  /** And nothing at all for a change nobody was asked about. */
+  it("holds still when no answer landed the newest change", () => {
+    render(
+      <TheRecord records={[OTHER]} marked={NOTHING_MARKED} held={NO_READINGS} revision={2} />,
+      { container: scrollingRail() }
+    )
+
+    expect(carriedTo()).toEqual([])
   })
 })
