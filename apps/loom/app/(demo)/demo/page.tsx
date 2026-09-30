@@ -168,9 +168,11 @@ const DemoPage = async () => {
         {/*
           * The trailing room the card needs to reach the top of this scroller,
           * and it is `arrival.ts`'s decision rather than a layout choice made
-          * here — `roomToLand` says what it measured and why it is conditional.
+          * here — `roomToLand` says what it measured, and why it is given for
+          * both moments a card has to reach this scroller's top: a question
+          * waiting on an answer, and the change that answer landed.
           */}
-        <aside className={`${RAIL} ${roomToLand(rail.waiting !== undefined)}`}>
+        <aside className={`${RAIL} ${roomToLand(rail)}`}>
           {/*
             * The claim, at the size of a claim — and a component rather than
             * four paragraphs written here.
@@ -216,6 +218,7 @@ const DemoPage = async () => {
             marked={rail.marked}
             held={rail.readings}
             revision={tree.revision}
+            {...(rail.landing === undefined ? {} : { landing: rail.landing })}
           />
 
           {/*

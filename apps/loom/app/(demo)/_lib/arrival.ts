@@ -118,5 +118,44 @@ export const clearanceFor = (block: ScrollLogicalPosition): string =>
  * rail below the footer, reachable only by scrolling past the end of the
  * record while a question is waiting, and it buys the frame the demo's one
  * invited press produces.
+ *
+ * ## And it outlived the question by one press too few
+ *
+ * The room was given while a question was **open** and taken back the moment it
+ * was answered — which is the press that produces the frame the whole
+ * demonstration is for. Measured on a production build at 1280 × 900 and filed
+ * on 28 September:
+ *
+ * | | after the ask | after the answer |
+ * | --- | --- | --- |
+ * | the rail's scroll | **788** — the card was carried to the top | **788**, nothing re-took it |
+ * | the card's top, in the rail | 831 | **740** — the panel above it lost 91px |
+ * | the furthest the rail could scroll | 1,223 | **993**, and **623** with a shorter card |
+ * | so the card's top, on screen | 43 | **−48**, or **+117** where the browser clamped |
+ *
+ * Two different failures, and the room is the second of them. Answering takes
+ * the caution out of the panel and puts the green button back, so everything
+ * above the card ends up 91px shorter than it was when the scroll was taken;
+ * that is what `AnswerInView` re-lands. But with the room gone the rail may no
+ * longer be *able* to put the card at its top — at 606px of card the furthest
+ * scroll is 623 and the landing is a clamp rather than a landing. **So what a
+ * stranger saw of the payoff frame was decided by whether the card was taller
+ * or shorter than the rail**, which is nobody's decision, and a re-landing
+ * without the room would have moved that arithmetic rather than removed it.
+ *
+ * So the room is given for **both** moments the rail has to put a card at its
+ * own top: a question waiting on an answer, and the change that answer landed
+ * (`landed.ts`). It is the same promise in the same file, made twice, and it
+ * costs the same band of empty rail for one press longer.
+ *
+ * **It is handed the rail rather than a boolean**, and that is this run's other
+ * small correction. `page.tsx` is an `async` Server Component no `vitest` run
+ * can mount, so a condition written at the call site is a condition nothing can
+ * check — the defect class `rail.ts` was extracted to end, which turned up five
+ * readings unwired by deleting one argument with the whole suite green. Asking
+ * for the two fields means the *when* is asserted here beside the *what*.
  */
-export const roomToLand = (waiting: boolean): string => (waiting ? "lg:pb-[70vh]" : "")
+export const roomToLand = (rail: {
+  readonly waiting?: unknown
+  readonly landing?: unknown
+}): string => (rail.waiting === undefined && rail.landing === undefined ? "" : "lg:pb-[70vh]")
