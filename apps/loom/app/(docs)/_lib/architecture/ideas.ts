@@ -85,7 +85,7 @@ const SOURCES: readonly IdeaSource[] = [
     id: "registry",
     title: "The vocabulary is a list you write",
     plain:
-      "A proposal may only name things you have registered — your heading, your card, your checkout. Anything else is not a bug that shows up when the page renders; it is a change that could not be proposed. This is the bargain the whole framework rests on: a bounded vocabulary buys you a change you can review, and the behaviour lives in your component rather than in the tree.",
+      "A proposal may only name things you have registered — your heading, your card, your checkout. Anything else is not a bug that shows up when the page renders; it is a change that could not be proposed. This is the bargain the whole framework rests on: a bounded vocabulary buys you a change you can review, and the behavior lives in your component rather than in the tree.",
     lesson: 15,
     record: 13,
   },

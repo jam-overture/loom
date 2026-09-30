@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 /**
  * The two asides a page needs and prose cannot make: a thing worth knowing, and
  * a thing that will bite. There is no third kind on purpose — a palette of six
- * callout colours turns a documented constraint into decoration, and a reader
+ * callout colors turns a documented constraint into decoration, and a reader
  * learns to skip all of them.
  *
  * Under the minimal theme the note carries the site's green — a mint ring on a
@@ -15,7 +15,7 @@ import type { ReactNode } from "react"
  * `.not-prose` region holding *authored markdown*, so the two treatments that
  * content needs — an underline on a link, a chip on a backtick span — have to
  * be asked for rather than inherited from the prose rules the barrier keeps
- * out. They come back in the callout's own colour, which is what the shared
+ * out. They come back in the callout's own color, which is what the shared
  * grey chip never did.
  */
 export type CalloutKind = "note" | "warning"

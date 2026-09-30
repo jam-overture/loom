@@ -10,6 +10,7 @@ import {
   type LoomNode,
   type LoomTree,
 } from "@jam-overture/loom"
+import { compositionById } from "@jam-overture/loom/primitives"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 /**
@@ -417,6 +418,54 @@ export const contactExampleTree = (to?: string): LoomTree => {
   ])
 }
 
+/**
+ * A band, built by the library rather than by this file.
+ *
+ * The two examples below are the only ones in the catalogue whose subtree this
+ * repository did not write, and that is the whole point of them. The page they
+ * sit on claims the starter library can build a whole section of a page in one
+ * step; the honest way to show that is to *call the thing that does it* and put
+ * what comes back on the screen. A band that stops building, or starts building
+ * a node the registry no longer has, takes `catalogue.test.tsx` red — which is
+ * the same guarantee every other example has, reaching one level further out.
+ *
+ * An unknown id throws. The ids here are parts of a page rather than free
+ * strings, and a part with no canonical design is already a red test in the
+ * library itself; this is the second place that would say so rather than
+ * rendering a page with a hole in it.
+ */
+const band = (ids: IdFactory, id: string): LoomNode => {
+  const composition = compositionById(id)
+
+  if (composition === undefined) {
+    throw new Error(`loom: no band in the starter library is called "${id}"`)
+  }
+
+  return composition.build(ids)
+}
+
+/** One band, whole: forty-four nodes that arrived as one operation. */
+const aBandDroppedInWhole = (): LoomTree => {
+  const ids = sequentialIdFactory("bandwhole")
+
+  return page(ids, MINIMAL, { width: "wide" }, [band(ids, "pricing")])
+}
+
+/**
+ * Three bands in the order the page sequence puts them.
+ *
+ * Three of the twenty-two rather than all of them, because an example frame is
+ * a viewport onto a document and a reader scrolling twenty-two bands has lost
+ * the sentence that sent them here. The three are `hero`, `features` and `cta`
+ * — the opening, the middle and the close — so what the frame shows is a
+ * document with a beginning and an end rather than an excerpt.
+ */
+const aPageThatStartedFromBands = (): LoomTree => {
+  const ids = sequentialIdFactory("frombands")
+
+  return page(ids, MINIMAL, {}, [band(ids, "hero"), band(ids, "features"), band(ids, "cta")])
+}
+
 const entries: readonly DocsExample[] = [
   {
     id: "first-tree",
@@ -473,6 +522,20 @@ const entries: readonly DocsExample[] = [
     caption:
       "Two sections, a call to action, a link, and two questions that open. Nothing on it is instrumented — the same tree is measured further down this page by reading its markup.",
     build: aPageAReaderScrolls,
+  },
+  {
+    id: "a-band-dropped-in-whole",
+    title: "A pricing band, built by the library",
+    caption:
+      "Forty-four nodes, none of them written here: the starter library built this subtree and it arrived on the page as a single insert. Ask to move “Most popular” onto another plan and watch it be one operation.",
+    build: aBandDroppedInWhole,
+  },
+  {
+    id: "a-page-that-started-from-bands",
+    title: "Three bands, in the order a page uses them",
+    caption:
+      "Scroll the frame: the opening, the middle and the close, taken from the library’s page sequence. Each was one insert, and what is on the screen afterwards is ordinary nodes — nothing in the tree records that a band put them there.",
+    build: aPageThatStartedFromBands,
   },
 ]
 

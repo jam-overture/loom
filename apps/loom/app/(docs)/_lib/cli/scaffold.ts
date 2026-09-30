@@ -37,7 +37,7 @@ type MemoryDisk = {
 /**
  * A disk that is a `Map`.
  *
- * `list` mirrors `nodeFileSystem`'s two behaviours the planner depends on: it is
+ * `list` mirrors `nodeFileSystem`'s two behaviors the planner depends on: it is
  * recursive, and a directory nothing has been written to lists as empty rather
  * than failing — "nothing here yet" is the ordinary case for `init`.
  *

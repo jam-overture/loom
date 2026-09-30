@@ -15,6 +15,7 @@ import {
 import { describeThemeError, type ThemeError } from "../theme/registry.js"
 
 import type { PropsIssue } from "./props.js"
+import { describeUnshownFault, type UnshownFault } from "./unshown.js"
 
 /**
  * Rendering is total: it always returns an element. Anything it could not
@@ -155,6 +156,50 @@ export type RenderDiagnostic =
       readonly nodeId: NodeId
       readonly type: PrimitiveType
       readonly name: string
+    }
+  | {
+      /**
+       * An answer arrived, under a name the primitive reads, and the primitive
+       * placed some of its rows and not the rest.
+       *
+       * The one way a binding can be wrong that is invisible from outside the
+       * component: each row has a shape only the primitive knows, so only the
+       * primitive can say that eleven of twelve stopped reading. A listing skips
+       * the row it cannot read and names it to the reader without a count
+       * (0175). There was nowhere else for it to say the count (0206).
+       *
+       * Both counts rather than the difference, because the sentence the author
+       * needs is *eleven of twelve*. Never the rows: a diagnostic is logged and
+       * a row is the host's data, the same line `data-unavailable` holds.
+       *
+       * Reported only when `shown < given`. An answer read whole is the ordinary
+       * case and would be one line per bound region in every log.
+       */
+      readonly code: "data-unshown"
+      readonly nodeId: NodeId
+      readonly type: PrimitiveType
+      readonly name: string
+      readonly given: number
+      readonly shown: number
+    }
+  | {
+      /**
+       * A primitive declares what it could not show and its declaration could
+       * not be believed: it threw, or it returned a reading that cannot describe
+       * an answer.
+       *
+       * The node renders exactly as it would have. A declaration is bookkeeping
+       * about an answer, not part of drawing it, and a page lost to bookkeeping
+       * is the worst trade available here — so the fault becomes the thing it
+       * was trying to report.
+       *
+       * It is the one diagnostic in this union a tree cannot cause and a
+       * deployment cannot cause. It is addressed to whoever wrote the component.
+       */
+      readonly code: "unshown-unreadable"
+      readonly nodeId: NodeId
+      readonly type: PrimitiveType
+      readonly fault: UnshownFault
     }
   | {
       /**
@@ -312,6 +357,10 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} binds "${diagnostic.name}" to "${diagnostic.source}" and it could not be answered — ${describeDataUnavailable(diagnostic.unavailable)}`
     case "data-unread":
       return `node ${diagnostic.nodeId} binds "${diagnostic.name}" and "${diagnostic.type}" does not read a binding of that name, so the answer was resolved and then read by nobody`
+    case "data-unshown":
+      return `node ${diagnostic.nodeId} was answered ${diagnostic.given} row${diagnostic.given === 1 ? "" : "s"} under "${diagnostic.name}" and "${diagnostic.type}" showed ${diagnostic.shown} of them, so the rest arrived and were not drawn`
+    case "unshown-unreadable":
+      return `node ${diagnostic.nodeId} is drawn by "${diagnostic.type}", which says what it could not show and could not be believed, so nothing was reported of what it dropped — ${describeUnshownFault(diagnostic.fault)}`
     case "data-unresolved":
       return diagnostic.resolution === "absent"
         ? `node ${diagnostic.nodeId} asks for data and this render was given no resolution, so it rendered with none`

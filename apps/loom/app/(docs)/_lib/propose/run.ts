@@ -88,7 +88,7 @@ export type DocsAsk =
  *
  * `undo` never hands its intent to the caller either — the utterance behind a
  * revert is a revision number rather than a sentence someone typed, so the
- * runtime synthesises it. Reading it back off the event is how the box can show
+ * runtime synthesizes it. Reading it back off the event is how the box can show
  * a reader that an undo asked for something, in the same shape as everything
  * else.
  */

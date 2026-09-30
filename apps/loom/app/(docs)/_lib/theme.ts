@@ -1,5 +1,5 @@
 /**
- * Where the reader's colour choice is kept.
+ * Where the reader's color choice is kept.
  *
  * It lives in its own module, imported by both the inline script in the layout
  * and the toggle, because the toggle is a client component and a plain constant

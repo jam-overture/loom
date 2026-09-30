@@ -1,5 +1,5 @@
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
-import { BrandColour } from "@/app/(docs)/_components/brand-colour"
+import { BrandColor } from "@/app/(docs)/_components/brand-color"
 import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
 import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
 
@@ -11,7 +11,7 @@ You do not style a Loom page by writing CSS for it. You **name three things on
 the root node**, and every primitive underneath changes appearance without being
 touched.
 
-The three are a **palette** — the colours — a **font pack** — the typefaces and
+The three are a **palette** — the colors — a **font pack** — the typefaces and
 the sizes they step through — and a **style preset** — the corners, the spacing
 and how fast anything moves. Each is a registered thing with an id, and the tree
 carries the ids and nothing else.
@@ -61,7 +61,7 @@ a delta that touches one node.
 
 ## Every palette declares every slot
 
-A palette is not a few brand colours. It is **seventeen named slots, all of them
+A palette is not a few brand colors. It is **seventeen named slots, all of them
 filled**, and the completeness is the point rather than bureaucracy: a tree
 themed with one palette has to be re-themable with any other, and a slot some
 palette left undefined would be a hole that only shows up on the page that used
@@ -69,14 +69,14 @@ it.
 
 <PaletteSlots />
 
-The names are jobs, not colours. `fg-muted` is *the ink that recedes*, so a
+The names are jobs, not colors. `fg-muted` is *the ink that recedes*, so a
 primitive asks for it without knowing whether today's answer is grey, warm brown
 or pale blue. Nothing in a tree ever says `#0a0a0a`.
 
 `brand-secondary` is worth a second look, because it is the slot that catches
 people out. It is reserved even in palettes that have only one accent — those
 mirror their accent into it — so that **every palette has the same shape**, and
-a primitive that paints an area with the second brand colour cannot be handed a
+a primitive that paints an area with the second brand color cannot be handed a
 palette where that slot is missing.
 
 The type ramp and the spacing scale work the same way, and for the same reason:
@@ -120,7 +120,7 @@ moving ([0089](/docs/architecture/decision-records)).
   too, so an empty string means clean.
 </Callout>
 
-## Where your brand colour actually goes
+## Where your brand color actually goes
 
 Now the part that surprises people, and the reason this page exists rather than
 a paragraph on another one.
@@ -135,13 +135,13 @@ the brand book left it.
 lightness that clears the bar with a margin rather than picking one and hoping.
 Here it is, run on a mint:
 
-<BrandColour />
+<BrandColor />
 
 That is not the tool being clumsy. It is the only honest answer to *"can we put
 our green on white and write on it?"* — and `canCarryText` will give you that
-answer for one colour in one call, before you have built anything.
+answer for one color in one call, before you have built anything.
 
-The brand colour is not thrown away when the answer is no. It goes to
+The brand color is not thrown away when the answer is no. It goes to
 `border-accent` and `brand-secondary`, where it is a rule, a ring or a tinted
 field — **an area rather than a letterform** — and `accent` takes a near-neutral
 ink instead. That is not a workaround; it is what the `minimal` palette this site
@@ -150,8 +150,8 @@ wears reached by hand before the derivation existed.
 <Callout kind="warning">
   `derivePalette` is a **build-time tool**. Derive, look at it, paste the result
   in — never call it in a render. A palette is reviewed by seeing it and diffed
-  by reading it, and a page whose colours are computed at import time is a page
-  whose colours nobody approved.
+  by reading it, and a page whose colors are computed at import time is a page
+  whose colors nobody approved.
 </Callout>
 
 ## Registering your own

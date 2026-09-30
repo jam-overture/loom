@@ -237,12 +237,3 @@ if (ARRIVAL_TOTALS.minutes > ARRIVAL_BUDGET_MINUTES) {
   )
 }
 
-/**
- * The way round the first three steps, for somebody who would rather start from
- * a project that already works.
- *
- * Named here rather than in the component so that it is resolved against the
- * rail like everything else — the shortcut past the route is the last link on
- * this site that should be allowed to rot.
- */
-export const ARRIVAL_SHORTCUT_HREF = pageAt("getting-started", "scaffolding-a-project").href

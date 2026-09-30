@@ -54,7 +54,7 @@ export const ThemeToggle = () => {
     <button
       type="button"
       onClick={() => choose(NEXT[choice])}
-      aria-label={`Colour theme: ${LABEL[choice]}. Switch to ${LABEL[NEXT[choice]]}.`}
+      aria-label={`Color theme: ${LABEL[choice]}. Switch to ${LABEL[NEXT[choice]]}.`}
       title={`Theme: ${LABEL[choice]}`}
       className="border-edge text-ink-muted hover:text-ink hover:border-edge-strong flex h-8 w-8 items-center justify-center rounded-md border text-sm transition-colors"
     >

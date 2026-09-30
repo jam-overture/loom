@@ -270,7 +270,7 @@ describe("what the generated file says a door needs installed", () => {
     /**
      * The finding this band was built for. Importing this door from a plain
      * Node script fails with `Vitest failed to access its internal state`,
-     * which is correct behaviour and was documented nowhere a reader would
+     * which is correct behavior and was documented nowhere a reader would
      * look.
      */
     expect(contracts?.requires.find((requirement) => requirement.package === "vitest")).toEqual({

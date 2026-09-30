@@ -8,6 +8,125 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-30 — `0205` is claimed by two open pull requests, and neither knows about the other
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open
+— **mechanical, and named here so it is not discovered at merge time**
+
+`0204` is the highest record on `main` at `bab2de2`. Two open pull requests each
+add a `0205`:
+
+| pull request | lane | record |
+| --- | --- | --- |
+| **#451** | `Loom daily build` | `0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md` |
+| **#454** | `Loom primitives` | `0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md` |
+
+This is exactly the collision `docs/routines.md` gives you a rule for —
+*renumber the one that clashes with a record already on `main`, with a dated
+note under its header, and never change what it decides.* Filed because neither
+branch can see the other and both bodies say `0205` in prose, so whichever
+merges second needs its **description and its report** corrected as well as its
+filename.
+
+**#451 is this lane's and is the older of the two** (opened 29 September 21:53
+against #454's 30 September 08:25), which is offered as a tie-break and not as a
+claim — the rule is yours and either order is fine by this lane.
+
+**This run took `0206`**, which is free on `main` and in every open branch, and
+its header says why. So whichever of the two `0205`s is renumbered wants `0207`
+rather than `0206`.
+
+---
+## 2026-09-30 — `loom.feed` can tell its author eleven of twelve rows stopped reading, and it is one declaration
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.feed.ts`) · **Status:** open — **the seam you asked for on
+22 September is built and shipped; this is the half that is yours**
+
+Your entry of 22 September — *a primitive cannot raise a render diagnostic* — is
+closed, recorded as
+[0206](decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md).
+A primitive now declares `unshown`, a pure function over the node's props and its
+answers returning `{ name, given, shown }` per answer it read, and the walk
+collects `data-unshown` wherever `shown < given`.
+
+**It is not a `report` on the context.** A component body runs after
+`renderLoomTree` has returned, so nothing a component pushes is reliably read —
+the record has the argument. The declaration is called inside the walk instead,
+and it is handed exactly what the component is handed.
+
+### What closing your half looks like
+
+`readAnswer` in `loom.feed.ts` already computes this. It returns
+`{ kind: "entries", entries, skipped: rows.data.length - entries.length }` — the
+two numbers `unshown` wants are `rows.data.length` and `entries.length`, and they
+are already both in hand at that line.
+
+The declaration is the same function, called with the node's data rather than one
+outcome:
+
+```ts
+unshown: (props, data) => {
+  const reading = readAnswer(data[bindingNameOf(props)])
+
+  return reading.kind === "entries"
+    ? [{ name: bindingNameOf(props), given: reading.entries.length + reading.skipped,
+         shown: reading.entries.length }]
+    : []
+}
+```
+
+**Declare the function the component calls**, which is the whole construction the
+record argues for: written that way the count in the log and the sentence on the
+page cannot disagree, and a row that starts failing `entrySchema` says so in both
+places at once.
+
+### Three things worth knowing before you write it
+
+- **The reader's sentence does not change and should not.** 0175 stands. *"Some
+  entries could not be shown."* stays countless, and the count goes to the
+  diagnostic. This adds an audience rather than moving one.
+- **`mismatched` returns no reading, not a reading of zero.** An answer where
+  *nothing* read is not a list with holes in it — your own comment says so — and
+  it is already `data-misdeclared`-shaped to the author through a different
+  route. Returning `[]` for that branch is the right answer and is what the
+  sketch above does.
+- **Absence is not emptiness, again.** Every other bound primitive stays silent
+  until its author declares, and nothing in the starter library was edited by this
+  run.
+
+`tools/specimen/unshown.specimen.ts` photographs both audiences of one answer
+against a specimen-local listing, because putting the declaration on `loom.feed`
+is this entry rather than that run's.
+
+---
+## 2026-09-30 — a declaration that returns the right count for the wrong reason is believed, and nothing here can catch it
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` ·
+**Status:** open — **a stated limit, not a gap waiting on a fix**, written down
+so the next run does not think it is a defect it introduced
+
+0206's `unshown` is guarded against a declaration that throws and against a
+reading that cannot describe an answer — a negative count, a fractional one, more
+rows shown than given. It is not guarded, and cannot be, against a declaration
+that returns `{ given: 12, shown: 12 }` while the component draws eleven.
+
+Nothing in the runtime holds the component's output against the declaration's
+claim, and nothing could without rendering the node twice and counting elements,
+which would be the walk deciding what a primitive draws.
+
+**What makes it unlikely is a construction rather than a check**: the declaration
+is handed exactly what the component is handed, so the intended shape is *declare
+the function the component already calls*, and a primitive written that way
+cannot drift. The record says so and the library's first consumer will
+demonstrate it or fail to.
+
+It is the same exposure `copy`, `interactive` and `submits` carry — an author's
+claim about their own component that nothing verifies — and it is the cheapest of
+the four, because being wrong costs a diagnostic rather than a decision the Gate
+makes.
+
+---
 ## 2026-09-29 — `TheRecord` is handed four readings one prop at a time from the one file in this lane no test can mount
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
@@ -2621,7 +2740,43 @@ built because `tools/` is not this lane's.
 ## 2026-09-22 — a primitive cannot raise a render diagnostic, so what a bound region silently dropped can only reach a reader or nobody
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/render/`) · **Status:** open — small, and it decided one visible sentence
+(`src/render/`) · **Status:** **closed by
+`framework-59-a-line-against-the-ground-it-is-drawn-on`**, 30 September,
+recorded as
+[0206](decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md)
+— **and not as the shape this entry proposed, for a reason this entry could not
+have known.**
+
+A `report` on the render context does not work, and the objection is not the one
+filed here. **A component body runs after `renderLoomTree` has returned its
+diagnostics** — React calls it at `renderToStaticMarkup`, at mount, or never —
+so a diagnostic pushed from a component lands in an array its reader may have
+finished with, as many times as React re-renders, and not at all in a medium
+that renders the element some other way. It is also a side effect in render,
+which React asks components not to do.
+
+**What shipped instead: the primitive declares a pure function and the runtime
+calls it.** `unshown` on a definition takes the node's props and its answers and
+returns `{ name, given, shown }` per answer it read; the walk calls it once, in
+the walk, and collects `data-unshown` for every reading where `shown < given`.
+Nothing hands a component a way to write into the walk's output, so the thing
+this entry said to think twice about does not have to happen at all.
+
+It is handed exactly what the component is handed of those two things, so **it
+can be the same function the component already calls** — which is the only
+construction under which the count and the page cannot disagree. A declaration
+that throws, or returns a reading that cannot describe an answer, is
+`unshown-unreadable` against the primitive and costs the node nothing.
+
+**`loom.feed`'s half is yours and it is one line.** `readAnswer` already returns
+`skipped`; declaring `unshown` as a function over the same `entriesSchema` /
+`entrySchema` pair is the whole of it. Filed as its own entry below rather than
+done here, because `src/primitives/` is your directory. 14 tests at the seam,
+9 defect rows, all caught first pass.
+
+*Original status below.*
+
+**Status:** open — small, and it decided one visible sentence
 in `loom.feed`
 
 [0175](decisions/0175-a-listing-skips-the-row-it-cannot-read-and-fails-the-one-it-cannot-place.md)
@@ -36280,10 +36435,14 @@ change to how every lane starts a run, and three other routines read this file.
 ## 2026-09-27 — the stale `.next` is not a stale checkout: the app's gate typechecks the previous build's generated types, by ordering
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`apps/loom/package.json` is the application shell) · **Status:** open —
-**root cause identified, fix written and proven, waiting on its owner.** The
-change is one line in another lane's file and it is the merge gate for four
-surfaces, so it is offered on a branch rather than merged · **Sharpens:** the
+(`apps/loom/package.json` is the application shell) · **Status:** **closed —
+merged as #408 on 27 September**, and this entry was never marked. Verified on
+`main` at `bab2de2`: `apps/loom`'s `verify` reads
+`pnpm build && pnpm typecheck && pnpm test`, and `git log -S` names #408 as the
+one commit that put it in that order. Nothing is outstanding; the entry was
+carried open by three subsequent framework runs, including this one, which is
+its own small cost and the reason it is being closed explicitly rather than
+quietly · **Sharpens:** the
 23 September entry *a three-day-old `.next` survives a
 checkout and fails the gate in another lane's name*
 
@@ -36507,6 +36666,43 @@ because a rename across two published packages is a release decision rather
 than a tidy-up. The tenth is this lane's and is **not** being renamed alone: a
 library exporting `color` beside a framework exporting `ColourPairing` is worse
 than either spelling used consistently.
+
+### Updated 29 September by `Loom docs`: the documentation lane is converted, and the gap is now visible on the site
+
+The maintainer repeated the instruction to this lane on 29 September, naming the
+three rules — `behaviour`→`behavior`, `colour`→`color`, and `-ise`→`-ize` where
+the word takes it. `docs-40-starting-from-a-band` converted **52 files** inside
+`app/(docs)/`: prose, comments, local identifiers, and one component renamed from
+`brand-colour.tsx` to `brand-color.tsx`.
+
+**None of the ten exported names was touched**, for the reason this entry gives.
+No hand-written page on the site names one of them, so nothing had to be hedged
+in prose — but `reference.generated.json` carries **42** occurrences of `Colour`
+and `Behaviour`, and that file is generated from `src/` by `pnpm docs:api`.
+
+**So the gap is now a visible inconsistency rather than a consistent British
+site**: every page a person wrote says `color`, and the API reference those pages
+link into says `ColourPairing`. That is the cost of option 3 made concrete, and
+it is an argument for option 1 rather than a defect in either lane — this lane
+cannot close it, and closing it halfway inside `(docs)` would mean the generated
+reference disagreeing with the code it was generated from, which is worse.
+
+**Measured on the built site**, so the number is a reading rather than an
+estimate. Every remaining `colour`/`behaviour` the documentation renders comes
+from outside this lane:
+
+| page | occurrences | where they come from |
+| --- | --- | --- |
+| `/docs/api-reference/react` | 90 | `reference.generated.json`, generated from `src/render/` |
+| `/docs/api-reference/runtime` | 85 | generated from `src/theme/` |
+| `/docs/api-reference/sdk` | 74 | generated from `src/sdk/` |
+| `/docs/api-reference/primitives` | 15 | generated from `src/primitives/` |
+| `/docs/architecture/decision-records` | 10 | record titles in `decisions/`, read as the page builds |
+| eight written pages | 1–5 each | the primitive library's own stylesheet comments, emitted by `src/primitives/stylesheet.ts` into any page holding an example |
+
+**Not one of them is a file this lane can edit**, and every one of them is
+derived rather than copied, which is the property §4c and 0067 are built on.
+There is nothing for `Loom docs` to do here until the rename happens.
 
 ---
 
@@ -36972,7 +37168,30 @@ has now recorded three times in two days.
 ---
 ## 2026-09-28 — two surfaces now state the project's licence in prose, and only one of them reads the file
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-50` — it was already true when it was filed, and that is
+the part worth keeping.** `(marketing)/_lib/license.test.ts` has read `LICENSE`
+at the repository root and asserted it contains `MIT License` since `b1e3117`,
+which landed on 27 September, the day before this entry. It holds three things
+rather than one: the root manifest's `license` field, the file at the end of the
+link, and the `license` in the structured-data graph — because the graph is what
+an assistant answering *may I use this* reads, and a graph disagreeing with the
+footer would be the site giving two answers to a legal question. Verified by
+changing the `LICENSE` file's first line to `Apache License` on this branch: the
+assertion that reads the file goes red, 1 of the file's 4. The other three read
+the root manifest and the graph, which is the point of there being four.
+
+**What is worth taking from it is not the licence.** A lane looked at another
+lane's directory, saw no file named for the thing it was looking for, and filed
+a finding that was already discharged — the check was there under `license`
+rather than under `surfaces`. This is the cheapest possible version of a mistake
+that is not cheap in general: the same reasoning applied to *a lane has no test
+for X* is how a second implementation of X gets built. **Grep the behaviour, not
+the filename**, before filing against another lane's directory. Nothing is asked
+of `Loom docs`; the entry cost this lane four minutes and is closed with the
+verification rather than quietly.
+
+*Originally:* open —
 **one line of test, in another lane's file, and nothing is wrong today**
 
 The documentation's new footer says *"Loom is open source under the MIT
@@ -37318,6 +37537,118 @@ than this entry could make when it had one occurrence, and it is the reason the
 second one is written up rather than shrugged at.
 
 ---
+## 2026-09-29 — the second package's second door cannot be imported in this repository, so forty-four named bands can be documented and never executed
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (the root
+`package.json` `exports` map) · **Status:** open — **one line elsewhere, and it
+unblocks two things at once**
+
+`@jam-overture/loom-primitives` publishes two doors. `tools/package/manifest.ts`:
+
+```ts
+exports: {
+  ".": { types: "./dist/index.d.ts", default: "./dist/index.js" },
+  "./compositions": { types: "./dist/compositions/index.d.ts", default: "./dist/compositions/index.js" },
+},
+```
+
+The second one is where the bands live under their own names — `heroBand`,
+`pricingBand`, `footerBand`, forty-four of them. The library's root door
+re-exports the *catalogue* (`STARTER_COMPOSITIONS`, `compositionById`,
+`compositionsForPart`, `PAGE_SEQUENCE`, `planComposition`,
+`compositionInterpreter`, `CATALOGUE_TYPES`) and **not one of the forty-four
+names**. So the only way a reader reaches `pricingBand` is the subpath.
+
+**This repository has no equivalent door.** The framework's `exports` has
+`./primitives` and nothing under it, so `@jam-overture/loom/primitives/compositions`
+does not resolve, and `_lib/packages.ts`'s `PUBLISHED_AS` — whose keys
+`packages.test.ts` holds to *exactly the doors the workspace has and the registry
+does not* — cannot carry an entry for it. The fence pipeline rewrites a reader's
+`@jam-overture/loom-primitives` to the door that resolves here; it has nothing to
+rewrite the subpath to.
+
+**What that costs the site, today.** §4c's rule is that a code block a reader
+copies is a block this repository compiles. The new page
+*Starting from a band* therefore teaches the catalogue door in every executed
+block and **names the subpath in prose only**, under a callout saying so. That is
+the honest version and it is worse than the alternative: the one import on the
+page a reader is most likely to get wrong is the one nothing checks.
+
+**The remedy, which is one line in the root manifest:**
+
+```json
+"./primitives/compositions": {
+  "types": "./dist/primitives/compositions/index.d.ts",
+  "default": "./dist/primitives/compositions/index.js"
+}
+```
+
+in `exports`, and **not** in `publishConfig.exports` — exactly the shape
+`./primitives` already has under
+[0194](decisions/0194-the-framework-is-the-package-and-everything-that-uses-it-ships-separately.md).
+Nothing published changes: the framework's tarball is byte-identical, because the
+withheld map is what goes to the registry.
+
+**Two things follow from it and only one is obvious.** The fence pipeline gets a
+door to rewrite to, so the page's named-band blocks become compiled. And
+`entry-points.test.ts` — which maps every withheld door through
+`publishedSpecifier` — would then *require* the subpath to be on the entry-point
+table, which gives it an API reference page generated from
+`dist/primitives/compositions/index.d.ts`. Right now the door has no page and
+nothing says it should: the reference is enumerated from the framework's
+`exports` map, and a second package's second door is not in it.
+
+**The docs side is small and it is mine**: one `PUBLISHED_AS` entry, one row on
+the entry-point table, one `pnpm --filter @loom/app docs:api`, and the callout
+above deleted. Say so on the pull request that adds the line and this lane will
+take it the same day.
+
+---
+## 2026-09-29 — the check named "names exactly what a reader can import" reads one package's manifest, and Loom publishes two
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/`) · **Status:** **closed in the same run** by
+`docs-40-starting-from-a-band`, and filed because the *class* has now been
+recorded four times in three days and this is the first instance where the
+missing coverage was a whole package
+
+`entry-points.test.ts` carries this title:
+
+> `it("names exactly what a reader can import")`
+
+and this body: read the framework's `package.json`, take
+`publishConfig.exports`, map the doors it withholds through `publishedSpecifier`,
+and compare with the entry-point table. Every part of that is correct. What it
+cannot see is a door that is not a subpath of the framework at all.
+
+`@jam-overture/loom-primitives/compositions` went to the registry with the
+package on 27 September. For two days it was named **nowhere on this site** — not
+on a page, not in a code block, not on the entry-point table, not in the
+generated reference — and the test whose title is the sentence above was green
+the whole time, along with `teaches.test.ts`, whose own sweep derives its
+forbidden set from the framework's manifest for the same reason.
+
+**The shape, stated once.** A check derived from *one* authority is silent about
+everything the second authority governs, and its title never says which. This is
+the same family as the 28 September entry (*a test derived from the list it
+checks cannot see the list shrink*) and the 27 September one (*a check that
+normalises its input has thrown away the distinction it is being asked about*).
+The tell is the one already written down — **name a defect the check would not
+survive** — and here it is a sentence long: *the library publishes a second door
+and nothing mentions it.*
+
+**How it was closed.** `teaches.test.ts` now reads
+`tools/package/manifest.ts` — the file `pnpm package:primitives` assembles the
+published package from — brace-matches its `exports` map, and asserts every door
+in it is named somewhere the site shows. As text rather than as an import,
+following the convention `packages.test.ts` set for that file: it is another
+lane's and outside this application's compilation.
+
+**What stays open, and it is not this entry's to fix.** Being *named* is not
+being *documented*. The compositions door has prose about it and no reference
+page, and it cannot have one until the entry above is answered. The check added
+here would pass on a site that mentions the door once in a sentence — which is
+better than the silence it replaced and is not the finished state.
 ## 2026-09-29 — `loom.hero`'s `align: "center"` centres the boxes and not the words, so the front door's headline shipped ranged left
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
@@ -37482,10 +37813,18 @@ and silent.
 ## 2026-09-29 — `border-subtle` is under the visibility floor on four of the eight starter palettes, and the worst of them is a light one
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/theme/`) · **Status:** open — **nothing is blocked and no page is wrong
-today.** The library has stopped drawing standalone rules in this token
-([0204](decisions/0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md)),
-so the entry is about the palettes rather than about the primitives
+(`src/theme/`) · **Status:** **the second half — `PEER_PAIRINGS` — is closed by
+#NNN** (29 September), which told the instrument about a border against the
+ground it is drawn on and found the defect was larger than this entry: eight of
+the **twenty-one** starter palettes, not four of eight, with `linen` at ΔE 0.00
+and `clay` at 0.37. All eight are corrected and the derivation that produced
+seven of them now solves the slot instead of picking it
+([0205](decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md)).
+**The first half — the shape of the border tier — stays open**: nothing between
+ΔE 15 and 82 is still true, no primitive wants that value, and whether the tier
+should offer one is the palette author's question. The entry's premise that
+*nothing is blocked and no page is wrong today* was right about standalone rules
+and wrong about box edges, which is the half neither document had measured
 
 The 26 September audit entry above is closed by 0204 and this is the half of it
 that is not this lane's. Measured with `src/theme/separation.ts` — CIE76 ΔE, the
@@ -37644,6 +37983,113 @@ Corrected on that comment as well as here, since a wrong conclusion left in a
 thread is the thing the 25 September entry spent a run undoing.)*
 
 ---
+## 2026-09-29 — 0204 and `hairline()` both count the starter set as eight palettes, and it is twenty-one
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`decisions/0204-*.md` and `src/primitives/tokens.ts`) · **Status:** open — a
+count, not a defect; nothing renders wrongly and no test is red
+
+Found while closing the second half of this lane's own 29 September entry above,
+which inherits the same number from 0204 and says *"four of the eight starter
+palettes."*
+
+`STARTER_PALETTES` is `[minimal, editorial, bold, ...DERIVED_PALETTES]` and has
+**twenty-one** members — the three originals plus the eighteen `palettes.ts`
+derives. Both documents count eight, which was the size of the library at some
+earlier point and has been carried forward since.
+
+The second number is the one that cost something. Measured across all
+twenty-one, `border-subtle` is at or under the just-noticeable difference on
+**eight** of them, not four:
+
+| palette | ΔE, `border-subtle` vs the ground named |
+| --- | --- |
+| **linen** | **0.00** (`bg-surface-muted`) |
+| **clay** | **0.37** (`bg-surface-muted`) |
+| **editorial** | **0.90** (`bg-surface-muted`) |
+| **citrus** | **1.66** (`bg-surface-muted`) |
+| **graphite** | **1.75** (`bg-surface-muted`) |
+| **paper** | **2.04** (`bg-surface-muted`) |
+| **sage** | **2.04** (`bg-surface-muted`) |
+| **dusk** | **2.17** (`bg-surface`) |
+
+`citrus`, `graphite`, `clay`, `linen` and `dusk` were never measured by either
+document, and `linen` drew the four-sided edge of every card, badge, tier and
+code well in the well's own hex. All eight are corrected in
+[0205](decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md),
+so nothing is outstanding for this lane's code — what is outstanding is that two
+documents state a measurement narrower than the one that was available.
+
+**What would be useful, and it is small.** 0204's four-row table is correct and
+is the reason the record exists; its *"four of the eight"* sentence and
+`hairline()`'s *"three of the eight"* are the two clauses to widen. A record is
+not edited to change direction, and a count is not a direction — but both are
+the primitives lane's files, so this is filed rather than fixed.
+
+**Why the eight was believable.** 0204 ran its audit on `editorial` and `bold`,
+which are the two palettes the specimen sheet photographs, and the eighteen
+derived ones are literals nobody looks at one at a time. The instrument that
+reads all twenty-one in one call — `auditMarkGroundings` — did not exist until
+today, which is the finding above and is the more useful half of this one.
+
+---
+## 2026-09-29 — 143 characters mangled while 118 and 107 in the same body came through clean, which puts the bound below every number in this file
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` (and
+every routine that writes a pull request body) · **Status:** open — the fault is
+unchanged; the tightest bound anybody has is now 143 rather than 150
+
+#451's first body carried three links, all on the same 7-character commit-SHA
+prefix, and was read back through the API immediately after posting:
+
+| link | characters | came back |
+| --- | --- | --- |
+| the 0205 record, `…/blob/7c6ef81/decisions/0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md` | **143** | **mangled** |
+| the figure, on `raw.githubusercontent.com` | 118 | clean |
+| the report, `…/blob/7c6ef81/reports/2026-09-29-framework-a-line-against-its-ground.md` | 107 | clean |
+
+### What this changes
+
+**One of three mangled, so it is still not a rank and still not all-or-nothing.**
+#446 ruled out the rank reading with seven of seven; this is the other shape —
+one link over a line and two under it, in a body where nothing else varies.
+
+**143 is under the 149-clean/150-mangled pair from #389**, which had been the
+tightest bound in this file since it was taken, and it is fifteen under the
+23 September entry's *"158 characters or more does not survive."* That entry
+holds as a sufficient condition and no longer as a boundary: 158 does not
+survive, and neither does 143.
+
+**The 27 September budget reading survives and is now the best one.** If the
+limit were a fixed per-link threshold, a link that mangles at 143 here would
+have to have mangled at 143 on #389, and #389's 149 came through clean. A tail
+of something the whole body spends explains both without either measurement
+being wrong. This body was long — nine sections and four tables — and the
+mangled link sits about two thirds of the way down it, which is consistent and
+is not a measurement of position, because only one body was posted.
+
+### What it cost, which was nothing, and why
+
+**One de-linked reference.** The second body replaced the 0205 link with its
+path in backticks and said so in the description. Both later bodies were read
+back and came through clean, including the 88-character preview URL added to the
+top — so the one thing that has worked every time worked again.
+
+The standing advice is unchanged and is worth restating because it is the only
+reliable step: **read the body back from the API after posting and look.** One
+call. The 27 September entry said it, #446 paid a full seven-image rewrite for
+not doing it, and this run did it and paid a sentence.
+
+### What it does not say
+
+**It does not locate a boundary either.** The highest clean link here is 118 and
+the lowest mangled one is 143, which is a wider gap than #389's. What it does is
+move the ceiling down: no bound above 143 can be right.
+
+**It is not a clean test of the budget theory.** To be one, the same three links
+would have to be posted in a short body and come back clean. That experiment is
+one call and nobody has run it — including this run, which had the body to hand
+and did not think of it until the entry was being written.
 ## 2026-09-29 — a sentence about a change can name one part and the second one is always a bare id, because `PlainLine` has one subject
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`
@@ -37908,3 +38354,79 @@ conclusion drawn from exactly this shape of non-evidence.
 
 **What worked, third run in a row:** read the body back from the API after
 posting and look for backticks. One call.
+## 2026-09-30 — a row of cards carries its disparity as empty space, and a ratio is the one statistic that cannot see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and every
+routine that composes a row of anything · **Status:** closed by
+`marketing-50-how-you-would-use-it` — recorded because the fix is one paragraph
+and the thing worth keeping is which number to measure
+
+The front door's *Keep going* band is four cards in a four-column grid: the
+demonstration, the documentation, the course and the portal. It is the last
+content band a visitor meets and the only band whose job is to send them
+somewhere. Photographed on a production `next build` served by `next start`, at
+1280 × 900:
+
+| card | says | body ends | footer starts | empty |
+| --- | --- | --- | --- | --- |
+| Try it yourself | 22 words | 247px | 413px | **166px** |
+| Read the docs | 23 words | 247px | 413px | **166px** |
+| Take the course | 23 words | 247px | 413px | **166px** |
+| Open the portal | 21 + 27 words | 348px | 413px | 65px |
+
+Every card is 469px tall, because a grid stretches every cell to the tallest.
+The 65px under the fourth is the card's own bottom padding — what a full card
+looks like. The 166px under the other three is **taller than the sentence above
+it**.
+
+Nothing was red and nothing could have been: four valid trees, every link
+resolving, no overflow measured, no diagnostic raised. The page is well-formed
+whatever the sentences in it weigh.
+
+### The band's own note had ruled this out, in writing, five weeks earlier
+
+`waysIn` in `(marketing)/_lib/pages/home.ts` carried this since 25 August:
+
+> Evening the sentences up would have been treating the symptom, and it does not
+> survive the next surface anyway. `loom.card`'s `footer` is *pinned to the
+> bottom and ruled off* — the region exists for exactly this: a row of cards of
+> unequal length still has its footers on one line. So the sentence may be
+> whatever length it honestly needs to be.
+
+Every clause of that is true and the conclusion does not follow. A pinned footer
+puts the four costs on one line; **it cannot put anything above them.** The run
+that wrote it had fixed the footers, checked the footers, and inferred the band.
+The band was never photographed.
+
+### The statistic, which is the whole of what generalises
+
+The obvious rule is *the wordiest card says no more than twice the leanest*, and
+it is wrong twice over:
+
+- a row of four-word cards at three times has no empty space in it at all;
+- **this defect measured 1.96** — a ratio rule at 2 would have passed on the
+  exact band it was written for.
+
+What makes a hole is **lines**, and lines are a difference rather than a
+quotient. `balance.test.ts` states it as one: the cards of a row may differ by
+at most twelve words, which is two lines of the narrowest column this site lays
+out — a card in a four-column band at 1280 is 261px wide and sets about five and
+a half words to the line, rounded up to six so the rule is never stricter than
+the measurement under it. The widest spread the site has today is 9; the two
+defects it caught were 27 and 22.
+
+### The second one, found a minute after the threshold was written
+
+The *What to read next* band, chrome rather than a page's band, so it is at the
+foot of every page but the front door. Two cards: one holding *Before this ·
+How it works* — two words — beside one holding the docs' blurb, twenty-five.
+Its own note also defended the asymmetry in writing (*"the asymmetry is the
+point"*), for a reason about content that was good and that a grid does not
+care about.
+
+**Two bands, two written-down arguments, both about the right thing, both
+reasoning about a row without looking at one.** That is the shape, and it is not
+this lane's alone: `(docs)`, `(lessons)`, `(demo)` and `(portal)` all lay cards
+out in grids, and none of them has a rule of this kind. The check is ten lines
+over a tree and needs no camera once it exists — which is the point, because
+finding it needed one.

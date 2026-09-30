@@ -16,7 +16,7 @@
  * **A surface is known here by its front door and nothing else.** The
  * documentation does not know that the portal has a history page or that the
  * course has eleven lessons, and must not: a path into another lane's interior
- * is a link that breaks the day that lane reorganises, and no test on this side
+ * is a link that breaks the day that lane reorganizes, and no test on this side
  * could see it break. A front door is the one address a route group owes the
  * rest of the application, so it is the one address this site keeps.
  *

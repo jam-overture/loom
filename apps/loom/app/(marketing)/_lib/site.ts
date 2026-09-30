@@ -290,25 +290,21 @@ export type GuardedSurface = SurfaceFacts & {
    * One sentence, in the same plain words as `blurb`, saying what the door is.
    *
    * Not what is behind it — `blurb` does that — and never a promise that it
-   * opens. It is rendered wherever this surface is offered with room for a
-   * sentence, off this one string, so the front door and the record page cannot
-   * come to describe the same door two ways.
+   * opens.
+   *
+   * **The place with room for it is an answer rather than a card**, which is a
+   * change of 30 September. It was in the body of the front door's *Open the
+   * portal* card until then, where it was the one card in a row of four saying
+   * twice what the other three said, and the row was photographed with 166px of
+   * nothing in each of the other three. What a card has room for is the cost
+   * word; what has room for the sentence is the question a reader asks when
+   * they want it. So this is read by `questions.ts` and nowhere else, and the
+   * card says the same fact in four words through `cost`.
    */
   readonly door: string
 }
 
 export type Surface = OpenSurface | GuardedSurface
-
-/**
- * The door's sentence, for a caller that has a surface and does not know which
- * kind it is.
- *
- * Every band that offers a surface offers all of them — the front door's is
- * exactly `PRODUCT_SURFACES` and holds a test to it — so the narrowing happens
- * once, here, rather than at each call site.
- */
-export const doorOf = (surface: Surface): string | undefined =>
-  surface.guarded ? surface.door : undefined
 
 /**
  * The one surface that answers the hero's promise rather than arguing for it.

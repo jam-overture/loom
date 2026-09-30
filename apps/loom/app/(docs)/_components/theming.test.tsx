@@ -8,7 +8,7 @@ import {
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { BrandColour, brandDerivation } from "./brand-colour"
+import { BrandColor, brandDerivation } from "./brand-color"
 import { ContrastAudit, contrastAuditFacts } from "./contrast-audit"
 import { PaletteSlots } from "./palette-slots"
 
@@ -39,7 +39,7 @@ describe("the slot table", () => {
     }
   })
 
-  it("paints each swatch the colour the palette actually holds", () => {
+  it("paints each swatch the color the palette actually holds", () => {
     const { container } = render(<PaletteSlots />)
     const painted = new Set(hexesIn(container))
 
@@ -80,7 +80,7 @@ describe("the contrast audit", () => {
   })
 
   /**
-   * The one the page would be dishonest without. A docs site that summarised a
+   * The one the page would be dishonest without. A docs site that summarized a
    * clean bill of health over palettes the runtime reports failures on is the
    * exact fault `describePaletteAudit` was written to prevent.
    */
@@ -113,13 +113,13 @@ describe("the contrast audit", () => {
   })
 })
 
-describe("the brand colour", () => {
+describe("the brand color", () => {
   /**
-   * The claim the section is built on. If a brand colour this saturated ever
+   * The claim the section is built on. If a brand color this saturated ever
    * starts clearing the bar on a near-white canvas, the prose beside it is
    * wrong and this fails rather than the reader finding out.
    */
-  it("finds the brand colour cannot be ink and the derived accent can", () => {
+  it("finds the brand color cannot be ink and the derived accent can", () => {
     expect(brandDerivation.brandCanCarryText).toBe(false)
     expect(brandDerivation.accentCanCarryText).toBe(true)
     expect(brandDerivation.brandRatio).toBeLessThan(brandDerivation.bar)
@@ -130,16 +130,16 @@ describe("the brand colour", () => {
     expect(brandDerivation.clean).toBe(true)
   })
 
-  it("puts the brand colour somewhere rather than discarding it", () => {
-    const { container } = render(<BrandColour />)
+  it("puts the brand color somewhere rather than discarding it", () => {
+    const { container } = render(<BrandColor />)
     const painted = hexesIn(container)
 
     expect(painted).toContain(brandDerivation.borderAccent)
     expect(painted).toContain(brandDerivation.brandSecondary)
   })
 
-  it("prints both measured ratios beside the two colours", () => {
-    render(<BrandColour />)
+  it("prints both measured ratios beside the two colors", () => {
+    render(<BrandColor />)
 
     expect(screen.getByText(new RegExp(`${brandDerivation.brandRatio.toFixed(2)}:1`))).toBeTruthy()
     expect(screen.getByText(new RegExp(`${brandDerivation.accentRatio.toFixed(2)}:1`))).toBeTruthy()

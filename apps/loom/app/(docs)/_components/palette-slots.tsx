@@ -13,7 +13,7 @@ import { PALETTE_SLOTS, STARTER_PALETTES, type Palette, type PaletteSlot } from 
  *
  * Three palettes rather than the whole registered set. Twenty-one columns is a
  * catalogue, and the argument the page is making needs only enough width to see
- * that the same seventeen names hold different colours — the count of the rest
+ * that the same seventeen names hold different colors — the count of the rest
  * is stated in prose beside it, and generated too.
  */
 
@@ -39,19 +39,19 @@ const tierOf = (slot: PaletteSlot): string => slot.split("-")[0] ?? slot
 const TIER_LABELS: Readonly<Record<string, string>> = {
   bg: "Surfaces — what the page and the things on it are painted",
   fg: "Inks — what carries meaning",
-  accent: "Accent — the one colour that means “this one”",
+  accent: "Accent — the one color that means “this one”",
   brand: "Brand secondary — areas, never letterforms",
   border: "Borders — the rules and rings",
 }
 
-const Swatch = ({ colour }: { readonly colour: string }) => (
+const Swatch = ({ color }: { readonly color: string }) => (
   <div className="flex flex-col gap-1">
     <div
       className="border-edge h-8 w-full min-w-14 rounded border"
-      style={{ backgroundColor: colour }}
-      data-swatch={colour}
+      style={{ backgroundColor: color }}
+      data-swatch={color}
     />
-    <span className="text-ink-faint font-mono text-[0.6875rem] leading-none">{colour}</span>
+    <span className="text-ink-faint font-mono text-[0.6875rem] leading-none">{color}</span>
   </div>
 )
 
@@ -81,7 +81,7 @@ export const PaletteSlots = () => (
             <div className="border-edge grid grid-cols-[minmax(9rem,1fr)_repeat(3,minmax(0,1fr))] items-start gap-3 border-b px-3 py-2 last:border-b-0">
               <span className="text-ink font-mono text-xs break-all">{slot}</span>
               {shownPalettes.map((palette) => (
-                <Swatch key={palette.id} colour={palette.slots[slot] ?? ""} />
+                <Swatch key={palette.id} color={palette.slots[slot] ?? ""} />
               ))}
             </div>
           </div>

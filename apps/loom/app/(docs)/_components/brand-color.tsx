@@ -8,18 +8,18 @@ import {
 } from "@jam-overture/loom"
 
 /**
- * What happens to a brand colour when you ask the runtime to build a palette
+ * What happens to a brand color when you ask the runtime to build a palette
  * around it — derived here, on this page, rather than described.
  *
  * The page needs to make a claim that sounds like an excuse when it is only
  * asserted: *your mint will come back darker than your brand book says, and that
  * is the right answer.* Asserting it invites the reader to assume the tool is
- * clumsy. So the derivation runs at build time and the two colours are printed
- * side by side with the measured ratio under each — the brand colour cannot
+ * clumsy. So the derivation runs at build time and the two colors are printed
+ * side by side with the measured ratio under each — the brand color cannot
  * carry text and the derived accent can, and both numbers came from
  * `contrastRatio` rather than from a paragraph.
  *
- * The mint is a stand-in for the reader's own colour and is deliberately a hard
+ * The mint is a stand-in for the reader's own color and is deliberately a hard
  * case: pale, saturated, and the sort of thing a brand book is proudest of.
  */
 
@@ -27,8 +27,8 @@ import {
 const BRAND_HUE = 152
 const BRAND_SATURATION = 68
 
-/** The colour as a brand book would print it: mid-lightness, full chroma. */
-const brandColour = hslHex(BRAND_HUE, BRAND_SATURATION, 55)
+/** The color as a brand book would print it: mid-lightness, full chroma. */
+const brandColor = hslHex(BRAND_HUE, BRAND_SATURATION, 55)
 
 const spec: PaletteSpec = {
   id: "your-brand",
@@ -47,18 +47,18 @@ const accent = derived.slots["accent"] ?? ""
 const borderAccent = derived.slots["border-accent"] ?? ""
 const brandSecondary = derived.slots["brand-secondary"] ?? ""
 
-const ratio = (colour: string): number => contrastRatio(colour, canvas) ?? 0
+const ratio = (color: string): number => contrastRatio(color, canvas) ?? 0
 
 /** What the derivation actually returned. Held against the prose by a test. */
 export const brandDerivation = {
-  brandColour,
+  brandColor,
   accent,
   borderAccent,
   brandSecondary,
   canvas,
-  brandCanCarryText: canCarryText(brandColour, canvas),
+  brandCanCarryText: canCarryText(brandColor, canvas),
   accentCanCarryText: canCarryText(accent, canvas),
-  brandRatio: ratio(brandColour),
+  brandRatio: ratio(brandColor),
   accentRatio: ratio(accent),
   clean,
   bar: TEXT_CONTRAST_MINIMUM,
@@ -66,12 +66,12 @@ export const brandDerivation = {
 
 const Verdict = ({
   label,
-  colour,
+  color,
   measured,
   carries,
 }: {
   readonly label: string
-  readonly colour: string
+  readonly color: string
   readonly measured: number
   readonly carries: boolean
 }) => (
@@ -81,29 +81,29 @@ const Verdict = ({
       className="border-edge flex h-16 items-end rounded border p-2"
       style={{ backgroundColor: canvas }}
     >
-      <span className="text-base font-semibold" style={{ color: colour }}>
+      <span className="text-base font-semibold" style={{ color }}>
         Read the archive
       </span>
     </div>
-    <p className="text-ink font-mono text-xs">{colour}</p>
+    <p className="text-ink font-mono text-xs">{color}</p>
     <p className={carries ? "text-ink-muted text-xs" : "text-ink text-xs font-semibold"}>
       {measured.toFixed(2)}:1 on the canvas — {carries ? "can be ink" : "cannot be ink"}
     </p>
   </div>
 )
 
-export const BrandColour = () => (
+export const BrandColor = () => (
   <div className="not-prose my-6 flex flex-col gap-3">
     <div className="grid gap-3 sm:grid-cols-2">
       <Verdict
-        label="The colour as your brand book prints it"
-        colour={brandDerivation.brandColour}
+        label="The color as your brand book prints it"
+        color={brandDerivation.brandColor}
         measured={brandDerivation.brandRatio}
         carries={brandDerivation.brandCanCarryText}
       />
       <Verdict
         label="What the derivation put in accent"
-        colour={brandDerivation.accent}
+        color={brandDerivation.accent}
         measured={brandDerivation.accentRatio}
         carries={brandDerivation.accentCanCarryText}
       />
@@ -111,22 +111,22 @@ export const BrandColour = () => (
 
     <div className="border-edge rounded-lg border p-3">
       <p className="text-ink-muted text-xs">
-        The brand colour is not thrown away. It goes where a colour is an area rather than a
+        The brand color is not thrown away. It goes where a color is an area rather than a
         letterform:
       </p>
       <div className="mt-3 flex flex-wrap gap-x-8 gap-y-3">
         {[
-          { slot: "border-accent", colour: borderAccent },
-          { slot: "brand-secondary", colour: brandSecondary },
+          { slot: "border-accent", color: borderAccent },
+          { slot: "brand-secondary", color: brandSecondary },
         ].map((entry) => (
           <div key={entry.slot} className="flex items-center gap-2">
             <span
               className="border-edge h-6 w-10 rounded border"
-              style={{ backgroundColor: entry.colour }}
-              data-swatch={entry.colour}
+              style={{ backgroundColor: entry.color }}
+              data-swatch={entry.color}
             />
             <span className="text-ink font-mono text-xs">{entry.slot}</span>
-            <span className="text-ink-faint font-mono text-xs">{entry.colour}</span>
+            <span className="text-ink-faint font-mono text-xs">{entry.color}</span>
           </div>
         ))}
       </div>

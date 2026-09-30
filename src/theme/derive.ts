@@ -1,4 +1,5 @@
 import { auditPalette, contrastRatio, TEXT_CONTRAST_MINIMUM } from "./contrast.js"
+import { colourDifference, JUST_NOTICEABLE_DIFFERENCE } from "./separation.js"
 import { paletteSchema, type Palette } from "./theme.js"
 
 /**
@@ -42,6 +43,20 @@ import { paletteSchema, type Palette } from "./theme.js"
 const MARGIN = 0.25
 
 const TARGET = TEXT_CONTRAST_MINIMUM + MARGIN
+
+/**
+ * How far past the just-noticeable difference a derived line lands, in ΔE.
+ *
+ * The same reasoning as `MARGIN` and for the same reason it is not zero: a slot
+ * solved to exactly the floor drops under it the first time somebody nudges a
+ * background by a value. 2.3 is what `separation.ts` asserts, because it is the
+ * published threshold; 3.0 is what this aims at, because it is the one a later
+ * edit can afford to lose a little of. Written as the floor plus a margin rather
+ * than as 3, so moving the published threshold moves this with it.
+ */
+const MARK_MARGIN = 0.7
+
+export const MARK_SEPARATION_TARGET = JUST_NOTICEABLE_DIFFERENCE + MARK_MARGIN
 
 export type PaletteMode = "light" | "dark"
 
@@ -136,6 +151,46 @@ const DEFAULT_LEVELS: Readonly<Record<PaletteMode, readonly [number, number, num
 }
 
 /**
+ * The lightness *nearest* `from` at this hue whose colour clears `target` ΔE
+ * against every one of `grounds`.
+ *
+ * Nearest rather than furthest, which is the opposite of `solveLightness` and
+ * for the mirror of its reason. An ink is dragged as far as the bar allows
+ * because a letterform has to be read; a line only has to be **found**, and a
+ * border pushed further than it needs to go stops being the subtle tier and
+ * becomes the default one. The tiers are a ramp and the gaps between them carry
+ * meaning (0204), so the search moves a line the least it can.
+ *
+ * Both directions are tried at each step and the darker one wins a tie, because
+ * on a light palette the grounds are above the border and moving down is the
+ * direction that gains separation from all three at once.
+ *
+ * Falls back to `from` when nothing within 40 points of lightness clears the
+ * target, which is a palette whose three grounds surround the tier — the
+ * derivation cannot fix that by moving one slot, and `auditMarkGroundings` is
+ * what says so.
+ */
+export const solveMarkLightness = (
+  hue: number,
+  saturation: number,
+  from: number,
+  grounds: readonly string[],
+  target: number
+): string => {
+  const nearestGround = (candidate: string): number =>
+    Math.min(...grounds.map((ground) => colourDifference(candidate, ground) ?? 0))
+
+  for (let step = 0; step <= 40; step += 0.125) {
+    for (const lightness of step === 0 ? [from] : [from - step, from + step]) {
+      const candidate = hslHex(hue, saturation, lightness)
+      if (lightness >= 0 && lightness <= 100 && nearestGround(candidate) >= target) return candidate
+    }
+  }
+
+  return hslHex(hue, saturation, from)
+}
+
+/**
  * Derives a palette. Total: it always returns one, and `auditPalette` on the
  * result is the check that it worked — see `derivePaletteChecked` for the pair.
  */
@@ -191,7 +246,22 @@ export const derivePalette = (spec: PaletteSpec): Palette => {
       "brand-secondary-strong": hslHex(sh, Math.min(ss + 6, 100), ink ? 38 : 48),
       "border-default": hslHex(ch, cs + 4, ink ? 86 : 22),
       "border-strong": hslHex(ch, cs + 4, ink ? 12 : 90),
-      "border-subtle": hslHex(ch, cs + 3, ink ? 92 : 17),
+      /**
+       * The one border tier that is solved rather than picked. At the default
+       * levels it lands two points of lightness from the muted well, which is
+       * under the just-noticeable difference — so eight of the palettes in
+       * `palettes.ts` shipped a card edge a reader could not find, and one of
+       * them drew it in the well's own colour. The other two tiers are 4 to 15
+       * and 74 to 98 from every ground at every hue this derives, so they are
+       * picked; if that ever stops being true, this is the function to reach for.
+       */
+      "border-subtle": solveMarkLightness(
+        ch,
+        cs + 3,
+        ink ? 92 : 17,
+        [bgCanvas, bgSurface, bgSurfaceMuted],
+        MARK_SEPARATION_TARGET
+      ),
       "border-accent": hslHex(ah, Math.min(as, 70), ink ? 58 : 62),
     },
   })

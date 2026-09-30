@@ -34,7 +34,7 @@ import { namesToEntries, parseSearchIndex, parseSearchNames, withCode, withNames
 const index = buildSearchIndex()
 
 /**
- * The first file as a browser really receives it: serialised, parsed, and with
+ * The first file as a browser really receives it: serialized, parsed, and with
  * the fields it left out filled back in.
  *
  * The two reassembly tests below go through here rather than through
@@ -45,7 +45,7 @@ const index = buildSearchIndex()
  */
 const arrived = () => parseSearchIndex(JSON.parse(JSON.stringify(searchContents())))
 
-/** The names file the same way: serialised, sent, parsed. */
+/** The names file the same way: serialized, sent, parsed. */
 const arrivedNames = () => parseSearchNames(JSON.parse(JSON.stringify(searchNames())))
 
 const hrefs = new Set(docsOrder.map((entry) => entry.href))
@@ -557,7 +557,7 @@ describe("what the index contains", () => {
    * The two halves are one index or they are nothing.
    *
    * The prose travels keyed by `href`, so an entry whose href the prose file
-   * does not recognise silently keeps an empty body — which would be a search
+   * does not recognize silently keeps an empty body — which would be a search
    * box quietly missing its fourth band with every test still green. This is the
    * check that the seam holds: put the halves back together and you have what
    * `buildSearchIndex` said in the first place.

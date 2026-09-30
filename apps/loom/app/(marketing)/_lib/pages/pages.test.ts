@@ -238,10 +238,19 @@ describe.each(SITE_ROUTES)("$path", (route) => {
       expect(markup).toContain(`>${neighbor.label}<`)
     }
 
+    /**
+     * The hand-off names the surface and stops there, as of 30 September.
+     *
+     * It carried the surface's blurb until then and was the only card in the
+     * band that carried anything — so the card beside it, holding two words,
+     * was stretched to its height and photographed with the difference as empty
+     * space. `chrome.ts` has the reasoning and `balance.test.ts` has the rule;
+     * what is asserted here is the half that is this band's own job, which is
+     * that the way onward is offered at all.
+     */
     if (onward !== undefined) {
       expect(markup).toContain(`href="${surfaceHref(ORIGIN, onward)}"`)
-      /** The hand-off says what is behind the door, which no other card does. */
-      expect(markup).toContain(asRendered(onward.blurb))
+      expect(markup).toContain(`>${onward.label}<`)
     }
   })
 

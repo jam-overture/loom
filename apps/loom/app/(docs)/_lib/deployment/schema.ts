@@ -16,7 +16,7 @@ import { TELEMETRY_DDL } from "@jam-overture/loom/telemetry/postgres"
  * column that arrives in the runtime appears here in the same commit, and one
  * that is renamed cannot be described under its old name.
  *
- * **An unrecognised statement throws rather than being skipped.** The failure
+ * **An unrecognized statement throws rather than being skipped.** The failure
  * this exists to prevent is a page that quietly stops mentioning something the
  * runtime does to a host's database — so a kind of statement this parser has
  * never seen takes the build down, where somebody is looking, instead of

@@ -48,14 +48,14 @@ const wordFor = (value: number): string => {
   return word
 }
 
-const capitalised = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
+const capitalized = (word: string): string => `${word.charAt(0).toUpperCase()}${word.slice(1)}`
 
 describe("the counts this page writes out", () => {
   it("names as many bindings and questions as the tree produced", () => {
     const asked = produceQuestions()
 
     expect(flowed).toContain(
-      `${capitalised(wordFor(asked.written.length))} bindings, ${wordFor(asked.asked)} questions.`
+      `${capitalized(wordFor(asked.written.length))} bindings, ${wordFor(asked.asked)} questions.`
     )
   })
 
@@ -74,7 +74,7 @@ describe("the counts this page writes out", () => {
   it("counts the ways an answer can fail to arrive", async () => {
     const missing = await produceMissingAnswers()
 
-    expect(flowed).toContain(`${capitalised(wordFor(missing.length))} ways a question goes unanswered`)
+    expect(flowed).toContain(`${capitalized(wordFor(missing.length))} ways a question goes unanswered`)
     expect(flowed).toContain(`produced by causing all ${wordFor(missing.length)}`)
   })
 
@@ -106,7 +106,7 @@ describe("the counts this page writes out", () => {
     const missing = await produceMissingAnswers()
     const early = missing.filter((row) => row.reached === "the adapter was never called")
 
-    expect(flowed).toContain(`${capitalised(wordFor(early.length))} of those never reach your code`)
+    expect(flowed).toContain(`${capitalized(wordFor(early.length))} of those never reach your code`)
     expect(flowed).toContain(
       `The other ${wordFor(missing.length - early.length)} are your deployment's own afternoon`
     )

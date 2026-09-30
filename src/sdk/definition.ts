@@ -7,6 +7,7 @@ import type { BehaviourName } from "../render/behaviour.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import type { BindingDeclaration } from "../render/reads.js"
+import type { UnshownDeclaration } from "../render/unshown.js"
 import { NO_TEXT, type PrimitiveText } from "../render/text.js"
 import type { PrimitiveRole } from "../role.js"
 
@@ -56,6 +57,10 @@ import type { PrimitiveRole } from "../role.js"
  *   primitive never reads (0181). Each entry is a fixed name or the name a prop
  *   gives (0184). Optional, and the second declaration where leaving it out and
  *   declaring it empty differ.
+ * - `unshown` — its own reading of the answers it was given, so the walk can say
+ *   that eleven of twelve rows arrived and were not drawn (0206). The only
+ *   declaration here that is a function, because how many rows survived a shape
+ *   is not data about a primitive. Optional, and read at render time.
  */
 
 export type PrimitiveDefinition<
@@ -188,6 +193,32 @@ export type PrimitiveDefinition<
    * so a declaration cannot go on naming a prop that was renamed away.
    */
   readonly reads?: readonly BindingDeclaration[]
+  /**
+   * What this primitive made of each answer it was given: the rows it found and
+   * the rows it placed. The walk reports the ones where those differ.
+   *
+   * The one way a binding can be wrong that nothing outside the component can
+   * see. A source can answer perfectly, under a name the primitive reads, with
+   * rows the primitive then declines one at a time — because a row's shape is
+   * the primitive's own, and eleven of twelve failing it is the author's problem
+   * and nobody else's. The reader is told without a count (0175); this is how
+   * the author is told with one (0206).
+   *
+   * A function, where everything above is data, and that is the honest shape
+   * rather than a shortcut. `reads` is a list of names, and a name is data —
+   * which is why it has a `fromProp` form instead of a callback (0184). A count
+   * of rows that survived a schema is not data about a primitive; it is the
+   * primitive reading an answer, and the primitive already contains that code,
+   * because it had to decide what to skip in order to skip it. Declare the
+   * function the component calls and the two cannot disagree.
+   *
+   * Pure, synchronous, and handed exactly what the component is handed of the
+   * same two things. It may not throw and may not return a reading that cannot
+   * describe an answer; both are caught and reported as
+   * `unshown-unreadable` against the primitive rather than allowed to cost the
+   * page, because rendering is total.
+   */
+  readonly unshown?: UnshownDeclaration
   readonly component: LoomPrimitive<TProps, TText, TBehaviour>
 }
 
@@ -238,6 +269,12 @@ export type PrimitiveEntry = {
    * two mean different things here and all the way out to the render walk.
    */
   readonly reads: readonly BindingDeclaration[] | undefined
+  /**
+   * The declared reading of this node's answers, or `undefined` where the author
+   * has not said. Nothing to check at registration — there are no names in it
+   * and no props it could name — so it is carried straight through.
+   */
+  readonly unshown: UnshownDeclaration | undefined
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
@@ -303,6 +340,7 @@ export const definePrimitive = <
   role: definition.role,
   copy: definition.copy,
   reads: definition.reads,
+  unshown: definition.unshown,
   /**
    * The one narrowing cast in the SDK, and the invariant that makes it sound:
    * a registry hands the renderer this component and the validator built from

@@ -169,9 +169,9 @@ const retheme: DocsPreset = {
   label: "Re-theme the page",
   utterance: "Put this page in the other palette.",
   rationale:
-    "One configure against the root node. A theme is three registered ids, so switching palette changes three strings and nothing else — no component is edited and no colour is named anywhere in the tree.",
+    "One configure against the root node. A theme is three registered ids, so switching palette changes three strings and nothing else — no component is edited and no color is named anywhere in the tree.",
   watchFor:
-    "The delta touches one node and sets one prop. Every colour, typeface and spacing on the page moves anyway.",
+    "The delta touches one node and sets one prop. Every color, typeface and spacing on the page moves anyway.",
   plan: (tree) => {
     const current = themeOf(tree)
     if (current === undefined) return undefined

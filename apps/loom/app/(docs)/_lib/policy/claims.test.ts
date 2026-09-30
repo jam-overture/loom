@@ -124,7 +124,7 @@ describe("the policies this page writes out", () => {
  *
  * A sentence in MDX is wrapped at eighty columns, so a claim four words long
  * straddles a newline about half the time and which half is an accident of
- * editing. Normalising is not weakening the check: a line break is not something
+ * editing. Normalizing is not weakening the check: a line break is not something
  * the page is saying.
  */
 const prose = page.replace(/\s+/g, " ")

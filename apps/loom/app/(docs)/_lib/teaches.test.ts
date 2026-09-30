@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
+import { REPOSITORY_ROOT } from "./architecture/source"
 import { apiEntries } from "./api/reference"
 import { entryPoints } from "./entry-points"
 import { PUBLISHED_AS } from "./packages"
@@ -158,6 +159,95 @@ describe("what the site tells a reader to import", () => {
 
     for (const published of PUBLISHED_AS.values()) {
       expect(command, published).toContain(published)
+    }
+  })
+})
+
+/**
+ * The doors of the **second** package, and why they needed their own check.
+ *
+ * Everything above is derived from the framework's manifest, and that was the
+ * whole of the guarantee until 29 September. Loom publishes two packages, and
+ * `@jam-overture/loom-primitives` has two doors: the library itself, and
+ * `./compositions`, which is where the bands live. The second one was on the
+ * registry for two days and named nowhere on this site — no page, no table, no
+ * reference — and the test whose title is *names exactly what a reader can
+ * import* was green throughout, because it reads the framework's `exports` and a
+ * second package is not in it.
+ *
+ * That is the same shape this ledger has now recorded four times: the check is
+ * right about what it checks and its title claims the thing next door. So this
+ * reads the file that decides the second package's shape.
+ *
+ * It is read as **text** rather than imported, which is the convention
+ * `packages.test.ts` already set for this file: `tools/package/manifest.ts` is
+ * another lane's and outside this application's compilation. A narrow way to
+ * hold a cross-lane fact, and a loud failure when it moves.
+ */
+const PRIMITIVES_MANIFEST = join(REPOSITORY_ROOT, "tools", "package", "manifest.ts")
+
+/**
+ * The subpaths the library's own export map carries, by brace-matching rather
+ * than by a lazy regular expression — the values are objects, so a match that
+ * stopped at the first `}` would find one door and report the set complete.
+ */
+const librarySubpaths = (): readonly string[] => {
+  const source = readFileSync(PRIMITIVES_MANIFEST, "utf8")
+  const open = source.indexOf("{", source.indexOf("exports:"))
+
+  if (open === -1) throw new Error("teaches: tools/package/manifest.ts declares no exports map")
+
+  let depth = 0
+
+  for (let at = open; at < source.length; at += 1) {
+    if (source[at] === "{") depth += 1
+    else if (source[at] === "}") {
+      depth -= 1
+
+      if (depth === 0) {
+        const body = source.slice(open + 1, at)
+
+        return [...body.matchAll(/^\s*"(?<subpath>\.[^"]*)":/gmu)].map((match) => match.groups?.subpath ?? "")
+      }
+    }
+  }
+
+  throw new Error("teaches: the exports map in tools/package/manifest.ts is not closed")
+}
+
+/** What a reader would type for each of them. */
+const libraryDoors = (): readonly string[] => {
+  const name = [...PUBLISHED_AS.values()][0]
+
+  if (name === undefined) throw new Error("teaches: no separately published package to check")
+
+  return librarySubpaths().map((subpath) => (subpath === "." ? name : `${name}${subpath.slice(1)}`))
+}
+
+describe("the doors of the separately published library", () => {
+  it("finds more than one, so this cannot pass by finding only the package itself", () => {
+    expect(libraryDoors().length).toBeGreaterThan(1)
+    expect(libraryDoors()).toContain([...PUBLISHED_AS.values()][0])
+  })
+
+  /**
+   * **Named somewhere a reader will meet it.** Not necessarily on the
+   * entry-point table: that table's set is derived from the framework's manifest
+   * and a page of the generated reference exists for each of its rows, and the
+   * library's second door has neither. Prose naming it is what this site can
+   * honestly offer today, and it is a great deal more than nothing — which is
+   * what it offered before.
+   */
+  it("names every one of them somewhere on the site", () => {
+    const everything = [
+      ...pages().map((page) => page.text),
+      readQuickstartSource(),
+      entryPoints.map((entry) => entry.specifier).join("\n"),
+      apiEntries.map((entry) => entry.specifier).join("\n"),
+    ].join("\n")
+
+    for (const door of libraryDoors()) {
+      expect(everything, door).toContain(door)
     }
   })
 })

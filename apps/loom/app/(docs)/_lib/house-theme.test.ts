@@ -133,7 +133,7 @@ describe("the chrome around them", () => {
    * change gives the docs chrome a grey fill back, the site stops looking like
    * the theme it says it wears, and no other test here would notice.
    */
-  it("keeps its structural surfaces on the page colour", () => {
+  it("keeps its structural surfaces on the page color", () => {
     const source = globals()
 
     expect(source).toContain("--surface-page: #ffffff")
