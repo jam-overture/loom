@@ -288,4 +288,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0202](0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md) | The harness measures the content a clip hides, and it is not `scrollWidth` | Accepted | §1 (process) |
 | [0203](0203-a-props-vocabulary-is-handed-the-props-a-primitive-is-handed.md) | A props vocabulary is handed the props a primitive is handed | Accepted | §2 |
 | [0204](0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md) | A rule with no fill beside it is measured in ΔE, not in contrast ratio | Accepted | §4b |
-| [0205](0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | A primitive that arranges only glyphs inherits its alignment | Accepted | §4b |
+| [0205](0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md) | A line the library declares is measured against every ground it is drawn on | Accepted | §4b |
+| [0206](0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md) | A primitive declares what it could not show, and the runtime decides whether to say so | Accepted | §3 |
+| [0207](0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | A primitive that arranges only glyphs inherits its alignment | Accepted | §4b |

@@ -12,7 +12,7 @@ import { defineSpecimen } from "../../tools/specimen/specimen.js"
  * Six bands that declare themselves centred, holding nodes that say nothing
  * about alignment — which is the arrangement this library rendered wrongly for
  * as long as `loom.heading` and `loom.prose` have existed
- * ([0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)).
+ * ([0207](../../decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)).
  *
  * ## Why the phrasebook could not be the sheet
  *

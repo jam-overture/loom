@@ -10,8 +10,12 @@ list and it is not a report.
 ---
 ## 2026-09-30 — `0205` is claimed by two open pull requests, and neither knows about the other
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open
-— **mechanical, and named here so it is not discovered at merge time**
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:**
+**closed** by `primitives-42-the-band-that-said-centre` (#454) — #451 merged
+first and kept `0205`; #454's record was renumbered to `0207` on 30 September,
+with a dated note under its header, and its citations, its report and its
+description were updated with it. Filing it here is why it cost one rename
+rather than a discovery at merge time.
 
 `0204` is the highest record on `main` at `bab2de2`. Two open pull requests each
 add a `0205`:
@@ -37653,7 +37657,7 @@ better than the silence it replaced and is not the finished state.
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
 **closed** by `primitives-42-the-band-that-said-centre`
-([0205](decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md))
+([0207](decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md))
 — **and the diagnosis below is wrong in a way worth keeping.** The remedy this
 entry asks for was already shipped: `loom.hero` has emitted `textAlign: centred
 ? "center" : "start"` on its text column since #403 on 26 September, three days

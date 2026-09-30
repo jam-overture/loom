@@ -54,7 +54,7 @@ export const loomStatGrid = definePrimitive({
            * Absent means inherit. This grid arranges its columns on the inline
            * axis with `auto-fit` rather than with `align-items`, so it has
            * nothing of its own for a text alignment to agree with, and under
-           * 0205 that makes it a glyph arranger rather than a band.
+           * 0207 that makes it a glyph arranger rather than a band.
            */
           ...(given.align === undefined ? {} : { textAlign: given.align }),
         },

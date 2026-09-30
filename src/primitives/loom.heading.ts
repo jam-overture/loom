@@ -110,7 +110,7 @@ export const loomHeading = definePrimitive({
            * on the column it lays its content out in, and a heading dropped into
            * that column answered it with a hard `start`, so the one centred band
            * on the marketing site shipped with the largest words on the site
-           * ranged left ([0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)).
+           * ranged left ([0207](../../decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)).
            *
            * The tell was in the same column: the eyebrow `loom.hero` renders
            * itself declares no alignment, so it inherited and sat centred above a

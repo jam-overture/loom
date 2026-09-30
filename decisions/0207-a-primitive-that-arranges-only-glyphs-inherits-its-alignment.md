@@ -1,8 +1,16 @@
-# 0205. A primitive that arranges only glyphs inherits its alignment
+# 0207. A primitive that arranges only glyphs inherits its alignment
 
 **Status:** Accepted
 **Date:** 2026-09-30
 **Section:** §4b
+
+> **Renumbered on 2026-09-30**, from 0205, when this branch (#454) was merged.
+> `main` had meanwhile accepted a different 0205 — *a line the library declares
+> is measured against every ground it is drawn on* (#451) — and two records
+> sharing a number is fatal ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> `0206` was taken by the same run that filed the clash, so this record takes
+> `0207`. Nothing in it changed but its number; references on the branch were
+> updated with it.
 
 ## Context
 

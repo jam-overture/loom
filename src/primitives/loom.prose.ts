@@ -36,7 +36,7 @@ export const loomProse = definePrimitive({
           fontSize: size(STEPS[given.size ?? "body"]),
           lineHeight: 1.6,
           color: given.tone === "muted" ? colour("fg-muted") : colour("fg-default"),
-          /** Absent means inherit — see `loom.heading`, and 0205. */
+          /** Absent means inherit — see `loom.heading`, and 0207. */
           ...(given.align === undefined ? {} : { textAlign: given.align }),
           ...(given.measured === true
             ? { maxWidth: READABLE_MEASURE, ...(given.align === "center" ? { marginInline: "auto" } : {}) }

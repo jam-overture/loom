@@ -133,7 +133,7 @@ export const loomBanner = definePrimitive({
           alignItems: "center",
           justifyContent: centred ? "center" : "space-between",
           /**
-           * The third instance of the trap 0205 is about, found by auditing the
+           * The third instance of the trap 0207 is about, found by auditing the
            * library rather than by a camera. This strip arranges its two boxes on
            * the inline axis, so it has to state the text alignment they agree
            * with: `space-between` puts the message hard against the start edge,

@@ -26,7 +26,7 @@ import { createStarterPrimitiveRegistry } from "./index.js"
  * they were right to — nothing was broken, two primitives simply disagreed.
  *
  * So the assertions here are not *this heading is centred*. They are the
- * invariant [0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)
+ * invariant [0207](../../decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)
  * states, swept over the whole library: **a primitive states a text alignment
  * exactly when it arranged boxes on the inline axis.** A hundredth primitive
  * that hardcodes `text-align: start` fails a test that names the rule, rather
@@ -94,7 +94,7 @@ const styles = (markup: string): readonly string[] =>
  * primitives, which is what makes this a sweep and not a snapshot:
  *
  * - **`align-items` or `justify-content` in the same declaration.** That element
- *   arranged boxes on an axis, and under 0205 it then owns the words in them.
+ *   arranged boxes on an axis, and under 0207 it then owns the words in them.
  *   `loom.hero`, `loom.banner`, `loom.person`, `loom.empty-state` and
  *   `loom.overlay` are here, deliberately.
  * - **`vertical-align` in the same declaration.** A table cell, whose alignment
@@ -271,7 +271,7 @@ describe("the invariant, over the whole library", () => {
 
   /**
    * The same sweep from the other side. Removing the `?? "start"` from a leaf is
-   * only half of 0205 — the other half is that a band which *did* arrange boxes
+   * only half of 0207 — the other half is that a band which *did* arrange boxes
    * keeps stating the alignment those boxes agree with, and the way to check
    * that is not to assert the bands but to assert that the exemption above is
    * carrying real weight. If nothing in the library paired the two, the filter

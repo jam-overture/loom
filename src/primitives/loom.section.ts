@@ -47,7 +47,7 @@ const props = z
      * shrink-wrap every one of them to its content. Setting `text-align` on the
      * band instead reaches the eyebrow, the heading region and the children
      * together, by inheritance, because under
-     * [0205](../../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)
+     * [0207](../../decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md)
      * none of them overrides an alignment it was not given.
      */
     align: z.enum(["start", "center"]).optional(),
@@ -93,7 +93,7 @@ export const loomSection = definePrimitive({
           maxWidth: WIDTHS[width],
           /**
            * Emitted only when asked, so a band inside an already-centred region
-           * does not quietly range itself left (0205). This is the only
+           * does not quietly range itself left (0207). This is the only
            * alignment this primitive sets: the inner wrappers keep flex's
            * `stretch`, so the regions stay full width and their words follow
            * this line down.

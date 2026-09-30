@@ -25,7 +25,7 @@ on the most-loaded page the project has.
 | `loom.heading`, `loom.prose`, `loom.stat-grid` | `align` unset now means **inherit**, not `start` |
 | `loom.section` | an `align` prop — the first way to move an eyebrow, which is a field and not a node |
 | `loom.banner` | states the text alignment its `justify-content` implies — a third instance, found by audit |
-| [0205](../decisions/0205-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | a primitive that arranges only glyphs inherits its alignment |
+| [0207](../decisions/0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | a primitive that arranges only glyphs inherits its alignment |
 | `alignment.test.ts` | 11 tests, **8 of them confirmed to fail** against the unfixed library |
 | `the-band-that-said-centre.specimen.ts` | six bands, two palettes, two viewports, before and after |
 
