@@ -37843,3 +37843,68 @@ change.
 The cheap confirmation, worth doing either way: read the emitted markup for the
 property under test. It costs one assertion and it does not depend on anything
 having been wide enough.
+
+---
+## 2026-09-30 — the mangling takes an HTML `src` attribute too, and 141 characters came back clean
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` (and every
+routine that writes a pull request body) · **Adds to:** the 29 September entry
+*seven links over the boundary in one body all mangled* · **Status:** open — two
+measurements, one of which narrows the bound by a single character
+
+#454 hit this and paid two body rewrites for it before reading the file. Two
+things in that came back new, and neither changes the standing advice.
+
+**One — it is not a markdown-syntax fault.** Every measurement in this file so
+far has been a markdown link or image, `[text](url)` or `![alt](url)`. The
+second draft of #454's body used raw HTML instead:
+
+```html
+<img width="900" alt="…" src="https://raw.githubusercontent.com/…-before-bold-wide.png" />
+```
+
+All four came back as `src="``https://…png"``` — **wrapped in the same double
+backticks, inside an HTML attribute.** So whatever is doing this is looking at
+the URL and not at the markdown construct around it, and rewriting the images as
+HTML is not a way round it. Worth having written down, because it is the first
+thing a run reaches for after the markdown form fails, and it costs a whole body
+to find out.
+
+**Two — 141 characters is clean, where 140 was the previous best.** The third
+draft used a short commit SHA in place of the branch name and all six links came
+back unmangled, read back from the API:
+
+| link | characters | came back |
+| --- | --- | --- |
+| `…/fb54407/reports/…-before-editorial-wide.png` | **141** | **clean** |
+| `…/fb54407/reports/…-before-bold-wide.png` | 136 | clean |
+| `…/fb54407/reports/…-editorial-wide.png` | 134 | clean |
+| `…/fb54407/reports/…-bold-wide.png` | 129 | clean |
+| `…/blob/fb54407/decisions/0205-….md` | 128 | clean |
+| `…/blob/fb54407/reports/…-centre.md` | 108 | clean |
+
+The same four images, with the branch name `primitives-42-the-band-that-said-centre`
+in place of `fb54407`, are 168–175 and **all four mangled**. The bound moves from
+140–168 to **141–168** and nothing else about it is settled. The 149-versus-150
+pair on #389 is still the tightest bound anybody has.
+
+**The confound, stated because the entry above was careful about its own.** The
+mangled draft and the clean draft differ in two ways, not one: the URLs got
+shorter *and* the syntax went back from HTML to markdown. So these six do not by
+themselves prove length carried it. What makes the length reading safe anyway is
+the first measurement in this entry — the HTML form mangled at 175, so HTML is
+not what rescued the clean draft, and the only remaining difference is the URL.
+
+**A third thing, and it is a non-measurement worth not mis-reading.** Two short
+links were clean in *every* draft, including the two that mangled everything
+else: `https://claude.ai/code` at 22 characters, inside `[Claude Code](…)`, and
+the 81-character Vercel preview URL posted bare. For about ten minutes this run
+took that as evidence of a **domain allowlist** — `claude.ai` passing where
+`github.com` did not — and started rewriting the body around that theory. It is
+just the length rule again, seen from below. **A short link on a different
+domain surviving is not evidence about the domain**, and this file's own history
+is the reason to say so out loud: the 25 September entry spent a run undoing a
+conclusion drawn from exactly this shape of non-evidence.
+
+**What worked, third run in a row:** read the body back from the API after
+posting and look for backticks. One call.
