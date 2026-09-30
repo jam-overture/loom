@@ -32,6 +32,19 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
  * the just-noticeable difference is a published property of human vision, not a
  * number chosen to fit these palettes.
  *
+ * ## The two questions in here
+ *
+ * **`auditSeparation`** asks whether two slots a reader is meant to tell apart
+ * can be told apart, and lets either the fills or a mark between them answer.
+ *
+ * **`auditMarkGroundings`** asks whether a line the library declares is a line a
+ * reader can find, against every ground it is drawn on. It was added on
+ * 29 September, five weeks after the module, because the first question cannot
+ * reach it: a mark is only measured there when the pair it separates has
+ * collapsed, so eight starter palettes were drawing a `border-subtle` edge
+ * within a just-noticeable difference of the fill it contained — one of them at
+ * ΔE 0.00 — with every test in this file green.
+ *
  * It reports; it does not decide — the bargain `auditPalette` and
  * `auditRegistry` both make, for the same reason (0076).
  */
@@ -84,9 +97,15 @@ export const colourDifference = (a: string, b: string): number | undefined => {
  * **`also-marked`** — a rule, a border or an outline separates them as well, so
  * the two colours are free to be equal. `minimal` is the argument for this
  * basis existing: its `bg-surface` *is* its `bg-canvas`, deliberately, because
- * every card in that palette is defined by its border. What is asserted for
- * these is the weaker and still real claim — the mark itself has to be visible
- * against both.
+ * every card in that palette is defined by its border.
+ *
+ * What an `also-marked` row asserts is that **one** of the two signals works:
+ * the fills differ, or the mark between them does. That is the right question
+ * for *can a reader tell these two regions apart*, and it is weaker than it
+ * reads — a palette whose fills differ is never asked about its mark at all, so
+ * a border that draws nothing passes here. Whether each line the library
+ * declares can be seen at all is `auditMarkGroundings`, which asks it of every
+ * ground the slot lands on and does not take a fill difference as an answer.
  */
 export type PeerBasis = "colour-only" | "also-marked"
 
@@ -188,6 +207,132 @@ export const PALETTE_PEER_PAIRINGS: readonly PeerPairing[] = [
     where: "loom.code panel on a page; loom.callout marks the same pair harder",
   },
 ]
+
+/**
+ * A slot the library draws as a line, and the grounds it is drawn against.
+ *
+ * The question a `PeerPairing` cannot ask. A pairing names two things a reader
+ * tells apart and treats a mark as a *defence* — something that may carry the
+ * pair when the two colours will not. So a mark is only ever measured when the
+ * colours it separates have collapsed, and a mark that draws nothing on a
+ * palette whose two fills happen to differ is never looked at.
+ *
+ * That is not a second way of asking the same thing. A border is a promise in
+ * its own right: the library declares an edge, and a palette that puts the edge
+ * within a just-noticeable difference of the fill behind it has erased a line
+ * the component says is there. Nothing else in the repository would say so —
+ * the region is still distinguishable, so `auditSeparation` passes, and every
+ * test that asks whether the token is real passes too, because the token is
+ * real. It is the module's own lesson at one turn further out: **a token is a
+ * promise about provenance, not about difference**, and a border tier is a
+ * promise about difference from whatever it lands on.
+ *
+ * `grounds` is every ground the library draws this slot against, not the one it
+ * was designed for. A line is judged against its nearest ground, because a rule
+ * that disappears into one of the three fills it is used on has disappeared.
+ */
+export type MarkGrounding = {
+  readonly mark: PaletteSlot
+  readonly grounds: readonly PaletteSlot[]
+  /** Where the library draws it, so a failure names a primitive. */
+  readonly where: string
+}
+
+/**
+ * Every slot the library draws as a line, with the grounds it lands on.
+ *
+ * Declared for the reason `PALETTE_PEER_PAIRINGS` is: a probe can see that
+ * `.loom-card` sets `border-color`, and nothing in the rule says the border is
+ * *meant to be seen* rather than to be the far side of a fill.
+ *
+ * The three tiers and what each is for is
+ * [0204](../../decisions/0204-a-rule-with-no-fill-beside-it-is-measured-in-delta-e.md)'s
+ * split, and the grounds are the three fills every one of them is drawn on:
+ * a page, a card, and a muted well. `border-accent` is not here — it is a ring
+ * a component draws to mean *this one*, and what it answers to is being
+ * different from the other tiers rather than from the ground.
+ */
+export const PALETTE_MARK_GROUNDINGS: readonly MarkGrounding[] = [
+  {
+    mark: "border-subtle",
+    grounds: ["bg-canvas", "bg-surface", "bg-surface-muted"],
+    where: "the four-sided edge of a box: loom.card, loom.badge, loom.tier, loom.code's well",
+  },
+  {
+    mark: "border-default",
+    grounds: ["bg-canvas", "bg-surface", "bg-surface-muted"],
+    where: "hairline(): a rule between table rows, a timeline rail, the line under a nav",
+  },
+  {
+    mark: "border-strong",
+    grounds: ["bg-canvas", "bg-surface"],
+    where: "loom.table and loom.comparison-table, the one rule under a header",
+  },
+]
+
+/** One slot against one of the grounds it is drawn on. */
+export type MeasuredMark = {
+  readonly grounding: MarkGrounding
+  readonly ground: PaletteSlot
+  /** `undefined` when either colour is a form `channelsOf` declines to guess at. */
+  readonly difference: number | undefined
+  /** False for a difference this could not measure: an undefended line is not a defended one. */
+  readonly visible: boolean
+}
+
+/** What one palette does with the lines the library draws in it. */
+export type MarkAudit = {
+  readonly palette: ThemeId
+  readonly measured: readonly MeasuredMark[]
+  /**
+   * The lines a reader cannot find. A border the library declares and the
+   * palette does not draw — the list a host asserts empty.
+   */
+  readonly invisible: readonly MeasuredMark[]
+}
+
+/**
+ * Measures every declared mark against every ground it is drawn on. Refuses
+ * nothing, decides nothing — the same bargain `auditSeparation` makes.
+ *
+ * Separate from `auditSeparation` rather than a fourth bucket inside it,
+ * because the two ask different questions of different shapes of declaration
+ * and a host may reasonably assert one and not the other: a palette may want
+ * two fills to be equal, and no palette wants a line it cannot see.
+ */
+export const auditMarkGroundings = (
+  palette: Palette,
+  groundings: readonly MarkGrounding[] = PALETTE_MARK_GROUNDINGS
+): MarkAudit => {
+  const measured = groundings.flatMap((grounding) =>
+    grounding.grounds.map((ground) => {
+      const difference = colourDifference(palette.slots[grounding.mark] ?? "", palette.slots[ground] ?? "")
+
+      return {
+        grounding,
+        ground,
+        difference,
+        visible: difference !== undefined && difference >= JUST_NOTICEABLE_DIFFERENCE,
+      }
+    })
+  )
+
+  return {
+    palette: palette.id,
+    measured,
+    invisible: measured.filter((entry) => !entry.visible),
+  }
+}
+
+/** One line per invisible mark, for a CLI or a failing test's message. Empty when clean. */
+export const describeMarkAudit = (audit: MarkAudit): string =>
+  audit.invisible
+    .map((entry) =>
+      entry.difference === undefined
+        ? `${audit.palette}: ${entry.grounding.mark} on ${entry.ground} could not be measured (${entry.grounding.where})`
+        : `${audit.palette}: ${entry.grounding.mark} differs from ${entry.ground} by ${entry.difference.toFixed(2)}, under ${JUST_NOTICEABLE_DIFFERENCE} — the line is not there (${entry.grounding.where})`
+    )
+    .join("\n")
 
 /** A peer that was measured, whether or not it came apart. */
 export type MeasuredPeer = {

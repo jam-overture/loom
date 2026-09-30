@@ -6,10 +6,18 @@ import {
   derivePalette,
   derivePaletteChecked,
   hslHex,
+  MARK_SEPARATION_TARGET,
   solveLightness,
+  solveMarkLightness,
   type PaletteSpec,
 } from "./derive.js"
 import { DERIVED_PALETTES } from "./palettes.js"
+import {
+  auditMarkGroundings,
+  colourDifference,
+  describeMarkAudit,
+  JUST_NOTICEABLE_DIFFERENCE,
+} from "./separation.js"
 import { PALETTE_SLOTS } from "./theme.js"
 
 const spec = (over: Partial<PaletteSpec> = {}): PaletteSpec => ({
@@ -190,5 +198,81 @@ describe("the palettes this library ships", () => {
 
     expect(new Set(canvases).size).toBe(canvases.length)
     expect(new Set(accents).size).toBe(accents.length)
+  })
+})
+
+describe("solveMarkLightness", () => {
+  const grounds = ["#ffffff", "#fafafa", "#f4f4f4"]
+
+  it("moves the line the least it can, in whichever direction works", () => {
+    const solved = solveMarkLightness(0, 0, 95, grounds, MARK_SEPARATION_TARGET)
+    const nearest = Math.min(...grounds.map((ground) => colourDifference(solved, ground) ?? 0))
+
+    expect(nearest).toBeGreaterThanOrEqual(MARK_SEPARATION_TARGET)
+    /**
+     * The whole difference from `solveLightness`, which takes the furthest
+     * lightness the bar allows. A line only has to be found, and a border
+     * dragged past what it needed is the next tier down — so this has to land
+     * just over the target and not near black.
+     */
+    expect(nearest).toBeLessThan(MARK_SEPARATION_TARGET + 1)
+  })
+
+  it("is already the answer when the starting lightness clears the target", () => {
+    expect(solveMarkLightness(0, 0, 50, grounds, MARK_SEPARATION_TARGET)).toBe(hslHex(0, 0, 50))
+  })
+
+  /**
+   * A target no lightness can reach — ΔE runs 0 to 100 and this asks for 200 —
+   * so the honest answer is the value it was handed plus an audit that says the
+   * line is not there, rather than a search that runs off the end of the scale
+   * and returns black.
+   */
+  it("gives back the lightness it was handed when nothing clears the target", () => {
+    expect(solveMarkLightness(0, 0, 50, ["#ffffff", "#000000"], 200)).toBe(hslHex(0, 0, 50))
+  })
+
+  it("aims past the threshold the audit asserts, so a later nudge does not drop under it", () => {
+    expect(MARK_SEPARATION_TARGET).toBeGreaterThan(JUST_NOTICEABLE_DIFFERENCE)
+  })
+})
+
+describe("the lines a derived palette draws", () => {
+  /**
+   * The defect that made `solveMarkLightness` necessary, asserted at every hue
+   * rather than at the one that was noticed. `border-subtle` used to be picked at
+   * a fixed lightness two points from the muted well, so every light palette this
+   * function derived shipped a card edge under the just-noticeable difference —
+   * seven of the eighteen in `palettes.ts`, and `linen` in the well's own colour.
+   */
+  it("draws every line it declares, at every hue and in both modes", () => {
+    for (const mode of ["light", "dark"] as const) {
+      for (let hue = 0; hue < 360; hue += 15) {
+        const palette = derivePalette(
+          spec({
+            mode,
+            id: `derived-${mode}-${hue}`,
+            canvas: { hue, saturation: 14 },
+            accent: { hue: (hue + 120) % 360, saturation: 58 },
+            secondary: { hue: (hue + 240) % 360, saturation: 62 },
+          })
+        )
+
+        expect(describeMarkAudit(auditMarkGroundings(palette)), `${mode} ${hue}`).toBe("")
+      }
+    }
+  })
+
+  it("solves the subtle tier and leaves the other two picked", () => {
+    const palette = derivePalette(spec())
+    const worst = (slot: "border-default" | "border-strong"): number =>
+      Math.min(
+        ...(["bg-canvas", "bg-surface", "bg-surface-muted"] as const).map(
+          (ground) => colourDifference(palette.slots[slot] ?? "", palette.slots[ground] ?? "") ?? 0
+        )
+      )
+
+    expect(worst("border-default")).toBeGreaterThan(MARK_SEPARATION_TARGET)
+    expect(worst("border-strong")).toBeGreaterThan(MARK_SEPARATION_TARGET)
   })
 })
