@@ -2,6 +2,8 @@ import { applyDelta, type ElementNode, type LoomNode, type LoomTree } from "@jam
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
+import { BAND } from "../bands"
+import { MECHANISM_JOURNEY_EYEBROW } from "../pages/how-it-works"
 import { RESERVED_VOCABULARY } from "../copy"
 import type { PageContext } from "../pages/home"
 import { askRunFor, renderTree, treeFor } from "../render"
@@ -37,6 +39,29 @@ const contextFor = (ask?: AskId, approve = false): PageContext => ({
 })
 
 const basePage = (): LoomTree => treeFor(HOME, contextFor())
+
+/**
+ * The milestones of one **named band**, rather than of a whole page.
+ *
+ * Both suites below compare runs of `loom.milestone` and both did it by
+ * sweeping an entire tree for the type. That was a correct proxy for exactly as
+ * long as each page had one band built out of milestones — the front door's
+ * waiting panel, and the mechanism page's five-step journey. The *Using it*
+ * band is the front door's second, so an unscoped sweep now counts a band that
+ * is not the panel on one side of every comparison.
+ *
+ * Naming the band is what these tests meant in the first place: their own
+ * docstrings say *the waiting panel* and *the steps the mechanism page names*.
+ * A page may now grow a third run of milestones without either of them
+ * silently starting to measure it.
+ */
+const milestonesIn = (page: LoomTree, eyebrow: string): readonly ElementNode[] => {
+  const band = elementsOf(page.root).find(
+    (element) => element.type === "loom.section" && element.props["eyebrow"] === eyebrow
+  )
+
+  return band === undefined ? [] : elementsOf(band).filter((e) => e.type === "loom.milestone")
+}
 
 const elementsOf = (node: LoomNode): readonly ElementNode[] =>
   node.kind === "text"
@@ -343,8 +368,8 @@ describe("the panel and the mechanism page", () => {
     const mechanism = treeFor(HOW_IT_WORKS, contextFor())
 
     expect(run).toBeDefined()
-    expect(run === undefined ? 0 : countOf(run.page, "loom.milestone")).toBe(
-      countOf(mechanism, "loom.milestone")
+    expect(run === undefined ? 0 : milestonesIn(run.page, BAND.seeItHappen).length).toBe(
+      milestonesIn(mechanism, MECHANISM_JOURNEY_EYEBROW).length
     )
   })
 
@@ -363,7 +388,7 @@ describe("the panel and the mechanism page", () => {
    * for both sides would pass however either panel was built.
    */
   const milestonesOf = (page: LoomTree): readonly ElementNode[] =>
-    elementsOf(page.root).filter((element) => element.type === "loom.milestone")
+    milestonesIn(page, BAND.seeItHappen)
 
   it("names the same steps, in the same order, before the visitor has asked", async () => {
     const run = await askRunFor(contextFor("calmer"))

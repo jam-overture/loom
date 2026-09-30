@@ -69,8 +69,15 @@ const hero = (ids: IdFactory): LoomNode =>
  * many steps there are or what they are — a thing that has gone wrong on this
  * site once, when one band said four and the page under it said five.
  */
+/**
+ * The eyebrow of the journey band, exported because `adapt.test.ts` counts this
+ * band's steps against the front door's panel and must find the band rather
+ * than sweep the page for a primitive type.
+ */
+export const MECHANISM_JOURNEY_EYEBROW = "End to end"
+
 const journey = (ids: IdFactory): LoomNode =>
-  section(ids, { width: "wide", eyebrow: "End to end" }, `${STEPS_CAPITALISED} steps, every time`, [
+  section(ids, { width: "wide", eyebrow: MECHANISM_JOURNEY_EYEBROW }, `${STEPS_CAPITALISED} steps, every time`, [
     buildElement(ids, {
       type: "loom.milestone-list",
       props: { rail: "line", density: "loose" },

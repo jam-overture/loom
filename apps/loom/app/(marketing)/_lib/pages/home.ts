@@ -356,6 +356,131 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * fill, which is decoration that survived four rewrites without ever meaning
  * anything. See the note on `WAYS_IN` for the general version.
  */
+/**
+ * The four beats, as data, because the shape is checked rather than described.
+ *
+ * `state` is what separates the two halves visually: `done` is a thing you have
+ * finished doing, `current` is a thing that is happening now and will be
+ * happening on the next visit too. That is the primitive's own vocabulary used
+ * for what it means, rather than a colour chosen to make two look different
+ * from two.
+ */
+type UsingItStep = {
+  readonly marker: string
+  readonly title: string
+  readonly body: string
+  readonly state: "done" | "current"
+}
+
+const USING_IT: readonly UsingItStep[] = [
+  {
+    marker: "1",
+    title: "Build your components",
+    body: "In your framework, the way you already do. Loom never writes code into your page and never asks you to rebuild it.",
+    state: "done",
+  },
+  {
+    marker: "2",
+    title: "Register them with Loom",
+    body: "One list of the pieces the AI may use, and the rules for what it may do with them. This is the whole of the setup.",
+    state: "done",
+  },
+  {
+    marker: "3",
+    title: "Your AI sees what readers do",
+    body: "Which parts of the page they reach, how long they stay, and what they press \u2014 and never who they are.",
+    state: "current",
+  },
+  {
+    marker: "4",
+    title: "The page adapts, on your rules",
+    body: "It proposes a change, your rules decide whether it lands, and what happened is written down so you can undo it.",
+    state: "current",
+  },
+]
+
+/**
+ * **How you would use this, said plainly, before anything is demonstrated.**
+ *
+ * Placed directly under the plain-words band, at the maintainer's direction of
+ * 30 September: the four words say what a change *is*, and this says what
+ * **you** do about it, so the two read as one answer to *what is this and how
+ * would I use it* before the demonstration below asks anybody to watch
+ * anything.
+ *
+ * The front door argued *why* for five weeks and never once said *what you
+ * would do*. Every other band is a claim about the world, a list of what goes
+ * wrong without this, a number, a question, or the product changing itself in
+ * front of you — all of it true, none of it an answer to the first thing a
+ * developer wants to know. A visitor could watch the demonstration work and
+ * still not know whether using it means rewriting their components.
+ *
+ * ## The shape is the argument, and it is not four equal steps
+ *
+ * The four beats divide two and two, and the division is the sell. **One and
+ * two are things you do once.** Three and four are what happens afterwards,
+ * on every visit, without you. A row of four identical boxes would read as
+ * four chores; the heading and the markers carry the split instead, so the
+ * payoff — *the work stops at two* — is the thing a reader takes away.
+ *
+ * `loom.milestone-row` is the primitive for it and this page had never used
+ * it. Its own docstring is exact about why it exists rather than the rail on
+ * `/how-it-works`: *"a roadmap is read down because time runs that way, and
+ * three steps are read across because they are meant to be taken in at once."*
+ * This band is the second kind. The five-step `JOURNEY` on `/how-it-works` is
+ * the first, and the two must not be confused — that one is what happens to
+ * **one change**, in milliseconds, at runtime; this one is what **you** do, in
+ * an afternoon, once.
+ *
+ * ## The fourth beat carries the record, and that is deliberate
+ *
+ * *"Your AI adapts your page"* is where the maintainer's sketch of this band
+ * ended, and ending there would sell the half a competitor can also claim.
+ * `docs/rollout.md` has the positioning on record: **the differentiator is not
+ * adaptation, it is the record.** So the fourth beat is the change *and* what
+ * is kept about it, which is also what turns the last step back toward the
+ * reader instead of trailing off the edge of the band.
+ *
+ * ## The vocabulary, checked against the brief
+ *
+ * *Monitor* is not used, though it is the word in the sketch: to a stranger it
+ * means uptime and dashboards. What actually happens is that the page reports
+ * which of its parts a reader reached, how long they stayed and what they
+ * pressed — and never who they are (0146), which is a property of the record
+ * rather than a setting, and is worth the words here because *your AI watches
+ * your users* is the sentence in this band most likely to alarm somebody.
+ *
+ * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
+ */
+const usingIt = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: BAND.usingIt },
+    "Two things you do. Then it runs.",
+    [
+      prose(
+        ids,
+        "You keep your framework and you keep your components. Loom needs one list from you: the pieces the AI may use, and the rules for what it may do with them.",
+        { size: "lead", measured: true }
+      ),
+      buildElement(ids, {
+        type: "loom.milestone-row",
+        props: { rail: "line", density: "loose" },
+        children: USING_IT.map((step) =>
+          buildElement(ids, {
+            type: "loom.milestone",
+            props: {
+              marker: step.marker,
+              title: step.title,
+              body: step.body,
+              state: step.state,
+            },
+          })
+        ),
+      }),
+    ]
+  )
+
 const problems = (ids: IdFactory): LoomNode =>
   section(
     ids,
@@ -768,6 +893,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
             ]),
         hero(ids, context),
         vocabulary(ids),
+        usingIt(ids),
         /**
          * Third band, and deliberately before anything that argues for the
          * product. The hero has made the claim and the four words have named
