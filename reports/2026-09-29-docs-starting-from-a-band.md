@@ -260,12 +260,20 @@ invisible to both the overflow measurement and the camera.
 `dist` and a `.next` deleted first, with the status written to a file as the last
 thing on its own line and read in a separate command.
 
-| | `main` at `657d27e` | this branch |
+Measured twice: once on the branch alone, and again after `main` moved under it
+(four pull requests landed while this was being built) and was merged in. The
+second reading is the one that matters and is what the pull request quotes.
+
+| | branched from `657d27e` | after merging `main` at `bab2de2` |
 | --- | --- | --- |
-| `@jam-overture/loom` | 166 files / 3,250 tests | **166 / 3,250** — `src/` was not opened |
-| `@loom/app` | 323 / 5,588 | **325 / 5,619** |
-| findings ledger | 871 entries, 0 malformed | **873**, 0 malformed |
-| prerender | 116 pages, 1,304 junctions | **117 / 1,371**, 0 run together, 0 unserved |
+| `@jam-overture/loom` | 166 files / 3,250 tests | **167 / 3,280** — `src/` was not opened by this branch; both numbers moved because `main` did |
+| `@loom/app` | 325 / 5,619 | **335 / 5,809** |
+| findings ledger | 873 entries, 0 malformed | **889**, 0 malformed |
+| prerender | 117 pages, 1,371 junctions | **119 / 1,371**, 0 run together, 0 unserved |
+
+The merge was clean — no conflicted file, `FINDINGS.md` auto-merged — and the
+gate was re-run from a deleted `dist` and `.next` on the merged head rather than
+relayed from the reading before it.
 
 **+35 tests added, 4 removed, none weakened, none skipped.** Two new files:
 `compositions.test.ts` (22) and `long-code.test.tsx` (7). `teaches.test.ts`

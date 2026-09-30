@@ -36528,6 +36528,23 @@ it is an argument for option 1 rather than a defect in either lane — this lane
 cannot close it, and closing it halfway inside `(docs)` would mean the generated
 reference disagreeing with the code it was generated from, which is worse.
 
+**Measured on the built site**, so the number is a reading rather than an
+estimate. Every remaining `colour`/`behaviour` the documentation renders comes
+from outside this lane:
+
+| page | occurrences | where they come from |
+| --- | --- | --- |
+| `/docs/api-reference/react` | 90 | `reference.generated.json`, generated from `src/render/` |
+| `/docs/api-reference/runtime` | 85 | generated from `src/theme/` |
+| `/docs/api-reference/sdk` | 74 | generated from `src/sdk/` |
+| `/docs/api-reference/primitives` | 15 | generated from `src/primitives/` |
+| `/docs/architecture/decision-records` | 10 | record titles in `decisions/`, read as the page builds |
+| eight written pages | 1–5 each | the primitive library's own stylesheet comments, emitted by `src/primitives/stylesheet.ts` into any page holding an example |
+
+**Not one of them is a file this lane can edit**, and every one of them is
+derived rather than copied, which is the property §4c and 0067 are built on.
+There is nothing for `Loom docs` to do here until the rename happens.
+
 ---
 
 ## 2026-09-27 — `package:primitives` is a primitives-lane script living in the framework's manifest, and nothing says so
