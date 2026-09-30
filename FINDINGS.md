@@ -37131,7 +37131,30 @@ has now recorded three times in two days.
 ---
 ## 2026-09-28 — two surfaces now state the project's licence in prose, and only one of them reads the file
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-50` — it was already true when it was filed, and that is
+the part worth keeping.** `(marketing)/_lib/license.test.ts` has read `LICENSE`
+at the repository root and asserted it contains `MIT License` since `b1e3117`,
+which landed on 27 September, the day before this entry. It holds three things
+rather than one: the root manifest's `license` field, the file at the end of the
+link, and the `license` in the structured-data graph — because the graph is what
+an assistant answering *may I use this* reads, and a graph disagreeing with the
+footer would be the site giving two answers to a legal question. Verified by
+changing the `LICENSE` file's first line to `Apache License` on this branch: the
+assertion that reads the file goes red, 1 of the file's 4. The other three read
+the root manifest and the graph, which is the point of there being four.
+
+**What is worth taking from it is not the licence.** A lane looked at another
+lane's directory, saw no file named for the thing it was looking for, and filed
+a finding that was already discharged — the check was there under `license`
+rather than under `surfaces`. This is the cheapest possible version of a mistake
+that is not cheap in general: the same reasoning applied to *a lane has no test
+for X* is how a second implementation of X gets built. **Grep the behaviour, not
+the filename**, before filing against another lane's directory. Nothing is asked
+of `Loom docs`; the entry cost this lane four minutes and is closed with the
+verification rather than quietly.
+
+*Originally:* open —
 **one line of test, in another lane's file, and nothing is wrong today**
 
 The documentation's new footer says *"Loom is open source under the MIT
@@ -38046,3 +38069,81 @@ deployment has a second version. The pictures of it in
 screen's own components, rendered outside Next with a fixture record and wearing
 the deployment's own stylesheet — stated there in those words rather than
 presented as a screenshot of the product.
+
+---
+## 2026-09-30 — a row of cards carries its disparity as empty space, and a ratio is the one statistic that cannot see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and every
+routine that composes a row of anything · **Status:** closed by
+`marketing-50-how-you-would-use-it` — recorded because the fix is one paragraph
+and the thing worth keeping is which number to measure
+
+The front door's *Keep going* band is four cards in a four-column grid: the
+demonstration, the documentation, the course and the portal. It is the last
+content band a visitor meets and the only band whose job is to send them
+somewhere. Photographed on a production `next build` served by `next start`, at
+1280 × 900:
+
+| card | says | body ends | footer starts | empty |
+| --- | --- | --- | --- | --- |
+| Try it yourself | 22 words | 247px | 413px | **166px** |
+| Read the docs | 23 words | 247px | 413px | **166px** |
+| Take the course | 23 words | 247px | 413px | **166px** |
+| Open the portal | 21 + 27 words | 348px | 413px | 65px |
+
+Every card is 469px tall, because a grid stretches every cell to the tallest.
+The 65px under the fourth is the card's own bottom padding — what a full card
+looks like. The 166px under the other three is **taller than the sentence above
+it**.
+
+Nothing was red and nothing could have been: four valid trees, every link
+resolving, no overflow measured, no diagnostic raised. The page is well-formed
+whatever the sentences in it weigh.
+
+### The band's own note had ruled this out, in writing, five weeks earlier
+
+`waysIn` in `(marketing)/_lib/pages/home.ts` carried this since 25 August:
+
+> Evening the sentences up would have been treating the symptom, and it does not
+> survive the next surface anyway. `loom.card`'s `footer` is *pinned to the
+> bottom and ruled off* — the region exists for exactly this: a row of cards of
+> unequal length still has its footers on one line. So the sentence may be
+> whatever length it honestly needs to be.
+
+Every clause of that is true and the conclusion does not follow. A pinned footer
+puts the four costs on one line; **it cannot put anything above them.** The run
+that wrote it had fixed the footers, checked the footers, and inferred the band.
+The band was never photographed.
+
+### The statistic, which is the whole of what generalises
+
+The obvious rule is *the wordiest card says no more than twice the leanest*, and
+it is wrong twice over:
+
+- a row of four-word cards at three times has no empty space in it at all;
+- **this defect measured 1.96** — a ratio rule at 2 would have passed on the
+  exact band it was written for.
+
+What makes a hole is **lines**, and lines are a difference rather than a
+quotient. `balance.test.ts` states it as one: the cards of a row may differ by
+at most twelve words, which is two lines of the narrowest column this site lays
+out — a card in a four-column band at 1280 is 261px wide and sets about five and
+a half words to the line, rounded up to six so the rule is never stricter than
+the measurement under it. The widest spread the site has today is 9; the two
+defects it caught were 27 and 22.
+
+### The second one, found a minute after the threshold was written
+
+The *What to read next* band, chrome rather than a page's band, so it is at the
+foot of every page but the front door. Two cards: one holding *Before this ·
+How it works* — two words — beside one holding the docs' blurb, twenty-five.
+Its own note also defended the asymmetry in writing (*"the asymmetry is the
+point"*), for a reason about content that was good and that a grid does not
+care about.
+
+**Two bands, two written-down arguments, both about the right thing, both
+reasoning about a row without looking at one.** That is the shape, and it is not
+this lane's alone: `(docs)`, `(lessons)`, `(demo)` and `(portal)` all lay cards
+out in grids, and none of them has a rule of this kind. The check is ten lines
+over a tree and needs no camera once it exists — which is the point, because
+finding it needed one.

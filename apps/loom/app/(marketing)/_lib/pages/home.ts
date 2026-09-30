@@ -29,7 +29,6 @@ import {
   DECISIONS_URL,
   DEMO,
   DOCS,
-  doorOf,
   HOME,
   HOW_IT_WORKS,
   internalHref,
@@ -356,6 +355,131 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * fill, which is decoration that survived four rewrites without ever meaning
  * anything. See the note on `WAYS_IN` for the general version.
  */
+/**
+ * The four beats, as data, because the shape is checked rather than described.
+ *
+ * `state` is what separates the two halves visually: `done` is a thing you have
+ * finished doing, `current` is a thing that is happening now and will be
+ * happening on the next visit too. That is the primitive's own vocabulary used
+ * for what it means, rather than a colour chosen to make two look different
+ * from two.
+ */
+type UsingItStep = {
+  readonly marker: string
+  readonly title: string
+  readonly body: string
+  readonly state: "done" | "current"
+}
+
+const USING_IT: readonly UsingItStep[] = [
+  {
+    marker: "1",
+    title: "Build your components",
+    body: "In your framework, the way you already do. Loom never writes code into your page and never asks you to rebuild it.",
+    state: "done",
+  },
+  {
+    marker: "2",
+    title: "Register them with Loom",
+    body: "One list of the pieces the AI may use, and the rules for what it may do with them. This is the whole of the setup.",
+    state: "done",
+  },
+  {
+    marker: "3",
+    title: "Your AI sees what readers do",
+    body: "Which parts of the page they reach, how long they stay, and what they press \u2014 and never who they are.",
+    state: "current",
+  },
+  {
+    marker: "4",
+    title: "The page adapts, on your rules",
+    body: "It proposes a change, your rules decide whether it lands, and what happened is written down so you can undo it.",
+    state: "current",
+  },
+]
+
+/**
+ * **How you would use this, said plainly, before anything is demonstrated.**
+ *
+ * Placed directly under the plain-words band, at the maintainer's direction of
+ * 30 September: the four words say what a change *is*, and this says what
+ * **you** do about it, so the two read as one answer to *what is this and how
+ * would I use it* before the demonstration below asks anybody to watch
+ * anything.
+ *
+ * The front door argued *why* for five weeks and never once said *what you
+ * would do*. Every other band is a claim about the world, a list of what goes
+ * wrong without this, a number, a question, or the product changing itself in
+ * front of you — all of it true, none of it an answer to the first thing a
+ * developer wants to know. A visitor could watch the demonstration work and
+ * still not know whether using it means rewriting their components.
+ *
+ * ## The shape is the argument, and it is not four equal steps
+ *
+ * The four beats divide two and two, and the division is the sell. **One and
+ * two are things you do once.** Three and four are what happens afterwards,
+ * on every visit, without you. A row of four identical boxes would read as
+ * four chores; the heading and the markers carry the split instead, so the
+ * payoff — *the work stops at two* — is the thing a reader takes away.
+ *
+ * `loom.milestone-row` is the primitive for it and this page had never used
+ * it. Its own docstring is exact about why it exists rather than the rail on
+ * `/how-it-works`: *"a roadmap is read down because time runs that way, and
+ * three steps are read across because they are meant to be taken in at once."*
+ * This band is the second kind. The five-step `JOURNEY` on `/how-it-works` is
+ * the first, and the two must not be confused — that one is what happens to
+ * **one change**, in milliseconds, at runtime; this one is what **you** do, in
+ * an afternoon, once.
+ *
+ * ## The fourth beat carries the record, and that is deliberate
+ *
+ * *"Your AI adapts your page"* is where the maintainer's sketch of this band
+ * ended, and ending there would sell the half a competitor can also claim.
+ * `docs/rollout.md` has the positioning on record: **the differentiator is not
+ * adaptation, it is the record.** So the fourth beat is the change *and* what
+ * is kept about it, which is also what turns the last step back toward the
+ * reader instead of trailing off the edge of the band.
+ *
+ * ## The vocabulary, checked against the brief
+ *
+ * *Monitor* is not used, though it is the word in the sketch: to a stranger it
+ * means uptime and dashboards. What actually happens is that the page reports
+ * which of its parts a reader reached, how long they stayed and what they
+ * pressed — and never who they are (0146), which is a property of the record
+ * rather than a setting, and is worth the words here because *your AI watches
+ * your users* is the sentence in this band most likely to alarm somebody.
+ *
+ * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
+ */
+const usingIt = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: BAND.usingIt },
+    "Two things you do. Then it runs.",
+    [
+      prose(
+        ids,
+        "You keep your framework and you keep your components. Loom needs one list from you: the pieces the AI may use, and the rules for what it may do with them.",
+        { size: "lead", measured: true }
+      ),
+      buildElement(ids, {
+        type: "loom.milestone-row",
+        props: { rail: "line", density: "loose" },
+        children: USING_IT.map((step) =>
+          buildElement(ids, {
+            type: "loom.milestone",
+            props: {
+              marker: step.marker,
+              title: step.title,
+              body: step.body,
+              state: step.state,
+            },
+          })
+        ),
+      }),
+    ]
+  )
+
 const problems = (ids: IdFactory): LoomNode =>
   section(
     ids,
@@ -608,10 +732,12 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * reading this site can obtain one by deciding to — so the card had not merely
  * gone quiet about the door, it had started describing it wrongly.
  *
- * `doorOf` puts it back, in the body rather than the blurb, and the type makes
- * it structural: a guarded surface without a `door` no longer compiles. The
- * note is checked rather than promised now — `pages.test.ts` renders this band
- * and holds the sentence to it.
+ * **What says it now is the cost line, and it is four words rather than a
+ * paragraph.** *Costs you an invitation* is the honest word for a door somebody
+ * else opens, it sits on the one line a reader compares the four destinations
+ * along, and `site.test.ts` holds it there. `PORTAL.door` says the rest — who
+ * writes the list — in the questions band two bands above, which is where a
+ * reader who wants that answer goes looking for it.
  *
  * **It is the four surfaces and nothing else**, as of 22 August. A fifth card
  * pointed at the repository, which was fine while there were three of them and
@@ -628,17 +754,27 @@ const WAYS_IN: Readonly<Record<string, { readonly title: string }>> = {
  * reason is the bottom of the cards.** `loom.feature`'s interior is its props —
  * a glyph, a title, a sentence — stacked from the top, so four cards holding
  * four sentences of four different lengths are four cards that stop at four
- * different heights inside one row that stretches them all to the tallest. Two
- * of the four were running better than a third empty, and the band that exists
- * to send a visitor onward was the worst-composed thing on the page.
+ * different heights inside one row that stretches them all to the tallest.
+ * `loom.card`'s `footer` is *pinned to the bottom and ruled off*, so the four
+ * costs land on a single line across the row whatever the bodies above them do
+ * — which is also the line a reader comparing four destinations reads along.
  *
- * Evening the sentences up would have been treating the symptom, and it does
- * not survive the next surface anyway. `loom.card`'s `footer` is *pinned to the
- * bottom and ruled off* — the region exists for exactly this, and its own note
- * says so: a row of cards of unequal length still has its footers on one line.
- * So the sentence may be whatever length it honestly needs to be, and the four
- * costs land on a single line across the row, which is also the line a reader
- * comparing four destinations is actually reading along.
+ * **That fixed the footers and it did not fix the band**, which is the whole of
+ * what this run changed and is worth writing down because the note here said
+ * otherwise for five weeks. It said evening the sentences up would be treating
+ * the symptom. Photographed on a production build at 1280, the symptom was the
+ * band: the portal's card said forty-eight words where its three neighbours
+ * said twenty-two, so every card was stretched to the tallest and three of the
+ * four carried **166px of nothing** between the last line of the sentence and
+ * the rule above the cost — taller than the sentence itself. A pinned footer
+ * puts the four costs on one line; it cannot put anything above them.
+ *
+ * So the sentences are evened up after all, by taking one away rather than
+ * writing three. What made the note's objection reasonable — that hand-tuning
+ * four strings does not survive a fifth surface — is answered by
+ * `balance.test.ts` rather than by leaving the band as it was: the ratio is
+ * stated over every row of cards on every route, so a blurb written at twice
+ * its neighbours' length is red on the run that writes it.
  *
  * Nothing was added to the library to do it. A card, a heading, a sentence, a
  * rule and four words, all registered before this run started.
@@ -655,22 +791,12 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
           throw new Error(`loom: ${surface.path} is offered nowhere on the front door`)
         }
 
-        const door = doorOf(surface)
-
         return buildElement(ids, {
           type: "loom.card",
           props: { href: surfaceHref(context.origin, surface) },
           children: [
             heading(ids, 3, way.title),
             prose(ids, surface.blurb, { tone: "muted" }),
-            /**
-             * The one card with a door says so here, in the body, and not in
-             * the footer where the cost is. The costs are read along one line
-             * across the row — that is the whole reason they are pinned — and a
-             * sentence dropped into that line would be read as a fourth cost
-             * and would break the line for the other three.
-             */
-            ...(door === undefined ? [] : [prose(ids, door, { size: "small", tone: "muted" })]),
             buildSlot(ids, "footer", [prose(ids, surface.cost, { size: "small", tone: "muted" })]),
           ],
         })
@@ -768,6 +894,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
             ]),
         hero(ids, context),
         vocabulary(ids),
+        usingIt(ids),
         /**
          * Third band, and deliberately before anything that argues for the
          * product. The hero has made the claim and the four words have named

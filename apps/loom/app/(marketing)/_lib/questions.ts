@@ -40,10 +40,15 @@ export type SiteQuestion = {
 /**
  * Composed rather than a constant, because the last answer is composed.
  *
- * `PORTAL.door` is the same sentence the band of cards carries and
+ * `PORTAL.door` is the site's one statement of what the portal's door is and
  * `SIGN_IN_LABEL` is the button's own word, so re-wording either cannot leave
  * this answer describing a page that no longer exists. A frozen array could not
  * hold that, and holding it is the point.
+ *
+ * **This band is the only place that sentence is rendered, as of 30 September.**
+ * The front door's band of cards carried it as well, and carrying it there cost
+ * the other three cards a third of their height each — see the note on
+ * `waysIn`. An answer is where somebody who wants it looks.
  */
 export const siteQuestions = (): readonly SiteQuestion[] => [
   {

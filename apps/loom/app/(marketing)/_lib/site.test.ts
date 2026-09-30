@@ -7,7 +7,6 @@ import {
   DEFAULT_THEME,
   DEMO,
   DOCS,
-  doorOf,
   internalHref,
   otherThemes,
   PORTAL,
@@ -181,7 +180,8 @@ describe("the rest of the product", () => {
      * at: that no *unguarded* surface warns about a door it does not have.
      */
     for (const surface of PRODUCT_SURFACES) {
-      const read = `${surface.blurb} ${surface.cost} ${doorOf(surface) ?? ""}`.toLowerCase()
+      const read =
+        `${surface.blurb} ${surface.cost} ${surface.guarded ? surface.door : ""}`.toLowerCase()
 
       expect(/\bsign|\baccount\b/.test(read)).toBe(surface.guarded)
     }
@@ -202,12 +202,10 @@ describe("the rest of the product", () => {
    */
   it("says who decides a door, rather than naming the door and stopping", () => {
     for (const surface of PRODUCT_SURFACES) {
-      const door = doorOf(surface)
+      if (!surface.guarded) continue
 
-      if (door === undefined) continue
-
-      expect(door.length).toBeGreaterThan(40)
-      expect(door.toLowerCase()).toContain("whoever runs the site")
+      expect(surface.door.length).toBeGreaterThan(40)
+      expect(surface.door.toLowerCase()).toContain("whoever runs the site")
     }
   })
 
