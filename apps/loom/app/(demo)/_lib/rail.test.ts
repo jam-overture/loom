@@ -652,3 +652,66 @@ describe("what a landed change is still holding", () => {
     expect(view.readings.get(landed.record.recordId)?.kept).toBeDefined()
   })
 })
+
+/**
+ * The card the rail has to hold still, and it is a reading rather than a flag
+ * for the same reason every other one here is: the two halves of the fix read
+ * it — the trailing room the landing needs (`arrival.ts`) and the card the
+ * scroll is taken to (`AnswerInView`) — and a room given for one card while a
+ * scroll is taken to another is the pair of half-decisions the whole unit
+ * exists to stop.
+ */
+describe("the card the visitor's answer landed", () => {
+  it("names the record whose answer produced the revision the page is at", async () => {
+    const session = await sessionFor("landing")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const landed = await allow(asked.session, asked.record)
+
+    const { view } = await railOf(landed.session)
+
+    expect(view.landing).toBe(landed.record.recordId)
+  })
+
+  /** Nothing while the question is still the question. */
+  it("names nothing while the change is still waiting on an answer", async () => {
+    const session = await sessionFor("landing-held")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+
+    const { view } = await railOf(asked.session)
+
+    expect(view.landing).toBeUndefined()
+  })
+
+  /**
+   * **And nothing for a change that applied on its own**, which is the row that
+   * separates this from *the newest applied record*. Nobody was asked, so
+   * nothing is being held still for them: the page moving is its own
+   * announcement, and the rail dragging itself to the card would be the surface
+   * moving for its own reasons (`answer-in-view.tsx`).
+   */
+  it("names nothing for a change nobody was asked about", async () => {
+    const session = await sessionFor("landing-alone")
+    const asked = await ask(session, "palette")
+
+    const { view } = await railOf(asked.session)
+
+    expect(asked.record.outcome).toBe("applied")
+    expect(view.landing).toBeUndefined()
+  })
+
+  /**
+   * And it goes quiet on its own once anything else has moved the page — no
+   * flag to clear, because the revision it is compared against is the page's.
+   */
+  it("goes quiet once a later change has moved the page", async () => {
+    const session = await sessionFor("landing-past")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const landed = await allow(asked.session, asked.record)
+    const after = await ask(landed.session, "palette")
+
+    const { view } = await railOf(after.session)
+
+    expect(after.record.outcome).toBe("applied")
+    expect(view.landing).toBeUndefined()
+  })
+})

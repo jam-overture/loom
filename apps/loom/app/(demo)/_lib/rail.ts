@@ -8,6 +8,7 @@ import { stillToAsk } from "./already-asked"
 import { partTheAskWouldTouch } from "./before-the-press"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { partTheRecordKept } from "./kept"
+import { landedOnYourAnswer } from "./landed"
 import { markedPage, type MarkedPage } from "./marked"
 import { movedOn, type MovedNote } from "./moved"
 import { plainChange, settingsOf, type PlainChange } from "./plain-change"
@@ -94,6 +95,17 @@ export type RailView<TPart> = {
   readonly marked: MarkedPage
   /** The caution at the controls, when a question is still open. */
   readonly waiting?: SetAside
+  /**
+   * The card the visitor's own answer just landed — the demo's payoff frame,
+   * and the one card the rail has to hold still under them.
+   *
+   * A record id rather than the record, because both readers of it already have
+   * the record: the rail asks it for the trailing room the landing needs
+   * (`arrival.ts`) and the list asks it which card to keep at the top
+   * (`AnswerInView`). `landed.ts` has the reading and why neither *newest* nor
+   * `answeredBy` alone is it.
+   */
+  readonly landing?: string
   /**
    * The ask that gets the green button, and the part of the page it would
    * touch — absent while a question is open, because the green on this rail
@@ -348,6 +360,7 @@ export const whatTheRailShows = <TPart>({
 
   const about = spotlit[0]
   const waiting = setAside(records, openQuestions)
+  const landing = landedOnYourAnswer(records, tree.revision)
   const available = stillToAsk(availablePresets(tree, ids), records, openQuestions)
 
   /**
@@ -368,6 +381,7 @@ export const whatTheRailShows = <TPart>({
     spots: drawn.flat(),
     marked,
     ...(waiting === undefined ? {} : { waiting }),
+    ...(landing === undefined ? {} : { landing: landing.recordId }),
     ...(nominated === undefined
       ? {}
       : {

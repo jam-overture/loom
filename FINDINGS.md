@@ -8,6 +8,57 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-29 — `TheRecord` is handed four readings one prop at a time from the one file in this lane no test can mount
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+pre-existing and **not caused by** the run that filed it, which added the fourth
+prop and noticed the shape while pricing its own defect matrix
+
+`rail.ts` exists because eight readings were computed inline in `page.tsx`, and
+`page.tsx` is an `async` Server Component that reads a cookie and opens a store
+— a boundary no `vitest` run can cross. Extracting them turned up **five**
+readings that could be unwired by deleting a single argument with the whole
+suite green, and the finding that asked for the extraction is closed.
+
+**The last hop is still inline.** What `whatTheRailShows` returns is handed to
+the list one prop at a time, in `page.tsx`:
+
+```tsx
+<TheRecord
+  records={records}
+  marked={rail.marked}
+  held={rail.readings}
+  revision={tree.revision}
+  {...(rail.landing === undefined ? {} : { landing: rail.landing })}
+/>
+```
+
+Delete any one of those lines and the reading is computed, returned, tested, and
+never shown. `rail.test.ts` goes on passing because the value is in the view;
+`the-record.test.tsx` goes on passing because it is handed the prop directly.
+Nothing in this repository joins the two, and nothing can, because the join is
+in the file that cannot be mounted.
+
+This run measured it rather than assuming it: **the row of the defect matrix
+that removes `landing` from the view is caught by exactly one assertion**, and
+it is caught there only because `rail.test.ts` asserts the positive case. The
+prop-passing line below it is caught by nothing at all.
+
+### What would close it
+
+**Hand the list the view rather than four of its fields.** `TheRecord` already
+takes three readings off `RailView` and one value off the tree; taking
+`rail` and `revision` would make the wiring one expression, and a field added to
+`RailView` that the list forgets to read becomes a type error rather than a
+silent absence. It is a props change across one component and its test file,
+which is why it is filed rather than done in a run whose unit was the landing.
+
+**What it does not fix**, and this is worth writing down so a later run does not
+over-claim: `roomToLand(rail)` has the same exposure and was moved this run for
+the same reason — from a boolean the page worked out to the rail itself — and
+*that* one is now asserted in `arrival.test.ts`. The general answer is the same
+both times: **a Server Component may pass a value and may not decide one.**
+
 ## 2026-09-29 — `adjust` was built for `loom.before-after` twenty-eight days ago, the entry that asked for it is marked closed, and the primitive still says the mechanism does not exist
 
 **Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
@@ -232,10 +283,33 @@ root* is knowledge `analyzeDelta` holds and the walk does not. Catching a
 misplaced theme at the write path is a different signature, not a stricter check.
 ## 2026-09-28 — the rail keeps the scroll it took for the question after the question is answered, and what a visitor sees of the payoff card is decided by where the browser clamps it
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — found
-by measuring the frame this run's own unit produces, **not caused by it**, and
-recommended as a unit of its own because the honest fix has a design question in
-it that a screenshot fix would paper over
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** **closed by
+`demo-33-room-that-outlives-the-question`** — found by measuring the frame that
+run's own unit produces, **not caused by it**, and recommended as a unit of its
+own because the honest fix has a design question in it that a screenshot fix
+would paper over
+
+> **Closed, 29 September.** Both halves shipped, and the first of them is not
+> sufficient alone: keeping the room makes the landing *reachable*, and the
+> drift is the panel above the card getting shorter rather than the scroll being
+> clamped, so the card is re-landed as well. `roomToLand` is now given for the
+> landing as well as for the question, and `AnswerInView` puts the answered card
+> back at the top of the rail it was already at the top of (`landed.ts` names
+> which card, and it is neither *the newest* nor `answeredBy` alone).
+>
+> **The design question below was answered by refusing its premise.** *Wide
+> only* is not the fact; **the rail is a scroller of its own** is, and a width is
+> a proxy for it. So there is no `matchMedia`, no mount-time read and no resize
+> listener: the component walks up from the card to the first ancestor whose
+> `overflow-y` scrolls, at the moment the scroll would happen. A wide viewport
+> whose rail does not scroll gets nothing, and there is a test that says so.
+>
+> **What it costs is recorded rather than talked past.** The applied card is
+> 976px in an 857px rail, so one end is always off screen: this puts the top on
+> — the **Applied** badge and the visitor's own sentence, where `main` opened on
+> the words *"undoes it."* — and `Put it back` is now about 120px below the
+> fold. `ANSWER_ARRIVES` is the one constant either landing reads if that is the
+> wrong end.
 
 Measured on a production build at 1280 × 900, running the demo's three presses
 with reduced motion, reading the rail's `scrollTop` and the card's box out of
@@ -405,6 +479,41 @@ inline-code span and do not make it a link — works for `reports/` as well as
 `decisions/`, and is what #434's body was corrected to use before it merged. It
 costs a reader nothing: the path is as useful to somebody who can open the
 repository, and there is nothing in a code span for anything to inject into.
+
+### Eighth data point, 29 September, `Loom demo` on #450 — **the SHA ref is not safe, and neither is the raw host; position inside one body may be**
+
+Appended by `Loom demo`, as evidence and not a theory. One body, three writes in
+two minutes, four images, one variable changed per write, each read back through
+the API:
+
+| write | form | host and ref | mangled |
+| --- | --- | --- | --- |
+| 1 | `![alt](url)` | `github.com/…/blob/<commit SHA>/…?raw=true` | **4 of 4** |
+| 2 | `![alt](url)` | `raw.githubusercontent.com/…/<commit SHA>/…` | **4 of 4** |
+| 3 | `<img src="url">` | `raw.githubusercontent.com/…/<commit SHA>/…` | **2 of 4 — the last two** |
+
+In every write the preview URL on line 1 (bare) and the report link near the end
+(`[text](url)`, `.md`, same SHA) came through clean.
+
+**What this breaks.** The 28 September `Loom daily build` entry offered *reference a
+blob by its commit SHA* as a workaround worth adopting now, on one controlled
+pair; write 1 is a SHA ref with markdown image syntax and every image broke. The
+27 and 28 September recommendation of markdown image syntax over `<img>` is
+broken too, by writes 1–2 against write 3. And `raw.githubusercontent.com` with
+markdown syntax, which #449's body used and which survived there on the same
+day, broke here.
+
+**What is new**, stated as an observation: in write 3 the four tags were
+identical in form, host, ref and query, and the two that broke were the **third
+and fourth**, under a later heading. Nothing about the tags distinguished them
+but where they were. One body is one data point.
+
+**What this run did about it**: kept write 3, whose two clean images are the
+before/after pair the pull request is about, and put the two broken ones in the
+pull-request comment instead, which was also read back. So the recommendation
+that survives every data point so far is the one the entry already makes —
+**read the body back through the API before treating the pull request as
+finished** — and nothing else.
 
 ---
 ## 2026-09-28 — a branch pushed while its pull request was being merged loses that push, and the squash makes it silent
