@@ -8,6 +8,262 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
+· **Status:** open — **not a defect and not a blocker**; three primitives shipped
+around it and the fourth is what it costs
+
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+unblocked four primitives: dialog, dropdown, lightbox, tooltip. This run built
+three of them. The fourth is not blocked by anything about `present` — it is
+blocked by what a control is allowed to be *called*.
+
+A behaviour declares the text keys its control needs, and a primitive supplies
+the strings:
+
+```ts
+const MENU_TEXT = { present: "Menu" } as const
+```
+
+Those strings are resolved by `TextResolver.textFor(type)` — **per type**, not
+per node. So every `loom.menu` on every page in a deployment has a button
+reading *Menu*, every `loom.lightbox` reads *Expand*, and a dictionary may
+translate them while a tree may not write them. That is 0055 and 0063 working
+exactly as designed, and for an **affordance** it is the right answer: *Expand*
+over the corner of a thumbnail is the word a reader wants, and a model inventing
+one per tile would be a page where the same control is called four things.
+
+A **dialog**'s trigger is not an affordance. It is the page's call to action —
+*Watch the demo*, *Book a call*, *See the whole record* — which is content, and
+the seam has nowhere to put it. A `loom.dialog` built today would be a modal
+opened by a chip reading *Open*, which is a worse page than no dialog.
+
+**Two further things the same constraint costs**, both measured on this run's
+specimen rather than reasoned about:
+
+- **An icon-only trigger is unreachable.** The control renders its label as a
+  child, so `ⓘ` beside a term — the shape a tooltip actually takes — cannot be
+  built. `loom.popover` ships with the word *Details*, which is a real design and
+  is not that one.
+- **Two of the same primitive on one page are two buttons with one name.** A
+  header with a *Product* menu and an *Account* menu has two buttons a screen
+  reader announces identically. `aria-label` on the panel does not fix it,
+  because the trigger is what a reader reaches first.
+
+**This is a question rather than a request.** The obvious shapes each give
+something up and one of them gives up the property the seam exists to protect:
+
+| shape | what it costs |
+| --- | --- |
+| a reserved prop the control's label falls back to | a model writes a control's words, which is exactly 0055's refusal |
+| a declared prop the *primitive* names as the label source, resolved by the seam | narrower — the primitive still chooses that this control is named from the tree — but it is a new field on the behaviour seam and a new path into a control's props |
+| nothing; triggers stay affordances | what shipped. A dialog is then a composition — a `loom.action` that is `interactive` beside a region — which the seam cannot express at all, because only a control opens a presentation |
+
+The third is what this run did, and it is why the gap inventory's first Tier B
+group now reads *three of four*.
+
+---
+## 2026-10-01 — a wipe's declared `position` is discarded the moment its slider mounts, so the prop is visible only on a page with no scripting
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/behaviour.ts`) · **Status:** open — **a live defect on every
+scripted page**, found by photographing the primitive the mechanism was built for
+
+`loom.before-after` now declares `adjust`, which is the three lines 0096's
+closure asked for and the 29 September finding re-asked for. Placing it exposed
+something neither record anticipated.
+
+`ADJUST_RESTING` is **50**, fixed, and `build` receives the node's text and
+content but not its props — which `behaviour.ts` states plainly and then argues
+is harmless:
+
+> *"the primitive supplies its own position as the `var()` fallback, which covers
+> the case that actually matters, the page where the control never mounts. Once a
+> reader has a slider in front of them, where it started is theirs to change."*
+
+The first half is true and is why this was safe to ship. The second half is the
+part that does not survive contact with a page. The control writes
+`--loom-adjust: 50` on its parent **in its mount effect**, so a band authored as
+`position: 35` renders at 35 in the HTML, and jumps to 50 the instant hydration
+lands. On any page a reader actually visits, the prop does nothing.
+
+**Measured, not inferred.** This run's specimen declares `position: 35` and the
+`shut` shot — the page as hydration settles, nothing pressed — has the divider at
+50 under both palettes. `library.test.ts` asserts the 35 because it asserts the
+static markup, which is the one place the prop is still visible.
+
+**What would close it**, smallest first, and the first is probably enough:
+
+1. **Let a primitive declare a behaviour's resting value** the way it declares
+   the behaviour's text — a per-type number, not a per-node one, so nothing a
+   model writes reaches it. `loom.before-after`'s default position is a
+   primitive-level fact and its *prop* would still be unreachable, so this
+   narrows the defect to "a tree that overrides the default is overridden back".
+2. **Hand `build` the node's props**, which is a real change to what a behaviour
+   is and is `ARCHITECTURAL`: props are AI-authored, and a control reading them
+   is a control a model configures.
+3. **Publish nothing until the reader touches it** — the control mounts, renders,
+   and writes no property until its first `input`. The fallback then holds until
+   somebody drags, which is exactly the behaviour the docstring describes.
+   Cheapest of the three and it changes `adjust`'s contract for every future
+   taker, which is why it is filed rather than proposed.
+
+---
+## 2026-10-01 — what a presented region still cannot do: trap focus, make the page inert, know whether it fits, or escape a transformed ancestor
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` (the first
+three) and `Loom daily build` (`src/render/`, the first two) · **Status:** open —
+**stated limits of three shipped primitives**, written down so the next author
+meets them here rather than in a browser
+
+0176 draws the line at *"the runtime opens and closes a boolean and nothing
+more"* and names focus trapping, `inert` and a scroll lock as the primitive's
+half. Building the three primitives found that the three are not alike: one is
+reachable from a stylesheet and two are not.
+
+**The scroll lock is done**, by a `:has()` rule on the document element scoped to
+the library's own class and the primitive's own state
+([0210](decisions/0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md)).
+It is released by the same attribute that sets it, so there is no pair of calls
+to get out of step.
+
+**Focus trapping and `inert` are not, and cannot be from here.** A reader on a
+keyboard can tab out of an open lightbox into the page behind it. Both are
+script, both are facts about elements this primitive did not render, and no
+stylesheet expresses either. If the seam ever grows a sixth member or a
+`modal: true` on `present`, this is the entry that asked for it; until then the
+lightbox is honest about being a picture over a page rather than a modal dialog.
+
+**A panel cannot know whether it fits.** `placement` and `align` on `loom.menu`
+and `loom.popover` are declared rather than measured, because whether a panel
+would fall off the bottom or the side of a window is a fact only the browser
+holds and the only portable way to ask is to measure in script — a client
+boundary this library does not open per primitive. CSS anchor positioning is the
+answer and is not available to a library that must render everywhere. The damage
+is bounded (`max-inline-size: min(18rem, calc(100vw - 2rem))`) and not abolished:
+a trigger near the left edge of a phone with `align: "end"` still hangs its panel
+off the page. **Worked example, found by photographing it:** `loom.nav` builds
+its own disclosure the moment it has children, that toggle takes the slack on the
+top line, and the actions region therefore wraps to a second line at the *left* —
+so a menu in a header's actions, correct at 1280, hung off the left of a
+390-pixel page. The specimen's bar carries no flat links for that reason.
+
+**A fixed region is contained by a transformed ancestor.** `position: fixed` is
+relative to the viewport until something above it carries a `transform`, a
+`filter` or a `backdrop-filter`, at which point that element becomes the
+containing block and a lightbox's frame is trapped inside a band. The three in
+this library are `loom.reveal`'s entrance, `.loom-lift`'s hover and a sticky
+`loom.nav`'s `backdrop-filter`. A lightbox goes in a plain band. There is no
+diagnosis for this and there cannot be one from a render.
+
+**And one that was a defect rather than a limit, kept because it is the same
+class.** The lightbox's root carried `isolation: isolate` for one draft. Isolation
+makes a stacking context, and a stacking context confines every `z-index` inside
+it — so the frame's layer stopped being a page layer and the bands *after* the
+tile in the document painted straight over the scrim. The photograph is what
+found it. A region drawn over the page has to be allowed to be over the page.
+
+---
+## 2026-10-01 — two cross-lane edits forced by a hundred-and-second primitive: one assertion in `src/sdk/`, and five lesson transcripts of which one is a teaching section
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/sdk/pairings.test.ts`) and `Loom lessons` (`lessons/`) · **Status:** open —
+everything is **shipped and `pnpm verify` is green**; this is so you review the
+edits rather than find them, and the last one is a judgement somebody has to make
+and I made it by default
+
+This is the 21, 22 and 30 September class again, from the other side of the
+repository: a lane cannot add a primitive without moving numbers that other
+lanes' files print.
+
+**The mechanical ones.** Five lesson transcripts print the size of the starter
+library or something derived from it, and the library went from 99 to 102:
+
+| lesson | what moved |
+| --- | --- |
+| `22-reach.md` | `primitives registered: 102`, `declaring a target: 16`, four new rows, and *Twelve* → *Sixteen* in the sentence under it |
+| `23-anchors.md` | the count |
+| `24-silence.md` | the count |
+| `30-rendezvous.md` | the count, and `saying nothing either way: 97` → `100` |
+
+**The one that wants your eye is lesson 31**, and it is not a number. Exercise G
+is the exercise that *found* this run's work: it printed `adjust / present /
+dismiss — nothing declares it`, and the section under it, *Found by running it:
+three members with nothing to place them*, is forty lines of teaching built on
+that output. All three are now declared, so the transcript the test holds to the
+real output had to change, and the prose under it stopped being true.
+
+**What I did, and it is reversible in either direction:**
+
+- The transcript is the current output: six takers, every member declared.
+- The paragraph under it says what it read on 29 September and that the next
+  section is about the difference.
+- **The section itself is unchanged**, with a block quote at its head saying it is
+  kept as written, in the present tense it was written in, and to read it as of
+  29 September.
+- A short closing subsection, *What those lines read now*, says what each line
+  reads today and makes the point the section was already making: a healthy
+  output and an unhealthy one are the same nine lines, and the gap lasted
+  twenty-eight days because nothing was pointed at it and two days after
+  something was.
+
+**I think keeping the section and dating it is better than rewriting it**, because
+what it teaches is the measurement rather than the defect, and a section rewritten
+to describe a closed gap teaches nobody to go looking for an open one. It is
+still yours to overrule, and the alternative — past-tensing the forty lines — is
+a mechanical edit somebody can make in ten minutes.
+
+**The `src/sdk/` edit is one assertion and is narrower than it looks.**
+`pairings.test.ts` asserted that `loom.overlay` is the only primitive in the
+library painting `bg-overlay`. Three primitives that present a region now paint
+it too, for the slot's stated reason — it is the surface a thing drawn *over* the
+page sits on, and a panel in `bg-surface` laid over a `bg-surface` card has no
+edge but its hairline under half the starter palettes. The list of types is
+**widened rather than loosened**: a fifth primitive quietly starting to paint the
+page's overlay surface still fails there. The row's `basis` — `painted`, reachable
+by no ancestor walk, which is what that test is for — is untouched.
+
+One thing was changed in `src/primitives/` rather than in `src/theme/` to avoid a
+third: the lightbox's caption was drafted in `fg-muted`, which would have made
+`fg-muted on bg-overlay` a **painted** pairing where `contrast.ts` declares a
+composed one — a row the palette audit measures at a weaker bar than the thing
+drawn. It is `fg-default` now, which is also the better reading of a title in a
+bar beside a cross.
+
+---
+## 2026-10-01 — `0209` is claimed by two open pull requests, which is the second consecutive number this has happened to
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 30 September entry *`0205` is claimed by two open pull requests,
+and neither knows about the other* · **Status:** open, and filed as **a second
+data point** rather than a second theory
+
+Checked while choosing a number for this run's record, on `main` at `f1879b5`:
+
+| number | claimed by |
+| --- | --- |
+| 0209 | `#462` — *what an adapter owes the runtime is a suite, not a sentence* |
+| 0209 | `#463` — *an app is a registry, a policy and a store, and loom has one of each* |
+
+`pnpm decisions:index` on `main` already reports it, in the one place nobody
+reads before opening a branch:
+
+```
+note: 0209 has no record here — either one was deleted, or the number is claimed
+on a branch that has not merged
+```
+
+This run took **0210** by checking the open pull requests' changed files, which
+is four API calls and is not something a routine should have to remember. Two
+consecutive numbers in two days makes it a rate rather than an accident: with
+five lanes opening branches against one counter, the next collision is a matter
+of how many are open at once.
+
+**Not proposing the fix**, because the shapes differ in who pays — a number
+allocated at merge rather than at write, a per-lane block, a check in
+`decisions:index` that reads open branches — and all three are the maintainer's
+call about a convention rather than a lane's about a file.
 ## 2026-10-01 — `ModelEffort` is a five-level scale borrowed from one vendor, and three adapters will each have to invent a mapping
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`, pending a
