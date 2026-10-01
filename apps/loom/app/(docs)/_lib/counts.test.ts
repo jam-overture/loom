@@ -269,9 +269,9 @@ describe("everything this site wrote for a reader", () => {
    * The sweep. A number in front of a counted noun, anywhere on the site.
    *
    * It refuses the **shape**, not the stale value. `ninety-eight primitives` is
-   * red because the library has ninety-nine; `ninety-nine primitives` is red
+   * red because the library has more than that; `ninety-nine primitives` is red
    * too, because it is the same sentence one week earlier and nothing would say
-   * so when the hundredth lands.
+   * so when the hundredth lands — which it did, on the day this shipped.
    */
   it("writes no counted size as a number", () => {
     const exemptAnywhere = (where: string, phrase: string): boolean =>
@@ -352,14 +352,14 @@ describe("an exemption", () => {
  *
  * Everything else here either reads a length or refuses a pattern. `spellOut`
  * produces the word a reader sees, so an off-by-one in its tens table puts
- * *eighty-nine* on a page about ninety-nine primitives — correct machinery,
- * wrong sentence, nothing red. The cases below are the boundaries plus every
- * value this site currently states.
+ * *eighty-nine* where the page should have said *ninety-nine* — correct
+ * machinery, wrong sentence, nothing red. The cases below are the boundaries
+ * plus every value this site currently states.
  */
 describe("spelling a number the way prose spells it", () => {
   it("spells the ones the site is stating today", () => {
     expect(SITE_COUNTS.map((count) => `${count.id}: ${spellOut(count.value)}`)).toEqual([
-      "starter-primitives: ninety-nine",
+      "starter-primitives: one hundred and two",
       "palette-slots: seventeen",
       "starter-palettes: twenty-one",
       "policy-settings: fourteen",
