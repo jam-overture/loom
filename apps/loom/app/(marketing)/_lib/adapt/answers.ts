@@ -113,8 +113,8 @@ export const worthWatching = (asks: readonly Ask[] = ASKS): string => {
   const exceptions = exceptionsIn(answerTallyOf(asks))
 
   return exceptions === 1
-    ? "The one that does not simply happen is the part worth watching."
-    : `The ${spell(exceptions)} that do not simply happen are the part worth watching.`
+    ? "The one that does not just go through is the one worth watching."
+    : `The ${spell(exceptions)} that do not just go through are the ones worth watching.`
 }
 
 /**

@@ -57,7 +57,7 @@ const hero = (ids: IdFactory): LoomNode =>
       buildSlot(ids, "heading", [heading(ids, 1, "How a change travels", { balance: true })]),
       prose(
         ids,
-        "Someone asks for a change. Before anything moves, the change is measured and checked against rules you wrote. Then it is written down — every time, whether it happened or not.",
+        "Someone asks for a change. Before anything moves, Loom measures it and checks it against rules you wrote. Then it writes down what happened, every time, whether the change went through or not.",
         { size: "lead", measured: true }
       ),
     ],
@@ -123,27 +123,27 @@ export const SHORT_ANSWERS: readonly ShortAnswer[] = [
     eyebrow: "Your rules",
     heading: "You decide what may change, before anyone asks",
     body: "A rule is a line you write once: this part may be rearranged, that part may not, and anything bigger than this waits for a person. They are read the same way every time, whether or not somebody is watching.",
-    example: "Say the price may never be edited, and no request edits the price — not yours, not a visitor's, not the AI's.",
+    example: "Say the price may never be edited, and then no request edits the price. Not yours, not a visitor's, not the AI's.",
   },
   {
     /** Replaces `/the-record`, which was 951 words. */
     eyebrow: "The record",
     heading: "Every change leaves a note you can read later",
-    body: "Who asked, what they asked for, what actually moved, which of your rules allowed it, and what putting it back would restore. It is kept whether the change happened or not.",
+    body: "The record holds who asked, what they asked for, what actually moved, which of your rules allowed it, and what putting it back would restore. Loom keeps it whether the change went through or not.",
     example: "Six months later you can ask why a section moved, and get an answer rather than a guess.",
   },
   {
     /** Replaces `/when-it-goes-wrong`, which was 1,116 words. */
     eyebrow: "When the answer is no",
     heading: "A refused change leaves the page exactly as it was",
-    body: "Nothing is half-applied. If the AI asks for something your rules do not allow, or asks for something that does not make sense, the page you are serving does not move — and the attempt is still written down.",
+    body: "Nothing is half-applied. If an AI model asks for something your rules do not allow, or something that does not make sense, the page you are serving does not move. The attempt is still written down.",
     example: "A request to delete your contact details is refused, your page is untouched, and the refusal is in the record.",
   },
   {
     /** Replaces `/putting-it-back`, which was 984 words. */
     eyebrow: "Putting it back",
     heading: "The undo is written at the same moment as the change",
-    body: "It is not reconstructed afterwards from what the page looks like now. The change that reverses it is worked out when the change is made, and kept beside it.",
+    body: "Loom works out the change that reverses it at the moment the change is made, and saves it. It does not reconstruct it afterwards from how the page looks now.",
     example: "Press once and the questions that were removed come back word for word, not rewritten.",
   },
 ]
@@ -194,11 +194,11 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(
     ids,
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },
-    "That is the whole of it, at this level",
+    "That is the short version",
     [
       prose(
         ids,
-        "This page is the short version on purpose. The documentation has the long one — what a rule can say, what the record holds field by field, and how to wire it into a page you already have.",
+        "This page is the short version on purpose. The documentation has the long one: what a rule can say, what the record holds field by field, and how to wire it into a page you already have.",
         { measured: true }
       ),
       stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
