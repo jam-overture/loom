@@ -14,6 +14,7 @@
  * real page for that reason.
  */
 export const BAND = {
+  whatIsIt: "What is Loom?",
   seeItHappen: "See it happen",
   inYourOwnWords: "Your turn",
   usingIt: "Using it",

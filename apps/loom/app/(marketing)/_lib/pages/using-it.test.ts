@@ -68,18 +68,20 @@ describe("the band that says what you would do", () => {
   /**
    * The load-bearing assertion, and the reason this file exists.
    *
-   * The shape is the argument: **two things you do, then two that keep
-   * happening.** A fifth step, or a third thing marked `done`, would be the
-   * band quietly becoming a list of chores — which is the one reading the
-   * heading promises it is not.
+   * The shape is the argument. It was two and two until 1 October, when the
+   * maintainer made the third beat *hook up your preferred AI model* — which is
+   * a thing you do rather than a thing that happens, and he was right: wiring a
+   * model is real setup work and the band had quietly left it out. So it is
+   * three you set up and one that then runs on every visit, and the heading
+   * moved with it.
    */
-  it("divides two and two: what you do once, and what then runs", () => {
+  it("is three things you set up, and one that then keeps happening", () => {
     const steps = stepsOf(home())
 
     expect(steps.map((step) => step.props["state"])).toEqual([
       "done",
       "done",
-      "current",
+      "done",
       "current",
     ])
   })
@@ -111,12 +113,39 @@ describe("the band that says what you would do", () => {
     expect(String(first?.props["body"])).toContain("never writes code")
   })
 
-  it("ends on what is kept about the change, not on the change", () => {
+  /**
+   * The last beat is the governance claim and the one most likely to be tidied
+   * back into *the page adapts*. All three of its clauses are asserted: the
+   * rules were written first, the record is kept either way, and it comes back.
+   */
+  it("ends on the rules, the record and the way back", () => {
     const steps = stepsOf(home())
     const last = steps[steps.length - 1]
 
     expect(last).toBeDefined()
-    expect(String(last?.props["body"])).toContain("undo")
+    expect(String(last?.props["title"])).toContain("your rules")
+
+    const body = String(last?.props["body"])
+
+    expect(body).toContain("rules you wrote")
+    expect(body).toContain("written down")
+    expect(body).toContain("reversible")
+  })
+
+  /**
+   * Step three is the one claim in the band that is about somebody else's
+   * software, so it is the one a reader could catch us overstating. It is true:
+   * `modelInterpreter` takes a `ModelClient`, and the Anthropic adapter is the
+   * only file in the runtime that knows a vendor exists — behind its own entry
+   * point, so a host bringing its own model never loads it.
+   */
+  it("does not name a vendor in the step about choosing one", () => {
+    const steps = stepsOf(home())
+    const said = steps.map((step) => `${step.props["title"]} ${step.props["body"]}`).join(" ")
+
+    for (const vendor of ["Anthropic", "OpenAI", "Claude", "GPT", "Gemini"]) {
+      expect(said, vendor).not.toContain(vendor)
+    }
   })
 
   /**

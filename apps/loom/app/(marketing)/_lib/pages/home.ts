@@ -356,6 +356,49 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * anything. See the note on `WAYS_IN` for the general version.
  */
 /**
+ * **The definition, and it is the maintainer's of 1 October.**
+ *
+ * His words: *"What is Loom? A governance framework for modern AI enabled web
+ * development and adaptation."* It sits directly under the opening because it
+ * is the answer to the first question a stranger has, and until now the page
+ * answered it only by implication — a manifesto headline, then four words of
+ * vocabulary, then a demonstration. Somebody could read three screens and still
+ * not have been told what the thing *is*.
+ *
+ * ## Why it is a heading rather than a paragraph
+ *
+ * It is one sentence and it is the sentence the rest of the page elaborates, so
+ * it is set at heading size and nothing else shares the band. A definition
+ * folded into a paragraph is a definition a reader skims past.
+ *
+ * ## The gloss underneath is not decoration
+ *
+ * **"Governance framework" is a boardroom phrase**, and this lane is held to a
+ * high schooler following what is going on. The phrase is right for the buyer
+ * `docs/rollout.md` records — *"regulated teams, agencies answering to clients,
+ * anyone with a compliance function"* — and it is a phrase a developer
+ * evaluating on a lunch break can bounce off. So the line under it says the
+ * same thing in words nobody needs a glossary for, and the two together are the
+ * band: the term for the person who was looking for that term, and the plain
+ * reading for everybody else.
+ *
+ * Nothing here says `TreeDelta`, `disposition` or `the Gate`.
+ */
+const whatIsIt = (ids: IdFactory): LoomNode =>
+  section(
+    ids,
+    { width: "wide", eyebrow: BAND.whatIsIt },
+    "A governance framework for modern AI-enabled web development and adaptation.",
+    [
+      prose(
+        ids,
+        "In plainer words: your AI can change your live page, and you decide in advance what it is allowed to change, see everything it did, and put any of it back.",
+        { size: "lead", measured: true }
+      ),
+    ]
+  )
+
+/**
  * The four beats, as data, because the shape is checked rather than described.
  *
  * `state` is what separates the two halves visually: `done` is a thing you have
@@ -386,14 +429,14 @@ const USING_IT: readonly UsingItStep[] = [
   },
   {
     marker: "3",
-    title: "Your AI sees what readers do",
-    body: "Which parts of the page they reach, how long they stay, and what they press \u2014 and never who they are.",
-    state: "current",
+    title: "Hook up your preferred AI model",
+    body: "Loom is wired to no vendor \u2014 point it at the model you already use. It is the only part of the system that guesses, and everything after it is checked.",
+    state: "done",
   },
   {
     marker: "4",
-    title: "The page adapts, on your rules",
-    body: "It proposes a change, your rules decide whether it lands, and what happened is written down so you can undo it.",
+    title: "Adapt your page, on your rules",
+    body: "Every change is weighed against the rules you wrote before anybody asked, written down whether it lands or not, and reversible in one press.",
     state: "current",
   },
 ]
@@ -455,11 +498,11 @@ const usingIt = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "wide", eyebrow: BAND.usingIt },
-    "Two things you do. Then it runs.",
+    "Four steps. Your rules decide.",
     [
       prose(
         ids,
-        "You keep your framework and you keep your components. Loom needs one list from you: the pieces the AI may use, and the rules for what it may do with them.",
+        "You keep your framework and you keep your components. What Loom needs from you is the list of pieces the AI may use, and the rules for what it may do with them.",
         { size: "lead", measured: true }
       ),
       buildElement(ids, {
@@ -893,6 +936,7 @@ export const homePageTree = (context: PageContext): LoomTree => {
               }),
             ]),
         hero(ids, context),
+        whatIsIt(ids),
         vocabulary(ids),
         usingIt(ids),
         /**
