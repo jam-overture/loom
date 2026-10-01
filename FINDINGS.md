@@ -39400,9 +39400,9 @@ what shows the two are different quantities.** On a production build at 1280:
 
 | page | words | height | screens at 900 | words a screen |
 | --- | --- | --- | --- | --- |
-| `/` | 1,143 | **5,207px** | 5.79 | 197 |
-| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
-| `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
+| `/` | 1,151 | **5,234px** | 5.82 | 198 |
+| `/how-it-works` | 862 | 4,688px | 5.21 | 165 |
+| `/what-you-run` | 499 | 2,808px | 3.12 | 160 |
 
 At page scale the two track each other within about 1.2×, which is why a word
 budget is a fair stand-in there. **Per band they do not**: the front door's hero
@@ -39846,3 +39846,154 @@ the verdict as a **word** rather than a number — `echo "GATE=red"` on non-zero
 so a run that quotes the wrong thing quotes something that does not look like a
 pass. Offered, not specified.
 
+
+---
+## 2026-10-01 — a correction pushed during `Loom merge`'s window lands on a branch whose pull request has already closed, and the merge takes the stale version
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and every lane
+that pushes a second time to its own branch · **Status:** open — the remedy is
+one command and this entry is mostly the timeline, because the 28 September
+entry on the same mechanism recorded the *push* being lost and this is the other
+outcome, where the push survives and the merge does not take it
+
+**Extends:** the 28 September entry *a push during `Loom merge`'s window is
+silently dropped, and the pull request still closes as merged*.
+
+`#468` added this site's copy budget. While it was open, `Loom merge` brought
+five commits onto the branch, among them `#469` — a copy pass over the whole
+marketing site. That copy moved every figure the budget's own docstring records,
+so the figures had to be retaken. Here is what the clock did:
+
+| | |
+| --- | --- |
+| 16:10:54 | `check_suite.completed` on the merge commit — the event that woke this lane |
+| 16:11:53 | the gate re-run against `#469`'s copy: 15 of 15 green |
+| **16:12:32** | **`Loom merge` merges `#468` as `b7e58a8`** |
+| 16:13–16:15 | pictures retaken, figures corrected, committed |
+| 16:1x | pushed — to a branch whose pull request had closed forty seconds into the work |
+
+Nothing failed and nothing warned. The push succeeded, the branch has the
+commit, and `git status` is clean against its remote. **The pull request simply
+was not there to carry it**, so `main` took the version with the pre-`#469`
+measurements in it.
+
+### Why it is worth its own entry
+
+The 28 September entry is about a push being **dropped**. This is the inverse and
+it is quieter: the push lands perfectly, on a ref nothing reads any more. The
+branch looks exactly like a branch whose work is safe, which is the one state a
+routine checks for.
+
+It also has a shape that makes it likely rather than unlucky. **A second push to
+your own branch is nearly always a correction**, and a correction is nearly
+always triggered by the same thing that made the branch mergeable — a merge
+commit from `Loom merge`, which is the event that both starts the clock and
+wakes the lane. So the window a routine does its re-measurement in is precisely
+the window the merge routine is working in.
+
+What landed here was harmless: the assertions and all six ceilings were correct
+and green, and only the comment's record of what it had measured was five days
+of drift behind — eleven words on one band. The same timing with a *fix* in it
+rather than a figure would have put a known-bad version on `main` with a green
+branch sitting beside it saying otherwise.
+
+### The remedy, which is one command
+
+**Before pushing a second time to your own branch, read the pull request's
+state** — not the branch's:
+
+```bash
+gh api repos/<owner>/<repo>/pulls/<n> --jq '.state, .merged'
+```
+
+If it is closed, the push is a no-op on anything anybody will read. The
+follow-up is a **fresh branch off the new `main` and a new pull request**, which
+is what `marketing-54` is. A merged pull request cannot track new work, and a
+branch is not evidence that it does.
+
+**For the other lanes:** this costs nothing to check and the failure is invisible
+without checking. Any lane that re-measures, re-photographs or re-runs anything
+after a `Loom merge` commit arrives is in this window by construction.
+
+---
+## 2026-10-01 — `main` is red: #470's "counted, not typed" rule met #465's three new primitives, and neither pull request was wrong
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, with one line for
+`Loom merge` · **Status:** open — **`main` at `19d5238` fails `pnpm verify`**,
+reproduced on a pristine checkout with nothing of this lane's applied. Two
+assertions, both in `(docs)/_lib/counts.test.ts`, both one line to fix, and
+neither is in this lane's route group so neither is fixed here
+
+```
+× everything this site wrote for a reader > writes no counted size as a number
+× spelling a number the way prose spells it > spells the ones the site is stating today
+```
+
+### What happened, and it is nobody's mistake
+
+**`#465`** (primitives) registered a menu, a popover and a lightbox, taking the
+starter library from **ninety-nine to one hundred and two**.
+
+**`#470`** (docs) landed the rule that *a number this site states about Loom is
+counted, not typed* — which is a good rule, and its own census test pins the
+spelled numbers as literals so the speller cannot drift in silence.
+
+Each was green on its own branch. **The combination is red, and it went red at
+merge rather than in either review**, because `#470` was verified against a
+`main` that did not yet carry `#465`'s three primitives. This is the
+cross-lane count staleness `docs/routines.md` gives `Loom merge` an explicit
+mandate for — *"small edits outside your lane when an earlier merge made your
+branch's tests go stale… a count… by running the code and recording what it
+prints"* — and it was not caught this time.
+
+### The two fixes, both one line
+
+**1. `(docs)/_lib/counts.test.ts:355`** — the census literal. `SITE_COUNTS`
+reads the library, so the expectation is the stale half:
+
+```diff
+-      "starter-primitives: ninety-nine",
++      "starter-primitives: one hundred and two",
+```
+
+`one hundred and two` is not my spelling of it — it is what the failing run
+printed as *Received*, so `spellOut(102)` is confirmed to render exactly that.
+Read off a run rather than typed, which is the same rule `#470` is about.
+
+**2. `(docs)/_lib/entry-points.ts:50`** — a typed count in prose:
+
+> *"The starter library's **forty-four bands** under their own names, for
+> assembling a page without going through the catalogue."*
+
+**The typed word is correct today**, which is precisely what `#470`'s rule
+exists to refuse. It wants producing from the count, as the other sentences on
+that surface now do:
+
+```
+`The starter library's ${spellOut(siteCount("starter-bands").value)} bands under their own names, …`
+```
+
+`starter-bands` is already in `SITE_COUNTS` at 44, so this needs no new count —
+only the substitution.
+
+### Why it is filed and not fixed
+
+`(docs)/_lib/` is another surface's route group. This lane's brief is explicit
+that it never edits one, and the whole value of the split is that a marketing
+pull request nobody has to read `(docs)` to review. No open pull request fixes
+this, so there is nothing to port either: `#471` is lessons and `#463` is the
+portal.
+
+**What it costs in the meantime:** every lane's `pnpm verify` is red on a clean
+`main` for a reason that has nothing to do with its own work, which is the most
+expensive kind of red — the one a run is tempted to explain away. Two lanes
+have already spent part of a run proving it is not theirs.
+
+### The line for `Loom merge`
+
+Both assertions are exactly the shape its mandate names, and the trigger is
+mechanical: `#465` changed a number that `#470`'s branch had already recorded.
+**A merge that lands a primitive count change should re-run the surfaces that
+state that count**, not only the branch being merged — the count has three
+readers on two surfaces and it is the one quantity in this repository that
+several lanes type independently.
