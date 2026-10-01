@@ -8,6 +8,355 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
+· **Status:** open — **not a defect and not a blocker**; three primitives shipped
+around it and the fourth is what it costs
+
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+unblocked four primitives: dialog, dropdown, lightbox, tooltip. This run built
+three of them. The fourth is not blocked by anything about `present` — it is
+blocked by what a control is allowed to be *called*.
+
+A behaviour declares the text keys its control needs, and a primitive supplies
+the strings:
+
+```ts
+const MENU_TEXT = { present: "Menu" } as const
+```
+
+Those strings are resolved by `TextResolver.textFor(type)` — **per type**, not
+per node. So every `loom.menu` on every page in a deployment has a button
+reading *Menu*, every `loom.lightbox` reads *Expand*, and a dictionary may
+translate them while a tree may not write them. That is 0055 and 0063 working
+exactly as designed, and for an **affordance** it is the right answer: *Expand*
+over the corner of a thumbnail is the word a reader wants, and a model inventing
+one per tile would be a page where the same control is called four things.
+
+A **dialog**'s trigger is not an affordance. It is the page's call to action —
+*Watch the demo*, *Book a call*, *See the whole record* — which is content, and
+the seam has nowhere to put it. A `loom.dialog` built today would be a modal
+opened by a chip reading *Open*, which is a worse page than no dialog.
+
+**Two further things the same constraint costs**, both measured on this run's
+specimen rather than reasoned about:
+
+- **An icon-only trigger is unreachable.** The control renders its label as a
+  child, so `ⓘ` beside a term — the shape a tooltip actually takes — cannot be
+  built. `loom.popover` ships with the word *Details*, which is a real design and
+  is not that one.
+- **Two of the same primitive on one page are two buttons with one name.** A
+  header with a *Product* menu and an *Account* menu has two buttons a screen
+  reader announces identically. `aria-label` on the panel does not fix it,
+  because the trigger is what a reader reaches first.
+
+**This is a question rather than a request.** The obvious shapes each give
+something up and one of them gives up the property the seam exists to protect:
+
+| shape | what it costs |
+| --- | --- |
+| a reserved prop the control's label falls back to | a model writes a control's words, which is exactly 0055's refusal |
+| a declared prop the *primitive* names as the label source, resolved by the seam | narrower — the primitive still chooses that this control is named from the tree — but it is a new field on the behaviour seam and a new path into a control's props |
+| nothing; triggers stay affordances | what shipped. A dialog is then a composition — a `loom.action` that is `interactive` beside a region — which the seam cannot express at all, because only a control opens a presentation |
+
+The third is what this run did, and it is why the gap inventory's first Tier B
+group now reads *three of four*.
+
+---
+## 2026-10-01 — a wipe's declared `position` is discarded the moment its slider mounts, so the prop is visible only on a page with no scripting
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/behaviour.ts`) · **Status:** open — **a live defect on every
+scripted page**, found by photographing the primitive the mechanism was built for
+
+`loom.before-after` now declares `adjust`, which is the three lines 0096's
+closure asked for and the 29 September finding re-asked for. Placing it exposed
+something neither record anticipated.
+
+`ADJUST_RESTING` is **50**, fixed, and `build` receives the node's text and
+content but not its props — which `behaviour.ts` states plainly and then argues
+is harmless:
+
+> *"the primitive supplies its own position as the `var()` fallback, which covers
+> the case that actually matters, the page where the control never mounts. Once a
+> reader has a slider in front of them, where it started is theirs to change."*
+
+The first half is true and is why this was safe to ship. The second half is the
+part that does not survive contact with a page. The control writes
+`--loom-adjust: 50` on its parent **in its mount effect**, so a band authored as
+`position: 35` renders at 35 in the HTML, and jumps to 50 the instant hydration
+lands. On any page a reader actually visits, the prop does nothing.
+
+**Measured, not inferred.** This run's specimen declares `position: 35` and the
+`shut` shot — the page as hydration settles, nothing pressed — has the divider at
+50 under both palettes. `library.test.ts` asserts the 35 because it asserts the
+static markup, which is the one place the prop is still visible.
+
+**What would close it**, smallest first, and the first is probably enough:
+
+1. **Let a primitive declare a behaviour's resting value** the way it declares
+   the behaviour's text — a per-type number, not a per-node one, so nothing a
+   model writes reaches it. `loom.before-after`'s default position is a
+   primitive-level fact and its *prop* would still be unreachable, so this
+   narrows the defect to "a tree that overrides the default is overridden back".
+2. **Hand `build` the node's props**, which is a real change to what a behaviour
+   is and is `ARCHITECTURAL`: props are AI-authored, and a control reading them
+   is a control a model configures.
+3. **Publish nothing until the reader touches it** — the control mounts, renders,
+   and writes no property until its first `input`. The fallback then holds until
+   somebody drags, which is exactly the behaviour the docstring describes.
+   Cheapest of the three and it changes `adjust`'s contract for every future
+   taker, which is why it is filed rather than proposed.
+
+---
+## 2026-10-01 — what a presented region still cannot do: trap focus, make the page inert, know whether it fits, or escape a transformed ancestor
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` (the first
+three) and `Loom daily build` (`src/render/`, the first two) · **Status:** open —
+**stated limits of three shipped primitives**, written down so the next author
+meets them here rather than in a browser
+
+0176 draws the line at *"the runtime opens and closes a boolean and nothing
+more"* and names focus trapping, `inert` and a scroll lock as the primitive's
+half. Building the three primitives found that the three are not alike: one is
+reachable from a stylesheet and two are not.
+
+**The scroll lock is done**, by a `:has()` rule on the document element scoped to
+the library's own class and the primitive's own state
+([0210](decisions/0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md)).
+It is released by the same attribute that sets it, so there is no pair of calls
+to get out of step.
+
+**Focus trapping and `inert` are not, and cannot be from here.** A reader on a
+keyboard can tab out of an open lightbox into the page behind it. Both are
+script, both are facts about elements this primitive did not render, and no
+stylesheet expresses either. If the seam ever grows a sixth member or a
+`modal: true` on `present`, this is the entry that asked for it; until then the
+lightbox is honest about being a picture over a page rather than a modal dialog.
+
+**A panel cannot know whether it fits.** `placement` and `align` on `loom.menu`
+and `loom.popover` are declared rather than measured, because whether a panel
+would fall off the bottom or the side of a window is a fact only the browser
+holds and the only portable way to ask is to measure in script — a client
+boundary this library does not open per primitive. CSS anchor positioning is the
+answer and is not available to a library that must render everywhere. The damage
+is bounded (`max-inline-size: min(18rem, calc(100vw - 2rem))`) and not abolished:
+a trigger near the left edge of a phone with `align: "end"` still hangs its panel
+off the page. **Worked example, found by photographing it:** `loom.nav` builds
+its own disclosure the moment it has children, that toggle takes the slack on the
+top line, and the actions region therefore wraps to a second line at the *left* —
+so a menu in a header's actions, correct at 1280, hung off the left of a
+390-pixel page. The specimen's bar carries no flat links for that reason.
+
+**A fixed region is contained by a transformed ancestor.** `position: fixed` is
+relative to the viewport until something above it carries a `transform`, a
+`filter` or a `backdrop-filter`, at which point that element becomes the
+containing block and a lightbox's frame is trapped inside a band. The three in
+this library are `loom.reveal`'s entrance, `.loom-lift`'s hover and a sticky
+`loom.nav`'s `backdrop-filter`. A lightbox goes in a plain band. There is no
+diagnosis for this and there cannot be one from a render.
+
+**And one that was a defect rather than a limit, kept because it is the same
+class.** The lightbox's root carried `isolation: isolate` for one draft. Isolation
+makes a stacking context, and a stacking context confines every `z-index` inside
+it — so the frame's layer stopped being a page layer and the bands *after* the
+tile in the document painted straight over the scrim. The photograph is what
+found it. A region drawn over the page has to be allowed to be over the page.
+
+---
+## 2026-10-01 — two cross-lane edits forced by a hundred-and-second primitive: one assertion in `src/sdk/`, and five lesson transcripts of which one is a teaching section
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/sdk/pairings.test.ts`) and `Loom lessons` (`lessons/`) · **Status:** open —
+everything is **shipped and `pnpm verify` is green**; this is so you review the
+edits rather than find them, and the last one is a judgement somebody has to make
+and I made it by default
+
+This is the 21, 22 and 30 September class again, from the other side of the
+repository: a lane cannot add a primitive without moving numbers that other
+lanes' files print.
+
+**The mechanical ones.** Five lesson transcripts print the size of the starter
+library or something derived from it, and the library went from 99 to 102:
+
+| lesson | what moved |
+| --- | --- |
+| `22-reach.md` | `primitives registered: 102`, `declaring a target: 16`, four new rows, and *Twelve* → *Sixteen* in the sentence under it |
+| `23-anchors.md` | the count |
+| `24-silence.md` | the count |
+| `30-rendezvous.md` | the count, and `saying nothing either way: 97` → `100` |
+
+**The one that wants your eye is lesson 31**, and it is not a number. Exercise G
+is the exercise that *found* this run's work: it printed `adjust / present /
+dismiss — nothing declares it`, and the section under it, *Found by running it:
+three members with nothing to place them*, is forty lines of teaching built on
+that output. All three are now declared, so the transcript the test holds to the
+real output had to change, and the prose under it stopped being true.
+
+**What I did, and it is reversible in either direction:**
+
+- The transcript is the current output: six takers, every member declared.
+- The paragraph under it says what it read on 29 September and that the next
+  section is about the difference.
+- **The section itself is unchanged**, with a block quote at its head saying it is
+  kept as written, in the present tense it was written in, and to read it as of
+  29 September.
+- A short closing subsection, *What those lines read now*, says what each line
+  reads today and makes the point the section was already making: a healthy
+  output and an unhealthy one are the same nine lines, and the gap lasted
+  twenty-eight days because nothing was pointed at it and two days after
+  something was.
+
+**I think keeping the section and dating it is better than rewriting it**, because
+what it teaches is the measurement rather than the defect, and a section rewritten
+to describe a closed gap teaches nobody to go looking for an open one. It is
+still yours to overrule, and the alternative — past-tensing the forty lines — is
+a mechanical edit somebody can make in ten minutes.
+
+**The `src/sdk/` edit is one assertion and is narrower than it looks.**
+`pairings.test.ts` asserted that `loom.overlay` is the only primitive in the
+library painting `bg-overlay`. Three primitives that present a region now paint
+it too, for the slot's stated reason — it is the surface a thing drawn *over* the
+page sits on, and a panel in `bg-surface` laid over a `bg-surface` card has no
+edge but its hairline under half the starter palettes. The list of types is
+**widened rather than loosened**: a fifth primitive quietly starting to paint the
+page's overlay surface still fails there. The row's `basis` — `painted`, reachable
+by no ancestor walk, which is what that test is for — is untouched.
+
+One thing was changed in `src/primitives/` rather than in `src/theme/` to avoid a
+third: the lightbox's caption was drafted in `fg-muted`, which would have made
+`fg-muted on bg-overlay` a **painted** pairing where `contrast.ts` declares a
+composed one — a row the palette audit measures at a weaker bar than the thing
+drawn. It is `fg-default` now, which is also the better reading of a title in a
+bar beside a cross.
+
+---
+## 2026-10-01 — `0209` is claimed by two open pull requests, which is the second consecutive number this has happened to
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Extends:** the 30 September entry *`0205` is claimed by two open pull requests,
+and neither knows about the other* · **Status:** open, and filed as **a second
+data point** rather than a second theory
+
+Checked while choosing a number for this run's record, on `main` at `f1879b5`:
+
+| number | claimed by |
+| --- | --- |
+| 0209 | `#462` — *what an adapter owes the runtime is a suite, not a sentence* |
+| 0209 | `#463` — *an app is a registry, a policy and a store, and loom has one of each* |
+
+`pnpm decisions:index` on `main` already reports it, in the one place nobody
+reads before opening a branch:
+
+```
+note: 0209 has no record here — either one was deleted, or the number is claimed
+on a branch that has not merged
+```
+
+This run took **0210** by checking the open pull requests' changed files, which
+is four API calls and is not something a routine should have to remember. Two
+consecutive numbers in two days makes it a rate rather than an accident: with
+five lanes opening branches against one counter, the next collision is a matter
+of how many are open at once.
+
+**Not proposing the fix**, because the shapes differ in who pays — a number
+allocated at merge rather than at write, a per-lane block, a check in
+`decisions:index` that reads open branches — and all three are the maintainer's
+call about a convention rather than a lane's about a file.
+## 2026-10-01 — `ModelEffort` is a five-level scale borrowed from one vendor, and three adapters will each have to invent a mapping
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`, pending a
+maintainer decision · **Status:** open — **nothing is broken; this blocks the
+second adapter rather than anything shipping today**
+
+The maintainer asked on 30 September for out-of-the-box adapters beside
+Anthropic — OpenAI, Gemini and Grok were the named candidates.
+[0209](decisions/0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md)
+lands the suite that makes a second adapter checkable. This is the question it
+deliberately did **not** answer.
+
+`ModelRequest.effort` is `low | medium | high | xhigh | max`. Five levels,
+matching one vendor's vocabulary, and the Anthropic adapter passes the value
+straight through. Providers expose reasoning effort on different scales with
+different granularity, so every new adapter has to map — and a mapping that
+silently rounds means a deployment asked for one amount of thinking and got
+another, invisibly, at **the one step where being wrong is expensive**: a
+plausible-but-wrong delta passes through a Gate that trusts the confidence the
+proposer reported (0005, 0007).
+
+Three shapes, and the choice is the maintainer's because it is about what Loom
+promises rather than about any vendor:
+
+| | what it costs |
+| --- | --- |
+| **keep five, adapters map** | every adapter rounds, differently, and `high` means something different per deployment |
+| **narrow to what every vendor can honour exactly** | a real loss of resolution on the vendor that has five, and a breaking change to `ModelRequest` |
+| **keep five, make the rounding reportable** | honest, and the only one that needs new surface — a completion would have to say what effort was actually used, the way `servedBy` already says which model actually answered |
+
+**The third is the one I would build**, and the precedent is already in the
+record: 0005 decided that the model which served a request is *recorded rather
+than assumed*, for exactly this reason. Effort is the same kind of fact and is
+currently assumed.
+
+0209's contract deliberately asserts nothing about effort, so it does not
+prejudge this.
+
+---
+## 2026-10-01 — no provider credentials are present in this environment, including the one the brief says is there
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **a limit on what any run can verify, not a defect**
+
+Checked on 1 October, by presence and never by value: `ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY` and
+`GROK_API_KEY` are **all absent**. The routine brief states `ANTHROPIC_API_KEY`
+is in the environment; it is not, in this session.
+
+Nothing fails because of it — 0005 built the live smoke test to skip cleanly
+without a key, and it does. What is lost is the one thing that test exists for,
+in 0005's own words: *"proof that the schema we hand a real model is one a real
+model can satisfy, which no fixture can establish."*
+
+**This is the gating fact for the adapter work**, and it is worth stating
+plainly before anybody writes three of them. `schema.ts` emits `const` 25 times
+and `anyOf` 3 times inside closed objects, and structured-output support differs
+per provider and per mode. Whether a given service accepts that schema is
+measurable and is **not** inferable — this repository's own method is to measure
+it, which is why `GRAMMAR_BUDGET_BYTES` carries a date and a measured band
+rather than a guess.
+
+So an adapter written here can be unit-tested against 0209's contract and
+cannot be shown to work. Worth knowing before the work is planned, not after.
+
+Two things that would help, in order: a key for one non-Anthropic provider in
+the environment, and `ANTHROPIC_API_KEY` restored so the existing smoke test
+runs again at all.
+
+---
+## 2026-10-01 — Grok may not be a third adapter, and that is worth five minutes before it is two modules
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — unverified, and cheap to verify once there is a key
+
+xAI's API is widely described as OpenAI-compatible at the chat-completions
+endpoint. If that holds for the **structured-output** path specifically — which
+is the only part of it Loom uses, and the part most likely to differ — then
+Grok is not a second module beside an OpenAI adapter. It is the same adapter
+with a different base URL and model id, which makes it a line in
+`docs/deployment.md` and a config rather than an entry point in `package.json`.
+
+Filed rather than assumed, because the failure mode runs both ways: building two
+modules that are one is waste, and assuming one module covers two services is a
+host finding out in production. The 27 September egress finding means no run here
+can check it against the live service either way.
+
+The order that answers it cheapest: build the OpenAI adapter first, point it at
+xAI's base URL with a Grok model id, and run 0209's contract plus one live call.
+One of those two outcomes is a config line and the other is an honest second
+module.
+
+---
 ## 2026-09-30 — two lesson files edited from outside the lane, both forced, and one of them changed a paragraph rather than a number
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
@@ -38637,6 +38986,92 @@ number is right* and *this number is the one you are looking at*, and the second
 is the property a documentation site actually needs.
 
 ---
+## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**not blocking**, and recommended as small. Nothing was prevented; the numbers
+in today's report are real
+
+Every unit this lane has shipped for a fortnight is argued on a measurement:
+*the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
+furthest scroll is 623 against a card top of 740*. Those numbers decide which
+unit is worth building and whether it worked, and **not one of them comes from
+anything the repository contains.**
+
+`pnpm shoot` takes the lane where it needs to go — the `do` list drives the two
+presses, `before` reaches a signed-in screen, `start` says what the browser
+arrived with — and then it can only photograph. *What a shot list still cannot
+do* names it: **read anything back out of the page**
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md),
+[0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md),
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)).
+
+So the measuring gets done by a `playwright-core` script written fresh in a
+scratch directory, run once, and deleted with the container. This run wrote
+one; the run before it wrote one; the run before that wrote one. Three scripts,
+three sessions, one shape, none of them in the repository and none of them
+reviewable.
+
+**What this run would have wanted, and what it costs to not have.** The unit
+today is *the payoff card fits its frame* — 975px to 765px in an 857px rail,
+and **Put it back** going from 23px below the bottom edge to 186px above it.
+There is a test that the reasoning folds. **There is nothing that can fail if
+the card grows back past 857px**, because nothing in this repository can see a
+box. The next run that adds two lines to that card puts the demo's closing
+argument back under the fold and the suite stays green.
+
+### What would close it, and why it is not an assertion
+
+The harness already prints a measurement it took off the page — `scrollWidth`
+against `innerWidth`, on every shot, which is how a page wider than the phone
+says so. This asks for one more of exactly that kind:
+
+```json
+{ "path": "/demo", "out": "…", "measure": ["aside", "aside li[id]", "text=Put it back"] }
+```
+
+— and a printed line per selector giving its box and whether it is inside the
+viewport, beside the `scrollWidth` line that is already there.
+
+**It prints; it does not assert**, which is the line 0159 draws and the reason
+this is worth asking for rather than arguing about. The harness stays an
+instrument, the judgement stays in the report, and what changes is that the
+number in the report was produced by something the maintainer can read.
+
+`tools/screenshot/` is `Loom daily build`'s, which is why this is filed rather
+than done.
+
+---
+## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-34-put-it-back-in-view`, and **small**
+
+That run made the payoff card fold its reasoning, because the visitor had
+already read it in order to press **Apply this change**. The fold works and the
+card now fits its frame. **The line it folds under does not.**
+
+`the-reasoning.tsx` builds one summary for every folded card:
+
+> `{brief} · and the rule that read it`
+
+which on the payoff card reads **"Some risk, and you could undo it. · and the
+rule that read it"**. Every word is true and the tense is wrong: the visitor is
+no longer weighing whether to accept some risk, they accepted it one press ago,
+and the summary is the answer to *what did I just agree to* rather than *what
+am I being asked*. It is also the only line on that card written as though the
+decision were still open, three lines above **You said yes**.
+
+This was not fixed in the run that created it because the summary is shared by
+every folded card in the rail — the read cards below, the moved-past holds, and
+now the answered one — and changing it for all of them to suit one is the
+wrong trade. What it wants is a second string chosen by the same reading that
+chose the fold, which is a copy decision worth making deliberately rather than
+at the end of a run about geometry.
+
+Not blocking, and nobody is misled: the words are accurate, they are one click
+from the full working, and the card around them says plainly that the change
+landed and that the visitor is what landed it.
 ## 2026-09-30 — the portal's record screens can be filled with a record that is entirely true, and it took nine minutes and five model calls to prove it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with the same decision
@@ -38891,3 +39326,102 @@ from nobody converting.
 **Not built, and deliberately not proposed as a record.** Shape 1 is the only
 candidate and it wants the maintainer's reading of rule 3 first. Raised in the
 run's report with a recommendation.
+## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — measured, not urgent, and not something the move could avoid
+
+The maintainer moved the five choices off the front door and onto
+`/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
+and **refused** are all still reachable there, which had to be measured rather
+than assumed, because two of the five were bound to what the *front door*
+protects and that page has no `loom.mosaic`.
+
+What did not survive is one step further in. Measured across all five choices on
+the new page, each with and without the visitor's yes:
+
+| choice | the change | its undo |
+| --- | --- | --- |
+| `problem` | landed | landed |
+| `shorter` | **held** | landed |
+| `proof` | landed | landed |
+| `calmer` | landed | landed |
+| `drop-pitch` | **refused** | none — nothing landed |
+
+**No undo on this page is held.** On the front door one was: the held request
+moved a protected band, so putting it back moved the same protected band again,
+and the rules held the undo on exactly the same grounds. Here the held request
+*removes* four bands, and putting four bands back is an insert — which the rules
+let through on its own.
+
+### Why this is worth writing down rather than shrugging at
+
+It is a claim the site makes. `undo.test.ts` asserted it in as many words until
+today: *"Nothing here exempts an undo to make the demonstration tidier, and this
+is the assertion that would fail if anything ever did."* Nothing exempted it.
+The arrangement simply stopped producing an example, and the assertion had to be
+rewritten to what is now true — that the undo is judged by the same rules,
+carries its own record and restores the page exactly.
+
+**The property still holds of the system.** An undo is a change (0032) and goes
+through the same Gate; it is only these five requests, against this page, that
+cannot show it. That distinction is the whole reason this is a finding and not a
+bug: nothing is broken, and a reader can no longer watch the most interesting
+case.
+
+### What would close it
+
+A sixth choice whose undo the rules hold — the shape that works is a request
+that **moves** something protected rather than removing something large, because
+the inverse of a move is another move and inherits the same weight. `/how-it-works`
+has two protected nodes, the menu and the footer, and moving either is a worse
+demonstration than the one it would replace.
+
+The honest alternative is to stop claiming it. Nothing on the page currently
+promises a held undo in words, so there is no copy to correct today; this entry
+exists so that whoever writes that copy knows it is not demonstrable here.
+
+---
+## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — **nothing is broken; this is why a sweep was needed at all**
+
+`voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
+no more than 35 words in a field a reader scans. Both run over
+`SCANNED_PROPS` — `title`, `body`, `label`, `caption`, `value`, `eyebrow` —
+which are the props a primitive is given.
+
+**The site's paragraphs are not props.** They are text nodes built by `prose()`,
+and no voice rule reads them. Of the 38 strings rewritten in today's sweep,
+the great majority were prose, including every one of the four worst sentences
+the maintainer quoted back on 1 October.
+
+### The part that is not just style
+
+One of those paragraphs was **factually stale**, and had been for a day:
+
+> *"The ready-made changes on the front door do not send anything at all."*
+
+The band it names moved to `/how-it-works` on 30 September. The band's own
+tests moved with it. This sentence was on a third page, naming the band in
+prose, and nothing in the repository connects those two facts. A reader
+following it lands on a page with no such thing on it.
+
+### Why extending the rule is not obviously right
+
+The 35-word limit is a *scanning* rule and would be wrong on a paragraph — a
+body paragraph is allowed to be a paragraph. The em-dash rule would extend
+cleanly today: after this sweep there is exactly **one em dash left in rendered
+copy site-wide**, and it is in the maintainer's own hero lead. A rule that has
+to name one sentence as an exception is a rule that will be edited rather than
+obeyed, so it was not written today.
+
+### What would actually close it
+
+The staleness is the catchable half, and it is not a voice problem. A paragraph
+that names a page (*"the front door"*, *"the How it works page"*) is making a
+claim about where something lives, and `SITE_ROUTES` already knows where things
+live. A check that reads rendered prose for the site's own page names and holds
+them against the page that actually carries the band would have caught this one
+the hour it broke.

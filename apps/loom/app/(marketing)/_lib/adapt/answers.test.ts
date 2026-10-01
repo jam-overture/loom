@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { spell } from "../journey"
 import { treeFor } from "../render"
-import { HOME, type SiteThemeName } from "../site"
+import { HOW_IT_WORKS, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import {
   ANSWER_ORDER,
@@ -31,9 +31,9 @@ import { runAsk } from "./run"
 const ORIGIN = "https://loom.example"
 const THEME: SiteThemeName = "minimal"
 
-const basePage = (): LoomTree => treeFor(HOME, { origin: ORIGIN, theme: THEME })
+const basePage = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
 
-const wordsOn = (route: typeof HOME): string =>
+const wordsOn = (route: typeof HOW_IT_WORKS): string =>
   wordsOf(treeFor(route, { origin: ORIGIN, theme: THEME }).root)
 
 describe("what this site's rules actually do with each choice", () => {
@@ -106,10 +106,10 @@ describe("the sentence the count is spelled into", () => {
 
   it("points at both exceptions rather than only the refusal", () => {
     expect(worthWatching()).toBe(
-      "The two that do not simply happen are the part worth watching."
+      "The two that do not just go through are the ones worth watching."
     )
     expect(worthWatching(shaped(["landed", "refused"]))).toBe(
-      "The one that does not simply happen is the part worth watching."
+      "The one that does not just go through is the one worth watching."
     )
   })
 
@@ -134,12 +134,12 @@ describe("every page that counts the choices", () => {
    * counting the choices, held against what the choices actually do — is the
    * same however many pages carry it.
    */
-  it.each([HOME])("$path introduces them with what they do", (route) => {
+  it.each([HOW_IT_WORKS])("$path introduces them with what they do", (route) => {
     expect(wordsOn(route)).toContain(whatTheChoicesDo())
   })
 
   it("the front door also says which are worth staying for", () => {
-    expect(wordsOn(HOME)).toContain(worthWatching())
+    expect(wordsOn(HOW_IT_WORKS)).toContain(worthWatching())
   })
 
 
@@ -151,7 +151,7 @@ describe("every page that counts the choices", () => {
    * saying both. This searches for the claim that was there and for every
    * near-miss of it a rewrite might reach for.
    */
-  it.each([HOME])(
+  it.each([HOW_IT_WORKS])(
     "$path never says the rest of them just happen",
     (route) => {
       const words = wordsOn(route)
@@ -173,6 +173,6 @@ describe("every page that counts the choices", () => {
    * outcomes, which is the product everybody else has.
    */
   it("says on the front door that one of them stops and asks", () => {
-    expect(wordsOn(HOME)).toContain("stops and asks you first")
+    expect(wordsOn(HOW_IT_WORKS)).toContain("stops and asks you first")
   })
 })

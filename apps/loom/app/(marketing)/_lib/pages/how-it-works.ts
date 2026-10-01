@@ -15,7 +15,9 @@ import { JOURNEY, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, splitSection, stack } from "../nodes"
 import { DEMO, DOCS, HOW_IT_WORKS, SITE_THEMES, surfaceHref } from "../site"
 
+import { answerBand } from "./answer"
 import type { PageContext } from "./home"
+import { seeItHappenBand } from "./see-it-happen"
 
 /**
  * The mechanism page: what happens between someone asking for a change and the
@@ -55,7 +57,7 @@ const hero = (ids: IdFactory): LoomNode =>
       buildSlot(ids, "heading", [heading(ids, 1, "How a change travels", { balance: true })]),
       prose(
         ids,
-        "Someone asks for a change. Before anything moves, the change is measured and checked against rules you wrote. Then it is written down — every time, whether it happened or not.",
+        "Someone asks for a change. Before anything moves, Loom measures it and checks it against rules you wrote. Then it writes down what happened, every time, whether the change went through or not.",
         { size: "lead", measured: true }
       ),
     ],
@@ -121,27 +123,27 @@ export const SHORT_ANSWERS: readonly ShortAnswer[] = [
     eyebrow: "Your rules",
     heading: "You decide what may change, before anyone asks",
     body: "A rule is a line you write once: this part may be rearranged, that part may not, and anything bigger than this waits for a person. They are read the same way every time, whether or not somebody is watching.",
-    example: "Say the price may never be edited, and no request edits the price — not yours, not a visitor's, not the AI's.",
+    example: "Say the price may never be edited, and then no request edits the price. Not yours, not a visitor's, not the AI's.",
   },
   {
     /** Replaces `/the-record`, which was 951 words. */
     eyebrow: "The record",
     heading: "Every change leaves a note you can read later",
-    body: "Who asked, what they asked for, what actually moved, which of your rules allowed it, and what putting it back would restore. It is kept whether the change happened or not.",
+    body: "The record holds who asked, what they asked for, what actually moved, which of your rules allowed it, and what putting it back would restore. Loom keeps it whether the change went through or not.",
     example: "Six months later you can ask why a section moved, and get an answer rather than a guess.",
   },
   {
     /** Replaces `/when-it-goes-wrong`, which was 1,116 words. */
     eyebrow: "When the answer is no",
     heading: "A refused change leaves the page exactly as it was",
-    body: "Nothing is half-applied. If the AI asks for something your rules do not allow, or asks for something that does not make sense, the page you are serving does not move — and the attempt is still written down.",
+    body: "Nothing is half-applied. If an AI model asks for something your rules do not allow, or something that does not make sense, the page you are serving does not move. The attempt is still written down.",
     example: "A request to delete your contact details is refused, your page is untouched, and the refusal is in the record.",
   },
   {
     /** Replaces `/putting-it-back`, which was 984 words. */
     eyebrow: "Putting it back",
     heading: "The undo is written at the same moment as the change",
-    body: "It is not reconstructed afterwards from what the page looks like now. The change that reverses it is worked out when the change is made, and kept beside it.",
+    body: "Loom works out the change that reverses it at the moment the change is made, and saves it. It does not reconstruct it afterwards from how the page looks now.",
     example: "Press once and the questions that were removed come back word for word, not rewritten.",
   },
 ]
@@ -192,11 +194,11 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(
     ids,
     { tone: "accent", width: "wide", eyebrow: "Going deeper" },
-    "That is the whole of it, at this level",
+    "That is the short version",
     [
       prose(
         ids,
-        "This page is the short version on purpose. The documentation has the long one — what a rule can say, what the record holds field by field, and how to wire it into a page you already have.",
+        "This page is the short version on purpose. The documentation has the long one: what a rule can say, what the record holds field by field, and how to wire it into a page you already have.",
         { measured: true }
       ),
       stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [
@@ -224,7 +226,17 @@ export type MechanismContext = PageContext & {
 
 export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
   const ids = sequentialIdFactory("how")
-  const chrome: ChromeContext = { ...context, current: HOW_IT_WORKS }
+  /**
+   * The most recent thing that happened to this page, which the notice at the
+   * top reports: the undo once the visitor has put a change back, and the change
+   * itself until then.
+   */
+  const latest = context.undone ?? context.record
+  const chrome: ChromeContext = {
+    ...context,
+    current: HOW_IT_WORKS,
+    ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
+  }
 
   return createTree(
     buildElement(ids, {
@@ -236,10 +248,69 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
+        /**
+         * The answer, before anything else on the page, and only for a visitor
+         * who asked for something.
+         *
+         * It moved here from the front door on 1 October with the band that
+         * offers the five choices. It sits above the opening band rather than
+         * inside it because the opening band is one of the things a request may
+         * configure, and a band whose props are a demonstration must not also be
+         * a status display. Above it, the notice is the first thing under the
+         * menu in every state, which is where a browser leaves a reader who has
+         * just followed one of the choices.
+         *
+         * Nothing is spread here when there is no record: the arrival page is
+         * the tree it has always been, node for node.
+         */
+        ...(latest === undefined
+          ? []
+          : [
+              answerBand(ids, {
+                origin: context.origin,
+                theme: context.theme,
+                record: latest,
+                ...(context.ask === undefined ? {} : { ask: context.ask }),
+                ...(context.approve === undefined ? {} : { approve: context.approve }),
+                ...(context.back === undefined ? {} : { back: context.back }),
+                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
+              }),
+            ]),
         hero(ids),
         journey(ids),
         ...SHORT_ANSWERS.map((answer) => shortAnswer(ids, answer)),
         whoAsks(ids),
+        /**
+         * **The five choices, and the page they change is this one.**
+         *
+         * The maintainer, 1 October: *"Remove the see it happen section from the
+         * main landing page and only let it exist in the How it works
+         * section."* It was the front door's from 22 August until then.
+         *
+         * It sits after the page has explained itself and before the closing
+         * band, so a reader meets the explanation, then the thing working, then
+         * the way onward. On the front door it came third, before any of the
+         * argument; here the argument is the page, so the demonstration goes at
+         * the end of it.
+         *
+         * **All three answers still happen here**, which is the part that had to
+         * be measured rather than assumed. The five choices were bound to the
+         * front door's bands, and two of them to what that page protects, so the
+         * obvious worry was that a page with no `loom.mosaic` could only ever
+         * show a change landing. It cannot be read off the policy: *held* comes
+         * from how much a change moves as well as from what it touches, and
+         * taking all four short answers away at once is enough. *Refused* is the
+         * menu, which the rules protect on every page of this site.
+         */
+        seeItHappenBand(ids, {
+          origin: context.origin,
+          theme: context.theme,
+          ...(context.ask === undefined
+            ? {}
+            : { ask: context.ask, approve: context.approve === true }),
+          ...(context.record === undefined ? {} : { record: context.record }),
+          ...(context.undone === undefined ? {} : { undone: context.undone }),
+        }),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),

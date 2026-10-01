@@ -518,9 +518,28 @@ describe("the declared list against the components", () => {
       (pairing) => pairing.foreground === "fg-default" && pairing.background === "bg-overlay"
     )
 
+    /**
+     * **Four types rather than one, since 1 October.** This assertion was
+     * written when `loom.overlay` was the only primitive in the library that
+     * painted `bg-overlay`, and the three primitives that present a region —
+     * a menu's panel, a popover's panel, a lightbox's plate — now paint it too,
+     * for the slot's stated reason: it is the surface a thing drawn *over* the
+     * page sits on, and a panel in `bg-surface` laid over a `bg-surface` card
+     * has no edge but its hairline under half the starter palettes.
+     *
+     * The row's own `basis` is what this test is for and it is unchanged: the
+     * pairing is `painted` and no ancestor walk reaches it. The list of types is
+     * widened rather than loosened, so a fifth primitive quietly starting to
+     * paint the page's overlay surface still fails here.
+     */
     expect(overlay?.basis).toBe("painted")
-    expect(overlay?.types).toEqual(["loom.overlay"])
-    expect(derived.childGrounds.find((ground) => ground.ground === "bg-overlay")?.types).toEqual(["loom.overlay"])
+    expect(overlay?.types).toEqual(["loom.lightbox", "loom.overlay"])
+    expect(derived.childGrounds.find((ground) => ground.ground === "bg-overlay")?.types).toEqual([
+      "loom.lightbox",
+      "loom.menu",
+      "loom.overlay",
+      "loom.popover",
+    ])
     expect(declared.get("fg-default|bg-overlay")?.basis).toBe("painted")
   })
 

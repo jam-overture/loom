@@ -193,11 +193,12 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 99 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(99)
+  it("registers as 102 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(102)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
+      "loom.menu",
       "loom.banner",
       "loom.section",
       "loom.split",
@@ -210,6 +211,8 @@ describe("the starter library", () => {
       "loom.reveal",
       "loom.backdrop",
       "loom.overlay",
+      "loom.lightbox",
+      "loom.popover",
       "loom.halo",
       "loom.card",
       "loom.frame",
@@ -416,6 +419,13 @@ describe("the starter library", () => {
      * its `children` — the failure the probe exists to catch — fails here.
      */
     expect(auditRegistry(registry).leaves).toEqual([
+      /**
+       * Two regions and no children, which is `loom.before-after`'s shape at
+       * the bottom of this list: what a lightbox shows is what a tree put in
+       * its `preview` and `full` slots, and a child node in it is a child
+       * nothing draws.
+       */
+      "loom.lightbox",
       "loom.pin",
       "loom.feature",
       "loom.milestone",
@@ -913,6 +923,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(datedPage(EDITORIAL)),
       ...typesIn(furniturePage(EDITORIAL)),
       ...typesIn(boundPage(EDITORIAL)),
+      ...typesIn(presentedPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
@@ -5403,8 +5414,17 @@ describe("the band that moves", () => {
      * longer be the same picture at the same scale, which is the entire point
      * of superimposing them.
      */
-    expect(tree).toContain("clip-path:inset(0 58% 0 0)")
-    expect(tree).toContain("clip-path:inset(0 50% 0 0)")
+    /**
+     * The clip reads the slider's property with **the declared position as the
+     * fallback**, which is the whole of why placing `adjust` here was additive.
+     * The property does not exist until the control has mounted and proved
+     * scripting runs, so this static render — which is a page served without it
+     * — is the still comparison at 42 and at the default 50, exactly as it was
+     * before the control existed.
+     */
+    expect(tree).toContain("clip-path:inset(0 calc(100% - var(--loom-adjust, 42) * 1%) 0 0)")
+    expect(tree).toContain("clip-path:inset(0 calc(100% - var(--loom-adjust, 50) * 1%) 0 0)")
+    expect(tree).toContain("inset-inline-start:calc(var(--loom-adjust, 42) * 1%)")
     expect(propsOfType("loom.before-after")).toEqual([
       "afterLabel",
       "aspect",
@@ -7621,6 +7641,206 @@ const atmospherePage = (
 }
 
 /**
+ * The three primitives that present a region, on one page, **as a page served
+ * without scripting renders them.**
+ *
+ * That is the whole reason this fixture is here rather than only in
+ * `presentation.test.ts`. `render` is `renderToStaticMarkup`, and every control
+ * in the behaviour vocabulary returns `null` until an effect has proved
+ * scripting runs — so this fixture has no trigger, no `data-loom-presented`
+ * anywhere, and therefore nothing that matches the rule which hides a region.
+ * Every panel in it is **open**, and that is the state 0176 says must render:
+ * written the other way round, a page without scripting has a panel nothing can
+ * open and nothing to say why.
+ */
+const presentedPage = (
+  theme: Record<string, string>,
+  idFactory: IdFactory = sequentialIdFactory()
+): LoomTree => {
+  const text = (value: string) => buildText(idFactory, value)
+
+  const link = (label: string, href: string) =>
+    buildElement(idFactory, { type: "loom.link", props: { href }, children: [text(label)] })
+
+  const shot = (src: string, alt: string) =>
+    buildElement(idFactory, {
+      type: "loom.media",
+      props: { src, alt, aspect: "wide", corners: "none" },
+    })
+
+  const menu = buildElement(idFactory, {
+    type: "loom.menu",
+    props: { align: "end" },
+    children: [
+      link("Why Loom", "/why"),
+      link("How it works", "/how"),
+      link("The record", "/record"),
+      link("Pricing", "/pricing"),
+    ],
+  })
+
+  const popover = buildElement(idFactory, {
+    type: "loom.popover",
+    props: { width: "wide", placement: "above" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.heading",
+        props: { level: 3 },
+        children: [text("What a gate is")],
+      }),
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { tone: "muted" },
+        children: [text("Every proposal is weighed before it is applied, and the weighing is recorded.")],
+      }),
+    ],
+  })
+
+  const lightbox = buildElement(idFactory, {
+    type: "loom.lightbox",
+    props: { aspect: "wide", caption: "The record, in full" },
+    children: [
+      buildSlot(idFactory, "preview", [shot("https://example.com/record-tile.png", "The record, at tile size")]),
+      buildSlot(idFactory, "full", [shot("https://example.com/record-full.png", "The record, in full")]),
+    ],
+  })
+
+  return createTree(
+    buildElement(idFactory, {
+      type: "loom.page",
+      props: { [THEME_PROP_KEY]: theme, width: "wide", fills: true },
+      children: [
+        buildElement(idFactory, {
+          type: "loom.nav",
+          props: { tone: "surface" },
+          children: [link("Product", "/product"), menu],
+        }),
+        buildElement(idFactory, {
+          type: "loom.section",
+          props: { eyebrow: "Presented regions" },
+          children: [
+            buildSlot(idFactory, "heading", [
+              buildElement(idFactory, {
+                type: "loom.heading",
+                props: { level: 1 },
+                children: [text("Three regions a reader opens")],
+              }),
+            ]),
+            popover,
+            lightbox,
+          ],
+        }),
+      ],
+    }),
+    idFactory
+  )
+}
+
+describe("the regions a reader opens", () => {
+  it("renders all three with nothing left unhonoured", () => {
+    const { markup, diagnostics } = render(presentedPage(EDITORIAL))
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Why Loom")
+    expect(markup).toContain("What a gate is")
+    expect(markup).toContain("The record, in full")
+  })
+
+  it("places no control on a page that was never told scripting runs, and hides nothing either", () => {
+    /**
+     * The pair of facts that make the rule's direction load-bearing, asserted
+     * together because each is harmless alone. No control renders, so no
+     * `data-loom-presented` is written — and the only mention of it anywhere is
+     * inside the stylesheet, where it is the rule waiting for an attribute that
+     * never arrives.
+     */
+    const { tree, stylesheet } = splitStylesheet(render(presentedPage(EDITORIAL)).markup)
+
+    expect(tree).not.toContain("loom-control")
+    expect(tree).not.toContain("data-loom-presented")
+    expect(stylesheet).toContain('[data-loom-presented="false"]')
+    /** Never the inverse, which is the way round that breaks this page. */
+    expect(stylesheet).not.toContain('[data-loom-presented="true"] > ')
+  })
+
+  it("sets no inline display on any region it has to be able to hide", () => {
+    /**
+     * `loom.nav`'s second lesson, applied before it could be sprung a second
+     * time: an inline `display` beats a rule, so a panel that declared its own
+     * would be a panel the hide rule silently failed to hide.
+     */
+    const { tree } = splitStylesheet(render(presentedPage(EDITORIAL)).markup)
+
+    for (const className of [
+      LIBRARY_CLASS.popoverPanel,
+      LIBRARY_CLASS.menuPanel,
+      LIBRARY_CLASS.lightboxFrame,
+    ]) {
+      const element = new RegExp(`class="${className}"[^>]*`).exec(tree)?.[0] ?? ""
+
+      expect(element).not.toBe("")
+      expect(element).not.toContain("display:")
+    }
+  })
+
+  it("keeps the trigger a direct child of the element the state lands on", () => {
+    /**
+     * The one placement mistake 0176 says nothing can diagnose: the control
+     * publishes its attribute on **its own parent**, so a trigger tucked into a
+     * box of the primitive's own would put the state one level below the root
+     * and the hide rule would match nothing for ever. Asserted against the
+     * markup rather than the intention — the control is absent here, so what is
+     * checked is that nothing in the library wraps a behaviour it placed inside
+     * a presentation.
+     *
+     * `presentation.test.ts` asserts the live half, with the control mounted.
+     */
+    for (const type of ["loom.popover", "loom.menu", "loom.lightbox"]) {
+      const primitive = registry.primitives.find((entry) => entry.type === type)
+
+      expect(primitive?.behaviours).toContain("present")
+      expect(primitive?.interactive).toBe("always")
+    }
+
+    expect(auditRegistry(registry).unplacedBehaviours).toEqual([])
+  })
+
+  it("declares a name for every control it places, in both palettes", () => {
+    /**
+     * The registry refuses a behaviour whose text key is missing, so this is
+     * the shape of the declaration rather than its presence — and the point of
+     * asserting the strings is that they are the primitive's and never the
+     * tree's. A deployment translates them; a model cannot write them, which is
+     * the limit filed against this run.
+     */
+    const named = (type: string): readonly string[] =>
+      Object.keys(registry.primitives.find((entry) => entry.type === type)?.text ?? {}).sort()
+
+    expect(named("loom.popover")).toEqual(["present"])
+    expect(named("loom.menu")).toEqual(["present"])
+    expect(named("loom.lightbox")).toEqual(["dismiss", "present"])
+    expect(named("loom.before-after")).toEqual(["adjust"])
+
+    for (const [, palette] of [
+      ["editorial", EDITORIAL],
+      ["bold", BOLD],
+    ] as const) {
+      expect(render(presentedPage(palette)).diagnostics).toEqual([])
+    }
+  })
+
+  it("survives the re-theme with no literal colour below the root", () => {
+    const editorial = splitStylesheet(render(presentedPage(EDITORIAL)).markup).tree
+    const bold = splitStylesheet(render(presentedPage(BOLD)).markup).tree
+    const body = bold.slice(bold.indexOf(">"))
+
+    expect(editorial.slice(editorial.indexOf(">"))).toBe(body)
+    expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
+  })
+})
+
+/**
  * All nine starting compositions on one page, in the order a landing page uses
  * them.
  *
@@ -7675,6 +7895,7 @@ describe("the composed vocabulary", () => {
       ...typesIn(shelfPage(EDITORIAL)),
       ...typesIn(atmospherePage(EDITORIAL)),
       ...typesIn(boundPage(EDITORIAL)),
+      ...typesIn(presentedPage(EDITORIAL)),
     ])
 
     expect([...registry.primitives.map((primitive) => primitive.type)].filter((type) => !used.has(type))).toEqual([])
