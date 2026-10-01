@@ -112,42 +112,42 @@ export const PASSED_THROUGH_SECONDS = 2
 export const SCRIPTED_VISITS: readonly ScriptedVisit[] = [
   { asFarAs: "The opening", stayed: { "The opening": 4 } },
   {
-    asFarAs: "See it happen",
-    stayed: { "The opening": 11, "See it happen": 26 },
-    pressed: ["See it happen"],
+    asFarAs: "Using it",
+    stayed: { "The opening": 11, "Using it": 26 },
+    pressed: ["The opening"],
   },
   {
-    asFarAs: "See it happen",
-    stayed: { "The opening": 8, "See it happen": 19 },
-    pressed: ["See it happen"],
+    asFarAs: "Using it",
+    stayed: { "The opening": 8, "Using it": 19 },
+    pressed: ["The opening"],
   },
   { asFarAs: "What this is for", stayed: { "The opening": 6, "What this is for": 14 } },
   {
-    asFarAs: "See it happen",
-    stayed: { "The opening": 9, "See it happen": 31 },
-    pressed: ["See it happen"],
+    asFarAs: "Using it",
+    stayed: { "The opening": 9, "Using it": 31 },
+    pressed: ["The opening"],
   },
   {
     asFarAs: "Questions",
-    stayed: { "The opening": 7, "See it happen": 22, Questions: 18 },
-    pressed: ["See it happen"],
+    stayed: { "The opening": 7, "Using it": 22, Questions: 18 },
+    pressed: ["The opening"],
     opened: ["Questions"],
   },
   { asFarAs: "The opening", stayed: { "The opening": 3 } },
   {
     asFarAs: "Where it is today",
-    stayed: { "The opening": 10, "See it happen": 12, "Where it is today": 9 },
+    stayed: { "The opening": 10, "Using it": 12, "Where it is today": 9 },
   },
   {
     asFarAs: "Keep going",
-    stayed: { "The opening": 8, "See it happen": 24, Questions: 21, "Keep going": 16 },
-    pressed: ["See it happen", "Keep going"],
+    stayed: { "The opening": 8, "Using it": 24, Questions: 21, "Keep going": 16 },
+    pressed: ["Keep going"],
     opened: ["Questions"],
   },
   { asFarAs: "What this is for", stayed: { "The opening": 5, "What this is for": 11 } },
   {
     asFarAs: "Keep going",
-    stayed: { "The opening": 12, "See it happen": 17, "Keep going": 13 },
+    stayed: { "The opening": 12, "Using it": 17, "Keep going": 13 },
   },
   {
     asFarAs: "Questions",
@@ -187,7 +187,7 @@ export type FunnelQuestion = {
  * does not say whether the two are among the nine.
  */
 export const FUNNEL_QUESTIONS: readonly FunnelQuestion[] = [
-  { from: "See it happen", to: "Keep going" },
+  { from: "Using it", to: "Keep going" },
 ]
 
 /**
@@ -204,7 +204,7 @@ export const FUNNEL_QUESTIONS: readonly FunnelQuestion[] = [
  * The band named is the one the front door actually cares about: the one that
  * lets a visitor ask for a change.
  */
-export const BAND_QUESTION = "See it happen"
+export const BAND_QUESTION = "Using it"
 
 /**
  * A band of the page by the name a reader would call it, or a build that stops.

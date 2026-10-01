@@ -5,10 +5,10 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 91,
+      "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -1449,14 +1449,14 @@
             {
               "name": "ChangeAnalysis",
               "kind": "type",
-              "signature": "type ChangeAnalysis = {\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    /** Nodes a move operation named. The subtree each carried is counted separately. */\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    /**\n     * Nodes a move carried, the node it named included. A move is the one\n     * operation whose reach is larger than the node it names, and measuring it\n     * that way is what makes the analysis independent of how the delta was\n     * phrased: relocating a slot and relocating the card inside it are the same\n     * physical change described two ways.\n     */\n    readonly relocatedNodeCount: number;\n    /** Nodes directly touched. A move counts the node, not the subtree riding along. */\n    readonly affectedNodeIds: readonly NodeId[];\n    /**\n     * Types this delta created, destroyed, or reconfigured. A move contributes\n     * nothing here whichever node it names — a relocated node is not rewritten,\n     * and `relocatedPrimitiveTypes` is where it is reported instead.\n     */\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types carried by a move, in the whole subtree rather than at its root. A\n     * protected primitive travelling across the page is a fact the Gate has to\n     * see, and it is not the same fact as one being rewritten.\n     */\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types destroyed outright, a subset of the touched types. Destroying a\n     * primitive is a strictly bigger deal than reconfiguring one, so stakes need\n     * to tell the two apart.\n     */\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n    /**\n     * Targets this change leaves inside another target, which is a control the\n     * reader cannot use. Sometimes because the markup is invalid and a browser\n     * drops the inner link; sometimes because the enclosing node covers itself\n     * with an overlay and the click never arrives. Same damage either way,\n     * and only the outer node's own declaration distinguishes it.\n     *\n     * Measured on the resulting tree rather than on the operations, because every\n     * operation kind can produce it and only one of them looks like it does:\n     * `insert` and `move` put a target somewhere, and `configure` breaks every\n     * link already inside a card by giving the card an `href`. Positions the tree\n     * already had are excluded, so a change is answerable for the breakage it\n     * introduces and not for the breakage it inherited.\n     *\n     * Empty for every host that declares no interactive vocabulary, which is the\n     * default.\n     */\n    readonly nestedTargets: readonly NestedTarget[];\n    /**\n     * Nodes this change would add that the deployment has no primitive for, so\n     * the page it produces has a hole where each one is.\n     *\n     * Measured on the operations rather than on the resulting tree, unlike\n     * `nestedTargets`, and the difference is the point. A tree may already name a\n     * primitive a later deployment rolled back — that is exactly why the renderer\n     * reports instead of throwing — and a change is answerable for the\n     * holes it introduces, not for the ones it found. Only `insert` can introduce\n     * one: `move` carries nodes the tree already had, and `configure` cannot\n     * change a type.\n     *\n     * Empty for every host that declares no vocabulary, which is the default.\n     */\n    readonly unknownPrimitives: readonly UnknownPrimitive[];\n    /**\n     * Nodes this change would leave carrying props the primitive declaring their\n     * type refuses, so the page it produces has a hole where each one is — the\n     * same hole `unknownPrimitives` describes, one question further down.\n     *\n     * Measured on both trees, like `nestedTargets`, and unlike `unknownPrimitives`:\n     * props are the one thing two operations in a delta can argue about, so only\n     * the tree at the end says what a reader will actually be served.\n     * `introducedInvalidProps` says why, and what a node already failing before\n     * the change counts as.\n     *\n     * Empty for every host that wires no props vocabulary, which is the default.\n     */\n    readonly invalidProps: readonly InvalidProps[];\n    /**\n     * Forms this change points somewhere else — a node that posted to one\n     * registered endpoint before and posts to another after.\n     *\n     * Measured on both trees, like `nestedTargets`, and unlike it needs no host\n     * vocabulary: `loom:submit` is the runtime's own key. A node that gains or\n     * loses a destination is not here; `redirection.ts` says why.\n     */\n    readonly redirectedSubmissions: readonly RedirectedSubmission[];\n    /**\n     * Bindings this change points somewhere else — a node that asked one question\n     * under a name before and asks a different one under that name after.\n     *\n     * The other end of the pipe from `redirectedSubmissions`, measured the same\n     * way and needing host vocabulary just as little: `loom:data` is the runtime's\n     * own key. A node that gains or loses a binding is not here; `repointing.ts`\n     * says why, and why a params change counts where a submission has no params\n     * to move.\n     */\n    readonly repointedBindings: readonly RepointedBinding[];\n    /**\n     * Distance from the root of the shallowest touched position, where the root\n     * is 0. A change near the root restructures the page; a change deep in a leaf\n     * usually does not.\n     */\n    readonly shallowestAffectedDepth: number;\n};",
-              "truncated": false,
+              "signature": "type ChangeAnalysis = {\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    /** Nodes a move operation named. The subtree each carried is counted separately. */\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    /**\n     * Nodes a move carried, the node it named included. A move is the one\n     * operation whose reach is larger than the node it names, and measuring it\n     * that way is what makes the analysis independent of how the delta was\n     * phrased: relocating a slot and relocating the card inside it are the same\n     * physical change described two ways.\n     */\n    readonly relocatedNodeCount: number;\n    /** Nodes directly touched. A move counts the node, not the subtree riding along. */\n    readonly affectedNodeIds: readonly NodeId[];\n    /**\n     * Types this delta created, destroyed, or reconfigured. A move contributes\n     * nothing here whichever node it names — a relocated node is not rewritten,\n     * and `relocatedPrimitiveTypes` is where it is reported instead.\n     */\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types carried by a move, in the whole subtree rather than at its root. A\n     * protected primitive travelling across the page is a fact the Gate has to\n     * see, and it is not the same fact as one being rewritten.\n     */\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    /**\n     * Types destroyed outright, a subset of the touched types. Destroying a\n     * primitive is a strictly bigger deal than reconfiguring one, so stakes need\n     * to tell the two apart.\n     */\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n    /**\n     * Targets this change leaves inside another target, which is a control the\n     * reader cannot use. Sometimes because the markup is invalid and a browser\n     * drops the inner link; sometimes because the enclosing node covers itself\n     * with an overlay and the click never arrives. Same damage either way,\n     * and only the outer node's own declaration distinguishes it.\n     *\n     * Measured on the resulting tree rather than on the operations, because every\n     * operation kind can produce it and only one of them looks like it does:\n     * `insert` and `move` put a target somewhere, and `configure` breaks every\n     * link already inside a card by giving the card an `href`. Positions the tree\n     * already had are excluded, so a change is answerable for the breakage it\n     * introduces and not for the breakage it inherited.\n     *\n     * Empty for every host that declares no interactive vocabulary, which is the\n     * default.\n     */\n    readonly nestedTargets: readonly NestedTarget[];\n    /**\n     * Nodes this change would add that the deployment has no primitive for, so\n     * the page it produces has a hole where each one is.\n     *\n     * Measured on the operations rather than on the resulting tree, unlike\n     * `nestedTargets`, and the difference is the point. A tree may already name a\n     * primitive a later deployment rolled back — that is exactly why the renderer\n     * reports instead of throwing — and a change is answerable for the\n     * holes it introduces, not for the ones it found. Only `insert` can introduce\n     * one: `move` carries nodes the tree already had, and `configure` cannot\n     * change a type.\n     *\n     * Empty for every host that declares no vocabulary, which is the default.\n     */\n    readonly unknownPrimitives: readonly UnknownPrimitive[];\n    /**\n     * Nodes this change would leave carrying props the primitive declaring their\n     * type refuses, so the page it produces has a hole where each one is — the\n     * same hole `unknownPrimitives` describes, one question further down.\n     *\n     * Measured on both trees, like `nestedTargets`, and unlike `unknownPrimitives`:\n     * props are the one thing two operations in a delta can argue about, so only\n     * the tree at the end says what a reader will actually be served.\n     * `introducedInvalidProps` says why, and what a node already failing before\n     * the change counts as.\n     *\n     * Empty for every host that wires no props vocabulary, which is the default.\n     */\n    readonly invalidProps: readonly InvalidProps[];\n    /**\n     * Questions this change would leave on the page that no primitive will look\n     * at — a node asking under a name its own primitive says it does not read.\n     *\n     * The one fact in this record about a change that *works*. The page draws,\n     * every node is registered, every schema is satisfied; the host pays a round\n     * trip to its own source on every render and the region shows its empty state,\n     * because the answer arrives under a name nobody opens.\n     *\n     * Measured on both trees, like `invalidProps` and unlike `unknownPrimitives`,\n     * and for that factor's reason twice over: a `configure` can put `loom:data` on\n     * a node that had none, and a `configure` can rename the *prop* that names the\n     * binding, so two operations in one delta can argue about it and only\n     * the tree at the end says what a reader will be served.\n     *\n     * Keyed by node **and name** where `invalidProps` is keyed by node alone, and\n     * the difference is the harm rather than an oversight. A node whose props fail\n     * is a hole, and a page has one hole there however many ways it is wrong; a\n     * node asking three questions nothing reads is three wasted round trips, and a\n     * change that adds the third is answerable for the third.\n     *\n     * Empty for every host that hands no reader, which is the default.\n     */\n    readonly unreadBindings: readonly UnreadBinding[];\n    /**\n     * Forms this change points somewhere else — a node that posted to one\n     * registered endpoint before and posts to another after.\n     *\n     * Measured\n…",
+              "truncated": true,
               "summary": ""
             },
             {
               "name": "analyzeDelta",
               "kind": "function",
-              "signature": "const analyzeDelta: (tree: LoomTree, delta: TreeDelta, isInteractive?: InteractivePredicate, isRegistered?: PrimitiveVocabulary, checkProps?: PropsVocabulary) => Result<ChangeAnalysis, TreeError>",
+              "signature": "const analyzeDelta: (tree: LoomTree, delta: TreeDelta, isInteractive?: InteractivePredicate, isRegistered?: PrimitiveVocabulary, checkProps?: PropsVocabulary, reads?: BindingReader) => Result<ChangeAnalysis, TreeError>",
               "truncated": false,
               "summary": "Walks the delta forward so each operation is measured against the tree it actually observes — an operation may target a node an earlier operation in the same delta inserted."
             }
@@ -1477,7 +1477,7 @@
             {
               "name": "assessChange",
               "kind": "function",
-              "signature": "const assessChange: (tree: LoomTree, proposal: ProposedChange, policy: GatePolicy, inverseDeltaId: DeltaId, checkProps?: PropsVocabulary) => Result<ChangeAssessment, TreeError>",
+              "signature": "const assessChange: (tree: LoomTree, proposal: ProposedChange, policy: GatePolicy, inverseDeltaId: DeltaId, checkProps?: PropsVocabulary, reads?: BindingReader) => Result<ChangeAssessment, TreeError>",
               "truncated": false,
               "summary": ""
             }
@@ -1799,7 +1799,7 @@
             {
               "name": "CompositionRuntime",
               "kind": "type",
-              "signature": "type CompositionRuntime = {\n    readonly interpreter: ChangeInterpreter;\n    /**\n     * Which policy judges a given change. A source rather than a policy, because\n     * one runtime may serve trees that do not deserve the same latitude; a host\n     * with one policy says so with `fixedPolicy`.\n     */\n    readonly policySource: PolicySource;\n    readonly events: EventSink;\n    readonly clock: Clock;\n    readonly idFactory: IdFactory;\n    /**\n     * Optional, and absent by default. With no repairer, a refusal is terminal.\n     * With one, a refused proposal gets exactly one more attempt — see\n     * `attemptRepair`, where the \"exactly one\" is structural rather than a\n     * counter that could drift.\n     */\n    readonly repairer?: ChangeRepairer;\n    /**\n     * What this deployment's primitives accept, checked before a delta is judged.\n     * Optional, and absent by default: a runtime handed none cannot check props,\n     * so \"this deployment refuses AI-authored props its own schemas reject\" is a\n     * visible choice at the composition root rather than a property of whichever\n     * interpreter happened to be wired in.\n     *\n     * Deliberately the same shape as the renderer's `PropsValidator`, so a host\n     * with a registry hands the same object to both seams and the two cannot\n     * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK\n     * is how one is obtained without hand-keeping it.\n     */\n    readonly propsVocabulary?: PropsVocabulary;\n};",
+              "signature": "type CompositionRuntime = {\n    readonly interpreter: ChangeInterpreter;\n    /**\n     * Which policy judges a given change. A source rather than a policy, because\n     * one runtime may serve trees that do not deserve the same latitude; a host\n     * with one policy says so with `fixedPolicy`.\n     */\n    readonly policySource: PolicySource;\n    readonly events: EventSink;\n    readonly clock: Clock;\n    readonly idFactory: IdFactory;\n    /**\n     * Optional, and absent by default. With no repairer, a refusal is terminal.\n     * With one, a refused proposal gets exactly one more attempt — see\n     * `attemptRepair`, where the \"exactly one\" is structural rather than a\n     * counter that could drift.\n     */\n    readonly repairer?: ChangeRepairer;\n    /**\n     * What this deployment's primitives accept, checked before a delta is judged.\n     * Optional, and absent by default: a runtime handed none cannot check props,\n     * so \"this deployment refuses AI-authored props its own schemas reject\" is a\n     * visible choice at the composition root rather than a property of whichever\n     * interpreter happened to be wired in.\n     *\n     * Deliberately the same shape as the renderer's `PropsValidator`, so a host\n     * with a registry hands the same object to both seams and the two cannot\n     * disagree about what is drawable. `propsVocabularyFor(registry)` in the SDK\n     * is how one is obtained without hand-keeping it.\n     */\n    readonly propsVocabulary?: PropsVocabulary;\n    /**\n     * What this deployment's primitives read an answer under, checked before a\n     * delta is judged. Optional and absent by default, for every reason\n     * `propsVocabulary` above gives — a runtime handed none cannot tell a question\n     * nothing reads from one something does, and refusing on that ground is a\n     * choice made at the composition root rather than inherited.\n     *\n     * Deliberately the renderer's own `BindingReader` rather than a second shape,\n     * so what the walk reports as `data-unread` is what the write path refuses. An\n     * SDK registry satisfies it already, which is why there is no\n     * `bindingReaderFor(registry)` beside `propsVocabularyFor`: the registry **is**\n     * one, and a helper that wrapped it would only be a place for the two to\n     * disagree.\n     */\n    readonly bindingReader?: BindingReader;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -2264,6 +2264,34 @@
               "signature": "const describeInvalidProps: (invalid: InvalidProps) => string",
               "truncated": false,
               "summary": "A sentence naming the node, its type and what its schema said."
+            },
+            {
+              "name": "NOTHING_DECLARED",
+              "kind": "value",
+              "signature": "const NOTHING_DECLARED: BindingReader",
+              "truncated": false,
+              "summary": "What a host that has handed no reader gets, which is today's behaviour."
+            },
+            {
+              "name": "UnreadBinding",
+              "kind": "type",
+              "signature": "type UnreadBinding = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** The name the node asked under, which is the half the primitive does not hold. */\n    readonly name: BindingName;\n};",
+              "truncated": false,
+              "summary": "A question a change would leave on the page that no primitive will look at."
+            },
+            {
+              "name": "unreadBindingsIn",
+              "kind": "function",
+              "signature": "const unreadBindingsIn: (node: LoomNode, reads: BindingReader) => readonly UnreadBinding[]",
+              "truncated": false,
+              "summary": "Every binding in a subtree whose name its own primitive says it does not read, in document order and name-sorted within a node."
+            },
+            {
+              "name": "describeUnreadBinding",
+              "kind": "function",
+              "signature": "const describeUnreadBinding: (unread: UnreadBinding) => string",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -4377,7 +4405,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4423,7 +4451,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5329,7 +5357,7 @@
       "files": 180,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5788,7 +5816,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6379,7 +6407,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6607,7 +6635,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7021,10 +7049,10 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 52,
+      "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7378,7 +7406,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7511,7 +7539,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8274,7 +8302,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8417,7 +8445,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8474,10 +8502,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 39,
+      "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9008,10 +9036,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 35,
+      "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9082,10 +9110,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 85,
+      "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9519,10 +9547,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 50,
+      "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1103,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9567,6 +9595,69 @@
               "name": "describeTelemetryJournalContract",
               "kind": "function",
               "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/model-contract",
+          "title": "Model contract",
+          "summary": "One suite, run against every `ModelClient`.",
+          "symbols": [
+            {
+              "name": "ModelSituation",
+              "kind": "type",
+              "signature": "type ModelSituation = \n/** The service answered, with this text, served by this model. */\n\"answers\"\n/** The service answered, and there was nothing in the reply that was text. */\n | \"answers-without-text\"\n/** The answer stopped at the output ceiling, mid-sentence. */\n | \"truncates\"\n/** The model declined to answer this content. */\n | \"refuses\"\n/** A credential, entitlement or billing problem: 401, 402, 403. */\n | \"refuses-the-caller\"\n/** The request itself is wrong and would fail again unchanged: 400, 404, 413, 422. */\n | \"refuses-the-request\"\n/** Busy now, fine later: 408, 409, 429, 500, 503. */\n | \"asks-for-later\"\n/** No response at all — a closed socket, a DNS failure, a TLS error. */\n | \"never-answers\";",
+              "truncated": false,
+              "summary": "What happened, in terms every vendor has rather than one vendor's."
+            },
+            {
+              "name": "MODEL_SITUATIONS",
+              "kind": "value",
+              "signature": "const MODEL_SITUATIONS: readonly ModelSituation[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONTRACT_REPLY",
+              "kind": "value",
+              "signature": "const CONTRACT_REPLY: string",
+              "truncated": false,
+              "summary": "The text this suite sends through, and the model it says served it."
+            },
+            {
+              "name": "CONTRACT_SERVED_BY",
+              "kind": "value",
+              "signature": "const CONTRACT_SERVED_BY = \"a-model-that-served-it\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ModelSituationClient",
+              "kind": "type",
+              "signature": "type ModelSituationClient = (() => ModelClient | Promise<ModelClient>) | \"not-expressible\";",
+              "truncated": false,
+              "summary": "A client wired to behave as one situation does, or a statement that this vendor has no such situation."
+            },
+            {
+              "name": "ModelClientContract",
+              "kind": "type",
+              "signature": "type ModelClientContract = Readonly<Record<ModelSituation, ModelSituationClient>>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "contractRequest",
+              "kind": "function",
+              "signature": "const contractRequest: () => ModelRequest",
+              "truncated": false,
+              "summary": "The request every case sends. Fixed, because none of these turn on its content."
+            },
+            {
+              "name": "describeModelClientContract",
+              "kind": "function",
+              "signature": "const describeModelClientContract: (name: string, contract: ModelClientContract) => void",
               "truncated": false,
               "summary": ""
             }

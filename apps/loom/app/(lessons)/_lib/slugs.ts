@@ -48,6 +48,26 @@ export const RECALL_PARTS = ["warm-up", "predict", "self-check"] as const
 
 export type RecallPart = (typeof RECALL_PARTS)[number]
 
+/**
+ * Where an `Explain it back` answer is filed — and it is a constant here rather
+ * than a fourth member of the list above, which is the whole point of writing it
+ * down in this file.
+ *
+ * `RECALL_PARTS` is the set of sections whose questions can be **missed**: they
+ * are answered, checked against something and graded, so a miss is a fact and
+ * the corrections queue can bring it back. An explanation is none of those. There
+ * is no answer to check it against, no grade, and therefore no miss — so it must
+ * not enter the queue, and the way it does not is by never being a `RecallPart`.
+ * `lessonSlugParts` returns `undefined` for this slug, which is the same thing
+ * the queue already does with a key it does not recognise.
+ *
+ * `try-it` is excluded for a neighbouring but different reason: it holds
+ * predictions, which are answered and never graded. Three kinds of thing the
+ * reader writes, two of them out of the queue, for two reasons that are worth
+ * keeping apart.
+ */
+export const ELABORATION_PART = "explain-it-back"
+
 /** What a section of a lesson is called, where the reader's record is concerned. */
 export const lessonSlug = (lesson: number, part: string): string =>
   `lesson-${String(lesson).padStart(2, "0")}-${part}`

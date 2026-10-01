@@ -1,4 +1,5 @@
 import type { DeltaId } from "../ids.js"
+import type { BindingReader } from "../render/reads.js"
 import { flatMapResult, mapResult, type Result } from "../result.js"
 import type { TreeError } from "../tree/errors.js"
 import type { LoomTree } from "../tree/tree.js"
@@ -9,7 +10,12 @@ import type { GatePolicy } from "./policy.js"
 import type { ProposedChange } from "./proposal.js"
 import { assessReversibility, type Reversibility } from "./reversibility.js"
 import { assessStakes, type StakeAssessment } from "./stakes.js"
-import { EVERY_TYPE_UNDECLARED, primitiveVocabularyFor, type PropsVocabulary } from "./vocabulary.js"
+import {
+  EVERY_TYPE_UNDECLARED,
+  NOTHING_DECLARED,
+  primitiveVocabularyFor,
+  type PropsVocabulary,
+} from "./vocabulary.js"
 
 /**
  * Everything the Gate is allowed to look at, gathered in one pass. Assembling
@@ -41,7 +47,8 @@ export const assessChange = (
   proposal: ProposedChange,
   policy: GatePolicy,
   inverseDeltaId: DeltaId,
-  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED
+  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED,
+  reads: BindingReader = NOTHING_DECLARED
 ): Result<ChangeAssessment, TreeError> =>
   flatMapResult(
     analyzeDelta(
@@ -49,7 +56,8 @@ export const assessChange = (
       proposal.delta,
       interactivePredicateFor(policy.interactiveTypes),
       primitiveVocabularyFor(policy.registeredPrimitiveTypes),
-      checkProps
+      checkProps,
+      reads
     ),
     (analysis) =>
       mapResult(

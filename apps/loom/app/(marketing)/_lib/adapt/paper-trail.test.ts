@@ -149,7 +149,7 @@ describe("the record the mechanism page prints", () => {
 
     it("says which rules refused it and what the change would have destroyed", () => {
       expect(trail.refused.json).toContain("stakes-at-refusal-floor")
-      expect(trail.refused.json).toContain("loom.mosaic")
+      expect(trail.refused.json).toContain("loom.nav")
     })
   })
 

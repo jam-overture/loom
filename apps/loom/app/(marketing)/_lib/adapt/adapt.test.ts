@@ -8,7 +8,6 @@ import { RESERVED_VOCABULARY } from "../copy"
 import type { PageContext } from "../pages/home"
 import { askRunFor, renderTree, treeFor } from "../render"
 import {
-  HOME,
   HOW_IT_WORKS,
   SITE_THEME_NAMES,
   askHref,
@@ -38,7 +37,7 @@ const contextFor = (ask?: AskId, approve = false): PageContext => ({
   ...(ask === undefined ? {} : { ask, approve }),
 })
 
-const basePage = (): LoomTree => treeFor(HOME, contextFor())
+const basePage = (): LoomTree => treeFor(HOW_IT_WORKS, contextFor())
 
 /**
  * The milestones of one **named band**, rather than of a whole page.
@@ -114,8 +113,15 @@ describe("what this site's rules do with each request", () => {
    * else would make the band's "I say yes" button decoration.
    */
   it("applies the held change when the visitor says yes", async () => {
-    const ask = askById("problem")
-    if (ask === undefined) throw new Error("loom: the get-to-the-point choice is gone")
+    /**
+     * **The held one is `shorter`, not `problem`, since 1 October.** On the
+     * front door the hold came from moving a protected band; on this page it
+     * comes from how much the change removes — all four short answers at once.
+     * Which request is held is a fact about the page the five choices run
+     * against, so it moved with them.
+     */
+    const ask = askById("shorter")
+    if (ask === undefined) throw new Error("loom: the shortest choice is gone")
 
     const held = await runAsk(basePage(), ask)
     const approved = await runAsk(basePage(), ask, true)
@@ -142,13 +148,23 @@ describe("what this site's rules do with each request", () => {
     expect(shapeOf(approved.page)).toBe(shapeOf(basePage()))
   })
 
-  it("leaves the point of the product on the page, which is what the rules protect", async () => {
+  /**
+   * **The way out of the page is what the rules protect here.** It was the band
+   * saying what the product is for while the five choices lived on the front
+   * door, and that band is a `loom.mosaic`. This page has none; what it has,
+   * and what every page of this site has, is a menu — and `loom.nav` is
+   * protected on the same terms.
+   *
+   * The demonstration is arguably better for it: everybody understands why you
+   * would not let a machine delete your navigation.
+   */
+  it("leaves the way out of the page alone, which is what the rules protect", async () => {
     const ask = askById("drop-pitch")
     if (ask === undefined) throw new Error("loom: the refused choice is gone")
 
     const approved = await runAsk(basePage(), ask, true)
 
-    expect(countOf(approved.page, "loom.mosaic")).toBe(1)
+    expect(countOf(approved.page, "loom.nav")).toBe(1)
   })
 })
 
@@ -192,7 +208,7 @@ describe("the change that reverses a change", () => {
 describe("the record and the page it stands on", () => {
   it.each(ASKS)("$id reports the change the visitor is looking at", async (ask) => {
     const first = await runAsk(basePage(), ask, true)
-    const staged = treeFor(HOME, { ...contextFor(ask.id, true), record: first.record })
+    const staged = treeFor(HOW_IT_WORKS, { ...contextFor(ask.id, true), record: first.record })
     const second = await runAsk(staged, ask, true)
 
     expect(second.record).toEqual(first.record)
@@ -229,7 +245,7 @@ describe("the address is the whole of the state", () => {
   it.each(ASKS)("$id survives a change of palette", async (ask) => {
     const run = await askRunFor(contextFor(ask.id, true))
     const markup = renderToStaticMarkup(
-      renderTree(run === undefined ? treeFor(HOME, contextFor(ask.id, true)) : run.page, {
+      renderTree(run === undefined ? treeFor(HOW_IT_WORKS, contextFor(ask.id, true)) : run.page, {
         origin: ORIGIN,
       }).element
     )
@@ -271,7 +287,7 @@ describe("the page a choice leaves behind", () => {
   it.each(states)("%s renders with nothing the runtime could not honor", async (_name, context) => {
     for (const theme of SITE_THEME_NAMES) {
       const run = await askRunFor({ ...context, theme })
-      const page = run === undefined ? treeFor(HOME, { ...context, theme }) : run.page
+      const page = run === undefined ? treeFor(HOW_IT_WORKS, { ...context, theme }) : run.page
 
       expect(unhonored(renderTree(page, { origin: ORIGIN }).diagnostics)).toEqual([])
     }
@@ -279,7 +295,7 @@ describe("the page a choice leaves behind", () => {
 
   it.each(states)("%s meets nobody with a word they do not have", async (_name, context) => {
     const run = await askRunFor(context)
-    const page = run === undefined ? treeFor(HOME, context) : run.page
+    const page = run === undefined ? treeFor(HOW_IT_WORKS, context) : run.page
     const words = wordsOf(page.root)
 
     for (const term of RESERVED_VOCABULARY) {
@@ -289,7 +305,7 @@ describe("the page a choice leaves behind", () => {
 
   it.each(states)("%s still has exactly one first-level heading", async (_name, context) => {
     const run = await askRunFor(context)
-    const page = run === undefined ? treeFor(HOME, context) : run.page
+    const page = run === undefined ? treeFor(HOW_IT_WORKS, context) : run.page
     const markup = renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
 
     expect([...markup.matchAll(/<h1\b/g)]).toHaveLength(1)

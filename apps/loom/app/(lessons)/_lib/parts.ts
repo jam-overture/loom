@@ -2,6 +2,8 @@ import type { LoomTree } from "@jam-overture/loom"
 import type { ReactNode } from "react"
 
 import type {
+  ElaborationPrompt,
+  ElaborationSource,
   ExerciseUnit,
   LessonPart,
   PromptQuestion,
@@ -18,11 +20,12 @@ import {
   type HeldPart,
 } from "./held"
 import { buildFragment, heading, prose, renderFragment } from "./loom"
-import { checkPointers } from "./links"
+import { checkPointers, lessonPointer } from "./links"
 import { promptSet, readLesson, section, splitAnswers, type LessonDocument, type Prompt } from "./lesson"
 import type { Block } from "./markdown"
-import { lessonSlug } from "./slugs"
+import { ELABORATION_PART, lessonSlug } from "./slugs"
 import { lesson as syllabusLesson } from "./syllabus"
+import { lessonsNamedInProse } from "./text"
 
 /**
  * A lesson, cut into the parts a screen treats differently — and the parts it
@@ -80,17 +83,67 @@ const questionsOf = (
   }))
 
 /**
- * The five sections a screen treats differently. Everything else in a lesson is
+ * The six sections a screen treats differently. Everything else in a lesson is
  * prose and is rendered as written, in the order it was written.
  */
 const WARM_UP = "Warm-up"
 const PREDICT = "Predict"
 export const TRY_IT = "Try it"
+const EXPLAIN_IT_BACK = "Explain it back"
 const SELF_CHECK = "Self-check"
 const REFLECT = "Reflect"
 const ANSWERS = "Answers"
 
 const CODE_LANGUAGES = new Set(["ts", "tsx"])
+
+/**
+ * The lessons an elaboration prompt says it builds on, as somewhere to go and a
+ * place in the record to read.
+ *
+ * Every lesson but the first has a prompt that names an earlier one — *derive it
+ * from lesson 08*, *lesson 03 told you operations are ordered* — and on paper
+ * that instruction is all it can be. What the surface can add is the one thing
+ * the reader has and the course does not: **what they themselves wrote about
+ * that lesson**, at the time, in their own words. So each named lesson travels
+ * with the slug its explanations are filed under, and the reader component
+ * decides what to do with it after the prompt has been answered.
+ *
+ * This lesson is dropped when a prompt names it, because a prompt saying *lesson
+ * 14 gave you the renderer* inside lesson 14 is the author locating the reader
+ * rather than pointing anywhere. Everything else a prompt names is kept in the
+ * order the course teaches it, including a lesson later than this one: a reader
+ * working out of order has words about lesson 28 while sitting in lesson 20, and
+ * refusing to show them would be this file deciding it knows what order they
+ * read in.
+ */
+const reachesBackTo = (prompt: Prompt, lesson: number): readonly ElaborationSource[] =>
+  lessonsNamedInProse(prompt.text)
+    .filter((number) => number !== lesson)
+    .flatMap((number): readonly ElaborationSource[] => {
+      const pointer = lessonPointer(number)
+
+      return pointer === undefined
+        ? []
+        : [
+            {
+              lesson: number,
+              title: pointer.title,
+              href: pointer.href,
+              slug: lessonSlug(number, ELABORATION_PART),
+            },
+          ]
+    })
+
+const elaborationQuestions = (
+  prompts: readonly Prompt[],
+  lesson: number,
+  key: string
+): readonly ElaborationPrompt[] =>
+  prompts.map((prompt) => ({
+    number: prompt.number,
+    body: renderFragment((ids) => [prose(ids, prompt.text)], `${key}q${prompt.number}`),
+    reaches: reachesBackTo(prompt, lesson),
+  }))
 
 export type LessonParts = {
   readonly parts: readonly LessonPart[]
@@ -258,6 +311,19 @@ export const lessonParts = (document: LessonDocument, exercises: ExerciseRun): L
         intro: fragment(set.intro, `${key}pi`),
         outro: fragment(set.outro, `${key}po`),
         questions: predictQuestions,
+      })
+      continue
+    }
+
+    if (title === EXPLAIN_IT_BACK && set !== undefined) {
+      parts.push({
+        kind: "elaborate",
+        id,
+        heading: sectionHeading(title, `${id}-h`),
+        slug: lessonSlug(document.number, ELABORATION_PART),
+        intro: fragment(set.intro, `${key}ei`),
+        outro: fragment(set.outro, `${key}eo`),
+        questions: elaborationQuestions(set.prompts, document.number, `${key}e`),
       })
       continue
     }

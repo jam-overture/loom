@@ -1,0 +1,12 @@
+# Every source file under this directory is text, and is to be diffed as text
+# whichever bytes happen to be inside a string literal.
+#
+# `record.ts` is why. Its correction key joins six fields with a byte that can
+# occur in none of them, which was written as a literal NUL until 30 September —
+# so `git` classified the module holding this surface's merge rules as binary and
+# printed `Bin 13206 -> 14798 bytes` in place of every diff of it, for as long as
+# nobody happened to need one. The literal is now an escape, which fixes that file;
+# this fixes the class, because the next separator somebody needs will be a
+# judgement about a key rather than a judgement about reviewability.
+*.ts diff
+*.tsx diff

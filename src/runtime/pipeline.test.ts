@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { sequentialIdFactory } from "../ids.js"
+import type { BindingReader } from "../render/reads.js"
 import { err, ok, type Result } from "../result.js"
 import {
   buildIntent,
@@ -12,6 +13,7 @@ import {
   scriptedRepairer,
   type CollectingEventSink,
 } from "../testing/doubles.js"
+import { DATA_PROP_KEY } from "../reserved-props.js"
 import { sampleTree, type SampleTree } from "../testing/fixtures.js"
 import { buildElement } from "../tree/builders.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
@@ -51,6 +53,7 @@ const harnessFor = (options: {
   /** For the containment tests: a sink that refuses some of what it is handed. */
   readonly sink?: CollectingEventSink
   readonly propsVocabulary?: PropsVocabulary
+  readonly bindingReader?: BindingReader
 }): Harness => {
   const { tree, ids } = sampleTree()
 
@@ -79,6 +82,7 @@ const harnessFor = (options: {
       clock: fixedClock(),
       idFactory: spare,
       ...(options.propsVocabulary ? { propsVocabulary: options.propsVocabulary } : {}),
+      ...(options.bindingReader ? { bindingReader: options.bindingReader } : {}),
     },
     events,
     tree,
@@ -1049,5 +1053,119 @@ describe("confirmChange against a declared props vocabulary", () => {
     if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
 
     expect(outcome.assessment.stakes.factors.map((factor) => factor.code)).toContain("invalid-props")
+  })
+})
+
+/** `loom.card` reads its answer under `items` and says so. */
+const readsItems: BindingReader = {
+  bindingsReadBy: (type) => (type === "loom.card" ? ["items"] : undefined),
+}
+
+/** The mistake a model makes: the right source, under a name nobody opens. */
+const asksUnderTheWrongName = (ids: SampleTree["ids"]): TreeOperation[] => [
+  {
+    op: "configure",
+    nodeId: ids.card,
+    set: { [DATA_PROP_KEY]: { rows: { source: "catalogue.services" } } },
+    unset: [],
+  },
+]
+
+describe("composeChange against a declared binding reader", () => {
+  /**
+   * The behaviour every deployment had before 0208, asserted rather than
+   * assumed: an unwired runtime commits exactly what it committed yesterday,
+   * which is the only thing that makes this additive. Two primitives in the
+   * library now declare `reads`, so a default that had leaked would start
+   * refusing changes on every host that upgraded without asking to.
+   */
+  it("commits a change no reader was consulted about when none is wired", async () => {
+    const { runtime, tree } = harnessFor({ build: asksUnderTheWrongName })
+
+    expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("applied")
+  })
+
+  it("refuses a change that would ask for data nothing on the page reads", async () => {
+    const { runtime, tree } = harnessFor({
+      build: asksUnderTheWrongName,
+      bindingReader: readsItems,
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.disposition.reason.code).toBe("stakes-at-refusal-floor")
+    expect(outcome.assessment.stakes.factors.map((factor) => factor.code)).toContain(
+      "unread-binding"
+    )
+  })
+
+  /**
+   * The whole reason a refusal beats a hold here: the refusal carries the name
+   * that was asked and the type that does not read it, which is everything a
+   * repairer needs and is one string away from the change that would land.
+   */
+  it("names the node and the name it asked under, rather than that something was wrong", async () => {
+    const { runtime, tree, ids } = harnessFor({
+      build: asksUnderTheWrongName,
+      bindingReader: readsItems,
+    })
+
+    const outcome = await composeChange(runtime, tree, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.assessment.analysis.unreadBindings).toEqual([
+      { nodeId: ids.card, type: "loom.card", name: "rows" },
+    ])
+  })
+
+  it("leaves the tree where it was, so no reader is served the empty region", async () => {
+    const { runtime, tree, ids } = harnessFor({
+      build: asksUnderTheWrongName,
+      bindingReader: readsItems,
+    })
+
+    await composeChange(runtime, tree, intentFor(tree))
+
+    const card = findNode(tree.root, ids.card)
+    expect(card?.kind === "element" && card.props[DATA_PROP_KEY]).toBeUndefined()
+  })
+
+  it("lets through a change that asks under the name the primitive declared", async () => {
+    const { runtime, tree } = harnessFor({
+      build: (ids) => [
+        {
+          op: "configure",
+          nodeId: ids.card,
+          set: { [DATA_PROP_KEY]: { items: { source: "catalogue.services" } } },
+          unset: [],
+        },
+      ],
+      bindingReader: readsItems,
+    })
+
+    expect((await composeChange(runtime, tree, intentFor(tree))).kind).toBe("applied")
+  })
+})
+
+describe("confirmChange against a declared binding reader", () => {
+  /**
+   * The confirmation path recomputes the assessment rather than trusting the one
+   * captured at proposal time, and it has to recompute it the same way. A reader
+   * threaded into one call site and not the other would let a held change land
+   * carrying exactly what the first look refused.
+   */
+  it("refuses a held change nothing will read, even with a person saying yes", () => {
+    const { runtime, tree, proposal } = harnessFor({
+      build: asksUnderTheWrongName,
+      bindingReader: readsItems,
+    })
+
+    const outcome = confirmChange(runtime, tree, proposal, intentFor(tree))
+    if (outcome.kind !== "rejected") throw new Error(`unexpected ${outcome.kind}`)
+
+    expect(outcome.assessment.stakes.factors.map((factor) => factor.code)).toContain(
+      "unread-binding"
+    )
   })
 })

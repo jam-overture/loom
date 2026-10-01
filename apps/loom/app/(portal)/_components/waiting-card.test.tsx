@@ -174,13 +174,46 @@ describe("WaitingCard", () => {
    * that can show those, which is the reading 0019 asks for rather than a
    * limitation worked around.
    */
-  it("hands the reader to the page rather than offering to answer here", () => {
+  it("hands the reader somewhere else rather than offering to answer here", () => {
     const { container } = card()
 
     expect(container.querySelector("button")).toBeNull()
     expect(screen.getByRole("link", { name: /Look at it on the page/ }).getAttribute("href")).toBe(
       "/portal/pages/t_1"
     )
+  })
+
+  /**
+   * Which of the two destinations is the button, as of 30 September. The page is
+   * where every *other* change waiting on it is; the screen this now leads with
+   * draws **this** change — the page as it stands beside the page it would become
+   * — and that is what a row of triage is trying to get a reader to.
+   *
+   * Asserted as an ordering rather than as two links, because two links is what it
+   * was and the defect would be offering them as equals: a reader choosing between
+   * two nouns before they know what either holds.
+   */
+  it("leads with the screen that draws this change, and keeps the page beside it", () => {
+    const { container } = card()
+    const text = container.textContent ?? ""
+
+    expect(
+      screen.getByRole("link", { name: /See what it would look like/ }).getAttribute("href")
+    ).toBe("/portal/pages/t_1/proposed/p_1")
+    expect(text.indexOf("See what it would look like")).toBeLessThan(
+      text.indexOf("Look at it on the page")
+    )
+  })
+
+  /** One bordered shape, so a reader is never asked to choose between two. */
+  it("offers exactly one of the two as a button", () => {
+    const { container } = card()
+    const bordered = [...container.querySelectorAll("a")].filter((link) =>
+      link.className.includes("border")
+    )
+
+    expect(bordered).toHaveLength(1)
+    expect(bordered[0]?.textContent).toContain("See what it would look like")
   })
 
   it("says a yes cannot be taken back, when it cannot", () => {

@@ -1,24 +1,50 @@
 import { describe, expect, it } from "vitest"
 
+import { bindingNameSchema } from "../data/source.js"
 import { sequentialIdFactory } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import type { BindingDeclaration, BindingReader } from "../render/reads.js"
 import * as reservedProps from "../reserved-props.js"
 import { buildElement, buildSlot, buildText } from "../tree/builders.js"
 
 import {
   describeInvalidProps,
   describeUnknownPrimitive,
+  describeUnreadBinding,
   EVERY_TYPE_REGISTERED,
   EVERY_TYPE_UNDECLARED,
   invalidPropsIn,
+  NOTHING_DECLARED,
   primitiveVocabularyFor,
   unknownPrimitivesIn,
+  unreadBindingsIn,
   type PropsVocabulary,
 } from "./vocabulary.js"
 
 const ids = sequentialIdFactory("voc")
 const typed = (type: string) => primitiveTypeSchema.parse(type)
+const named = (name: string) => bindingNameSchema.parse(name)
+
+/** A reader over a plain table, which is what an SDK registry answers from. */
+const readerOf = (table: Readonly<Record<string, readonly BindingDeclaration[]>>): BindingReader => ({
+  bindingsReadBy: (type) => table[type],
+})
+
+const readsEntries = readerOf({ "loom.feed": ["entries"] })
+const readsWhicheverPropSays = readerOf({
+  "loom.feed": [{ fromProp: "binding", default: "entries" }],
+})
+
+const feedAsking = (...names: readonly string[]) =>
+  buildElement(ids, {
+    type: "loom.feed",
+    props: {
+      "loom:data": Object.fromEntries(
+        names.map((name) => [name, { source: "catalogue.services" }])
+      ),
+    },
+  })
 
 describe("primitiveVocabularyFor", () => {
   it("holds the types it was given and nothing else", () => {
@@ -296,5 +322,137 @@ describe("invalidPropsIn, on the runtime's own keys", () => {
     })
 
     expect(seen).toEqual([reservedProps.partitionReservedProps(props).props])
+  })
+})
+
+describe("NOTHING_DECLARED", () => {
+  /**
+   * The default has to be silent, and silent for the right reason: nobody has
+   * said what any primitive reads, which is not a primitive claiming it reads
+   * none. A reader answering `[]` here would refuse every bound node on every
+   * deployment that has not opted in.
+   */
+  it("answers undefined for every type, so nothing is reported", () => {
+    expect(NOTHING_DECLARED.bindingsReadBy(typed("loom.feed"))).toBeUndefined()
+    expect(unreadBindingsIn(feedAsking("rows"), NOTHING_DECLARED)).toEqual([])
+  })
+})
+
+describe("unreadBindingsIn", () => {
+  it("reports a name the primitive says it does not read", () => {
+    const node = feedAsking("rows")
+
+    expect(unreadBindingsIn(node, readsEntries)).toEqual([
+      { nodeId: node.id, type: typed("loom.feed"), name: named("rows") },
+    ])
+  })
+
+  it("says nothing about a name the primitive reads", () => {
+    expect(unreadBindingsIn(feedAsking("entries"), readsEntries)).toEqual([])
+  })
+
+  /**
+   * The bargain `reads` makes, on this side of the seam: absence and emptiness
+   * are different answers (0181), and a type this reader does not hold is the
+   * absent one.
+   */
+  it("says nothing about a type the reader has no declaration for", () => {
+    const node = buildElement(ids, {
+      type: "loom.banner",
+      props: { "loom:data": { rows: { source: "catalogue.services" } } },
+    })
+
+    expect(unreadBindingsIn(node, readsEntries)).toEqual([])
+  })
+
+  /**
+   * A primitive that has declared `[]` has said it reads nothing, which is a
+   * claim and not a silence — so every name on it is unread.
+   */
+  it("reports every name on a primitive that declared it reads none", () => {
+    const node = feedAsking("entries")
+
+    expect(unreadBindingsIn(node, readerOf({ "loom.feed": [] }))).toEqual([
+      { nodeId: node.id, type: typed("loom.feed"), name: named("entries") },
+    ])
+  })
+
+  /** 0184: a declaration may name the prop that names the binding. */
+  it("resolves a prop-named declaration against the node's own props", () => {
+    const renamed = buildElement(ids, {
+      type: "loom.feed",
+      props: {
+        binding: "services",
+        "loom:data": { services: { source: "catalogue.services" } },
+      },
+    })
+
+    expect(unreadBindingsIn(renamed, readsWhicheverPropSays)).toEqual([])
+  })
+
+  it("reports the default name on a node whose naming prop is absent", () => {
+    const node = feedAsking("services")
+
+    expect(unreadBindingsIn(node, readsWhicheverPropSays).map((unread) => unread.name)).toEqual([
+      named("services"),
+    ])
+  })
+
+  it("reaches below the root of an inserted subtree", () => {
+    const buried = feedAsking("rows")
+    const banner = buildElement(ids, {
+      type: "loom.banner",
+      children: [buildSlot(ids, "body", [buried])],
+    })
+
+    expect(unreadBindingsIn(banner, readsEntries).map((unread) => unread.nodeId)).toEqual([
+      buried.id,
+    ])
+  })
+
+  it("reports nothing for a subtree of text and slots", () => {
+    expect(
+      unreadBindingsIn(buildSlot(ids, "body", [buildText(ids, "Welcome")]), readsEntries)
+    ).toEqual([])
+  })
+
+  it("reports a node's own names sorted, and its nodes in document order", () => {
+    const first = feedAsking("rows", "items")
+    const second = feedAsking("cards")
+    const banner = buildElement(ids, { type: "loom.banner", children: [first, second] })
+
+    expect(unreadBindingsIn(banner, readsEntries).map((unread) => [unread.nodeId, unread.name])).toEqual(
+      [
+        [first.id, named("items")],
+        [first.id, named("rows")],
+        [second.id, named("cards")],
+      ]
+    )
+  })
+
+  it("says nothing about a node with no loom:data at all", () => {
+    expect(unreadBindingsIn(buildElement(ids, { type: "loom.feed" }), readsEntries)).toEqual([])
+  })
+
+  /**
+   * A malformed declaration is the renderer's to report and there is nothing
+   * here to say about it: `parseBindings` refuses the whole map together, so
+   * there are no names in it to be read.
+   */
+  it("says nothing about a loom:data that does not parse", () => {
+    const node = buildElement(ids, {
+      type: "loom.feed",
+      props: { "loom:data": { rows: { source: "Not A Source Id" } } },
+    })
+
+    expect(unreadBindingsIn(node, readsEntries)).toEqual([])
+  })
+
+  it("names the node, the name it asked under, and the type that does not read it", () => {
+    const node = feedAsking("rows")
+
+    expect(
+      describeUnreadBinding({ nodeId: node.id, type: typed("loom.feed"), name: named("rows") })
+    ).toBe(`${node.id} asks under "rows", which loom.feed does not read`)
   })
 })

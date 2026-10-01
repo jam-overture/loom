@@ -125,15 +125,19 @@ export const SITE_PROPS_VOCABULARY = propsVocabularyFor(siteRegistry)
  */
 export const PROTECTED_IN_PLAIN_WORDS: Readonly<Record<string, string>> = {
   "loom.mosaic": "what it says it is for",
-  "loom.nav": "the way out of it",
-  "loom.footer": "the way out of it",
+  "loom.nav": "the menu",
+  "loom.footer": "the links at the bottom",
 }
 
 /**
- * The protected list as a reader meets it: no type names, and deduplicated,
- * because the menu and the closing band are two pieces of one promise and a
- * visitor told "the way out of it, and the way out of it" is being read a list
- * of implementation details.
+ * The protected list as a reader meets it: no type names, and deduplicated.
+ *
+ * The menu and the closing band said *"the way out of it"* between them until
+ * 1 October, which is not how anybody describes a menu, and the dedup existed
+ * so a visitor was not told "the way out of it, and the way out of it". They
+ * are named plainly now, so nothing collapses today — the dedup stays because
+ * two types sharing one phrase is a thing this table invites, and the sentence
+ * reading a list twice is the failure it prevents.
  */
 export const protectedInPlainWords = (): readonly string[] => [
   ...new Set(

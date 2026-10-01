@@ -70,3 +70,41 @@ export const plainText = (markdown: string): string =>
     /** A removed reference leaves its space behind, in front of the comma it preceded. */
     .replace(/\s+([,.;:!?])/g, "$1")
     .trim()
+
+/**
+ * `lesson 08`, `lessons 18 and 19`, `Lesson 05's` — a lesson named in a sentence
+ * rather than in a marker.
+ *
+ * This is deliberately a second function and not a widening of
+ * `referencedLessons`, because the two are not the same fact written two ways.
+ * A `*(04)*` marker is **data**: the schedule writes it so the queue can offer a
+ * pointer, it appears nowhere a reader reads, and it is exact by construction.
+ * A prose mention is the **author addressing the reader** — *derive it from
+ * lesson 08*, *lesson 03 told you operations are ordered* — and it is a guess
+ * about intent read off a sentence.
+ *
+ * Folding them together would let the guess into the queue's pointers, where
+ * being wrong means grading somebody against the wrong lesson. Keeping them
+ * apart means the guess is only ever used for the one thing it is good enough
+ * for: offering the reader something they themselves wrote about a lesson this
+ * prompt says it builds on. A false positive there costs a paragraph of their
+ * own words they did not ask for; a missed one costs nothing they had.
+ *
+ * Two digits, always, which is what every lesson in this course is and what
+ * makes the pattern safe next to a decision record (four digits opening with a
+ * zero) and a section number (`§6`). The run after the first number is taken
+ * whole so that *lessons 18 and 19* and *lessons 01, 14 and 22* yield both and
+ * all three, rather than the first — the same mistake `LEADING_NUMBERS` above
+ * was written to stop this file making twice.
+ */
+const NAMED_LESSONS = /\blessons?\s+(\d{2}(?:\s*(?:,|and)\s*\d{2})*)/gi
+
+export const lessonsNamedInProse = (markdown: string): readonly number[] => {
+  const found = new Set<number>()
+
+  for (const match of markdown.matchAll(NAMED_LESSONS)) {
+    for (const number of match[1]?.match(/\d{2}/g) ?? []) found.add(Number(number))
+  }
+
+  return [...found].sort((a, b) => a - b)
+}

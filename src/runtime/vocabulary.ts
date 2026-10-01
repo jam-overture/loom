@@ -1,7 +1,10 @@
+import { parseBindings } from "../data/binding.js"
+import type { BindingName } from "../data/source.js"
 import type { NodeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
+import { unreadBindings, type BindingReader } from "../render/reads.js"
 import { partitionReservedProps } from "../reserved-props.js"
 import { walkTree } from "../tree/navigation.js"
 import type { LoomNode } from "../tree/node.js"
@@ -184,3 +187,108 @@ export const describeInvalidProps = (invalid: InvalidProps): string =>
   `${invalid.type} at ${invalid.nodeId} (${invalid.issues
     .map((issue) => `${issue.path}: ${issue.message}`)
     .join("; ")})`
+
+/**
+ * What a deployment's primitives *read*, as far as the write path is concerned.
+ *
+ * The third question in this module, under the two above it. `PrimitiveVocabulary`
+ * answers *can this be drawn at all*; `PropsVocabulary` answers *will its own
+ * primitive accept what it carries*; this one answers the question a bound node
+ * raises and neither of those can see — the type is registered, the props are
+ * fine, and **is anything going to look at the answer this node is asking for?**
+ *
+ * A binding is a question the tree asks under a name, and the name is how the
+ * primitive reading it finds the answer (0058). Three of the four ways that
+ * declaration can be wrong are already refused before a delta lands: an
+ * unregistered source and an undeclared param are refused at the data seam, and
+ * a malformed `loom:data` never parses. The fourth resolves perfectly — a name
+ * nothing reads costs the host a round trip to its own source, hands the answer
+ * to a primitive that looks under a different name, and draws the empty state.
+ *
+ * `BindingReader`, the renderer's own seam, rather than a fourth vocabulary
+ * shaped for this side. It is the same move `PropsVocabulary` makes with
+ * `PropsVerdict` and for the identical reason: what the renderer reports as
+ * `data-unread` is then, by construction, what the write path declines to write,
+ * and an SDK registry already satisfies it structurally — so a host hands the
+ * same object to both seams and there is nothing here that can drift or go
+ * missing.
+ *
+ * Handed to the write path rather than declared on the policy, which is 0179's
+ * rule and this is the second thing it covers: a reader is behaviour, a policy
+ * is data with a fingerprint, and a policy carrying a function is a policy that
+ * cannot be compared with the one that decided yesterday.
+ */
+
+/**
+ * What a host that has handed no reader gets, which is today's behaviour.
+ *
+ * `undefined` for every type rather than an empty list, and the asymmetry with
+ * `EVERY_TYPE_REGISTERED` is `unreadBindings`' own bargain rather than a second
+ * judgement: absence and emptiness are different answers (0181), `undefined`
+ * means *nobody has said*, and nothing is reported for it. A reader that
+ * answered `[]` would claim every primitive reads no binding and refuse every
+ * bound node on every deployment that has not opted in.
+ */
+export const NOTHING_DECLARED: BindingReader = { bindingsReadBy: () => undefined }
+
+/** A question a change would leave on the page that no primitive will look at. */
+export type UnreadBinding = {
+  readonly nodeId: NodeId
+  readonly type: PrimitiveType
+  /** The name the node asked under, which is the half the primitive does not hold. */
+  readonly name: BindingName
+}
+
+/**
+ * Every binding in a subtree whose name its own primitive says it does not read,
+ * in document order and name-sorted within a node.
+ *
+ * Measured on the **declaration** rather than on the answers, which is the one
+ * place this walk differs from `reportUnreadBindings` in the renderer, and the
+ * difference is forced rather than chosen: there are no answers here. Nothing
+ * has been asked, no source has run, and the question of whether one *could*
+ * have answered is not this seam's. That turns out to be the stronger reading
+ * anyway — a name nothing reads is wrong whether or not the source behind it
+ * happens to be up.
+ *
+ * A node whose `loom:data` does not parse contributes nothing. `parseBindings`
+ * refuses the whole map together and the renderer reports that separately
+ * (0058); there are no names in a malformed declaration to be read, so there is
+ * nothing here to say about one that has not already been said louder.
+ *
+ * The whole subtree rather than its root, for the reason `unknownPrimitivesIn`
+ * gives: an inserted band carries its own children, and a wasted round trip
+ * three levels down is the same wasted round trip.
+ */
+export const unreadBindingsIn = (
+  node: LoomNode,
+  reads: BindingReader
+): readonly UnreadBinding[] =>
+  Array.from(walkTree(node)).flatMap((current) => {
+    if (current.kind !== "element") return []
+
+    const declared = reads.bindingsReadBy(current.type)
+    if (declared === undefined) return []
+
+    const bindings = parseBindings(current.props["loom:data"] ?? {})
+    if (!bindings.ok) return []
+
+    /**
+     * The seam decides in plain strings, so the brand is recovered by looking
+     * the answer back up among the names that were handed in rather than by
+     * asserting it — the move `parseBindings` makes one module over, for its
+     * reason: filtering keeps the one place that could be wrong honest.
+     */
+    const asked = new Map<string, BindingName>(
+      Array.from(bindings.value.keys()).map((name) => [name, name])
+    )
+
+    return unreadBindings(asked.keys(), declared, current.props).flatMap((name) => {
+      const named = asked.get(name)
+
+      return named === undefined ? [] : [{ nodeId: current.id, type: current.type, name: named }]
+    })
+  })
+
+export const describeUnreadBinding = (unread: UnreadBinding): string =>
+  `${unread.nodeId} asks under "${unread.name}", which ${unread.type} does not read`

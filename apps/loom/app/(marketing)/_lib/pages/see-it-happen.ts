@@ -6,8 +6,7 @@ import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
 import { heading, prose, stack } from "../nodes"
-import { askHref, mechanismHref, type SiteThemeName } from "../site"
-import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
+import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
 
 /**
  * The band where the page stops describing itself and does it.
@@ -479,21 +478,30 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
      */
     prose(
       ids,
-      "These five are prepared, so the whole sequence runs here without an AI in the way. To ask for something in your own words, the next band down is a page you can type into.",
+      "These five are prepared, so the whole sequence runs here without calling an AI model. To ask for something in your own words, try the demo. It is a page you can type into.",
       { tone: "muted", size: "small", measured: true }
     ),
     buildElement(ids, {
       type: "loom.action",
       props: {
-        href: `${askHref(context.origin, {
-          theme: context.theme,
-          ...(context.ask === undefined
-            ? {}
-            : { ask: context.ask, approve: context.approve === true }),
-        })}#${YOUR_TURN_ANCHOR}`,
+        /**
+         * The demonstration, as a surface rather than as a band of this page.
+         *
+         * It was a fragment link to a framed copy of `/demo` directly below —
+         * removed on 1 October at the maintainer's direction: *"get rid of the
+         * demo injected into the main landing page. If people want to get to
+         * the demo, they can click the demo link."* So this is that link, and
+         * it is the same address the bar and the footer use.
+         *
+         * `surfaceHref` rather than `internalHref`, so the palette is not
+         * carried across: a surface that does not read `?theme=` would be
+         * handed a parameter that means nothing and looks like it means
+         * something.
+         */
+        href: surfaceHref(context.origin, DEMO),
         variant: "quiet",
       },
-      children: [buildText(ids, "Take a turn")],
+      children: [buildText(ids, "Try the demo")],
     }),
   ]),
 ]
@@ -526,7 +534,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
      */
     prose(
       ids,
-      "Each one is a real request, put to the rules this site is published under — the same way it would be on a page of yours.",
+      "Each one is a real request, checked against the rules this site runs under, exactly as it would be on a page of yours.",
       { tone: "muted", size: "small" }
     ),
     /**

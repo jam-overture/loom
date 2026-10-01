@@ -86,7 +86,20 @@ const effect: ProposalEffect = {
   operations: [],
 }
 
-const card = () => render(<HeldProposalCard held={held} effect={effect} />)
+/**
+ * Spread rather than passed as `pictureHref={maybe}`: this app typechecks with
+ * `exactOptionalPropertyTypes`, under which *absent* and *present and undefined*
+ * are different types — which is exactly the distinction the prop is carrying,
+ * so the test has to make it the same way the caller does.
+ */
+const card = (pictureHref?: string) =>
+  render(
+    <HeldProposalCard
+      held={held}
+      effect={effect}
+      {...(pictureHref === undefined ? {} : { pictureHref })}
+    />
+  )
 
 describe("HeldProposalCard", () => {
   it("leads with what the AI wants to do, in its own sentence", () => {
@@ -228,5 +241,35 @@ describe("HeldProposalCard", () => {
     for (const details of Array.from(container.querySelectorAll("details"))) details.remove()
 
     expect(container.textContent).not.toContain("confidence-below-minimum")
+  })
+
+  /**
+   * The picture, offered between the account of the change and the answer to it.
+   *
+   * Above the buttons rather than below, which is the order this card has argued
+   * for since it was rewritten: what it would do, what each answer sets in motion,
+   * then the answer. A picture of the page is a stronger form of the first of
+   * those, and under the buttons it would be evidence offered after the decision.
+   */
+  it("offers the pictures between what the change does and the buttons that answer it", () => {
+    const { container } = card("/portal/pages/t_1/proposed/p_1")
+    const text = container.textContent ?? ""
+
+    expect(
+      screen.getByRole("link", { name: /See what it would look like/ }).getAttribute("href")
+    ).toBe("/portal/pages/t_1/proposed/p_1")
+    expect(text.indexOf("See what it would look like")).toBeLessThan(text.indexOf("If you say yes"))
+  })
+
+  /**
+   * And nothing at all when the reader is already looking at them. This card is
+   * rendered on the screen that draws the pictures as well as in the queue that
+   * does not, and a link to the screen you are on is the one link a reader can
+   * reasonably feel cheated by.
+   */
+  it("offers no link to the pictures when it is rendered beside them", () => {
+    const { container } = card()
+
+    expect(container.textContent).not.toContain("See what it would look like")
   })
 })

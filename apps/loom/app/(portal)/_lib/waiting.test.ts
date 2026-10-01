@@ -164,6 +164,19 @@ describe("waitingChange", () => {
   it("points at the one place the change can be answered", () => {
     expect(waitingChange(heldFixture()).href).toBe("/portal/pages/t_1")
   })
+
+  /**
+   * And at the screen that draws it, which is a second address rather than a
+   * replacement: one names the page every waiting change on it shares, the other
+   * names this change and nothing else. A row of triage owes a reader both, and a
+   * row carrying only the first is the row this queue was for a fortnight.
+   */
+  it("points at the screen that draws this change, and only this one", () => {
+    const change = waitingChange(heldFixture())
+
+    expect(change.pictureHref).toBe("/portal/pages/t_1/proposed/p_1")
+    expect(change.pictureHref).not.toBe(change.href)
+  })
 })
 
 /** A row this build could place and could not read, on the page under test. */

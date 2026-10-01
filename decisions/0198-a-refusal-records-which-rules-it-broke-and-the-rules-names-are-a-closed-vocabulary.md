@@ -4,6 +4,12 @@
 **Date:** 2026-09-27
 **Section:** §6 (telemetry), binding on §2
 
+> **30 September 2026.** Two counts in the table below moved from *thirteen* to
+> *fourteen* when [0208](0208-a-question-nothing-reads-is-refused-before-it-is-written.md)
+> added `unread-binding`. Maintained rather than superseded: nothing this record
+> decides has changed, and `src/record-claims.test.ts` exists to fail until the
+> arithmetic in the prose agrees with the list in `src/`.
+
 ## Context
 
 `assessStakes` returns a level and the factors that produced it, and the second
@@ -61,9 +67,9 @@ raised nothing.
 
 | | crosses | why |
 | --- | --- | --- |
-| `code` | **yes** | one of thirteen fixed strings, naming a rule and nothing about the change |
+| `code` | **yes** | one of fourteen fixed strings, naming a rule and nothing about the change |
 | `detail` | no | a sentence naming nodes, types and endpoints. It is content, and content is what 0023 keeps out |
-| `level` | no | recoverable. Twelve of the thirteen are fixed at their code; `large-removal` is decided by `removedNodeCount`, which the summary already carries, against the `removalThresholds` of the policy `policyFingerprint` already names |
+| `level` | no | recoverable. Thirteen of the fourteen are fixed at their code; `large-removal` is decided by `removedNodeCount`, which the summary already carries, against the `removalThresholds` of the policy `policyFingerprint` already names |
 
 **And `StakeFactorCode` becomes a schema**, because the codes now leave the
 process and anything crossing that boundary is parsed on the way back in.
