@@ -45,6 +45,12 @@ export const entryPoints: readonly EntryPoint[] = [
     audience: "app",
   },
   {
+    specifier: "@jam-overture/loom-primitives/compositions",
+    summary:
+      "The starter library's forty-four bands under their own names, for assembling a page without going through the catalogue.",
+    audience: "app",
+  },
+  {
     specifier: "@jam-overture/loom/sdk",
     summary: "Defining and registering primitives of your own, and the catalogue a model is shown.",
     audience: "host",
