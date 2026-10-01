@@ -8,9 +8,9 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 13,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 14,
         "widest": true,
         "sharedWith": [
           {
@@ -4405,9 +4405,9 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -4451,9 +4451,9 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 14,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
           {
@@ -5354,14 +5354,20 @@
           "reach": "loaded"
         }
       ],
-      "files": 180,
+      "files": 184,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
-        "sharedWith": [],
+        "sharedWith": [
+          {
+            "specifier": "@jam-overture/loom-primitives/compositions",
+            "slug": "primitives-compositions",
+            "names": 13
+          }
+        ],
         "collisions": []
       },
       "groups": [
@@ -5802,6 +5808,751 @@
       ]
     },
     {
+      "specifier": "@jam-overture/loom-primitives/compositions",
+      "slug": "primitives-compositions",
+      "types": "./dist/primitives/compositions/index.d.ts",
+      "requires": [],
+      "files": 54,
+      "narrower": [],
+      "standing": {
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 15,
+        "widest": false,
+        "sharedWith": [
+          {
+            "specifier": "@jam-overture/loom-primitives",
+            "slug": "primitives",
+            "names": 13
+          }
+        ],
+        "collisions": []
+      },
+      "groups": [
+        {
+          "module": "primitives/compositions",
+          "title": "Compositions",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "STARTER_COMPOSITIONS",
+              "kind": "value",
+              "signature": "const STARTER_COMPOSITIONS: readonly Composition[]",
+              "truncated": false,
+              "summary": "Every band on offer — the phrasebook, not the page."
+            },
+            {
+              "name": "CATALOGUE_TYPES",
+              "kind": "value",
+              "signature": "const CATALOGUE_TYPES: readonly string[]",
+              "truncated": false,
+              "summary": "Every primitive type some band in the phrasebook builds, sorted."
+            },
+            {
+              "name": "compositionById",
+              "kind": "function",
+              "signature": "const compositionById: (id: string) => Composition | undefined",
+              "truncated": false,
+              "summary": "The band with this id, or `undefined`."
+            },
+            {
+              "name": "compositionsForPart",
+              "kind": "function",
+              "signature": "const compositionsForPart: (part: CompositionPart) => readonly Composition[]",
+              "truncated": false,
+              "summary": "Every design of one band, in catalogue order, canonical design first."
+            },
+            {
+              "name": "PAGE_SEQUENCE",
+              "kind": "value",
+              "signature": "const PAGE_SEQUENCE: readonly Composition[]",
+              "truncated": false,
+              "summary": "One design of each band, in the order a page uses them."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/articles-band",
+          "title": "Articles band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "articlesBand",
+              "kind": "value",
+              "signature": "const articlesBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/banner-band",
+          "title": "Banner band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bannerBand",
+              "kind": "value",
+              "signature": "const bannerBand: Composition",
+              "truncated": false,
+              "summary": "The strip above everything — the first thing on the page and the first part this catalogue has ever had that sits above the navigation."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/bento-band",
+          "title": "Bento band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bentoBand",
+              "kind": "value",
+              "signature": "const bentoBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/catalogue-band",
+          "title": "Catalogue band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "catalogueBand",
+              "kind": "value",
+              "signature": "const catalogueBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/changelog-band",
+          "title": "Changelog band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "changelogBand",
+              "kind": "value",
+              "signature": "const changelogBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/code-band",
+          "title": "Code band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "codeBand",
+              "kind": "value",
+              "signature": "const codeBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/code-session-band",
+          "title": "Code session band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "codeSessionBand",
+              "kind": "value",
+              "signature": "const codeSessionBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/comparison-band",
+          "title": "Comparison band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "comparisonBand",
+              "kind": "value",
+              "signature": "const comparisonBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/composition",
+          "title": "Composition",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "COMPOSITION_PARTS",
+              "kind": "value",
+              "signature": "const COMPOSITION_PARTS: readonly [\"banner\", \"nav\", \"hero\", \"proof\", \"features\", \"bento\", \"steps\", \"code\", \"integrations\", \"metrics\", \"specs\", \"pricing\", \"comparison\", \"testimonials\", \"credentials\", \"team\", \"articles\", \"changelog\", \"faq\", \"contact\", \"cta\", \"footer\"]",
+              "truncated": false,
+              "summary": "The bands a page is made of, in the order a page uses them."
+            },
+            {
+              "name": "CompositionPart",
+              "kind": "type",
+              "signature": "type CompositionPart = (typeof COMPOSITION_PARTS)[number];",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "Composition",
+              "kind": "type",
+              "signature": "type Composition = {\n    /**\n     * Lower-case words joined by hyphens, the way an anchor or a slot name is.\n     *\n     * **A part's canonical design has the part's own name as its id**, and every\n     * other design of that part is the part name plus what makes it different —\n     * `hero` and `hero-split`. That convention is not cosmetic: it is what lets\n     * the page sequence be *derived* rather than maintained as a second hand-kept\n     * list that could disagree with the first. There is a test on it.\n     */\n    readonly id: string;\n    /** Which band of a page this is a design of. */\n    readonly part: CompositionPart;\n    /** What a person choosing it from a list reads. */\n    readonly label: string;\n    /**\n     * What lands on the page, in one clause, said before it happens.\n     *\n     * About the page and never about the verdict, for the reason the demo's\n     * presets give: whether the Gate applies a band or holds it is computed from\n     * the tree at assessment time, so a promise about the outcome would be a\n     * surface predicting a decision it does not make.\n     */\n    readonly promise: string;\n    /** The interpreter's own words about why this subtree answers that ask. */\n    readonly rationale: string;\n    /** Every primitive type the subtree uses, for the catalogue and the audit. */\n    readonly uses: readonly string[];\n    readonly build: (ids: IdFactory) => ElementNode;\n};",
+              "truncated": false,
+              "summary": "A band of a page, dropped in whole as one operation."
+            },
+            {
+              "name": "COMPOSITION_INTERPRETER",
+              "kind": "value",
+              "signature": "const COMPOSITION_INTERPRETER = \"loom/composition\"",
+              "truncated": false,
+              "summary": "What produced the delta, for `Provenance.interpreter`. Not a model."
+            },
+            {
+              "name": "CompositionTarget",
+              "kind": "type",
+              "signature": "type CompositionTarget = {\n    readonly parentId?: NodeId;\n    /** Clamped to the parent's current child count, never trusted as an index. */\n    readonly index?: number;\n};",
+              "truncated": false,
+              "summary": "Where the band goes."
+            },
+            {
+              "name": "CompositionPlan",
+              "kind": "type",
+              "signature": "type CompositionPlan = {\n    readonly outcome: \"planned\";\n    readonly operations: readonly TreeOperation[];\n}\n/**\n * The named parent is not in this tree, so there is nowhere to put the band.\n *\n * A distinct outcome rather than a silent append at the root: a band that\n * quietly landed somewhere other than where it was asked for is worse than\n * one that did not land, because the second is visible.\n */\n | {\n    readonly outcome: \"no-such-parent\";\n    readonly parentId: NodeId;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "planComposition",
+              "kind": "function",
+              "signature": "const planComposition: (composition: Composition, tree: LoomTree, ids: IdFactory, target?: CompositionTarget) => CompositionPlan",
+              "truncated": false,
+              "summary": "One `insert`, computed against the tree as it stands."
+            },
+            {
+              "name": "compositionInterpreter",
+              "kind": "function",
+              "signature": "const compositionInterpreter: (composition: Composition, idFactory: IdFactory, clock: Clock, target?: CompositionTarget) => ChangeInterpreter",
+              "truncated": false,
+              "summary": "A composition as an ordinary `ChangeInterpreter`."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/contact-band",
+          "title": "Contact band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "contactBand",
+              "kind": "value",
+              "signature": "const contactBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/contact-details-band",
+          "title": "Contact details band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "contactDetailsBand",
+              "kind": "value",
+              "signature": "const contactDetailsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/conversation-band",
+          "title": "Conversation band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "conversationBand",
+              "kind": "value",
+              "signature": "const conversationBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/credentials-band",
+          "title": "Credentials band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "credentialsBand",
+              "kind": "value",
+              "signature": "const credentialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/cta-band",
+          "title": "Cta band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "ctaBand",
+              "kind": "value",
+              "signature": "const ctaBand: Composition",
+              "truncated": false,
+              "summary": "The last band: ask again, at a reading width, on the accent ground."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/cta-signup-band",
+          "title": "Cta signup band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "ctaSignupBand",
+              "kind": "value",
+              "signature": "const ctaSignupBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/episodes-band",
+          "title": "Episodes band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "episodesBand",
+              "kind": "value",
+              "signature": "const episodesBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/faq-band",
+          "title": "Faq band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "faqBand",
+              "kind": "value",
+              "signature": "const faqBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/faq-grid-band",
+          "title": "Faq grid band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "faqGridBand",
+              "kind": "value",
+              "signature": "const faqGridBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/features-alternating-band",
+          "title": "Features alternating band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "featuresAlternatingBand",
+              "kind": "value",
+              "signature": "const featuresAlternatingBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/features-band",
+          "title": "Features band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "featuresBand",
+              "kind": "value",
+              "signature": "const featuresBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/feed-band",
+          "title": "Feed band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "feedBand",
+              "kind": "value",
+              "signature": "const feedBand: Composition",
+              "truncated": false,
+              "summary": "The writing band as a page that has a blog draws it: one node that asks where the posts are, and the region it shows until something answers."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/footer-band",
+          "title": "Footer band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "footerBand",
+              "kind": "value",
+              "signature": "const footerBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/hero-band",
+          "title": "Hero band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "heroBand",
+              "kind": "value",
+              "signature": "const heroBand: Composition",
+              "truncated": false,
+              "summary": "The first screen: an eyebrow, a claim, a sentence, and two ways in."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/hero-split-band",
+          "title": "Hero split band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "heroSplitBand",
+              "kind": "value",
+              "signature": "const heroSplitBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/integrations-band",
+          "title": "Integrations band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "integrationsBand",
+              "kind": "value",
+              "signature": "const integrationsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/integrations-grid-band",
+          "title": "Integrations grid band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "integrationsGridBand",
+              "kind": "value",
+              "signature": "const integrationsGridBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/listings-band",
+          "title": "Listings band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "listingsBand",
+              "kind": "value",
+              "signature": "const listingsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-band",
+          "title": "Metrics band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsBand",
+              "kind": "value",
+              "signature": "const metricsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-chart-band",
+          "title": "Metrics chart band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsChartBand",
+              "kind": "value",
+              "signature": "const metricsChartBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-live-band",
+          "title": "Metrics live band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsLiveBand",
+              "kind": "value",
+              "signature": "const metricsLiveBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/nav-band",
+          "title": "Nav band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "navBand",
+              "kind": "value",
+              "signature": "const navBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/offerings-band",
+          "title": "Offerings band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "offeringsBand",
+              "kind": "value",
+              "signature": "const offeringsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/pricing-band",
+          "title": "Pricing band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "pricingBand",
+              "kind": "value",
+              "signature": "const pricingBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/pricing-matrix-band",
+          "title": "Pricing matrix band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "pricingMatrixBand",
+              "kind": "value",
+              "signature": "const pricingMatrixBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/proof-band",
+          "title": "Proof band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "proofBand",
+              "kind": "value",
+              "signature": "const proofBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/proof-faces-band",
+          "title": "Proof faces band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "proofFacesBand",
+              "kind": "value",
+              "signature": "const proofFacesBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/proof-story-band",
+          "title": "Proof story band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "proofStoryBand",
+              "kind": "value",
+              "signature": "const proofStoryBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/shelf-band",
+          "title": "Shelf band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "shelfBand",
+              "kind": "value",
+              "signature": "const shelfBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/specs-band",
+          "title": "Specs band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "specsBand",
+              "kind": "value",
+              "signature": "const specsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/steps-band",
+          "title": "Steps band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "stepsBand",
+              "kind": "value",
+              "signature": "const stepsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/steps-cards-band",
+          "title": "Steps cards band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "stepsCardsBand",
+              "kind": "value",
+              "signature": "const stepsCardsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/team-band",
+          "title": "Team band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "teamBand",
+              "kind": "value",
+              "signature": "const teamBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/testimonials-band",
+          "title": "Testimonials band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "testimonialsBand",
+              "kind": "value",
+              "signature": "const testimonialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/testimonials-wall-band",
+          "title": "Testimonials wall band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "testimonialsWallBand",
+              "kind": "value",
+              "signature": "const testimonialsWallBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/whats-on-band",
+          "title": "Whats on band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "whatsOnBand",
+              "kind": "value",
+              "signature": "const whatsOnBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
       "specifier": "@jam-overture/loom/sdk",
       "slug": "sdk",
       "types": "./dist/sdk/index.d.ts",
@@ -5816,9 +6567,9 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 14,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
           {
@@ -6407,9 +7158,9 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -6635,9 +7386,9 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -7052,9 +7803,9 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -7406,9 +8157,9 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -7539,9 +8290,9 @@
         }
       ],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 13,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 14,
         "widest": false,
         "sharedWith": [
           {
@@ -7789,7 +8540,7 @@
             {
               "name": "ReaderReadings",
               "kind": "type",
-              "signature": "type ReaderReadings = {\n    /** Total time on screen. Summed across batches, because `dwelled` is per-batch. */\n    readonly dwellMs: Readonly<Record<NodeId, number>>;\n    /** Nodes that came into view at all. `viewed` fires once per node per page view. */\n    readonly reached: Readonly<Record<NodeId, true>>;\n    /**\n     * Times the node itself was used — a link followed, a button pressed, a field\n     * filled.\n     *\n     * It is the node the signal names, which is the nearest addressed element to\n     * what a reader aimed at. In the starter library that is the control, so a\n     * band's count here is zero however busy the band was; `engagements` is the\n     * number that is about the band.\n     */\n    readonly activations: Readonly<Record<NodeId, number>>;\n    readonly opens: Readonly<Record<NodeId, number>>;\n    readonly closes: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a reader used something *inside* the node — pressed, followed, filled,\n     * opened or closed, at any depth.\n     *\n     * The regions' number. Read off the ancestry a delegated signal carries, so a\n     * batch whose senders did not walk contributes nothing rather than a guess.\n     * Strictly inside, so a control's own use is in `activations` and never here,\n     * and a subtree total is the addition.\n     *\n     * Occurrences rather than readers, because a fold is one page view: *how many\n     * of the people reading this used something in the band* is a question about\n     * many views, and it is `ReaderTally.engaged`.\n     */\n    readonly engagements: Readonly<Record<NodeId, number>>;\n    /**\n     * What each node is, as its signals reported it. Kept because a consumer\n     * holding only readings would otherwise have to go back to the tree to render\n     * a row, and the signals already say.\n     *\n     * A region named only as somewhere a press happened inside is in here too, so\n     * it gets a row rather than being a number with no name.\n     */\n    readonly types: Readonly<Record<NodeId, PrimitiveType>>;\n    readonly batches: number;\n    readonly signals: number;\n};",
+              "signature": "type ReaderReadings = {\n    /** Total time on screen. Summed across batches, because `dwelled` is per-batch. */\n    readonly dwellMs: Readonly<Record<NodeId, number>>;\n    /** Nodes that came into view at all. `viewed` fires once per node per page view. */\n    readonly reached: Readonly<Record<NodeId, true>>;\n    /**\n     * Times the node itself was used — a link followed, a button pressed, a field\n     * filled.\n     *\n     * It is the node the signal names, which is the nearest addressed element to\n     * what a reader aimed at. In the starter library that is the control, so a\n     * band's count here is zero however busy the band was; `engagements` is the\n     * number that is about the band.\n     */\n    readonly activations: Readonly<Record<NodeId, number>>;\n    readonly opens: Readonly<Record<NodeId, number>>;\n    readonly closes: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a form inside the node was submitted and the browser let it go.\n     *\n     * Filed against the node the signal names, which for the starter library's\n     * `loom.form` is the form itself. The band it was the end of is in\n     * `engagements`, like every other delegated kind.\n     */\n    readonly completions: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a reader used something *inside* the node — pressed, followed, filled,\n     * opened or closed, at any depth.\n     *\n     * The regions' number. Read off the ancestry a delegated signal carries, so a\n     * batch whose senders did not walk contributes nothing rather than a guess.\n     * Strictly inside, so a control's own use is in `activations` and never here,\n     * and a subtree total is the addition.\n     *\n     * Occurrences rather than readers, because a fold is one page view: *how many\n     * of the people reading this used something in the band* is a question about\n     * many views, and it is `ReaderTally.engaged`.\n     */\n    readonly engagements: Readonly<Record<NodeId, number>>;\n    /**\n     * What each node is, as its signals reported it. Kept because a consumer\n     * holding only readings would otherwise have to go back to the tree to render\n     * a row, and the signals already say.\n     *\n     * A region named only as somewhere a press happened inside is in here too, so\n     * it gets a row rather than being a number with no name.\n     */\n    readonly types: Readonly<Record<NodeId, PrimitiveType>>;\n    readonly batches: number;\n    readonly signals: number;\n};",
               "truncated": false,
               "summary": "What a set of batches says about each node they mention."
             },
@@ -7817,7 +8568,7 @@
             {
               "name": "NodeReading",
               "kind": "type",
-              "signature": "type NodeReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly dwellMs: number;\n    readonly reached: boolean;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /** Times a reader used something inside it, at any depth. */\n    readonly engagements: number;\n};",
+              "signature": "type NodeReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly dwellMs: number;\n    readonly reached: boolean;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /** Times a form inside it was submitted and the browser let it go. */\n    readonly completions: number;\n    /** Times a reader used something inside it, at any depth. */\n    readonly engagements: number;\n};",
               "truncated": false,
               "summary": "One node's line, as something rendering a table wants it."
             },
@@ -8029,19 +8780,19 @@
         {
           "module": "signals/kinds",
           "title": "Kinds",
-          "summary": "The four kinds of reader signal, with nothing else in the module.",
+          "summary": "The five kinds of reader signal, with nothing else in the module.",
           "symbols": [
             {
               "name": "READER_SIGNAL_KINDS",
               "kind": "value",
-              "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\"]",
+              "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\", \"completed\"]",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "DELEGATED_READER_SIGNAL_KINDS",
               "kind": "value",
-              "signature": "const DELEGATED_READER_SIGNAL_KINDS: readonly [\"activated\", \"disclosed\"]",
+              "signature": "const DELEGATED_READER_SIGNAL_KINDS: readonly [\"activated\", \"disclosed\", \"completed\"]",
               "truncated": false,
               "summary": "The kinds whose node is not the thing a reader aimed at."
             }
@@ -8076,7 +8827,7 @@
             {
               "name": "ReaderTally",
               "kind": "type",
-              "signature": "type ReaderTally = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Distinct page views that produced any signal at all about this node. */\n    readonly views: number;\n    /** Distinct page views in which it came into view. The denominator of a funnel. */\n    readonly reached: number;\n    /**\n     * Distinct page views in which a reader used something *inside* this node —\n     * pressed a link or button, filled a field, opened or closed a disclosure.\n     *\n     * The counter regions are reported by, and the only one that needs a signal to\n     * say more than which node it is about. A press is filed against the control,\n     * and every control in the starter library is an addressed node of its own, so\n     * `activations` on a band is nearly always zero and always will be: the band\n     * is not the thing anybody pressed. This counts the views whose reader did\n     * something under it, at any depth, from the ancestry a delegated signal\n     * carries.\n     *\n     * **Strictly inside.** A button's own `engaged` is 0 while its `activations`\n     * is 1; its band's is the other way round. The two never double-count the same\n     * node, and a subtree total is the addition.\n     *\n     * **Zero from a sender that does not walk.** A batch whose delegated signals\n     * carry no `within` — synthesised on a server, replayed from a fixture, sent\n     * by a host that turned the walk off — adds nothing here, exactly as a batch\n     * with no view key adds nothing to `views`.\n     */\n    readonly engaged: number;\n    readonly dwellMs: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n};",
+              "signature": "type ReaderTally = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Distinct page views that produced any signal at all about this node. */\n    readonly views: number;\n    /** Distinct page views in which it came into view. The denominator of a funnel. */\n    readonly reached: number;\n    /**\n     * Distinct page views in which a reader used something *inside* this node —\n     * pressed a link or button, filled a field, opened or closed a disclosure.\n     *\n     * The counter regions are reported by, and the only one that needs a signal to\n     * say more than which node it is about. A press is filed against the control,\n     * and every control in the starter library is an addressed node of its own, so\n     * `activations` on a band is nearly always zero and always will be: the band\n     * is not the thing anybody pressed. This counts the views whose reader did\n     * something under it, at any depth, from the ancestry a delegated signal\n     * carries.\n     *\n     * **Strictly inside.** A button's own `engaged` is 0 while its `activations`\n     * is 1; its band's is the other way round. The two never double-count the same\n     * node, and a subtree total is the addition.\n     *\n     * **Zero from a sender that does not walk.** A batch whose delegated signals\n     * carry no `within` — synthesised on a server, replayed from a fixture, sent\n     * by a host that turned the walk off — adds nothing here, exactly as a batch\n     * with no view key adds nothing to `views`.\n     */\n    readonly engaged: number;\n    readonly dwellMs: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /**\n     * Times a form inside this node was submitted and the browser let it go.\n     *\n     * The conversion counter, and the only one that is about a reader finishing\n     * rather than a reader looking. It is an occurrence rather than a view count\n     * for the same reason `activations` is: a reader who submits twice did two\n     * things, and *how many views converted* is a `FunnelPair` ending in\n     * `completed`, which is one row and already answerable.\n     *\n     * Filed against the node the form is — `loom.form` is addressed, so usually\n     * the form itself — never the band above it. The band's number is `engaged`,\n     * credited from the ancestry the signal carries.\n     */\n    readonly completions: number;\n};",
               "truncated": false,
               "summary": "One node at one revision, as every view of it added up."
             },
@@ -8176,7 +8927,7 @@
               "kind": "schema",
               "signature": "const readerSignalSchema: z.ZodDiscriminatedUnion<…>",
               "truncated": false,
-              "summary": "The four kinds."
+              "summary": "The five kinds."
             },
             {
               "name": "ReaderSignal",
@@ -8302,9 +9053,9 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 14,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
           {
@@ -8445,9 +9196,9 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -8505,9 +9256,9 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 14,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 15,
         "widest": false,
         "sharedWith": [
           {
@@ -9039,9 +9790,9 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -9113,9 +9864,9 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []
@@ -9550,9 +10301,9 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1115,
-        "otherDoors": 15,
-        "doorsSharingNothing": 15,
+        "packageNames": 1159,
+        "otherDoors": 16,
+        "doorsSharingNothing": 16,
         "widest": false,
         "sharedWith": [],
         "collisions": []

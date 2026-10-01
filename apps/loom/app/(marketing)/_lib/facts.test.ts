@@ -128,7 +128,7 @@ describe("what the site says about the repository", () => {
   })
 
   it("shows as many kinds of change as there are", () => {
-    expect(statLabelled("kinds of change there are").props["value"]).toBe(
+    expect(statLabelled("kinds of change Loom allows").props["value"]).toBe(
       String(TREE_OPERATIONS.length)
     )
   })
@@ -146,7 +146,7 @@ describe("what the site says about the repository", () => {
     expect(statsOfHome().map((stat) => stat.props["label"])).toEqual([
       "ready-made pieces to build with",
       "decisions written down",
-      "kinds of change there are",
+      "kinds of change Loom allows",
     ])
   })
 })

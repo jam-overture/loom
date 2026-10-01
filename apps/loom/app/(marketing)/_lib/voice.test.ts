@@ -259,7 +259,7 @@ describe("the spelling a reader meets", () => {
  * half a reader sees.
  *
  * **`cost` is deliberately not caught.** `PRODUCT_SURFACES` prices each
- * destination in *attention* — *Costs you a click*, *Costs you an afternoon* —
+ * destination in *attention* — *Takes one click*, *Takes an afternoon* —
  * which is the most useful thing that band says and is not a price.
  */
 const PRICED = new RegExp(

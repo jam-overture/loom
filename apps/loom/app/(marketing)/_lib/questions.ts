@@ -54,18 +54,18 @@ export const siteQuestions = (): readonly SiteQuestion[] => [
   {
     question: "Can the AI write code into my page?",
     answer:
-      "No. It can only use the pieces you handed it, and only set options those pieces already have. The worst it can ask for is something your page already knows how to do.",
+      "No. It can only use the components you registered with Loom, and it can only change settings those components already have. The most it can ask for is something your page already knows how to do.",
     open: true,
   },
   {
     question: "What stops a bad change from landing?",
     answer:
-      "Your rules do. Each request is weighed on how much it moves and whether it can be taken back, then allowed, held for a person, or refused.",
+      "Your rules do. Loom measures how much of the page a change moves and whether it can be undone, then gives one of three answers: go ahead, hold it for a person to approve, or reject it.",
   },
   {
     question: "Is this a page builder?",
     answer:
-      "It is the part a page builder would be built on. No editor to learn, nothing hosted with us — you keep your own components.",
+      "No. It is the layer a page builder would be built on top of. There is no editor to learn and nothing is hosted with us. You keep your own components.",
   },
   {
     question: "What happens when a change is wrong?",
@@ -74,6 +74,6 @@ export const siteQuestions = (): readonly SiteQuestion[] => [
   },
   {
     question: "Do I need an account to use this?",
-    answer: `No. Loom runs inside your own application, and the portal is part of what you put there rather than a service you join. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page is that door on this site's own portal — on a site of yours it would be your list, and you would be on it.`,
+    answer: `No. Loom runs inside your own application, and the portal comes with it rather than being a service you sign up for. ${PORTAL.door} So the ${SIGN_IN_LABEL} button at the top of this page opens this site's own portal. On a site of yours it would be your portal, and your list.`,
   },
 ]

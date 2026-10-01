@@ -4,6 +4,8 @@ import {
   activated,
   activatedIn,
   batchOf,
+  completed,
+  completedIn,
   disclosedIn,
   dwelled,
   nodeId,
@@ -180,6 +182,75 @@ describe("rollUp", () => {
    * The counter a region is reported by. Everything else on a tally is about
    * the node itself, and a band is never the node anybody pressed.
    */
+  /**
+   * The conversion counter (0211). Everything above it counts a reader looking;
+   * this one counts a reader finishing.
+   */
+  describe("completions", () => {
+    it("counts a form let go against the node the form is", () => {
+      const rollup = rollUp([batchOf([completed("signup")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "signup")).toMatchObject({ completions: 1, views: 1 })
+    })
+
+    /**
+     * The double-count that would be permanent if it got in (0158). Occurrences
+     * sum, so two submissions in one view are two completions — and the number
+     * that must *not* move with them is the view count, which is what any rate
+     * is taken over.
+     */
+    it("sums two submissions in one page view without counting the view twice", () => {
+      const rollup = rollUp([
+        batchOf([completed("signup")], { view: viewKey(1) }),
+        batchOf([completed("signup")], { view: viewKey(1) }),
+      ])
+
+      expect(tallyFor(rollup, "signup")).toMatchObject({ completions: 2, views: 1 })
+      expect(rollup.views).toBe(1)
+    })
+
+    /**
+     * The commercial question, and the reason the kind carries an ancestry at
+     * all: *which band converted*. The form's own row says it was submitted;
+     * the band's row says somebody finished something in it.
+     */
+    it("credits the bands the form was the end of, and not the form", () => {
+      const rollup = rollUp([batchOf([completedIn("signup", "pricing", "page")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "signup")).toMatchObject({ completions: 1, engaged: 0 })
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ completions: 0, engaged: 1 })
+      expect(tallyFor(rollup, "page")).toMatchObject({ completions: 0, engaged: 1 })
+    })
+
+    /**
+     * What the kind was approved for: the difference between *they looked at
+     * the pricing band* and *they bought*. A pair ending in `completed` is a
+     * conversion rate, and it needed no new shape — a funnel end already names
+     * a kind.
+     */
+    it("answers a funnel that ends in a completion", () => {
+      const rollup = rollUp(
+        [
+          batchOf([viewed("pricing"), completed("signup")], { view: viewKey(1) }),
+          batchOf([viewed("pricing")], { view: viewKey(2) }),
+        ],
+        {
+          pairs: [
+            { from: { nodeId: nodeId("pricing"), kind: "viewed" }, to: { nodeId: nodeId("signup"), kind: "completed" } },
+          ],
+        }
+      )
+
+      expect(rollup.funnels).toMatchObject([{ reached: 2, converted: 1 }])
+    })
+
+    it("counts nothing for a node nobody submitted", () => {
+      const rollup = rollUp([batchOf([viewed("pricing")], { view: viewKey(1) })])
+
+      expect(tallyFor(rollup, "pricing")).toMatchObject({ completions: 0 })
+    })
+  })
+
   describe("engaged", () => {
     it("credits the regions a press happened inside, and not the region with the press", () => {
       const rollup = rollUp([batchOf([activatedIn("buy", "pricing", "page")], { view: viewKey(1) })])

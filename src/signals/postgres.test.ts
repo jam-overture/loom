@@ -54,6 +54,7 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   activations: 0,
   opens: 0,
   closes: 0,
+  completions: 0,
   ...overrides,
 })
 

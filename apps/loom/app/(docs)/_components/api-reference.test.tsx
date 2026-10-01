@@ -288,6 +288,28 @@ describe("what to install before the import will run", () => {
     expect(band().querySelectorAll("li")).toHaveLength(0)
   })
 
+  /**
+   * The sentence used to name `@jam-overture/loom` whatever door it was on,
+   * which was true of every door that reached it until 1 October. Loom's
+   * second package then gained a door that loads nothing, and the one page in
+   * the reference with nothing to install became the one page telling a reader
+   * the wrong package arrives with it.
+   */
+  it("names the package the door actually ships from, not always the framework", () => {
+    render(
+      <ApiEntryReference
+        entry={{
+          ...needing([]),
+          specifier: "@jam-overture/loom-primitives/compositions",
+        }}
+        prose={noProse}
+      />
+    )
+
+    expect(band().textContent).toContain("@jam-overture/loom-primitives")
+    expect(band().textContent).not.toContain("with @jam-overture/loom itself")
+  })
+
   it("comes before the prose and the list of names, because it can stop a reader", () => {
     const { container } = render(<ApiEntryReference entry={entry} prose={noProse} />)
     const text = container.textContent ?? ""

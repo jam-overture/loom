@@ -80,7 +80,7 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        "You hand over the pieces your site is already built from and say what each one can be told. From then on the AI can arrange those pieces and set those options — and nothing else. It cannot write new code into your page, because code is not a thing a change is allowed to carry."
+        "You give Loom the components your site is already built from, and you say which settings each one accepts. After that the AI can rearrange those components and change those settings. That is all it can do. It cannot write new code into your page, because a change can only ever name a component and its settings."
       ),
       prose(
         ids,
@@ -115,7 +115,7 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
       ),
       prose(
         ids,
-        "The ready-made changes on the front door do not send anything at all: they are worked out on your own server, which is why they still work on a deployment with no model configured.",
+        "The ready-made changes on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
         { tone: "muted" }
       ),
     ]
@@ -159,7 +159,7 @@ const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
       ),
       prose(
         ids,
-        "It is there because a page that adapts should be able to tell whether the change helped, and that is a question about parts of a page rather than about people.",
+        "It is there because a page that adapts should be able to tell whether the change helped. That is a question about parts of a page, not about people.",
         { tone: "muted" }
       ),
     ]
@@ -169,7 +169,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { width: "wide", eyebrow: "Next" }, "Have a look at the rest", [
     prose(
       ids,
-      "The site you are reading is one of these. It is an ordinary application with the package installed, built from the starter pieces anybody gets, and everything you have watched it do it did on the machine it is served from.",
+      "The site you are reading is a Loom application itself. It is an ordinary app with the package installed, built from the starter components anybody gets, and everything you have watched it do happened on the machine serving it.",
       { measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", align: "center", wrap: true }, [

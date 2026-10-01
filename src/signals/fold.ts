@@ -54,6 +54,14 @@ export type ReaderReadings = {
   readonly opens: Readonly<Record<NodeId, number>>
   readonly closes: Readonly<Record<NodeId, number>>
   /**
+   * Times a form inside the node was submitted and the browser let it go.
+   *
+   * Filed against the node the signal names, which for the starter library's
+   * `loom.form` is the form itself. The band it was the end of is in
+   * `engagements`, like every other delegated kind.
+   */
+  readonly completions: Readonly<Record<NodeId, number>>
+  /**
    * Times a reader used something *inside* the node — pressed, followed, filled,
    * opened or closed, at any depth.
    *
@@ -86,6 +94,7 @@ export const EMPTY_READINGS: ReaderReadings = {
   activations: {},
   opens: {},
   closes: {},
+  completions: {},
   engagements: {},
   types: {},
   batches: 0,
@@ -103,7 +112,8 @@ const bumped = (
  * a reading knows exactly as it knows the node's own.
  */
 const withinOf = (signal: ReaderSignal): readonly { nodeId: NodeId; type: PrimitiveType }[] =>
-  (signal.kind === "activated" || signal.kind === "disclosed") && signal.within !== undefined
+  (signal.kind === "activated" || signal.kind === "disclosed" || signal.kind === "completed") &&
+  signal.within !== undefined
     ? signal.within
     : []
 
@@ -121,6 +131,8 @@ const foldSignal = (readings: ReaderReadings, signal: ReaderSignal): ReaderReadi
       signal.kind === "activated" ? bumped(readings.activations, nodeId, 1) : readings.activations,
     opens: signal.kind === "disclosed" && signal.open ? bumped(readings.opens, nodeId, 1) : readings.opens,
     closes: signal.kind === "disclosed" && !signal.open ? bumped(readings.closes, nodeId, 1) : readings.closes,
+    completions:
+      signal.kind === "completed" ? bumped(readings.completions, nodeId, 1) : readings.completions,
     types: {
       ...readings.types,
       ...Object.fromEntries(within.map((region) => [region.nodeId, region.type])),
@@ -156,6 +168,8 @@ export type NodeReading = {
   readonly activations: number
   readonly opens: number
   readonly closes: number
+  /** Times a form inside it was submitted and the browser let it go. */
+  readonly completions: number
   /** Times a reader used something inside it, at any depth. */
   readonly engagements: number
 }
@@ -181,6 +195,7 @@ export const nodeReadingsOf = (readings: ReaderReadings): readonly NodeReading[]
         activations: readings.activations[nodeId] ?? 0,
         opens: readings.opens[nodeId] ?? 0,
         closes: readings.closes[nodeId] ?? 0,
+        completions: readings.completions[nodeId] ?? 0,
         engagements: readings.engagements[nodeId] ?? 0,
       }
     })
