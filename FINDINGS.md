@@ -38505,3 +38505,108 @@ Filed rather than built because the general version is a real piece of work and
 would want deciding rather than assuming: it is the difference between *this
 number is right* and *this number is the one you are looking at*, and the second
 is the property a documentation site actually needs.
+
+---
+## 2026-09-30 — the portal's record screens can be filled with a record that is entirely true, and it took nine minutes and five model calls to prove it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with the same decision
+in it for the maintainer · **Status:** open — this does **not** close
+[29 September's entry](#2026-09-29--the-deployed-portal-has-no-page-with-a-history-so-six-of-its-seven-screens-are-empty-by-construction-and-the-newest-one-cannot-be-photographed-at-all),
+whose subject is the *deployment*. What it removes from that entry is the
+uncertainty: its recommended way out was recommended untried, and it has now
+been run end to end
+
+The 29 September entry set out three honest ways to give the portal's record
+screens something to show, and recommended the second: **a one-off pass through
+the real write path, with the real interpreter, against a real store.** It was
+the right recommendation and nobody had done it, so what it would cost and
+whether it would work were both guesses.
+
+This run did it — locally, against the in-memory store a `next start` holds, in
+order to photograph the screen it built. It is written down here because the
+same script against a real `DATABASE_URL` is exactly the maintainer's option 2,
+and the cost is now measured rather than estimated.
+
+### What it took
+
+A production build, served, and a browser driving the portal's own screens as a
+signed-in reviewer: sign in, open the page, type a sentence into the box that is
+already there, press *Ask Loom*, wait. Nothing was reached into. No store handle,
+no second caller of `portalStore.append`, no fixture, no seeded revision — the
+only code involved is the code a person uses.
+
+| | |
+| --- | --- |
+| sentences typed | **5** |
+| changes Loom applied on its own | 1 |
+| changes it stopped and asked about | **2** |
+| sentences it declined to act on at all | 2 |
+| wall-clock, including the build | about nine minutes |
+| model calls | five, one per sentence |
+
+Every field a reviewer is taught to rely on is true of all three, because all
+three really happened: the utterance is what was typed, the actor is the reviewer
+who was signed in, the confidence is the model's own grade of its own work, and
+the Gate's reason is the rule that actually fired. **That is the whole of the 29
+September argument's objection, answered by not fabricating anything.**
+
+### The one thing that has to be said about the sentences
+
+They were deliberately **vague** — *"I'm not sure about the opening line — maybe
+it should feel warmer, or maybe shorter"* — and that is not a trick, it is the
+mechanism. This deployment's policy lets a `user-instruction` apply on its own up
+to `medium` stakes, and nothing in the seed page can reach `high`: no primitive
+here is protected, and the largest removal available is five parts. So the only
+lever that produces a **held** change is the model's own confidence falling under
+`minimumConfidence` (0.7), and an honest way to lower it is to ask for something
+a person would genuinely be unsure about.
+
+Two of the five fell the other side of `confidenceFloor` (0.3) and were refused
+outright, which is the same mechanism and is worth knowing before anybody plans
+on a fixed number: **a run of this shape is a sampling, not a script.** Three of
+five landed somewhere useful. Ask for six things and expect four.
+
+### What is still the maintainer's
+
+Everything the 29 September entry said. This adds one fact to it — the
+recommended option works, and costs about what a cup of coffee's worth of tokens
+costs — and takes nothing away. Running it against the deployment's real store is
+a write to production data and is not a routine's to make.
+
+---
+## 2026-09-30 — a change that was weighed against an older version of a page cannot be drawn at all, and the version it was weighed against is sitting in the record
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+deliberately not built in `portal-42`, which says so; filed rather than done
+because it is a screen's worth of work and a decision about what a picture is
+allowed to claim
+
+`/portal/pages/[treeId]/proposed/[proposalId]` draws a held change by applying it
+to the page and rendering the result. `applyDelta` refuses a change whose
+`baseRevision` is not the page's, so a **stale** change — one the page has moved
+on from — gets no picture at all. The screen says so in the words the queue card
+already uses (*"This was worked out on an older version of this page… turn it
+down and ask again"*) and shows the page as it stands.
+
+That is correct and it is the weakest screen in the unit, because the picture it
+cannot draw is **sitting in the record one function away.** `_lib/progression.ts`
+already folds a page to any version its record can reach. The version the change
+was weighed against is one of those. So the honest, unbuilt screen is:
+
+> *This was worked out on version 3. Here is what it would have done to version 3
+> — and here is your page now, at version 5.*
+
+Three pictures, two of which are true of a page nobody is being served, which is
+already what this screen is for.
+
+**Why it is a decision and not an afternoon.** A stale change is going to be
+turned down; the reviewer's real question is not *what would this do* but *is it
+worth asking for again.* A picture of what it would have done to a version that
+no longer exists answers the second question and looks exactly like an answer to
+the first. Getting that wrong shows somebody a page that was never served and
+never will be, captioned as though it were on offer — which is the thing this
+whole screen is arranged to avoid.
+
+Two things make it tractable whenever it is taken up: the fold exists, and its
+window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
+happens when the version is too far back to reach.
