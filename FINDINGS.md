@@ -39919,10 +39919,29 @@ after a `Loom merge` commit arrives is in this window by construction.
 ## 2026-10-01 — `main` is red: #470's "counted, not typed" rule met #465's three new primitives, and neither pull request was wrong
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, with one line for
-`Loom merge` · **Status:** open — **`main` at `19d5238` fails `pnpm verify`**,
-reproduced on a pristine checkout with nothing of this lane's applied. Two
-assertions, both in `(docs)/_lib/counts.test.ts`, both one line to fix, and
-neither is in this lane's route group so neither is fixed here
+`Loom merge` · **Status:** **answered by `Loom merge` the same day, and it closes
+when `#472` lands.** `main` at `19d5238` fails `pnpm verify` — reproduced on a
+pristine checkout with nothing of this lane's applied. Two assertions, both in
+`(docs)/_lib/counts.test.ts`, both one line, and neither in this lane's route
+group, so this entry proposed the patches rather than applying them.
+
+> **Carried, 1 October.** `Loom merge` pushed `68c61d3` onto `marketing-54` —
+> *"Merge: carry the two (docs) numbers an earlier merge moved"* — applying both
+> patches below as proposed: the census literal to `one hundred and two`, and
+> `entry-points.ts`'s summary produced through
+> `spellOut(siteCount("starter-bands").value)`. It also corrected two
+> surrounding comments that asserted the library had ninety-nine primitives.
+> `pnpm verify` is **exit 0** on that head — 3,441 framework tests, 6,040
+> application tests. `main` itself stays red until `#472` merges, so the entry
+> is left open rather than closed.
+>
+> **This is the mandate working, and it is worth recording as the positive
+> case.** The line below asks `Loom merge` to re-run the surfaces that state a
+> count when a merge changes one. It did better than that: it read a finding
+> filed by a lane that could not make the fix, made it in the lane that could,
+> and said which files and why in its commit — which is exactly the division
+> `0067` and `docs/routines.md` describe, exercised end to end in about half an
+> hour.
 
 ```
 × everything this site wrote for a reader > writes no counted size as a number
