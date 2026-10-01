@@ -13,7 +13,7 @@ import {
   type TreeOperation,
 } from "@jam-overture/loom"
 
-import { BAND } from "../bands"
+import { MECHANISM_BAND, MECHANISM_SHORT_ANSWERS } from "../bands"
 import { REPOSITORY_URL } from "../site"
 import type { Verdict } from "./record"
 
@@ -136,14 +136,14 @@ const problem: Ask = {
    * let a request through on its own either — so it stops and asks the visitor,
    * which is the middle answer and the one no competitor has.
    */
-  answer: "held",
-  utterance: "Skip the tour. What problem does this actually solve?",
+  answer: "landed",
+  utterance: "Skip ahead. Can I undo a change the AI makes?",
   label: "Get to the point",
   rationale:
-    "This lifts the whole band about what Loom is for to just under the headline and leaves every other band where it was. Nothing is copied and nothing is rewritten: the band under the headline is the one that was further down.",
+    "This moves the band about putting a change back up to just under the headline, and leaves every other band where it was. Nothing is copied and nothing is rewritten. The band now under the headline is the one that was further down.",
   plan: (page) => {
     const opening = openingBand(page)
-    const point = bandAt(page, BAND.problems)
+    const point = bandAt(page, MECHANISM_BAND.puttingItBack)
 
     if (opening === undefined || point === undefined) return undefined
     if (point.index === opening.index + 1) return undefined
@@ -160,15 +160,17 @@ const problem: Ask = {
  */
 const shorter: Ask = {
   id: "shorter",
-  answer: "landed",
-  utterance: "I am in a hurry. Take the questions off the page.",
+  answer: "held",
+  utterance: "I am in a hurry. Cut this down to the essentials.",
   label: "I don't have long",
   rationale:
-    "This takes the whole band of questions away — its heading, all four questions and every answer under them. Everything it removes is carried in the change that reverses it, so putting it back restores each answer word for word rather than writing it again.",
+    "This takes away all four short answers at once, with their headings and every word under them. That is enough of the page in one go that your rules stop and ask a person first. Everything it would remove is carried in the change that reverses it, so putting it back restores each answer word for word.",
   plan: (page) => {
-    const questions = bandAt(page, BAND.questions)
+    const ops = MECHANISM_SHORT_ANSWERS.map((eyebrow) => bandAt(page, eyebrow))
+      .filter((found): found is NonNullable<typeof found> => found !== undefined)
+      .map((found) => ({ op: "remove", nodeId: found.band.id }) as const)
 
-    return questions === undefined ? undefined : [{ op: "remove", nodeId: questions.band.id }]
+    return ops.length === 0 ? undefined : ops
   },
 }
 
@@ -275,14 +277,18 @@ const dropPitch: Ask = {
   id: "drop-pitch",
   /** Refused, and there is no yes that moves it. See the note above. */
   answer: "refused",
-  utterance: "Cut the sales pitch. I only want to see the product.",
-  label: "Cut the pitch",
+  utterance: "Hide the menu. I want to read this without distractions.",
+  label: "Take the menu away",
   rationale:
-    "This takes away the whole band about what Loom is for, and the four things under it. What it destroys is one of the two things this site's rules protect, which is a fact about the change rather than about who asked for it.",
+    "This would remove the menu at the top of the page. The way out of a page is one of the things this site's rules protect, so the answer is no. That is a fact about the change, not about who asked for it, and there is no button that overrides it.",
   plan: (page) => {
-    const point = bandAt(page, BAND.problems)
+    const menu = page.root.children.find(
+      (child) => child.kind === "element" && child.type === "loom.nav"
+    )
 
-    return point === undefined ? undefined : [{ op: "remove", nodeId: point.band.id }]
+    return menu === undefined || menu.kind !== "element"
+      ? undefined
+      : [{ op: "remove", nodeId: menu.id }]
   },
 }
 

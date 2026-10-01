@@ -27,7 +27,7 @@ import { siteRegistry } from "./registry"
  *
  * This was `["insert", "remove", "move", "configure"] as const`, spelled out
  * here. That was already better than a digit and it was still a promise rather
- * than a fact: the page's "kinds of change there are" counted a list this file
+ * than a fact: the page's "kinds of change Loom allows" counted a list this file
  * kept, so the number could only be right for as long as somebody remembered to
  * edit two repositories' worth of meaning in step.
  *

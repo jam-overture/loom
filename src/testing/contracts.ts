@@ -4,7 +4,9 @@
  *
  * A `TreeStore`, a `HoldStore` and a `TelemetryJournal` are seams: Loom ships
  * an in-memory implementation of each and a Postgres one, and a host is
- * expected to be able to write a third. What it cannot do from outside this
+ * expected to be able to write a third. A `ModelClient` is the same kind of
+ * thing one step further out — Loom ships *one* implementation of it, and 0005
+ * made even that one opt-in so a host could bring its own. What it cannot do from outside this
  * repository is find out whether the third one is *right*. The promises are not
  * in the type — an append is ordered, a hold is exclusive, a journal is
  * append-only — and a host discovering each of them from a production incident
@@ -29,6 +31,17 @@
  */
 
 export { describeHoldStoreContract, heldProposalFixture } from "./hold-contract.js"
+
+export {
+  CONTRACT_REPLY,
+  CONTRACT_SERVED_BY,
+  contractRequest,
+  describeModelClientContract,
+  MODEL_SITUATIONS,
+  type ModelClientContract,
+  type ModelSituation,
+  type ModelSituationClient,
+} from "./model-contract.js"
 
 export { describeTelemetryJournalContract, sampleEpisode } from "./journal-contract.js"
 

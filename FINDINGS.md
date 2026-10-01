@@ -264,6 +264,97 @@ of how many are open at once.
 allocated at merge rather than at write, a per-lane block, a check in
 `decisions:index` that reads open branches — and all three are the maintainer's
 call about a convention rather than a lane's about a file.
+## 2026-10-01 — `ModelEffort` is a five-level scale borrowed from one vendor, and three adapters will each have to invent a mapping
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`, pending a
+maintainer decision · **Status:** open — **nothing is broken; this blocks the
+second adapter rather than anything shipping today**
+
+The maintainer asked on 30 September for out-of-the-box adapters beside
+Anthropic — OpenAI, Gemini and Grok were the named candidates.
+[0209](decisions/0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md)
+lands the suite that makes a second adapter checkable. This is the question it
+deliberately did **not** answer.
+
+`ModelRequest.effort` is `low | medium | high | xhigh | max`. Five levels,
+matching one vendor's vocabulary, and the Anthropic adapter passes the value
+straight through. Providers expose reasoning effort on different scales with
+different granularity, so every new adapter has to map — and a mapping that
+silently rounds means a deployment asked for one amount of thinking and got
+another, invisibly, at **the one step where being wrong is expensive**: a
+plausible-but-wrong delta passes through a Gate that trusts the confidence the
+proposer reported (0005, 0007).
+
+Three shapes, and the choice is the maintainer's because it is about what Loom
+promises rather than about any vendor:
+
+| | what it costs |
+| --- | --- |
+| **keep five, adapters map** | every adapter rounds, differently, and `high` means something different per deployment |
+| **narrow to what every vendor can honour exactly** | a real loss of resolution on the vendor that has five, and a breaking change to `ModelRequest` |
+| **keep five, make the rounding reportable** | honest, and the only one that needs new surface — a completion would have to say what effort was actually used, the way `servedBy` already says which model actually answered |
+
+**The third is the one I would build**, and the precedent is already in the
+record: 0005 decided that the model which served a request is *recorded rather
+than assumed*, for exactly this reason. Effort is the same kind of fact and is
+currently assumed.
+
+0209's contract deliberately asserts nothing about effort, so it does not
+prejudge this.
+
+---
+## 2026-10-01 — no provider credentials are present in this environment, including the one the brief says is there
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **a limit on what any run can verify, not a defect**
+
+Checked on 1 October, by presence and never by value: `ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY` and
+`GROK_API_KEY` are **all absent**. The routine brief states `ANTHROPIC_API_KEY`
+is in the environment; it is not, in this session.
+
+Nothing fails because of it — 0005 built the live smoke test to skip cleanly
+without a key, and it does. What is lost is the one thing that test exists for,
+in 0005's own words: *"proof that the schema we hand a real model is one a real
+model can satisfy, which no fixture can establish."*
+
+**This is the gating fact for the adapter work**, and it is worth stating
+plainly before anybody writes three of them. `schema.ts` emits `const` 25 times
+and `anyOf` 3 times inside closed objects, and structured-output support differs
+per provider and per mode. Whether a given service accepts that schema is
+measurable and is **not** inferable — this repository's own method is to measure
+it, which is why `GRAMMAR_BUDGET_BYTES` carries a date and a measured band
+rather than a guess.
+
+So an adapter written here can be unit-tested against 0209's contract and
+cannot be shown to work. Worth knowing before the work is planned, not after.
+
+Two things that would help, in order: a key for one non-Anthropic provider in
+the environment, and `ANTHROPIC_API_KEY` restored so the existing smoke test
+runs again at all.
+
+---
+## 2026-10-01 — Grok may not be a third adapter, and that is worth five minutes before it is two modules
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — unverified, and cheap to verify once there is a key
+
+xAI's API is widely described as OpenAI-compatible at the chat-completions
+endpoint. If that holds for the **structured-output** path specifically — which
+is the only part of it Loom uses, and the part most likely to differ — then
+Grok is not a second module beside an OpenAI adapter. It is the same adapter
+with a different base URL and model id, which makes it a line in
+`docs/deployment.md` and a config rather than an entry point in `package.json`.
+
+Filed rather than assumed, because the failure mode runs both ways: building two
+modules that are one is waste, and assuming one module covers two services is a
+host finding out in production. The 27 September egress finding means no run here
+can check it against the live service either way.
+
+The order that answers it cheapest: build the OpenAI adapter first, point it at
+xAI's base URL with a Grok model id, and run 0209's contract plus one live call.
+One of those two outcomes is a config line and the other is an honest second
+module.
 
 ---
 ## 2026-09-30 — two lesson files edited from outside the lane, both forced, and one of them changed a paragraph rather than a number
@@ -38895,6 +38986,92 @@ number is right* and *this number is the one you are looking at*, and the second
 is the property a documentation site actually needs.
 
 ---
+## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**not blocking**, and recommended as small. Nothing was prevented; the numbers
+in today's report are real
+
+Every unit this lane has shipped for a fortnight is argued on a measurement:
+*the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
+furthest scroll is 623 against a card top of 740*. Those numbers decide which
+unit is worth building and whether it worked, and **not one of them comes from
+anything the repository contains.**
+
+`pnpm shoot` takes the lane where it needs to go — the `do` list drives the two
+presses, `before` reaches a signed-in screen, `start` says what the browser
+arrived with — and then it can only photograph. *What a shot list still cannot
+do* names it: **read anything back out of the page**
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md),
+[0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md),
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)).
+
+So the measuring gets done by a `playwright-core` script written fresh in a
+scratch directory, run once, and deleted with the container. This run wrote
+one; the run before it wrote one; the run before that wrote one. Three scripts,
+three sessions, one shape, none of them in the repository and none of them
+reviewable.
+
+**What this run would have wanted, and what it costs to not have.** The unit
+today is *the payoff card fits its frame* — 975px to 765px in an 857px rail,
+and **Put it back** going from 23px below the bottom edge to 186px above it.
+There is a test that the reasoning folds. **There is nothing that can fail if
+the card grows back past 857px**, because nothing in this repository can see a
+box. The next run that adds two lines to that card puts the demo's closing
+argument back under the fold and the suite stays green.
+
+### What would close it, and why it is not an assertion
+
+The harness already prints a measurement it took off the page — `scrollWidth`
+against `innerWidth`, on every shot, which is how a page wider than the phone
+says so. This asks for one more of exactly that kind:
+
+```json
+{ "path": "/demo", "out": "…", "measure": ["aside", "aside li[id]", "text=Put it back"] }
+```
+
+— and a printed line per selector giving its box and whether it is inside the
+viewport, beside the `scrollWidth` line that is already there.
+
+**It prints; it does not assert**, which is the line 0159 draws and the reason
+this is worth asking for rather than arguing about. The harness stays an
+instrument, the judgement stays in the report, and what changes is that the
+number in the report was produced by something the maintainer can read.
+
+`tools/screenshot/` is `Loom daily build`'s, which is why this is filed rather
+than done.
+
+---
+## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-34-put-it-back-in-view`, and **small**
+
+That run made the payoff card fold its reasoning, because the visitor had
+already read it in order to press **Apply this change**. The fold works and the
+card now fits its frame. **The line it folds under does not.**
+
+`the-reasoning.tsx` builds one summary for every folded card:
+
+> `{brief} · and the rule that read it`
+
+which on the payoff card reads **"Some risk, and you could undo it. · and the
+rule that read it"**. Every word is true and the tense is wrong: the visitor is
+no longer weighing whether to accept some risk, they accepted it one press ago,
+and the summary is the answer to *what did I just agree to* rather than *what
+am I being asked*. It is also the only line on that card written as though the
+decision were still open, three lines above **You said yes**.
+
+This was not fixed in the run that created it because the summary is shared by
+every folded card in the rail — the read cards below, the moved-past holds, and
+now the answered one — and changing it for all of them to suit one is the
+wrong trade. What it wants is a second string chosen by the same reading that
+chose the fold, which is a copy decision worth making deliberately rather than
+at the end of a run about geometry.
+
+Not blocking, and nobody is misled: the words are accurate, they are one click
+from the full working, and the card around them says plainly that the change
+landed and that the visitor is what landed it.
 ## 2026-09-30 — the portal's record screens can be filled with a record that is entirely true, and it took nine minutes and five model calls to prove it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with the same decision
@@ -38998,3 +39175,104 @@ whole screen is arranged to avoid.
 Two things make it tractable whenever it is taken up: the fold exists, and its
 window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
+
+---
+## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — measured, not urgent, and not something the move could avoid
+
+The maintainer moved the five choices off the front door and onto
+`/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
+and **refused** are all still reachable there, which had to be measured rather
+than assumed, because two of the five were bound to what the *front door*
+protects and that page has no `loom.mosaic`.
+
+What did not survive is one step further in. Measured across all five choices on
+the new page, each with and without the visitor's yes:
+
+| choice | the change | its undo |
+| --- | --- | --- |
+| `problem` | landed | landed |
+| `shorter` | **held** | landed |
+| `proof` | landed | landed |
+| `calmer` | landed | landed |
+| `drop-pitch` | **refused** | none — nothing landed |
+
+**No undo on this page is held.** On the front door one was: the held request
+moved a protected band, so putting it back moved the same protected band again,
+and the rules held the undo on exactly the same grounds. Here the held request
+*removes* four bands, and putting four bands back is an insert — which the rules
+let through on its own.
+
+### Why this is worth writing down rather than shrugging at
+
+It is a claim the site makes. `undo.test.ts` asserted it in as many words until
+today: *"Nothing here exempts an undo to make the demonstration tidier, and this
+is the assertion that would fail if anything ever did."* Nothing exempted it.
+The arrangement simply stopped producing an example, and the assertion had to be
+rewritten to what is now true — that the undo is judged by the same rules,
+carries its own record and restores the page exactly.
+
+**The property still holds of the system.** An undo is a change (0032) and goes
+through the same Gate; it is only these five requests, against this page, that
+cannot show it. That distinction is the whole reason this is a finding and not a
+bug: nothing is broken, and a reader can no longer watch the most interesting
+case.
+
+### What would close it
+
+A sixth choice whose undo the rules hold — the shape that works is a request
+that **moves** something protected rather than removing something large, because
+the inverse of a move is another move and inherits the same weight. `/how-it-works`
+has two protected nodes, the menu and the footer, and moving either is a worse
+demonstration than the one it would replace.
+
+The honest alternative is to stop claiming it. Nothing on the page currently
+promises a held undo in words, so there is no copy to correct today; this entry
+exists so that whoever writes that copy knows it is not demonstrable here.
+
+---
+## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — **nothing is broken; this is why a sweep was needed at all**
+
+`voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
+no more than 35 words in a field a reader scans. Both run over
+`SCANNED_PROPS` — `title`, `body`, `label`, `caption`, `value`, `eyebrow` —
+which are the props a primitive is given.
+
+**The site's paragraphs are not props.** They are text nodes built by `prose()`,
+and no voice rule reads them. Of the 38 strings rewritten in today's sweep,
+the great majority were prose, including every one of the four worst sentences
+the maintainer quoted back on 1 October.
+
+### The part that is not just style
+
+One of those paragraphs was **factually stale**, and had been for a day:
+
+> *"The ready-made changes on the front door do not send anything at all."*
+
+The band it names moved to `/how-it-works` on 30 September. The band's own
+tests moved with it. This sentence was on a third page, naming the band in
+prose, and nothing in the repository connects those two facts. A reader
+following it lands on a page with no such thing on it.
+
+### Why extending the rule is not obviously right
+
+The 35-word limit is a *scanning* rule and would be wrong on a paragraph — a
+body paragraph is allowed to be a paragraph. The em-dash rule would extend
+cleanly today: after this sweep there is exactly **one em dash left in rendered
+copy site-wide**, and it is in the maintainer's own hero lead. A rule that has
+to name one sentence as an exception is a rule that will be edited rather than
+obeyed, so it was not written today.
+
+### What would actually close it
+
+The staleness is the catchable half, and it is not a voice problem. A paragraph
+that names a page (*"the front door"*, *"the How it works page"*) is making a
+claim about where something lives, and `SITE_ROUTES` already knows where things
+live. A check that reads rendered prose for the site's own page names and holds
+them against the page that actually carries the band would have caught this one
+the hour it broke.
