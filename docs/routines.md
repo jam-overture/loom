@@ -92,7 +92,8 @@ Each routine owns one part of the repository and does not edit another's.
 
 | Routine | Owns |
 | --- | --- |
-| Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the application shell |
+| Framework (`Loom daily build`) | `src/` **except `src/primitives/` and `src/signals/`**, and the application shell |
+| Signals (`Loom signals`) | `src/signals/`, the reader-signal intake under `apps/loom/app/`, and `docs/signals.md` |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
 | Portal (`Loom portal`) | `apps/loom/app/(portal)/` |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
