@@ -24,33 +24,104 @@ import { describe, expect, it } from "vitest"
 const ROOT = process.cwd()
 const DIST = join(ROOT, "dist")
 
-/** One export per entry point, chosen because a broken re-export chain leaves the module loadable but empty. */
-const ENTRY_POINTS: readonly (readonly [string, string])[] = [
-  ["index.js", "createTree"],
-  ["render/index.js", "renderRequest"],
-  ["sdk/index.js", "definePrimitive"],
-  ["cli/index.js", "runCli"],
-  ["store/index.js", "memoryTreeStore"],
-  ["write/index.js", "commitIntent"],
-  ["store/postgres.js", "postgresTreeStore"],
-  ["signals/index.js", "parseReaderSignalBatch"],
-  ["signals/broadcast.js", "broadcastReaderSignals"],
-  ["telemetry/index.js", "episodesOf"],
-  ["testing/index.js", "sampleTree"],
-]
+/**
+ * Every door this repository resolves, read off the manifest rather than
+ * listed here.
+ *
+ * It used to be a hand-kept list of eleven files, and five of the sixteen doors
+ * were not on it — `./anthropic`, `./primitives`, `./signals/postgres`,
+ * `./telemetry/postgres`, and the library's compositions door the day it was
+ * added. Nothing could say so, because the list was its own authority: the
+ * check named *loads every entry point* was loading the ones somebody had
+ * remembered. That is the defect class this repository has now recorded four
+ * times — a check derived from the list it checks cannot see the list grow —
+ * and the fix is the one the class asks for, which is to derive the set from
+ * the thing that decides it.
+ */
+const manifestExports = (): Readonly<Record<string, { readonly default: string }>> =>
+  (
+    JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
+      readonly exports: Record<string, { readonly default: string }>
+    }
+  ).exports
+
+const doors = (): readonly string[] => Object.keys(manifestExports())
+
+/** The file a door opens, which is the only condition `exports` here ever carries. */
+const targetOf = (door: string): string => {
+  const condition = manifestExports()[door]
+  if (condition === undefined) throw new Error(`no such door: ${door}`)
+
+  return join(ROOT, condition.default)
+}
+
+/**
+ * One export per door, chosen because a broken re-export chain leaves the
+ * module loadable but empty.
+ *
+ * Not a list of doors — a lookup *for* them. A door with no entry here fails
+ * the first test below rather than going unchecked, which is the whole
+ * difference between this and what it replaced.
+ */
+const NAMED_EXPORT: Readonly<Record<string, string>> = {
+  ".": "createTree",
+  "./anthropic": "anthropicModelClient",
+  "./react": "renderRequest",
+  "./primitives": "STARTER_PRIMITIVES",
+  "./primitives/compositions": "heroBand",
+  "./sdk": "definePrimitive",
+  "./cli": "runCli",
+  "./store": "memoryTreeStore",
+  "./write": "commitIntent",
+  "./postgres": "postgresTreeStore",
+  "./signals": "parseReaderSignalBatch",
+  "./signals/broadcast": "broadcastReaderSignals",
+  "./signals/postgres": "postgresReaderSignalJournal",
+  "./telemetry": "episodesOf",
+  "./telemetry/postgres": "postgresTelemetryJournal",
+  "./testing": "sampleTree",
+}
+
+/**
+ * The one door that cannot be imported the way the others are, with the reason
+ * written beside it.
+ *
+ * An exemption is a sentence somebody has to write, so that a door is never
+ * skipped because adding it was inconvenient. `./testing/contracts` has the
+ * module-graph walk further down instead, which is what the imports are really
+ * buying.
+ */
+const NOT_IMPORTABLE: Readonly<Record<string, string>> = {
+  "./testing/contracts": "vitest throws on import outside a test run, by design",
+}
 
 describe("the compiled package", () => {
   it("has been built before the suite runs", () => {
     expect(existsSync(DIST)).toBe(true)
   })
 
+  it("accounts for every door the manifest offers, and offers no door the manifest does not", () => {
+    const accounted = [...Object.keys(NAMED_EXPORT), ...Object.keys(NOT_IMPORTABLE)].sort()
+
+    expect(accounted).toEqual([...doors()].sort())
+  })
+
   it("loads every entry point under plain Node, with its exports intact", () => {
-    const script = ENTRY_POINTS.map(
-      ([file, named], index) =>
-        `import * as entry${index} from ${JSON.stringify(join(DIST, file))};` +
-        `if (typeof entry${index}[${JSON.stringify(named)}] !== "function") ` +
-        `throw new Error(${JSON.stringify(`${file} is missing ${named}`)});`
-    ).join("\n")
+    const script = doors()
+      .filter((door) => !(door in NOT_IMPORTABLE))
+      .map((door, index) => {
+        const named = NAMED_EXPORT[door]
+        if (named === undefined) throw new Error(`${door} has no export named in NAMED_EXPORT`)
+
+        const file = targetOf(door)
+
+        return (
+          `import * as entry${index} from ${JSON.stringify(file)};` +
+          `if (entry${index}[${JSON.stringify(named)}] === undefined) ` +
+          `throw new Error(${JSON.stringify(`${door} is missing ${named}`)});`
+        )
+      })
+      .join("\n")
 
     const run = (): string =>
       execFileSync(process.execPath, ["--input-type=module", "-e", `${script}\nconsole.log("ok")`], {

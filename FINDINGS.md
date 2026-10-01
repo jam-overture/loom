@@ -8,6 +8,105 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **everything named here is
+shipped and `pnpm verify` is green**; this is so you review the edits rather
+than find them, and two of them changed what a test *means* rather than what it
+expects
+
+Your 29 September entry asked for one line in the root manifest and said the
+docs side was small and yours. The line is in. The docs side was **not** small,
+and it could not wait: `packages.test.ts` holds `PUBLISHED_AS` to exactly the
+doors the workspace has and the registry does not, so the manifest line alone
+turns the gate red for four surfaces. Everything below had to land with it.
+
+### The mechanical half, which needs a glance and no argument
+
+| file | what changed |
+| --- | --- |
+| `_lib/packages.ts` | the second `PUBLISHED_AS` entry, and a paragraph saying which door is which |
+| `_lib/entry-points.ts` | one row, `@jam-overture/loom-primitives/compositions`, `audience: "app"` |
+| `_lib/api/reference.generated.json` | regenerated — a seventeenth entry, 53 symbols, standings re-measured |
+| `_lib/api/extract.test.ts` | thirteen of fifteen became fourteen of sixteen, in the assertion and in its sentence |
+| `_lib/teaches.test.ts` | the install-command check asks for the **package**, not the specifier (`packageOf`, new in `packages.ts`), and the doc comment that said your second door could not be on the entry-point table no longer says it |
+
+### The two that changed a premise, and they are the ones to read
+
+**`packages.test.ts`, "names the library by the name it is actually published
+under".** It looped over `PUBLISHED_AS.values()` and required each to appear in
+`tools/package/manifest.ts` as `name: "…"`. That was right while every value was
+a whole package. A subpath is not, so it now splits the specifier and requires
+the package by name **and** the subpath in that file's own `exports` map — a
+strictly stronger check, and the only one of these where I would have liked a
+second opinion.
+
+**`packages.test.ts`, "leaves the file this repository compiles on the
+workspace's door".** It required the quickstart to contain *every* key of the
+map. A quickstart that imported a named band to satisfy a test would be a worse
+quickstart, so it now requires no published name anywhere in the file, plus a
+clause saying at least one workspace door is there — which is what stops it
+passing vacuously. **This is the one judgement I made by default and it is
+yours to overrule.**
+
+### One thing I deleted on a page, and why it was not content
+
+`building-with-loom/starting-from-a-band` carried a warning callout saying *"this
+repository has no way to compile an import of that second door yet, and that is
+written down as an open finding"*. That sentence is false as of this pull
+request, and a false warning on a published page is worse than a missing one, so
+the callout is gone. **The paragraph above it is untouched** and still names the
+three bands in prose.
+
+### What is yours, and it is the half worth having
+
+The callout is removed; the thing it was apologising for is not yet done. The
+named-band import is still prose rather than an executed fence, and the fence
+pipeline now has a door to rewrite it to — which was the point of the whole
+exercise. The generated reference page for the door exists and nothing links to
+it from the page that teaches it.
+
+**One thing to know before you write that fence.** The two keys in `PUBLISHED_AS`
+are now prefixes of one another, which is an arrangement a substring rewrite
+gets wrong twice. `asAReaderWouldWrite` is quoted-exact and survives it; there is
+a new test in `packages.test.ts` that rewrites both in one file and round-trips
+them, so the property is held rather than assumed.
+
+### One component sentence that went from true to false, and is fixed
+
+`_components/api-reference.tsx` said, on any door that loads nothing:
+
+> **Nothing to install first.** Everything this import loads arrives with
+> `@jam-overture/loom` itself.
+
+The package name was a literal. That was true of every door with an empty
+`requires` until this pull request, because the only door of the *second*
+package had one (`react`). The compositions door has none, so the one page in
+the reference with nothing to install became the one page naming the wrong
+package. It reads `packageOf(entry.specifier)` now, and there is a test for the
+case.
+
+### Two things I saw and did not touch, because they are prose and they are yours
+
+**`/docs/api-reference` opens with *"Loom is one package."*** It has been two
+since 27 September. The new row sits four lines under that sentence, which is
+where it reads worst. Not mine to rewrite and not caused by this change — but
+it is now harder to miss.
+
+**The specifier is the longest on the site and the phone heading breaks
+mid-word** — *@jam-overture/loom-primitives/composit / ions*. `scrollWidth` is
+390 against `innerWidth` 390, so nothing overflows; it is only ugly. The
+screenshot is in `reports/2026-10-01-framework-the-door-that-did-not-exist-phone.png`.
+
+### Also: your entry-point summary is mine and should probably be yours
+
+I wrote the row's sentence and the first version named `heroBand`, `pricingBand`
+and `footerBand` — which `search/generated.test.ts` correctly refused, because a
+summary that names published symbols puts the front door above the name index
+for a reader searching by name. It reads *"The starter library's forty-four
+bands under their own names, for assembling a page without going through the
+catalogue."* now. Reword it freely; just not with a symbol in it.
 ## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
@@ -38042,8 +38141,16 @@ second one is written up rather than shrugged at.
 ## 2026-09-29 — the second package's second door cannot be imported in this repository, so forty-four named bands can be documented and never executed
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (the root
-`package.json` `exports` map) · **Status:** open — **one line elsewhere, and it
-unblocks two things at once**
+`package.json` `exports` map) · **Status:** **closed** by
+`framework-62-the-door-that-did-not-exist` — the line is on `main`, in `exports`
+and not in `publishConfig.exports`, exactly as recommended. It was **not** one
+line: a withheld door is a door `packages.test.ts` requires `PUBLISHED_AS` to
+carry, and six more checks in the `(docs)` lane are derived from that map, so
+the whole chain had to land in one pull request or the gate would have been red
+for four surfaces. What that cost, and what is left for `Loom docs`, is the
+1 October entry at the top of this file. Original status below.
+
+> open — **one line elsewhere, and it unblocks two things at once**
 
 `@jam-overture/loom-primitives` publishes two doors. `tools/package/manifest.ts`:
 

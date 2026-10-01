@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest"
 import { REPOSITORY_ROOT } from "./architecture/source"
 import { apiEntries } from "./api/reference"
 import { entryPoints } from "./entry-points"
-import { PUBLISHED_AS } from "./packages"
+import { packageOf, PUBLISHED_AS } from "./packages"
 import { readQuickstartSource } from "./quickstart/program"
 
 /**
@@ -158,7 +158,7 @@ describe("what the site tells a reader to import", () => {
     expect(command).toContain("@jam-overture/loom")
 
     for (const published of PUBLISHED_AS.values()) {
-      expect(command, published).toContain(published)
+      expect(command, published).toContain(packageOf(published))
     }
   })
 })
@@ -231,12 +231,16 @@ describe("the doors of the separately published library", () => {
   })
 
   /**
-   * **Named somewhere a reader will meet it.** Not necessarily on the
-   * entry-point table: that table's set is derived from the framework's manifest
-   * and a page of the generated reference exists for each of its rows, and the
-   * library's second door has neither. Prose naming it is what this site can
-   * honestly offer today, and it is a great deal more than nothing — which is
-   * what it offered before.
+   * **Named somewhere a reader will meet it**, which is deliberately weaker
+   * than *on the entry-point table*, because that table's set is derived from
+   * the framework's manifest and a door the framework does not resolve cannot
+   * be on it.
+   *
+   * Both of the library's doors clear the stronger bar today — the framework
+   * gained `./primitives/compositions` on 1 October, so the second one is a
+   * row and a generated reference page like any other. A third door of the
+   * library's would not, until the same line is added for it, and this is the
+   * check that would still hold it to something.
    */
   it("names every one of them somewhere on the site", () => {
     const everything = [

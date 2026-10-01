@@ -13,6 +13,7 @@ import {
   type ApiRequirement,
   type ApiSymbol,
 } from "@/app/(docs)/_lib/api/model"
+import { packageOf } from "@/app/(docs)/_lib/packages"
 
 /**
  * The reference, rendered.
@@ -298,7 +299,8 @@ const BeforeItWillRun = ({ entry }: { readonly entry: ApiEntry }) => {
           <span className="font-semibold">Nothing to install first.</span>{" "}
           <span className="text-ink-muted">
             Everything this import loads arrives with{" "}
-            <code className="code-chip font-mono text-xs">@jam-overture/loom</code> itself.
+            <code className="code-chip font-mono text-xs">{packageOf(entry.specifier)}</code>{" "}
+            itself.
           </span>
         </p>
       ) : null}
