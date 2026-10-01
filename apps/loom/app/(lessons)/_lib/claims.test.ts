@@ -230,3 +230,82 @@ describe("what a lesson says about a list in the runtime", () => {
     }
   })
 })
+
+/**
+ * A sentence that counts a list a few lines under it — and the one case in this
+ * file where the second copy can be *derived* rather than registered.
+ *
+ * `lessons/README.md` said *reading one there differs from reading the file in
+ * exactly three ways* above a list of four, and had said it since the fourth was
+ * added. Every check in this repository was green throughout: no runtime list is
+ * being counted, so the registry above has nothing to hold it against; the count
+ * is of a list in the same document, four lines below the number.
+ *
+ * Which makes it lesson 28's first remedy rather than its third. There is no
+ * author to ask and nothing to register — the second copy already exists, as the
+ * list itself, and what was missing was the comparison. So this reads the number
+ * word out of the sentence, counts the items in the list that follows it, and
+ * requires them to agree. Adding a way, removing one, or rewording the sentence
+ * all fail here, and the obligation is discharged by a program rather than by
+ * somebody remembering, which is the whole argument for deriving.
+ *
+ * It is deliberately not general. A pattern that went looking for every *N
+ * things* in the course would find the ones that count a list, the ones that
+ * count something in `src/` — that is the registry above — and the ones that
+ * count nothing at all, and would have to guess between them. Each entry here is
+ * a sentence somebody decided is counting the list under it.
+ */
+const SELF_COUNTED: readonly {
+  readonly file: string
+  readonly what: string
+  readonly phrase: RegExp
+}[] = [
+  {
+    file: "README.md",
+    what: "the ways a lesson on the surface differs from the lesson in this directory",
+    phrase: /differs from reading the file in exactly (\w+) ways/,
+  },
+]
+
+/**
+ * The top-level items of the markdown list that starts after a line, counted.
+ *
+ * A continuation line is indented and an item is not, which is the only
+ * distinction needed here: the lists this is pointed at are bulleted, one
+ * paragraph deep, and end at the first line that is neither blank, indented, nor
+ * a bullet.
+ */
+const itemsAfter = (lines: readonly string[], from: number): number => {
+  const start = lines.findIndex((line, index) => index > from && line.startsWith("- "))
+
+  if (start < 0) return 0
+
+  let items = 0
+
+  for (const line of lines.slice(start)) {
+    if (line.startsWith("- ")) items += 1
+    else if (line !== "" && !line.startsWith("  ")) break
+  }
+
+  return items
+}
+
+describe("a sentence that counts the list under it", () => {
+  it.each(SELF_COUNTED)("agrees with the list in $file, counting $what", ({ file, what, phrase }) => {
+    const text = COURSE.get(file)
+
+    expect(text, `${file} is not in ${COURSE_DIR}`).toBeDefined()
+
+    const lines = (text ?? "").split("\n")
+    const at = lines.findIndex((line) => phrase.test(line))
+
+    expect(at, `${file} no longer contains the sentence counting ${what}`).toBeGreaterThanOrEqual(0)
+
+    const word = phrase.exec(lines[at] ?? "")?.[1] ?? ""
+
+    expect(
+      word.toLowerCase(),
+      `${file} counts ${what} and the list under it has ${itemsAfter(lines, at)} items`
+    ).toBe(wordFor(itemsAfter(lines, at)))
+  })
+})

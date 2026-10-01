@@ -36,6 +36,7 @@ const RECORD: Progress = {
     },
   },
   predictions: {},
+  explanations: {},
   corrections: [
     {
       set: "set-a",
