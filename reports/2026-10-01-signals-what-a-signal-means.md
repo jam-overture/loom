@@ -1,7 +1,14 @@
 # Reader signals — what a signal means, joined to the tree that was read
 
 **Routine:** `Loom signals` · **Date:** 1 October 2026 · **Branch:**
-`signals-02-what-a-signal-means`
+`signals-02-what-a-signal-means` · **Pull request:** #477
+
+**Preview:** https://loom-git-signals-02-what-a-s-d46936-jpizzolato36-6341s-projects.vercel.app
+— Vercel reports it Ready. **It is not visited from this session**, because
+`*.vercel.app` is denied by the environment's egress policy (`Loom portal`,
+27 September), and nothing in this change renders anything a page would show
+anyway: it is a server-side join with no surface of its own until the portal
+builds step 4.
 
 ## What I completed
 
