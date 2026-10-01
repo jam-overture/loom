@@ -91,6 +91,12 @@ the verdict without writing anything (0021). What is printed is its answer.
 
 All prefixed `reports/2026-10-01-demo-what-it-will-say`.
 
+**Every `after` picture here is byte-identical to a fresh shot taken from the
+final committed build**, re-run after the gate went green: the four `md5`s
+match. They are pictures of the code in this pull request and not of an
+intermediate one. The question frame is identical across **three** separately
+built commits — `main`'s, this branch's first build, and the final one.
+
 ### Measured, on the two production builds
 
 Driven and the boxes read off the page, at 1280 × 900:
@@ -262,7 +268,40 @@ that proves the verdict dies with the *change* rather than with the *ask*.
 ### The defect matrix
 
 Each defect restored in turn against this commit, the demo lane run against it,
-and the lane restored with `git checkout` between rows.
+and the lane restored between rows. Baseline **716 passed** (696 on
+30 September; +20).
+
+| defect restored | caught |
+| --- | --- |
+| the page never asks the Gate — `whatItWillSay` handed no preset | **0** |
+| the prop is dropped on the way to the panel | **0** |
+| the verdict renders outside the form, reordered away from its button | **1** |
+| the hedge never gives way — the brief sentence is never used | **1** |
+| the hedge is always dropped — the fuller sentence is lost | **4** |
+| held and applied swap their sentences, so the verdict lies | **4** |
+| an ask that reached no verdict gets one invented | **2** |
+| the read path judges under the shipped default instead of `demoPolicy` | **2** |
+| the read path judges at the wrong base revision | **0** |
+
+**Six of nine caught, and the three that were not are the honest part.**
+
+**Two of them are `page.tsx`**, and they are this lane's open finding of
+29 September arriving in a new place: the file that makes the call and passes
+the prop is an `async` Server Component, and no `vitest` run can mount one.
+Delete either line and the verdict silently vanishes from the arrival screen
+with 716 green. The panel's own behaviour is held on both branches, and the
+join is not held by anything. This run added a sixth prop to that list rather
+than closing it, which the report says above and the finding already asks for.
+
+**The third is a field that turns out not to be load-bearing.** Handing
+`composeChange` a `baseRevision` one past the tree's own changes nothing: the
+read path never consults it, because it is the *write* path (`commitIntent`)
+that refuses a delta aimed at a page that has moved. So the field is carried
+for the sake of matching the intent `actions.ts` writes, field for field — which
+is why it is there and why it should stay — and a wrong value in it is silent.
+Worth knowing and not worth a guard: the value is `tree.revision`, read off the
+tree in the same expression, and there is no client here to have seen a
+different one.
 
 ## Decisions taken that were not specified
 
@@ -305,6 +344,10 @@ review.
   and nothing here can see what that costs a real request.* 0.62ms warm in a
   `vitest` process is not a cold serverless invocation, and this lane cannot
   measure one — `*.vercel.app` is denied from the sandbox.
+- **Filed**, for `Loom daily build`: *the defect matrix every lane ends with
+  deletes the run's own work if the run has not committed, and the convention
+  as written says to do exactly that.* It happened here, on row 2 of nine, and
+  is written up below.
 - **Appended**, to 30 September's entry for `Loom daily build` about what a
   shot list cannot see: a **fourth** throwaway `playwright-core` script in four
   runs, and the first where the measurement *chose the unit* rather than
@@ -316,6 +359,30 @@ review.
 consecutive run, one call. `*.vercel.app` denied from the sandbox
 (`Loom portal`, 27 September) — the preview URL is on the pull request and the
 pictures are from a local production build.
+
+## The matrix ate the unit, and it is worth writing down
+
+Row 2 of nine reverted this run's entire change to `main`, and nothing said so.
+
+`git checkout -- "apps/loom/app/(demo)"` restores from the index, which is
+`HEAD`, and `HEAD` on a branch whose unit is not yet committed is still `main`.
+Four tracked files went back; the two that survived were new and therefore
+untracked, which is the opposite of a safety property. **The symptom was not an
+error** — it was the lane's count dropping 716 → 709 and staying there, which
+reads exactly like a defect being caught. Two more rows and this report would
+have carried a fabricated matrix.
+
+The convention as written in nearly every lane's report is *"the lane restored
+with `git checkout` between rows"*, and it is a trap for any run that has not
+committed first. The unit was reapplied from the session, the branch was
+committed, and the matrix re-run from the commit — which is where the three
+uncaught rows above come from. It is filed for `Loom daily build`, because
+`docs/routines.md` is where *Reading the merge gate* lives and this is the same
+shape of hazard: a command that reports success while doing something other
+than what the run believes.
+
+Twenty minutes, and no work permanently lost. A longer unit would not have been
+so lucky.
 
 ## Open questions
 

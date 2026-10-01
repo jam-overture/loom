@@ -8,6 +8,54 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — the defect matrix every lane ends with deletes the run's own work if the run has not committed, and the convention as written says to do exactly that
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and no work permanently**, because the edits were still in the session and
+could be reapplied. A longer unit would not have been so lucky.
+
+Every lane in this repository ends its report with a defect matrix, and the
+sentence describing how it is run is nearly identical across them:
+
+> Each defect restored in turn against this commit, the demo lane run against
+> it, and the lane restored with `git checkout` between rows.
+
+`git checkout -- <path>` restores from the **index**, which is `HEAD`. On a
+branch where the run has not yet committed, `HEAD` is still `main` — so the
+first restore reverts not just the planted defect but **the entire unit**, for
+every tracked file under that path, with no confirmation and no error.
+
+**That is what happened here**, on row 2 of nine. Four files went back to
+`main`; the two files that survived did so only because they were new and
+therefore untracked, which is the opposite of a safety property. The symptom was
+not an error message: it was the lane's test count dropping from 716 to 709 and
+staying there for the next row, which reads exactly like a defect being caught.
+The matrix was two rows from reporting fiction.
+
+**The fix is one word**, and it is the word the convention should carry:
+
+```bash
+git checkout HEAD -- <path>   # same thing, until HEAD is not what you meant
+git stash                     # no
+git commit                    # the real answer
+```
+
+`git checkout HEAD -- …` is not the fix either, strictly — it is the same
+command. **The real rule is ordering: commit the unit before planting the first
+defect.** Then `HEAD` is the thing being tested, the restore means what it
+says, and a matrix cannot eat its own subject. This run committed and re-ran,
+and the matrix came back with three rows nothing caught — which is the result
+worth having and was not available before.
+
+**Filed for the framework routine because `docs/routines.md` is its file**, and
+this belongs beside *Reading the merge gate*: it is the same shape of hazard —
+a command that reports success while doing something other than what the run
+believes — and the same remedy, which is to write down the ordering rather than
+trust everyone to re-derive it. The briefs say `main` too, so the maintainer may
+want the sentence in both places.
+
+---
 ## 2026-10-01 — the demo's first screen spends 42% of itself on a still life, and this run paid for the verdict without reclaiming it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
