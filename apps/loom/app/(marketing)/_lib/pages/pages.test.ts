@@ -11,7 +11,6 @@ import { PALETTE_SWITCHER_LABEL, READ_NEXT_EYEBROW } from "../chrome"
 import { PLACEHOLDER_STRINGS } from "../copy"
 import { unhonored } from "../frames"
 import { SHORT_ANSWERS } from "./how-it-works"
-import { YOUR_TURN_ANCHOR } from "./in-your-own-words"
 import { pageTreeFor, renderTree, SITE_PAGES, treeFor } from "../render"
 import {
   DEFAULT_THEME,
@@ -427,34 +426,37 @@ describe("the way to the demonstration", () => {
    * that some band *holds* the anchor is therefore the assertion that matters,
    * not that the href was spelled.
    */
-  it("is offered by the band that demonstrates, which is where the typing is missing", () => {
-    const band = bandOf(HOME, (found) => found.props["eyebrow"] === BAND.seeItHappen)
-
-    expect(hrefsIn(band).some((href) => href.endsWith(`#${YOUR_TURN_ANCHOR}`))).toBe(true)
-  })
-
-  it("lands on a band that is actually there to be landed on", () => {
-    const held = bandWith(
-      treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME }).root,
-      (found) => found.props["anchor"] === YOUR_TURN_ANCHOR
-    )
-
-    expect(held).toHaveLength(1)
-  })
-
   /**
-   * And the demonstration itself is on the page rather than linked from it —
-   * §4d's *embeds the demonstration rather than describing it*, which is the
-   * reason the demonstration is public at all (0056). The frame's `src` is the
-   * demonstration's own address, so the band is not a second copy of anything.
+   * **The demonstration is a link now, not a band.**
+   *
+   * Three assertions stood here until 1 October: that the band which
+   * demonstrates offered a fragment link onward, that something on the page
+   * held that anchor, and that the band below framed `/demo` rather than
+   * pointing at it — §4d's *embeds the demonstration rather than describing
+   * it*, which was the reason the demonstration is public at all (0056).
+   *
+   * The maintainer removed the frame: *"get rid of the demo injected into the
+   * main landing page. If people want to get to the demo, they can click the
+   * demo link."* So what replaces them is the property that instruction
+   * actually asks for — **the demonstration is still one click from the front
+   * door** — which is the thing that would quietly stop being true if the link
+   * went the way the frame did.
+   *
+   * It is deliberately not pinned to a band. The bar, the footer's map, the
+   * band of ways in and this band all offer it, and a test naming one of them
+   * would fail the day the page is rearranged while a reader could still get
+   * there perfectly well.
    */
-  it("is framed by the band below it, rather than pointed at", () => {
-    const band = bandOf(HOME, (found) => found.props["eyebrow"] === BAND.inYourOwnWords)
-    const frames = bandWith(band, (found) => found.type === "loom.embed")
+  it("still offers the demonstration, from somewhere on the front door", () => {
+    const tree = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
 
-    expect(frames).toHaveLength(1)
-    expect(frames[0]?.props["src"]).toBe(DEMO_HREF)
-    expect(hrefsIn(band)).toContain(DEMO_HREF)
+    expect(hrefsIn(tree.root)).toContain(DEMO_HREF)
+  })
+
+  it("frames nothing, now that the demonstration is a link", () => {
+    const tree = treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+
+    expect(bandWith(tree.root, (found) => found.type === "loom.embed")).toHaveLength(0)
   })
 
   /**

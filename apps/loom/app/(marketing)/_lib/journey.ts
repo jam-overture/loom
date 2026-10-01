@@ -46,7 +46,7 @@ export const JOURNEY: readonly JourneyStep[] = [
   },
   {
     title: "The AI writes down what it wants to change",
-    body: "Not new code — an exact list: add this, remove that, move the other, change a setting. That list is the only thing that goes any further.",
+    body: "The model does not write code. It sends back an exact list: add this, remove that, move the other, change a setting.",
   },
   {
     title: "The change is measured",
@@ -54,7 +54,7 @@ export const JOURNEY: readonly JourneyStep[] = [
   },
   {
     title: "Your rules decide",
-    body: "One of three answers: do it, hold it for a person to look at, or refuse it — and which of your rules said so.",
+    body: "You get one of three answers: do it, hold it for a person to review, or reject it. Loom tells you which of your rules decided.",
   },
   {
     title: "What happened is written down",
@@ -217,19 +217,19 @@ export type PlainWord = {
 export const PLAIN_WORDS_GLOSSED: readonly PlainWord[] = [
   {
     word: "Ask",
-    line: "Not only you. A colleague, a visitor, or the page itself reacting to something it saw — and you say in advance how far each of them may go.",
+    line: "Anyone can ask: you, a colleague, a visitor, or the page itself reacting to what it sees. You decide in advance how far each of them can go.",
   },
   {
     word: "Check",
-    line: "Against rules you wrote down before anybody asked, so the answer is the same whether or not somebody is watching.",
+    line: "Loom checks the change against rules you wrote down ahead of time. You get the same answer whether or not anyone is watching.",
   },
   {
     word: "Record",
-    line: "Not a list of code changes. A sentence naming the rule that let it through — written whether it landed or not.",
+    line: "You get a plain sentence saying what changed and which rule allowed it. Loom writes it down whether the change was accepted or rejected.",
   },
   {
     word: "Undo",
-    line: "Worked out at the moment the change is made and kept beside it, rather than reconstructed from the page afterwards.",
+    line: "Loom works out how to reverse the change at the same time it makes it, and keeps that ready. It does not have to reconstruct it later.",
   },
 ]
 
