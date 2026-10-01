@@ -4,6 +4,8 @@ import {
   activated,
   activatedIn,
   batchOf,
+  completed,
+  completedIn,
   disclosedIn,
   dwelled,
   nodeId,
@@ -121,6 +123,30 @@ describe("engagements", () => {
   })
 })
 
+describe("completions", () => {
+  it("counts each form the browser let go against the node the form is", () => {
+    const readings = readingsOf([batchOf([completed("signup")]), batchOf([completed("signup")])])
+
+    expect(readings.completions[nodeId("signup")]).toBe(2)
+  })
+
+  /**
+   * A completion is a use of the band it was the end of, like every other
+   * delegated kind — and never a use of itself.
+   */
+  it("credits the bands it was inside without crediting the form", () => {
+    const readings = readingsOf([batchOf([completedIn("signup", "pricing", "page")])])
+
+    expect(readings.engagements[nodeId("pricing")]).toBe(1)
+    expect(readings.engagements[nodeId("page")]).toBe(1)
+    expect(readings.engagements[nodeId("signup")]).toBeUndefined()
+  })
+
+  it("leaves a node nobody submitted out rather than at zero", () => {
+    expect(readingsOf([batchOf([viewed("hero")])]).completions).toEqual({})
+  })
+})
+
 describe("nodeReadingsOf", () => {
   it("puts the longest on screen first", () => {
     const rows = nodeReadingsOf(
@@ -141,6 +167,7 @@ describe("nodeReadingsOf", () => {
       activations: 0,
       opens: 0,
       closes: 0,
+      completions: 0,
       engagements: 0,
     })
   })

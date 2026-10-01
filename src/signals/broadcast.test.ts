@@ -617,6 +617,199 @@ describe("broadcastReaderSignals", () => {
     })
   })
 
+  /**
+   * The fifth kind, which is the only one about a reader finishing rather than
+   * a reader looking (0209).
+   *
+   * The form is put in by each test rather than into `PAGE`, because almost
+   * every test above counts the signals a page produces and a form sitting in
+   * the markup would change all of them.
+   */
+  describe("a form the browser let go", () => {
+    const addForm = (nodeId: string, into: Element = byId("n_2")): HTMLFormElement => {
+      into.insertAdjacentHTML(
+        "beforeend",
+        `<form data-loom-node="${nodeId}" data-loom-type="loom.form" id="${nodeId}-form">
+           <input name="email" />
+           <button id="${nodeId}-send" type="submit">Send</button>
+         </form>`
+      )
+
+      return document.getElementById(`${nodeId}-form`) as HTMLFormElement
+    }
+
+    /** What a browser dispatches when a form's constraints are satisfied. */
+    const submit = (form: HTMLFormElement): boolean =>
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+
+    const withinOf = (batches: readonly ReaderSignalBatch[]) =>
+      batches.flatMap((batch) => batch.signals).flatMap((signal) => ("within" in signal ? [signal.within] : []))
+
+    it("reports it as completed, against the form's own node", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["completed:n_6"])
+    })
+
+    it("names the bands the form was the end of, so a deployment can ask which one converted", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(withinOf(batches)).toEqual([
+        [
+          { nodeId: "n_2", type: "loom.section" },
+          { nodeId: "n_1", type: "loom.page" },
+        ],
+      ])
+    })
+
+    /**
+     * A page that posts with `fetch` cancels the native submit, and from the
+     * page's side a cancelled submit and a failed one are the same event. The
+     * broadcaster reports what it can attest and nothing else.
+     */
+    it("says nothing when a handler on the page cancelled it", async () => {
+      const form = addForm("n_6")
+      form.addEventListener("submit", (event) => event.preventDefault())
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /**
+     * `preventDefault` may be called by a listener registered after this one —
+     * React attaches its own at a root container that can be this very element
+     * — so the answer is read once the dispatch is over rather than during it.
+     * Registering the broadcaster first is what makes this test the one that
+     * fails if the microtask is ever removed.
+     */
+    it("reads the cancellation even when it is called after the broadcaster heard the event", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+      root.addEventListener("submit", (event) => event.preventDefault())
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /** Captured at the root, so a handler inside the page cannot make a conversion invisible. */
+    it("hears a submit that something inside the page stopped from bubbling", async () => {
+      const form = addForm("n_6")
+      form.addEventListener("submit", (event) => event.stopPropagation())
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["completed:n_6"])
+    })
+
+    /**
+     * The double-count this kind invites. Pressing the control is an activation
+     * of the control and the submission is a completion of the form; they are
+     * two facts about two nodes, and the thing that would be wrong is one
+     * action producing two completions.
+     *
+     * The submit button here is **not** an addressed node, which is the sharper
+     * version: the press is filed against the form as well, so both signals
+     * name `n_6`. One `completed` is still one `completed`.
+     *
+     * Driven by pressing the control rather than by dispatching the event, so
+     * the one click goes through the whole path a reader's would — the click
+     * listener and the implicit submission the press causes.
+     */
+    it("counts one completion for one submission, though the press is also an activation", async () => {
+      addForm("n_6")
+      const batches = start()
+
+      ;(document.getElementById("n_6-send") as HTMLElement).click()
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["activated:n_6", "completed:n_6"])
+    })
+
+    it("reports nothing for a submission after the broadcast stopped", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      broadcast?.stop()
+      submit(form)
+      await settle()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("is not reported at all when the host did not ask for the kind", async () => {
+      const form = addForm("n_6")
+      const batches = start({ kinds: ["activated"] })
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("is reported only for the primitive types the host named", async () => {
+      const form = addForm("n_6")
+      const batches = start({ kinds: ["completed"], types: { completed: ["loom.contact-form"] } })
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /**
+     * A form outside the page this broadcast is pointed at is not this page's
+     * conversion, and the capture listener is on the root rather than the
+     * document, so it should never hear one.
+     */
+    it("ignores a form that is not inside the root", async () => {
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `<form data-loom-node="n_9" data-loom-type="loom.form" id="outside-form"></form>`
+      )
+      const batches = start()
+
+      submit(document.getElementById("outside-form") as HTMLFormElement)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("sends a batch the parser accepts, ancestry and all", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => parseReaderSignalBatch(batch).ok)).toEqual([true])
+    })
+  })
+
   it("reads a page the render seam addressed", () => {
     const { tree } = sampleTree()
     document.body.innerHTML = renderToStaticMarkup(

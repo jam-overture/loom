@@ -27,7 +27,7 @@ the portal every day.
 
 | | |
 | --- | --- |
-| Four closed kinds | `viewed`, `dwelled`, `activated`, `disclosed` |
+| Five closed kinds | `viewed`, `dwelled`, `activated`, `disclosed`, `completed` |
 | Identity | node id + primitive type, filed under the batch's tree and revision |
 | Content | **none** — no text, no URLs, no typed values, nothing about the reader |
 | Configuration | the host's argument, never a prop in the tree |
@@ -76,15 +76,16 @@ call inside a pull request.
 5. **Aggregates are the durable artefact.** Raw batches are a short-lived buffer,
    rolled up and expired. Retention is per-deployment configuration with a short
    default, never a constant (0146).
-6. **The vocabulary stays closed.** Four kinds, plus `completed` as the one
-   approved addition below. A sixth is a record.
+6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
+   1 October ([0209](../decisions/0209-a-completion-is-a-form-the-browser-let-go.md)).
+   A sixth is a record.
 
 ## The plan, in order
 
 Each step is a lane's to build. Later steps depend on earlier ones being on
 `main`; do not start one whose input does not exist yet.
 
-### 1. The broadcaster stops going blind · `Loom signals` · **approved, first**
+### 1. The broadcaster stops going blind · `Loom signals` · **done**
 
 `broadcastReaderSignals` finds addressed elements once, when it is called
 (`src/signals/broadcast.ts:296`), and never looks again. Anything rendered
@@ -102,7 +103,7 @@ addressed elements — the broadcaster already runs one for disclosures at
 `broadcast.ts:336` — and a sentence in the module documentation that a new root
 or revision is a new broadcast. Closes the open finding of 12 September.
 
-### 2. `completed`, the kind that closes a funnel · `Loom signals` · **approved**
+### 2. `completed`, the kind that closes a funnel · `Loom signals` · **done, 1 October**
 
 The existing four measure attention. None of them says a reader *finished*
 anything, so the portal could show engagement and never conversion.
@@ -117,7 +118,21 @@ and "they bought".
 one addition that genuinely threatens rule 4. If it is ever wanted it should be
 *hovered with intent* — dwell-thresholded — and it needs its own argument.
 
-### 3. Ingestion, storage and rollup · `Loom signals` · **approved, after 1 and 2**
+**Done**, and three things were settled in the building that the step did not
+say ([0209](../decisions/0209-a-completion-is-a-form-the-browser-let-go.md)).
+A completion is a `submit` the page did not cancel, which is the whole of what a
+browser can attest — so a form posted with `fetch` and cancelled reports
+nothing, deliberately. The cancellation is read in a microtask after the
+dispatch, because whether the broadcaster's listener runs before or after the
+page's own is registration order. And the kind **carries `within`**: it is a
+third `DELEGATED_READER_SIGNAL_KIND`, since the node a completion names is the
+form and the band the form was the end of is the thing worth reading — the
+rarest kind in the vocabulary, so 0167's volume argument does not reach it.
+`ReaderTally` gains `completions`; a `FunnelPair` ending in `completed` is a
+conversion rate and needed no new shape. The broadcaster grew 281 bytes
+minified, 88 gzipped.
+
+### 3. Ingestion, storage and rollup · `Loom signals` · **done**
 
 **Reuse the telemetry subsystem's shape; do not build a parallel one.**
 `src/telemetry/` already has a journal, a sink, memory and Postgres

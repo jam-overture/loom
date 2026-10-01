@@ -14,10 +14,10 @@ import { viewKeyPattern } from "./view.js"
  * it came into view, it stayed there this long, a reader activated a target in
  * it, a reader opened or closed it. Nothing more, and deliberately so.
  *
- * **The vocabulary is closed.** Four kinds, for the same reason the operations on
- * a tree are four and the schemes a URL may use are a list (0053): an adaptation
- * is proposed from these, and a stream that may carry anything is a stream
- * nothing can reason about. A kind is added here or it does not exist.
+ * **The vocabulary is closed.** Five kinds, for the same reason the operations
+ * on a tree are four and the schemes a URL may use are a list (0053): an
+ * adaptation is proposed from these, and a stream that may carry anything is a
+ * stream nothing can reason about. A kind is added here or it does not exist.
  *
  * **A signal carries no content.** No text a node shows, no URL a link goes to,
  * no value a reader typed, nothing that identifies the reader. The tree already
@@ -87,18 +87,27 @@ export const signalAddressSchema = z.object(addressSchema).strict()
 const withinSchema = z.array(signalAddressSchema).readonly()
 
 /**
- * The four kinds.
+ * The five kinds.
  *
  * `viewed` fires once per node for the life of the page. `dwelled` is time on
  * screen accumulated since the previous batch, so summing a node's `dwelled` over
  * every batch is its total. `activated` is a reader using a link, button or field
  * inside the node — the node named is the nearest addressed one, which in the
  * starter library is usually the control itself. `disclosed` is a region opened
- * or closed.
+ * or closed. `completed` is a form inside the node submitted with its
+ * constraints satisfied and nothing on the page cancelling it.
  *
- * Those last two are `DELEGATED_READER_SIGNAL_KINDS`: what a reader aimed at is
- * a control, and the region it sits in is a question nothing else can answer
- * afterwards, so they carry `within` and the other two do not.
+ * **`completed` is what a page can see, and not a word more.** It does not say
+ * a server accepted anything: the broadcaster watches the page and never the
+ * reply, so what it can attest is that the browser fired `submit` — which it
+ * does only once constraint validation has passed — and that no handler called
+ * `preventDefault`. A page that posts with `fetch` and cancels the native
+ * submit reports nothing here, which is the honest answer, because from the
+ * page's side a cancelled submit and a failed one look identical (0209).
+ *
+ * The last three are `DELEGATED_READER_SIGNAL_KINDS`: what a reader aimed at is
+ * a control or a form, and the region it sits in is a question nothing else can
+ * answer afterwards, so they carry `within` and the other two do not.
  */
 export const readerSignalSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("viewed"), ...addressSchema, at: instantSchema }).strict(),
@@ -114,6 +123,9 @@ export const readerSignalSchema = z.discriminatedUnion("kind", [
       at: instantSchema,
       within: withinSchema.optional(),
     })
+    .strict(),
+  z
+    .object({ kind: z.literal("completed"), ...addressSchema, at: instantSchema, within: withinSchema.optional() })
     .strict(),
 ])
 
