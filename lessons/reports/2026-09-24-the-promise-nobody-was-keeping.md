@@ -166,7 +166,7 @@ runtime change that stranded a lesson. Reading the August reports:
 - **7 August** — the framework routine did it: 0042, the recommended half rather
   than the cheap one, one door instead of two `try`/`catch` blocks, plus the two
   things the lesson had not thought of.
-- **8 August** — that run's report: *"#54 fixes the behaviour lesson 05's
+- **8 August** — that run's report: *"#54 fixes the behavior lesson 05's
   exercise D documents. Landing them together would ship lesson 05 already
   wrong."* Two subsequent reports carried the note forward as an open item.
 

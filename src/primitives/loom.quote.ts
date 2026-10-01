@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { portrait } from "./portrait.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
 /**
@@ -72,14 +72,14 @@ type Props = z.infer<typeof props>
 
 const SURFACES: Readonly<Record<"card" | "feature", CSSProperties>> = {
   card: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
     borderRadius: radius("lg"),
     padding: space(5),
   },
   feature: {
     background: "transparent",
-    borderInlineStart: `2px solid ${colour("border-accent")}`,
+    borderInlineStart: `2px solid ${color("border-accent")}`,
     borderRadius: "0",
     paddingInlineStart: space(5),
     paddingBlock: space(3),
@@ -131,14 +131,14 @@ export const loomQuote = definePrimitive({
         { style: { display: "flex", flexDirection: "column", gap: space(1) } },
         createElement(
           "span",
-          { style: { fontSize: size(2), fontWeight: weight("heading"), color: colour("fg-default") } },
+          { style: { fontSize: size(2), fontWeight: weight("heading"), color: color("fg-default") } },
           given.author
         ),
         given.role === undefined
           ? null
           : createElement(
               "span",
-              { style: { fontSize: size(2), color: colour("fg-muted") } },
+              { style: { fontSize: size(2), color: color("fg-muted") } },
               given.role
             )
       )
@@ -170,7 +170,7 @@ export const loomQuote = definePrimitive({
             fontFamily: family(feature ? "heading" : "body"),
             fontSize: size(feature ? 5 : 3),
             lineHeight: feature ? 1.35 : 1.6,
-            color: colour("fg-default"),
+            color: color("fg-default"),
             textWrap: "pretty",
           },
         },
@@ -182,7 +182,7 @@ export const loomQuote = definePrimitive({
               fontFamily: family("heading"),
               fontSize: size(feature ? 8 : 6),
               lineHeight: 0.9,
-              color: colour("accent"),
+              color: color("accent"),
               /** Optical alignment: the glyph's own sidebearing reads as a gap. */
               marginInlineStart: "-0.08em",
             },

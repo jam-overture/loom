@@ -24,7 +24,7 @@ import { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./presented.js"
  *
  * **What a primitive still has to do, and the runtime cannot.** A modal traps
  * focus, marks the rest of the page inert, and stops the document behind it
- * scrolling. None of that is here, and none of it is a behaviour: they are
+ * scrolling. None of that is here, and none of it is a behavior: they are
  * facts about the region and the page around it, which is the half the primitive
  * owns. A primitive that presents a *modal* region has to arrange them and this
  * seam neither helps nor hinders it.

@@ -3,7 +3,7 @@ import type { ZodType, ZodTypeAny, ZodTypeDef } from "zod"
 import { catalogueFields, closedChoices, type CataloguedProp, type ClosedChoice } from "../catalogue.js"
 import type { InteractiveWhen } from "../interactivity.js"
 import type { JsonObject, JsonObjectView } from "../json.js"
-import type { BehaviourName } from "../render/behaviour.js"
+import type { BehaviorName } from "../render/behavior.js"
 import type { LoomPrimitive } from "../render/primitive.js"
 import type { PropsIssue, PropsVerdict } from "../render/props.js"
 import type { BindingDeclaration } from "../render/reads.js"
@@ -39,7 +39,7 @@ import type { PrimitiveRole } from "../role.js"
  * - `submits` — whether it posts, so a deployment can be told that a primitive
  *   which needs a destination is registered and that the seam feeding it is
  *   wired (0065). Optional, read by nothing at render time, and the one
- *   declaration the audit checks against behaviour rather than taking on trust.
+ *   declaration the audit checks against behavior rather than taking on trust.
  * - `frames` — which of its props reach an `iframe`, so the render seam can
  *   hold each one against the origins the deployment permits (0095). Optional,
  *   and unlike `submits` it is read at render time: nothing else in the system
@@ -66,7 +66,7 @@ import type { PrimitiveRole } from "../role.js"
 export type PrimitiveDefinition<
   TProps extends JsonObjectView = JsonObject,
   TText extends string = never,
-  TBehaviour extends BehaviourName = never,
+  TBehavior extends BehaviorName = never,
 > = {
   readonly type: string
   readonly description: string
@@ -115,9 +115,9 @@ export type PrimitiveDefinition<
    */
   readonly frames?: readonly string[]
   /**
-   * The controls this primitive takes from the runtime's closed behaviour
+   * The controls this primitive takes from the runtime's closed behavior
    * vocabulary — `["copy"]` on a code panel. Optional, and empty for almost
-   * everything: a Loom page is data, and a behaviour is the exception that has
+   * everything: a Loom page is data, and a behavior is the exception that has
    * to be asked for by name.
    *
    * Declaring one is a claim with two consequences the registry checks. The
@@ -126,7 +126,7 @@ export type PrimitiveDefinition<
    * target the reader aims at, so this primitive must also declare itself
    * `interactive` or the Gate will let one sit inside an anchor.
    */
-  readonly behaviours?: readonly TBehaviour[]
+  readonly behaviors?: readonly TBehavior[]
   /**
    * What part this primitive plays — `"heading"` on anything a reader takes as
    * the title of what follows, whatever it is called. Optional, and absent on
@@ -219,7 +219,7 @@ export type PrimitiveDefinition<
    * page, because rendering is total.
    */
   readonly unshown?: UnshownDeclaration
-  readonly component: LoomPrimitive<TProps, TText, TBehaviour>
+  readonly component: LoomPrimitive<TProps, TText, TBehavior>
 }
 
 /**
@@ -249,11 +249,11 @@ export type PrimitiveEntry = {
   readonly submits: boolean
   /** Declared framable prop names, still raw: the registry is what checks them. */
   readonly frames: readonly string[]
-  /** Declared behaviour names, still raw: the registry is what checks them. */
-  readonly behaviours: readonly string[]
+  /** Declared behavior names, still raw: the registry is what checks them. */
+  readonly behaviors: readonly string[]
   /**
    * The declared role, still raw: the registry is what checks it, for the same
-   * reason it checks a behaviour name. `undefined` for the primitive that plays
+   * reason it checks a behavior name. `undefined` for the primitive that plays
    * no part a consumer asks about, which is most of them.
    */
   readonly role: string | undefined
@@ -325,9 +325,9 @@ const verdictFor = <TProps extends JsonObjectView>(
 export const definePrimitive = <
   TProps extends JsonObjectView,
   TText extends string = never,
-  TBehaviour extends BehaviourName = never,
+  TBehavior extends BehaviorName = never,
 >(
-  definition: PrimitiveDefinition<TProps, TText, TBehaviour>
+  definition: PrimitiveDefinition<TProps, TText, TBehavior>
 ): PrimitiveEntry => ({
   type: definition.type,
   description: definition.description,
@@ -336,7 +336,7 @@ export const definePrimitive = <
   interactive: definition.interactive,
   submits: definition.submits ?? false,
   frames: definition.frames ?? [],
-  behaviours: definition.behaviours ?? [],
+  behaviors: definition.behaviors ?? [],
   role: definition.role,
   copy: definition.copy,
   reads: definition.reads,

@@ -5,7 +5,7 @@ import { build, type BuildOptions } from "esbuild"
 import { err, ok, type Result } from "../../src/result.js"
 
 /**
- * The one build step in the harness, and the reason it took five behaviours to
+ * The one build step in the harness, and the reason it took five behaviors to
  * arrive.
  *
  * A specimen is markup with no bundler behind it, and that is most of what
@@ -63,7 +63,7 @@ export const entrySource = (modulePath: string, hydratePath: string): string =>
  * DOM to match the client, which is a different page from the one the browser
  * was served — so a specimen photographed in development mode could show a
  * picture that no reader will ever be served. The production build is the one
- * whose behaviour a deployment has.
+ * whose behavior a deployment has.
  */
 export const bundleOptions = (entry: string, resolveDir: string): BuildOptions => ({
   stdin: { contents: entry, resolveDir, sourcefile: "specimen-entry.ts", loader: "ts" },

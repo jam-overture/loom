@@ -116,12 +116,12 @@ describe("the sign-in pressure summary", () => {
 
   /**
    * The defect the checkup screen shipped and this one was about to: a sentence
-   * set in the colour and size of the lines above it is read as one more of
+   * set in the color and size of the lines above it is read as one more of
    * them. The next move is a response to the verdict, so it must not wear the
-   * verdict's tone — a way out printed in the refusal colour reads as more
+   * verdict's tone — a way out printed in the refusal color reads as more
    * alarm.
    */
-  it("does not print the next move inside the coloured verdict", () => {
+  it("does not print the next move inside the colored verdict", () => {
     const { container } = render(<PressureSummary pressure={locking} now={NOW} />)
 
     const band = container.querySelector("[data-pressure]")
@@ -132,11 +132,11 @@ describe("the sign-in pressure summary", () => {
   })
 
   /**
-   * Colour is never the only channel. The state is in the band's words and in a
+   * Color is never the only channel. The state is in the band's words and in a
    * data attribute a test can read; a reader who cannot tell the palette apart
    * loses nothing.
    */
-  it("names the state in words as well as in colour", () => {
+  it("names the state in words as well as in color", () => {
     const { container } = render(<PressureSummary pressure={quiet} now={NOW} />)
 
     expect(container.querySelector("[data-pressure]")?.getAttribute("data-pressure")).toBe("quiet")

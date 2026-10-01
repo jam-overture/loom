@@ -61,7 +61,7 @@ describe("the compiled package", () => {
   })
 
   /**
-   * The whole behaviour seam rests on this one line surviving compilation. A
+   * The whole behavior seam rests on this one line surviving compilation. A
    * `"use client"` that TypeScript moved below the imports, or dropped, is a
    * boundary a bundler never opens — after which a control is asked to run a
    * click handler in a server component, and the failure lands in somebody
@@ -74,7 +74,7 @@ describe("the compiled package", () => {
    */
   it("keeps the client directive at the top of every control that needs one", () => {
     const controls = readdirSync(join(DIST, "render")).filter(
-      (file) => file.startsWith("behaviour-") && file.endsWith(".js")
+      (file) => file.startsWith("behavior-") && file.endsWith(".js")
     )
 
     expect(controls).not.toHaveLength(0)

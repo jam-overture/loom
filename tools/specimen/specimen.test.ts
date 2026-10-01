@@ -32,7 +32,7 @@ import {
   type SpecimenBrowser,
   type SpecimenPage,
 } from "./capture.js"
-import behaviourSpecimen from "./behaviour.specimen.js"
+import behaviorSpecimen from "./behavior.specimen.js"
 import { bundleOptions, bundleSpecimen, describeBundleError, entrySource } from "./bundle.js"
 import { specimenElement } from "./element.js"
 import exampleSpecimen from "./example.specimen.js"
@@ -1704,8 +1704,8 @@ describe("the primitives a specimen registers for itself", () => {
    */
   it("registers what the specimen declared, which nothing could pass before", async () => {
     const built = await specimenElement(
-      behaviourSpecimen,
-      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+      behaviorSpecimen,
+      behaviorSpecimen.themes[0]?.selection ?? selection("editorial")
     )
 
     expect(built.ok).toBe(true)
@@ -1715,10 +1715,10 @@ describe("the primitives a specimen registers for itself", () => {
   })
 
   it("leaves the node undrawn when the specimen declares nothing for its type", async () => {
-    const { primitives: _declared, ...withoutPrimitives } = behaviourSpecimen
+    const { primitives: _declared, ...withoutPrimitives } = behaviorSpecimen
     const built = await specimenElement(
       withoutPrimitives,
-      behaviourSpecimen.themes[0]?.selection ?? selection("editorial")
+      behaviorSpecimen.themes[0]?.selection ?? selection("editorial")
     )
 
     expect(built.ok).toBe(true)
@@ -1754,13 +1754,13 @@ describe("bundling a live specimen", () => {
     expect(options.platform).toBe("browser")
   })
 
-  it("bundles the behaviour specimen, whose primitive the specimen declares", async () => {
-    const built = await bundleSpecimen("tools/specimen/behaviour.specimen.ts")
+  it("bundles the behavior specimen, whose primitive the specimen declares", async () => {
+    const built = await bundleSpecimen("tools/specimen/behavior.specimen.ts")
 
     expect(built.ok).toBe(true)
     if (!built.ok) return
 
-    expect(built.value).toContain("spec.behaviours")
+    expect(built.value).toContain("spec.behaviors")
     expect(built.value.length).toBeGreaterThan(1000)
   }, 30_000)
 
@@ -1794,8 +1794,8 @@ describe("both seams in one element", () => {
 
   it("builds the same markup twice for a specimen that declares answers and live", async () => {
     const [first, second] = await Promise.all([
-      markupOf(behaviourSpecimen),
-      markupOf(behaviourSpecimen),
+      markupOf(behaviorSpecimen),
+      markupOf(behaviorSpecimen),
     ])
 
     expect(first).toBe(second)
@@ -1809,7 +1809,7 @@ describe("both seams in one element", () => {
    * reaches when nothing answered it.
    */
   it("resolves a live specimen's declared answers, so its bound band has rows", async () => {
-    const rendered = await renderSpecimen(behaviourSpecimen)
+    const rendered = await renderSpecimen(behaviorSpecimen)
 
     expect(rendered.ok).toBe(true)
     if (!rendered.ok) return
@@ -1824,9 +1824,9 @@ describe("both seams in one element", () => {
 
   /** The worked copy earns its name by declaring all three, so this guards it. */
   it("has one worked copy declaring a primitive, answers and states at once", () => {
-    expect(behaviourSpecimen.primitives?.length).toBeGreaterThan(0)
-    expect(Object.keys(behaviourSpecimen.answers ?? {})).toEqual(["controls.shipped"])
-    expect(isLive(behaviourSpecimen)).toBe(true)
+    expect(behaviorSpecimen.primitives?.length).toBeGreaterThan(0)
+    expect(Object.keys(behaviorSpecimen.answers ?? {})).toEqual(["controls.shipped"])
+    expect(isLive(behaviorSpecimen)).toBe(true)
   })
 
   it("names all three ways a specimen page can be refused", () => {

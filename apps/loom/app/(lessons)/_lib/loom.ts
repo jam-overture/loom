@@ -125,7 +125,7 @@ export const section = (
  * So the theme is resolved through the same registry, by the same public
  * function the root primitive uses, and applied to the element the whole surface
  * sits in — one mount, inherited through the cascade by everything under it,
- * furniture included. Nothing here names a colour.
+ * furniture included. Nothing here names a color.
  */
 const resolved = resolveTheme({ [THEME_PROP_KEY]: COURSE_THEME }, courseThemes)
 

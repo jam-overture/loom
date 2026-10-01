@@ -8,13 +8,13 @@
 export * from "./addressing.js"
 export * from "./anchor.js"
 /**
- * The `behaviour-*.js` controls are deliberately not re-exported. A behaviour's
- * implementation is reached by declaring it and reading `loom.behaviours`, and
+ * The `behavior-*.js` controls are deliberately not re-exported. A behavior's
+ * implementation is reached by declaring it and reading `loom.behaviors`, and
  * a host that imported a control directly would get one with no registration
  * behind it — no declared name to translate, and nothing telling the Gate the
  * page now holds a target.
  */
-export * from "./behaviour.js"
+export * from "./behavior.js"
 export * from "./control.js"
 export * from "./decorative.js"
 export * from "./diagnostics.js"

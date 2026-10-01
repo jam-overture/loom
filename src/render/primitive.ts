@@ -10,7 +10,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { SubmissionOutcome } from "../submit/resolution.js"
 
 import type { AnchorAttributes } from "./anchor.js"
-import type { BehaviourName, PrimitiveBehaviours } from "./behaviour.js"
+import type { BehaviorName, PrimitiveBehaviors } from "./behavior.js"
 import type { DecorativeChildren } from "./decorative.js"
 import type { EditableAttributes } from "./editable.js"
 import type { PrimitiveText } from "./text.js"
@@ -29,7 +29,7 @@ import type { PrimitiveText } from "./text.js"
 
 export type LoomRenderContext<
   TText extends string = never,
-  TBehaviour extends BehaviourName = never,
+  TBehavior extends BehaviorName = never,
 > = {
   readonly nodeId: NodeId
   readonly type: PrimitiveType
@@ -145,19 +145,19 @@ export type LoomRenderContext<
    * The controls this primitive declared, built and ready to place.
    *
    * Always present, empty for the primitive that declared none, so a primitive
-   * reads `loom.behaviours.copy` without first proving the map exists — and
+   * reads `loom.behaviors.copy` without first proving the map exists — and
    * typed by what it declared, so reading one it did not ask for does not
    * compile.
    *
-   * A behaviour is the one thing a primitive receives that **runs**: a copy
+   * A behavior is the one thing a primitive receives that **runs**: a copy
    * button is a click handler, and a click handler is not expressible in the
    * JSON a primitive's props are. It arrives already built rather than as a
    * component to configure, because there is nothing here for a tree, a model
    * or a primitive to get right or wrong — the strings came from the
    * primitive's own declarations and the content came from the tree. See
-   * `behaviour.ts`.
+   * `behavior.ts`.
    */
-  readonly behaviours: PrimitiveBehaviours<TBehaviour>
+  readonly behaviors: PrimitiveBehaviors<TBehavior>
   /**
    * This node's children again, rendered as a copy nothing resolves to a node —
    * for the arrangements that have to say the same content twice (see
@@ -200,9 +200,9 @@ export const NO_SLOTS: SlotChildren = Object.freeze(
 export type LoomPrimitiveProps<
   TProps extends JsonObjectView = JsonObject,
   TText extends string = never,
-  TBehaviour extends BehaviourName = never,
+  TBehavior extends BehaviorName = never,
 > = {
-  readonly loom: LoomRenderContext<TText, TBehaviour>
+  readonly loom: LoomRenderContext<TText, TBehavior>
   /** The node's props, exactly as they appear in the tree. */
   readonly props: TProps
   /** Rendered children in tree order, or null when the node has none. */
@@ -212,8 +212,8 @@ export type LoomPrimitiveProps<
 export type LoomPrimitive<
   TProps extends JsonObjectView = JsonObject,
   TText extends string = never,
-  TBehaviour extends BehaviourName = never,
-> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>
+  TBehavior extends BehaviorName = never,
+> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehavior>>
 
 /** A primitive called as the plain function of its props, rather than mounted. */
 export type CallablePrimitive = (props: LoomPrimitiveProps) => ReactNode

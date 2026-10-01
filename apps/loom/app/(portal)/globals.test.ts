@@ -140,11 +140,11 @@ describe("the chrome's tokens against the registered minimal theme", () => {
   })
 
   /**
-   * The three verdict colours that are *not* from the palette, asserted as a
+   * The three verdict colors that are *not* from the palette, asserted as a
    * decision rather than left to look like an oversight. A single-accent palette
    * cannot say "applied", "waiting on you" and "refused" in three
-   * distinguishable colours, and a reviewer scanning a queue reads those by
-   * colour before they read the label. `applied` is the theme's green exactly;
+   * distinguishable colors, and a reviewer scanning a queue reads those by
+   * color before they read the label. `applied` is the theme's green exactly;
    * the other two are functional and deliberately outside the brand.
    */
   it("keeps a distinct hue for held and refused, which the palette cannot supply", () => {

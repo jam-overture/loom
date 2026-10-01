@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -127,13 +127,13 @@ type Props = z.infer<typeof props>
  */
 const SURFACES = {
   plain: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
   },
   featured: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-accent")}`,
-    boxShadow: `0 0 0 1px ${colour("accent")}, 0 32px 64px -48px ${colour("accent-strong")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-accent")}`,
+    boxShadow: `0 0 0 1px ${color("accent")}, 0 32px 64px -48px ${color("accent-strong")}`,
   },
 } as const
 
@@ -165,7 +165,7 @@ export const loomEvent = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -190,7 +190,7 @@ export const loomEvent = definePrimitive({
           ...SURFACES[given.emphasis ?? "plain"],
           padding: space(5),
           borderRadius: radius("lg"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),
@@ -219,7 +219,7 @@ export const loomEvent = definePrimitive({
                * `accent-strong` exists to keep *small* emphatic text legible — a
                * validation message, a price set at the end of a line. A date at
                * heading size has all the weight it needs from the ramp, and the
-               * lighter accent is the one every other large accent-coloured
+               * lighter accent is the one every other large accent-colored
                * thing in the library already wears.
                *
                * There is a second reason and it is worth knowing before someone
@@ -232,7 +232,7 @@ export const loomEvent = definePrimitive({
                * props and a price is optional. That is filed rather than fixed
                * here: the file belongs to another lane.
                */
-              color: colour("accent"),
+              color: color("accent"),
             },
           },
           given.date
@@ -252,7 +252,7 @@ export const loomEvent = definePrimitive({
                     fontFamily: family("body"),
                     fontSize: size(2),
                     lineHeight: 1.5,
-                    color: colour("fg-muted"),
+                    color: color("fg-muted"),
                   },
                 },
                 given.location
@@ -268,7 +268,7 @@ export const loomEvent = definePrimitive({
                     fontFamily: family("body"),
                     fontSize: size(3),
                     lineHeight: 1.6,
-                    color: colour("fg-muted"),
+                    color: color("fg-muted"),
                   },
                 },
                 given.note

@@ -19,7 +19,7 @@ describe("the course, composed", () => {
     const paragraph = container.querySelector("p")
 
     expect(paragraph?.textContent).toBe("Why is a half-applied delta worse?")
-    /** Styled from the theme's custom properties — no colour is named here. */
+    /** Styled from the theme's custom properties — no color is named here. */
     expect(paragraph?.getAttribute("style")).toContain("var(--loom-")
   })
 
@@ -51,7 +51,7 @@ describe("the course, composed", () => {
     expect(style["--loom-heading-weight"]).not.toBe(style["--loom-body-weight"])
   })
 
-  it("mounts one theme for the whole surface, in variables rather than colours", () => {
+  it("mounts one theme for the whole surface, in variables rather than colors", () => {
     const variables = Object.keys(COURSE_THEME_STYLE)
 
     expect(variables).toContain("--loom-fg-default")

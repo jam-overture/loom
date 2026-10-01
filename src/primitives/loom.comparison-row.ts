@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 
 /**
  * One criterion, answered across every subject in the table.
@@ -86,7 +86,7 @@ export const loomComparisonRow = definePrimitive({
             fontWeight: weight("body"),
             fontSize: size(3),
             lineHeight: 1.4,
-            color: colour("fg-default"),
+            color: color("fg-default"),
           },
         },
         given.heading ?? null,

@@ -1,7 +1,7 @@
 import { RAMP_STEPS, type PaletteSlot } from "../theme/theme.js"
 
 /**
- * The only way a primitive in this library names a colour, a size, or a length.
+ * The only way a primitive in this library names a color, a size, or a length.
  *
  * A ported primitive is not done until it renders under both starter palettes,
  * and the failure that rule exists to catch is a literal — one `#0a0a0a` left
@@ -35,7 +35,7 @@ export const RAMP: readonly RampStep[] = Array.from(
   (_unused, index) => (index + 1) as RampStep
 )
 
-export const colour = (slot: PaletteSlot): string => `var(--loom-${slot})`
+export const color = (slot: PaletteSlot): string => `var(--loom-${slot})`
 
 /** A length off the style preset's spacing scale. */
 export const space = (step: RampStep): string => `var(--loom-spacing-${step})`
@@ -80,7 +80,7 @@ export const MONOSPACE_STACK =
 export const monospace = (): string => `var(--loom-mono-family, ${MONOSPACE_STACK})`
 
 /**
- * The colour a line takes when the line is the only thing being drawn.
+ * The color a line takes when the line is the only thing being drawn.
  *
  * `border-subtle` is the right slot for the **edge of a box**: a card is mostly
  * fill, the fill is what tells a reader it is a card, and the edge only has to
@@ -126,7 +126,7 @@ export const monospace = (): string => `var(--loom-mono-family, ${MONOSPACE_STAC
  * light palette — which is why `loom.table` and `loom.comparison-table` keep it
  * for the one rule under a header and take this for the rules between rows.
  */
-export const hairline = (): string => colour("border-default")
+export const hairline = (): string => color("border-default")
 
 /**
  * The reading measure, as a length rather than a palette slot.

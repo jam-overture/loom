@@ -82,7 +82,7 @@ const storedRevisionSchema = z.object({
  * A null column and an absent key have to produce the same entry, or a revision
  * nobody approved would compare unequal between this store and the in-memory
  * one — and the contract suite both are checked against would be measuring the
- * backing store rather than the behaviour.
+ * backing store rather than the behavior.
  */
 const toStoredRevision = (row: z.infer<typeof storedRevisionSchema>): StoredRevision => {
   const { answeredBy, ...rest } = row

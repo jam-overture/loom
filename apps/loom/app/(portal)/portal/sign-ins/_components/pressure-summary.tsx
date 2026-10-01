@@ -11,7 +11,7 @@ import {
 /**
  * What is happening at the front door, and what to do about it.
  *
- * Colour is a second channel and never the only one, the same rule
+ * Color is a second channel and never the only one, the same rule
  * `/portal/checkup` follows: the band names the state in words and the sentence
  * under it says it again, so nothing here depends on telling the palette apart.
  *
@@ -51,11 +51,11 @@ export const PressureSummary = ({
       </div>
 
       {/*
-       * Outside the coloured band on purpose. Inside it, the move would inherit
+       * Outside the colored band on purpose. Inside it, the move would inherit
        * the tone of the thing it is a response to — a next move set in the
-       * refusal colour reads as a fourth line of alarm rather than as the way
+       * refusal color reads as a fourth line of alarm rather than as the way
        * out of it. This is the same defect the checkup screen's correction had:
-       * a sentence shipped in the size and colour of the lines above it is read
+       * a sentence shipped in the size and color of the lines above it is read
        * as one more of them.
        */}
       <div className="border-edge-subtle flex flex-col gap-1 rounded-md border p-3">
@@ -66,7 +66,7 @@ export const PressureSummary = ({
 
       {/*
        * This screen used to mute everything inside the disclosure by hand,
-       * because `TechnicalDetail` set no colour of its own and inherited
+       * because `TechnicalDetail` set no color of its own and inherited
        * whatever it was mounted in — at page level, the body ink, which
        * rendered the record *louder* than the plain sentence above it. The
        * component sets its own altitude now, so the compensation is gone: a

@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import { sequentialIdFactory } from "../../src/ids.js"
 import type { LoomPrimitiveProps } from "../../src/render/primitive.js"
-import { DISCLOSED_ATTRIBUTE, PRESENTED_ATTRIBUTE } from "../../src/render/behaviour.js"
+import { DISCLOSED_ATTRIBUTE, PRESENTED_ATTRIBUTE } from "../../src/render/behavior.js"
 import { DATA_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
 import { definePrimitive } from "../../src/sdk/definition.js"
 import { themeSelectionSchema, type ThemeSelection } from "../../src/theme/theme.js"
@@ -14,7 +14,7 @@ import { defineSpecimen } from "./specimen.js"
 import { WIDE } from "./specimen.js"
 
 /**
- * The behaviour vocabulary, photographed.
+ * The behavior vocabulary, photographed.
  *
  * Five members shipped between 24 August and 23 September and not one of them
  * had ever appeared in a picture in this repository, because every control
@@ -23,10 +23,10 @@ import { WIDE } from "./specimen.js"
  * four days rather than go without. This is that picture, taken by the harness.
  *
  * **The subject is the seam, so the primitive is the smallest thing that can
- * hold it.** `spec.behaviours` places all five controls and the three regions
+ * hold it.** `spec.behaviors` places all five controls and the three regions
  * they drive, has no props, and is registered for this specimen only through
  * `Specimen.primitives`. It is deliberately not a primitive anybody's page would
- * want: `loom.nav` and `loom.code` are the two real ones that take a behaviour
+ * want: `loom.nav` and `loom.code` are the two real ones that take a behavior
  * today, between them they cover two of the five, and adding three more to the
  * starter library to have something to photograph would be this lane editing
  * `src/primitives/` — which is `Loom primitives`' directory.
@@ -94,12 +94,12 @@ const group = (key: string, children: readonly ReactNode[]): ReactNode =>
 const region = (key: string, className: string, label: string): ReactNode =>
   createElement("div", { key, className: `spec-region ${className}` }, label)
 
-export const specBehaviours = definePrimitive({
-  type: "spec.behaviours",
-  description: "A specimen subject that places every control in the behaviour vocabulary.",
+export const specBehaviors = definePrimitive({
+  type: "spec.behaviors",
+  description: "A specimen subject that places every control in the behavior vocabulary.",
   props,
   text: TEXT,
-  behaviours: ["copy", "disclose", "adjust", "present", "dismiss"],
+  behaviors: ["copy", "disclose", "adjust", "present", "dismiss"],
   /**
    * Five controls is five targets, and the registry refuses a primitive that
    * takes one without saying so — which is the check that keeps a button out of
@@ -113,12 +113,12 @@ export const specBehaviours = definePrimitive({
       "div",
       { ...loom.editable, className: "spec-slab" },
       createElement("style", { key: "style" }, STYLES),
-      group("copy", [loom.behaviours.copy]),
+      group("copy", [loom.behaviors.copy]),
       /** The menu is a following sibling of the button, which is what the plain contract selects. */
-      group("disclose", [loom.behaviours.disclose, region("menu", "spec-menu", "The menu")]),
+      group("disclose", [loom.behaviors.disclose, region("menu", "spec-menu", "The menu")]),
       /** The number lands on this group, and the fill below reads it by inheritance. */
       group("adjust", [
-        loom.behaviours.adjust,
+        loom.behaviors.adjust,
         createElement(
           "div",
           { key: "track", className: "spec-track" },
@@ -127,12 +127,12 @@ export const specBehaviours = definePrimitive({
       ]),
       /** The boolean lands on this group, and the panel inside it is what the rule reaches. */
       group("present", [
-        loom.behaviours.present,
+        loom.behaviors.present,
         createElement(
           "div",
           { key: "panel", className: "spec-region spec-panel" },
           "The panel",
-          loom.behaviours.dismiss
+          loom.behaviors.dismiss
         ),
       ])
     ),
@@ -143,7 +143,7 @@ const build = (theme: ThemeSelection) => {
 
   const section = buildElement(idFactory, {
     type: "loom.section",
-    props: { eyebrow: "Behaviour", width: "readable" },
+    props: { eyebrow: "Behavior", width: "readable" },
     children: [
       buildElement(idFactory, {
         type: "loom.heading",
@@ -160,7 +160,7 @@ const build = (theme: ThemeSelection) => {
           ),
         ],
       }),
-      buildElement(idFactory, { type: "spec.behaviours", props: {}, children: [] }),
+      buildElement(idFactory, { type: "spec.behaviors", props: {}, children: [] }),
       buildElement(idFactory, {
         type: "loom.heading",
         props: { level: 2 },
@@ -211,10 +211,10 @@ const build = (theme: ThemeSelection) => {
 }
 
 export default defineSpecimen({
-  name: "behaviour",
-  title: "The behaviour vocabulary",
+  name: "behavior",
+  title: "The behavior vocabulary",
   build,
-  primitives: [specBehaviours],
+  primitives: [specBehaviors],
   /**
    * The other seam, declared on the same specimen. Nothing arbitrates between
    * the two: an answer is a reply held in this module, so the browser's resolve

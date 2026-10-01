@@ -8,7 +8,7 @@ import { movedOn } from "./moved"
  *
  * The runtime's own words for it are in `confirmHeld` — *"it is not stale
  * pending a retry, it is dead"* — and `pipeline.test.ts` holds this file to that
- * behaviour end to end. What is checked here is only that the surface asks the
+ * behavior end to end. What is checked here is only that the surface asks the
  * question the same way the runtime answers it: on equality of the two numbers,
  * and never on which is larger.
  */

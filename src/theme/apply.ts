@@ -30,7 +30,7 @@ export const themeVariables = (theme: ResolvedTheme): ThemeVariables => {
    *
    * Derived, so a host palette gets them without declaring anything and a
    * re-theme changes them with everything else. Omitted rather than defaulted
-   * where a colour could not be measured, for the reason `--loom-mono-family` is
+   * where a color could not be measured, for the reason `--loom-mono-family` is
    * omitted: a primitive supplies its own `var()` fallback, and a default
    * written here would put this file's guess above the palette's silence.
    */

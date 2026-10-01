@@ -11,7 +11,7 @@ import { ceilingNote } from "@/app/(demo)/_lib/ceiling"
 import { ASK_AGAIN_CAUTION, ASK_AGAIN_LABEL, movedOn } from "@/app/(demo)/_lib/moved"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
-import { SPOT_COLOURS } from "@/app/(demo)/_lib/spotlight"
+import { SPOT_COLORS } from "@/app/(demo)/_lib/spotlight"
 import {
   UNDO_AGAIN_LABEL,
   UNDO_AGAIN_MEANING,
@@ -1036,7 +1036,7 @@ describe("an ask the page has moved past", () => {
  * way of solving it — naming the ask in the rail's line, numbering the marks, a
  * legend — asks them to read a sentence. This asks them to see that two things
  * are the same thing, so what is asserted here is sameness: the words, and the
- * colours, are the mark's own rather than a second copy.
+ * colors, are the mark's own rather than a second copy.
  */
 describe("the card's own mark", () => {
   it("wears the words the page is wearing for this change", () => {
@@ -1046,17 +1046,17 @@ describe("the card's own mark", () => {
   })
 
   /**
-   * In the chip's colours, read from the one table the stylesheet on the stage is
+   * In the chip's colors, read from the one table the stylesheet on the stage is
    * drawn from. A Tailwind token here would be a second definition of one
-   * colour, free to drift the first time either is retuned — and a pill that is
-   * nearly the chip's colour is worse than no pill, because the whole mechanism
+   * color, free to drift the first time either is retuned — and a pill that is
+   * nearly the chip's color is worse than no pill, because the whole mechanism
    * is a visitor recognising it without being told.
    */
-  it("wears the mark's own colours, not a second copy of them", () => {
-    /** The DOM keeps colours as `rgb()`; the table keeps them as the CSS writes them. */
+  it("wears the mark's own colors, not a second copy of them", () => {
+    /** The DOM keeps colors as `rgb()`; the table keeps them as the CSS writes them. */
     const rgb = (hex: string): string => {
       const parsed = /^#([0-9a-f]{6})$/i.exec(hex)?.[1]
-      if (parsed === undefined) throw new Error(`${hex} is not a six-digit hex colour`)
+      if (parsed === undefined) throw new Error(`${hex} is not a six-digit hex color`)
 
       const [r, g, b] = [0, 2, 4].map((at) => Number.parseInt(parsed.slice(at, at + 2), 16))
 
@@ -1067,8 +1067,8 @@ describe("the card's own mark", () => {
 
     const style = screen.getByText("This would be removed").getAttribute("style") ?? ""
 
-    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.fill))
-    expect(style).toContain(rgb(SPOT_COLOURS.awaiting.ink))
+    expect(style).toContain(rgb(SPOT_COLORS.awaiting.fill))
+    expect(style).toContain(rgb(SPOT_COLORS.awaiting.ink))
   })
 
   /**

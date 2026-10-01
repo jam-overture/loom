@@ -8,7 +8,7 @@ import { boldPalette, minimalPalette } from "@jam-overture/loom"
 import { MARK_PATH } from "./chrome"
 
 /**
- * The browser-tab mark, held against the palettes it borrows its two colours
+ * The browser-tab mark, held against the palettes it borrows its two colors
  * from.
  *
  * **This site has never had one.** `tools/prerender/metadata.ts` has supported
@@ -16,10 +16,10 @@ import { MARK_PATH } from "./chrome"
  * every tab showing any of the four surfaces has carried the browser's blank
  * page glyph.
  *
- * ## Why this file has literal colour in it, on the one surface whose rule is
+ * ## Why this file has literal color in it, on the one surface whose rule is
  * that nothing does
  *
- * Every other assertion this lane makes about colour is that there is none —
+ * Every other assertion this lane makes about color is that there is none —
  * `pages.test.ts` sweeps the served markup for a hex value and fails on one.
  * That rule exists because a tree is themed at render and a literal would
  * survive the theming.
@@ -82,7 +82,7 @@ describe("the tab mark", () => {
 /**
  * The tab icon and the bar mark are the same four arms and deliberately not the
  * same artefact — a file for the browser's chrome, path data for the page,
- * because the two answer to different colour axes (`prefers-color-scheme`
+ * because the two answer to different color axes (`prefers-color-scheme`
  * against the Loom palette). Two copies of one shape is a thing that drifts,
  * and this is the cheapest guard against it: derive the path from the file's
  * own rectangles and fail if they disagree.

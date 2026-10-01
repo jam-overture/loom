@@ -51,7 +51,7 @@ const MINIMAL = { palette: "minimal", fontPack: "minimal-sans", stylePreset: "pr
 /**
  * A page that uses every primitive in the library at least once, so a single
  * fixture answers the questions worth asking of all ten at once: do they
- * register, do they render, do they survive a re-theme, and is any colour in
+ * register, do they render, do they survive a re-theme, and is any color in
  * the output not coming from the palette.
  */
 const samplePage = (theme: Record<string, string>, idFactory: IdFactory = sequentialIdFactory()): LoomTree => {
@@ -183,7 +183,7 @@ const render = (
      * ([0063](../../decisions/0063-a-declared-string-travels-with-the-primitive.md)).
      * So leaving it out is the honest wiring for a host that has no
      * translations, and the declared-name assertions below now prove the new
-     * behaviour rather than working around the old one.
+     * behavior rather than working around the old one.
      */
     themes,
     editMode,
@@ -1026,7 +1026,7 @@ describe("the composed vocabulary", () => {
     expect(markup).toContain('href="https://example.com/meridian"')
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(marketingPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(marketingPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -1167,7 +1167,7 @@ describe("the pricing band", () => {
     expect(markup).toContain('src="https://example.com/ren.jpg"')
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(pricingPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(pricingPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -1463,7 +1463,7 @@ describe("the compose-and-arrange layer", () => {
     expect(named).not.toContain("aria-hidden")
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(arrangedPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(arrangedPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -1731,7 +1731,7 @@ describe("the ported bands", () => {
     expect(markup).toMatch(/<img[^>]*src="https:\/\/example\.com\/ada\.jpg"[^>]*alt=""/)
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(portedPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(portedPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -2011,7 +2011,7 @@ describe("the catalogue bands", () => {
     expect(idsIn(bandOf({ lead: true }))).toEqual(idsIn(bandOf({})))
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(cataloguePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(cataloguePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -2210,7 +2210,7 @@ describe("the page chrome", () => {
     it("declares the control and its one name, in both palettes", () => {
       const nav = registry.primitives.find((primitive) => primitive.type === "loom.nav")
 
-      expect(nav?.behaviours).toEqual(["disclose"])
+      expect(nav?.behaviors).toEqual(["disclose"])
       /** One name, not two — `aria-expanded` carries the state (0092). */
       expect(nav?.text["disclose"]).toBe("Menu")
 
@@ -2311,7 +2311,7 @@ describe("the page chrome", () => {
     expect(bar).not.toContain("@media")
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(chromePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(chromePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -2694,7 +2694,7 @@ describe("the form band", () => {
   it("draws its own focus ring and its own chevron, because neither is the palette's by default", () => {
     const { markup } = render(contactPage(EDITORIAL))
 
-    /** A native select arrow is the operating system's colour, and cannot be told about a theme. */
+    /** A native select arrow is the operating system's color, and cannot be told about a theme. */
     expect(markup).toContain(".loom-select::after")
     expect(markup).toContain("border-inline-end: 2px solid currentColor")
     expect(markup).toContain(".loom-input:focus-visible")
@@ -2706,7 +2706,7 @@ describe("the form band", () => {
     expect(reduced).toContain(".loom-input")
   })
 
-  it("survives the re-theme in every state, with no literal colour below the root", async () => {
+  it("survives the re-theme in every state, with no literal color below the root", async () => {
     const editorial = await renderPosting(targeted(EDITORIAL), workingEndpoints())
     const bold = await renderPosting(targeted(BOLD), workingEndpoints())
     const boldBody = splitStylesheet(bold.markup).tree
@@ -2796,7 +2796,7 @@ describe("the targets the library declares", () => {
    * `loom.nav` was in the list above until it took a disclosure control, and it
    * is out of it because the primitive changed rather than because the rule
    * did. A container that places a `<button>` *is* a target — the registry
-   * refuses the behaviour without the declaration (0086), and the declaration
+   * refuses the behavior without the declaration (0086), and the declaration
    * is what keeps a menu button from being nested inside an anchor.
    */
   it("declares a target on the one container that places a control", () => {
@@ -2858,14 +2858,14 @@ describe("the re-theme guarantee", () => {
     expect(splitStylesheet(editorial).stylesheet).toBe(splitStylesheet(bold).stylesheet)
   })
 
-  it("mounts every palette slot at the root and reads colour only from there", () => {
+  it("mounts every palette slot at the root and reads color only from there", () => {
     const { markup } = render(samplePage(BOLD))
     const root = styleOf(markup)
     const body = bodyOf(markup)
 
     for (const slot of PALETTE_SLOTS) expect(root).toContain(`--loom-${slot}:`)
 
-    /** No literal colour anywhere below the root: hex, rgb(), or hsl(). */
+    /** No literal color anywhere below the root: hex, rgb(), or hsl(). */
     expect(body).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(body).not.toMatch(/\b(rgba?|hsla?)\(/)
   })
@@ -2874,7 +2874,7 @@ describe("the re-theme guarantee", () => {
     /**
      * `minimal` is the first palette not ported from Hermes, and a third one
      * earns its keep here rather than in the theme tests: two palettes prove a
-     * primitive reads its colours from slots, and the third proves the *slots
+     * primitive reads its colors from slots, and the third proves the *slots
      * were filled by someone who knew what reads them*. A palette that put its
      * light green at `accent` would compile, register, and resolve — and every
      * eyebrow, kicker and disclosure marker in these eight fixtures would come
@@ -2927,7 +2927,7 @@ describe("the schemas the seam enforces", () => {
   })
 
   it("refuses a prop no primitive declared, rather than ignoring it", () => {
-    expect(propsOf("loom.divider")({ ornament: "rule", colour: "red" }).outcome).toBe("invalid")
+    expect(propsOf("loom.divider")({ ornament: "rule", color: "red" }).outcome).toBe("invalid")
   })
 
   it("requires alt text unless the image says it is decorative", () => {
@@ -3029,7 +3029,7 @@ describe("the enum-driven display mode", () => {
   it("spans the line with every ornament, which nothing asserted until one shipped wrong", () => {
     /**
      * The marketing routine's finding, as the assertion that was missing. The
-     * palette test rendered all three ornaments and asserted about colour, so a
+     * palette test rendered all three ornaments and asserted about color, so a
      * mark drawn at the left end of an empty line passed it for six days. The
      * divider's element is a flex row: an ornament that states neither a width
      * nor a flex shrinks to its content, and `dots` and `diamond` both did.
@@ -3511,7 +3511,7 @@ describe("the technical vocabulary", () => {
 
     /**
      * The display-mode assertion for this unit (0052): one enum, two
-     * renderings, and the difference is markup rather than a colour — a
+     * renderings, and the difference is markup rather than a color — a
      * terminal that were merely a darker panel would be unreadable under a
      * palette that has no dark surface.
      *
@@ -3646,7 +3646,7 @@ describe("the technical vocabulary", () => {
     expect(render(technicalPage(EDITORIAL)).markup).toMatch(/<kbd[^>]*font-size:0\.85em/)
   })
 
-  it("renders the same under every palette, with no colour of its own", () => {
+  it("renders the same under every palette, with no color of its own", () => {
     for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
       const { markup, diagnostics } = render(technicalPage(theme))
       const tree = splitStylesheet(markup).tree
@@ -3704,7 +3704,7 @@ describe("the prose vocabulary", () => {
     expect(markup).toContain("<li>")
   })
 
-  it("colours the marker from the stylesheet, because ::marker cannot be reached inline", () => {
+  it("colors the marker from the stylesheet, because ::marker cannot be reached inline", () => {
     const { markup } = render(prosePage(EDITORIAL))
 
     expect(markup).toContain(".loom-list > li::marker")
@@ -3764,7 +3764,7 @@ describe("the prose vocabulary", () => {
      * `bolder` rather than `var(--loom-heading-weight)`, which is the mistake
      * this shipped as and a screenshot caught. `bold-sans` declares
      * `headingWeight: 400` beside `bodyWeight: 400` — a legitimate pack that
-     * carries emphasis in size and colour — so the heading token renders a
+     * carries emphasis in size and color — so the heading token renders a
      * stressed word identically to the words either side of it. A relative
      * keyword is heavier than whatever it inherits under every pack, including
      * one nobody has registered yet.
@@ -3847,7 +3847,7 @@ describe("the prose vocabulary", () => {
     expect(markup).toContain("border-inline-start:3px solid var(--loom-border-strong)")
   })
 
-  it("renders the same under every palette, with no colour of its own", () => {
+  it("renders the same under every palette, with no color of its own", () => {
     for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
       const { markup, diagnostics } = render(prosePage(theme))
       const tree = splitStylesheet(markup).tree
@@ -4156,11 +4156,11 @@ describe("the comparison band", () => {
      *
      * So the tick is `accent-strong` **everywhere** rather than `accent` outside
      * the column and `accent-strong` inside it: one slot passes on both grounds,
-     * and a tick that changed colour with its column would say something about
+     * and a tick that changed color with its column would say something about
      * the answer that is not true. What the column does re-ink is the two that
      * recede, `no` and the notes, which is the rule asserted here.
      *
-     * It is also why no mark and no note sets a colour inline. An inline colour
+     * It is also why no mark and no note sets a color inline. An inline color
      * beats a rule, so a cell that painted its own glyph would be unreachable
      * from the column that has to re-ink it — the first trap `stylesheet.ts`
      * names, and here it would be an accessibility failure rather than a
@@ -4248,7 +4248,7 @@ describe("the comparison band", () => {
      * quietly doing nothing: no error, no warning, no failing test anywhere
      * else, and a phone rendering that is merely wrong. This is the assertion
      * that would notice, so it checks the absence as well as the presence, and
-     * under both palettes because a width is not a colour and neither palette
+     * under both palettes because a width is not a color and neither palette
      * is allowed to have its own.
      */
     for (const markup of [editorial, bold]) {
@@ -4446,7 +4446,7 @@ describe("the general table", () => {
       [...(body ?? "").matchAll(/<(t[dh])[\s>]/g)].flatMap((match) => (match[1] === undefined ? [] : [match[1]]))
     )
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(tablePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(tablePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -5006,7 +5006,7 @@ describe("the band that moves", () => {
 
     /**
      * The 24 August finding about `loom.table`'s scroll edge, answered here
-     * rather than there: a gradient to the page's colour needs a ground a
+     * rather than there: a gradient to the page's color needs a ground a
      * primitive cannot know, and a mask fades opacity instead. So a band inside
      * a card fades to the card.
      */
@@ -5429,12 +5429,12 @@ describe("the band that moves", () => {
     /**
      * 0086's first consumer in this library, closing the finding this lane
      * filed on 21 August. The control is built by the runtime and placed here;
-     * a declared behaviour nobody places is reported the same way a declared
+     * a declared behavior nobody places is reported the same way a declared
      * slot nobody renders is.
      */
-    expect(code?.behaviours).toEqual(["copy"])
+    expect(code?.behaviors).toEqual(["copy"])
     expect(Object.keys(code?.text ?? {}).sort()).toEqual(["copied", "copy"])
-    expect(audited.unplacedBehaviours).toEqual([])
+    expect(audited.unplacedBehaviors).toEqual([])
   })
 
   it("gives every code panel a bar, because that is where the button goes", () => {
@@ -5451,7 +5451,7 @@ describe("the band that moves", () => {
     expect(bars).toHaveLength(3)
   })
 
-  it("renders the same under every palette, with no colour of its own", () => {
+  it("renders the same under every palette, with no color of its own", () => {
     for (const theme of [EDITORIAL, BOLD, MINIMAL]) {
       const { markup, diagnostics } = render(motionPage(theme))
       const tree = splitStylesheet(markup).tree
@@ -5679,7 +5679,7 @@ describe("what you can book, and why you should be believed", () => {
     expect([...markup.matchAll(/class="loom-credential /g)]).toHaveLength(4)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(bookablePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(bookablePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -5932,7 +5932,7 @@ describe("how it works, and what it works with", () => {
     expect([...markup.matchAll(/class="loom-orbit-seat/g)]).toHaveLength(6)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(explainerPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(explainerPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -6161,7 +6161,7 @@ describe("how it works, and what it works with", () => {
  * on, and where to turn up.
  *
  * One fixture holds both because the questions worth asking of them are the
- * same questions — do they render, do they survive a re-theme, is any colour in
+ * same questions — do they render, do they survive a re-theme, is any color in
  * the output a literal, and did the port put each Hermes field where 0052 and
  * 0094 say it goes — and because they are the two halves of one run.
  *
@@ -6363,7 +6363,7 @@ describe("what you press play on, and where to turn up", () => {
     expect([...markup.matchAll(/class="loom-event /g)]).toHaveLength(3)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(datedPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(datedPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -6374,7 +6374,7 @@ describe("what you press play on, and where to turn up", () => {
     expect(bold).toContain("Loom at Strange Loop")
     /**
      * The root carries the palette itself, so the literal check starts below
-     * it. `transparent` is not a colour a palette could have supplied and is
+     * it. `transparent` is not a color a palette could have supplied and is
      * the one word allowed through — it is how a triangle is drawn out of
      * borders and how a plain surface reserves a border's width.
      */
@@ -6673,7 +6673,7 @@ describe("the furniture between the bands", () => {
     expect([...markup.matchAll(/class="loom-carousel-cell"/g)]).toHaveLength(6)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(furniturePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(furniturePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -6819,7 +6819,7 @@ describe("the furniture between the bands", () => {
   it("cuts the ring's middle out rather than covering it, so it is right on every ground", () => {
     /**
      * `loom.hero`'s aurora reasoning, one primitive later: a disc painted over
-     * the middle has to be the colour of whatever is behind the band, and the
+     * the middle has to be the color of whatever is behind the band, and the
      * same ring sits on the canvas, inside a card and on a tinted section. A
      * mask removes the middle instead.
      */
@@ -6935,7 +6935,7 @@ describe("the product on the page", () => {
     expect([...markup.matchAll(new RegExp(`class="${LIBRARY_CLASS.frame}"`, "g"))]).toHaveLength(2)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(productPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(productPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -7181,7 +7181,7 @@ describe("the exchange, and the way a band arrives", () => {
     expect([...markup.matchAll(/class="loom-reveal loom-reveal-fade"/g)]).toHaveLength(2)
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(conversationPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(conversationPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -7835,7 +7835,7 @@ describe("the composed vocabulary", () => {
     expect(markup).toContain('href="https://example.com/meridian"')
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(marketingPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(marketingPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -8033,7 +8033,7 @@ describe("the shelf and the listings band", () => {
     expect(markup).toContain("Book a viewing")
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(shelfPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(shelfPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -8248,7 +8248,7 @@ describe("the shelf and the listings band", () => {
  * and nine bands, which is a thing no fixture in this file had ever done.
  *
  * All three are one CSS property, all three were valid CSS before, and none of
- * them was catchable by an assertion about markup, colour or width — the
+ * them was catchable by an assertion about markup, color or width — the
  * defects lived in the *geometry*, which vitest has no layout engine to
  * measure. What is assertable is that the property is still declared, and that
  * is what these three do: a guard against the line being deleted, not a proof
@@ -8370,7 +8370,7 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
 
   /**
    * The wash and the rim both read `accent-strong` and `brand-secondary`, and
-   * both are invisible if a palette happens to hold the same colour in the two
+   * both are invisible if a palette happens to hold the same color in the two
    * slots. That is not hypothetical: `editorial` mirrors its accent into
    * `brand-secondary` — `#4a5b78` in both — so the obvious spelling of the wash,
    * `accent` to `brand-secondary`, would have rendered a gradient nobody could
@@ -8673,9 +8673,9 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
   /**
    * `background-clip: text` with a transparent fill is one unsupported property
    * away from a word nobody can see, and the same word disappears a second way
-   * under forced colours. Both fallbacks are rules rather than inline styles on
+   * under forced colors. Both fallbacks are rules rather than inline styles on
    * purpose — an inline style would beat them — so the assertion is that the
-   * element carries no colour of its own and the stylesheet carries both
+   * element carries no color of its own and the stylesheet carries both
    * escapes.
    */
   it("never paints a washed word into a corner it cannot come back from", () => {
@@ -8722,7 +8722,7 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
     }
   })
 
-  it("renders under both starter palettes with no literal colour below the root", () => {
+  it("renders under both starter palettes with no literal color below the root", () => {
     const editorial = splitStylesheet(render(atmospherePage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(atmospherePage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -8962,9 +8962,9 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
 
   /**
    * The layers of one paint, under one palette, as the string a diff would see.
-   * Every assertion below reads a paint's *geometry* rather than its colour,
+   * Every assertion below reads a paint's *geometry* rather than its color,
    * which is why one palette is enough for them and why the pair that does read
-   * colour states both.
+   * color states both.
    */
   const paintLayers = (paint: string, theme: JsonObject = EDITORIAL): string => {
     const idFactory = sequentialIdFactory()
@@ -9021,7 +9021,7 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
   })
 
   /**
-   * The ruled paints read colour rather than geometry, so this one is asserted
+   * The ruled paints read color rather than geometry, so this one is asserted
    * under both starter palettes: `border-subtle` is eleven values of a channel
    * against `editorial`'s canvas and the blueprint had been invisible there
    * since it shipped.
@@ -9043,7 +9043,7 @@ describe("the atmosphere behind a band, the words over a picture, and the one am
 
   /**
    * The mask's core, and the asymmetry is the assertion: a blueprint whose
-   * strongest line was three quarters of its own colour gets a plateau, and a
+   * strongest line was three quarters of its own color gets a plateau, and a
    * lattice already landing at 88 values of a channel does not, because the same
    * change would make a texture that is legible-but-noisy noisier.
    *
@@ -9302,7 +9302,7 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
    * resolution, like every other fixture here — and the states that need one
    * are in `bound.test.ts`, which drives the real seam. What it is here for is
    * the two properties this file holds over *every* primitive: that the markup
-   * is identical under both starter palettes, and that no colour in it is the
+   * is identical under both starter palettes, and that no color in it is the
    * primitive's own.
    */
   const answered = buildElement(idFactory, {
@@ -9650,7 +9650,7 @@ describe("the states a region is in when its content is not simply there", () =>
     expect(calmed).toContain(".loom-waiting-bar {\n    animation: none;")
   })
 
-  it("survives the re-theme with no literal colour below the root", () => {
+  it("survives the re-theme with no literal color below the root", () => {
     const editorial = splitStylesheet(render(boundPage(EDITORIAL)).markup).tree
     const bold = splitStylesheet(render(boundPage(BOLD)).markup).tree
     const body = bold.slice(bold.indexOf(">"))
@@ -9739,7 +9739,7 @@ describe("a portrait with no photograph", () => {
         const body = drawn(face.type, face.props, theme)
 
         expect(body, `${face.type} does not tint its monogram`).toContain("background-color:var(--loom-accent-subtle)")
-        expect(body, `${face.type} writes a literal colour`).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+        expect(body, `${face.type} writes a literal color`).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
       }
     }
   })
@@ -9868,7 +9868,7 @@ describe("what a footer's columns promise", () => {
   /**
    * `auto` is the one value that means *as many as fit*, which is `auto-fit`
    * left alone — so it reserves nothing, and a tree that wants the old
-   * behaviour has a word for it.
+   * behavior has a word for it.
    */
   it("reserves nothing for the value that promises nothing", () => {
     expect(footer({ columns: "auto" })).not.toContain("min-width")
@@ -9892,8 +9892,8 @@ describe("what a footer's columns promise", () => {
  * Everything here was found by looking rather than by reasoning, which is why
  * the assertions are mostly about *what is painted* rather than about what is
  * declared. A schema cannot tell a tile that earns its width from one that does
- * not, and it cannot tell a dashed line drawn in a colour nobody can see from
- * one drawn in a colour they can.
+ * not, and it cannot tell a dashed line drawn in a color nobody can see from
+ * one drawn in a color they can.
  */
 describe("what a picture found under the bands", () => {
   const drawnTree = (node: ElementNode, theme: Record<string, string> = EDITORIAL): string => {
@@ -9966,7 +9966,7 @@ describe("what a picture found under the bands", () => {
     for (const theme of [EDITORIAL, BOLD]) {
       const body = feature(true, theme)
 
-      expect(body.slice(body.indexOf(">")), "a tile writes a literal colour").not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(body.slice(body.indexOf(">")), "a tile writes a literal color").not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     }
   })
 
@@ -10011,7 +10011,7 @@ describe("what a picture found under the bands", () => {
       const body = logo({ name: "Linear", surface: "card" }, theme)
 
       expect(body).toContain("var(--loom-border-default)")
-      expect(body.slice(body.indexOf(">")), "a plated mark writes a literal colour").not.toMatch(
+      expect(body.slice(body.indexOf(">")), "a plated mark writes a literal color").not.toMatch(
         /#[0-9a-fA-F]{3,8}\b/
       )
     }
@@ -10077,7 +10077,7 @@ describe("what a picture found under the bands", () => {
 
   /**
    * The guides are this band's whole argument and one of the two starter
-   * palettes was drawing them in a colour that does not exist against its own
+   * palettes was drawing them in a color that does not exist against its own
    * surface. Asserted on the shared stylesheet, which is where the rule lives.
    */
   it("draws the ring and its connectors in a line the darker palette can show", () => {
@@ -10265,7 +10265,7 @@ describe("the lines that were the whole mark", () => {
      * `loom.meter` was in the sheet twice, byte for byte, until 29 September.
      * Nothing rendered differently for it — the second copy set every property
      * the first had, to the same value — and that is exactly what made it worth
-     * a test rather than a tidy: a lane changing the chevron's colour in the
+     * a test rather than a tidy: a lane changing the chevron's color in the
      * first copy would have watched the second one win and concluded the token
      * was not the problem.
      */

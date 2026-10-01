@@ -85,7 +85,7 @@ const fetchPost: PostBatch = (url, body) => {
  * Nothing about the response is read, and nothing about it could be useful: the
  * page has no retry to attempt and no reader to tell. A refused batch is a
  * counter that will not be incremented, which is the correct failure for a
- * sink — the alternative is a page whose behaviour depends on whether anybody
+ * sink — the alternative is a page whose behavior depends on whether anybody
  * is measuring it.
  */
 export const deliverReaderSignals = (

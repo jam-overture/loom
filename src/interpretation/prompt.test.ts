@@ -152,7 +152,7 @@ describe("the theme block", () => {
 
     expect(message).toContain(THEME_PROP_KEY)
     expect(message).toContain("Give all three every time")
-    expect(message).toContain("never set a colour on a primitive")
+    expect(message).toContain("never set a color on a primitive")
   })
 
   it("shows the palette hex to nobody", () => {

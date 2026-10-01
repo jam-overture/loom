@@ -358,7 +358,7 @@ src/
 │   └── catalogue.ts       # Where a deployment will accept a submission
 ├── catalogue.ts         # What a deployment can build with, as data
 ├── primitives/          # The starter library — a separate entry point
-│   ├── tokens.ts        # The only way a primitive names a colour or a length
+│   ├── tokens.ts        # The only way a primitive names a color or a length
 │   ├── url.ts           # The scheme allowlist every href and src is held to
 │   ├── loom.page.ts     # …and one module per primitive, named for its type
 │   └── index.ts         # The ten, and a registry over them
@@ -571,7 +571,7 @@ const rendered = await renderRequest(request, { source, resolver, themes: create
 
 The renderer resolves the selection, flattens it into `--loom-*` custom
 properties, and hands them to the **root** primitive as `loom.theme`. A
-primitive applies it as its `style` and reads colour, type and spacing back out
+primitive applies it as its `style` and reads color, type and spacing back out
 through `var(--loom-accent)` and friends, so it never learns which palette it is
 wearing and a re-theme touches no node below the root:
 
@@ -685,11 +685,11 @@ const registry = createStarterPrimitiveRegistry([myOwnPrimitive])   // Result, l
 | `loom.media` | leaf | An image; alt text required unless it says it is decorative |
 | `loom.action` | leaf | A call to action; its destination is scheme-checked |
 
-Every one of them reads colour, type and spacing through `var(--loom-*)` and
+Every one of them reads color, type and spacing through `var(--loom-*)` and
 hard-codes none of it, which is what makes a re-theme one `configure` on the
 root. That is enforced by a test: the whole sample page is rendered under both
 starter palettes, and the markup below the root has to be byte-identical and to
-contain no literal colour.
+contain no literal color.
 
 Two rules govern the port, and the remaining sixty follow them:
 

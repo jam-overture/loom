@@ -102,7 +102,7 @@ const themeBlock = (themes: ThemeCatalogue | undefined): string => {
 
 ${rendered}
 
-To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an object with all three keys: {"${THEME_PROP_KEY}":{"palette":"…","fontPack":"…","stylePreset":"…"}}. Give all three every time, even when only one changes — a selection missing a key does not resolve and the page renders unthemed. Use only ids from the lists above. Colours, fonts and spacing come from the theme; never set a colour on a primitive.
+To re-theme the page, configure the root node and set "${THEME_PROP_KEY}" to an object with all three keys: {"${THEME_PROP_KEY}":{"palette":"…","fontPack":"…","stylePreset":"…"}}. Give all three every time, even when only one changes — a selection missing a key does not resolve and the page renders unthemed. Use only ids from the lists above. Colors, fonts and spacing come from the theme; never set a color on a primitive.
 
 `
 }

@@ -58,7 +58,7 @@ describe("MarkedPage", () => {
   })
 
   /**
-   * The behaviour the clear-then-set arrangement exists for, and the only one a
+   * The behavior the clear-then-set arrangement exists for, and the only one a
    * test written after the fact can see: a reviewer walking from one change to the
    * next stays on this route, so the component is re-rendered rather than
    * remounted. Setting without clearing would leave the previous change's part
@@ -93,7 +93,7 @@ describe("MarkedPage", () => {
   /**
    * The class the CSS hangs off. Without it every outline in this file is a rule
    * that matches nothing, and every assertion above would go on passing — the
-   * attribute is set by this component and the colour is not.
+   * attribute is set by this component and the color is not.
    */
   it("puts the page in the box the outlines are declared against", () => {
     const { container } = page([mark("n_card", "going")])

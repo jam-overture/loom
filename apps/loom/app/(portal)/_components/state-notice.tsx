@@ -18,7 +18,7 @@ import type { ReactNode } from "react"
  *   always something, which is why `action` is required for this tone.
  * - `settled` — Loom looked, and the answer is a good one. See below.
  * - `failure` — the read did not happen. Solid and marked in the refusal
- *   colour, so it cannot be skimmed as emptiness. What is on screen is not the
+ *   color, so it cannot be skimmed as emptiness. What is on screen is not the
  *   absence of data; it is the absence of an answer.
  * - `notice` — a condition worth knowing that is not a failure, like an
  *   ephemeral store. Quiet on purpose: it must not compete with the page.

@@ -37,7 +37,7 @@ import { Wordmark } from "./wordmark"
  * front door now frames this demonstration, and a link home from inside that
  * frame goes home *into the frame*. The mark keeps saying whose page this is
  * and stops being a door; the argument is in `wordmark.tsx` and the browser
- * behaviour behind it is in `_lib/framed.ts`.
+ * behavior behind it is in `_lib/framed.ts`.
  */
 export const DemoBar = ({ revision, policyId }: { readonly revision: number; readonly policyId: string }) => (
   <header className="border-edge-subtle bg-surface-topbar flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1.5 border-b px-4 py-2.5 lg:gap-y-2 lg:px-5">

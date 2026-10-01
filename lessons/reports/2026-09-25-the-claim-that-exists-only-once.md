@@ -20,7 +20,7 @@ from 109 — `/lessons/28` and `/lessons/review/set-ag`.
 The brief allows alternating between a lesson and a piece of the surface once
 `(lessons)/` exists. I took the lesson, for two reasons. The syllabus had one
 question outstanding and it was a good one — lesson 27 ended on *when a decision
-record argues for a behaviour and the code implements a default instead, what in
+record argues for a behavior and the code implements a default instead, what in
 this repository would ever notice?* — and the course has now been bitten twice in
 three days by the same shape: lesson 09's stale rung count, lesson 05's inverted
 answer. Both times the repair built a check. Neither time did anybody write down
@@ -194,7 +194,7 @@ defect in anybody's code**:
    `decisions/README.md` that is measurably not true of `decisions/`. Recommended
    fix is the README, not a check.
 
-**Nothing for another lane's behaviour.** `src/` was read and not opened.
+**Nothing for another lane's behavior.** `src/` was read and not opened.
 `tools/decisions/` is well argued throughout, and the one thing in it that looks
 like an omission — a bare citation checked only for existence — is stated as a
 limit in 0118's *Consequences* before any reader could find it, which is the

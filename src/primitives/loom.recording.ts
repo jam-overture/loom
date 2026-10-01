@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS, type AspectName } from "./layout.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -208,7 +208,7 @@ export const loomRecording = definePrimitive({
             className: LIBRARY_CLASS.recordingArt,
             style: {
               ...(marked ? { blockSize: "4.75rem" } : { aspectRatio: SHAPES[given.shape ?? "wide"] }),
-              background: colour("bg-surface-muted"),
+              background: color("bg-surface-muted"),
             },
           },
           given.artwork === undefined
@@ -246,9 +246,9 @@ export const loomRecording = definePrimitive({
                    * and it costs nothing over a photograph.
                    */
                   style: {
-                    background: colour("bg-surface"),
-                    border: `1px solid ${colour("border-strong")}`,
-                    color: colour("fg-default"),
+                    background: color("bg-surface"),
+                    border: `1px solid ${color("border-strong")}`,
+                    color: color("fg-default"),
                   },
                 },
                 /**
@@ -266,7 +266,7 @@ export const loomRecording = definePrimitive({
                     blockSize: "0",
                     borderBlockStart: "0.4rem solid transparent",
                     borderBlockEnd: "0.4rem solid transparent",
-                    borderInlineStart: `0.68rem solid ${colour("fg-default")}`,
+                    borderInlineStart: `0.68rem solid ${color("fg-default")}`,
                     /** Optical centring: a triangle's mass is not its bounding box. */
                     marginInlineStart: "0.16rem",
                   },
@@ -281,9 +281,9 @@ export const loomRecording = definePrimitive({
                   className: LIBRARY_CLASS.recordingTime,
                   style: {
                     margin: "0",
-                    background: colour("bg-surface"),
-                    color: colour("fg-default"),
-                    border: `1px solid ${colour("border-subtle")}`,
+                    background: color("bg-surface"),
+                    color: color("fg-default"),
+                    border: `1px solid ${color("border-subtle")}`,
                     borderRadius: radius("sm"),
                     paddingInline: space(2),
                     paddingBlock: "0.15rem",
@@ -307,7 +307,7 @@ export const loomRecording = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -329,12 +329,12 @@ export const loomRecording = definePrimitive({
         ...loom.editable,
         className: `${LIBRARY_CLASS.recording} ${LIBRARY_CLASS.lift}`,
         style: {
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
           /** Keeps the artwork inside the corners in both arrangements. */
           overflow: "hidden",
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),
@@ -364,7 +364,7 @@ export const loomRecording = definePrimitive({
                     lineHeight: 1.4,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    color: colour("accent"),
+                    color: color("accent"),
                   },
                 },
                 given.byline
@@ -381,7 +381,7 @@ export const loomRecording = definePrimitive({
                     fontFamily: family("body"),
                     fontSize: size(3),
                     lineHeight: 1.6,
-                    color: colour("fg-muted"),
+                    color: color("fg-muted"),
                   },
                 },
                 given.note
@@ -420,7 +420,7 @@ export const loomRecording = definePrimitive({
                     fontFamily: family("body"),
                     fontSize: size(1),
                     lineHeight: 1.4,
-                    color: colour("fg-muted"),
+                    color: color("fg-muted"),
                   },
                 },
                 given.duration

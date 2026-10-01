@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, hairline, monospace, radius, size, space } from "./tokens.js"
+import { color, family, hairline, monospace, radius, size, space } from "./tokens.js"
 
 /**
  * The chrome a product screenshot sits in: a browser window, an app window, or
@@ -87,7 +87,7 @@ const HANDSET_WIDTH = "22rem"
  * A handset's corners are far rounder than any surface in the type scale, and
  * `radius("full")` on a rectangle is a stadium rather than a phone. So this is
  * a length and not a token, which is the one thing `tokens.ts` allows a
- * primitive to write for itself: the rule it enforces is about **colour**, and
+ * primitive to write for itself: the rule it enforces is about **color**, and
  * there is no palette on which a phone has different corners.
  */
 const HANDSET_RADIUS = "2.25rem"
@@ -102,7 +102,7 @@ const dot = (index: number): ReactNode =>
       width: "0.62rem",
       height: "0.62rem",
       borderRadius: radius("full"),
-      background: colour("fg-subtle"),
+      background: color("fg-subtle"),
       /**
        * Opacity rather than a fourth grey. Every palette declares three inks
        * and the third is held to a contrast bar (0074) because it is *text*;
@@ -131,7 +131,7 @@ const SIGNAL: ReactNode = createElement(
         width: "0.16rem",
         height: `${height}rem`,
         borderRadius: radius("sm"),
-        background: colour("fg-muted"),
+        background: color("fg-muted"),
       },
     })
   )
@@ -143,7 +143,7 @@ const BAR_BASE = {
   gap: space(3),
   paddingBlock: space(2),
   paddingInline: space(3),
-  background: colour("bg-surface-muted"),
+  background: color("bg-surface-muted"),
   borderBlockEnd: `1px solid ${hairline()}`,
 } as const
 
@@ -163,7 +163,7 @@ const chromeBar = (chrome: NonNullable<Props["chrome"]>, label: string | undefin
           paddingInline: space(4),
           fontFamily: family("body"),
           fontSize: size(1),
-          color: colour("fg-muted"),
+          color: color("fg-muted"),
         },
       },
       createElement("span", { key: "name", style: { flex: "0 1 auto", minWidth: "0" } }, label),
@@ -183,7 +183,7 @@ const chromeBar = (chrome: NonNullable<Props["chrome"]>, label: string | undefin
           width: "5.5rem",
           height: "1.05rem",
           borderRadius: radius("full"),
-          background: colour("fg-default"),
+          background: color("fg-default"),
         },
       }),
       SIGNAL
@@ -205,7 +205,7 @@ const chromeBar = (chrome: NonNullable<Props["chrome"]>, label: string | undefin
             textAlign: "center",
             fontFamily: family("body"),
             fontSize: size(1),
-            color: colour("fg-muted"),
+            color: color("fg-muted"),
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -234,13 +234,13 @@ const chromeBar = (chrome: NonNullable<Props["chrome"]>, label: string | undefin
               maxWidth: "28rem",
               paddingBlock: space(1),
               paddingInline: space(3),
-              background: colour("bg-canvas"),
-              border: `1px solid ${colour("border-subtle")}`,
+              background: color("bg-canvas"),
+              border: `1px solid ${color("border-subtle")}`,
               borderRadius: radius("full"),
               /** An address in the body face reads as a caption; in mono it reads as an address. */
               fontFamily: monospace(),
               fontSize: size(1),
-              color: colour("fg-muted"),
+              color: color("fg-muted"),
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -271,8 +271,8 @@ export const loomFrame = definePrimitive({
           overflow: "hidden",
           width: "100%",
           boxSizing: "border-box",
-          background: colour("bg-surface"),
-          border: handset ? `${HANDSET_BEZEL} solid ${colour("fg-default")}` : `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: handset ? `${HANDSET_BEZEL} solid ${color("fg-default")}` : `1px solid ${color("border-subtle")}`,
           borderRadius: handset ? HANDSET_RADIUS : radius("lg"),
           /**
            * A long, low shadow rather than a ring: the frame has to read as
@@ -285,7 +285,7 @@ export const loomFrame = definePrimitive({
            * a dark one**. That is the right answer for both and it is not the
            * same effect, which only the two screenshots side by side will say.
            */
-          boxShadow: `0 32px 64px -44px ${colour("fg-default")}`,
+          boxShadow: `0 32px 64px -44px ${color("fg-default")}`,
           ...(handset ? { maxWidth: HANDSET_WIDTH, marginInline: "auto" } : {}),
         },
       },
@@ -304,7 +304,7 @@ export const loomFrame = definePrimitive({
              * laptop and a legend under the screen on a phone.
              */
             position: "relative",
-            background: colour("bg-surface-muted"),
+            background: color("bg-surface-muted"),
             minHeight: space(7),
           },
         },

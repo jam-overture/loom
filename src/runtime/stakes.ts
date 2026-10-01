@@ -306,7 +306,7 @@ const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
  * the page can.
  *
  * A host that disagrees does not need a knob. It declares no vocabulary and this
- * never fires, which is today's behaviour and the default (0002).
+ * never fires, which is today's behavior and the default (0002).
  */
 const unknownPrimitive = ({ analysis }: StakeInput): StakeFactor | null => {
   const { unknownPrimitives } = analysis
@@ -340,7 +340,7 @@ const unknownPrimitive = ({ analysis }: StakeInput): StakeFactor | null => {
  * only available answer is no.
  *
  * A host that disagrees does not need a knob. It wires no props vocabulary and
- * this never fires, which is today's behaviour and the default (0002).
+ * this never fires, which is today's behavior and the default (0002).
  */
 const invalidProps = ({ analysis }: StakeInput): StakeFactor | null => {
   const { invalidProps: invalid } = analysis

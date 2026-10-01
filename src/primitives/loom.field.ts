@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { LIBRARY_CLASS, libraryStylesheet } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * One thing a form asks for: a label, the control under it, and the note that
@@ -132,9 +132,9 @@ const CONTROL: CSSProperties = {
   boxSizing: "border-box",
   paddingBlock: space(3),
   paddingInline: space(3),
-  background: colour("bg-surface"),
-  color: colour("fg-default"),
-  border: `1px solid ${colour("border-default")}`,
+  background: color("bg-surface"),
+  color: color("fg-default"),
+  border: `1px solid ${color("border-default")}`,
   borderRadius: radius("md"),
   fontFamily: family("body"),
   fontWeight: weight("body"),
@@ -175,9 +175,9 @@ const controlFor = (
      * `accent-color` is why this is two enum members rather than a hand-drawn
      * control: it themes the native checkbox from the palette, so the tick is
      * the browser's — with the browser's focus ring, the browser's touch
-     * behaviour and the platform's idea of what a checkbox looks like — and it
+     * behavior and the platform's idea of what a checkbox looks like — and it
      * is still `accent` under every registered palette. Drawing our own would
-     * have meant re-implementing all three to change one colour.
+     * have meant re-implementing all three to change one color.
      */
     return createElement("input", {
       ...shared,
@@ -186,7 +186,7 @@ const controlFor = (
         flex: "0 0 auto",
         width: size(4),
         height: size(4),
-        accentColor: colour("accent"),
+        accentColor: color("accent"),
         /** Sat on the first line of the label rather than on the box's top edge. */
         marginBlockStart: "0.1em",
         cursor: "pointer",
@@ -206,7 +206,7 @@ const controlFor = (
   if (type === "select") {
     /**
      * The native arrow is switched off and drawn in CSS, because the one the
-     * browser supplies is the operating system's colour and cannot be told
+     * browser supplies is the operating system's color and cannot be told
      * about the palette — a light grey chevron that disappears on the bold
      * canvas. The replacement is `currentColor`, so it is the palette's by
      * construction.
@@ -278,7 +278,7 @@ export const loomField = definePrimitive({
           fontWeight: type === "checkbox" ? weight("body") : weight("heading"),
           fontSize: type === "checkbox" ? size(3) : size(2),
           lineHeight: type === "checkbox" ? 1.5 : undefined,
-          color: type === "checkbox" ? colour("fg-muted") : colour("fg-default"),
+          color: type === "checkbox" ? color("fg-muted") : color("fg-default"),
           ...(type === "checkbox" ? { cursor: "pointer" } : {}),
         },
       },
@@ -292,7 +292,7 @@ export const loomField = definePrimitive({
         ? null
         : createElement(
             "span",
-            { "aria-hidden": true, style: { color: colour("accent-strong") } },
+            { "aria-hidden": true, style: { color: color("accent-strong") } },
             " *"
           )
     )
@@ -304,7 +304,7 @@ export const loomField = definePrimitive({
             "p",
             {
               id: hint,
-              style: { margin: "0", fontSize: size(2), color: colour("fg-muted") },
+              style: { margin: "0", fontSize: size(2), color: color("fg-muted") },
             },
             given.hint
           )

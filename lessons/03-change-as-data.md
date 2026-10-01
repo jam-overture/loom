@@ -274,8 +274,8 @@ Write, rate 1–5, then reveal.
 3. Why is refusing a delta better than applying the 3 of 4 operations that
    worked?
 
-4. `configure` on a text node with `set: { colour: "red" }` is refused. Why —
-   and where would that colour actually live?
+4. `configure` on a text node with `set: { color: "red" }` is refused. Why —
+   and where would that color actually live?
 
 ---
 
@@ -342,9 +342,9 @@ and nothing can attribute. The inverse delta computed for the full change would
 no longer match reality, so it would not even be undoable. A refusal leaves you
 in a known state; a partial application leaves you in an unaccountable one.
 
-**4** Text nodes have exactly one settable key, `value` — so `colour` is refused
-with `unconfigurable-key`. Presentation is not text's business: the colour
+**4** Text nodes have exactly one settable key, `value` — so `color` is refused
+with `unconfigurable-key`. Presentation is not text's business: the color
 belongs in the props of the *element* that contains the text, and that element's
-registered primitive decides what `colour` means. This keeps content and
+registered primitive decides what `color` means. This keeps content and
 presentation on separate nodes, which is also why "rewrite this sentence" and
 "restyle this card" are different operations on different targets.

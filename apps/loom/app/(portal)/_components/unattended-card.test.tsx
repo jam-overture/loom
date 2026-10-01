@@ -21,7 +21,7 @@ import { UnattendedCard } from "./unattended-card"
  * What these pin is the order a reader meets it in, and the one thing it must
  * not do: read as an alarm. A change the Gate applied correctly is news, not a
  * warning, and a portal that dresses its own runtime working properly in the
- * refusal colour teaches a reader to ignore the colour.
+ * refusal color teaches a reader to ignore the color.
  */
 
 const treeId = treeIdSchema.parse("t_1")
@@ -129,11 +129,11 @@ describe("a change nobody was asked about", () => {
 
   /**
    * Not an alarm. The Gate applying a change it was allowed to apply is the
-   * runtime working, and a card in the refusal colour would teach a reader that
-   * the colour means nothing. `bg-applied` is the same green the portal already
+   * runtime working, and a card in the refusal color would teach a reader that
+   * the color means nothing. `bg-applied` is the same green the portal already
    * uses for a change that went through.
    */
-  it("is coloured as something that happened, not as something that went wrong", () => {
+  it("is colored as something that happened, not as something that went wrong", () => {
     const { container } = render(<UnattendedCard change={change} page={page} />)
     const markup = container.innerHTML
 

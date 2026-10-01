@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS } from "./layout.js"
-import { colour, family, radius, size, space } from "./tokens.js"
+import { color, family, radius, size, space } from "./tokens.js"
 
 /**
  * Two states of one thing, superimposed, with a hard edge between them — the
@@ -41,7 +41,7 @@ import { colour, family, radius, size, space } from "./tokens.js"
  * — not something a tree's JSON props can carry, and not something this library
  * may implement for itself:
  * [0086](../../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
- * settled that a behaviour is a control the runtime builds and a primitive
+ * settled that a behavior is a control the runtime builds and a primitive
  * places, and the vocabulary has one member. So this is filed as a second
  * member rather than built, and what ships is the still version, which is what
  * most pages that use this actually are.
@@ -102,8 +102,8 @@ const DEFAULT_POSITION = 50
  * always visible, whatever is underneath, and the pair costs one `box-shadow`.
  */
 const OUTLINED: CSSProperties = {
-  background: colour("bg-surface"),
-  boxShadow: `0 0 0 1px ${colour("fg-default")}`,
+  background: color("bg-surface"),
+  boxShadow: `0 0 0 1px ${color("fg-default")}`,
 }
 
 const chip = (label: string, edge: "start" | "end"): ReactNode =>
@@ -119,7 +119,7 @@ const chip = (label: string, edge: "start" | "end"): ReactNode =>
         paddingInline: space(3),
         borderRadius: radius("full"),
         ...OUTLINED,
-        color: colour("fg-default"),
+        color: color("fg-default"),
         fontFamily: family("body"),
         fontSize: size(1),
         letterSpacing: "0.08em",
@@ -138,8 +138,8 @@ const chevron = (towards: "start" | "end"): ReactNode =>
     style: {
       width: "0.42em",
       height: "0.42em",
-      borderInlineStart: `2px solid ${colour("fg-default")}`,
-      borderBlockStart: `2px solid ${colour("fg-default")}`,
+      borderInlineStart: `2px solid ${color("fg-default")}`,
+      borderBlockStart: `2px solid ${color("fg-default")}`,
       transform: `rotate(${towards === "start" ? "-45deg" : "135deg"})`,
     },
   })
@@ -171,7 +171,7 @@ export const loomBeforeAfter = definePrimitive({
           overflow: "hidden",
           width: "100%",
           borderRadius: radius("md"),
-          background: colour("bg-surface-muted"),
+          background: color("bg-surface-muted"),
           ...(aspect === undefined ? {} : { aspectRatio: ASPECT_RATIOS[aspect] }),
         },
       },

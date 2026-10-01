@@ -121,11 +121,11 @@ never be stricter than applying one" — and the reason is sound: the undo of a
 could not compute the undo of a deletion, which is the most important undo there
 is.
 
-So the recommended repair is to the sentence, not the behaviour: 0038 landed
+So the recommended repair is to the sentence, not the behavior: 0038 landed
 after that comment was written and made it false. Something like *"fails for the
 structural reasons applying would fail; it does not check the delta's envelope,
 and it deliberately does not apply the recycling rule"* would be accurate. It is
-one comment and no behaviour change.
+one comment and no behavior change.
 
 Worth noting where this bites in practice, since it is not only cosmetic:
 `assessReversibility` calls `invertDelta`, so a proposal containing a recycled id

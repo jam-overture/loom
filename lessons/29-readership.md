@@ -88,7 +88,7 @@ your confidence on.
    component: () => createElement("span", null, "quiet")
 
    // (c) reads a prop it does not declare
-   component: ({ props: given }) => createElement("span", null, given.colour)
+   component: ({ props: given }) => createElement("span", null, given.color)
    ```
 
    For each of (a), (b) and (c), say what happens at each of three moments: the
@@ -97,13 +97,13 @@ your confidence on.
 
 2. `auditRegistry` calls every registered component and reports, among other
    things, `unplacedSlots` — a primitive that declared a region and then did not
-   render it — and `unplacedBehaviours`, the same for a control it asked the
+   render it — and `unplacedBehaviors`, the same for a control it asked the
    runtime for. Both are described in the source as *a promise the registration
    made and the component did not keep.*
 
    A props schema is also a promise the registration made. Write down **why the
    audit cannot report an unkept one** — and make your answer about a property
-   that slots and behaviours have and props do not, rather than about effort.
+   that slots and behaviors have and props do not, rather than about effort.
 
 3. Suppose you build the check anyway: call every component in the starter
    library, under every configuration the audit already probes, and record which
@@ -230,24 +230,24 @@ own schema closes over (0075), in every answer state its registrant supplied
 
 - a primitive that ignores `loom.editable`, so the portal cannot see it;
 - a primitive that declared a **slot** and dropped it;
-- a primitive that took a **behaviour** from the runtime and did not place its
+- a primitive that took a **behavior** from the runtime and did not place its
   control;
 - a primitive that declared `submits` and placed no address, or placed one
   without declaring;
 - a primitive that **threw** under props its own schema accepts.
 
 Two of those are described in `audit.ts` in exactly the words this lesson needs.
-`unplacedSlots` and `unplacedBehaviours` are each *a promise the registration made
+`unplacedSlots` and `unplacedBehaviors` are each *a promise the registration made
 and the component did not keep* — and the comment on the second one goes one step
 further and stops one step short:
 
 > Like `unplacedSlots` this is a promise the registration made and the component
 > did not keep — and unlike a slot, nothing else on the page hints that something
-> is missing, because the content a behaviour acts on renders perfectly without
+> is missing, because the content a behavior acts on renders perfectly without
 > it.
 
 That sentence is ranking two broken promises by **how visible the breakage is**.
-A dropped slot loses content, which a reader might notice. A dropped behaviour
+A dropped slot loses content, which a reader might notice. A dropped behavior
 loses a control beside content that renders perfectly, which a reader will not.
 The axis is already in the file. Take it one notch further and you arrive at this
 lesson: an unread prop loses *nothing*. The page renders, the content is all
@@ -313,7 +313,7 @@ three things the audit already checks:
 
 ```text
   declared slots no component placed:      0
-  declared behaviours no component placed: 0
+  declared behaviors no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 5
     loom.tally       prefix, suffix
@@ -492,7 +492,7 @@ block a build on.
 | --- | --- |
 | `src/sdk/definition.ts` | The registration contract. Read the doc comment top to bottom as a list of *audiences*: almost every field names who reads it and several say "read by nothing at render time", which is the distinction this lesson is about. |
 | `src/sdk/registry.ts` | `undeclaredInteractiveProp`, `undeclaredFrameProp`, `undeclaredCopyProp`, `registeredReads`. Four comparisons against the schema, and the three refusal messages that name one drift. |
-| `src/sdk/audit.ts` | `unplacedSlots` and `unplacedBehaviours`, and the comment that ranks two broken promises by how visible each is. The axis this lesson extends is written there. |
+| `src/sdk/audit.ts` | `unplacedSlots` and `unplacedBehaviors`, and the comment that ranks two broken promises by how visible each is. The axis this lesson extends is written there. |
 | `src/sdk/conformance.ts` | `probeConfigurations` — the sum of the closed choices, not their product — and `probeStates`, whose comment argues why one half is derived and the other supplied. |
 | `src/primitives/loom.embed.ts` | The one true row. Its header says the component no longer reads a URL, and why the placed `src` must be the seam's and not the tree's. |
 | `src/primitives/loom.feed.ts` | `readAnswer`, and why a binding with no outcome reads as empty. The reason exercise C's first three rows exist. |
@@ -534,7 +534,7 @@ import { nodeIdSchema } from "./ids.js"
 import type { JsonObject } from "./json.js"
 import { primitiveTypeSchema } from "./primitive-type.js"
 import { createStarterPrimitiveRegistry } from "./primitives/index.js"
-import { NO_BEHAVIOURS } from "./render/behaviour.js"
+import { NO_BEHAVIORS } from "./render/behavior.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE } from "./render/editable.js"
 import { asCallablePrimitive, NO_SLOTS, type LoomPrimitiveProps } from "./render/primitive.js"
 import { auditRegistry } from "./sdk/audit.js"
@@ -613,7 +613,7 @@ const callWatching = (
       data,
       frames: framesFor(entry),
       text: entry.text,
-      behaviours: NO_BEHAVIOURS,
+      behaviors: NO_BEHAVIORS,
       decorative: () => null,
     },
     props: watched as JsonObject,
@@ -762,7 +762,7 @@ npx tsc -p tsconfig.json --noEmit
 Reading only the lines about that file, the whole of what it says is:
 
 ```text
-src/scratch.ts(28,97): error TS2339: Property 'colour' does not exist on type '{ tone?: "accent" | "neutral" | undefined; }'.
+src/scratch.ts(28,97): error TS2339: Property 'color' does not exist on type '{ tone?: "accent" | "neutral" | undefined; }'.
 ```
 
 **One diagnostic, for (c), naming line 28 of three definitions.** (a) and (b) are
@@ -793,7 +793,7 @@ describe("C", () => {
     const audit = auditRegistry(registry)
 
     console.log(`  declared slots no component placed:      ${audit.unplacedSlots.length}`)
-    console.log(`  declared behaviours no component placed: ${audit.unplacedBehaviours.length}`)
+    console.log(`  declared behaviors no component placed: ${audit.unplacedBehaviors.length}`)
     console.log(`  components that threw under their own schema: ${audit.throwsOnDeclaredProps.length}`)
     console.log(`  primitives with a declared prop nothing read: ${rows.length}`)
     for (const row of rows) console.log(row)
@@ -803,7 +803,7 @@ describe("C", () => {
 
 ```
   declared slots no component placed:      0
-  declared behaviours no component placed: 0
+  declared behaviors no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 5
     loom.tally       prefix, suffix

@@ -33,14 +33,14 @@ So the lesson opens on the question that fact raises: why did a seam that fits
 perfectly not feel like the same thing for three lessons? The answer it gives is
 that data, destinations and origins all keep a **value** away from a model, and
 this one keeps away a **value space**. A URL is dangerous because of what it
-points at. A colour is not dangerous at all; sixteen million values with no wrong
+points at. A color is not dangerous at all; sixteen million values with no wrong
 ones is a different problem, and it happens to have the same solution.
 
 The **second half is what the lesson is actually for.** Contrast is not a
-property of a colour, it is a property of a pair, and no party holds the pair:
+property of a color, it is a property of a pair, and no party holds the pair:
 
-- the tree holds a palette id and a structure, and no colours;
-- the palette holds seventeen colours and no idea which are read on which;
+- the tree holds a palette id and a structure, and no colors;
+- the palette holds seventeen colors and no idea which are read on which;
 - the primitive holds at most one end — `loom.perk` writes `fg-subtle` and paints
   no ground, and 0008 forbids the renderer from enforcing parentage, so any
   surface is a legal parent.
@@ -85,8 +85,8 @@ genuinely interesting — a lightness search against the AA bar — but it is a
 build-time tool and a lesson that spent a thousand words on it would be teaching
 the library rather than the idea. What survived is 0077's sentence, which earns
 its place because it is the same instinct as the rest of the course pointed at a
-build step: *a page whose colours are computed at import time is a page whose
-colours nobody approved.*
+build step: *a page whose colors are computed at import time is a page whose
+colors nobody approved.*
 
 **Cut: the font-pack and style-preset schemas in detail.** Three orthogonal
 pieces is stated and demonstrated (Exercise B: seventeen of forty-five variables
@@ -118,7 +118,7 @@ argument.
 
 **The equal-luminance pair had to be constructed.** `#b3261e` (brick red) on
 `#1d6a4a` (forest green) is **1.00:1** contrast and **ΔE 91.19**. In an
-accessibility report that ratio means "these are the same colour"; a reader
+accessibility report that ratio means "these are the same color"; a reader
 disagrees instantly. I searched for the pair rather than guessing one, by fixing
 a red and solving for a green of matching relative luminance. It is the whole
 argument for the separation audit being a different instrument in two numbers.
@@ -148,7 +148,7 @@ to fix.
 ## Found while teaching
 
 **One, filed.** `src/theme/derive.ts`'s module comment closes by naming
-`deriveBrandPalette` as the tool that decides whether a brand colour can be ink
+`deriveBrandPalette` as the tool that decides whether a brand color can be ink
 or has to be an area. No such function exists — the identifier appears exactly
 once in the repository, in that sentence. Filed in `FINDINGS.md` for
 `Loom primitives`. It matters more than its size because of 0080: the comment is

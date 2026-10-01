@@ -61,7 +61,7 @@ five before you look anything up.
    rung that speaks. *(09)*
 
 Question 1 is the one to be exact about. Everything in this lesson is downstream
-of that behaviour being correct, and a rough answer here will let you read the
+of that behavior being correct, and a rough answer here will let you read the
 rest as a bug report about something that is working.
 
 ---
@@ -120,7 +120,7 @@ smallest number of steps the system allows:
 4. They read it, decide it is fine, and click yes.
 5. The answer comes back `not-written`, and the row disappears.
 
-Nothing here is a bug. Step 5 is lesson 10's behaviour and it is right:
+Nothing here is a bug. Step 5 is lesson 10's behavior and it is right:
 `confirmHeld` reads head, compares it to the revision the hold recorded, and when
 they differ it **releases the hold** and reports `revision-conflict` without ever
 calling `confirmChange`. Dead rather than stale, deliberately — the delta was
@@ -969,7 +969,7 @@ Write for two minutes, then move on.
 
 Set AE in [`review-schedule.md`](review-schedule.md), two days after this lesson.
 Interleaved with 05, 09, 10, 16, 18, 22, 24 and 25 — heavy on 10, because this
-lesson is unreadable if `confirmHeld`'s behaviour is not solid, and heavy on 24,
+lesson is unreadable if `confirmHeld`'s behavior is not solid, and heavy on 24,
 because the rule about what a reading owes a caller is here in its second form
 and the two are worth holding side by side.
 

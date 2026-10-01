@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { portrait } from "./portrait.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -85,7 +85,7 @@ export const loomPerson = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.2,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.name
@@ -102,7 +102,7 @@ export const loomPerson = definePrimitive({
           lineHeight: 1.4,
           letterSpacing: "0.04em",
           textTransform: "uppercase",
-          color: colour("accent"),
+          color: color("accent"),
         },
       },
       given.role
@@ -120,7 +120,7 @@ export const loomPerson = definePrimitive({
           gap: space(3),
           textAlign: centred ? "center" : "start",
           textDecoration: "none",
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),
@@ -150,7 +150,7 @@ export const loomPerson = definePrimitive({
                 fontFamily: family("body"),
                 fontSize: size(3),
                 lineHeight: 1.6,
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.bio

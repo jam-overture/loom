@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, weight } from "./tokens.js"
+import { color, family, size, weight } from "./tokens.js"
 
 /**
  * One cell of a `loom.table` — a value, a label, or a sentence.
@@ -145,7 +145,7 @@ export const loomTableCell = definePrimitive({
           fontWeight: heading ? "bolder" : weight("body"),
           fontSize: size(3),
           lineHeight: 1.5,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           ...(numeric ? { fontVariantNumeric: "tabular-nums" } : {}),
         },
       },

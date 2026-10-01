@@ -23,7 +23,7 @@ import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, type DemoSession } from "./session"
 import {
   MAX_SPOTS,
-  SPOT_COLOURS,
+  SPOT_COLORS,
   spotlightCss,
   spotlightsAcross,
   spotlightsFor,
@@ -153,7 +153,7 @@ describe("marking a change on the page", () => {
    * The most persuasive moment this surface has: Loom is asking about *that*
    * band, and the band says so itself rather than being described in the rail.
    */
-  it("marks the band a held removal is asking about, in the waiting colour", async () => {
+  it("marks the band a held removal is asking about, in the waiting color", async () => {
     const session = await sessionFor("trim-held")
     const record = await ask(session, "trim")
     const marks = await marksFor(session, record)
@@ -368,7 +368,7 @@ describe("marking a change on the page", () => {
 
   /**
    * A move near the root is a restructure, so the Gate holds it — which means
-   * the same node is marked twice in a visitor's session, in two colours, saying
+   * the same node is marked twice in a visitor's session, in two colors, saying
    * two different things about the same band. That pair is the demo's whole
    * argument in one gesture, so both halves are asserted here.
    */
@@ -458,7 +458,7 @@ describe("which change the page is about", () => {
   })
 
   /**
-   * And never in two colours at once. *"Two marks in two colours on one page is a
+   * And never in two colors at once. *"Two marks in two colors on one page is a
    * quiz rather than an explanation"* is the rule this list had to be reconciled
    * with, and it survives intact: green says *this landed* and amber says *this
    * is waiting*, and a page showing both asks a stranger to hold two ideas at
@@ -495,7 +495,7 @@ describe("which change the page is about", () => {
    *
    * Answering either of two holds kills the other where it stands
    * (`_lib/moved.ts`). The page went on ringing the dead one's band in amber and
-   * labelling it *This would be removed*, which is this surface's colour for a
+   * labelling it *This would be removed*, which is this surface's color for a
    * question it is still asking. It is not asking, and no answer will land it.
    */
   it("does not mark a hold the page has moved past", () => {
@@ -712,7 +712,7 @@ describe("the mark's stylesheet", () => {
 
   const luminance = (hex: string): number => {
     const parsed = /^#([0-9a-f]{6})$/i.exec(hex.trim())
-    if (!parsed?.[1]) throw new Error(`${hex} is not a six-digit hex colour`)
+    if (!parsed?.[1]) throw new Error(`${hex} is not a six-digit hex color`)
 
     const channels = [0, 2, 4].map((offset) => {
       const part = Number.parseInt(parsed[1]!.slice(offset, offset + 2), 16) / 255
@@ -730,18 +730,18 @@ describe("the mark's stylesheet", () => {
   }
 
   /**
-   * The colour is the entire mechanism: a visitor is never told what the marks
-   * mean, they see one colour on the badge, on the dot in the rail and on the
+   * The color is the entire mechanism: a visitor is never told what the marks
+   * mean, they see one color on the badge, on the dot in the rail and on the
    * ring on the page, and read it in a glance. If a run retunes the badge and
    * not the ring, that teaching quietly stops working and nothing else notices.
    */
-  it("wears the same two colours the record's own badges do", () => {
-    expect(SPOT_COLOURS.applied.fill).toBe(tokenValue("--outcome-applied-text"))
-    expect(SPOT_COLOURS.awaiting.fill).toBe(tokenValue("--outcome-awaiting-text"))
+  it("wears the same two colors the record's own badges do", () => {
+    expect(SPOT_COLORS.applied.fill).toBe(tokenValue("--outcome-applied-text"))
+    expect(SPOT_COLORS.awaiting.fill).toBe(tokenValue("--outcome-awaiting-text"))
   })
 
   it.each([["applied"], ["awaiting"]] as const)("keeps the %s chip legible", (tone) => {
-    expect(contrast(SPOT_COLOURS[tone].fill, SPOT_COLOURS[tone].ink)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(SPOT_COLORS[tone].fill, SPOT_COLORS[tone].ink)).toBeGreaterThanOrEqual(4.5)
   })
 
   /**
@@ -766,7 +766,7 @@ describe("the mark's stylesheet", () => {
   ] as const)("keeps the %s ring visible on the %s stage", (tone, paletteId) => {
     const palette = paletteId === boldPalette.id ? boldPalette : editorialPalette
 
-    expect(contrast(SPOT_COLOURS[tone].edge, canvasOf(palette))).toBeGreaterThanOrEqual(3)
+    expect(contrast(SPOT_COLORS[tone].edge, canvasOf(palette))).toBeGreaterThanOrEqual(3)
   })
 
   it("keys the rule on the attribute edit mode already puts on the node", () => {
@@ -782,7 +782,7 @@ describe("the mark's stylesheet", () => {
 
     expect(rules).toContain('[data-loom-node="demo-n7"]')
     expect(rules).toContain('content: "Just changed"')
-    expect(rules).toContain(SPOT_COLOURS.applied.edge)
+    expect(rules).toContain(SPOT_COLORS.applied.edge)
   })
 
   /**

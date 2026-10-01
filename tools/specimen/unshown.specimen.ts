@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import type { NodeData } from "../../src/data/resolution.js"
 import { sequentialIdFactory } from "../../src/ids.js"
-import { colour, family, monospace, size, space, weight } from "../../src/primitives/tokens.js"
+import { color, family, monospace, size, space, weight } from "../../src/primitives/tokens.js"
 import { describeRenderDiagnostic } from "../../src/render/diagnostics.js"
 import type { LoomPrimitiveProps } from "../../src/render/primitive.js"
 import { readUnshown, unshownRows, type UnshownDeclaration } from "../../src/render/unshown.js"
@@ -87,7 +87,7 @@ const readingOfEntries: UnshownDeclaration = (_props, data) => [
 const ROW_STYLE: CSSProperties = {
   paddingTop: space(3),
   paddingBottom: space(3),
-  borderBottom: `1px solid ${colour("border-subtle")}`,
+  borderBottom: `1px solid ${color("border-subtle")}`,
 }
 
 const TITLE: CSSProperties = {
@@ -95,7 +95,7 @@ const TITLE: CSSProperties = {
   fontFamily: family("heading"),
   fontWeight: weight("heading"),
   fontSize: size(4),
-  color: colour("fg-default"),
+  color: color("fg-default"),
 }
 
 const META: CSSProperties = {
@@ -104,14 +104,14 @@ const META: CSSProperties = {
   fontSize: size(1),
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: colour("fg-subtle"),
+  color: color("fg-subtle"),
 }
 
 const NOTICE: CSSProperties = {
   marginTop: space(4),
   fontFamily: family("body"),
   fontSize: size(2),
-  color: colour("fg-muted"),
+  color: color("fg-muted"),
 }
 
 const listing = definePrimitive({
@@ -153,7 +153,7 @@ const LOG: CSSProperties = {
   fontFamily: monospace(),
   fontSize: size(2),
   lineHeight: 1.6,
-  color: colour("fg-default"),
+  color: color("fg-default"),
   whiteSpace: "pre-wrap",
   wordBreak: "break-word",
 }
@@ -165,7 +165,7 @@ const LABEL: CSSProperties = {
   fontSize: size(1),
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: colour("fg-subtle"),
+  color: color("fg-subtle"),
 }
 
 /**

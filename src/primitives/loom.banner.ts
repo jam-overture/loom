@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, hairline, radius, size, space } from "./tokens.js"
+import { color, family, hairline, radius, size, space } from "./tokens.js"
 
 /**
  * The strip a site runs above everything else: one short thing to say, and one
@@ -76,11 +76,11 @@ type Props = z.infer<typeof props>
  */
 const TONES: Readonly<Record<NonNullable<Props["tone"]>, CSSProperties>> = {
   accent: {
-    background: colour("accent-subtle"),
-    borderBlockEnd: `1px solid ${colour("border-accent")}`,
+    background: color("accent-subtle"),
+    borderBlockEnd: `1px solid ${color("border-accent")}`,
   },
   surface: {
-    background: colour("bg-surface-muted"),
+    background: color("bg-surface-muted"),
     borderBlockEnd: `1px solid ${hairline()}`,
   },
   plain: {
@@ -155,7 +155,7 @@ export const loomBanner = definePrimitive({
           fontFamily: family("body"),
           fontSize: size(2),
           lineHeight: 1.5,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           /**
            * Square by default and rounded by nothing: a strip that spans the
            * page has no corners to soften, and one that does not span it is

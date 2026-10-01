@@ -14,7 +14,7 @@ export type ShootArgs = {
   readonly listPath: string
   /**
    * An application directory to start, serve the shots from, and stop again.
-   * Absent leaves today's behaviour: the list's own `baseUrl`, and a server
+   * Absent leaves today's behavior: the list's own `baseUrl`, and a server
    * somebody else is responsible for.
    */
   readonly serveDir?: string

@@ -17,7 +17,7 @@ import type { MarkLegend } from "@/app/(portal)/_lib/proposed-view"
  * An outline is the one decoration that costs no space at all, which is why edit
  * mode was built on it and why this is built on the same thing. The cost is that
  * an outline cannot say what it means, so the meaning goes beside the pictures
- * instead of on them — once, for both, because the same colour means the same
+ * instead of on them — once, for both, because the same color means the same
  * thing on each and a key repeated twice is a reader wondering whether it
  * changed.
  *
@@ -52,7 +52,7 @@ export const MarkLegendView = ({
       {legend.map((entry) => (
         <li key={entry.kind} className="flex items-start gap-2">
           {/*
-            * The swatch is the rule itself rather than a coloured square: it
+            * The swatch is the rule itself rather than a colored square: it
             * carries `data-loom-mark` inside a `loom-marked` box, so it is drawn
             * by exactly the declaration that draws the outline on the page. A
             * hand-picked border here could go on saying green after the rule it
@@ -75,12 +75,12 @@ export const MarkLegendView = ({
     {notOutlined !== null && <p className="text-ink-muted text-xs">{notOutlined}</p>}
 
     {/*
-      * Which of the four operations each colour stands for. A reviewer matching
+      * Which of the four operations each color stands for. A reviewer matching
       * this screen against the change record needs the word the record uses, and
       * the word the record uses is the one this screen has spent four sentences
       * not saying.
       */}
-    <TechnicalDetail summary="The operation behind each colour">
+    <TechnicalDetail summary="The operation behind each color">
       <dl className="flex flex-wrap gap-x-4 gap-y-1">
         {legend.map((entry) => (
           <div key={entry.kind} className="flex gap-1">

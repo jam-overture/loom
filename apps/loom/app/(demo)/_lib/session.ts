@@ -27,7 +27,7 @@ import type { ChangeRecord } from "./record"
  * Memory is the right store here for the reason `lib/store.ts` says it is the
  * wrong one for the portal: this state is *meant* to be as durable as the visit.
  * On a serverless host an instance recycles and a visitor's page returns to its
- * starting shape, which is the correct behaviour for a demo and would be data
+ * starting shape, which is the correct behavior for a demo and would be data
  * loss for a portal.
  */
 

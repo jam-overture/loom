@@ -1,7 +1,7 @@
 import type { DecorationLookup } from "../render/addressing.js"
 import type { PrimitiveType } from "../primitive-type.js"
 
-import type { BehaviourName } from "../render/behaviour.js"
+import type { BehaviorName } from "../render/behavior.js"
 
 import {
   describeProbeFailures,
@@ -58,9 +58,9 @@ export type UnplacedSlots = {
 }
 
 /** A primitive that took a control from the runtime and then did not place it. */
-export type UnplacedBehaviours = {
+export type UnplacedBehaviors = {
   readonly type: PrimitiveType
-  readonly behaviours: readonly BehaviourName[]
+  readonly behaviors: readonly BehaviorName[]
 }
 
 /** A primitive that threw under some configuration its own schema accepts. */
@@ -95,12 +95,12 @@ export type RegistryAudit = {
    */
   readonly unplacedSlots: readonly UnplacedSlots[]
   /**
-   * Declared a behaviour and dropped its control. Like `unplacedSlots` this is
+   * Declared a behavior and dropped its control. Like `unplacedSlots` this is
    * a promise the registration made and the component did not keep — and unlike
    * a slot, nothing else on the page hints that something is missing, because
-   * the content a behaviour acts on renders perfectly without it.
+   * the content a behavior acts on renders perfectly without it.
    */
-  readonly unplacedBehaviours: readonly UnplacedBehaviours[]
+  readonly unplacedBehaviors: readonly UnplacedBehaviors[]
   /**
    * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and
    * label as props and has nowhere to put a text node. It is here because it is
@@ -170,8 +170,8 @@ export type RegistryAudit = {
 const unplacedIn = (placement: PlacementVerdict): readonly string[] =>
   placement.outcome === "probed" ? placement.unplacedSlots : []
 
-const unplacedBehavioursIn = (placement: PlacementVerdict): readonly BehaviourName[] =>
-  placement.outcome === "probed" ? placement.unplacedBehaviours : []
+const unplacedBehaviorsIn = (placement: PlacementVerdict): readonly BehaviorName[] =>
+  placement.outcome === "probed" ? placement.unplacedBehaviors : []
 
 /**
  * The throwing configurations a placement verdict saw, from whichever branch it
@@ -239,7 +239,7 @@ export const auditRegistry = (
         primitive.slots,
         primitive.text,
         configurations,
-        primitive.behaviours,
+        primitive.behaviors,
         primitive.frames
       ),
       submission: probeSubmissionPlacement(
@@ -276,9 +276,9 @@ export const auditRegistry = (
     unplacedSlots: audits
       .filter((audit) => unplacedIn(audit.placement).length > 0)
       .map((audit) => ({ type: audit.type, slots: unplacedIn(audit.placement) })),
-    unplacedBehaviours: audits
-      .filter((audit) => unplacedBehavioursIn(audit.placement).length > 0)
-      .map((audit) => ({ type: audit.type, behaviours: unplacedBehavioursIn(audit.placement) })),
+    unplacedBehaviors: audits
+      .filter((audit) => unplacedBehaviorsIn(audit.placement).length > 0)
+      .map((audit) => ({ type: audit.type, behaviors: unplacedBehaviorsIn(audit.placement) })),
     leaves: audits
       .filter((audit) => audit.placement.outcome === "probed" && !audit.placement.rendersChildren)
       .map((audit) => audit.type),
@@ -329,8 +329,8 @@ const describePlacement = (placement: PlacementVerdict): string => {
     return `declares ${placement.unplacedSlots.join(", ")} and does not place ${placement.unplacedSlots.length === 1 ? "it" : "them"}`
   }
 
-  if (placement.unplacedBehaviours.length > 0) {
-    return `takes the ${placement.unplacedBehaviours.join(", ")} behaviour and does not place ${placement.unplacedBehaviours.length === 1 ? "its control" : "their controls"}`
+  if (placement.unplacedBehaviors.length > 0) {
+    return `takes the ${placement.unplacedBehaviors.join(", ")} behavior and does not place ${placement.unplacedBehaviors.length === 1 ? "its control" : "their controls"}`
   }
 
   const under =

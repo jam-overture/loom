@@ -259,6 +259,6 @@ export interface TreeStore {
  * Depending on the whole store to read from it is what forces a renderer's tree
  * source, or a snapshot audit, to be handed something that can also append. It
  * also makes every stub grow a method the code under test never calls, which is
- * how a test starts describing the interface instead of the behaviour.
+ * how a test starts describing the interface instead of the behavior.
  */
 export type TreeReader = Pick<TreeStore, "head" | "revisions">

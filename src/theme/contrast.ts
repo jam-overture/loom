@@ -7,7 +7,7 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
  * background they pair it with, and the three starter palettes clear it because
  * a test iterating `STARTER_PALETTES` says so. `createThemeRegistry({ palettes })`
  * *replaces* that list (0049), so a host supplying its own gets `paletteSchema` —
- * which checks that every slot holds a colour and has no idea which slots are
+ * which checks that every slot holds a color and has no idea which slots are
  * read as text on which others — and nothing else. A host palette with a 2:1
  * subtle registers, resolves, re-themes and renders.
  *
@@ -31,12 +31,12 @@ export const TEXT_CONTRAST_MINIMUM = 4.5
  * and that `loom.page` puts them on `bg-canvas`; nothing in either component
  * says the first is a filled control that answers its own ink with
  * `fg-on-accent` while the second is a page surface where a child brings
- * whichever ink it likes. Both set a colour beside the ground and only one of
+ * whichever ink it likes. Both set a color beside the ground and only one of
  * them means it.
  *
  * So the four are declared here. A ground on this list is one where a palette
  * owes the reader every ink in the ramp; a ground off it is one where the
- * primitive painting it has already answered what colour the text is, and
+ * primitive painting it has already answered what color the text is, and
  * holding a palette to `fg-muted` on `accent` would be a bar no palette can
  * pass — it is 1.00:1 in some palette however the palette is written.
  */
@@ -143,7 +143,7 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
    * `fg-subtle` is held to the body-text bar like the rest (0074). The
    * slot recedes and none of what it carries is reliably large — a `loom.footer`
    * note row and a `loom.tier` note are ordinary small text — so a threshold of
-   * 3:1 would be a bar chosen to fit the colours rather than the reader.
+   * 3:1 would be a bar chosen to fit the colors rather than the reader.
    */
   /**
    * Painted across a stack rather than down a chain: `loom.overlay` sets the ink
@@ -191,7 +191,7 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
    * The two the library does not clear. Both are an ink placed on the tinted
    * panel, both are reachable in an ordinary tree — a perk list inside a
    * `loom.section tone="accent"` is the whole of it — and neither is a bar
-   * chosen to fit the colours: `accent` is 4.43:1 on `plum` and `fg-subtle` is
+   * chosen to fit the colors: `accent` is 4.43:1 on `plum` and `fg-subtle` is
    * 3.76:1 on `carbon`, against a 4.5 that every other pairing here clears.
    *
    * They are listed rather than omitted because the alternative is an audit
@@ -205,7 +205,7 @@ export const PALETTE_TEXT_PAIRINGS: readonly TextPairing[] = [
   { foreground: "fg-subtle", background: "accent-subtle", basis: "composed", where: "loom.perk note inside an accent section" },
 ]
 
-/** sRGB channel, linearised. WCAG's own curve. */
+/** sRGB channel, linearized. WCAG's own curve. */
 const channel = (value: number): number => {
   const c = value / 255
 
@@ -213,14 +213,14 @@ const channel = (value: number): number => {
 }
 
 /**
- * The colour as three 0–255 channels, or nothing when it is a form this cannot
+ * The color as three 0–255 channels, or nothing when it is a form this cannot
  * measure.
  *
- * `colourSchema` accepts more than hex — `rgb()`, `hsl()`, a named colour, and
+ * `colorSchema` accepts more than hex — `rgb()`, `hsl()`, a named color, and
  * eight-digit hex with an alpha. Only three- and six-digit hex are measured
  * here, and the rest answer `undefined` rather than a guess:
  *
- * - a named colour needs the CSS colour table, which is 148 entries of vocabulary
+ * - a named color needs the CSS color table, which is 148 entries of vocabulary
  *   this module would then own
  * - `hsl()` and modern `rgb()` syntax are a parser, and a parser that is subtly
  *   wrong reports a passing ratio for a failing pair, which is worse than
@@ -232,11 +232,11 @@ const channel = (value: number): number => {
  * the conformance probe: a check that cannot answer says so, rather than passing.
  *
  * Exported because `separation.ts` measures the same palette in a different
- * colour space and has to decline the same forms for the same reasons. Two
+ * color space and has to decline the same forms for the same reasons. Two
  * parsers would be two answers to "is this measurable".
  */
-export const channelsOf = (colour: string): readonly [number, number, number] | undefined => {
-  const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(colour)?.[1]
+export const channelsOf = (color: string): readonly [number, number, number] | undefined => {
+  const hex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(color)?.[1]
   if (hex === undefined) return undefined
 
   const pairs =
@@ -254,20 +254,20 @@ const luminance = ([r, g, b]: readonly [number, number, number]): number =>
  * Relative luminance, or `undefined` for a form `channelsOf` declines to guess
  * at.
  *
- * A ratio is a question about two colours; **how dark is this** is a question
+ * A ratio is a question about two colors; **how dark is this** is a question
  * about one, and `measure.ts` has to ask it — a scrim is asked to darken what is
  * under it, and darkening is a property of the wash rather than of a pair. It is
  * computed here, with WCAG's curve, rather than a second time somewhere else
  * against a curve half a rounding away from this one.
  */
-export const relativeLuminance = (colour: string): number | undefined => {
-  const channels = channelsOf(colour)
+export const relativeLuminance = (color: string): number | undefined => {
+  const channels = channelsOf(color)
 
   return channels === undefined ? undefined : luminance(channels)
 }
 
 /**
- * The WCAG contrast ratio between two colours, or `undefined` when either is a
+ * The WCAG contrast ratio between two colors, or `undefined` when either is a
  * form `channelsOf` declines to guess at.
  */
 export const contrastRatio = (a: string, b: string): number | undefined => {
@@ -286,7 +286,7 @@ export type MeasuredPairing = {
   readonly meets: boolean
 }
 
-/** A pairing whose colours could not be measured, and which colour stopped it. */
+/** A pairing whose colors could not be measured, and which color stopped it. */
 export type UnmeasuredPairing = {
   readonly pairing: TextPairing
   readonly foreground: string

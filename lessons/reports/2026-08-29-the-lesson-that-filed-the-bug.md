@@ -1,7 +1,7 @@
 # 2026-08-29 — Lesson 07 was wrong, and it was wrong about its own finding
 
 **No new lesson.** [`lessons/07-measuring-a-change.md`](../07-measuring-a-change.md)
-has been describing pre-0044 behaviour for three weeks, and the correction
+has been describing pre-0044 behavior for three weeks, and the correction
 outranks the syllabus — which is finished anyway, and whose last two entries are
 open PRs nobody has read.
 
@@ -34,7 +34,7 @@ lists in `src/`, and nothing checks them.
 The method was blunt and cheap. Extract every `ts` fence from every lesson's
 *Try it* section, concatenate them in order, write them to `src/scratch.test.ts`,
 run, and compare the transcript against the outputs the lesson prints — with ANSI
-stripped, because vitest colours numbers and a naive diff reports every one of
+stripped, because vitest colors numbers and a naive diff reports every one of
 them.
 
 The result, lesson by lesson:

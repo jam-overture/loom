@@ -20,7 +20,7 @@ addressing, the `duplicate-node-id` refusal, and both `compareTrees` comparisons
 are all still exactly as written. Lesson 03 has no delta that removes and inserts
 the same id, so it is untouched.
 
-That is the useful finding for future runs: the blast radius of a behaviour
+That is the useful finding for future runs: the blast radius of a behavior
 change on a written lesson is usually one exercise, and the only way to know
 which one is to run all of them. Re-running the whole lesson cost about four
 minutes.

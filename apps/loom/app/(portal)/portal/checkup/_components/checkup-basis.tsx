@@ -63,7 +63,7 @@ export const CheckupBasis = ({
 
       {/*
        * Ruled off from the three above it. In the first build it was the same
-       * size and colour as a `dd` with the same gap above it, so it read as a
+       * size and color as a `dd` with the same gap above it, so it read as a
        * fourth input to the check rather than as the thing the check took on
        * trust — which is the one sentence this component exists to say.
        */}

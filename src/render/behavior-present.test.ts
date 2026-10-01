@@ -5,8 +5,8 @@ import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./behaviour.js"
-import { DismissControl, PresentControl } from "./behaviour-present.js"
+import { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./behavior.js"
+import { DismissControl, PresentControl } from "./behavior-present.js"
 import { controlClass } from "./control.js"
 
 /**

@@ -63,11 +63,11 @@ Read each prop and ask which of the four operations it is impersonating.
 | `showBadge: boolean` | `insert` / `remove` | decompose |
 | `align: "start" \| "center"` | none — no operation reorders glyphs | real prop |
 | `text`, `href`, `alt`, `label` | none — content | real prop |
-| `animationSpeed`, `parallaxDepth` | none — parameterises indivisible behaviour | real prop |
+| `animationSpeed`, `parallaxDepth` | none — parameterises indivisible behavior | real prop |
 
 Props that encode **the presence, count, or arrangement of children** are
 structure smuggled into a prop bag. Props that encode **content**, or tune
-behaviour that cannot be split into nodes, are real props.
+behavior that cannot be split into nodes, are real props.
 
 ### The distinction that is easy to get wrong
 
@@ -108,9 +108,9 @@ a joint someone would actually want to change.
 
 Two things stay atomic regardless of how many props they carry:
 
-1. **Indivisible behaviour.** An animated gradient, a marquee, a canvas effect,
+1. **Indivisible behavior.** An animated gradient, a marquee, a canvas effect,
    anything that measures itself. Splitting these produces nodes that mean
-   nothing alone, and their behaviour belongs in the registered component
+   nothing alone, and their behavior belongs in the registered component
    ([0009](../decisions/0009-primitives-receive-props-in-a-bag.md)).
 2. **Things with no interesting interior.** A badge is a badge.
 

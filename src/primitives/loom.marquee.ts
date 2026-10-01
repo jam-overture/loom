@@ -14,7 +14,7 @@ import { libraryStylesheet, LIBRARY_CLASS, MARQUEE_GAP } from "./stylesheet.js"
  * Ported from Hermes' `marquee`, and the port map calls it **atomic**. That
  * verdict is half right and the half it gets wrong is the interesting one.
  * What cannot decompose here is the *motion*: a continuous loop is one
- * behaviour over a whole row, and there is no node that is "the scrolling".
+ * behavior over a whole row, and there is no node that is "the scrolling".
  * The **content** decomposes exactly as well as any other band's — a logo in a
  * marquee is a logo, and it means the same thing standing still. So this is
  * 0054's shape rather than 0052's exception: a container named for the
@@ -85,10 +85,10 @@ const props = z
     /**
      * Whether the band dissolves at its two edges or stops at them.
      *
-     * The fade is a **mask**, not a gradient to the page's colour, and that is
+     * The fade is a **mask**, not a gradient to the page's color, and that is
      * the whole reason it can exist here at all: `loom.table` wanted the same
      * effect on 24 August and could not have it, because a gradient needs a
-     * ground colour and a primitive cannot know what it is sitting on. A mask
+     * ground color and a primitive cannot know what it is sitting on. A mask
      * fades opacity, so a band inside a card fades to the card and a band on
      * the canvas fades to the canvas, with nothing in the primitive naming
      * either.

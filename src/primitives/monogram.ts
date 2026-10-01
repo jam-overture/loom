@@ -10,7 +10,7 @@
  * The first letter of the first two words, which is the convention a reader
  * recognises and the only one that does not need a name to be two words. A name
  * written in a script with no case is unchanged by `toUpperCase`, which is the
- * right behaviour rather than a missing one.
+ * right behavior rather than a missing one.
  *
  * It takes `string | undefined` although every caller's schema says `string`,
  * and that is not defensiveness for its own sake: a primitive is called with an

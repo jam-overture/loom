@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, monospace, radius, weight } from "./tokens.js"
+import { color, monospace, radius, weight } from "./tokens.js"
 
 /**
  * A name from the code, set in monospace inside a sentence — `ChangeInterpreter`,
@@ -32,7 +32,7 @@ import { colour, monospace, radius, weight } from "./tokens.js"
  *
  * **Why this is not `loom.kbd`, which it will be confused with.** A key cap is
  * an input device and a code span is a name, and the catalogue keeps them apart
- * by colour rather than by shape: a cap is neutral, bordered and raised off a
+ * by color rather than by shape: a cap is neutral, bordered and raised off a
  * `bg-surface-muted` ground, because a key is a physical object; a code span is
  * tinted with the accent and flat, because a symbol is a reference. A reader
  * who never learns the rule still never mistakes one for the other.
@@ -44,7 +44,7 @@ import { colour, monospace, radius, weight } from "./tokens.js"
  * belongs to the line rather than interrupting it, and its corners are the
  * small radius a run of text can carry.
  *
- * Its colours are `accent-strong` on `accent-subtle`, which is a pairing
+ * Its colors are `accent-strong` on `accent-subtle`, which is a pairing
  * `PALETTE_TEXT_PAIRINGS` measures and 0074's bar clears in every registered
  * palette. That is not a coincidence — it is the pairing chosen *because* it is
  * measured, after the 22 August finding found two obvious ones that are not.
@@ -77,8 +77,8 @@ export const loomCodeSpan = definePrimitive({
           fontFamily: monospace(),
           fontSize: "0.9em",
           fontWeight: weight("body"),
-          background: colour("accent-subtle"),
-          color: colour("accent-strong"),
+          background: color("accent-subtle"),
+          color: color("accent-strong"),
           paddingBlock: "0.1em",
           /**
            * Tighter on the inline axis than a panel would be, because the

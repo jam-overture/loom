@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 
 /**
  * A run of `loom.link` under a heading — one column of a footer, a row of legal
@@ -80,7 +80,7 @@ export const loomLinkList = definePrimitive({
                 fontSize: size(1),
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                color: colour("fg-subtle"),
+                color: color("fg-subtle"),
               },
             },
             given.label

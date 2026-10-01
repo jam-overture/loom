@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { BEHAVIOUR_NAMES } from "./behaviour.js"
+import { BEHAVIOR_NAMES } from "./behavior.js"
 import {
   CONTROL_CLASS,
   CONTROL_DISPLAY_PROPERTY,
@@ -19,8 +19,8 @@ import {
  * than a build.
  */
 describe("the class and the display property a control carries", () => {
-  it("gives every behaviour in the vocabulary a class of its own", () => {
-    expect(BEHAVIOUR_NAMES.map((name) => controlClass(name))).toEqual([
+  it("gives every behavior in the vocabulary a class of its own", () => {
+    expect(BEHAVIOR_NAMES.map((name) => controlClass(name))).toEqual([
       "loom-control loom-control-copy",
       "loom-control loom-control-disclose",
       "loom-control loom-control-adjust",
@@ -30,13 +30,13 @@ describe("the class and the display property a control carries", () => {
   })
 
   it("carries the shared class first, so one rule reaches every control", () => {
-    expect(BEHAVIOUR_NAMES.every((name) => controlClass(name).startsWith(`${CONTROL_CLASS} `))).toBe(
+    expect(BEHAVIOR_NAMES.every((name) => controlClass(name).startsWith(`${CONTROL_CLASS} `))).toBe(
       true
     )
   })
 
-  it("names one property per behaviour and one for the group", () => {
-    expect(BEHAVIOUR_NAMES.map((name) => controlDisplayProperty(name))).toEqual([
+  it("names one property per behavior and one for the group", () => {
+    expect(BEHAVIOR_NAMES.map((name) => controlDisplayProperty(name))).toEqual([
       "--loom-copy-display",
       "--loom-disclose-display",
       "--loom-adjust-display",

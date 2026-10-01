@@ -110,7 +110,7 @@ export const scopeOf = (
    * The root holds everything by construction, so a scope of the root is the
    * whole page said the long way. It is reported as `spread` and posted as no
    * scope at all, which is what the page screen has always sent when nothing is
-   * picked — one behaviour rather than two spellings of it.
+   * picked — one behavior rather than two spellings of it.
    */
   if (!row || row.parentId === null) return { kind: "spread", count: picked.length }
 

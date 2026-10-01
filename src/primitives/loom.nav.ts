@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, hairline, radius, space } from "./tokens.js"
+import { color, hairline, radius, space } from "./tokens.js"
 
 /**
  * The bar across the top of a page: a mark, the menu, and the one thing the
@@ -99,14 +99,14 @@ const STICKY_LAYER = 20
 const TONES: Readonly<Record<"plain" | "surface" | "floating", CSSProperties>> = {
   plain: { background: "transparent" },
   surface: {
-    background: colour("bg-surface"),
+    background: color("bg-surface"),
     borderBlockEnd: `1px solid ${hairline()}`,
   },
   floating: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
     borderRadius: radius("full"),
-    boxShadow: `0 20px 44px -34px ${colour("fg-default")}`,
+    boxShadow: `0 20px 44px -34px ${color("fg-default")}`,
   },
 }
 
@@ -141,10 +141,10 @@ export const loomNav = definePrimitive({
   /**
    * One key, and the same word open and closed — `aria-expanded` carries the
    * state, which is the disclosure pattern as the ARIA practices state it. The
-   * registry refuses the behaviour without it (0086).
+   * registry refuses the behavior without it (0086).
    */
   text: NAV_TEXT,
-  behaviours: ["disclose"],
+  behaviors: ["disclose"],
   /**
    * A bar of links that now also holds a button. It was always a target the
    * reader aims at and never said so; taking a control is what makes the
@@ -233,7 +233,7 @@ export const loomNav = definePrimitive({
         : createElement(
             "div",
             { key: "toggle", className: LIBRARY_CLASS.navToggle },
-            loom.behaviours.disclose
+            loom.behaviors.disclose
           ),
       children === null
         ? null

@@ -22,7 +22,7 @@ import type { Spotlight, SpotTone } from "./spotlight"
  * - **the rail's line** stops pointing at *this* the moment there is more than
  *   one thing it could mean, and says instead that each question below carries
  *   its own mark;
- * - **each card wears its own mark's words**, in the mark's own colours, so the
+ * - **each card wears its own mark's words**, in the mark's own colors, so the
  *   pairing is a thing to *look* at rather than a sentence to reason about — the
  *   same amber pill reading *Something new would go here* on the card and on the
  *   band it is pointing at.
@@ -60,7 +60,7 @@ export type MarkedChange = {
 export type MarkedPage = {
   /** The rail's one line, absent when the page carries no mark to explain. */
   readonly line?: string
-  /** The colour of the dot beside it, which is the colour of the marks. */
+  /** The color of the dot beside it, which is the color of the marks. */
   readonly tone?: SpotTone
   /**
    * The chip's own words, by record — and only when more than one change is
@@ -104,7 +104,7 @@ export const markedPage = (changes: readonly MarkedChange[]): MarkedPage => {
     tone,
     /**
      * The first mark of each, because a change drawing two of them is drawing
-     * them in one colour with one set of words to be told apart by, and the card
+     * them in one color with one set of words to be told apart by, and the card
      * repeating the second adds a line without adding an answer.
      */
     words: new Map(drawn.map((change) => [change.recordId, change.spots[0]!.label])),

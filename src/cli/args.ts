@@ -10,7 +10,7 @@ import { RESERVED_PRIMITIVE_TYPES } from "./templates.js"
  *
  * The surface is two commands and one option, and a parser for that is smaller
  * than the code needed to configure a parser library. It is also pure, so the
- * grammar is asserted directly rather than through a framework's behaviour.
+ * grammar is asserted directly rather than through a framework's behavior.
  *
  * This is also where a primitive type is validated, because whether a type is
  * well-formed is a property of the string and of nothing else. Checking it here

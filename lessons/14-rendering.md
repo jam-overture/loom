@@ -209,7 +209,7 @@ is the part of the design worth carrying out of this lesson.
 | **Degrade** | the node renders, without the thing it asked for | `theme-unresolved`, `theme-unregistered`, `data-unavailable`, `data-misdeclared`, `data-unresolved`, `submit-unavailable`, `submit-misdeclared`, `submit-unresolved` |
 | **Report** | the node renders exactly as written; something was ignored or went unchecked | `props-undeclared`, `theme-misplaced`, `reserved-prop-unrecognised` |
 
-Thirteen codes, three behaviours. The rule that assigns them is one question:
+Thirteen codes, three behaviors. The rule that assigns them is one question:
 
 > **Would rendering this node hand a primitive something its own types say
 > cannot occur?**
@@ -238,7 +238,7 @@ Notice that this is an argument you have already seen, in a different costume.
 Lesson 12: *two failures that would produce different downstream answers must
 not be one code.* Here it is applied to **actions** rather than to codes — two
 faults that should produce different pages must not produce the same
-behaviour — and the same reasoning gives you thirteen codes rather than one
+behavior — and the same reasoning gives you thirteen codes rather than one
 "render failed".
 
 ### The unknown primitive takes its subtree with it

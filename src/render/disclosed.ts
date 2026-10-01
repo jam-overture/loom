@@ -1,7 +1,7 @@
 /**
  * The disclose contract's one name, in a module with nothing else in it.
  *
- * It lives apart from `behaviour.ts` so that code which only needs to *read* a
+ * It lives apart from `behavior.ts` so that code which only needs to *read* a
  * disclosure — the reader-signal broadcaster — can import the name without
  * importing the React controls that write it (0136).
  */

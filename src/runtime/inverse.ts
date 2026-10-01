@@ -28,7 +28,7 @@ import type { DiscardedWork } from "./proposal.js"
  * So the store-shaped half comes out. What is left is the whole of what a
  * stateless caller needs and exactly what `revertInterpreter` is built from,
  * which is the property that keeps the two honest: a surface offering an undo
- * gets the portal's behaviour rather than its own reading of it.
+ * gets the portal's behavior rather than its own reading of it.
  */
 
 /**

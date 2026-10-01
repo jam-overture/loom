@@ -331,7 +331,7 @@ attention on it instead.
   `interactiveTypesFor`, sixteen lines, the whole seam between a library and a
   policy.
 - [`src/sdk/registry.ts`](../src/sdk/registry.ts) — the two registration
-  refusals: `undeclared-interactive-prop`, and `undeclared-interactive-behaviour`.
+  refusals: `undeclared-interactive-prop`, and `undeclared-interactive-behavior`.
   The second one is the subject of exercise F, and of most of what follows it.
 
 ---
@@ -610,7 +610,7 @@ That is not a bug and it is worth sitting with. The check is **vocabulary**, and
 vocabulary is host-owned (0002): a library whose components the runtime has
 never seen cannot have its compositions judged, and a runtime that guessed would
 be legislating. What the host does to get the check is one line —
-`interactiveTypesFor(registry)` — and what it does to keep the old behaviour is
+`interactiveTypesFor(registry)` — and what it does to keep the old behavior is
 nothing at all.
 
 ### Exercise E — answerable for what you did, not for what you found
@@ -730,7 +730,7 @@ Its whole purpose is to hold controls that work. The answer is yes, obviously,
 which by the definition this lesson taught you means it is **not** a target.
 
 Why does it say it is? Because a nav grew a "more" disclosure button, and the
-registry has a second rule: a primitive that takes a behaviour which renders a
+registry has a second rule: a primitive that takes a behavior which renders a
 control must declare `interactive`, or registration fails
 ([0086](../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)).
 That rule exists to stop a primitive that *places* a control from being nested

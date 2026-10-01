@@ -28,7 +28,7 @@ import type { Composition } from "./composition.js"
  * what goes here is `loom.frame` holding a small product surface **built out of
  * the library** — two figures, two measures, a caption. No asset, no
  * third-party URL, no file a host has to place, and it re-themes with the page
- * because every colour in it comes from the palette.
+ * because every color in it comes from the palette.
  *
  * That is worth more than a screenshot would have been, and not only because a
  * screenshot was unavailable. A picture of a product is a picture; this is the

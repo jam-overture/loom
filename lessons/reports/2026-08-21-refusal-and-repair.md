@@ -36,7 +36,7 @@ the part it consolidates has missed the spacing interval it exists to hit.
 24 days. 0040 is `Accepted`, 2026-08-06. Every file the lesson cites last
 changed on 08-15, except `pipeline.ts`, which changed today and only in a
 comment (§4c's doc-comment pass, `0006` → `the gate exists to make (0006)`).
-Nothing in the repair path has moved behaviourally since the record that
+Nothing in the repair path has moved behaviorally since the record that
 created it.
 
 **Machinery next run, and it is a specific piece.** `_lib/links.ts` says it
@@ -178,7 +178,7 @@ rejected outcome naming the repair attempt's fate, or the interpretation error
 itself.
 
 Filed in `FINDINGS.md`, owned by `Loom daily build`. Not fixed here — a lessons
-PR that also changes behaviour is a lessons PR nobody can review.
+PR that also changes behavior is a lessons PR nobody can review.
 
 ## Needs your input
 
@@ -192,7 +192,7 @@ One thing worth a sentence if you have one:
 **Is the `configure` rendering asymmetry a defect?** `renderDelta` shows prop
 keys for `configure` and full props for `insert`. I have left it in the lesson
 as a judgement call for the reader rather than filed it against the framework,
-because both behaviours are defensible and the choice belongs to whoever owns
+because both behaviors are defensible and the choice belongs to whoever owns
 the prompt. If you think it is a bug, it is a two-line change in
 `src/interpretation/render.ts` and a finding rather than a lesson.
 

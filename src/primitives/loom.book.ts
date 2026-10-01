@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -78,7 +78,7 @@ import { linkUrlSchema, mediaUrlSchema } from "./url.js"
  * with a darker edge down its leading side reads as a book seen slightly from
  * the side, and it costs one `border-inline-start`. It is deliberately not a
  * `box-shadow`: the palette has no shadow slot — the standing finding from
- * `primitives-17` — so a shadow would have to be a literal colour, which is the
+ * `primitives-17` — so a shadow would have to be a literal color, which is the
  * one thing `tokens.ts` exists to make impossible.
  *
  * **A card that reads two ways, chosen by the room it is given.** The third
@@ -144,7 +144,7 @@ export const loomBook = definePrimitive({
             ? `${LIBRARY_CLASS.bookCover} ${LIBRARY_CLASS.bookCoverBare}`
             : LIBRARY_CLASS.bookCover,
         style: {
-          background: colour("bg-surface-muted"),
+          background: color("bg-surface-muted"),
           /**
            * A border on all four edges **and** a heavier one on the leading
            * edge, and the four-sided one is there because a screenshot showed
@@ -157,8 +157,8 @@ export const loomBook = definePrimitive({
            * drawn object under both, and the spine keeps it a book rather than a
            * thumbnail.
            */
-          border: `1px solid ${colour("border-subtle")}`,
-          borderInlineStart: `3px solid ${colour("border-strong")}`,
+          border: `1px solid ${color("border-subtle")}`,
+          borderInlineStart: `3px solid ${color("border-strong")}`,
           borderRadius: radius("sm"),
         },
       },
@@ -189,7 +189,7 @@ export const loomBook = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -247,7 +247,7 @@ export const loomBook = definePrimitive({
                     lineHeight: 1.4,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    color: colour("accent"),
+                    color: color("accent"),
                   },
                 },
                 given.marker
@@ -262,7 +262,7 @@ export const loomBook = definePrimitive({
                 fontFamily: family("body"),
                 fontSize: size(3),
                 lineHeight: 1.5,
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.author
@@ -279,7 +279,7 @@ export const loomBook = definePrimitive({
                     fontFamily: family("body"),
                     fontSize: size(2),
                     lineHeight: 1.6,
-                    color: colour("fg-subtle"),
+                    color: color("fg-subtle"),
                   },
                 },
                 given.note

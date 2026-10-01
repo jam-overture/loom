@@ -151,7 +151,7 @@ describe("a primitive's data", () => {
   /**
    * The three ways to hand a bound tree a render with no answers, filed by
    * `Loom lessons` on 14 September as a table in which the middle row was silent.
-   * It is asserted as a table because the defect was not any one row's behaviour
+   * It is asserted as a table because the defect was not any one row's behavior
    * — each was defensible alone — but the fact that three routes to one mistake
    * reported three different amounts.
    */

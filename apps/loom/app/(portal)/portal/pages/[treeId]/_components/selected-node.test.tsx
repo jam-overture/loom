@@ -219,7 +219,7 @@ describe("SelectedNode", () => {
    * only by accident of both being "not addressable". A delegated click still
    * lands somewhere; an unaddressable one does not, and it is not a refusal.
    */
-  it("does not colour a part nobody can click as a refusal", () => {
+  it("does not color a part nobody can click as a refusal", () => {
     const { container } = pane()
 
     pick(/Mystery/)

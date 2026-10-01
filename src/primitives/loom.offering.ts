@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -120,13 +120,13 @@ type Props = z.infer<typeof props>
  */
 const SURFACES = {
   plain: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
   },
   featured: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-accent")}`,
-    boxShadow: `0 0 0 1px ${colour("accent")}, 0 32px 64px -48px ${colour("accent-strong")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-accent")}`,
+    boxShadow: `0 0 0 1px ${color("accent")}, 0 32px 64px -48px ${color("accent-strong")}`,
   },
 } as const
 
@@ -158,7 +158,7 @@ export const loomOffering = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -207,7 +207,7 @@ export const loomOffering = definePrimitive({
                 fontWeight: weight("heading"),
                 fontSize: size(4),
                 lineHeight: 1.2,
-                color: colour("accent-strong"),
+                color: color("accent-strong"),
               },
             },
             given.price
@@ -223,7 +223,7 @@ export const loomOffering = definePrimitive({
           ...SURFACES[given.emphasis ?? "plain"],
           padding: space(5),
           borderRadius: radius("lg"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),

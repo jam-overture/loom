@@ -8,7 +8,7 @@ import type { Composition } from "./composition.js"
  * Five questions, the first one open.
  *
  * `loom.faq` is a `<details>` and `loom.faq-list` is the column it sits in, so
- * the band works with scripting off and needs no behaviour. What the
+ * the band works with scripting off and needs no behavior. What the
  * composition adds is the arrangement nobody wants to re-derive: a reading
  * measure rather than the page's full width, and exactly one question open.
  *

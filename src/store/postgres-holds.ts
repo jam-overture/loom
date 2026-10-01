@@ -102,7 +102,7 @@ const parseAll = (
  * not.
  *
  * Taking it from the last *parsed* hold is the bug that skipping would
- * otherwise introduce, and it is worse than the behaviour it replaces. A page
+ * otherwise introduce, and it is worse than the behavior it replaces. A page
  * whose final rows were all unreadable would resume before them and report them
  * again forever; a page whose rows were *all* unreadable would have no last
  * hold at all, so the cursor would come back `null` and every hold after them

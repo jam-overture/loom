@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, space } from "./tokens.js"
+import { color, family, size, space } from "./tokens.js"
 
 /**
  * The "trusted by" wall: a row of `loom.logo` marks under an optional line of
@@ -62,7 +62,7 @@ export const loomLogoCloud = definePrimitive({
                 fontFamily: family("body"),
                 fontSize: size(2),
                 letterSpacing: "0.08em",
-                color: colour("fg-subtle"),
+                color: color("fg-subtle"),
               },
             },
             given.label

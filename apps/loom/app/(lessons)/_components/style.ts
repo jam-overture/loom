@@ -6,7 +6,7 @@ import type { CSSProperties } from "react"
  * Every value here is a custom property the mounted theme sets, which is the
  * whole point: the answer box and the confidence control are not primitives and
  * cannot be (0067 permits the machinery and forbids a second component library),
- * but they can refuse to name a colour. Re-theme the course and the buttons move
+ * but they can refuse to name a color. Re-theme the course and the buttons move
  * with it, because there is nothing here to move separately.
  */
 
@@ -17,7 +17,7 @@ export const inkSubtle = "var(--loom-fg-subtle)"
  * Two accents, because they are two jobs, and one theme proved it.
  *
  * `accent` is what a filled control is made of, and `highlight` is what points
- * at something. Under a palette whose accent is a colour those read as the same
+ * at something. Under a palette whose accent is a color those read as the same
  * decision, which is why this file had one token until the house theme arrived
  * with `accent: #0a0a0a` — a black primary button, deliberately, so that the
  * green is left free to be a highlight rather than the largest element on the
@@ -27,7 +27,7 @@ export const inkSubtle = "var(--loom-fg-subtle)"
  * So: fills and rings that mean "this is the button" take `accent`; the one
  * thing on a page that is being pointed at takes `highlight`, on `highlightTint`
  * inside `highlightEdge`. Both still come from the theme, and a palette that
- * makes them the same colour again is welcome to.
+ * makes them the same color again is welcome to.
  */
 export const accent = "var(--loom-accent)"
 export const highlight = "var(--loom-accent-strong)"

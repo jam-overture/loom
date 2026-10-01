@@ -14,7 +14,7 @@ import {
  * The starter vocabulary, ported from the Hermes registry.
  *
  * Two palettes rather than one, deliberately: a single palette cannot show
- * whether a primitive reads its colours from the slots or hard-codes them, and
+ * whether a primitive reads its colors from the slots or hard-codes them, and
  * the port of the remaining twenty-seven is only safe once something proves a
  * primitive survives being re-themed.
  *
@@ -129,7 +129,7 @@ export const airyModernStylePreset: StylePreset = stylePresetSchema.parse({
  * The third palette, and the first one specified by the maintainer rather than
  * ported: white paper, black ink, and one green.
  *
- * The green is **Hyperion's**, taken from the one colour that codebase holds
+ * The green is **Hyperion's**, taken from the one color that codebase holds
  * constant. Every other token in Hyperion changes with its six themes; the
  * positive-action button does not:
  *
@@ -145,11 +145,11 @@ export const airyModernStylePreset: StylePreset = stylePresetSchema.parse({
  * second green.
  *
  * **Where each stop lands is decided by how the library reads the slot, not by
- * how the colour looks in isolation**, and getting that backwards is the whole
+ * how the color looks in isolation**, and getting that backwards is the whole
  * trap. `accent` is read as *text* far more often than as a fill — a section's
  * eyebrow, an article's kicker, a disclosure marker, the current page in a nav —
  * and the mint at 1.58:1 on white is unreadable at every one of them. So the
- * mint cannot be `accent`, however much it is the colour someone pictures. It
+ * mint cannot be `accent`, however much it is the color someone pictures. It
  * goes to `border-accent`, where a hairline, a pill's ring, a quote's rule and a
  * featured tier's border are exactly the "subtle highlight" the brief asks for
  * and where 1.58:1 is a soft mark rather than a failure.
@@ -159,7 +159,7 @@ export const airyModernStylePreset: StylePreset = stylePresetSchema.parse({
  * near-black button with a green cast was the restrained reading. Rendered, it
  * was neither: too dark to read as green and too green to read as black — the
  * review called it "dark hunter green black", which is exactly what it looked
- * like. The brief names three colours, whites, black *and* green, and a black
+ * like. The brief names three colors, whites, black *and* green, and a black
  * button is the one that leaves the green to be a highlight rather than the
  * largest element on the page.
  *
@@ -178,7 +178,7 @@ export const minimalPalette: Palette = paletteSchema.parse({
     /**
      * **`bg-surface` is the canvas white, and that is the whole outline-first
      * decision.** It is the fill behind a card, a nav, a footer, a hero panel
-     * and a `tone: "surface"` section — so setting it to the page colour means
+     * and a `tone: "surface"` section — so setting it to the page color means
      * every one of those is defined by its border instead of by a change of
      * background, without a single primitive being touched. The instruction was
      * to prefer outlined components and use fills sparingly; this is the one
@@ -194,7 +194,7 @@ export const minimalPalette: Palette = paletteSchema.parse({
      * The one fill left, and it stays a real one because it is *functional*
      * rather than structural: the well behind an image that has not loaded, a
      * person's monogram, a neutral badge. Nine primitives read it, and a
-     * placeholder the same colour as the page is a placeholder nobody can see.
+     * placeholder the same color as the page is a placeholder nobody can see.
      */
     "bg-surface-muted": "#f4f4f5",
     "bg-overlay": "#ffffff",

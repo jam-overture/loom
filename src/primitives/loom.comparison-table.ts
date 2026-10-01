@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * The band that answers *how is this different from what I use now* — subjects
@@ -121,7 +121,7 @@ export const loomComparisonTable = definePrimitive({
           boxSizing: "border-box",
           width: "100%",
           fontFamily: family("body"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       columns === undefined ? null : createElement("thead", null, columns),
@@ -137,8 +137,8 @@ export const loomComparisonTable = definePrimitive({
           boxSizing: "border-box",
           minWidth: "0",
           width: "100%",
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
           /** Clips the table's corners to the panel's radius. */
           overflow: "hidden",
@@ -170,7 +170,7 @@ export const loomComparisonTable = definePrimitive({
                 fontWeight: weight("heading"),
                 fontSize: size(4),
                 lineHeight: 1.3,
-                color: colour("fg-default"),
+                color: color("fg-default"),
               },
             },
             given.caption

@@ -209,11 +209,11 @@ exists to do.
 ## What is next
 
 **Lesson 05's exercise D, first.** It is a lesson teaching the opposite of the
-runtime's behaviour, it has been doing so for a week, and the repair is
+runtime's behavior, it has been doing so for a week, and the repair is
 well-specified above.
 
 **Then Part V's eleventh seam, whose material this run turned up by accident.**
-The question lesson 27 left — *a decision record argues for a behaviour in the
+The question lesson 27 left — *a decision record argues for a behavior in the
 present tense and a schema three files away quietly disagrees, and nothing
 compares them* — is one half of something larger. Every check this repository
 runs over `decisions/` checks that **two copies of one fact agree**: a filename

@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -137,7 +137,7 @@ export const loomListing = definePrimitive({
       {
         key: "media",
         className: bare ? `${LIBRARY_CLASS.listingMedia} ${LIBRARY_CLASS.listingMediaBare}` : LIBRARY_CLASS.listingMedia,
-        style: { background: colour("bg-surface-muted") },
+        style: { background: color("bg-surface-muted") },
       },
       given.image === undefined
         ? null
@@ -171,7 +171,7 @@ export const loomListing = definePrimitive({
           fontFamily: family("body"),
           fontSize: size(3),
           lineHeight: 1.45,
-          color: colour("fg-muted"),
+          color: color("fg-muted"),
         },
       },
       given.href === undefined
@@ -198,8 +198,8 @@ export const loomListing = definePrimitive({
           boxSizing: "border-box",
           height: "100%",
           overflow: "hidden",
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
         },
       },
@@ -233,7 +233,7 @@ export const loomListing = definePrimitive({
                   fontWeight: weight("heading"),
                   fontSize: size(6),
                   lineHeight: 1.1,
-                  color: colour("fg-default"),
+                  color: color("fg-default"),
                 },
               },
               given.price

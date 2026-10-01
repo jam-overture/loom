@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space } from "./tokens.js"
+import { color, family, size, space } from "./tokens.js"
 
 /**
  * Where the reader is, and every step back out — a run of `loom.link` with the
@@ -110,7 +110,7 @@ export const loomLinkTrail = definePrimitive({
           gap: space(2),
           fontFamily: family("body"),
           fontSize: given.scale === "medium" ? size(3) : size(2),
-          color: colour("fg-muted"),
+          color: color("fg-muted"),
         },
       },
       libraryStylesheet(),

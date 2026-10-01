@@ -55,7 +55,7 @@ describe("slotChroma", () => {
     }
   })
 
-  it("declines a colour it cannot parse rather than guessing at it", () => {
+  it("declines a color it cannot parse rather than guessing at it", () => {
     expect(slotChroma("hsl(210 30% 40%)")).toBeUndefined()
     expect(slotChroma("rebeccapurple")).toBeUndefined()
   })
@@ -159,7 +159,7 @@ describe("paletteScheme", () => {
   })
 
   /**
-   * Two functions comparing one pair of colours must not be able to disagree
+   * Two functions comparing one pair of colors must not be able to disagree
    * about it. `paletteScrim` reads the same ink and the same canvas to decide
    * which end of the pair a wash is drawn in; a light palette is exactly one
    * whose wash is drawn in its ink.
@@ -174,7 +174,7 @@ describe("paletteScheme", () => {
 })
 
 describe("paletteMeasures", () => {
-  it("measures the slots a palette puts its colour in, and no others", () => {
+  it("measures the slots a palette puts its color in, and no others", () => {
     const { chroma } = paletteMeasures(boldPalette)
 
     expect(Object.keys(chroma).sort()).toEqual([...PALETTE_CHROMA_SLOTS].sort())
@@ -199,7 +199,7 @@ describe("paletteMeasures", () => {
 })
 
 describe("the variables a stylesheet gets", () => {
-  it("emits a unitless chroma per colour slot, so calc() can multiply by it", () => {
+  it("emits a unitless chroma per color slot, so calc() can multiply by it", () => {
     const variables = themeVariables(wearing(boldPalette))
 
     for (const slot of PALETTE_CHROMA_SLOTS) {

@@ -89,7 +89,7 @@ export type UnshownDeclaration = (
  * Which primitive declares a reading, asked per type.
  *
  * Structural, and detected the way `BindingReader`, `FrameResolver` and
- * `BehaviourResolver` are: a registry built by the SDK satisfies it, and a host
+ * `BehaviorResolver` are: a registry built by the SDK satisfies it, and a host
  * resolving from a plain map has registered nothing that could have declared
  * one — so there is nothing here for a host to wire and nothing that can go
  * missing.

@@ -22,7 +22,7 @@ import type { PrimitiveRegistry } from "./registry.js"
  *
  * Deriving it is still the host's explicit call. A deployment that wants the
  * check off leaves this out of its policy and gets the runtime's prior
- * behaviour; a deployment with a second registry concatenates two of these.
+ * behavior; a deployment with a second registry concatenates two of these.
  */
 export const registeredTypesFor = (registry: PrimitiveRegistry): readonly PrimitiveType[] =>
   registry.primitives.map((primitive) => primitive.type)
@@ -38,7 +38,7 @@ export const registeredTypesFor = (registry: PrimitiveRegistry): readonly Primit
  *
  * Wiring it is still the host's explicit call, for the reason
  * `registeredTypesFor` gives one layer up: a runtime handed none checks
- * nothing, which is the behaviour every deployment had before 0179.
+ * nothing, which is the behavior every deployment had before 0179.
  */
 export const propsVocabularyFor =
   (registry: PrimitiveRegistry): PropsVocabulary =>

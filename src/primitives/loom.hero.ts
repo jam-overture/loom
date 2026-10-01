@@ -7,7 +7,7 @@ import { definePrimitive } from "../sdk/definition.js"
 import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
 import { ABOVE_BACKDROP, backdropLayers, PAINT_NAMES } from "./backdrop.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, motion, radius, size, space } from "./tokens.js"
+import { color, motion, radius, size, space } from "./tokens.js"
 
 /**
  * The first thing on a page, and the primitive that decides whether this
@@ -22,14 +22,14 @@ import { colour, motion, radius, size, space } from "./tokens.js"
  * separate type, and a model swapping it emits one `configure` rather than
  * replacing the node and every child underneath it.
  *
- * What the enum notably does not carry is colour. Hermes' gradient variants
+ * What the enum notably does not carry is color. Hermes' gradient variants
  * took raw hex from the page author; here `aurora` reads the palette's accent
  * and secondary, so re-theming a page re-themes its hero (0049). That is the
  * whole difference between a variant a model configures and a canvas it paints.
  *
  * The entrance animation is not reachable from the tree at all. It lives in the
  * stylesheet this primitive emits, and the tree says only what the copy is and
- * which backdrop to use — props are JSON, so behaviour stays in the registered
+ * which backdrop to use — props are JSON, so behavior stays in the registered
  * component where a reviewer approved it once, rather than arriving per-node in
  * a proposal.
  */
@@ -159,8 +159,8 @@ const heroLayers = (backdrop: NonNullable<Props["backdrop"]>): readonly ReactNod
   backdrop === "none" || backdrop === "panel" ? [] : [...backdropLayers(backdrop)]
 
 const PANEL: CSSProperties = {
-  background: colour("bg-surface"),
-  border: `1px solid ${colour("border-subtle")}`,
+  background: color("bg-surface"),
+  border: `1px solid ${color("border-subtle")}`,
   borderRadius: radius("lg"),
 }
 
@@ -201,19 +201,19 @@ export const loomHero = definePrimitive({
                   display: "inline-block",
                   paddingBlock: space(1),
                   paddingInline: space(3),
-                  border: `1px solid ${colour("border-accent")}`,
+                  border: `1px solid ${color("border-accent")}`,
                   borderRadius: radius("full"),
                   fontSize: size(1),
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  color: colour("accent"),
+                  color: color("accent"),
                 },
               },
               given.eyebrow
             )
           ),
       rise(1, loom.slots["heading"], { maxWidth: DISPLAY_MEASURE }),
-      rise(2, children, { maxWidth: READING_MEASURE, color: colour("fg-muted"), fontSize: size(4) }),
+      rise(2, children, { maxWidth: READING_MEASURE, color: color("fg-muted"), fontSize: size(4) }),
       rise(3, loom.slots["actions"], {
         display: "flex",
         flexWrap: "wrap",

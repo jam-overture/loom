@@ -557,7 +557,7 @@ Lesson 24 asked what a system returns when it cannot answer, and whether anybody
 would notice if it started returning that when it could.
 
 A compiler's answer to *is this list complete* is no output at all. It is the same
-output as a pass, produced by the same run, in the same colour. There is no
+output as a pass, produced by the same run, in the same color. There is no
 `I wasn't asked` and nowhere for one to go: a build either has diagnostics or does
 not, and a question nobody put to it is indistinguishable from a question it
 answered yes.

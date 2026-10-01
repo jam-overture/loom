@@ -118,9 +118,9 @@ export const TheRecord = ({
       {/*
         * The sentence that joins the two halves of the screen.
         *
-        * The dot is the same colour as the ring on the page and as the badge on
+        * The dot is the same color as the ring on the page and as the badge on
         * the card underneath, and that is the whole teaching: a visitor is never
-        * told "the marks mean X", they are shown one colour in three places at
+        * told "the marks mean X", they are shown one color in three places at
         * once and read it in a glance. It appears only when there is a mark to
         * explain, so it is never a legend for something that is not on screen.
         */}
@@ -144,7 +144,7 @@ export const TheRecord = ({
            *
            * `marked.tone` rather than the record's own state, because this pill
            * exists to be recognised as *the same object* as the chip on the band
-           * — same words, same fill, same ink — and the chip's colour is a fact
+           * — same words, same fill, same ink — and the chip's color is a fact
            * about the marks the page drew.
            */
           const words = marked.words.get(record.recordId)

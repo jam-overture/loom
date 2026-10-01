@@ -17,7 +17,7 @@ import { readingOf } from "@/app/(portal)/_lib/vocabulary"
  * deciding anything, they are finding out.
  *
  * The two cards share a shape on purpose: the same three-part body, the same
- * coloured strip carrying the Gate's own reason, the same disclosure at the
+ * colored strip carrying the Gate's own reason, the same disclosure at the
  * foot. A person who has learnt to read one of them can read the other.
  *
  * The strip is `applied` rather than `awaiting`, which is the only visual

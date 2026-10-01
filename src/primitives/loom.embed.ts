@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS, type AspectName } from "./layout.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space } from "./tokens.js"
+import { color, family, radius, size, space } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
 /**
@@ -15,7 +15,7 @@ import { mediaUrlSchema } from "./url.js"
  *
  * Ported from Hermes' `embed`, and genuinely atomic: an `<iframe>` has no
  * interior this library can address, no children worth naming, and one
- * behaviour — maintaining a ratio around content whose height it cannot
+ * behavior — maintaining a ratio around content whose height it cannot
  * measure. An unsized iframe is 300 × 150 by the HTML specification, and a
  * video that renders as a small grey rectangle is the failure this primitive
  * exists to make impossible.
@@ -267,11 +267,11 @@ export const loomEmbed = definePrimitive({
           boxSizing: "border-box",
           width: "100%",
           overflow: "hidden",
-          background: colour("bg-surface-muted"),
+          background: color("bg-surface-muted"),
           ...(flush
             ? {}
             : {
-                border: `1px solid ${colour("border-subtle")}`,
+                border: `1px solid ${color("border-subtle")}`,
                 borderRadius: radius("md"),
               }),
         },
@@ -298,7 +298,7 @@ export const loomEmbed = definePrimitive({
                 textAlign: "center",
                 fontFamily: family("body"),
                 fontSize: size(2),
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             loom.text.refused
@@ -355,7 +355,7 @@ export const loomEmbed = definePrimitive({
               style: {
                 fontFamily: family("body"),
                 fontSize: size(1),
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.caption

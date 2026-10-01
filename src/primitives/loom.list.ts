@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, READABLE_MEASURE, type RampStep } from "./tokens.js"
+import { color, family, size, READABLE_MEASURE, type RampStep } from "./tokens.js"
 
 /**
  * A run of points, bulleted or numbered — the list a page's prose is written
@@ -109,7 +109,7 @@ export const loomList = definePrimitive({
           fontFamily: family("body"),
           fontSize: size(STEPS[given.size ?? "body"]),
           lineHeight: 1.6,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           ...(given.measured === true ? { maxWidth: READABLE_MEASURE } : {}),
         },
       },

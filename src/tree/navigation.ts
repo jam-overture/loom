@@ -71,8 +71,8 @@ export const isDescendantOf = (root: LoomNode, ancestorId: NodeId, nodeId: NodeI
  * and a separator here would put something on a reader's clipboard that is not
  * on their screen.
  *
- * It reads the **tree**, never the rendered markup. A behaviour that acts on a
- * node's text (`render/behaviour.ts`) is then right before the browser has laid
+ * It reads the **tree**, never the rendered markup. A behavior that acts on a
+ * node's text (`render/behavior.ts`) is then right before the browser has laid
  * anything out, and cannot pick up a label, a caption or a control that a
  * primitive rendered beside the content rather than as it.
  */

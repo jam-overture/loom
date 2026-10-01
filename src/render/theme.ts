@@ -101,7 +101,7 @@ export const themeStyle = (theme: ResolvedTheme): CSSProperties =>
  * paints and therefore what is behind any band excerpted out of the page; a band
  * that paints a surface of its own paints it over this, exactly as it does in
  * place. `color` alongside it because a frame setting only the ground leaves
- * anything inheriting its colour reading the *host's* ink on the tree's paper —
+ * anything inheriting its color reading the *host's* ink on the tree's paper —
  * the tree's own primitives read `--loom-fg-default` and are unaffected, and
  * everything the host puts in that frame is not.
  */
@@ -110,7 +110,7 @@ export type ThemeGround = {
   readonly color: string
   /**
    * Absent — rather than guessed — when either end of the palette's body-copy
-   * pair is a colour `channelsOf` declines to read, in which case whatever
+   * pair is a color `channelsOf` declines to read, in which case whatever
    * `color-scheme` the host's own stylesheet sets stands. Every registered
    * palette declares both as hex and resolves.
    */

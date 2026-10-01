@@ -43,7 +43,7 @@ an unanswered question in the most recent lesson does.
 the lesson is actually about have not moved since.
 
 What I deliberately did **not** build any argument on: `submits` (0087, 23
-August, one day old) and `behaviours` (0086, two days). Both are additive fields
+August, one day old) and `behaviors` (0086, two days). Both are additive fields
 on the same definition and both would have made good examples. Neither appears
 in an exercise, and the only place either is mentioned is a passing reference to
 `primitive-type.ts` serving several registries. If they move next week the

@@ -34,7 +34,7 @@ import { portalPolicy, portalPropsVocabulary } from "./policy"
  * `Loom marketing` filed, on 23 September, that nothing in this repository wired
  * a props vocabulary and that 0173's registered-types list was unset on all four
  * surfaces. Its own row is closed. This is the portal's, and a suite that only
- * asserted the new behaviour would be worth much less than one that also measures
+ * asserted the new behavior would be worth much less than one that also measures
  * the old: *this change is refused now* is a fact about a policy, and **this exact
  * change was committed yesterday** is the fact that says why the policy needed
  * changing.

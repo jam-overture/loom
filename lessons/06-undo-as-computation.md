@@ -788,7 +788,7 @@ Which means the right repair is to narrow the sentence, not to tighten the code.
 not caught up with 0038; the accurate version is that inversion is a *structural*
 check and skips the envelope and the recycling rule. Worth knowing before you
 lean on it, and it is flagged for the build routine rather than fixed here — a
-lessons change that also changes behaviour is one nobody can review.
+lessons change that also changes behavior is one nobody can review.
 
 **1** `insert` → `remove { nodeId }`. `remove` → `insert { parentId, index, node
 }`, carrying the whole detached subtree. `move` → `move { nodeId, parentId, index

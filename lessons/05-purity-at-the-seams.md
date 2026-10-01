@@ -353,7 +353,7 @@ use it, because building a `RuntimeEventEnvelope` by hand is now the odd thing
 to do. Compare the alternative that was on the table — a `guardedSink(sink)`
 decorator the host wraps its sink in. Same containment, and it is the same
 obligation one level further out: a host that forgets to wrap gets the old
-behaviour with nothing to indicate anything is missing. **A guarantee a caller
+behavior with nothing to indicate anything is missing. **A guarantee a caller
 can opt out of by omission is not one.**
 
 **It covers rejecting as well as throwing, and this is the half you would not

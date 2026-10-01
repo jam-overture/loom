@@ -43,7 +43,7 @@ export type BindingDeclaration<Name extends string = string> =
 /**
  * Which binding names a primitive says it reads, asked per type.
  *
- * Structural, and detected the way `FrameResolver` and `BehaviourResolver` are:
+ * Structural, and detected the way `FrameResolver` and `BehaviorResolver` are:
  * a registry built by the SDK satisfies it, and a host resolving from a plain
  * map has registered nothing that could declare a binding name in the first
  * place — so there is nothing here to wire and nothing that can go missing.

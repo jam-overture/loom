@@ -87,7 +87,7 @@ export const LIBRARY_CLASS = {
   lift: "loom-lift",
   /** Wipes an underline in from the left on hover — a link that is a whole tile. */
   underline: "loom-underline",
-  /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */
+  /** Two slow-drifting color fields, for a hero backdrop that is not a flat wash. */
   aurora: "loom-aurora",
   /** The disclosure marker of a `details`, rotated when its section is open. */
   marker: "loom-marker",
@@ -155,7 +155,7 @@ export const LIBRARY_CLASS = {
    * A `loom.avatar-row` cluster: each face overlaps the one before it and rings
    * itself in the page's ground so the edge reads. The ring is `bg-canvas`
    * because a primitive cannot know what it is sitting on — a cluster placed
-   * inside a `loom.card` rings itself in the canvas colour rather than the
+   * inside a `loom.card` rings itself in the canvas color rather than the
    * card's, which is a hair off and the honest limit of a static stylesheet.
    */
   cluster: "loom-cluster",
@@ -190,10 +190,10 @@ export const LIBRARY_CLASS = {
   /** A qualifier under an answer, dimmed — and re-lit where the column is tinted. */
   compareNote: "loom-compare-note",
   /**
-   * The three verdicts. Their colour is here rather than on the element because
+   * The three verdicts. Their color is here rather than on the element because
    * a tinted column re-inks the two that recede — `fg-subtle` on `accent-subtle`
    * measures 3.76:1 across the registered palettes, under the bar a palette
-   * slot carrying text is held to — and an inline colour would beat the rule that does it.
+   * slot carrying text is held to — and an inline color would beat the rule that does it.
    */
   compareYes: "loom-compare-yes",
   compareNo: "loom-compare-no",
@@ -609,7 +609,7 @@ export const LIBRARY_CLASS = {
    *
    * `background-clip: text` with a transparent fill is one unsupported property
    * away from an invisible word, so the wash is inside an `@supports` test and
-   * the declaration outside it is a solid `accent-strong`. The forced-colours
+   * the declaration outside it is a solid `accent-strong`. The forced-colors
    * rule after it is the second way the same word disappears, and it is the one
    * that cannot be felt by testing in a browser that is behaving normally.
    */
@@ -712,7 +712,7 @@ export const LIBRARY_CLASS = {
 
 /**
  * Reduced motion removes movement, never feedback: a `.loom-rise` element ends
- * at `opacity: 1` rather than never arriving, and hover still recolours. An
+ * at `opacity: 1` rather than never arriving, and hover still recolors. An
  * entrance animation that is simply switched off is how a page renders blank
  * for anyone who asked their system to calm it down.
  */
@@ -1576,7 +1576,7 @@ details[open] > summary .loom-marker {
  * were the thing holding the arrangement together and under one of the two
  * starter palettes it was drawing nothing at all. The numbers are in the
  * 26 September finding; they cannot be written here, because a hex literal
- * inside this sheet is indistinguishable from a hardcoded colour to the test
+ * inside this sheet is indistinguishable from a hardcoded color to the test
  * that forbids one.
  */
 .loom-orbit-guide {

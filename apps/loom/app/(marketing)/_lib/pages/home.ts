@@ -361,7 +361,7 @@ const vocabulary = (ids: IdFactory): LoomNode =>
  * `state` is what separates the two halves visually: `done` is a thing you have
  * finished doing, `current` is a thing that is happening now and will be
  * happening on the next visit too. That is the primitive's own vocabulary used
- * for what it means, rather than a colour chosen to make two look different
+ * for what it means, rather than a color chosen to make two look different
  * from two.
  */
 type UsingItStep = {

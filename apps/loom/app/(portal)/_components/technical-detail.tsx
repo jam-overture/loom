@@ -19,7 +19,7 @@ import type { ReactNode } from "react"
  *
  * ## The altitude is this component's, not the screen's
  *
- * For a fortnight it set no text colour at all, so the record was rendered in
+ * For a fortnight it set no text color at all, so the record was rendered in
  * whatever ink it happened to be mounted inside. Inside a `StateNotice`, whose
  * content wrapper is muted, that was quiet. Inside a card, which sets nothing,
  * it was **the body ink — the same weight as the plain sentence the disclosure

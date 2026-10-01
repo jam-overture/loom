@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, radius } from "./tokens.js"
+import { color, radius } from "./tokens.js"
 
 /**
  * A span inside a sentence that matters more than the words around it.
@@ -74,7 +74,7 @@ import { colour, radius } from "./tokens.js"
  * one real trap in building it. The obvious spelling is `accent` to
  * `brand-secondary`, and under `editorial` — one of the two starter palettes —
  * those two slots hold *the same hex*, `#4a5b78`, because a single-accent
- * palette mirrors its accent into its secondary. A wash between a colour and
+ * palette mirrors its accent into its secondary. A wash between a color and
  * itself is a flat fill: the primitive would have rendered a gradient nobody
  * could see, under the palette every screenshot in this repository is taken in
  * first. That is `tokens.ts`' standing warning — a token promises the value
@@ -121,7 +121,7 @@ const TONES: Readonly<Record<"strong" | "subtle" | "marked" | "washed", Tone>> =
      * is what every other primitive here reaches for and what this was
      * written as first. It renders *nothing* under `bold-sans`, whose font pack
      * declares `headingWeight: 400` beside `bodyWeight: 400` — a legitimate
-     * pack, since that family carries its emphasis in size and colour rather
+     * pack, since that family carries its emphasis in size and color rather
      * than in weight, and a stressed word inside a paragraph that came out
      * identical to the words on either side of it.
      *
@@ -132,7 +132,7 @@ const TONES: Readonly<Record<"strong" | "subtle" | "marked" | "washed", Tone>> =
      * It is the same argument `loom.kbd` makes for `em` over a ramp step, one
      * axis across.
      */
-    style: { fontWeight: "bolder", color: colour("fg-default") },
+    style: { fontWeight: "bolder", color: color("fg-default") },
   },
   subtle: {
     element: "em",
@@ -141,8 +141,8 @@ const TONES: Readonly<Record<"strong" | "subtle" | "marked" | "washed", Tone>> =
   marked: {
     element: "mark",
     style: {
-      background: colour("accent-subtle"),
-      color: colour("fg-default"),
+      background: color("accent-subtle"),
+      color: color("fg-default"),
       /**
        * Padded and rounded in `em`, so the highlight grows with the type it
        * marks. A headline phrase and a footnote phrase get the same *shape* of
@@ -166,14 +166,14 @@ const TONES: Readonly<Record<"strong" | "subtle" | "marked" | "washed", Tone>> =
      * **Everything visual is in the rule and nothing is here**, which is the
      * stylesheet's first mechanic doing real work rather than being obeyed: an
      * inline style beats a rule, so a `color` set here would defeat the
-     * `@supports` fallback and the forced-colours rule both — and the failure
+     * `@supports` fallback and the forced-colors rule both — and the failure
      * mode of defeating them is a word nobody can see.
      *
      * `bolder` is the one declaration that survives inline, because it is a
-     * weight rather than a colour and it is the same relative-to-context
+     * weight rather than a color and it is the same relative-to-context
      * reasoning `strong` uses above: a wash under `bold-sans`, whose pack
      * declares `headingWeight: 400` beside `bodyWeight: 400`, would otherwise be
-     * a coloured word at the weight of the sentence around it.
+     * a colored word at the weight of the sentence around it.
      */
     style: { fontWeight: "bolder" },
   },
@@ -182,7 +182,7 @@ const TONES: Readonly<Record<"strong" | "subtle" | "marked" | "washed", Tone>> =
 export const loomEmphasis = definePrimitive({
   type: "loom.emphasis",
   description:
-    "A span inside a sentence that matters more than the words around it — bold, italic, highlighted, or washed in the palette's two accent colours. Its text is a child.",
+    "A span inside a sentence that matters more than the words around it — bold, italic, highlighted, or washed in the palette's two accent colors. Its text is a child.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {

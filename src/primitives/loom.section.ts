@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
-import { colour, radius, size, space, WIDTHS, type WidthName } from "./tokens.js"
+import { color, radius, size, space, WIDTHS, type WidthName } from "./tokens.js"
 
 /**
  * A band of the page, with a region above its content for whatever introduces
@@ -61,9 +61,9 @@ const props = z
 type Props = z.infer<typeof props>
 
 const TONES = {
-  canvas: { background: "transparent", color: colour("fg-default") },
-  surface: { background: colour("bg-surface"), color: colour("fg-default") },
-  accent: { background: colour("accent-subtle"), color: colour("fg-default") },
+  canvas: { background: "transparent", color: color("fg-default") },
+  surface: { background: color("bg-surface"), color: color("fg-default") },
+  accent: { background: color("accent-subtle"), color: color("fg-default") },
 } as const
 
 export const loomSection = definePrimitive({
@@ -129,7 +129,7 @@ export const loomSection = definePrimitive({
                 fontSize: size(1),
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: colour("accent"),
+                color: color("accent"),
               },
             },
             given.eyebrow

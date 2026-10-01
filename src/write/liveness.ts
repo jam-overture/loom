@@ -12,7 +12,7 @@ import type { HeldProposal } from "./held.js"
  * it would land on, and when they differ it releases the hold and reports
  * `revision-conflict` — dead rather than stale, because the delta can never
  * apply again and a second attempt at something impossible is worse than no
- * attempt. That is the right behaviour and it arrives too late to be useful to
+ * attempt. That is the right behavior and it arrives too late to be useful to
  * the person doing the answering.
  *
  * Nothing said so beforehand. `forTree` hands back every waiting proposal with

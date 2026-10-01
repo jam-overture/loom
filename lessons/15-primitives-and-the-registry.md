@@ -134,7 +134,7 @@ the portal. It renders beautifully and quietly drops half of what it was handed.
 
 The first is a *bound* problem — it is about what may be proposed at all. The
 second is a *data* problem — it is about a document meeting a schema. The third
-is a *behaviour* problem, and it is the awkward one: it cannot be read off any
+is a *behavior* problem, and it is the awkward one: it cannot be read off any
 declaration, because the whole failure is the gap between a declaration and the
 code beside it.
 
@@ -207,7 +207,7 @@ paying out somewhere lesson 07 never looked.
 Notice also what the catalogue is *not*. It carries no schemas, no types, no
 components — a projection throws away code, which is exactly what makes it able
 to leave the process (12). And it is optional and absent by default: a host who
-wires no catalogue gets exactly the behaviour of the system before 0013.
+wires no catalogue gets exactly the behavior of the system before 0013.
 Nothing is invented to fill the gap.
 
 ### Declaring is mandatory. Restricting is not.

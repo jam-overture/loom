@@ -96,7 +96,7 @@ describe("robots, on a deployment that is not for finding", () => {
 
   /**
    * The negative case this rule exists to get right: a self-hosted Loom site
-   * has no `VERCEL_ENV` and keeps exactly the behaviour it had before.
+   * has no `VERCEL_ENV` and keeps exactly the behavior it had before.
    */
   it("leaves a deployment Vercel says nothing about alone", () => {
     expect(withEnv(undefined, robots).sitemap).toBeDefined()

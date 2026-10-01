@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, weight, type RampStep } from "./tokens.js"
+import { color, family, size, weight, type RampStep } from "./tokens.js"
 
 /**
  * A heading, with its text as child nodes rather than a `text` prop.
@@ -100,7 +100,7 @@ export const loomHeading = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: headingSize(STEP_FOR_LEVEL[given.level] ?? 5),
           lineHeight: 1.15,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           /**
            * **Absent means inherit, not `start`.**
            *

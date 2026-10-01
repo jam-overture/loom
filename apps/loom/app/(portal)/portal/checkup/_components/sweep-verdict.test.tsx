@@ -104,11 +104,11 @@ describe("SweepVerdict", () => {
   })
 
   /**
-   * Colour is a second channel and never the only one. A reader who cannot tell
+   * Color is a second channel and never the only one. A reader who cannot tell
    * the palette apart still reads which of the results this is, because the
    * result is in words.
    */
-  it("says which result this is in words, not only in colour", () => {
+  it("says which result this is in words, not only in color", () => {
     const { container } = render(
       <SweepVerdict
         reading={reading({ tone: "rejected", label: "One of your pages doesn’t match its own history." })}

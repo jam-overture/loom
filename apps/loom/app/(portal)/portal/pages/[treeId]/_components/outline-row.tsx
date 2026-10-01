@@ -32,7 +32,7 @@ const titleFor = (row: OutlineRow): string =>
  * independently of every other row, which is what `aria-pressed` means — and the
  * difference is what a screen reader says when the second row is picked. With
  * the wrong one it announces that the first row is no longer selected, which is
- * the behaviour this phase exists to remove.
+ * the behavior this phase exists to remove.
  */
 export const OutlineRowButton = ({
   row,

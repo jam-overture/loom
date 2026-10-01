@@ -28,7 +28,7 @@ import type { LoomNode } from "../tree/node.js"
 export type PrimitiveVocabulary = (type: PrimitiveType) => boolean
 
 /**
- * What a host that has declared no vocabulary gets, which is today's behaviour.
+ * What a host that has declared no vocabulary gets, which is today's behavior.
  *
  * It answers `true` for everything rather than `false`, and the asymmetry with
  * `NOTHING_INTERACTIVE` is deliberate. Declaring nothing means *I have not told
@@ -116,7 +116,7 @@ export type PropsVocabulary = (type: PrimitiveType, props: JsonObject) => PropsV
 
 /**
  * What a host that has wired no props vocabulary gets, which is today's
- * behaviour.
+ * behavior.
  *
  * `undeclared` rather than `valid`, and the distinction is not academic: the
  * render seam already separates *these props are fine* from *nobody said what
@@ -214,13 +214,13 @@ export const describeInvalidProps = (invalid: InvalidProps): string =>
  * missing.
  *
  * Handed to the write path rather than declared on the policy, which is 0179's
- * rule and this is the second thing it covers: a reader is behaviour, a policy
+ * rule and this is the second thing it covers: a reader is behavior, a policy
  * is data with a fingerprint, and a policy carrying a function is a policy that
  * cannot be compared with the one that decided yesterday.
  */
 
 /**
- * What a host that has handed no reader gets, which is today's behaviour.
+ * What a host that has handed no reader gets, which is today's behavior.
  *
  * `undefined` for every type rather than an empty list, and the asymmetry with
  * `EVERY_TYPE_REGISTERED` is `unreadBindings`' own bargain rather than a second

@@ -311,7 +311,7 @@ the one primitive it was built for.
 
 ### The measurement
 
-Exercise G of [lesson 31](lessons/31-behaviour.md) asks the starter registry
+Exercise G of [lesson 31](lessons/31-behavior.md) asks the starter registry
 which of its primitives declare a behaviour, and then asks each member of the
 vocabulary whether anything declares *it*:
 
@@ -30046,7 +30046,12 @@ and the demo's own sequencing is what makes this reachable in two presses.
 ## 2026-09-15 — `21st.dev` is still `EGRESS_BLOCKED`, from the demo lane a seventeenth time
 
 **Filed by:** `Loom demo` · **Owned by:** `@jonathanbravecredit` · **Status:**
-re-verified in place against the standing entry, **not re-filed**
+**closed 1 October 2026** by `merge-01-us-spellings-and-no-21st-dev`, and with
+it the whole `21st.dev` series — original text below. The maintainer's
+instruction was to stop going there. `21st.dev` is out of both lists in
+`.claude/settings.json` and out of *Network access* in `docs/routines.md`, which
+now says plainly not to fetch it and not to re-file it. Nothing was added to the
+allowlist; the proxy block was never the part this repository could fix
 
 Checked again this run and it returns `EGRESS_BLOCKED`. The standing entry says
 everything a new one would, and a third of this file being entries filed twice
@@ -34158,7 +34163,14 @@ land them without a marketing run.
 ## 2026-09-24 — `nextjs.org` is `EGRESS_BLOCKED`, and `docs/routines.md` lists it as allowed
 
 **Filed by:** `Loom marketing` · **Owned by:** `@jonathanbravecredit`,
-reassigned from `Loom daily build` on 25 September · **Status:** open — one
+reassigned from `Loom daily build` on 25 September · **Status:** open **for
+`nextjs.org`**, which is unchanged and still listed; its `21st.dev` half is
+**closed 1 October 2026** by `merge-01-us-spellings-and-no-21st-dev` — original
+text below. This entry's diagnosis is what the remedy was built on: because the
+cause is the proxy and not the lists, delisting changes what a run is *told* it
+may reach, which is what was generating the filings. The same remedy is
+available for `nextjs.org` and was not taken, because the maintainer named one
+domain — one
 fetch from the marketing lane on 24 September, and **nothing for a lane to do**:
 the entry's own reading of `.claude/settings.json` establishes that both
 committed lists already name the domain, so the block is the environment's

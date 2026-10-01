@@ -400,7 +400,7 @@ also unread, both are reported — two true things about one mistake, in the ord
 somebody would fix them. A malformed `loom:data` reaches neither, because there
 are no names in it to be read.
 
-And the seam is detected structurally, the way the frame and behaviour resolvers
+And the seam is detected structurally, the way the frame and behavior resolvers
 are: a registry built by the SDK satisfies it, and a host resolving primitives
 from a plain object has registered nothing that could have declared a name in
 the first place. Nothing to wire, so nothing that can be left unwired — which is

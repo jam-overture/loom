@@ -32,12 +32,12 @@ import { askForChange } from "../actions"
  * (`record-card.tsx`) — moved up, not removed — and what is left here is the
  * half that was only ever this block's: **the way out**.
  *
- * **The left rule, in the third colour.** The card has two of these already and
+ * **The left rule, in the third color.** The card has two of these already and
  * they are a language rather than a decoration: amber for a question still open
  * (`WhatWouldHappen`, the same amber as the ring on the stage), green for the
  * answer the visitor gave (`answerNote`). This is the grey of the `no-change`
- * badge forty pixels above it, which is the colour of a question that is shut.
- * One colour in two places, which is how this rail teaches everything rather
+ * badge forty pixels above it, which is the color of a question that is shut.
+ * One color in two places, which is how this rail teaches everything rather
  * than with a legend.
  *
  * **And nothing to rule off when there is no way out**, which is the other half

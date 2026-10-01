@@ -51,7 +51,7 @@ export type AnchorAttributes = {
  * not, because unlike a refused frame — which a primitive renders differently,
  * and visibly — there is nothing for a primitive to do about an anchor it did
  * not get. What is left is a diagnostic, which is where a fault with no
- * behaviour belongs.
+ * behavior belongs.
  */
 export type AnchorReading =
   | { readonly status: "anchored"; readonly attributes: AnchorAttributes }

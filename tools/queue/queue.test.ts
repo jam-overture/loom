@@ -94,7 +94,7 @@ describe("planQueue", () => {
   })
 
   /**
-   * The behaviour the whole tool exists for: one of a colliding pair still
+   * The behavior the whole tool exists for: one of a colliding pair still
    * lands, and the queue keeps moving past it rather than stopping at the first
    * refusal.
    */

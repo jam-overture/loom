@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, monospace, radius, weight } from "./tokens.js"
+import { color, monospace, radius, weight } from "./tokens.js"
 
 /**
  * One key, as a key cap — `⌘`, `K`, `Esc`.
@@ -31,7 +31,7 @@ import { colour, monospace, radius, weight } from "./tokens.js"
  *
  * The cap is `<kbd>`, which is the element browsers and screen readers already
  * know means keyboard input, and the raised edge is a thicker bottom border
- * rather than a shadow: a shadow needs a colour that is neither the surface nor
+ * rather than a shadow: a shadow needs a color that is neither the surface nor
  * the border, and there is no palette slot that means "a little darker than
  * this" without becoming ink under a palette that reads it as one.
  */
@@ -71,13 +71,13 @@ export const loomKbd = definePrimitive({
            * sitting on a `bg-surface` card is a cap defined by its border
            * alone, which under the dark palette is very nearly invisible.
            */
-          background: colour("bg-surface-muted"),
-          border: `1px solid ${colour("border-default")}`,
+          background: color("bg-surface-muted"),
+          border: `1px solid ${color("border-default")}`,
           /** The raised edge. It is the whole of what makes this read as a cap. */
           borderBlockEndWidth: "2px",
-          borderBlockEndColor: colour("border-strong"),
+          borderBlockEndColor: color("border-strong"),
           borderRadius: radius("sm"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
           fontFamily: monospace(),
           fontSize: "0.85em",
           fontWeight: weight("body"),

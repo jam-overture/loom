@@ -168,7 +168,7 @@ describe("every page of this site", () => {
  * **The maintainer's third instruction of 26 September**, and the only one of
  * the four that is a property rather than a judgement call — which is why it is
  * a test rather than a pass somebody did once. A site edited by seven routines
- * with no memory of each other will drift back into *colour* and *behaviour*
+ * with no memory of each other will drift back into *color* and *behavior*
  * within a week of anybody fixing it by hand, and nothing would say so.
  *
  * It reads the words a page actually renders rather than grepping the source,
@@ -180,8 +180,8 @@ describe("every page of this site", () => {
 const BRITISH = new RegExp(
   [
     "colou?rs?",
-    "coloured",
-    "behaviours?",
+    "colored",
+    "behaviors?",
     "honou?r(ed|s)?",
     "favou?rites?",
     "neighbou?rs?",

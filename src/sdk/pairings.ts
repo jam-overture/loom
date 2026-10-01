@@ -1,7 +1,7 @@
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PaletteSlot } from "../theme/theme.js"
 
-import { probeColourPairings, probeConfigurations, probeStates } from "./conformance.js"
+import { probeColorPairings, probeConfigurations, probeStates } from "./conformance.js"
 import type { PrimitiveRegistry, RegisteredPrimitive } from "./registry.js"
 
 /**
@@ -77,7 +77,7 @@ export type ChildGround = {
  * so a *required* prop is unset too. It is that a component written as
  * `given.price === undefined ? null : …` produces no element at all under an
  * absent optional prop, so any ink that element paints is invisible here, while
- * a required prop's element still renders and still shows its colour. Optional
+ * a required prop's element still renders and still shows its color. Optional
  * and not a closed choice is exactly the set a component guards on and the probe
  * cannot open.
  *
@@ -174,7 +174,7 @@ export const registryPairings = (
 ): RegistryPairings => {
   const probed = registry.primitives.map((primitive) => ({
     type: primitive.type,
-    verdict: probeColourPairings(
+    verdict: probeColorPairings(
       primitive.component,
       primitive.slots,
       primitive.text,

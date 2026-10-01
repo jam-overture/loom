@@ -143,7 +143,7 @@ const ORIGINS: readonly IntentOrigin[] = [
  * front of you — "Loom made this change on its own". A rule has not fired yet
  * and may never; what a reader wants from it is what it *would* do. The tone is
  * taken from `GATE_VERDICTS` rather than restated, so a refusal is the same
- * colour here as everywhere else in the portal.
+ * color here as everywhere else in the portal.
  */
 export const WHEN_IT_FIRES: Readonly<Record<DispositionKind, PlainWord>> = {
   rejected: {

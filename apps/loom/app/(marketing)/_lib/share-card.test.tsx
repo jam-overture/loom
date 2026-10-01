@@ -40,8 +40,8 @@ type Drawn = { readonly props?: { readonly style?: Record<string, unknown>; read
  * changes both. This side is derived from the element tree, so a color written
  * into the file is caught whether or not anybody updated a list.
  */
-const coloursIn = (node: unknown): readonly string[] => {
-  if (Array.isArray(node)) return node.flatMap(coloursIn)
+const colorsIn = (node: unknown): readonly string[] => {
+  if (Array.isArray(node)) return node.flatMap(colorsIn)
   if (typeof node !== "object" || node === null) return []
 
   const { props } = node as Drawn
@@ -51,7 +51,7 @@ const coloursIn = (node: unknown): readonly string[] => {
 
   return [
     ...values.flatMap((value) => [...value.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map(([hex]) => hex)),
-    ...coloursIn(props?.children),
+    ...colorsIn(props?.children),
   ]
 }
 
@@ -95,7 +95,7 @@ describe.each(SITE_THEME_NAMES)("under the %s palette", (name) => {
         "https://loom.example"
       )
     const slots = Object.values(theme.palette.slots)
-    const drawn = coloursIn(shareCardImage(card, theme))
+    const drawn = colorsIn(shareCardImage(card, theme))
 
     expect(drawn.length).toBeGreaterThan(0)
     expect([...new Set(drawn)].filter((color) => !slots.includes(color))).toEqual([])

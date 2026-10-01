@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * What a region says when it holds nothing — and the first primitive in this
@@ -107,8 +107,8 @@ type Props = z.infer<typeof props>
  * by outline rather than being shared.
  */
 const OUTLINES: Readonly<Record<NonNullable<Props["outline"]>, CSSProperties>> = {
-  dashed: { border: `2px dashed ${colour("border-subtle")}`, borderRadius: radius("lg") },
-  solid: { border: `1px solid ${colour("border-subtle")}`, borderRadius: radius("lg") },
+  dashed: { border: `2px dashed ${color("border-subtle")}`, borderRadius: radius("lg") },
+  solid: { border: `1px solid ${color("border-subtle")}`, borderRadius: radius("lg") },
   none: {},
 }
 
@@ -168,8 +168,8 @@ export const loomEmptyState = definePrimitive({
                 width: space(8),
                 height: space(8),
                 borderRadius: radius("full"),
-                background: colour("bg-surface-muted"),
-                color: colour("fg-subtle"),
+                background: color("bg-surface-muted"),
+                color: color("fg-subtle"),
                 marginBlockEnd: space(1),
               },
             },
@@ -194,7 +194,7 @@ export const loomEmptyState = definePrimitive({
                 fontWeight: weight("body"),
                 fontSize: size(3),
                 lineHeight: 1.6,
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             children

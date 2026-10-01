@@ -24,7 +24,7 @@ describe("UnderConstruction", () => {
   /**
    * `status` and not `alert`. This is a standing condition rather than
    * something that just happened, and an alert would interrupt a screen reader
-   * on every navigation within the portal — the behaviour `StateNotice` already
+   * on every navigation within the portal — the behavior `StateNotice` already
    * reasons about and reserves for a read that failed.
    */
   it("is announced as a standing condition rather than an interruption", () => {
@@ -39,7 +39,7 @@ describe("UnderConstruction", () => {
    * person, rather than the red it uses for a refusal. Nothing here is broken,
    * and red would say it was.
    */
-  it("wears the waiting colour rather than the refusal colour", () => {
+  it("wears the waiting color rather than the refusal color", () => {
     const banner = render(<UnderConstruction />).container.querySelector(
       "[data-under-construction]"
     )

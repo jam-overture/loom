@@ -22,7 +22,7 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
  * ## Why this is not a second contrast bar
  *
  * A contrast ratio compares luminance, and two slots can differ in hue while
- * matching in luminance — 1.00:1 and plainly different colours. Asking WCAG's
+ * matching in luminance — 1.00:1 and plainly different colors. Asking WCAG's
  * question here would report a pair as identical that a reader distinguishes at
  * a glance, and would miss a pair that differs in luminance alone by less than
  * an eye can resolve.
@@ -50,7 +50,7 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
  */
 
 /**
- * ΔE below which two colours are the same colour to a reader.
+ * ΔE below which two colors are the same color to a reader.
  *
  * The conventional just-noticeable difference for CIE76 under controlled
  * viewing. It is a floor and not a target: a pair at 2.4 is technically
@@ -68,14 +68,14 @@ import type { Palette, PaletteSlot, ThemeId } from "./theme.js"
 export const JUST_NOTICEABLE_DIFFERENCE = 2.3
 
 /**
- * The CIE76 colour difference between two colours, or `undefined` when either
+ * The CIE76 color difference between two colors, or `undefined` when either
  * is a form `channelsOf` declines to guess at.
  *
  * The conversion is `lab.ts`'s, shared with the module that measures how much
- * colour a single slot has: both are distances in the same space, and two
- * copies of it would be two answers to where a colour sits.
+ * color a single slot has: both are distances in the same space, and two
+ * copies of it would be two answers to where a color sits.
  */
-export const colourDifference = (a: string, b: string): number | undefined => {
+export const colorDifference = (a: string, b: string): number | undefined => {
   const [first, second] = [a, b].map(labOf)
   if (!first || !second) return undefined
 
@@ -90,12 +90,12 @@ export const colourDifference = (a: string, b: string): number | undefined => {
 /**
  * How the reader is told the two apart, which decides what a collapse means.
  *
- * **`colour-only`** — nothing but the colour separates them where they meet. A
+ * **`color-only`** — nothing but the color separates them where they meet. A
  * palette that collapses one has a page in it where two different things look
  * like one thing, and no tree can avoid it.
  *
  * **`also-marked`** — a rule, a border or an outline separates them as well, so
- * the two colours are free to be equal. `minimal` is the argument for this
+ * the two colors are free to be equal. `minimal` is the argument for this
  * basis existing: its `bg-surface` *is* its `bg-canvas`, deliberately, because
  * every card in that palette is defined by its border.
  *
@@ -107,7 +107,7 @@ export const colourDifference = (a: string, b: string): number | undefined => {
  * declares can be seen at all is `auditMarkGroundings`, which asks it of every
  * ground the slot lands on and does not take a fill difference as an answer.
  */
-export type PeerBasis = "colour-only" | "also-marked"
+export type PeerBasis = "color-only" | "also-marked"
 
 type PeerBase = {
   readonly first: PaletteSlot
@@ -125,7 +125,7 @@ type PeerBase = {
  * something else can be measured too.
  */
 export type PeerPairing =
-  | (PeerBase & { readonly basis: "colour-only" })
+  | (PeerBase & { readonly basis: "color-only" })
   | (PeerBase & { readonly basis: "also-marked"; readonly mark: PaletteSlot })
 
 /**
@@ -140,8 +140,8 @@ export type PeerPairing =
  *
  * Two rules keep the list honest, both borrowed from `PALETTE_TEXT_PAIRINGS`:
  * every row names somewhere the library really puts the two together, and
- * **nothing may be demoted.** A pair that is `colour-only` in any place where
- * the boundary is what the reader reads is `colour-only` here, whatever else
+ * **nothing may be demoted.** A pair that is `color-only` in any place where
+ * the boundary is what the reader reads is `color-only` here, whatever else
  * marks it elsewhere: `loom.card` outlines its surface, and `loom.section
  * tone="surface"` paints the same fill on the same canvas with no border at
  * all, so the pair answers for the section. Where two primitives mark a pair
@@ -159,37 +159,37 @@ export const PALETTE_PEER_PAIRINGS: readonly PeerPairing[] = [
   {
     first: "fg-default",
     second: "fg-muted",
-    basis: "colour-only",
+    basis: "color-only",
     where: "loom.prose tone muted under a default one",
   },
   {
     first: "fg-muted",
     second: "fg-subtle",
-    basis: "colour-only",
+    basis: "color-only",
     where: "loom.tier note under its body, loom.milestone",
   },
   /**
    * The row that fails, and the reason the module is worth its tests. A
    * `loom.link` in a paragraph is `accent` on the `fg-default` around it, at
    * rest with no underline — the wipe-in rule arrives on hover — and no
-   * difference in weight. Colour is the whole of the signal.
+   * difference in weight. Color is the whole of the signal.
    */
   {
     first: "fg-default",
     second: "accent",
-    basis: "colour-only",
+    basis: "color-only",
     where: "loom.link tone accent inside a paragraph",
   },
   {
     first: "bg-canvas",
     second: "bg-surface",
-    basis: "colour-only",
+    basis: "color-only",
     where: "loom.section tone surface, which paints a band and no border",
   },
   {
     first: "bg-canvas",
     second: "accent-subtle",
-    basis: "colour-only",
+    basis: "color-only",
     where: "loom.section tone accent, likewise",
   },
   {
@@ -213,8 +213,8 @@ export const PALETTE_PEER_PAIRINGS: readonly PeerPairing[] = [
  *
  * The question a `PeerPairing` cannot ask. A pairing names two things a reader
  * tells apart and treats a mark as a *defence* — something that may carry the
- * pair when the two colours will not. So a mark is only ever measured when the
- * colours it separates have collapsed, and a mark that draws nothing on a
+ * pair when the two colors will not. So a mark is only ever measured when the
+ * colors it separates have collapsed, and a mark that draws nothing on a
  * palette whose two fills happen to differ is never looked at.
  *
  * That is not a second way of asking the same thing. A border is a promise in
@@ -274,7 +274,7 @@ export const PALETTE_MARK_GROUNDINGS: readonly MarkGrounding[] = [
 export type MeasuredMark = {
   readonly grounding: MarkGrounding
   readonly ground: PaletteSlot
-  /** `undefined` when either colour is a form `channelsOf` declines to guess at. */
+  /** `undefined` when either color is a form `channelsOf` declines to guess at. */
   readonly difference: number | undefined
   /** False for a difference this could not measure: an undefended line is not a defended one. */
   readonly visible: boolean
@@ -306,7 +306,7 @@ export const auditMarkGroundings = (
 ): MarkAudit => {
   const measured = groundings.flatMap((grounding) =>
     grounding.grounds.map((ground) => {
-      const difference = colourDifference(palette.slots[grounding.mark] ?? "", palette.slots[ground] ?? "")
+      const difference = colorDifference(palette.slots[grounding.mark] ?? "", palette.slots[ground] ?? "")
 
       return {
         grounding,
@@ -342,16 +342,16 @@ export type MeasuredPeer = {
    * How far the mark is from whichever of the two it is nearer to — the mark's
    * worst case, since it has to be visible against both.
    *
-   * `undefined` for a `colour-only` peer, which has no mark, and for a mark
+   * `undefined` for a `color-only` peer, which has no mark, and for a mark
    * written in a form this cannot measure. The second case judges the pair on
-   * its colours alone, which is the safe direction: a defence that cannot be
+   * its colors alone, which is the safe direction: a defence that cannot be
    * measured is not counted as one.
    */
   readonly markDifference: number | undefined
   readonly separated: boolean
 }
 
-/** A peer whose colours could not be measured, and which colour stopped it. */
+/** A peer whose colors could not be measured, and which color stopped it. */
 export type UnmeasuredPeer = {
   readonly pairing: PeerPairing
   readonly first: string
@@ -363,18 +363,18 @@ export type PaletteSeparation = {
   readonly palette: ThemeId
   readonly measured: readonly MeasuredPeer[]
   /**
-   * Colour-only peers under the threshold: two things that look like one thing,
+   * Color-only peers under the threshold: two things that look like one thing,
    * with nothing else to go on. The list a host asserts empty.
    */
   readonly collapsed: readonly MeasuredPeer[]
   /**
-   * Marked peers whose colours have collapsed **and** whose mark has too — a
+   * Marked peers whose colors have collapsed **and** whose mark has too — a
    * card that is neither filled nor outlined. Separate from `collapsed` because
    * it is a different defect with a different fix, and because a marked pair
    * whose mark is doing its job is not a defect at all.
    */
   readonly unmarked: readonly MeasuredPeer[]
-  /** Neither separated nor collapsed: a colour this cannot measure. */
+  /** Neither separated nor collapsed: a color this cannot measure. */
   readonly unmeasured: readonly UnmeasuredPeer[]
 }
 
@@ -388,8 +388,8 @@ const markOf = (pairing: PeerPairing): PaletteSlot | undefined =>
  * into one side of the boundary it draws has stopped drawing it.
  */
 const markSeparation = (mark: string, first: string, second: string): number | undefined => {
-  const toFirst = colourDifference(mark, first)
-  const toSecond = colourDifference(mark, second)
+  const toFirst = colorDifference(mark, first)
+  const toSecond = colorDifference(mark, second)
 
   return toFirst === undefined || toSecond === undefined ? undefined : Math.min(toFirst, toSecond)
 }
@@ -408,7 +408,7 @@ export const auditSeparation = (
   const results = peers.map((pairing) => {
     const first = palette.slots[pairing.first] ?? ""
     const second = palette.slots[pairing.second] ?? ""
-    const difference = colourDifference(first, second)
+    const difference = colorDifference(first, second)
 
     if (difference === undefined) return { unmeasured: { pairing, first, second } }
 
@@ -434,7 +434,7 @@ export const auditSeparation = (
   return {
     palette: palette.id,
     measured,
-    collapsed: apart.filter((entry) => entry.pairing.basis === "colour-only"),
+    collapsed: apart.filter((entry) => entry.pairing.basis === "color-only"),
     unmarked: apart.filter((entry) => entry.pairing.basis === "also-marked"),
     unmeasured: results.flatMap((result) => (result.unmeasured ? [result.unmeasured] : [])),
   }

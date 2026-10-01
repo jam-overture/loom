@@ -131,7 +131,7 @@ const menuLink = (ids: IdFactory, context: ChromeContext, route: SiteRoute): Loo
  *
  * `app/icon.svg` and this are the same four arms, and they are deliberately not
  * the same artefact. **A favicon and a bar mark answer different questions.**
- * The file carries its own colour and swaps it on `prefers-color-scheme`, which
+ * The file carries its own color and swaps it on `prefers-color-scheme`, which
  * is the operating system's axis and is exactly right for a browser tab. A
  * Loom palette is a different axis: `bold` is dark on a machine in light mode,
  * and an image is opaque to the cascade, so a file in the bar renders `#0a0a0a`

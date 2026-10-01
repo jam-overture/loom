@@ -50,7 +50,7 @@ export const gatePolicySchema = z.object({
    * it: `interactiveTypesFor(registry)` in the SDK reads what each primitive
    * declared about itself, so the knowledge stays with the component rather
    * than in a policy file that drifts from it. Empty by default, which is
-   * exactly today's behaviour — a deployment that declares nothing is judged on
+   * exactly today's behavior — a deployment that declares nothing is judged on
    * shape alone.
    */
   interactiveTypes: interactiveTypesSchema.default({}),
@@ -65,7 +65,7 @@ export const gatePolicySchema = z.object({
    *
    * **Empty means undeclared, not empty.** A host that leaves this out is not
    * claiming a library of nothing; it is declining to say, and gets exactly
-   * today's behaviour — an unrenderable insert is appended and reported at
+   * today's behavior — an unrenderable insert is appended and reported at
    * render. The asymmetry with an allowlist is deliberate and is the only way a
    * default can be both additive and safe.
    */

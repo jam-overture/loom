@@ -13,7 +13,7 @@ import { controlClass, controlDisplay } from "./control.js"
  * click handler is not expressible in JSON, which is what a primitive's props
  * are ([0009](../../decisions/0009-primitives-receive-props-in-a-bag.md)).
  * So it lives here, behind `"use client"`, and a primitive receives it already
- * built — see `behaviour.ts` for why that is the shape rather than a prop, a
+ * built — see `behavior.ts` for why that is the shape rather than a prop, a
  * host-installed script, or a primitive of its own.
  *
  * **It renders nothing until it knows it will work.** The server render and the
@@ -30,7 +30,7 @@ import { controlClass, controlDisplay } from "./control.js"
  */
 
 export type CopyControlProps = {
-  /** What goes on the clipboard: the text of the node the behaviour belongs to. */
+  /** What goes on the clipboard: the text of the node the behavior belongs to. */
   readonly value: string
   /** The control's name, in the language this deployment serves. */
   readonly label: string

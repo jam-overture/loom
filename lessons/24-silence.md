@@ -436,7 +436,7 @@ the registry — and an unknown string accepted there would read, to every consu
 as *a primitive that declares no role*. Silence, arrived at by typo.
 
 So `unknown-role` refuses it, beside `undeclared-copy-prop` (a `copy` naming a
-prop the schema does not have), `undeclared-frame-prop` and `unknown-behaviour`.
+prop the schema does not have), `undeclared-frame-prop` and `unknown-behavior`.
 The general rule, which is the most portable thing in this lesson:
 
 > **Any channel with a "nobody said" value has to make it impossible to reach
@@ -476,7 +476,7 @@ a sentence.
 
 One collision to know about before you go looking, because it will cost you a
 minute otherwise. `loom.quote` declares a **prop** called `role` — the author's
-job title, "Head of Design, Acme" — and `loom.code` declares a **behaviour**
+job title, "Head of Design, Acme" — and `loom.code` declares a **behavior**
 called `copy`, the button that puts a snippet on your clipboard. Neither has
 anything to do with the two declarations in this lesson, which sit *beside*
 `props` on a definition rather than inside it. Both words were spoken for before
@@ -900,7 +900,7 @@ instead of throwing.
 Last, what this exercise used to say, because it is worth more than what it says
 now. Until 18 September the third line of the first reading read `unread: none`
 and the paragraph under it ended *this is filed rather than fixed* — a lessons
-change that also changes behaviour is a lessons change nobody can review, so the
+change that also changes behavior is a lessons change nobody can review, so the
 gap was written up and handed to the lane that owns the seam. That cost five days
 and bought a record which rejected the one-line version of the fix on exactly the
 grounds this lesson spends four sections building.

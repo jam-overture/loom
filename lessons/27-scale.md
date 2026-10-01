@@ -260,7 +260,7 @@ descendant gets the same one. That is the whole shape of the channel. So:
 - A rank — *this is the third tallest* — impossible. Every child inherits the
   same value, so there is no value the container can publish that distinguishes
   one child from another.
-- A running total, an index, a colour-by-position, *draw the tallest one
+- A running total, an index, a color-by-position, *draw the tallest one
   differently*: all impossible, all for that one reason.
 
 A primitive that needs one of those is back at the top of this section with none
@@ -340,7 +340,7 @@ does not implement it: it defaults it, and the default is the one value that
 makes the failure invisible rather than loud.
 
 That is filed as a finding rather than fixed here — `src/primitives/` belongs to
-another lane, and a lessons branch that changes behaviour is a lessons branch
+another lane, and a lessons branch that changes behavior is a lessons branch
 nobody can review. It is in the lesson because the gap between *what a decision
 argues* and *what the code does about it* is the most useful thing on this page,
 and because it took writing exercise D to see it. Reading the record does not
@@ -1065,7 +1065,7 @@ they will — a default is what you get when nobody asks the second question out
 loud.
 
 The question to carry into an eleventh seam is the one the finding leaves: **when
-a decision record argues for a behaviour and the code implements a default
+a decision record argues for a behavior and the code implements a default
 instead, what in this repository would ever notice?** Lesson 25 asked where to
 put a claim so that getting it wrong is an event. This one has a claim written
 down, in an `Accepted` record, in the present tense — and a schema three files

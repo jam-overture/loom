@@ -429,7 +429,7 @@ describe("describeRegistryAudit", () => {
     expect(described).not.toContain("loom.card: spreads loom.editable; renders its children; posts")
   })
 
-  it("puts the two disagreements between declaration and behaviour on the line", () => {
+  it("puts the two disagreements between declaration and behavior on the line", () => {
     const described = describeRegistryAudit(auditRegistry(registryOf([claimingToPost, quietlyPosting])))
 
     expect(described).toContain("loom.claiming-to-post: spreads loom.editable; renders its children; declares `submits` and places no address")

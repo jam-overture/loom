@@ -309,9 +309,9 @@ one magic `type` string, which is a discriminated union with extra steps.
 
 **2** A function is not a `JsonObject` value, so it will not typecheck, and if it
 were forced through it could not be stored, sent, or produced by a model.
-Instead: the *primitive* owns rendering behaviour. Register a list primitive that
+Instead: the *primitive* owns rendering behavior. Register a list primitive that
 knows how to render its children, and let the tree express the rows as child
-nodes. Behaviour belongs in registered code; the tree carries data.
+nodes. Behavior belongs in registered code; the tree carries data.
 
 **3** Something outside the tree notices the condition and proposes a delta — an
 `EditIntent` with origin `system-signal`. That proposal is assessed and gated

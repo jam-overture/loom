@@ -7,7 +7,7 @@ import type { SubmissionTarget } from "../submit/endpoint.js"
 import type { SubmissionOutcome } from "../submit/resolution.js"
 
 import { LIBRARY_CLASS, libraryStylesheet } from "./stylesheet.js"
-import { colour, radius, size, space, WIDTHS } from "./tokens.js"
+import { color, radius, size, space, WIDTHS } from "./tokens.js"
 
 /**
  * The band where a page stops telling and starts asking: a set of
@@ -114,10 +114,10 @@ const NOTICE: CSSProperties = {
   margin: "0",
   paddingBlock: space(3),
   paddingInline: space(4),
-  background: colour("bg-surface-muted"),
-  border: `1px solid ${colour("border-default")}`,
+  background: color("bg-surface-muted"),
+  border: `1px solid ${color("border-default")}`,
   borderRadius: radius("md"),
-  color: colour("fg-muted"),
+  color: color("fg-muted"),
   fontSize: size(2),
 }
 
@@ -223,7 +223,7 @@ export const loomForm = definePrimitive({
           ? null
           : createElement(
               "div",
-              { style: { color: colour("fg-muted"), fontSize: size(2) } },
+              { style: { color: color("fg-muted"), fontSize: size(2) } },
               loom.slots["note"]
             )
       )

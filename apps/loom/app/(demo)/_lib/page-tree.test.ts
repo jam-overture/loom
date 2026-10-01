@@ -121,7 +121,7 @@ describe("the demo page", () => {
   })
 
   /**
-   * The re-theme preset's promise is *every colour and typeface on the page
+   * The re-theme preset's promise is *every color and typeface on the page
    * changes at once*, and it is only true if the two themes disagree about all
    * three. They were `editorial`/`bold` and are now `midnight`/`editorial` —
    * a dark page going light, which is the most legible version of that promise
@@ -172,10 +172,10 @@ describe("the demo page", () => {
   /**
    * The re-theme guarantee, on the page a visitor actually sees: everything
    * below the root's own style attribute is the same markup under both
-   * palettes, and none of it names a colour. A primitive that hard-coded one
+   * palettes, and none of it names a color. A primitive that hard-coded one
    * would fail here rather than at a glance in a screenshot.
    */
-  it("changes nothing below the root across a re-theme, and names no colour there", () => {
+  it("changes nothing below the root across a re-theme, and names no color there", () => {
     const afterRootTag = (markup: string): string => {
       const tree = markup.slice(markup.lastIndexOf("</style>") + "</style>".length)
 

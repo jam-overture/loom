@@ -1,12 +1,12 @@
 import { auditPalette, contrastRatio, TEXT_CONTRAST_MINIMUM } from "./contrast.js"
-import { colourDifference, JUST_NOTICEABLE_DIFFERENCE } from "./separation.js"
+import { colorDifference, JUST_NOTICEABLE_DIFFERENCE } from "./separation.js"
 import { paletteSchema, type Palette } from "./theme.js"
 
 /**
  * Builds a palette that clears the bar, from three hues and a mode.
  *
  * `auditPalette` is the half of this pair that **reports**: it tells a host
- * whether the colours they chose can be read. This is the half that
+ * whether the colors they chose can be read. This is the half that
  * **constructs**, and it exists because reporting is not much help on its own —
  * a host told that four of their twelve pairings fail still has to solve twelve
  * simultaneous contrast constraints by hand, and the usual outcome is that they
@@ -14,20 +14,20 @@ import { paletteSchema, type Palette } from "./theme.js"
  * looked at.
  *
  * The seventeen slots of a palette are not seventeen decisions. Three of them
- * are — *what colour is the page, what colour is the ink that carries meaning,
- * and what is the second colour* — and the rest follow by rule. So this takes
+ * are — *what color is the page, what color is the ink that carries meaning,
+ * and what is the second color* — and the rest follow by rule. So this takes
  * the three and derives the rest, searching for a lightness that clears
  * `TEXT_CONTRAST_MINIMUM` with a margin rather than picking one and hoping.
  *
  * **It is a build-time tool, not a runtime one.** The palettes this library
  * ships are literals in `palettes.ts` — derived once, looked at, committed —
  * because a palette is reviewed by seeing it and diffed by reading it, and a
- * page whose colours are computed at import time is a page whose colours nobody
+ * page whose colors are computed at import time is a page whose colors nobody
  * approved. Derive, look, paste. Never call this in a render.
  *
  * ## The one thing it cannot do for you
  *
- * **It will not put a brand colour where a brand colour does not go.** `accent`
+ * **It will not put a brand color where a brand color does not go.** `accent`
  * is ink — eyebrows, kickers, the disclosure marker, the current nav item — so
  * a hue given here is darkened until it can carry text, and a pale mint or a
  * bright yellow comes back much darker than the brand book says. That is the
@@ -35,11 +35,11 @@ import { paletteSchema, type Palette } from "./theme.js"
  * `border-accent` and `brand-secondary`, where it is an area rather than a
  * letterform, and `accent` is near-black.
  *
- * `deriveBrandPalette` is the shape of that answer: give it the brand colour and
+ * `deriveBrandPalette` is the shape of that answer: give it the brand color and
  * it decides, by measuring, whether it can be ink or has to be an area.
  */
 
-/** How far above the AA bar a derived colour lands. */
+/** How far above the AA bar a derived color lands. */
 const MARGIN = 0.25
 
 const TARGET = TEXT_CONTRAST_MINIMUM + MARGIN
@@ -72,11 +72,11 @@ export type PaletteSpec = {
   readonly name: string
   readonly description: string
   readonly mode: PaletteMode
-  /** The page itself. Its hue tints every neutral, which is what stops a palette looking like grey with colour on top. */
+  /** The page itself. Its hue tints every neutral, which is what stops a palette looking like grey with color on top. */
   readonly canvas: HueSpec
-  /** The colour that carries meaning as text. Darkened, or lightened, until it can. */
+  /** The color that carries meaning as text. Darkened, or lightened, until it can. */
   readonly accent: HueSpec
-  /** The second colour. Never carries text, so it keeps its chroma — this is what `loom.hero`'s aurora paints. */
+  /** The second color. Never carries text, so it keeps its chroma — this is what `loom.hero`'s aurora paints. */
   readonly secondary: HueSpec
   /**
    * Lightness of the canvas, the surface behind a card, and the muted well, in
@@ -113,7 +113,7 @@ export const hslHex = (hue: number, saturation: number, lightness: number): stri
  * The lightest ink (or darkest, on a dark palette) at this hue that still clears
  * `target` against `on`.
  *
- * Lightest rather than merely sufficient, because a colour dragged further than
+ * Lightest rather than merely sufficient, because a color dragged further than
  * it needs to go loses its hue: an accent solved to 8% lightness is black
  * whatever its hue said, and a palette of five of those is five identical
  * palettes. Twenty-four bisection steps put it within about 0.000006 of the
@@ -151,7 +151,7 @@ const DEFAULT_LEVELS: Readonly<Record<PaletteMode, readonly [number, number, num
 }
 
 /**
- * The lightness *nearest* `from` at this hue whose colour clears `target` ΔE
+ * The lightness *nearest* `from` at this hue whose color clears `target` ΔE
  * against every one of `grounds`.
  *
  * Nearest rather than furthest, which is the opposite of `solveLightness` and
@@ -178,7 +178,7 @@ export const solveMarkLightness = (
   target: number
 ): string => {
   const nearestGround = (candidate: string): number =>
-    Math.min(...grounds.map((ground) => colourDifference(candidate, ground) ?? 0))
+    Math.min(...grounds.map((ground) => colorDifference(candidate, ground) ?? 0))
 
   for (let step = 0; step <= 40; step += 0.125) {
     for (const lightness of step === 0 ? [from] : [from - step, from + step]) {
@@ -251,7 +251,7 @@ export const derivePalette = (spec: PaletteSpec): Palette => {
        * levels it lands two points of lightness from the muted well, which is
        * under the just-noticeable difference — so eight of the palettes in
        * `palettes.ts` shipped a card edge a reader could not find, and one of
-       * them drew it in the well's own colour. The other two tiers are 4 to 15
+       * them drew it in the well's own color. The other two tiers are 4 to 15
        * and 74 to 98 from every ground at every hue this derives, so they are
        * picked; if that ever stops being true, this is the function to reach for.
        */
@@ -288,12 +288,12 @@ export const derivePaletteChecked = (
 }
 
 /**
- * Whether a brand colour can carry text on a given ground.
+ * Whether a brand color can carry text on a given ground.
  *
  * The question a host actually has, and the one they are usually answering
  * wrongly: *can we put our orange in `accent`?* If this says no, the honest
  * places for it are `border-accent` and `brand-secondary` — a rule, a ring, a
  * tinted field — and `accent` takes a near-neutral ink instead.
  */
-export const canCarryText = (colour: string, on: string): boolean =>
-  (contrastRatio(colour, on) ?? 0) >= TEXT_CONTRAST_MINIMUM
+export const canCarryText = (color: string, on: string): boolean =>
+  (contrastRatio(color, on) ?? 0) >= TEXT_CONTRAST_MINIMUM

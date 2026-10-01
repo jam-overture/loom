@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, hairline, size, space, weight } from "./tokens.js"
+import { color, family, hairline, size, space, weight } from "./tokens.js"
 
 /**
  * One question and its answer, as a disclosure that needs no JavaScript.
@@ -70,7 +70,7 @@ export const loomFaq = definePrimitive({
             fontWeight: weight("heading"),
             fontSize: size(4),
             lineHeight: 1.3,
-            color: colour("fg-default"),
+            color: color("fg-default"),
           },
         },
         createElement("span", null, given.question),
@@ -83,7 +83,7 @@ export const loomFaq = definePrimitive({
               flex: "0 0 auto",
               fontSize: size(4),
               lineHeight: 1,
-              color: colour("accent"),
+              color: color("accent"),
             },
           },
           "+"
@@ -99,7 +99,7 @@ export const loomFaq = definePrimitive({
             fontFamily: family("body"),
             fontSize: size(3),
             lineHeight: 1.7,
-            color: colour("fg-muted"),
+            color: color("fg-muted"),
             textWrap: "pretty",
           },
         },

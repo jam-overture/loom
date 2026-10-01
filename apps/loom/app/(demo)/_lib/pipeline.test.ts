@@ -574,7 +574,7 @@ describe("the demo's policy", () => {
  *
  * The runtime is unambiguous about it (`confirmHeld`: *"it is not stale pending
  * a retry, it is dead"*) and it had never reached the screen. The card went on
- * saying **Waiting on you**, the page went on ringing its band in the colour of
+ * saying **Waiting on you**, the page went on ringing its band in the color of
  * an open question, and pressing *Apply this change* spent the offer and
  * answered with `applied, then not written: revision-conflict` in the smallest
  * type on the card.

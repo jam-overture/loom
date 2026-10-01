@@ -55,7 +55,7 @@ opens by quoting **this lesson's own exercise** as the finding that prompted it:
 
 The lesson ran its exercise, the exercise exposed a real gap, the gap became an
 Accepted record three days later — and the lesson then sat on `main` for
-eighteen days teaching the behaviour that record had removed. The course
+eighteen days teaching the behavior that record had removed. The course
 generated a correction to the system and did not receive it back.
 
 ## What I changed
@@ -121,7 +121,7 @@ went unnoticed for eighteen days: a routine that writes lessons and files
 findings has no path by which the resolution of its own finding reaches the
 lesson that raised it. 0090 closed the 24 August finding and nothing re-opened
 lesson 15. The new suite closes this particular case — the transcript would have
-gone red the day 0090 merged — but only where a behaviour change shows up in
+gone red the day 0090 merged — but only where a behavior change shows up in
 printed output. A record that changes what a lesson *says* without changing what
 it *prints* is still invisible, and I do not have a mechanical answer to that.
 

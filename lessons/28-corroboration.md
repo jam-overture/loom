@@ -25,7 +25,7 @@ manufacture a second copy, and who ends up paying for it.
 
 Lesson 27 ended with a question, and it was not rhetorical:
 
-> When a decision record argues for a behaviour and the code implements a default
+> When a decision record argues for a behavior and the code implements a default
 > instead, what in this repository would ever notice?
 
 The answer is nothing, and the interesting part is *why* nothing — because it is
@@ -932,7 +932,7 @@ than only the records. This is the alternative worth understanding, because it i
 *correct* and was still not taken. It cannot be done at all until the reference
 generator lifts a linked citation the way it lifts a bare one, which is another
 lane's file — and even then it is a diff across more than a hundred files that
-changes no behaviour and conflicts with every open branch. 0118 records it as
+changes no behavior and conflicts with every open branch. 0118 records it as
 deferred rather than rejected, which is the honest word: it is the only thing
 that would close the gap the record admits to.
 
@@ -1074,7 +1074,7 @@ Write for two minutes, then move on.
   answer named a *person* or named a *role*. This course's answer turned out to
   be "whichever routine next adds a primitive", which is neither.
 - Now go and look at your own work. Find a comment, a README line, or a variable
-  name that makes a claim about behaviour elsewhere in the system. Work out three
+  name that makes a claim about behavior elsewhere in the system. Work out three
   things and write them down: whether a second copy of that fact exists anywhere,
   what would have to change for one to exist, and — the one people skip — who
   would be the one to notice when it went wrong, and how long that would take.

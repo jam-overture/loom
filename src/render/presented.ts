@@ -1,7 +1,7 @@
 /**
  * The present contract's one name, in a module with nothing else in it.
  *
- * It lives apart from `behaviour.ts` for the reason `disclosed.ts` does: code
+ * It lives apart from `behavior.ts` for the reason `disclosed.ts` does: code
  * that only needs to *read* whether a region is showing should not have to
  * import the React controls that write it (0136).
  */
@@ -59,7 +59,7 @@ export const PRESENTED_ATTRIBUTE = "data-loom-presented"
  * one is (0009).
  *
  * Two controls of one primitive therefore have to agree about one boolean, and
- * nothing in the seam let them. A behaviour is built as an independent node the
+ * nothing in the seam let them. A behavior is built as an independent node the
  * primitive places where it likes, so the two have no common React ancestor to
  * hold state, no provider between them, and no way to be handed a shared object:
  * `build` runs on the server and a control's props cross the client boundary, so

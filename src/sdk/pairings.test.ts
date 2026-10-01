@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
 import { createStarterPrimitiveRegistry } from "../primitives/index.js"
-import { colour } from "../primitives/tokens.js"
+import { color } from "../primitives/tokens.js"
 import { PALETTE_TEXT_GROUNDS, PALETTE_TEXT_PAIRINGS } from "../theme/contrast.js"
 import type { PaletteSlot } from "../theme/theme.js"
 
-import { probeColourPairings } from "./conformance.js"
+import { probeColorPairings } from "./conformance.js"
 import { definePrimitive } from "./definition.js"
 import { registryPairings } from "./pairings.js"
 import { createPrimitiveRegistry, type PrimitiveRegistry } from "./registry.js"
@@ -28,11 +28,11 @@ const registryOf = (...entries: readonly ReturnType<typeof definePrimitive>[]): 
 }
 
 const painted = (ground: PaletteSlot, ink: PaletteSlot, children: ReactNode): ReactNode =>
-  createElement("div", { style: { background: colour(ground) } }, createElement("p", { style: { color: colour(ink) } }, children))
+  createElement("div", { style: { background: color(ground) } }, createElement("p", { style: { color: color(ink) } }, children))
 
-describe("probeColourPairings", () => {
+describe("probeColorPairings", () => {
   it("reads an ink under a ground the same primitive painted", () => {
-    const verdict = probeColourPairings(() => painted("bg-surface", "fg-muted", null))
+    const verdict = probeColorPairings(() => painted("bg-surface", "fg-muted", null))
 
     expect(verdict.outcome).toBe("probed")
     if (verdict.outcome !== "probed") return
@@ -41,7 +41,7 @@ describe("probeColourPairings", () => {
   })
 
   it("calls an ink with no ground of its own floating, because its parent decides", () => {
-    const verdict = probeColourPairings(() => createElement("p", { style: { color: colour("fg-subtle") } }, "note"))
+    const verdict = probeColorPairings(() => createElement("p", { style: { color: color("fg-subtle") } }, "note"))
 
     expect(verdict.outcome).toBe("probed")
     if (verdict.outcome !== "probed") return
@@ -50,8 +50,8 @@ describe("probeColourPairings", () => {
   })
 
   it("names the ground children land on, which is the nearest one above them", () => {
-    const verdict = probeColourPairings(({ children }) =>
-      createElement("section", { style: { background: colour("accent-subtle") } }, children)
+    const verdict = probeColorPairings(({ children }) =>
+      createElement("section", { style: { background: color("accent-subtle") } }, children)
     )
 
     expect(verdict.outcome).toBe("probed")
@@ -64,11 +64,11 @@ describe("probeColourPairings", () => {
    * outermost — a card on a canvas hands its children the card.
    */
   it("hands children the innermost ground, not the outermost", () => {
-    const verdict = probeColourPairings(({ children }) =>
+    const verdict = probeColorPairings(({ children }) =>
       createElement(
         "div",
-        { style: { background: colour("bg-canvas") } },
-        createElement("div", { style: { background: colour("bg-surface") } }, children)
+        { style: { background: color("bg-canvas") } },
+        createElement("div", { style: { background: color("bg-surface") } }, children)
       )
     )
 
@@ -87,12 +87,12 @@ describe("probeColourPairings", () => {
         createElement(
           "div",
           null,
-          createElement("div", { style: { background: colour("bg-surface-muted") } }, loom.slots.aside),
-          createElement("div", { style: { background: colour("bg-surface") } }, children)
+          createElement("div", { style: { background: color("bg-surface-muted") } }, loom.slots.aside),
+          createElement("div", { style: { background: color("bg-surface") } }, children)
         ),
     })
 
-    const verdict = probeColourPairings(primitive.component, primitive.slots)
+    const verdict = probeColorPairings(primitive.component, primitive.slots)
 
     expect(verdict.outcome).toBe("probed")
     if (verdict.outcome !== "probed") return
@@ -101,14 +101,14 @@ describe("probeColourPairings", () => {
 
   /**
    * A guess would be worse than a gap. `contrastRatio` already declines a
-   * colour it would have to parse, and a probe that read `linear-gradient(...)`
-   * as its first colour would report a pairing the page never renders.
+   * color it would have to parse, and a probe that read `linear-gradient(...)`
+   * as its first color would report a pairing the page never renders.
    */
-  it("answers nothing for a colour that is not a slot variable", () => {
-    const verdict = probeColourPairings(() =>
+  it("answers nothing for a color that is not a slot variable", () => {
+    const verdict = probeColorPairings(() =>
       createElement(
         "div",
-        { style: { background: `linear-gradient(${colour("accent")}, ${colour("bg-canvas")})` } },
+        { style: { background: `linear-gradient(${color("accent")}, ${color("bg-canvas")})` } },
         createElement("p", { style: { color: "#336699" } }, "hand-picked")
       )
     )
@@ -127,11 +127,11 @@ describe("probeColourPairings", () => {
    * of its own regions, and it was invisible until today.
    */
   it("reads an ink inherited from above onto a ground painted below it", () => {
-    const verdict = probeColourPairings(() =>
+    const verdict = probeColorPairings(() =>
       createElement(
         "article",
-        { style: { color: colour("fg-default"), background: colour("bg-surface") } },
-        createElement("div", { style: { background: colour("bg-surface-muted") } }, "a tinted well")
+        { style: { color: color("fg-default"), background: color("bg-surface") } },
+        createElement("div", { style: { background: color("bg-surface-muted") } }, "a tinted well")
       )
     )
 
@@ -150,13 +150,13 @@ describe("probeColourPairings", () => {
    * meet.
    */
   it("reads the ground a sibling stacked under the content painted", () => {
-    const verdict = probeColourPairings(({ children }) =>
+    const verdict = probeColorPairings(({ children }) =>
       createElement(
         "div",
-        { style: { display: "grid", color: colour("fg-default") } },
+        { style: { display: "grid", color: color("fg-default") } },
         createElement("div", {
           key: "scrim",
-          style: { gridArea: "1 / 1", zIndex: 1, background: colour("bg-overlay") },
+          style: { gridArea: "1 / 1", zIndex: 1, background: color("bg-overlay") },
         }),
         createElement("div", { key: "content", style: { gridArea: "1 / 1", zIndex: 2 } }, children)
       )
@@ -179,13 +179,13 @@ describe("probeColourPairings", () => {
    * own stack and find no ground under them.
    */
   it("takes the nearest ground below in the stack, not the bottom of it", () => {
-    const verdict = probeColourPairings(({ children }) =>
+    const verdict = probeColorPairings(({ children }) =>
       createElement(
         "div",
-        { style: { display: "grid", color: colour("fg-default") } },
+        { style: { display: "grid", color: color("fg-default") } },
         createElement("div", { key: "content", style: { gridArea: "1 / 1", zIndex: "2" } }, children),
-        createElement("div", { key: "scrim", style: { gridArea: "1 / 1", zIndex: 1, background: colour("bg-overlay") } }),
-        createElement("div", { key: "back", style: { gridArea: "1 / 1", zIndex: 0, background: colour("bg-canvas") } })
+        createElement("div", { key: "scrim", style: { gridArea: "1 / 1", zIndex: 1, background: color("bg-overlay") } }),
+        createElement("div", { key: "back", style: { gridArea: "1 / 1", zIndex: 0, background: color("bg-canvas") } })
       )
     )
 
@@ -201,11 +201,11 @@ describe("probeColourPairings", () => {
    * earlier one is what it sits on.
    */
   it("orders a stack that declares no depth by the order it was written in", () => {
-    const verdict = probeColourPairings(({ children }) =>
+    const verdict = probeColorPairings(({ children }) =>
       createElement(
         "div",
-        { style: { display: "grid", color: colour("fg-muted") } },
-        createElement("div", { key: "under", style: { gridArea: "a", background: colour("bg-surface-muted") } }),
+        { style: { display: "grid", color: color("fg-muted") } },
+        createElement("div", { key: "under", style: { gridArea: "a", background: color("bg-surface-muted") } }),
         createElement("div", { key: "over", style: { gridArea: "a" } }, children)
       )
     )
@@ -220,11 +220,11 @@ describe("probeColourPairings", () => {
    * put every row of a table on the ground of the row beside it.
    */
   it("does not stack two siblings that sit in different cells", () => {
-    const verdict = probeColourPairings(({ children }) =>
+    const verdict = probeColorPairings(({ children }) =>
       createElement(
         "div",
-        { style: { display: "grid", color: colour("fg-default") } },
-        createElement("div", { key: "left", style: { gridArea: "1 / 1", background: colour("bg-overlay") } }),
+        { style: { display: "grid", color: color("fg-default") } },
+        createElement("div", { key: "left", style: { gridArea: "1 / 1", background: color("bg-overlay") } }),
         createElement("div", { key: "right", style: { gridArea: "1 / 2" } }, children)
       )
     )
@@ -242,12 +242,12 @@ describe("probeColourPairings", () => {
    * that will ever be written, for a pair no reader can meet.
    */
   it("does not make a ground of an empty box, because nothing is written on a dot", () => {
-    const verdict = probeColourPairings(() =>
+    const verdict = probeColorPairings(() =>
       createElement(
         "div",
-        { style: { color: colour("fg-default"), background: colour("bg-surface") } },
-        createElement("span", { key: "dot", style: { background: colour("fg-muted") } }),
-        createElement("span", { key: "spacer", style: { background: colour("fg-subtle") } }, null)
+        { style: { color: color("fg-default"), background: color("bg-surface") } },
+        createElement("span", { key: "dot", style: { background: color("fg-muted") } }),
+        createElement("span", { key: "spacer", style: { background: color("fg-subtle") } }, null)
       )
     )
 
@@ -262,11 +262,11 @@ describe("probeColourPairings", () => {
    * anything, because the component said it.
    */
   it("still records an ink the component declared on a box with nothing in it", () => {
-    const verdict = probeColourPairings(() =>
+    const verdict = probeColorPairings(() =>
       createElement(
         "div",
-        { style: { background: colour("bg-surface") } },
-        createElement("span", { key: "mark", style: { color: colour("accent") } })
+        { style: { background: color("bg-surface") } },
+        createElement("span", { key: "mark", style: { color: color("accent") } })
       )
     )
 
@@ -276,7 +276,7 @@ describe("probeColourPairings", () => {
   })
 
   it("says it could not answer for a component it cannot call", () => {
-    const verdict = probeColourPairings(class Legacy {} as never)
+    const verdict = probeColorPairings(class Legacy {} as never)
 
     expect(verdict.outcome).toBe("not-probeable")
   })
@@ -289,7 +289,7 @@ describe("registryPairings", () => {
         type: "loom.probe-note",
         description: "An ink with no ground, which is what makes it composed.",
         props: z.object({}),
-        component: () => createElement("p", { style: { color: colour("fg-subtle") } }, "note"),
+        component: () => createElement("p", { style: { color: color("fg-subtle") } }, "note"),
       })
     )
 
@@ -336,7 +336,7 @@ describe("registryPairings", () => {
         component: ({ children }) =>
           createElement(
             "button",
-            { style: { background: colour("accent"), color: colour("fg-on-accent") } },
+            { style: { background: color("accent"), color: color("fg-on-accent") } },
             children
           ),
       })
@@ -363,10 +363,10 @@ describe("registryPairings", () => {
         component: ({ props }) =>
           createElement(
             "div",
-            { style: { background: colour("bg-surface") } },
+            { style: { background: color("bg-surface") } },
             props.price === undefined
               ? null
-              : createElement("p", { style: { color: colour("accent-strong") } }, String(props.price))
+              : createElement("p", { style: { color: color("accent-strong") } }, String(props.price))
           ),
       })
     )

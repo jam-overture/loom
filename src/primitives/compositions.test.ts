@@ -37,7 +37,7 @@ import {
  * to it. What does apply is everything about the *tree it builds*: the types
  * have to exist, the props have to pass their own schemas, the slots have to be
  * ones the primitive declares, and the whole thing has to render under both
- * starter palettes with no colour of its own. None of that is checkable by
+ * starter palettes with no color of its own. None of that is checkable by
  * reading the module — it is checkable by building the subtree, putting it in a
  * page, and rendering it, which is what almost every test here does.
  *
@@ -381,7 +381,7 @@ describe("what a band renders", () => {
     })
   }
 
-  it("reads every colour from the palette and names none of its own", () => {
+  it("reads every color from the palette and names none of its own", () => {
     const ids = sequentialIdFactory()
     const page = pageOf(
       BOLD,

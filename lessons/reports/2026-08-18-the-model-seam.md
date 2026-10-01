@@ -191,7 +191,7 @@ and only because the lesson cites 0057 heavily. A cheap guard beside the existin
 numbering test would catch the class.
 
 **3. A model-supplied `id` on an inserted node is stripped in silence.** Exercise
-C, above. Not a behaviour bug: the emitted JSON Schema sets
+C, above. Not a behavior bug: the emitted JSON Schema sets
 `additionalProperties: false`, so a grammar-constrained model cannot produce the
 key, and this is reachable only through a `ModelClient` that does not enforce the
 schema — a host's own adapter, or a stub. And on the supported path the node still

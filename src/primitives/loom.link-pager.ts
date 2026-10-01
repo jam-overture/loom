@@ -46,7 +46,7 @@ import { space } from "./tokens.js"
  *
  * The current page is marked by a lit border on a raised tile rather than by a
  * filled accent one, and that is 0145's lesson taken second-hand: the fill
- * would have to win against a colour `loom.link` sets inline, and a palette
+ * would have to win against a color `loom.link` sets inline, and a palette
  * with little chroma to spare would have given accent text on an accent ground.
  * A border and a ground that differ from the page carry the mark in greyscale.
  */

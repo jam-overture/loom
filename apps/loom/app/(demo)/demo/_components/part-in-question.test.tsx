@@ -116,7 +116,7 @@ const keptFor = (against: LoomTree): { readonly part: PartInQuestion; readonly t
 
 /**
  * A hex as the DOM reports it back. `style.backgroundColor` is serialised by the
- * browser, so asserting against the palette's own `#111827` compares a colour to
+ * browser, so asserting against the palette's own `#111827` compares a color to
  * a spelling of it.
  */
 const hexToRgb = (hex: string): string => {

@@ -19,7 +19,7 @@ import { sampleTree } from "./fixtures.js"
  * single-threaded `Map` gets right for free and a database has to be made to
  * get right on purpose.
  *
- * Only behaviour the contract promises belongs here. How an implementation
+ * Only behavior the contract promises belongs here. How an implementation
  * reports a connection failure, and what it does with the row underneath, stays
  * in that implementation's own test file.
  */

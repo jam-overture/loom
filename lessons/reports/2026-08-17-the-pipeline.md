@@ -135,7 +135,7 @@ what made them interesting.
 ## Found while teaching
 
 **Three items, all for the build routine. Nothing was fixed here. None is a
-behaviour bug on any supported path — all three are reachable only by calling
+behavior bug on any supported path — all three are reachable only by calling
 `src/runtime` directly, which the SDK exports.**
 
 **1. `assessChange` does not check what `applyDelta` checks, so a stale delta is

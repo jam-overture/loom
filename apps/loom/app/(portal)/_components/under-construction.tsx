@@ -24,14 +24,14 @@
  *
  * ## The tone
  *
- * `awaiting` is the portal's amber — the colour it already uses for a change
+ * `awaiting` is the portal's amber — the color it already uses for a change
  * that is held, waiting on a person. A surface that is waiting to be finished
- * is the same idea at the width of the screen, so this needs no colour of its
+ * is the same idea at the width of the screen, so this needs no color of its
  * own. Not `refuse`: nothing here is broken, and red would say it was.
  *
  * `role="status"` rather than `role="alert"`. An alert interrupts, and this is
  * a standing condition rather than something that just happened — it would be
- * read out on every navigation within the portal, which is the behaviour
+ * read out on every navigation within the portal, which is the behavior
  * `StateNotice` already reasons about and rejects for everything but a failed
  * read.
  */

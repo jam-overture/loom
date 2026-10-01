@@ -94,7 +94,7 @@ import { useSelection } from "./selection-context"
  * `bg-surface-base` is the portal's card, and an excerpt in one reads as a row
  * of this tool rather than as a piece of the reader's page. It is the same
  * distinction the preview frame already draws with `bg-surface-preview`, which
- * is the colour a reader has learned means *this is your page and not us*.
+ * is the color a reader has learned means *this is your page and not us*.
  *
  * A ceiling, because a part of a page is as tall as it likes and three of them
  * would otherwise push the box that acts on them off the screen. It scrolls

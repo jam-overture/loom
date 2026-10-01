@@ -29,7 +29,7 @@ const required = (token: string): string => {
  */
 const luminance = (hex: string): number => {
   const parsed = /^#([0-9a-f]{6})$/i.exec(hex.trim())
-  if (!parsed?.[1]) throw new Error(`${hex} is not a six-digit hex colour`)
+  if (!parsed?.[1]) throw new Error(`${hex} is not a six-digit hex color`)
 
   const channels = [0, 2, 4].map((offset) => {
     const part = Number.parseInt(parsed[1]!.slice(offset, offset + 2), 16) / 255
@@ -72,7 +72,7 @@ describe("the demo's stylesheet", () => {
   })
 
   /**
-   * The green is the registry's, not a colour this surface picked, and it is
+   * The green is the registry's, not a color this surface picked, and it is
    * the only hue in the chrome — so the thing to press and the mark on a change
    * that landed are the same green, and nothing else is.
    */
@@ -105,7 +105,7 @@ describe("the demo's stylesheet", () => {
   })
 
   /**
-   * The five outcome tints are the demo's only coloured surfaces, and each one
+   * The five outcome tints are the demo's only colored surfaces, and each one
    * carries a word — "Applied", "Waiting on you", "Refused". A tint whose text
    * fails is a state a visitor cannot read on the one card that matters.
    */

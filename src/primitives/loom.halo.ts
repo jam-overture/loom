@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { ABOVE_BACKDROP } from "./backdrop.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, radius } from "./tokens.js"
+import { color, radius } from "./tokens.js"
 
 /**
  * Light around one thing, so a reader's eye lands on it before the things
@@ -57,7 +57,7 @@ import { colour, radius } from "./tokens.js"
  *
  * ## What the tree may say
  *
- * Which light, and how the lit area is cornered. Not a colour
+ * Which light, and how the lit area is cornered. Not a color
  * ([0049](../../decisions/0049-a-theme-is-three-ids-in-the-tree.md) — the two
  * slots are the palette's), not a duration or an easing
  * ([0055](../../decisions/0055-motion-is-a-static-stylesheet-the-primitive-emits.md)),
@@ -98,7 +98,7 @@ import { colour, radius } from "./tokens.js"
  * two every palette in this repository gives real chroma to, precisely because
  * they are the ones painted as areas — `src/theme/palettes.ts` says so in its
  * own words, and `library.test.ts` asserts they differ in every registered
- * palette, because a wash between a colour and itself is a flat fill.
+ * palette, because a wash between a color and itself is a flat fill.
  *
  * That still leaves how *much* chroma, which no primitive can know — the
  * unresolved half of the 20 August aurora finding, arriving at a second
@@ -109,8 +109,8 @@ import { colour, radius } from "./tokens.js"
  *
  * **So the rims do not rely on it.** `RIM_OFFSET` below is the whole of that
  * argument: a light that stands *off* the edge is legible as geometry, and
- * geometry survives a palette with no colour to spare, a greyscale printer and
- * a reader who cannot separate the two hues. Colour is what makes a halo
+ * geometry survives a palette with no color to spare, a greyscale printer and
+ * a reader who cannot separate the two hues. Color is what makes a halo
  * beautiful; distance is what makes it work. Only `glow` is still carried by
  * chroma alone, and it is the one of the three that is allowed to be quiet,
  * because a bloom has no job on a page where nothing else is bright either.
@@ -150,11 +150,11 @@ type Props = z.infer<typeof props>
  * assertion, and **not distinguishable from the two unlit tiers beside it**,
  * which is the one thing this primitive exists to do.
  *
- * Colour could not fix that, because the palette is the thing with no chroma
+ * Color could not fix that, because the palette is the thing with no chroma
  * and no primitive can know it. **Geometry can.** Pulled out four pixels, the
  * rim is separated from the card's own edge by a strip of the page's ground, so
  * what a reader sees is *two* boundaries rather than one heavier one — and two
- * boundaries read in greyscale, on a colour-blind display, and under the
+ * boundaries read in greyscale, on a color-blind display, and under the
  * quietest palette anybody registers.
  *
  * This is the capability 0130 names as the difference between the two wrappers
@@ -204,8 +204,8 @@ const LIGHTS: Readonly<Record<"ring" | "trace" | "glow", Light>> = {
        * bloom carries it alone or it is not a third light.
        */
       boxShadow: [
-        `0 0 40px -12px ${colour("accent-strong")}`,
-        `0 0 80px -24px ${colour("brand-secondary")}`,
+        `0 0 40px -12px ${color("accent-strong")}`,
+        `0 0 80px -24px ${color("brand-secondary")}`,
       ].join(", "),
     },
   },

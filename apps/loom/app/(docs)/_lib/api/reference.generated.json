@@ -1759,7 +1759,7 @@
               "kind": "value",
               "signature": "const NOTHING_INTERACTIVE: InteractivePredicate",
               "truncated": false,
-              "summary": "What a host that declares no interactive vocabulary gets, which is today's behaviour."
+              "summary": "What a host that declares no interactive vocabulary gets, which is today's behavior."
             },
             {
               "name": "interactivePredicateFor",
@@ -2200,7 +2200,7 @@
               "kind": "value",
               "signature": "const EVERY_TYPE_REGISTERED: PrimitiveVocabulary",
               "truncated": false,
-              "summary": "What a host that has declared no vocabulary gets, which is today's behaviour."
+              "summary": "What a host that has declared no vocabulary gets, which is today's behavior."
             },
             {
               "name": "primitiveVocabularyFor",
@@ -2242,7 +2242,7 @@
               "kind": "value",
               "signature": "const EVERY_TYPE_UNDECLARED: PropsVocabulary",
               "truncated": false,
-              "summary": "What a host that has wired no props vocabulary gets, which is today's behaviour."
+              "summary": "What a host that has wired no props vocabulary gets, which is today's behavior."
             },
             {
               "name": "InvalidProps",
@@ -2270,7 +2270,7 @@
               "kind": "value",
               "signature": "const NOTHING_DECLARED: BindingReader",
               "truncated": false,
-              "summary": "What a host that has handed no reader gets, which is today's behaviour."
+              "summary": "What a host that has handed no reader gets, which is today's behavior."
             },
             {
               "name": "UnreadBinding",
@@ -2529,7 +2529,7 @@
               "kind": "function",
               "signature": "const planTreeSubmissions: (tree: LoomTree) => SubmissionPlan",
               "truncated": false,
-              "summary": "Two forms naming one endpoint are resolved once and share a target. That is the rule that identical questions are asked once, applied to a question that has no params to differ by, and it is also the behaviour a reader would expect: two newsletter forms on one page post to the same place, and a per-form nonce would break the second one every time somebody used the first."
+              "summary": "Two forms naming one endpoint are resolved once and share a target. That is the rule that identical questions are asked once, applied to a question that has no params to differ by, and it is also the behavior a reader would expect: two newsletter forms on one page post to the same place, and a per-form nonce would break the second one every time somebody used the first."
             },
             {
               "name": "planSubmissionsIn",
@@ -2681,14 +2681,14 @@
             {
               "name": "channelsOf",
               "kind": "function",
-              "signature": "const channelsOf: (colour: string) => readonly [number, number, number] | undefined",
+              "signature": "const channelsOf: (color: string) => readonly [number, number, number] | undefined",
               "truncated": false,
-              "summary": "The colour as three 0–255 channels, or nothing when it is a form this cannot measure."
+              "summary": "The color as three 0–255 channels, or nothing when it is a form this cannot measure."
             },
             {
               "name": "relativeLuminance",
               "kind": "function",
-              "signature": "const relativeLuminance: (colour: string) => number | undefined",
+              "signature": "const relativeLuminance: (color: string) => number | undefined",
               "truncated": false,
               "summary": "Relative luminance, or `undefined` for a form `channelsOf` declines to guess at."
             },
@@ -2697,7 +2697,7 @@
               "kind": "function",
               "signature": "const contrastRatio: (a: string, b: string) => number | undefined",
               "truncated": false,
-              "summary": "The WCAG contrast ratio between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+              "summary": "The WCAG contrast ratio between two colors, or `undefined` when either is a form `channelsOf` declines to guess at."
             },
             {
               "name": "MeasuredPairing",
@@ -2711,7 +2711,7 @@
               "kind": "type",
               "signature": "type UnmeasuredPairing = {\n    readonly pairing: TextPairing;\n    readonly foreground: string;\n    readonly background: string;\n};",
               "truncated": false,
-              "summary": "A pairing whose colours could not be measured, and which colour stopped it."
+              "summary": "A pairing whose colors could not be measured, and which color stopped it."
             },
             {
               "name": "PaletteAudit",
@@ -2765,7 +2765,7 @@
             {
               "name": "PaletteSpec",
               "kind": "type",
-              "signature": "type PaletteSpec = {\n    readonly id: string;\n    readonly name: string;\n    readonly description: string;\n    readonly mode: PaletteMode;\n    /** The page itself. Its hue tints every neutral, which is what stops a palette looking like grey with colour on top. */\n    readonly canvas: HueSpec;\n    /** The colour that carries meaning as text. Darkened, or lightened, until it can. */\n    readonly accent: HueSpec;\n    /** The second colour. Never carries text, so it keeps its chroma — this is what `loom.hero`'s aurora paints. */\n    readonly secondary: HueSpec;\n    /**\n     * Lightness of the canvas, the surface behind a card, and the muted well, in\n     * that order. Defaults suit most palettes; a deeper dark mode or a warmer\n     * paper is where you would change them.\n     */\n    readonly levels?: readonly [number, number, number];\n    /**\n     * Forces `accent` to the end of the range rather than to the lightest value\n     * that clears the bar. A palette with no chroma has nothing to solve for, and\n     * solving anyway leaves a mid-grey primary button that reads as a disabled\n     * one.\n     */\n    readonly extremeAccent?: boolean;\n};",
+              "signature": "type PaletteSpec = {\n    readonly id: string;\n    readonly name: string;\n    readonly description: string;\n    readonly mode: PaletteMode;\n    /** The page itself. Its hue tints every neutral, which is what stops a palette looking like grey with color on top. */\n    readonly canvas: HueSpec;\n    /** The color that carries meaning as text. Darkened, or lightened, until it can. */\n    readonly accent: HueSpec;\n    /** The second color. Never carries text, so it keeps its chroma — this is what `loom.hero`'s aurora paints. */\n    readonly secondary: HueSpec;\n    /**\n     * Lightness of the canvas, the surface behind a card, and the muted well, in\n     * that order. Defaults suit most palettes; a deeper dark mode or a warmer\n     * paper is where you would change them.\n     */\n    readonly levels?: readonly [number, number, number];\n    /**\n     * Forces `accent` to the end of the range rather than to the lightest value\n     * that clears the bar. A palette with no chroma has nothing to solve for, and\n     * solving anyway leaves a mid-grey primary button that reads as a disabled\n     * one.\n     */\n    readonly extremeAccent?: boolean;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -2788,7 +2788,7 @@
               "kind": "function",
               "signature": "const solveMarkLightness: (hue: number, saturation: number, from: number, grounds: readonly string[], target: number) => string",
               "truncated": false,
-              "summary": "The lightness *nearest* `from` at this hue whose colour clears `target` ΔE against every one of `grounds`."
+              "summary": "The lightness *nearest* `from` at this hue whose color clears `target` ΔE against every one of `grounds`."
             },
             {
               "name": "derivePalette",
@@ -2807,9 +2807,9 @@
             {
               "name": "canCarryText",
               "kind": "function",
-              "signature": "const canCarryText: (colour: string, on: string) => boolean",
+              "signature": "const canCarryText: (color: string, on: string) => boolean",
               "truncated": false,
-              "summary": "Whether a brand colour can carry text on a given ground."
+              "summary": "Whether a brand color can carry text on a given ground."
             }
           ]
         },
@@ -3026,14 +3026,14 @@
         {
           "module": "theme/lab",
           "title": "Lab",
-          "summary": "A colour in CIELAB, which is where every perceptual question about a palette gets answered.",
+          "summary": "A color in CIELAB, which is where every perceptual question about a palette gets answered.",
           "symbols": [
             {
-              "name": "linearise",
+              "name": "linearize",
               "kind": "function",
-              "signature": "const linearise: (value: number) => number",
+              "signature": "const linearize: (value: number) => number",
               "truncated": false,
-              "summary": "sRGB channel, linearised."
+              "summary": "sRGB channel, linearized."
             },
             {
               "name": "Lab",
@@ -3045,9 +3045,9 @@
             {
               "name": "labOf",
               "kind": "function",
-              "signature": "const labOf: (colour: string) => Lab | undefined",
+              "signature": "const labOf: (color: string) => Lab | undefined",
               "truncated": false,
-              "summary": "L*a*b* under D65, the white point sRGB is defined against, or `undefined` when the colour is a form `channelsOf` declines to guess at."
+              "summary": "L*a*b* under D65, the white point sRGB is defined against, or `undefined` when the color is a form `channelsOf` declines to guess at."
             }
           ]
         },
@@ -3159,7 +3159,7 @@
               "kind": "value",
               "signature": "const PALETTE_CHROMA_SLOTS: readonly PaletteSlot[]",
               "truncated": false,
-              "summary": "The slots a palette puts its colour in, and the only ones whose chroma tells anybody anything."
+              "summary": "The slots a palette puts its color in, and the only ones whose chroma tells anybody anything."
             },
             {
               "name": "SCRIM_DARK_CEILING",
@@ -3178,16 +3178,16 @@
             {
               "name": "slotChroma",
               "kind": "function",
-              "signature": "const slotChroma: (colour: string) => number | undefined",
+              "signature": "const slotChroma: (color: string) => number | undefined",
               "truncated": false,
-              "summary": "How much colour is in one slot, as a fraction of the most sRGB can hold, or `undefined` when the colour is a form `channelsOf` declines to guess at."
+              "summary": "How much color is in one slot, as a fraction of the most sRGB can hold, or `undefined` when the color is a form `channelsOf` declines to guess at."
             },
             {
               "name": "paletteScrim",
               "kind": "function",
               "signature": "const paletteScrim: (palette: Palette) => Scrim | undefined",
               "truncated": false,
-              "summary": "The palette's scrim pair, or `undefined` when either end is a colour this cannot measure — `undefined` rather than a guess, so a host whose palette is written in `hsl()` is told the wash is unavailable instead of being handed a pair that might be the wrong way round."
+              "summary": "The palette's scrim pair, or `undefined` when either end is a color this cannot measure — `undefined` rather than a guess, so a host whose palette is written in `hsl()` is told the wash is unavailable instead of being handed a pair that might be the wrong way round."
             },
             {
               "name": "PaletteScheme",
@@ -3201,12 +3201,12 @@
               "kind": "function",
               "signature": "const paletteScheme: (palette: Palette) => PaletteScheme | undefined",
               "truncated": false,
-              "summary": "Which way round the palette is, or `undefined` when either end of its body-copy pair is a colour `channelsOf` declines to read."
+              "summary": "Which way round the palette is, or `undefined` when either end of its body-copy pair is a color `channelsOf` declines to read."
             },
             {
               "name": "PaletteMeasures",
               "kind": "type",
-              "signature": "type PaletteMeasures = {\n    readonly palette: ThemeId;\n    /**\n     * Chroma per slot, normalised, for the slots that carry colour. A slot whose\n     * colour could not be measured is **absent** rather than zero: zero is a real\n     * answer meaning grey, and `graphite`'s accent really is 0.000.\n     */\n    readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>;\n    readonly scrim: Scrim | undefined;\n    /**\n     * Which way round the palette is, and `undefined` on the same terms `scrim`\n     * is: a pair this cannot read is reported as unavailable rather than guessed.\n     */\n    readonly scheme: PaletteScheme | undefined;\n};",
+              "signature": "type PaletteMeasures = {\n    readonly palette: ThemeId;\n    /**\n     * Chroma per slot, normalised, for the slots that carry color. A slot whose\n     * color could not be measured is **absent** rather than zero: zero is a real\n     * answer meaning grey, and `graphite`'s accent really is 0.000.\n     */\n    readonly chroma: Readonly<Partial<Record<PaletteSlot, number>>>;\n    readonly scrim: Scrim | undefined;\n    /**\n     * Which way round the palette is, and `undefined` on the same terms `scrim`\n     * is: a pair this cannot read is reported as unavailable rather than guessed.\n     */\n    readonly scheme: PaletteScheme | undefined;\n};",
               "truncated": false,
               "summary": "Everything measurable about one palette that its slots do not say."
             },
@@ -3439,26 +3439,26 @@
               "kind": "value",
               "signature": "const JUST_NOTICEABLE_DIFFERENCE = 2.3",
               "truncated": false,
-              "summary": "ΔE below which two colours are the same colour to a reader."
+              "summary": "ΔE below which two colors are the same color to a reader."
             },
             {
-              "name": "colourDifference",
+              "name": "colorDifference",
               "kind": "function",
-              "signature": "const colourDifference: (a: string, b: string) => number | undefined",
+              "signature": "const colorDifference: (a: string, b: string) => number | undefined",
               "truncated": false,
-              "summary": "The CIE76 colour difference between two colours, or `undefined` when either is a form `channelsOf` declines to guess at."
+              "summary": "The CIE76 color difference between two colors, or `undefined` when either is a form `channelsOf` declines to guess at."
             },
             {
               "name": "PeerBasis",
               "kind": "type",
-              "signature": "type PeerBasis = \"colour-only\" | \"also-marked\";",
+              "signature": "type PeerBasis = \"color-only\" | \"also-marked\";",
               "truncated": false,
               "summary": "How the reader is told the two apart, which decides what a collapse means."
             },
             {
               "name": "PeerPairing",
               "kind": "type",
-              "signature": "type PeerPairing = (PeerBase & {\n    readonly basis: \"colour-only\";\n}) | (PeerBase & {\n    readonly basis: \"also-marked\";\n    readonly mark: PaletteSlot;\n});",
+              "signature": "type PeerPairing = (PeerBase & {\n    readonly basis: \"color-only\";\n}) | (PeerBase & {\n    readonly basis: \"also-marked\";\n    readonly mark: PaletteSlot;\n});",
               "truncated": false,
               "summary": "Two slots a reader is meant to tell apart, and what tells them apart."
             },
@@ -3486,7 +3486,7 @@
             {
               "name": "MeasuredMark",
               "kind": "type",
-              "signature": "type MeasuredMark = {\n    readonly grounding: MarkGrounding;\n    readonly ground: PaletteSlot;\n    /** `undefined` when either colour is a form `channelsOf` declines to guess at. */\n    readonly difference: number | undefined;\n    /** False for a difference this could not measure: an undefended line is not a defended one. */\n    readonly visible: boolean;\n};",
+              "signature": "type MeasuredMark = {\n    readonly grounding: MarkGrounding;\n    readonly ground: PaletteSlot;\n    /** `undefined` when either color is a form `channelsOf` declines to guess at. */\n    readonly difference: number | undefined;\n    /** False for a difference this could not measure: an undefended line is not a defended one. */\n    readonly visible: boolean;\n};",
               "truncated": false,
               "summary": "One slot against one of the grounds it is drawn on."
             },
@@ -3514,7 +3514,7 @@
             {
               "name": "MeasuredPeer",
               "kind": "type",
-              "signature": "type MeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly difference: number;\n    /**\n     * How far the mark is from whichever of the two it is nearer to — the mark's\n     * worst case, since it has to be visible against both.\n     *\n     * `undefined` for a `colour-only` peer, which has no mark, and for a mark\n     * written in a form this cannot measure. The second case judges the pair on\n     * its colours alone, which is the safe direction: a defence that cannot be\n     * measured is not counted as one.\n     */\n    readonly markDifference: number | undefined;\n    readonly separated: boolean;\n};",
+              "signature": "type MeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly difference: number;\n    /**\n     * How far the mark is from whichever of the two it is nearer to — the mark's\n     * worst case, since it has to be visible against both.\n     *\n     * `undefined` for a `color-only` peer, which has no mark, and for a mark\n     * written in a form this cannot measure. The second case judges the pair on\n     * its colors alone, which is the safe direction: a defence that cannot be\n     * measured is not counted as one.\n     */\n    readonly markDifference: number | undefined;\n    readonly separated: boolean;\n};",
               "truncated": false,
               "summary": "A peer that was measured, whether or not it came apart."
             },
@@ -3523,12 +3523,12 @@
               "kind": "type",
               "signature": "type UnmeasuredPeer = {\n    readonly pairing: PeerPairing;\n    readonly first: string;\n    readonly second: string;\n};",
               "truncated": false,
-              "summary": "A peer whose colours could not be measured, and which colour stopped it."
+              "summary": "A peer whose colors could not be measured, and which color stopped it."
             },
             {
               "name": "PaletteSeparation",
               "kind": "type",
-              "signature": "type PaletteSeparation = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPeer[];\n    /**\n     * Colour-only peers under the threshold: two things that look like one thing,\n     * with nothing else to go on. The list a host asserts empty.\n     */\n    readonly collapsed: readonly MeasuredPeer[];\n    /**\n     * Marked peers whose colours have collapsed **and** whose mark has too — a\n     * card that is neither filled nor outlined. Separate from `collapsed` because\n     * it is a different defect with a different fix, and because a marked pair\n     * whose mark is doing its job is not a defect at all.\n     */\n    readonly unmarked: readonly MeasuredPeer[];\n    /** Neither separated nor collapsed: a colour this cannot measure. */\n    readonly unmeasured: readonly UnmeasuredPeer[];\n};",
+              "signature": "type PaletteSeparation = {\n    readonly palette: ThemeId;\n    readonly measured: readonly MeasuredPeer[];\n    /**\n     * Color-only peers under the threshold: two things that look like one thing,\n     * with nothing else to go on. The list a host asserts empty.\n     */\n    readonly collapsed: readonly MeasuredPeer[];\n    /**\n     * Marked peers whose colors have collapsed **and** whose mark has too — a\n     * card that is neither filled nor outlined. Separate from `collapsed` because\n     * it is a different defect with a different fix, and because a marked pair\n     * whose mark is doing its job is not a defect at all.\n     */\n    readonly unmarked: readonly MeasuredPeer[];\n    /** Neither separated nor collapsed: a color this cannot measure. */\n    readonly unmeasured: readonly UnmeasuredPeer[];\n};",
               "truncated": false,
               "summary": "What one palette does with the pairs its reader has to tell apart."
             },
@@ -4564,21 +4564,21 @@
           ]
         },
         {
-          "module": "render/behaviour",
-          "title": "Behaviour",
-          "summary": "The behaviour seam: the things a primitive *does* that its props cannot carry.",
+          "module": "render/behavior",
+          "title": "Behavior",
+          "summary": "The behavior seam: the things a primitive *does* that its props cannot carry.",
           "symbols": [
             {
-              "name": "BEHAVIOUR_NAMES",
+              "name": "BEHAVIOR_NAMES",
               "kind": "value",
-              "signature": "const BEHAVIOUR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\", \"present\", \"dismiss\"]",
+              "signature": "const BEHAVIOR_NAMES: readonly [\"copy\", \"disclose\", \"adjust\", \"present\", \"dismiss\"]",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "BehaviourName",
+              "name": "BehaviorName",
               "kind": "type",
-              "signature": "type BehaviourName = (typeof BEHAVIOUR_NAMES)[number];",
+              "signature": "type BehaviorName = (typeof BEHAVIOR_NAMES)[number];",
               "truncated": false,
               "summary": ""
             },
@@ -4611,72 +4611,72 @@
               "summary": "Where the control sits before anybody moves it."
             },
             {
-              "name": "BEHAVIOURS",
+              "name": "BEHAVIORS",
               "kind": "value",
-              "signature": "const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>>",
+              "signature": "const BEHAVIORS: Readonly<Record<BehaviorName, Behavior>>",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "isBehaviourName",
+              "name": "isBehaviorName",
               "kind": "function",
-              "signature": "const isBehaviourName: (value: string) => value is BehaviourName",
+              "signature": "const isBehaviorName: (value: string) => value is BehaviorName",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "PrimitiveBehaviours",
+              "name": "PrimitiveBehaviors",
               "kind": "type",
-              "signature": "type PrimitiveBehaviours<TName extends BehaviourName = never> = Readonly<Record<TName, ReactNode>>;",
+              "signature": "type PrimitiveBehaviors<TName extends BehaviorName = never> = Readonly<Record<TName, ReactNode>>;",
               "truncated": false,
-              "summary": "The controls a primitive receives, by declared behaviour name — already built and ready to place, the way `loom.slots` hands over rendered regions."
+              "summary": "The controls a primitive receives, by declared behavior name — already built and ready to place, the way `loom.slots` hands over rendered regions."
             },
             {
-              "name": "NO_BEHAVIOURS",
+              "name": "NO_BEHAVIORS",
               "kind": "value",
-              "signature": "const NO_BEHAVIOURS: PrimitiveBehaviours<BehaviourName>",
+              "signature": "const NO_BEHAVIORS: PrimitiveBehaviors<BehaviorName>",
               "truncated": false,
-              "summary": "The map handed to a primitive that declared none. Null-prototype for the reason `NO_TEXT` gives: `constructor` is not a behaviour name today, and a lookup that answered with a function off `Object.prototype` if it ever were is not a thing anyone should have to debug from a rendered page."
+              "summary": "The map handed to a primitive that declared none. Null-prototype for the reason `NO_TEXT` gives: `constructor` is not a behavior name today, and a lookup that answered with a function off `Object.prototype` if it ever were is not a thing anyone should have to debug from a rendered page."
             },
             {
-              "name": "BehaviourResolver",
+              "name": "BehaviorResolver",
               "kind": "interface",
-              "signature": "interface BehaviourResolver {\n    readonly behavioursFor: (type: PrimitiveType) => readonly BehaviourName[];\n}",
+              "signature": "interface BehaviorResolver {\n    readonly behaviorsFor: (type: PrimitiveType) => readonly BehaviorName[];\n}",
               "truncated": false,
-              "summary": "The renderer's whole dependency on the seam: which behaviours a type declared."
+              "summary": "The renderer's whole dependency on the seam: which behaviors a type declared."
             },
             {
-              "name": "isBehaviourResolver",
+              "name": "isBehaviorResolver",
               "kind": "function",
-              "signature": "const isBehaviourResolver: (value: object) => value is BehaviourResolver",
+              "signature": "const isBehaviorResolver: (value: object) => value is BehaviorResolver",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "UnnamedBehaviour",
+              "name": "UnnamedBehavior",
               "kind": "type",
-              "signature": "type UnnamedBehaviour = {\n    readonly behaviour: BehaviourName;\n    readonly key: string;\n};",
+              "signature": "type UnnamedBehavior = {\n    readonly behavior: BehaviorName;\n    readonly key: string;\n};",
               "truncated": false,
-              "summary": "A declared behaviour whose control could not be given a name."
+              "summary": "A declared behavior whose control could not be given a name."
             },
             {
-              "name": "ResolvedBehaviours",
+              "name": "ResolvedBehaviors",
               "kind": "type",
-              "signature": "type ResolvedBehaviours = {\n    readonly behaviours: PrimitiveBehaviours<BehaviourName>;\n    /**\n     * Behaviours left out because a key resolved to nothing. The registry refuses\n     * a primitive that declares neither, so the way here is a host dictionary\n     * that answers a declared key with a blank — which `overlayText` has no\n     * business second-guessing and this has no business rendering.\n     */\n    readonly unnamed: readonly UnnamedBehaviour[];\n};",
+              "signature": "type ResolvedBehaviors = {\n    readonly behaviors: PrimitiveBehaviors<BehaviorName>;\n    /**\n     * Behaviors left out because a key resolved to nothing. The registry refuses\n     * a primitive that declares neither, so the way here is a host dictionary\n     * that answers a declared key with a blank — which `overlayText` has no\n     * business second-guessing and this has no business rendering.\n     */\n    readonly unnamed: readonly UnnamedBehavior[];\n};",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "NO_RESOLVED_BEHAVIOURS",
+              "name": "NO_RESOLVED_BEHAVIORS",
               "kind": "value",
-              "signature": "const NO_RESOLVED_BEHAVIOURS: ResolvedBehaviours",
+              "signature": "const NO_RESOLVED_BEHAVIORS: ResolvedBehaviors",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "resolveBehaviours",
+              "name": "resolveBehaviors",
               "kind": "function",
-              "signature": "const resolveBehaviours: (names: readonly BehaviourName[], content: string, text: PrimitiveText<string>) => ResolvedBehaviours",
+              "signature": "const resolveBehaviors: (names: readonly BehaviorName[], content: string, text: PrimitiveText<string>) => ResolvedBehaviors",
               "truncated": false,
               "summary": "Builds the controls for one node."
             }
@@ -4692,14 +4692,14 @@
               "kind": "value",
               "signature": "const CONTROL_CLASS = \"loom-control\"",
               "truncated": false,
-              "summary": "The class every control carries, and the stem of the second one naming which behaviour built it: `loom-control loom-control-copy`."
+              "summary": "The class every control carries, and the stem of the second one naming which behavior built it: `loom-control loom-control-copy`."
             },
             {
               "name": "controlClass",
               "kind": "function",
-              "signature": "const controlClass: (name: BehaviourName) => string",
+              "signature": "const controlClass: (name: BehaviorName) => string",
               "truncated": false,
-              "summary": "The classes the runtime stamps on the control one behaviour builds."
+              "summary": "The classes the runtime stamps on the control one behavior builds."
             },
             {
               "name": "CONTROL_DISPLAY_PROPERTY",
@@ -4711,14 +4711,14 @@
             {
               "name": "controlDisplayProperty",
               "kind": "function",
-              "signature": "const controlDisplayProperty: (name: BehaviourName) => string",
+              "signature": "const controlDisplayProperty: (name: BehaviorName) => string",
               "truncated": false,
-              "summary": "The custom property that decides whether *one* behaviour's control is displayed: `--loom-copy-display`."
+              "summary": "The custom property that decides whether *one* behavior's control is displayed: `--loom-copy-display`."
             },
             {
               "name": "controlDisplay",
               "kind": "function",
-              "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
+              "signature": "const controlDisplay: (name: BehaviorName, resting: string) => string",
               "truncated": false,
               "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
             }
@@ -4860,7 +4860,7 @@
         {
           "module": "render/inline-variables",
           "title": "Inline variables",
-          "summary": "A render whose colours are values rather than references.",
+          "summary": "A render whose colors are values rather than references.",
           "symbols": [
             {
               "name": "VariableSubstitution",
@@ -4921,7 +4921,7 @@
             {
               "name": "LoomRenderContext",
               "kind": "type",
-              "signature": "type LoomRenderContext<TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /**\n     * Present only when the tree was rendered in edit mode. Spread onto the\n     * primitive's own root element; a primitive that drops it renders correctly\n     * but becomes invisible to the portal.\n     */\n    readonly editable?: EditableAttributes;\n    /**\n     * The `id` this node answers to, so a link on the same page can point at it.\n     *\n     * Present only when the tree named an anchor that is usable and that no\n     * earlier node claimed; absent otherwise, including inside a decorative copy,\n     * which carries no identity. Spread onto the primitive's own root element,\n     * beside `editable` — a primitive that drops it renders correctly and cannot\n     * be linked to.\n     *\n     * There is nothing here to distinguish \"the tree named none\" from \"the tree\n     * named one and it was refused\", which every other seam on this context takes\n     * care to keep apart. The difference is real and it is in the diagnostics; it\n     * is not here because a primitive would do the same thing with both, and a\n     * shape that offers a choice nobody can act on invites one to be invented.\n     */\n    readonly anchor?: AnchorAttributes;\n    /**\n     * The tree's theme, flattened into CSS custom properties. Present on the\n     * **root node only**, and only when the tree names a theme the render could\n     * resolve; apply it as `style` on the primitive's own root element.\n     *\n     * It arrives here rather than on a wrapper the renderer emits for the reason\n     * `editable.ts` gives for the same choice: a wrapper changes what `>`,\n     * `:first-child` and `:nth-child` select, and a page that only lays out\n     * correctly when it is unthemed is not a page anyone reviewed. The cost is\n     * that a root primitive which drops it renders unstyled — which is what the\n     * two starter palettes exist to catch.\n     */\n    readonly theme?: CSSProperties;\n    /**\n     * The content of this element's own `slot` children, keyed by slot name — the\n     * named regions the primitive declared and is responsible for placing.\n     *\n     * Always present, empty when the node has no slot children, so a primitive\n     * reads `loom.slots.aside` without first proving the map exists. A slot the\n     * primitive does not place renders nothing: that is what makes a region a\n     * region rather than a position in `children`.\n     */\n    readonly slots: SlotChildren;\n    /**\n     * What the host answered for this node's bindings, by binding name.\n     *\n     * Always present, empty when the node binds nothing, so a primitive reads\n     * `loom.data.services` without first proving the map exists. Each answer is\n     * `ready` or `unavailable` with a reason — never merely absent — because a\n     * primitive shows different things for \"you have no services yet\" and \"we\n     * could not reach your services\", and a shape that cannot tell them apart\n     * guarantees it eventually shows the wrong one.\n     *\n     * It arrives beside `props` rather than merged into them because the two have\n     * different authors. Props are in the tree, proposed by a model and weighed by\n     * the Gate; data is the host's answer to a question the tree asked, and it\n     * belongs to whoever runs the deployment.\n     */\n    readonly data: NodeData;\n    /**\n     * Where this node's form posts, if it declared a submission.\n     *\n     * Absent — not `unavailable` — when the node declared none: the three states\n     * are distinct and a form primitive acts differently on each. Absent is a\n     * tree that never said where to post, which is an authoring gap; `unavailable`\n     * is a deployment that could not answer right now, which is not.\n     *\n     * Unlike `data`, `text` and `slots` there is at most one per node, because a\n     * form posts to one place. Everything on a `ready` target is host-authored:\n     * nothing about the address is in the tree, so nothing about it survives into\n     * a delta, a revision, or the diff a reviewer reads.\n     */\n    readonly submit?: SubmissionOutcome;\n    /**\n     * Whether the URLs this primitive said it frames may be framed, by the\n     * prop name that carried each one.\n     *\n     * Always present, empty for the primitive that declared no framable prop —\n     * which is all but one of them — so a primitive reads `loom.frames.src`\n     * without first proving the map exists. An entry appears for every declared\n     * prop the node actually carries, so a primitive that has a `src` to frame\n     * always has an answer about it, and one whose optional `src` was left out\n     * has nothing to frame and no entry.\n     *\n     * Unlike `data` and `submit`, no part of this waits on anything: an allowlist\n     * is a static fact about a deployment, so the check happens inside the walk\n     * and there is nothing for a host to resolve first. What a host *does* have\n     * to wire is the allowlist itself — absent, every frame is refused, because a\n     * deployment that has not said whose documents it will run has not agreed to\n     * run anybody's.\n     */\n    readonly frames: NodeFrames;\n    /**\n     * The strings this primitive declared, resolved for this deployment.\n     *\n     * Always present and always complete: every key the primitive declared is\n     * here, carrying the host's translation where there is one and the declared\n     * string where there is not. A primitive reads `loom.text.excluded` and gets a\n     * string, never `undefined` — a control whose accessible name went missing\n     * because nobody translated it is the failure this seam exists to prevent.\n     *\n     * Empty for a primitive that declared none, and typed as such: `TText` is the\n     * union of declared keys, so reading one that was never declared does not\n     * compile.\n     */\n    readonly text: PrimitiveText<TTex\n…",
+              "signature": "type LoomRenderContext<TText extends string = never, TBehavior extends BehaviorName = never> = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /**\n     * Present only when the tree was rendered in edit mode. Spread onto the\n     * primitive's own root element; a primitive that drops it renders correctly\n     * but becomes invisible to the portal.\n     */\n    readonly editable?: EditableAttributes;\n    /**\n     * The `id` this node answers to, so a link on the same page can point at it.\n     *\n     * Present only when the tree named an anchor that is usable and that no\n     * earlier node claimed; absent otherwise, including inside a decorative copy,\n     * which carries no identity. Spread onto the primitive's own root element,\n     * beside `editable` — a primitive that drops it renders correctly and cannot\n     * be linked to.\n     *\n     * There is nothing here to distinguish \"the tree named none\" from \"the tree\n     * named one and it was refused\", which every other seam on this context takes\n     * care to keep apart. The difference is real and it is in the diagnostics; it\n     * is not here because a primitive would do the same thing with both, and a\n     * shape that offers a choice nobody can act on invites one to be invented.\n     */\n    readonly anchor?: AnchorAttributes;\n    /**\n     * The tree's theme, flattened into CSS custom properties. Present on the\n     * **root node only**, and only when the tree names a theme the render could\n     * resolve; apply it as `style` on the primitive's own root element.\n     *\n     * It arrives here rather than on a wrapper the renderer emits for the reason\n     * `editable.ts` gives for the same choice: a wrapper changes what `>`,\n     * `:first-child` and `:nth-child` select, and a page that only lays out\n     * correctly when it is unthemed is not a page anyone reviewed. The cost is\n     * that a root primitive which drops it renders unstyled — which is what the\n     * two starter palettes exist to catch.\n     */\n    readonly theme?: CSSProperties;\n    /**\n     * The content of this element's own `slot` children, keyed by slot name — the\n     * named regions the primitive declared and is responsible for placing.\n     *\n     * Always present, empty when the node has no slot children, so a primitive\n     * reads `loom.slots.aside` without first proving the map exists. A slot the\n     * primitive does not place renders nothing: that is what makes a region a\n     * region rather than a position in `children`.\n     */\n    readonly slots: SlotChildren;\n    /**\n     * What the host answered for this node's bindings, by binding name.\n     *\n     * Always present, empty when the node binds nothing, so a primitive reads\n     * `loom.data.services` without first proving the map exists. Each answer is\n     * `ready` or `unavailable` with a reason — never merely absent — because a\n     * primitive shows different things for \"you have no services yet\" and \"we\n     * could not reach your services\", and a shape that cannot tell them apart\n     * guarantees it eventually shows the wrong one.\n     *\n     * It arrives beside `props` rather than merged into them because the two have\n     * different authors. Props are in the tree, proposed by a model and weighed by\n     * the Gate; data is the host's answer to a question the tree asked, and it\n     * belongs to whoever runs the deployment.\n     */\n    readonly data: NodeData;\n    /**\n     * Where this node's form posts, if it declared a submission.\n     *\n     * Absent — not `unavailable` — when the node declared none: the three states\n     * are distinct and a form primitive acts differently on each. Absent is a\n     * tree that never said where to post, which is an authoring gap; `unavailable`\n     * is a deployment that could not answer right now, which is not.\n     *\n     * Unlike `data`, `text` and `slots` there is at most one per node, because a\n     * form posts to one place. Everything on a `ready` target is host-authored:\n     * nothing about the address is in the tree, so nothing about it survives into\n     * a delta, a revision, or the diff a reviewer reads.\n     */\n    readonly submit?: SubmissionOutcome;\n    /**\n     * Whether the URLs this primitive said it frames may be framed, by the\n     * prop name that carried each one.\n     *\n     * Always present, empty for the primitive that declared no framable prop —\n     * which is all but one of them — so a primitive reads `loom.frames.src`\n     * without first proving the map exists. An entry appears for every declared\n     * prop the node actually carries, so a primitive that has a `src` to frame\n     * always has an answer about it, and one whose optional `src` was left out\n     * has nothing to frame and no entry.\n     *\n     * Unlike `data` and `submit`, no part of this waits on anything: an allowlist\n     * is a static fact about a deployment, so the check happens inside the walk\n     * and there is nothing for a host to resolve first. What a host *does* have\n     * to wire is the allowlist itself — absent, every frame is refused, because a\n     * deployment that has not said whose documents it will run has not agreed to\n     * run anybody's.\n     */\n    readonly frames: NodeFrames;\n    /**\n     * The strings this primitive declared, resolved for this deployment.\n     *\n     * Always present and always complete: every key the primitive declared is\n     * here, carrying the host's translation where there is one and the declared\n     * string where there is not. A primitive reads `loom.text.excluded` and gets a\n     * string, never `undefined` — a control whose accessible name went missing\n     * because nobody translated it is the failure this seam exists to prevent.\n     *\n     * Empty for a primitive that declared none, and typed as such: `TText` is the\n     * union of declared keys, so reading one that was never declared does not\n     * compile.\n     */\n    readonly text: PrimitiveText<TText>\n…",
               "truncated": true,
               "summary": ""
             },
@@ -4942,14 +4942,14 @@
             {
               "name": "LoomPrimitiveProps",
               "kind": "type",
-              "signature": "type LoomPrimitiveProps<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly loom: LoomRenderContext<TText, TBehaviour>;\n    /** The node's props, exactly as they appear in the tree. */\n    readonly props: TProps;\n    /** Rendered children in tree order, or null when the node has none. */\n    readonly children: ReactNode;\n};",
+              "signature": "type LoomPrimitiveProps<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehavior extends BehaviorName = never> = {\n    readonly loom: LoomRenderContext<TText, TBehavior>;\n    /** The node's props, exactly as they appear in the tree. */\n    readonly props: TProps;\n    /** Rendered children in tree order, or null when the node has none. */\n    readonly children: ReactNode;\n};",
               "truncated": false,
               "summary": "`TProps` is what a primitive's declared schema accepts. It defaults to the whole JSON object space, so a primitive that declares nothing — or a host that registers without §4's SDK — is still a `LoomPrimitive`. A narrower `TProps` is a claim about what the bag contains, and the only thing that makes the claim true is the render seam validating against the same schema the type came from; that pairing is the registry's job (see `sdk/registry.ts`)."
             },
             {
               "name": "LoomPrimitive",
               "kind": "type",
-              "signature": "type LoomPrimitive<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehaviour>>;",
+              "signature": "type LoomPrimitive<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehavior extends BehaviorName = never> = ComponentType<LoomPrimitiveProps<TProps, TText, TBehavior>>;",
               "truncated": false,
               "summary": ""
             },
@@ -5222,7 +5222,7 @@
             {
               "name": "ThemeGround",
               "kind": "type",
-              "signature": "type ThemeGround = {\n    readonly backgroundColor: string;\n    readonly color: string;\n    /**\n     * Absent — rather than guessed — when either end of the palette's body-copy\n     * pair is a colour `channelsOf` declines to read, in which case whatever\n     * `color-scheme` the host's own stylesheet sets stands. Every registered\n     * palette declares both as hex and resolves.\n     */\n    readonly colorScheme?: PaletteScheme;\n};",
+              "signature": "type ThemeGround = {\n    readonly backgroundColor: string;\n    readonly color: string;\n    /**\n     * Absent — rather than guessed — when either end of the palette's body-copy\n     * pair is a color `channelsOf` declines to read, in which case whatever\n     * `color-scheme` the host's own stylesheet sets stands. Every registered\n     * palette declares both as hex and resolves.\n     */\n    readonly colorScheme?: PaletteScheme;\n};",
               "truncated": false,
               "summary": "The ground a host paints when it draws a frame standing in for the page."
             },
@@ -5674,7 +5674,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a table\n     * with a column that stays put cannot do without.\n     */\n    readonly scrollX: \"loom-scroll-x\";\n    /**\n     * The comparison band's scroller, which differs from the general table's in\n     * one line: it holds its criterion column in place, so a snap has to land a\n     * subject *beside* that column rather than behind it.\n     */\n    readonly compareScroll: \"loom-compare-scroll\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly com\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting color fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas color rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a table\n     * with a column that stays put cannot do without.\n     */\n    readonly scrollX: \"loom-scroll-x\";\n    /**\n     * The comparison band's scroller, which differs from the general table's in\n     * one line: it holds its criterion column in place, so a snap has to land a\n     * subject *beside* that column rather than behind it.\n     */\n    readonly compareScroll: \"loom-compare-scroll\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly compa\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -5690,7 +5690,7 @@
         {
           "module": "primitives/tokens",
           "title": "Tokens",
-          "summary": "The only way a primitive in this library names a colour, a size, or a length.",
+          "summary": "The only way a primitive in this library names a color, a size, or a length.",
           "symbols": [
             {
               "name": "RampStep",
@@ -5707,9 +5707,9 @@
               "summary": ""
             },
             {
-              "name": "colour",
+              "name": "color",
               "kind": "function",
-              "signature": "const colour: (slot: PaletteSlot) => string",
+              "signature": "const color: (slot: PaletteSlot) => string",
               "truncated": false,
               "summary": ""
             },
@@ -5774,7 +5774,7 @@
               "kind": "function",
               "signature": "const hairline: () => string",
               "truncated": false,
-              "summary": "The colour a line takes when the line is the only thing being drawn."
+              "summary": "The color a line takes when the line is the only thing being drawn."
             },
             {
               "name": "READABLE_MEASURE",
@@ -5913,9 +5913,9 @@
               "summary": "A primitive that declared a region and then did not render it."
             },
             {
-              "name": "UnplacedBehaviours",
+              "name": "UnplacedBehaviors",
               "kind": "type",
-              "signature": "type UnplacedBehaviours = {\n    readonly type: PrimitiveType;\n    readonly behaviours: readonly BehaviourName[];\n};",
+              "signature": "type UnplacedBehaviors = {\n    readonly type: PrimitiveType;\n    readonly behaviors: readonly BehaviorName[];\n};",
               "truncated": false,
               "summary": "A primitive that took a control from the runtime and then did not place it."
             },
@@ -5929,7 +5929,7 @@
             {
               "name": "RegistryAudit",
               "kind": "type",
-              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behaviour and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behaviour acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviours: readonly UnplacedBehaviours[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props built from its own schema. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deployment that\n     * ships one without the other ships embeds that render a refusal.\n     *\n     * Declared rather than probed, which is the one place this audit takes an\n     * author's word for something it could in principle check. It could not\n     * check this one usefully: the seam already refuses to register a `frames`\n     * naming a prop the schema does not declare, and the failure left over — a\n     * primitive that puts a URL in an `iframe` and never said so — is invisible\n     * to a probe, because an `iframe` a primitive built out of a prop it did not\n     * declare looks exactly like one it did. What would catch that is a lint over\n     * the markup, not a call of the component. Named here rather than left as a\n     * gap somebody discovers.\n     */\n    readonly frames: readonly PrimitiveType[];\n};",
+              "signature": "type RegistryAudit = {\n    readonly audits: readonly PrimitiveAudit[];\n    /** Registered, renders, invisible to the portal. */\n    readonly notDecorated: readonly PrimitiveType[];\n    /** The probe could not answer — neither a pass nor a failure. */\n    readonly notProbeable: readonly PrimitiveType[];\n    /**\n     * Declared a slot and dropped it. Unlike `notDecorated` this loses content\n     * rather than a handle, so a host with no portal at all still wants it empty.\n     */\n    readonly unplacedSlots: readonly UnplacedSlots[];\n    /**\n     * Declared a behavior and dropped its control. Like `unplacedSlots` this is\n     * a promise the registration made and the component did not keep — and unlike\n     * a slot, nothing else on the page hints that something is missing, because\n     * the content a behavior acts on renders perfectly without it.\n     */\n    readonly unplacedBehaviors: readonly UnplacedBehaviors[];\n    /**\n     * Renders no children — a leaf. Not a fault: `loom.stat` holds its value and\n     * label as props and has nowhere to put a text node. It is here because it is\n     * the one fact the renderer cannot derive, and a portal that offers \"insert\n     * into this node\" needs it to avoid offering a place nothing will appear.\n     */\n    readonly leaves: readonly PrimitiveType[];\n    /**\n     * Threw on props built from its own schema. A fault whoever registered it\n     * wants to know about — a tree the validator accepts can take the page down —\n     * and never a reason to distrust the rest of this audit, which is answered by\n     * the configurations that did render.\n     *\n     * Every primitive that threw is here, including one that threw under *all* of\n     * them. That case used to reach only `notProbeable`, beside the class and\n     * hook-using components that are legitimate primitives, so the most\n     * extreme instance of the fault this list exists for sat in the one list a\n     * host cannot assert empty. `everyConfiguration` marks it rather than hiding\n     * it.\n     */\n    readonly throwsOnDeclaredProps: readonly ThrowingConfigurations[];\n    /**\n     * The registered primitives that post, as the probe observed them.\n     *\n     * This is the list a deployment holds its endpoint registry against: if\n     * anything here is registered, `renderRequest` wants `endpoints`, and a\n     * deployment that ships one without the other ships forms that render\n     * disabled. Derived rather than declared, so it is the truth about the\n     * components rather than the sum of their authors' intentions.\n     */\n    readonly submits: readonly PrimitiveType[];\n    /**\n     * Places an address and never declared it posts. Not a broken page — the\n     * form works — but the declaration is what a deployment reads to know the\n     * seam is load-bearing here, so an undeclared submitter is a form whose need\n     * for an endpoint registry is invisible until someone fills it in.\n     */\n    readonly undeclaredSubmitters: readonly PrimitiveType[];\n    /**\n     * Declared it posts and placed no address under any configuration probed.\n     * This is the failure the submission seam exists to prevent, caught one layer\n     * earlier than it would otherwise be: a submit control that goes nowhere\n     * renders, looks finished, and reports nothing until a visitor uses it.\n     */\n    readonly unwiredSubmitters: readonly PrimitiveType[];\n    /**\n     * The registered primitives that put a prop in a frame.\n     *\n     * This is the list a deployment holds its framable-origin registry against,\n     * exactly as `submits` is held against its endpoint registry: if anything\n     * here is registered, `renderRequest` wants `origins`, and a deployment that\n     * ships one without the other ships embeds that render a refusal.\n     *\n     * Declared rather than probed, which is the one place this audit takes an\n     * author's word for something it could in principle check. It could not\n     * check this one usefully: the seam already refuses to register a `frames`\n     * naming a prop the schema does not declare, and the failure left over — a\n     * primitive that puts a URL in an `iframe` and never said so — is invisible\n     * to a probe, because an `iframe` a primitive built out of a prop it did not\n     * declare looks exactly like one it did. What would catch that is a lint over\n     * the markup, not a call of the component. Named here rather than left as a\n     * gap somebody discovers.\n     */\n    readonly frames: readonly PrimitiveType[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -6062,14 +6062,14 @@
             {
               "name": "PlacementVerdict",
               "kind": "type",
-              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviours whose control no probed configuration placed. */\n    readonly unplacedBehaviours: readonly BehaviourName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
+              "signature": "type PlacementVerdict = {\n    readonly outcome: \"probed\";\n    /** Declared slots that no probed configuration placed. */\n    readonly unplacedSlots: readonly string[];\n    /** Declared behaviors whose control no probed configuration placed. */\n    readonly unplacedBehaviors: readonly BehaviorName[];\n    /** Whether any probed configuration placed the children it was handed. */\n    readonly rendersChildren: boolean;\n    /**\n     * The configurations that answered — one unasked `{}` alone when the\n     * schema closes over nothing and the caller supplied no answers.\n     */\n    readonly probed: readonly ProbeConfiguration[];\n    /**\n     * Configurations built from the primitive's own schema that it threw on.\n     * Never a reason to distrust the verdict — the configurations that\n     * answered still answered — and always a fault: a component that throws\n     * on a value its schema accepts is one a valid tree can crash a page with.\n     */\n    readonly threw: readonly ProbeFailure[];\n} | NotProbeable;",
               "truncated": false,
               "summary": "The second probe: does a primitive place what it was handed?"
             },
             {
               "name": "probePlacement",
               "kind": "function",
-              "signature": "const probePlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredBehaviours?: readonly BehaviourName[], declaredFrames?: readonly string[]) => PlacementVerdict",
+              "signature": "const probePlacement: (primitive: LoomPrimitive, declaredSlots: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredBehaviors?: readonly BehaviorName[], declaredFrames?: readonly string[]) => PlacementVerdict",
               "truncated": false,
               "summary": ""
             },
@@ -6088,25 +6088,25 @@
               "summary": "`some` rather than `every`, matching `probePlacement`. The question is whether this primitive posts at all, and a primitive that renders a form under one layout and a summary under another is answering honestly in both."
             },
             {
-              "name": "ColourPairing",
+              "name": "ColorPairing",
               "kind": "type",
-              "signature": "type ColourPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n};",
+              "signature": "type ColorPairing = {\n    readonly foreground: PaletteSlot;\n    readonly background: PaletteSlot;\n};",
               "truncated": false,
-              "summary": "The fourth probe: which colours does this primitive put on which grounds?"
+              "summary": "The fourth probe: which colors does this primitive put on which grounds?"
             },
             {
-              "name": "ColourVerdict",
+              "name": "ColorVerdict",
               "kind": "type",
-              "signature": "type ColourVerdict = {\n    readonly outcome: \"probed\";\n    /** Ink and ground both set by this primitive. */\n    readonly painted: readonly ColourPairing[];\n    /** Ink set here, ground left to whatever this is placed in. */\n    readonly floating: readonly PaletteSlot[];\n    /** Grounds this primitive puts its declared children and slots on. */\n    readonly childGrounds: readonly PaletteSlot[];\n} | NotProbeable;",
+              "signature": "type ColorVerdict = {\n    readonly outcome: \"probed\";\n    /** Ink and ground both set by this primitive. */\n    readonly painted: readonly ColorPairing[];\n    /** Ink set here, ground left to whatever this is placed in. */\n    readonly floating: readonly PaletteSlot[];\n    /** Grounds this primitive puts its declared children and slots on. */\n    readonly childGrounds: readonly PaletteSlot[];\n} | NotProbeable;",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "probeColourPairings",
+              "name": "probeColorPairings",
               "kind": "function",
-              "signature": "const probeColourPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredFrames?: readonly string[]) => ColourVerdict",
+              "signature": "const probeColorPairings: (primitive: LoomPrimitive, declaredSlots?: readonly string[], text?: PrimitiveText<string>, configurations?: readonly ProbeConfiguration[], declaredFrames?: readonly string[]) => ColorVerdict",
               "truncated": false,
-              "summary": "The union across every configuration, rather than the intersection the decoration probe takes. Decoration is a promise that has to hold however the primitive is configured; a colour pairing is a fact about one configuration, and a `loom.section` that paints `accent-subtle` only under `tone: \"accent\"` renders that pairing on a real page whatever the other tones do."
+              "summary": "The union across every configuration, rather than the intersection the decoration probe takes. Decoration is a promise that has to hold however the primitive is configured; a color pairing is a fact about one configuration, and a `loom.section` that paints `accent-subtle` only under `tone: \"accent\"` renders that pairing on a real page whatever the other tones do."
             }
           ]
         },
@@ -6160,21 +6160,21 @@
             {
               "name": "PrimitiveDefinition",
               "kind": "type",
-              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    /**\n     * What part this primitive plays — `\"heading\"` on anything a reader takes as\n     * the title of what follows, whatever it is called. Optional, and absent on\n     * almost everything: most primitives are an arrangement or a surface and play\n     * no part a consumer asks about categorically.\n     *\n     * A role travels in the opposite direction from every other declaration here.\n     * `interactive` and `frames` are read by the runtime and constrain what a tree\n     * may do; a role is read by a *host* and constrains nothing. It is here rather\n     * than in a host's own table for the same reason `description` is: the author\n     * of the component is the one who knows, and a table maintained beside the\n     * registry goes stale the day somebody registers a second heading.\n     *\n     * Typed rather than free — see `role.ts` for why the vocabulary is closed and\n     * why it currently has one member. A host writing JavaScript can still hand\n     * over a string the runtime does not know, so the registry refuses one rather\n     * than letting a misspelling read as \"declares no role\".\n     */\n    readonly role?: PrimitiveRole;\n    /**\n     * The props whose values a reader reads as words — `[\"value\", \"label\",\n     * \"caption\"]` on a stat, `[]` on an arrangement that shows none of its own.\n     *\n     * Optional, and the distinction between `[]` and leaving it out is the whole\n     * of what it buys. `[]` says *this primitive shows no words of its\n     * own*; absence says *nobody has said*, and `copyIn` reports the second and\n     * trusts the first. A default would collapse them, which is why there is\n     * none.\n     *\n     * Read by nothing in the runtime, like `role` and `submits`: it changes no\n     * render and constrains no tree. The named props must be props the schema\n     * declares, and the registry refuses a declaration that names one it does\n     * not — the same drift `frames` and `interactive` are checked for, with less\n     * riding on it and the same silence when it happens.\n     */\n    readonly copy?: readonly string[];\n    /**\n     * The binding names this primitive reads an answer under — `[\"entries\"]` on a\n     * feed, `[]` on everything that draws only what the tree wrote.\n     *\n     * A tree's `loom:data` maps a *name* to a source, and the name is how the\n     * primitive reading the answer finds it. Until this existed, the name\n     * was the one thing in that declaration nothing could check: an unregistered\n     * source is refused and a param the source did not\n…",
+              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehavior extends BehaviorName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behavior\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behavior is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviors?: readonly TBehavior[];\n    /**\n     * What part this primitive plays — `\"heading\"` on anything a reader takes as\n     * the title of what follows, whatever it is called. Optional, and absent on\n     * almost everything: most primitives are an arrangement or a surface and play\n     * no part a consumer asks about categorically.\n     *\n     * A role travels in the opposite direction from every other declaration here.\n     * `interactive` and `frames` are read by the runtime and constrain what a tree\n     * may do; a role is read by a *host* and constrains nothing. It is here rather\n     * than in a host's own table for the same reason `description` is: the author\n     * of the component is the one who knows, and a table maintained beside the\n     * registry goes stale the day somebody registers a second heading.\n     *\n     * Typed rather than free — see `role.ts` for why the vocabulary is closed and\n     * why it currently has one member. A host writing JavaScript can still hand\n     * over a string the runtime does not know, so the registry refuses one rather\n     * than letting a misspelling read as \"declares no role\".\n     */\n    readonly role?: PrimitiveRole;\n    /**\n     * The props whose values a reader reads as words — `[\"value\", \"label\",\n     * \"caption\"]` on a stat, `[]` on an arrangement that shows none of its own.\n     *\n     * Optional, and the distinction between `[]` and leaving it out is the whole\n     * of what it buys. `[]` says *this primitive shows no words of its\n     * own*; absence says *nobody has said*, and `copyIn` reports the second and\n     * trusts the first. A default would collapse them, which is why there is\n     * none.\n     *\n     * Read by nothing in the runtime, like `role` and `submits`: it changes no\n     * render and constrains no tree. The named props must be props the schema\n     * declares, and the registry refuses a declaration that names one it does\n     * not — the same drift `frames` and `interactive` are checked for, with less\n     * riding on it and the same silence when it happens.\n     */\n    readonly copy?: readonly string[];\n    /**\n     * The binding names this primitive reads an answer under — `[\"entries\"]` on a\n     * feed, `[]` on everything that draws only what the tree wrote.\n     *\n     * A tree's `loom:data` maps a *name* to a source, and the name is how the\n     * primitive reading the answer finds it. Until this existed, the name\n     * was the one thing in that declaration nothing could check: an unregistered\n     * source is refused and a param the source did not declar\n…",
               "truncated": true,
               "summary": ""
             },
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behavior names, still raw: the registry is what checks them. */\n    readonly behaviors: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behavior name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
             {
               "name": "definePrimitive",
               "kind": "function",
-              "signature": "const definePrimitive: <TProps extends JsonObjectView, TText extends string = never, TBehaviour extends BehaviourName = never>(definition: PrimitiveDefinition<TProps, TText, TBehaviour>) => PrimitiveEntry",
+              "signature": "const definePrimitive: <TProps extends JsonObjectView, TText extends string = never, TBehavior extends BehaviorName = never>(definition: PrimitiveDefinition<TProps, TText, TBehavior>) => PrimitiveEntry",
               "truncated": false,
               "summary": "Declares a primitive. The generic parameter is inferred from the schema, so the component is checked against what its own schema produces at the point of declaration rather than at the point of registration — an author who reads `props.titel` finds out here."
             }
@@ -6251,21 +6251,21 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviors: readonly BehaviorName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behavior\";\n    readonly type: string;\n    readonly behavior: string;\n} | {\n    readonly code: \"unnamed-behavior\";\n    readonly type: string;\n    readonly behavior: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behavior\";\n    readonly type: string;\n    readonly behavior: string;\n} | {\n    readonly code: \"unpaired-behavior\";\n    readonly type: string;\n    readonly behavior: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "PrimitiveRegistry",
               "kind": "type",
-              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviourResolver & FrameResolver & BindingReader & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
+              "signature": "type PrimitiveRegistry = PrimitiveResolver & PropsValidator & TextResolver & BehaviorResolver & FrameResolver & BindingReader & UnshownReader & CopyDeclarations & {\n    /** In registration order, so a catalogue and an audit read predictably. */\n    readonly primitives: readonly RegisteredPrimitive[];\n    /**\n     * The types that declared a given role, in registration order.\n     *\n     * Empty for a role nothing here declares, which is the honest answer and\n     * not a failure: a deployment that registered no heading has no heading,\n     * and a consumer deriving a page name from one should show what it shows\n     * for a page that has none.\n     *\n     * Types rather than whole registrations, because every consumer this exists\n     * for is matching nodes in a tree, and a node carries a type. A caller that\n     * wants the registration has `primitives` and this is not in its way.\n     */\n    readonly typesWithRole: (role: PrimitiveRole) => readonly PrimitiveType[];\n};",
               "truncated": false,
               "summary": ""
             },

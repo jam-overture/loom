@@ -20,7 +20,7 @@ const token = (name: string): string => {
 }
 
 /**
- * A copied colour is a colour that can go stale, and this surface has one place
+ * A copied color is a color that can go stale, and this surface has one place
  * where copying is unavoidable: the share card is a PNG, drawn by a renderer
  * that reads no stylesheet.
  *
@@ -29,7 +29,7 @@ const token = (name: string): string => {
  * prevent is the one nobody on this project would ever see — a card that looks
  * right in a report and wrong beside the page a month later.
  */
-describe("the colours the share card borrows", () => {
+describe("the colors the share card borrows", () => {
   it.each([
     ["--surface-page", CHROME.page],
     ["--border-subtle", CHROME.edge],

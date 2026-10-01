@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, weight } from "./tokens.js"
+import { color, family, radius, size, weight } from "./tokens.js"
 
 /**
  * One mark placed at a point over the thing it is explaining.
@@ -150,12 +150,12 @@ export const loomPin = definePrimitive({
           key: "dot",
           className: LIBRARY_CLASS.pinDot,
           style: {
-            background: colour("accent"),
-            color: colour("fg-on-accent"),
+            background: color("accent"),
+            color: color("fg-on-accent"),
             fontFamily: family("body"),
             fontSize: size(1),
             fontWeight: weight("heading"),
-            boxShadow: `0 6px 16px -8px ${colour("fg-default")}`,
+            boxShadow: `0 6px 16px -8px ${color("fg-default")}`,
           },
         },
         given.marker
@@ -176,13 +176,13 @@ export const loomPin = definePrimitive({
              * the same value, so the rendering is identical today and the swap
              * is one token when the row exists. Filed.
              */
-            background: colour("bg-surface"),
-            color: colour("fg-default"),
-            border: `1px solid ${colour("border-subtle")}`,
+            background: color("bg-surface"),
+            color: color("fg-default"),
+            border: `1px solid ${color("border-subtle")}`,
             borderRadius: radius("sm"),
             fontFamily: family("body"),
             fontSize: size(1),
-            boxShadow: `0 10px 24px -18px ${colour("fg-default")}`,
+            boxShadow: `0 10px 24px -18px ${color("fg-default")}`,
           },
         },
         given.label

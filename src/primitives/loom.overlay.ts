@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { GAPS, GAP_NAMES } from "./layout.js"
-import { colour, radius } from "./tokens.js"
+import { color, radius } from "./tokens.js"
 
 /**
  * A ground with content set over it: a headline across a photograph, a label on
@@ -112,7 +112,7 @@ const props = z
      * turns a reviewable choice into a value nobody reads in a proposal.
      *
      * **`none` over a photograph is a foot-gun and nothing here can disarm it.**
-     * The text colour is the page's and the picture is the author's, so a pale
+     * The text color is the page's and the picture is the author's, so a pale
      * photograph is illegible under a dark palette and a dark one is illegible
      * under a light palette — whichever image is chosen, one of the two starter
      * palettes is wrong. It stays because an overlay over a *palette-derived*
@@ -185,11 +185,11 @@ export const loomOverlay = definePrimitive({
           width: "100%",
           /**
            * Set here rather than inherited: the ground is usually a photograph,
-           * which does not change the text colour, and an overlay inside an
+           * which does not change the text color, and an overlay inside an
            * `accent` section would otherwise take that band's `fg-on-accent`
            * and put it on this band's veil.
            */
-          color: colour("fg-default"),
+          color: color("fg-default"),
           ...corners,
         },
       },
@@ -217,7 +217,7 @@ export const loomOverlay = definePrimitive({
               ...CELL,
               zIndex: 1,
               pointerEvents: "none",
-              background: colour("bg-overlay"),
+              background: color("bg-overlay"),
               opacity: scrim === "veil" ? 0.78 : 0.92,
               ...(scrim === "veil"
                 ? {}

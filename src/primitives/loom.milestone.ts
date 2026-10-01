@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, hairline, radius, size, space, weight } from "./tokens.js"
+import { color, family, hairline, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -69,20 +69,20 @@ const DOTS: Readonly<Record<State, { names: "current" | "planned" | undefined; s
   done: {
     /** The default state names nothing — see the note above about nine rows. */
     names: undefined,
-    style: { background: colour("accent"), borderColor: colour("accent") },
+    style: { background: color("accent"), borderColor: color("accent") },
   },
   current: {
     names: "current",
     style: {
-      background: colour("accent"),
-      borderColor: colour("accent"),
+      background: color("accent"),
+      borderColor: color("accent"),
       /** A ring rather than a bigger dot, so the rail's centre line does not move. */
-      boxShadow: `0 0 0 4px ${colour("accent-subtle")}`,
+      boxShadow: `0 0 0 4px ${color("accent-subtle")}`,
     },
   },
   planned: {
     names: "planned",
-    style: { background: colour("bg-canvas"), borderColor: colour("border-strong") },
+    style: { background: color("bg-canvas"), borderColor: color("border-strong") },
   },
 }
 
@@ -114,7 +114,7 @@ export const loomMilestone = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.title
@@ -130,7 +130,7 @@ export const loomMilestone = definePrimitive({
           alignItems: "flex-start",
           gap: space(2),
           textDecoration: "none",
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       title,
@@ -145,7 +145,7 @@ export const loomMilestone = definePrimitive({
                 fontFamily: family("body"),
                 fontSize: size(3),
                 lineHeight: 1.6,
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.body
@@ -178,7 +178,7 @@ export const loomMilestone = definePrimitive({
             fontSize: size(2),
             lineHeight: 1.6,
             fontVariantNumeric: "tabular-nums",
-            color: colour("fg-subtle"),
+            color: color("fg-subtle"),
             whiteSpace: "nowrap",
           },
         },

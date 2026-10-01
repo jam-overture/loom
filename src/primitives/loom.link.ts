@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, weight, type RampStep } from "./tokens.js"
+import { color, family, size, weight, type RampStep } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -53,9 +53,9 @@ const props = z
 type Props = z.infer<typeof props>
 
 const TONES = {
-  default: colour("fg-default"),
-  muted: colour("fg-muted"),
-  accent: colour("accent"),
+  default: color("fg-default"),
+  muted: color("fg-muted"),
+  accent: color("accent"),
 } as const
 
 const SCALES: Readonly<Record<"small" | "medium", RampStep>> = { small: 2, medium: 3 }
@@ -108,7 +108,7 @@ export const loomLink = definePrimitive({
           fontWeight: current ? weight("heading") : weight("body"),
           fontSize: size(SCALES[given.scale ?? "medium"]),
           lineHeight: 1.4,
-          color: current ? colour("accent") : TONES[given.tone ?? "default"],
+          color: current ? color("accent") : TONES[given.tone ?? "default"],
           textDecoration: "none",
         },
       },

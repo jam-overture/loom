@@ -8,7 +8,7 @@ import { nodeIdSchema } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { LOOM_NODE_ATTRIBUTE, LOOM_TYPE_ATTRIBUTE, type EditableAttributes } from "../render/editable.js"
-import { NO_BEHAVIOURS, type BehaviourName, type PrimitiveBehaviours } from "../render/behaviour.js"
+import { NO_BEHAVIORS, type BehaviorName, type PrimitiveBehaviors } from "../render/behavior.js"
 import {
   asCallablePrimitive,
   NO_SLOTS,
@@ -167,7 +167,7 @@ const probeProps = (
     data: configuration.data,
     frames,
     text,
-    behaviours: NO_BEHAVIOURS,
+    behaviors: NO_BEHAVIORS,
     decorative: PROBE_DECORATIVE,
   },
   props: configuration.props,
@@ -299,8 +299,8 @@ const probeFrames = (declared: readonly string[]): NodeFrames => {
 /** The marker handed to a declared slot, unique per name so a miss names itself. */
 const slotMarker = (name: string): string => `loom-probe-slot:${name}`
 
-/** The same, for a declared behaviour's control. */
-const behaviourMarker = (name: string): string => `loom-probe-behaviour:${name}`
+/** The same, for a declared behavior's control. */
+const behaviorMarker = (name: string): string => `loom-probe-behavior:${name}`
 
 /** Whether this element, or anything it returned, carries the probe's decoration. */
 const carriesDecoration = (node: ReactNode, editable: EditableAttributes): boolean => {
@@ -404,10 +404,10 @@ export const probeEditableDecoration = (
 /**
  * The second probe: does a primitive place what it was handed?
  *
- * A declared behaviour is a promise of the same kind and fails the same way. A
+ * A declared behavior is a promise of the same kind and fails the same way. A
  * primitive that asks for the copy control and never reads
- * `loom.behaviours.copy` registers cleanly, renders correctly and simply has no
- * copy button — the gap the behaviour was declared to close, still open, with
+ * `loom.behaviors.copy` registers cleanly, renders correctly and simply has no
+ * copy button — the gap the behavior was declared to close, still open, with
  * the declaration saying otherwise.
  *
  * A declared slot is a promise. The catalogue tells a model the region exists,
@@ -443,8 +443,8 @@ export type PlacementVerdict =
       readonly outcome: "probed"
       /** Declared slots that no probed configuration placed. */
       readonly unplacedSlots: readonly string[]
-      /** Declared behaviours whose control no probed configuration placed. */
-      readonly unplacedBehaviours: readonly BehaviourName[]
+      /** Declared behaviors whose control no probed configuration placed. */
+      readonly unplacedBehaviors: readonly BehaviorName[]
       /** Whether any probed configuration placed the children it was handed. */
       readonly rendersChildren: boolean
       /**
@@ -485,7 +485,7 @@ export const probePlacement = (
   declaredSlots: readonly string[],
   text: PrimitiveText<string> = NO_TEXT,
   configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
-  declaredBehaviours: readonly BehaviourName[] = [],
+  declaredBehaviors: readonly BehaviorName[] = [],
   declaredFrames: readonly string[] = []
 ): PlacementVerdict => {
   const probeable = asProbeable(primitive)
@@ -494,8 +494,8 @@ export const probePlacement = (
   const slots: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
   for (const name of declaredSlots) slots[name] = slotMarker(name)
 
-  const behaviours: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
-  for (const name of declaredBehaviours) behaviours[name] = behaviourMarker(name)
+  const behaviors: Record<string, ReactNode> = Object.create(null) as Record<string, ReactNode>
+  for (const name of declaredBehaviors) behaviors[name] = behaviorMarker(name)
 
   const attempts = configurations.map((configuration) => ({
     configuration,
@@ -507,7 +507,7 @@ export const probePlacement = (
         data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
-        behaviours: behaviours as PrimitiveBehaviours<BehaviourName>,
+        behaviors: behaviors as PrimitiveBehaviors<BehaviorName>,
         decorative: PROBE_DECORATIVE,
       },
       props: configuration.props,
@@ -525,7 +525,7 @@ export const probePlacement = (
   return {
     outcome: "probed",
     unplacedSlots: declaredSlots.filter((name) => !placed(slotMarker(name))),
-    unplacedBehaviours: declaredBehaviours.filter((name) => !placed(behaviourMarker(name))),
+    unplacedBehaviors: declaredBehaviors.filter((name) => !placed(behaviorMarker(name))),
     rendersChildren: placed(PROBE_CHILDREN),
     probed: answered.map((attempt) => attempt.configuration),
     threw: failuresIn(attempts),
@@ -601,7 +601,7 @@ export const probeSubmissionPlacement = (
         data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
-        behaviours: NO_BEHAVIOURS,
+        behaviors: NO_BEHAVIORS,
         submit: PROBE_SUBMISSION,
         decorative: PROBE_DECORATIVE,
       },
@@ -620,7 +620,7 @@ export const probeSubmissionPlacement = (
 }
 
 /**
- * The fourth probe: which colours does this primitive put on which grounds?
+ * The fourth probe: which colors does this primitive put on which grounds?
  *
  * `PALETTE_TEXT_PAIRINGS` in `src/theme/contrast.ts` says of itself that it is
  * *read off `src/primitives` rather than imagined*, and until now that was a
@@ -654,7 +654,7 @@ export const probeSubmissionPlacement = (
  * `loom.overlay` is the case that proves it. It sets `fg-default` on its root
  * and paints nothing there; a scrim child paints `bg-overlay` in grid cell
  * `1 / 1` at `zIndex: 1`; the content sits in the same cell at `zIndex: 2` and
- * sets no colour of its own. Every word of it renders in `fg-default` on
+ * sets no color of its own. Every word of it renders in `fg-default` on
  * `bg-overlay` — and read as an ancestor chain the two ends never meet, so the
  * pairing was invisible here from the day the primitive shipped.
  *
@@ -668,10 +668,10 @@ export const probeSubmissionPlacement = (
  * Only `children` is walked, matching `carriesDecoration`, so an element handed
  * to another component through a prop of the primitive's own naming is not
  * followed. Only `background`, `backgroundColor` and `color` are read, and only
- * where the value is exactly the `var(--loom-…)` form `colour()` produces — a
+ * where the value is exactly the `var(--loom-…)` form `color()` produces — a
  * primitive that composes a gradient or interpolates a variable into a longhand
  * answers nothing rather than a guess, for the reason `contrastRatio` declines
- * a colour it would have to parse.
+ * a color it would have to parse.
  *
  * **Stacking is read from `gridArea` and from nothing else.** An absolutely
  * positioned sibling also lies under its neighbours, and whether it lies under
@@ -683,16 +683,16 @@ export const probeSubmissionPlacement = (
  * rule costs nothing real and the wide one would have been a guess.
  */
 
-export type ColourPairing = {
+export type ColorPairing = {
   readonly foreground: PaletteSlot
   readonly background: PaletteSlot
 }
 
-export type ColourVerdict =
+export type ColorVerdict =
   | {
       readonly outcome: "probed"
       /** Ink and ground both set by this primitive. */
-      readonly painted: readonly ColourPairing[]
+      readonly painted: readonly ColorPairing[]
       /** Ink set here, ground left to whatever this is placed in. */
       readonly floating: readonly PaletteSlot[]
       /** Grounds this primitive puts its declared children and slots on. */
@@ -700,7 +700,7 @@ export type ColourVerdict =
     }
   | NotProbeable
 
-/** `colour()` emits `var(--loom-<slot>)` and nothing else does. */
+/** `color()` emits `var(--loom-<slot>)` and nothing else does. */
 const SLOT_VARIABLE = /^var\(--loom-([a-z-]+)\)$/
 
 const slotOf = (value: unknown): PaletteSlot | undefined => {
@@ -716,7 +716,7 @@ const groundOf = (style: Readonly<Record<string, unknown>>): PaletteSlot | undef
   slotOf(style["background"]) ?? slotOf(style["backgroundColor"])
 
 type Paint = {
-  readonly painted: ColourPairing[]
+  readonly painted: ColorPairing[]
   readonly floating: PaletteSlot[]
   readonly childGrounds: PaletteSlot[]
 }
@@ -880,7 +880,7 @@ const collectChildren = (
 
 const uniqueSlots = (slots: readonly PaletteSlot[]): readonly PaletteSlot[] => [...new Set(slots)].sort()
 
-const uniquePairings = (pairings: readonly ColourPairing[]): readonly ColourPairing[] =>
+const uniquePairings = (pairings: readonly ColorPairing[]): readonly ColorPairing[] =>
   [...new Map(pairings.map((pairing) => [`${pairing.foreground}|${pairing.background}`, pairing])).values()].sort(
     (a, b) => `${a.foreground}|${a.background}`.localeCompare(`${b.foreground}|${b.background}`)
   )
@@ -888,17 +888,17 @@ const uniquePairings = (pairings: readonly ColourPairing[]): readonly ColourPair
 /**
  * The union across every configuration, rather than the intersection the
  * decoration probe takes. Decoration is a promise that has to hold however the
- * primitive is configured; a colour pairing is a fact about one configuration,
+ * primitive is configured; a color pairing is a fact about one configuration,
  * and a `loom.section` that paints `accent-subtle` only under `tone: "accent"`
  * renders that pairing on a real page whatever the other tones do.
  */
-export const probeColourPairings = (
+export const probeColorPairings = (
   primitive: LoomPrimitive,
   declaredSlots: readonly string[] = [],
   text: PrimitiveText<string> = NO_TEXT,
   configurations: readonly ProbeConfiguration[] = DEFAULT_CONFIGURATIONS,
   declaredFrames: readonly string[] = []
-): ColourVerdict => {
+): ColorVerdict => {
   const probeable = asProbeable(primitive)
   if (!probeable.ok) return notCallable(probeable.error)
 
@@ -917,7 +917,7 @@ export const probeColourPairings = (
         data: configuration.data,
         frames: probeFrames(declaredFrames),
         text,
-        behaviours: NO_BEHAVIOURS,
+        behaviors: NO_BEHAVIORS,
         decorative: PROBE_DECORATIVE,
       },
       props: configuration.props,

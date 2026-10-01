@@ -29,7 +29,7 @@ describe("SidebarNav", () => {
     }
   })
 
-  it("marks the route it is on for a screen reader, not only in colour", () => {
+  it("marks the route it is on for a screen reader, not only in color", () => {
     render(<SidebarNav />)
 
     const current = screen.getAllByRole("link").filter((l) => l.getAttribute("aria-current"))

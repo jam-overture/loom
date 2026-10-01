@@ -51,7 +51,7 @@ export type MergeAttempt =
  * `attempt` leaves the tree exactly as it found it, whatever the answer; `take`
  * is only ever called after a clean attempt on the same branch. Genuine
  * stateful identity — there is a real working tree behind it that accumulates
- * merges — so it is an object with behaviour rather than a value.
+ * merges — so it is an object with behavior rather than a value.
  */
 export type MergeTree = {
   readonly attempt: (branch: string) => Promise<MergeAttempt>

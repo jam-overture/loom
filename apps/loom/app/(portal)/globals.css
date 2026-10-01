@@ -65,7 +65,7 @@
 
        The palette has three ink stops and the chrome names four, so
        placeholder and muted resolve to the same `fg-subtle`. Inventing
-       a fourth lighter grey would put a colour on screen that no
+       a fourth lighter grey would put a color on screen that no
        palette declares, which is the thing this file is not allowed to
        do.
        ─────────────────────────────────────────────────────────────── */
@@ -102,7 +102,7 @@
        palette makes `accent` black precisely so the affirmative action
        is the single black shape and the green stays a highlight; the
        refusal and the neutral are outlined, separated by ink weight
-       rather than by colour. The minimal palette has no red, and
+       rather than by color. The minimal palette has no red, and
        inventing one to fill a "discard" button would be exactly the
        second source of truth this file refuses.
        ─────────────────────────────────────────────────────────────── */
@@ -118,12 +118,12 @@
 
     /* ── Dispositions ────────────────────────────────────────────────
        One token pair per `ChangeOutcome` kind in the composition
-       runtime, so a disposition can never be rendered in a colour the
+       runtime, so a disposition can never be rendered in a color the
        runtime has no name for. Add a kind, add a pair.
 
        These are the one group that is *not* drawn from the brand
        palette, and the reason is worth stating rather than hiding. A
-       verdict colour is functional: "applied", "waiting on you" and
+       verdict color is functional: "applied", "waiting on you" and
        "refused" have to be tellable apart at a glance, and a palette
        with a single accent cannot say three things. Rendering all three
        in greys and greens would cost a reviewer the fastest signal on
@@ -166,7 +166,7 @@
        The outline over a part a held change is about, on the two
        pictures of `/portal/pages/[treeId]/proposed/[proposalId]`.
 
-       Not a fifth colour between them: these are the disposition inks
+       Not a fifth color between them: these are the disposition inks
        above, unchanged. A part being taken away is the red a refusal is
        already drawn in, a part arriving is the green an applied change
        is already drawn in, and a part that stays on the page with
@@ -177,7 +177,7 @@
        nothing.
 
        The two amber kinds are told apart by the line and not by the
-       colour — a part whose settings changed is where it was, a part
+       color — a part whose settings changed is where it was, a part
        that moved is not — because they are the same piece of news at
        two altitudes, and the legend is what actually names them.
        ─────────────────────────────────────────────────────────────── */

@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { anchorAttributes, anchorSchema, anchorStyle } from "./anchor.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * The aside a page steps out of its own flow to make — a note, a caveat, the
@@ -85,14 +85,14 @@ type Props = z.infer<typeof props>
  */
 const TONES = {
   accent: {
-    background: colour("accent-subtle"),
-    rule: colour("accent"),
-    title: colour("accent-strong"),
+    background: color("accent-subtle"),
+    rule: color("accent"),
+    title: color("accent-strong"),
   },
   neutral: {
-    background: colour("bg-surface-muted"),
-    rule: colour("border-strong"),
-    title: colour("fg-default"),
+    background: color("bg-surface-muted"),
+    rule: color("border-strong"),
+    title: color("fg-default"),
   },
 } as const
 
@@ -170,7 +170,7 @@ export const loomCallout = definePrimitive({
           fontFamily: family("body"),
           fontSize: size(3),
           lineHeight: 1.6,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           width: "100%",
           minWidth: "0",
           boxSizing: "border-box",

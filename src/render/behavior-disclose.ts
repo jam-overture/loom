@@ -2,17 +2,17 @@
 
 import { createElement, useCallback, useEffect, useState } from "react"
 
-import { DISCLOSED_ATTRIBUTE } from "./behaviour.js"
+import { DISCLOSED_ATTRIBUTE } from "./behavior.js"
 import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * A button that opens and closes the region beside it.
  *
  * The second control in the runtime that runs on the client, and it exists for
- * the same reason as the first: a disclosure is a behaviour, a behaviour is a
+ * the same reason as the first: a disclosure is a behavior, a behavior is a
  * function, and a primitive's props are JSON
  * ([0009](../../decisions/0009-primitives-receive-props-in-a-bag.md)).
- * See `behaviour.ts` for why that makes it the runtime's to build rather than
+ * See `behavior.ts` for why that makes it the runtime's to build rather than
  * the primitive's, and 0091 for why the *region* is nonetheless the primitive's
  * to hide.
  *

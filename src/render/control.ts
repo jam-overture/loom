@@ -1,9 +1,9 @@
-import type { BehaviourName } from "./behaviour.js"
+import type { BehaviorName } from "./behavior.js"
 
 /**
  * The handle a primitive has on a control it did not build.
  *
- * A behaviour arrives as a node with nothing left to configure, and that is what
+ * A behavior arrives as a node with nothing left to configure, and that is what
  * makes placing it the whole of a primitive's part. It also means the primitive
  * is handed an element it cannot name: the class it would aim a rule at, and the
  * one line of that rule an inline style would otherwise beat. Both are here, in
@@ -13,11 +13,11 @@ import type { BehaviourName } from "./behaviour.js"
 
 /**
  * The class every control carries, and the stem of the second one naming which
- * behaviour built it: `loom-control loom-control-copy`.
+ * behavior built it: `loom-control loom-control-copy`.
  *
  * Until this existed, a primitive styling the control it had been handed had two
  * options and neither was good. An element selector guesses what a control
- * renders — `button`, which stopped being true the first time a behaviour
+ * renders — `button`, which stopped being true the first time a behavior
  * rendered an input, as `adjust` does. A wrapper of the primitive's own exists
  * only so there is something to select, and costs a box on every page. A stable
  * class removes both, and costs the runtime one attribute.
@@ -30,8 +30,8 @@ import type { BehaviourName } from "./behaviour.js"
  */
 export const CONTROL_CLASS = "loom-control"
 
-/** The classes the runtime stamps on the control one behaviour builds. */
-export const controlClass = (name: BehaviourName): string =>
+/** The classes the runtime stamps on the control one behavior builds. */
+export const controlClass = (name: BehaviorName): string =>
   `${CONTROL_CLASS} ${CONTROL_CLASS}-${name}`
 
 /**
@@ -65,15 +65,15 @@ export const controlClass = (name: BehaviourName): string =>
 export const CONTROL_DISPLAY_PROPERTY = "--loom-control-display"
 
 /**
- * The custom property that decides whether *one* behaviour's control is
+ * The custom property that decides whether *one* behavior's control is
  * displayed: `--loom-copy-display`.
  *
  * The group property is the common case and this is the escape from it. A
  * primitive that places two controls — a code panel that copies and folds — has
- * one subtree and therefore one inherited value, so without a per-behaviour name
+ * one subtree and therefore one inherited value, so without a per-behavior name
  * hiding either would hide both.
  */
-export const controlDisplayProperty = (name: BehaviourName): string => `--loom-${name}-display`
+export const controlDisplayProperty = (name: BehaviorName): string => `--loom-${name}-display`
 
 /**
  * The value a control writes for `display`: its own, behind the two properties a
@@ -84,5 +84,5 @@ export const controlDisplayProperty = (name: BehaviourName): string => `--loom-$
  * deployment that sets neither gets exactly what the control set before any of
  * this existed.
  */
-export const controlDisplay = (name: BehaviourName, resting: string): string =>
+export const controlDisplay = (name: BehaviorName, resting: string): string =>
   `var(${controlDisplayProperty(name)}, var(${CONTROL_DISPLAY_PROPERTY}, ${resting}))`

@@ -6,7 +6,7 @@ one was the turn for course plumbing under the brief's alternation. The candidat
 carried forward — `transcripts.test.ts` having no way to say a block's red is
 *expected* — is still small, still true, and still worth doing.
 
-It lost to this because of what reading `src/render/` turned up: **the behaviour
+It lost to this because of what reading `src/render/` turned up: **the behavior
 seam has five decision records, five members, four registration checks, a probe,
 and no lesson.** It is the last untaught seam of any size in the framework, it is
 settled (0086 on 22 August, the most recent member on 20 September), and it is
@@ -14,8 +14,8 @@ the first thing in Part V whose missing piece is not a fact. A check on this
 lane's own markdown will still be there next week; a fourteenth seam that changes
 what Part V is *about* was the better spend.
 
-**Landed:** [lesson 31 — *Behaviour: the thing a page does, which no tree can
-name*](../31-behaviour.md). Seven exercises, all executed. Set AJ. Roughly
+**Landed:** [lesson 31 — *Behavior: the thing a page does, which no tree can
+name*](../31-behavior.md). Seven exercises, all executed. Set AJ. Roughly
 **45–60 minutes** to work through — four Predict questions, none of them a grid,
 and exercise C is the one that takes the longest because both of its blocks are
 surprising for different reasons.
@@ -55,10 +55,10 @@ button arrives from an effect once `navigator.clipboard.writeText` is actually
 there.
 
 I did not know this before running exercise D, and it reframed the whole lesson.
-**A behaviour leaves no trace in a pure function of the tree.** This course's
+**A behavior leaves no trace in a pure function of the tree.** This course's
 entire method — run it, print what it says — reaches everything in Loom except
 this, which is why all four registry checks are at *registration*: that is the
-last moment at which a behaviour is visible to anything that is not a browser.
+last moment at which a behavior is visible to anything that is not a browser.
 
 **Predict 3** is the `adjust` question: `disclose` stamps a boolean on its own
 button, so where does a control that hands back a *number* put it? Almost
@@ -85,7 +85,7 @@ Both filed in `FINDINGS.md` for `Loom primitives`, neither fixed. `src/` and
 
 **`adjust` was built for `loom.before-after` and `loom.before-after` does not
 declare it.** Exercise G asks the starter registry which primitives take a
-control: two out of ninety-nine, and three of the five behaviours have no
+control: two out of ninety-nine, and three of the five behaviors have no
 declaring primitive at all.
 
 0096 names `loom.before-after` in its Context, its worked CSS is a `clip-path` on
@@ -110,7 +110,7 @@ second copy of a fact they are not currently doubting.
 **`present` and `dismiss` are the same shape, nine days old.** 0176 splits Tier B
 into three groups and says, in as many words, *this record settles the first* —
 dialog, dropdown, lightbox, tooltip. `docs/primitive-gap-inventory.md`, edited
-five days after that record, still says Tier B is *"blocked on the behaviour
+five days after that record, still says Tier B is *"blocked on the behavior
 vocabulary"* and that its nine members *"arrive together or not at all, because
 they are one framework decision rather than nine."* Four of the nine have had
 their decision since 20 September. Filed as a correction to a document rather
@@ -142,7 +142,7 @@ Two transcript decisions taken on purpose:
 The one thing worth flagging to a future run of this lane: **exercise C's second
 block is the props floor, and `Loom daily build` has an open pull request (#444)
 that changes how the floor treats reserved keys.** This exercise deliberately
-uses *plain* unknown props — `copyable`, `behaviours` — rather than a `loom:`
+uses *plain* unknown props — `copyable`, `behaviors` — rather than a `loom:`
 key, so #444 cannot move it. Lesson 30's exercise D was not so lucky and was
 edited from outside this lane for exactly that reason.
 
@@ -161,13 +161,13 @@ comment. `schedule.test.ts` and `queue.test.ts` gain AJ; the queue's whole-cours
 length goes 35 → **36**; `syllabus.ts`'s comment goes thirty-five →
 thirty-six.
 
-`declarations.test.ts` gains a row for `Behaviour`, which lesson 31 prints whole
-out of `src/render/behaviour.ts`, so its five members are now this lane's to keep
+`declarations.test.ts` gains a row for `Behavior`, which lesson 31 prints whole
+out of `src/render/behavior.ts`, so its five members are now this lane's to keep
 printed. Its header count and `declarations.ts`' go nineteen → twenty.
 
 **And a new claim in `claims.test.ts`**, which is the part of this run I would
-defend hardest. The phrase *the behaviour vocabulary has five members* now
-appears three times across `lessons/` and is held against `BEHAVIOUR_NAMES`.
+defend hardest. The phrase *the behavior vocabulary has five members* now
+appears three times across `lessons/` and is held against `BEHAVIOR_NAMES`.
 It is registered because of what this run found: `loom.before-after` carries the
 same count in `src/`, has carried it since the vocabulary had one member, and
 nothing compares it to anything. Writing the check for this lane's copy of a
@@ -185,9 +185,9 @@ this is still visible, and is anything checking it there?** Two candidates:
   finding attached, and is starting to look like something this lane should
   either write or stop listing.
 - **The conformance probe's reach**, which lesson 31 touches and does not open:
-  `unplacedBehaviours` is the one check in this seam that has to run the
+  `unplacedBehaviors` is the one check in this seam that has to run the
   component, and lesson 29 ended on what a probe built on watching output cannot
-  see. A declared behaviour that is placed *conditionally* is the case neither
+  see. A declared behavior that is placed *conditionally* is the case neither
   lesson covers.
 
 **Or the machinery this run passed over**, which is now two runs deferred:

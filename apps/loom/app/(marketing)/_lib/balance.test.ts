@@ -8,7 +8,7 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * How much each card in a row says, against how much the one beside it says.
  *
  * A row of cards is laid out across equal columns and every card in it is
- * stretched to the height of the tallest. That is the right behaviour and it
+ * stretched to the height of the tallest. That is the right behavior and it
  * has one consequence nothing in this repository could report: **a card that
  * says less than its neighbour carries the difference as empty space**, and the
  * empty space is at the bottom, under the last line, where a reader reads it as
@@ -63,7 +63,7 @@ const isElement = (node: LoomNode): node is ElementNode => node.kind === "elemen
  *
  * **A string prop counts as text when it contains a space**, and that line is
  * worth stating because it is doing real work rather than being tidy. The props
- * that decide layout and behaviour are single tokens — `columns: "four"`,
+ * that decide layout and behavior are single tokens — `columns: "four"`,
  * `tone: "outline"`, `variant: "quiet"`, `state: "done"`, `marker: "1"` — and
  * an `href` never contains one. Everything with a space in it is a sentence
  * somebody wrote for a reader. It is a heuristic and it is allowed to be one
@@ -196,7 +196,7 @@ const ORIGIN = "https://loom.example"
  * a rule swept over only one of them is a rule about half the site.
  *
  * The palettes are deliberately **not** swept, unlike `alignment.test.ts`. What
- * a theme can change is colour and type, and neither is a word; a loop over
+ * a theme can change is color and type, and neither is a word; a loop over
  * three palettes here would triple the assertions and could not fail
  * differently in any of them, which is decoration rather than coverage.
  */

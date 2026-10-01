@@ -139,9 +139,9 @@ export type Specimen = {
    * A specimen is `renderToStaticMarkup` with no dev server and no hydration,
    * and that is the right subject for almost everything: it is the render seam's
    * own output, with nothing between it and the camera. It is also the one
-   * subject in which **no control in the behaviour vocabulary appears at all.**
+   * subject in which **no control in the behavior vocabulary appears at all.**
    * Every one of them returns `null` until an effect proves scripting runs
-   * (`behaviour.ts`), which is deliberate and correct on a served page and means
+   * (`behavior.ts`), which is deliberate and correct on a served page and means
    * a specimen of a primitive that copies, discloses, adjusts, presents or
    * dismisses photographs the page without the thing it was taken for. Five
    * members in, nothing in this repository had ever photographed one; three

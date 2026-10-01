@@ -249,7 +249,7 @@ const renderThemeGroup = (label: string, entries: readonly ThemeCatalogueEntry[]
  * other palettes exist, so the only reachable answers are the one already
  * mounted and an invented id that fails to resolve. The hex is deliberately not
  * here. A model choosing between registered palettes by description is the
- * bargain 0049 struck; a model choosing colours is the thing it rules out.
+ * bargain 0049 struck; a model choosing colors is the thing it rules out.
  */
 export const renderThemeCatalogue = (catalogue: ThemeCatalogue): string =>
   [

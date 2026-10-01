@@ -365,10 +365,10 @@ describe("what a bound region looks like under a second palette", () => {
    * The rule every primitive in this library is held to, applied to the two
    * that have a rendering no other fixture reaches: the failure line and the
    * skipped-row note are drawn by the primitive rather than by the tree, so
-   * they are the two strings in this library most likely to carry a colour of
+   * they are the two strings in this library most likely to carry a color of
    * their own.
    */
-  it("renders every state identically under both starter palettes, with no colour of its own", async () => {
+  it("renders every state identically under both starter palettes, with no color of its own", async () => {
     const states: readonly (readonly [string, SourceEntry])[] = [
       ["rows", sourceAnswering([...POSTS])],
       ["none", sourceAnswering([])],

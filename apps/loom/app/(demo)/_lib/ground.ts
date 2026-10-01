@@ -8,7 +8,7 @@ import { demoThemes } from "./registry"
  * What the page on the stage is painted on, read off the page's own theme.
  *
  * **The demo's one structural claim is that the page is data**, and the rail
- * says so in as many words: *every colour and typeface on the page changes at
+ * says so in as many words: *every color and typeface on the page changes at
  * once.* Two places in this lane drew the page anyway and held a copy of what
  * it looks like, and on 26 September `DEMO_STARTING_THEME` moved from
  * `editorial` to `midnight` and both copies became wrong in the same instant:
@@ -24,7 +24,7 @@ import { demoThemes } from "./registry"
  *   It was, and then it was not. A link unfurled to a cream page with navy
  *   figures and landed on a navy page with cyan ones.
  *
- * Neither was a wrong colour. Both were a **second copy of a decision that has
+ * Neither was a wrong color. Both were a **second copy of a decision that has
  * one home** — the three registered ids on the tree's root node (0049) — and
  * the copy is the defect whether or not it currently agrees. `chrome.ts` has
  * had exactly this discipline on the rail's half from the start: it holds a
@@ -55,18 +55,18 @@ const startingTheme = ((): ResolvedTheme => {
 export const demoPagePalette: Palette = startingTheme.palette
 
 /**
- * One of the page's own colours, for something that has to draw the page
+ * One of the page's own colors, for something that has to draw the page
  * without a cascade to read it through.
  *
  * `ImageResponse` resolves no custom properties, so the share card cannot say
  * `var(--loom-bg-canvas)` and has to be handed the value. Everything on a real
  * screen reads the variable and never calls this.
  */
-export const pageColour = (slot: PaletteSlot): string => {
-  const colour = demoPagePalette.slots[slot]
-  if (colour === undefined) throw new Error(`loom: the demo's palette has no ${slot}`)
+export const pageColor = (slot: PaletteSlot): string => {
+  const color = demoPagePalette.slots[slot]
+  if (color === undefined) throw new Error(`loom: the demo's palette has no ${slot}`)
 
-  return colour
+  return color
 }
 
 /**

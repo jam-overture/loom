@@ -438,7 +438,7 @@ describe("the legend", () => {
    * disclosure under the pictures prints — so nothing is removed by saying it
    * plainly.
    */
-  it("says what each colour means without using the runtime's vocabulary", () => {
+  it("says what each color means without using the runtime's vocabulary", () => {
     const legend = legendFor(MARK_ORDER.map((kind, index) => ({ nodeId: `n_${index}` as NodeId, kind })))
 
     expect(legend).toHaveLength(MARK_ORDER.length)

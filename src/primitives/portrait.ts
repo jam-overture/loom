@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from "react"
 
 import { monogramOf } from "./monogram.js"
-import { colour, family, radius, size, weight, type RampStep } from "./tokens.js"
+import { color, family, radius, size, weight, type RampStep } from "./tokens.js"
 
 /**
  * The face a primitive draws for a person, with or without a photograph.
@@ -105,7 +105,7 @@ export const portrait = (given: PortraitRequest): ReactNode => {
         display: "block",
         objectFit: "cover",
         /** Shows through while the photograph loads, so the row never has a hole in it. */
-        backgroundColor: colour("bg-surface-muted"),
+        backgroundColor: color("bg-surface-muted"),
       },
     })
   }
@@ -143,8 +143,8 @@ export const portrait = (given: PortraitRequest): ReactNode => {
          * accent reads as a decision, an empty grey circle reads as something
          * that failed to load.
          */
-        backgroundColor: colour("accent-subtle"),
-        color: colour("accent-strong"),
+        backgroundColor: color("accent-subtle"),
+        color: color("accent-strong"),
         fontFamily: family("heading"),
         fontWeight: weight("heading"),
         fontSize: size(given.glyph),

@@ -140,7 +140,7 @@ export type RailInput<TPart> = {
    * How to show the part of the page a question is about.
    *
    * Called only for a question that can still be answered — see `answerable`
-   * below, which is the one behaviour change this extraction made rather than
+   * below, which is the one behavior change this extraction made rather than
    * preserved.
    */
   readonly showPart: (part: PartInQuestion, proposalId: string) => TPart

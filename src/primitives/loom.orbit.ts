@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, radius, space } from "./tokens.js"
+import { color, radius, space } from "./tokens.js"
 
 /**
  * Whatever it is given, circling something it is given — the *works with*
@@ -239,7 +239,7 @@ export const loomOrbit = definePrimitive({
                  * whatever the tree puts here is the one thing on the band
                  * that must read as the middle — and until this was drawn, the
                  * first photograph of an assembled page showed a wordmark the
-                 * same weight and colour as the eight going round it, sitting
+                 * same weight and color as the eight going round it, sitting
                  * in the middle of a large empty circle. A ring of nine equals
                  * is not an orbit; nothing about the arrangement says which one
                  * the others are moving around.
@@ -249,8 +249,8 @@ export const loomOrbit = definePrimitive({
                  * mark of one or two letters and clip every longer one, which
                  * is a rule that silently punishes the ordinary case.
                  */
-                background: colour("accent-subtle"),
-                border: `1px solid ${colour("border-accent")}`,
+                background: color("accent-subtle"),
+                border: `1px solid ${color("border-accent")}`,
                 borderRadius: radius("full"),
                 paddingBlock: space(3),
                 paddingInline: space(5),

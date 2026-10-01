@@ -107,7 +107,7 @@ extending the fixture for the replay-gap half — appended a revision that remov
 the header the doctored text lived in. The same audit, same wrong seed, now says
 `agrees`.
 
-That is correct behaviour and it is not written down anywhere. `auditSnapshot`
+That is correct behavior and it is not written down anywhere. `auditSnapshot`
 compares end states; a seed error whose effects a later revision erased is
 invisible to it, permanently and silently. The lesson makes the reader produce
 it and then states the corollary in the strongest form I can defend: **an audit

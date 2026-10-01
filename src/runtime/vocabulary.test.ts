@@ -57,7 +57,7 @@ describe("primitiveVocabularyFor", () => {
   /**
    * The asymmetry with `NOTHING_INTERACTIVE` is the whole reason this is safe to
    * ship: an empty policy field is a host that has not spoken, and a host that
-   * has not spoken must get exactly the runtime's prior behaviour.
+   * has not spoken must get exactly the runtime's prior behavior.
    */
   it("treats an empty list as undeclared rather than as an empty library", () => {
     expect(primitiveVocabularyFor([])).toBe(EVERY_TYPE_REGISTERED)
@@ -153,7 +153,7 @@ describe("EVERY_TYPE_UNDECLARED", () => {
     })
   })
 
-  it("finds nothing wrong with anything, which is the prior behaviour", () => {
+  it("finds nothing wrong with anything, which is the prior behavior", () => {
     const node = buildElement(ids, { type: "loom.card", props: { variant: "invented" } })
 
     expect(invalidPropsIn(node, EVERY_TYPE_UNDECLARED)).toEqual([])

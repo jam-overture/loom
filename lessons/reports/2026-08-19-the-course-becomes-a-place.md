@@ -75,7 +75,7 @@ Per 0067 the prose goes through the registry: every question, heading and note o
 these pages is a `loom.prose` or `loom.heading` in a small tree, rendered by
 `renderLoomTree` against `createStarterPrimitiveRegistry()`. The furniture — the
 answer box, the confidence buttons, the queue — is application furniture as the
-brief allows, and it still names no colour: it styles itself from the same
+brief allows, and it still names no color: it styles itself from the same
 `--loom-*` variables the theme mounts, so a re-theme moves the buttons with the
 paragraphs.
 

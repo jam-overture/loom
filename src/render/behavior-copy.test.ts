@@ -5,13 +5,13 @@ import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { CopyControl } from "./behaviour-copy.js"
+import { CopyControl } from "./behavior-copy.js"
 import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * The one part of the runtime that needs a browser to be tested, because it is
  * the one part that runs in one. Everything the seam does around it —
- * declaring, checking, placing — is covered without a DOM in `behaviour.test.ts`.
+ * declaring, checking, placing — is covered without a DOM in `behavior.test.ts`.
  */
 
 declare global {

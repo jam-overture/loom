@@ -34,7 +34,7 @@ The list becomes child nodes and the container becomes a primitive named by
 [0054](../decisions/0054-a-container-is-its-childs-name-plus-the-arrangement.md).
 This is most of Hermes.
 
-**Atomic — one primitive with props.** Indivisible behaviour: something that
+**Atomic — one primitive with props.** Indivisible behavior: something that
 measures itself, animates continuously, or embeds a third party. The
 granularity doc's first exception.
 
@@ -217,8 +217,8 @@ mean nothing alone". That is true of the **motion** and false of the
 **content**: a logo in a marquee is a logo, and it means the same thing standing
 still. So it is 0054's shape — a container named for the arrangement it puts its
 children in — and it needed no new child type, because every child type it wants
-was already registered. The rule the row got wrong: *indivisible behaviour makes
-a primitive atomic only when the thing the behaviour acts on is also
+was already registered. The rule the row got wrong: *indivisible behavior makes
+a primitive atomic only when the thing the behavior acts on is also
 indivisible.*
 
 The other two were right. `embed` frames a document with no interior this

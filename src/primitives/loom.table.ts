@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * Rows and columns of whatever it is given — the ordinary table a document is
@@ -179,7 +179,7 @@ export const loomTable = definePrimitive({
           boxSizing: "border-box",
           width: "100%",
           fontFamily: family("body"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       columns === undefined ? null : createElement("thead", null, columns),
@@ -197,8 +197,8 @@ export const loomTable = definePrimitive({
           width: "100%",
           ...(panel
             ? {
-                background: colour("bg-surface"),
-                border: `1px solid ${colour("border-subtle")}`,
+                background: color("bg-surface"),
+                border: `1px solid ${color("border-subtle")}`,
                 borderRadius: radius("lg"),
                 /** Clips the table's corners to the panel's radius. */
                 overflow: "hidden",
@@ -229,7 +229,7 @@ export const loomTable = definePrimitive({
                 fontWeight: weight("heading"),
                 fontSize: size(4),
                 lineHeight: 1.3,
-                color: colour("fg-default"),
+                color: color("fg-default"),
               },
             },
             given.caption

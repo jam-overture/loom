@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, weight } from "./tokens.js"
+import { color, family, size, weight } from "./tokens.js"
 
 /**
  * A measured fact about the thing it sits on: a figure and the unit it counts.
@@ -103,7 +103,7 @@ export const loomSpec = definePrimitive({
           style: {
             fontFamily: family("heading"),
             fontWeight: weight("heading"),
-            color: colour("fg-default"),
+            color: color("fg-default"),
           },
         },
         given.value
@@ -114,7 +114,7 @@ export const loomSpec = definePrimitive({
             "span",
             {
               key: "label",
-              style: { fontFamily: family("body"), color: colour("fg-muted") },
+              style: { fontFamily: family("body"), color: color("fg-muted") },
             },
             given.label
           )

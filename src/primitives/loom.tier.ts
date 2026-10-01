@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * One plan: what it is called, what it costs, what it gets you, and the one
@@ -75,13 +75,13 @@ type Props = z.infer<typeof props>
  */
 const SURFACES: Readonly<Record<"plain" | "featured", CSSProperties>> = {
   plain: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
   },
   featured: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-accent")}`,
-    boxShadow: `0 0 0 1px ${colour("accent")}, 0 32px 64px -48px ${colour("accent-strong")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-accent")}`,
+    boxShadow: `0 0 0 1px ${color("accent")}, 0 32px 64px -48px ${color("accent-strong")}`,
   },
 }
 
@@ -119,7 +119,7 @@ export const loomTier = definePrimitive({
               fontSize: size(3),
               lineHeight: 1.2,
               letterSpacing: "0.02em",
-              color: colour("fg-muted"),
+              color: color("fg-muted"),
             },
           },
           given.name
@@ -147,7 +147,7 @@ export const loomTier = definePrimitive({
               lineHeight: 1,
               /** A price wraps mid-string otherwise — "$1,200 / mo" over two lines. */
               textWrap: "nowrap",
-              color: colour("fg-default"),
+              color: color("fg-default"),
             },
           },
           given.price
@@ -156,7 +156,7 @@ export const loomTier = definePrimitive({
           ? null
           : createElement(
               "span",
-              { style: { fontFamily: family("body"), fontSize: size(3), color: colour("fg-muted") } },
+              { style: { fontFamily: family("body"), fontSize: size(3), color: color("fg-muted") } },
               given.period
             )
       ),
@@ -169,7 +169,7 @@ export const loomTier = definePrimitive({
                 margin: "0",
                 fontFamily: family("body"),
                 fontSize: size(2),
-                color: colour("fg-subtle"),
+                color: color("fg-subtle"),
               },
             },
             given.note
@@ -191,7 +191,7 @@ export const loomTier = definePrimitive({
           height: "100%",
           padding: space(5),
           borderRadius: radius("lg"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),

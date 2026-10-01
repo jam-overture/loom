@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -116,7 +116,7 @@ export const loomCredential = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(3),
           lineHeight: 1.3,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -150,10 +150,10 @@ export const loomCredential = definePrimitive({
           boxSizing: "border-box",
           height: "100%",
           padding: space(4),
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       libraryStylesheet(),
@@ -180,8 +180,8 @@ export const loomCredential = definePrimitive({
                 blockSize: space(8),
                 overflow: "hidden",
                 padding: space(2),
-                background: colour("bg-surface-muted"),
-                border: `1px solid ${colour("border-subtle")}`,
+                background: color("bg-surface-muted"),
+                border: `1px solid ${color("border-subtle")}`,
                 borderRadius: radius("md"),
               },
             },
@@ -212,8 +212,8 @@ export const loomCredential = definePrimitive({
          * that: a name and its date competing for one line is a competition the
          * name has to win, so the date stops competing.
          *
-         * Accent rather than muted, and it is the card's only colour, because
-         * the whole surface is a link here (0066): accent-coloured *words*
+         * Accent rather than muted, and it is the card's only color, because
+         * the whole surface is a link here (0066): accent-colored *words*
          * beside the name read as a second link that is not one, which is what
          * "Amazon Web Services" in accent looked like. A year is unmistakably
          * not a destination.
@@ -231,7 +231,7 @@ export const loomCredential = definePrimitive({
                   lineHeight: 1.4,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: colour("accent"),
+                  color: color("accent"),
                 },
               },
               given.year
@@ -248,7 +248,7 @@ export const loomCredential = definePrimitive({
                   fontFamily: family("body"),
                   fontSize: size(2),
                   lineHeight: 1.4,
-                  color: colour("fg-muted"),
+                  color: color("fg-muted"),
                 },
               },
               given.issuer
@@ -265,7 +265,7 @@ export const loomCredential = definePrimitive({
                   fontFamily: family("body"),
                   fontSize: size(2),
                   lineHeight: 1.6,
-                  color: colour("fg-muted"),
+                  color: color("fg-muted"),
                 },
               },
               given.note

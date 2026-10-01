@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * How much of a thing there is, drawn rather than typeset.
@@ -76,7 +76,7 @@ const CENTRE = "50%"
 
 /**
  * The hole is cut with a mask rather than covered with a smaller disc, for the
- * reason `loom.hero`'s aurora gives: a disc on top has to be painted the colour
+ * reason `loom.hero`'s aurora gives: a disc on top has to be painted the color
  * of whatever is behind the band, and a primitive cannot know it — the same
  * ring sits on the canvas, inside a card, and on a tinted section. A mask
  * removes the middle instead, so the page shows through it under every palette
@@ -93,7 +93,7 @@ export const loomMeter = definePrimitive({
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const percent = proportion(given.value)
     const readout = given.readout ?? `${Math.round(percent)}%`
-    const fill = colour(given.tone === "neutral" ? "fg-muted" : "accent")
+    const fill = color(given.tone === "neutral" ? "fg-muted" : "accent")
     const ring = given.shape === "ring"
 
     /**
@@ -139,7 +139,7 @@ export const loomMeter = definePrimitive({
         height: space(2),
         width: "100%",
         borderRadius: radius("full"),
-        background: colour("bg-surface-muted"),
+        background: color("bg-surface-muted"),
         overflow: "hidden",
       },
       createElement("div", {
@@ -159,7 +159,7 @@ export const loomMeter = definePrimitive({
       position: "absolute",
       inset: "0",
       borderRadius: CENTRE,
-      background: `conic-gradient(${fill} var(--loom-meter-sweep), ${colour("bg-surface-muted")} 0)`,
+      background: `conic-gradient(${fill} var(--loom-meter-sweep), ${color("bg-surface-muted")} 0)`,
       maskImage: RING_HOLE,
       WebkitMaskImage: RING_HOLE,
     })
@@ -172,7 +172,7 @@ export const loomMeter = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: ring ? size(4) : size(3),
           lineHeight: 1,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           /** A figure that changes width mid-fill jitters against its own label. */
           fontVariantNumeric: "tabular-nums",
           /**
@@ -196,14 +196,14 @@ export const loomMeter = definePrimitive({
       },
       createElement(
         "span",
-        { style: { fontFamily: family("body"), fontSize: size(3), color: colour("fg-default") } },
+        { style: { fontFamily: family("body"), fontSize: size(3), color: color("fg-default") } },
         given.label
       ),
       given.caption === undefined
         ? null
         : createElement(
             "span",
-            { style: { fontFamily: family("body"), fontSize: size(2), color: colour("fg-muted") } },
+            { style: { fontFamily: family("body"), fontSize: size(2), color: color("fg-muted") } },
             given.caption
           )
     )

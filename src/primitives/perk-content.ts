@@ -3,7 +3,7 @@ import { z } from "zod"
 
 import type { PrimitiveText } from "../render/text.js"
 
-import { colour, family, radius, size, space } from "./tokens.js"
+import { color, family, radius, size, space } from "./tokens.js"
 
 /**
  * What a perk *is*, shared by the two primitives that are one.
@@ -72,17 +72,17 @@ const MARKERS: Readonly<Record<PerkState, { glyph: string; names: PerkTextKey | 
     glyph: "✓",
     /** Decoration — see `PERK_TEXT` for why this one has no accessible name. */
     names: undefined,
-    style: { background: colour("accent-subtle"), color: colour("accent-strong") },
+    style: { background: color("accent-subtle"), color: color("accent-strong") },
   },
   excluded: {
     glyph: "✕",
     names: "excluded",
-    style: { background: colour("bg-surface-muted"), color: colour("fg-subtle") },
+    style: { background: color("bg-surface-muted"), color: color("fg-subtle") },
   },
   coming: {
     glyph: "○",
     names: "coming",
-    style: { background: colour("bg-surface-muted"), color: colour("fg-muted") },
+    style: { background: color("bg-surface-muted"), color: color("fg-muted") },
   },
 }
 
@@ -94,12 +94,12 @@ const MARKER_SIZE = "1.25rem"
  * never included priority support is not a plan that lost it.
  */
 const TEXT: Readonly<Record<PerkState, string>> = {
-  included: colour("fg-default"),
-  excluded: colour("fg-subtle"),
-  coming: colour("fg-muted"),
+  included: color("fg-default"),
+  excluded: color("fg-subtle"),
+  coming: color("fg-muted"),
 }
 
-/** The row's own layout and colour, for whichever element carries it. */
+/** The row's own layout and color, for whichever element carries it. */
 export const perkRowStyle = (state: PerkState): CSSProperties => ({
   display: "flex",
   alignItems: "flex-start",
@@ -153,5 +153,5 @@ export const perkText = (given: PerkProps): ReactNode =>
     createElement("span", null, given.label),
     given.note === undefined
       ? null
-      : createElement("span", { style: { fontSize: size(2), color: colour("fg-subtle") } }, given.note)
+      : createElement("span", { style: { fontSize: size(2), color: color("fg-subtle") } }, given.note)
   )

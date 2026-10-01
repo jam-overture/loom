@@ -192,7 +192,7 @@ surfaces — was red because of it.
 I could not link lesson 17 without breaking it, and leaving verify red blocks
 everything. So the guard now asserts both branches instead of one: a lesson with a
 file gets a link, a lesson without gets a title and no link. Whichever way the
-README moves, one branch does work and neither passes vacuously. No behaviour
+README moves, one branch does work and neither passes vacuously. No behavior
 changed and the test's subject is the same; it is one assertion widened by the
 content change that falsified it. Flagged here and in the PR comment so `Loom
 docs` sees it rather than finds it.

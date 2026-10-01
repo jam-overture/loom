@@ -255,7 +255,7 @@ const DemoPage = async () => {
             * the frame's sandbox permits no navigation but the frame's own, so
             * the only thing this link can reach in a box is the box.
             * `read-the-docs.tsx` argues the trade and `_lib/framed.ts` has the
-            * browser behaviour behind it.
+            * browser behavior behind it.
             */}
           <footer className="border-edge-subtle text-ink-muted mt-auto flex flex-col gap-3 border-t pt-4 text-2xs">
             <ReadTheDocs />
@@ -299,7 +299,7 @@ const DemoPage = async () => {
         * It is rendered for the one change the page is currently about, which is
         * the same record the marks are about and the same one the rail's legend
         * names, so the dot on the bar, the ring on the band and the badge on the
-        * card are one colour saying one thing. `spotlitChanges` prefers a held
+        * card are one color saying one thing. `spotlitChanges` prefers a held
         * change over an applied one, which is the right preference here too: a
         * question the visitor has not answered outranks a receipt.
         */}

@@ -3,7 +3,7 @@ import { z } from "zod"
 /**
  * The theme vocabulary, ported from the Hermes registry (§4b).
  *
- * Three orthogonal pieces — colour, type, and shape — because they vary
+ * Three orthogonal pieces — color, type, and shape — because they vary
  * independently in practice: a host swaps the palette for a dark mode without
  * touching the typographic ramp, and swaps the ramp for a rebrand without
  * touching the radii.
@@ -11,12 +11,12 @@ import { z } from "zod"
  * Every piece is *registered and addressed by id*, never inlined. That is the
  * same bargain the primitive registry makes: a bounded vocabulary a model may
  * choose from, so "make it warmer" resolves to a named palette a human approved
- * rather than to seventeen colours a model invented. The alternative — letting a
+ * rather than to seventeen colors a model invented. The alternative — letting a
  * proposal carry raw hex — would put an unbounded value space inside the one
  * part of the system that exists to bound what AI may produce.
  */
 
-const colourSchema = z
+const colorSchema = z
   .string()
   .regex(/^(#[0-9a-fA-F]{3,8}|rgba?\(.+\)|hsla?\(.+\)|[a-z]+)$/)
 
@@ -73,7 +73,7 @@ export const paletteSchema = z.object({
   id: themeIdSchema,
   name: z.string().min(1),
   description: z.string().min(1),
-  slots: z.record(paletteSlotSchema, colourSchema).refine(
+  slots: z.record(paletteSlotSchema, colorSchema).refine(
     (slots) => PALETTE_SLOTS.every((slot) => slots[slot] !== undefined),
     { message: "a palette must declare every slot" }
   ),
@@ -124,7 +124,7 @@ export type FontFace = z.infer<typeof fontFaceSchema>
  *
  * `monoFamily` is optional where the other two are required, and the asymmetry
  * is deliberate rather than an oversight. A palette declares every slot because
- * an undeclared colour has no universal fallback; an undeclared *face* has one,
+ * an undeclared color has no universal fallback; an undeclared *face* has one,
  * because every operating system ships a monospace. `tokens.ts` asks for
  * `var(--loom-mono-family, <system stack>)`, so a pack with no opinion about
  * code costs a reader nothing, and a pack built around a particular mono gets

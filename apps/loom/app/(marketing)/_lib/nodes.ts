@@ -93,7 +93,7 @@ export const link = (
  * for a reason a reader cannot see because there is nothing there to see.
  *
  * It reads as deliberate on `bold` and `editorial`, where the fill is a real
- * change of colour. That is the trap: the tone is correct on two palettes and is
+ * change of color. That is the trap: the tone is correct on two palettes and is
  * a ragged left margin on the one every screenshot and every visitor gets.
  *
  * So the site stops asking for a plate the house theme cannot draw. **This is a

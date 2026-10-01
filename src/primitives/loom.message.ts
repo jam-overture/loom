@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { portrait } from "./portrait.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
 /**
@@ -66,7 +66,7 @@ import { mediaUrlSchema } from "./url.js"
  *
  * ## The pairings it paints
  *
- * Nothing here is a colour combination the contrast audit does not already
+ * Nothing here is a color combination the contrast audit does not already
  * carry. A person's bubble is `fg-default` on `accent-subtle`, which is the
  * pairing `loom.section`'s accent tone already paints; the assistant's is
  * `fg-default` on `bg-surface`. The composing dots are `fg-muted` rather than
@@ -114,13 +114,13 @@ const AVATAR_SIZE = "2.25rem"
  */
 const SKINS: Readonly<Record<Speaker, CSSProperties>> = {
   person: {
-    background: colour("accent-subtle"),
-    border: `1px solid ${colour("border-accent")}`,
+    background: color("accent-subtle"),
+    border: `1px solid ${color("border-accent")}`,
     borderEndEndRadius: radius("sm"),
   },
   assistant: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
+    background: color("bg-surface"),
+    border: `1px solid ${color("border-subtle")}`,
     borderEndStartRadius: radius("sm"),
   },
   /**
@@ -135,7 +135,7 @@ const SKINS: Readonly<Record<Speaker, CSSProperties>> = {
     borderRadius: "0",
     padding: `${space(1)} 0`,
     fontSize: size(2),
-    color: colour("fg-muted"),
+    color: color("fg-muted"),
     textAlign: "center",
   },
 }
@@ -157,7 +157,7 @@ const BUBBLE: CSSProperties = {
   fontFamily: family("body"),
   fontSize: size(3),
   lineHeight: 1.6,
-  color: colour("fg-default"),
+  color: color("fg-default"),
   textWrap: "pretty",
 }
 
@@ -196,7 +196,7 @@ export const loomMessage = definePrimitive({
               ? null
               : createElement(
                   "span",
-                  { key: "name", style: { fontWeight: weight("heading"), color: colour("fg-default") } },
+                  { key: "name", style: { fontWeight: weight("heading"), color: color("fg-default") } },
                   given.name
                 ),
             given.stamp === undefined
@@ -205,7 +205,7 @@ export const loomMessage = definePrimitive({
                   "span",
                   {
                     key: "stamp",
-                    style: { color: colour("fg-subtle"), fontVariantNumeric: "tabular-nums" },
+                    style: { color: color("fg-subtle"), fontVariantNumeric: "tabular-nums" },
                   },
                   given.stamp
                 )
@@ -235,7 +235,7 @@ export const loomMessage = definePrimitive({
             width: "0.4rem",
             height: "0.4rem",
             borderRadius: radius("full"),
-            background: colour("fg-muted"),
+            background: color("fg-muted"),
           },
         })
       )

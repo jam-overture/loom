@@ -138,5 +138,5 @@ node -e 'import("@jam-overture/loom-primitives").then((m) => console.log(m.START
 
 Done on 26 September against both tarballs: **98 primitives, 44 compositions, a
 22-part page sequence, a hero band rendered to 48KB of markup, zero
-diagnostics, and no literal colour below the root** — the re-theme guarantee
+diagnostics, and no literal color below the root** — the re-theme guarantee
 holding in a package installed from a tarball by a project that is not this one.

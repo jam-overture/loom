@@ -16,11 +16,11 @@ import { sampleTree } from "./fixtures.js"
  *
  * `memory.ts` has described itself as "the reference implementation ... what a
  * SQL or KV implementation will be checked against" since the day it was written.
- * That was a promise; this is what makes it true. A behavioural disagreement
+ * That was a promise; this is what makes it true. A behavioral disagreement
  * between the in-memory store and Postgres is now a test failure rather than
  * something discovered in production.
  *
- * Only behaviour the *contract* promises belongs here. Anything specific to one
+ * Only behavior the *contract* promises belongs here. Anything specific to one
  * implementation — how it reports a connection failure, what it exposes beyond
  * the interface — stays in that implementation's own test file.
  */

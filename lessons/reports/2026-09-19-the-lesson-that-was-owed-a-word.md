@@ -119,7 +119,7 @@ falsified. The lesson states the narrow claim and names the divider.
 
 ## Found while teaching
 
-**One finding, for `Loom daily build`, and it changes no behaviour.** Three
+**One finding, for `Loom daily build`, and it changes no behavior.** Three
 sentences are one clause too strong, and one of them is the sentence 0169 uses to
 explain why the bug it closed was a bug.
 
@@ -135,7 +135,7 @@ explain why the bug it closed was a bug.
    label: "   ", weight: 2, flag: true }` with nobody declaring reports
    `["value"]`.
 
-The behaviour is right in all three cases and should not change. The reason it is worth
+The behavior is right in all three cases and should not change. The reason it is worth
 two words is decision 3 of that record, which turns on what the two sides do
 differently: as documented they differ in two places, blanks and non-strings, and
 only one of those differences is intended. *Non-blank string-valued* makes it one

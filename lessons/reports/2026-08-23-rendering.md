@@ -61,7 +61,7 @@ Everything else in the lesson hangs off that, including the reason
 projection cannot.
 
 **The three grades of failure are the part I most want to survive a month.**
-Thirteen diagnostic codes, three behaviours — omit, degrade, report — and one
+Thirteen diagnostic codes, three behaviors — omit, degrade, report — and one
 question that assigns them: *would rendering this node hand a primitive
 something its own types say cannot occur?* That question is derivable rather
 than arbitrary, and the lesson says which earlier argument it is a restatement

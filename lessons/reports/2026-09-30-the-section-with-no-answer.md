@@ -218,7 +218,7 @@ lesson 29's exercise C is the one block that has signed up for it.
 *what is the last moment at which this is still visible, and is anything checking
 it there?* The two candidates lesson 31's report named are unchanged — a
 composition's stated `max` against the magnitudes inside it, which has now been
-carried for four runs, and the conformance probe's reach over a behaviour placed
+carried for four runs, and the conformance probe's reach over a behavior placed
 conditionally.
 
 **And one thing this run created rather than found.** `Explain it back` now stores

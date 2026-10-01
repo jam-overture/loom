@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react"
 
-import { colour, family, radius, size, space, weight, type RampStep } from "./tokens.js"
+import { color, family, radius, size, space, weight, type RampStep } from "./tokens.js"
 
 /**
  * The paint and the sizing shared by the library's two controls.
@@ -27,18 +27,18 @@ export type ControlScale = (typeof CONTROL_SCALES)[number]
 
 const PAINT: Readonly<Record<ControlVariant, CSSProperties>> = {
   primary: {
-    background: colour("accent"),
-    color: colour("fg-on-accent"),
-    border: `1px solid ${colour("accent")}`,
+    background: color("accent"),
+    color: color("fg-on-accent"),
+    border: `1px solid ${color("accent")}`,
   },
   secondary: {
     background: "transparent",
-    color: colour("fg-default"),
-    border: `1px solid ${colour("border-strong")}`,
+    color: color("fg-default"),
+    border: `1px solid ${color("border-strong")}`,
   },
   quiet: {
     background: "transparent",
-    color: colour("accent"),
+    color: color("accent"),
     border: "1px solid transparent",
   },
 }

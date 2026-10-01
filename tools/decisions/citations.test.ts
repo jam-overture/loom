@@ -156,10 +156,10 @@ describe("checkCitations", () => {
       `props are JSON (${linkTo("0009", "0009-a-primitive-declares-its-props-and-the-seam-enforces-them.md")}).`
     )
 
-    expect(checkCitations("src/render/behaviour-copy.ts", text, RECORDS)).toEqual([
+    expect(checkCitations("src/render/behavior-copy.ts", text, RECORDS)).toEqual([
       {
         code: "link-unknown-record",
-        source: "src/render/behaviour-copy.ts",
+        source: "src/render/behavior-copy.ts",
         number: 9,
         opens: "0009-a-primitive-declares-its-props-and-the-seam-enforces-them.md",
       },

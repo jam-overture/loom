@@ -14,7 +14,7 @@ import type { Reasoning } from "@/app/(demo)/_lib/reasoning"
 import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
 import type { ChangeRecord } from "@/app/(demo)/_lib/record"
 import { demoState, toneClasses, type WriteReport } from "@/app/(demo)/_lib/report"
-import { SPOT_COLOURS, type SpotTone } from "@/app/(demo)/_lib/spotlight"
+import { SPOT_COLORS, type SpotTone } from "@/app/(demo)/_lib/spotlight"
 import {
   appliedWords,
   askedLine,
@@ -143,7 +143,7 @@ export const RecordCard = ({
    */
   readonly offer?: UndoOffer
   /**
-   * The words the page is wearing for this change, and the colour it wears them
+   * The words the page is wearing for this change, and the color it wears them
    * in — present only while the page carries a mark for more than one change.
    *
    * It is the chip off the band, reproduced: same words, same fill, same ink. A
@@ -256,13 +256,13 @@ export const RecordCard = ({
 
           {/*
             * And, when the page is marked for more than one thing, this card's
-            * own mark — the chip off the band, in the band's chip's colours.
+            * own mark — the chip off the band, in the band's chip's colors.
             *
-            * Styled from `SPOT_COLOURS` rather than from a class, because the
+            * Styled from `SPOT_COLORS` rather than from a class, because the
             * one property that matters is that it is *identical* to the thing on
             * the page, and the thing on the page is drawn from that table into a
             * stylesheet the stage serves (`spotlightCss`). A Tailwind token here
-            * would be a second definition of one colour, free to drift the first
+            * would be a second definition of one color, free to drift the first
             * time either is retuned.
             *
             * Read aloud with a preposition, because "Waiting on you · Something
@@ -284,7 +284,7 @@ export const RecordCard = ({
           {mark && (
             <span
               className="relative rounded-sm px-1.5 py-0.5 text-2xs"
-              style={{ background: SPOT_COLOURS[mark.tone].fill, color: SPOT_COLOURS[mark.tone].ink }}
+              style={{ background: SPOT_COLORS[mark.tone].fill, color: SPOT_COLORS[mark.tone].ink }}
             >
               <span className="sr-only">marked on the page: </span>
               {mark.label}

@@ -138,7 +138,7 @@ export const UNDECLARED_DISCLOSING_TYPES: readonly string[] = ["loom.faq"]
  */
 const isDisclosure = (node: ElementNode): boolean =>
   UNDECLARED_DISCLOSING_TYPES.includes(node.type) ||
-  siteRegistry.behavioursFor(node.type).includes("disclose")
+  siteRegistry.behaviorsFor(node.type).includes("disclose")
 
 const bandIn = (page: LoomTree, bandId: string): ElementNode => {
   const found = page.root.children.find(

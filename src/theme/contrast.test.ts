@@ -19,7 +19,7 @@ describe("contrastRatio", () => {
     expect(contrastRatio("#7a7a7a", "#7a7a7a")).toBeCloseTo(1, 5)
   })
 
-  it("does not care which colour is named first", () => {
+  it("does not care which color is named first", () => {
     expect(contrastRatio("#1a1a1a", "#fafafa")).toBe(contrastRatio("#fafafa", "#1a1a1a"))
   })
 
@@ -29,13 +29,13 @@ describe("contrastRatio", () => {
   })
 
   /**
-   * The colour schema accepts more than hex, and every other form is answered
+   * The color schema accepts more than hex, and every other form is answered
    * with `undefined` rather than a guess — see the note in `contrast.ts`. A
    * check that cannot measure something says so; it does not pass it.
    */
-  it("declines to measure a colour it would have to guess at", () => {
-    for (const colour of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
-      expect(contrastRatio(colour, "#ffffff"), colour).toBeUndefined()
+  it("declines to measure a color it would have to guess at", () => {
+    for (const color of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
+      expect(contrastRatio(color, "#ffffff"), color).toBeUndefined()
     }
   })
 })
@@ -126,7 +126,7 @@ describe("auditPalette", () => {
    * paints the primary button, so putting the button's mint there is the obvious
    * move, and it takes every eyebrow, kicker and disclosure marker down with it.
    */
-  it("refuses a palette that puts a fill colour in the slot read as text", () => {
+  it("refuses a palette that puts a fill color in the slot read as text", () => {
     const audit = auditPalette(withSlots({ accent: "#72e3ad" }))
 
     /**
@@ -147,7 +147,7 @@ describe("auditPalette", () => {
    * one surface in the ramp whose name invites the wrong value: *overlay* reads
    * as a dark wash to anyone who has written a modal, and a host palette that
    * fills it that way under a light page renders every `loom.overlay` as dark
-   * ink on a dark veil. `paletteSchema` sees a valid colour; before this row
+   * ink on a dark veil. `paletteSchema` sees a valid color; before this row
    * existed `auditPalette` measured the slot in no pairing at all and answered
    * with an empty `failures`, which is what a clean palette answers with.
    */
@@ -184,7 +184,7 @@ describe("auditPalette", () => {
   /**
    * Every pairing names slots a primitive actually reads together. A pairing
    * invented for the table would be a bar chosen for its own sake, and the two
-   * ends of one are never the same slot — a colour on itself is 1:1 and would
+   * ends of one are never the same slot — a color on itself is 1:1 and would
    * fail every palette ever written.
    */
   it("pairs a foreground with a background and never with itself", () => {

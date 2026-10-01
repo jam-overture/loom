@@ -163,7 +163,7 @@ describe("the way back to the record", () => {
 
   /**
    * The tone is the surface's one teaching device — the dot here, the ring on
-   * the band and the badge on the card are one colour — and it also decides
+   * the band and the badge on the card are one color — and it also decides
    * which of the two things this bar has to say is true.
    */
   it("says what a held change is waiting for, and offers the answer rather than a receipt", () => {
@@ -179,7 +179,7 @@ describe("the way back to the record", () => {
     expect(bar().innerHTML).toContain("bg-awaiting-ink")
   })
 
-  it("says an applied change was written down, in the colour of the mark on the page", () => {
+  it("says an applied change was written down, in the color of the mark on the page", () => {
     const watcher = browser()
 
     render(<BackToTheRecord recordId={RECORD} tone="applied" />)

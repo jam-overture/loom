@@ -16,9 +16,9 @@ import { paletteSchema, type Palette } from "./theme.js"
  *
  * **The values below are the source of truth, not the tool.** They are literals
  * because a palette is reviewed by looking at it and diffed by reading it, and
- * because a palette generated at import time is a page whose colours depend on
+ * because a palette generated at import time is a page whose colors depend on
  * a function nobody read. The tool is how a *new* one is derived — a host with
- * a brand colour and no time to solve twelve contrast constraints by hand — and
+ * a brand color and no time to solve twelve contrast constraints by hand — and
  * it is documented for that, not run here.
  *
  * Two conventions worth knowing before editing one, both learned the expensive
@@ -26,8 +26,8 @@ import { paletteSchema, type Palette } from "./theme.js"
  *
  * - **`accent` is ink.** Eyebrows, kickers, the disclosure marker, the current
  *   nav item. It is dark on a light palette and light on a dark one, and it is
- *   the slot people are most tempted to fill with their brand colour. If the
- *   brand colour cannot carry text, it belongs in `border-accent` or
+ *   the slot people are most tempted to fill with their brand color. If the
+ *   brand color cannot carry text, it belongs in `border-accent` or
  *   `brand-secondary`, which is exactly what `minimal` does with its mint.
  * - **`accent-strong` and `brand-secondary` are areas.** `loom.hero`'s aurora
  *   is the one place in the library that paints a slot as a large field, and it

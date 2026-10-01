@@ -61,7 +61,7 @@ import { changelogBand } from "./compositions/changelog-band.js"
  * 13px transcript and the prose above it, which is the pairing that went wrong
  * in #329 and was caught by a photograph rather than by a test.
  *
- * Bad at: anything about `loom.code`'s copy control, which is a behaviour and
+ * Bad at: anything about `loom.code`'s copy control, which is a behavior and
  * not a state — a still shows the button and cannot show that it copies.
  *
  * ## Why the name carries a date

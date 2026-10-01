@@ -15,7 +15,7 @@ import { stakeFactor } from "./stakes.js"
  *
  * A pure function from an assessment and a policy to a disposition. It performs
  * no IO, reads no clock, touches no tree, and holds no state — the same inputs
- * always produce the same decision, which is what makes the runtime's behaviour
+ * always produce the same decision, which is what makes the runtime's behavior
  * auditable after the fact and testable before it.
  *
  * The decision is a short ordered list of rules; the first one that fires wins.

@@ -142,7 +142,7 @@ a self-graded number — no discount, no per-interpreter
 multiplier, no second model grading the first — and it is blunt about why:
 
 > Inventing a correction before there is outcome data to fit it against would be
-> guessing dressed as rigour, and it would make the Gate's behaviour depend on a
+> guessing dressed as rigour, and it would make the Gate's behavior depend on a
 > hidden model rather than on its stated rules.
 
 Then it does the thing worth copying. Having decided not to solve the problem,
@@ -424,7 +424,7 @@ entire job is to ask.
 
 And a third, about ownership. 0031:
 
-> Loom is a framework, and the interesting adaptive behaviour belongs to the
+> Loom is a framework, and the interesting adaptive behavior belongs to the
 > applications built on it, tuned to their own tolerance for a wrong guess. What
 > a framework owes them is not a built-in learner but a record complete enough to
 > learn from, reachable from outside the runtime.
@@ -1008,7 +1008,7 @@ the last three are the ones worth arguing with.
 
 **Discount confidence by a per-interpreter factor.** The obvious fix in July, and
 rejected because there was no data to fit the factor against. The number would
-have been invented, and the Gate's behaviour would have come to depend on a table
+have been invented, and the Gate's behavior would have come to depend on a table
 nobody could justify — which is precisely the thing lesson 09 built a rule ladder
 to avoid.
 

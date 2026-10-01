@@ -17,7 +17,7 @@ import type { ChangeRecord } from "./record"
  * with the first.
  *
  * **Every step of it is correct**, which is why the fix is words rather than
- * behaviour. The two low-risk presets land unattended, which moves the tree's
+ * behavior. The two low-risk presets land unattended, which moves the tree's
  * revision; a hold is judged against a base revision, and
  * `HeldProposal.baseRevision` going stale is the runtime's own way of saying
  * *Loom will not apply a decision to a page it has not seen*; and `moved.ts`

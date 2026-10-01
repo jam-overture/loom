@@ -109,7 +109,7 @@ describe("TreeOutline", () => {
   })
 
   /**
-   * The one behaviour a toggling selection needs no instructions for, and the
+   * The one behavior a toggling selection needs no instructions for, and the
    * reason there is no modifier key anywhere on this screen.
    */
   it("lets a part go when it is picked a second time", () => {

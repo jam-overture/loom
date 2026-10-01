@@ -145,7 +145,7 @@ describe("probePlacement", () => {
     expect(probePlacement(placingBothRegions, ["start", "end"])).toEqual({
       outcome: "probed",
       unplacedSlots: [],
-      unplacedBehaviours: [],
+      unplacedBehaviors: [],
       rendersChildren: true,
       probed: [unasked({})],
       threw: [],
@@ -177,7 +177,7 @@ describe("probePlacement", () => {
     expect(probePlacement(decorating, [])).toEqual({
       outcome: "probed",
       unplacedSlots: [],
-      unplacedBehaviours: [],
+      unplacedBehaviors: [],
       rendersChildren: true,
       probed: [unasked({})],
       threw: [],
@@ -231,7 +231,7 @@ describe("a probe of a primitive that reads its own declared text", () => {
     expect(probePlacement(entry.component, [], entry.text)).toEqual({
       outcome: "probed",
       unplacedSlots: [],
-      unplacedBehaviours: [],
+      unplacedBehaviors: [],
       rendersChildren: true,
       probed: [unasked({})],
       threw: [],

@@ -11,14 +11,14 @@ const every = () =>
   legendFor(MARK_ORDER.map((kind, index) => ({ nodeId: `n_${index}` as NodeId, kind })))
 
 describe("MarkLegendView", () => {
-  it("says what each colour means, in a person's words", () => {
+  it("says what each color means, in a person's words", () => {
     render(<MarkLegendView legend={every()} notOutlined={null} />)
 
     expect(screen.getByText(/Taken away/)).toBeTruthy()
     expect(screen.getByText("On your page now, and not on it afterwards.")).toBeTruthy()
   })
 
-  it("says how many parts wear each colour, spelling out one", () => {
+  it("says how many parts wear each color, spelling out one", () => {
     render(
       <MarkLegendView
         notOutlined={null}
@@ -36,7 +36,7 @@ describe("MarkLegendView", () => {
 
   /**
    * The swatch is drawn by the rule it is a key to, not by a border picked here.
-   * A hand-picked colour would go on saying green after the declaration had been
+   * A hand-picked color would go on saying green after the declaration had been
    * changed — a legend contradicting a picture on the same screen, which is the
    * one thing a key must not be able to do.
    */
@@ -49,7 +49,7 @@ describe("MarkLegendView", () => {
     expect(swatches).toEqual([...MARK_ORDER])
   })
 
-  it("shows nothing about a colour a change does not use", () => {
+  it("shows nothing about a color a change does not use", () => {
     render(
       <MarkLegendView
         legend={legendFor([{ nodeId: "n_1" as NodeId, kind: "going" }])}
@@ -63,7 +63,7 @@ describe("MarkLegendView", () => {
 
   /**
    * The governing principle, on the one part of this screen whose whole job is to
-   * explain a convention. The record — which of the four operations each colour
+   * explain a convention. The record — which of the four operations each color
    * stands for — is one click down and is *meant* to use the runtime's words, so
    * the sweep is over what a reader meets before they have asked for any.
    */
@@ -82,7 +82,7 @@ describe("MarkLegendView", () => {
    * the key and gone looking has already spent the attention it was meant to
    * save.
    */
-  it("says what has no ring to look for, beside the colours that do", () => {
+  it("says what has no ring to look for, beside the colors that do", () => {
     const { container } = render(
       <MarkLegendView
         legend={legendFor([{ nodeId: "n_1" as NodeId, kind: "going" }])}
@@ -101,7 +101,7 @@ describe("MarkLegendView", () => {
     expect(container.textContent).not.toContain("no ring")
   })
 
-  it("keeps the operation behind each colour, one click down", () => {
+  it("keeps the operation behind each color, one click down", () => {
     const { container } = render(<MarkLegendView legend={every()} notOutlined={null} />)
     const details = container.querySelector("details")
 

@@ -1,7 +1,7 @@
 # 21 — Appearance: the look a tree names and cannot check
 
-**After this lesson you will be able to** say why letting a model write a colour
-fails for a reason that has nothing to do with colour, and give that reason as a
+**After this lesson you will be able to** say why letting a model write a color
+fails for a reason that has nothing to do with color, and give that reason as a
 property of the *value space* rather than as a ranking of dangers; state what a
 tree carries when it wears a theme and why it is exactly three ids; explain why
 there is no default theme and connect that refusal to what lesson 18 said a page
@@ -97,8 +97,8 @@ principles.
    schema, the theme registry, the Gate, the renderer, or something else. Write
    your answer and **rate your confidence 1–5**.
 
-3. Two proposals arrive against the same page. One swaps the entire colour
-   scheme — every background, every text colour, the accent, the borders. The
+3. Two proposals arrive against the same page. One swaps the entire color
+   scheme — every background, every text color, the accent, the borders. The
    other rewrites the page's title from "Home" to "Home page". **Which one does
    the Gate route more carefully?** Give the stakes level you expect for each
    and the disposition each gets under the default policy.
@@ -106,7 +106,7 @@ principles.
 4. A contrast ratio tells you whether text is legible against the ground behind
    it. **Name a different property a palette owes its reader that a contrast
    ratio cannot detect at all** — not "detects poorly", cannot detect. Then, to
-   prove it, describe a pair of colours where the ratio gives the most reassuring
+   prove it, describe a pair of colors where the ratio gives the most reassuring
    possible answer and the reader's actual experience is the opposite. If you
    can name the property but not construct the pair, write the property down
    anyway and say what you would need to know to build the example.
@@ -122,7 +122,7 @@ answers is most of this lesson.
 
 ### The obvious answer, and the four ways it fails
 
-Let the model write colours. It is what every code-generating assistant does,
+Let the model write colors. It is what every code-generating assistant does,
 and it is what a design tool exports:
 
 ```json
@@ -135,16 +135,16 @@ Start with why this is not merely inelegant.
 bound one.** Everything from lesson 01 onward is the same trade: AI produces a
 `TreeDelta`, and a `TreeDelta` is short, ordered, discrete, and drawn from a
 closed vocabulary — four operations, registered primitive types, declared props.
-A colour written as a string has sixteen million values and no wrong ones. There
+A color written as a string has sixteen million values and no wrong ones. There
 is nothing for a reviewer to disagree with, nothing for a policy to be about, and
 no sense in which one proposal's `#8b96a3` is more or less correct than another's
 `#8b96a4`. The Gate can weigh a change to a *protected prop key*; it cannot weigh
-a change to a colour, because "which colour" is not the kind of question it is
+a change to a color, because "which color" is not the kind of question it is
 built to have an opinion about.
 
 **A re-theme becomes sixty operations against sixty nodes.** This is the half of
 Predict 1 that separates the answers. "Make it warmer" is one intent and one
-decision, and if colour lives on nodes then it arrives as a delta the length of
+decision, and if color lives on nodes then it arrives as a delta the length of
 the page. Everything the earlier lessons built then degrades at once: the
 analysis in lesson 07 reports a broad change touching every node in the tree; the
 stakes assessment in lesson 08 sees the breadth factor fire; the Gate in lesson
@@ -165,9 +165,9 @@ rather than a setting.
 
 ### The second obvious answer, which is worse in a more interesting way
 
-So put the colours in the deployment. The host configures a theme, the renderer
+So put the colors in the deployment. The host configures a theme, the renderer
 mounts it, and the tree says nothing about appearance at all. Clean separation;
-the model never touches a colour.
+the model never touches a color.
 
 This is the one to think about, because it is what most systems do and because
 the reason it is rejected is a sentence you already met in lesson 18.
@@ -185,10 +185,10 @@ need it. The comment in `render/theme.ts` says so directly:
 
 Read the distinction carefully, because it is finer than "the deployment owns
 nothing". The deployment absolutely owns what the names mean — it registers the
-palettes, and the same tree renders in different colours on two deployments. What
+palettes, and the same tree renders in different colors on two deployments. What
 it may not own is **whether the tree said anything**. A tree that names no theme
 does not get one. It renders unstyled, which looks broken, and looking broken is
-the intended behaviour: the alternative is a page that renders differently on two
+the intended behavior: the alternative is a page that renders differently on two
 deployments while the tree that was reviewed is identical and silent about it.
 
 The difference between the seams, in one line: **a query's answer cannot be in
@@ -206,11 +206,11 @@ that matters to the person reading the page:
 
 **Can they read it?**
 
-Contrast is not a property of a colour. It is a property of a *pair* — an ink and
+Contrast is not a property of a color. It is a property of a *pair* — an ink and
 the ground behind it. So ask who holds the pair:
 
-- **The tree** holds a palette id and a structure. It holds no colours at all.
-- **The palette** holds seventeen colours and has no idea which of them are read
+- **The tree** holds a palette id and a structure. It holds no colors at all.
+- **The palette** holds seventeen colors and has no idea which of them are read
   as text on which others. It is a bag of slots; nothing in it says `fg-subtle`
   is ever printed on `bg-surface-muted`.
 - **The primitive** holds, at most, one end. `loom.callout` paints a muted well
@@ -231,7 +231,7 @@ ask yet.
 
 ### The tree carries three ids
 
-A theme is three registered documents, addressed by id: a **palette** (colour), a
+A theme is three registered documents, addressed by id: a **palette** (color), a
 **font pack** (type), and a **style preset** (radii, spacing, motion, density).
 Three rather than one because they vary independently in practice — a dark mode
 swaps the palette and nothing else; a rebrand swaps the type ramp and keeps the
@@ -362,7 +362,7 @@ This is lesson 12's rule with a new subject: a projection contains what the mode
 needs to make its decision and nothing else. The decision is *which registered
 look best answers "warmer"*, and that decision is made from the description. The
 hex values would be sixteen more tokens per palette and would introduce exactly
-one new capability — the ability to reason about a colour it may not write.
+one new capability — the ability to reason about a color it may not write.
 
 The prompt block adds one instruction that is pure operations, and it is there
 because of a schema rule rather than a style preference:
@@ -406,7 +406,7 @@ strictly larger than the set anybody was maintaining by hand.
 text ramp is *meant* to work on.** The probe can see that `loom.action` puts
 children on `accent` and that `loom.page` puts them on `bg-canvas`. Nothing in
 either component says the first is a filled control that has already answered
-what colour its text is, while the second is a page surface where a child brings
+what color its text is, while the second is a page surface where a child brings
 whichever ink it likes. **Both set an ink beside a ground and only one of them
 means it.** So five grounds are declared — `bg-canvas`, `bg-surface`,
 `bg-surface-muted`, `accent-subtle`, `bg-overlay` — and a ground on that list is
@@ -415,7 +415,7 @@ one where a palette owes the reader every ink in the ramp. There were four until
 by a stacked sibling and found that `loom.overlay` had been writing on one all
 along.
 
-Get the shape of that argument, because it generalises past colour. A probe can
+Get the shape of that argument, because it generalises past color. A probe can
 observe what a component *does*. It cannot observe what the component *means* by
 doing it, and a check whose correctness depends on meaning needs the meaning
 declared next to it, with a test that the declaration still matches what the
@@ -428,7 +428,7 @@ Now the part that surprises people who expected a guarantee.
 `auditPalette` is a function a host runs against its own palettes. It is not a
 refusal at registration. `createThemeRegistry({ palettes })` *replaces* the
 starter list, and a host supplying its own gets `paletteSchema` — which checks
-that every slot holds a colour and has no idea which slots are read as text on
+that every slot holds a color and has no idea which slots are read as text on
 which — and nothing else. **A host palette with a 2:1 subtle registers, resolves,
 re-themes and renders.** Exercise E is that sentence, executed.
 
@@ -444,7 +444,7 @@ measures and the Gate judges (lesson 07); `auditRegistry` reports on a primitive
 and refuses nothing (lesson 15); the confidence calibrator measures and is not
 allowed to act on what it finds (lesson 17). Each time, the argument was that
 whoever *imposes* has to be the party who owns the consequences. A library that
-refused a host's brand colours at startup would be making an accessibility policy
+refused a host's brand colors at startup would be making an accessibility policy
 decision on behalf of an organisation whose legal obligations it does not know.
 
 What keeps the reporting honest is the split, and one rule about it: **nothing may
@@ -462,7 +462,7 @@ failures are carried in the open.
 
 ### A check that cannot answer says so
 
-`colourSchema` accepts more than hex: `rgb()`, `hsl()`, a named colour,
+`colorSchema` accepts more than hex: `rgb()`, `hsl()`, a named color,
 eight-digit hex with an alpha. The contrast module measures three- and six-digit
 hex and answers `undefined` for everything else, and an unmeasurable pairing goes
 into its own list — neither a pass nor a failure.
@@ -470,7 +470,7 @@ into its own list — neither a pass nor a failure.
 The reasons for declining are worth reading as three different reasons rather
 than one:
 
-- a **named colour** needs the CSS colour table, which is 148 entries of
+- a **named color** needs the CSS color table, which is 148 entries of
   vocabulary this module would then own;
 - **`hsl()` and modern `rgb()`** are a parser, and *a parser that is subtly wrong
   reports a passing ratio for a failing pair*, which is worse than reporting
@@ -478,7 +478,7 @@ than one:
 - an **alpha** composites against whatever is behind it, so its contrast is not a
   property of the two slots at all.
 
-Only the third is a fact about colour. The first is about scope and the second is
+Only the third is a fact about color. The first is about scope and the second is
 about which direction an error runs in — and the second is the one to carry
 forward, because "it might be wrong" is a bad reason to omit a check and "it
 would be wrong in the direction of reassurance" is a very good one.
@@ -505,13 +505,13 @@ The general form is the sentence this lesson exists to leave you with:
 `weight("heading")` promises that the value came from the font pack's heading
 weight. It promises nothing whatsoever about that value being different from the
 body weight — and "this word is stressed" is a claim about difference. The same
-hole exists for colour: a link inside a paragraph, a quiet note under a less
+hole exists for color: a link inside a paragraph, a quiet note under a less
 quiet one, a card's fill against the page behind it. Both halves are the
 palette's promise and only one of them was being checked.
 
-So there is a second audit, and it is not a second contrast bar. Two colours can
+So there is a second audit, and it is not a second contrast bar. Two colors can
 differ in hue while matching exactly in luminance — a contrast ratio of 1.00:1
-between two colours a reader tells apart instantly. Exercise G runs that pair.
+between two colors a reader tells apart instantly. Exercise G runs that pair.
 Asking WCAG's question about *difference* would report as identical a pair anybody
 can distinguish, and would miss a pair that differs in luminance alone by less
 than an eye can resolve.
@@ -529,21 +529,21 @@ Three details of how it is built are each a small argument:
   page of rotation terms nobody reviewing a palette would verify — and the error
   runs in the safe direction for the one thing asserted: *a pair CIE76 calls
   collapsed is collapsed under any metric.*
-- **`colour-only` versus `also-marked`**, as a discriminated union rather than an
+- **`color-only` versus `also-marked`**, as a discriminated union rather than an
   optional field, so a pair cannot be declared as carried by something else
   without naming what that something is. A claim that a border does the work is
   only worth making if the border can be measured too — and it is, against
-  whichever of the two colours it is *nearer* to, because a rule that disappears
+  whichever of the two colors it is *nearer* to, because a rule that disappears
   into one side of the boundary it draws has stopped drawing it.
 - **The starter palettes are not asserted clean.** The test pins the collapses
   *exactly* — nine of them, by name, including `minimal`, which is the palette all
-  four Loom surfaces wear. `minimal`'s links are the paragraph's own colour at
+  four Loom surfaces wear. `minimal`'s links are the paragraph's own color at
   rest with no underline, and fixing that is another lane's file. Pinning rather
   than asserting empty is the honest move when you have found something you are
   not the one to fix: what the assertion buys is that a **tenth cannot join them
   quietly.**
 
-### Where the colours came from in the first place
+### Where the colors came from in the first place
 
 One last piece, because it explains a constraint the rest of the module works
 under. The palettes are literals. They were derived — there is a solver that
@@ -551,7 +551,7 @@ takes three hues and a mode and searches for lightnesses that clear the bar with
 a margin — but the derivation is a **build-time tool**: *derive, look, paste.*
 
 > a palette is reviewed by seeing it and diffed by reading it, and a page whose
-> colours are computed at import time is a page whose colours nobody approved.
+> colors are computed at import time is a page whose colors nobody approved.
 
 That is 0077, and it is the same instinct as the rest of this course pointed at a
 build step: a value nobody looked at is a value nobody approved, and a diff you
@@ -612,7 +612,7 @@ import { testPrimitiveResolver } from "./testing/primitives.js"
 import {
   auditPalette,
   auditSeparation,
-  colourDifference,
+  colorDifference,
   contrastRatio,
   createThemeRegistry,
   describePaletteAudit,
@@ -662,7 +662,7 @@ const render = (tree: LoomTree, registry = themes) =>
 const houseStyle: Palette = paletteSchema.parse({
   id: "house",
   name: "House",
-  description: "Our brand colours: white paper, our blue, grey secondary text.",
+  description: "Our brand colors: white paper, our blue, grey secondary text.",
   slots: {
     "bg-canvas": "#ffffff",
     "bg-surface": "#ffffff",
@@ -745,12 +745,12 @@ The second refusal is the operational fact from the prompt block, executed: a
 selection with two of three keys does not resolve. Not "resolves partially", not
 "keeps the old preset" — a refusal.
 
-The fourth is the one to notice. `#f5f2ec` is a perfectly good colour, and it is
-refused as a *malformed selection* rather than as a bad colour, because
+The fourth is the one to notice. `#f5f2ec` is a perfectly good color, and it is
+refused as a *malformed selection* rather than as a bad color, because
 `themeIdSchema` accepts lower-case dash-separated identifiers and a hex string is
 not one. **The value space closed one layer earlier than you might look for it:**
-there is no point at which a colour is checked and rejected, because there is no
-point at which a colour is expected.
+there is no point at which a color is checked and rejected, because there is no
+point at which a color is expected.
 
 ### Exercise B — one id, fifty-two variables, one attribute
 
@@ -805,7 +805,7 @@ The output:
 ```
 
 Twenty-three of fifty-two, which is the orthogonality claim in numbers: the
-palette id moves every colour and no type or spacing value, so `--loom-scale-5` is
+palette id moves every color and no type or spacing value, so `--loom-scale-5` is
 24px in both. Twenty-three rather than seventeen because a palette's variables are
 not only its seventeen slots — the runtime also measures a chroma for five of them
 and derives a scrim pair from its body copy
@@ -815,7 +815,7 @@ same under these two palettes, so six of the seven change here.) Swapping *one* 
 the three ids changes exactly the variables that id owns.
 
 The last two lines are the load-bearing ones. Two pages in wildly different
-colour schemes are **the same document with one attribute different**, and
+color schemes are **the same document with one attribute different**, and
 `--loom-accent` appears once in the whole page. That is what "re-theming touches
 no node and no primitive" means concretely — not that it is cheap, but that there
 is precisely one place in the output where the change lives.
@@ -871,7 +871,7 @@ own repair was established.
 
 Row two is worth a second look. The card's theme is not merged, not inherited,
 not partially applied: it is dropped with a report. One tree wears one theme, and
-the reason is the cascade — nested themes would mean a primitive's colour
+the reason is the cascade — nested themes would mean a primitive's color
 depended on where it sat, which is precisely the property `var(--loom-accent)`
 was chosen to avoid.
 
@@ -922,7 +922,7 @@ describe("D", () => {
     }
 
     const rootId = tree.root.id
-    const retheme = weigh("every colour", [
+    const retheme = weigh("every color", [
       { op: "configure", nodeId: rootId, set: { [THEME_PROP_KEY]: bold }, unset: [] },
     ])
     weigh("the title", [{ op: "configure", nodeId: rootId, set: { title: "Home page" }, unset: [] }])
@@ -938,7 +938,7 @@ it.
 The output:
 
 ```
-  every colour   touches=["n_3"] depth=0 stakes=low factors=0 reversible=true gate=accepted
+  every color   touches=["n_3"] depth=0 stakes=low factors=0 reversible=true gate=accepted
   the title      touches=["n_3"] depth=0 stakes=low factors=0 reversible=true gate=accepted
   the undo: [{"op":"configure","nodeId":"n_3","set":{"loom:theme":{"palette":"editorial","fontPack":"editorial-serif","stylePreset":"comfortable"}},"unset":[]}]
 ```
@@ -1013,9 +1013,9 @@ The program prints the first seven lines of the report; the eighth failure is
 
 **Eight painted failures and an empty diagnostics array.** Every layer this
 course has taught you to expect a refusal from lets it through, and each one for
-a defensible reason: the schema checked that every slot holds a colour, which it
+a defensible reason: the schema checked that every slot holds a color, which it
 does; the registry checked that the ids resolve, which they do; the renderer
-checked nothing about colour because a colour is not a thing it has an opinion
+checked nothing about color because a color is not a thing it has an opinion
 about. There is white label text on a light blue button at 2.54:1 and nobody
 objects.
 
@@ -1104,7 +1104,7 @@ takes five pairings out of the measured set, and **two of them were painted
 failures**: `house` had eight painted failures and `house-hsl` has six, with five
 pairings moved into `unmeasured`. Nothing got better. If unmeasured had been folded into
 "pass", a host could have made two real failures disappear by rewriting one
-colour in a different notation — which is exactly why it is a third answer.
+color in a different notation — which is exactly why it is a third answer.
 
 ### Exercise G — the question a contrast ratio cannot ask
 
@@ -1114,7 +1114,7 @@ describe("G", () => {
     const ink = "#b3261e"
     const other = "#1d6a4a"
     console.log(`  contrast ${ink} / ${other}: ${contrastRatio(ink, other)?.toFixed(2)}:1`)
-    console.log(`  ΔE       ${ink} / ${other}: ${colourDifference(ink, other)?.toFixed(2)}`)
+    console.log(`  ΔE       ${ink} / ${other}: ${colorDifference(ink, other)?.toFixed(2)}`)
     console.log(`  the floor: ${JUST_NOTICEABLE_DIFFERENCE}`)
 
     for (const palette of [editorialPalette, houseStyle]) {
@@ -1146,7 +1146,7 @@ house: bg-canvas and bg-surface (loom.section tone surface, which paints a band 
 ```
 
 **1.00:1 between a red and a green.** In an accessibility report that number
-means "these two colours are the same colour". A reader looking at them would
+means "these two colors are the same color". A reader looking at them would
 disagree instantly, and the ΔE of 91 — against a floor of 2.3 — is the
 measurement that agrees with the reader. This is the concrete answer to Predict
 4, and it is the whole argument for why separation is a different instrument and
@@ -1171,7 +1171,7 @@ like when a promise had two halves and only one of them was being checked.
 
 Six, and the first is the one you probably wrote for Predict 1.
 
-**Colours on nodes.** The default in every other system, and it fails four ways
+**Colors on nodes.** The default in every other system, and it fails four ways
 at once, of which only one is aesthetic. The one that would have hurt most is the
 second: a re-theme arriving as sixty operations makes every piece of machinery in
 Parts II and III report a large, broad, structural-looking change, correctly, for
@@ -1191,7 +1191,7 @@ start doing to its hosts. The cheap half, run in the host's own tests, is the
 whole of the answer on purpose.
 
 **A contrast refinement on `paletteSchema`.** Cheaper still, and it cannot be
-written. The schema sees seventeen colours and no information about which are read
+written. The schema sees seventeen colors and no information about which are read
 on which; the pairings come from the *component library*, which the schema knows
 nothing about. This is the interesting failure of the five, because it is not a
 policy disagreement — it is a check that cannot be expressed where it would be
@@ -1204,10 +1204,10 @@ a deployment that wants it — `loom:theme` in the policy's protected prop keys,
 it becomes an ordinary stake factor — which is the difference between a knob a
 host turns and an opinion a library ships.
 
-**Deriving palettes at request time from a brand colour.** The solver exists and
+**Deriving palettes at request time from a brand color.** The solver exists and
 would run in a render. Rejected by 0077: a palette is reviewed by seeing it and
-diffed by reading it, and a page whose colours are computed at import time is a
-page whose colours nobody approved. Derive, look, paste — the same instinct as
+diffed by reading it, and a page whose colors are computed at import time is a
+page whose colors nobody approved. Derive, look, paste — the same instinct as
 the rest of this course, pointed at a build step.
 
 ---
@@ -1246,7 +1246,7 @@ about a *value* being unsafe.
 Seven questions. For each: **rate your confidence 1–5 before you write your
 answer, then check.**
 
-1. Give the reason a model may not write a colour, phrased as a property of the
+1. Give the reason a model may not write a color, phrased as a property of the
    value space rather than as a danger. Then apply the same reasoning to a case
    this lesson did not cover: a model asked to set the number of columns in a
    grid. Same answer or different, and why?
@@ -1270,7 +1270,7 @@ answer, then check.**
    failures or passes. Give the reason it is a third answer, then say what a host
    that wants the guarantee has to assert, and then name the other place in this
    course where a check answers "I could not tell you" as a first-class result.
-7. Two colours at 1.00:1 that a reader tells apart instantly. Explain how both
+7. Two colors at 1.00:1 that a reader tells apart instantly. Explain how both
    facts are true at once, say what that proves about using a contrast ratio to
    check whether a link is visible in a paragraph, and give the reason the ΔE
    threshold was borrowed from published work rather than chosen.
@@ -1287,7 +1287,7 @@ Write for two minutes, then move on.
 
 - Predict 1 is the one to look at first, and specifically the second half of it.
   Most readers get the registry right and the delta wrong. If you wrote a delta
-  with one operation per node, write down what made "colour lives on nodes" feel
+  with one operation per node, write down what made "color lives on nodes" feel
   like the default — you almost certainly learned it from a tool where it was
   true, and it is worth knowing which of your instincts came from CSS rather than
   from anything about this system.

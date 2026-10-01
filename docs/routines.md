@@ -481,13 +481,36 @@ Two separate mechanisms gate the network, and a domain usually needs both:
   which is in-process and does **not** consult the sandbox allowlist. A headless
   run has nobody to approve a prompt, so an unlisted domain simply fails.
 
-Currently allowed: `21st.dev` and `nextjs.org` (the visual and structural
-references the primitives, marketing and docs briefs tell you to consult),
-GitHub, and the npm registry.
+Currently allowed: `nextjs.org`, GitHub, and the npm registry.
 
-**Needing a domain that is not listed is a finding, not a fix.** File it in
-`FINDINGS.md` and say what you were trying to reach. Widening egress is the
-security-relevant half of the sandbox — it is what stops a compromised command
+> **`21st.dev` was removed on 1 October 2026, at the maintainer's instruction.**
+> It had been listed since 19 August as the visual reference the primitives,
+> marketing and demo briefs told you to consult, and **every attempt to reach it
+> failed** — twenty-three filings from the demo lane alone, the last on 21
+> September. The cause was established on 24 September and is not in this
+> repository: the domain was present in *both* committed lists and the
+> environment's egress proxy refused it anyway. Removing it from the lists does
+> not change what the proxy does. It changes what a run is told it may do, and
+> that is what was generating the filings.
+>
+> **So do not fetch `21st.dev`, and do not re-file it.** The visual standard is
+> the library itself: `loom.hero`, `loom.feature-grid`, the 44 starter
+> compositions, and the Hermes content models on disk. Where a brief still names
+> `21st.dev`, this file is the later instruction and wins — say so in the report
+> rather than reaching for the network. The block counts recorded in
+> `docs/primitive-gap-inventory.md` were taken while the site was readable and
+> stay as a historical measurement; they are not a reason to go back.
+
+**A listed domain can still be refused by the environment's egress proxy**,
+which sits upstream of anything this repository commits. When that happens there
+is nothing in the repository to fix, and the finding belongs to the maintainer,
+not to a lane.
+
+**Needing a domain that is not listed is a finding, not a fix** — but only
+*once*. Re-confirming a block already in `FINDINGS.md` is not a new finding and
+does not earn a new entry; name the existing one and move on.
+
+Widening egress is the security-relevant half of the sandbox — it is what stops a compromised command
 sending `ANTHROPIC_API_KEY` or the database credentials somewhere — so the list
 stays narrow and deliberate.
 

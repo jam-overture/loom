@@ -437,7 +437,7 @@ is still going to settle, and an unhandled rejection arriving late would take a
 Node server down for a call the runtime had already reported on.
 
 **`src/render/data.test.ts`** — read this one as prose. It is the seam's
-behaviour written as sentences, and `servicesPrimitive` at the top is the
+behavior written as sentences, and `servicesPrimitive` at the top is the
 shortest correct example of a primitive that distinguishes "none" from "could
 not reach".
 

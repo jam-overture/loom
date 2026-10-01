@@ -156,7 +156,7 @@ to be had.
 
 **Part V's eleventh seam, and the question lesson 27 left for it** is now
 unblocked, and it is the better of the two candidates: *a decision record argues
-for a behaviour in the present tense, in an `Accepted` record, and a schema three
+for a behavior in the present tense, in an `Accepted` record, and a schema three
 files away quietly disagrees with it — and nothing in this repository compares a
 record's argument to the code that is supposed to implement it.* That is where
 the next lesson should start.

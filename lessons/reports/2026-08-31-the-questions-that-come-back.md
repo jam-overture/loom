@@ -51,7 +51,7 @@ done and does not come round again; the question becomes a line of text in a
 summary, and looking at a line of text is not retrieving it.
 
 That is the largest hole in this surface and it is worse than an unbuilt feature,
-because the course was **asserting** the behaviour. Of the seven principles in
+because the course was **asserting** the behavior. Of the seven principles in
 `lessons/README.md`, this is the one *Make It Stick* is least equivocal about:
 successive relearning — the same item retrieved again after a gap, more than
 once — is most of the difference between knowing something in the session and

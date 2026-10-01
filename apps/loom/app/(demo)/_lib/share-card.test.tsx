@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { describe, expect, it } from "vitest"
 
 import { CHROME } from "./chrome"
-import { pageColour, pageGround } from "./ground"
+import { pageColor, pageGround } from "./ground"
 import { DEMO_STARTING_THEME } from "./page-tree"
 import { demoThemes } from "./registry"
 import { demoShareCard, SHARE_IMAGE_SIZE } from "./share"
@@ -90,7 +90,7 @@ const grounds = (node: unknown): readonly string[] => {
 
 const luminance = (hex: string): number => {
   const digits = /^#([0-9a-f]{6})$/i.exec(hex.trim())?.[1]
-  if (digits === undefined) throw new Error(`${hex} is not a six-digit hex colour`)
+  if (digits === undefined) throw new Error(`${hex} is not a six-digit hex color`)
 
   const channels = [0, 2, 4].map((offset) => {
     const part = Number.parseInt(digits.slice(offset, offset + 2), 16) / 255
@@ -142,8 +142,8 @@ describe("the card a shared link unfurls as", () => {
    */
   it("keeps the split the surface is built on — a light stage, a dark rail", () => {
     const drawn = grounds(image)
-    const light = drawn.filter((colour) => luminance(colour) > 0.5)
-    const dark = drawn.filter((colour) => luminance(colour) < 0.05)
+    const light = drawn.filter((color) => luminance(color) > 0.5)
+    const dark = drawn.filter((color) => luminance(color) < 0.05)
 
     expect(light.length).toBeGreaterThan(0)
     expect(dark).toContain(CHROME.page)
@@ -166,7 +166,7 @@ describe("the card a shared link unfurls as", () => {
 
   /**
    * Every pair, at 4.5:1. `CARD_PAIRINGS` is the list the element draws from, so
-   * a colour changed in one place and not the other is caught here rather than
+   * a color changed in one place and not the other is caught here rather than
    * in somebody's feed.
    */
   it.each(CARD_PAIRINGS)("keeps $what readable", ({ foreground, background }) => {
@@ -199,7 +199,7 @@ describe("the card a shared link unfurls as", () => {
     )
 
     expect(stageGrounds).toEqual(new Set([ground?.backgroundColor]))
-    expect(pageColour("bg-canvas")).toBe(ground?.backgroundColor)
+    expect(pageColor("bg-canvas")).toBe(ground?.backgroundColor)
   })
 
   /**

@@ -807,7 +807,7 @@ registry that was populated asynchronously before the request, which this
 interface already permits.
 
 **Refusing at the props schema, so the node is omitted entirely.** This is
-0053's behaviour, and it is wrong here — which is worth more than the other four
+0053's behavior, and it is wrong here — which is worth more than the other four
 put together, because it is the same mechanism giving a different answer in a
 different place. An unregistered origin is a **deployment configuration fact**,
 not a malformed tree. The same tree is correct on the deployment that registered

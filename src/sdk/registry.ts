@@ -14,11 +14,11 @@ import {
 } from "../primitive-type.js"
 import { err, ok, type Result } from "../result.js"
 import {
-  BEHAVIOURS,
-  isBehaviourName,
-  type BehaviourName,
-  type BehaviourResolver,
-} from "../render/behaviour.js"
+  BEHAVIORS,
+  isBehaviorName,
+  type BehaviorName,
+  type BehaviorResolver,
+} from "../render/behavior.js"
 import type { FrameResolver } from "../render/frame.js"
 import type { BindingDeclaration, BindingReader } from "../render/reads.js"
 import type { UnshownDeclaration, UnshownReader } from "../render/unshown.js"
@@ -71,7 +71,7 @@ export type RegisteredPrimitive = {
   /** The props it puts in a frame (0095). Empty for all but one primitive. */
   readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
-  readonly behaviours: readonly BehaviourName[]
+  readonly behaviors: readonly BehaviorName[]
   /** What part it plays (0114). `undefined` for most, which play none. */
   readonly role: PrimitiveRole | undefined
   /**
@@ -98,7 +98,7 @@ export type RegisteredPrimitive = {
   readonly validate: (props: JsonObject) => PropsVerdict
 }
 
-const NO_BEHAVIOUR_NAMES: readonly BehaviourName[] = Object.freeze([])
+const NO_BEHAVIOR_NAMES: readonly BehaviorName[] = Object.freeze([])
 
 const NO_FRAME_PROPS: readonly string[] = Object.freeze([])
 
@@ -112,22 +112,22 @@ export type RegistryError =
   | { readonly code: "undeclared-interactive-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "undeclared-frame-prop"; readonly type: string; readonly prop: string }
   | { readonly code: "undeclared-copy-prop"; readonly type: string; readonly prop: string }
-  | { readonly code: "unknown-behaviour"; readonly type: string; readonly behaviour: string }
+  | { readonly code: "unknown-behavior"; readonly type: string; readonly behavior: string }
   | {
-      readonly code: "unnamed-behaviour"
+      readonly code: "unnamed-behavior"
       readonly type: string
-      readonly behaviour: string
+      readonly behavior: string
       readonly key: string
     }
   | {
-      readonly code: "undeclared-interactive-behaviour"
+      readonly code: "undeclared-interactive-behavior"
       readonly type: string
-      readonly behaviour: string
+      readonly behavior: string
     }
   | {
-      readonly code: "unpaired-behaviour"
+      readonly code: "unpaired-behavior"
       readonly type: string
-      readonly behaviour: string
+      readonly behavior: string
       readonly requires: string
     }
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
@@ -138,7 +138,7 @@ export type RegistryError =
 export type PrimitiveRegistry = PrimitiveResolver &
   PropsValidator &
   TextResolver &
-  BehaviourResolver &
+  BehaviorResolver &
   FrameResolver &
   BindingReader &
   UnshownReader &
@@ -176,16 +176,16 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" says a reader reads "${error.prop}", which its props schema does not declare; a preview built on that declaration would report a word the page never shows, and go on reporting it after the prop was renamed`
     case "undeclared-interactive-prop":
       return `"${error.type}" says it renders a target when "${error.prop}" is set, and its schema declares no such prop; a trigger naming a prop that cannot arrive is a target the Gate will never see`
-    case "unknown-behaviour":
-      return `"${error.type}" takes a behaviour called "${error.behaviour}" and the runtime has none; a behaviour is implemented here, not registered, so the vocabulary is the list in \`render/behaviour.ts\``
-    case "unnamed-behaviour":
-      return `"${error.type}" takes the "${error.behaviour}" behaviour and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
-    case "undeclared-interactive-behaviour":
-      return `"${error.type}" takes the "${error.behaviour}" behaviour, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
+    case "unknown-behavior":
+      return `"${error.type}" takes a behavior called "${error.behavior}" and the runtime has none; a behavior is implemented here, not registered, so the vocabulary is the list in \`render/behavior.ts\``
+    case "unnamed-behavior":
+      return `"${error.type}" takes the "${error.behavior}" behavior and declares no "${error.key}" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent`
+    case "undeclared-interactive-behavior":
+      return `"${error.type}" takes the "${error.behavior}" behavior, which renders a target, and declares no \`interactive\`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two`
     case "invalid-binding-name":
       return `"${error.type}" says it reads a binding called "${error.name}", which is not a binding name — ${BINDING_NAME_EXPECTATION}; a tree cannot ask under a name it cannot write, so this primitive would report every binding it was ever given`
-    case "unpaired-behaviour":
-      return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
+    case "unpaired-behavior":
+      return `"${error.type}" takes the "${error.behavior}" behavior and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
     case "undeclared-reads-prop":
       return `"${error.type}" says it reads a binding under whichever name its "${error.prop}" prop gives, which its props schema does not declare; that prop can never arrive, so the primitive would read its default for ever and go on doing so after the prop it names was renamed`
     case "unknown-role":
@@ -264,7 +264,7 @@ const undeclaredCopyProp = (entry: PrimitiveEntry): string | undefined => {
 }
 
 /**
- * The declared behaviours, or the first thing wrong with them.
+ * The declared behaviors, or the first thing wrong with them.
  *
  * Four checks, and each one is the whole of what can be known without calling
  * the component: the name is in the vocabulary, the strings its control needs
@@ -273,26 +273,26 @@ const undeclaredCopyProp = (entry: PrimitiveEntry): string | undefined => {
  * beside it. Whether the primitive actually *places* what it declared needs the
  * component called, which is the audit's job and not this one's.
  */
-const registeredBehaviours = (
+const registeredBehaviors = (
   entry: PrimitiveEntry
-): Result<readonly BehaviourName[], RegistryError> => {
-  const names: BehaviourName[] = []
+): Result<readonly BehaviorName[], RegistryError> => {
+  const names: BehaviorName[] = []
 
-  for (const behaviour of entry.behaviours) {
-    if (!isBehaviourName(behaviour)) {
-      return err({ code: "unknown-behaviour", type: entry.type, behaviour })
+  for (const behavior of entry.behaviors) {
+    if (!isBehaviorName(behavior)) {
+      return err({ code: "unknown-behavior", type: entry.type, behavior })
     }
 
-    const missing = BEHAVIOURS[behaviour].text.find(
+    const missing = BEHAVIORS[behavior].text.find(
       (key) => (entry.text[key] ?? "").trim() === ""
     )
 
     if (missing !== undefined) {
-      return err({ code: "unnamed-behaviour", type: entry.type, behaviour, key: missing })
+      return err({ code: "unnamed-behavior", type: entry.type, behavior, key: missing })
     }
 
-    if (BEHAVIOURS[behaviour].rendersControl && !entry.interactive) {
-      return err({ code: "undeclared-interactive-behaviour", type: entry.type, behaviour })
+    if (BEHAVIORS[behavior].rendersControl && !entry.interactive) {
+      return err({ code: "undeclared-interactive-behavior", type: entry.type, behavior })
     }
 
     /**
@@ -300,12 +300,12 @@ const registeredBehaviours = (
      * the two may be declared in either order — a primitive that names the
      * cross before the trigger is not making a mistake.
      */
-    const requires = BEHAVIOURS[behaviour].requires
-    if (requires !== undefined && !entry.behaviours.includes(requires)) {
-      return err({ code: "unpaired-behaviour", type: entry.type, behaviour, requires })
+    const requires = BEHAVIORS[behavior].requires
+    if (requires !== undefined && !entry.behaviors.includes(requires)) {
+      return err({ code: "unpaired-behavior", type: entry.type, behavior, requires })
     }
 
-    names.push(behaviour)
+    names.push(behavior)
   }
 
   return ok(names)
@@ -315,7 +315,7 @@ const registeredBehaviours = (
  * The declared role, checked — `undefined` for the primitive that declared none,
  * which is most of them.
  *
- * Shaped like `registeredBehaviours` because it is the same job: an entry
+ * Shaped like `registeredBehaviors` because it is the same job: an entry
  * carries the declaration raw, the registry is the boundary that decides whether
  * it is a member, and a string that is not one is refused rather than dropped.
  */
@@ -426,8 +426,8 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     return err({ code: "undeclared-copy-prop", type: entry.type, prop: unreadable })
   }
 
-  const behaviours = registeredBehaviours(entry)
-  if (!behaviours.ok) return behaviours
+  const behaviors = registeredBehaviors(entry)
+  if (!behaviors.ok) return behaviors
 
   const role = registeredRole(entry)
   if (!role.ok) return role
@@ -446,7 +446,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     interactive: entry.interactive,
     submits: entry.submits,
     frames: entry.frames,
-    behaviours: behaviours.value,
+    behaviors: behaviors.value,
     role: role.value,
     copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
     reads: reads.value,
@@ -507,8 +507,8 @@ export const createPrimitiveRegistry = (
     validateProps: (type: PrimitiveType, props: JsonObject): PropsVerdict =>
       byType.get(type)?.validate(props) ?? { outcome: "undeclared" },
     textFor: (type: PrimitiveType): PrimitiveText<string> => byType.get(type)?.text ?? NO_TEXT,
-    behavioursFor: (type: PrimitiveType): readonly BehaviourName[] =>
-      byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
+    behaviorsFor: (type: PrimitiveType): readonly BehaviorName[] =>
+      byType.get(type)?.behaviors ?? NO_BEHAVIOR_NAMES,
     framePropsFor: (type: PrimitiveType): readonly string[] =>
       byType.get(type)?.frames ?? NO_FRAME_PROPS,
     /**

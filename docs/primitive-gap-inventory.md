@@ -110,12 +110,12 @@ for the other, and it was found by building both.
 is one enum member and one open design question, not two strings, and this
 paragraph is here so the next run does not re-count it as cheap.
 
-## Tier B — blocked on the behaviour vocabulary
+## Tier B — blocked on the behavior vocabulary
 
 Every one of these is a thing a marketing page genuinely has, and every one needs
-the framework to name a behaviour the tree can declare. A tab strip has been
+the framework to name a behavior the tree can declare. A tab strip has been
 filed for this since at least 11 September (*"wants a `select` member in the
-behaviour vocabulary"*).
+behavior vocabulary"*).
 
 tabs · tooltip · popover / hover card · dialog or modal · dropdown menu ·
 toast · lightbox gallery · a monthly/annual pricing toggle · a filter or
@@ -233,7 +233,7 @@ that consumer. Filed for `Loom daily build`.
 
 | | 13 Sep | planned for 19 Sep | **actual, 19 Sep** |
 | --- | --- | --- | --- |
-| primitives | 92 | ~110 — Tier A now, Tier B if the behaviour vocabulary opens | **96** (Tier A closed; Tier B never opened) |
+| primitives | 92 | ~110 — Tier A now, Tier B if the behavior vocabulary opens | **96** (Tier A closed; Tier B never opened) |
 | starting compositions | 9 | ~140 | **34** |
 | **droppable things** | **101** | **250** | **130** |
 

@@ -21,7 +21,7 @@ import type { Composition } from "./composition.js"
  * canonical contact band **arrives dimmed, with a notice above it**, and stays
  * that way until a deployment names somewhere for it to post.
  *
- * That is correct behaviour and it is also a real cost, paid by every page that
+ * That is correct behavior and it is also a real cost, paid by every page that
  * wants a contact band before it has a backend: a demo, a preview, a screenshot,
  * a static site that has no endpoint and never will. A `mailto:` and a `tel:`
  * need no registry, work with scripting off, and are what a small company's

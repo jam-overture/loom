@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 
 /**
  * A score out of five, drawn as stars.
@@ -129,9 +129,9 @@ export const loomRating = definePrimitive({
                   insetBlockStart: "0",
                   insetInlineStart: "0",
                   width: filled,
-                  color: colour("accent-strong"),
+                  color: color("accent-strong"),
                 }
-              : { color: colour("fg-subtle"), opacity: UNLIT }),
+              : { color: color("fg-subtle"), opacity: UNLIT }),
             display: "block",
             overflow: "hidden",
             whiteSpace: "nowrap",
@@ -168,12 +168,12 @@ export const loomRating = definePrimitive({
         "span",
         {
           key: "numeral",
-          style: { fontSize: scale.numeral, fontWeight: weight("heading"), color: colour("fg-default") },
+          style: { fontSize: scale.numeral, fontWeight: weight("heading"), color: color("fg-default") },
         },
         score.toFixed(1),
         createElement(
           "span",
-          { key: "outof", style: { fontSize: scale.caption, fontWeight: weight("body"), color: colour("fg-muted") } },
+          { key: "outof", style: { fontSize: scale.caption, fontWeight: weight("body"), color: color("fg-muted") } },
           ` / ${OUT_OF}`
         )
       ),
@@ -181,7 +181,7 @@ export const loomRating = definePrimitive({
         ? null
         : createElement(
             "span",
-            { key: "caption", style: { fontSize: scale.caption, color: colour("fg-muted") } },
+            { key: "caption", style: { fontSize: scale.caption, color: color("fg-muted") } },
             given.caption
           )
     )

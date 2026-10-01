@@ -65,7 +65,7 @@ import type { Composition } from "./composition.js"
  * Nothing here is an asset. It is `loom.frame`'s window chrome over a
  * `loom.code` panel, which is `hero-split-band`'s rule — *a product surface
  * built out of the library is worth more than a screenshot* — one level down,
- * and it re-themes with the page because every colour in it is the palette's.
+ * and it re-themes with the page because every color in it is the palette's.
  *
  * The lines are a real `configure` against the tree this band is in, down to
  * the shape of a node id, rather than invented syntax that would be a lie a

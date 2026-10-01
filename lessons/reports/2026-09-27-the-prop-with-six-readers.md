@@ -42,14 +42,14 @@ record the whole time.
 **What makes it a Part V seam rather than a to-do** is the reason nothing checks
 it, which took most of the reading to see. `auditRegistry` calls every component
 under every configuration its schema closes over and reports five kinds of broken
-promise: no decoration, a dropped slot, a dropped behaviour control, an
+promise: no decoration, a dropped slot, a dropped behavior control, an
 undelivered `submits`, a throw. Every one of those is a promise **whose keeping
 shows up in what the component returned.** Reading a prop returns nothing. A
 component that honours `tone` and one that ignores it can emit byte-identical
 markup.
 
 The axis was already in `audit.ts` and stops one notch short of this. Its comment
-on `unplacedBehaviours` ranks two broken promises by how visible each is — a
+on `unplacedBehaviors` ranks two broken promises by how visible each is — a
 dropped slot loses content a reader might notice, a dropped control loses nothing
 a reader can see. One more notch along is a prop that loses nothing at all.
 
@@ -67,7 +67,7 @@ Seven declared props in the library that no call touched:
 
 ```
   declared slots no component placed:      0
-  declared behaviours no component placed: 0
+  declared behaviors no component placed: 0
   components that threw under their own schema: 0
   primitives with a declared prop nothing read: 4
     loom.tally       prefix, suffix

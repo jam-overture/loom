@@ -13,7 +13,7 @@ import * as style from "./_components/style"
  * The theme is mounted once, here, and everything below reads it: the primitives
  * a lesson's prose is composed from, and the machinery around them alike. That
  * is the only styling decision this file makes — there is no palette in it, no
- * font stack and no colour, because the surface is not permitted a design system
+ * font stack and no color, because the surface is not permitted a design system
  * of its own (0067) and does not need one.
  */
 

@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -101,7 +101,7 @@ export const loomArticle = definePrimitive({
             {
               key: "cover",
               className: LIBRARY_CLASS.coverMedia,
-              style: { background: colour("bg-surface-muted") },
+              style: { background: color("bg-surface-muted") },
             },
             createElement("img", {
               src: given.image,
@@ -128,7 +128,7 @@ export const loomArticle = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -163,8 +163,8 @@ export const loomArticle = definePrimitive({
           boxSizing: "border-box",
           height: "100%",
           overflow: "hidden",
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
         },
       },
@@ -195,7 +195,7 @@ export const loomArticle = definePrimitive({
                   lineHeight: 1.4,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: colour("accent"),
+                  color: color("accent"),
                 },
               },
               given.kicker
@@ -212,7 +212,7 @@ export const loomArticle = definePrimitive({
                   fontFamily: family("body"),
                   fontSize: size(3),
                   lineHeight: 1.6,
-                  color: colour("fg-muted"),
+                  color: color("fg-muted"),
                 },
               },
               given.excerpt

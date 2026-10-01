@@ -1,11 +1,11 @@
-# 31 — Behaviour: the thing a page does, which no tree can name
+# 31 — Behavior: the thing a page does, which no tree can name
 
 **After this lesson you will be able to** say why a copy button on a code panel
 cannot be a prop, and make that a sentence about the thesis of this whole system
 rather than about JSON; name the three shapes the answer could have taken and
 give the concrete page each of the two rejected ones breaks; state what a
 control is handed, who names it, and what part of it is left for the primitive;
-give the four things a registry can check about a behaviour and say why all four
+give the four things a registry can check about a behavior and say why all four
 happen at *registration* rather than on a page; explain why the control that
 hands back a boolean writes it in one place and the control that hands back a
 number writes it in another, in a form that mentions inheritance and not CSS
@@ -62,8 +62,8 @@ five before you look anything up.
 2. The renderer is a **total, pure** projection. Those are two properties, not
    one. Say what each buys, separately, and name something the system could still
    do if it had only one of them. *(14)*
-3. A model may not write a colour. State the rule and then state the reason,
-   and check that your reason does not mention colour. *(21)*
+3. A model may not write a color. State the rule and then state the reason,
+   and check that your reason does not mention color. *(21)*
 4. A `loom.card` holding a `loom.action` is fine; a *linked* `loom.card` holding
    one is not. Say what a primitive is allowed to declare about itself here, what
    it is not, and who derives the rest. *(22)*
@@ -93,7 +93,7 @@ of this lesson tells you anything.
    the specific page on which it goes wrong. Not "it's less clean" — a page, and
    what a visitor sees on it.
 
-2. A primitive is registered. It declares the copy behaviour, it declares both
+2. A primitive is registered. It declares the copy behavior, it declares both
    of the strings the control needs, the registry accepted it, and its component
    places the control in its markup. You render its page with
    `renderToStaticMarkup`. Nothing is wrong, nothing is missing, no diagnostic
@@ -161,7 +161,7 @@ perfectly good pages on the strength of a button that does not exist.
 
 Predict 1 asked you for three. These are the three that were weighed.
 
-**A prop.** `copyable: true`, or a `behaviour: "copy"` string in the node. It is
+**A prop.** `copyable: true`, or a `behavior: "copy"` string in the node. It is
 the obvious one and it is expressible — JSON holds booleans and strings, the
 Gate can weigh it, the analysis can diff it. It fails on
 [0055](../decisions/0055-motion-is-a-static-stylesheet-the-primitive-emits.md)'s
@@ -177,7 +177,7 @@ Put concretely, the page it breaks is any page where a proposal that reads
 weighed as a prop edit because it is one.
 
 **A script the host installs.** The library ships the markup and a
-`loom-behaviours.js` the deployment is told to link. This is how a great many
+`loom-behaviors.js` the deployment is told to link. This is how a great many
 component libraries actually work. It fails on the other half of 0055's
 argument: a primitive that works only where somebody remembered to link something
 fails **silently, in somebody else's deployment**, with nothing in the render to
@@ -206,20 +206,20 @@ do* other than "go and look".
 ### A control the runtime builds, and a primitive places
 
 [0086](../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
-settles it in one sentence: **a behaviour is a control this package implements, a
+settles it in one sentence: **a behavior is a control this package implements, a
 primitive declares by name, and the renderer hands over already built.**
 
 ```ts
 definePrimitive({
   type: "loom.code",
-  behaviours: ["copy"],
+  behaviors: ["copy"],
   text: { copy: "Copy", copied: "Copied" },
   interactive: "always",
   component: ({ loom, children }) =>
     createElement(
       "figure",
       null,
-      loom.behaviours.copy,
+      loom.behaviors.copy,
       createElement("pre", null, children)
     ),
 })
@@ -227,7 +227,7 @@ definePrimitive({
 
 `src/primitives/` **declares and never implements.** Nothing in the library of
 ninety-nine primitives opens a client boundary of its own; the whole library
-contains no `"use client"`. What arrives in `loom.behaviours.copy` is a
+contains no `"use client"`. What arrives in `loom.behaviors.copy` is a
 `ReactNode` — not a component — and that is deliberate rather than convenient.
 There is nothing left for the primitive to configure, because the strings came
 from its own declarations and the content came from the tree. A component here
@@ -251,15 +251,15 @@ keys `copy` and `copied`, resolved through the ordinary text seam
 German deployment translates the button with the dictionary it already has and
 no new machinery.
 
-**A model is never shown any of this.** Behaviours are not in the catalogue. A
+**A model is never shown any of this.** Behaviors are not in the catalogue. A
 proposal cannot author one, and a vocabulary a model cannot use is prompt you pay
 for and cannot spend. Exercise A asks the catalogue what it says about
 `loom.code` and the answer is five prop names, no slots, and no mention of a
-behaviour at all.
+behavior at all.
 
 ### The set is closed, and the closure is the design
 
-The behaviour vocabulary has five members. They live in one file, one entry each,
+The behavior vocabulary has five members. They live in one file, one entry each,
 and **adding one is a change to this package** — a name, an implementation, its
 strings, and a line in a decision record.
 
@@ -270,34 +270,34 @@ lists. A reviewer who wants to know what a Loom deployment's pages can do reads
 five entries, not ninety-nine modules.
 
 And it is what makes Predict 4 come out the way it does. Nothing in a tree names
-a behaviour. There is no prop to gate, nothing for the analysis to weigh, and no
+a behavior. There is no prop to gate, nothing for the analysis to weigh, and no
 way to phrase a proposal that makes something copy. **The Gate is not what stops
-a model adding a behaviour. The medium is** — and exercise C is that sentence
+a model adding a behavior. The medium is** — and exercise C is that sentence
 executed, including the part where the Gate cheerfully accepts `copyable: true`
 at low stakes and the page goes on doing exactly nothing.
 
 ### Four checks at registration, and one by probe
 
-A behaviour is declared by a name in a list, which is the weakest kind of
+A behavior is declared by a name in a list, which is the weakest kind of
 statement a system can accept. So the registry checks four things, and the
 interesting part is that all four are checkable **without calling the
 component**:
 
 | check | what it catches |
 | --- | --- |
-| the name is in the vocabulary | `behaviours: ["fold"]` — a behaviour nobody implemented |
+| the name is in the vocabulary | `behaviors: ["fold"]` — a behavior nobody implemented |
 | the strings its control needs are strings this primitive declares | a control with no accessible name |
 | a primitive taking a control declares itself `interactive` | lesson 22's fault: a button inside an anchor, one of which a browser silently drops |
-| a behaviour that needs another is declared with it | a dismiss control asking a region nothing opens to close |
+| a behavior that needs another is declared with it | a dismiss control asking a region nothing opens to close |
 
-The fifth is not a check but a **probe**: a declared behaviour the component
-never places is reported as `unplacedBehaviours`, exactly as a declared slot
+The fifth is not a check but a **probe**: a declared behavior the component
+never places is reported as `unplacedBehaviors`, exactly as a declared slot
 nobody rendered is reported as `unplacedSlots`. That is lesson 29's instrument,
 and it is on the other side of the line from the four above — you cannot know
 whether a component placed something without running it.
 
 Why the split matters is the sentence to keep. The first four are the registry's
-because registration is the last moment at which anything about a behaviour is
+because registration is the last moment at which anything about a behavior is
 visible at all. Read the next section before deciding whether that sounds like an
 overstatement.
 
@@ -363,7 +363,7 @@ behind it. The first of those is a **second control**, and a click handler is a
 function whichever button it is on.
 
 So two controls of one primitive have to agree about one boolean — and nothing in
-the seam lets them. A behaviour is built as an independent node the primitive
+the seam lets them. A behavior is built as an independent node the primitive
 places where it likes, so the two have no common React ancestor to hold state, no
 provider between them, and no way to be handed a shared object: `build` runs on
 the server and a control's props cross the client boundary, so anything passed
@@ -400,33 +400,33 @@ same judgement the seam already makes about a control with no accessible name.
 
 | What | Where |
 | --- | --- |
-| The vocabulary, and one entry per member | `src/render/behaviour.ts` |
-| `BEHAVIOUR_NAMES`, the closed list | `src/render/behaviour.ts` |
-| `resolveBehaviours` — builds the controls for one node | `src/render/behaviour.ts` |
-| The five controls, each behind `"use client"` | `src/render/behaviour-copy.ts`, `-disclose.ts`, `-adjust.ts`, `-present.ts` |
+| The vocabulary, and one entry per member | `src/render/behavior.ts` |
+| `BEHAVIOR_NAMES`, the closed list | `src/render/behavior.ts` |
+| `resolveBehaviors` — builds the controls for one node | `src/render/behavior.ts` |
+| The five controls, each behind `"use client"` | `src/render/behavior-copy.ts`, `-disclose.ts`, `-adjust.ts`, `-present.ts` |
 | `DISCLOSED_ATTRIBUTE`, in a module with nothing else in it | `src/render/disclosed.ts` |
 | `PRESENTED_ATTRIBUTE` and `DISMISS_EVENT`, likewise | `src/render/presented.ts` |
 | The class a primitive aims a rule at, and the property that wins | `src/render/control.ts` |
-| The four checks | `registeredBehaviours` in `src/sdk/registry.ts` |
+| The four checks | `registeredBehaviors` in `src/sdk/registry.ts` |
 | The probe that reports an unplaced control | `probePlacement` in `src/sdk/conformance.ts` |
-| Where a declaration is written | `behaviours` in `src/sdk/definition.ts` |
+| Where a declaration is written | `behaviors` in `src/sdk/definition.ts` |
 
 One declaration is worth printing whole, because the three axes above are its
 last three fields:
 
 ```ts
-type Behaviour = {
+type Behavior = {
   readonly description: string
   readonly text: readonly string[]
   readonly rendersControl: boolean
-  readonly requires?: BehaviourName
+  readonly requires?: BehaviorName
   readonly build: (content: string, text: PrimitiveText<string>) => ReactNode
 }
 ```
 
 `text` is the strings the primitive must declare. `rendersControl` is whether
 this puts a target on the page, which is what drives the `interactive` check —
-and it is a field rather than a constant because the first behaviour that renders
+and it is a field rather than a constant because the first behavior that renders
 nothing is a question of *when*, not *if*. `requires` is the pair. `build` is the
 whole of the implementation seam, and its two arguments are the two things a
 control may be given: the node's own text, and the primitive's resolved strings.
@@ -459,12 +459,12 @@ import { sequentialIdFactory } from "./ids.js"
 import { createStarterPrimitiveRegistry } from "./primitives/index.js"
 import { ANCHOR_PROP_KEY, DATA_PROP_KEY, SUBMIT_PROP_KEY, THEME_PROP_KEY } from "./reserved-props.js"
 import {
-  BEHAVIOURS,
-  BEHAVIOUR_NAMES,
+  BEHAVIORS,
+  BEHAVIOR_NAMES,
   CONTROL_CLASS,
   describeRenderDiagnostic,
   renderLoomTree,
-  resolveBehaviours,
+  resolveBehaviors,
   type LoomPrimitiveProps,
 } from "./render/index.js"
 import { assessChange } from "./runtime/assessment.js"
@@ -493,7 +493,7 @@ const RESERVED = [THEME_PROP_KEY, DATA_PROP_KEY, SUBMIT_PROP_KEY, ANCHOR_PROP_KE
 /** A primitive that places whatever controls it declared, above its own content. */
 const takes = (
   type: string,
-  behaviours: readonly string[],
+  behaviors: readonly string[],
   text: Readonly<Record<string, string>>,
   interactive: "always" | undefined
 ) =>
@@ -502,13 +502,13 @@ const takes = (
     description: "A slab that places the controls it was given.",
     props: z.object({}).strict(),
     text: text as never,
-    behaviours: behaviours as never,
+    behaviors: behaviors as never,
     interactive,
     component: ({ loom, children }: LoomPrimitiveProps<Record<string, never>, string, never>) =>
       createElement(
         "div",
         { ...loom.editable },
-        ...BEHAVIOUR_NAMES.map((name) => (loom.behaviours as Record<string, unknown>)[name] ?? null),
+        ...BEHAVIOR_NAMES.map((name) => (loom.behaviors as Record<string, unknown>)[name] ?? null),
         children
       ),
   })
@@ -525,7 +525,7 @@ const words = (markup: string): string =>
 `takes` places **every** member of the vocabulary, not just the one it declared.
 That is not laziness — it is the type bargain from lesson 15 being deliberately
 stepped around with a cast so that one helper can serve seven exercises. In real
-code `loom.behaviours` is typed to the union of names the primitive declared, so
+code `loom.behaviors` is typed to the union of names the primitive declared, so
 reading one it did not ask for does not compile.
 
 ### Exercise A — the vocabulary, and everything a tree could say about it
@@ -533,45 +533,45 @@ reading one it did not ask for does not compile.
 ```ts
 describe("A", () => {
   it("prints the vocabulary, and asks what a tree could say about it", () => {
-    console.log(`  behaviours in the vocabulary: ${BEHAVIOUR_NAMES.length}`)
-    for (const name of BEHAVIOUR_NAMES) {
-      const behaviour = BEHAVIOURS[name]
+    console.log(`  behaviors in the vocabulary: ${BEHAVIOR_NAMES.length}`)
+    for (const name of BEHAVIOR_NAMES) {
+      const behavior = BEHAVIORS[name]
       console.log(
-        `    ${name.padEnd(9)} text ${JSON.stringify(behaviour.text).padEnd(20)} renders a control ${
-          behaviour.rendersControl
-        }  needs ${behaviour.requires ?? "nothing"}`
+        `    ${name.padEnd(9)} text ${JSON.stringify(behavior.text).padEnd(20)} renders a control ${
+          behavior.rendersControl
+        }  needs ${behavior.requires ?? "nothing"}`
       )
     }
     console.log(`  reserved keys a tree may carry: ${JSON.stringify(RESERVED)}`)
-    console.log(`  one of them naming a behaviour: ${RESERVED.some((key) => /behaviour/i.test(key))}`)
+    console.log(`  one of them naming a behavior: ${RESERVED.some((key) => /behavior/i.test(key))}`)
 
     const code = catalogueOf(registry).find((entry) => entry.type === "loom.code")
     console.log(`  what a model is told loom.code has`)
     console.log(`    props: ${JSON.stringify(code?.props.map((prop) => prop.name))}`)
     console.log(`    slots: ${JSON.stringify(code?.slots)}`)
-    console.log(`    a behaviours field: ${Object.hasOwn(code ?? {}, "behaviours")}`)
+    console.log(`    a behaviors field: ${Object.hasOwn(code ?? {}, "behaviors")}`)
   })
 })
 ```
 
 ```
-  behaviours in the vocabulary: 5
+  behaviors in the vocabulary: 5
     copy      text ["copy","copied"]    renders a control true  needs nothing
     disclose  text ["disclose"]         renders a control true  needs nothing
     adjust    text ["adjust"]           renders a control true  needs nothing
     present   text ["present"]          renders a control true  needs nothing
     dismiss   text ["dismiss"]          renders a control true  needs present
   reserved keys a tree may carry: ["loom:theme","loom:data","loom:submit","loom:anchor"]
-  one of them naming a behaviour: false
+  one of them naming a behavior: false
   what a model is told loom.code has
     props: ["caption","density","language","tone","wrap"]
     slots: []
-    a behaviours field: false
+    a behaviors field: false
 ```
 
 The last three lines are the ones to sit with. `loom.code` is the primitive that
 has a copy button. What a model is told about it is five prop names and no slots.
-The behaviour is not withheld from the model as a precaution — there is simply no
+The behavior is not withheld from the model as a precaution — there is simply no
 field in a catalogue entry where it could go, because there is no proposal a
 model could write that would use it.
 
@@ -586,7 +586,7 @@ question, an address, a name. None of them is a verb.
 describe("B", () => {
   it("asks the registry to accept five primitives that each take a control", () => {
     const attempts = [
-      ["a behaviour the runtime does not have", takes("x.a", ["fold"], { fold: "Fold" }, "always")],
+      ["a behavior the runtime does not have", takes("x.a", ["fold"], { fold: "Fold" }, "always")],
       ["copy, with only one of its two strings", takes("x.b", ["copy"], { copy: "Copy" }, "always")],
       ["copy, both strings, no interactive", takes("x.c", ["copy"], { copy: "Copy", copied: "Copied" }, undefined)],
       ["dismiss on its own", takes("x.d", ["dismiss"], { dismiss: "Close" }, "always")],
@@ -603,21 +603,21 @@ describe("B", () => {
 ```
 
 ```
-  a behaviour the runtime does not have
-    unknown-behaviour — "x.a" takes a behaviour called "fold" and the runtime has none; a behaviour is implemented here, not registered, so the vocabulary is the list in `render/behaviour.ts`
+  a behavior the runtime does not have
+    unknown-behavior — "x.a" takes a behavior called "fold" and the runtime has none; a behavior is implemented here, not registered, so the vocabulary is the list in `render/behavior.ts`
   copy, with only one of its two strings
-    unnamed-behaviour — "x.b" takes the "copy" behaviour and declares no "copied" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent
+    unnamed-behavior — "x.b" takes the "copy" behavior and declares no "copied" text; a control whose name a deployment cannot translate is the failure the text seam exists to prevent
   copy, both strings, no interactive
-    undeclared-interactive-behaviour — "x.c" takes the "copy" behaviour, which renders a target, and declares no `interactive`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two
+    undeclared-interactive-behavior — "x.c" takes the "copy" behavior, which renders a target, and declares no `interactive`; the Gate would then allow one inside an anchor, where a browser silently drops one of the two
   dismiss on its own
-    unpaired-behaviour — "x.d" takes the "dismiss" behaviour and not "present", which it does nothing without; it would render a control that asks a region nothing opens to close
+    unpaired-behavior — "x.d" takes the "dismiss" behavior and not "present", which it does nothing without; it would render a control that asks a region nothing opens to close
   copy, both strings, interactive
     registered
 ```
 
-Four refusals, and the first one's message is the one to read twice: *a behaviour
+Four refusals, and the first one's message is the one to read twice: *a behavior
 is implemented here, not registered.* Everything else a primitive declares is a
-claim about itself that the registry records. A behaviour name is a **reference**
+claim about itself that the registry records. A behavior name is a **reference**
 into a list the primitive did not write and cannot extend — lesson 30's
 vocabulary, and the reason this half of the seam is loud.
 
@@ -670,7 +670,7 @@ describe("C", () => {
 
     const changes = [
       ["copyable: true", configure({ copyable: true })],
-      ["behaviours: [copy]", configure({ behaviours: ["copy"] })],
+      ["behaviors: [copy]", configure({ behaviors: ["copy"] })],
       ["caption: Install", configure({ caption: "Install" })],
     ] as const
 
@@ -700,11 +700,11 @@ describe("C", () => {
 ```
   the registered types wired, and nothing checking props
     copyable: true     invalid props: 0  stakes: low      gate: accepted
-    behaviours: [copy] invalid props: 0  stakes: low      gate: accepted
+    behaviors: [copy] invalid props: 0  stakes: low      gate: accepted
     caption: Install   invalid props: 0  stakes: low      gate: accepted
   and propsVocabularyFor(registry) wired as well
     copyable: true     invalid props: 1  stakes: critical gate: rejected
-    behaviours: [copy] invalid props: 1  stakes: critical gate: rejected
+    behaviors: [copy] invalid props: 1  stakes: critical gate: rejected
     caption: Install   invalid props: 0  stakes: low      gate: accepted
 ```
 
@@ -726,7 +726,7 @@ carries, so a proposal claiming to add one is a proposal that adds a string.
 The second block is the props floor from lesson 15 doing its ordinary job — a key
 no schema declares is refused at critical stakes — and it is worth noticing that
 it refuses `copyable` for exactly the same reason it would refuse `capton`. It
-has no idea a behaviour was being attempted. Nothing in this system does, because
+has no idea a behavior was being attempted. Nothing in this system does, because
 nothing was.
 
 ### Exercise D — the render, and the button that is not in it
@@ -765,12 +765,12 @@ describe("D", () => {
     console.log(`  a <button> anywhere in it: ${markup.includes("<button")}`)
     console.log(`  the control's class anywhere in it: ${markup.includes(CONTROL_CLASS)}`)
 
-    const resolved = resolveBehaviours(["copy"], "pnpm add loom", { copy: "Copy", copied: "Copied" })
-    console.log(`  the seam built a control: ${resolved.behaviours.copy !== undefined}`)
+    const resolved = resolveBehaviors(["copy"], "pnpm add loom", { copy: "Copy", copied: "Copied" })
+    console.log(`  the seam built a control: ${resolved.behaviors.copy !== undefined}`)
     console.log(`  left out for want of a name: ${resolved.unnamed.length}`)
     console.log(
       `  that control, rendered on its own: ${JSON.stringify(
-        renderToStaticMarkup(resolved.behaviours.copy as never)
+        renderToStaticMarkup(resolved.behaviors.copy as never)
       )}`
     )
   })
@@ -809,10 +809,10 @@ the honest price of not hiding something before you know it can be got back.
 
 Now the consequence for this course, which is the part to carry out of this
 lesson. Every claim in the previous thirty lessons has been checkable by running
-a program and printing what it said. This one is not. **A behaviour has no
+a program and printing what it said. This one is not. **A behavior has no
 observable trace in a pure function of the tree.** That is why the four checks
 are at registration: registration is the last moment at which anything about a
-behaviour is visible to anything that is not a browser.
+behavior is visible to anything that is not a browser.
 
 ### Exercise E — the Gate, asked about a page holding that same invisible button
 
@@ -907,7 +907,7 @@ Put this beside exercise D and the pair is the lesson's sharpest single fact.
 The markup in exercise D has no `<button>` in it, the static page is a `div` and
 a line of text, and the Gate is correct to refuse anyway — because what it is
 reasoning about is the primitive's *declaration*, and the declaration is the only
-part of a behaviour that exists outside a browser.
+part of a behavior that exists outside a browser.
 
 That is also why the registry refuses `x.c` in exercise B. A primitive that takes
 a control and does not say it is `interactive` has removed the only evidence the
@@ -947,14 +947,14 @@ describe("F", () => {
     the page says: "pnpm add loom"
   a dictionary that answers one of them with a space
     diagnostics: 1
-      behaviour-unnamed — node n_s2 takes the "copy" behaviour and "copy" resolved to nothing, so the control was left out rather than rendered with no accessible name
+      behavior-unnamed — node n_s2 takes the "copy" behavior and "copy" resolved to nothing, so the control was left out rather than rendered with no accessible name
     the page says: "pnpm add loom"
 ```
 ```
   the two pages, character for character: the same
 ```
 
-The registry refuses a primitive that declares a behaviour and not its strings,
+The registry refuses a primitive that declares a behavior and not its strings,
 so the only way here is a **host dictionary** that answers a declared key with a
 blank. The dictionary schema refuses the empty string and accepts whitespace,
 which is how a space gets through.
@@ -979,13 +979,13 @@ one seam in this course where the render has nothing to show.
 describe("G", () => {
   it("counts the primitives in the starter library that take a control", () => {
     console.log(`  primitives in the starter library: ${registry.primitives.length}`)
-    const takers = registry.primitives.filter((entry) => entry.behaviours.length > 0)
+    const takers = registry.primitives.filter((entry) => entry.behaviors.length > 0)
     for (const entry of takers) {
-      console.log(`    ${entry.type.padEnd(16)} ${JSON.stringify(entry.behaviours)}`)
+      console.log(`    ${entry.type.padEnd(16)} ${JSON.stringify(entry.behaviors)}`)
     }
-    console.log(`  behaviours with a declaring primitive in the library:`)
-    for (const name of BEHAVIOUR_NAMES) {
-      const declared = takers.filter((entry) => (entry.behaviours as readonly string[]).includes(name))
+    console.log(`  behaviors with a declaring primitive in the library:`)
+    for (const name of BEHAVIOR_NAMES) {
+      const declared = takers.filter((entry) => (entry.behaviors as readonly string[]).includes(name))
       console.log(`    ${name.padEnd(9)} ${declared.length === 0 ? "nothing declares it" : declared.map((e) => e.type).join(", ")}`)
     }
   })
@@ -996,7 +996,7 @@ describe("G", () => {
   primitives in the starter library: 99
     loom.nav         ["disclose"]
     loom.code        ["copy"]
-  behaviours with a declaring primitive in the library:
+  behaviors with a declaring primitive in the library:
     copy      loom.code
     disclose  loom.nav
     adjust    nothing declares it
@@ -1028,7 +1028,7 @@ Worse, the primitive's own doc comment still argues that it *cannot*:
 
 > A draggable wipe needs a pointer handler, and a handler is a function — not
 > something a tree's JSON props can carry, and not something this library may
-> implement for itself: 0086 settled that a behaviour is a control the runtime
+> implement for itself: 0086 settled that a behavior is a control the runtime
 > builds and a primitive places, and the vocabulary has one member. So this is
 > filed as a second member rather than built.
 
@@ -1052,13 +1052,13 @@ twenty-eight, which is why they are a smaller entry rather than none. 0176 names
 four primitives it unblocks and says, in as many words, *this record settles the
 first* of the three groups Tier B splits into.
 `docs/primitive-gap-inventory.md`, edited five days after that record, still says
-Tier B is *"blocked on the behaviour vocabulary"* and that its nine members
+Tier B is *"blocked on the behavior vocabulary"* and that its nine members
 *"arrive together or not at all, because they are one framework decision rather
 than nine"*. Four of the nine have had their decision for nine days.
 
 Both are filed in `FINDINGS.md` for `Loom primitives` rather than fixed here.
 `src/primitives/` and `docs/` are not this lane's, and a lesson that changed
-behaviour while teaching it would be a lesson nobody can review.
+behavior while teaching it would be a lesson nobody can review.
 
 What makes the first one worth a lesson's attention rather than a bug report is
 the exercise that found it. It is nine lines, it reads two things the repository
@@ -1071,16 +1071,16 @@ fact they are not currently doubting.**
 ## It could have been otherwise
 
 **A prop.** Rejected on 0055's argument, and it is worth stating what the
-rejection costs, because it is not free. A deployment cannot turn a behaviour on
+rejection costs, because it is not free. A deployment cannot turn a behavior on
 without a code change, and an author who wants a copy button on a primitive that
 does not declare one has to edit that primitive. In exchange: nothing a model
 writes can change what a page *does*, which is the property the whole system
 exists to protect, and exercise C is what that property looks like when you poke
 at it.
 
-**A behaviour as its own primitive.** `loom.copy-button`, a node in the tree like
+**A behavior as its own primitive.** `loom.copy-button`, a node in the tree like
 any other. It is a real design and some systems take it. It fails on what a
-behaviour acts *on*: a copy control belongs to the node whose text it copies, and
+behavior acts *on*: a copy control belongs to the node whose text it copies, and
 a sibling node would have to be told which node that is — an id in the tree,
 which lesson 04 spent a whole lesson explaining you should not be writing by
 hand, and lesson 30 would then class as an agreement nobody holds a copy of.
@@ -1144,17 +1144,17 @@ Seven questions. For each: **rate your confidence 1–5 before you write your
 answer, then check.**
 
 1. State the general rule this seam is an instance of, in a form that mentions
-   neither behaviours nor primitives: it should be a sentence about what you do
+   neither behaviors nor primitives: it should be a sentence about what you do
    when the thing you need cannot be expressed in the medium you have chosen.
    Then give one example from outside Loom.
 2. A model proposes `copyable: true` on a code panel and a deployment that checks
    no props accepts it. Say what makes that *safe*, and make your answer about
    the system rather than about that particular prop name.
-3. The behaviour vocabulary has five members. For three of them, say what the
+3. The behavior vocabulary has five members. For three of them, say what the
    control hands back and where it writes it, and then say why the boolean and
    the number cannot go in the same place. Your answer must contain the word
    "inheritance" and must not contain the word "CSS".
-4. The registry makes four checks about a declared behaviour and the conformance
+4. The registry makes four checks about a declared behavior and the conformance
    probe makes a fifth. Say which side of the line each is on and *why the line
    falls there* — the answer is one sentence about what can be known without
    running something.
@@ -1163,7 +1163,7 @@ answer, then check.**
    the other thing in this seam that is treated the same way for the same reason.
 6. A page with a copy button on it, rendered to static markup, contains no
    button. Say what that costs and what it buys, and then say what it implies
-   about where a behaviour can be checked at all.
+   about where a behavior can be checked at all.
 7. Two controls of one primitive agree through the DOM. Say what was unavailable
    that forced it, say what the rejected alternative would have guaranteed, and
    then say why a channel that fails by *not reaching* is the right kind of

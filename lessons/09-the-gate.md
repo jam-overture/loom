@@ -549,7 +549,7 @@ rung 2 tests `isAtLeast`. So:
 > "usually", not "by default" — there is no policy in which a critical change
 > reaches rung 7.
 
-Which means the four ceiling values have three distinct behaviours: a ceiling of
+Which means the four ceiling values have three distinct behaviors: a ceiling of
 `critical` and a ceiling of `high` are the same policy, because the level that
 distinguishes them is refused before the ceiling is read. Exercise D's last two
 rows are that fact, and it is worth sitting with, because a host writing
@@ -791,7 +791,7 @@ describe("C", () => {
 })
 // Q3: same level, same origin, different outcomes. Say what the Gate knows here
 //     that `stakes.level` does not carry — and then say what you would have to
-//     add to the *level* to get the same behaviour, and what that would break.
+//     add to the *level* to get the same behavior, and what that would break.
 ```
 
 **D — who asked, and where that stops mattering.** Seven rows. The last two are
@@ -828,7 +828,7 @@ describe("D", () => {
 })
 // Q4: the fifth row's policy never mentions `user-instruction`. Say what it got
 //     and why that direction is the right one. Then, from the last two rows:
-//     how many behaviourally distinct values does `autoApplyCeiling` have under
+//     how many behaviorally distinct values does `autoApplyCeiling` have under
 //     the default refusal floor? Prove it from the ladder, not from the output.
 ```
 
@@ -1369,7 +1369,7 @@ is not the ceiling in disguise — `autoApplyCeiling: { developer: "critical" }`
 the widest latitude the type permits, and the change is still held.
 
 What the Gate knows that `stakes.level` does not carry is **which factor**
-produced the level. To get the same behaviour from the level alone you would have
+produced the level. To get the same behavior from the level alone you would have
 to promote `discards-later-work` to `critical`, and then rung 2 catches it first
 and it is a refusal for everybody — including a person who is entitled to look at
 a revert and say yes. There is no value on a four-point scale that means "always
@@ -1402,7 +1402,7 @@ mode of the other direction is a change nobody saw.
 The last two rows: `refusalFloor` cannot exceed `critical`, since `critical` is
 the top of `STAKE_ORDER`, and rung 2 fires on `isAtLeast`. So a `critical`
 change is refused under **every** policy, and rung 7 never sees one. Which
-means `autoApplyCeiling` has three behaviourally distinct values, not four:
+means `autoApplyCeiling` has three behaviorally distinct values, not four:
 `critical` and `high` differ only in what they say about critical changes, and
 critical changes never reach the rule that reads them.
 

@@ -54,7 +54,7 @@ import { WrongPages } from "./_components/wrong-pages"
  * Like `/portal/activity` it reads through the public telemetry exports, and for
  * a sharper reason — 0031 says calibration is the reference consumer. If this
  * page needed anything the package does not export, nobody outside could build
- * the adaptive behaviour this record is supposed to make possible.
+ * the adaptive behavior this record is supposed to make possible.
  */
 const TrustPage = async ({
   searchParams,

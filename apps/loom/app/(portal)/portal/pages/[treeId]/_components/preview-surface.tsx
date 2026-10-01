@@ -17,7 +17,7 @@ import { useSelection } from "./selection-context"
  * changes no markup that anyone laid out.
  *
  * Clicks are read the same way, by delegation. A listener per node would mean
- * the runtime attaching behaviour to primitives it does not own.
+ * the runtime attaching behavior to primitives it does not own.
  *
  * ## Several at once, as of phase 2
  *
@@ -34,7 +34,7 @@ import { useSelection } from "./selection-context"
  *
  * **A click on the page itself, and not on any part of it, lets everything go.**
  * That is the one gesture a toggling selection needs that toggling cannot
- * express, and it is the behaviour every canvas and file list already has.
+ * express, and it is the behavior every canvas and file list already has.
  */
 
 /** Portal-side and presentational: the runtime emits identity, not state. */

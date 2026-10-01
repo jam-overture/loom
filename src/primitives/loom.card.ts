@@ -6,7 +6,7 @@ import { definePrimitive } from "../sdk/definition.js"
 
 import { GAP_NAMES, GAPS } from "./layout.js"
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, hairline, radius, space } from "./tokens.js"
+import { color, hairline, radius, space } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -90,9 +90,9 @@ const props = z
 type Props = z.infer<typeof props>
 
 const TONES = {
-  surface: { background: colour("bg-surface"), borderColor: colour("border-subtle") },
-  outline: { background: "transparent", borderColor: colour("border-default") },
-  accent: { background: colour("accent-subtle"), borderColor: colour("border-accent") },
+  surface: { background: color("bg-surface"), borderColor: color("border-subtle") },
+  outline: { background: "transparent", borderColor: color("border-default") },
+  accent: { background: color("accent-subtle"), borderColor: color("border-accent") },
   plain: { background: "transparent", borderColor: "transparent" },
 } as const
 
@@ -139,7 +139,7 @@ export const loomCard = definePrimitive({
           overflow: "hidden",
           border: "1px solid",
           borderRadius: radius("lg"),
-          color: colour("fg-default"),
+          color: color("fg-default"),
           textDecoration: "none",
           /**
            * **A card says how wide it is, so what is on it can ask.** A card is

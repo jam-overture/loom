@@ -13,7 +13,7 @@ import { registryOf } from "../testing/definitions.js"
 import { buildElement, buildText } from "../tree/builders.js"
 import { createTree, type LoomTree } from "../tree/tree.js"
 
-import { BEHAVIOURS, BEHAVIOUR_NAMES, isBehaviourName, resolveBehaviours } from "./behaviour.js"
+import { BEHAVIORS, BEHAVIOR_NAMES, isBehaviorName, resolveBehaviors } from "./behavior.js"
 import { staticPrimitiveResolver, type LoomPrimitiveProps } from "./primitive.js"
 import { renderLoomTree } from "./render.js"
 import { NO_TEXT } from "./text.js"
@@ -28,18 +28,18 @@ const codeDefinition: PrimitiveEntry = definePrimitive({
   props: z.object({}),
   text: { copy: "Copy", copied: "Copied" },
   interactive: "always",
-  behaviours: ["copy"],
+  behaviors: ["copy"],
   component: ({ loom, children }) =>
     createElement(
       "figure",
       { ...loom.editable },
       createElement("pre", null, children),
-      loom.behaviours.copy
+      loom.behaviors.copy
     ),
 })
 
 /**
- * The primitive the second behaviour exists for: a bar that places a disclosure
+ * The primitive the second behavior exists for: a bar that places a disclosure
  * beside the region the disclosure collapses. It is `loom.nav`'s shape rather
  * than `loom.nav` itself — that file is another lane's, and the point of this
  * fixture is the seam, not the bar.
@@ -50,12 +50,12 @@ const barDefinition: PrimitiveEntry = definePrimitive({
   props: z.object({}),
   text: { disclose: "Menu" },
   interactive: "always",
-  behaviours: ["disclose"],
+  behaviors: ["disclose"],
   component: ({ loom, children }) =>
     createElement(
       "nav",
       { ...loom.editable },
-      loom.behaviours.disclose,
+      loom.behaviors.disclose,
       createElement("ul", null, children)
     ),
 })
@@ -71,18 +71,18 @@ const dialogDefinition: PrimitiveEntry = definePrimitive({
   props: z.object({}),
   text: { present: "Details", dismiss: "Close" },
   interactive: "always",
-  behaviours: ["present", "dismiss"],
+  behaviors: ["present", "dismiss"],
   component: ({ loom, children }) =>
     createElement(
       "div",
       { ...loom.editable },
-      loom.behaviours.present,
-      createElement("div", { className: "panel" }, loom.behaviours.dismiss, children)
+      loom.behaviors.present,
+      createElement("div", { className: "panel" }, loom.behaviors.dismiss, children)
     ),
 })
 
 /**
- * Both at once. The seam has carried one behaviour since it was built, so the
+ * Both at once. The seam has carried one behavior since it was built, so the
  * property worth a test is that a second is a second and not a replacement:
  * two controls, two independent sets of strings, one primitive.
  */
@@ -92,13 +92,13 @@ const panelDefinition: PrimitiveEntry = definePrimitive({
   props: z.object({}),
   text: { copy: "Copy", copied: "Copied", disclose: "Show" },
   interactive: "always",
-  behaviours: ["copy", "disclose"],
+  behaviors: ["copy", "disclose"],
   component: ({ loom, children }) =>
     createElement(
       "figure",
       { ...loom.editable },
-      loom.behaviours.disclose,
-      loom.behaviours.copy,
+      loom.behaviors.disclose,
+      loom.behaviors.copy,
       createElement("pre", null, children)
     ),
 })
@@ -111,7 +111,7 @@ const proseDefinition: PrimitiveEntry = definePrimitive({
   component: ({ loom, children }: LoomPrimitiveProps) =>
     createElement(
       "p",
-      { ...loom.editable, "data-behaviours": Object.keys(loom.behaviours).length },
+      { ...loom.editable, "data-behaviors": Object.keys(loom.behaviors).length },
       children
     ),
 })
@@ -130,13 +130,13 @@ const markupOf = (tree: LoomTree, entries: readonly PrimitiveEntry[]): string =>
   )
 }
 
-describe("the behaviour vocabulary", () => {
+describe("the behavior vocabulary", () => {
   it("is closed, and a name outside it is not one", () => {
-    expect(isBehaviourName("copy")).toBe(true)
-    expect(isBehaviourName("disclose")).toBe(true)
-    expect(isBehaviourName("adjust")).toBe(true)
-    expect(isBehaviourName("paste")).toBe(false)
-    expect(isBehaviourName("constructor")).toBe(false)
+    expect(isBehaviorName("copy")).toBe(true)
+    expect(isBehaviorName("disclose")).toBe(true)
+    expect(isBehaviorName("adjust")).toBe(true)
+    expect(isBehaviorName("paste")).toBe(false)
+    expect(isBehaviorName("constructor")).toBe(false)
   })
 
   /**
@@ -145,7 +145,7 @@ describe("the behaviour vocabulary", () => {
    * described, so growing it is a visible edit here as well as there.
    */
   it("is the five controls the runtime implements, and no others", () => {
-    expect(Object.keys(BEHAVIOURS)).toEqual(["copy", "disclose", "adjust", "present", "dismiss"])
+    expect(Object.keys(BEHAVIORS)).toEqual(["copy", "disclose", "adjust", "present", "dismiss"])
   })
 
   /**
@@ -155,7 +155,7 @@ describe("the behaviour vocabulary", () => {
    */
   it("says of every member whether it answers to another, and names one that resolves", () => {
     const requires = Object.fromEntries(
-      BEHAVIOUR_NAMES.map((name) => [name, BEHAVIOURS[name].requires])
+      BEHAVIOR_NAMES.map((name) => [name, BEHAVIORS[name].requires])
     )
 
     expect(requires).toEqual({
@@ -168,33 +168,33 @@ describe("the behaviour vocabulary", () => {
 
     for (const [name, required] of Object.entries(requires)) {
       if (required === undefined) continue
-      expect(BEHAVIOUR_NAMES, name).toContain(required)
+      expect(BEHAVIOR_NAMES, name).toContain(required)
     }
   })
 
-  it("says of every behaviour which strings its control needs", () => {
-    for (const [name, behaviour] of Object.entries(BEHAVIOURS)) {
-      expect(behaviour.text.length, name).toBeGreaterThan(0)
-      expect(behaviour.description.trim(), name).not.toBe("")
+  it("says of every behavior which strings its control needs", () => {
+    for (const [name, behavior] of Object.entries(BEHAVIORS)) {
+      expect(behavior.text.length, name).toBeGreaterThan(0)
+      expect(behavior.description.trim(), name).not.toBe("")
     }
   })
 })
 
-describe("resolveBehaviours", () => {
+describe("resolveBehaviors", () => {
   it("hands back nothing at all for a primitive that declared none", () => {
-    const resolved = resolveBehaviours([], "pnpm add loom", NO_TEXT)
+    const resolved = resolveBehaviors([], "pnpm add loom", NO_TEXT)
 
-    expect(Object.keys(resolved.behaviours)).toEqual([])
+    expect(Object.keys(resolved.behaviors)).toEqual([])
     expect(resolved.unnamed).toEqual([])
   })
 
   it("builds a control for each declared name", () => {
-    const resolved = resolveBehaviours(["copy"], "pnpm add loom", {
+    const resolved = resolveBehaviors(["copy"], "pnpm add loom", {
       copy: "Copy",
       copied: "Copied",
     })
 
-    expect(Object.keys(resolved.behaviours)).toEqual(["copy"])
+    expect(Object.keys(resolved.behaviors)).toEqual(["copy"])
     expect(resolved.unnamed).toEqual([])
   })
 
@@ -204,22 +204,22 @@ describe("resolveBehaviours", () => {
    * dictionary schema accepts because it only refuses the empty string.
    */
   it("leaves a control out rather than render it with no name", () => {
-    const resolved = resolveBehaviours(["copy"], "pnpm add loom", { copy: "Copy", copied: "   " })
+    const resolved = resolveBehaviors(["copy"], "pnpm add loom", { copy: "Copy", copied: "   " })
 
-    expect(Object.keys(resolved.behaviours)).toEqual([])
-    expect(resolved.unnamed).toEqual([{ behaviour: "copy", key: "copied" }])
+    expect(Object.keys(resolved.behaviors)).toEqual([])
+    expect(resolved.unnamed).toEqual([{ behavior: "copy", key: "copied" }])
   })
 
   it("answers with a map that inherits nothing from Object.prototype", () => {
-    const resolved = resolveBehaviours(["copy"], "x", { copy: "Copy", copied: "Copied" })
+    const resolved = resolveBehaviors(["copy"], "x", { copy: "Copy", copied: "Copied" })
 
-    expect(Object.getPrototypeOf(resolved.behaviours)).toBeNull()
+    expect(Object.getPrototypeOf(resolved.behaviors)).toBeNull()
   })
 
   it("builds a disclosure from the one string that names it", () => {
-    const resolved = resolveBehaviours(["disclose"], "", { disclose: "Menu" })
+    const resolved = resolveBehaviors(["disclose"], "", { disclose: "Menu" })
 
-    expect(Object.keys(resolved.behaviours)).toEqual(["disclose"])
+    expect(Object.keys(resolved.behaviors)).toEqual(["disclose"])
     expect(resolved.unnamed).toEqual([])
   })
 
@@ -229,24 +229,24 @@ describe("resolveBehaviours", () => {
    * dictionary that blanks one leaves the other alone.
    */
   it("builds both controls for a primitive that declared both", () => {
-    const resolved = resolveBehaviours(["copy", "disclose"], "pnpm add loom", {
+    const resolved = resolveBehaviors(["copy", "disclose"], "pnpm add loom", {
       copy: "Copy",
       copied: "Copied",
       disclose: "Show",
     })
 
-    expect(Object.keys(resolved.behaviours)).toEqual(["copy", "disclose"])
+    expect(Object.keys(resolved.behaviors)).toEqual(["copy", "disclose"])
   })
 
   it("drops only the control whose name is blank, and keeps the other", () => {
-    const resolved = resolveBehaviours(["copy", "disclose"], "pnpm add loom", {
+    const resolved = resolveBehaviors(["copy", "disclose"], "pnpm add loom", {
       copy: "Copy",
       copied: "Copied",
       disclose: " ",
     })
 
-    expect(Object.keys(resolved.behaviours)).toEqual(["copy"])
-    expect(resolved.unnamed).toEqual([{ behaviour: "disclose", key: "disclose" }])
+    expect(Object.keys(resolved.behaviors)).toEqual(["copy"])
+    expect(resolved.unnamed).toEqual([{ behavior: "disclose", key: "disclose" }])
   })
 
   /**
@@ -257,7 +257,7 @@ describe("resolveBehaviours", () => {
    */
   it("builds a disclosure the same way whatever the node says", () => {
     const named = (content: string): readonly string[] =>
-      Object.keys(resolveBehaviours(["disclose"], content, { disclose: "Menu" }).behaviours)
+      Object.keys(resolveBehaviors(["disclose"], content, { disclose: "Menu" }).behaviors)
 
     expect(named("")).toEqual(["disclose"])
     expect(named("a bar full of words")).toEqual(["disclose"])
@@ -265,13 +265,13 @@ describe("resolveBehaviours", () => {
 
   /**
    * The same property, asserted separately rather than folded into the test
-   * above, because the two behaviours reach it for different reasons: a
+   * above, because the two behaviors reach it for different reasons: a
    * disclosure ignores the content because it acts on layout, and an adjust
    * ignores it because it acts on a number nobody typed into the tree.
    */
   it("builds an adjust the same way whatever the node says", () => {
     const named = (content: string): readonly string[] =>
-      Object.keys(resolveBehaviours(["adjust"], content, { adjust: "Reveal" }).behaviours)
+      Object.keys(resolveBehaviors(["adjust"], content, { adjust: "Reveal" }).behaviors)
 
     expect(named("")).toEqual(["adjust"])
     expect(named("a caption under the pictures")).toEqual(["adjust"])
@@ -284,10 +284,10 @@ describe("resolveBehaviours", () => {
    * what happens is somewhere else on the page.
    */
   it("drops an adjust whose name is blank rather than rendering it nameless", () => {
-    const resolved = resolveBehaviours(["adjust"], "", { adjust: "  " })
+    const resolved = resolveBehaviors(["adjust"], "", { adjust: "  " })
 
-    expect(Object.keys(resolved.behaviours)).toEqual([])
-    expect(resolved.unnamed).toEqual([{ behaviour: "adjust", key: "adjust" }])
+    expect(Object.keys(resolved.behaviors)).toEqual([])
+    expect(resolved.unnamed).toEqual([{ behavior: "adjust", key: "adjust" }])
   })
 })
 
@@ -296,7 +296,7 @@ describe("a rendered tree", () => {
    * The control renders nothing on the server, because it does not yet know
    * whether the clipboard is there. What this proves is that the primitive
    * placed what it declared and the render walked through it without throwing —
-   * the button itself is `behaviour-copy.test.ts`.
+   * the button itself is `behavior-copy.test.ts`.
    */
   it("places a declared control without emitting a button before it can work", () => {
     const markup = markupOf(treeWith("loom.code", "pnpm add @jam-overture/loom"), [codeDefinition])
@@ -337,7 +337,7 @@ describe("a rendered tree", () => {
 
   it("hands a primitive that declared none an empty map", () => {
     expect(markupOf(treeWith("loom.prose", "hello"), [proseDefinition])).toContain(
-      'data-behaviours="0"'
+      'data-behaviors="0"'
     )
   })
 
@@ -346,13 +346,13 @@ describe("a rendered tree", () => {
    * nothing to lose and nothing for a host to wire — the text seam's base case,
    * with no dictionary half.
    */
-  it("renders through a bare resolver with no behaviours and no diagnostics", () => {
+  it("renders through a bare resolver with no behaviors and no diagnostics", () => {
     const rendered = renderLoomTree(treeWith("loom.prose", "hello"), {
       resolver: staticPrimitiveResolver({ "loom.prose": proseDefinition.component }),
     })
 
     expect(rendered.diagnostics).toEqual([])
-    expect(renderToStaticMarkup(rendered.element)).toContain('data-behaviours="0"')
+    expect(renderToStaticMarkup(rendered.element)).toContain('data-behaviors="0"')
   })
 
   it("reports the control it left out when a dictionary blanks its name", () => {
@@ -369,12 +369,12 @@ describe("a rendered tree", () => {
     })
 
     expect(rendered.diagnostics).toEqual([
-      { code: "behaviour-unnamed", nodeId: expect.any(String), behaviour: "copy", key: "copied" },
+      { code: "behavior-unnamed", nodeId: expect.any(String), behavior: "copy", key: "copied" },
     ])
   })
 })
 
-describe("registering a primitive that takes a behaviour", () => {
+describe("registering a primitive that takes a behavior", () => {
   const errorOf = (entry: PrimitiveEntry): string => {
     const built = createPrimitiveRegistry([entry])
     if (built.ok) throw new Error("expected the registration to be refused")
@@ -386,8 +386,8 @@ describe("registering a primitive that takes a behaviour", () => {
     expect(createPrimitiveRegistry([codeDefinition]).ok).toBe(true)
   })
 
-  it("refuses a behaviour the runtime does not implement", () => {
-    const entry: PrimitiveEntry = { ...codeDefinition, behaviours: ["paste"] }
+  it("refuses a behavior the runtime does not implement", () => {
+    const entry: PrimitiveEntry = { ...codeDefinition, behaviors: ["paste"] }
 
     expect(errorOf(entry)).toContain("the runtime has none")
   })
@@ -417,7 +417,7 @@ describe("registering a primitive that takes a behaviour", () => {
   /**
    * A menu button is as much a target as a copy button, so the check that keeps
    * a code panel out of a linked card keeps a bar out of one too. Worth its own
-   * case because `rendersControl` is per behaviour, and a second one that
+   * case because `rendersControl` is per behavior, and a second one that
    * forgot to set it would register happily.
    */
   it("refuses a bar that takes a disclosure and does not call itself interactive", () => {
@@ -440,7 +440,7 @@ describe("registering a primitive that takes a behaviour", () => {
     const entry: PrimitiveEntry = {
       ...dialogDefinition,
       text: { dismiss: "Close" },
-      behaviours: ["dismiss"],
+      behaviors: ["dismiss"],
     }
 
     expect(errorOf(entry)).toContain("does nothing without")
@@ -451,7 +451,7 @@ describe("registering a primitive that takes a behaviour", () => {
    * so far, so a primitive that names the cross first is not making a mistake.
    */
   it("accepts the pair whichever order it is declared in", () => {
-    const entry: PrimitiveEntry = { ...dialogDefinition, behaviours: ["dismiss", "present"] }
+    const entry: PrimitiveEntry = { ...dialogDefinition, behaviors: ["dismiss", "present"] }
 
     expect(createPrimitiveRegistry([entry]).ok).toBe(true)
   })
@@ -471,19 +471,19 @@ describe("registering a primitive that takes a behaviour", () => {
   it("answers for a type it knows, and for one it does not", () => {
     const registry = registryOf([codeDefinition, proseDefinition, panelDefinition])
 
-    expect(registry.behavioursFor(primitiveTypeSchema.parse("loom.code"))).toEqual(["copy"])
-    expect(registry.behavioursFor(primitiveTypeSchema.parse("loom.panel"))).toEqual([
+    expect(registry.behaviorsFor(primitiveTypeSchema.parse("loom.code"))).toEqual(["copy"])
+    expect(registry.behaviorsFor(primitiveTypeSchema.parse("loom.panel"))).toEqual([
       "copy",
       "disclose",
     ])
-    expect(registry.behavioursFor(primitiveTypeSchema.parse("loom.prose"))).toEqual([])
-    expect(registry.behavioursFor(primitiveTypeSchema.parse("loom.absent"))).toEqual([])
+    expect(registry.behaviorsFor(primitiveTypeSchema.parse("loom.prose"))).toEqual([])
+    expect(registry.behaviorsFor(primitiveTypeSchema.parse("loom.absent"))).toEqual([])
   })
 })
 
 describe("the audit", () => {
   it("has nothing to report about a primitive that places what it declared", () => {
-    expect(auditRegistry(registryOf([codeDefinition])).unplacedBehaviours).toEqual([])
+    expect(auditRegistry(registryOf([codeDefinition])).unplacedBehaviors).toEqual([])
   })
 
   /**
@@ -498,22 +498,22 @@ describe("the audit", () => {
       props: z.object({}),
       text: { copy: "Copy", copied: "Copied" },
       interactive: "always",
-      behaviours: ["copy"],
+      behaviors: ["copy"],
       component: ({ loom, children }: LoomPrimitiveProps) =>
         createElement("pre", { ...loom.editable }, children),
     })
 
-    expect(auditRegistry(registryOf([dropping])).unplacedBehaviours).toEqual([
-      { type: "loom.code", behaviours: ["copy"] },
+    expect(auditRegistry(registryOf([dropping])).unplacedBehaviors).toEqual([
+      { type: "loom.code", behaviors: ["copy"] },
     ])
   })
 
   it("has nothing to report about a bar that places its disclosure", () => {
-    expect(auditRegistry(registryOf([barDefinition])).unplacedBehaviours).toEqual([])
+    expect(auditRegistry(registryOf([barDefinition])).unplacedBehaviors).toEqual([])
   })
 
   /**
-   * The probe answers per behaviour rather than per primitive, which is the
+   * The probe answers per behavior rather than per primitive, which is the
    * property that matters once there are two: a component that places one
    * control and forgets the other is the likeliest way to get this wrong, and
    * "it places something" would report nothing.
@@ -525,13 +525,13 @@ describe("the audit", () => {
       props: z.object({}),
       text: { copy: "Copy", copied: "Copied", disclose: "Show" },
       interactive: "always",
-      behaviours: ["copy", "disclose"],
+      behaviors: ["copy", "disclose"],
       component: ({ loom, children }: LoomPrimitiveProps<Record<string, never>, string, "copy" | "disclose">) =>
-        createElement("figure", { ...loom.editable }, loom.behaviours.disclose, children),
+        createElement("figure", { ...loom.editable }, loom.behaviors.disclose, children),
     })
 
-    expect(auditRegistry(registryOf([half])).unplacedBehaviours).toEqual([
-      { type: "loom.panel", behaviours: ["copy"] },
+    expect(auditRegistry(registryOf([half])).unplacedBehaviors).toEqual([
+      { type: "loom.panel", behaviors: ["copy"] },
     ])
   })
 })

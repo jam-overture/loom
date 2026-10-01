@@ -9,7 +9,7 @@ import { libraryStylesheet } from "./stylesheet.js"
 import { radius } from "./tokens.js"
 
 /**
- * Atmosphere behind whatever is put inside it: drifting colour, a ruled ground,
+ * Atmosphere behind whatever is put inside it: drifting color, a ruled ground,
  * beams, or one pool of light.
  *
  * ## The gap this closes, which three runs looked for and missed
@@ -54,7 +54,7 @@ import { radius } from "./tokens.js"
  *
  * ## What the tree may say
  *
- * Which paint, and how the painted area is cornered. Not a colour (0049 — the
+ * Which paint, and how the painted area is cornered. Not a color (0049 — the
  * paints read palette slots, so re-theming a page re-themes its atmosphere),
  * not a duration, delay or easing (0055), and not an opacity, which is the
  * "tune it a bit" prop that would turn a reviewable choice into a number nobody
@@ -113,7 +113,7 @@ type Props = z.infer<typeof props>
 export const loomBackdrop = definePrimitive({
   type: "loom.backdrop",
   description:
-    "Atmosphere behind whatever is put inside it: drifting colour, a ruled grid, a lattice of dots, beams from above, or one pool of light. Wraps anything and draws nothing of its own. The grid and dots need a band a few hundred pixels tall to read as a ground; the other three work at any height.",
+    "Atmosphere behind whatever is put inside it: drifting color, a ruled grid, a lattice of dots, beams from above, or one pool of light. Wraps anything and draws nothing of its own. The grid and dots need a band a few hundred pixels tall to read as a ground; the other three work at any height.",
   props,
   slots: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>

@@ -196,7 +196,7 @@ describe("refusalState", () => {
    * only way this can fail quietly: a future edit that makes `CANNOT_BE_DRAWN`
    * read like the ordinary refusal passes every other test in this file.
    */
-  it("gives the two refusals different words, and the same colour", () => {
+  it("gives the two refusals different words, and the same color", () => {
     expect(CANNOT_BE_DRAWN.label).not.toBe(CHANGE_STATES.refused.label)
     expect(CANNOT_BE_DRAWN.meaning).not.toBe(CHANGE_STATES.refused.meaning)
     expect(CANNOT_BE_DRAWN.tone).toBe(CHANGE_STATES.refused.tone)

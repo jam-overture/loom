@@ -290,15 +290,15 @@ export type RenderDiagnostic =
     }
   | {
       /**
-       * A declared behaviour's control had no name to render under, so it was
-       * left out. The registry refuses a primitive that declares a behaviour
+       * A declared behavior's control had no name to render under, so it was
+       * left out. The registry refuses a primitive that declares a behavior
        * and not its strings, so the way here is a dictionary that answers a
        * declared key with a blank — a translation fault, in the one place that
        * can see it, rather than an unnamed button on the page.
        */
-      readonly code: "behaviour-unnamed"
+      readonly code: "behavior-unnamed"
       readonly nodeId: NodeId
-      readonly behaviour: string
+      readonly behavior: string
       readonly key: string
     }
   | {
@@ -381,8 +381,8 @@ export const describeRenderDiagnostic = (diagnostic: RenderDiagnostic): string =
       return `node ${diagnostic.nodeId} names an anchor a link could not carry, so it is not a fragment target — ${diagnostic.detail}`
     case "anchor-claimed":
       return `node ${diagnostic.nodeId} names the anchor "${diagnostic.anchor}" and node ${diagnostic.holder} already holds it, so only the first one is a fragment target`
-    case "behaviour-unnamed":
-      return `node ${diagnostic.nodeId} takes the "${diagnostic.behaviour}" behaviour and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
+    case "behavior-unnamed":
+      return `node ${diagnostic.nodeId} takes the "${diagnostic.behavior}" behavior and "${diagnostic.key}" resolved to nothing, so the control was left out rather than rendered with no accessible name`
     case "theme-values-unmounted":
       return `this render was asked for the theme's values and node ${diagnostic.nodeId} mounted no theme, so every reference on the page was left as written — nothing outside a browser will resolve them`
     case "excerpt-absent":

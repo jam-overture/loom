@@ -1,8 +1,8 @@
 /**
- * The rail's own colours, as values something other than CSS can read.
+ * The rail's own colors, as values something other than CSS can read.
  *
  * `globals.css` is the demo's chrome and it is the only declaration of it. This
- * file adds no colour and decides nothing: it is the handful of those tokens
+ * file adds no color and decides nothing: it is the handful of those tokens
  * that the share card needs, in a form the image renderer can take, because
  * `ImageResponse` resolves no cascade and no custom properties — a card styled
  * `var(--surface-page)` draws black on black.
@@ -15,7 +15,7 @@
  *
  * It is deliberately the *subset* a picture needs, and only the **chrome** half
  * of it. The other half of the card is the page on the stage, and that one
- * carries a registered theme of its own (0050) — so its colours come off the
+ * carries a registered theme of its own (0050) — so its colors come off the
  * palette rather than from here, which is the same division the running surface
  * makes.
  */

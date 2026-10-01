@@ -1,7 +1,7 @@
 import { createElement, type CSSProperties, type ReactNode } from "react"
 
 import { LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, motion } from "./tokens.js"
+import { color, motion } from "./tokens.js"
 
 /**
  * The atmosphere a band is painted on, as layers rather than as a background.
@@ -16,14 +16,14 @@ import { colour, motion } from "./tokens.js"
  *
  * Five paints, and the test each one had to pass to be here is **a reader can
  * tell it apart from the other four at a glance**, not "it is a different
- * number". Two colour fields drifting, a ruled blueprint, a lattice of points,
+ * number". Two color fields drifting, a ruled blueprint, a lattice of points,
  * beams from above, one pool of light. A sixth that was merely a dimmer aurora
  * would be [0052](../../decisions/0052-a-repeated-item-is-a-node-and-a-fixed-field-is-a-prop.md)'s
  * shades-of-one mistake in the one place this library has room for it.
  *
  * ## What a paint may not do
  *
- * **Name a colour.** Hermes' gradient heroes took `from`, `to` and `via` as raw
+ * **Name a color.** Hermes' gradient heroes took `from`, `to` and `via` as raw
  * hex from the page author, so re-theming a page left its hero behind. Every
  * value below is a palette slot, which is what keeps a re-theme one `configure`
  * on the root ([0049](../../decisions/0049-a-theme-is-three-ids-in-the-tree.md)).
@@ -41,7 +41,7 @@ import { colour, motion } from "./tokens.js"
  * `transparent` interpolates towards transparent *black*, so an accent field
  * greys out on its way to nothing and the element's own square edge stays
  * visible where the gradient has not finished. A mask fades opacity alone, so
- * the colour is the palette's to the last pixel.
+ * the color is the palette's to the last pixel.
  *
  * **A field hangs inside its band, not off the corner.** The obvious way to
  * write a glow in a corner is negative insets and a bigger box; with the
@@ -145,7 +145,7 @@ export const ABOVE_BACKDROP: CSSProperties = { position: "relative", zIndex: 1 }
 /**
  * A third of an opacity is what a hero's fields have carried since they
  * shipped, and it is too much once the same paint is a band rather than a
- * screen: the field is smaller, so the colour is concentrated, and under a
+ * screen: the field is smaller, so the color is concentrated, and under a
  * low-chroma palette — `editorial`'s accent is a slate `#34425a` — a
  * concentrated tint is not light behind the band, it is a grey blob on it.
  * Spread out it reads as atmosphere; concentrated it reads as dirt.
@@ -163,7 +163,7 @@ const AURORA_OPACITY = 0.26
  * the library reads that slot as *ink* — eyebrows, kickers, the disclosure
  * marker, the current nav item — far more often than as a fill. These paints
  * are the only place in the library that reads a slot as a large area of
- * colour, so it is they that have to move.
+ * color, so it is they that have to move.
  *
  * `accent-subtle` would fix the smudge by making the paint vanish: that slot is
  * a *tile background* — `#e6ebf2` and `#effbf5` — which at a third of an opacity
@@ -183,7 +183,7 @@ const auroraField = (slot: typeof GLOW | typeof GLOW_SECOND, position: CSSProper
       position: "absolute",
       width: "min(46rem, 78%)",
       height: "min(46rem, 100%)",
-      background: colour(slot),
+      background: color(slot),
       maskImage: CLOSEST_SIDE_FADE,
       WebkitMaskImage: CLOSEST_SIDE_FADE,
       opacity: AURORA_OPACITY,
@@ -225,7 +225,7 @@ const RAYS_APEX = "-10rem"
  * **`core` is where that mask stops being a point.** The fade was
  * `black 0%, transparent <reach>`, which is fully opaque at the centre pixel and
  * nowhere else, so the strongest line a blueprint ever drew was three quarters
- * of its own colour and the rest fell away from there. A core holds the mask
+ * of its own color and the rest fell away from there. A core holds the mask
  * open over the middle of the band and then fades on the same reach — still
  * brightest at the middle and still nothing at every edge, which is this file's
  * rule unchanged, with a plateau where it had a peak. Measured over a
@@ -314,7 +314,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
      * the lattice takes it and the blueprint does not: a point covers a
      * fraction of the area a line does.
      */
-    const line = colour("border-default")
+    const line = color("border-default")
 
     return [
       ruled(
@@ -339,7 +339,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
     return [
       ruled(
         "dots",
-        `radial-gradient(${colour("border-strong")} 1px, transparent 1px)`,
+        `radial-gradient(${color("border-strong")} 1px, transparent 1px)`,
         "1.5rem 1.5rem",
         "0%",
         "68%"
@@ -354,7 +354,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
      * down the page so the beams dissolve rather than ending, and the second
      * pass narrows them to the middle so the band's own corners stay clean.
      */
-    const beams = `repeating-conic-gradient(from 200deg at 50% ${RAYS_APEX}, ${colour(GLOW)} 0deg 4deg, transparent 4deg 11deg)`
+    const beams = `repeating-conic-gradient(from 200deg at 50% ${RAYS_APEX}, ${color(GLOW)} 0deg 4deg, transparent 4deg 11deg)`
     const fade = "linear-gradient(to bottom, black 0%, transparent 85%)"
     const narrow = "radial-gradient(ellipse at 50% 30%, black 0%, transparent 78%)"
 
@@ -381,7 +381,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
    * *not* the aurora with one field deleted: the pool is wide, centred and
    * still, where a field is round, cornered and drifting.
    *
-   * A flat colour under an elliptical **mask**, for the first trap above rather
+   * A flat color under an elliptical **mask**, for the first trap above rather
    * than for symmetry — written as a gradient ending at `transparent` it is a
    * pool of light that turns grey on its way out, which is most visible in
    * exactly the palettes whose accent has least chroma to begin with.
@@ -394,7 +394,7 @@ export const backdropLayers = (paint: PaintName): readonly ReactNode[] => {
       "aria-hidden": true,
       style: {
         ...LAYER,
-        background: colour(GLOW),
+        background: color(GLOW),
         opacity: 0.18,
         maskImage: pool,
         WebkitMaskImage: pool,

@@ -1027,7 +1027,7 @@ apart. This one is mostly not about the seam at all: lesson 21's registry half i
 the pattern you already have, and the half worth retrieving is what happened when
 a property turned out to belong to nobody.
 
-1. Give the reason a model may not write a colour, as a property of the value
+1. Give the reason a model may not write a color, as a property of the value
    space rather than as a danger. Then apply the same reasoning to two cases no
    lesson covered: the number of columns in a grid, and the alt text on an
    image. If your rule gives the same answer for both, you have not found it
@@ -1057,7 +1057,7 @@ a property turned out to belong to nobody.
    answers "I could not tell you" as a first-class result. Then the sharper half:
    say what a host could have made disappear if `unmeasured` had been folded into
    "pass". *(15, 20, 21)*
-7. Two colours at 1.00:1 that a reader tells apart at a glance. Explain how both
+7. Two colors at 1.00:1 that a reader tells apart at a glance. Explain how both
    are true, then state what a design token promises and does not — in one
    sentence, to somebody who has never heard of Loom — and derive from your
    sentence the class of bug it predicts. *(21)*
@@ -1289,7 +1289,7 @@ them has memorised the result rather than the rule.
 ## Set AE — two days after lesson 26
 
 Interleaved with 05, 09, 10, 16, 18, 22, 24 and 25. Heavy on 10, because lesson
-26 is unreadable if `confirmHeld`'s behaviour is not solid; and heavy on 24,
+26 is unreadable if `confirmHeld`'s behavior is not solid; and heavy on 24,
 because the rule about what a reading owes a caller appears here in its second
 form and the two are worth holding side by side.
 
@@ -1304,7 +1304,7 @@ form and the two are worth holding side by side.
    away from it the comparison lives. *(26)*
 3. A hold against a deleted tree is marked `unknown` and not `dead`, although
    every consequence of the two is identical. Give the argument in terms of what
-   a badge *claims* rather than what it causes, and then name the rung behaviour
+   a badge *claims* rather than what it causes, and then name the rung behavior
    in the Gate that is the same discipline. *(09, 26)*
 4. Nothing in this runtime throws, and every failure is a member of a closed set
    — and yet `markHoldsFromStore` hands back no `Result` at all. Say why, state
@@ -1573,7 +1573,7 @@ publishes a number.
    That reads like a fact about a serialisation format. Say what it is actually a
    consequence of, in a sentence about what a reviewer of a change has to be able
    to do. *(01, 31)*
-3. A behaviour is handed to a primitive as a node with nothing left to
+3. A behavior is handed to a primitive as a node with nothing left to
    configure, rather than as a component it may pass props to. Give the argument
    for that, and then say what a primitive *does* still decide. *(15, 31)*
 4. A primitive that takes a copy control must declare itself `interactive`, and
@@ -1590,7 +1590,7 @@ publishes a number.
    Then say which of the two is the reason this seam is safe. *(09, 31)*
 7. A page with a copy button on it, rendered to static markup, contains no
    button. Say what that buys, what it costs, and then say what it implies about
-   *where* a behaviour can be checked at all — the last part is the one the four
+   *where* a behavior can be checked at all — the last part is the one the four
    registration checks are an answer to. *(14, 31)*
 8. Two controls of one primitive have to agree about one boolean and the seam
    that built them gives them no way to. Say what they use instead, what the
@@ -1598,7 +1598,7 @@ publishes a number.
    not reaching is the right kind of failure. Then compare it with lesson 30's
    answer to a very similar problem, and say what made the verdicts differ.
    *(30, 31)*
-9. The behaviour vocabulary has five members and two primitives in the starter
+9. The behavior vocabulary has five members and two primitives in the starter
    library declare one. Say what the healthy reading of that is and what the
    unhealthy one is, and then state the general rule about what a word like
    *closed* on a finding is worth when nothing compares it to anything. *(24, 28,

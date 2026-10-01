@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 
 /**
  * One intersection of a comparison: what this subject does about this criterion.
@@ -88,8 +88,8 @@ type MarkKey = keyof typeof CELL_TEXT
  * face that has them, and it draws at the same weight. Beside a tick and a
  * cross it reads as *neither*, which is what partial means.
  *
- * The colours are **not here**. They are class names resolved by the library's
- * stylesheet, because a featured column repaints its own ink — an inline colour
+ * The colors are **not here**. They are class names resolved by the library's
+ * stylesheet, because a featured column repaints its own ink — an inline color
  * would beat that rule and be unreachable from it, which is the first trap
  * `stylesheet.ts` names.
  */
@@ -206,7 +206,7 @@ export const loomComparison = definePrimitive({
           fontWeight: subject ? "bolder" : weight("body"),
           fontSize: size(3),
           lineHeight: 1.4,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       answer,

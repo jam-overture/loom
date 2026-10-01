@@ -93,7 +93,7 @@ describe("plainStanding", () => {
   })
 
   /**
-   * Colour is a second channel and never the only one, so the five standings
+   * Color is a second channel and never the only one, so the five standings
    * have to be distinguishable with the palette turned off.
    */
   it("gives every standing a label of its own", () => {

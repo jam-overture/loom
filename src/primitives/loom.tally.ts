@@ -7,7 +7,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, size } from "./tokens.js"
+import { color, size } from "./tokens.js"
 
 /**
  * One figure that is read rather than written — `loom.stat`'s content model
@@ -177,7 +177,7 @@ export const loomTally = definePrimitive({
            * which is the one mechanic this library relies on for exactly this.
            */
           ...(figure === undefined
-            ? { style: { fontSize: size(5), color: colour("fg-subtle") } }
+            ? { style: { fontSize: size(5), color: color("fg-subtle") } }
             : {}),
         },
         value

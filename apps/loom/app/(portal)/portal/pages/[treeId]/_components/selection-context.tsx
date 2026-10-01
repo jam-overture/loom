@@ -29,7 +29,7 @@ import { scopeOf, type SelectionScope } from "@/app/(portal)/_lib/selection-scop
  *   application does and it is undiscoverable: the test this surface is held to
  *   is whether a bright high schooler can work out what to do, and a person who
  *   does not know the chord can never pick two parts. Clicking a picked part
- *   again lets it go, which is the one behaviour that needs no instruction. The
+ *   again lets it go, which is the one behavior that needs no instruction. The
  *   cost is that switching from one part to another is two clicks, and the pane
  *   answers it with a count and a way to let everything go at once.
  * - **`picked` is derived by filtering `rows`, never by the order clicked.** A

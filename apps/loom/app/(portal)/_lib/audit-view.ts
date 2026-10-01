@@ -96,7 +96,7 @@ export const DIFFERENCE_LIMIT = 25
 /**
  * An audit verdict borrows the portal's existing outcome palette rather than
  * introducing a second one. A reviewer already reads `applied` as "this went
- * through" and `rejected` as "this did not"; a new set of colours meaning
+ * through" and `rejected` as "this did not"; a new set of colors meaning
  * roughly the same things would be one more thing to learn.
  *
  * `unreplayable` is `uninterpreted` and not `rejected` on purpose: the same

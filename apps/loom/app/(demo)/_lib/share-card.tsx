@@ -1,9 +1,9 @@
 import type { ReactElement } from "react"
 
 import { CHROME, CHROME_RADIUS } from "./chrome"
-import { pageColour } from "./ground"
+import { pageColor } from "./ground"
 import type { DemoShareCard } from "./share"
-import { SPOT_COLOURS } from "./spotlight"
+import { SPOT_COLORS } from "./spotlight"
 
 /**
  * The card, drawn.
@@ -28,14 +28,14 @@ import { SPOT_COLOURS } from "./spotlight"
  * rather than a licence — there is one element per region here, this module is
  * private to the image route, and no page imports any of it.
  *
- * **No colour below is chosen here, and the two halves take theirs from
+ * **No color below is chosen here, and the two halves take theirs from
  * different places on purpose.** The rail's are `chrome.ts`'s, which are
  * `globals.css`'s. The stage's are the registered palette the demo tree
  * carries, because the page being changed wears its own theme (0050) and always
  * has. That division is the running surface's, and copying it is what stops the
  * card being a picture of a page this deployment does not serve.
  *
- * **That last sentence was false for a day**, and it is why `pageColour` is
+ * **That last sentence was false for a day**, and it is why `pageColor` is
  * imported rather than a palette. This file named `editorialPalette` directly
  * and said in a comment that it was doing so because that is what
  * `DEMO_STARTING_THEME` names. It was — and on 26 September the starting theme
@@ -50,17 +50,17 @@ import { SPOT_COLOURS } from "./spotlight"
  */
 
 /**
- * The four of the page's colours this picture draws with, named once.
+ * The four of the page's colors this picture draws with, named once.
  *
- * `pageColour` resolves them off the palette the tree carries; this is only the
+ * `pageColor` resolves them off the palette the tree carries; this is only the
  * shorthand, so the pairings list below and the elements that draw them cannot
  * be reading two different slots.
  */
 const PAGE = {
-  canvas: pageColour("bg-canvas"),
-  ink: pageColour("fg-default"),
-  muted: pageColour("fg-muted"),
-  accent: pageColour("accent"),
+  canvas: pageColor("bg-canvas"),
+  ink: pageColor("fg-default"),
+  muted: pageColor("fg-muted"),
+  accent: pageColor("accent"),
 } as const
 
 /**
@@ -78,7 +78,7 @@ export const CARD_PAIRINGS: readonly {
   { what: "the page's headline", foreground: PAGE.ink, background: PAGE.canvas },
   { what: "a figure", foreground: PAGE.accent, background: PAGE.canvas },
   { what: "a figure's label", foreground: PAGE.muted, background: PAGE.canvas },
-  { what: "the mark's chip", foreground: SPOT_COLOURS.awaiting.ink, background: SPOT_COLOURS.awaiting.fill },
+  { what: "the mark's chip", foreground: SPOT_COLORS.awaiting.ink, background: SPOT_COLORS.awaiting.fill },
   { what: "the badge", foreground: CHROME.awaitingInk, background: CHROME.awaitingGround },
   { what: "the ask", foreground: CHROME.inkSecondary, background: CHROME.page },
   { what: "the verdict", foreground: CHROME.inkPrimary, background: CHROME.page },
@@ -109,8 +109,8 @@ const chip = (words: string): ReactElement => (
   <div
     style={{
       display: "flex",
-      backgroundColor: SPOT_COLOURS.awaiting.fill,
-      color: SPOT_COLOURS.awaiting.ink,
+      backgroundColor: SPOT_COLORS.awaiting.fill,
+      color: SPOT_COLORS.awaiting.ink,
       borderRadius: 999,
       paddingTop: 5,
       paddingBottom: 5,
@@ -138,7 +138,7 @@ const band = (card: DemoShareCard): ReactElement => (
       display: "flex",
       flexDirection: "column",
       marginTop: 34,
-      border: `3px solid ${SPOT_COLOURS.awaiting.edge}`,
+      border: `3px solid ${SPOT_COLORS.awaiting.edge}`,
       borderRadius: CHROME_RADIUS.large,
       paddingTop: 20,
       paddingBottom: 22,

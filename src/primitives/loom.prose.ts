@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, READABLE_MEASURE, type RampStep } from "./tokens.js"
+import { color, family, size, READABLE_MEASURE, type RampStep } from "./tokens.js"
 
 const props = z
   .object({
@@ -35,7 +35,7 @@ export const loomProse = definePrimitive({
           fontFamily: family("body"),
           fontSize: size(STEPS[given.size ?? "body"]),
           lineHeight: 1.6,
-          color: given.tone === "muted" ? colour("fg-muted") : colour("fg-default"),
+          color: given.tone === "muted" ? color("fg-muted") : color("fg-default"),
           /** Absent means inherit — see `loom.heading`, and 0207. */
           ...(given.align === undefined ? {} : { textAlign: given.align }),
           ...(given.measured === true

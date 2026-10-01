@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -96,7 +96,7 @@ export const loomProduct = definePrimitive({
             {
               key: "cover",
               className: LIBRARY_CLASS.coverMedia,
-              style: { background: colour("bg-surface-muted") },
+              style: { background: color("bg-surface-muted") },
             },
             createElement("img", {
               src: given.image,
@@ -118,7 +118,7 @@ export const loomProduct = definePrimitive({
           fontWeight: weight("heading"),
           fontSize: size(4),
           lineHeight: 1.25,
-          color: colour("fg-default"),
+          color: color("fg-default"),
         },
       },
       given.href === undefined
@@ -167,7 +167,7 @@ export const loomProduct = definePrimitive({
                 fontWeight: weight("heading"),
                 fontSize: size(5),
                 lineHeight: 1.1,
-                color: colour("accent-strong"),
+                color: color("accent-strong"),
               },
             },
             given.price
@@ -185,8 +185,8 @@ export const loomProduct = definePrimitive({
           boxSizing: "border-box",
           height: "100%",
           overflow: "hidden",
-          background: colour("bg-surface"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("lg"),
         },
       },
@@ -227,7 +227,7 @@ export const loomProduct = definePrimitive({
                   fontFamily: family("body"),
                   fontSize: size(3),
                   lineHeight: 1.6,
-                  color: colour("fg-muted"),
+                  color: color("fg-muted"),
                 },
               },
               given.description

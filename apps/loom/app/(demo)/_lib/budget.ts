@@ -7,7 +7,7 @@
  * after the first bad week.
  *
  * A token bucket rather than a fixed count, because the failure being prevented
- * is a burst and the behaviour wanted afterwards is recovery: a demo that spent
+ * is a burst and the behavior wanted afterwards is recovery: a demo that spent
  * its allowance on Tuesday should work again on Wednesday without a deploy.
  *
  * Pure — state in, state out — so the policy is testable without a clock, a

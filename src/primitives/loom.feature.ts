@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -77,8 +77,8 @@ const props = z
 type Props = z.infer<typeof props>
 
 const CARD: CSSProperties = {
-  background: colour("bg-surface"),
-  border: `1px solid ${colour("border-subtle")}`,
+  background: color("bg-surface"),
+  border: `1px solid ${color("border-subtle")}`,
   borderRadius: radius("lg"),
   padding: space(5),
 }
@@ -115,7 +115,7 @@ export const loomFeature = definePrimitive({
                 width: space(7),
                 height: space(7),
                 borderRadius: radius("md"),
-                background: colour("accent-subtle"),
+                background: color("accent-subtle"),
                 fontSize: size(4),
                 lineHeight: 1,
               },
@@ -134,7 +134,7 @@ export const loomFeature = definePrimitive({
             fontWeight: weight("heading"),
             fontSize: size(4),
             lineHeight: 1.2,
-            color: colour("fg-default"),
+            color: color("fg-default"),
           },
         },
         given.title
@@ -148,7 +148,7 @@ export const loomFeature = definePrimitive({
             fontFamily: family("body"),
             fontSize: size(3),
             lineHeight: 1.6,
-            color: colour("fg-muted"),
+            color: color("fg-muted"),
           },
         },
         given.body
@@ -177,7 +177,7 @@ export const loomFeature = definePrimitive({
            * cards 66px over the bottom of the grid and into whatever band came
            * next; with two rows the second row was drawn *through* the first.
            * Both are visible in a screenshot and invisible to every assertion,
-           * because the markup, the colours and the widths were all correct.
+           * because the markup, the colors and the widths were all correct.
            *
            * `loom.section` writes the same line with the same reasoning —
            * *"no stylesheet resets these"* — which is what makes this an
@@ -185,7 +185,7 @@ export const loomFeature = definePrimitive({
            */
           boxSizing: "border-box",
           textDecoration: "none",
-          color: colour("fg-default"),
+          color: color("fg-default"),
           ...(card ? CARD : PLAIN),
         },
       },

@@ -35,7 +35,7 @@ import { unreadableMark } from "@/app/(portal)/_lib/unreadable-change"
  * picture of the thing it names would be the one pressable part of a card
  * looking exactly like the parts that are not.
  *
- * ## The waiting mark is a count and a word, never a colour alone
+ * ## The waiting mark is a count and a word, never a color alone
  *
  * A page with three changes waiting and a page with none are told apart by
  * words. The tint is the palette's instruction that something changed, and it

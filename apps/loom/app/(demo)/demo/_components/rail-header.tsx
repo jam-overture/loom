@@ -38,7 +38,7 @@
  * line** with one word in the accent, a pair of **quiet chips**, and depth from
  * hairlines rather than from boxes.
  *
- * Every one of those is available here without a single new colour, because the
+ * Every one of those is available here without a single new color, because the
  * rail already has a mono face, an accent and a two-step border ramp. What it
  * did not have was **contrast between its own levels**: the eyebrow, the
  * section labels and the body copy sat within four pixels of each other, so a

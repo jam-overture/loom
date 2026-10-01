@@ -255,7 +255,7 @@ const notOutlined = (standings: readonly (Addressing | null)[]): string | null =
 }
 
 /**
- * One row of the legend: what a colour means, and how many parts wear it.
+ * One row of the legend: what a color means, and how many parts wear it.
  *
  * A `PlainWord`, so the runtime's own name for the operation travels with the
  * plain one and the disclosure under the pictures can print it. The count comes
@@ -280,7 +280,7 @@ const LEGEND: Readonly<Record<MarkKind, PlainWord>> = {
   },
   changed: {
     label: "Changed",
-    meaning: "Stays where it is, with something about it different — its words, its size, its colour.",
+    meaning: "Stays where it is, with something about it different — its words, its size, its color.",
     technical: "configure",
   },
   moved: {
@@ -294,7 +294,7 @@ const LEGEND: Readonly<Record<MarkKind, PlainWord>> = {
  * What the legend says, which is what the change does rather than what the
  * picture managed to outline.
  *
- * Only the kinds that occur, so a reviewer is never given a key to a colour that
+ * Only the kinds that occur, so a reviewer is never given a key to a color that
  * is not on either picture. Counted over the whole delta rather than per side: a
  * part that is taken away appears on one picture and is one deletion, and a
  * legend that counted per picture would say *1 taken away* beside the before and

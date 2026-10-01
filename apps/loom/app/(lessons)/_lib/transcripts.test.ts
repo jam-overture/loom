@@ -106,7 +106,7 @@ const ANSWERS = "Answers"
  *
  * It was 125 after lesson 30 (rendezvous), which added seven — one per
  * exercise, every one a whole transcript in a single block. Lesson 31
- * (behaviour) added eight for seven exercises: its exercise F prints in two
+ * (behavior) added eight for seven exercises: its exercise F prints in two
  * blocks, because the line that compares its two pages to each other is a claim
  * about the two transcripts above it rather than part of either.
  *

@@ -85,9 +85,9 @@ const CLAIMS: readonly Claim[] = [
     icon: "◉",
     eyebrow: "Theme",
     title: "Re-theming is not a rewrite",
-    body: "Colour, type and spacing live in the palette rather than in the page. Changing how the whole site looks is one change to one node, and every band on it follows.",
+    body: "Color, type and spacing live in the palette rather than in the page. Changing how the whole site looks is one change to one node, and every band on it follows.",
     specifics: [
-      "No band names a colour of its own",
+      "No band names a color of its own",
       "A palette swap is one operation against the page root",
       "The same tree renders under every palette you have",
     ],

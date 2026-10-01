@@ -12,7 +12,7 @@ import { SpotlightScroll } from "./spotlight-scroll"
  * holds, a stranger's whole experience of the most interesting moment on this
  * surface was a paragraph about a part of the screen they could not see.
  *
- * So the card and the node are now the same colour, and the eye can go from one
+ * So the card and the node are now the same color, and the eye can go from one
  * to the other. Green means it landed; amber means Loom is waiting for an answer
  * about *this*.
  *

@@ -5,14 +5,14 @@ import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
-import { AdjustControl } from "./behaviour-adjust.js"
+import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behavior.js"
+import { AdjustControl } from "./behavior-adjust.js"
 import { controlClass, controlDisplay } from "./control.js"
 
 /**
  * The third control that needs a browser to be tested, for the reason the other
  * two suites give: everything the seam does around it — declaring, checking,
- * placing — is covered without a DOM in `behaviour.test.ts`.
+ * placing — is covered without a DOM in `behavior.test.ts`.
  *
  * What is specific to this one is *where the value lands*. The contract is a
  * custom property on an element this control did not create, which is the whole

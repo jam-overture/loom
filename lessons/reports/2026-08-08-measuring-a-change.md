@@ -11,7 +11,7 @@ link, and a new interleaved Set I in `review-schedule.md`.
 warm-ups draw on 05 and 06, and the alternative is a lesson that pretends its
 prerequisites do not exist. Merge order is #49 → #52 → #55 → this. That question
 was raised for a decision on #55 and has not been answered, so I have kept the
-existing behaviour rather than changed it unasked.
+existing behavior rather than changed it unasked.
 
 ## What I emphasised, and why
 
@@ -121,14 +121,14 @@ the subtree. Executed, under a policy declaring `loom.card` protected:
 | `move main → header` | `[]` | `medium` |
 
 The third row is a protected primitive crossing the page with no factor naming
-it. The behaviour is *internally consistent* — "touched" means named-by,
+it. The behavior is *internally consistent* — "touched" means named-by,
 created-by or destroyed-by an operation, which is the same definition that makes
 `movedNodeCount` 1 — so I do not think this is a bug in the ordinary sense. What
 it is: a field whose name licenses a reading the code does not implement, driving
 a rule called `protected-type-touched`, where the two available phrasings of one
 relocation differ by a level.
 
-**My recommendation: document, do not change behaviour.** Two or three lines on
+**My recommendation: document, do not change behavior.** Two or three lines on
 `touchedPrimitiveTypes` giving the definition and stating explicitly that a
 subtree riding along a `move` is not touched. Changing the measurement (collect
 types from the whole moved subtree) would make the field mean different things

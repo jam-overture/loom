@@ -234,7 +234,7 @@ than a check, which is lesson 28's own order of preference applied to somebody
 else's directory: the cheapest way to stop owing a second copy is to say out loud
 that it was never one.
 
-**Nothing for another lane's behaviour, and `src/` was read only.** The one thing
+**Nothing for another lane's behavior, and `src/` was read only.** The one thing
 in `src/interpretation/` that looked like an omission — an `AbortSignal` any
 implementation may ignore — is argued in `deadline.ts`'s own doc comment more
 carefully than this lesson now puts it, and that comment is where the section's

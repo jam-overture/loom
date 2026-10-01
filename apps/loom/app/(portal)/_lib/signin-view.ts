@@ -31,7 +31,7 @@ export type PressureReading = {
  * choice `/portal/checkup` made. `locking` is `rejected` because that is what is
  * happening — attempts are being turned away — and not because it is an
  * emergency; the detail is where the difference between "working" and "wrong"
- * is drawn, and colour is never the only channel.
+ * is drawn, and color is never the only channel.
  */
 const TONES: Readonly<Record<PressureTone, OutcomeTone>> = {
   quiet: "applied",

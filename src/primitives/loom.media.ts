@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS, type AspectName } from "./layout.js"
-import { colour, family, radius, size, space } from "./tokens.js"
+import { color, family, radius, size, space } from "./tokens.js"
 import { mediaUrlSchema } from "./url.js"
 
 /**
@@ -77,7 +77,7 @@ export const loomMedia = definePrimitive({
         height: ratio === undefined ? "auto" : "100%",
         objectFit: given.fit ?? "cover",
         ...(ratio === undefined ? {} : { aspectRatio: ratio }),
-        background: colour("bg-surface-muted"),
+        background: color("bg-surface-muted"),
         borderRadius: corners === "none" ? "0" : radius(corners),
       },
     })
@@ -97,7 +97,7 @@ export const loomMedia = definePrimitive({
               style: {
                 fontFamily: family("body"),
                 fontSize: size(2),
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.caption

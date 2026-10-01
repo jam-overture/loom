@@ -17,7 +17,7 @@ import { TreeOutline } from "./tree-outline"
  * It had no test until this change, and the reason it earns one now is that the
  * marking stopped being *move the mark* and became *clear every one, then set
  * the ones that are picked*. Those two are the same code for one selected part
- * and different code for two, so the behaviour that matters is invisible to any
+ * and different code for two, so the behavior that matters is invisible to any
  * test written before this.
  *
  * The children stand in for what a Server Component produced. What this
@@ -97,7 +97,7 @@ describe("PreviewSurface", () => {
   })
 
   /**
-   * The behaviour phase 2 added, and the whole reason this file exists. Two
+   * The behavior phase 2 added, and the whole reason this file exists. Two
    * parts of one page outlined at once, without this component knowing how many
    * there are.
    */

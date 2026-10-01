@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, space, weight } from "./tokens.js"
+import { color, family, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -156,12 +156,12 @@ export const loomBrand = definePrimitive({
           )
 
     /**
-     * `colour("fg-default")` rather than the muted ink `loom.logo` uses for a
+     * `color("fg-default")` rather than the muted ink `loom.logo` uses for a
      * wall mark. A wall is other people's names and wants to recede; this is
      * the reader's answer to *whose site is this*, and it is the one piece of
      * text in the bar that should not be quiet.
      *
-     * The colour is on the container so the word and the mark cannot disagree:
+     * The color is on the container so the word and the mark cannot disagree:
      * the path takes `currentColor` and inherits exactly what the word is set
      * in, on every palette, with no second value to keep in step.
      */
@@ -171,7 +171,7 @@ export const loomBrand = definePrimitive({
       display: "inline-flex",
       alignItems: "center",
       gap: space(2),
-      color: colour("fg-default"),
+      color: color("fg-default"),
       textDecoration: "none",
     } as const
 

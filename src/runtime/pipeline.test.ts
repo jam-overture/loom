@@ -909,7 +909,7 @@ const overlongProp = (ids: SampleTree["ids"]): TreeOperation[] => [
 
 describe("composeChange against a declared props vocabulary", () => {
   /**
-   * The behaviour every deployment had before 0179, asserted rather than
+   * The behavior every deployment had before 0179, asserted rather than
    * assumed: an unwired runtime must be bit-for-bit what it was, because that
    * is the only thing that makes this an additive change.
    */
@@ -1073,7 +1073,7 @@ const asksUnderTheWrongName = (ids: SampleTree["ids"]): TreeOperation[] => [
 
 describe("composeChange against a declared binding reader", () => {
   /**
-   * The behaviour every deployment had before 0208, asserted rather than
+   * The behavior every deployment had before 0208, asserted rather than
    * assumed: an unwired runtime commits exactly what it committed yesterday,
    * which is the only thing that makes this additive. Two primitives in the
    * library now declare `reads`, so a default that had leaked would start

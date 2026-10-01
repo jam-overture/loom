@@ -14,7 +14,7 @@ import {
 import { DERIVED_PALETTES } from "./palettes.js"
 import {
   auditMarkGroundings,
-  colourDifference,
+  colorDifference,
   describeMarkAudit,
   JUST_NOTICEABLE_DIFFERENCE,
 } from "./separation.js"
@@ -32,7 +32,7 @@ const spec = (over: Partial<PaletteSpec> = {}): PaletteSpec => ({
 })
 
 describe("hslHex", () => {
-  it("agrees with the values a colour picker gives", () => {
+  it("agrees with the values a color picker gives", () => {
     expect(hslHex(0, 0, 0)).toBe("#000000")
     expect(hslHex(0, 0, 100)).toBe("#ffffff")
     expect(hslHex(0, 100, 50)).toBe("#ff0000")
@@ -57,9 +57,9 @@ describe("solveLightness", () => {
     }
   })
 
-  it("stops at the lightest colour that clears it, rather than going to black", () => {
+  it("stops at the lightest color that clears it, rather than going to black", () => {
     /**
-     * The property that keeps a derived palette *coloured*. A solver that
+     * The property that keeps a derived palette *colored*. A solver that
      * overshoots gives every palette a near-black accent, and five palettes
      * that differ only in a hue nobody can see are one palette.
      */
@@ -123,11 +123,11 @@ describe("derivePalette", () => {
     }
   })
 
-  it("is pure — the same spec twice gives the same colours", () => {
+  it("is pure — the same spec twice gives the same colors", () => {
     expect(derivePalette(spec()).slots).toEqual(derivePalette(spec()).slots)
   })
 
-  it("keeps the second colour saturated, because nothing reads text on it", () => {
+  it("keeps the second color saturated, because nothing reads text on it", () => {
     /**
      * `loom.hero`'s aurora paints `brand-secondary` and `accent-strong` as
      * large fields, and the finding of 20 August is what happens when a slot
@@ -143,7 +143,7 @@ describe("derivePalette", () => {
 
   it("darkens a bright accent hue rather than letting it fail", () => {
     /**
-     * The behaviour a host is most likely to be surprised by, asserted so it is
+     * The behavior a host is most likely to be surprised by, asserted so it is
      * documented rather than discovered: a brand yellow handed to `accent`
      * comes back dark enough to read, not the yellow they asked for.
      */
@@ -157,7 +157,7 @@ describe("derivePalette", () => {
 })
 
 describe("canCarryText", () => {
-  it("answers the question a host is actually asking about their brand colour", () => {
+  it("answers the question a host is actually asking about their brand color", () => {
     /** `minimal`'s mint on its paper: the case the house palette had to solve. */
     expect(canCarryText("#72e3ad", "#ffffff")).toBe(false)
     expect(canCarryText("#176e44", "#ffffff")).toBe(true)
@@ -206,7 +206,7 @@ describe("solveMarkLightness", () => {
 
   it("moves the line the least it can, in whichever direction works", () => {
     const solved = solveMarkLightness(0, 0, 95, grounds, MARK_SEPARATION_TARGET)
-    const nearest = Math.min(...grounds.map((ground) => colourDifference(solved, ground) ?? 0))
+    const nearest = Math.min(...grounds.map((ground) => colorDifference(solved, ground) ?? 0))
 
     expect(nearest).toBeGreaterThanOrEqual(MARK_SEPARATION_TARGET)
     /**
@@ -243,7 +243,7 @@ describe("the lines a derived palette draws", () => {
    * rather than at the one that was noticed. `border-subtle` used to be picked at
    * a fixed lightness two points from the muted well, so every light palette this
    * function derived shipped a card edge under the just-noticeable difference —
-   * seven of the eighteen in `palettes.ts`, and `linen` in the well's own colour.
+   * seven of the eighteen in `palettes.ts`, and `linen` in the well's own color.
    */
   it("draws every line it declares, at every hue and in both modes", () => {
     for (const mode of ["light", "dark"] as const) {
@@ -268,7 +268,7 @@ describe("the lines a derived palette draws", () => {
     const worst = (slot: "border-default" | "border-strong"): number =>
       Math.min(
         ...(["bg-canvas", "bg-surface", "bg-surface-muted"] as const).map(
-          (ground) => colourDifference(palette.slots[slot] ?? "", palette.slots[ground] ?? "") ?? 0
+          (ground) => colorDifference(palette.slots[slot] ?? "", palette.slots[ground] ?? "") ?? 0
         )
       )
 

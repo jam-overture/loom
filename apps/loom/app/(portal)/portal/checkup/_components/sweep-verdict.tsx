@@ -11,7 +11,7 @@ import { toneClasses } from "@/app/(portal)/_lib/outcome"
  * over a different subject, and a reviewer who has read one should not have to
  * learn a second layout to read the other.
  *
- * Colour is a second channel and never the only one: the verdict says in words
+ * Color is a second channel and never the only one: the verdict says in words
  * which of the five results this is, so a reader who cannot tell the palette
  * apart reads the same answer.
  *

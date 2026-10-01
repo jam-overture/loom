@@ -37,7 +37,7 @@ describe("which deployments are for finding", () => {
    * The negative case, which is the one this rule exists to get right.
    *
    * A local `next start`, a test run, and a self-hosted Loom site all have no
-   * `VERCEL_ENV`. Every one of them keeps the behaviour it had before this
+   * `VERCEL_ENV`. Every one of them keeps the behavior it had before this
    * rule existed.
    */
   it.each([undefined, ""])("leaves a deployment Vercel says nothing about alone (%s)", (value) => {

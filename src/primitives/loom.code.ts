@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, hairline, monospace, radius, size, space, weight } from "./tokens.js"
+import { color, hairline, monospace, radius, size, space, weight } from "./tokens.js"
 
 /**
  * A snippet, set in monospace on a tinted surface — or a terminal, which is the
@@ -45,7 +45,7 @@ import { colour, hairline, monospace, radius, size, space, weight } from "./toke
  * click is not something a tree can express, and faking one would be worse than
  * the gap;
  * [0086](../../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
- * answered it by making a behaviour something the runtime builds and a
+ * answered it by making a behavior something the runtime builds and a
  * primitive places. So this primitive declares `copy`, declares the two strings
  * its control needs a name from, declares itself `interactive` because a
  * control is a target, and places what it is handed. It implements nothing:
@@ -126,13 +126,13 @@ type CodeTextKey = "copy" | "copied"
  * so a terminal is not a *darker* panel — no palette slot means "dark", and one
  * that did would be black text on black under `minimal`. What separates the two
  * is the window dots and the label's alignment, which read the same way under
- * every palette because neither is a colour.
+ * every palette because neither is a color.
  */
 const DOT: CSSProperties = {
   width: "0.6rem",
   height: "0.6rem",
   borderRadius: radius("full"),
-  background: colour("border-strong"),
+  background: color("border-strong"),
 }
 
 export const loomCode = definePrimitive({
@@ -148,7 +148,7 @@ export const loomCode = definePrimitive({
    * dictionary may translate them and nothing has to remember to (0063).
    */
   text: { copy: "Copy", copied: "Copied" },
-  behaviours: ["copy"],
+  behaviors: ["copy"],
   /**
    * Unconditionally, because the control is unconditional. `{ whenProps }` is
    * for the primitive that is a target only under some configuration — a card
@@ -172,7 +172,7 @@ export const loomCode = definePrimitive({
           paddingBlock: space(2),
           paddingInline: space(3),
           borderBlockEnd: `1px solid ${hairline()}`,
-          background: colour("bg-surface"),
+          background: color("bg-surface"),
         },
       },
       !terminal
@@ -201,7 +201,7 @@ export const loomCode = definePrimitive({
                 fontSize: size(1),
                 fontWeight: weight("body"),
                 letterSpacing: "0.06em",
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.language
@@ -215,7 +215,7 @@ export const loomCode = definePrimitive({
       createElement(
         "span",
         { key: "copy", style: { display: "flex", marginInlineStart: "auto", flex: "0 0 auto" } },
-        loom.behaviours.copy
+        loom.behaviors.copy
       )
     )
 
@@ -244,7 +244,7 @@ export const loomCode = definePrimitive({
           fontFamily: monospace(),
           fontSize: size(2),
           lineHeight: compact ? 1.5 : 1.7,
-          color: colour("fg-default"),
+          color: color("fg-default"),
           /**
            * `pre-wrap` rather than `pre` when wrapping, and it is worth being
            * precise about what changes: **the content's own breaks survive
@@ -285,8 +285,8 @@ export const loomCode = definePrimitive({
            * under a hero, a panel in a column — this does nothing at all.
            */
           flex: "1 1 auto",
-          background: colour("bg-surface-muted"),
-          border: `1px solid ${colour("border-subtle")}`,
+          background: color("bg-surface-muted"),
+          border: `1px solid ${color("border-subtle")}`,
           borderRadius: radius("md"),
           overflow: "hidden",
         },
@@ -314,7 +314,7 @@ export const loomCode = definePrimitive({
         ? null
         : createElement(
             "figcaption",
-            { style: { fontSize: size(1), color: colour("fg-muted") } },
+            { style: { fontSize: size(1), color: color("fg-muted") } },
             given.caption
           )
     )

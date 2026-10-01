@@ -53,8 +53,8 @@ describe("palette schema", () => {
     }
   })
 
-  it("rejects a colour that is not a colour", () => {
-    const slots = { ...editorialPalette.slots, accent: "not a colour" }
+  it("rejects a color that is not a color", () => {
+    const slots = { ...editorialPalette.slots, accent: "not a color" }
 
     expect(paletteSchema.safeParse({ ...editorialPalette, slots }).success).toBe(false)
   })
@@ -134,7 +134,7 @@ describe("themeVariables", () => {
     expect(themeVariables(resolved())).toEqual(themeVariables(resolved()))
   })
 
-  it("changes every colour and nothing else when only the palette changes", () => {
+  it("changes every color and nothing else when only the palette changes", () => {
     const light = themeVariables(resolved())
 
     const swapped = registry.resolve(
@@ -157,7 +157,7 @@ describe("themeVariables", () => {
 
 /**
  * A palette can be well-formed and still unusable, and nothing above catches it.
- * The slot schema checks that every slot holds a colour; it has no idea which
+ * The slot schema checks that every slot holds a color; it has no idea which
  * slots are read as text on which other slots, so a palette whose accent is a
  * pale mint registers, resolves, re-themes and renders every eyebrow on the page
  * at 1.6:1.
@@ -210,7 +210,7 @@ describe("what the library reads against what", () => {
      * The mint reads at 1.58:1 on white, so it can be a border and can never be
      * a letterform. Asserted as the specific value because the swap is tempting
      * and silent: `accent` paints the primary button, so putting the button
-     * colour there is the *obvious* move, and it takes every eyebrow, kicker and
+     * color there is the *obvious* move, and it takes every eyebrow, kicker and
      * disclosure marker on the page down with it.
      */
     const minimal = STARTER_PALETTES.find((palette) => palette.id === "minimal")
@@ -234,7 +234,7 @@ describe("what the library reads against what", () => {
      *
      * `bg-surface-muted` is deliberately *not* held to this. It is a functional
      * fill — the well behind a missing image, a monogram — and a placeholder the
-     * colour of the page is a placeholder nobody can see.
+     * color of the page is a placeholder nobody can see.
      */
     const minimal = STARTER_PALETTES.find((palette) => palette.id === "minimal")
     if (!minimal) throw new Error("minimal palette is not registered")
@@ -246,7 +246,7 @@ describe("what the library reads against what", () => {
 
   /**
    * The ramp has to stay a ramp. Darkening `fg-subtle` to clear AA moves it
-   * towards `fg-muted`, and a palette where the two are the same colour has
+   * towards `fg-muted`, and a palette where the two are the same color has
    * spent a slot on nothing — the assertion that would have caught it if the
    * repair had been taken one step further.
    */

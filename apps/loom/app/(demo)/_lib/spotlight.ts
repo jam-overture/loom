@@ -15,9 +15,9 @@ import type { TouchedNode, TouchKind } from "./touched"
  * ones the Gate holds, which is the most interesting thing this surface has to
  * show. The record said what moved. The page said nothing.
  *
- * So the change gets marked *where it happened*, in the same colour the card in
+ * So the change gets marked *where it happened*, in the same color the card in
  * the rail is wearing — green for a change that landed, amber for one waiting on
- * an answer. The colour is the whole link between the two halves of the screen:
+ * an answer. The color is the whole link between the two halves of the screen:
  * a visitor who reads "Waiting on you" on an amber badge and sees one amber ring
  * on the page has been told which band the question is about without a word of
  * explanation.
@@ -34,8 +34,8 @@ import type { TouchedNode, TouchKind } from "./touched"
 export type SpotTone = "applied" | "awaiting"
 
 /**
- * The mark's two colours, and they are `globals.css`'s outcome tints rather than
- * two colours picked here — `spotlight.test.ts` holds them against that file, so
+ * The mark's two colors, and they are `globals.css`'s outcome tints rather than
+ * two colors picked here — `spotlight.test.ts` holds them against that file, so
  * a run that retunes the badge on the card cannot leave the ring on the page
  * wearing last month's green.
  *
@@ -45,7 +45,7 @@ export type SpotTone = "applied" | "awaiting"
  * A mark that read a chrome variable would be a mark the demo's own first preset
  * could repaint.
  */
-export const SPOT_COLOURS: Readonly<Record<SpotTone, { readonly edge: string; readonly fill: string; readonly ink: string }>> = {
+export const SPOT_COLORS: Readonly<Record<SpotTone, { readonly edge: string; readonly fill: string; readonly ink: string }>> = {
   applied: { edge: "#1f985e", fill: "#72e3ad", ink: "#0a0a0a" },
   awaiting: { edge: "#a97b16", fill: "#f0c674", ink: "#0a0a0a" },
 }
@@ -354,7 +354,7 @@ const spotFor = (
   }
 }
 
-/** One change to be marked: what it touched, in what colour, and which way round. */
+/** One change to be marked: what it touched, in what color, and which way round. */
 export type SpotlightRequest = {
   readonly touched: readonly TouchedNode[]
   readonly tone: SpotTone
@@ -457,11 +457,11 @@ export type SpotlitChange = { readonly record: ChangeRecord; readonly tone: Spot
  * **Every question still waiting on an answer**, newest first, because each of
  * them is asking the visitor for something and a page that marks one of two open
  * questions has silently chosen for them. It used to return exactly one, and the
- * reason given was that *"two marks in two colours on one page is a quiz rather
- * than an explanation"*. That reasoning is about two **colours** — a green mark
+ * reason given was that *"two marks in two colors on one page is a quiz rather
+ * than an explanation"*. That reasoning is about two **colors** — a green mark
  * saying *this landed* beside an amber one saying *this is waiting* asks a
  * stranger to hold two ideas at once — and it still stands. Two marks in the
- * same colour, both amber, both saying *this would happen if you say yes*, are
+ * same color, both amber, both saying *this would happen if you say yes*, are
  * not a quiz: they are two questions, marked, which is what the rail says there
  * are.
  *
@@ -603,9 +603,9 @@ const wrappingFor = (spot: Spotlight): string =>
  * the page did not ask to have rounded — the mark changing the page it is
  * describing, in the one property `outline` was chosen to avoid.
  */
-const ringFor = (spot: Spotlight, colour: (typeof SPOT_COLOURS)[SpotTone]): string =>
+const ringFor = (spot: Spotlight, color: (typeof SPOT_COLORS)[SpotTone]): string =>
   spot.subject === "node"
-    ? `\n  outline: 2px solid ${colour.edge};\n  outline-offset: -1px;\n  border-radius: 4px;`
+    ? `\n  outline: 2px solid ${color.edge};\n  outline-offset: -1px;\n  border-radius: 4px;`
     : ""
 
 /**
@@ -619,12 +619,12 @@ const ringFor = (spot: Spotlight, colour: (typeof SPOT_COLOURS)[SpotTone]): stri
 export const spotlightCss = (spots: readonly Spotlight[]): string =>
   spots
     .map((spot) => {
-      const colour = SPOT_COLOURS[spot.tone]
+      const color = SPOT_COLORS[spot.tone]
       const selector = `[${LOOM_NODE_ATTRIBUTE}=${cssString(spot.nodeId)}]`
 
       return `
 ${selector} {
-  position: relative;${ringFor(spot, colour)}
+  position: relative;${ringFor(spot, color)}
   scroll-margin: 4rem;${stackingFor(spot)}
 }
 ${selector}::after {
@@ -635,8 +635,8 @@ ${selector}::after {
   z-index: 5;
   padding: 4px 8px;
   border-radius: 4px;
-  background: ${colour.fill};
-  color: ${colour.ink};
+  background: ${color.fill};
+  color: ${color.ink};
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 11px;
   font-weight: 500;

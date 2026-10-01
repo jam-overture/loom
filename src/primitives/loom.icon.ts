@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, radius, size, space } from "./tokens.js"
+import { color, radius, size, space } from "./tokens.js"
 
 /**
  * One glyph, optionally in a tile.
@@ -54,29 +54,29 @@ const SIZES = {
 } as const
 
 /**
- * `bare` carries its own foreground because the tiled colour is chosen against
+ * `bare` carries its own foreground because the tiled color is chosen against
  * the tile. `fg-on-accent` on a `strong` tile is the contrast the palette
  * promises; the same value on the page background is text nobody can read, and
  * that is exactly the class of mistake the two starter palettes exist to catch.
  */
 const TONES = {
   accent: {
-    background: colour("accent-subtle"),
-    color: colour("accent-strong"),
-    borderColor: colour("border-accent"),
-    bare: colour("accent"),
+    background: color("accent-subtle"),
+    color: color("accent-strong"),
+    borderColor: color("border-accent"),
+    bare: color("accent"),
   },
   neutral: {
-    background: colour("bg-surface-muted"),
-    color: colour("fg-muted"),
-    borderColor: colour("border-subtle"),
-    bare: colour("fg-muted"),
+    background: color("bg-surface-muted"),
+    color: color("fg-muted"),
+    borderColor: color("border-subtle"),
+    bare: color("fg-muted"),
   },
   strong: {
-    background: colour("accent"),
-    color: colour("fg-on-accent"),
-    borderColor: colour("accent-strong"),
-    bare: colour("accent-strong"),
+    background: color("accent"),
+    color: color("fg-on-accent"),
+    borderColor: color("accent-strong"),
+    bare: color("accent-strong"),
   },
 } as const
 

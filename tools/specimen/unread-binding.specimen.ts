@@ -2,7 +2,7 @@ import { createElement, type CSSProperties, type ReactNode } from "react"
 import { z } from "zod"
 
 import { sequentialIdFactory } from "../../src/ids.js"
-import { colour, family, monospace, size, space } from "../../src/primitives/tokens.js"
+import { color, family, monospace, size, space } from "../../src/primitives/tokens.js"
 import type { LoomPrimitiveProps } from "../../src/render/primitive.js"
 import type { BindingReader } from "../../src/render/reads.js"
 import { DATA_PROP_KEY, THEME_PROP_KEY } from "../../src/reserved-props.js"
@@ -145,7 +145,7 @@ const LABEL: CSSProperties = {
   fontSize: size(1),
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: colour("fg-subtle"),
+  color: color("fg-subtle"),
 }
 
 const LOG: CSSProperties = {
@@ -154,7 +154,7 @@ const LOG: CSSProperties = {
   fontFamily: monospace(),
   fontSize: size(2),
   lineHeight: 1.6,
-  color: colour("fg-default"),
+  color: color("fg-default"),
   whiteSpace: "pre-wrap",
   wordBreak: "break-word",
 }

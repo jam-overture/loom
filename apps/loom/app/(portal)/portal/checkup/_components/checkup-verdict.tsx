@@ -26,7 +26,7 @@ import { toneClasses } from "@/app/(portal)/_lib/outcome"
  * headline, the fold's own count of accepted changes — sit one disclosure down,
  * unaltered. Nothing that was on this screen has left it.
  *
- * Colour is still a second channel and never the only one: the verdict says
+ * Color is still a second channel and never the only one: the verdict says
  * which of the three outcomes this is in words, so a reader who cannot tell the
  * palette apart reads the same result.
  *

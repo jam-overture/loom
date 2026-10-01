@@ -594,7 +594,7 @@ export const LessonReader = ({ lesson, parts }: LessonReaderProps) => {
             <p style={style.note}>
               {complete
                 ? "Every transcript above was produced by compiling this section and running it against src/ when this page was built, and fetched just now from the address it is served at. It is not a record of what the code printed when the lesson was written — a lesson whose exercises stop running is a red test, and this page would be telling you so instead."
-                : "The exercises have already run. They were compiled and executed against src/ when this page was built, so what you are predicting against is this commit's behaviour and not a transcript somebody typed up. What they printed is not in this page: it is fetched when the last prediction is in, so there is nothing here to read ahead to. You still have to say what you think it is."}
+                : "The exercises have already run. They were compiled and executed against src/ when this page was built, so what you are predicting against is this commit's behavior and not a transcript somebody typed up. What they printed is not in this page: it is fetched when the last prediction is in, so there is nothing here to read ahead to. You still have to say what you think it is."}
             </p>
           </div>
         ) : (

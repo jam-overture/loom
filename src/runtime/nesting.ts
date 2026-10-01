@@ -17,7 +17,7 @@ import { childrenOf, type ElementNode, type LoomNode } from "../tree/node.js"
 /** Whether this element renders a target — its type and its own props, never its position. */
 export type InteractivePredicate = (node: ElementNode) => boolean
 
-/** What a host that declares no interactive vocabulary gets, which is today's behaviour. */
+/** What a host that declares no interactive vocabulary gets, which is today's behavior. */
 export const NOTHING_INTERACTIVE: InteractivePredicate = () => false
 
 export const interactivePredicateFor = (types: InteractiveTypes): InteractivePredicate => {

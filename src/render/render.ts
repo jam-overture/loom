@@ -23,13 +23,13 @@ import {
   type AnchorLedger,
 } from "./anchor.js"
 import {
-  isBehaviourResolver,
-  NO_RESOLVED_BEHAVIOURS,
-  resolveBehaviours,
-  type BehaviourName,
-  type BehaviourResolver,
-  type PrimitiveBehaviours,
-} from "./behaviour.js"
+  isBehaviorResolver,
+  NO_RESOLVED_BEHAVIORS,
+  resolveBehaviors,
+  type BehaviorName,
+  type BehaviorResolver,
+  type PrimitiveBehaviors,
+} from "./behavior.js"
 import type { DecorativeChildren } from "./decorative.js"
 import type { RenderDiagnostic } from "./diagnostics.js"
 import { literalThemeElement } from "./inline-variables.js"
@@ -188,7 +188,7 @@ type RenderContext = {
   readonly data: DataResolution | undefined
   readonly submissions: SubmissionResolution | undefined
   readonly origins: FrameOriginRegistry | undefined
-  /** Absent for the same reason `behaviours` is: a plain map declares nothing. */
+  /** Absent for the same reason `behaviors` is: a plain map declares nothing. */
   readonly frames: FrameResolver | undefined
   /** Absent for the same reason `frames` is: a plain map declares nothing. */
   readonly reads: BindingReader | undefined
@@ -200,11 +200,11 @@ type RenderContext = {
   readonly text: TextResolver | undefined
   /**
    * Absent when the resolver is not a registry, which is also the only way to
-   * have registered a primitive that declares a behaviour — so there is nothing
+   * have registered a primitive that declares a behavior — so there is nothing
    * for a host to wire here and nothing that can go missing. It is the text
    * seam's base case with no dictionary half to lay over it (0063).
    */
-  readonly behaviours: BehaviourResolver | undefined
+  readonly behaviors: BehaviorResolver | undefined
   /** Who holds each anchor, for the length of this one render. */
   readonly anchors: AnchorLedger
   /**
@@ -321,7 +321,7 @@ const renderContextFor = (
   frames: NodeFrames,
   anchor: AnchorAttributes | undefined,
   text: PrimitiveText<string>,
-  behaviours: PrimitiveBehaviours<BehaviourName>,
+  behaviors: PrimitiveBehaviors<BehaviorName>,
   context: RenderContext
 ): LoomRenderContext => {
   const isRoot = isRootNode(node, context)
@@ -334,7 +334,7 @@ const renderContextFor = (
     data,
     frames,
     text,
-    behaviours,
+    behaviors,
     decorative: decorativeChildrenFor(node, context),
     ...(submit ? { submit } : {}),
     ...(anchor ? { anchor } : {}),
@@ -641,29 +641,29 @@ const nodeAnchorFor = (
 /**
  * The controls this node's primitive declared, built from the tree.
  *
- * The content a behaviour acts on is `textOf` the node — read from the tree
+ * The content a behavior acts on is `textOf` the node — read from the tree
  * rather than from the markup around it, so a copy button copies what the page
  * says and not the language label its own primitive rendered beside it.
  *
- * A behaviour whose name could not be resolved is left out and reported, for
- * the reason `resolveBehaviours` gives: a control a screen reader announces as
+ * A behavior whose name could not be resolved is left out and reported, for
+ * the reason `resolveBehaviors` gives: a control a screen reader announces as
  * "button" is worse than no control, and this is the only place that can say so.
  */
-const nodeBehavioursFor = (
+const nodeBehaviorsFor = (
   node: ElementNode,
   text: PrimitiveText<string>,
   context: RenderContext
-): PrimitiveBehaviours<BehaviourName> => {
-  const declared = context.behaviours?.behavioursFor(node.type) ?? []
-  if (declared.length === 0) return NO_RESOLVED_BEHAVIOURS.behaviours
+): PrimitiveBehaviors<BehaviorName> => {
+  const declared = context.behaviors?.behaviorsFor(node.type) ?? []
+  if (declared.length === 0) return NO_RESOLVED_BEHAVIORS.behaviors
 
-  const resolved = resolveBehaviours(declared, textOf(node), text)
+  const resolved = resolveBehaviors(declared, textOf(node), text)
 
-  for (const { behaviour, key } of resolved.unnamed) {
-    context.collect({ code: "behaviour-unnamed", nodeId: node.id, behaviour, key })
+  for (const { behavior, key } of resolved.unnamed) {
+    context.collect({ code: "behavior-unnamed", nodeId: node.id, behavior, key })
   }
 
-  return resolved.behaviours
+  return resolved.behaviors
 }
 
 /**
@@ -763,7 +763,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     reserved[ANCHOR_PROP_KEY] === undefined ? undefined : nodeAnchorFor(node, reserved, context)
 
   const text = context.text?.textFor(node.type) ?? NO_TEXT
-  const behaviours = nodeBehavioursFor(node, text, context)
+  const behaviors = nodeBehaviorsFor(node, text, context)
   const body = renderElementBody(node, context)
 
   const rendered = {
@@ -775,7 +775,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
       frames,
       anchor,
       text,
-      behaviours,
+      behaviors,
       context
     ),
     props,
@@ -924,7 +924,7 @@ const renderFrom = (
     reads: isBindingReader(options.resolver) ? options.resolver : undefined,
     unshown: isUnshownReader(options.resolver) ? options.resolver : undefined,
     text: composeText(options.resolver, options.text),
-    behaviours: isBehaviourResolver(options.resolver) ? options.resolver : undefined,
+    behaviors: isBehaviorResolver(options.resolver) ? options.resolver : undefined,
     anchors: createAnchorLedger(),
     decorative: false,
     literals:

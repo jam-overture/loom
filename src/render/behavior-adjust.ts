@@ -2,7 +2,7 @@
 
 import { createElement, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react"
 
-import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
+import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behavior.js"
 import { controlClass, controlDisplay } from "./control.js"
 
 /**
@@ -36,7 +36,7 @@ import { controlClass, controlDisplay } from "./control.js"
  * right, and a `role="slider"` div reimplements every one of them worse. The
  * pure-CSS routes were weighed and rejected before this seam existed — a range
  * input cannot drive a clip *in CSS alone*, which is true and is exactly the gap
- * a behaviour fills: the value is read here, in a component, and written where
+ * a behavior fills: the value is read here, in a component, and written where
  * a stylesheet can reach it.
  */
 

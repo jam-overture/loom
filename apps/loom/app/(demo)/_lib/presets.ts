@@ -105,9 +105,9 @@ const palette: DemoPreset = {
   id: "palette",
   utterance: "Switch this page to the other palette.",
   label: "Re-theme the whole page",
-  promise: "Every colour and typeface on the page changes at once.",
+  promise: "Every color and typeface on the page changes at once.",
   rationale:
-    "A theme is three registered ids on the root node, so switching palette is one configure against one node. Nothing below the root is touched, and no primitive names a colour.",
+    "A theme is three registered ids on the root node, so switching palette is one configure against one node. Nothing below the root is touched, and no primitive names a color.",
   plan: (tree) => {
     const current = themeOf(tree)
     const next = current?.["palette"] === DEMO_ALTERNATE_THEME["palette"] ? DEMO_STARTING_THEME : DEMO_ALTERNATE_THEME

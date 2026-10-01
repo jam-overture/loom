@@ -120,9 +120,9 @@ four states are an answer, and the fourth — *a shape this primitive cannot dra
 — is only reachable if the answer gets past the source. `answers.specimen.ts` is
 the worked copy and puts all four in one frame.
 
-### Photographing a behaviour
+### Photographing a behavior
 
-A specimen is static markup, and **every control in the behaviour vocabulary —
+A specimen is static markup, and **every control in the behavior vocabulary —
 `copy`, `disclose`, `adjust`, `present`, `dismiss` — renders nothing until an
 effect proves scripting runs.** So a specimen of a primitive that takes one
 photographs the page without it, correctly, and there was no flag that changed
@@ -148,10 +148,10 @@ declares no states, which is one picture of the page as it settles.
 A specimen that says nothing about `live` is unchanged in every respect — no
 bundle, no browser JavaScript, and the same file names it had.
 
-Every control carries `loom-control` and `loom-control-<behaviour>`, which is
+Every control carries `loom-control` and `loom-control-<behavior>`, which is
 what a step clicks. What a control publishes is `data-loom-disclosed`,
 `data-loom-presented` or the `--loom-adjust` custom property, and the primitive's
-own rules read those — see `src/render/behaviour.ts`.
+own rules read those — see `src/render/behavior.ts`.
 
 **`answers` and `live` compose, and nothing special happens when both are
 declared.** The browser resolves the same declared answers the server did and
@@ -175,7 +175,7 @@ It is for photographing a **seam**: the smallest primitive that holds the thing
 under test, so a run does not have to add one to `src/primitives/` — another
 lane's directory — to have a subject. A primitive anybody's page should be able
 to use is not this; it is a finding for `Loom primitives`.
-`tools/specimen/behaviour.specimen.ts` is the worked copy of all three halves:
+`tools/specimen/behavior.specimen.ts` is the worked copy of all three halves:
 it declares a primitive, a set of answers and a list of states.
 
 Put it beside the code it photographs. Nothing in this directory is any lane's

@@ -12,7 +12,7 @@ import { PlainReading } from "./plain-reading"
  * `plain-change.test.ts` holds *which* words and in which tense; this holds that
  * they reach the screen quoted, in order, with the count of the ones that did
  * not fit, that a change with nothing to quote does not draw an empty row where
- * the words would be, and that the two states are drawn in the two colours the
+ * the words would be, and that the two states are drawn in the two colors the
  * marks on the stage use.
  */
 
@@ -84,17 +84,17 @@ describe("the plain reading of a change", () => {
   })
 
   /**
-   * The colour is the whole of what the tone changes, and it is the colour of
+   * The color is the whole of what the tone changes, and it is the color of
    * the ring the same change left on the stage. A landed change drawn in the
-   * waiting colour says the question is still open.
+   * waiting color says the question is still open.
    */
-  it("draws a waiting change in the waiting colour, by default", () => {
+  it("draws a waiting change in the waiting color, by default", () => {
     const { container } = render(<PlainReading lines={[REMOVAL]} />)
 
     expect(container.querySelector("ul")?.className).toContain("border-awaiting-ink")
   })
 
-  it("draws a landed change in the applied colour", () => {
+  it("draws a landed change in the applied color", () => {
     const { container } = render(<PlainReading lines={[REMOVED]} tone="applied" />)
 
     expect(container.querySelector("ul")?.className).toContain("border-applied-ink")

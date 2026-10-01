@@ -515,7 +515,7 @@ export const NOTHING_WEIGHED: Readonly<Record<DispositionKind, string>> = {
  * rather than about what.
  *
  * The tone stays `rejected`. Nothing about this is gentler than a refusal — the
- * change did not happen — and a fourth colour for a fourth shade of no would
+ * change did not happen — and a fourth color for a fourth shade of no would
  * teach a reader a palette instead of an answer.
  */
 export const CANNOT_BE_DRAWN: PlainState = {

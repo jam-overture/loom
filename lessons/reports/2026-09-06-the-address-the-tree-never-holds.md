@@ -89,7 +89,7 @@ Reflect asks what that says about writing down what a decision does not cover.
 
 All six were executed. The Try it section's fences were extracted from the
 published markdown and run as one program, so the transcripts are this commit's
-behaviour rather than mine.
+behavior rather than mine.
 
 **Exercise C is the best thing in the lesson and I did not plan it.** I wrote it
 expecting to demonstrate that a `javascript:` action is refused. What it actually

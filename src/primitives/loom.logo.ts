@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 import { linkUrlSchema, mediaUrlSchema } from "./url.js"
 
 /**
@@ -17,9 +17,9 @@ import { linkUrlSchema, mediaUrlSchema } from "./url.js"
  * hosted somewhere that has stopped answering. A logo wall of empty boxes is
  * the failure this avoids.
  *
- * The image is greyed and lifts to full colour on hover, which is what a real
+ * The image is greyed and lifts to full color on hover, which is what a real
  * logo wall does — twelve brand palettes at full strength fight both the page's
- * theme and each other. It is a filter rather than a colour, so it stays true
+ * theme and each other. It is a filter rather than a color, so it stays true
  * under both palettes and needs no per-logo styling.
  *
  * ## `surface`, and the photograph that asked for it
@@ -75,8 +75,8 @@ const MARK_HEIGHT = "1.75rem"
  *   Photographed, not reasoned.
  */
 const PLATE: CSSProperties = {
-  background: colour("bg-surface"),
-  border: `1px solid ${colour("border-default")}`,
+  background: color("bg-surface"),
+  border: `1px solid ${color("border-default")}`,
   borderRadius: radius("md"),
   paddingBlock: space(2),
   paddingInline: space(4),
@@ -102,7 +102,7 @@ export const loomLogo = definePrimitive({
                 fontWeight: weight("heading"),
                 fontSize: size(4),
                 letterSpacing: "-0.01em",
-                color: colour("fg-muted"),
+                color: color("fg-muted"),
               },
             },
             given.name
@@ -139,7 +139,7 @@ export const loomLogo = definePrimitive({
               display: "inline-flex",
               alignItems: "center",
               textDecoration: "none",
-              color: colour("fg-muted"),
+              color: color("fg-muted"),
               ...plate,
             },
           },

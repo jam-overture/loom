@@ -31,7 +31,7 @@
  * Which is why this is a predicate rather than a prop. A query parameter from
  * the embedding page would work and is worse — it makes the demonstration's
  * chrome a function of who linked to it, and a third party who frames this is
- * owed the same behaviour as the host that ships it. `window.self !== window.top`
+ * owed the same behavior as the host that ships it. `window.self !== window.top`
  * is true of any host, needs no coordination, and is the browser answering a
  * question about itself.
  *

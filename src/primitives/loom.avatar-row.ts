@@ -15,7 +15,7 @@ import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
  * a stack puts a gap *between* its children, and this puts each face partly
  * over the one before it. That is not a gap of a negative size — it needs the
  * later face to paint over the earlier one and to carry a ring in the page's own
- * canvas colour so the edge reads, which is two properties a gap does not have.
+ * canvas color so the edge reads, which is two properties a gap does not have.
  * Named by 0054: the child is `loom.avatar`, the arrangement is a row.
  *
  * **The overlap is the container's, not the avatar's**, and that is the whole

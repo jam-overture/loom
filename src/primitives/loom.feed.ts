@@ -7,7 +7,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
-import { colour, family, hairline, size, space, weight } from "./tokens.js"
+import { color, family, hairline, size, space, weight } from "./tokens.js"
 import { linkUrlSchema } from "./url.js"
 
 /**
@@ -228,7 +228,7 @@ const META: CSSProperties = {
   fontSize: size(1),
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: colour("fg-subtle"),
+  color: color("fg-subtle"),
 }
 
 const titleOf = (entry: Entry): ReactNode => {
@@ -247,7 +247,7 @@ const titleOf = (entry: Entry): ReactNode => {
         fontWeight: weight("heading"),
         fontSize: size(5),
         lineHeight: 1.25,
-        color: colour("fg-default"),
+        color: color("fg-default"),
       },
     },
     entry.title
@@ -310,7 +310,7 @@ const entryOf = (entry: Entry, index: number, given: Props): ReactNode => {
               fontWeight: weight("body"),
               fontSize: size(3),
               lineHeight: 1.6,
-              color: colour("fg-muted"),
+              color: color("fg-muted"),
             },
           },
           entry.detail
@@ -337,7 +337,7 @@ const noticeOf = (words: string): ReactNode =>
         fontWeight: weight("body"),
         fontSize: size(3),
         lineHeight: 1.6,
-        color: colour("fg-muted"),
+        color: color("fg-muted"),
       },
     },
     words
@@ -449,7 +449,7 @@ export const loomFeed = definePrimitive({
                 fontFamily: family("body"),
                 fontWeight: weight("body"),
                 fontSize: size(2),
-                color: colour("fg-subtle"),
+                color: color("fg-subtle"),
               },
             },
             loom.text.unreadable

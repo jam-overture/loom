@@ -23,8 +23,8 @@ import { partitionReservedProps, themeGround, THEME_PROP_KEY } from "./theme.js"
  * The render root mounting what 0049 put in the tree.
  *
  * The load-bearing assertion is the re-theme: the same tree, the same
- * primitives, a different palette id, and different colour on the page. That is
- * what says a primitive reads its colour from the slots — and it is the check
+ * primitives, a different palette id, and different color on the page. That is
+ * what says a primitive reads its color from the slots — and it is the check
  * every ported primitive has to pass, which is why two starter palettes exist.
  */
 
@@ -113,7 +113,7 @@ describe("mounting a theme at the render root", () => {
   })
 
   /**
-   * The mono family reaches the root the same way a colour does, and the two
+   * The mono family reaches the root the same way a color does, and the two
    * assertions below are the two halves of 0084's bargain: a pack that names a
    * face mounts it, and a pack that names none mounts nothing — leaving
    * `var(--loom-mono-family, <system stack>)` in the primitive to resolve to a

@@ -61,7 +61,7 @@ import type { Composition } from "./composition.js"
  * change.
  *
  * That is also the honest second design: `articlesBand` is a grid of four and
- * this is a column of six, which is a different rhythm and not a recolour.
+ * this is a column of six, which is a different rhythm and not a recolor.
  *
  * `shape: "square"` throughout: cover art is square, and a row of six frames
  * that disagreed about their ratio would read as a mistake even where each one

@@ -300,7 +300,7 @@ describe("what the Gate weighed, as part of the report", () => {
   })
 
   /**
-   * The one behaviour this unit was built for. Same kind, same reason code, same
+   * The one behavior this unit was built for. Same kind, same reason code, same
    * everything a `switch` over `WriteOutcome` can see — and a different headline,
    * because what was wrong is different in a way a person has to act on. One sends
    * somebody to `/portal/rules` to loosen a rule; the other tells them their
@@ -318,7 +318,7 @@ describe("what the Gate weighed, as part of the report", () => {
     expect(undrawable.meaning).toBe(CANNOT_BE_DRAWN.meaning)
   })
 
-  it("keeps both refusals in one colour, so the difference is carried by the words", () => {
+  it("keeps both refusals in one color, so the difference is carried by the words", () => {
     expect(reportOf(refusedFor("stakes-at-refusal-floor"), weighing([factor("unknown-primitive", "critical")])).tone).toBe(
       reportOf(refusedFor("stakes-at-refusal-floor"), weighing([factor("large-removal", "critical")])).tone
     )

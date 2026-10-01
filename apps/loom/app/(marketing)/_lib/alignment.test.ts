@@ -27,7 +27,7 @@ import { SITE_ROUTES, SITE_THEME_NAMES, type SiteRoute, type SiteThemeName } fro
  *
  * Nothing was red and nothing could have been. Both alignments are valid props
  * with valid values, the page renders, the schema passes, the markup carries no
- * colour and measures no overflow. The only instrument that could see it is a
+ * color and measures no overflow. The only instrument that could see it is a
  * camera — which is this lane's third finding of that shape in five days, and
  * the reason this file exists rather than a one-line fix on its own.
  *

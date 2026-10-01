@@ -54,10 +54,10 @@ describe("loom.brand", () => {
   })
 
   /**
-   * The colour is on the container and never on the path, so the word and the
+   * The color is on the container and never on the path, so the word and the
    * mark cannot drift apart — there is only one value and the path inherits it.
    */
-  it("sets one colour, on the container, for both halves", () => {
+  it("sets one color, on the container, for both halves", () => {
     const markup = markupOf({ name: "Overture", mark: MARK })
 
     expect(markup).toContain("color:var(--loom-fg-default")

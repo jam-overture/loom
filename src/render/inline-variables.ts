@@ -16,7 +16,7 @@ import {
 } from "./primitive.js"
 
 /**
- * A render whose colours are values rather than references.
+ * A render whose colors are values rather than references.
  *
  * The renderer is a total pure projection into React
  * ([0008](../../decisions/0008-the-renderer-is-a-total-pure-projection.md)) and a
@@ -28,7 +28,7 @@ import {
  *
  * Something has to render where there is no cascade. An image renderer takes
  * inline styles and literal values; it resolves no custom properties, so a
- * projection whose every colour is a `var()` renders as a blank rectangle. So
+ * projection whose every color is a `var()` renders as a blank rectangle. So
  * does an email body, and so does anything else that has to show a page outside
  * a browser. `Loom marketing` hit it first and drew its share card by hand,
  * reading the resolved theme itself, and filed the hand-drawn copy of a page as

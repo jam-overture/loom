@@ -105,7 +105,7 @@ export const BackToTheRecord = ({
         className="border-edge bg-surface-base text-ink mx-auto flex w-full max-w-lg items-center gap-3 rounded-md border px-4 py-3 text-left shadow-lg"
       >
         {/*
-          * The same dot as the legend in the rail, the same colour as the ring
+          * The same dot as the legend in the rail, the same color as the ring
           * on the page and the badge on the card. It is the surface's one
           * teaching device and it costs nothing to keep using it.
           */}

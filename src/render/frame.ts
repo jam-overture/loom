@@ -23,7 +23,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 /**
  * Which of a primitive's props reach a frame, read off whatever registered it.
  *
- * Structural, and detected the way `BehaviourResolver` is: a registry built by
+ * Structural, and detected the way `BehaviorResolver` is: a registry built by
  * the SDK satisfies it, and a host resolving from a plain map has registered
  * nothing that could declare a framable prop in the first place — so there is
  * nothing here to wire and nothing that can go missing.

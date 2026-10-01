@@ -5,14 +5,14 @@ import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { DISCLOSED_ATTRIBUTE } from "./behaviour.js"
+import { DISCLOSED_ATTRIBUTE } from "./behavior.js"
 import { controlClass, controlDisplay } from "./control.js"
-import { DiscloseControl } from "./behaviour-disclose.js"
+import { DiscloseControl } from "./behavior-disclose.js"
 
 /**
  * The second control that needs a browser to be tested, for the reason the copy
  * control's suite gives: everything the seam does around it — declaring,
- * checking, placing — is covered without a DOM in `behaviour.test.ts`.
+ * checking, placing — is covered without a DOM in `behavior.test.ts`.
  *
  * What is specific to this one is the *contract*, which is an attribute a
  * stylesheet somebody else writes will select on. So these tests assert the

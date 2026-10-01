@@ -70,7 +70,7 @@ import type { Composition } from "./composition.js"
  * There is a second reason that is specific to this band and worth saying,
  * because it is about honesty rather than about plumbing. These are placeholder
  * integrations in a starting composition. A real logo — the actual GitHub mark,
- * in GitHub's own colours — reads as a **partnership that has been agreed**,
+ * in GitHub's own colors — reads as a **partnership that has been agreed**,
  * and shipping one in a band a host may publish before re-reading it would have
  * this library making a claim on their behalf that nobody has earned. A
  * wordmark says the same true thing and claims nothing.

@@ -301,7 +301,7 @@ permitted is a real thing to put on a page. A binding that could not be answered
 An anchor has no such rendering. There is no way to draw a refused `id`. A shape
 that offered a primitive a choice it cannot act on would invite one to be
 invented, so what is left is a diagnostic — which is where a fault with no
-behaviour belongs.
+behavior belongs.
 
 ### The name is emitted verbatim, and the limit is stated rather than fixed
 

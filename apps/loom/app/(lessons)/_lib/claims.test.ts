@@ -6,7 +6,7 @@ import {
   ESCALATION_LADDER,
   treeOperationSchema,
 } from "@jam-overture/loom"
-import { BEHAVIOUR_NAMES } from "@jam-overture/loom/react"
+import { BEHAVIOR_NAMES } from "@jam-overture/loom/react"
 import { describe, expect, it } from "vitest"
 
 import { COURSE_DIR } from "./source"
@@ -164,9 +164,9 @@ const CLAIMS: readonly CourseClaim[] = [
     matters: "lesson 09's In the code row, which is where a reader goes to find the vocabulary",
   },
   {
-    what: "the members of the behaviour vocabulary",
-    phrase: /behaviour vocabulary has (\w+) members/,
-    count: BEHAVIOUR_NAMES.length,
+    what: "the members of the behavior vocabulary",
+    phrase: /behavior vocabulary has (\w+) members/,
+    count: BEHAVIOR_NAMES.length,
     occurrences: 3,
     matters:
       "the sentence lesson 31 states the closed set in, its self-check, and Set AJ — and the " +

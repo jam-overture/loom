@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, radius, size, space, weight } from "./tokens.js"
+import { color, family, radius, size, space, weight } from "./tokens.js"
 
 /**
  * A short label attached to something else — "Most popular", "Beta", "New".
@@ -35,7 +35,7 @@ const props = z
   .object({
     /**
      * Three treatments, not three shades: an accent badge claims attention, a
-     * neutral one classifies quietly, and an outline one sits on a coloured
+     * neutral one classifies quietly, and an outline one sits on a colored
      * surface where a filled badge would fight it.
      */
     tone: z.enum(["accent", "neutral", "outline"]).optional(),
@@ -46,19 +46,19 @@ type Props = z.infer<typeof props>
 
 const TONES = {
   accent: {
-    background: colour("accent-subtle"),
-    color: colour("accent-strong"),
-    borderColor: colour("border-accent"),
+    background: color("accent-subtle"),
+    color: color("accent-strong"),
+    borderColor: color("border-accent"),
   },
   neutral: {
-    background: colour("bg-surface-muted"),
-    color: colour("fg-muted"),
-    borderColor: colour("border-subtle"),
+    background: color("bg-surface-muted"),
+    color: color("fg-muted"),
+    borderColor: color("border-subtle"),
   },
   outline: {
     background: "transparent",
-    color: colour("fg-default"),
-    borderColor: colour("border-strong"),
+    color: color("fg-default"),
+    borderColor: color("border-strong"),
   },
 } as const
 

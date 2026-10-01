@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, family, size, space, weight, WIDTHS, type WidthName } from "./tokens.js"
+import { color, family, size, space, weight, WIDTHS, type WidthName } from "./tokens.js"
 
 /**
  * The render root, and the only primitive in this library that mounts a theme.
@@ -23,7 +23,7 @@ const props = z
      * [0072](../../decisions/0072-a-page-paints-its-ink-and-its-canvas-together.md).
      * A page that is the whole document paints both. A page embedded in a
      * host's own chrome sets `fills: false` and paints neither, so it takes the
-     * host's colours rather than half of each.
+     * host's colors rather than half of each.
      */
     fills: z.boolean().optional(),
   })
@@ -60,7 +60,7 @@ export const loomPage = definePrimitive({
            * how the documentation site rendered `#f5f5f5` body text on white
            * for a fortnight with no diagnostic and every test passing (0072).
            */
-          ...(fills ? { color: colour("fg-default"), background: colour("bg-canvas") } : {}),
+          ...(fills ? { color: color("fg-default"), background: color("bg-canvas") } : {}),
         },
       },
       createElement(

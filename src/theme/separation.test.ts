@@ -11,7 +11,7 @@ import { minimalPalette, STARTER_PALETTES } from "./library.js"
 import {
   auditMarkGroundings,
   auditSeparation,
-  colourDifference,
+  colorDifference,
   describeMarkAudit,
   describeSeparationAudit,
   JUST_NOTICEABLE_DIFFERENCE,
@@ -30,39 +30,39 @@ const starterRegistry = (): PrimitiveRegistry => {
   return made.value
 }
 
-describe("colourDifference", () => {
+describe("colorDifference", () => {
   /**
    * The two anchors of the scale. Black to white is 100 by construction — L*
-   * runs 0 to 100 and neither colour has any chroma — so a conversion that has
+   * runs 0 to 100 and neither color has any chroma — so a conversion that has
    * drifted fails here before it can report a palette wrongly.
    */
   it("measures the two ends of the scale", () => {
-    expect(colourDifference("#000000", "#ffffff")).toBeCloseTo(100, 5)
-    expect(colourDifference("#123456", "#123456")).toBe(0)
+    expect(colorDifference("#000000", "#ffffff")).toBeCloseTo(100, 5)
+    expect(colorDifference("#123456", "#123456")).toBe(0)
   })
 
-  it("does not care which colour is named first", () => {
-    expect(colourDifference("#1a1a1a", "#fafafa")).toBe(colourDifference("#fafafa", "#1a1a1a"))
+  it("does not care which color is named first", () => {
+    expect(colorDifference("#1a1a1a", "#fafafa")).toBe(colorDifference("#fafafa", "#1a1a1a"))
   })
 
   it("reads a three-digit hex as the six-digit one it abbreviates", () => {
-    expect(colourDifference("#3a7", "#33aa77")).toBe(0)
+    expect(colorDifference("#3a7", "#33aa77")).toBe(0)
   })
 
   /**
    * The reason this is not a contrast ratio, asserted rather than claimed. An
    * olive and a blue with all but the same luminance: WCAG calls them the same
-   * colour and a reader does not. Measuring difference with a ratio would report
+   * color and a reader does not. Measuring difference with a ratio would report
    * this pair as collapsed.
    */
   it("sees a difference in hue that a contrast ratio cannot", () => {
     expect(contrastRatio("#8a6d00", "#0079a8") ?? 0).toBeLessThan(1.01)
-    expect(colourDifference("#8a6d00", "#0079a8") ?? 0).toBeGreaterThan(80)
+    expect(colorDifference("#8a6d00", "#0079a8") ?? 0).toBeGreaterThan(80)
   })
 
-  it("declines to measure a colour it would have to guess at", () => {
-    for (const colour of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
-      expect(colourDifference(colour, "#ffffff"), colour).toBeUndefined()
+  it("declines to measure a color it would have to guess at", () => {
+    for (const color of ["rgb(10, 10, 10)", "hsl(200 50% 40%)", "rebeccapurple", "#11223344"]) {
+      expect(colorDifference(color, "#ffffff"), color).toBeUndefined()
     }
   })
 })
@@ -123,7 +123,7 @@ describe("auditSeparation", () => {
    * `minimal` sets `accent` to its own `fg-default` on purpose — "black, so the
    * green is a highlight and not the biggest thing on the page" — and the
    * consequence nobody had measured is that `loom.link tone="accent"` inside a
-   * paragraph is the paragraph's own colour, at rest, with no underline. Two
+   * paragraph is the paragraph's own color, at rest, with no underline. Two
    * more palettes land within a JND of the same thing.
    *
    * Pinned rather than fixed here: `minimal` is the palette all four surfaces
@@ -131,7 +131,7 @@ describe("auditSeparation", () => {
    * else's to choose. What this assertion buys is that a fourth cannot join
    * them quietly.
    */
-  it("counts the colour-only collapses exactly, so a new one cannot slip in beside them", () => {
+  it("counts the color-only collapses exactly, so a new one cannot slip in beside them", () => {
     const collapsed = STARTER_PALETTES.flatMap((palette) =>
       auditSeparation(palette).collapsed.map(
         (entry) => `${palette.id}: ${entry.pairing.first} and ${entry.pairing.second}`
@@ -206,11 +206,11 @@ describe("auditSeparation", () => {
 
   /**
    * A mark is only a defence while it is visible. Flattening the well into the
-   * surface and then painting the outline the same colour turns `minimal`'s
+   * surface and then painting the outline the same color turns `minimal`'s
    * bordered card — legal today, and asserted above — into a panel with no
    * edge and no fill.
    */
-  it("reports a marked pair whose mark has gone as well, and does not call it colour-only", () => {
+  it("reports a marked pair whose mark has gone as well, and does not call it color-only", () => {
     const audit = auditSeparation(
       withSlots({ "bg-surface-muted": "#ffffff", "border-subtle": "#ffffff" })
     )
@@ -284,7 +284,7 @@ describe("auditMarkGroundings", () => {
   /**
    * The gate, and what it cost to be able to write it. Eight of the palettes
    * below shipped a `border-subtle` edge within a just-noticeable difference of
-   * a fill it is drawn on — `linen` drew it in the well's own colour, ΔE 0.00,
+   * a fill it is drawn on — `linen` drew it in the well's own color, ΔE 0.00,
    * and `clay` at 0.37 — and every test in this file was green throughout,
    * because the only thing that ever measured a border measured it as a defence
    * for a pair of fills that were not in trouble.
@@ -305,8 +305,8 @@ describe("auditMarkGroundings", () => {
 
   /**
    * The blind spot this function exists for, planted deliberately: a well that
-   * is plainly a different colour from the surface around it, outlined in the
-   * well's own colour. `auditSeparation` passes the pair — the fills tell a
+   * is plainly a different color from the surface around it, outlined in the
+   * well's own color. `auditSeparation` passes the pair — the fills tell a
    * reader the two apart and it never has to ask about the mark — and the border
    * the primitive declares draws nothing. This is the shape of what eight
    * starter palettes were doing.
@@ -331,11 +331,11 @@ describe("auditMarkGroundings", () => {
   })
 
   /**
-   * A line whose colour cannot be measured is reported rather than passed. The
+   * A line whose color cannot be measured is reported rather than passed. The
    * safe direction, and the same one `MeasuredPeer` takes for a mark it cannot
    * read: a defence that cannot be measured is not counted as one.
    */
-  it("counts a colour it cannot measure as a line it cannot find", () => {
+  it("counts a color it cannot measure as a line it cannot find", () => {
     const marks = auditMarkGroundings(withSlots({ "border-default": "rgb(200, 200, 200)" }))
 
     expect(marks.invisible.map((entry) => entry.grounding.mark)).toEqual([
@@ -359,7 +359,7 @@ describe("the border ramp", () => {
    * tier ought to offer something between `border-default` (ΔE 4 to 15 from its
    * grounds) and `border-strong` (74 to 98) is the open half of the 29 September
    * finding and is the palette author's call; that two tiers a table puts on one
-   * page are not the same colour is not.
+   * page are not the same color is not.
    */
   it("keeps the three border tiers a just-noticeable difference apart", () => {
     for (const palette of STARTER_PALETTES) {
@@ -368,7 +368,7 @@ describe("the border ramp", () => {
         ["border-default", "border-strong"],
       ] as const) {
         expect(
-          colourDifference(palette.slots[lower] ?? "", palette.slots[upper] ?? "") ?? 0,
+          colorDifference(palette.slots[lower] ?? "", palette.slots[upper] ?? "") ?? 0,
           `${palette.id}: ${lower} against ${upper}`
         ).toBeGreaterThanOrEqual(JUST_NOTICEABLE_DIFFERENCE)
       }

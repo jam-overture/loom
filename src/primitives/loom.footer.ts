@@ -5,7 +5,7 @@ import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { COLUMN_NAMES } from "./layout.js"
-import { colour, hairline, space } from "./tokens.js"
+import { color, hairline, space } from "./tokens.js"
 
 /**
  * The band that closes a page: who this is, what else is here, and the small
@@ -180,7 +180,7 @@ export const loomFooter = definePrimitive({
           width: "100%",
           paddingBlock: space(7),
           ...(tone === "surface"
-            ? { background: colour("bg-surface"), paddingInline: space(5) }
+            ? { background: color("bg-surface"), paddingInline: space(5) }
             : { borderBlockStart: `1px solid ${hairline()}` }),
         },
       },
@@ -218,7 +218,7 @@ export const loomFooter = definePrimitive({
                 gap: space(4),
                 paddingBlockStart: space(5),
                 borderBlockStart: `1px solid ${hairline()}`,
-                color: colour("fg-subtle"),
+                color: color("fg-subtle"),
               },
             },
             note

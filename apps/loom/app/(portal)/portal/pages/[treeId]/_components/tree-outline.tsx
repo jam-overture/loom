@@ -33,9 +33,9 @@ import { useSelection } from "./selection-context"
  * next to it rather than being something to work out.
  *
  * What is deliberately *not* here is *"click another part to pick it too"*.
- * Clicking a second row and having it join the first is the behaviour a person
+ * Clicking a second row and having it join the first is the behavior a person
  * discovers by doing it once; a line of instructions above a list is what a
- * surface writes when its behaviour needs explaining, and this one does not.
+ * surface writes when its behavior needs explaining, and this one does not.
  * The legend below says what a picked part is *for*, which is the thing nobody
  * discovers.
  */

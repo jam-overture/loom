@@ -81,8 +81,8 @@ is the only green on the surface. The overdue rows went to `fg-muted` — twelve
 green dates would have undone the point of the palette by making the highlight
 the wallpaper.
 
-A palette that makes `accent` and `accent-strong` the same colour again is
-welcome to; nothing here names a colour.
+A palette that makes `accent` and `accent-strong` the same color again is
+welcome to; nothing here names a color.
 
 ## Executed
 

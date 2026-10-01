@@ -4,7 +4,7 @@ import { z } from "zod"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { colour, hairline, space, type RampStep } from "./tokens.js"
+import { color, hairline, space, type RampStep } from "./tokens.js"
 
 /**
  * The enum-driven one: `ornament` selects between three genuinely different
@@ -47,7 +47,7 @@ const dot = (key: number): ReturnType<typeof createElement> =>
       width: "4px",
       height: "4px",
       borderRadius: "50%",
-      background: colour("accent"),
+      background: color("accent"),
     },
   })
 
@@ -62,13 +62,13 @@ const dot = (key: number): ReturnType<typeof createElement> =>
  * `diamond` set neither a width nor a flex, so they took `flex: 0 1 auto` and
  * shrank to their content — three dots centred inside a box the width of three
  * dots, and a diamond whose two hairlines had nothing to grow into. The library
- * palette test rendered both and asserted about colour, so a mark drawn in
+ * palette test rendered both and asserted about color, so a mark drawn in
  * entirely the wrong place passed it.
  */
 const ORNAMENTS = {
   rule: () =>
     createElement("span", {
-      style: { display: "block", width: "100%", height: "1px", background: colour("border-default") },
+      style: { display: "block", width: "100%", height: "1px", background: color("border-default") },
     }),
   dots: () =>
     createElement(
@@ -90,7 +90,7 @@ const ORNAMENTS = {
           width: "8px",
           height: "8px",
           rotate: "45deg",
-          background: colour("accent"),
+          background: color("accent"),
         },
       }),
       createElement("span", {

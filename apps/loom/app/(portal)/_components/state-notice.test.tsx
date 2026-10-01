@@ -60,7 +60,7 @@ describe("StateNotice", () => {
    * "You're all caught up." was rendered in the dashed box that means "nothing
    * here yet" — so the reader who did not open the disclosure met a blank slot
    * where a clean bill of health should be. `settled` must not be dashed, and it
-   * must not be grey either: a good result carries the same colour the portal
+   * must not be grey either: a good result carries the same color the portal
    * already uses for a change that went through.
    */
   it("shows a good result as a result rather than as a space something goes in", () => {

@@ -22,7 +22,7 @@ import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
  *
  * So this says it in the words on the page. `plain-change.ts` owns which words
  * and why; what this file owes them is a position — under the rule, above the
- * answer or the undo — and a colour.
+ * answer or the undo — and a color.
  *
  * **Two tones, because this line now outlives the question that raised it.** It
  * was `WhatWouldHappen`, and it rendered only while a change was waiting: the
@@ -34,10 +34,10 @@ import type { PlainChange } from "@/app/(demo)/_lib/plain-change"
  * record now carries its own copy in the past tense (`record.did`) and this
  * renders both.
  *
- * The left rule is `answerNote`'s device, in the colour of the state it belongs
+ * The left rule is `answerNote`'s device, in the color of the state it belongs
  * to. Amber is the ring around the band on the stage while the question is
  * open; green is the ring once it has landed — so the sentence and the mark it
- * describes are the same colour in two places at once, which is the teaching
+ * describes are the same color in two places at once, which is the teaching
  * this rail does everywhere rather than a legend.
  */
 export const PlainReading = ({

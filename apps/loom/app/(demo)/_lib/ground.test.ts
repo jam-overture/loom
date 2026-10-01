@@ -8,12 +8,12 @@ import {
   type ResolvedTheme,
 } from "@jam-overture/loom"
 
-import { demoPagePalette, pageColour, pageGround } from "./ground"
+import { demoPagePalette, pageColor, pageGround } from "./ground"
 import { DEMO_ALTERNATE_THEME, DEMO_STARTING_THEME } from "./page-tree"
 import { demoThemes } from "./registry"
 
 /**
- * The page's own colours, and the two copies of them this lane used to hold.
+ * The page's own colors, and the two copies of them this lane used to hold.
  *
  * The assertion this file exists for is the last one, and it is a measurement
  * rather than a preference: on 26 September the excerpt inside a question was
@@ -47,8 +47,8 @@ describe("the palette the page wears", () => {
   })
 
   it("hands out the palette's own value for a slot", () => {
-    expect(pageColour("bg-canvas")).toBe(demoPagePalette.slots["bg-canvas"])
-    expect(pageColour("fg-default")).toBe(demoPagePalette.slots["fg-default"])
+    expect(pageColor("bg-canvas")).toBe(demoPagePalette.slots["bg-canvas"])
+    expect(pageColor("fg-default")).toBe(demoPagePalette.slots["fg-default"])
   })
 })
 
@@ -76,7 +76,7 @@ describe("the ground a frame standing in for the page paints", () => {
   })
 
   /**
-   * A palette whose colours cannot be measured still gets a ground — the two
+   * A palette whose colors cannot be measured still gets a ground — the two
    * hex-or-not values are the palette's either way — and gets no opinion about
    * `color-scheme`, so the stylesheet's own stands rather than this file
    * guessing from something it could not read.
