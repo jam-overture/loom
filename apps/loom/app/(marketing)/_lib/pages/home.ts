@@ -391,7 +391,7 @@ const whatIsIt = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        "In plainer words: your AI can change your live page, and you decide in advance what it is allowed to change, see everything it did, and put any of it back.",
+        "In other words: an AI model can change your live site, but only in the ways you approved first. You can see every change it made, and you can undo any of them.",
         { size: "lead", measured: true }
       ),
     ]
@@ -417,25 +417,25 @@ const USING_IT: readonly UsingItStep[] = [
   {
     marker: "1",
     title: "Build your components",
-    body: "In your framework, the way you already do. Loom never writes code into your page and never asks you to rebuild it.",
+    body: "Use whatever framework you already use. Loom does not write code into your page, and it does not ask you to rebuild anything.",
     state: "done",
   },
   {
     marker: "2",
     title: "Register them with Loom",
-    body: "One list of the pieces the AI may use, and the rules for what it may do with them. This is the whole of the setup.",
+    body: "Tell Loom which of your components the AI is allowed to use. That is all the setup there is.",
     state: "done",
   },
   {
     marker: "3",
     title: "Hook up your preferred AI model",
-    body: "Loom is wired to no vendor \u2014 point it at the model you already use. It is the only part of the system that guesses, and everything after it is checked.",
+    body: "Loom is AI model agnostic. Pick the model you already use, or bring your own. Loom sends it what your users are doing, and it suggests changes from there.",
     state: "done",
   },
   {
     marker: "4",
     title: "Adapt your page, on your rules",
-    body: "Every change is weighed against the rules you wrote before anybody asked, written down whether it lands or not, and reversible in one press.",
+    body: "Define your acceptance policy up front, so an AI model can only make changes you already approved. Anything else gets rejected, and Loom tells you why.",
     state: "current",
   },
 ]
@@ -501,7 +501,7 @@ const usingIt = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        "You keep your framework and you keep your components. What Loom needs from you is the list of pieces the AI may use, and the rules for what it may do with them.",
+        "You keep your framework and your components. Loom needs two things from you: which components an AI model is allowed to use, and what it is allowed to do with them.",
         { size: "lead", measured: true }
       ),
       buildElement(ids, {
@@ -541,7 +541,7 @@ const problems = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               title: "It writes code, and somebody has to read all of it",
-              body: "A tool that writes components hands you work rather than taking it away — every line of it has to be read, reviewed and owned by somebody. Loom never writes code into your page. It rearranges pieces you already built and trust.",
+              body: "When a tool writes components for you, somebody still has to read, review and own every line. Loom does not write code. It rearranges components you already built.",
             },
           }),
           buildElement(ids, {
@@ -644,7 +644,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
           props: {
             value: FACTS.decisions,
             label: "decisions written down",
-            caption: "What was chosen, what was rejected, and why — written before the code, kept after it.",
+            caption: "What was chosen, what was rejected, and why. Written before the code and kept afterwards.",
           },
         }),
         buildElement(ids, {
