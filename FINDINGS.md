@@ -28938,8 +28938,39 @@ a later run that adds one is told the row's sentence has to change with it.
 ## 2026-09-16 — a claims test that pins a correct number is how a docs page blocks the thing it documents
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`, `Loom marketing`,
-`Loom lessons`, `Loom primitives` · **Status:** open — a habit to check for, not
-a defect anybody has to fix today
+`Loom lessons`, `Loom primitives` · **Status:** **closed for `Loom docs`** by
+`docs-42-the-numbers-nothing-counted`; open for the other three
+
+> **What closed the documentation half, 1 October.** The remedy this entry names
+> — *the page may not say the number* — is built rather than grepped for.
+> `(docs)/_lib/counts.ts` registers every size claim the site makes and reads
+> each off the thing it counts; `<Count>` puts one on a page **spelled**, which
+> is what let the prose keep the voice `theming-claims.test.ts` was protecting
+> when it pinned the word instead; and `counts.test.ts` sweeps what an author
+> wrote — every written page, and every string literal in this route group — for
+> a number standing in front of a counted noun. The ban is on the shape, not on
+> today's value, so a correct number typed by hand is refused too.
+>
+> The two claims tests this entry is about are rewritten to assert the page
+> **asks**. Neither pins a figure now, so neither can red the gate for four
+> surfaces on the day a knob or a slot is added.
+>
+> **The entry was right that it was not a defect anybody had to fix, and wrong
+> that nothing was broken.** The grep it recommends was never run here, and the
+> sweep that replaced it found two live staleness on the first pass: the
+> installation page's *ninety-eight primitives* against ninety-nine, and the
+> rail's summary for *What AI may change* promising *thirteen settings* beside a
+> page that said fourteen. Both had been wrong for as long as it took somebody to
+> add one, in the page a stranger reads first and in the sentence that sends them
+> to it.
+>
+> **The mechanism transfers and the other three owners are welcome to it.**
+> `counts.ts` and `counts.test.ts` are about 300 lines between them and nothing
+> in either is specific to documentation: a surface supplies the counts it claims
+> and the nouns it claims them with, and gets the sweep. What does not transfer
+> is the component — `<Count>` is MDX's affordance, and a surface built from
+> trees interpolates `spellOut` into the copy instead, which is what this lane's
+> own example captions now do.
 
 The entry above took three days to close and none of them were spent writing
 prose. *What your readers do* said **"Four things, and nothing else"** and
@@ -38934,3 +38965,157 @@ claim about where something lives, and `SITE_ROUTES` already knows where things
 live. A check that reads rendered prose for the site's own page names and holds
 them against the page that actually carries the band would have caught this one
 the hour it broke.
+
+---
+## 2026-10-01 — a number whose noun is somewhere else in the sentence is invisible to the one check that would find it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped today
+
+Today's sweep refuses *a number standing in front of a thing the runtime
+counts*: `ninety-eight primitives`, `seventeen named slots`, `Forty-four nodes`.
+It works because the noun is the subject, and the noun is what makes a false
+positive rare — a page says *two bands* about an example a dozen times and means
+it.
+
+**The theming page's wording defeated it, and did so while being correct.**
+
+> *"shipping your brand plus twenty-one others is a menu, not a design system"*
+
+Twenty-one is `STARTER_PALETTES.length`. The noun is *others*, which refers back
+to a word two sentences earlier. No regular expression over one page finds that,
+and the sentence was **both** the most load-bearing figure on the page and the
+one most likely to move — eighteen of the twenty-one are derived, so the count
+changes whenever `palettes.ts` grows.
+
+It is fixed by rewriting rather than by catching: the sentence now says *plus the
+other `<Count of="starter-palettes" as="word" />` palettes*, which puts the noun
+back and brings it inside the sweep. **That is a fix for one sentence and not for
+the class.** The next author to write *plus twenty-one others* gets a green
+build.
+
+**What would close it, and why it was not written today.** A rule over rendered
+prose asking *is there a bare number here at all, and is it one of the counts?*
+would find it — the value is the join, not the noun. It would also flag every
+true sentence that happens to contain a number equal to a count, and on this site
+that is a real set: a palette count of 21 collides with nothing today, but a
+count of 3 or 10 collides with most pages. The honest version needs the number to
+be *suspiciously* equal, which means either a window or a per-count opt-in, and
+both are design decisions rather than a line of code. Offered as shaped work, not
+as a line.
+
+---
+## 2026-10-01 — four sentences in `src/` state the size of the primitive library, and all four say ninety-eight
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` (one),
+`Loom daily build` (three) · **Status:** open — stale prose, no behaviour
+
+Today's sweep covers `apps/loom/app/(docs)/` because that is this lane. Running
+the same pattern over `src/` out of curiosity finds the same defect four more
+times, all of them stale against a library of **ninety-nine**:
+
+| | says |
+| --- | --- |
+| `src/primitives/loom.feed.ts:390` | *"of two primitives in a library of ninety-eight"* — `Loom primitives` |
+| `src/sdk/audit.ts:201` | *"which is ninety-six of the ninety-eight registered today"* — `Loom daily build` |
+| `src/sdk/audit.test.ts:528` | *"Ninety-six of the ninety-eight read no binding"* — `Loom daily build` |
+| `src/interpretation/render.test.ts:272` | *"would cost every proposal ninety-eight lines"* — `Loom daily build` |
+
+All four are doc comments, so nothing a reader of the site sees and nothing a
+test asserts. They are filed rather than fixed because `src/` is not this lane's
+and because the interesting half is not the four edits.
+
+**The interesting half.** `audit.ts` is making an *argument* from the pair —
+ninety-six of ninety-eight primitives read no binding, therefore the audit is
+cheap — and arguments from arithmetic are the ones that rot into
+nonsense rather than into a wrong digit. The remedy this lane used today is
+available there and is smaller in `src/`: a doc comment may say *all but two*,
+which is the claim, and stays true while the two are the two.
+
+What is **not** offered is the sweep. A check over `src/` doc comments would be a
+check on how the framework's authors write about their own code, and that is a
+decision for the lanes that own it.
+
+---
+## 2026-10-01 — three spellers in one route group, and the two that are tests cannot use the third
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+duplication with a reason, which is the kind worth writing down
+
+`spellOut` in `_lib/counts.ts` is the **third** number-to-words function in this
+route group. `compositions.test.ts` has one inline with its own `tens` and
+`units` arrays; `theming-claims.test.ts` keeps a lookup, down to one entry today
+from three.
+
+The usual move is to fold the two into the one. **It would break both of them**,
+and the reason is the failure this lane has filed three times under a different
+name. Both are tests that spell a number *in order to go looking for it in a
+page*: they compute the English for a derived count and assert the page contains
+it. Spelling that expectation with the same function the page spells it with
+makes the comparison vacuous — an off-by-one in the tens table puts
+*eighty-nine* on the page and *eighty-nine* in the assertion, and the test is
+green about a page that is wrong.
+
+So there are two correct resolutions and a wrong one:
+
+- **Leave them.** Three implementations of a pure function whose output is
+  checked against a table of nineteen cases is cheap, and two of the three exist
+  precisely to disagree with the first.
+- **Fold them, and change what they assert** — from *the page says the word* to
+  *the page asks for the number*, which is what the two claims tests rewritten
+  today now do. `compositions.test.ts` is the remaining candidate and was left
+  alone deliberately: its page-scoped ban on digits **and** words is stronger
+  than the site-wide sweep for that one page, and rewriting a working check to
+  remove a duplicate speller is a trade in the wrong direction.
+- **Import `spellOut` into them and keep the assertion.** This is the one that
+  looks like the fix and is the defect.
+
+Recorded so the next run does not reach for the third option, which is what a
+reader of three spellers would reach for.
+
+---
+## 2026-10-01 — the merge-gate remedy was followed exactly and the notification still said zero, because the remedy fixes the file and not the thing a run reads
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — cost this run nothing, because the file was read second
+
+`docs/routines.md`'s *Reading the merge gate* section is on its third spelling of
+one mistake. This run followed its remedy to the letter:
+
+```bash
+pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
+```
+
+Nothing after the gate on the line. `$?` correct. `echo … > file` the last thing
+the line does — which is what the 25 September entry adds over the 12 September
+one, and it is right. **The file said `EXIT=2`.**
+
+**The harness notification for that background command said *exit code 0*.** It
+was not wrong: the status of a compound command is its last command's, the last
+command is `echo`, and `echo` succeeded. That is the identical arithmetic as the
+`tee` case, arrived at from the one direction the remedy cannot close — because
+the remedy's whole mechanism is *put a successful command last*, and a
+successful command last is exactly what makes the line's own status 0.
+
+So the two spellings the section already names are a pipe and a `tee`, and this
+is a third thing: **the remedy guarantees the line reports success.** The file
+is the only true report, and the instruction has to be to read it rather than
+merely to write it.
+
+What it would have cost: the first gate of this run was **red**, with a
+`TS2339` on a property name in a new test. The notification said zero. The next
+step in the procedure is *open the pull request*, and the report beside it would
+have said green. It cost nothing here only because the log was read for test
+counts and the error was in it.
+
+**What would close it.** One sentence in that section, which is the lane's to
+write: *the status of the line you just ran is `echo`'s, so it is always
+success — read `verify.exit`, and never the notification, the exit code, or the
+last line of the log.* The section currently says how to write the file and does
+not say that reading anything else is guaranteed to mislead.
+
+A stronger version is available and is a change rather than a sentence: write
+the verdict as a **word** rather than a number — `echo "GATE=red"` on non-zero —
+so a run that quotes the wrong thing quotes something that does not look like a
+pass. Offered, not specified.
+
