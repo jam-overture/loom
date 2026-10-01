@@ -38,6 +38,22 @@ Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-whe
 The guide is */docs/the-runtime/what-your-readers-do*.
 `prototypes/ski-apparel` is a working end-to-end example, including the rail.
 
+## Who owns this
+
+**`Loom signals`**, a routine the maintainer created on 30 September 2026 to run
+beside `Loom daily build` on the same schedule. Its lane is `src/signals/`, the
+intake under `apps/loom/app/`, and this file.
+
+It is pointed at one thing: **what Loom can answer about its readers, rather than
+how much it collects.** The six rules below are the shape of that, and the first
+place to look for new capability is what is already in a batch — a tree id and a
+revision join to the registry on the server, so most "we should send more" turns
+out to be "we should interpret what we have".
+
+`src/render/` and `src/sdk/` stay `Loom daily build`'s, so an attribute on the
+markup or a declaration on a primitive is a finding filed for that lane. So is
+signal-to-intent derivation, which is still out of scope for everyone.
+
 ## The rules this is built under
 
 These are settled. A change to any of them is a decision record, not a judgement
@@ -68,7 +84,7 @@ call inside a pull request.
 Each step is a lane's to build. Later steps depend on earlier ones being on
 `main`; do not start one whose input does not exist yet.
 
-### 1. The broadcaster stops going blind · `Loom daily build` · **approved, first**
+### 1. The broadcaster stops going blind · `Loom signals` · **approved, first**
 
 `broadcastReaderSignals` finds addressed elements once, when it is called
 (`src/signals/broadcast.ts:296`), and never looks again. Anything rendered
@@ -86,7 +102,7 @@ addressed elements — the broadcaster already runs one for disclosures at
 `broadcast.ts:336` — and a sentence in the module documentation that a new root
 or revision is a new broadcast. Closes the open finding of 12 September.
 
-### 2. `completed`, the kind that closes a funnel · `Loom daily build` · **approved**
+### 2. `completed`, the kind that closes a funnel · `Loom signals` · **approved**
 
 The existing four measure attention. None of them says a reader *finished*
 anything, so the portal could show engagement and never conversion.
@@ -101,7 +117,7 @@ and "they bought".
 one addition that genuinely threatens rule 4. If it is ever wanted it should be
 *hovered with intent* — dwell-thresholded — and it needs its own argument.
 
-### 3. Ingestion, storage and rollup · `Loom daily build` · **approved, after 1 and 2**
+### 3. Ingestion, storage and rollup · `Loom signals` · **approved, after 1 and 2**
 
 **Reuse the telemetry subsystem's shape; do not build a parallel one.**
 `src/telemetry/` already has a journal, a sink, memory and Postgres
@@ -135,6 +151,35 @@ The guide exists for broadcasting and will need the capture half. Lessons and
 marketing follow the same rule: **after the shape settles, not during.** Writing
 them while step 3 is in flight means writing them twice.
 
+### 6. What a signal means, joined on the server · `Loom signals` · **approved**
+
+A batch names a node, a tree and a revision. The registry knows what that node
+*is* — the part it plays (0114), which of its props a reader reads (0122) — and
+intake and rollup hold both. So `dwelled on n_42` can be counted as *time spent
+on a pricing band* with **no byte added to the payload**, no browser change, and
+no new decision about what to keep.
+
+That is the asymmetry worth exploiting: the wire stays node-shaped and anonymous,
+while what can be asked of the counters grows. Which roles readers engage with
+and which they skip; which parts of a page are read and which are scrolled past;
+which copy a reader actually reached.
+
+**Not this:** sending the metadata from the browser. 0167 already refused
+ancestry on the high-volume kinds — payload multiplied by page depth, to buy what
+the server could derive — and the same argument covers roles, parts and copy.
+
+### 7. Region, as an aggregate and nothing else · `Loom signals` · **approved**
+
+Where readers are, which the intake can read from the request without the browser
+knowing anything about it. Three constraints are the design:
+
+- **it lands on a counter, never on a batch** — a region beside a `view` key on a
+  raw row is a step toward a profile;
+- **a bucket is kept only once it holds enough views to not be a person**, with
+  the floor as configuration and the reason in the record;
+- **the address it came from is never stored**, and no digest of one outlives the
+  process.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a
@@ -145,6 +190,23 @@ them while step 3 is in flight means writing them twice.
 - **A tracking primitive.** See rule 3.
 
 ## Under consideration, not approved
+
+**Per-reader identity, deferred 30 September 2026.** A unique id per reader,
+returning-reader measurement, anything that stitches one person across page
+views. The maintainer is interested and has parked it: intake stays per
+deployment, not per person, because a persistent reader id is personal data in
+the EU, the UK and California, and shipping it would hand every Loom deployment a
+consent obligation it did not ask for.
+
+When it returns it is **opt-in, and a gate with a record rather than a banner**: a
+broadcaster that refuses to start without a recorded decision, an intake that
+refuses an identified batch which cannot show which decision allowed it, and
+collection that can be shown and withdrawn. A consent *prompt* may be a primitive
+that displays the choice and calls a handler the host supplies — the switch stays
+host configuration, per rule 3.
+
+**It is parked, not open.** Do not build it and do not write a record arguing for
+it. If a design choice would make adding it later expensive, say so in a report.
 
 **Longer retention as something a deployment pays for.** The maintainer's
 intent, and the reason rule 5 makes the window configuration rather than a
