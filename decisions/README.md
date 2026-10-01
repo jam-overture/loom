@@ -292,3 +292,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0206](0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md) | A primitive declares what it could not show, and the runtime decides whether to say so | Accepted | §3 |
 | [0207](0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | A primitive that arranges only glyphs inherits its alignment | Accepted | §4b |
 | [0208](0208-a-question-nothing-reads-is-refused-before-it-is-written.md) | A question nothing reads is refused before it is written | Accepted | §2 |
+| [0209](0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md) | What an adapter owes the runtime is a suite, not a sentence | Accepted | §2 |
+| [0210](0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md) | A primitive may lock the page's scroll from the stylesheet, and only while its own region is open | Accepted | §4b |
+| [0211](0211-a-completion-is-a-form-the-browser-let-go.md) | A completion is a form the browser let go, and it carries the bands it was the end of | Accepted | §6 |

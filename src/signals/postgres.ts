@@ -90,6 +90,7 @@ const storedTallySchema = z.object({
   activations: countSchema,
   opens: countSchema,
   closes: countSchema,
+  completions: countSchema,
   updatedAt: instantSchema,
 })
 
@@ -258,6 +259,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
                 activations: tally.activations,
                 opens: tally.opens,
                 closes: tally.closes,
+                completions: tally.completions,
                 updatedAt,
               }))
             )
@@ -272,6 +274,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
                 activations: sql`${loomReaderTallies.activations} + excluded.activations`,
                 opens: sql`${loomReaderTallies.opens} + excluded.opens`,
                 closes: sql`${loomReaderTallies.closes} + excluded.closes`,
+                completions: sql`${loomReaderTallies.completions} + excluded.completions`,
                 updatedAt,
               },
             })

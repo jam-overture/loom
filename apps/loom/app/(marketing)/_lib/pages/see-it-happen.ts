@@ -478,7 +478,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
      */
     prose(
       ids,
-      "These five are prepared, so the whole sequence runs here without an AI in the way. To ask for something in your own words, the demonstration is a page you can type into.",
+      "These five are prepared, so the whole sequence runs here without calling an AI model. To ask for something in your own words, try the demo. It is a page you can type into.",
       { tone: "muted", size: "small", measured: true }
     ),
     buildElement(ids, {
@@ -501,7 +501,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
         href: surfaceHref(context.origin, DEMO),
         variant: "quiet",
       },
-      children: [buildText(ids, "Take a turn")],
+      children: [buildText(ids, "Try the demo")],
     }),
   ]),
 ]
@@ -534,7 +534,7 @@ const choices = (ids: IdFactory, context: SeeItHappenContext): LoomNode =>
      */
     prose(
       ids,
-      "Each one is a real request, put to the rules this site is published under — the same way it would be on a page of yours.",
+      "Each one is a real request, checked against the rules this site runs under, exactly as it would be on a page of yours.",
       { tone: "muted", size: "small" }
     ),
     /**

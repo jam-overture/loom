@@ -25,6 +25,7 @@ describe("parseReaderSignalBatch", () => {
         { kind: "dwelled", nodeId: "n_1", type: "loom.section", ms: 4200 },
         { kind: "activated", nodeId: "n_2", type: "loom.card", at },
         { kind: "disclosed", nodeId: "n_3", type: "loom.faq", open: true, at },
+        { kind: "completed", nodeId: "n_4", type: "loom.form", at },
       ])
     )
 
@@ -113,6 +114,33 @@ describe("parseReaderSignalBatch", () => {
       .map((option) => option.shape.kind.value)
 
     expect([...carrying].sort()).toEqual([...DELEGATED_READER_SIGNAL_KINDS].sort())
+  })
+
+  /**
+   * A completion says a form was let go and nothing about what was in it. The
+   * fields are the one thing a submission has that no other signal does, which
+   * makes this the sharpest version of 0136's rule rather than a repeat of it.
+   */
+  it("refuses a completion carrying anything about what was submitted", () => {
+    expect(
+      parseReaderSignalBatch(
+        batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, fields: ["email"] }])
+      ).ok
+    ).toBe(false)
+    expect(
+      parseReaderSignalBatch(
+        batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, action: "/subscribe" }])
+      ).ok
+    ).toBe(false)
+  })
+
+  it("reads the bands a completion says it was the end of", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, within: [region] }])
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.signals[0]).toMatchObject({ within: [region] })
   })
 
   it("says where a batch went wrong instead of throwing", () => {

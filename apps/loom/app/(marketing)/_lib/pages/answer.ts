@@ -3,7 +3,7 @@ import { buildElement, buildText, type IdFactory, type LoomNode } from "@jam-ove
 import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"
 import { action, prose, stack } from "../nodes"
-import { askHref, mechanismHref, type SiteThemeName } from "../site"
+import { askHref, type SiteThemeName } from "../site"
 
 /**
  * The answer, where the visitor lands.
@@ -167,30 +167,19 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
       variant: "quiet",
     }),
     /**
-     * The whole record, on the page that prints one.
+     * **There was a second control here until 1 October, and it has nowhere
+     * left to go.**
      *
-     * It was `/the-record` until 26 September, a page whose whole job was
-     * replaying a sequence of requests from the front door. The maintainer's
-     * direction that day retired it into the mechanism page, which already
-     * printed the record of a real run and already took an `ask` in its
-     * address — so the destination is the same argument, one page shorter, and
-     * `mechanismHref` carries the approval with it because the record does.
+     * *See the whole record* pointed at `/how-it-works`, which is the page that
+     * prints the raw record of a run. The five choices moved onto that page, so
+     * this notice is now on it: the link would hand a reader the address they
+     * are already reading.
      *
-     * What is lost with the page is the multi-change sequence: a history of
-     * several requests, replayable from one address. Nothing on the site linked
-     * to one except that page, and a marketing site is not where somebody
-     * assembles a sequence.
+     * Nothing is lost. The record it offered is the panel in the band directly
+     * below, and *See it on this page* above is the control that goes there. A
+     * second button to the same place, worded as though it were somewhere else,
+     * is worse than no button.
      */
-    action(
-      ids,
-      "See the whole record",
-      mechanismHref(context.origin, {
-        theme: context.theme,
-        ask: record.ask,
-        ...(context.approve === true ? { approve: true } : {}),
-      }),
-      { variant: "quiet" }
-    ),
   ])
 }
 

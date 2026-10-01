@@ -49,6 +49,7 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     activations bigint NOT NULL,
     opens bigint NOT NULL,
     closes bigint NOT NULL,
+    completions bigint NOT NULL DEFAULT 0,
     updated_at timestamptz NOT NULL,
     PRIMARY KEY (tree_id, revision, node_id)
   )`,
@@ -58,6 +59,12 @@ export const READER_SIGNALS_DDL: readonly string[] = [
    * measured doing anything in here*, which is what was true of them.
    */
   `ALTER TABLE loom_reader_tallies ADD COLUMN IF NOT EXISTS engaged bigint NOT NULL DEFAULT 0`,
+  /**
+   * For a deployment whose tallies table predates the fifth kind. Additive and
+   * defaulted, so existing rows read as *nothing was submitted here*, which is
+   * what nobody was counting.
+   */
+  `ALTER TABLE loom_reader_tallies ADD COLUMN IF NOT EXISTS completions bigint NOT NULL DEFAULT 0`,
   `ALTER TABLE loom_reader_tallies ENABLE ROW LEVEL SECURITY`,
   `CREATE TABLE IF NOT EXISTS loom_reader_funnels (
     tree_id text NOT NULL,

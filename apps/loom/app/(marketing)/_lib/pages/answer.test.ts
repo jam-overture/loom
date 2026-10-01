@@ -1,9 +1,11 @@
 import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
+import { ANCHOR } from "../bands"
+
 import { ASKS, type AskId } from "../adapt/asks"
 import { askRunFor, treeFor } from "../render"
-import { askHref, DEFAULT_THEME, HOME, HOW_IT_WORKS, type SiteThemeName } from "../site"
+import { askHref, DEFAULT_THEME, HOW_IT_WORKS, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import type { PageContext } from "./home"
 
@@ -61,7 +63,7 @@ const indexOfType = (page: LoomTree, type: string): number =>
 const servedPage = async (context: PageContext): Promise<LoomTree> => {
   const run = await askRunFor(context)
 
-  return run === undefined ? treeFor(HOME, context) : run.page
+  return run === undefined ? treeFor(HOW_IT_WORKS, context) : run.page
 }
 
 const actionsOf = (band: ElementNode): readonly ElementNode[] =>
@@ -77,7 +79,7 @@ const hrefOf = (action: ElementNode): string => {
 
 describe("the page a stranger arrives at", () => {
   it("carries no answer band, because nothing has been asked", () => {
-    expect(answerOf(treeFor(HOME, contextFor()))).toBeUndefined()
+    expect(answerOf(treeFor(HOW_IT_WORKS, contextFor()))).toBeUndefined()
   })
 
   /**
@@ -87,7 +89,7 @@ describe("the page a stranger arrives at", () => {
    * spread that quietly reordered the opening band would pass the check above.
    */
   it("opens on the menu and the opening band, in that order and with nothing between", () => {
-    const page = treeFor(HOME, contextFor())
+    const page = treeFor(HOW_IT_WORKS, contextFor())
 
     expect(indexOfType(page, "loom.nav")).toBe(0)
     expect(indexOfType(page, "loom.hero")).toBe(1)
@@ -167,18 +169,32 @@ describe.each(ANSWERED)("%s", (_name, context) => {
    * band writes has to carry what the visitor actually did**, or the page they
    * arrive at is reporting on a different request from the one they just made.
    */
+  /**
+   * **The control is now the one that stays on the page**, since the five
+   * choices moved onto `/how-it-works` on 1 October. *See the whole record*
+   * pointed at that page and has been removed: this notice is on it, so the
+   * link would have handed a reader the address they were already reading.
+   *
+   * What is left to hold is the same property, on the control that survives —
+   * *See it on this page* lands on the band that ran the change, and the
+   * address it writes carries what the visitor actually did. It is found by its
+   * fragment rather than by its path, because every control in this band now
+   * shares a path with the page it is on, and the *I say yes* button beside it
+   * legitimately carries an approval the visitor has not given yet.
+   */
   it("hands over an address carrying the request the visitor made", async () => {
     const run = await askRunFor(context)
     const record = (run as NonNullable<typeof run>).record
     const band = answerOf((run as NonNullable<typeof run>).page) as ElementNode
     const onward = actionsOf(band)
       .map(hrefOf)
-      .find((href) => new URL(href).pathname === HOW_IT_WORKS.path)
+      .find((href) => href.endsWith(`#${ANCHOR.seeItHappen}`))
 
     expect(onward).toBeDefined()
 
     const address = new URL(onward as string)
 
+    expect(address.pathname).toBe(HOW_IT_WORKS.path)
     expect(address.searchParams.get("ask")).toBe(record.ask)
     expect(address.searchParams.get("approve")).toBe(context.approve === true ? "1" : null)
   })

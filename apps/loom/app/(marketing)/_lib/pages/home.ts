@@ -22,8 +22,6 @@ import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import { action, heading, prose, section, stack } from "../nodes"
-import { answerBand } from "./answer"
-import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
   DEMO,
@@ -526,11 +524,11 @@ const problems = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { eyebrow: BAND.problems, width: "wide" },
-    "Letting AI near your interface is the easy part",
+    "The hard part is answering for what it changed",
     [
       prose(
         ids,
-        "Getting a machine to produce a page has stopped being hard. Being able to answer for what it produced has not.",
+        "Getting a machine to change your page is easy now. Being able to say what it changed, and put it back, is not.",
         { size: "lead", measured: true }
       ),
       buildElement(ids, {
@@ -562,7 +560,7 @@ const problems = (ids: IdFactory): LoomNode =>
             type: "loom.feature",
             props: {
               title: "Undoing it means finding the commit and hoping",
-              body: "Every change arrives with the change that reverses it, worked out at the same moment and kept beside it. Putting the page back is one press, and it is recorded like anything else.",
+              body: "Loom works out how to undo a change at the same time it makes it, and saves both. Putting the page back takes one press, and that gets recorded too.",
             },
           }),
         ],
@@ -605,7 +603,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
      */
     prose(
       ids,
-      "Not one of these numbers was typed from memory. Each is checked against the code it describes.",
+      "Every number here is checked against the code it describes. None of them was typed from memory.",
       { tone: "muted", measured: true }
     ),
     buildElement(ids, {
@@ -636,7 +634,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
             value: FACTS.primitives,
             label: "ready-made pieces to build with",
             caption:
-              "A starting point, not the deal: components you already built join the same list.",
+              "A starting point, not a limit. Components you already built join the same list.",
           },
         }),
         buildElement(ids, {
@@ -651,7 +649,7 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
           type: "loom.stat",
           props: {
             value: FACTS.operations,
-            label: "kinds of change there are",
+            label: "kinds of change Loom allows",
             caption: "Add something, remove something, move something, change a setting. That is the whole list.",
           },
         }),
@@ -865,7 +863,7 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
     prose(
       ids,
-      "The menu, the questions, this sentence — every one of them is a piece the AI could be asked to move, and none of it is code you would have to read afterwards.",
+      "The menu, the questions, this sentence: every one of them is a piece the AI could be asked to move. None of it is code you would have to read afterwards.",
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
@@ -885,12 +883,6 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
-  /**
-   * The most recent thing that happened to this page, which the notice at the
-   * top reports: the undo once the visitor has put a change back, and the change
-   * itself until then.
-   */
-  const latest = context.undone ?? context.record
   const chrome: ChromeContext = {
     origin: context.origin,
     theme: context.theme,
@@ -909,31 +901,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
-        /**
-         * The answer, before the pitch, and only for a visitor who asked.
-         *
-         * It sits above the opening band rather than inside it because the
-         * opening band is one of the things a request may configure — *Turn it
-         * down* changes its backdrop and how tall it stands — and a band whose
-         * props are a demonstration must not also be a status display. Above it
-         * the notice is the first thing under the menu in every state, which is
-         * where a browser leaves a reader who has just followed a link.
-         *
-         * Nothing is spread here when there is no record: the arrival page is
-         * the tree it has always been, node for node.
-         */
-        ...(latest === undefined
-          ? []
-          : [
-              answerBand(ids, {
-                origin: context.origin,
-                theme: context.theme,
-                record: latest,
-                ...(context.approve === undefined ? {} : { approve: context.approve }),
-                ...(context.back === undefined ? {} : { back: context.back }),
-                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
-              }),
-            ]),
         hero(ids, context),
         whatIsIt(ids),
         vocabulary(ids),
@@ -944,15 +911,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * the steps; the next thing a visitor meets should be the claim being
          * true, not four features explaining why it would be.
          */
-        seeItHappenBand(ids, {
-          origin: context.origin,
-          theme: context.theme,
-          ...(context.ask === undefined
-            ? {}
-            : { ask: context.ask, approve: context.approve === true }),
-          ...(context.record === undefined ? {} : { record: context.record }),
-          ...(context.undone === undefined ? {} : { undone: context.undone }),
-        }),
         /**
          * The same claim with the training wheels off, directly under the band
          * that has been apologising for them since 22 August.

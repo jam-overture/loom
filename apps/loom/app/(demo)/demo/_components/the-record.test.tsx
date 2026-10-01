@@ -331,10 +331,19 @@ const foldedIn = (container: HTMLElement): readonly boolean[] =>
   )
 
 describe("the record, once it repeats itself", () => {
+  /**
+   * `OTHER` is the newest card in most of these rows and `APPLIED` is not, and
+   * the choice is load-bearing rather than incidental. `OTHER` landed **on its
+   * own**, so its card is the first and only telling of its reasoning;
+   * `APPLIED` is the same ask a visitor **answered**, so its card is the second
+   * telling of an argument they read in order to press the green button
+   * (`reasoning.ts`). The two fixtures were both "a change that landed" until
+   * that distinction started deciding the rail.
+   */
   it("argues the newest card in full and folds the ones under it", () => {
     const { container } = render(
       <TheRecord
-        records={[APPLIED, OTHER, { ...OTHER, recordId: "i_4" }]}
+        records={[OTHER, { ...OTHER, recordId: "i_4" }, { ...OTHER, recordId: "i_5" }]}
         marked={NOTHING_MARKED}
         held={NO_READINGS}
         revision={3}
@@ -349,6 +358,10 @@ describe("the record, once it repeats itself", () => {
    * question open and ask for something else, which pushes the question down
    * the rail — and the sentence that makes **Apply this change** safe to press
    * goes with it.
+   *
+   * The card above it is the answered one, which folds, so this row now says
+   * both halves of the rule at once: **a folded card at the head of the rail
+   * does not fold the live question under it.**
    */
   it("keeps a card still waiting on an answer whole, wherever it has ended up", () => {
     const { container } = render(
@@ -360,7 +373,7 @@ describe("the record, once it repeats itself", () => {
       />
     )
 
-    expect(foldedIn(container)).toEqual([false, false])
+    expect(foldedIn(container)).toEqual([true, false])
   })
 
   /**
@@ -374,7 +387,7 @@ describe("the record, once it repeats itself", () => {
     ])
 
     const { container } = render(
-      <TheRecord records={[APPLIED, HELD]} marked={NOTHING_MARKED} held={moved} revision={2} />
+      <TheRecord records={[OTHER, HELD]} marked={NOTHING_MARKED} held={moved} revision={2} />
     )
 
     expect(foldedIn(container)).toEqual([false, true])
@@ -383,7 +396,85 @@ describe("the record, once it repeats itself", () => {
   /** One ask is never a repetition. */
   it("folds nothing when there is only one card", () => {
     const { container } = render(
+      <TheRecord records={[OTHER]} marked={NOTHING_MARKED} held={NO_READINGS} revision={1} />
+    )
+
+    expect(foldedIn(container)).toEqual([false])
+  })
+})
+
+/**
+ * ## The payoff card, at the level that renders it
+ *
+ * `reasoning.test.ts` decides the rule; these rows check the rail carries it to
+ * the one card the whole demonstration is for. Measured at 1280 × 900 against a
+ * production build, folding it took the applied card from **975px to 765px** in
+ * a rail whose viewport is **857px** — which is what puts **Put it back**, and
+ * the caution under it, inside the frame instead of 23px below it.
+ */
+describe("the card the visitor answered", () => {
+  it("folds, alone in the rail and newest in it", () => {
+    const { container } = render(
       <TheRecord records={[APPLIED]} marked={NOTHING_MARKED} held={NO_READINGS} revision={1} />
+    )
+
+    expect(foldedIn(container)).toEqual([true])
+  })
+
+  /**
+   * The row that would catch the fold being written as *"the newest card that
+   * landed"*, which is the plausible simplification and is wrong: the change
+   * nobody was asked about has never argued itself anywhere else, and its card
+   * is where a stranger finds out Loom was allowed to act alone.
+   *
+   * Two cards, both applied, both with a revision, in one list — and they must
+   * not agree.
+   */
+  it("folds while a change that landed on its own, in the same list, does not", () => {
+    expect(APPLIED.answeredBy).toBeDefined()
+    expect(OTHER.answeredBy).toBeUndefined()
+
+    const { container } = render(
+      <TheRecord records={[OTHER, APPLIED]} marked={NOTHING_MARKED} held={NO_READINGS} revision={2} />
+    )
+
+    expect(foldedIn(container)).toEqual([false, true])
+  })
+
+  /**
+   * And the pair that is the rule in one assertion: the same `recordId`, one
+   * press apart. Open while it is being decided, folded once it has been.
+   */
+  it("was whole one press earlier, as the question it came from", () => {
+    const { container } = render(
+      <TheRecord records={[HELD]} marked={NOTHING_MARKED} held={NO_READINGS} revision={0} />
+    )
+
+    expect(foldedIn(container)).toEqual([false])
+  })
+
+  /**
+   * The other half of the condition, rendered rather than returned.
+   *
+   * **No thanks** sets `answeredBy` and produces no revision, so a fold written
+   * as *"the visitor answered it"* alone would fold this card — and this card
+   * grows no undo, no *what came off* and no kept band, so folding it buys no
+   * room and hides the only content it has. The unit-level row in
+   * `reasoning.test.ts` was the single wire on that condition until this one.
+   */
+  it("does not fold an ask the visitor declined, which answered and landed nothing", () => {
+    const declined: ChangeRecord = {
+      ...ASKED,
+      recordId: "i_6",
+      outcome: "discarded",
+      answeredBy: "a demo visitor",
+    }
+
+    expect(declined.answeredBy).toBeDefined()
+    expect(declined.revision).toBeUndefined()
+
+    const { container } = render(
+      <TheRecord records={[declined]} marked={NOTHING_MARKED} held={NO_READINGS} revision={0} />
     )
 
     expect(foldedIn(container)).toEqual([false])

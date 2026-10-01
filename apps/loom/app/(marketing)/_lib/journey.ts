@@ -42,7 +42,7 @@ export type JourneyStep = {
 export const JOURNEY: readonly JourneyStep[] = [
   {
     title: "Someone asks for something",
-    body: "In their own words, about one page. Nothing has moved yet.",
+    body: "They ask in their own words, about one page. Nothing has moved yet.",
   },
   {
     title: "The AI writes down what it wants to change",
@@ -50,7 +50,7 @@ export const JOURNEY: readonly JourneyStep[] = [
   },
   {
     title: "The change is measured",
-    body: "How much of the page it moves, what it touches, and whether it can be taken back cleanly.",
+    body: "Loom measures how much of the page it moves, what it touches, and whether it can be taken back cleanly.",
   },
   {
     title: "Your rules decide",
@@ -58,7 +58,7 @@ export const JOURNEY: readonly JourneyStep[] = [
   },
   {
     title: "What happened is written down",
-    body: "Who asked, what moved, and the change that puts it back. Nothing is overwritten.",
+    body: "Loom records who asked, what moved, and the change that puts it back. Nothing is overwritten.",
   },
 ]
 
@@ -229,7 +229,7 @@ export const PLAIN_WORDS_GLOSSED: readonly PlainWord[] = [
   },
   {
     word: "Undo",
-    line: "Loom works out how to reverse the change at the same time it makes it, and keeps that ready. It does not have to reconstruct it later.",
+    line: "Loom works out how to undo a change at the same time it makes it, and saves both. It never has to guess the undo later from how the page looks now.",
   },
 ]
 

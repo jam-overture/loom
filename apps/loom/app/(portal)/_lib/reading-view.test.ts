@@ -51,6 +51,7 @@ const tally = (
   activations: counts.activations ?? 0,
   opens: counts.opens ?? 0,
   closes: counts.closes ?? 0,
+  completions: counts.completions ?? 0,
   updatedAt: counts.updatedAt ?? "2026-09-15T00:00:00.000Z",
 })
 
