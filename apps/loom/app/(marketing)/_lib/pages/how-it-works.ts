@@ -15,7 +15,9 @@ import { JOURNEY, STEPS_CAPITALISED } from "../journey"
 import { action, heading, prose, section, splitSection, stack } from "../nodes"
 import { DEMO, DOCS, HOW_IT_WORKS, SITE_THEMES, surfaceHref } from "../site"
 
+import { answerBand } from "./answer"
 import type { PageContext } from "./home"
+import { seeItHappenBand } from "./see-it-happen"
 
 /**
  * The mechanism page: what happens between someone asking for a change and the
@@ -224,7 +226,17 @@ export type MechanismContext = PageContext & {
 
 export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
   const ids = sequentialIdFactory("how")
-  const chrome: ChromeContext = { ...context, current: HOW_IT_WORKS }
+  /**
+   * The most recent thing that happened to this page, which the notice at the
+   * top reports: the undo once the visitor has put a change back, and the change
+   * itself until then.
+   */
+  const latest = context.undone ?? context.record
+  const chrome: ChromeContext = {
+    ...context,
+    current: HOW_IT_WORKS,
+    ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),
+  }
 
   return createTree(
     buildElement(ids, {
@@ -236,10 +248,69 @@ export const howItWorksPageTree = (context: MechanismContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
+        /**
+         * The answer, before anything else on the page, and only for a visitor
+         * who asked for something.
+         *
+         * It moved here from the front door on 1 October with the band that
+         * offers the five choices. It sits above the opening band rather than
+         * inside it because the opening band is one of the things a request may
+         * configure, and a band whose props are a demonstration must not also be
+         * a status display. Above it, the notice is the first thing under the
+         * menu in every state, which is where a browser leaves a reader who has
+         * just followed one of the choices.
+         *
+         * Nothing is spread here when there is no record: the arrival page is
+         * the tree it has always been, node for node.
+         */
+        ...(latest === undefined
+          ? []
+          : [
+              answerBand(ids, {
+                origin: context.origin,
+                theme: context.theme,
+                record: latest,
+                ...(context.ask === undefined ? {} : { ask: context.ask }),
+                ...(context.approve === undefined ? {} : { approve: context.approve }),
+                ...(context.back === undefined ? {} : { back: context.back }),
+                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
+              }),
+            ]),
         hero(ids),
         journey(ids),
         ...SHORT_ANSWERS.map((answer) => shortAnswer(ids, answer)),
         whoAsks(ids),
+        /**
+         * **The five choices, and the page they change is this one.**
+         *
+         * The maintainer, 1 October: *"Remove the see it happen section from the
+         * main landing page and only let it exist in the How it works
+         * section."* It was the front door's from 22 August until then.
+         *
+         * It sits after the page has explained itself and before the closing
+         * band, so a reader meets the explanation, then the thing working, then
+         * the way onward. On the front door it came third, before any of the
+         * argument; here the argument is the page, so the demonstration goes at
+         * the end of it.
+         *
+         * **All three answers still happen here**, which is the part that had to
+         * be measured rather than assumed. The five choices were bound to the
+         * front door's bands, and two of them to what that page protects, so the
+         * obvious worry was that a page with no `loom.mosaic` could only ever
+         * show a change landing. It cannot be read off the policy: *held* comes
+         * from how much a change moves as well as from what it touches, and
+         * taking all four short answers away at once is enough. *Refused* is the
+         * menu, which the rules protect on every page of this site.
+         */
+        seeItHappenBand(ids, {
+          origin: context.origin,
+          theme: context.theme,
+          ...(context.ask === undefined
+            ? {}
+            : { ask: context.ask, approve: context.approve === true }),
+          ...(context.record === undefined ? {} : { record: context.record }),
+          ...(context.undone === undefined ? {} : { undone: context.undone }),
+        }),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),
         siteFooter(ids, chrome),

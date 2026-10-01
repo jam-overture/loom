@@ -38740,3 +38740,59 @@ whole screen is arranged to avoid.
 Two things make it tractable whenever it is taken up: the fold exists, and its
 window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
+
+---
+## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — measured, not urgent, and not something the move could avoid
+
+The maintainer moved the five choices off the front door and onto
+`/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
+and **refused** are all still reachable there, which had to be measured rather
+than assumed, because two of the five were bound to what the *front door*
+protects and that page has no `loom.mosaic`.
+
+What did not survive is one step further in. Measured across all five choices on
+the new page, each with and without the visitor's yes:
+
+| choice | the change | its undo |
+| --- | --- | --- |
+| `problem` | landed | landed |
+| `shorter` | **held** | landed |
+| `proof` | landed | landed |
+| `calmer` | landed | landed |
+| `drop-pitch` | **refused** | none — nothing landed |
+
+**No undo on this page is held.** On the front door one was: the held request
+moved a protected band, so putting it back moved the same protected band again,
+and the rules held the undo on exactly the same grounds. Here the held request
+*removes* four bands, and putting four bands back is an insert — which the rules
+let through on its own.
+
+### Why this is worth writing down rather than shrugging at
+
+It is a claim the site makes. `undo.test.ts` asserted it in as many words until
+today: *"Nothing here exempts an undo to make the demonstration tidier, and this
+is the assertion that would fail if anything ever did."* Nothing exempted it.
+The arrangement simply stopped producing an example, and the assertion had to be
+rewritten to what is now true — that the undo is judged by the same rules,
+carries its own record and restores the page exactly.
+
+**The property still holds of the system.** An undo is a change (0032) and goes
+through the same Gate; it is only these five requests, against this page, that
+cannot show it. That distinction is the whole reason this is a finding and not a
+bug: nothing is broken, and a reader can no longer watch the most interesting
+case.
+
+### What would close it
+
+A sixth choice whose undo the rules hold — the shape that works is a request
+that **moves** something protected rather than removing something large, because
+the inverse of a move is another move and inherits the same weight. `/how-it-works`
+has two protected nodes, the menu and the footer, and moving either is a worse
+demonstration than the one it would replace.
+
+The honest alternative is to stop claiming it. Nothing on the page currently
+promises a held undo in words, so there is no copy to correct today; this entry
+exists so that whoever writes that copy knows it is not demonstrable here.
