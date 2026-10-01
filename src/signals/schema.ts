@@ -77,6 +77,12 @@ export const loomReaderTallies = pgTable(
     activations: bigint("activations", { mode: "number" }).notNull(),
     opens: bigint("opens", { mode: "number" }).notNull(),
     closes: bigint("closes", { mode: "number" }).notNull(),
+    /**
+     * Added with the fifth kind, and defaulted for the same reason `engaged`
+     * is: a deployment whose table predates the question has rows for which
+     * `0` is the true answer, not a missing one.
+     */
+    completions: bigint("completions", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [primaryKey({ columns: [table.treeId, table.revision, table.nodeId] })]

@@ -94,7 +94,23 @@ export const CONTROL_TYPES = [
 export const DISCLOSURE_TYPES = ["loom.faq"] as const
 
 /**
- * The four kinds, each aimed at the types it means something for.
+ * Nothing on this site is a form, so nothing on it can be completed.
+ *
+ * Empty rather than absent, and the difference is the whole of what this list
+ * does: a kind `types` does not name is reported for **every** addressed type,
+ * so leaving `completed` out would have this site asking about a kind it has
+ * no subject for. Empty asks about none, which is the true answer until there
+ * is something here to submit.
+ *
+ * Written by `Loom signals` on 1 October, landing the fifth kind, because the
+ * alarm below is red until somebody answers — and this is the answer a site
+ * with no form has. The day marketing grows one, this is the line that says
+ * what the site wants to hear about it (filed in `FINDINGS.md` the same day).
+ */
+export const COMPLETION_TYPES = [] as const
+
+/**
+ * The five kinds, each aimed at the types it means something for.
  *
  * A list per kind rather than one list for all four, which is what the shape
  * exists for (0136): time on screen is a question about bands, a press is a
@@ -102,7 +118,7 @@ export const DISCLOSURE_TYPES = ["loom.faq"] as const
  * that matters under a `dwelled` for every link on screen several times a
  * minute.
  *
- * **A fifth kind is a red test rather than a silent gap.** `asked.test.ts`
+ * **A new kind is a red test rather than a silent gap.** `asked.test.ts`
  * holds these keys against `READER_SIGNAL_KINDS`, so the day a kind is added to
  * the runtime somebody has to decide what this site asks of it — the same alarm
  * `/what-readers-do` already carries for the words it prints, and for the same
@@ -114,4 +130,5 @@ export const SITE_SIGNAL_TYPES: ReaderSignalTypes = {
   dwelled: [...BAND_TYPES],
   activated: [...CONTROL_TYPES],
   disclosed: [...DISCLOSURE_TYPES],
+  completed: [...COMPLETION_TYPES],
 }

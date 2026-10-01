@@ -39177,6 +39177,155 @@ window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
 
 ---
+
+## 2026-10-01 — the sentence that stops a reader over-reading `completed` is the one sentence the page deletes the day the kind ships
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs` · **Status:** open —
+one paragraph, and it is the one that stops the kind being misread
+
+`completed` landed today (0211), so */docs/the-runtime/what-your-readers-do*
+does exactly what it was built to do: `produceApproved` goes empty, the
+announcement block renders `null`, and the row moves into the vocabulary table.
+That machinery is right and nothing about it needs changing.
+
+What goes with the announcement is `NOT_MEANT`, and that is the problem. It
+holds one sentence:
+
+> *It does not mean a server accepted it. The broadcaster watches the page,
+> never the reply — it can see that a form was let go with its constraints
+> satisfied, and a kind that implied more than that would be measuring
+> something it cannot see.*
+
+It is printed only for a kind the runtime does **not** have yet, on the
+reasoning that once a kind ships, what it does is visible in the signals beside
+it. That reasoning holds for the other four and does not hold for this one. The
+other four are named after what they are: a `viewed` is a node viewed. A
+`completed` is named after something the page **cannot observe** — whether
+anything was completed anywhere — and the row that is left says only what it
+does mean. A reader who builds a conversion report on it will read the word and
+not the gap.
+
+**The gap is wider than that sentence says, and 0211 widened it.** The
+broadcaster reports a completion only when nothing on the page called
+`preventDefault`, so a form posted with `fetch` — which is most forms in a
+client-rendered app — reports **nothing at all**. A deployment reading zero
+completions cannot currently tell *nobody submitted* from *our forms are
+intercepted and this kind does not see them*, and the page is the only place
+that could say so.
+
+**What would close it:** a `doesNotMean` on the live row as well as the approved
+one, carrying both halves — not a server's acceptance, and not a submission the
+page cancelled. The shape is already there; it is which list it is read from.
+
+**Nothing is blocked.** Both facts are in `signal.ts`'s module documentation and
+in 0211, so a reader who gets as far as the source finds them.
+
+---
+
+## 2026-10-01 — nothing on the marketing site is a form, so the site's answer to the fifth kind is an empty list that nobody will revisit
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom marketing` · **Status:** open
+— no defect today, a decision to re-take on the day the site grows a form
+
+`SITE_SIGNAL_TYPES` carries a deliberate alarm: `asked.test.ts` holds its keys
+against `READER_SIGNAL_KINDS`, so a kind added to the runtime reddens this site
+until somebody decides what it asks about. The comment names the moment exactly
+— *"the day it lands this fails — which is the moment somebody can still decide
+whether a form being submitted is a thing this site wants to hear about"*.
+
+`completed` landed today (0211) and the alarm fired. **This lane answered it,
+which is a cross-lane edit and is why this entry exists.** The answer is
+`COMPLETION_TYPES = []`: nothing under `(marketing)` renders a `loom.form` or a
+`loom.field`, so there is no subject on this site for the kind, and an empty
+list asks about none. Leaving the key out was the alternative and is wrong — a
+kind `types` does not name is reported for *every* addressed type, so absence
+would have this site broadcasting a kind it has no subject for.
+
+The edit was taken rather than filed because `pnpm verify` green is the merge
+gate for four surfaces and a red marketing suite would have held the runtime
+change indefinitely — the same stall the vocabulary already sat in for three
+days in September. It is one list and one comment; nothing else under
+`(marketing)` is touched.
+
+**What is yours.** The empty list is correct and it is also the kind of entry
+that rots silently: the day this site grows a contact form, a newsletter sign-up
+or anything else that posts, the list stays empty and the one conversion on the
+site goes uncounted, with no test to say so. The alarm cannot fire a second time
+for the same kind. Worth a line in whichever band introduces a form, or a test
+asserting that a site with no `loom.form` is the reason the list is empty —
+which would then be the alarm.
+
+---
+
+## 2026-10-01 — the reader screen has a conversion counter to show and does not know it exists
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+additive, and it is the number the screen was arguing towards
+
+`ReaderTally` gained `completions` today (0211): times a form inside a node was
+submitted and the browser let it go. It is the first counter on that row about a
+reader **finishing** rather than a reader looking, and `/portal/readers` renders
+the other seven.
+
+Two things are now answerable that were not, and neither needs anything built in
+this lane:
+
+- **A conversion rate per band.** `reached` and `completions` on the same row,
+  or more precisely a `FunnelPair` whose `to` end names `completed` — a funnel
+  end already takes any kind, so a pair ending in a completion answered a
+  conversion rate the day the kind shipped, with no new shape.
+- **Before versus after a change, on the number that pays for the product.**
+  Tallies are per revision, so the comparison the portal already draws for time
+  on screen now reaches conversion.
+
+`part-counters.tsx` is the component that explains what each counter is about,
+and it currently explains seven. `completions` is the one that needs the
+sentence most, because the word promises more than the signal can see: it is a
+form the **page** let go, not a submission a server accepted, and a page that
+posts with `fetch` and cancels the native submit reports nothing. A screen that
+showed it as *conversions* without that would be the plausible-false-number
+failure this lane's own entry of 14 September argued against.
+
+**Nothing is blocked.** The column defaults to `0` on every existing row, so the
+screen is correct today and incomplete rather than wrong.
+
+---
+
+## 2026-10-01 — a form that posts with `fetch` is invisible to the conversion counter, and the fix cannot be a guess by the broadcaster
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
+a question for the maintainer before it is a unit of work
+
+0211 settled that a `completed` is a `submit` the page did not cancel. For the
+starter library that is exactly right: `loom.form` renders a native
+`<form action method>` with no handler, so Loom's own forms report normally and
+the counter is honest.
+
+For a host's own form it is a hole. A page that posts with `fetch` calls
+`preventDefault`, so the broadcaster sees a cancelled submit and reports
+nothing — and from the page's side a cancelled submit and a failed one are the
+same event, which is why 0211 refused to report it. The consequence is that a
+deployment can have conversions and see zero, with nothing distinguishing that
+from nobody converting.
+
+**The three shapes, and why none of them is obviously right.**
+
+1. **A host-called function** — `completed(node)` on the broadcast handle, so
+   the page that knows its own submission succeeded says so. Honest, and it is
+   the only one that can be. It is also measurement a page's JavaScript can
+   switch on, which is near enough to rule 3's edge to need an argument rather
+   than an afternoon: rule 3 refuses measurement as a **prop in the tree** so a
+   proposal cannot write it, and a host's own code is not a proposal — but the
+   distinction should be written down before it is relied on.
+2. **Report every `submit`, cancelled or not.** Rejected in 0211 and should stay
+   rejected: it counts rejected input as conversion, permanently (0158).
+3. **Watch for the page's own success signal** — a navigation, a DOM change, a
+   `fetch` wrapper. The last is the broadcaster reaching outside the page it was
+   pointed at, and the first two are guesses dressed as observations.
+
+**Not built, and deliberately not proposed as a record.** Shape 1 is the only
+candidate and it wants the maintainer's reading of rule 3 first. Raised in the
+run's report with a recommendation.
 ## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**

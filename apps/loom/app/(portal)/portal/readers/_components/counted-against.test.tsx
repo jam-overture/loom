@@ -24,6 +24,7 @@ const reading = revisionReadings([
     activations: 0,
     opens: 0,
     closes: 0,
+    completions: 0,
     updatedAt: "2026-09-15T14:05:00.000Z",
   } satisfies StoredTally,
 ])[0]!

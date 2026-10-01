@@ -42,7 +42,13 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  * the control rather than the band. The addressed elements above it go on the
  * signal as `within`, read off the walk this was already doing — because which
  * region a node sat in is a fact about the page at the moment of the press, and
- * nothing downstream can recover it afterwards.
+ * nothing downstream can recover it afterwards. A `completed` carries the same
+ * walk, for the same reason and more sharply: *which band converted* is the
+ * question a deployment opens the portal to ask.
+ *
+ * **A completion is a form the browser let go.** Nothing else on the page is a
+ * finish a reader can be said to have reached, and nothing else is observable
+ * without asking the network how it went (0211).
  *
  * **It keeps up with a page that changes.** Nodes that arrive after it started
  * are watched and nodes that leave stop counting, so a band behind a Suspense
@@ -513,6 +519,37 @@ export const broadcastReaderSignals = (
     }))(details)
   }
 
+  /**
+   * A form inside the page was submitted, which is the one completion a page
+   * can witness on its own.
+   *
+   * **Captured rather than delegated**, like `toggle` and unlike `click`: a
+   * handler inside the page may call `stopPropagation`, and a submission the
+   * broadcaster never heard is a conversion nobody counted. The press on the
+   * submit control is a separate fact and is still reported as `activated`
+   * against the control — two kinds about two nodes, not one action counted
+   * twice.
+   *
+   * **`preventDefault` is read once the dispatch is over, never during it.**
+   * Any listener may cancel a submit, and whether this one runs before or after
+   * theirs is registration order — React attaches its own at a root container
+   * which may be this very element. A microtask queued here runs after dispatch
+   * has finished, so what it reads is the final answer rather than whichever
+   * one happened to be true halfway through. The instant is taken at the event,
+   * not in the microtask, because the event is when the reader finished.
+   */
+  const onSubmit = (event: Event): void => {
+    const form = event.target
+    if (!(form instanceof HTMLFormElement) || !root.contains(form)) return
+
+    const at = now()
+
+    queueMicrotask(() => {
+      if (stopped || event.defaultPrevented) return
+      record("completed", (address, within) => ({ kind: "completed", ...address, at, ...within }))(form)
+    })
+  }
+
   const disclosures = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (!(mutation.target instanceof Element)) continue
@@ -561,6 +598,7 @@ export const broadcastReaderSignals = (
 
   root.addEventListener("click", onClick)
   root.addEventListener("toggle", onToggle, true)
+  root.addEventListener("submit", onSubmit, true)
   disclosures.observe(root, {
     attributes: true,
     attributeFilter: [DISCLOSED_ATTRIBUTE],
@@ -582,6 +620,7 @@ export const broadcastReaderSignals = (
     arrivals?.disconnect()
     root.removeEventListener("click", onClick)
     root.removeEventListener("toggle", onToggle, true)
+    root.removeEventListener("submit", onSubmit, true)
     document.removeEventListener("visibilitychange", onVisibility)
     document.defaultView?.removeEventListener("pagehide", onPageHide)
   }

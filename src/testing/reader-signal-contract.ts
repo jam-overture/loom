@@ -78,6 +78,22 @@ export const disclosedIn = (name: string, open: boolean, ...regions: readonly st
   within: regions.map((region) => ({ nodeId: nodeId(region), type: primitiveType("loom.section") })),
 })
 
+export const completed = (name: string): ReaderSignal => ({
+  kind: "completed",
+  nodeId: nodeId(name),
+  type: primitiveType("loom.form"),
+  at: 1_300,
+})
+
+/** A form let go, and the bands it was the end of — nearest first, like a press. */
+export const completedIn = (name: string, ...regions: readonly string[]): ReaderSignal => ({
+  kind: "completed",
+  nodeId: nodeId(name),
+  type: primitiveType("loom.form"),
+  at: 1_300,
+  within: regions.map((region) => ({ nodeId: nodeId(region), type: primitiveType("loom.section") })),
+})
+
 export const dwelled = (name: string, ms: number): ReaderSignal => ({
   kind: "dwelled",
   nodeId: nodeId(name),
@@ -97,6 +113,7 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   activations: 0,
   opens: 0,
   closes: 0,
+  completions: 0,
   ...overrides,
 })
 
@@ -339,12 +356,15 @@ export const describeReaderTallyStoreContract = (
      */
     it("adds a second window to the first rather than replacing it", async () => {
       const store = await make()
-      await store.apply({ tallies: [tally({ dwellMs: 500, activations: 1 })], funnels: [] }, AT)
-      await store.apply({ tallies: [tally({ dwellMs: 250, activations: 2 })], funnels: [] }, LATER)
+      await store.apply({ tallies: [tally({ dwellMs: 500, activations: 1, completions: 1 })], funnels: [] }, AT)
+      await store.apply(
+        { tallies: [tally({ dwellMs: 250, activations: 2, completions: 2 })], funnels: [] },
+        LATER
+      )
 
       const [row] = unwrap(await store.tallies())
 
-      expect(row).toMatchObject({ dwellMs: 750, activations: 3, views: 2, updatedAt: LATER })
+      expect(row).toMatchObject({ dwellMs: 750, activations: 3, completions: 3, views: 2, updatedAt: LATER })
     })
 
     /**
