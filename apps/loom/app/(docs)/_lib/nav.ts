@@ -270,7 +270,7 @@ const orderedSections: readonly DocsSection[] = [
         slug: "what-ai-may-change",
         title: "What AI may change",
         summary:
-          "The second list you write: which of your primitives matter, how much latitude each kind of asker gets, and the thirteen settings that decide it.",
+          "The second list you write: which of your primitives matter, how much latitude each kind of asker gets, and the settings that decide it.",
       },
     ],
   },
