@@ -1,7 +1,7 @@
+import { buildElement, createTree, sequentialIdFactory, type LoomTree } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
-import { BAND } from "./bands"
 import {
   OWN_ORIGIN_DESCRIPTION,
   sameOriginFrames,
@@ -10,9 +10,8 @@ import {
   unhonored,
   whyNoFrameOrigins,
 } from "./frames"
-import { FRAME_CAPTION, FRAME_TITLE, YOUR_TURN_ANCHOR } from "./pages/in-your-own-words"
 import { renderTree, treeFor } from "./render"
-import { DEFAULT_THEME, DEMO, HOME, SITE_ROUTES, SITE_THEME_NAMES, surfaceHref } from "./site"
+import { DEFAULT_THEME, DEMO, SITE_ROUTES, surfaceHref } from "./site"
 
 /**
  * The band that was built on 4 September, measured, and withdrawn the same run.
@@ -31,10 +30,45 @@ import { DEFAULT_THEME, DEMO, HOME, SITE_ROUTES, SITE_THEME_NAMES, surfaceHref }
 
 const ORIGIN = "https://loom.example"
 
-const home = (origin = ORIGIN) => treeFor(HOME, { origin, theme: DEFAULT_THEME })
 
-const markupOf = (origin: string, rendering = origin): string =>
-  renderToStaticMarkup(renderTree(home(origin), { origin: rendering, addressed: false }).element)
+/**
+ * A page with a frame on it, built here rather than taken from the site.
+ *
+ * The two refusal tests below used the front door, which framed `/demo` from
+ * 12 September until the maintainer removed it on 1 October. Nothing on this
+ * site frames anything now — so a fixture that is *this site's page* can no
+ * longer exercise a refusal, and reaching for another page would only move the
+ * same dependency.
+ *
+ * What is being tested is the seam, not the page: a tree built for one origin,
+ * rendered by a deployment that registered another. So the tree is three nodes
+ * and it is honest about being a fixture. It frames the demonstration's own
+ * address, which is exactly what `siteFrameRegistry` permits, so the *allowed*
+ * half of the pair still proves the registry works rather than proving that
+ * nothing was framed.
+ */
+const framedPage = (): LoomTree => {
+  const ids = sequentialIdFactory("framed")
+
+  return createTree(
+    buildElement(ids, {
+      type: "loom.page",
+      props: { width: "wide" },
+      children: [
+        buildElement(ids, {
+          type: "loom.embed",
+          props: {
+            src: surfaceHref(ORIGIN, DEMO),
+            title: "The demonstration, framed by a fixture",
+            aspect: "adaptive",
+          },
+        }),
+      ],
+    }),
+    ids
+  )
+}
+
 
 describe("the origins this site is willing to frame", () => {
   it("is exactly one, and it is this deployment's own", () => {
@@ -79,113 +113,6 @@ describe("the origins this site is willing to frame", () => {
   })
 })
 
-describe("the demonstration, framed on the front door", () => {
-  it("is one frame, permitted, and reported as the deployment's own", () => {
-    const disclosed = sameOriginFrames(
-      renderTree(home(), { origin: ORIGIN, addressed: false }).diagnostics
-    )
-
-    expect(disclosed).toHaveLength(1)
-    expect(disclosed[0]?.origin).toBe(ORIGIN)
-    expect(disclosed[0]?.prop).toBe("src")
-  })
-
-  /**
-   * The assertion the withdrawn band needed and did not have.
-   *
-   * `allow-forms` is the whole difference between a demonstration a visitor can
-   * use and one that ignores them, and it is granted by the seam rather than by
-   * anything in the tree — so it is checked on the markup a browser is served
-   * rather than on a prop. `allow-top-navigation` is checked in the same breath
-   * because it is still withheld, and a frame that could move the page it sits
-   * on is a different thing from one that cannot.
-   */
-  it("is served with the one grant its controls need, and not with the one nothing needs", () => {
-    const markup = markupOf(ORIGIN)
-    const sandbox = /<iframe[^>]*sandbox="([^"]*)"/.exec(markup)?.[1]
-
-    expect(sandbox).toBeDefined()
-    expect(sandbox?.split(" ")).toContain("allow-forms")
-    expect(sandbox).not.toContain("allow-top-navigation")
-  })
-
-  it("frames the demonstration's own address, lazily, with a name a screen reader can use", () => {
-    const markup = markupOf(ORIGIN)
-
-    expect(markup).toContain(`src="${surfaceHref(ORIGIN, DEMO)}"`)
-    expect(markup).toContain('loading="lazy"')
-    expect(markup).toContain(FRAME_TITLE)
-  })
-
-  /**
-   * The caption, escaped the way the markup spells it. It is the one place a
-   * visitor is told the frame is live rather than a recording, and that the page
-   * inside it is not ours — so it is asserted on the served bytes rather than on
-   * the prop it was written into.
-   */
-  it("says what it is, under it", () => {
-    const escaped = FRAME_CAPTION.replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll("'", "&#x27;")
-
-    expect(markupOf(ORIGIN)).toContain(escaped)
-  })
-
-  it("is a band of its own, anchored, so the band above can point at it", () => {
-    const band = home().root.children.find(
-      (child) => child.kind === "element" && child.props["eyebrow"] === BAND.inYourOwnWords
-    )
-
-    expect(band?.kind).toBe("element")
-    expect(band?.kind === "element" ? band.props["anchor"] : undefined).toBe(YOUR_TURN_ANCHOR)
-  })
-
-  /**
-   * Two decisions that were measured rather than chosen, pinned so that undoing
-   * either is a failing test rather than a quiet regression a screenshot at one
-   * width would not show.
-   *
-   * `adaptive` is the shape: `wide` left the demonstration's one control twelve
-   * pixels below the fold of the box at 1440, and `square` on a phone showed its
-   * bar and two paragraphs and no control. And the way out comes **before** the
-   * frame, because at 390 the frame is 465px tall and the control inside it is
-   * 778px down — so below the frame, the link is behind the whole box on exactly
-   * the device that cannot use the box.
-   */
-  it("holds the shape and the order the measurements settled", () => {
-    const band = home().root.children.find(
-      (child) => child.kind === "element" && child.props["eyebrow"] === BAND.inYourOwnWords
-    )
-
-    if (band?.kind !== "element") throw new Error("loom: the front door has no such band")
-
-    const at = (type: string): number =>
-      band.children.findIndex((child) => child.kind === "element" && child.type === type)
-
-    const embed = at("loom.embed")
-    const wayOut = at("loom.stack")
-
-    expect(embed).toBeGreaterThan(-1)
-    expect(wayOut).toBeGreaterThan(-1)
-    expect(wayOut).toBeLessThan(embed)
-    expect(
-      band.children.find((child) => child.kind === "element" && child.type === "loom.embed")
-    ).toMatchObject({ props: { aspect: "adaptive" } })
-  })
-
-  it.each(SITE_THEME_NAMES)("is framed the same way wearing %s", (theme) => {
-    const markup = renderToStaticMarkup(
-      renderTree(treeFor(HOME, { origin: ORIGIN, theme }), {
-        origin: ORIGIN,
-        addressed: false,
-      }).element
-    )
-
-    expect(markup).toContain(`src="${surfaceHref(ORIGIN, DEMO)}"`)
-  })
-})
-
 describe("a frame this deployment did not register", () => {
   /**
    * The failure a visitor can see, rather than the one nobody can.
@@ -197,7 +124,7 @@ describe("a frame this deployment did not register", () => {
    * space, the notice is in the markup, and the render says why.
    */
   it("renders the notice instead of the frame, and says so in the diagnostics", () => {
-    const rendered = renderTree(home(), { origin: "https://elsewhere.example", addressed: false })
+    const rendered = renderTree(framedPage(), { origin: "https://elsewhere.example", addressed: false })
     const markup = renderToStaticMarkup(rendered.element)
 
     expect(markup).not.toContain("<iframe")
@@ -212,8 +139,8 @@ describe("a frame this deployment did not register", () => {
    * all of them.
    */
   it("is something the runtime could not honor, unlike a frame it could", () => {
-    const refused = renderTree(home(), { origin: "https://elsewhere.example", addressed: false })
-    const allowed = renderTree(home(), { origin: ORIGIN, addressed: false })
+    const refused = renderTree(framedPage(), { origin: "https://elsewhere.example", addressed: false })
+    const allowed = renderTree(framedPage(), { origin: ORIGIN, addressed: false })
 
     expect(unhonored(refused.diagnostics)).not.toEqual([])
     expect(unhonored(allowed.diagnostics)).toEqual([])
@@ -221,15 +148,25 @@ describe("a frame this deployment did not register", () => {
   })
 })
 
-describe("the rest of the site", () => {
+describe("every page of this site", () => {
   /**
-   * One frame, on one page, and the others say so by rendering none.
+   * **Nothing on this site frames anything, as of 1 October**, and that is the
+   * assertion rather than an absence of one.
    *
-   * A registry is a permission, and a permission nothing uses is a permission
-   * that grew quietly. This is what would catch a second frame arriving on a
-   * page that nobody thought was framing anything.
+   * The front door carried a framed copy of `/demo` from 12 September until the
+   * maintainer removed it: *"get rid of the demo injected into the main landing
+   * page. If people want to get to the demo, they can click the demo link."*
+   * So the exception this sweep used to carve out — `HOME` — is gone, and the
+   * rule is now total.
+   *
+   * **The registry above stays, and stays tested.** A permission nothing uses
+   * is a permission that grew quietly, and this is the pair that keeps it
+   * honest: the registry says what *may* be framed, and this says that nothing
+   * currently is. A frame arriving on any page, on a deployment that would
+   * permit it, is a failing test rather than a thing somebody notices in a
+   * screenshot.
    */
-  it.each(SITE_ROUTES.filter((route) => route.path !== HOME.path))(
+  it.each(SITE_ROUTES)(
     "$path frames nothing",
     (route) => {
       const rendered = renderTree(treeFor(route, { origin: ORIGIN, theme: DEFAULT_THEME }), {

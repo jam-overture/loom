@@ -23,7 +23,6 @@ import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import { action, heading, prose, section, stack } from "../nodes"
 import { answerBand } from "./answer"
-import { inYourOwnWordsBand } from "./in-your-own-words"
 import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
@@ -971,7 +970,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * because the frame loads lazily — a visitor who never scrolls this far
          * never fetches it.
          */
-        inYourOwnWordsBand(ids, { origin: context.origin, theme: context.theme }),
         problems(ids),
         /**
          * A rule rather than the diamond this band wants: `loom.divider`'s
