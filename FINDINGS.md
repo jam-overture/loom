@@ -8,6 +8,123 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-09-30 — two lesson files edited from outside the lane, both forced, and one of them changed a paragraph rather than a number
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
+open — both lessons are **true** as they stand and `pnpm verify` is green; this is
+so you review the edits rather than find them, and the second one is a judgement
+somebody has to make and I made it by default
+
+The 21 and 22 September entries in this ledger are about a lane editing a lesson
+transcript to keep the gate green. This is the same thing, from
+[0208](decisions/0208-a-question-nothing-reads-is-refused-before-it-is-written.md),
+and one half of it is worse than a number.
+
+**The easy one.** `lessons/07-measuring-a-change.md` prints a serialised
+`ChangeAnalysis` twice, and the record gained a field. Read off two actual runs
+rather than typed, `"unreadBindings":[]` inserted where the type declares it —
+after `invalidProps`, before `redirectedSubmissions` — and
+`transcripts.test.ts` now agrees character for character. No prose near either
+line cites the shape, so nothing else moved.
+
+**The one that wants your eye.** `lessons/05-purity-at-the-seams.md` prints
+`CompositionRuntime` as a fence and `declarations.test.ts` holds it to being the
+**whole** type, so the fence gained `bindingReader?: BindingReader` and the census
+went from 7 members to 8. That much is mechanical. What is not is the paragraph
+under it, which opened:
+
+> The two optional fields are optional for different reasons, and being able to
+> say which is a better test of whether you have the idea than reciting the five.
+
+There are three optional fields now, and its argument is a **two-way sort** —
+`repairer` is a source of variation, `propsVocabulary` is not. `bindingReader`
+lands on the same side as `propsVocabulary`, so the sort survives and the count
+does not. It now reads *"The three optional fields are optional for two different
+reasons"* and names the two non-varying fields together.
+
+**I think that is the better sentence and it is still yours to overrule.** It
+makes the lesson's point sharper — the partition is two-way and it was luck that
+it used to have one field on each side — but it is a rewritten paragraph in a
+teaching file, not a number, and the five-field non-determinism budget the
+surrounding argument turns on is untouched either way. Self-check 1 still asks
+about the five and is unaffected.
+
+**Nothing else in the course moved.** `analyzeDelta`'s and `assessChange`'s
+signatures both grew an optional trailing parameter, and lesson 21's and lesson
+22's calls to them are unaffected because the new parameter is last and
+defaulted — which is a reason this unit kept the positional shape, and is filed
+separately as a limit.
+
+---
+## 2026-09-30 — one clause each in two surfaces' plain-language tables, added from outside the lane because `StakeFactorCode` is a closed set
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` and
+`Loom marketing` (one file each) · **Status:** open — the clauses are **shipped
+and the build is green**; this is so you review the wording rather than discover
+it
+
+[0208](decisions/0208-a-question-nothing-reads-is-refused-before-it-is-written.md)
+adds a fourteenth member to `StakeFactorCode`, `unread-binding`. Both of your
+tables are `Record`s over that union, so your typecheck fails until each has a
+line — this is the 21 September class again, and there is no version of it that
+waits for you.
+
+| where | what it now says |
+| --- | --- |
+| `app/(portal)/_lib/vocabulary.ts`, `STAKE_FACTORS` | *"it would ask your data for something the part in question never looks at, so the answer is fetched and thrown away"* |
+| `app/(marketing)/_lib/adapt/record.ts`, `RAISED_BY` | *"it asks your data for something no piece on the page reads"* |
+
+**Three things worth knowing before you reword either.**
+
+**Every other clause in both tables is about something a reader would see go
+wrong, and this one is not.** The page draws. Every part is registered, every
+schema is satisfied, the markup is what was asked for — and the region shows its
+empty state while the deployment pays for an answer nothing opens. "Fetched and
+thrown away" is the phrase carrying that, and it is the one thing a reader has to
+take away, because the remedy is a *name* rather than a setting or another page.
+
+**`UNDRAWABLE` was deliberately not extended.** `refusal.ts` calls it "the two
+factors that describe a change nobody can carry out", and invites a third only
+for a genuinely undrawable one. This change is carried out fine; what is wrong is
+that it buys nothing. If your reading is that a reader should meet it in the same
+band anyway, that is yours to decide and the list is one line.
+
+**The detail line beside the clause is the runtime's and it names the string to
+fix** — `n_card asks under "rows", which loom.feed does not read`. Unlike
+`invalid-props`, whose issue messages may quote a model's own words, this one
+quotes only a binding name, which is a name in the tree and never content.
+
+---
+## 2026-09-30 — `analyzeDelta` is at the end of its parameter shape, and collecting them means editing two lesson transcripts
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — a stated limit, not a defect; nothing is broken and the next vocabulary is
+the one that cannot be added this way
+
+`analyzeDelta` now takes **four** optional trailing vocabularies —
+`isInteractive`, `isRegistered`, `checkProps`, `reads` — and `assessChange` takes
+two of them positionally behind `inverseDeltaId`. The doc comment has grumbled
+about this since the third arrived and predicted the fourth; here it is.
+
+Collecting them into one record is the right shape and is a **breaking change to
+a published function**. What makes it more than a signature edit is who calls it:
+
+| caller | call |
+| --- | --- |
+| `lessons/21-appearance.md` | `analyzeDelta(tree, delta)` — survives either way |
+| `lessons/22-reach.md`, Exercise | `analyzeDelta(tree, delta, interactivePredicateFor(applied.interactiveTypes))` — does not |
+
+So the run that collects them is the run that can also rewrite lesson 22's
+transcript, which is `Loom lessons`' file and not this lane's. Three entries in
+this ledger are already about a lane editing a transcript to keep `verify` green,
+and this one is avoidable by doing the two together.
+
+**Not urgent, and it is worth saying why rather than leaving it to look like
+neglect.** Four optional trailing predicates still typecheck, still have
+`assessChange` as their one assembling caller, and the positional shape is what
+made this unit additive. What it cannot absorb is a fifth.
+
+---
 ## 2026-09-30 — `0205` is claimed by two open pull requests, and neither knows about the other
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:**
@@ -2457,8 +2574,21 @@ the refusal half now that 0179 has landed on `main` with #360.
 ## 2026-09-22 — a binding name nothing reads is reported and still not refused, and the route that would refuse it is on an unmerged branch
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
-open — a stated remainder, not a gap waiting on a fix, and the honest other half
-of what shipped today
+**closed** by `framework-60-a-name-nothing-reads`, recorded as
+[0208](decisions/0208-a-question-nothing-reads-is-refused-before-it-is-written.md).
+Built on the route this entry named and at the moment it named: 0179 is on
+`main`, and `loom.feed` and `loom.tally` are the **second** declaration of
+`reads`, which is where the entry said the refusal belongs. One fact in
+`ChangeAnalysis`, one `critical` factor, an ordinary `stakes-at-refusal-floor`
+refusal, and `CompositionRuntime.bindingReader` — optional, so a host that hands
+nothing keeps what it had.
+
+One thing the entry did not anticipate and the record argues at length: the level
+is `critical` for a **different reason** than `unknown-primitive` and
+`invalid-props`. Those are critical because the page has a hole; this change
+draws perfectly. It is ranked with them because the only answer a person could
+give is no, and because the declaration holds the correct name — so a refusal is
+the one disposition that tells a repairer what to do instead.
 
 The 19 September finding asked for an invented binding name to be *"as refusable
 as an invented source id"*. What shipped is a **render diagnostic**, which is one

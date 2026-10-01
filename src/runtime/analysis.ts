@@ -1,5 +1,6 @@
 import type { NodeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
+import type { BindingReader } from "../render/reads.js"
 import { assertNever, err, ok, type Result } from "../result.js"
 import { applyOperation } from "../tree/apply.js"
 import type { TreeDelta, TreeOperation } from "../tree/delta.js"
@@ -20,11 +21,14 @@ import {
   EVERY_TYPE_REGISTERED,
   EVERY_TYPE_UNDECLARED,
   invalidPropsIn,
+  NOTHING_DECLARED,
   unknownPrimitivesIn,
+  unreadBindingsIn,
   type InvalidProps,
   type PrimitiveVocabulary,
   type PropsVocabulary,
   type UnknownPrimitive,
+  type UnreadBinding,
 } from "./vocabulary.js"
 
 /**
@@ -125,6 +129,30 @@ export type ChangeAnalysis = {
    * Empty for every host that wires no props vocabulary, which is the default.
    */
   readonly invalidProps: readonly InvalidProps[]
+  /**
+   * Questions this change would leave on the page that no primitive will look
+   * at — a node asking under a name its own primitive says it does not read.
+   *
+   * The one fact in this record about a change that *works*. The page draws,
+   * every node is registered, every schema is satisfied; the host pays a round
+   * trip to its own source on every render and the region shows its empty state,
+   * because the answer arrives under a name nobody opens (0181).
+   *
+   * Measured on both trees, like `invalidProps` and unlike `unknownPrimitives`,
+   * and for that factor's reason twice over: a `configure` can put `loom:data` on
+   * a node that had none, and a `configure` can rename the *prop* that names the
+   * binding (0184), so two operations in one delta can argue about it and only
+   * the tree at the end says what a reader will be served.
+   *
+   * Keyed by node **and name** where `invalidProps` is keyed by node alone, and
+   * the difference is the harm rather than an oversight. A node whose props fail
+   * is a hole, and a page has one hole there however many ways it is wrong; a
+   * node asking three questions nothing reads is three wasted round trips, and a
+   * change that adds the third is answerable for the third.
+   *
+   * Empty for every host that hands no reader, which is the default.
+   */
+  readonly unreadBindings: readonly UnreadBinding[]
   /**
    * Forms this change points somewhere else — a node that posted to one
    * registered endpoint before and posts to another after.
@@ -333,25 +361,60 @@ const introducedInvalidProps = (
   return produced.filter((invalid) => !inherited.has(invalid.nodeId))
 }
 
+/** Node and name together; a name is only unique within the node that asks it. */
+const unreadKey = (unread: UnreadBinding): string => `${unread.nodeId} ${unread.name}`
+
+/**
+ * The wasted questions this delta is answerable for: the ones unread in the tree
+ * it produces, less the ones already unread in the tree it started from.
+ *
+ * Keyed on both halves, unlike `introducedInvalidProps` and for the reason the
+ * field's own comment gives: two unread names on one node are two round trips,
+ * so a change that adds the second inherits the first and answers for the
+ * second. `questionsIn` in `repointing.ts` keys the same pair the same way, and
+ * for the same reason — a name means nothing without the node asking it.
+ *
+ * The before-walk is skipped when the result has none, which is the ordinary
+ * case and — with `NOTHING_DECLARED` — the only case on a deployment that has
+ * handed no reader.
+ */
+const introducedUnreadBindings = (
+  before: LoomNode,
+  after: LoomNode,
+  reads: BindingReader
+): readonly UnreadBinding[] => {
+  const produced = unreadBindingsIn(after, reads)
+  if (produced.length === 0) return produced
+
+  const inherited = new Set(unreadBindingsIn(before, reads).map(unreadKey))
+
+  return produced.filter((unread) => !inherited.has(unreadKey(unread)))
+}
+
 /**
  * Walks the delta forward so each operation is measured against the tree it
  * actually observes — an operation may target a node an earlier operation in
  * the same delta inserted.
  *
- * The three vocabularies are separate trailing parameters rather than one
- * record, which is not the shape `StakeInput` argues for. This function is
- * published and a lesson calls it by hand, so collecting them would be a
- * breaking change to teach nothing, and a third one arriving is the second time
- * that has been true; what keeps them from being forgotten is that
- * `assessChange` is the only caller that assembles them, and it passes all
- * three in one expression.
+ * The four vocabularies are separate trailing parameters rather than one record,
+ * which is not the shape `StakeInput` argues for, and this is the third time a
+ * new one has arrived to find it. It stays positional here and the reason is
+ * unchanged: this function is published and two lesson transcripts call it by
+ * hand, so collecting them is a breaking change that teaches nothing and edits
+ * files this lane does not own. It is at its limit — four optional trailing
+ * predicates is as far as this shape goes, and the run that collects them is the
+ * run that can also rewrite the transcripts. Filed rather than left implicit.
+ *
+ * What keeps them from being forgotten is that `assessChange` is the only caller
+ * that assembles them, and it passes all four in one expression.
  */
 export const analyzeDelta = (
   tree: LoomTree,
   delta: TreeDelta,
   isInteractive: InteractivePredicate = NOTHING_INTERACTIVE,
   isRegistered: PrimitiveVocabulary = EVERY_TYPE_REGISTERED,
-  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED
+  checkProps: PropsVocabulary = EVERY_TYPE_UNDECLARED,
+  reads: BindingReader = NOTHING_DECLARED
 ): Result<ChangeAnalysis, TreeError> => {
   const tally = emptyTally()
   let state: LoomNode = tree.root
@@ -381,6 +444,7 @@ export const analyzeDelta = (
     nestedTargets: introducedNestedTargets(tree.root, state, isInteractive),
     unknownPrimitives: tally.unknown,
     invalidProps: introducedInvalidProps(tree.root, state, checkProps),
+    unreadBindings: introducedUnreadBindings(tree.root, state, reads),
     redirectedSubmissions: redirectedSubmissionsBetween(tree.root, state),
     repointedBindings: repointedBindingsBetween(tree.root, state),
     shallowestAffectedDepth: Number.isFinite(tally.shallowest) ? tally.shallowest : 0,

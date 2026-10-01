@@ -152,6 +152,7 @@ export type CompositionRuntime = {
   readonly idFactory: IdFactory
   readonly repairer?: ChangeRepairer
   readonly propsVocabulary?: PropsVocabulary
+  readonly bindingReader?: BindingReader
 }
 ```
 
@@ -172,14 +173,15 @@ reversibility analysis, `gate`, `applyDelta`, `invertDelta` — is a pure functi
 of its arguments. So the non-determinism budget of an entire change is five
 fields long, and you can read it in one place.
 
-The two optional fields are optional for different reasons, and being able to
-say which is a better test of whether you have the idea than reciting the five.
+The three optional fields are optional for two different reasons, and being able
+to sort them is a better test of whether you have the idea than reciting the five.
 `repairer` is a second visit to the interpreter, so it is the same source of
 variation as the first field; it is absent by default because a refusal being
-terminal is the safer thing to have to ask for. `propsVocabulary` is not a
-source of variation at all — it is a pure validator, and it answers the same on
-both runs. It is here because it is something a **deployment** declares, and the
-composition root is where a deployment gets to speak.
+terminal is the safer thing to have to ask for. The other two are not sources of
+variation at all — `propsVocabulary` is a pure validator and `bindingReader`
+answers a question about a registry, and both answer the same on both runs. They
+are here because they are things a **deployment** declares, and the composition
+root is where a deployment gets to speak.
 
 So the type is doing two jobs, and only one of them is the inventory. A field
 can sit on `CompositionRuntime` without being an answer to *what could differ
