@@ -22,7 +22,7 @@ example-editorial-wide   1280x900@2x  scrollWidth 1280 / innerWidth 1280
 One `.png` per theme per viewport, named `<specimen>-<theme>-<viewport>.png`.
 The exit code is non-zero if any shot overflowed its viewport.
 
-## The two measurements every shot takes
+## The measurements a shot takes
 
 The line above is the first one: the **document** against the viewport, which is
 "the page is wider than the phone" and is the single most-reported visual defect
@@ -57,6 +57,45 @@ still the document measurement alone.
 
 `tools/specimen/a-clip-hides-an-overflow.specimen.ts` is the subject this was
 built against, committed so it can be pointed at again.
+
+### The third one, which a shot has to ask for
+
+The two above are taken on every shot whether anybody wanted them or not. This
+one exists because a lane named something it wants the size of, and it is
+`pnpm shoot`'s alone
+([0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
+
+```json
+{ "path": "/demo", "out": "the-rail", "measure": ["aside", "aside li[id]", "text=Put it back"] }
+```
+
+```
+the-rail  1280x900@2x  scrollWidth 1280 / innerWidth 1280
+    aside  x 24 y 24  352x857  holding 1239 in 857
+    aside li[id] (1 of 4)  x 40 y 377  320x358  ← 195 past the fold
+    text=Put it back  no match
+```
+
+One line per match, in document order, `(n of m)` when a selector matched more
+than once, twenty at most and then a count. `x` and `y` are viewport-relative,
+because that is the frame of reference every geometry claim in this repository
+actually makes. `holding A in B` appears only when a box's own content extends
+further than the room it has. `← N past the fold` appears only when the box
+reaches below the bottom edge.
+
+Any selector the driver understands, `text=` included: the reading goes through
+a locator rather than a `querySelectorAll`, which is also why `measure` resolves
+in the shot's `frame` like every other selector it carries.
+
+**It does not change the exit code**, and a selector that matches nothing prints
+`no match` rather than failing the run. Which of these readings is a defect is
+the report's to say — a block below the fold is a copy and ordering decision,
+and the instrument that reports it has no business settling it.
+
+**It is not offered on a specimen.** A specimen is photographed `fullPage`, so
+its picture has no fold in it, and a fold measured against the viewport it
+happened to be laid out at would be a number about a boundary the artefact does
+not have.
 
 ## Writing a specimen
 
@@ -290,5 +329,8 @@ is why the two are one harness and what it cost when they were two.
   remains the portal's own recipe.
 - **It does not diff against baselines.** Visual regression is a different
   project; this makes it possible later and presumes none of it.
+- **It does not fail a shot on a measurement it took.** `measure` prints; the
+  exit code is still the document overflow alone. A height budget is the obvious
+  next ask and 0212 says why it is deliberately not here yet.
 - **It runs in no CI job.** It is a tool a run drives when it has something to
   look at.

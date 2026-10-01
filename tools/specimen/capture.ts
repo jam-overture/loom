@@ -150,6 +150,83 @@ export const clippedFrom = (boxes: readonly ClippingBox[]): readonly ClippedOver
 export const clips = (measurement: Overflow): boolean => measurement.clipped.length > 0
 
 /**
+ * One element's rectangle, as the page reports it, before anything has been
+ * decided about whether it fits.
+ *
+ * Fractional on purpose. `getBoundingClientRect` is, layout is, and a reading
+ * rounded at the source is a reading whose error nobody can see afterwards —
+ * two blocks 0.4px apart both arrive as the same integer and a report quotes
+ * them as touching. Rounding is presentation, so it happens in `describeShot`.
+ *
+ * Viewport-relative, which is the frame of reference every geometry claim in
+ * this repository has actually been making: *the card is 975px in an 857px
+ * rail*, *the reply sits 186px above the bottom edge*. A document-relative
+ * reading would be a different number that reads the same, which is the worst
+ * kind.
+ */
+export type ElementBox = {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+  /**
+   * How far this element's own content extends down, and how much room it has.
+   *
+   * The pair, not the difference, because the difference is the only thing a
+   * report would print and the two numbers are what make it checkable: *857px
+   * of rail holding 1,239px of asks* says where the remedy is, and *382px
+   * hidden* does not. Integers, unlike the rectangle above — the DOM rounds
+   * these two itself and there is nothing finer to preserve.
+   */
+  readonly scrollHeight: number
+  readonly clientHeight: number
+}
+
+/**
+ * One selector the shot list asked about, and what it matched.
+ *
+ * Every match in document order, not the first. A lane asking about
+ * `aside li[id]` is asking about the list, and a harness that answered with its
+ * head would be answering a question nobody asked — while looking like it had
+ * answered the one they did. `found` is empty when nothing matched, which is a
+ * reading and not an error: a selector that stops matching is exactly what a
+ * lane wants to find out, and it arrives as a printed `no match` rather than as
+ * a failed run.
+ */
+export type MeasuredSelector = {
+  readonly selector: string
+  readonly found: readonly ElementBox[]
+}
+
+/**
+ * Whether all four edges of the box are inside the viewport.
+ *
+ * In Node and not in the page, for `clippedFrom`'s reason: reading a rectangle
+ * needs a laid-out document, and deciding whether that rectangle fits is
+ * arithmetic. Before this split the only way to check the rule was to take a
+ * photograph and read the output.
+ */
+export const insideViewport = (box: ElementBox, viewport: SpecimenViewport): boolean =>
+  box.x >= 0 &&
+  box.y >= 0 &&
+  box.x + box.width <= viewport.width &&
+  box.y + box.height <= viewport.height
+
+/**
+ * How far past the bottom edge of the viewport the box reaches, and 0 when its
+ * bottom is inside.
+ *
+ * Its own function beside `insideViewport` rather than a field of one verdict,
+ * because it is the one direction with a remedy. A block off the right-hand
+ * edge is the overflow the document measurement already reports and the
+ * stylesheet already owns; a block below the fold is a copy and ordering
+ * decision, which is what six of this repository's last ten visual units have
+ * actually been about.
+ */
+export const pastTheFold = (box: ElementBox, viewport: SpecimenViewport): number =>
+  Math.max(0, box.y + box.height - viewport.height)
+
+/**
  * One thing to do to a page before the shutter.
  *
  * Four members, and the line they are all on one side of is
@@ -279,6 +356,21 @@ export type SpecimenPage = {
   /** Runs the steps in order. Anchor navigation is pinned; see `playwright.ts`. */
   readonly act: (steps: readonly ShotStep[], frame?: string) => Promise<void>
   readonly measure: () => Promise<Overflow>
+  /**
+   * Read the rectangle of every element the shot named, in the document the
+   * shot's own selectors resolve against.
+   *
+   * A second reading beside `measure` rather than a field inside it, because
+   * the two answer different questions and only one of them is asked on every
+   * shot. The overflow measurement is the page's own business and is taken
+   * whether a lane asked or not; this one exists because a lane named something
+   * it wants the size of, and a shot that named nothing must not pay a round
+   * trip into the page to be told so.
+   */
+  readonly boxes: (
+    selectors: readonly string[],
+    frame?: string
+  ) => Promise<readonly MeasuredSelector[]>
   readonly capture: (file: string, target: CaptureTarget) => Promise<void>
   readonly close: () => Promise<void>
 }
@@ -374,6 +466,22 @@ export type Shot = Approach & {
   readonly start?: StartState
   readonly fullPage: boolean
   readonly clip?: string
+  /**
+   * Selectors to read a rectangle for, printed beside the shot's own line.
+   *
+   * Required and empty by default, for the reason `do` is
+   * ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)):
+   * the capture loop never branches on undefined, and the absence of a
+   * measurement is stated where a shot is planned rather than discovered where
+   * it is taken.
+   *
+   * It prints and it does not assert, which is the whole of
+   * [0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md).
+   * Nothing here can fail a run: a selector that matches nothing reports `no
+   * match`, a block below the fold reports how far below, and which of those
+   * readings is a defect is the report's to say.
+   */
+  readonly measure: readonly string[]
 }
 
 export type ShotResult = {
@@ -384,6 +492,8 @@ export type ShotResult = {
   readonly overflowed: boolean
   /** Whether any box on the page hid content it could not fit. */
   readonly clipped: boolean
+  /** One entry per selector the shot asked about, in the order it asked. */
+  readonly measured: readonly MeasuredSelector[]
 }
 
 export type CaptureOptions = {
@@ -436,6 +546,18 @@ export const captureShots = async (
        * something nobody is looking at.
        */
       const overflow = await page.measure()
+      /**
+       * After the steps too, and for the same reason: a rail that was scrolled
+       * or a card that was opened is the state whose size the lane asked about.
+       *
+       * Skipped entirely when nothing was named. A shot with no `measure` is
+       * every shot in this repository today, and a round trip into the page to
+       * be handed an empty list is a cost paid by all of them for none of them.
+       */
+      const measured =
+        shot.measure.length === 0
+          ? []
+          : await page.boxes(shot.measure, shot.frame)
       const file = join(outDir, shot.file)
       await page.capture(file, {
         fullPage: shot.fullPage,
@@ -449,6 +571,7 @@ export const captureShots = async (
         overflow,
         overflowed: overflows(overflow),
         clipped: clips(overflow),
+        measured,
       })
     } finally {
       await page.close()
@@ -475,6 +598,63 @@ export const CLIPPED_SHOWN = 5
  * page and each of these is about one element: a reader scanning the left
  * margin sees one line per picture, exactly as before this existed.
  */
+/**
+ * The most matches a single selector prints.
+ *
+ * `CLIPPED_SHOWN`'s reasoning with its sign reversed, and the difference is
+ * worth stating. A clipping box is *discovered* — the page decides how many
+ * there are — so a cap protects a lane from a page with forty of one cause. A
+ * measured box was *asked for*, so a cap withholds something a lane wanted,
+ * and the failure to prevent is a lane quoting a truncated table as a complete
+ * one. Hence a higher ceiling than the discovered list, and hence the
+ * `…and N more` line below it: a lane that hit this can see it did and narrow
+ * the selector, which is the only outcome where the number is safe to quote.
+ */
+export const MEASURED_SHOWN = 20
+
+/** `x`, `y` and the size, rounded for a report line. See `ElementBox`. */
+const describeBox = (box: ElementBox, viewport: SpecimenViewport): string => {
+  const hidden = box.scrollHeight > box.clientHeight
+  const past = pastTheFold(box, viewport)
+
+  return (
+    `x ${Math.round(box.x)} y ${Math.round(box.y)}  ` +
+    `${Math.round(box.width)}x${Math.round(box.height)}` +
+    (hidden ? `  holding ${box.scrollHeight} in ${box.clientHeight}` : "") +
+    (past > 0
+      ? `  ← ${Math.round(past)} past the fold`
+      : insideViewport(box, viewport)
+        ? ""
+        : "  ← outside the viewport")
+  )
+}
+
+/**
+ * One line per match of one selector, or one line saying there were none.
+ *
+ * `(n of m)` whenever a selector matched more than once, because the two facts
+ * a lane needs about the second row of a table are which row it is and how many
+ * rows there are — and a bare repetition of the selector gives it neither.
+ */
+const describeSelector = (
+  entry: MeasuredSelector,
+  viewport: SpecimenViewport
+): readonly string[] => {
+  if (entry.found.length === 0) return [`    ${entry.selector}  no match`]
+
+  const shown = entry.found.slice(0, MEASURED_SHOWN)
+  const rest = entry.found.length - shown.length
+  const total = entry.found.length
+
+  return [
+    ...shown.map((box, index) => {
+      const which = total === 1 ? "" : ` (${index + 1} of ${total})`
+      return `    ${entry.selector}${which}  ${describeBox(box, viewport)}`
+    }),
+    ...(rest > 0 ? [`    …and ${rest} more match${rest === 1 ? "" : "es"}`] : []),
+  ]
+}
+
 export const describeShot = (result: ShotResult): string => {
   const head =
     `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x  ` +
@@ -482,13 +662,20 @@ export const describeShot = (result: ShotResult): string => {
     (result.overflowed ? "  ← overflows" : "")
 
   const { clipped } = result.overflow
-  if (clipped.length === 0) return head
-
   const shown = clipped.slice(0, CLIPPED_SHOWN)
   const rest = clipped.length - shown.length
+
+  /**
+   * The measured lines come after the clipped ones, under the same indent and
+   * in the order the shot asked. Two readings of one page, and the one the
+   * lane requested is the one it is scrolling to find.
+   */
   return [
-    `${head}  ← ${clipped.length} clipping ${clipped.length === 1 ? "box hides" : "boxes hide"} content`,
+    clipped.length === 0
+      ? head
+      : `${head}  ← ${clipped.length} clipping ${clipped.length === 1 ? "box hides" : "boxes hide"} content`,
     ...shown.map((box) => `    ${box.element}  content reaches ${box.reach} in ${box.width}`),
     ...(rest > 0 ? [`    …and ${rest} more`] : []),
+    ...result.measured.flatMap((entry) => describeSelector(entry, result.viewport)),
   ].join("\n")
 }

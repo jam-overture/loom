@@ -39126,9 +39126,30 @@ is the property a documentation site actually needs.
 ---
 ## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
-**not blocking**, and recommended as small. Nothing was prevented; the numbers
-in today's report are real
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-63-nothing-can-see-a-box`**
+([0212](decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md))
+— **the shape you asked for, exactly**: `measure` on a shot, a printed line per
+match, and nothing in it touching the exit code. Three things to know. **The
+cap is twenty matches per selector, not five** — `CLIPPED_SHOWN`'s reasoning
+reverses when the box was asked for rather than discovered, and the
+`…and N more matches` line is what makes a truncated table safe to quote.
+**`(n of m)` is on every line of a multi-match selector**, because `aside li`
+on `/demo` is nine of them and three of those nine are the ones you care
+about. **And it is `pnpm shoot`'s only, not a specimen's** — a specimen is
+photographed `fullPage`, so a fold measured against its viewport is a number
+about a boundary its picture does not have.
+
+**The half you asked for that is not here, stated plainly:** nothing can still
+fail if the payoff card grows back past 857px. The number is in the run's output
+and a person reads it. 0212's *Alternatives considered* argues the delay rather
+than glossing it — the first run of this instrument found six blocks past the
+fold on `/demo`, every one a rail scrolling correctly, and 0202's last line is
+what a gate that goes red on all of them on day one does to an instrument. **A
+per-shot height budget is the next ask and it is yours to make**, now with a
+run's worth of readings to make it against.
+
+**Your 857 was right.** The first real output reads `holding 1240 in 857`
 
 Every unit this lane has shipped for a fortnight is argued on a measurement:
 *the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
@@ -39997,3 +40018,74 @@ mechanical: `#465` changed a number that `#470`'s branch had already recorded.
 state that count**, not only the branch being merged — the count has three
 readers on two surfaces and it is the one quantity in this repository that
 several lanes type independently.
+
+---
+## 2026-10-01 — a `pnpm verify` started on a clean `main` and edited underneath reports another lane's file, and the one it names is the lesson that reads `tools/` off disk
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and one wrong conclusion**, which was nearly the expensive kind: for a few
+minutes this run believed `main` was red in `(lessons)` and was composing the
+cross-lane patch for it
+
+### What happened
+
+The run opened by starting a baseline `pnpm verify` on a pristine `main` at
+`ee9c1d5`, in the background, and then — because the baseline takes about twenty
+minutes and there was reading to do — started building. The baseline came back
+**exit 1**, with one failing test in a route group this lane does not own:
+
+```
+FAIL  app/(lessons)/_lib/transcripts.test.ts > what a lesson says its exercises print > is what lesson 28 actually prints
+AssertionError: expected [ 'citations the checks refuse: 0' ] to deeply equal []
+```
+
+That reads exactly like the cross-lane count staleness that put `main` red
+earlier the same day, in the same shape, in another lane's file. It is not. It
+is this run's own work, arriving in the middle of its own baseline.
+
+**The mechanism, which is the general part.** Lesson 28's exercise D reads every
+citation in `decisions/`, `src/` and `tools/` **off disk at test time** and
+compares the count against the transcript the lesson has recorded. This run had
+written `[0212](../../decisions/0212-…)` into two files under `tools/specimen/`
+about forty minutes before `decisions/0212-…` existed. Two `link-unknown-record`
+problems, so the exercise printed `citations the checks refuse: 2` where the
+lesson says `0`, and the drift was reported against **the lesson's file** rather
+than against either file this run had touched.
+
+So a baseline is not a baseline if the tree moves under it. `vitest` reads the
+files when it reaches them, and `pnpm verify`'s application half runs last —
+roughly twenty minutes after the command starts, which is a wide enough window
+to do most of a unit's work in.
+
+### Why the symptom was so convincing
+
+Three things lined up. The failure named another lane's file; the repository had
+*actually* been red in a comparable way six hours earlier, and the ledger entry
+about it was on this run's reading list; and `git status` on the branch was
+clean of `(lessons)` entirely, which is the sentence that stops you looking
+further. The thing that broke the spell was that no commit on `main` could
+plausibly have done it.
+
+### What holds
+
+**A baseline run owns the tree for its duration.** Either leave the tree alone
+while it runs, or do not call what comes back a baseline. The cheap version,
+which this run should have used: take the baseline on a **separate checkout** of
+`main`, so the branch is free the whole time.
+
+The stronger version, and the reason this is filed rather than written in a
+report: `docs/routines.md`'s *Reading the merge gate* is where every routine
+learns what a red gate means, and it currently has nothing about **when** a gate
+was read. A number read off a run that overlapped the run's own edits is not a
+measurement of anything — and it is indistinguishable from a real cross-lane
+break, which is the most expensive failure this ledger has on it twice today.
+
+### For whoever writes that paragraph
+
+The one-line rule is *a verify you edited underneath measured neither tree*. The
+corollary worth stating with it is that the drift surfaces **in the file that
+reads**, not the file that changed — so a failure in another lane's route group
+is not evidence that the cause is in another lane's route group, and three of
+today's entries are about lanes spending part of a run proving a red is not
+theirs.

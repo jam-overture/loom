@@ -392,6 +392,49 @@ describe("reaching a state that is not photographed", () => {
   })
 
   /**
+   * The reading three lanes wrote a scratch driver for, four runs running
+   * (0212). It is a list because the claim a report makes is a table, and a
+   * lane that can ask about one block of a rail will ask about the next.
+   */
+  it("carries the selectors a shot asked the size of, in the order it asked", () => {
+    const planned = planShots(
+      listOf({
+        shots: [{ path: "/demo", out: "x", measure: ["aside", "aside li[id]", "text=Put it back"] }],
+      })
+    )
+
+    expect(planned[0]?.measure).toEqual(["aside", "aside li[id]", "text=Put it back"])
+  })
+
+  /**
+   * Empty and not absent, for `do`'s reason: the capture loop never branches
+   * on undefined, and a shot that measures nothing says so where it is planned.
+   */
+  it("gives a shot that named nothing an empty list rather than no field", () => {
+    const planned = planShots(listOf({ shots: [{ path: "/x", out: "x" }] }))
+
+    expect(planned[0]?.measure).toEqual([])
+  })
+
+  /**
+   * `stepSchema`'s rule, for the same failure: a misspelling on a permissive
+   * object parses, runs, measures nothing, and prints a shot line that looks
+   * exactly like a shot that asked for nothing.
+   */
+  it("refuses a misspelled measure, and an empty selector inside a good one", () => {
+    const measure = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", measure: value }] }).success
+
+    expect(measure(["aside"])).toBe(true)
+    expect(measure([])).toBe(true)
+    expect(measure([""])).toBe(false)
+    expect(measure("aside")).toBe(false)
+    expect(
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", measur: ["aside"] }] }).success
+    ).toBe(false)
+  })
+
+  /**
    * Refused rather than resolved by precedence: the two mean opposite things,
    * so picking a winner hands a lane the picture it did not ask for silently.
    */

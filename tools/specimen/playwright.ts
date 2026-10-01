@@ -8,6 +8,8 @@ import { err, ok, type Result } from "../../src/result.js"
 import {
   clippedFrom,
   type ClippingBox,
+  type ElementBox,
+  type MeasuredSelector,
   type Overflow,
   type SpecimenBrowser,
   type SpecimenPage,
@@ -66,6 +68,21 @@ export type LaunchedLocator = {
    */
   readonly scrollIntoViewIfNeeded: () => Promise<unknown>
   readonly screenshot: (options: { readonly path: string }) => Promise<unknown>
+  /**
+   * Every match, read in the page in one round trip.
+   *
+   * Deliberately **not** strict, unlike `click` and `scrollIntoViewIfNeeded`.
+   * There the ambiguity of two matches decides what the picture is of and is
+   * the lane's to resolve; here the two matches *are* the answer — a lane
+   * asking the size of a list's rows is asking about all of them — so a
+   * locator that would refuse them is the wrong one.
+   *
+   * This is also the call that makes a Playwright selector work here at all:
+   * `text=Put it back` and `>> nth=` are the driver's engine and not the
+   * document's, so a `page.evaluate` with `querySelectorAll` in it would accept
+   * such a selector from a lane and hand back `no match` forever.
+   */
+  readonly evaluateAll: <TValue>(body: (elements: Element[]) => TValue) => Promise<TValue>
 }
 
 /** A browsing context inside the page, which resolves selectors and nothing else. */
@@ -296,6 +313,39 @@ const readClippingBoxes = (): readonly ClippingBox[] => {
 }
 
 /**
+ * Run in the page over every element one selector matched: its rectangle and
+ * its content extent.
+ *
+ * Six numbers and no judgement. Whether a block fits, where the fold falls and
+ * which of these readings is a defect is all arithmetic over these six, so all
+ * of it is in Node where it can be tested without a browser — the same split
+ * `readClippingBoxes` and `clippedFrom` are on, for the same reason
+ * ([0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
+ *
+ * **Not one named helper inside it**, and the flat loop is that rule rather
+ * than a style — `readClippingBoxes` above says why at length: the compiler
+ * wraps a named inner function in a `__name` call that exists in this process
+ * and not in the page.
+ */
+const readBoxes = (elements: Element[]): readonly ElementBox[] => {
+  const boxes: ElementBox[] = []
+
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect()
+    boxes.push({
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      scrollHeight: element.scrollHeight,
+      clientHeight: element.clientHeight,
+    })
+  }
+
+  return boxes
+}
+
+/**
  * Run in the top document before the first step of a `do` list: hold it still.
  *
  * A click on a real `a[href]` in the starter library navigates, and every step
@@ -372,6 +422,26 @@ export const chromiumBrowser = async (
           ...(await page.evaluate(measureDocument)),
           clipped: clippedFrom(await page.evaluate(readClippingBoxes)),
         }),
+        /**
+         * Through `locatorFor`, so `frame` means here what it means to a
+         * `waitFor`, to every step and to a clipped capture. A lane that can
+         * photograph inside the framed `/demo` can measure inside it too,
+         * without the harness learning a second word for the same field.
+         *
+         * One round trip per selector rather than one for all of them: the
+         * selectors are the driver's own engine, and resolving them is the one
+         * part of this that cannot happen in a single `evaluate`.
+         */
+        boxes: async (selectors, frame): Promise<readonly MeasuredSelector[]> => {
+          const at = locatorFor(frame)
+          const measured: MeasuredSelector[] = []
+
+          for (const selector of selectors) {
+            measured.push({ selector, found: await at(selector).evaluateAll(readBoxes) })
+          }
+
+          return measured
+        },
         /**
          * The directory is made here rather than in the capture loop, because
          * this is the file that writes and the loop is exercised against a

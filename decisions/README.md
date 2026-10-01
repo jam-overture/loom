@@ -295,3 +295,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0209](0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md) | What an adapter owes the runtime is a suite, not a sentence | Accepted | §2 |
 | [0210](0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md) | A primitive may lock the page's scroll from the stylesheet, and only while its own region is open | Accepted | §4b |
 | [0211](0211-a-completion-is-a-form-the-browser-let-go.md) | A completion is a form the browser let go, and it carries the bands it was the end of | Accepted | §6 |
+| [0212](0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md) | The harness reads a box, it prints the number, and the judgement stays in the report | Accepted | §1 (process) |
