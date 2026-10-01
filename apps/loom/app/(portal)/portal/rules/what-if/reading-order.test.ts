@@ -53,6 +53,11 @@ describe("the reading order", () => {
     )
   })
 
+  it("does not reassure a reader about a count of nothing", () => {
+    expect(source).toContain('restOf(plan) !== ""')
+    expect(source).not.toContain("would have gone exactly as they did")
+  })
+
   it("gives the answer before the changes it is an answer about", () => {
     expect(at("verdictOf(plan, moved)")).toBeLessThan(at("<MovedGroup"))
   })

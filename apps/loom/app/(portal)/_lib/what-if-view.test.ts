@@ -11,6 +11,7 @@ import {
   MOVEMENTS,
   movedIn,
   readsTheRulesWrong,
+  restOf,
   verdictOf,
   whatHappened,
   WOULD_HAPPEN,
@@ -163,6 +164,34 @@ describe("the answer in one sentence", () => {
     [plan(), true],
   ] as const)("reads plainly", (given, asked) => {
     expect(runtimeWordsIn(verdictOf(given, asked))).toEqual([])
+  })
+})
+
+describe("the changes that would not move", () => {
+  /**
+   * Found on a screenshot of a refusal floor at `low`, where every change
+   * moves: **"The other 0 would have gone exactly as they did."** A count of
+   * nothing printed as a reassurance is the shape of sentence a template
+   * produces and only an eye catches.
+   */
+  it("says nothing rather than reassuring about nothing", () => {
+    expect(restOf(plan({ weighed: 3, unchanged: 0, moved: [moved("turned-down")] }))).toBe("")
+  })
+
+  it("counts the ones that stay put", () => {
+    expect(restOf(plan({ weighed: 3, unchanged: 2 }))).toBe(
+      "The other 2 would have gone exactly as they did."
+    )
+  })
+
+  it("agrees with itself about one", () => {
+    expect(restOf(plan({ weighed: 2, unchanged: 1 }))).toBe(
+      "The other one would have gone exactly as it did."
+    )
+  })
+
+  it("reads plainly", () => {
+    expect(runtimeWordsIn(restOf(plan({ unchanged: 4 })))).toEqual([])
   })
 })
 

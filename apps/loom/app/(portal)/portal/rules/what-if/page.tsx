@@ -24,6 +24,7 @@ import {
   MOVEMENTS,
   movedIn,
   readsTheRulesWrong,
+  restOf,
   verdictOf,
 } from "@/app/(portal)/_lib/what-if-view"
 
@@ -173,10 +174,8 @@ const WhatIfPage = async ({ searchParams }: { readonly searchParams: Promise<Add
               <h2 className="text-md tracking-tight">What would have been different</h2>
               <p className="text-sm">{verdictOf(plan, moved)}</p>
               {cost !== "" && <p className="text-ink-secondary text-sm">{cost}</p>}
-              {moved && plan.moved.length > 0 && (
-                <p className="text-ink-muted text-sm">
-                  The other {plan.unchanged} would have gone exactly as they did.
-                </p>
+              {moved && plan.moved.length > 0 && restOf(plan) !== "" && (
+                <p className="text-ink-muted text-sm">{restOf(plan)}</p>
               )}
             </section>
           )}

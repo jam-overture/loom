@@ -127,6 +127,23 @@ export const costOf = (plan: Gameplan): string => {
   return `Of the ones that would go ahead without asking, ${parts.join(" and ")}.`
 }
 
+/**
+ * The changes that would not move, as a line under the answer.
+ *
+ * Empty when there are none, which is the whole reason it is a function.
+ * **"The other 0 would have gone exactly as they did"** was on the screen
+ * until a screenshot of a refusal floor at `low` — where every change moves —
+ * was looked at. A count of nothing, printed as a reassurance, is the shape of
+ * sentence this lane keeps producing from a template and keeps finding by eye.
+ */
+export const restOf = (plan: Gameplan): string => {
+  if (plan.unchanged === 0) return ""
+
+  return plan.unchanged === 1
+    ? "The other one would have gone exactly as it did."
+    : `The other ${plan.unchanged} would have gone exactly as they did.`
+}
+
 /** What one change was, and what happened to it, as the line above its row. */
 export const askedFor = (change: JudgedChange): string =>
   change.asked.trim() === "" ? "Somebody asked for a change here." : change.asked
