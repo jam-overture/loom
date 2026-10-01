@@ -1,4 +1,4 @@
-import { randomIdFactory } from "@jam-overture/loom"
+import { randomIdFactory, systemClock } from "@jam-overture/loom"
 import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { roomToLand } from "@/app/(demo)/_lib/arrival"
@@ -8,6 +8,7 @@ import { whatTheRailShows } from "@/app/(demo)/_lib/rail"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
+import { whatItWillSay } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { AskPanel } from "./_components/ask-panel"
 import { BackToTheRecord } from "./_components/back-to-the-record"
@@ -143,6 +144,24 @@ const DemoPage = async () => {
     ),
   })
 
+  /**
+   * And what the Gate will say about the ask the panel is about to invite,
+   * reached by running it — interpreted, analysed, assessed and gated, stopping
+   * at the verdict without writing (0021).
+   *
+   * **This page decides nothing by making the call.** Which ask is primary is
+   * `rail.ts`'s reading, taken straight off the view above and handed through;
+   * what comes back is two sentences the runtime produced. The only thing that
+   * has to happen here is the `await`, which is the one thing a client
+   * component cannot do and the reason this is not in `ask-panel.tsx` beside
+   * the button it is about.
+   *
+   * It costs a tree walk and no key: the presets are deterministic (0057), so
+   * a visitor who never presses anything is still told the truth about what
+   * pressing would do, on a deployment with nothing configured.
+   */
+  const willSay = await whatItWillSay(tree, rail.leading?.preset, randomIdFactory, systemClock)
+
   return (
     /* On a wide screen the demo is one viewport: the bar is fixed, and the
      * stage and the rail scroll independently, so a visitor reading a record
@@ -191,6 +210,7 @@ const DemoPage = async () => {
             modelConfigured={isDemoModelConfigured}
             {...(rail.waiting === undefined ? {} : { waiting: rail.waiting })}
             {...(rail.leading === undefined ? {} : { leading: rail.leading })}
+            {...(willSay === undefined ? {} : { willSay })}
           />
 
           {rendered.diagnostics.length > 0 && (
