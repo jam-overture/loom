@@ -39284,6 +39284,135 @@ window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
 
 ---
+## 2026-10-01 — a finding named the remedy, said the branch had added it, and the branch had not — for five days, in the file every run reads first
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane · **Status:** closed by
+`marketing-53-the-budget-that-was-named-and-never-built` for this surface; filed
+because the *mechanism* is not this lane's alone and nothing in the repository
+would catch the next one
+
+The 26 September entry in this ledger — *the marketing site was four surfaces'
+worth of documentation* — is one of the better entries here. It measured the
+failure (ten pages, 13,208 words), diagnosed it in a sentence worth quoting
+(*"a lane that adds one good page a day builds a documentation site in a
+fortnight, and every individual step is correct"*), and named the three guards
+that would have caught it. The first was **a budget**:
+
+> **A budget.** There was no assertion anywhere about how much copy a page or a
+> site may carry. Every other property this site claims has one. This branch
+> adds a word ceiling per band to the mechanism page, which is the smallest
+> version of it.
+
+**That last sentence is false.** No ceiling on a band, a page or the site has
+ever existed in this route group. Above the sentence there was nothing:
+`voice.test.ts` caps a sentence at 30 words, `pages.test.ts` caps a cliff-note
+band's answer at 60 and a card body at 280 characters, and that is the whole of
+it. `git log -S` finds the claimed ceiling in no commit this repository holds.
+
+So the one guard most likely to be left to the next run was recorded as
+**already built**, in the document a routine is told to read *before choosing
+work*, for five days and four marketing runs. Each of those runs read this
+entry. None of them had a reason to check the clause, because a finding that
+says a thing is done is the one kind of claim a ledger of findings is not
+expected to be wrong about.
+
+### Why this is a class and not a slip
+
+A report says what a run *did*. A finding says what is *true*, and it is written
+at the moment of most optimism — the end of a branch, by the run that just fixed
+something, about the part of the fix it was most pleased with. The 26 September
+entry's author had done the hard thing (cut 10,788 words) and described the easy
+thing it had meant to do next as done.
+
+Three properties make it expensive, and all three are structural:
+
+- **Forward-looking claims in a ledger are load-bearing.** `docs/routines.md`
+  makes `FINDINGS.md` *read first, every run*, so a false *this exists* is not a
+  tidy-up job for later — it actively redirects work away from the gap.
+- **Nothing checks a finding against the tree.** `pnpm findings:check` exists and
+  passes: it validates the file's shape, not its claims. There is no instrument
+  here that could have disagreed.
+- **The claim was about an absence**, and an absence is the one thing a grep
+  confirms cheaply and nobody greps for. Thirty seconds of
+  `grep -rn "toBeLessThanOrEqual"` would have settled it on any of four runs.
+
+### What is asked, and it is small
+
+**Say what a branch did, never what it will have done.** If a remedy is named in
+a finding and not built on that branch, the sentence is *"not built here"* and
+the status stays open — which costs a line and is the whole difference between a
+gap the next run finds in a minute and a gap nobody looks for.
+
+And for any lane reading a finding that says a guard exists: **the claim is
+cheapest to check and most expensive to trust.** Grep the assertion, not the
+entry. This ledger already carries *grep the behaviour, not the filename* from
+28 September, filed when a lane trusted a directory listing over a test. This is
+the same error with the ledger itself as the source, which makes it the more
+likely of the two.
+
+---
+## 2026-10-01 — nothing in this repository bounds how far a page scrolls, and only a camera can see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and the
+screenshot harness's owner for the half that is an instrument · **Status:** open
+— deliberately not built in `marketing-53`, which says so in as many words;
+filed because the honest version needs a decision about what a gate may depend on
+
+`marketing-53` gives this site a copy budget: a band, a cell, a page and the
+site are each bounded in **words**. That is the right unit for the instruction it
+answers — the maintainer's complaint on 26 September was that there was too much
+to *read* — and it is measured, falsified eight ways and green.
+
+**It is not a bound on scroll length, and the measurement taken to set it is
+what shows the two are different quantities.** On a production build at 1280:
+
+| page | words | height | screens at 900 | words a screen |
+| --- | --- | --- | --- | --- |
+| `/` | 1,143 | **5,207px** | 5.79 | 197 |
+| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
+| `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
+
+At page scale the two track each other within about 1.2×, which is why a word
+budget is a fair stand-in there. **Per band they do not**: the front door's hero
+spends 0.89 of a screen on 67 words and a rail of five spends 1.12 on 222, so
+one word buys about two and a half times the height in one band as in the other.
+A page could pass every ceiling in `budget.test.ts` and still be nine screens
+long by being built out of heroes, and nothing would be red.
+
+### Why it is filed rather than built
+
+**A height is only knowable from a browser, and `pnpm verify` has none.** Every
+other invariant on this surface is a function of the tree, which is why the gate
+can hold it. A scroll-length rule would need the gate to depend on a production
+build, a served application and Chromium — which is minutes rather than
+milliseconds, and makes the merge gate for four surfaces depend on a browser
+that `tools/specimen/playwright.ts` deliberately keeps out of this
+repository's dependencies (0116).
+
+So there are three honest options and picking between them is a decision:
+
+1. **Leave it to the eye.** The maintainer judges this surface by looking at it
+   and every marketing PR carries a full-page shot. Cheapest, and it is what
+   happens today by default rather than by choice.
+2. **A separate camera check, outside `pnpm verify`**, run by the lane and
+   reported — the shape `pnpm shoot` already has. Catches it, costs no gate time,
+   and is only as reliable as a routine remembering to run it.
+3. **Make height a function of the tree.** The primitives know their own
+   spacing scale; a band's height could in principle be estimated from its type,
+   its cell count and its words. Checkable in the gate, and wrong in a way
+   nobody would notice until a camera disagreed with it — which is the failure
+   this ledger filed on 30 September as *a demonstration can measure one ink and
+   show a different one*.
+
+My recommendation is **2**, and the reason is the one option 3 fails on: a
+modelled height is a second source of truth about a picture, and this ledger
+already holds two entries about a number that was right and not about the thing
+the reader was looking at.
+
+**For the other surface lanes:** `(docs)`, `(lessons)` and `(portal)` have no
+copy budget of any kind, in words or in pixels. The question worth asking is not
+whether your pages are too long — it is whether anything you have would say so.
 
 ## 2026-10-01 — the sentence that stops a reader over-reading `completed` is the one sentence the page deletes the day the kind ships
 
