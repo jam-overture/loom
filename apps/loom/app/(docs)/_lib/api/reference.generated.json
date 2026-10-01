@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4405,7 +4405,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4451,7 +4451,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5354,10 +5354,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 180,
+      "files": 184,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5815,7 +5815,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6567,7 +6567,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7158,7 +7158,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7386,7 +7386,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7803,7 +7803,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8157,7 +8157,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8290,7 +8290,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8540,7 +8540,7 @@
             {
               "name": "ReaderReadings",
               "kind": "type",
-              "signature": "type ReaderReadings = {\n    /** Total time on screen. Summed across batches, because `dwelled` is per-batch. */\n    readonly dwellMs: Readonly<Record<NodeId, number>>;\n    /** Nodes that came into view at all. `viewed` fires once per node per page view. */\n    readonly reached: Readonly<Record<NodeId, true>>;\n    /**\n     * Times the node itself was used — a link followed, a button pressed, a field\n     * filled.\n     *\n     * It is the node the signal names, which is the nearest addressed element to\n     * what a reader aimed at. In the starter library that is the control, so a\n     * band's count here is zero however busy the band was; `engagements` is the\n     * number that is about the band.\n     */\n    readonly activations: Readonly<Record<NodeId, number>>;\n    readonly opens: Readonly<Record<NodeId, number>>;\n    readonly closes: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a reader used something *inside* the node — pressed, followed, filled,\n     * opened or closed, at any depth.\n     *\n     * The regions' number. Read off the ancestry a delegated signal carries, so a\n     * batch whose senders did not walk contributes nothing rather than a guess.\n     * Strictly inside, so a control's own use is in `activations` and never here,\n     * and a subtree total is the addition.\n     *\n     * Occurrences rather than readers, because a fold is one page view: *how many\n     * of the people reading this used something in the band* is a question about\n     * many views, and it is `ReaderTally.engaged`.\n     */\n    readonly engagements: Readonly<Record<NodeId, number>>;\n    /**\n     * What each node is, as its signals reported it. Kept because a consumer\n     * holding only readings would otherwise have to go back to the tree to render\n     * a row, and the signals already say.\n     *\n     * A region named only as somewhere a press happened inside is in here too, so\n     * it gets a row rather than being a number with no name.\n     */\n    readonly types: Readonly<Record<NodeId, PrimitiveType>>;\n    readonly batches: number;\n    readonly signals: number;\n};",
+              "signature": "type ReaderReadings = {\n    /** Total time on screen. Summed across batches, because `dwelled` is per-batch. */\n    readonly dwellMs: Readonly<Record<NodeId, number>>;\n    /** Nodes that came into view at all. `viewed` fires once per node per page view. */\n    readonly reached: Readonly<Record<NodeId, true>>;\n    /**\n     * Times the node itself was used — a link followed, a button pressed, a field\n     * filled.\n     *\n     * It is the node the signal names, which is the nearest addressed element to\n     * what a reader aimed at. In the starter library that is the control, so a\n     * band's count here is zero however busy the band was; `engagements` is the\n     * number that is about the band.\n     */\n    readonly activations: Readonly<Record<NodeId, number>>;\n    readonly opens: Readonly<Record<NodeId, number>>;\n    readonly closes: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a form inside the node was submitted and the browser let it go.\n     *\n     * Filed against the node the signal names, which for the starter library's\n     * `loom.form` is the form itself. The band it was the end of is in\n     * `engagements`, like every other delegated kind.\n     */\n    readonly completions: Readonly<Record<NodeId, number>>;\n    /**\n     * Times a reader used something *inside* the node — pressed, followed, filled,\n     * opened or closed, at any depth.\n     *\n     * The regions' number. Read off the ancestry a delegated signal carries, so a\n     * batch whose senders did not walk contributes nothing rather than a guess.\n     * Strictly inside, so a control's own use is in `activations` and never here,\n     * and a subtree total is the addition.\n     *\n     * Occurrences rather than readers, because a fold is one page view: *how many\n     * of the people reading this used something in the band* is a question about\n     * many views, and it is `ReaderTally.engaged`.\n     */\n    readonly engagements: Readonly<Record<NodeId, number>>;\n    /**\n     * What each node is, as its signals reported it. Kept because a consumer\n     * holding only readings would otherwise have to go back to the tree to render\n     * a row, and the signals already say.\n     *\n     * A region named only as somewhere a press happened inside is in here too, so\n     * it gets a row rather than being a number with no name.\n     */\n    readonly types: Readonly<Record<NodeId, PrimitiveType>>;\n    readonly batches: number;\n    readonly signals: number;\n};",
               "truncated": false,
               "summary": "What a set of batches says about each node they mention."
             },
@@ -8568,7 +8568,7 @@
             {
               "name": "NodeReading",
               "kind": "type",
-              "signature": "type NodeReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly dwellMs: number;\n    readonly reached: boolean;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /** Times a reader used something inside it, at any depth. */\n    readonly engagements: number;\n};",
+              "signature": "type NodeReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly dwellMs: number;\n    readonly reached: boolean;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /** Times a form inside it was submitted and the browser let it go. */\n    readonly completions: number;\n    /** Times a reader used something inside it, at any depth. */\n    readonly engagements: number;\n};",
               "truncated": false,
               "summary": "One node's line, as something rendering a table wants it."
             },
@@ -8780,19 +8780,19 @@
         {
           "module": "signals/kinds",
           "title": "Kinds",
-          "summary": "The four kinds of reader signal, with nothing else in the module.",
+          "summary": "The five kinds of reader signal, with nothing else in the module.",
           "symbols": [
             {
               "name": "READER_SIGNAL_KINDS",
               "kind": "value",
-              "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\"]",
+              "signature": "const READER_SIGNAL_KINDS: readonly [\"viewed\", \"dwelled\", \"activated\", \"disclosed\", \"completed\"]",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "DELEGATED_READER_SIGNAL_KINDS",
               "kind": "value",
-              "signature": "const DELEGATED_READER_SIGNAL_KINDS: readonly [\"activated\", \"disclosed\"]",
+              "signature": "const DELEGATED_READER_SIGNAL_KINDS: readonly [\"activated\", \"disclosed\", \"completed\"]",
               "truncated": false,
               "summary": "The kinds whose node is not the thing a reader aimed at."
             }
@@ -8827,7 +8827,7 @@
             {
               "name": "ReaderTally",
               "kind": "type",
-              "signature": "type ReaderTally = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Distinct page views that produced any signal at all about this node. */\n    readonly views: number;\n    /** Distinct page views in which it came into view. The denominator of a funnel. */\n    readonly reached: number;\n    /**\n     * Distinct page views in which a reader used something *inside* this node —\n     * pressed a link or button, filled a field, opened or closed a disclosure.\n     *\n     * The counter regions are reported by, and the only one that needs a signal to\n     * say more than which node it is about. A press is filed against the control,\n     * and every control in the starter library is an addressed node of its own, so\n     * `activations` on a band is nearly always zero and always will be: the band\n     * is not the thing anybody pressed. This counts the views whose reader did\n     * something under it, at any depth, from the ancestry a delegated signal\n     * carries.\n     *\n     * **Strictly inside.** A button's own `engaged` is 0 while its `activations`\n     * is 1; its band's is the other way round. The two never double-count the same\n     * node, and a subtree total is the addition.\n     *\n     * **Zero from a sender that does not walk.** A batch whose delegated signals\n     * carry no `within` — synthesised on a server, replayed from a fixture, sent\n     * by a host that turned the walk off — adds nothing here, exactly as a batch\n     * with no view key adds nothing to `views`.\n     */\n    readonly engaged: number;\n    readonly dwellMs: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n};",
+              "signature": "type ReaderTally = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** Distinct page views that produced any signal at all about this node. */\n    readonly views: number;\n    /** Distinct page views in which it came into view. The denominator of a funnel. */\n    readonly reached: number;\n    /**\n     * Distinct page views in which a reader used something *inside* this node —\n     * pressed a link or button, filled a field, opened or closed a disclosure.\n     *\n     * The counter regions are reported by, and the only one that needs a signal to\n     * say more than which node it is about. A press is filed against the control,\n     * and every control in the starter library is an addressed node of its own, so\n     * `activations` on a band is nearly always zero and always will be: the band\n     * is not the thing anybody pressed. This counts the views whose reader did\n     * something under it, at any depth, from the ancestry a delegated signal\n     * carries.\n     *\n     * **Strictly inside.** A button's own `engaged` is 0 while its `activations`\n     * is 1; its band's is the other way round. The two never double-count the same\n     * node, and a subtree total is the addition.\n     *\n     * **Zero from a sender that does not walk.** A batch whose delegated signals\n     * carry no `within` — synthesised on a server, replayed from a fixture, sent\n     * by a host that turned the walk off — adds nothing here, exactly as a batch\n     * with no view key adds nothing to `views`.\n     */\n    readonly engaged: number;\n    readonly dwellMs: number;\n    readonly activations: number;\n    readonly opens: number;\n    readonly closes: number;\n    /**\n     * Times a form inside this node was submitted and the browser let it go.\n     *\n     * The conversion counter, and the only one that is about a reader finishing\n     * rather than a reader looking. It is an occurrence rather than a view count\n     * for the same reason `activations` is: a reader who submits twice did two\n     * things, and *how many views converted* is a `FunnelPair` ending in\n     * `completed`, which is one row and already answerable.\n     *\n     * Filed against the node the form is — `loom.form` is addressed, so usually\n     * the form itself — never the band above it. The band's number is `engaged`,\n     * credited from the ancestry the signal carries.\n     */\n    readonly completions: number;\n};",
               "truncated": false,
               "summary": "One node at one revision, as every view of it added up."
             },
@@ -8927,7 +8927,7 @@
               "kind": "schema",
               "signature": "const readerSignalSchema: z.ZodDiscriminatedUnion<…>",
               "truncated": false,
-              "summary": "The four kinds."
+              "summary": "The five kinds."
             },
             {
               "name": "ReaderSignal",
@@ -9053,7 +9053,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9196,7 +9196,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9256,7 +9256,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9790,7 +9790,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9864,7 +9864,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10298,10 +10298,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 51,
+      "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1151,
+        "packageNames": 1159,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10346,6 +10346,69 @@
               "name": "describeTelemetryJournalContract",
               "kind": "function",
               "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/model-contract",
+          "title": "Model contract",
+          "summary": "One suite, run against every `ModelClient`.",
+          "symbols": [
+            {
+              "name": "ModelSituation",
+              "kind": "type",
+              "signature": "type ModelSituation = \n/** The service answered, with this text, served by this model. */\n\"answers\"\n/** The service answered, and there was nothing in the reply that was text. */\n | \"answers-without-text\"\n/** The answer stopped at the output ceiling, mid-sentence. */\n | \"truncates\"\n/** The model declined to answer this content. */\n | \"refuses\"\n/** A credential, entitlement or billing problem: 401, 402, 403. */\n | \"refuses-the-caller\"\n/** The request itself is wrong and would fail again unchanged: 400, 404, 413, 422. */\n | \"refuses-the-request\"\n/** Busy now, fine later: 408, 409, 429, 500, 503. */\n | \"asks-for-later\"\n/** No response at all — a closed socket, a DNS failure, a TLS error. */\n | \"never-answers\";",
+              "truncated": false,
+              "summary": "What happened, in terms every vendor has rather than one vendor's."
+            },
+            {
+              "name": "MODEL_SITUATIONS",
+              "kind": "value",
+              "signature": "const MODEL_SITUATIONS: readonly ModelSituation[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONTRACT_REPLY",
+              "kind": "value",
+              "signature": "const CONTRACT_REPLY: string",
+              "truncated": false,
+              "summary": "The text this suite sends through, and the model it says served it."
+            },
+            {
+              "name": "CONTRACT_SERVED_BY",
+              "kind": "value",
+              "signature": "const CONTRACT_SERVED_BY = \"a-model-that-served-it\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ModelSituationClient",
+              "kind": "type",
+              "signature": "type ModelSituationClient = (() => ModelClient | Promise<ModelClient>) | \"not-expressible\";",
+              "truncated": false,
+              "summary": "A client wired to behave as one situation does, or a statement that this vendor has no such situation."
+            },
+            {
+              "name": "ModelClientContract",
+              "kind": "type",
+              "signature": "type ModelClientContract = Readonly<Record<ModelSituation, ModelSituationClient>>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "contractRequest",
+              "kind": "function",
+              "signature": "const contractRequest: () => ModelRequest",
+              "truncated": false,
+              "summary": "The request every case sends. Fixed, because none of these turn on its content."
+            },
+            {
+              "name": "describeModelClientContract",
+              "kind": "function",
+              "signature": "const describeModelClientContract: (name: string, contract: ModelClientContract) => void",
               "truncated": false,
               "summary": ""
             }
