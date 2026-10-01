@@ -38730,6 +38730,92 @@ number is right* and *this number is the one you are looking at*, and the second
 is the property a documentation site actually needs.
 
 ---
+## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
+**not blocking**, and recommended as small. Nothing was prevented; the numbers
+in today's report are real
+
+Every unit this lane has shipped for a fortnight is argued on a measurement:
+*the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
+furthest scroll is 623 against a card top of 740*. Those numbers decide which
+unit is worth building and whether it worked, and **not one of them comes from
+anything the repository contains.**
+
+`pnpm shoot` takes the lane where it needs to go — the `do` list drives the two
+presses, `before` reaches a signed-in screen, `start` says what the browser
+arrived with — and then it can only photograph. *What a shot list still cannot
+do* names it: **read anything back out of the page**
+([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md),
+[0182](decisions/0182-a-shot-may-reach-a-state-it-does-not-photograph-and-may-name-the-document-it-reaches-into.md),
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)).
+
+So the measuring gets done by a `playwright-core` script written fresh in a
+scratch directory, run once, and deleted with the container. This run wrote
+one; the run before it wrote one; the run before that wrote one. Three scripts,
+three sessions, one shape, none of them in the repository and none of them
+reviewable.
+
+**What this run would have wanted, and what it costs to not have.** The unit
+today is *the payoff card fits its frame* — 975px to 765px in an 857px rail,
+and **Put it back** going from 23px below the bottom edge to 186px above it.
+There is a test that the reasoning folds. **There is nothing that can fail if
+the card grows back past 857px**, because nothing in this repository can see a
+box. The next run that adds two lines to that card puts the demo's closing
+argument back under the fold and the suite stays green.
+
+### What would close it, and why it is not an assertion
+
+The harness already prints a measurement it took off the page — `scrollWidth`
+against `innerWidth`, on every shot, which is how a page wider than the phone
+says so. This asks for one more of exactly that kind:
+
+```json
+{ "path": "/demo", "out": "…", "measure": ["aside", "aside li[id]", "text=Put it back"] }
+```
+
+— and a printed line per selector giving its box and whether it is inside the
+viewport, beside the `scrollWidth` line that is already there.
+
+**It prints; it does not assert**, which is the line 0159 draws and the reason
+this is worth asking for rather than arguing about. The harness stays an
+instrument, the judgement stays in the report, and what changes is that the
+number in the report was produced by something the maintainer can read.
+
+`tools/screenshot/` is `Loom daily build`'s, which is why this is filed rather
+than done.
+
+---
+## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-34-put-it-back-in-view`, and **small**
+
+That run made the payoff card fold its reasoning, because the visitor had
+already read it in order to press **Apply this change**. The fold works and the
+card now fits its frame. **The line it folds under does not.**
+
+`the-reasoning.tsx` builds one summary for every folded card:
+
+> `{brief} · and the rule that read it`
+
+which on the payoff card reads **"Some risk, and you could undo it. · and the
+rule that read it"**. Every word is true and the tense is wrong: the visitor is
+no longer weighing whether to accept some risk, they accepted it one press ago,
+and the summary is the answer to *what did I just agree to* rather than *what
+am I being asked*. It is also the only line on that card written as though the
+decision were still open, three lines above **You said yes**.
+
+This was not fixed in the run that created it because the summary is shared by
+every folded card in the rail — the read cards below, the moved-past holds, and
+now the answered one — and changing it for all of them to suit one is the
+wrong trade. What it wants is a second string chosen by the same reading that
+chose the fold, which is a copy decision worth making deliberately rather than
+at the end of a run about geometry.
+
+Not blocking, and nobody is misled: the words are accurate, they are one click
+from the full working, and the card around them says plainly that the change
+landed and that the visitor is what landed it.
 ## 2026-09-30 — the portal's record screens can be filled with a record that is entirely true, and it took nine minutes and five model calls to prove it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with the same decision
