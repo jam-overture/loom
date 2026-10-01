@@ -175,7 +175,7 @@ describe("the readings", () => {
    * The two questions, written out, because **nothing else can hold them.**
    *
    * Found by mutation and by nothing else: pointing the second question's first
-   * half at a different band — `Questions` rather than `See it happen` — passed
+   * half at a different band — `Questions` rather than `Using it` — passed
    * all 1,524 tests. Two rounds of it did. Every other assertion about a funnel
    * reads `FUNNEL_QUESTIONS` to work out what to expect, so it moves with the
    * constant, and *the denominator is the bar for the band it names* stays true
@@ -185,13 +185,13 @@ describe("the readings", () => {
    * Which question a page asks is an editorial decision rather than a derivable
    * one, so it is pinned the way the off-bar list is pinned — exactly, so that
    * changing one is a red test and an argument rather than a quiet re-aim. The
-   * bands are named as literals for the same reason: `See it happen` and `Keep
+   * bands are named as literals for the same reason: `Using it` and `Keep
    * going` are the band that offers a change and the band with the links out,
    * and a question about any other pair is a different band of the page.
    */
   it("asks about the band that offers a change, and about the foot of the page", () => {
-    expect(FUNNEL_QUESTIONS).toEqual([{ from: "See it happen", to: "Keep going" }])
-    expect(BAND_QUESTION).toBe("See it happen")
+    expect(FUNNEL_QUESTIONS).toEqual([{ from: "Using it", to: "Keep going" }])
+    expect(BAND_QUESTION).toBe("Using it")
   })
 
   /**
@@ -228,7 +228,7 @@ describe("the readings", () => {
 
     const [readOn] = readings.funnels
 
-    expect(readOn?.reached).toBe(bandNamed("See it happen")?.reached)
+    expect(readOn?.reached).toBe(bandNamed("Using it")?.reached)
     expect(readOn?.converted).toBe(bandNamed("Keep going")?.reached)
   })
 

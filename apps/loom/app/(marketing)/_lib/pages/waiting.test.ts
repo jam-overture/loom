@@ -1,9 +1,9 @@
 import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
-import { BAND } from "../bands"
+import { BAND, MECHANISM_BAND } from "../bands"
 import { pageTreeFor, treeFor } from "../render"
-import { DEFAULT_THEME, HOME, HOW_IT_WORKS, type SiteThemeName } from "../site"
+import { DEFAULT_THEME, HOW_IT_WORKS, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import { ASKS } from "../adapt/asks"
 import { PANEL_STEPS } from "./see-it-happen"
@@ -32,7 +32,7 @@ const elementsOf = (node: LoomNode): readonly ElementNode[] =>
     ? []
     : [...(node.kind === "element" ? [node] : []), ...node.children.flatMap(elementsOf)]
 
-const arrival = (): LoomTree => treeFor(HOME, { origin: ORIGIN, theme: THEME })
+const arrival = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
 
 /**
  * The band, found by its eyebrow rather than by position — the same handle the
@@ -64,7 +64,7 @@ describe("the panel before the visitor has asked for anything", () => {
   it.each(ASKS.map((ask) => ask.id))(
     "names the same steps, in the same order, as the panel %s fills in",
     async (ask) => {
-      const asked = await pageTreeFor(HOME, { origin: ORIGIN, theme: THEME, ask })
+      const asked = await pageTreeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME, ask })
 
       expect(stepsIn(bandOf(arrival())).map((step) => step.props["title"])).toEqual(
         stepsIn(bandOf(asked)).map((step) => step.props["title"])
@@ -136,6 +136,21 @@ describe("the panel before the visitor has asked for anything", () => {
   it("names as many steps as the mechanism page teaches", () => {
     const mechanism = treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: THEME })
 
-    expect(stepsIn(bandOf(arrival())).length).toBe(stepsIn(mechanism.root).length)
+    /**
+     * **Both runs of milestones are on one page now**, so the mechanism side has
+     * to be scoped to the band that teaches the steps rather than swept off the
+     * whole tree. Unscoped it counted the journey's five and the waiting panel's
+     * five and asserted five equals ten.
+     *
+     * The same proxy failed the same way in `adapt.test.ts` on 30 September, for
+     * the same reason: counting a primitive across a page is only a stand-in for
+     * counting a band while that page has one of them.
+     */
+    const journey = mechanism.root.children.find(
+      (child) => child.kind === "element" && child.props["eyebrow"] === MECHANISM_BAND.journey
+    )
+
+    expect(journey).toBeDefined()
+    expect(stepsIn(bandOf(arrival())).length).toBe(stepsIn(journey as ElementNode).length)
   })
 })

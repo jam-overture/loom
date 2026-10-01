@@ -8,6 +8,7 @@ import {
   askHref,
   DECISIONS_URL,
   HOME,
+  HOW_IT_WORKS,
   internalHref,
   otherThemes,
   PORTAL,
@@ -104,7 +105,7 @@ export type ChromeContext = {
  * the *same* page underneath.
  */
 const inAnotherPalette = (context: ChromeContext, palette: SiteThemeName): string =>
-  context.current.path === HOME.path
+  context.current.path === HOW_IT_WORKS.path
     ? askHref(context.origin, {
         theme: palette,
         ...(context.ask === undefined ? {} : { ask: context.ask, approve: context.approve === true }),

@@ -6,7 +6,7 @@ import { ASKS, type AskId } from "./adapt/asks"
 import { ANCHOR } from "./bands"
 import type { PageContext } from "./pages/home"
 import { pageTreeFor, renderTree } from "./render"
-import { HOME } from "./site"
+import { HOW_IT_WORKS } from "./site"
 
 /**
  * A link that stays on the page, held to the one thing that can make it fail.
@@ -53,7 +53,7 @@ const STATES: readonly (readonly [string, PageContext])[] = [
   }),
 ]
 
-const pageFor = async (context: PageContext): Promise<LoomTree> => pageTreeFor(HOME, context)
+const pageFor = async (context: PageContext): Promise<LoomTree> => pageTreeFor(HOW_IT_WORKS, context)
 
 const markupFor = (page: LoomTree): string =>
   renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
@@ -95,7 +95,7 @@ const samePageFragmentsIn = (page: LoomTree): readonly string[] =>
     const url = resolved(href)
 
     if (url === undefined || url.origin !== ORIGIN) return []
-    if (url.pathname !== HOME.path) return []
+    if (url.pathname !== HOW_IT_WORKS.path) return []
 
     return url.hash === "" ? [] : [url.hash.slice(1)]
   })
