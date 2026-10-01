@@ -15,6 +15,14 @@ The short answer: **the honest ceiling on distinct primitives is about 110–120
 not 250.** The number 250 is reachable, and the rest of it is compositions. The
 arithmetic is at the end.
 
+> **Where the count is, 1 October 2026: 102.** Tier A closed on 14 September
+> except the radio group, which is in Tier B's second group below and blocked
+> there. Tier B's first group is **unblocked and three of its four have
+> shipped**; its other two groups are the whole of what is left behind a
+> framework decision. Read the corrected Tier B before planning a run against
+> this document — it said something false for eleven days and that is what the
+> correction is about.
+
 ## The thing that makes 250 look reasonable, and why it misleads
 
 21st.dev advertises **1152 hero components, 216 pricing sections, 161
@@ -110,22 +118,42 @@ for the other, and it was found by building both.
 is one enum member and one open design question, not two strings, and this
 paragraph is here so the next run does not re-count it as cheap.
 
-## Tier B — blocked on the behaviour vocabulary
+## Tier B — **three groups, not one decision** (corrected 1 October)
 
-Every one of these is a thing a marketing page genuinely has, and every one needs
-the framework to name a behaviour the tree can declare. A tab strip has been
-filed for this since at least 11 September (*"wants a `select` member in the
-behaviour vocabulary"*).
+This section said *"roughly nine, and they arrive together or not at all,
+because they are one framework decision rather than nine"* from 13 September to
+1 October. **That stopped being true on 20 September** and the document a lane
+reads before choosing work said otherwise for eleven days;
+[0176](../decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+sorts the nine by what each actually needs and says of the first group *"This
+record settles the first."* `Loom lessons` filed the correction on 29 September,
+having measured it from the other end — `present` and `dismiss` were in the
+vocabulary and nothing in the library declared either.
 
-tabs · tooltip · popover / hover card · dialog or modal · dropdown menu ·
-toast · lightbox gallery · a monthly/annual pricing toggle · a filter or
-segmented control
+So, split the way 0176 splits them:
 
-**Roughly nine**, and they arrive together or not at all, because they are one
-framework decision rather than nine. They are `Loom daily build`'s to open, not
-this lane's to work around — and working around them individually, with a
-`<details>` here and a CSS-only tab strip there, is how a library ends up with
-nine different answers to one question.
+| group | what it needs | state |
+| --- | --- | --- |
+| **dialog · dropdown · lightbox · tooltip** | a region that opens and can be closed by something other than the opener | **unblocked 20 Sep by `present`/`dismiss`.** Three of the four shipped 1 October — `loom.menu`, `loom.popover`, `loom.lightbox` |
+| **tabs · segmented control · pricing toggle · radio group** | one of *n* children chosen, where the labels are in the children | **blocked, and `ARCHITECTURAL`.** A container receives its children as one rendered node and cannot read a prop off one (0008), so a control that renders *n* labelled buttons cannot learn what to put on them. 0176 filed it and did not build it |
+| **toast** | a region that appears on an event nobody pressed | **blocked.** One primitive, one gap, and the only member of the vocabulary that would render no control the reader aims at |
+
+### What the first group's three cost, and the one it did not buy
+
+`loom.menu` and `loom.popover` are the named and general halves of one shape
+(0062), `loom.lightbox` is the first primitive in the library to declare **both**
+members of the pair, and the gallery row of Tier C — *gallery →
+`loom.mosaic`* — became true the day a tile existed that opens.
+
+**A dialog is the one the group did not deliver, and the reason is the trigger's
+word rather than its behaviour.** A control's name is declared by the primitive
+and resolved through the text seam, which is per *type* — so every
+`loom.lightbox` on every page says `Expand`, and a deployment may translate that
+but a tree may not write it. For an affordance that is the right answer, and for
+the three that shipped the generic word is the word a reader wants. A dialog's
+trigger is the page's call to action, which is content, and the seam has nowhere
+to put it. Filed on 1 October against the framework; until it moves, a dialog
+here would be a modal opened by a chip reading *Open*.
 
 ## The reach of the catalogue over the vocabulary — measured 19 September
 
@@ -188,7 +216,7 @@ accordion → `loom.faq` (*"a disclosure a reader opens"*) · alert → `loom.ca
 + `loom.marquee` · bento → `loom.mosaic` · press / awards → `loom.credential` ·
 video → `loom.embed` · map → `loom.media` (static) or `loom.embed` (live) ·
 newsletter → `loom.form` · changelog → `loom.milestone-list` · integrations →
-`loom.orbit` · comparison → `loom.comparison-table` · gallery → `loom.mosaic`
+`loom.orbit` · comparison → `loom.comparison-table` · gallery → `loom.mosaic` of `loom.lightbox` (the tile that opens, 1 Oct)
 
 A **general** `loom.disclosure` and a **general** `loom.definition-list` were
 both considered again and both rejected again: the first is `loom.faq` with the

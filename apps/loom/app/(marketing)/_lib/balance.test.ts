@@ -1,6 +1,7 @@
-import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
+import type { LoomTree } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
 
+import { runsIn } from "./measure"
 import { treeFor } from "./render"
 import { SITE_ROUTES, type SiteRoute } from "./site"
 
@@ -49,39 +50,12 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * today**, so a fourth page with a row of cards is checked the day it is added.
  */
 
-const isElement = (node: LoomNode): node is ElementNode => node.kind === "element"
-
 /**
- * What a node says, counted in words, through its children and its props alike.
- *
- * Both halves are needed and neither is enough. `loom.card` is given its lines
- * as `loom.prose` children, so its words are in text nodes; `loom.feature`,
- * `loom.stat` and `loom.milestone` are given theirs as `title`, `body`,
- * `label`, `caption` — props the primitive renders itself (0052) — so a count
- * that read only text nodes would score every one of those rows zero and pass
- * on all of them.
- *
- * **A string prop counts as text when it contains a space**, and that line is
- * worth stating because it is doing real work rather than being tidy. The props
- * that decide layout and behaviour are single tokens — `columns: "four"`,
- * `tone: "outline"`, `variant: "quiet"`, `state: "done"`, `marker: "1"` — and
- * an `href` never contains one. Everything with a space in it is a sentence
- * somebody wrote for a reader. It is a heuristic and it is allowed to be one
- * here because being wrong costs a word or two of count on a threshold with
- * three lines of margin either side; the defect it exists to see is twenty-two
- * words wide.
+ * The word count and the run-finding are `measure.ts`'s, and were this file's
+ * private helpers until the copy budget needed the same two. The reasoning that
+ * used to sit here — why a string prop with a space in it counts as copy, and
+ * why a slot is not a row — moved with them.
  */
-const wordsIn = (node: LoomNode): number => {
-  if (node.kind === "text") return node.value.trim().split(/\s+/).filter(Boolean).length
-
-  const spoken = isElement(node)
-    ? Object.values(node.props)
-        .filter((value): value is string => typeof value === "string" && /\s/.test(value))
-        .reduce((total, value) => total + value.trim().split(/\s+/).length, 0)
-    : 0
-
-  return spoken + node.children.reduce((total, child) => total + wordsIn(child), 0)
-}
 
 /**
  * The containers whose children are laid out across equal columns and stretched
@@ -154,39 +128,17 @@ type Row = {
 }
 
 /**
- * Every run of two or more sibling elements of one type, with the element that
- * holds them — which is what makes a row identifiable without any page builder
- * having to declare one.
- *
- * Slots are skipped rather than classified. A slot is a region *inside* one
- * primitive (0051), so two `loom.prose` in a hero's `heading` slot are two
- * paragraphs of one band and never two cells of a row.
+ * The runs on one page, tagged with the route they were found on so a failure
+ * names the page. Which containers the rule *applies* to is this file's
+ * question and is settled by `ROWS` below, not here.
  */
-const rowsOf = (page: LoomTree, route: string): readonly Row[] => {
-  const found: Row[] = []
-
-  const walk = (node: LoomNode): void => {
-    if (node.kind === "text") return
-
-    const cells = node.children.filter(isElement)
-    const types = new Set(cells.map((cell) => cell.type))
-
-    if (isElement(node) && cells.length >= 2 && types.size === 1) {
-      found.push({
-        route,
-        container: node.type,
-        cell: [...types][0] as string,
-        words: cells.map(wordsIn),
-      })
-    }
-
-    node.children.forEach(walk)
-  }
-
-  walk(page.root)
-
-  return found
-}
+const rowsOf = (page: LoomTree, route: string): readonly Row[] =>
+  runsIn(page.root).map((run) => ({
+    route,
+    container: run.container,
+    cell: run.cell,
+    words: run.words,
+  }))
 
 const ORIGIN = "https://loom.example"
 

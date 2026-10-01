@@ -345,6 +345,54 @@ export const LIBRARY_CLASS = {
   /** Its actions end, which takes the slack on a phone when no control was built. */
   navActions: "loom-nav-actions",
   /**
+   * The three primitives that present a region, and the regions they present.
+   *
+   * Each root carries `data-loom-presented` — written there by the control the
+   * primitive placed inside it — and each region is hidden by a rule keyed on
+   * that root. **The rule hides on `"false"` and never reveals on `"true"`**, so
+   * a page served without scripting has no control, no attribute, no rule that
+   * matches, and the region simply there; `presentation.ts` carries why that
+   * direction is the only safe one and `presentation.test.ts` asserts it.
+   *
+   * The regions' own `display` is here rather than on the element for the first
+   * mechanic above: an inline value beats a rule, so a panel that declared its
+   * own `display` would be a panel the hide rule silently failed to hide.
+   */
+  popover: "loom-popover",
+  popoverPanel: "loom-popover-panel",
+  menu: "loom-menu",
+  /**
+   * A menu's dropped panel, and the rows inside it.
+   *
+   * The rows are a rule on the panel's **direct children** rather than a style
+   * on a child this library would have to own, which is `loom.link-pager`'s
+   * pattern a second time and works for the same reason: `loom.link` leaves its
+   * padding off the element deliberately, so a container is free to give it a
+   * hit area. It reaches a `loom.action` in the last row of an account menu
+   * without either of them knowing about the other.
+   */
+  menuPanel: "loom-menu-panel",
+  /**
+   * A `loom.lightbox`: the root the state is published on, the tile on the page,
+   * the region drawn over the viewport, and the plate inside it.
+   *
+   * The root is also where the **present** control is positioned from, and that
+   * is not a convenience. A control paints itself with an inline `style`
+   * (`control.ts`), so the class the runtime stamps on it is the only handle a
+   * primitive has — and the chip belongs over the corner of the tile, which is a
+   * `position` no control sets for itself.
+   */
+  lightbox: "loom-lightbox",
+  lightboxPreview: "loom-lightbox-preview",
+  lightboxFrame: "loom-lightbox-frame",
+  lightboxPanel: "loom-lightbox-panel",
+  /**
+   * A `loom.before-after`, which carried no class at all until it took a
+   * control. Same reason as the lightbox's root: the slider is the runtime's
+   * element and where it sits over the band is this primitive's decision.
+   */
+  beforeAfter: "loom-before-after",
+  /**
    * A `loom.feature`. The tile, which measures itself; the box holding its two
    * halves; the words; and the region it places what it was handed in.
    *
@@ -1442,6 +1490,90 @@ details[open] > summary .loom-marker {
     display: none;
   }
 }
+/**
+ * The three presentations. Each pair is the region's own box followed by the one
+ * rule that hides it, written in the only direction that is safe on a page
+ * served without scripting — see \`presentation.ts\`.
+ */
+.loom-popover-panel {
+  display: flex;
+  flex-direction: column;
+}
+.loom-popover[data-loom-presented="false"] > .loom-popover-panel {
+  display: none;
+}
+.loom-menu-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.loom-menu[data-loom-presented="false"] > .loom-menu-panel {
+  display: none;
+}
+/**
+ * A menu row. After \`.loom-link\` in this file on purpose: the two selectors
+ * weigh the same, so the later one is what gives a row its hit area instead of
+ * the two pixels a link reserves for its underline. \`background-image: none\`
+ * is the underline itself, which would wipe in under a row already painting a
+ * background of its own.
+ */
+.loom-menu-panel > * {
+  padding-block: var(--loom-spacing-2);
+  padding-inline: var(--loom-spacing-3);
+  border-radius: var(--loom-radius-sm);
+  background-image: none;
+  transition: background-color var(--loom-motion-fast) ease;
+}
+.loom-menu-panel > *:hover, .loom-menu-panel > *:focus-visible {
+  background-color: var(--loom-bg-surface-muted);
+}
+.loom-lightbox > .loom-control-present {
+  position: absolute;
+  inset-block-end: var(--loom-spacing-3);
+  inset-inline-end: var(--loom-spacing-3);
+  z-index: 2;
+}
+/**
+ * The frame, and the two tracks are not decoration.
+ *
+ * \`display: grid\` with implicit tracks sizes its one column to the **max-content
+ * of the plate inside it**, so a paragraph in the opened region computed its
+ * widest unbroken width, the track grew to match, and the plate — capped at
+ * 64rem — clipped it and scrolled sideways. \`minmax(0, 1fr)\` is the standard
+ * answer: it lets the track be the frame's own size and the content wrap inside
+ * it. Found by photographing it; the picture blamed the plate.
+ */
+.loom-lightbox-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+}
+.loom-lightbox[data-loom-presented="false"] > .loom-lightbox-frame {
+  display: none;
+}
+/**
+ * The scroll lock, and the only rule in this file that reaches the document
+ * element — 0210. It is scoped by a library class inside the \`:has()\`, so it
+ * applies while a Loom lightbox is open and at no other time, and it is the one
+ * thing a modal owes a reader that the behaviour seam leaves to the primitive
+ * and a stylesheet can actually hold.
+ */
+html:has(.loom-lightbox[data-loom-presented="true"]) {
+  overflow: hidden;
+}
+/**
+ * The wipe's slider, over the foot of the band. A control paints itself inline,
+ * so a primitive can only place it from here.
+ */
+.loom-before-after > .loom-control-adjust {
+  position: absolute;
+  inset-block-end: var(--loom-spacing-3);
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  inline-size: min(18rem, 70%);
+  z-index: 2;
+}
 .loom-feature {
   container-type: inline-size;
 }
@@ -2090,6 +2222,9 @@ details[open] > summary .loom-marker {
   }
   .loom-lift:hover {
     transform: none;
+  }
+  .loom-menu-panel > * {
+    transition: none;
   }
   .loom-meter-fill, .loom-meter-arc {
     animation: none;

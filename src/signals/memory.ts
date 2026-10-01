@@ -110,6 +110,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       activations: (existing?.activations ?? 0) + tally.activations,
       opens: (existing?.opens ?? 0) + tally.opens,
       closes: (existing?.closes ?? 0) + tally.closes,
+      completions: (existing?.completions ?? 0) + tally.completions,
       updatedAt: at,
     })
   }
