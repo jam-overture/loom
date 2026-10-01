@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import type { OperationEffect, ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
+import { recordOf, surfaceOf } from "@/app/(portal)/_test/rendered"
 
 import { ProposalEffectView } from "./proposal-effect"
 
@@ -36,25 +37,6 @@ const effect = (over: Partial<ProposalEffect> = {}): ProposalEffect => ({
   inertCount: 0,
   ...over,
 })
-
-/**
- * What a reviewer meets without asking.
- *
- * A closed `<details>` is still in the DOM — deliberately, so find-in-page
- * reaches it — which means `document.body.textContent` cannot tell "on the
- * surface" from "one click down". Every assertion about the plain-language rule
- * turns on that difference, so it gets a reading of its own.
- */
-const surfaceOf = (container: HTMLElement): string => {
-  const copy = container.cloneNode(true) as HTMLElement
-
-  for (const disclosure of Array.from(copy.querySelectorAll("details"))) disclosure.remove()
-
-  return copy.textContent ?? ""
-}
-
-const recordOf = (container: HTMLElement): string =>
-  Array.from(container.querySelectorAll("details"), (one) => one.textContent ?? "").join(" ")
 
 describe("ProposalEffectView", () => {
   it("asks the reader's own question rather than labelling the section", () => {
