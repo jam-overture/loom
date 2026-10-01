@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest"
 import { calibrationOf, sittingMisses } from "./calibration"
 import {
   EMPTY_PROGRESS,
+  explanationsFor,
   predictionsFor,
   readProgress,
   setProgress,
   withAttempt,
+  withExplanation,
   withLessonWorkedThrough,
   withPrediction,
   type Attempt,
@@ -175,5 +177,80 @@ describe("predictions, which are not attempts", () => {
         "lesson-13-predict"
       )
     ).toEqual([])
+  })
+})
+
+describe("explanations, which nothing grades and nothing rates", () => {
+  const written = withExplanation(EMPTY_PROGRESS, "lesson-31-explain-it-back", {
+    question: 1,
+    answer: "A closed set is a set somebody can be held to.",
+    on: "2026-09-29",
+  })
+
+  it("files them under the lesson section they were written in", () => {
+    expect(explanationsFor(written, "lesson-31-explain-it-back")).toHaveLength(1)
+    expect(explanationsFor(written, "lesson-30-explain-it-back")).toEqual([])
+  })
+
+  it("replaces a rewritten explanation rather than keeping a draft beside it", () => {
+    const again = withExplanation(written, "lesson-31-explain-it-back", {
+      question: 1,
+      answer: "Second go, better.",
+      on: "2026-10-06",
+    })
+
+    expect(explanationsFor(again, "lesson-31-explain-it-back")).toHaveLength(1)
+    expect(explanationsFor(again, "lesson-31-explain-it-back")[0]?.answer).toBe("Second go, better.")
+  })
+
+  /**
+   * The absence of a confidence is the design and not an omission, so it is worth
+   * one assertion: a rating added here later would be a number about how fluent
+   * the explaining felt, which is the feeling this course exists to distrust.
+   */
+  it("carries no confidence through a round trip, and drops one somebody added", () => {
+    const back = readProgress(JSON.parse(JSON.stringify(written)))
+
+    expect(explanationsFor(back, "lesson-31-explain-it-back")[0]).toEqual({
+      question: 1,
+      answer: "A closed set is a set somebody can be held to.",
+      on: "2026-09-29",
+    })
+
+    expect(
+      explanationsFor(
+        readProgress({
+          explanations: { "lesson-31-explain-it-back": [{ question: 1, answer: "x", on: "2026-09-29", confidence: 5 }] },
+        }),
+        "lesson-31-explain-it-back"
+      )[0]
+    ).not.toHaveProperty("confidence")
+  })
+
+  /**
+   * An empty answer is what "I can't explain this yet" records, and it has to
+   * survive: a reader who said so is a different reader from one who wrote
+   * nothing, and the comparison the section offers says which of the two it is
+   * looking at.
+   */
+  it("keeps an explanation that says nothing, and drops one that is not legible", () => {
+    expect(
+      explanationsFor(
+        readProgress({
+          explanations: {
+            "lesson-31-explain-it-back": [
+              { question: 1, answer: "", on: "2026-09-29" },
+              { question: 2, on: "not a day" },
+              null,
+            ],
+          },
+        }),
+        "lesson-31-explain-it-back"
+      )
+    ).toEqual([{ question: 1, answer: "", on: "2026-09-29" }])
+  })
+
+  it("reads a record written before explanations existed", () => {
+    expect(readProgress({ lessons: {}, sets: {} }).explanations).toEqual({})
   })
 })

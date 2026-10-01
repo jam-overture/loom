@@ -442,6 +442,16 @@ export const STAKE_FACTORS: Readonly<Record<StakeFactorCode, string>> = {
    * evidence (`Loom marketing`, 23 September).
    */
   "invalid-props": "it would set a part up in a way that part itself refuses, so it would not draw",
+  /*
+   * The page would draw. Added by `Loom daily build` with 0208, in this table's
+   * voice and filed for review — every other clause here is about something a
+   * reader would *see* go wrong, and this one is the first that is not: the part
+   * asks your data a question, the answer comes back, and nothing on the page
+   * opens it. "Fetched and thrown away" is the one thing a reader has to take
+   * away, because the remedy is a name rather than a setting.
+   */
+  "unread-binding":
+    "it would ask your data for something the part in question never looks at, so the answer is fetched and thrown away",
   "redirected-submission": "it would send what people type into a form somewhere other than before",
   "repointed-binding": "it would put different data of yours on the page than before",
 }

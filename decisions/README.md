@@ -291,3 +291,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0205](0205-a-line-the-library-declares-is-measured-against-every-ground-it-is-drawn-on.md) | A line the library declares is measured against every ground it is drawn on | Accepted | §4b |
 | [0206](0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md) | A primitive declares what it could not show, and the runtime decides whether to say so | Accepted | §3 |
 | [0207](0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | A primitive that arranges only glyphs inherits its alignment | Accepted | §4b |
+| [0208](0208-a-question-nothing-reads-is-refused-before-it-is-written.md) | A question nothing reads is refused before it is written | Accepted | §2 |

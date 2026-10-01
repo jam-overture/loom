@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 
+import { bindingNameSchema } from "../data/source.js"
 import { sequentialIdFactory, type TreeId } from "../ids.js"
 import type { JsonObject } from "../json.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
+import type { BindingReader } from "../render/reads.js"
 import { DATA_PROP_KEY, SUBMIT_PROP_KEY } from "../reserved-props.js"
 import {
   boundTree,
@@ -22,6 +24,7 @@ import {
   primitiveVocabularyFor,
   type PrimitiveVocabulary,
   type PropsVocabulary,
+  type UnreadBinding,
 } from "./vocabulary.js"
 
 const spare = sequentialIdFactory("an")
@@ -826,5 +829,194 @@ describe("analyzeDelta invalid props", () => {
     ])
 
     expect(analysis.invalidProps.map((invalid) => invalid.nodeId)).toEqual([buried.id])
+  })
+})
+
+/** A page holding one card that asks a question, so a test can start unread. */
+const askingPage = (...names: readonly string[]) => {
+  const factory = sequentialIdFactory("unread")
+  const card = buildElement(factory, {
+    type: "loom.card",
+    props: {
+      [DATA_PROP_KEY]: Object.fromEntries(
+        names.map((name) => [name, { source: "catalogue.services" }])
+      ),
+    },
+  })
+  const page = buildElement(factory, { type: "loom.page", children: [card] })
+
+  return { tree: createTree(page, factory), card: card.id, page: page.id }
+}
+
+const readsItems: BindingReader = {
+  bindingsReadBy: (type) => (type === primitiveTypeSchema.parse("loom.card") ? ["items"] : undefined),
+}
+
+const analyzeReads = (
+  start: ReturnType<typeof askingPage>,
+  operations: TreeOperation[],
+  reads: BindingReader = readsItems
+) => {
+  const result = analyzeDelta(
+    start.tree,
+    deltaOf(start.tree.treeId, operations),
+    undefined,
+    undefined,
+    undefined,
+    reads
+  )
+  if (!result.ok) throw new Error(result.error.code)
+
+  return result.value
+}
+
+const asked = (analysis: { readonly unreadBindings: readonly UnreadBinding[] }) =>
+  analysis.unreadBindings.map((unread) => `${unread.nodeId} ${unread.name}`)
+
+describe("analyzeDelta unread bindings", () => {
+  it("reports none when the host hands no reader", () => {
+    const start = askingPage("rows")
+    const analysis = analyzeDelta(
+      start.tree,
+      deltaOf(start.tree.treeId, [
+        { op: "configure", nodeId: start.card, set: { title: "Services" }, unset: [] },
+      ])
+    )
+
+    expect(analysis.ok && analysis.value.unreadBindings).toEqual([])
+  })
+
+  it("names an inserted node asking under a name its primitive does not read", () => {
+    const start = askingPage("items")
+    const added = buildElement(spare, {
+      type: "loom.card",
+      props: { [DATA_PROP_KEY]: { rows: { source: "catalogue.services" } } },
+    })
+
+    const analysis = analyzeReads(start, [
+      { op: "insert", parentId: start.page, index: 1, node: added },
+    ])
+
+    expect(analysis.unreadBindings).toEqual([
+      {
+        nodeId: added.id,
+        type: primitiveTypeSchema.parse("loom.card"),
+        name: bindingNameSchema.parse("rows"),
+      },
+    ])
+  })
+
+  /**
+   * The case a walk over the operations alone would miss, and the reason this
+   * fact is measured on the two trees: a `configure` puts a question on a node
+   * that had none, and no `insert` was involved.
+   */
+  it("names a node a configure gave a question nothing reads", () => {
+    const start = askingPage("items")
+
+    const analysis = analyzeReads(start, [
+      {
+        op: "configure",
+        nodeId: start.card,
+        set: { [DATA_PROP_KEY]: { items: { source: "catalogue.services" }, rows: { source: "catalogue.services" } } },
+        unset: [],
+      },
+    ])
+
+    expect(asked(analysis)).toEqual([`${start.card} rows`])
+  })
+
+  /**
+   * 0184's half, at the write path: a `configure` that changes the *prop* naming
+   * the binding orphans a question without touching `loom:data` at all.
+   */
+  it("names a node a configure orphaned by renaming the prop that names the binding", () => {
+    const start = askingPage("items")
+    const byProp: BindingReader = {
+      bindingsReadBy: () => [{ fromProp: "binding", default: "items" }],
+    }
+
+    const analysis = analyzeReads(
+      start,
+      [{ op: "configure", nodeId: start.card, set: { binding: "elsewhere" }, unset: [] }],
+      byProp
+    )
+
+    expect(asked(analysis)).toEqual([`${start.card} items`])
+  })
+
+  it("says nothing about a change that leaves every question read", () => {
+    const start = askingPage("items")
+
+    const analysis = analyzeReads(start, [
+      { op: "configure", nodeId: start.card, set: { title: "Services" }, unset: [] },
+    ])
+
+    expect(analysis.unreadBindings).toEqual([])
+  })
+
+  /**
+   * The inherited case. A page may already be asking a question nobody reads —
+   * a primitive that was rewritten, or a declaration that landed after the tree
+   * did — and an edit elsewhere is not the change that started the round trip.
+   */
+  it("does not answer for a question that was already unread and was left alone", () => {
+    const start = askingPage("rows")
+
+    const analysis = analyzeReads(start, [
+      { op: "configure", nodeId: start.page, set: { title: "Services" }, unset: [] },
+    ])
+
+    expect(analysis.unreadBindings).toEqual([])
+  })
+
+  /**
+   * Where this parts company with `invalidProps`, which keys by node alone. Two
+   * unread names on one node are two round trips, so the change that adds the
+   * second is answerable for the second and inherits the first.
+   */
+  it("answers for a second unread name on a node that already had one", () => {
+    const start = askingPage("rows")
+
+    const analysis = analyzeReads(start, [
+      {
+        op: "configure",
+        nodeId: start.card,
+        set: { [DATA_PROP_KEY]: { rows: { source: "catalogue.services" }, cards: { source: "catalogue.services" } } },
+        unset: [],
+      },
+    ])
+
+    expect(asked(analysis)).toEqual([`${start.card} cards`])
+  })
+
+  /** Broken and then fixed inside one delta is not broken, as with props. */
+  it("says nothing about a delta that asks wrongly and then corrects itself", () => {
+    const start = askingPage("items")
+
+    const analysis = analyzeReads(start, [
+      {
+        op: "configure",
+        nodeId: start.card,
+        set: { [DATA_PROP_KEY]: { rows: { source: "catalogue.services" } } },
+        unset: [],
+      },
+      {
+        op: "configure",
+        nodeId: start.card,
+        set: { [DATA_PROP_KEY]: { items: { source: "catalogue.services" } } },
+        unset: [],
+      },
+    ])
+
+    expect(analysis.unreadBindings).toEqual([])
+  })
+
+  it("says nothing about a question a remove took off the page", () => {
+    const start = askingPage("rows")
+
+    const analysis = analyzeReads(start, [{ op: "remove", nodeId: start.card }])
+
+    expect(analysis.unreadBindings).toEqual([])
   })
 })

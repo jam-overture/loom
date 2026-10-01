@@ -1,4 +1,5 @@
 import type { IdFactory } from "../ids.js"
+import type { BindingReader } from "../render/reads.js"
 import { applyDelta } from "../tree/apply.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
@@ -57,6 +58,21 @@ export type CompositionRuntime = {
    * is how one is obtained without hand-keeping it.
    */
   readonly propsVocabulary?: PropsVocabulary
+  /**
+   * What this deployment's primitives read an answer under, checked before a
+   * delta is judged. Optional and absent by default, for every reason
+   * `propsVocabulary` above gives — a runtime handed none cannot tell a question
+   * nothing reads from one something does, and refusing on that ground is a
+   * choice made at the composition root rather than inherited (0179, 0208).
+   *
+   * Deliberately the renderer's own `BindingReader` rather than a second shape,
+   * so what the walk reports as `data-unread` is what the write path refuses. An
+   * SDK registry satisfies it already, which is why there is no
+   * `bindingReaderFor(registry)` beside `propsVocabularyFor`: the registry **is**
+   * one, and a helper that wrapped it would only be a place for the two to
+   * disagree.
+   */
+  readonly bindingReader?: BindingReader
 }
 
 export type CompositionOutcome =
@@ -208,7 +224,8 @@ const judgeProposal = (
     proposal,
     policy,
     runtime.idFactory.deltaId(),
-    runtime.propsVocabulary
+    runtime.propsVocabulary,
+    runtime.bindingReader
   )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })
@@ -358,7 +375,8 @@ export const confirmChange = (
     proposal,
     policy,
     runtime.idFactory.deltaId(),
-    runtime.propsVocabulary
+    runtime.propsVocabulary,
+    runtime.bindingReader
   )
   if (!assessed.ok) {
     emit({ type: "assessment-failed", proposal, error: assessed.error })

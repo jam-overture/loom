@@ -382,3 +382,143 @@ describe("running a lesson's exercises", () => {
     expect(screen.queryByText(/Write down what this prints/)).toBeNull()
   })
 })
+
+/**
+ * The elaboration section, which gates nothing and is the only part of this file
+ * not asserting an absence from the payload.
+ *
+ * There is nothing to withhold: an `Explain it back` prompt has no answer
+ * anywhere, which is what makes the words worth writing. So what is asserted here
+ * is the two things that are actually load-bearing — that no confidence is asked
+ * for, because a rating with no outcome measures fluency, and that the reader's
+ * own earlier explanation arrives **after** they have written and not before,
+ * because arriving before is reading your notes.
+ */
+describe("explaining it back", () => {
+  const ELABORATE: readonly LessonPart[] = [
+    {
+      kind: "elaborate",
+      id: "explain-it-back",
+      heading: <h2>Explain it back</h2>,
+      slug: "lesson-99-explain-it-back",
+      intro: <p>Closed book.</p>,
+      outro: <p>Prompt 2 is the one that transfers.</p>,
+      questions: [
+        {
+          number: 1,
+          body: <p>Explain the ladder to somebody who wrote the OR-of-predicates version.</p>,
+          reaches: [],
+        },
+        {
+          number: 2,
+          body: <p>Derive it from lesson 08.</p>,
+          reaches: [
+            {
+              lesson: 8,
+              title: "Two axes: stakes and reversibility",
+              href: "/lessons/08",
+              slug: "lesson-08-explain-it-back",
+            },
+          ],
+        },
+      ],
+    },
+  ]
+
+  const held = (progress: unknown): void => {
+    window.localStorage.setItem("loom.lessons.progress.v1", JSON.stringify(progress))
+  }
+
+  const explain = (written: string) => {
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: written } })
+    fireEvent.click(screen.getByRole("button", { name: "That is my explanation" }))
+  }
+
+  beforeEach(() => {
+    window.localStorage.clear()
+    forgetHeld()
+  })
+
+  it("asks for no confidence, and says why the control is missing", () => {
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    expect(screen.queryByRole("group", { name: "Confidence" })).toBeNull()
+    expect(screen.getByText(/Nothing to rate here/)).toBeTruthy()
+  })
+
+  it("takes one prompt at a time and requires something written", () => {
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    expect(screen.queryByText(/Derive it from lesson 08/)).toBeNull()
+
+    explain("Their version cannot say which rule chose the outcome.")
+
+    expect(screen.getByText(/Derive it from lesson 08/)).toBeTruthy()
+  })
+
+  it("does not show what you wrote about lesson 08 until you have written this one", () => {
+    held({
+      explanations: {
+        "lesson-08-explain-it-back": [
+          { question: 1, answer: "Stakes and reversibility are independent.", on: "2026-09-01" },
+        ],
+      },
+    })
+
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    expect(screen.queryByText(/Stakes and reversibility are independent/)).toBeNull()
+
+    explain("Their version cannot say which rule chose the outcome.")
+    explain("Every combination has to be reachable.")
+
+    expect(screen.getByText(/Stakes and reversibility are independent/)).toBeTruthy()
+    expect(screen.getByText(/prompt 1, 2026-09-01/)).toBeTruthy()
+  })
+
+  /**
+   * Two ways of having nothing to compare against, and they are different facts
+   * about the reader: one never wrote anything there, the other wrote that they
+   * could not. Only the second is about their understanding, and a blank would
+   * have said both.
+   */
+  it("says which kind of nothing it has, when it has nothing", () => {
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    explain("Their version cannot say which rule chose the outcome.")
+    explain("Every combination has to be reachable.")
+
+    expect(screen.getByText(/this is the one thing here that only you can have put there/)).toBeTruthy()
+  })
+
+  it("says the other kind when the earlier explanation said it could not be given", () => {
+    held({
+      explanations: { "lesson-08-explain-it-back": [{ question: 1, answer: "", on: "2026-09-01" }] },
+    })
+
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    explain("Their version cannot say which rule chose the outcome.")
+    explain("Every combination has to be reachable.")
+
+    expect(screen.getByText(/beyond saying at the time that you could not explain it yet/)).toBeTruthy()
+  })
+
+  it("brings the reader's own words back beside the prompt that asked for them", () => {
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    explain("Their version cannot say which rule chose the outcome.")
+    explain("Every combination has to be reachable.")
+
+    expect(screen.getByText(/Their version cannot say which rule chose/)).toBeTruthy()
+    expect(screen.getByText(/Prompt 2 is the one that transfers/)).toBeTruthy()
+  })
+
+  it("records an explanation that says nothing, rather than refusing to move on", () => {
+    render(<LessonReader lesson={99} parts={ELABORATE} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "I can’t explain this yet" }))
+
+    expect(screen.getByText(/Derive it from lesson 08/)).toBeTruthy()
+  })
+})

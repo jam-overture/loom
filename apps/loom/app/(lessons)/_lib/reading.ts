@@ -107,7 +107,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
 /**
- * The four fields this course writes. One of them is enough.
+ * The five fields this course writes. One of them is enough.
  *
  * The test is deliberately about the *shape* rather than the contents, because
  * `{ lessons: {} }` is a record of somebody who marked a lesson and unmarked it
@@ -115,7 +115,13 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * key that happens to collide. The first may be overwritten and the second may
  * not, and nothing but the keys distinguishes them.
  */
-const RECORD_FIELDS = ["lessons", "sets", "predictions", "corrections"] as const
+const RECORD_FIELDS = [
+  "lessons",
+  "sets",
+  "predictions",
+  "explanations",
+  "corrections",
+] as const
 
 const looksLikeRecord = (value: Record<string, unknown>): boolean =>
   RECORD_FIELDS.some((field) => field in value)

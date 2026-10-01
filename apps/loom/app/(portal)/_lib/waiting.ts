@@ -1,6 +1,7 @@
 import type { Disposition } from "@jam-overture/loom"
 import { describeHoldError, type HeldProposal, type HoldError } from "@jam-overture/loom/write"
 
+import { proposedHref } from "./proposed-view"
 import { screenName } from "./screen-names"
 import { unreadableClause, type UnreadableChange } from "./unreadable-change"
 import type { WaitingTriage } from "./waiting-effect"
@@ -135,6 +136,16 @@ export type WaitingChange = {
   readonly effect: WaitingTriage | undefined
   /** Where the change can actually be answered. */
   readonly href: string
+  /**
+   * Where the change is drawn — the page as it stands beside the page it would
+   * become, with the parts it is about outlined on both.
+   *
+   * A second address rather than a replacement for the one above, because the two
+   * answer different questions and a row of triage owes a reader both. `href` is
+   * the page itself: every other change waiting on it, the outline, the box you
+   * type in. This one is *this* change, and nothing else.
+   */
+  readonly pictureHref: string
 }
 
 export const waitingChange = (
@@ -155,6 +166,7 @@ export const waitingChange = (
   answers: answerOutcomes(held.disposition),
   effect,
   href: `/portal/pages/${held.treeId}`,
+  pictureHref: proposedHref(held.treeId, held.proposalId),
 })
 
 /**

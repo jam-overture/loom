@@ -162,6 +162,29 @@
     --node-label-bg: #1f985e;
     --node-label-text: #ffffff;
 
+    /* ── What a change would do, drawn over the page ──────────────────
+       The outline over a part a held change is about, on the two
+       pictures of `/portal/pages/[treeId]/proposed/[proposalId]`.
+
+       Not a fifth colour between them: these are the disposition inks
+       above, unchanged. A part being taken away is the red a refusal is
+       already drawn in, a part arriving is the green an applied change
+       is already drawn in, and a part that stays on the page with
+       something different about it is the amber of a change still
+       waiting on somebody. A reviewer who has learnt what amber means
+       on a queue card has learnt what it means here for free, and a
+       fourth hue invented for this screen would have taught them
+       nothing.
+
+       The two amber kinds are told apart by the line and not by the
+       colour — a part whose settings changed is where it was, a part
+       that moved is not — because they are the same piece of news at
+       two altitudes, and the legend is what actually names them.
+       ─────────────────────────────────────────────────────────────── */
+    --mark-going-outline: var(--outcome-rejected-text);
+    --mark-arriving-outline: var(--outcome-applied-text);
+    --mark-changed-outline: var(--outcome-awaiting-text);
+
     /* ── Type — 14px base, dense scale ───────────────────────────────
        Deliberately *not* the font pack's `scaleRamp`. That ramp runs
        12→72 because it is sized for pages a visitor reads — a hero
@@ -276,6 +299,36 @@
   .loom-preview [data-loom-selected] {
     outline: 2px solid var(--node-selected-outline);
     outline-offset: 2px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   WHAT WOULD CHANGE — the same decoration, over a page nobody has
+   been served yet. `data-loom-mark` is the portal's, set by
+   `MarkedPage` on whichever parts a held change is about; the offset
+   steps out one pixel further than selection's so that a marked part
+   inside a picked one is still two rings rather than one.
+   ══════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  .loom-marked [data-loom-mark="going"] {
+    outline: 2px dashed var(--mark-going-outline);
+    outline-offset: 3px;
+  }
+
+  .loom-marked [data-loom-mark="arriving"] {
+    outline: 2px solid var(--mark-arriving-outline);
+    outline-offset: 3px;
+  }
+
+  .loom-marked [data-loom-mark="changed"] {
+    outline: 2px solid var(--mark-changed-outline);
+    outline-offset: 3px;
+  }
+
+  .loom-marked [data-loom-mark="moved"] {
+    outline: 2px dashed var(--mark-changed-outline);
+    outline-offset: 3px;
   }
 }
 

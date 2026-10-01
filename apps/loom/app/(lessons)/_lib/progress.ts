@@ -57,6 +57,41 @@ export type Prediction = {
 }
 
 /**
+ * An idea in the reader's own words, and the one thing on this surface with no
+ * confidence rating on it.
+ *
+ * `Explain it back` is the elaboration section, which is one of the seven
+ * principles this course is built on and was the only one with nothing behind
+ * it: a numbered prompt set, rendered as prose, that the reader scrolls past.
+ * The section says *closed book* and, in most lessons, *then compare* — and
+ * there was nothing on the page holding the first or able to offer the second.
+ *
+ * **Why no rating**, since every other input here takes one first and a reader
+ * will notice. A confidence is a prediction about an outcome, and calibration is
+ * that prediction scored against what happened. An explanation has no outcome:
+ * there is no printed answer to it anywhere in this repository and there cannot
+ * be, because the words being asked for are the reader's. A number rated here
+ * could never be scored against anything, so what it would actually measure is
+ * how fluent the explanation felt while it was being written — which is the
+ * illusion `lessons/README.md` opens by naming as the enemy. The honest control
+ * is the one that is missing.
+ *
+ * So an explanation is not an `Attempt` (nothing grades it), and not a
+ * `Prediction` (nothing reveals an answer to it, and it carries no rating). What
+ * it is is a **dated statement of what the reader understood on that day**, kept
+ * so that the next lesson to say *derive this from lesson 08* can hand back what
+ * they wrote when they were in lesson 08 — the one comparison in this course
+ * that no printed answer can supply, and the reason this is stored rather than
+ * merely required.
+ */
+export type Explanation = {
+  readonly question: number
+  /** Empty when the reader said, explicitly, that they could not explain it. */
+  readonly answer: string
+  readonly on: string
+}
+
+/**
  * The same question, answered again on a later day.
  *
  * The schedule's instruction after a miss is one sentence long — *look up only
@@ -90,6 +125,8 @@ export type Progress = {
   readonly sets: Readonly<Record<string, SetProgress>>
   /** Set slug to what was written before the answer existed. */
   readonly predictions: Readonly<Record<string, readonly Prediction[]>>
+  /** Lesson slug to what the reader said the idea was, in their own words. */
+  readonly explanations: Readonly<Record<string, readonly Explanation[]>>
   /** Every re-answer, oldest first. Appended to; nothing here is ever replaced. */
   readonly corrections: readonly Correction[]
 }
@@ -98,6 +135,7 @@ export const EMPTY_PROGRESS: Progress = {
   lessons: {},
   sets: {},
   predictions: {},
+  explanations: {},
   corrections: [],
 }
 
@@ -159,6 +197,18 @@ const readPrediction = (value: unknown): Prediction | undefined => {
   return { question, confidence, on, answer: typeof value["answer"] === "string" ? value["answer"] : "" }
 }
 
+const readExplanation = (value: unknown): Explanation | undefined => {
+  if (!isObject(value)) return undefined
+
+  const question = value["question"]
+  const on = readDay(value["on"])
+
+  if (typeof question !== "number" || !Number.isInteger(question)) return undefined
+  if (on === undefined) return undefined
+
+  return { question, on, answer: typeof value["answer"] === "string" ? value["answer"] : "" }
+}
+
 const readCorrection = (value: unknown): Correction | undefined => {
   if (!isObject(value)) return undefined
 
@@ -215,12 +265,25 @@ export const readProgress = (value: unknown): Progress => {
     }
   }
 
+  const explanations: Record<string, readonly Explanation[]> = {}
+  const rawExplanations = value["explanations"]
+
+  if (isObject(rawExplanations)) {
+    for (const [slug, written] of Object.entries(rawExplanations)) {
+      if (!Array.isArray(written)) continue
+
+      explanations[slug] = written
+        .map(readExplanation)
+        .filter((explanation): explanation is Explanation => explanation !== undefined)
+    }
+  }
+
   const raw = value["corrections"]
   const corrections = Array.isArray(raw)
     ? raw.map(readCorrection).filter((entry): entry is Correction => entry !== undefined)
     : []
 
-  return { lessons, sets, predictions, corrections }
+  return { lessons, sets, predictions, explanations, corrections }
 }
 
 export const setProgress = (progress: Progress, slug: string): SetProgress =>
@@ -283,6 +346,39 @@ export const withPrediction = (
     predictions: {
       ...progress.predictions,
       [slug]: [...existing, prediction].sort((a, b) => a.question - b.question),
+    },
+  }
+}
+
+export const explanationsFor = (progress: Progress, slug: string): readonly Explanation[] =>
+  progress.explanations[slug] ?? []
+
+/**
+ * An explanation, written down. Rewriting one replaces it, on `withPrediction`'s
+ * rule and for the same reason: a reader who came back to the section mid-sitting
+ * is one reader.
+ *
+ * What it deliberately does **not** do is accumulate. A second go at explaining
+ * lesson 09 a month later is a better thing than the first go and nothing here
+ * measures the difference, because there is no grade to compare — so keeping both
+ * would be keeping two documents and calling the older one history. The date
+ * carried is the date of what is held, which is what the comparison downstream
+ * needs to say honestly how old the words it is showing are.
+ */
+export const withExplanation = (
+  progress: Progress,
+  slug: string,
+  explanation: Explanation
+): Progress => {
+  const existing = explanationsFor(progress, slug).filter(
+    (each) => each.question !== explanation.question
+  )
+
+  return {
+    ...progress,
+    explanations: {
+      ...progress.explanations,
+      [slug]: [...existing, explanation].sort((a, b) => a.question - b.question),
     },
   }
 }

@@ -9,7 +9,13 @@ import {
   summariseRecord,
   unpackRecord,
 } from "./record"
-import { EMPTY_PROGRESS, type Attempt, type Correction, type Progress } from "./progress"
+import {
+  EMPTY_PROGRESS,
+  type Attempt,
+  type Correction,
+  type Explanation,
+  type Progress,
+} from "./progress"
 
 /**
  * The rules an import is allowed to have.
@@ -37,6 +43,13 @@ const correction = (question: number, on: string, over: Partial<Correction> = {}
   confidence: 2,
   answer: `re-answer to ${question}`,
   grade: "got-it",
+  on,
+  ...over,
+})
+
+const explanation = (question: number, on: string, over: Partial<Explanation> = {}): Explanation => ({
+  question,
+  answer: `in my own words, ${question}, on ${on}`,
   on,
   ...over,
 })
@@ -193,6 +206,61 @@ describe("saying what an import would do before it does it", () => {
   })
 })
 
+describe("explanations, which replace rather than accumulate", () => {
+  /**
+   * The opposite rule to a correction's, and the reason is that there is no grade
+   * to sort two of these by. Two machines holding two goes at explaining lesson 09
+   * would merge into a document and an older draft of it, with nothing able to say
+   * which was which.
+   */
+  it("keeps the later of two explanations of the same prompt", () => {
+    const merged = mergeRecords(
+      progress({ explanations: { "lesson-09-explain-it-back": [explanation(1, "2026-03-01")] } }),
+      progress({
+        explanations: {
+          "lesson-09-explain-it-back": [explanation(1, "2026-04-01"), explanation(2, "2026-04-01")],
+        },
+      })
+    )
+
+    const kept = merged.explanations["lesson-09-explain-it-back"] ?? []
+
+    expect(kept).toHaveLength(2)
+    expect(kept[0]?.on).toBe("2026-04-01")
+  })
+
+  it("does not move an explanation backwards, whichever file was opened second", () => {
+    const merged = mergeRecords(
+      progress({ explanations: { "lesson-09-explain-it-back": [explanation(1, "2026-04-01")] } }),
+      progress({ explanations: { "lesson-09-explain-it-back": [explanation(1, "2026-03-01")] } })
+    )
+
+    expect(merged.explanations["lesson-09-explain-it-back"]?.[0]?.on).toBe("2026-04-01")
+  })
+
+  it("reports them before applying them, and says nothing is new on a second import", () => {
+    const incoming = progress({
+      explanations: { "lesson-09-explain-it-back": [explanation(1, "2026-04-01")] },
+    })
+
+    expect(describeMerge(EMPTY_PROGRESS, incoming).explanations).toEqual({ added: 1, alreadyHeld: 0 })
+    expect(describeMerge(EMPTY_PROGRESS, incoming).nothingNew).toBe(false)
+
+    const merged = mergeRecords(EMPTY_PROGRESS, incoming)
+
+    expect(describeMerge(merged, incoming).explanations).toEqual({ added: 0, alreadyHeld: 1 })
+    expect(describeMerge(merged, incoming).nothingNew).toBe(true)
+  })
+
+  it("is history worth carrying, so a record holding only explanations is not empty", () => {
+    expect(
+      isEmptyRecord(
+        progress({ explanations: { "lesson-09-explain-it-back": [explanation(1, "2026-04-01")] } })
+      )
+    ).toBe(false)
+  })
+})
+
 describe("what the record page may show", () => {
   it("counts what is at stake without holding an answer", () => {
     const summary = summariseRecord(
@@ -214,6 +282,7 @@ describe("what the record page may show", () => {
       sets: 1,
       attempts: 3,
       predictions: 0,
+      explanations: 0,
       corrections: 1,
       confidentAndWrong: 1,
       firstDay: "2026-03-01",
@@ -222,6 +291,27 @@ describe("what the record page may show", () => {
     })
 
     expect(JSON.stringify(summary)).not.toContain("answer to")
+  })
+
+  /**
+   * An explanation is a day the reader worked, and the summary is what says how
+   * much a cleared browser would cost. Leaving them out of the day set would
+   * report a reader who only ever wrote explanations as having nothing at stake.
+   */
+  it("counts explanations, and the days they were written on", () => {
+    const summary = summariseRecord(
+      progress({
+        explanations: {
+          "lesson-09-explain-it-back": [explanation(1, "2026-03-11"), explanation(2, "2026-03-11")],
+          "lesson-10-explain-it-back": [explanation(1, "2026-03-14")],
+        },
+      })
+    )
+
+    expect(summary.explanations).toBe(3)
+    expect(summary.days).toBe(2)
+    expect(summary.firstDay).toBe("2026-03-11")
+    expect(summary.lastDay).toBe("2026-03-14")
   })
 
   it("has no dates to report for an empty record", () => {

@@ -188,13 +188,31 @@ export const WaitingCard = ({
       * draft had two black buttons on one screen, either of which a reader
       * could reasonably have read as "apply", on the one surface whose whole
       * purpose is that nobody approves a change without looking at it.
+      *
+      * ## Which of the two is the button, 30 September
+      *
+      * The page was the only place to go when this card was written, and the
+      * note above still describes why going somewhere is the whole of what this
+      * row does. What changed is that there is now a screen which draws *this
+      * change* — the page as it stands beside the page it would become, with the
+      * parts it is about outlined on both — and that is a better destination for
+      * a row of triage than the page is.
+      *
+      * The page stays reachable, as a plain link rather than as a second button,
+      * and it is genuinely a different errand: it is where every other change
+      * waiting on that page is, and where a reader goes to ask for something
+      * instead of answering this. Two bordered shapes would have made the reader
+      * choose between two nouns before they knew what either held.
       */}
-    <div>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <Link
-        href={change.href}
+        href={change.pictureHref}
         className="bg-neutral text-neutral-ink border-neutral-edge hover:bg-surface-hover inline-block rounded-md border px-3 py-1.5 text-xs no-underline"
       >
-        Look at it on the page →
+        See what it would look like →
+      </Link>
+      <Link href={change.href} className="text-xs">
+        Look at it on the page
       </Link>
     </div>
 
