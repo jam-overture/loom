@@ -38889,3 +38889,48 @@ demonstration than the one it would replace.
 The honest alternative is to stop claiming it. Nothing on the page currently
 promises a held undo in words, so there is no copy to correct today; this entry
 exists so that whoever writes that copy knows it is not demonstrable here.
+
+---
+## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — **nothing is broken; this is why a sweep was needed at all**
+
+`voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
+no more than 35 words in a field a reader scans. Both run over
+`SCANNED_PROPS` — `title`, `body`, `label`, `caption`, `value`, `eyebrow` —
+which are the props a primitive is given.
+
+**The site's paragraphs are not props.** They are text nodes built by `prose()`,
+and no voice rule reads them. Of the 38 strings rewritten in today's sweep,
+the great majority were prose, including every one of the four worst sentences
+the maintainer quoted back on 1 October.
+
+### The part that is not just style
+
+One of those paragraphs was **factually stale**, and had been for a day:
+
+> *"The ready-made changes on the front door do not send anything at all."*
+
+The band it names moved to `/how-it-works` on 30 September. The band's own
+tests moved with it. This sentence was on a third page, naming the band in
+prose, and nothing in the repository connects those two facts. A reader
+following it lands on a page with no such thing on it.
+
+### Why extending the rule is not obviously right
+
+The 35-word limit is a *scanning* rule and would be wrong on a paragraph — a
+body paragraph is allowed to be a paragraph. The em-dash rule would extend
+cleanly today: after this sweep there is exactly **one em dash left in rendered
+copy site-wide**, and it is in the maintainer's own hero lead. A rule that has
+to name one sentence as an exception is a rule that will be edited rather than
+obeyed, so it was not written today.
+
+### What would actually close it
+
+The staleness is the catchable half, and it is not a voice problem. A paragraph
+that names a page (*"the front door"*, *"the How it works page"*) is making a
+claim about where something lives, and `SITE_ROUTES` already knows where things
+live. A check that reads rendered prose for the site's own page names and holds
+them against the page that actually carries the band would have caught this one
+the hour it broke.
