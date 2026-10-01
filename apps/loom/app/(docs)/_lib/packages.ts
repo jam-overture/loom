@@ -5,7 +5,9 @@
  * **The plain version.** Loom ships as two packages. `@jam-overture/loom` is the
  * framework — the tree, the change model, the Gate, and the adapters behind
  * their own doors. `@jam-overture/loom-primitives` is the starter library: the
- * ninety-eight primitives every example on this site is built from.
+ * primitives every example on this site is built from. How many there are is a
+ * number no file states — `_lib/counts.ts` reads it off the library, because the
+ * sentence this one used to carry said ninety-eight while there were ninety-nine.
  *
  * They were one package until 27 September, and the seam is the whole reason
  * this file exists.

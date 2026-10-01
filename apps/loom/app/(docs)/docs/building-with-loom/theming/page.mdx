@@ -1,5 +1,6 @@
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { BrandColor } from "@/app/(docs)/_components/brand-color"
+import { Count } from "@/app/(docs)/_components/count"
 import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
 import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
 import { MountedGround, ThemeMount } from "@/app/(docs)/_components/theme-mount"
@@ -62,8 +63,8 @@ a delta that touches one node.
 
 ## Every palette declares every slot
 
-A palette is not a few brand colors. It is **seventeen named slots, all of them
-filled**, and the completeness is the point rather than bureaucracy: a tree
+A palette is not a few brand colors. It is **<Count of="palette-slots" as="word" />
+named slots, all of them filled**, and the completeness is the point rather than bureaucracy: a tree
 themed with one palette has to be re-themable with any other, and a slot some
 palette left undefined would be a hole that only shows up on the page that used
 it.
@@ -173,7 +174,8 @@ and you are done.
 One thing to know before you do: each list **replaces** the starter set rather
 than adding to it. Register two palettes and two palettes is what a proposal may
 name — which is usually what a deployment wants, because shipping your brand
-plus twenty-one others is a menu, not a design system. Spread `STARTER_PALETTES`
+plus the other <Count of="starter-palettes" as="word" /> palettes is a menu, not
+a design system. Spread `STARTER_PALETTES`
 in if you want both.
 
 ```ts

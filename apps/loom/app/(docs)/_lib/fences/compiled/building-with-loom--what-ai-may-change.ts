@@ -13,13 +13,13 @@ import type { CompositionRuntime } from "@jam-overture/loom"
 
 import { clock, events, idFactory, interpreter } from "../context/building-with-loom--what-ai-may-change"
 
-// page.mdx:20 — a program
+// page.mdx:21 — a program
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
   protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],
 })
 
-// page.mdx:160 — a program
+// page.mdx:162 — a program
 const runtime: CompositionRuntime = {
   interpreter,
   policySource: fixedPolicy(policy),

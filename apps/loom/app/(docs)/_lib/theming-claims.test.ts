@@ -1,14 +1,10 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import {
-  createThemeRegistry,
-  PALETTE_SLOTS,
-  RAMP_STEPS,
-  STARTER_PALETTES,
-  TEXT_CONTRAST_MINIMUM,
-} from "@jam-overture/loom"
+import { createThemeRegistry, RAMP_STEPS, TEXT_CONTRAST_MINIMUM } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
+
+import { siteCount } from "./counts"
 
 /**
  * The numbers *Making it look like yours* states in prose, held against the
@@ -16,10 +12,21 @@ import { describe, expect, it } from "vitest"
  *
  * Three blocks on that page are generated and cannot drift. The prose around
  * them can, and does not have the decency to fail while doing it — "seventeen
- * named slots" stays a sentence long after a slot is added. So the sentences
- * that carry a figure are read back off the file here and checked, which is the
- * cheapest way to let a page speak in words rather than in components without
- * becoming the copy that rots.
+ * named slots" stays a sentence long after a slot is added.
+ *
+ * **Two of the sentences that used to be checked here are now produced.** This
+ * file read the page back and asserted the spelled figure was the right one,
+ * which kept the number true and made the page a lock: a runtime that grew an
+ * eighteenth slot reddened `pnpm verify` for four surfaces until somebody
+ * retyped a word. That is the 16 September finding, and the remedy it names is
+ * that the page may not say the number. `_lib/counts.ts` produces both of them
+ * now, spelled, and `counts.test.ts` sweeps every page for a number standing in
+ * front of a counted noun — so the assertions below are that the page **asks**,
+ * which cannot be right-today in the way the old pair was.
+ *
+ * `RAMP_STEPS` stays pinned, and the distinction is the finding's own: a ramp
+ * has eight steps because eight is the shape of a ramp, not because somebody
+ * put eight things in a list. It is a constant the prose may name.
  *
  * Only figures. Nothing here holds the page's argument, its tone or its
  * headings — a test that asserted the wording would be a test that had to be
@@ -32,11 +39,16 @@ const page = readFileSync(
   "utf8"
 )
 
-/** Written-out numbers, because the page is prose and prose spells them. */
+/**
+ * Written-out numbers, because the page is prose and prose spells them.
+ *
+ * One entry left. `spellOut` in `_lib/counts.ts` is the general version and the
+ * two figures that needed it have moved there; this stays a lookup because a
+ * test that spelled its expectation with the function the page spells it with
+ * would be comparing the module to itself.
+ */
 const WORDS: Readonly<Record<number, string>> = {
   8: "eight",
-  17: "seventeen",
-  21: "twenty-one",
 }
 
 const wordFor = (value: number): string => {
@@ -50,8 +62,8 @@ const wordFor = (value: number): string => {
 }
 
 describe("what the theming page claims about the vocabulary", () => {
-  it("says how many slots a palette declares, and is right", () => {
-    expect(page).toContain(`${wordFor(PALETTE_SLOTS.length)} named slots`)
+  it("asks for the number of slots rather than spelling it", () => {
+    expect(page).toContain(siteCount("palette-slots").rendered)
   })
 
   it("says how many steps the ramps have, and is right", () => {
@@ -59,13 +71,16 @@ describe("what the theming page claims about the vocabulary", () => {
   })
 
   /**
-   * The one that reads as an aside and is the most load-bearing: the sentence
-   * about registering your own says shipping the starter set alongside it is
-   * "your brand plus twenty-one others". Eighteen of those are derived, so the
-   * count moves whenever `palettes.ts` grows.
+   * The one that reads as an aside and was the most load-bearing: the sentence
+   * about registering your own weighs the starter set against your brand, and
+   * most of that set is derived — so the count moved whenever `palettes.ts`
+   * grew, and the page had to be edited to keep up. It now names the noun it is
+   * counting, which is what puts it inside the sweep: the old wording was "your
+   * brand plus twenty-one others", and a bare number in front of *others* is
+   * one no check on this site can find.
    */
-  it("says how many palettes come registered, and is right", () => {
-    expect(page).toContain(`${wordFor(STARTER_PALETTES.length)} others`)
+  it("asks for the number of registered palettes rather than spelling it", () => {
+    expect(page).toContain(siteCount("starter-palettes").rendered)
   })
 
   it("quotes the contrast bar as the runtime sets it", () => {

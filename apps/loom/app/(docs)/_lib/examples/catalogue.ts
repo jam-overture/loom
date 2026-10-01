@@ -3,6 +3,7 @@ import {
   buildSlot,
   buildText,
   createTree,
+  PALETTE_SLOTS,
   sequentialIdFactory,
   SUBMIT_PROP_KEY,
   type IdFactory,
@@ -12,6 +13,9 @@ import {
 } from "@jam-overture/loom"
 import { compositionById } from "@jam-overture/loom/primitives"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
+
+import { bandNodesIn } from "../compositions"
+import { spellOut } from "../counts"
 
 /**
  * Every example on the site, as a tree.
@@ -325,9 +329,11 @@ const derivedTheme = (): LoomTree => {
       props: { tone: "surface", padding: "loose" },
       children: [
         heading(ids, 2, "A palette nobody painted"),
-        prose(ids, "Three hues went in. Seventeen slots came out, each measured against the ink it has to carry.", {
-          tone: "muted",
-        }),
+        prose(
+          ids,
+          `Three hues went in. ${spellOut(PALETTE_SLOTS.length, "Word")} slots came out, each measured against the ink it has to carry.`,
+          { tone: "muted" }
+        ),
         buildElement(ids, {
           type: "loom.action",
           props: { href: "https://example.com/archive", variant: "primary", scale: "small" },
@@ -444,7 +450,7 @@ const band = (ids: IdFactory, id: string): LoomNode => {
   return composition.build(ids)
 }
 
-/** One band, whole: forty-four nodes that arrived as one operation. */
+/** One band, whole: the nodes of a pricing table, arrived as one operation. */
 const aBandDroppedInWhole = (): LoomTree => {
   const ids = sequentialIdFactory("bandwhole")
 
@@ -526,8 +532,7 @@ const entries: readonly DocsExample[] = [
   {
     id: "a-band-dropped-in-whole",
     title: "A pricing band, built by the library",
-    caption:
-      "Forty-four nodes, none of them written here: the starter library built this subtree and it arrived on the page as a single insert. Ask to move “Most popular” onto another plan and watch it be one operation.",
+    caption: `${spellOut(bandNodesIn("pricing"), "Word")} nodes, none of them written here: the starter library built this subtree and it arrived on the page as a single insert. Ask to move “Most popular” onto another plan and watch it be one operation.`,
     build: aBandDroppedInWhole,
   },
   {
