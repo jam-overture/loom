@@ -166,7 +166,7 @@ The guide exists for broadcasting and will need the capture half. Lessons and
 marketing follow the same rule: **after the shape settles, not during.** Writing
 them while step 3 is in flight means writing them twice.
 
-### 6. What a signal means, joined on the server · `Loom signals` · **approved**
+### 6. What a signal means, joined on the server · `Loom signals` · **done, 1 October**
 
 A batch names a node, a tree and a revision. The registry knows what that node
 *is* — the part it plays (0114), which of its props a reader reads (0122) — and
@@ -182,6 +182,40 @@ which copy a reader actually reached.
 **Not this:** sending the metadata from the browser. 0167 already refused
 ancestry on the high-volume kinds — payload multiplied by page depth, to buy what
 the server could derive — and the same argument covers roles, parts and copy.
+
+**Done.** `pageReadingOf(tree, tallies, declarations)` in `src/signals/parts.ts`
+is the join: every element node of a revision in reading order, each with the
+role its type declared, the words it says itself, and the counters filed against
+it or nothing. Four things were settled in the building and are in
+[0212](../decisions/0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md):
+
+- **The join is at read time, not at rollup time.** A declaration is a fact about
+  the library, not about a window of reading, so stamping it onto a stored row
+  bakes today's silence into counters that outlive it — and the correction is
+  impossible once the raw window has expired. Read-time means the day
+  `src/primitives/` declares `copy` across itself, every counter already stored
+  reinterprets.
+- **The tree is what makes silence a measurement.** A part nobody reached has no
+  row, so no reading of the counters alone can say a part was *skipped*. The
+  element nodes of the revision are the universe — a text or slot node carries no
+  identity attributes, so no signal can ever name one — and against that universe
+  absence is an answer. This is the half of step 6 that works today and needs no
+  declaration from anybody.
+- **Three standings, not two.** `read`, `skipped`, and `unknown` for a window
+  with no views at all or a part that reported something other than a view. A
+  two-valued reading has to call a page nobody opened a page everybody skipped.
+- **A grouped row adds occurrences and never view counts.** `views`, `reached`
+  and `engaged` are absent from every per-role total: distinctness cannot be
+  added (0147), and `engaged` would count one press twice, once on the control
+  and once on the band it was inside (0167). A role row counts *parts* read,
+  skipped and unknown instead.
+
+**It answers thinly today, and the thinness is in another lane.** Nothing in
+`src/primitives/` declares `role` or `copy`, so every part comes back
+`role: null` with its string props named in `copy.unread` — 0114's and 0122's
+stated bargain, where *nobody has said* is a different answer from *there are
+none*. Filed for `Loom primitives`, which now has a second consumer and a
+concrete payoff.
 
 ### 7. Region, as an aggregate and nothing else · `Loom signals` · **approved**
 
