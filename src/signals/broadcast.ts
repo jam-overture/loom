@@ -48,7 +48,7 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  *
  * **A completion is a form the browser let go.** Nothing else on the page is a
  * finish a reader can be said to have reached, and nothing else is observable
- * without asking the network how it went (0209).
+ * without asking the network how it went (0211).
  *
  * **It keeps up with a page that changes.** Nodes that arrive after it started
  * are watched and nodes that leave stop counting, so a band behind a Suspense

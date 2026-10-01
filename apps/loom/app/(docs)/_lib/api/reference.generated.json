@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": true,
@@ -4405,7 +4405,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4451,7 +4451,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -5354,10 +5354,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 180,
+      "files": 184,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5816,7 +5816,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -6407,7 +6407,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6635,7 +6635,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7052,7 +7052,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7406,7 +7406,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7539,7 +7539,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 13,
         "widest": false,
@@ -8302,7 +8302,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8445,7 +8445,7 @@
       "files": 12,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -8505,7 +8505,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9039,7 +9039,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9113,7 +9113,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9547,10 +9547,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 51,
+      "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1107,
+        "packageNames": 1115,
         "otherDoors": 15,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9595,6 +9595,69 @@
               "name": "describeTelemetryJournalContract",
               "kind": "function",
               "signature": "const describeTelemetryJournalContract: (name: string, makeJournal: () => Promise<TelemetryJournal> | TelemetryJournal) => void",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "testing/model-contract",
+          "title": "Model contract",
+          "summary": "One suite, run against every `ModelClient`.",
+          "symbols": [
+            {
+              "name": "ModelSituation",
+              "kind": "type",
+              "signature": "type ModelSituation = \n/** The service answered, with this text, served by this model. */\n\"answers\"\n/** The service answered, and there was nothing in the reply that was text. */\n | \"answers-without-text\"\n/** The answer stopped at the output ceiling, mid-sentence. */\n | \"truncates\"\n/** The model declined to answer this content. */\n | \"refuses\"\n/** A credential, entitlement or billing problem: 401, 402, 403. */\n | \"refuses-the-caller\"\n/** The request itself is wrong and would fail again unchanged: 400, 404, 413, 422. */\n | \"refuses-the-request\"\n/** Busy now, fine later: 408, 409, 429, 500, 503. */\n | \"asks-for-later\"\n/** No response at all — a closed socket, a DNS failure, a TLS error. */\n | \"never-answers\";",
+              "truncated": false,
+              "summary": "What happened, in terms every vendor has rather than one vendor's."
+            },
+            {
+              "name": "MODEL_SITUATIONS",
+              "kind": "value",
+              "signature": "const MODEL_SITUATIONS: readonly ModelSituation[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "CONTRACT_REPLY",
+              "kind": "value",
+              "signature": "const CONTRACT_REPLY: string",
+              "truncated": false,
+              "summary": "The text this suite sends through, and the model it says served it."
+            },
+            {
+              "name": "CONTRACT_SERVED_BY",
+              "kind": "value",
+              "signature": "const CONTRACT_SERVED_BY = \"a-model-that-served-it\"",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "ModelSituationClient",
+              "kind": "type",
+              "signature": "type ModelSituationClient = (() => ModelClient | Promise<ModelClient>) | \"not-expressible\";",
+              "truncated": false,
+              "summary": "A client wired to behave as one situation does, or a statement that this vendor has no such situation."
+            },
+            {
+              "name": "ModelClientContract",
+              "kind": "type",
+              "signature": "type ModelClientContract = Readonly<Record<ModelSituation, ModelSituationClient>>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "contractRequest",
+              "kind": "function",
+              "signature": "const contractRequest: () => ModelRequest",
+              "truncated": false,
+              "summary": "The request every case sends. Fixed, because none of these turn on its content."
+            },
+            {
+              "name": "describeModelClientContract",
+              "kind": "function",
+              "signature": "const describeModelClientContract: (name: string, contract: ModelClientContract) => void",
               "truncated": false,
               "summary": ""
             }

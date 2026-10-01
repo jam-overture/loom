@@ -39183,7 +39183,7 @@ happens when the version is too far back to reach.
 **Filed by:** `Loom signals` · **Owned by:** `Loom docs` · **Status:** open —
 one paragraph, and it is the one that stops the kind being misread
 
-`completed` landed today (0209), so */docs/the-runtime/what-your-readers-do*
+`completed` landed today (0211), so */docs/the-runtime/what-your-readers-do*
 does exactly what it was built to do: `produceApproved` goes empty, the
 announcement block renders `null`, and the row moves into the vocabulary table.
 That machinery is right and nothing about it needs changing.
@@ -39205,7 +39205,7 @@ anything was completed anywhere — and the row that is left says only what it
 does mean. A reader who builds a conversion report on it will read the word and
 not the gap.
 
-**The gap is wider than that sentence says, and 0209 widened it.** The
+**The gap is wider than that sentence says, and 0211 widened it.** The
 broadcaster reports a completion only when nothing on the page called
 `preventDefault`, so a form posted with `fetch` — which is most forms in a
 client-rendered app — reports **nothing at all**. A deployment reading zero
@@ -39218,7 +39218,7 @@ one, carrying both halves — not a server's acceptance, and not a submission th
 page cancelled. The shape is already there; it is which list it is read from.
 
 **Nothing is blocked.** Both facts are in `signal.ts`'s module documentation and
-in 0209, so a reader who gets as far as the source finds them.
+in 0211, so a reader who gets as far as the source finds them.
 
 ---
 
@@ -39233,7 +39233,7 @@ until somebody decides what it asks about. The comment names the moment exactly
 — *"the day it lands this fails — which is the moment somebody can still decide
 whether a form being submitted is a thing this site wants to hear about"*.
 
-`completed` landed today (0209) and the alarm fired. **This lane answered it,
+`completed` landed today (0211) and the alarm fired. **This lane answered it,
 which is a cross-lane edit and is why this entry exists.** The answer is
 `COMPLETION_TYPES = []`: nothing under `(marketing)` renders a `loom.form` or a
 `loom.field`, so there is no subject on this site for the kind, and an empty
@@ -39262,7 +39262,7 @@ which would then be the alarm.
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
 additive, and it is the number the screen was arguing towards
 
-`ReaderTally` gained `completions` today (0209): times a form inside a node was
+`ReaderTally` gained `completions` today (0211): times a form inside a node was
 submitted and the browser let it go. It is the first counter on that row about a
 reader **finishing** rather than a reader looking, and `/portal/readers` renders
 the other seven.
@@ -39296,7 +39296,7 @@ screen is correct today and incomplete rather than wrong.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` · **Status:** open —
 a question for the maintainer before it is a unit of work
 
-0209 settled that a `completed` is a `submit` the page did not cancel. For the
+0211 settled that a `completed` is a `submit` the page did not cancel. For the
 starter library that is exactly right: `loom.form` renders a native
 `<form action method>` with no handler, so Loom's own forms report normally and
 the counter is honest.
@@ -39304,7 +39304,7 @@ the counter is honest.
 For a host's own form it is a hole. A page that posts with `fetch` calls
 `preventDefault`, so the broadcaster sees a cancelled submit and reports
 nothing — and from the page's side a cancelled submit and a failed one are the
-same event, which is why 0209 refused to report it. The consequence is that a
+same event, which is why 0211 refused to report it. The consequence is that a
 deployment can have conversions and see zero, with nothing distinguishing that
 from nobody converting.
 
@@ -39317,7 +39317,7 @@ from nobody converting.
    than an afternoon: rule 3 refuses measurement as a **prop in the tree** so a
    proposal cannot write it, and a host's own code is not a proposal — but the
    distinction should be written down before it is relied on.
-2. **Report every `submit`, cancelled or not.** Rejected in 0209 and should stay
+2. **Report every `submit`, cancelled or not.** Rejected in 0211 and should stay
    rejected: it counts rejected input as conversion, permanently (0158).
 3. **Watch for the page's own success signal** — a navigation, a DOM change, a
    `fetch` wrapper. The last is the broadcaster reaching outside the page it was

@@ -183,7 +183,7 @@ describe("rollUp", () => {
    * the node itself, and a band is never the node anybody pressed.
    */
   /**
-   * The conversion counter (0209). Everything above it counts a reader looking;
+   * The conversion counter (0211). Everything above it counts a reader looking;
    * this one counts a reader finishing.
    */
   describe("completions", () => {

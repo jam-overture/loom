@@ -77,7 +77,7 @@ call inside a pull request.
    rolled up and expired. Retention is per-deployment configuration with a short
    default, never a constant (0146).
 6. **The vocabulary stays closed.** Five kinds, `completed` having landed on
-   1 October ([0209](../decisions/0209-a-completion-is-a-form-the-browser-let-go.md)).
+   1 October ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
    A sixth is a record.
 
 ## The plan, in order
@@ -119,7 +119,7 @@ one addition that genuinely threatens rule 4. If it is ever wanted it should be
 *hovered with intent* — dwell-thresholded — and it needs its own argument.
 
 **Done**, and three things were settled in the building that the step did not
-say ([0209](../decisions/0209-a-completion-is-a-form-the-browser-let-go.md)).
+say ([0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md)).
 A completion is a `submit` the page did not cancel, which is the whole of what a
 browser can attest — so a form posted with `fetch` and cancelled reports
 nothing, deliberately. The cancellation is read in a microtask after the

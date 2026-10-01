@@ -103,7 +103,7 @@ const withinSchema = z.array(signalAddressSchema).readonly()
  * does only once constraint validation has passed — and that no handler called
  * `preventDefault`. A page that posts with `fetch` and cancels the native
  * submit reports nothing here, which is the honest answer, because from the
- * page's side a cancelled submit and a failed one look identical (0209).
+ * page's side a cancelled submit and a failed one look identical (0211).
  *
  * The last three are `DELEGATED_READER_SIGNAL_KINDS`: what a reader aimed at is
  * a control or a form, and the region it sits in is a question nothing else can

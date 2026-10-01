@@ -1,8 +1,15 @@
-# 0209 — A completion is a form the browser let go, and it carries the bands it was the end of
+# 0211 — A completion is a form the browser let go, and it carries the bands it was the end of
 
 **Status:** Accepted
 **Date:** 2026-10-01
 **Section:** §6 — Reader signals
+
+> **Renumbered on 2026-10-01**, from 0209, when the branch that carried it
+> (#466) was merged. `main` had meanwhile accepted a different 0209 — *what an
+> adapter owes the runtime is a suite, not a sentence* (#462) — and two records
+> sharing a number is fatal (0097). 0210 was taken by #465, which merged first,
+> so this record is 0211. It was written on 1 October and nothing in it changed
+> but its number; the citations on the branch were updated with it.
 
 ## Context
 

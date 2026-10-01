@@ -20,7 +20,7 @@ through the whole pipeline rather than stopped at the schema.
 | Live counter | `ReaderReadings.completions`, and a column on `NodeReading` |
 | Conversion rate | a `FunnelPair` ending in `completed` — **no new shape was needed** |
 | Browser cost | **+281 bytes minified, +88 gzipped** |
-| Record | [0209](../decisions/0209-a-completion-is-a-form-the-browser-let-go.md) |
+| Record | [0211](../decisions/0211-a-completion-is-a-form-the-browser-let-go.md) |
 
 The thing worth noticing is the last row of that table but one. A funnel end
 already names a kind, so the day `completed` exists, *of the 40 views that
@@ -31,7 +31,7 @@ waiting for a word.
 
 ## Decisions I took that the step did not specify
 
-Three, and they are in 0209 with the alternatives. In short:
+Three, and they are in 0211 with the alternatives. In short:
 
 **1. A completion is a `submit` the page did not cancel.** A browser fires
 `submit` only once constraint validation has passed, so the event is the
@@ -135,7 +135,7 @@ minimal, each with its own entry in `FINDINGS.md`.
 
 ## Records, findings, plan
 
-- **Added:** decision **0209**, *A completion is a form the browser let go, and
+- **Added:** decision **0211**, *A completion is a form the browser let go, and
   it carries the bands it was the end of*. Accepted — `docs/signals.md` already
   approved the kind and nothing here contradicts an accepted record. Index
   regenerated. The number is the next free on `main`; #462 also claims 0209, so
