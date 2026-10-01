@@ -51,11 +51,11 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  *
  * | | widest today | ceiling | at |
  * | --- | --- | --- | --- |
- * | a band read straight down | 101 — `/what-you-run`'s *What this page counts* | 120 | 84% |
- * | one cell of a run | 94 — the front door's longest question | 110 | 85% |
- * | a band of cells | 247 — the front door's *Questions* | 300 | 82% |
- * | a page | 1,143 — the front door | 1,500 | 76% |
- * | the site | 2,499 | 3,300 | 76% |
+ * | a band read straight down | 99 — `/what-you-run`'s *What this page counts* | 120 | 82% |
+ * | one cell of a run | 86 — the front door's longest question | 110 | 78% |
+ * | a band of cells | 258 — the front door's *Questions* | 300 | 86% |
+ * | a page | 1,151 — the front door | 1,500 | 77% |
+ * | the site | 2,512 | 3,300 | 76% |
  *
  * **The split between a plain band and a band of cells is the measurement that
  * made this soundly checkable rather than a number somebody liked.** The first
@@ -102,9 +102,9 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  *
  * What it genuinely does not see is **scroll length**, and that is filed rather
  * than claimed. Photographed on a production build of this branch at 1280, the
- * front door is **5,207px** tall — 5.8 of the harness's 900px screens — against
- * 4,688px for `/how-it-works` and 2,783px for `/what-you-run`. Across the three
- * pages that is 162 to 197 words a screen, which is close enough to call words
+ * front door is **5,234px** tall — 5.8 of the harness's 900px screens — against
+ * 4,688px for `/how-it-works` and 2,808px for `/what-you-run`. Across the three
+ * pages that is 160 to 198 words a screen, which is close enough to call words
  * a stand-in for scroll at page scale. **Per band it is not**: the hero says 67
  * words in 0.89 of a screen while a rail of five says 222 in 1.12, so the same
  * word buys two and a half times the height depending on the band it is in. A
@@ -160,6 +160,16 @@ const FEWEST_WORDS_ON_THE_SITE = 1_500
  * since landed, which took the page ceiling from 91% used to 76% and left
  * every other figure here unchanged, and this file did not have to move. A band
  * crossing between two pages is exactly the edit a budget should not punish.
+ *
+ * **Then `#469` landed too — a copy pass over the whole site — and it is the
+ * better evidence of the two, because this file had never seen it.** Every
+ * ceiling held, and the figures it moved are the interesting part: the widest
+ * cell fell from 94 words to 86 and the widest plain band from 101 to 99, while
+ * the widest *band of cells* **grew from 247 to 258**, taking it from 82% of its
+ * ceiling to 86%. A pass whose stated job was to make the site read better out
+ * loud still added eleven words to the band nearest a limit. That is precisely
+ * the drift no reviewer sees in a diff, measured rather than supposed, on the
+ * second day this file existed.
  */
 const A_CEILING_IS_BINDING_ABOVE = 0.6
 

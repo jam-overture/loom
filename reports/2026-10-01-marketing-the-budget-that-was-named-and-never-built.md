@@ -11,7 +11,7 @@ recorded in the ledger as **already there**.
 
 This branch builds it.
 
-![the front door, full page at 1280 — 5,207px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.png)
+![the front door, full page at 1280 — 5,234px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.png)
 
 ---
 
@@ -65,15 +65,15 @@ is the whole of why the unit is shaped the way it is:
 
 | band | words | laid out as |
 | --- | --- | --- |
-| `/what-you-run` — *What this page counts* | **101** | read straight down |
-| `/how-it-works` — *End to end* | 123 | a rail of 5 rungs |
-| `/` — *Using it* | 154 | a row of 4 |
-| `/` — *What this is for* | 159 | a mosaic of 4 |
-| `/` — *See it happen* | 217 | a rail of 5 |
-| `/` — *Questions* | **247** | 5 questions |
+| `/what-you-run` — *What this page counts* | **99** | read straight down |
+| `/how-it-works` — *End to end* | 122 | a rail of 5 rungs |
+| `/` — *Using it* | 152 | a row of 4 |
+| `/` — *What this is for* | 158 | a mosaic of 4 |
+| `/how-it-works` — *See it happen* | 218 | a rail of 5 |
+| `/` — *Questions* | **258** | 5 questions |
 
 Across three pages and both deployments, **a band a reader reads straight down
-never exceeds 101 words, while a band laid out as cells reaches 247.** That is
+never exceeds 99 words, while a band laid out as cells reaches 258.** That is
 not drift, it is geometry: four cards carry four bodies of about sixty words and
 a reader meets one at a time. One ceiling over both would have to be loose
 enough for the row, which makes it meaningless for the paragraph.
@@ -83,12 +83,12 @@ judgment — the headroom:
 
 | | widest today | ceiling | at |
 | --- | --- | --- | --- |
-| a band read straight down | 101 | **120** | 84% |
-| one cell of a run | 94 | **110** | 85% |
-| a band of cells | 247 | **300** | 82% |
-| a page | 1,143 (the front door) | **1,500** | 76% |
-| the site | 2,499 | **3,300** | 76% |
-| the site, at least | 2,499 | **1,500** floor | — |
+| a band read straight down | 99 | **120** | 82% |
+| one cell of a run | 86 | **110** | 78% |
+| a band of cells | 258 | **300** | 86% |
+| a page | 1,151 (the front door) | **1,500** | 77% |
+| the site | 2,512 | **3,300** | 76% |
+| the site, at least | 2,512 | **1,500** floor | — |
 
 **The site's ceiling is the one number the maintainer set himself.** 3,300 is
 25% of the 13,208 words measured on 26 September — the strict end of *"60–75%
@@ -175,11 +175,32 @@ chosen**:
 into a test of it.** `main` moved to `#464` and `#462`, this branch merged it in,
 and the re-measurement matched the prediction exactly: the page figure went from
 91% of its ceiling to 76%, every other figure was unchanged, and **no ceiling
-had to move.** The figures in this report and in `budget.test.ts` are the
-post-merge ones.
+had to move.**
 
-That is the margin earning itself rather than being argued for, and it is why
-the binding fraction is three fifths rather than something tighter.
+### And then `#469` landed, which is the better test of the two
+
+`Loom merge` brought five more commits onto this branch, among them **`#469` — a
+copy pass over the whole marketing site.** This file had never seen that copy,
+and nobody writing it was thinking about a budget. Every ceiling held, and what
+moved is the interesting part:
+
+| | before `#469` | after | ceiling |
+| --- | --- | --- | --- |
+| a plain band | 101 | **99** | 120 |
+| one cell | 94 | **86** | 110 |
+| a band of cells | 247 | **258** | 300 |
+| a page | 1,143 | **1,151** | 1,500 |
+| the site | 2,499 | **2,512** | 3,300 |
+
+**A pass whose stated job was to make the site read better out loud added eleven
+words to the band nearest a limit**, taking *Questions* from 82% of its ceiling
+to 86%. Nothing is over budget and nothing needed changing. But that is the
+drift no reviewer sees in a diff — measured rather than supposed, on the second
+day this file existed, by an edit made for an unrelated and good reason.
+
+All figures in this report and in `budget.test.ts` are the post-`#469` ones. The
+margin earning itself twice in a day is why the binding fraction is three fifths
+rather than something tighter.
 
 **The one-word difference in the total is the useful fact.** A band moved
 between two pages and the site's copy was conserved almost exactly, so a
@@ -197,9 +218,9 @@ Measured on a production build at 1280:
 
 | page | words | height | screens at 900 | words a screen |
 | --- | --- | --- | --- | --- |
-| `/` | 1,143 | **5,207px** | 5.79 | 197 |
-| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
-| `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
+| `/` | 1,151 | **5,234px** | 5.82 | 198 |
+| `/how-it-works` | 862 | 4,688px | 5.21 | 165 |
+| `/what-you-run` | 499 | 2,808px | 3.12 | 160 |
 
 At page scale the two track within about 1.2×. **Per band they do not**: the
 hero spends 0.89 of a screen on 67 words and the rail under it spends 1.12 on

@@ -39369,9 +39369,9 @@ what shows the two are different quantities.** On a production build at 1280:
 
 | page | words | height | screens at 900 | words a screen |
 | --- | --- | --- | --- | --- |
-| `/` | 1,143 | **5,207px** | 5.79 | 197 |
-| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
-| `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
+| `/` | 1,151 | **5,234px** | 5.82 | 198 |
+| `/how-it-works` | 862 | 4,688px | 5.21 | 165 |
+| `/what-you-run` | 499 | 2,808px | 3.12 | 160 |
 
 At page scale the two track each other within about 1.2×, which is why a word
 budget is a fair stand-in there. **Per band they do not**: the front door's hero
