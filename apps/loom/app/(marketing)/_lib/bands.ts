@@ -24,6 +24,40 @@ export const BAND = {
   waysIn: "Keep going",
 } as const
 
+
+/**
+ * The bands of `/how-it-works`, by the eyebrow each one carries.
+ *
+ * Separate from `BAND` because that map is the front door's. These exist for
+ * one reason: **the five choices moved to this page on 1 October**, at the
+ * maintainer's instruction, and a choice has to find the band it is about.
+ * `asks.ts` reads these; `how-it-works.ts` writes them onto the sections.
+ *
+ * Spelled here rather than in the page builder so that the page and the
+ * requests made against it cannot drift apart silently. A choice whose band has
+ * been renamed finds nothing, returns nothing, and stops being offered without
+ * anything turning red, which is the failure `asks.test.ts` exists to catch.
+ */
+export const MECHANISM_BAND = {
+  journey: "End to end",
+  rules: "Your rules",
+  record: "The record",
+  refusal: "When the answer is no",
+  puttingItBack: "Putting it back",
+  whoAsks: "Who is asking",
+  goingDeeper: "Going deeper",
+} as const
+
+export type MechanismBandName = keyof typeof MECHANISM_BAND
+
+/** The four short answers, which the shortest of the five choices takes away together. */
+export const MECHANISM_SHORT_ANSWERS: readonly string[] = [
+  MECHANISM_BAND.rules,
+  MECHANISM_BAND.record,
+  MECHANISM_BAND.refusal,
+  MECHANISM_BAND.puttingItBack,
+]
+
 export type BandName = keyof typeof BAND
 
 /**

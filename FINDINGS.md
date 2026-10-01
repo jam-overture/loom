@@ -8,6 +8,99 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — `ModelEffort` is a five-level scale borrowed from one vendor, and three adapters will each have to invent a mapping
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`, pending a
+maintainer decision · **Status:** open — **nothing is broken; this blocks the
+second adapter rather than anything shipping today**
+
+The maintainer asked on 30 September for out-of-the-box adapters beside
+Anthropic — OpenAI, Gemini and Grok were the named candidates.
+[0209](decisions/0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md)
+lands the suite that makes a second adapter checkable. This is the question it
+deliberately did **not** answer.
+
+`ModelRequest.effort` is `low | medium | high | xhigh | max`. Five levels,
+matching one vendor's vocabulary, and the Anthropic adapter passes the value
+straight through. Providers expose reasoning effort on different scales with
+different granularity, so every new adapter has to map — and a mapping that
+silently rounds means a deployment asked for one amount of thinking and got
+another, invisibly, at **the one step where being wrong is expensive**: a
+plausible-but-wrong delta passes through a Gate that trusts the confidence the
+proposer reported (0005, 0007).
+
+Three shapes, and the choice is the maintainer's because it is about what Loom
+promises rather than about any vendor:
+
+| | what it costs |
+| --- | --- |
+| **keep five, adapters map** | every adapter rounds, differently, and `high` means something different per deployment |
+| **narrow to what every vendor can honour exactly** | a real loss of resolution on the vendor that has five, and a breaking change to `ModelRequest` |
+| **keep five, make the rounding reportable** | honest, and the only one that needs new surface — a completion would have to say what effort was actually used, the way `servedBy` already says which model actually answered |
+
+**The third is the one I would build**, and the precedent is already in the
+record: 0005 decided that the model which served a request is *recorded rather
+than assumed*, for exactly this reason. Effort is the same kind of fact and is
+currently assumed.
+
+0209's contract deliberately asserts nothing about effort, so it does not
+prejudge this.
+
+---
+## 2026-10-01 — no provider credentials are present in this environment, including the one the brief says is there
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — **a limit on what any run can verify, not a defect**
+
+Checked on 1 October, by presence and never by value: `ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY` and
+`GROK_API_KEY` are **all absent**. The routine brief states `ANTHROPIC_API_KEY`
+is in the environment; it is not, in this session.
+
+Nothing fails because of it — 0005 built the live smoke test to skip cleanly
+without a key, and it does. What is lost is the one thing that test exists for,
+in 0005's own words: *"proof that the schema we hand a real model is one a real
+model can satisfy, which no fixture can establish."*
+
+**This is the gating fact for the adapter work**, and it is worth stating
+plainly before anybody writes three of them. `schema.ts` emits `const` 25 times
+and `anyOf` 3 times inside closed objects, and structured-output support differs
+per provider and per mode. Whether a given service accepts that schema is
+measurable and is **not** inferable — this repository's own method is to measure
+it, which is why `GRAMMAR_BUDGET_BYTES` carries a date and a measured band
+rather than a guess.
+
+So an adapter written here can be unit-tested against 0209's contract and
+cannot be shown to work. Worth knowing before the work is planned, not after.
+
+Two things that would help, in order: a key for one non-Anthropic provider in
+the environment, and `ANTHROPIC_API_KEY` restored so the existing smoke test
+runs again at all.
+
+---
+## 2026-10-01 — Grok may not be a third adapter, and that is worth five minutes before it is two modules
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build` · **Status:**
+open — unverified, and cheap to verify once there is a key
+
+xAI's API is widely described as OpenAI-compatible at the chat-completions
+endpoint. If that holds for the **structured-output** path specifically — which
+is the only part of it Loom uses, and the part most likely to differ — then
+Grok is not a second module beside an OpenAI adapter. It is the same adapter
+with a different base URL and model id, which makes it a line in
+`docs/deployment.md` and a config rather than an entry point in `package.json`.
+
+Filed rather than assumed, because the failure mode runs both ways: building two
+modules that are one is waste, and assuming one module covers two services is a
+host finding out in production. The 27 September egress finding means no run here
+can check it against the live service either way.
+
+The order that answers it cheapest: build the OpenAI adapter first, point it at
+xAI's base URL with a Grok model id, and run 0209's contract plus one live call.
+One of those two outcomes is a config line and the other is an honest second
+module.
+
+---
 ## 2026-09-30 — two lesson files edited from outside the lane, both forced, and one of them changed a paragraph rather than a number
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons` · **Status:**
@@ -38871,3 +38964,57 @@ the reader was looking at.
 **For the other surface lanes:** `(docs)`, `(lessons)` and `(portal)` have no
 copy budget of any kind, in words or in pixels. The question worth asking is not
 whether your pages are too long — it is whether anything you have would say so.
+## 2026-10-01 — no request on the mechanism page can produce a held undo, so the site demonstrates one fewer thing than it used to
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — measured, not urgent, and not something the move could avoid
+
+The maintainer moved the five choices off the front door and onto
+`/how-it-works` on 1 October. The demonstration survives: **landed**, **held**
+and **refused** are all still reachable there, which had to be measured rather
+than assumed, because two of the five were bound to what the *front door*
+protects and that page has no `loom.mosaic`.
+
+What did not survive is one step further in. Measured across all five choices on
+the new page, each with and without the visitor's yes:
+
+| choice | the change | its undo |
+| --- | --- | --- |
+| `problem` | landed | landed |
+| `shorter` | **held** | landed |
+| `proof` | landed | landed |
+| `calmer` | landed | landed |
+| `drop-pitch` | **refused** | none — nothing landed |
+
+**No undo on this page is held.** On the front door one was: the held request
+moved a protected band, so putting it back moved the same protected band again,
+and the rules held the undo on exactly the same grounds. Here the held request
+*removes* four bands, and putting four bands back is an insert — which the rules
+let through on its own.
+
+### Why this is worth writing down rather than shrugging at
+
+It is a claim the site makes. `undo.test.ts` asserted it in as many words until
+today: *"Nothing here exempts an undo to make the demonstration tidier, and this
+is the assertion that would fail if anything ever did."* Nothing exempted it.
+The arrangement simply stopped producing an example, and the assertion had to be
+rewritten to what is now true — that the undo is judged by the same rules,
+carries its own record and restores the page exactly.
+
+**The property still holds of the system.** An undo is a change (0032) and goes
+through the same Gate; it is only these five requests, against this page, that
+cannot show it. That distinction is the whole reason this is a finding and not a
+bug: nothing is broken, and a reader can no longer watch the most interesting
+case.
+
+### What would close it
+
+A sixth choice whose undo the rules hold — the shape that works is a request
+that **moves** something protected rather than removing something large, because
+the inverse of a move is another move and inherits the same weight. `/how-it-works`
+has two protected nodes, the menu and the footer, and moving either is a worse
+demonstration than the one it would replace.
+
+The honest alternative is to stop claiming it. Nothing on the page currently
+promises a held undo in words, so there is no copy to correct today; this entry
+exists so that whoever writes that copy knows it is not demonstrable here.

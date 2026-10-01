@@ -692,7 +692,7 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
 }
 
 export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOME.path, options)
+  askedHref(origin, HOW_IT_WORKS.path, options)
 
 /**
  * The mechanism page, with the request whose record it should print.

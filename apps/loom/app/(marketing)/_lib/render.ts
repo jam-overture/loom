@@ -111,8 +111,8 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
   const ask = askById(context.ask)
   if (ask === undefined) return undefined
 
-  const probe = await walk(treeFor(HOME, context), ask, context)
-  const staged = treeFor(HOME, {
+  const probe = await walk(treeFor(HOW_IT_WORKS, context), ask, context)
+  const staged = treeFor(HOW_IT_WORKS, {
     ...context,
     record: probe.record,
     ...(probe.undone === undefined ? {} : { undone: probe.undone }),
@@ -139,7 +139,7 @@ export const askRunFor = async (context: SitePageContext): Promise<FrontDoorRun 
  */
 export const trailFor = async (context: SitePageContext): Promise<PaperTrail> =>
   paperTrailFor(
-    treeFor(HOME, { origin: context.origin, theme: context.theme }),
+    treeFor(HOW_IT_WORKS, { origin: context.origin, theme: context.theme }),
     context.ask,
     context.approve === true
   )
@@ -148,14 +148,27 @@ export const pageTreeFor = async (
   route: SiteRoute,
   context: SitePageContext
 ): Promise<LoomTree> => {
+  /**
+   * **The mechanism page is where a request is made and answered, as of
+   * 1 October.** The maintainer: *"Remove the see it happen section from the
+   * main landing page and only let it exist in the How it works section."*
+   *
+   * So this page does what the front door used to: it runs the visitor's
+   * request against **itself**, and renders the page the request produced. The
+   * paper trail it already printed is still printed, now of the same page it is
+   * on rather than of the front door.
+   *
+   * The trail is built against the page *as published* — without the ask
+   * applied — for the reason it always was: the request is made here, so the
+   * page it is made against has to be the one this site publishes. What the
+   * visitor's `ask` decides is which request to run, never which page to run it
+   * against.
+   */
   if (route.path === HOW_IT_WORKS.path) {
-    return treeFor(route, { ...context, trail: await trailFor(context) })
-  }
+    const trail = await trailFor(context)
+    const run = await askRunFor({ ...context, trail })
 
-  if (route.path === HOME.path) {
-    const run = await askRunFor(context)
-
-    return run === undefined ? treeFor(route, context) : run.page
+    return run === undefined ? treeFor(route, { ...context, trail }) : run.page
   }
 
   return treeFor(route, context)

@@ -22,8 +22,6 @@ import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
 import { action, heading, prose, section, stack } from "../nodes"
-import { answerBand } from "./answer"
-import { seeItHappenBand } from "./see-it-happen"
 import {
   DECISIONS_URL,
   DEMO,
@@ -885,12 +883,6 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
 
 export const homePageTree = (context: PageContext): LoomTree => {
   const ids = sequentialIdFactory("home")
-  /**
-   * The most recent thing that happened to this page, which the notice at the
-   * top reports: the undo once the visitor has put a change back, and the change
-   * itself until then.
-   */
-  const latest = context.undone ?? context.record
   const chrome: ChromeContext = {
     origin: context.origin,
     theme: context.theme,
@@ -909,31 +901,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
       },
       children: [
         siteHeader(ids, chrome),
-        /**
-         * The answer, before the pitch, and only for a visitor who asked.
-         *
-         * It sits above the opening band rather than inside it because the
-         * opening band is one of the things a request may configure — *Turn it
-         * down* changes its backdrop and how tall it stands — and a band whose
-         * props are a demonstration must not also be a status display. Above it
-         * the notice is the first thing under the menu in every state, which is
-         * where a browser leaves a reader who has just followed a link.
-         *
-         * Nothing is spread here when there is no record: the arrival page is
-         * the tree it has always been, node for node.
-         */
-        ...(latest === undefined
-          ? []
-          : [
-              answerBand(ids, {
-                origin: context.origin,
-                theme: context.theme,
-                record: latest,
-                ...(context.approve === undefined ? {} : { approve: context.approve }),
-                ...(context.back === undefined ? {} : { back: context.back }),
-                ...(context.backApprove === undefined ? {} : { backApprove: context.backApprove }),
-              }),
-            ]),
         hero(ids, context),
         whatIsIt(ids),
         vocabulary(ids),
@@ -944,15 +911,6 @@ export const homePageTree = (context: PageContext): LoomTree => {
          * the steps; the next thing a visitor meets should be the claim being
          * true, not four features explaining why it would be.
          */
-        seeItHappenBand(ids, {
-          origin: context.origin,
-          theme: context.theme,
-          ...(context.ask === undefined
-            ? {}
-            : { ask: context.ask, approve: context.approve === true }),
-          ...(context.record === undefined ? {} : { record: context.record }),
-          ...(context.undone === undefined ? {} : { undone: context.undone }),
-        }),
         /**
          * The same claim with the training wheels off, directly under the band
          * that has been apologising for them since 22 August.
