@@ -54,8 +54,8 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  * | a band read straight down | 101 — `/what-you-run`'s *What this page counts* | 120 | 84% |
  * | one cell of a run | 94 — the front door's longest question | 110 | 85% |
  * | a band of cells | 247 — the front door's *Questions* | 300 | 82% |
- * | a page | 1,360 — the front door | 1,500 | 91% |
- * | the site | 2,498 | 3,300 | 76% |
+ * | a page | 1,143 — the front door | 1,500 | 76% |
+ * | the site | 2,499 | 3,300 | 76% |
  *
  * **The split between a plain band and a band of cells is the measurement that
  * made this soundly checkable rather than a number somebody liked.** The first
@@ -102,15 +102,15 @@ import { SITE_ROUTES, type SiteRoute } from "./site"
  *
  * What it genuinely does not see is **scroll length**, and that is filed rather
  * than claimed. Photographed on a production build of this branch at 1280, the
- * front door is **6,154px** tall — 6.8 of the harness's 900px screens — against
- * 3,740px for `/how-it-works` and 2,783px for `/what-you-run`. Across the three
- * pages that is 153 to 199 words a screen, which is close enough to call words
+ * front door is **5,207px** tall — 5.8 of the harness's 900px screens — against
+ * 4,688px for `/how-it-works` and 2,783px for `/what-you-run`. Across the three
+ * pages that is 162 to 197 words a screen, which is close enough to call words
  * a stand-in for scroll at page scale. **Per band it is not**: the hero says 67
- * words in 0.89 of a screen while the rail below it says 222 in 1.12, so the
- * same word buys two and a half times the height depending on the band it is
- * in. A word count is a proxy for how much a visitor is asked to *read*, which
- * is what the maintainer's instruction was about. Nothing here should be read
- * as a bound on how far they scroll, and no check in this repository is one.
+ * words in 0.89 of a screen while a rail of five says 222 in 1.12, so the same
+ * word buys two and a half times the height depending on the band it is in. A
+ * word count is a proxy for how much a visitor is asked to *read*, which is
+ * what the maintainer's instruction was about. Nothing here should be read as a
+ * bound on how far they scroll, and no check in this repository is one.
  */
 
 /** A band a reader reads straight down, with no run of cells in it. */
@@ -152,10 +152,14 @@ const FEWEST_WORDS_ON_THE_SITE = 1_500
  * it, and copy falling far under one reports the ceiling as stale instead of
  * passing quietly.
  *
- * Three fifths rather than something tighter because the five ceilings sit
- * between 76% and 91% used today, and the front door is about to lose a band to
- * `/how-it-works` on another branch — which takes the page ceiling to 76% and
- * is an edit that should not have to touch this file.
+ * Three fifths rather than something tighter, and that margin was measured
+ * against a moving site rather than guessed. The numbers above were first set
+ * while `#464` was open — a branch moving the *See it happen* band off the
+ * front door — so both states were measured before any ceiling was chosen: the
+ * front door at 1,360 words and 1,143, `/how-it-works` at 638 and 856. It has
+ * since landed, which took the page ceiling from 91% used to 76% and left
+ * every other figure here unchanged, and this file did not have to move. A band
+ * crossing between two pages is exactly the edit a budget should not punish.
  */
 const A_CEILING_IS_BINDING_ABOVE = 0.6
 

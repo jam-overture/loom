@@ -11,7 +11,7 @@ recorded in the ledger as **already there**.
 
 This branch builds it.
 
-![the front door, full page at 1280 — 6,154px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.png)
+![the front door, full page at 1280 — 5,207px, the thing a budget is about](2026-10-01-marketing-the-budget-never-built-front-door.png)
 
 ---
 
@@ -86,9 +86,9 @@ judgment — the headroom:
 | a band read straight down | 101 | **120** | 84% |
 | one cell of a run | 94 | **110** | 85% |
 | a band of cells | 247 | **300** | 82% |
-| a page | 1,360 (the front door) | **1,500** | 91% |
-| the site | 2,498 | **3,300** | 76% |
-| the site, at least | 2,498 | **1,500** floor | — |
+| a page | 1,143 (the front door) | **1,500** | 76% |
+| the site | 2,499 | **3,300** | 76% |
+| the site, at least | 2,499 | **1,500** floor | — |
 
 **The site's ceiling is the one number the maintainer set himself.** 3,300 is
 25% of the 13,208 words measured on 26 September — the strict end of *"60–75%
@@ -157,21 +157,29 @@ records that it was wrong.
 
 ---
 
-## Checked against the open pull request before the numbers were set
+## Checked against the open pull request before the numbers were set — and then it landed
 
-`#464` moves the *See it happen* band from the front door to `/how-it-works`. A
+`#464` moved the *See it happen* band from the front door to `/how-it-works`. A
 ceiling that turned my own open PR red would be worse than no ceiling, so both
-branches were measured rather than reasoned about:
+branches were measured rather than reasoned about **before any number was
+chosen**:
 
-| | `main` | after `#464` |
+| | `main`, when the numbers were set | after `#464` |
 | --- | --- | --- |
 | `/` | 1,360 | 1,143 |
 | `/how-it-works` | 638 | 856 |
 | `/what-you-run` | 500 | 500 |
 | **the site** | **2,498** | **2,499** |
 
-Every ceiling and the floor hold on both, and the binding clause holds on both —
-which is why three fifths rather than something tighter.
+**It merged while this branch was being written, which turned the precaution
+into a test of it.** `main` moved to `#464` and `#462`, this branch merged it in,
+and the re-measurement matched the prediction exactly: the page figure went from
+91% of its ceiling to 76%, every other figure was unchanged, and **no ceiling
+had to move.** The figures in this report and in `budget.test.ts` are the
+post-merge ones.
+
+That is the margin earning itself rather than being argued for, and it is why
+the binding fraction is three fifths rather than something tighter.
 
 **The one-word difference in the total is the useful fact.** A band moved
 between two pages and the site's copy was conserved almost exactly, so a
@@ -189,11 +197,11 @@ Measured on a production build at 1280:
 
 | page | words | height | screens at 900 | words a screen |
 | --- | --- | --- | --- | --- |
-| `/` | 1,360 | **6,154px** | 6.84 | 199 |
-| `/how-it-works` | 638 | 3,740px | 4.16 | 153 |
+| `/` | 1,143 | **5,207px** | 5.79 | 197 |
+| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
 | `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
 
-At page scale the two track within about 1.3×. **Per band they do not**: the
+At page scale the two track within about 1.2×. **Per band they do not**: the
 hero spends 0.89 of a screen on 67 words and the rail under it spends 1.12 on
 222, so one word buys two and a half times the height in one band as in the
 other. A page could pass every ceiling here and still be nine screens long by

@@ -38920,13 +38920,13 @@ what shows the two are different quantities.** On a production build at 1280:
 
 | page | words | height | screens at 900 | words a screen |
 | --- | --- | --- | --- | --- |
-| `/` | 1,360 | **6,154px** | 6.84 | 199 |
-| `/how-it-works` | 638 | 3,740px | 4.16 | 153 |
+| `/` | 1,143 | **5,207px** | 5.79 | 197 |
+| `/how-it-works` | 856 | 4,688px | 5.21 | 164 |
 | `/what-you-run` | 500 | 2,783px | 3.09 | 162 |
 
-At page scale the two track each other within about 1.3×, which is why a word
+At page scale the two track each other within about 1.2×, which is why a word
 budget is a fair stand-in there. **Per band they do not**: the front door's hero
-spends 0.89 of a screen on 67 words and the rail under it spends 1.12 on 222, so
+spends 0.89 of a screen on 67 words and a rail of five spends 1.12 on 222, so
 one word buys about two and a half times the height in one band as in the other.
 A page could pass every ceiling in `budget.test.ts` and still be nine screens
 long by being built out of heroes, and nothing would be red.
