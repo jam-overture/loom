@@ -1611,6 +1611,59 @@ work.
 
 ---
 
+## Set AK — two days after lesson 32
+
+Interleaved with 09, 14, 17, 25, 28 and 31. Heavy on 25, because *a check is
+bounded by the population of values that pass through the place it runs* is this
+lesson's second half arriving from the other direction; and on 17, because a
+measurement that is not allowed to act on its own verdict is a shape this course
+has met before and in a different lane.
+
+1. *Does this page overflow* is not a question about the page. Name the inputs the
+   answer is a function of, say which of them anybody in Loom owns, and then say
+   which one of the ones you listed a reader can change without touching anything.
+   *(14, 32)*
+2. A `loom.backdrop` sets `overflow: hidden` and has to. State the reason it has
+   to, state what that costs the one automated visual check in this repository,
+   and then say how far the cost reaches — not which primitives clip, but which
+   *pages*. *(32)*
+3. `scrollWidth` is the obvious way to ask how far a clipping box's content
+   reaches, and it is wrong twice over. Name both things in the starter library it
+   reports as defects, and then say what a false line in a report costs. Your
+   answer to the last part must not be "it is inaccurate". *(32)*
+4. The instrument is two functions in two files. Say what decides which side a
+   piece of it goes on, give one exclusion that can live on the arithmetic side
+   and one that cannot, and state the general rule about why. *(25, 32)*
+5. The per-box reading deliberately does not change the exit code, and the record
+   argues that folding it in would have been how the instrument got switched off
+   rather than fixed. Give that argument, give the counter-argument, and then say
+   what would have to be true before the decision is revisited. *(32)*
+6. Compare this seam's remedy with lesson 31's. Both are about a fact that is
+   invisible to a pure function of the tree, and they end up in different places.
+   Say what makes a *declaration at registration* the right answer in one case and
+   impossible in the other, in a sentence about who knows. *(31, 32)*
+7. The only suite that drives this instrument hands its browser double a function
+   and is handed back a clean reading somebody typed into the test. Say exactly
+   what that suite asserts, say what it cannot assert, and then say why lesson
+   29's remedy — instrument the place the thing happens — is unavailable.
+   *(29, 32)*
+8. A primitive handed twelve rows it can read eleven of says so, and a primitive
+   whose heading will not fit a phone does not. Both faults are invisible from
+   outside at the moment they happen. Say what distinguishes them, and make your
+   answer a sentence about a *party* rather than about a mechanism. *(24, 32)*
+9. Lesson 17 has a number that measures something and is not allowed to act on
+   it. This lesson has a reading that names something and does not fail the build.
+   Say what the two have in common, and then say what makes them different —
+   because one of the two separations is permanent and the other has a shelf life.
+   *(17, 28, 32)*
+
+Question 4 is the point of the set and the one that transfers furthest outside
+this repository. Question 2 is where a confident half-answer is most likely: the
+reach of the blindness is the part nearly everybody understates, and it is
+understated in the same way every time.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1661,3 +1714,4 @@ renders this file rather than restating it.
 | AH | 2 days after L29 | | |
 | AI | 2 days after L30 | | |
 | AJ | 2 days after L31 | | |
+| AK | 2 days after L32 | | |
