@@ -115,6 +115,13 @@ export const planShots = (specimen: Specimen): readonly PlannedShot[] => {
  * that silently did nothing. A live specimen has one, so the steps its states
  * declare are carried through — and a static specimen's list is still empty,
  * because `planStates` gives it the one nameless state with nothing in it.
+ *
+ * `measure` is empty here for a reason of the same kind, and it is the
+ * `fullPage` above. A specimen is photographed whole, so its picture has no
+ * fold in it — and `pastTheFold` against the viewport it was laid out at would
+ * report a number about a boundary that nothing in the artefact has. A lane
+ * wanting a band measured against a screen is asking about a screen, which is
+ * this harness's other subject.
  */
 export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly Shot[] =>
   shots.map((shot) => ({
@@ -124,4 +131,5 @@ export const shotsAt = (origin: string, shots: readonly PlannedShot[]): readonly
     viewport: shot.viewport,
     do: shot.do,
     fullPage: true,
+    measure: [],
   }))

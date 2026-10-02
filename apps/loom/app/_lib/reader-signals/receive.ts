@@ -1,11 +1,14 @@
 import {
   describeIngestError,
   ingestReaderSignals,
+  readerRegionOf,
   type IntakeGate,
+  type ReaderRegionStore,
   type ReaderSignalJournal,
+  type RegionIntake,
 } from "@jam-overture/loom/signals"
 
-import { describeIntakeSwitch, type IntakeSettings } from "./settings"
+import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } from "./settings"
 
 /**
  * The mouth: what a browser's batches actually arrive at.
@@ -36,6 +39,12 @@ import { describeIntakeSwitch, type IntakeSettings } from "./settings"
 export type Intake = {
   readonly settings: IntakeSettings
   readonly journal: ReaderSignalJournal
+  /**
+   * Where the buckets are kept. Written here rather than by the rollup, because
+   * the request is the only place a region was ever knowable, and gone by the
+   * time a window is folded.
+   */
+  readonly regions: ReaderRegionStore
   readonly gate: IntakeGate
   /** Whether what is kept outlives this process. The status says it rather than implying it. */
   readonly durable: boolean
@@ -101,6 +110,28 @@ const readAtMost = async (
 }
 
 /**
+ * Where this delivery came from, when the deployment counts that.
+ *
+ * The region is read from a header the platform wrote and used once, here. It is
+ * never put on the batch, never joined to the view key the batch carries, and
+ * the address it was derived from is not read at all — the only thing this
+ * handler ever looks at an address for is the rate limit, and that digest is
+ * minted per process and shared with nothing.
+ *
+ * A deployment that switched regions off, or misspelled the switch, counts
+ * nothing: a region is the one part of an intake that is worth having and never
+ * worth guessing at.
+ */
+const whereFrom = (request: Request, intake: Intake): RegionIntake | undefined =>
+  intake.settings.region.chosen.state === "on"
+    ? {
+        store: intake.regions,
+        region: readerRegionOf(request.headers.get(intake.settings.region.header)),
+        at: new Date(intake.now()).toISOString(),
+      }
+    : undefined
+
+/**
  * Receive a delivery.
  *
  * The order is the order of what each refusal costs the deployment. Whether
@@ -158,7 +189,7 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
     return refuse(400, "a delivery is JSON")
   }
 
-  const kept = await ingestReaderSignals(intake.journal, delivery)
+  const kept = await ingestReaderSignals(intake.journal, delivery, whereFrom(request, intake))
 
   if (!kept.ok) {
     /**
@@ -184,6 +215,8 @@ export type IntakeStatus = {
   /** Subjects the gate is currently counting on this instance. */
   readonly subjects: number
   readonly detail: string
+  /** Whether where readers are is counted, and under what floor. One sentence, for an operator. */
+  readonly regions: string
 }
 
 /**
@@ -210,6 +243,7 @@ export const describeIntake = (intake: Intake): IntakeStatus => {
     deliveries: policy.deliveries,
     windowMs: policy.windowMs,
     subjects: intake.gate.subjects(),
+    regions: describeRegionSettings(intake.settings.region),
     detail:
       intake.settings.chosen.state === "on" && !intake.durable
         ? "reader signals are being collected into memory, which a serverless deployment forgets; " +

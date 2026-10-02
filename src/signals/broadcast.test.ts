@@ -810,6 +810,68 @@ describe("broadcastReaderSignals", () => {
     })
   })
 
+  /**
+   * The flag an intake counts arrivals by. One delivery of a page view carries
+   * it, which is what makes *a reader from here* a number that does not grow
+   * with how long they stayed.
+   */
+  describe("the opening delivery", () => {
+    it("marks the first batch of a page view and no other", () => {
+      const batches = start()
+
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => batch.first)).toEqual([true, undefined])
+    })
+
+    /**
+     * A page that gathered nothing sends nothing, so the opening is the first
+     * batch that actually goes rather than the first time the timer fired.
+     */
+    it("marks the first batch that was sent, not the first flush", () => {
+      const batches = start()
+
+      broadcast?.flush()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => batch.first)).toEqual([true])
+    })
+
+    it("names the page view it opened, which is what the parser insists on", () => {
+      const batches = start()
+
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches[0]?.view).toMatch(/^[0-9a-f]{32}$/)
+      expect(parseReaderSignalBatch(batches[0]).ok).toBe(true)
+    })
+
+    /**
+     * A client-side navigation stops one broadcast and starts another, which is
+     * a second page view and so a second arrival — the same rule the view key
+     * follows.
+     */
+    it("opens again for a second broadcast, because that is a second page view", () => {
+      const first = start()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+      broadcast?.stop()
+
+      const second = start()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(first[0]?.first).toBe(true)
+      expect(second[0]?.first).toBe(true)
+      expect(second[0]?.view).not.toBe(first[0]?.view)
+    })
+  })
+
   it("reads a page the render seam addressed", () => {
     const { tree } = sampleTree()
     document.body.innerHTML = renderToStaticMarkup(
