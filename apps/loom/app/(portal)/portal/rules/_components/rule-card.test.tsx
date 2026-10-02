@@ -3,34 +3,9 @@ import { describe, expect, it } from "vitest"
 
 import { NO_RECORD, type RuleRecord } from "@/app/(portal)/_lib/rule-record"
 import type { PlainRule } from "@/app/(portal)/_lib/rules-view"
+import { recordOf, surfaceOf } from "@/app/(portal)/_test/rendered"
 
 import { RuleCard } from "./rule-card"
-
-/**
- * What a reader meets without asking, and what is one click down.
- *
- * A closed `<details>` is still in the DOM — deliberately, so browser
- * find-in-page reaches it — so `container.textContent` cannot tell the surface
- * from the record, and every assertion about the plain-language rule turns on
- * exactly that difference.
- *
- * This is the **third** copy of this pair, after `piece-card.test.tsx` and
- * `proposal-effect.test.tsx`. Copied again rather than shared for the reason the
- * second copy gives: both of those files are open on unmerged branches, and a
- * shared helper landing in three places at once is the collision this repository
- * has already paid for. The finding asking for one home is refreshed with this
- * run's count rather than restated.
- */
-const surfaceOf = (container: HTMLElement): string => {
-  const copy = container.cloneNode(true) as HTMLElement
-
-  for (const disclosure of Array.from(copy.querySelectorAll("details"))) disclosure.remove()
-
-  return copy.textContent ?? ""
-}
-
-const recordOf = (container: HTMLElement): string =>
-  Array.from(container.querySelectorAll("details"), (one) => one.textContent ?? "").join(" ")
 
 const rule = (over: Partial<PlainRule> = {}): PlainRule => ({
   id: "ceiling",

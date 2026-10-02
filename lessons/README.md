@@ -320,6 +320,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [29](29-readership.md) | Readership: the declaration with more than one reader | Why the registry can hold four of a primitive's declarations against its props schema and cannot hold the schema against its own component; what property a dropped slot has that an unread prop does not, and what that rules out for any check built on watching output; how to make a read observable, and why the seven suspects that turns up include no defects and one security boundary working exactly as designed — and what it means that *does the component read this* was a question about the wrong party. |
 | [30](30-rendezvous.md) | Rendezvous: the name two parties have to spell the same | Why two of the three parts of a binding can be refused before anything is drawn and the third could not be; what a system does when the fact it wants to check exists in exactly one place, and who pays for the second copy; why the declaration that closes the seam is a rule rather than a list, and how a plain list of names turns out to be silent on the broken page and loud on the working one — and what it meant that the write path, asked about the same node, refused a page with nothing wrong with it. |
 | [31](31-behaviour.md) | Behaviour: the thing a page does | Why a copy button cannot be a prop, and why that is the thesis of this system in its smallest form; what a control is handed, who names it, and what the primitive is left to decide; why the four things a registry can check about a behaviour are all checked at registration; where a control that hands back a boolean writes it and why a control that hands back a number cannot write it in the same place — and what it means that a page with a copy button on it, rendered to static markup, contains no button. |
+| [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it — and what it means that the only suite driving this instrument asserts that the measurement was requested and nothing at all about what it returns. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -538,6 +539,38 @@ last moment at which a behaviour is visible to anything that is not a browser. S
 the question to carry into a fifteenth seam is not lesson 28's *where is the
 second copy*, but **what is the last moment at which this is still visible, and
 is anything checking it there?**
+
+Lesson 32 answers that question and the answer comes out backwards, which is why
+Part V has a fifteenth seam rather than stopping at fourteen. A heading whose
+longest word is wider than a phone has no earlier moment to lose: it is not in the
+tree, the registry, a declaration or the markup, because it does not exist until a
+layout engine has been handed that markup, a viewport, and whichever font actually
+loaded. The last moment it is visible is also the **first**. And this is the one
+seam so far where nothing in the system is missing anything — the tree is valid,
+the primitive is correct, the render is the pure total projection lesson 14
+promised, and the Gate's numbers for the page that works and the page that is
+broken are identical because the two changes *are* identical. The fault is a
+function of five inputs and Loom owns one.
+
+So the remedy is the sixth: stand where the fact is and measure it. What makes it
+a lesson rather than a tool is everything after that. Measuring is the cheap half;
+**deciding which readings are defects cannot be done without knowing the system
+being measured**, because a clipped rim is decoration working, a sideways scroller
+is a feature announcing itself, and a one-pixel box holding a sentence is an
+accessibility pattern — all three indistinguishable from the real fault in the
+numbers alone. Two of the four exclusions are arithmetic; the other two have to be
+made at the point the reading is taken, which is the last place the reason still
+exists — and the
+half that *can* be arithmetic is in a second file precisely so that something can
+test it, which leaves the other half testable by nothing at all. That cost is
+stated rather than discovered: the one suite that drives the instrument hands its
+browser double a function and gets back a reading somebody typed, so what it
+asserts is that the measurement was requested and nothing whatever about what it
+would return.
+
+The question to carry into a sixteenth seam is the one that lesson's own Predict
+opens with, and most first answers get it wrong by two rows: **what is this fact a
+function of, and which of those inputs does anybody in this system own?**
 
 ## Pacing
 

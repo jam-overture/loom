@@ -14,6 +14,7 @@ import {
   recordOfRules,
   type RulesRecord,
 } from "@/app/(portal)/_lib/rule-record"
+import { WHAT_IF_NAME, WHAT_IF_PATH } from "@/app/(portal)/_lib/levers"
 import { rulesOf } from "@/app/(portal)/_lib/rules-view"
 import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 
@@ -91,9 +92,25 @@ const RulesPage = async () => {
           page. Some of them turn a change down; most of them stop and put it in front of you.
         </p>
 
-        <Link href="/portal/pages" className="w-fit text-xs">
-          Ask for a change →
-        </Link>
+        <div className="flex flex-wrap gap-4">
+          {/*
+           * Two ways out rather than one, and the new one leads.
+           *
+           * A reader who has just read what a rule has cost them has one
+           * obvious next question, and until now this screen's only answer to
+           * it was to go and edit a file. The rules are still set in code and
+           * nothing about that has changed — what the second screen adds is the
+           * evidence for the edit, which is the half that did not exist
+           * anywhere.
+           */}
+          <Link href={WHAT_IF_PATH} className="w-fit text-xs">
+            {WHAT_IF_NAME} →
+          </Link>
+
+          <Link href="/portal/pages" className="w-fit text-xs">
+            Ask for a change →
+          </Link>
+        </div>
       </header>
 
       {record !== undefined && <p className="text-sm">{headlineOf(record)}</p>}

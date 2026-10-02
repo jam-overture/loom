@@ -8,6 +8,149 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — the defect matrix every lane ends with deletes the run's own work if the run has not committed, and the convention as written says to do exactly that
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and no work permanently**, because the edits were still in the session and
+could be reapplied. A longer unit would not have been so lucky.
+
+Every lane in this repository ends its report with a defect matrix, and the
+sentence describing how it is run is nearly identical across them:
+
+> Each defect restored in turn against this commit, the demo lane run against
+> it, and the lane restored with `git checkout` between rows.
+
+`git checkout -- <path>` restores from the **index**, which is `HEAD`. On a
+branch where the run has not yet committed, `HEAD` is still `main` — so the
+first restore reverts not just the planted defect but **the entire unit**, for
+every tracked file under that path, with no confirmation and no error.
+
+**That is what happened here**, on row 2 of nine. Four files went back to
+`main`; the two files that survived did so only because they were new and
+therefore untracked, which is the opposite of a safety property. The symptom was
+not an error message: it was the lane's test count dropping from 716 to 709 and
+staying there for the next row, which reads exactly like a defect being caught.
+The matrix was two rows from reporting fiction.
+
+**The fix is one word**, and it is the word the convention should carry:
+
+```bash
+git checkout HEAD -- <path>   # same thing, until HEAD is not what you meant
+git stash                     # no
+git commit                    # the real answer
+```
+
+`git checkout HEAD -- …` is not the fix either, strictly — it is the same
+command. **The real rule is ordering: commit the unit before planting the first
+defect.** Then `HEAD` is the thing being tested, the restore means what it
+says, and a matrix cannot eat its own subject. This run committed and re-ran,
+and the matrix came back with three rows nothing caught — which is the result
+worth having and was not available before.
+
+**Filed for the framework routine because `docs/routines.md` is its file**, and
+this belongs beside *Reading the merge gate*: it is the same shape of hazard —
+a command that reports success while doing something other than what the run
+believes — and the same remedy, which is to write down the ordering rather than
+trust everyone to re-derive it. The briefs say `main` too, so the maintainer may
+want the sentence in both places.
+
+---
+## 2026-10-01 — the demo's first screen spends 42% of itself on a still life, and this run paid for the verdict without reclaiming it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
+run's candidate unless the maintainer points elsewhere, and it is a **design
+question rather than a defect**
+
+Measured on a production build at 1280×900, on `main` at `ee9c1d5`, before this
+run touched anything. The rail's scroller is **857px** and its content is
+**1,239px**:
+
+| block | top, within the rail | height |
+| --- | --- | --- |
+| the claim, the chips | 20 | 171 |
+| the ask panel opens | 215 | — |
+| **the leading ask's excerpt** | **377** | **358** |
+| *or ask for one of these* | 751 | 17 |
+| *or type your own* | 1040 | 20 |
+| *what happens when you ask* | 1101 | 17 |
+| the one link out, to `/docs` | 1141 | 78 |
+
+So the single largest element a stranger meets is a **358px re-render of a band
+that is already on the page beside it** — and everything from the four other
+asks downwards is off the screen.
+
+**The excerpt is not wrong and the reason it is 21rem is good.** `globals.css`
+argues it at length: at rail width the stat grid falls to one column and its
+three figures stand about 330px, and *"a window that showed 3,400 and faded out
+before 24 and 92% would be previewing one number under a button promising
+three."* That is right, and shrinking it to buy room would reopen a defect that
+was closed deliberately.
+
+**What changed is that it now has competition.** This run put the Gate's
+verdict on that screen — two lines, computed, about the button directly above
+the excerpt — and did **not** reclaim any pixels for it: the brief sentence
+replacing the hedge gave back about as much as the verdict took, so the first
+screen holds one more idea in the same space and the rail is roughly where it
+was. That is the right trade for one run and it is not a resting place. The
+question nobody has asked is whether, on the one screen that has to land in
+sixty seconds, *a picture of the band* still outranks *the asks nobody can see*.
+
+**Three shapes:**
+
+1. **Leave it.** The excerpt makes the one invited press concrete and the four
+   others are deliberately secondary. Cheapest, and defensible.
+2. **Fold the excerpt behind a disclosure**, the way `WhatHappens` and the free
+   text already are. Reclaims the whole 358px; costs the one thing the excerpt
+   exists for, which is that a stranger sees what the button names *without*
+   doing anything.
+3. **Let the stage answer it.** Mark the band before the press and bring the
+   stage to it, which is the surface's own answer to *where is that* everywhere
+   else. Costs the rail nothing and costs the hero, which is the thing that
+   makes the specimen read as a real page on arrival. **Argued against here**
+   for that reason, and written down so the next run does not re-reach for it.
+
+**Recommendation: 1 until something else needs the pixels**, and the reason to
+record the table now is that this is the fourth consecutive run to measure it
+with a script it then deleted — see the data point appended to the
+30 September entry about what a shot list cannot see.
+
+---
+## 2026-10-01 — the demo's arrival screen now runs the Gate on a render, and nothing in this repository can see what that costs a real request
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-35-what-it-will-say`, and **measured rather than feared**
+
+That run put the Gate's verdict on the first screen by running the real thing:
+`composeChange` interprets, analyses, assesses and gates the leading preset
+against the live tree on every render of `/demo`, and prints what it answered.
+The claim is that this cannot be wrong, and it is held by a test. What is not
+held by anything is what it costs.
+
+**The function itself is nothing.** Timed over 200 runs against the starting
+tree on this machine: **0.62ms** for the held ask (`trim`, the lead — the
+removal walks the largest subtree) and **0.31ms** for the re-theme. It is a
+tree walk and no key, which is the whole reason it could be put on a render at
+all (0057).
+
+**What is unmeasured is the request.** `page.tsx` says in its own comment that
+*a crawler should cost nothing*, and builds the pristine tree rather than
+allocating a session for exactly that reason. This run added sub-millisecond
+work to that same path — but sub-millisecond **here**, warm, in a `vitest`
+process, against a tree already in memory. Nobody has measured a cold serverless
+invocation on the deployment, and this lane cannot: `*.vercel.app` is denied by
+the environment's network policy (`Loom portal`, 27 September), so every number
+this lane quotes is from a local `next start`.
+
+**Why it is filed rather than fixed.** The two obvious fixes are both worse than
+the thing they fix at this size. Caching the verdict per revision would be a
+second answer to a question that has one, and the cache key would have to carry
+the policy; computing it lazily on the client would put a runtime across the
+boundary this surface has kept the registry off. At 0.62ms the right action is
+to know the number and leave it alone — and to re-measure if the preset table
+grows a change that walks more page than a removal of one band does.
+
+---
 ## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
@@ -20699,8 +20842,12 @@ routine on the way past.
 
 ## 2026-09-04 — the plain-reading test helper now exists in three copies, and the two it was to be merged with are still unmerged
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
-count on the 2 September entry, not a new argument
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-44-what-if-you-changed-these-rules`**, 1 October — the pair is one
+module at `app/(portal)/_test/rendered.ts` and all four copies are gone. See the
+1 October entry for what the delay cost and why it ended. Original status below.
+
+> **Status:** open — a count on the 2 September entry, not a new argument
 
 `surfaceOf`/`recordOf` — the pair that separates what a reader meets from what is
 behind a `<details>` — is the sharpest test this lane has, because it turns "speak
@@ -39179,6 +39326,30 @@ number in the report was produced by something the maintainer can read.
 `tools/screenshot/` is `Loom daily build`'s, which is why this is filed rather
 than done.
 
+### Fourth instance, 1 October, `Loom demo` on #475 — and the first where the measurement decided the unit
+
+Appended rather than filed again, because it is the same ask with one more data
+point behind it and a second entry would only make it look like two problems.
+
+This run wrote the fourth throwaway `playwright-core` script in four runs. What
+is different is that this time **the measurement was the diagnosis, not the
+evidence for one.** The unit was chosen off a table this script printed and
+nothing else could: at 1280×900 the rail's content is 1,239px against 857px of
+screen, and the single largest thing on a stranger's first screen was a 358px
+re-render — **42% of it** — of a band already on the page beside it, with the
+four other asks, the free-text box, the explainer and the only link out all
+below the fold.
+
+None of those six numbers is checkable by anything in this repository. The
+script that produced them was deleted with the container, and the run before
+this one and the two before that each wrote their own. **A lane whose unit is
+chosen by a measurement it cannot keep is a lane choosing its next unit by
+rewriting the same instrument**, which is a different and worse cost than not
+being able to assert a regression.
+
+The ask is unchanged and still the cheap one: let a shot *print* a named
+selector's box beside the `scrollWidth` line it already prints.
+
 ---
 ## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
 
@@ -39919,10 +40090,30 @@ after a `Loom merge` commit arrives is in this window by construction.
 ## 2026-10-01 — `main` is red: #470's "counted, not typed" rule met #465's three new primitives, and neither pull request was wrong
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, with one line for
-`Loom merge` · **Status:** open — **`main` at `19d5238` fails `pnpm verify`**,
-reproduced on a pristine checkout with nothing of this lane's applied. Two
-assertions, both in `(docs)/_lib/counts.test.ts`, both one line to fix, and
-neither is in this lane's route group so neither is fixed here
+`Loom merge` · **Status:** **closed — `main` is green again at `ee9c1d5`**,
+verified `pnpm verify` exit 0 on a clean checkout: 3,441 framework tests, 6,040
+application tests. It was red at `19d5238`, reproduced on a pristine checkout
+with nothing of this lane's applied. Two assertions, both in
+`(docs)/_lib/counts.test.ts`, both one line, and neither in this lane's route
+group, so this entry proposed the patches rather than applying them.
+
+> **Carried, 1 October.** `Loom merge` pushed `68c61d3` onto `marketing-54` —
+> *"Merge: carry the two (docs) numbers an earlier merge moved"* — applying both
+> patches below as proposed: the census literal to `one hundred and two`, and
+> `entry-points.ts`'s summary produced through
+> `spellOut(siteCount("starter-bands").value)`. It also corrected two
+> surrounding comments that asserted the library had ninety-nine primitives.
+> `pnpm verify` is **exit 0** on that head — 3,441 framework tests, 6,040
+> application tests — and `#472` carried it to `main` as `ee9c1d5`, where the
+> same gate is green. Total time red: about an hour.
+>
+> **This is the mandate working, and it is worth recording as the positive
+> case.** The line below asks `Loom merge` to re-run the surfaces that state a
+> count when a merge changes one. It did better than that: it read a finding
+> filed by a lane that could not make the fix, made it in the lane that could,
+> and said which files and why in its commit — which is exactly the division
+> `0067` and `docs/routines.md` describe, exercised end to end in about half an
+> hour.
 
 ```
 × everything this site wrote for a reader > writes no counted size as a number
@@ -40149,3 +40340,177 @@ screen that will is step 4 of [`docs/signals.md`](docs/signals.md) and is not
 built. Filed now because it is cheaper to know before that screen is written
 than after, and because the lane that owns `src/store/` is the only one that can
 do it.
+
+## 2026-10-01 — a host cannot re-measure its own stakes from its own record, and it is two fields short
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+
+`/portal/rules/what-if` replays every judgment this deployment has recorded
+against a policy a reader is editing on the screen. **Seven of a `GatePolicy`'s
+seventeen fields can be played against. The other ten cannot**, and the reason
+is two omissions from one record type.
+
+### What works, and why
+
+The Gate is a pure function of a `ChangeAssessment` and a policy, and every rung
+of `ESCALATION_LADDER` reads one of four facts the journal already holds — the
+stake level, the reversibility, the stake factor codes (0198) and the
+interpreter's confidence. So the two confidence thresholds, `refusalFloor` and
+the four `autoApplyCeiling` entries all replay exactly, and the screen proves it:
+it re-runs the deployment's own policy over the record and keeps only the
+judgments whose recorded verdict it reproduces.
+
+### What does not, and the gap is small
+
+What cannot be replayed is the **measurement** — `removalThresholds`,
+`breadthThreshold`, `shallowDepthThreshold`, `protectedPrimitiveTypes`,
+`protectedPropKeys`. Moving one of those changes the stake *level*, and the
+level is recorded rather than recomputable, so the screen deliberately does not
+offer them. Offering them and holding the level fixed would answer every
+question with "nothing would change", which is a lie shaped like a result.
+
+`assessStakes` is published and takes `{ analysis, discards }` and a policy. It
+reads nine fields of `ChangeAnalysis`. **`AssessmentSummary` carries seven of
+them**:
+
+| `assessStakes` reads | on `AssessmentSummary`? |
+| --- | --- |
+| `insertedNodeCount`, `removedNodeCount`, `movedNodeCount` | yes |
+| `touchedPrimitiveTypes`, `removedPrimitiveTypes`, `relocatedPrimitiveTypes` | yes |
+| `shallowestAffectedDepth` | yes |
+| **`affectedNodeIds`** | **no** |
+| **`configuredPropKeys`** | **no** |
+
+`affectedNodeIds` is read for its **length alone** — `broadChange` compares
+`analysis.affectedNodeIds.length` against `breadthThreshold` — so a count is
+enough and the ids themselves need never be journalled. `configuredPropKeys` is
+read by `protectedProp`, and is the only input to that factor.
+
+### The ask
+
+Two fields on `assessmentSummarySchema`, both optional for 0045's reason:
+
+```
+affectedNodeCount?: number        // analysis.affectedNodeIds.length
+configuredPropKeys?: readonly string[]
+```
+
+With those, a host holding its own journal can rebuild the `StakeInput` for
+every change it ever judged and re-measure it under a policy it is considering —
+which turns a seven-field simulation into a seventeen-field one, and makes
+*"would marking `loom.card` as protected have caught any of this?"* answerable
+from the record rather than from a rebuild of history.
+
+**Two things it is not.** It is not a request to journal the delta — the delta is
+already on the record and this is cheaper than re-analysing it, which would need
+the tree at the base revision as well. And it is not this lane's to do: 0018 is
+explicit that the portal reads the framework through what it publishes, and a
+record type is the framework's.
+
+**Everything else `assessStakes` reads is already summarised.** `nestedTargets`,
+`unknownPrimitives`, `invalidProps`, `unreadBindings`, `redirectedSubmissions`
+and `repointedBindings` each produce exactly one factor code, and the codes are
+on the record — so those factors replay today without carrying the lists.
+
+---
+
+## 2026-10-01 — `surfaceOf` and `recordOf` are one module at last, and the reason the four copies survived has expired
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-44-what-if-you-changed-these-rules`** — this closes the 4 September
+entry, which was itself a count on the 2 September one
+
+The pair that tells what a reader meets from what is behind a `<details>` now
+lives in `app/(portal)/_test/rendered.ts`, beside `_test/plain-language.ts` and
+for the same reason: it is a test concern, so a screen must not be able to
+import the thing it is being judged against.
+
+**Four copies, all identical in substance, now gone** —
+`_components/proposal-effect.test.tsx`,
+`portal/pieces/_components/piece-card.test.tsx`,
+`portal/checkup/_components/checkup-verdict.test.tsx` and
+`portal/rules/_components/rule-card.test.tsx`. Each carried a comment explaining
+why it had been copied rather than shared, and every one of those comments gave
+the same reason: the files it would be merged with were open on unmerged
+branches. All four have been on `main` for weeks, so the reason had quietly
+expired and nobody had been back to check.
+
+**What made this run do it was needing a fifth.** The entry's own sentence —
+*"a helper in four places is not a helper"* — reads as a judgement when you are
+writing the fourth copy and as an instruction when you are about to write the
+fifth.
+
+Two other functions in this lane are called `surfaceOf` and are **not** copies:
+`_lib/checkup-reach.test.ts` and `_lib/rules-view.test.ts` each flatten a view
+object rather than a rendered DOM. They are left alone. A shared name is not a
+duplicate, and folding them in would mean one helper with two unrelated jobs.
+## 2026-10-01 — the merge-window trap, filed and then walked into forty minutes later, by the run that filed it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — the remedy in the entry above it is **not sufficient**, and this entry is
+the correction to my own advice rather than a new mechanism
+
+**Extends:** the entry filed earlier today on `#468`'s correction landing after
+its pull request closed, and through it the 28 September entry.
+
+That entry ends with a remedy I was pleased with:
+
+> **Before pushing a second time to your own branch, read the pull request's
+> state** — not the branch's. `gh api …/pulls/<n> --jq '.state, .merged'`
+
+**It happened again on `#472`, to the run that wrote that sentence, inside the
+hour.** `Loom merge` pushed the `(docs)` fix onto `marketing-54`; I re-verified,
+corrected a report section and a ledger status that the fix had made untrue,
+committed and pushed. `#472` merged at 17:12:50 at head `68c61d3`. My correction
+is `bdb658c`, and it is not on `main`.
+
+### Why the remedy failed, which is the only new information here
+
+**I did check the state. I checked it in the same command as the push.**
+
+```bash
+git push … ; gh api …/pulls/472 --jq '.state'   # closed
+```
+
+A check that runs beside the push cannot prevent anything, and a check that runs
+before it closes a window of seconds rather than the window that matters. The
+real race is not between the check and the push — it is between **the whole
+correction** (re-verify, re-measure, re-photograph, write, commit: five to
+fifteen minutes) and a merge routine that is already looking at a green,
+mergeable branch.
+
+So the advice was the right shape and the wrong size. **A state check is not a
+lock**, and nothing a lane can run makes it one.
+
+### The remedy that actually holds
+
+**Decide where a correction goes before making it, from the branch's
+mergeability rather than from its content.**
+
+- The pull request is **red, conflicted, or waiting on something** → the
+  correction belongs on this branch. There is time.
+- The pull request is **green and mergeable** → assume it is about to merge,
+  because that is what `Loom merge` exists to do. Put the correction on the
+  **next** branch and say so in the comment.
+
+That is a judgment made once, at the start, costing nothing — rather than a
+check that cannot win a race it is entered into too late.
+
+**The corollary is the uncomfortable one and it is the useful half:** a green
+mergeable branch of yours is *not a place to keep working*. Both times today I
+treated one as a draft I still held, because it had my name on it and I was
+mid-thought. It was a queue entry. The two things look identical from inside the
+lane and `git status` reports the same clean tree either way.
+
+### What it has cost so far, which is the argument for the size of the remedy
+
+Nothing yet, twice — eleven words in a docstring the first time, a status line
+and a test table the second, both re-landed on the following branch. `#473`
+carries this one.
+
+**Three branches to deliver one unit, and two of the three exist only because of
+this.** That is the real cost: not a wrong line on `main` but a lane spending
+two runs chasing its own record. The same timing around a *fix* rather than a
+figure would put a known-bad version on `main` with a green branch beside it
+saying otherwise, and the branch would look exactly like a branch whose work was
+safe.
