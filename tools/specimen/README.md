@@ -63,7 +63,7 @@ built against, committed so it can be pointed at again.
 The two above are taken on every shot whether anybody wanted them or not. This
 one exists because a lane named something it wants the size of, and it is
 `pnpm shoot`'s alone
-([0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
+([0213](../../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
 
 ```json
 { "path": "/demo", "out": "the-rail", "measure": ["aside", "aside li[id]", "text=Put it back"] }
@@ -331,6 +331,6 @@ is why the two are one harness and what it cost when they were two.
   project; this makes it possible later and presumes none of it.
 - **It does not fail a shot on a measurement it took.** `measure` prints; the
   exit code is still the document overflow alone. A height budget is the obvious
-  next ask and 0212 says why it is deliberately not here yet.
+  next ask and 0213 says why it is deliberately not here yet.
 - **It runs in no CI job.** It is a tool a run drives when it has something to
   look at.

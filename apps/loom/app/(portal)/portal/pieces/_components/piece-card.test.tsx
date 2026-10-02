@@ -7,6 +7,8 @@ import {
   type CataloguedPrimitive,
 } from "@jam-overture/loom"
 
+import { recordOf, surfaceOf } from "@/app/(portal)/_test/rendered"
+
 import { PieceCard } from "./piece-card"
 
 /** The names in a catalogue are branded, so a fixture parses rather than casts. */
@@ -20,30 +22,6 @@ const piece = (over: Partial<CataloguedPrimitive> = {}): CataloguedPrimitive => 
   reads: undefined,
   ...over,
 })
-
-/**
- * What a reader meets without asking.
- *
- * A closed `<details>` is still in the DOM — deliberately, so browser
- * find-in-page reaches it — which means `container.textContent` cannot tell "on
- * the surface" from "one click down". Every assertion about the plain-language
- * rule turns on exactly that difference, so it gets a reading of its own.
- *
- * The same pair exists in `_components/proposal-effect.test.tsx`. Copied rather
- * than shared because that file is open on another branch and a shared helper
- * landing in two places at once is the collision this repository already knows
- * about; worth lifting into one module once both have merged.
- */
-const surfaceOf = (container: HTMLElement): string => {
-  const copy = container.cloneNode(true) as HTMLElement
-
-  for (const disclosure of Array.from(copy.querySelectorAll("details"))) disclosure.remove()
-
-  return copy.textContent ?? ""
-}
-
-const recordOf = (container: HTMLElement): string =>
-  Array.from(container.querySelectorAll("details"), (one) => one.textContent ?? "").join(" ")
 
 describe("PieceCard", () => {
   it("leads with a name a person reads and keeps the type beside it", () => {

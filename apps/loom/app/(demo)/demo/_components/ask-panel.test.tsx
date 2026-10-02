@@ -275,6 +275,120 @@ describe("the ask panel", () => {
   })
 
   /**
+   * ## What the Gate says about the button, before anybody presses it
+   *
+   * The arrival screen's whole argument used to be the half of this product
+   * everybody else has — *an AI can rewrite this page* — with the Gate present
+   * only as a hedge covering every ask ever made. `what-it-will-say.ts`
+   * computes the other half for the one ask this panel invites, and these are
+   * the properties the panel owes it.
+   */
+  const WILL_HOLD = {
+    lead: "Pressing this raises a question, not a change.",
+    detail: "Some risk — so Loom asks you before the page moves, and writes down what you decide.",
+    moves: false,
+  } as const
+
+  it("says what the Gate will do about the ask it is offering", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={WILL_HOLD}
+      />
+    )
+
+    expect(screen.getByText(WILL_HOLD.lead)).toBeTruthy()
+    expect(screen.getByText(/asks you before the page moves/)).toBeTruthy()
+  })
+
+  /**
+   * **Welded to the button, not to the panel**, which is what survives the
+   * narrow layout's reversal: the press, what it does to the page and what
+   * Loom does about it are three facts about one control, and a verdict
+   * reordered away from the button it is about is a verdict about nothing.
+   */
+  it("keeps the verdict inside the form it is about", () => {
+    const { container } = render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={WILL_HOLD}
+      />
+    )
+
+    const form = container.querySelector(`form:has(input[value="${DEMO_LEADING_PRESET}"])`)
+
+    expect(form).toBeTruthy()
+    expect(form?.contains(screen.getByText(WILL_HOLD.lead))).toBe(true)
+  })
+
+  /**
+   * And it follows the promise rather than leading it. The promise is about
+   * the page — *the appointments, the years and the waiting time come off* —
+   * and the verdict is about what Loom does with that. Read the other way
+   * round, a stranger is told a decision about a change they have not been
+   * told the shape of.
+   */
+  it("puts the verdict under the promise, not over it", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={WILL_HOLD}
+      />
+    )
+
+    const promise = screen.getByText(leadingAsk(ALL)!.promise)
+    const verdict = screen.getByText(WILL_HOLD.lead)
+
+    expect(
+      promise.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  /**
+   * The hedge gives way to the fact, and only to the fact.
+   *
+   * *"Some changes it makes on its own, some it won't make without asking you
+   * first"* is a stand-in for something the surface could not state. With the
+   * statement directly below it, the stand-in is three lines of *maybe* over a
+   * line of *this one will* — so the claim stays and the hedge goes.
+   */
+  it("drops the hedge when it has the fact, and keeps the claim", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={WILL_HOLD}
+      />
+    )
+
+    expect(screen.queryByText(/won’t make without asking you/i)).toBeNull()
+    expect(screen.getByText(/weighs every ask before it lands/i)).toBeTruthy()
+    expect(screen.getByText(/writes down what it did/i)).toBeTruthy()
+  })
+
+  /**
+   * And restores it when there is nothing to foretell. Nothing is removed from
+   * this surface: a deployment whose leading ask never reaches a verdict shows
+   * the sentence exactly as it has always shown it.
+   */
+  it("keeps the whole sentence when the Gate has said nothing", () => {
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
+
+    expect(screen.getByText(/won’t make without asking you/i)).toBeTruthy()
+  })
+
+  /**
    * A re-theme is one configure against the page root, and an excerpt of the
    * root is the whole page rendered a second time inside the rail beside it. It
    * comes over absent, and absent has to render as nothing rather than as an

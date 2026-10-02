@@ -31,12 +31,12 @@ const ELABORATION = "Explain it back"
 /**
  * Prompts across the written lessons that name a lesson other than their own.
  *
- * 30 of the course's 31 lessons have one. Lesson 01 does not and cannot — there
+ * 31 of the course's 32 lessons have one. Lesson 01 does not and cannot — there
  * is nothing behind it — which is the one row in this census that is a fact about
  * the course rather than about the parser, and it is why the total is pinned
  * alongside the per-lesson count rather than instead of it.
  */
-const LESSONS_WITH_A_DERIVATION = 30
+const LESSONS_WITH_A_DERIVATION = 31
 
 const promptsOf = (file: string) =>
   promptSet(section(readLesson(file), ELABORATION)?.blocks ?? [])?.prompts ?? []

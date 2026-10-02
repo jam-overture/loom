@@ -4,7 +4,7 @@
 **Date:** 2026-10-01
 **Section:** §1 (process) — the harness
 **Branch:** `framework-63-nothing-can-see-a-box`, off `main` at `ee9c1d5`. **Not stacked**: this lane has no open pull request
-**Records added:** [0212](../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md). **None superseded**
+**Records added:** [0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md). **None superseded**
 **Findings closed:** one. **Filed:** one
 
 ```
@@ -91,7 +91,7 @@ write it.
 
 ## Five things that had to be decided rather than inherited
 
-All five are in 0212 with the reasoning; the short version is that each is a way
+All five are in 0213 with the reasoning; the short version is that each is a way
 this could have become a test runner with a camera attached.
 
 | | |
@@ -126,7 +126,7 @@ The finding's sharpest sentence is that **nothing can fail if the payoff card
 grows back past the fold**. After this, still nothing can. The number appears in
 the run's output and a person has to read it.
 
-That is deliberate and 0212 argues it: the first run of this instrument across
+That is deliberate and 0213 argues it: the first run of this instrument across
 six lanes' surfaces will find blocks below the fold on pages nobody considers
 broken — this run's own first output has six of them on `/demo`, every one of
 them a rail doing exactly what a scroller does — and a gate that goes red on all
@@ -153,8 +153,8 @@ question below.
 staleness.** The baseline `pnpm verify` was started on a clean `main` and then
 edited *underneath*, because the run began work while it was still going. Lesson
 28's exercise D reads every citation in `decisions/`, `src/` and `tools/` off
-disk at test time, so the `0212` links written into `tools/specimen/` an hour
-before `0212` existed came back as two refused citations and the lesson's
+disk at test time, so the `0213` links written into `tools/specimen/` an hour
+before `0213` existed came back as two refused citations and the lesson's
 recorded transcript drifted. **`main` is green at `ee9c1d5`**, exactly as #473
 says it is; the red was this branch's work landing in the middle of its own
 baseline. Filed, because the trap is general and the symptom names another
@@ -193,7 +193,7 @@ The second was the citation trap above.
 
 ## Open questions
 
-**A per-shot height budget.** Named in 0212 as the next ask and deliberately not
+**A per-shot height budget.** Named in 0213 as the next ask and deliberately not
 built. The shape it wants is a number a lane declares per selector, failing the
 run when a box exceeds it — which is an assertion, so it needs 0159 revisited
 rather than extended, and it needs a run's worth of readings first.

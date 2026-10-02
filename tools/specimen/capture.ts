@@ -476,7 +476,7 @@ export type Shot = Approach & {
    * it is taken.
    *
    * It prints and it does not assert, which is the whole of
-   * [0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md).
+   * [0213](../../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md).
    * Nothing here can fail a run: a selector that matches nothing reports `no
    * match`, a block below the fold reports how far below, and which of those
    * readings is a defect is the report's to say.
@@ -494,6 +494,25 @@ export type ShotResult = {
   readonly clipped: boolean
   /** One entry per selector the shot asked about, in the order it asked. */
   readonly measured: readonly MeasuredSelector[]
+}
+
+/**
+ * What `describeShot` needs, which is less than the harness produces.
+ *
+ * `captureShots` always takes the measurement, even when the shot asked about
+ * nothing — so `ShotResult` keeps `measured` required and a reading is never
+ * silently missing from a real run. But the formatter is also the only part of
+ * this harness anything outside it builds a result *for*: a lesson teaching
+ * what a report's line is made of hand-builds the shape, and such a shot has
+ * no measurement to speak of rather than an empty one it had to remember to
+ * write down.
+ *
+ * So the reader asks for less than the producer promises. Both facts stay
+ * true, neither side has to be weakened to the other, and the one place that
+ * reads the field is where the absence is handled.
+ */
+export type DescribableShot = Omit<ShotResult, "measured"> & {
+  readonly measured?: readonly MeasuredSelector[]
 }
 
 export type CaptureOptions = {
@@ -655,7 +674,7 @@ const describeSelector = (
   ]
 }
 
-export const describeShot = (result: ShotResult): string => {
+export const describeShot = (result: DescribableShot): string => {
   const head =
     `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x  ` +
     `scrollWidth ${result.overflow.scrollWidth} / innerWidth ${result.overflow.innerWidth}` +
@@ -676,6 +695,6 @@ export const describeShot = (result: ShotResult): string => {
       : `${head}  ← ${clipped.length} clipping ${clipped.length === 1 ? "box hides" : "boxes hide"} content`,
     ...shown.map((box) => `    ${box.element}  content reaches ${box.reach} in ${box.width}`),
     ...(rest > 0 ? [`    …and ${rest} more`] : []),
-    ...result.measured.flatMap((entry) => describeSelector(entry, result.viewport)),
+    ...(result.measured ?? []).flatMap((entry) => describeSelector(entry, result.viewport)),
   ].join("\n")
 }

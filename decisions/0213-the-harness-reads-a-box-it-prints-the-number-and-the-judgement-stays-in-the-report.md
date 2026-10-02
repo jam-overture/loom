@@ -1,8 +1,18 @@
-# 0212. The harness reads a box, it prints the number, and the judgement stays in the report
+# 0213. The harness reads a box, it prints the number, and the judgement stays in the report
 
 **Status:** Accepted
 **Date:** 2026-10-01
 **Section:** §1 (process)
+
+> **2026-10-02 — renumbered from 0212, and one clause added to the fifth
+> decision.** `0212` went to [#477](https://github.com/jam-overture/loom/pull/477)
+> while this branch was open; two routines wrote the same number on the same day,
+> which is the collision `FINDINGS.md` has now recorded three times. Nothing this
+> record decides changed. The one addition is a clause under *the judgement is
+> in Node and the reading is in the page*: the formatter takes
+> `DescribableShot`, so a shot built by hand need not carry a measurement while
+> the harness's own result still always does. That is a clarification of where
+> the split already fell, not a new direction.
 
 ## Context
 
@@ -114,6 +124,18 @@ whether that rectangle fits is arithmetic. `insideViewport` and `pastTheFold`
 are pure functions over six numbers and a viewport, so the rules they encode are
 tested without a browser instead of checked by taking a photograph and reading
 the output.
+
+**And the formatter asks for less than the harness promises.** `describeShot` is
+the one part of this instrument that something outside it builds a result *for* —
+a lesson teaching what a report's line is made of hand-builds the shape, which is
+how this clause came to be written at all. `ShotResult` keeps `measured`
+required, because `captureShots` always takes the reading and a measurement
+missing from a real run must not be a silent `undefined`. `DescribableShot` makes
+it optional, and the formatter takes that. Both facts are true at once: a shot
+that measured nothing carries an empty list, and a shot that is not the harness's
+has nothing to say about selectors at all. The alternative — one type, weakened
+to the weaker caller — would have the producer promise less than it delivers, and
+the next hand-built shot would find out the same way this one did.
 
 **`measure` is `pnpm shoot`'s and not a specimen's**, and the reason is the same
 shape as 0159's reason for withholding `do` from a static specimen. A specimen

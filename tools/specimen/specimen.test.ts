@@ -1018,7 +1018,7 @@ describe("the boxes a lane asked the size of", () => {
   /**
    * A selector that stops matching is the thing a lane most wants to be told,
    * and it arrives as a reading rather than as a failed run — which is
-   * 0212's line: this prints, and nothing in it decides an exit code.
+   * 0213's line: this prints, and nothing in it decides an exit code.
    */
   it("reports a selector that matched nothing, and does not fail the shot", async () => {
     const { browser } = fakeBrowser([])
@@ -1058,6 +1058,70 @@ describe("the boxes a lane asked the size of", () => {
     expect(lines).toHaveLength(1 + MEASURED_SHOWN + 1)
     expect(lines[1]).toContain("(1 of 24)")
     expect(lines[lines.length - 1]).toBe("    …and 4 more matches")
+  })
+
+  /**
+   * The case that put this field's contract in the open: `#476` was green on
+   * its own branch and red the moment `main` arrived, because lesson 32
+   * hand-builds a shot result to teach what a report's line is made of, and a
+   * hand-built shot has no measurement in it.
+   *
+   * `DescribableShot` is the answer, and this is the test that holds it: the
+   * formatter takes a result whose `measured` is simply absent and prints the
+   * shot's own line, the same as one that measured nothing. The producer's
+   * guarantee is untouched — `captureShots` still always carries the field —
+   * so neither side had to be weakened to the other.
+   */
+  it("prints a hand-built shot that carries no measurement at all", () => {
+    const overflow = { scrollWidth: 390, innerWidth: 390, clipped: [] }
+
+    const handBuilt = describeShot({
+      name: "a-page-with-nothing-wrong-with-it",
+      file: "reports/a-page-with-nothing-wrong-with-it.png",
+      viewport: PHONE,
+      overflow,
+      overflowed: false,
+      clipped: false,
+    })
+
+    expect(handBuilt).toBe(
+      "a-page-with-nothing-wrong-with-it  390x844@2x  scrollWidth 390 / innerWidth 390"
+    )
+    expect(handBuilt).toBe(
+      describeShot({
+        name: "a-page-with-nothing-wrong-with-it",
+        file: "reports/a-page-with-nothing-wrong-with-it.png",
+        viewport: PHONE,
+        overflow,
+        overflowed: false,
+        clipped: false,
+        measured: [],
+      })
+    )
+  })
+
+  /**
+   * An absent measurement must not swallow the readings that come before it:
+   * the clipped lines are the page's own business and are taken whether a lane
+   * asked about a selector or not.
+   */
+  it("still prints the clipped lines when no measurement was carried", () => {
+    const lines = describeShot({
+      name: "a-clip-hides-an-overflow",
+      file: "reports/a-clip-hides-an-overflow.png",
+      viewport: PHONE,
+      overflow: {
+        scrollWidth: 390,
+        innerWidth: 390,
+        clipped: [{ element: "div > div", reach: 370, width: 346 }],
+      },
+      overflowed: false,
+      clipped: true,
+    }).split("\n")
+
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toContain("← 1 clipping box hides content")
+    expect(lines[1]).toBe("    div > div  content reaches 370 in 346")
   })
 
   /** Rounded for the line and never at the source. `ElementBox` says why. */

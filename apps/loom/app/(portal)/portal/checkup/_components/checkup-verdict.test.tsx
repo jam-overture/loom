@@ -13,6 +13,7 @@ import {
 } from "@jam-overture/loom"
 
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
+import { surfaceOf } from "@/app/(portal)/_test/rendered"
 
 import { CheckupVerdictPanel } from "./checkup-verdict"
 
@@ -53,22 +54,6 @@ const agreeing = (idReturns: readonly IdReturn[] = []) =>
 
 const diverged = (count: number) =>
   describeAudit({ outcome: "diverged", revision: count, ...drifted(count), idReturns: [] })
-
-/**
- * What a reader meets without clicking anything: the rendered text with every
- * disclosure's contents taken out.
- *
- * Written as a removal from a clone rather than by subtracting strings, because
- * a screen with two disclosures on it needs both gone and `replace` takes the
- * first.
- */
-const surfaceOf = (container: HTMLElement): string => {
-  const shown = container.cloneNode(true) as HTMLElement
-
-  for (const disclosure of shown.querySelectorAll("details")) disclosure.remove()
-
-  return shown.textContent ?? ""
-}
 
 /**
  * The rule this surface is rebuilt on, asserted rather than trusted: **nothing

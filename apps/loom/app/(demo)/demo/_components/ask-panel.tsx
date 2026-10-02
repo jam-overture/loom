@@ -10,6 +10,7 @@ import {
   ASKS_HEADING_WHILE_WAITING,
   type SetAside,
 } from "@/app/(demo)/_lib/set-aside"
+import type { WillSay } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { askForChange } from "../actions"
 
@@ -84,12 +85,34 @@ import { askForChange } from "../actions"
 const WHAT_EVERY_ASK_MEETS =
   "Loom weighs every ask before it lands: some changes it makes on its own, some it won’t make without asking you first. Either way, it writes down what it did."
 
+/**
+ * The same claim, less the hedge — for the screen where the hedge has been
+ * replaced by the truth about the button under it.
+ *
+ * **Nothing is removed and this is not a second voice.** The sentence above
+ * does two jobs: it says Loom weighs every ask and writes down what it did,
+ * which is the claim; and it says *some* asks wait for you, which is a hedge
+ * standing in for a fact the surface could not state. `what-it-will-say.ts`
+ * can state it — for the one ask this panel invites, computed by the Gate
+ * itself — so on that screen the hedge is three lines of *maybe* directly
+ * above a line of *this one will*. The claim stays; the stand-in goes.
+ *
+ * It is not deleted, because a deployment can still have nothing to foretell:
+ * an ask the tree gives nothing to do, or a panel with no leading ask at all,
+ * gets the full sentence exactly as it has always had it. Both are asserted,
+ * and `ask-panel.test.tsx` holds the property that matters either way — a
+ * visitor meets the claim before they meet anything to press.
+ */
+const WHAT_EVERY_ASK_MEETS_BRIEFLY =
+  "Loom weighs every ask before it lands, and writes down what it did."
+
 export const AskPanel = ({
   revision,
   available,
   modelConfigured,
   waiting,
   leading,
+  willSay,
 }: {
   readonly revision: number
   readonly available: readonly DemoPresetId[]
@@ -123,6 +146,20 @@ export const AskPanel = ({
     /** Absent when the ask names the page itself, which the re-theme does. */
     readonly part?: ReactNode
   }
+  /**
+   * What the Gate says about the leading ask, run against this tree before
+   * anybody pressed it (`_lib/what-it-will-say.ts`).
+   *
+   * Computed by the page for the reason the nomination is not: reaching a
+   * verdict is `async`, and a client component cannot await one. What crosses
+   * the boundary is two sentences the runtime produced, not a runtime.
+   *
+   * Absent on its own terms rather than with `leading`: there is a lead
+   * whenever an ask is on offer, and there is a verdict only when that ask
+   * reached the Gate. The panel reads the two separately and the absence of
+   * this one is what restores the fuller sentence above.
+   */
+  readonly willSay?: WillSay
 }) => {
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
@@ -188,15 +225,32 @@ export const AskPanel = ({
         * promise and this sentence directly under it — which is the same three
         * facts in the same 200 pixels, rather than three facts and no button.
         *
-        * The sentence stays on the first screen either way. That is the
-        * property the placement was chosen for — the lead is a change the Gate
-        * *holds*, so the first press moves nothing, and a stranger who was not
-        * told that has watched a button do nothing — and it is unchanged: at
-        * 348 × 465 the button, its promise and this sentence are all above the
-        * fold together, which is more than was true of any of them before.
+        * **What is on the first screen, re-measured, and the claim this
+        * comment used to make is no longer true.** It said that at 348 × 465
+        * the button, its promise and this sentence were all above the fold
+        * together. Driven against a production build at that size today, the
+        * button is 325–471, the promise 383–415, and the sentence **487–524**:
+        * it is below the fold, and arithmetic says it already was before the
+        * verdict was added — the header has gained a line and a chip row since
+        * the measurement was taken, and nothing re-took it.
+        *
+        * What is above the fold is the thing the property was *for*. The lead
+        * is a change the Gate holds, so the first press moves nothing, and a
+        * stranger who was not told that has watched a button do nothing. The
+        * sentence was the stand-in that said so; `willSay` says it about this
+        * button, computed, and it sits 423–471 — inside the form, where the
+        * reversal keeps it welded to the press. At 390 × 844 all four are on
+        * the first screen. At 348 × 465 the verdict's third line is clipped by
+        * **6px**, which is this run's cost and is in its report.
+        *
+        * A measurement in a comment is a claim with a date on it. This one is
+        * 1 October 2026, and the next run to move anything above this block
+        * owes it another.
         */}
       <div className="flex flex-col-reverse gap-4 lg:flex-col">
-        <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
+        <p className="text-ink-secondary text-sm">
+          {willSay === undefined ? WHAT_EVERY_ASK_MEETS : WHAT_EVERY_ASK_MEETS_BRIEFLY}
+        </p>
 
         {lead && (
           <form action={submit} className="flex flex-col gap-1.5">
@@ -226,6 +280,59 @@ export const AskPanel = ({
               * stays welded to it rather than being reordered away from it.
               */}
             <p className="text-ink-muted text-xs">{lead.promise}</p>
+
+            {/*
+              * And what Loom will say about it, which is the other half of
+              * what a stranger needs before pressing anything and the half
+              * this panel has never had.
+              *
+              * The promise above is about the *page* — it is `presets.ts`'s
+              * and it is deliberately silent about the verdict, because a
+              * typed label naming one would be a surface predicting a decision
+              * it does not make. This line is about the *Gate*, and it is
+              * silent about nothing because it is not typed: `composeChange`
+              * ran, against this tree, under this policy, with this preset's
+              * own interpreter, and what is printed is its answer
+              * (`_lib/what-it-will-say.ts`).
+              *
+              * **Inside the form, directly under the promise**, for the reason
+              * the promise is: both are facts about this one button and the
+              * narrow layout reorders the block around them. Welded here, the
+              * press, what it does to the page, and what Loom does about it
+              * travel as one thing to whichever end of the screen the layout
+              * puts them.
+              *
+              * The lead is the sentence that stops the first press reading as
+              * a broken button. `DEMO_LEADING_PRESET` is a change the Gate
+              * holds — that is the whole of why it is the lead — so *Pressing
+              * this raises a question, not a change* is the expectation this
+              * surface most needs to set and the one a stranger has had to
+              * infer from a hedge about asks in general.
+              *
+              * **Two lines and no panel**, which is the restraint that keeps
+              * this from being the card's argument made early. The weighing,
+              * the rule and the ceiling comparison stay on the card, where the
+              * tense is right and where a visitor is deciding rather than
+              * browsing; what is here is strictly less than what lands there,
+              * so the press reads as a promise kept.
+              *
+              * **And the rule is the neutral edge, not the awaiting amber**,
+              * although the words say a question is coming. Amber on this rail
+              * means *there is a question open and it is yours* — it is the
+              * badge, the ring on the stage, the sticky caution and the rule
+              * on the card's *what would happen*, all about one live hold. No
+              * hold exists here: nobody has asked for anything, and a fifth
+              * amber mark standing for a question that has not been raised
+              * would make the arrival screen look like a screen with work on
+              * it. The tone is earned by the press, which is the same rule the
+              * spotlight follows.
+              */}
+            {willSay && (
+              <p className="text-ink-secondary border-edge-subtle mt-0.5 border-l-2 pl-2.5 text-xs">
+                <strong className="text-ink font-medium">{willSay.lead}</strong>{" "}
+                {willSay.detail}
+              </p>
+            )}
           </form>
         )}
       </div>

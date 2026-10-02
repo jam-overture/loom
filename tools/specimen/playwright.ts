@@ -320,7 +320,7 @@ const readClippingBoxes = (): readonly ClippingBox[] => {
  * which of these readings is a defect is all arithmetic over these six, so all
  * of it is in Node where it can be tested without a browser — the same split
  * `readClippingBoxes` and `clippedFrom` are on, for the same reason
- * ([0212](../../decisions/0212-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
+ * ([0213](../../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
  *
  * **Not one named helper inside it**, and the flat loop is that rule rather
  * than a style — `readClippingBoxes` above says why at length: the compiler
