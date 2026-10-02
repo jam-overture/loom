@@ -76,6 +76,23 @@ describe("willSayOf", () => {
   })
 
   /**
+   * And each of the three gets its **own** standing, which is the half of the
+   * verdict a row and a count read instead of the sentence.
+   *
+   * Asserted separately from the sentences because it is a separate failure:
+   * a standing that collapses two outcomes into one leaves every sentence on
+   * the screen correct and makes the arithmetic over them wrong. The refusal
+   * is the row that matters here — nothing on the shipped preset table reaches
+   * it against the starting page, so a defect in that one branch is invisible
+   * to every other test in this lane.
+   */
+  it("gives each of the three answers a standing of its own", () => {
+    expect(willSayOf(outcome("awaiting-confirmation", "medium"))?.standing).toBe("asks-you")
+    expect(willSayOf(outcome("applied", "low"))?.standing).toBe("on-its-own")
+    expect(willSayOf(outcome("rejected", "critical"))?.standing).toBe("refuses")
+  })
+
+  /**
    * The level is the portal's word for it and not a fourth wording of one
    * scale. A visitor told *Some risk* here, the same visitor told *Some risk*
    * on the card one press later, and a reviewer told it in the queue are

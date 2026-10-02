@@ -206,15 +206,17 @@ read in a separate command.
 
 | | `main` at `f4d2b9c` | this branch |
 | --- | --- | --- |
-| `@jam-overture/loom` (`src/`, `tools/`) | VERIFY_SRC | **VERIFY_SRC** — `src/` untouched |
-| `@loom/app` (`apps/loom/`) | VERIFY_APP_MAIN | **VERIFY_APP** |
-| the demo lane, measured | **716** in 47 files | **739** in 49 files |
-| findings | FINDINGS_MAIN | **FINDINGS_BRANCH**, 0 malformed |
+| `@jam-overture/loom` (`src/`, `tools/`) | 173 files / 3,560 | **173 / 3,560** — `src/` untouched |
+| `@loom/app` (`apps/loom/`) | 359 / 6,322, 0 skipped | **361 / 6,346**, 0 skipped |
+| the demo lane, measured | **716** in 47 files | **740** in 49 files |
+| findings | 949 | **949**, 0 malformed — three appended, none filed |
 
-**+23 lane tests, all written**: seven in `how-many-wait-for-you.test.ts`, five
+**+24 lane tests, all written**: seven in `how-many-wait-for-you.test.ts`, six
 in `what-it-will-say.test.ts`, six in `ask-panel.test.tsx`, four in
-`what-each-row-says.test.ts` and one in `pipeline.test.ts`. Nothing weakened,
-skipped or deleted.
+`what-each-row-says.test.ts` and one in `pipeline.test.ts`. Both totals moved by
+exactly 24, so none of it is a file-driven sweep picking up the two new modules —
+every one was written. Nothing weakened, skipped or deleted. 124 prerendered
+pages, 1,461 text junctions, 0 run together.
 
 **The one test that earns its place over all the others** is the last of those.
 `pipeline.test.ts` already held each foretold verdict against its own press. The
@@ -226,7 +228,7 @@ failure it is really there for is a split taken over the wrong set — one count
 the preset table rather than the asks on offer reads *5* over four rows the first
 time a visitor opens a question.
 
-**It went red twice, both from reading the file rather than from a surprise.**
+**It went red twice during the unit, and once more in the matrix.**
 A first version of the join test tallied `"awaiting-confirmation"`, which is the
 runtime's word for a composition outcome and not `RecordOutcome`'s word for a
 held record (`awaiting-you`) — so three real holds counted as zero and the test
@@ -241,11 +243,38 @@ a new place, and caught by the diff's size rather than by a test.
 Each defect restored in turn **against the commit**, the demo lane run against
 it, and the lane restored from `HEAD` between rows — which is only safe because
 the unit was committed first, and that is this lane's own finding of 1 October
-being obeyed rather than rediscovered. Baseline **739 passed**.
+being obeyed rather than rediscovered. Baseline **740 passed**.
 
 | defect restored | caught |
 | --- | --- |
-| MATRIX |
+| the panel counts the preset table instead of what it is offering | **34** |
+| the two clauses swap, so the count says it the wrong way round | **6** |
+| the lead's verdict is looked up under the wrong key | **4** |
+| the read path judges under the shipped default instead of `demoPolicy` | **4** |
+| the split is never used — the claim never gives way | **3** |
+| a held ask is marked as one Loom goes ahead with | **2** |
+| a split of one is printed, restating the verdict directly above it | **2** |
+| every row reads the same, so the count proves nothing | **1** |
+| a refusal is marked as one Loom goes ahead with | **1** |
+| the *page* counts the preset table instead of the asks on offer | **0** |
+
+**Nine of ten, and the tenth is not a defect.** Handing `whatEachWillSay` every
+preset id rather than `rail.available` changes nothing a visitor sees: the panel
+counts and marks what **it** is offering, so an extra answer in the set is
+ignored, and the cost is a tree walk nobody reads. That is the shape of this
+change working — the readings moved off `page.tsx` and into a file a test can
+mount, so the one thing the page can still get wrong is wasted work rather than a
+wrong sentence.
+
+**Two of the ten were caught only after a test was written for them.** The first
+pass left *a refusal is marked as one Loom goes ahead with* at **0**, and it was
+the honest result: nothing on the shipped preset table is refused against the
+starting page, so that branch of `willSayOf` is unreachable from every other test
+in this lane, and a standing that collapsed it into *goes ahead* would have left
+every sentence on the screen correct and the arithmetic over them wrong. One
+test now asserts all three standings directly. The other was a badly built
+defect rather than a gap — a policy spread that changed no field the Gate reads —
+and it is in the table above as the real thing, rebuilt and caught four times.
 
 ## Decisions taken that were not specified
 
