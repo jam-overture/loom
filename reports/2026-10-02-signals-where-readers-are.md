@@ -1,7 +1,12 @@
 # Reader signals — where readers are, counted once per reader
 
 **Routine:** `Loom signals` · **Date:** 2 October 2026 · **Branch:**
-`signals-03-where-readers-are`
+`signals-03-where-readers-are` · **Pull request:** #479
+
+**Preview:** https://loom-git-signals-03-where-re-57050c-jpizzolato36-6341s-projects.vercel.app
+— **not visited from this session**, because `*.vercel.app` is denied by this
+environment's egress policy, and nothing here renders anything anyway: it is a
+server-side counter with no surface of its own until the portal builds one.
 
 ## What I completed
 
