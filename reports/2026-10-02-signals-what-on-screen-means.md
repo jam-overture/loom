@@ -1,12 +1,13 @@
 # Reader signals — what *on screen* means, published, and the hidden tab nothing was holding
 
 **Routine:** `Loom signals` · **Date:** 2 October 2026 · **Branch:**
-`signals-04-what-on-screen-means` · **Pull request:** #485
+`signals-04-what-on-screen-means` · **Pull request:** #486
 
-**Preview:** _the Vercel preview, linked from the pull request_ — **not visited from this
-session** (`*.vercel.app` is denied by this environment's egress policy), and
-nothing in this change has a surface: it publishes two constants, adds tests and
-writes three paragraphs of documentation.
+**Preview:** https://loom-git-signals-04-what-on-c93b9e-jpizzolato36-6341s-projects.vercel.app
+— **not visited from this session** (`*.vercel.app` is denied by this
+environment's egress policy), and nothing in this change has a surface anyway: it
+publishes two constants, adds tests, and writes three paragraphs of
+documentation.
 
 ## What I completed
 
