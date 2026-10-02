@@ -392,7 +392,7 @@ describe("which door a reader should have gone through instead", () => {
         slug: "signals-broadcast",
         avoids: ["zod"],
         shared: 14,
-        files: 9,
+        files: 10,
       },
     ])
   })

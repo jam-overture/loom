@@ -40753,7 +40753,19 @@ safe.
 ## 2026-10-02 — a node that leaves the page while the tab is in the background is credited with the whole time the tab was hidden, and the mutation that proves it passes the runtime's own ledger suite
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/ledger.ts`)
-· **Status:** open — **a latent defect, not a live one.** The code on `main` is
+· **Status:** **closed by `signals-04-what-on-screen-means`** — the case asked
+for, the case at the broadcaster, and a sweep of every short sequence. **One
+correction to the finding, in the lane's favour and against its own reading:**
+`drain`'s `if (!hidden)` is **not** redundant. Removing it is not an equivalent
+mutation, because `drain` while hidden sets `since = now` on every entry `hid`
+had closed — so the next `left` in that hidden tab accrues from the delivery. It
+was unfalsifiable rather than redundant: nothing closed a stretch from the hidden
+direction, which is the very gap this finding named. It is also load-bearing on
+*every* tab-hide in the real broadcaster, which calls `ledger.hid(now)` and then
+`flush()` (`broadcast.ts:601`). Three tests now fail against the deleted
+`since = null` and two against the deleted guard; both were at zero.
+
+Originally filed as: **a latent defect, not a live one.** The code on `main` is
 correct; what is missing is anything that would notice if it stopped being.
 
 Found while holding *What your readers do*'s new caveat for `dwelled` — *"a tab
@@ -40816,7 +40828,19 @@ repository half to be the guard.
 ## 2026-10-02 — "on screen" is two numbers inside an unexported function, so no page can say what `viewed` actually measures without typing them
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`)
-· **Status:** open — **a documentation gap with a one-line remedy**, and the
+· **Status:** **closed by `signals-04-what-on-screen-means`** — the two names the
+finding asked for, `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION`,
+published from **`@jam-overture/loom/signals`** (not from `/signals/broadcast`,
+and that is the whole of [0215](decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)):
+a name a browser entry point *exports* survives minification, so exporting them
+there measured **+77 bytes minified, +42 gzipped** on every page that broadcasts,
+against **+0 minified** for the same two numbers imported into `broadcast.ts`
+from `readable.ts`. They are not configuration and changing either is a record,
+because a rollup cannot record the threshold a browser applied. The rule itself
+stays unexported and is now tested through a doubled `IntersectionObserver` —
+`src/signals/readable.test.ts`, the first test in `src/` to reach it.
+
+Originally filed as: **a documentation gap with a one-line remedy**, and the
 page is written around it rather than blocked by it.
 
 `isReadable` decides what *came into view* means:
@@ -41196,3 +41220,35 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-02 — the sentence the portal lane asked for is in `parts.ts`, and the state it argues about is now held by two tests
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:**
+**informational — nothing to do.** Written here rather than as a status on the
+entry it answers, because that entry is on `portal-45-what-did-people-skip` and
+has not reached `main`; editing it from this branch would be two lanes writing one
+line.
+
+`Loom portal` filed *a page cannot report that every one of its parts went
+unread* on 2 October, having designed, written and commented a `StopsAt.everything`
+state before a test found it unreachable, and asked for **one sentence where the
+vocabulary is**. It is in `PartStanding`'s doc comment on
+`signals-04-what-on-screen-means`, in the lane's own words and with the reasoning
+the entry supplied:
+
+- `skipped` means no row names the part and `PageReading.views` is the largest
+  `views` any one row reports, **both read off the same rows** — so every part
+  being skipped needs a window with no row for any part, which makes `views` zero,
+  which makes every part `unknown` instead;
+- the one input that does produce it is a row naming a node the revision does not
+  have, which is `orphaned` and is the state a consumer should refuse to draw;
+- and the reachable neighbour worth a screen is **rows exist and not one reports
+  reach** — a page whose parts are not reporting, not a page nobody scrolled.
+
+**Two tests now hold it**, which the entry did not ask for and is the part worth
+knowing about downstream: *cannot report every part skipped, because the rows that
+would say so are the rows that set the floor*, and the orphaned row that does
+produce it — asserting `standings` of `{ read: 0, skipped: 5, unknown: 0 }`
+together with `orphaned` naming the row. So a future change that made the
+impossible state reachable would go red here rather than on a portal screen.
