@@ -137,12 +137,12 @@ arrivals. The journal contract suite now fails if either implementation keeps it
 
 | | |
 | --- | --- |
-| Runtime suite | **173 files, 3,525 tests, 0 failed** (3,462 before) |
+| Runtime suite | **173 files, 3,526 tests, 0 failed** (3,462 before) |
 | Application suite | **356 files, 6,285 passed, 1 skipped, 0 failed** (6,262 before) |
 | `findings:check` | 939 findings, 0 malformed |
 | `prerender:check` | 122 pages, 1,451 text junctions, 0 run together |
 
-**86 tests added**, nothing skipped and no existing test weakened. Two existing
+**87 tests added**, nothing skipped and no existing test weakened. Two existing
 assertions changed, both because an outcome gained a field rather than changed a
 meaning: `ingestReaderSignals` now reports `regions: 0` when nobody said where a
 delivery came from, and the Postgres row-security sweep now names four tables.
@@ -214,6 +214,20 @@ with `git checkout HEAD --` between rows.
 | 2 | `regionCountsOf` counting batches instead of distinct view keys | `region.test.ts` — *counts one view when the same opening arrives twice* |
 | 3 | the floor clamped with `Math.min` rather than `Math.max` | `region.test.ts` — *cannot be lowered*, and the settings suite |
 | 4 | the unplaced bucket subject to the floor | `region.test.ts` — *never withholds the readers it could not place* |
-| 5 | the region counted before the journal accepted the batch | `ingest.test.ts` — the refusing-journal case counted a bucket for a delivery that was refused |
+| 5 | the region counted before the journal accepted the batch | **nothing — and this is the row worth having run the matrix for.** See below |
 | 6 | the Postgres upsert setting `views` rather than adding to it | the contract suite, in both implementations, and the concurrency test |
 | 7 | the memory journal keeping the opening marker | the journal contract suite — *does not buffer the opening marker* |
+
+### Row 5, which the matrix caught and nothing else did
+
+Moving the region count to *before* `journal.receive` left all twenty-one tests
+green. Every region test passed because the counting is right either way, and the
+one test that refuses a delivery did not pass a region store at all — so a
+deployment whose database refused a batch would have counted the reader who sent
+it, and the bucket would have said a reader arrived from a country and read
+nothing.
+
+`counts no region for a delivery the buffer refused` is the test that was
+missing. It fails against the defect and passes on the final tree, and it is the
+87th of the 87 added — written after the matrix rather than before it, which is
+the honest order and the reason the matrix is run at all.

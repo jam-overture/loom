@@ -241,6 +241,26 @@ describe("where a delivery came from", () => {
     expect(page.ok && page.value.batches).toHaveLength(1)
   })
 
+  /**
+   * The ordering, which is the half a passing region test would not notice. A
+   * region counted for a delivery the buffer then refused is a reader who
+   * arrived from a country and read nothing: every other counter about that page
+   * view is missing, and the one number that is there is the one about where
+   * they were.
+   */
+  it("counts no region for a delivery the buffer refused", async () => {
+    const regions = memoryReaderRegionStore()
+
+    const refused = await ingestReaderSignals(refusing(), opening(1), {
+      store: regions,
+      region: GB,
+      at: AT,
+    })
+
+    expect(refused.ok).toBe(false)
+    expect(await regionsIn(regions)).toEqual([])
+  })
+
   it("refuses an opening that names no page view, like any other malformed batch", async () => {
     const refused = await ingestReaderSignals(
       memoryReaderSignalJournal(),
