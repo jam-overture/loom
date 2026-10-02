@@ -22,6 +22,11 @@ import {
  * renders nothing once there are none, which is the point of it: the day a kind
  * lands, the announcement of it removes itself.
  *
+ * Every row additionally carries the gap between its name and the fact it stands
+ * for. That used to be printed only beside a kind the runtime had not got yet,
+ * which meant the one row most likely to be misread — a `completed`, named after
+ * something no page can observe — lost its caveat on the day it became real.
+ *
  * The fourth block on that page — the live one — is a client component, because
  * a broadcaster with no browser has nothing to report and a table of invented
  * batches is exactly what this site keeps refusing to ship.
@@ -74,19 +79,29 @@ const Cell = ({ children }: { readonly children: React.ReactNode }) => (
 export const WhatAPageMaySay = () => <>{producePlainly()}</>
 
 /**
- * The kinds, and one real signal of each.
+ * The kinds, what each one means, what it does **not**, and one real signal of
+ * each.
  *
  * The signals are printed beside the sentences because the sentences are the
  * easy half. "A region was opened" is a thing anybody could write; the JSON
  * under it is the runtime's schema having accepted that exact object, with the
  * node id of a node on the page above.
+ *
+ * The *does not mean* line is the one addition a reader of the old panel would
+ * notice, and it is here rather than in the prose for the reason the prose
+ * cannot do it: a caveat in a paragraph is read once, by somebody who has not
+ * yet met the name it is about, while this one sits against the row somebody is
+ * looking at when they decide what to count. It is styled as a counterweight to
+ * `means` — same size, muted, behind a hairline — because that is what it is.
+ * Dimming it further would make it a footnote, and the whole finding behind this
+ * block is that it is not one.
  */
 export const TheVocabulary = () => {
   const kinds = produceKinds()
 
   return (
     <Panel caption={`The whole vocabulary: ${kinds.length} kinds, and nothing else a page may say`}>
-      <ul className="m-0 flex list-none flex-col gap-0 p-0">
+      <ul className="m-0 flex list-none flex-col gap-0 p-0" data-vocabulary={kinds.length}>
         {kinds.map((row) => (
           <li key={row.kind} className="border-edge border-b px-3 py-3 last:border-b-0" data-kind={row.kind}>
             <p className="m-0 flex flex-wrap items-baseline gap-2">
@@ -98,7 +113,13 @@ export const TheVocabulary = () => {
             <p className="text-ink-muted m-0 mt-1 text-xs">
               On the page above: {row.here}
             </p>
-            <p className="text-ink-faint m-0 mt-1 font-mono text-xs">{row.carries}</p>
+            <p
+              className="border-edge text-ink-muted m-0 mt-2 border-l-2 pl-2 text-sm"
+              data-does-not-mean={row.kind}
+            >
+              {row.doesNotMean}
+            </p>
+            <p className="text-ink-faint m-0 mt-2 font-mono text-xs">{row.carries}</p>
             <pre className="text-ink-muted m-0 mt-2 overflow-x-auto font-mono text-xs leading-relaxed">
               {row.example}
             </pre>
