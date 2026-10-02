@@ -24,9 +24,13 @@ import {
   clips,
   CLIPPED_SHOWN,
   describeShot,
+  insideViewport,
+  MEASURED_SHOWN,
   overflows,
+  pastTheFold,
   type CaptureTarget,
   type ClippingBox,
+  type ElementBox,
   type Overflow,
   type Shot,
   type SpecimenBrowser,
@@ -266,7 +270,12 @@ const describeTarget = (file: string, target: CaptureTarget): string => {
 }
 
 const fakeBrowser = (
-  measurements: readonly Overflow[]
+  measurements: readonly Overflow[],
+  /**
+   * What a selector matches, by selector. Absent means no match, which is a
+   * reading the loop has to carry rather than an error.
+   */
+  boxes: Readonly<Record<string, readonly ElementBox[]>> = {}
 ): {
   browser: SpecimenBrowser
   /** Every address opened, and every start state applied before one. */
@@ -317,6 +326,11 @@ const fakeBrowser = (
           journal.push("measure")
           return measurement
         },
+        boxes: async (selectors, frame) => {
+          const where = frame === undefined ? "" : ` in ${frame}`
+          journal.push(`boxes ${selectors.join(", ")}${where}`)
+          return selectors.map((selector) => ({ selector, found: boxes[selector] ?? [] }))
+        },
         capture: async (file, target) => {
           written.push(describeTarget(file, target))
         },
@@ -337,6 +351,7 @@ const shotAt = (overrides: Partial<Shot> = {}): Shot => ({
   viewport: WIDE,
   do: [],
   fullPage: false,
+  measure: [],
   ...overrides,
 })
 
@@ -386,6 +401,7 @@ describe("taking the shots", () => {
         },
         act: async () => {},
         measure: async () => ({ scrollWidth: 0, innerWidth: 0, clipped: [] }),
+        boxes: async () => [],
         capture: async () => {},
         close: async () => {
           closed += 1
@@ -679,6 +695,7 @@ describe("taking the shots", () => {
         overflow: { scrollWidth: 1420, innerWidth: 390, clipped: [] },
         overflowed: true,
         clipped: false,
+        measured: [],
       })
     ).toBe("a-band-editorial-phone  390x844@2x  scrollWidth 1420 / innerWidth 390  ← overflows")
   })
@@ -799,6 +816,7 @@ describe("the boxes a page hides content inside", () => {
         },
         overflowed: false,
         clipped: true,
+        measured: [],
       })
     ).toBe(
       "a-band-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content\n" +
@@ -824,6 +842,7 @@ describe("the boxes a page hides content inside", () => {
       overflow: { scrollWidth: 390, innerWidth: 390, clipped: many },
       overflowed: false,
       clipped: true,
+      measured: [],
     }).split("\n")
 
     expect(lines[0]).toContain("← 8 clipping boxes hide content")
@@ -847,8 +866,394 @@ describe("the boxes a page hides content inside", () => {
   })
 })
 
+/**
+ * The reading nothing in this repository could take.
+ *
+ * Filed by `Loom demo` on 30 September, after four consecutive runs of three
+ * lanes had each written a throwaway `playwright-core` script in a scratch
+ * directory to answer *how tall is that*. Every unit those runs shipped was
+ * argued on a number none of them could show anybody.
+ */
+describe("the boxes a lane asked the size of", () => {
+  /**
+   * A box that fits `WIDE` on every edge and holds exactly what it shows, so
+   * each test below states its own one departure from fitting rather than
+   * inheriting two.
+   */
+  const box = (overrides: Partial<ElementBox> = {}): ElementBox => ({
+    x: 24,
+    y: 24,
+    width: 352,
+    height: 800,
+    scrollHeight: 800,
+    clientHeight: 800,
+    ...overrides,
+  })
+
+  it("prints the rectangle under the shot's own line, indented like a clipping box", () => {
+    expect(
+      describeShot({
+        name: "the-rail",
+        file: "reports/the-rail.png",
+        viewport: WIDE,
+        overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+        overflowed: false,
+        clipped: false,
+        measured: [{ selector: "aside", found: [box()] }],
+      })
+    ).toBe(
+      "the-rail  1280x900@2x  scrollWidth 1280 / innerWidth 1280\n" +
+        "    aside  x 24 y 24  352x800"
+    )
+  })
+
+  /**
+   * The claim `Loom demo` has made in four reports and could not evidence:
+   * *857px of rail holding 1,239px of asks*. Both numbers, because the
+   * difference alone says how much is hidden and not where the remedy is.
+   */
+  it("names the content extent of a box holding more than it shows", () => {
+    const [, line] = describeShot({
+      name: "the-rail",
+      file: "reports/the-rail.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "aside", found: [box({ scrollHeight: 1239 })] }],
+    }).split("\n")
+
+    expect(line).toBe("    aside  x 24 y 24  352x800  holding 1239 in 800")
+  })
+
+  /**
+   * A box whose content fits says nothing about it. Every element on a page is
+   * one, so a line per element saying `holding 857 in 857` is a line no report
+   * would paste and a wall every lane would learn to scroll past.
+   */
+  it("says nothing about the extent of a box whose content fits", () => {
+    const [, line] = describeShot({
+      name: "the-rail",
+      file: "reports/the-rail.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "aside", found: [box()] }],
+    }).split("\n")
+
+    expect(line).not.toContain("holding")
+  })
+
+  /**
+   * The defect `Loom demo` shipped a unit to fix and had nothing that could
+   * fail if it came back: *the payoff card fits its frame*. A card that grows
+   * two lines puts the closing argument under the fold, and the suite stays
+   * green — so the number arrives in the run's own output instead.
+   */
+  it("says how far past the fold a block reaches", () => {
+    const [, line] = describeShot({
+      name: "the-card",
+      file: "reports/the-card.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "[data-payoff]", found: [box({ y: 120, height: 975 })] }],
+    }).split("\n")
+
+    expect(line).toBe("    [data-payoff]  x 24 y 120  352x975  ← 195 past the fold")
+  })
+
+  /**
+   * Scrolled above the top of the viewport is out of the picture too, and it
+   * has no number worth printing: *how far above* is a distance to somewhere
+   * the reader cannot get back to by reading on. Said, not measured.
+   */
+  it("calls a block above the top of the viewport outside it, without a distance", () => {
+    const [, line] = describeShot({
+      name: "the-lead",
+      file: "reports/the-lead.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "h1", found: [box({ y: -40, height: 60 })] }],
+    }).split("\n")
+
+    expect(line).toBe("    h1  x 24 y -40  352x60  ← outside the viewport")
+  })
+
+  /**
+   * `(n of m)` and not a bare repetition. The two facts a lane needs about the
+   * second row of a table are which row it is and how many rows there are, and
+   * the selector printed three times gives it neither — which is how a report
+   * quotes the wrong row's height with the right selector beside it.
+   */
+  it("numbers every match of a selector that matched more than once", () => {
+    const lines = describeShot({
+      name: "the-asks",
+      file: "reports/the-asks.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [
+        {
+          selector: "aside li[id]",
+          found: [
+            box({ y: 377, height: 358, scrollHeight: 358, clientHeight: 358 }),
+            box({ y: 751, height: 17, scrollHeight: 17, clientHeight: 17 }),
+          ],
+        },
+      ],
+    }).split("\n")
+
+    expect(lines.slice(1)).toEqual([
+      "    aside li[id] (1 of 2)  x 24 y 377  352x358",
+      "    aside li[id] (2 of 2)  x 24 y 751  352x17",
+    ])
+  })
+
+  /**
+   * A selector that stops matching is the thing a lane most wants to be told,
+   * and it arrives as a reading rather than as a failed run — which is
+   * 0213's line: this prints, and nothing in it decides an exit code.
+   */
+  it("reports a selector that matched nothing, and does not fail the shot", async () => {
+    const { browser } = fakeBrowser([])
+
+    const [result] = await captureShots(
+      [shotAt({ measure: ["text=Put it back"] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(result?.measured).toEqual([{ selector: "text=Put it back", found: [] }])
+    expect(result?.overflowed).toBe(false)
+    expect(describeShot(result as never).split("\n")[1]).toBe("    text=Put it back  no match")
+  })
+
+  /**
+   * A lane that asked for `li` on a long page gets a wall, and the line that
+   * makes the wall safe is the one saying it was cut: a truncated table a lane
+   * can see is truncated is a table it narrows the selector for, and the only
+   * version of this whose numbers are safe to quote.
+   */
+  it("shows the first twenty matches and counts the rest", () => {
+    const many = Array.from({ length: 24 }, (_unused, index) =>
+      box({ y: index * 20, height: 16, scrollHeight: 16, clientHeight: 16 })
+    )
+
+    const lines = describeShot({
+      name: "a-list",
+      file: "reports/a-list.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "li", found: many }],
+    }).split("\n")
+
+    expect(lines).toHaveLength(1 + MEASURED_SHOWN + 1)
+    expect(lines[1]).toContain("(1 of 24)")
+    expect(lines[lines.length - 1]).toBe("    …and 4 more matches")
+  })
+
+  /**
+   * The case that put this field's contract in the open: `#476` was green on
+   * its own branch and red the moment `main` arrived, because lesson 32
+   * hand-builds a shot result to teach what a report's line is made of, and a
+   * hand-built shot has no measurement in it.
+   *
+   * `DescribableShot` is the answer, and this is the test that holds it: the
+   * formatter takes a result whose `measured` is simply absent and prints the
+   * shot's own line, the same as one that measured nothing. The producer's
+   * guarantee is untouched — `captureShots` still always carries the field —
+   * so neither side had to be weakened to the other.
+   */
+  it("prints a hand-built shot that carries no measurement at all", () => {
+    const overflow = { scrollWidth: 390, innerWidth: 390, clipped: [] }
+
+    const handBuilt = describeShot({
+      name: "a-page-with-nothing-wrong-with-it",
+      file: "reports/a-page-with-nothing-wrong-with-it.png",
+      viewport: PHONE,
+      overflow,
+      overflowed: false,
+      clipped: false,
+    })
+
+    expect(handBuilt).toBe(
+      "a-page-with-nothing-wrong-with-it  390x844@2x  scrollWidth 390 / innerWidth 390"
+    )
+    expect(handBuilt).toBe(
+      describeShot({
+        name: "a-page-with-nothing-wrong-with-it",
+        file: "reports/a-page-with-nothing-wrong-with-it.png",
+        viewport: PHONE,
+        overflow,
+        overflowed: false,
+        clipped: false,
+        measured: [],
+      })
+    )
+  })
+
+  /**
+   * An absent measurement must not swallow the readings that come before it:
+   * the clipped lines are the page's own business and are taken whether a lane
+   * asked about a selector or not.
+   */
+  it("still prints the clipped lines when no measurement was carried", () => {
+    const lines = describeShot({
+      name: "a-clip-hides-an-overflow",
+      file: "reports/a-clip-hides-an-overflow.png",
+      viewport: PHONE,
+      overflow: {
+        scrollWidth: 390,
+        innerWidth: 390,
+        clipped: [{ element: "div > div", reach: 370, width: 346 }],
+      },
+      overflowed: false,
+      clipped: true,
+    }).split("\n")
+
+    expect(lines).toHaveLength(2)
+    expect(lines[0]).toContain("← 1 clipping box hides content")
+    expect(lines[1]).toBe("    div > div  content reaches 370 in 346")
+  })
+
+  /** Rounded for the line and never at the source. `ElementBox` says why. */
+  it("rounds a fractional rectangle for the line and leaves the reading alone", () => {
+    const fractional = box({ x: 23.6, y: 24.4, width: 351.52, height: 799.6 })
+
+    const [, line] = describeShot({
+      name: "the-rail",
+      file: "reports/the-rail.png",
+      viewport: WIDE,
+      overflow: { scrollWidth: 1280, innerWidth: 1280, clipped: [] },
+      overflowed: false,
+      clipped: false,
+      measured: [{ selector: "aside", found: [fractional] }],
+    }).split("\n")
+
+    expect(line).toBe("    aside  x 24 y 24  352x800")
+    expect(fractional.y).toBe(24.4)
+  })
+
+  it("calls a box inside all four edges inside the viewport and nothing over one", () => {
+    expect(insideViewport(box({ x: 0, y: 0, width: 1280, height: 900 }), WIDE)).toBe(true)
+    expect(insideViewport(box({ x: 0, y: 0, width: 1281, height: 900 }), WIDE)).toBe(false)
+    expect(insideViewport(box({ x: 0, y: 0, width: 1280, height: 901 }), WIDE)).toBe(false)
+    expect(insideViewport(box({ x: -1, y: 0, width: 100, height: 100 }), WIDE)).toBe(false)
+    expect(insideViewport(box({ x: 0, y: -1, width: 100, height: 100 }), WIDE)).toBe(false)
+  })
+
+  /**
+   * Two independent facts, like `overflows` and `clips`: a block can be past
+   * the fold, outside the viewport another way, or both, and folding them into
+   * one verdict would lose the only one of the two that has a remedy.
+   */
+  it("measures the fold only downwards, and reports nothing for a box that fits", () => {
+    expect(pastTheFold(box({ y: 0, height: 900 }), WIDE)).toBe(0)
+    expect(pastTheFold(box({ y: 0, height: 901 }), WIDE)).toBe(1)
+    expect(pastTheFold(box({ y: -500, height: 100 }), WIDE)).toBe(0)
+    expect(pastTheFold(box({ x: 2000, y: 0, height: 100 }), WIDE)).toBe(0)
+  })
+
+  /**
+   * After the steps, for the reason the overflow measurement is: a rail that
+   * was scrolled or a card that was opened is the state whose size the lane
+   * asked about, and measuring the page the load produced would report the
+   * height of something nobody is looking at.
+   */
+  it("reads the boxes after the steps, and after the overflow measurement", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ do: [{ click: "[data-ask]" }], measure: ["aside"] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["click [data-ask]", "measure", "boxes aside"])
+  })
+
+  /**
+   * Every shot in this repository names no selector, and a round trip into the
+   * page to be handed an empty list is a cost all of them would pay for none
+   * of them.
+   */
+  it("does not reach into the page for a shot that named nothing", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    const [result] = await captureShots([shotAt()], browser, { outDir: "reports" })
+
+    expect(journal).toEqual(["measure"])
+    expect(result?.measured).toEqual([])
+  })
+
+  /** One field, applied wherever a selector is resolved. `Approach.frame`. */
+  it("reads the boxes in the frame the shot's own selectors resolve against", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ frame: "iframe#demo", measure: ["aside", "text=Put it back"] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["measure", "boxes aside, text=Put it back in iframe#demo"])
+  })
+
+  it("keeps the selectors in the order the shot asked, and carries every reading", async () => {
+    const { browser } = fakeBrowser([], {
+      aside: [box()],
+      "aside li[id]": [box({ y: 377 }), box({ y: 751 })],
+    })
+
+    const [result] = await captureShots(
+      [shotAt({ measure: ["aside li[id]", "aside", "text=gone"] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(result?.measured.map((entry) => entry.selector)).toEqual([
+      "aside li[id]",
+      "aside",
+      "text=gone",
+    ])
+    expect(result?.measured.map((entry) => entry.found.length)).toEqual([2, 1, 0])
+  })
+})
+
 describe("the browser adapter", () => {
-  const recordingLauncher = (): {
+  /**
+   * One element as the only six numbers `readBoxes` reads off one.
+   *
+   * A reading rather than an element, because the point of handing the real
+   * in-page function a double is to pin *which six* it asks for: a
+   * `getBoundingClientRect` and two properties, and nothing a laid-out page
+   * would be needed to answer.
+   */
+  type ElementReading = {
+    readonly rect: { x: number; y: number; width: number; height: number }
+    readonly scrollHeight: number
+    readonly clientHeight: number
+  }
+
+  const elementOf = (reading: ElementReading): Element =>
+    ({
+      getBoundingClientRect: () => reading.rect,
+      scrollHeight: reading.scrollHeight,
+      clientHeight: reading.clientHeight,
+    }) as unknown as Element
+
+  const recordingLauncher = (
+    /** What each selector matches, keyed as the double names it. */
+    matched: Readonly<Record<string, readonly ElementReading[]>> = {}
+  ): {
     launcher: ChromiumLauncher
     launches: LaunchOptions[]
     contexts: ContextOptions[]
@@ -917,6 +1322,17 @@ describe("the browser adapter", () => {
                       },
                       screenshot: async (options: { path: string }) => {
                         elementShots.push({ selector: where, path: options.path })
+                      },
+                      /**
+                       * The real in-page function is run against the doubles,
+                       * so what a test pins is the reading the adapter takes
+                       * rather than only that it asked for one.
+                       */
+                      evaluateAll: async <TValue,>(
+                        body: (elements: Element[]) => TValue
+                      ): Promise<TValue> => {
+                        journal.push(`evaluateAll ${where}`)
+                        return body((matched[where] ?? []).map(elementOf))
                       },
                     }
                   }
@@ -1265,6 +1681,57 @@ describe("the browser adapter", () => {
 
     expect(recorder.elementShots).toEqual([{ selector: "[data-figure]", path: file }])
     expect(recorder.screenshots).toEqual([])
+  })
+
+  /**
+   * The reading goes through a locator and not through a `page.evaluate` with
+   * a `querySelectorAll` in it, and these three tests are why: the selector is
+   * the driver's engine, the match set is the answer rather than its head, and
+   * the frame is the one a shot already named.
+   */
+  it("reads six numbers off every element a selector matched, in the driver's own engine", async () => {
+    const recorder = recordingLauncher({
+      "text=Put it back": [
+        { rect: { x: 40, y: 714, width: 120, height: 44 }, scrollHeight: 44, clientHeight: 44 },
+      ],
+    })
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    expect(await page.boxes(["text=Put it back"])).toEqual([
+      {
+        selector: "text=Put it back",
+        found: [
+          { x: 40, y: 714, width: 120, height: 44, scrollHeight: 44, clientHeight: 44 },
+        ],
+      },
+    ])
+  })
+
+  it("hands back every match rather than the first, and an empty list for none", async () => {
+    const recorder = recordingLauncher({
+      "aside li[id]": [
+        { rect: { x: 40, y: 377, width: 320, height: 358 }, scrollHeight: 358, clientHeight: 358 },
+        { rect: { x: 40, y: 751, width: 320, height: 17 }, scrollHeight: 17, clientHeight: 17 },
+      ],
+    })
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    const measured = await page.boxes(["aside li[id]", "aside footer"])
+
+    expect(measured.map((entry) => entry.found.length)).toEqual([2, 0])
+    expect(measured[0]?.found.map((found) => found.y)).toEqual([377, 751])
+  })
+
+  it("resolves its selectors through the frame it was given, like every other one", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.boxes(["aside"], "iframe#demo")
+
+    expect(recorder.journal).toEqual(["evaluateAll aside in iframe#demo"])
   })
 
   it("collects the search paths from both variables, since NODE_PATH is what lanes reach for", () => {

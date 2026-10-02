@@ -1,0 +1,18 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-02-framework-the-measurement-that-survived-the-merge-the-rail-wide",
+      "viewport": "wide",
+      "waitFor": "aside",
+      "measure": [
+        "aside",
+        "aside h1",
+        "aside li",
+        "text=Ask that page for a change",
+        "text=a selector that matches nothing"
+      ]
+    }
+  ]
+}

@@ -335,6 +335,17 @@ export const broadcastReaderSignals = (
   const view = mintViewKey(options.random)
 
 
+  /**
+   * Whether the opening delivery of this page view has gone.
+   *
+   * One batch of a view carries `first` and the rest do not, which is how an
+   * intake counts a reader arriving exactly once — without it, the only
+   * countable unit is the delivery, and a reader who stays ten minutes is a
+   * hundred of them. A new broadcast mints a new view key and gets a new
+   * opening, which is what a client-side navigation needs.
+   */
+  let opened = false
+
   const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
 
@@ -381,8 +392,11 @@ export const broadcastReaderSignals = (
       revision: page.value.revision,
       sentAt: now(),
       view,
+      ...(opened ? {} : { first: true as const }),
       signals,
     }
+
+    opened = true
 
     root.dispatchEvent(new CustomEvent(READER_SIGNALS_EVENT, { detail: batch, bubbles: true }))
     deliverSafely(options.send, batch)

@@ -17,8 +17,13 @@ import {
   type ReaderSignalStoreError,
   type ReceivedBatch,
 } from "./journal.js"
+import {
+  readerRegionSchema,
+  type ReaderRegionStore,
+  type StoredRegionCount,
+} from "./region.js"
 import { readerSignalKindSchema, readerSignalSchema, viewKeySchema } from "./signal.js"
-import { loomReaderFunnels, loomReaderSignals, loomReaderTallies } from "./schema.js"
+import { loomReaderFunnels, loomReaderRegions, loomReaderSignals, loomReaderTallies } from "./schema.js"
 import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 
 export * from "./migrate.js"
@@ -26,7 +31,7 @@ export * from "./migrate.js"
 /**
  * The Drizzle tables are **not** re-exported, unlike the journal's.
  *
- * A deployment needs the two factories below and `ensureReaderSignalsSchema`;
+ * A deployment needs the three factories below and `ensureReaderSignalsSchema`;
  * a `PgTableWithColumns` is how this file talks to the driver. Publishing the
  * three of them put about 7 KB of generated Drizzle type into the API
  * reference a reader downloads — for `loomReaderTallies` alone, a signature
@@ -216,7 +221,7 @@ export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJourn
   },
 })
 
-/** Both counter tables are filtered the same way, on the two columns they share. */
+/** Every counter table is filtered the same way, on the two columns they all share. */
 const within = (
   columns: { readonly treeId: PgColumn; readonly revision: PgColumn },
   request: TallyReadRequest | undefined
@@ -349,6 +354,73 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           })
     } catch (cause) {
       return err(failure(cause, "could not read reader funnels"))
+    }
+  },
+})
+
+const storedRegionSchema = z.object({
+  treeId: treeIdSchema,
+  revision: z.number().int().nonnegative(),
+  /**
+   * Parsed on the way out like every other column, which here is a closed set
+   * of two-letter codes and one word. A row holding anything else was not
+   * written by this runtime, and reading it as a region would put it on a screen.
+   */
+  region: readerRegionSchema,
+  views: countSchema,
+  updatedAt: instantSchema,
+})
+
+export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore => ({
+  /**
+   * One upsert, additive in the statement, for the reason the tallies are: this
+   * runs on the request path and two deliveries arriving together is the
+   * ordinary case rather than the unlucky one.
+   */
+  count: async (counts, at) => {
+    if (counts.length === 0) return ok(undefined)
+
+    const updatedAt = new Date(at)
+
+    try {
+      await db
+        .insert(loomReaderRegions)
+        .values(
+          counts.map((count) => ({
+            treeId: count.treeId,
+            revision: count.revision,
+            region: count.region,
+            views: count.views,
+            updatedAt,
+          }))
+        )
+        .onConflictDoUpdate({
+          target: [loomReaderRegions.treeId, loomReaderRegions.revision, loomReaderRegions.region],
+          set: {
+            views: sql`${loomReaderRegions.views} + excluded.views`,
+            updatedAt,
+          },
+        })
+
+      return ok(undefined)
+    } catch (cause) {
+      return err(failure(cause, `could not count ${counts.length} reader regions`))
+    }
+  },
+
+  regions: async (request?: TallyReadRequest) => {
+    try {
+      const rows = await db.select().from(loomReaderRegions).where(within(loomReaderRegions, request))
+      const parsed = z.array(storedRegionSchema).safeParse(rows)
+
+      return parsed.success
+        ? ok(parsed.data as readonly StoredRegionCount[])
+        : err<ReaderSignalStoreError>({
+            code: "unavailable",
+            detail: `a stored region did not parse: ${parsed.error.issues[0]?.path.join(".") ?? "unknown"}`,
+          })
+    } catch (cause) {
+      return err(failure(cause, "could not read reader regions"))
     }
   },
 })

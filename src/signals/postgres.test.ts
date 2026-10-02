@@ -6,10 +6,12 @@ import { describe, expect, it, vi } from "vitest"
 import type { LoomDatabase } from "../store/database.js"
 import {
   batchOf,
+  describeReaderRegionStoreContract,
   describeReaderSignalJournalContract,
   describeReaderTallyStoreContract,
   nodeId,
   primitiveType,
+  region,
   TREE,
   viewed,
   viewKey,
@@ -17,7 +19,11 @@ import {
 import { rowSecurityOn } from "../testing/row-security.js"
 
 import { ensureReaderSignalsSchema } from "./migrate.js"
-import { postgresReaderSignalJournal, postgresReaderTallyStore } from "./postgres.js"
+import {
+  postgresReaderRegionStore,
+  postgresReaderSignalJournal,
+  postgresReaderTallyStore,
+} from "./postgres.js"
 import type { ReaderTally } from "./rollup.js"
 
 /**
@@ -42,6 +48,10 @@ describeReaderTallyStoreContract("postgresReaderTallyStore", async () =>
   postgresReaderTallyStore(await freshDatabase())
 )
 
+describeReaderRegionStoreContract("postgresReaderRegionStore", async () =>
+  postgresReaderRegionStore(await freshDatabase())
+)
+
 const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
   treeId: TREE,
   revision: 1,
@@ -61,12 +71,13 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
 const AT = "2026-09-14T00:00:00.000Z"
 
 describe("the reader signal tables — Postgres specifics", () => {
-  it("protects all three with row level security", async () => {
+  it("protects all four with row level security", async () => {
     const db = await freshDatabase()
 
     expect(await rowSecurityOn(db, "loom_reader_signals")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_tallies")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_funnels")).toBe(true)
+    expect(await rowSecurityOn(db, "loom_reader_regions")).toBe(true)
   })
 
   it("runs its migration twice without complaining", async () => {
@@ -132,6 +143,61 @@ describe("the reader signal tables — Postgres specifics", () => {
     const rows = await store.tallies()
 
     expect(rows.ok && rows.value[0]?.dwellMs).toBe(15)
+  })
+
+  /**
+   * Regions are counted on the request path, so deliveries landing at the same
+   * moment is the ordinary case rather than the unlucky one — and this table is
+   * the only one in the subsystem written by something a stranger triggers. A
+   * lost arrival is a bucket that stays below the floor and a map with a country
+   * missing from it.
+   */
+  it("adds arrivals that land at the same moment rather than losing one", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderRegionStore(db)
+    const arrival = { treeId: TREE, revision: 1, region: region("GB"), views: 1 }
+
+    await Promise.all([
+      store.count([arrival], AT),
+      store.count([arrival], AT),
+      store.count([arrival], AT),
+    ])
+
+    const rows = await store.regions()
+
+    expect(rows.ok && rows.value).toHaveLength(1)
+    expect(rows.ok && rows.value[0]?.views).toBe(3)
+  })
+
+  it("reads a region count back as a number, not as the string a driver may hand over", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderRegionStore(db)
+    await store.count([{ treeId: TREE, revision: 1, region: region("FR"), views: 12 }], AT)
+    await store.count([{ treeId: TREE, revision: 1, region: region("FR"), views: 3 }], AT)
+
+    const rows = await store.regions()
+
+    expect(rows.ok && rows.value[0]?.views).toBe(15)
+  })
+
+  /**
+   * The column is fed from a request header, so the one thing worth asserting
+   * about it is that a row holding something that is not a region does not come
+   * back as one. A deployment whose table was written to by anything else finds
+   * out here rather than on a screen.
+   */
+  it("refuses to hand back a region that is not one", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderRegionStore(db)
+    await db.execute(
+      sql`insert into loom_reader_regions (tree_id, revision, region, views, updated_at)
+          values (${TREE}, 1, 'Greater London', 40, now())`
+    )
+
+    const rows = await store.regions()
+
+    expect(rows.ok).toBe(false)
+    expect(!rows.ok && rows.error.detail).toContain("region")
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {
