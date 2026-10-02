@@ -219,7 +219,7 @@ discovered.
 | | `main` @ `f4d2b9c` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` | 173 files / **3,560** | **174** / **3,611** |
-| `@loom/app` | BASE_APP_FILES files / **BASE_APP_TESTS** | BRANCH_APP_FILES / **BRANCH_APP_TESTS** |
+| `@loom/app` | 359 files / **6,322** | 359 / **6,322** |
 | findings | 949 | **951**, 0 malformed |
 | published exports | 1,233 | **1,245** (+12) |
 
@@ -229,7 +229,9 @@ partition, 1 for the two new record fields. **The application suite is the same 
 reference, and two fields added to one fixture in `(portal)`, described below.
 
 The `main` baseline was measured in a worktree at `f4d2b9c` with its own `dist`
-built, not quoted. Nothing was weakened, skipped or deleted.
+built and both suites run, not quoted. The branch's own run was on a deleted
+`dist` and `apps/loom/.next`. Nothing was weakened, skipped or deleted, and
+nothing in either suite is skipped.
 
 **Red three times while working. Two were mine and one was a fixture in another
 lane.**
