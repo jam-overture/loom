@@ -128,7 +128,7 @@ describe("PageReadingCard", () => {
   it("names the part fewest people got to, in a person's words", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("Fewest people got as far as")
+    expect(container.textContent).toContain("fewest got as far as")
     expect(container.textContent).toContain("the footer “Built with Loom”")
     expect(container.textContent).toContain("3 of the 40 visits")
   })
@@ -172,7 +172,28 @@ describe("PageReadingCard", () => {
       tally("n_foot", 1, { views: 6, reached: 6 }, "loom.footer"),
     ])
 
-    expect(container.textContent).toContain("Nothing here is being scrolled past")
+    expect(container.textContent).toContain("seen by about as many of them as every other")
+  })
+
+  /**
+   * **A sentence read off rows may not make a claim about the page.**
+   *
+   * Every figure in this list comes from a counter, and a part nobody got to
+   * has no counter — so *nothing here is being scrolled past* was a statement
+   * about parts that had reported, printed as a statement about the page. It
+   * was true of its own evidence and wrong about its subject, and it stayed
+   * that way until a reading that knows the page existed to contradict it.
+   *
+   * The claim is made in exactly one place now, by the one reading that holds
+   * the page as well as the counters.
+   */
+  it.each([
+    ["every part equally seen", [tally("n_hero", 1, { views: 6, reached: 6 }), tally("n_foot", 1, { views: 6, reached: 6 }, "loom.footer")]],
+    ["one part seen less", [tally("n_hero", 1, { views: 6, reached: 6 }), tally("n_foot", 1, { views: 6, reached: 2 }, "loom.footer")]],
+  ])("never claims the page is unskipped from the counters alone — %s", (_case, tallies) => {
+    const { container } = cardFor(tallies)
+
+    expect(container.textContent).not.toContain("is being scrolled past")
   })
 
   /** The governing rule, measured with every disclosure taken away. */

@@ -115,14 +115,26 @@ export const PageReadingCard = ({
       <CountedAgainst reading={newest} standing={standing} />
 
       <ul className="flex flex-col gap-2 text-xs">
+        {/*
+         * **Scoped to the parts people reported on, and it used to claim the
+         * page.** Every figure in this list is read off rows, and a part nobody
+         * got to has no row — so *fewest people got as far as the opening line*
+         * was being printed directly above *nobody got to the other three
+         * parts*, which is a contradiction a reader meets before they have
+         * finished the card. It was invisible until the section below existed
+         * to disagree with it, and a screenshot is what found it.
+         *
+         * Nothing is removed and no number changes. What changes is that the
+         * sentence now says which parts it compared, which is what it always
+         * meant.
+         */}
         {highlights.fewestSaw === undefined ? (
           <li className="text-ink-muted">
-            Every part of this page was seen by about as many people as every other. Nothing
-            here is being scrolled past.
+            Every part people reported on was seen by about as many of them as every other.
           </li>
         ) : (
           <li className="text-ink">
-            Fewest people got as far as{" "}
+            Of the parts people reported on, fewest got as far as{" "}
             <PartName part={highlights.fewestSaw.name} /> —{" "}
             {outOfVisits(highlights.fewestSaw.reached, newest.views)}. If anything on this page
             is worth moving up, it is what sits above that.
