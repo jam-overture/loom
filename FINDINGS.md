@@ -40514,3 +40514,86 @@ two runs chasing its own record. The same timing around a *fix* rather than a
 figure would put a known-bad version on `main` with a green branch beside it
 saying otherwise, and the branch would look exactly like a branch whose work was
 safe.
+
+---
+
+## 2026-10-02 — the reader screen can now say where readers are, and the floor that keeps it honest lives in one function rather than in the rows
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked, and one line of it is a correctness constraint rather than a
+preference
+
+Step 7 of [`docs/signals.md`](docs/signals.md) landed with
+[0213](decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md):
+page views per country, counted at the intake, per tree and revision. It is a
+fourth table beside the tallies and the funnels, and it needs no rollup to have
+run — a deployment that took one delivery has a number.
+
+**What to read it with**, from `@jam-overture/loom/signals`
+(Postgres at `@jam-overture/loom/signals/postgres`):
+
+```ts
+const store = postgresReaderRegionStore(db)
+const rows = await store.regions({ treeId, revision })   // both filters optional
+const reading = regionReadingOf(rows.ok ? rows.value : [])
+// reading.regions  — [{ region: "GB", views: 412 }, …], most-read first
+// reading.withheld — { buckets: 3, views: 7 } — counted, named nowhere
+// reading.views    — every view in the rows, named or not
+// reading.floor    — the bucket size it withheld by
+```
+
+**`regionReadingOf` is not a convenience and reading the rows directly is a
+defect.** The floor — 25 views, raise-only — is in that function and nowhere
+else. The rows deliberately hold small buckets, because a floor applied at write
+time can never be reached, so a screen that maps `store.regions()` straight onto
+a list will publish *Luxembourg: 1*, which is a reader, not a readership. The
+record's argument is the whole reason the bucket size exists.
+
+Two shapes worth having on the screen, both free: **the withheld total**, so the
+map adds up to the number of views there were rather than quietly to fewer; and
+**the unplaced bucket**, which is never withheld and is `"unknown"` rather than a
+missing row — on a deployment behind a proxy that writes no country header it is
+*every* view, and a map with nothing on it should say which of those two things
+happened.
+
+A region view is exact, unlike `views` on a tally (0147): it is counted once,
+when a page view began, so these numbers may be added across revisions and trees
+without the straddle over-count. `regionReadingOf` groups before it suppresses
+for exactly that reason, so handing it two revisions' rows is correct.
+
+---
+
+## 2026-10-02 — a deployment can now count where its readers are and nothing operator-facing says so, including that it is on by default
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`docs/deployment.md`) · **Status:** open — small, and the default is the part
+that makes it worth filing rather than leaving to the next doc pass
+
+`docs/deployment.md` §8 is where a deployment learns that reader signals keep
+nothing until `LOOM_SIGNAL_INTAKE=on`. Three variables now sit beside that one and
+the section does not mention them:
+
+| | |
+| --- | --- |
+| `LOOM_SIGNAL_REGION` | **on unless set to off** — the one default in the intake that is not off |
+| `LOOM_SIGNAL_REGION_HEADER` | `x-vercel-ip-country` by default; another platform's header goes here |
+| `LOOM_SIGNAL_REGION_FLOOR` | 25 views by default, raise-only; a smaller number is refused and the status says so |
+
+**The default is why this is filed rather than deferred.** A deployment that
+switches intake on starts counting page views per country without typing anything
+— which is the decision
+[0213](decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)
+argues for, and which an operator should be able to discover somewhere other than
+a decision record. `GET /api/reader-signals` reports all three in one sentence
+today, so the section has something true to point at.
+
+One sentence is worth borrowing from the record: the header must be one the
+platform *writes*, not one it passes through. A deployment whose proxy forwards a
+caller's `x-vercel-ip-country` should set `LOOM_SIGNAL_REGION=off` rather than
+count buckets a stranger can fill — the value is a closed set so the worst case is
+a bucket that already exists, but it is still the caller's number.
+
+**Filed for the framework lane because `docs/deployment.md` is not in this lane's
+three paths.** If the maintainer would rather the reader-signal section of that
+file belonged to `Loom signals`, this lane will take it and the brief is the place
+to say so.

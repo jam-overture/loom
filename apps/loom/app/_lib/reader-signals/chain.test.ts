@@ -4,9 +4,12 @@ import {
   collectReaderSignals,
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_REGION_FLOOR,
   describeCollection,
+  memoryReaderRegionStore,
   memoryReaderSignalJournal,
   memoryReaderTallyStore,
+  regionReadingOf,
 } from "@jam-overture/loom/signals"
 
 import type { TreeId } from "@jam-overture/loom"
@@ -35,20 +38,32 @@ import { receiveReaderSignals, type Intake } from "./receive"
  */
 const at = (ms: number) => ({ now: () => new Date(ms).toISOString() })
 
-const batch = (nodeId: string, dwellMs: number) => ({
+const SETTINGS = {
+  chosen: { state: "on" },
+  hops: 1,
+  region: {
+    chosen: { state: "on" },
+    header: "x-vercel-ip-country",
+    floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
+  },
+} as const
+
+const batch = (nodeId: string, dwellMs: number, over: Record<string, unknown> = {}) => ({
   treeId: "t_landing",
   revision: 4,
   sentAt: 1_000,
   view: "0123456789abcdef0123456789abcdef",
+  ...over,
   signals: [
     { kind: "viewed", nodeId, type: "loom.section", at: 1_000 },
     { kind: "dwelled", nodeId, type: "loom.section", ms: dwellMs },
   ],
 })
 
-const post = (body: unknown): Request =>
+const post = (body: unknown, headers: Record<string, string> = {}): Request =>
   new Request("https://loom.test/api/reader-signals", {
     method: "POST",
+    headers,
     body: JSON.stringify(body),
   })
 
@@ -58,8 +73,9 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     const store = memoryReaderTallyStore()
 
     const intake: Intake = {
-      settings: { chosen: { state: "on" }, hops: 1 },
+      settings: SETTINGS,
       journal,
+      regions: memoryReaderRegionStore(),
       gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
       durable: true,
       subjectOf: () => Promise.resolve("a-reader"),
@@ -100,14 +116,52 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     expect(left.ok && left.value.batches).toHaveLength(0)
   })
 
+  /**
+   * The other end of the same chain, and the one that never touches the buffer.
+   * A region is counted at the door, so it is a number the portal can read
+   * before any rollup has run — and it is still one number per reader however
+   * many batches they delivered.
+   */
+  it("counts where a reader was, once, without the buffer ever holding it", async () => {
+    const journal = memoryReaderSignalJournal(at(0))
+    const regions = memoryReaderRegionStore()
+    const intake: Intake = {
+      settings: SETTINGS,
+      journal,
+      regions,
+      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
+      durable: true,
+      subjectOf: () => Promise.resolve("a-reader"),
+      now: () => 0,
+    }
+    const headers = { "x-vercel-ip-country": "gb" }
+
+    await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true }), headers), intake)
+    await receiveReaderSignals(post(batch("n_hero", 2_000), headers), intake)
+
+    const rows = await regions.regions()
+    expect(rows.ok && rows.value.map((row) => `${row.region}:${row.views}`)).toEqual(["GB:1"])
+
+    /** One reader is not a readership, so the bucket is counted and not named. */
+    const reading = regionReadingOf(rows.ok ? rows.value : [])
+    expect(reading.regions).toEqual([])
+    expect(reading.withheld).toEqual({ buckets: 1, views: 1 })
+    expect(reading.views).toBe(1)
+
+    /** And nothing in the buffer says where anybody was. */
+    const buffered = await journal.read()
+    expect(JSON.stringify(buffered.ok && buffered.value.batches)).not.toContain("GB")
+  })
+
   /** A refused delivery reaches no counter, which is the half that must also hold. */
   it("counts nothing from a delivery the door turned away", async () => {
     const journal = memoryReaderSignalJournal(at(0))
     const store = memoryReaderTallyStore()
 
     const shut: Intake = {
-      settings: { chosen: { state: "off" }, hops: 1 },
+      settings: { ...SETTINGS, chosen: { state: "off" } },
       journal,
+      regions: memoryReaderRegionStore(),
       gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
       durable: true,
       subjectOf: () => Promise.resolve("a-reader"),

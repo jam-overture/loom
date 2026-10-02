@@ -150,3 +150,54 @@ describe("parseReaderSignalBatch", () => {
     if (!parsed.ok) expect(parsed.error.code).toBe("invalid-batch")
   })
 })
+
+describe("the marker that says a page view began", () => {
+  const VIEW = "0123456789abcdef0123456789abcdef"
+
+  it("reads an opening delivery", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW, first: true })
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.first).toBe(true)
+  })
+
+  it("reads a batch that is not one, and does not invent an answer", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW })
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.first).toBeUndefined()
+  })
+
+  /**
+   * The flag means *this page view began here*, so a batch naming no page view
+   * is making a claim it cannot support — and a receiver that dropped it quietly
+   * would undercount arrivals for a reason nobody could see.
+   */
+  it("refuses an opening that names no page view", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { first: true })
+    )
+
+    expect(parsed.ok).toBe(false)
+    if (!parsed.ok) expect(parsed.error.issues[0]?.path).toBe("first")
+  })
+
+  /**
+   * It is a marker and not a counter. Anything other than *yes* is refused, so
+   * no sender can ever send a number here and no consumer has to decide what a
+   * `false` would have meant.
+   */
+  it("refuses anything that is not plainly an opening", () => {
+    for (const given of [false, 1, "true", null]) {
+      expect(
+        parseReaderSignalBatch(
+          batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW, first: given })
+        ).ok
+      ).toBe(false)
+    }
+  })
+})

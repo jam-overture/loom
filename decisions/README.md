@@ -296,3 +296,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0210](0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md) | A primitive may lock the page's scroll from the stylesheet, and only while its own region is open | Accepted | §4b |
 | [0211](0211-a-completion-is-a-form-the-browser-let-go.md) | A completion is a form the browser let go, and it carries the bands it was the end of | Accepted | §6 |
 | [0212](0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md) | What a reader signal means is joined to the tree when it is read, and the tree is what makes silence a measurement | Accepted | §6 |
+| [0213](0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md) | Where readers are is a floored bucket counted at the door, and a page view says when it began | Accepted | §4c (reader signals) |

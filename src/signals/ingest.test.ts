@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { batchOf, viewed, viewKey } from "../testing/reader-signal-contract.js"
+import { batchOf, region, viewed, viewKey } from "../testing/reader-signal-contract.js"
 
 import { describeIngestError, ingestReaderSignals, MAX_BATCHES_PER_DELIVERY } from "./ingest.js"
 import type { ReaderSignalJournal } from "./journal.js"
-import { memoryReaderSignalJournal } from "./memory.js"
+import { memoryReaderRegionStore, memoryReaderSignalJournal } from "./memory.js"
+import type { ReaderRegionStore } from "./region.js"
 
 const refusing = (): ReaderSignalJournal => ({
   ...memoryReaderSignalJournal(),
@@ -20,7 +21,7 @@ describe("ingestReaderSignals", () => {
 
     const outcome = await ingestReaderSignals(journal, asSent(batchOf([viewed("a"), viewed("b")])))
 
-    expect(outcome.ok && outcome.value).toEqual({ batches: 1, signals: 2 })
+    expect(outcome.ok && outcome.value).toEqual({ batches: 1, signals: 2, regions: 0 })
   })
 
   it("takes a list, because a queue draining after an outage posts one", async () => {
@@ -31,7 +32,7 @@ describe("ingestReaderSignals", () => {
       asSent([batchOf([viewed("a")]), batchOf([viewed("b")])])
     )
 
-    expect(outcome.ok && outcome.value).toEqual({ batches: 2, signals: 2 })
+    expect(outcome.ok && outcome.value).toEqual({ batches: 2, signals: 2, regions: 0 })
   })
 
   it("keeps what it accepted, in order", async () => {
@@ -155,5 +156,98 @@ describe("ingestReaderSignals", () => {
         String(MAX_BATCHES_PER_DELIVERY + 2)
       )
     })
+  })
+})
+
+describe("where a delivery came from", () => {
+  const AT = "2026-10-02T00:00:00.000Z"
+  const GB = region("GB")
+
+  const opening = (nth: number) =>
+    asSent(batchOf([viewed("a")], { view: viewKey(nth), first: true }))
+
+  const regionsIn = async (store: ReaderRegionStore) => {
+    const rows = await store.regions()
+
+    return rows.ok ? rows.value.map((row) => `${row.region}:${row.views}`) : ["unavailable"]
+  }
+
+  it("counts a reader arriving, once, against a bucket", async () => {
+    const regions = memoryReaderRegionStore()
+
+    const outcome = await ingestReaderSignals(memoryReaderSignalJournal(), opening(1), {
+      store: regions,
+      region: GB,
+      at: AT,
+    })
+
+    expect(outcome.ok && outcome.value.regions).toBe(1)
+    expect(await regionsIn(regions)).toEqual(["GB:1"])
+  })
+
+  it("counts nothing for the deliveries that follow", async () => {
+    const regions = memoryReaderRegionStore()
+    const where = { store: regions, region: GB, at: AT }
+    const journal = memoryReaderSignalJournal()
+
+    await ingestReaderSignals(journal, opening(1), where)
+    await ingestReaderSignals(journal, asSent(batchOf([viewed("b")], { view: viewKey(1) })), where)
+
+    expect(await regionsIn(regions)).toEqual(["GB:1"])
+  })
+
+  it("counts nothing at all for a caller that does not say where", async () => {
+    const journal = memoryReaderSignalJournal()
+
+    const outcome = await ingestReaderSignals(journal, opening(1))
+
+    expect(outcome.ok && outcome.value.regions).toBe(0)
+  })
+
+  /**
+   * The region never lands on the row the batch is buffered in. It is the whole
+   * constraint, so it is asserted rather than assumed: a reader of the buffer
+   * can see which page view a batch belonged to and can never see where it came
+   * from.
+   */
+  it("never writes the region onto the buffered batch", async () => {
+    const journal = memoryReaderSignalJournal()
+    await ingestReaderSignals(journal, opening(1), { store: memoryReaderRegionStore(), region: GB, at: AT })
+
+    const page = await journal.read()
+    const stored = page.ok ? page.value.batches[0] : undefined
+
+    expect(JSON.stringify(stored)).not.toContain("GB")
+  })
+
+  /**
+   * The batch is already kept, so refusing the delivery would invite a retry
+   * that counted every signal in it twice. A region that could not be written is
+   * a counter that did not move, reported rather than raised.
+   */
+  it("keeps a delivery whose region could not be counted, and says why", async () => {
+    const refusing: ReaderRegionStore = {
+      ...memoryReaderRegionStore(),
+      count: () => Promise.resolve({ ok: false, error: { code: "unavailable", detail: "no database" } }),
+    }
+    const journal = memoryReaderSignalJournal()
+
+    const outcome = await ingestReaderSignals(journal, opening(1), { store: refusing, region: GB, at: AT })
+
+    expect(outcome.ok && outcome.value.regions).toBe(0)
+    expect(outcome.ok && outcome.value.regionError?.detail).toBe("no database")
+
+    const page = await journal.read()
+    expect(page.ok && page.value.batches).toHaveLength(1)
+  })
+
+  it("refuses an opening that names no page view, like any other malformed batch", async () => {
+    const refused = await ingestReaderSignals(
+      memoryReaderSignalJournal(),
+      asSent(batchOf([viewed("a")], { first: true }))
+    )
+
+    expect(refused.ok).toBe(false)
+    expect(!refused.ok && refused.error.code).toBe("invalid-delivery")
   })
 })

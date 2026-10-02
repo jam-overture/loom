@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4405,7 +4405,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4451,7 +4451,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5357,7 +5357,7 @@
       "files": 184,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5815,7 +5815,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6567,7 +6567,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7158,7 +7158,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7386,7 +7386,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7803,7 +7803,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8157,7 +8157,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8277,7 +8277,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 30,
+      "files": 31,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8290,7 +8290,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8596,9 +8596,16 @@
             {
               "name": "IngestOutcome",
               "kind": "type",
-              "signature": "type IngestOutcome = {\n    readonly batches: number;\n    readonly signals: number;\n};",
+              "signature": "type IngestOutcome = {\n    readonly batches: number;\n    readonly signals: number;\n    /**\n     * Page views counted against a region, which is zero unless the caller said\n     * where the delivery came from and the delivery opened a page view.\n     */\n    readonly regions: number;\n    /**\n     * Why no region was counted, when a region store refused one.\n     *\n     * Present and the delivery still stands: the batch is already kept, and a\n     * sender told to retry would deliver it twice, which is the one failure in\n     * this subsystem that cannot be undone. So a lost region count is a\n     * counter that did not move, reported here rather than raised — the same\n     * trade a sink makes when a browser refuses a beacon.\n     */\n    readonly regionError?: ReaderSignalStoreError;\n};",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "RegionIntake",
+              "kind": "type",
+              "signature": "type RegionIntake = {\n    readonly store: ReaderRegionStore;\n    readonly region: ReaderRegion;\n    /** When, as an instant the counter is stamped with. The caller's clock, like every other. */\n    readonly at: string;\n};",
+              "truncated": false,
+              "summary": "Where a delivery came from, for a caller who can tell."
             },
             {
               "name": "IngestError",
@@ -8617,7 +8624,7 @@
             {
               "name": "ingestReaderSignals",
               "kind": "function",
-              "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown) => Promise<Result<IngestOutcome, IngestError>>",
+              "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown, where?: RegionIntake) => Promise<Result<IngestOutcome, IngestError>>",
               "truncated": false,
               "summary": "Parse a delivery and keep it."
             }
@@ -8816,6 +8823,13 @@
               "signature": "const memoryReaderTallyStore: () => ReaderTallyStore",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "memoryReaderRegionStore",
+              "kind": "function",
+              "signature": "const memoryReaderRegionStore: () => ReaderRegionStore",
+              "truncated": false,
+              "summary": "Where readers were, in the process."
             }
           ]
         },
@@ -8893,6 +8907,118 @@
               "signature": "const wordsReadIn: (reading: PageReading) => readonly string[]",
               "truncated": false,
               "summary": "The words readers actually reached, in reading order."
+            }
+          ]
+        },
+        {
+          "module": "signals/region",
+          "title": "Region",
+          "summary": "Where readers are, as a counter and nothing else.",
+          "symbols": [
+            {
+              "name": "UNKNOWN_REGION",
+              "kind": "value",
+              "signature": "const UNKNOWN_REGION: ReaderRegion",
+              "truncated": false,
+              "summary": "A region nobody can name."
+            },
+            {
+              "name": "regionPattern",
+              "kind": "value",
+              "signature": "const regionPattern: RegExp",
+              "truncated": false,
+              "summary": "Two uppercase letters, which is what a country code is."
+            },
+            {
+              "name": "readerRegionSchema",
+              "kind": "schema",
+              "signature": "const readerRegionSchema: z.ZodBranded<…>",
+              "truncated": false,
+              "summary": "A country, or the admission that there is none."
+            },
+            {
+              "name": "ReaderRegion",
+              "kind": "type",
+              "signature": "type ReaderRegion = z.infer<typeof readerRegionSchema>;",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readerRegionOf",
+              "kind": "function",
+              "signature": "const readerRegionOf: (given: string | null | undefined) => ReaderRegion",
+              "truncated": false,
+              "summary": "Read a region off whatever the platform wrote, and never fail."
+            },
+            {
+              "name": "ReaderRegionCount",
+              "kind": "type",
+              "signature": "type ReaderRegionCount = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly region: ReaderRegion;\n    /** Page views that *began* here, so a longer visit is not a bigger number. */\n    readonly views: number;\n};",
+              "truncated": false,
+              "summary": "Page views from one region, of one revision of one tree."
+            },
+            {
+              "name": "StoredRegionCount",
+              "kind": "type",
+              "signature": "type StoredRegionCount = ReaderRegionCount & {\n    readonly updatedAt: string;\n};",
+              "truncated": false,
+              "summary": "A region count as the store keeps it, which is the count plus when it last moved."
+            },
+            {
+              "name": "ReaderRegionStore",
+              "kind": "interface",
+              "signature": "interface ReaderRegionStore {\n    /**\n     * Add views to the buckets they belong in, creating rows that do not exist\n     * yet. Additive for the same reason applying a rollup is: every call reports\n     * what just arrived rather than what is true so far.\n     */\n    readonly count: (counts: readonly ReaderRegionCount[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly regions: (request?: TallyReadRequest) => Promise<Result<readonly StoredRegionCount[], ReaderSignalStoreError>>;\n}",
+              "truncated": false,
+              "summary": "The durable half, and the only one there is — a region has no raw form to expire, because it was never written down as an observation."
+            },
+            {
+              "name": "regionCountsOf",
+              "kind": "function",
+              "signature": "const regionCountsOf: (batches: readonly ReaderSignalBatch[], region: ReaderRegion) => readonly ReaderRegionCount[]",
+              "truncated": false,
+              "summary": "What one delivery adds, which is one view per page view it opened."
+            },
+            {
+              "name": "DEFAULT_REGION_FLOOR",
+              "kind": "value",
+              "signature": "const DEFAULT_REGION_FLOOR = 25",
+              "truncated": false,
+              "summary": "The smallest a bucket may be before it is named."
+            },
+            {
+              "name": "regionFloorOf",
+              "kind": "function",
+              "signature": "const regionFloorOf: (asked: number | undefined) => number",
+              "truncated": false,
+              "summary": "The floor that will actually be used, given what somebody asked for."
+            },
+            {
+              "name": "RegionBucket",
+              "kind": "type",
+              "signature": "type RegionBucket = {\n    readonly region: ReaderRegion;\n    readonly views: number;\n};",
+              "truncated": false,
+              "summary": "One region, as a reading reports it."
+            },
+            {
+              "name": "RegionReading",
+              "kind": "type",
+              "signature": "type RegionReading = {\n    /** The floor the rows were read at, so a screen can say what it is withholding by. */\n    readonly floor: number;\n    /** Buckets large enough to name, most-read first. */\n    readonly regions: readonly RegionBucket[];\n    /** What was too small to name, as a total that names nowhere. */\n    readonly withheld: {\n        readonly buckets: number;\n        readonly views: number;\n    };\n    /** Every view in the rows, named or withheld. A reading never loses one. */\n    readonly views: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "RegionReadingOptions",
+              "kind": "type",
+              "signature": "type RegionReadingOptions = {\n    /** Raised above {@link DEFAULT_REGION_FLOOR}; a smaller number is the default.  */\n    readonly floor?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "regionReadingOf",
+              "kind": "function",
+              "signature": "const regionReadingOf: (rows: readonly StoredRegionCount[], options?: RegionReadingOptions) => RegionReading",
+              "truncated": false,
+              "summary": "Rows from the store, read as something a screen may show."
             }
           ]
         },
@@ -9016,7 +9142,7 @@
             {
               "name": "readerSignalBatchSchema",
               "kind": "schema",
-              "signature": "const readerSignalBatchSchema: z.ZodObject<…>",
+              "signature": "const readerSignalBatchSchema: z.ZodEffects<…>",
               "truncated": false,
               "summary": "One delivery: the signals a page gathered since the last one, all about the same tree at the same revision."
             },
@@ -9130,7 +9256,7 @@
       "files": 9,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9270,10 +9396,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 12,
+      "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9284,14 +9410,14 @@
         {
           "module": "signals/migrate",
           "title": "Migrate",
-          "summary": "Creating the three reader-signal tables, with row level security switched on.",
+          "summary": "Creating the four reader-signal tables, with row level security switched on.",
           "symbols": [
             {
               "name": "READER_SIGNALS_DDL",
               "kind": "value",
               "signature": "const READER_SIGNALS_DDL: readonly string[]",
               "truncated": false,
-              "summary": "The three tables, as statements a host can run."
+              "summary": "The four tables, as statements a host can run."
             },
             {
               "name": "ensureReaderSignalsSchema",
@@ -9320,6 +9446,13 @@
               "signature": "const postgresReaderTallyStore: (db: LoomDatabase) => ReaderTallyStore",
               "truncated": false,
               "summary": ""
+            },
+            {
+              "name": "postgresReaderRegionStore",
+              "kind": "function",
+              "signature": "const postgresReaderRegionStore: (db: LoomDatabase) => ReaderRegionStore",
+              "truncated": false,
+              "summary": ""
             }
           ]
         }
@@ -9333,7 +9466,7 @@
       "files": 40,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9867,7 +10000,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9941,7 +10074,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10378,7 +10511,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1169,
+        "packageNames": 1187,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

@@ -33,6 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -217,7 +218,7 @@ stated bargain, where *nobody has said* is a different answer from *there are
 none*. Filed for `Loom primitives`, which now has a second consumer and a
 concrete payoff.
 
-### 7. Region, as an aggregate and nothing else · `Loom signals` · **approved**
+### 7. Region, as an aggregate and nothing else · `Loom signals` · **done, 2 October**
 
 Where readers are, which the intake can read from the request without the browser
 knowing anything about it. Three constraints are the design:
@@ -228,6 +229,56 @@ knowing anything about it. Three constraints are the design:
   the floor as configuration and the reason in the record;
 - **the address it came from is never stored**, and no digest of one outlives the
   process.
+
+**Done**, and one thing the step did not anticipate turned out to decide the whole
+shape ([0213](../decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)).
+
+**A region counter has to count page views, and an intake cannot count them.**
+Rollup counts distinct views by comparing view keys inside a window; the door
+cannot, because a view key may never be written down, so it has no way to tell a
+reader's fortieth delivery from a fortieth reader. The only unit available to it
+unaided is the delivery — and that does not merely blur the number, it **inverts
+the floor**: a reader who stays ten minutes posts a hundred batches, so one person
+clears any floor on their own and is reported as a readership.
+
+So a batch now says whether it opened its page view — `first: true`, on at most
+one batch of a view, refused by the parser unless the batch names the view it
+opened. It is the one addition to a payload this plan has made, it is **31 bytes
+minified and 13 on the wire once per page view**, and it is the thing that could
+not be derived: deriving it server-side means remembering view keys, which is the
+one value rule 2 forbids keeping.
+
+What that bought, beyond the floor meaning something: **a region view is exact.**
+It is counted once, when a page view began, so region numbers add across
+revisions, trees and months — unlike `views` on a tally, which is a distinct count
+summed across windows and over-counts the views that straddle one (0147). The same
+marker would give a rollup an exact count of page views *begun* in a window, which
+is that approximation solved rather than bounded. Not built: it is a column and a
+counter, and it is the next question rather than this step.
+
+Three other things settled in the building:
+
+- **The floor is 25 views, applied when the rows are read, and raise-only.** A
+  floor enforced at write time cannot work — a bucket that is never written can
+  never reach the floor, so the map stays empty for ever. What is withheld is
+  still reported as a total that names nowhere, so a reading accounts for every
+  view there was. An operator may be more careful than the default and not less,
+  and the status endpoint says so when a smaller number was refused.
+- **The readers nobody could place are a bucket and are never withheld.** They
+  name no place, so there is nobody in them to re-identify, and hiding them would
+  make a reading's numbers stop adding up.
+- **A region is a closed set — two letters, or the word for not knowing.** The
+  header is written by whatever is in front of the application, so on a deployment
+  whose proxy passes a caller's value through it is written by the caller.
+  Anything that is not a country code is unplaced, which makes the worst a
+  poisoned header can do *adding to a bucket that already exists*.
+
+**How a deployment switches it on.** Nothing, if intake is on: regions are counted
+by default, read from `x-vercel-ip-country`, floored at 25. `LOOM_SIGNAL_REGION=off`
+refuses it, `LOOM_SIGNAL_REGION_HEADER` names another platform's header, and
+`LOOM_SIGNAL_REGION_FLOOR` raises the floor. `GET /api/reader-signals` says which
+of those is in force. The operator-facing documentation is another lane's and is
+filed as a finding.
 
 ## Still not in scope
 
