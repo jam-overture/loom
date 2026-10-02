@@ -11,7 +11,15 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import { COUNTED_ANCHOR } from "../bands"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
-import { action, heading, prose, section, splitSection, stack } from "../nodes"
+import {
+  action,
+  heading,
+  prose,
+  section,
+  splitSection,
+  stack,
+  TERTIARY_CONTROL,
+} from "../nodes"
 import {
   DEMO,
   DOCS,
@@ -180,8 +188,8 @@ const closing = (ids: IdFactory, context: PageContext): LoomNode =>
         { variant: "primary" }
       ),
       action(ids, "Read the docs", surfaceHref(context.origin, DOCS), { variant: "secondary" }),
-      action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), { variant: "quiet" }),
-      action(ids, "Read the source", REPOSITORY_URL, { variant: "quiet", external: true }),
+      action(ids, "Try it yourself", surfaceHref(context.origin, DEMO), TERTIARY_CONTROL),
+      action(ids, "Read the source", REPOSITORY_URL, { ...TERTIARY_CONTROL, external: true }),
     ]),
   ])
 

@@ -3,22 +3,32 @@ import { beforeEach, describe, expect, it } from "vitest"
 import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  DEFAULT_REGION_FLOOR,
+  memoryReaderRegionStore,
   memoryReaderSignalJournal,
   type IntakePolicy,
+  type ReaderRegionStore,
   type ReaderSignalJournal,
 } from "@jam-overture/loom/signals"
 
 import { describeIntake, readerSignalStatus, receiveReaderSignals, type Intake } from "./receive"
-import { readIntakeSwitch } from "./settings"
+import {
+  DEFAULT_REGION_HEADER,
+  readIntakeSwitch,
+  readRegionFloor,
+  readRegionSwitch,
+  type IntakeSettings,
+} from "./settings"
 
 const TREE = "t_page"
 
 /** What a browser actually posts: plain JSON, with every brand already lost. */
-const batch = (signals = 1, nodeFrom = 0) => ({
+const batch = (signals = 1, nodeFrom = 0, over: Record<string, unknown> = {}) => ({
   treeId: TREE,
   revision: 3,
   sentAt: 1_700_000_000_000,
   view: "0123456789abcdef0123456789abcdef",
+  ...over,
   signals: Array.from({ length: signals }, (_unused, at) => ({
     kind: "viewed",
     nodeId: `n_${nodeFrom + at}`,
@@ -29,9 +39,21 @@ const batch = (signals = 1, nodeFrom = 0) => ({
 
 const policy: IntakePolicy = { ...DEFAULT_INTAKE_POLICY, deliveries: 3, maxBytes: 512 }
 
+const settingsOf = (over: Partial<IntakeSettings> = {}): IntakeSettings => ({
+  chosen: { state: "on" },
+  hops: 1,
+  region: {
+    chosen: { state: "on" },
+    header: DEFAULT_REGION_HEADER,
+    floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
+  },
+  ...over,
+})
+
 const intakeOf = (over: Partial<Intake> = {}): Intake => ({
-  settings: { chosen: { state: "on" }, hops: 1 },
+  settings: settingsOf(),
   journal: memoryReaderSignalJournal(),
+  regions: memoryReaderRegionStore(),
   gate: createIntakeGate(policy),
   durable: true,
   subjectOf: () => Promise.resolve("a-caller"),
@@ -80,7 +102,7 @@ describe("receiveReaderSignals", () => {
 
   describe("a deployment that never asked", () => {
     it("does not have this endpoint at all", async () => {
-      const off = intakeOf({ settings: { chosen: { state: "off" }, hops: 1 } })
+      const off = intakeOf({ settings: settingsOf({ chosen: { state: "off" } }) })
 
       const response = await receiveReaderSignals(post(batch()), off)
 
@@ -93,7 +115,7 @@ describe("receiveReaderSignals", () => {
     /** An operator who configured something and got silence is the failure nobody notices. */
     it("says so loudly when the switch was typed wrong", async () => {
       const broken = intakeOf({
-        settings: { chosen: readIntakeSwitch("enabled"), hops: 1 },
+        settings: settingsOf({ chosen: readIntakeSwitch("enabled") }),
       })
 
       const response = await receiveReaderSignals(post(batch()), broken)
@@ -220,15 +242,149 @@ describe("receiveReaderSignals", () => {
   })
 })
 
+describe("where a delivery came from", () => {
+  const opening = (over: Record<string, unknown> = {}) => batch(1, 0, { first: true, ...over })
+
+  const bucketsIn = async (regions: ReaderRegionStore): Promise<readonly string[]> => {
+    const rows = await regions.regions()
+
+    return rows.ok ? rows.value.map((row) => `${row.region}:${row.views}`) : ["unavailable"]
+  }
+
+  it("counts a reader arriving from the region the platform wrote", async () => {
+    const regions = memoryReaderRegionStore()
+
+    const response = await receiveReaderSignals(
+      post(opening(), { [DEFAULT_REGION_HEADER]: "de" }),
+      intakeOf({ regions })
+    )
+
+    expect(response.status).toBe(204)
+    expect(await bucketsIn(regions)).toEqual(["DE:1"])
+  })
+
+  /**
+   * The counter that makes the floor mean anything. A reader who stays on a page
+   * delivers a batch every few seconds, and a bucket that moved for each of them
+   * would let one visitor clear any floor on their own.
+   */
+  it("counts one reader once, however many batches they deliver", async () => {
+    const regions = memoryReaderRegionStore()
+    const intake = intakeOf({ regions })
+    const headers = { [DEFAULT_REGION_HEADER]: "GB" }
+
+    await receiveReaderSignals(post(opening(), headers), intake)
+    await receiveReaderSignals(post(batch(), headers), intake)
+    await receiveReaderSignals(post(batch(), headers), intake)
+
+    expect(await bucketsIn(regions)).toEqual(["GB:1"])
+  })
+
+  it("counts a reader it could not place, rather than dropping them", async () => {
+    const regions = memoryReaderRegionStore()
+
+    await receiveReaderSignals(post(opening()), intakeOf({ regions }))
+
+    expect(await bucketsIn(regions)).toEqual(["unknown:1"])
+  })
+
+  /**
+   * A deployment whose proxy passes a caller's header through is a deployment
+   * whose region column a stranger can write to. Two letters or nothing is the
+   * closed set that makes the worst case *a bucket that already exists*.
+   */
+  it("counts a header holding something that is not a country as unplaced", async () => {
+    const regions = memoryReaderRegionStore()
+
+    await receiveReaderSignals(
+      post(opening(), { [DEFAULT_REGION_HEADER]: "Kensington" }),
+      intakeOf({ regions })
+    )
+
+    expect(await bucketsIn(regions)).toEqual(["unknown:1"])
+  })
+
+  it("reads the header this deployment was told to read", async () => {
+    const regions = memoryReaderRegionStore()
+    const intake = intakeOf({
+      regions,
+      settings: settingsOf({
+        region: {
+          chosen: { state: "on" },
+          header: "cf-ipcountry",
+          floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
+        },
+      }),
+    })
+
+    await receiveReaderSignals(post(opening(), { "cf-ipcountry": "FR", [DEFAULT_REGION_HEADER]: "GB" }), intake)
+
+    expect(await bucketsIn(regions)).toEqual(["FR:1"])
+  })
+
+  it("counts nothing for a deployment that switched regions off", async () => {
+    const regions = memoryReaderRegionStore()
+    const intake = intakeOf({
+      regions,
+      settings: settingsOf({
+        region: {
+          chosen: readRegionSwitch("off"),
+          header: DEFAULT_REGION_HEADER,
+          floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
+        },
+      }),
+    })
+
+    const response = await receiveReaderSignals(post(opening(), { [DEFAULT_REGION_HEADER]: "GB" }), intake)
+
+    expect(response.status).toBe(204)
+    expect(await bucketsIn(regions)).toEqual([])
+  })
+
+  /**
+   * The region is used once, in this handler, and never written down beside the
+   * page view it came with — which is the constraint the whole shape exists for.
+   */
+  it("never lets the region reach the batch it buffered", async () => {
+    const intake = intakeOf()
+
+    await receiveReaderSignals(post(opening(), { [DEFAULT_REGION_HEADER]: "GB" }), intake)
+
+    const page = await intake.journal.read()
+
+    expect(JSON.stringify(page.ok && page.value.batches)).not.toContain("GB")
+  })
+
+  /**
+   * The batch is already kept by then. Refusing would invite a retry that
+   * counted every signal in it twice, which is the one mistake in this subsystem
+   * that cannot be undone.
+   */
+  it("keeps a delivery whose bucket could not be written", async () => {
+    const regions: ReaderRegionStore = {
+      ...memoryReaderRegionStore(),
+      count: () => Promise.resolve({ ok: false, error: { code: "unavailable", detail: "no database" } }),
+    }
+    const intake = intakeOf({ regions })
+
+    const response = await receiveReaderSignals(post(opening(), { [DEFAULT_REGION_HEADER]: "GB" }), intake)
+
+    expect(response.status).toBe(204)
+
+    const page = await intake.journal.read()
+    expect(page.ok && page.value.batches).toHaveLength(1)
+  })
+})
+
 describe("the status", () => {
   it("distinguishes the three states that all present as no numbers", () => {
     expect(describeIntake(intakeOf()).intake).toBe("on")
     expect(
-      describeIntake(intakeOf({ settings: { chosen: { state: "off" }, hops: 1 } })).intake
+      describeIntake(intakeOf({ settings: settingsOf({ chosen: { state: "off" } }) })).intake
     ).toBe("off")
     expect(
       describeIntake(
-        intakeOf({ settings: { chosen: readIntakeSwitch("enabled"), hops: 1 } })
+        intakeOf({ settings: settingsOf({ chosen: readIntakeSwitch("enabled") }) })
       ).intake
     ).toBe("unusable")
   })
@@ -260,6 +416,33 @@ describe("the status", () => {
     await receiveReaderSignals(post(batch()), intake)
 
     expect(describeIntake(intake).subjects).toBe(1)
+  })
+
+  it("says whether where readers are is being counted, and under what floor", () => {
+    expect(describeIntake(intakeOf()).regions).toContain(DEFAULT_REGION_HEADER)
+    expect(describeIntake(intakeOf()).regions).toContain(String(DEFAULT_REGION_FLOOR))
+  })
+
+  /**
+   * An operator who asked for a smaller bucket than the runtime allows gets the
+   * runtime's, and should be able to find that out from the status rather than
+   * from the source.
+   */
+  it("says so when a floor it was given was refused", () => {
+    const status = describeIntake(
+      intakeOf({
+        settings: settingsOf({
+          region: {
+            chosen: { state: "on" },
+            header: DEFAULT_REGION_HEADER,
+            floor: readRegionFloor("5"),
+          },
+        }),
+      })
+    )
+
+    expect(status.regions).toContain("5")
+    expect(status.regions).toContain(String(DEFAULT_REGION_FLOOR))
   })
 
   it("names no secret", () => {

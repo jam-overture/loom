@@ -1,6 +1,7 @@
 import { err, ok, type Result } from "../result.js"
 
 import type { ReaderSignalJournal, ReaderSignalStoreError } from "./journal.js"
+import { regionCountsOf, type ReaderRegion, type ReaderRegionStore } from "./region.js"
 import { parseReaderSignalBatch, type ReaderSignalBatch, type ReaderSignalParseError } from "./signal.js"
 
 /**
@@ -31,6 +32,36 @@ export const MAX_BATCHES_PER_DELIVERY = 50
 export type IngestOutcome = {
   readonly batches: number
   readonly signals: number
+  /**
+   * Page views counted against a region, which is zero unless the caller said
+   * where the delivery came from and the delivery opened a page view.
+   */
+  readonly regions: number
+  /**
+   * Why no region was counted, when a region store refused one.
+   *
+   * Present and the delivery still stands: the batch is already kept, and a
+   * sender told to retry would deliver it twice, which is the one failure in
+   * this subsystem that cannot be undone (0158). So a lost region count is a
+   * counter that did not move, reported here rather than raised — the same
+   * trade a sink makes when a browser refuses a beacon.
+   */
+  readonly regionError?: ReaderSignalStoreError
+}
+
+/**
+ * Where a delivery came from, for a caller who can tell.
+ *
+ * The region is read from the request by whatever is serving this — the
+ * framework has no request and no opinion about which header a platform
+ * writes. What it owns is the counting: once per page view, against a bucket,
+ * and never onto the batch that is about to be buffered.
+ */
+export type RegionIntake = {
+  readonly store: ReaderRegionStore
+  readonly region: ReaderRegion
+  /** When, as an instant the counter is stamped with. The caller's clock, like every other. */
+  readonly at: string
 }
 
 export type IngestError =
@@ -77,7 +108,8 @@ const deliveryOf = (input: unknown): readonly unknown[] => (Array.isArray(input)
  */
 export const ingestReaderSignals = async (
   journal: ReaderSignalJournal,
-  input: unknown
+  input: unknown,
+  where?: RegionIntake
 ): Promise<Result<IngestOutcome, IngestError>> => {
   const delivery = deliveryOf(input)
 
@@ -97,8 +129,19 @@ export const ingestReaderSignals = async (
   const received = await journal.receive(batches)
   if (!received.ok) return err(received.error)
 
+  /**
+   * After the buffer accepted it, never before. A region counted for a delivery
+   * the journal then refused would be a reader who arrived from a country and
+   * read nothing — every other counter about that page view is missing, and the
+   * one number that is there is the one about where they were.
+   */
+  const counted = where === undefined ? [] : regionCountsOf(batches, where.region)
+  const regions = counted.reduce((views, count) => views + count.views, 0)
+  const kept = where === undefined || counted.length === 0 ? undefined : await where.store.count(counted, where.at)
+
   return ok({
     batches: batches.length,
     signals: batches.reduce((count, batch) => count + batch.signals.length, 0),
+    ...(kept !== undefined && !kept.ok ? { regions: 0, regionError: kept.error } : { regions }),
   })
 }

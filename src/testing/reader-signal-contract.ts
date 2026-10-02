@@ -3,13 +3,19 @@ import { describe, expect, it } from "vitest"
 import { nodeIdSchema, treeIdSchema, type NodeId, type TreeId } from "../ids.js"
 import { primitiveTypeSchema, type PrimitiveType } from "../primitive-type.js"
 import type { ReaderSignalJournal } from "../signals/journal.js"
+import {
+  UNKNOWN_REGION,
+  type ReaderRegion,
+  type ReaderRegionCount,
+  type ReaderRegionStore,
+} from "../signals/region.js"
 import type { FunnelPair, ReaderTally } from "../signals/rollup.js"
 import type { ReaderSignal, ReaderSignalBatch, ViewKey } from "../signals/signal.js"
 import type { ReaderTallyStore } from "../signals/tally.js"
 
 /**
- * Two suites, run against every implementation of the buffer and of the
- * counters.
+ * Three suites, run against every implementation of the buffer, the counters and
+ * the regions.
  *
  * The same argument as `store-contract.ts` and `journal-contract.ts`: an
  * interface is only tested once a second implementation exists, and a
@@ -27,6 +33,8 @@ export const primitiveType = (name: string): PrimitiveType => primitiveTypeSchem
 
 /** A key of the right shape, spelled so a failing assertion says which view it was. */
 export const viewKey = (nth: number): ViewKey => String(nth).padStart(32, "0") as ViewKey
+
+export const region = (code: string): ReaderRegion => code as ReaderRegion
 
 export const batchOf = (
   signals: readonly ReaderSignal[],
@@ -186,6 +194,22 @@ export const describeReaderSignalJournalContract = (
         undefined,
         viewKey(1),
       ])
+    })
+
+    /**
+     * The marker that says a page view began with this delivery is read at the
+     * door and goes no further. Both implementations drop it, and they have to
+     * agree: a buffer that kept it in memory and lost it in Postgres is a
+     * rollup whose answer depends on where it ran.
+     */
+    it("does not buffer the opening marker", async () => {
+      const journal = await make()
+      await journal.receive([batchOf([viewed("a")], { view: viewKey(3), first: true })])
+
+      const [stored] = unwrap(await journal.read()).batches
+
+      expect(stored?.first).toBeUndefined()
+      expect(stored?.view).toBe(viewKey(3))
     })
 
     it("keeps trees apart", async () => {
@@ -451,6 +475,114 @@ export const describeReaderTallyStoreContract = (
       )
 
       expect(unwrap(await store.funnels()).map((row) => row.converted).sort()).toEqual([3, 9])
+    })
+  })
+}
+
+/**
+ * Where readers were, against every implementation.
+ *
+ * Shorter than the other two suites because the table is narrower, and the
+ * properties it does assert are the ones a wrong implementation would be
+ * plausible without: that a second delivery adds to the first, that two
+ * countries are two rows, and that a revision is part of the key.
+ */
+export const describeReaderRegionStoreContract = (
+  name: string,
+  make: () => ReaderRegionStore | Promise<ReaderRegionStore>
+): void => {
+  describe(`${name} — ReaderRegionStore contract`, () => {
+    const count = (over: Partial<ReaderRegionCount> = {}): ReaderRegionCount => ({
+      treeId: TREE,
+      revision: 1,
+      region: region("GB"),
+      views: 1,
+      ...over,
+    })
+
+    it("reads back a count it was given", async () => {
+      const store = await make()
+      await store.count([count({ views: 4 })], AT)
+
+      expect(unwrap(await store.regions())[0]).toMatchObject({
+        region: "GB",
+        views: 4,
+        revision: 1,
+        updatedAt: AT,
+      })
+    })
+
+    it("reads nothing from a store nothing has been counted into", async () => {
+      const store = await make()
+
+      expect(unwrap(await store.regions())).toEqual([])
+    })
+
+    it("accepts a delivery that counted nothing", async () => {
+      const store = await make()
+
+      expect(unwrap(await store.count([], AT))).toBeUndefined()
+    })
+
+    /**
+     * The property the floor depends on. Every call carries one delivery's
+     * arrivals, so a store that replaced would hold a bucket at one view for
+     * ever and withhold a country a thousand readers came from.
+     */
+    it("adds a second delivery to the first rather than replacing it", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 })], AT)
+      await store.count([count({ views: 2 })], LATER)
+
+      const rows = unwrap(await store.regions())
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ views: 5, updatedAt: LATER })
+    })
+
+    it("keeps two regions apart", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 }), count({ region: region("FR"), views: 1 })], AT)
+
+      expect(
+        unwrap(await store.regions())
+          .map((row) => `${row.region}:${row.views}`)
+          .sort()
+      ).toEqual(["FR:1", "GB:3"])
+    })
+
+    it("keeps the readers of one revision apart from the next", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 }), count({ revision: 2, views: 1 })], AT)
+
+      expect(unwrap(await store.regions()).map((row) => row.revision).sort()).toEqual([1, 2])
+    })
+
+    it("keeps a bucket for the readers it could not place", async () => {
+      const store = await make()
+      await store.count([count({ region: UNKNOWN_REGION, views: 2 })], AT)
+
+      expect(unwrap(await store.regions())[0]).toMatchObject({ region: "unknown", views: 2 })
+    })
+
+    it("reads one tree without the other", async () => {
+      const store = await make()
+      await store.count([count(), count({ treeId: OTHER_TREE, views: 7 })], AT)
+
+      const rows = unwrap(await store.regions({ treeId: OTHER_TREE }))
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]?.views).toBe(7)
+    })
+
+    it("reads one revision without the other", async () => {
+      const store = await make()
+      await store.count([count(), count({ revision: 9, views: 7 })], AT)
+
+      const rows = unwrap(await store.regions({ revision: 9 }))
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]?.views).toBe(7)
     })
   })
 }

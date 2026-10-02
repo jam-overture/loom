@@ -895,13 +895,13 @@ describe("G", () => {
 
 ```
   getComputedStyle       capture.ts false playwright.ts true  specimen.test.ts false
-  getBoundingClientRect  capture.ts false playwright.ts true  specimen.test.ts false
+  getBoundingClientRect  capture.ts true  playwright.ts true  specimen.test.ts true
   createRange            capture.ts false playwright.ts true  specimen.test.ts false
   clientWidth            capture.ts true  playwright.ts true  specimen.test.ts false
-  querySelectorAll       capture.ts false playwright.ts true  specimen.test.ts false
+  querySelectorAll       capture.ts false playwright.ts true  specimen.test.ts true
   what the suite's browser double returns from every evaluate:
     { scrollWidth: 390, innerWidth: 390, clipped: [] }
-  top-level functions in playwright.ts: 10
+  top-level functions in playwright.ts: 11
   of those, handed to page.evaluate: 3
     measureDocument    exported false  named in the suite false
     readClippingBoxes  exported false  named in the suite false

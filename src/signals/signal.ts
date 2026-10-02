@@ -155,9 +155,38 @@ export const readerSignalBatchSchema = z
      * view, which would inflate every funnel denominator.
      */
     view: viewKeySchema.optional(),
+    /**
+     * Whether this is the opening delivery of its page view.
+     *
+     * One batch of a page view carries it and the rest do not, so a receiver
+     * can count page views without remembering anything: *this is a reader
+     * arriving* is a fact only the sender has, and the server's alternative is
+     * to hold the view keys it has already seen — which is the one value
+     * nothing is allowed to keep (0146).
+     *
+     * It says nothing about the reader and nothing about the page. It is the
+     * field that lets an intake count where its readers are, once, per reader,
+     * rather than once per delivery — and a counter that moves with how long
+     * somebody stayed is a counter that makes one visitor look like a crowd.
+     *
+     * **Optional, and absent is not false.** A sender that does not mint view
+     * keys has no page views to open, and a batch replayed from a fixture is
+     * not an arrival.
+     */
+    first: z.literal(true).optional(),
     signals: z.array(readerSignalSchema).min(1),
   })
   .strict()
+  /**
+   * An opening with nothing to open is refused rather than ignored. The flag
+   * means *this page view began here*, so a batch that names no page view is
+   * making a claim it cannot support, and a receiver that quietly dropped it
+   * would be undercounting for a reason nobody could see.
+   */
+  .refine((batch) => batch.first !== true || batch.view !== undefined, {
+    message: "says it opened a page view but names none",
+    path: ["first"],
+  })
 
 export type ReaderSignalBatch = z.infer<typeof readerSignalBatchSchema>
 
