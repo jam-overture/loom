@@ -40699,3 +40699,156 @@ two runs chasing its own record. The same timing around a *fix* rather than a
 figure would put a known-bad version on `main` with a green branch beside it
 saying otherwise, and the branch would look exactly like a branch whose work was
 safe.
+
+---
+## 2026-10-02 — a presentation's panel is laid out at full width until scripting hydrates, and on a 390px page that is three hundred pixels of sideways scroll
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/presentation.ts`, `src/primitives/stylesheet.ts`) ·
+**Status:** open — **`ARCHITECTURAL` if anyone acts on it.** The behaviour is
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+working exactly as specified and `presentation.test.ts` asserts the rule that
+causes it. Nothing here proposes superseding that record; what is new is the
+cost, measured
+
+`presentation.ts` §2 states the rule and its reason, and both are right:
+
+> Every control in the vocabulary renders `null` until an effect has proved
+> scripting runs. So on a page served without it there is no button, no
+> attribute, and no rule that matches — which means the region must be **visible
+> by default and hidden by the rule**.
+
+The consequence nobody had measured is that *a page with scripting on passes
+through the no-scripting state on every load.* Between first paint and
+hydration there is no control, so `.loom-popover[data-loom-presented="false"]`
+matches nothing, so the panel is laid out — `position: absolute`, at
+`max-inline-size: min(26rem, calc(100vw - 2rem))`, beside a trigger that may be
+most of the way across the page.
+
+**The measurement, from the camera rather than from reading the sheet.** A sheet
+holding one `loom.popover`, shot at 390×844 with an empty step list:
+
+```
+run 1  …-editorial-phone-shut  390x844@2x  scrollWidth 693 / innerWidth 390  ← overflows
+run 2  …-bold-phone-shut       390x844@2x  scrollWidth 697 / innerWidth 390  ← overflows
+```
+
+One overflowing shot per run and a different palette each time — the signature
+of a race rather than of a defect in a band. Three hundred pixels of page that is not there a moment later. Adding
+`{ wait: 400 }` to that one state removes it on every shot under both palettes,
+which is the experiment: the overflow is the pre-hydration layout and nothing
+else.
+
+### Why this is worth an entry rather than a shrug
+
+**It is a real reader's experience, not only a photograph's.** On a phone on a
+slow connection the window between paint and hydration is not four hundred
+milliseconds, and what a reader gets is a page that scrolls sideways and then
+stops doing so. Every page with a menu, a popover or a lightbox on it has this,
+which is to say every page the catalogue will build once those three are
+reachable.
+
+**And it makes the harness's own gate nondeterministic.** `pnpm specimen` fails a
+run on `scrollWidth > innerWidth`, correctly. With a presentation in the sheet it
+fails on *one palette per run and a different palette each run*, because it is
+racing hydration — so the first instinct is to disbelieve the gate, which is the
+worst thing that can happen to a measurement nobody else takes.
+
+### The three shapes a fix could take, smallest first, none of them taken here
+
+1. **A `@media (scripting: none)` escape.** Keep the hide rule in the safe
+   direction, and hide the panel by default where scripting is off. Browser
+   support for `scripting` is good and the no-JS case 0176 protects is exactly
+   what the query names. The risk is that `scripting: enabled` is true during the
+   pre-hydration window too, so this fixes nothing unless the default flips.
+2. **Flip the default and reveal on `"true"`, with a `<noscript>` rule.** The
+   direction 0176 rejected, made safe by the one mechanism that only applies
+   when scripting is off. It costs a `<noscript>` block in a library stylesheet
+   that is otherwise one sheet.
+3. **Clip the root rather than hide the panel.** `overflow: clip` on
+   `PRESENTATION_ROOT` until the control exists bounds the damage without
+   touching the rule's direction — the panel still occupies no width — but a
+   root that clips is a root that clips the open panel too, so it has to be
+   undone by the same attribute that reveals it, which is the rule again.
+
+**Worked around, not fixed:** the sheet that found this waits four hundred
+milliseconds in its `shut` state and says why in its own comment.
+
+---
+## 2026-10-02 — `loom.menu` is the one unreachable primitive that is not waiting for a band, and a second nav design is what proved it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.menu.ts`) · **Status:** open — **not a new finding.** It
+is the 1 October filing about a control's name, with the consequence attached
+and a number on it
+
+The 1 October entry established that a control's word is the primitive's and is
+resolved per type (0055, 0063), and that this is why `loom.dialog` was not built.
+What it did not say is that the same constraint makes an *already shipped*
+primitive unreachable from the catalogue.
+
+`loom.nav` declares `disclose` and names its control `Menu`. `loom.menu` names
+its control `Menu`. A bar holding both has two buttons reading *Menu* at 390px,
+one nested inside the other, and the one in the panel is the one a reader
+reaches second.
+
+**This was found by trying to build the band.** The obvious second design of the
+`nav` part — the bar whose destinations fold behind a button — is the one
+everybody would name first, and `loom.menu`'s own doc comment names a header as
+its first use. It cannot be built at the quality bar today, so `nav-centred`
+shipped instead and `loom.menu` is still at reach zero.
+
+The measured size of it, which is what this entry adds:
+
+| | |
+| --- | --- |
+| registered primitives | 102 |
+| reached by dropping in a band | **90** after 2 October (89 before) |
+| unreached and genuinely waiting for a band | `loom.lightbox`, `loom.pin` |
+| unreached because the catalogue ships no asset | `media`, `embed`, `carousel`, `before-after`, `overlay` |
+| unreached and belonging to a bound or paged region | `link-pager`, `waiting-state`, `link-trail` |
+| structural | `loom.page` |
+| **unreached because of a string** | **`loom.menu`** |
+
+One entry on that list is a different kind of thing from all the others, and it
+is the only one where the work is not in this lane's gift.
+
+---
+## 2026-10-02 — the size of the catalogue is spelled out in three places in `apps/`, and the lane that changes it cannot see any of them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — a hazard with a fresh instance,
+and the instance is already fixed
+
+Adding four bands to `src/primitives/compositions/` turned `main`'s app suite red
+in three places, none of them in this lane:
+
+| | why |
+| --- | --- |
+| `_lib/counts.test.ts` | the expected spelling list holds `"starter-bands: forty-four"` as a literal |
+| `_lib/packages.ts` | a doc comment: *"`…/compositions` is the forty-four bands"* |
+| `_components/bands.tsx` | a doc comment: *"why there are forty-four bands and twenty-two places to put one"* |
+| `_lib/api/reference.generated.json` | a generated artefact, regenerated with the repository's own `pnpm --filter @loom/app docs:api` |
+
+All four are corrected on the branch that caused them, which is the only
+reasonable thing to do with a red build — and it meant a lane whose brief says
+*do not edit `apps/`* editing `apps/`, in a one-word diff it had no way to
+anticipate. Said plainly in the pull request rather than slipped in.
+
+**The interesting half is that `counts.ts` got it right.** `SITE_COUNTS` reads
+`STARTER_COMPOSITIONS.length` from the library, so the *page* a reader sees was
+never wrong for a moment and needed no edit at all. That is the mechanism working
+exactly as designed. What is not covered by it is the test's own expected list —
+which has to be a literal, or it asserts nothing — and two doc comments beside it
+that spell the number in prose.
+
+**What would be useful, and it is the `audit.ts` remedy one directory over.** The
+1 October entry about four sentences in `src/` saying *ninety-eight* ends with
+it: a doc comment may state the *claim* rather than the arithmetic. Here that is
+*"the bands under their own names"* and *"one design of every part, and more than
+one of several"* — both true today, both still true after the next band, and
+neither a number this lane moves without knowing.
+
+The test's literal is a different thing and should stay a literal. It is the one
+place in the repository where the catalogue's size is asserted rather than read,
+and that is its job.
