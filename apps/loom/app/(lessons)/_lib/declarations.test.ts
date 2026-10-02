@@ -80,6 +80,8 @@ const HELD: readonly Held[] = [
   { lesson: "27-scale.md", name: "LoomPrimitiveProps", members: 3, whole: true },
   { lesson: "30-rendezvous.md", name: "BindingDeclaration", members: 2, whole: true },
   { lesson: "31-behaviour.md", name: "Behaviour", members: 5, whole: true },
+  { lesson: "33-shortfall.md", name: "UnshownDeclaration", members: 0, whole: true },
+  { lesson: "33-shortfall.md", name: "UnshownReading", members: 3, whole: true },
 ]
 
 /**
