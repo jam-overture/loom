@@ -40190,6 +40190,156 @@ readers on two surfaces and it is the one quantity in this repository that
 several lanes type independently.
 
 ---
+## 2026-10-01 — `role` and `copy` now have a reader that turns them into a sentence about readers, and the library still declares neither
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **not a new finding**, and deliberately
+so: the 19 September entry asking for one pass over the library is still the
+work. This adds the consumer that was missing from it, and a number
+
+0122 shipped `copy` with nothing declaring it and said so in its own
+consequences. 0114 shipped `role` the same way. Both were filed for this lane,
+and the 19 September entry — *no primitive declares `copy`, and the first
+populated picture of `/portal/readers` shows what that costs a reader* — is the
+open ask. The 30 September entry explains why two declarations were backed out
+of a pull request rather than shipped, and that reasoning was right: two of a
+hundred and two is a picture of a library that mostly declines to say.
+
+**What changed today is that the payoff is no longer hypothetical.**
+`pageReadingOf` (`src/signals/parts.ts`, 0212) joins a revision's reader
+counters to its tree and the registry, so a counter becomes a sentence:
+
+| the counter says | with the declarations it says |
+| --- | --- |
+| `dwelled on n_42, 11,400 ms` | eleven seconds on a part that plays no declared role, whose words nobody has classified |
+| `viewed on n_42` | *"Winter range — now 30% off"* was read; the three bands below it were not |
+
+The second row is what `wordsReadIn` returns, and it is the thing a maintainer
+asked for in plain language: **which copy a reader actually reached.** Today it
+returns the empty list for any page built from the starter library, because
+every part's words are in `copy.unread` instead — named, which is 0122's bargain
+working exactly as designed, and useless to a reader of the portal.
+
+**The honest size of it, measured:** `copyFor` answers `undefined` for every one
+of the starter library's types, and `typesWithRole("heading")` answers `[]`. So
+of the two halves of the interpretation layer, the half that needs no
+declaration — which parts of a page readers reached and which they skipped —
+works now, and the half that needs you is dark.
+
+**Nothing is blocked and nothing needs to be rushed.** The join is at read time
+on purpose (0212): the day this lane declares `copy` across the library, every
+counter already stored reinterprets, including windows rolled up months ago.
+That is the property that makes this safe to do later rather than urgently —
+and it is also why doing it in one pass, as the 19 September entry asks, costs
+nothing extra.
+
+**One thing for the record rather than for action.** 0114's bar for a second
+role is *a consumer that cannot answer its question, written down as a finding*.
+This lane now has one consumer that would use more of the vocabulary than
+`heading` — a reading grouped by role is thin with one member — but it has no
+question it cannot answer, so this is not that filing. Said here so nobody reads
+the thin role rows as a request for members.
+
+---
+## 2026-10-01 — the reader screen can now ask which parts of a page readers skipped, which is the one question counters alone can never answer
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — additive, nothing blocked, and
+step 4 of [`docs/signals.md`](docs/signals.md) now has the shape it was told to
+wait for
+
+Step 6 landed (0212). `pageReadingOf(tree, tallies, declarations)` from
+`@jam-overture/loom/signals` is a pure join of a revision's counters to that
+revision's tree and the deployment's registry. `portalRegistry` satisfies
+`PartDeclarations` structurally — `copyFor` and `typesWithRole`, nothing else —
+so there is no new wiring to build.
+
+**What it answers that `/portal/readers` cannot ask today.**
+
+- **Which parts readers skipped.** A part nobody reached has no tally row, so a
+  screen reading rows can only ever draw what *was* read. The tree is the
+  universe of parts, and against it absence is a measurement. Each
+  `PartReading.standing` is `read`, `skipped` or `unknown`, and the third is
+  load-bearing: a window with no views makes every part `unknown`, because a
+  page nobody opened is not a page everybody skipped.
+- **Where in the page the reading stops.** Parts come back in reading order with
+  `depth` and `parentId`, which is the shape of a drop-off and the thing a map
+  keyed by node id cannot show.
+- **Which copy a reader actually reached** — `wordsReadIn(reading)`. Empty for
+  the starter library today; see the entry above, filed for `Loom primitives`.
+- **Which roles readers engage with and which they skip** — `reading.roles`, one
+  row per role in the vocabulary plus a row for the parts that declared none.
+
+**Two things to carry into the screen rather than re-derive.**
+
+1. **`PART_STANDINGS` and `describePartStanding` are exported** so a surface
+   renders the vocabulary instead of keeping its own copy — the same reason
+   `describeIntakeVerdict` exists, and the mistake 0114 was filed about.
+2. **`reading.views` is a floor, not a count, and its name should survive the
+   trip to the screen.** It is the largest `views` any single row reports,
+   because distinct view counts cannot be added across rows (0147). Drawing it
+   as *page views* would be the plausible-false-number failure this lane's own
+   14 September entry argued against.
+
+**One shape to be careful with.** A grouped row carries `dwellMs`,
+`activations`, `opens`, `closes` and `completions` and deliberately carries no
+`views`, `reached` or `engaged`. If a screen wants a per-role view count there
+is not an honest one to give: one reader who read three headings is three in a
+sum of `reached` and one person. What a role row says about views is how many of
+its *parts* were read, skipped or unknown.
+
+**The cost of before-versus-after, stated plainly.** A reading needs the tree of
+the revision its counters name. For the head revision that is the snapshot the
+store already holds. For an older one it is a log replay — see the entry below,
+filed for the lane that owns `src/store/`. So *before versus after a change* is
+two readings and, today, two different amounts of work.
+
+---
+## 2026-10-01 — nothing can ask a store for the tree as it was at revision N, and the comparison that justifies Loom needs two of them
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Status:** open — not blocking, and the workaround is correct rather than
+merely available
+
+Reader counters are keyed by tree **and revision**, deliberately: adding two
+revisions of a node together is what makes *before versus after a change*
+unreadable. Interpreting them (0212) therefore needs the tree **of that
+revision** — the registry alone cannot say which parts existed when the
+counters were collected.
+
+A store answers that for exactly one revision. `TreeReader` hands back the
+snapshot, which is the head; an older revision is recovered by `replayTree` over
+the log from the seed, which the caller assembles itself by paging
+`revisions()`. `auditSnapshot` already does precisely this walk, so the
+machinery exists and the fold is proven — what is missing is a way to ask for
+the result at a chosen revision and stop there.
+
+**Why it matters more than it reads.** The comparison this whole subsystem
+exists for is one revision against another. With a snapshot-only read, the
+*after* side is a map lookup and the *before* side is a full log fold that
+every consumer writes for itself — and a consumer that gets the stopping
+condition slightly wrong draws one revision's counters against another
+revision's tree. `pageReadingOf` reports `orphaned` and `foreign` precisely so
+that mistake is visible rather than plausible, but reporting a mistake is worse
+than making it impossible.
+
+**The shape, if it is wanted** — and this is a suggestion from outside the lane,
+not a design:
+
+```ts
+treeAt(reader, treeId, revision): Promise<Result<ReplayedTree, …>>
+```
+
+A fold that stops at `revision` rather than at the end of the log, which is
+`foldLog` with one more condition and would give `auditSnapshot` and this one
+caller the same walk. `revisions()` is already paged (0026), so bounding the
+read is the same question the paging answers.
+
+**Not filed as urgent.** No surface compares revisions' readings yet; the portal
+screen that will is step 4 of [`docs/signals.md`](docs/signals.md) and is not
+built. Filed now because it is cheaper to know before that screen is written
+than after, and because the lane that owns `src/store/` is the only one that can
+do it.
 
 ## 2026-10-01 — a host cannot re-measure its own stakes from its own record, and it is two fields short
 
