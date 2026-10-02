@@ -1,0 +1,25 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-01-framework-nothing-can-see-a-box-the-rail-wide",
+      "viewport": "wide",
+      "waitFor": "aside",
+      "measure": [
+        "aside",
+        "aside h1",
+        "aside li",
+        "text=Ask that page for a change",
+        "text=a selector that matches nothing"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-01-framework-nothing-can-see-a-box-the-rail-phone",
+      "viewport": "phone",
+      "waitFor": "aside",
+      "measure": ["aside", "aside h1"]
+    }
+  ]
+}
