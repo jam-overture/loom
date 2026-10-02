@@ -5,7 +5,7 @@ import { ASKS, type AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
 import { protectedInPlainWords } from "../adapt/run"
 import { ANCHOR, BAND } from "../bands"
-import { heading, prose, stack } from "../nodes"
+import { heading, prose, stack, TERTIARY_CONTROL } from "../nodes"
 import { askHref, DEMO, mechanismHref, surfaceHref, type SiteThemeName } from "../site"
 
 /**
@@ -233,7 +233,7 @@ const readTheRecord = (
         ask: record.ask,
         approve: context.approve === true,
       }),
-      variant: "quiet",
+      ...TERTIARY_CONTROL,
     },
     children: [buildText(ids, "See every line the machinery wrote")],
   })
@@ -499,7 +499,7 @@ const typeYourOwn = (ids: IdFactory, context: SeeItHappenContext): readonly Loom
          * something.
          */
         href: surfaceHref(context.origin, DEMO),
-        variant: "quiet",
+        ...TERTIARY_CONTROL,
       },
       children: [buildText(ids, "Try the demo")],
     }),

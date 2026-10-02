@@ -21,7 +21,7 @@ import {
 import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
-import { action, heading, prose, section, stack } from "../nodes"
+import { action, heading, prose, section, stack, TERTIARY_CONTROL } from "../nodes"
 import {
   DECISIONS_URL,
   DEMO,
@@ -682,11 +682,10 @@ const facts = (ids: IdFactory, context: PageContext): LoomNode =>
         ids,
         "What you would be running",
         internalHref(context.origin, WHAT_YOU_RUN.path, context.theme),
-        { variant: "quiet", scale: "small" }
+        TERTIARY_CONTROL
       ),
       action(ids, "Read the decisions", DECISIONS_URL, {
-        variant: "quiet",
-        scale: "small",
+        ...TERTIARY_CONTROL,
         external: true,
       }),
     ]),
