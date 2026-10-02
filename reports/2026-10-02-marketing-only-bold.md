@@ -3,13 +3,13 @@
 Six controls on three pages, in the row at the end of every band, that a visitor
 had no way of knowing were controls.
 
-![the row on /what-you-run, before](2026-10-02-marketing-only-bold-before-wyr.png)
+![the row on /what-you-run, before](2026-10-02-only-bold-before-wyr.png)
 
 *"Try it yourself"* and *"Read the source"* are links. They are bold black words
 beside two pills, on a white page, with nothing drawn around them and no
 underline. Nobody would press them.
 
-![the same row, after](2026-10-02-marketing-only-bold-after-wyr.png)
+![the same row, after](2026-10-02-only-bold-after-wyr.png)
 
 ---
 
@@ -107,12 +107,12 @@ third instance of the shape.
 
 ## What it cost, which is not nothing
 
-![the same row on bold, before](2026-10-02-marketing-only-bold-before-wyr-bold.png)
+![the same row on bold, before](2026-10-02-only-bold-before-wyr-bold.png)
 
 On `bold` the two quiet controls were **yellow**, and they read perfectly well
 as links. That is what the change gives up.
 
-![and after](2026-10-02-marketing-only-bold-after-wyr-bold.png)
+![and after](2026-10-02-only-bold-after-wyr-bold.png)
 
 The trade is deliberate and it is the same one the `tone: "surface"` change made
 on 28 September: a composition that is right on one palette and wrong on the
@@ -123,15 +123,15 @@ size rather than with fill and hue.
 
 ## The other two places
 
-![the front door's stats band, after](2026-10-02-marketing-only-bold-after-home.png)
+![the front door's stats band, after](2026-10-02-only-bold-after-home.png)
 
-![the mechanism page, after](2026-10-02-marketing-only-bold-after-hiw.png)
+![the mechanism page, after](2026-10-02-only-bold-after-hiw.png)
 
 The sixth is on the notice at the top of `/how-it-works` and only exists once a
 visitor has pressed one of the five choices, which is why it needed the sweep
 below rather than a look at the three published pages.
 
-![/what-you-run at 390](2026-10-02-marketing-only-bold-after-phone.png)
+![/what-you-run at 390](2026-10-02-only-bold-after-phone.png)
 
 ---
 
