@@ -1,3 +1,4 @@
+import { Count } from "@/app/(docs)/_components/count"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 
 export const metadata = pageMetadata("getting-started", "installation")
@@ -6,8 +7,9 @@ export const metadata = pageMetadata("getting-started", "installation")
 
 Loom is **two packages**. `@jam-overture/loom` is the framework — the tree, the
 change model and the Gate — with several entry points behind it.
-`@jam-overture/loom-primitives` is the starter library: the ninety-eight
-primitives every example on this site is built from.
+`@jam-overture/loom-primitives` is the starter library: the
+<Count of="starter-primitives" as="word" /> primitives every example on this site
+is built from.
 
 Install both, and a React renderer to mount what they produce.
 

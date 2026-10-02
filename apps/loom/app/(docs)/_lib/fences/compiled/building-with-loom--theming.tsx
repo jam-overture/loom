@@ -20,8 +20,8 @@ import {
   registry,
 } from "../context/building-with-loom--theming"
 
-// page.mdx:27 — the inside of an object literal
-const objectAtLine27 = {
+// page.mdx:28 — the inside of an object literal
+const objectAtLine28 = {
 props: {
   "loom:theme": {
     palette: "tide",
@@ -31,22 +31,22 @@ props: {
 }
 }
 
-// page.mdx:160 — a program
+// page.mdx:161 — a program
 const themes = createThemeRegistry({
   palettes: [ourLightPalette, ourDarkPalette],
   fontPacks: [ourFontPack],
   stylePresets: [ourStylePreset],
 })
 
-// page.mdx:179 — a program
+// page.mdx:181 — a program
 createThemeRegistry({ palettes: [...STARTER_PALETTES, ourLightPalette] })
 
-// page.mdx:244 — a program
+// page.mdx:246 — a program
 const Excerpt = ({ tree, theme }: { tree: LoomTree; theme: ResolvedTheme }) => (
   <div style={{ ...themeStyle(theme), ...themeGround(theme) }}>
     {renderLoomTree(tree, { resolver: registry, validator: registry }).element}
   </div>
 )
 
-export { objectAtLine27, themes, Excerpt, createThemeRegistry, STARTER_PALETTES, renderLoomTree, themeGround, themeStyle }
+export { objectAtLine28, themes, Excerpt, createThemeRegistry, STARTER_PALETTES, renderLoomTree, themeGround, themeStyle }
 export type { LoomTree, ResolvedTheme }

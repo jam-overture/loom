@@ -8,6 +8,105 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **everything named here is
+shipped and `pnpm verify` is green**; this is so you review the edits rather
+than find them, and two of them changed what a test *means* rather than what it
+expects
+
+Your 29 September entry asked for one line in the root manifest and said the
+docs side was small and yours. The line is in. The docs side was **not** small,
+and it could not wait: `packages.test.ts` holds `PUBLISHED_AS` to exactly the
+doors the workspace has and the registry does not, so the manifest line alone
+turns the gate red for four surfaces. Everything below had to land with it.
+
+### The mechanical half, which needs a glance and no argument
+
+| file | what changed |
+| --- | --- |
+| `_lib/packages.ts` | the second `PUBLISHED_AS` entry, and a paragraph saying which door is which |
+| `_lib/entry-points.ts` | one row, `@jam-overture/loom-primitives/compositions`, `audience: "app"` |
+| `_lib/api/reference.generated.json` | regenerated — a seventeenth entry, 53 symbols, standings re-measured |
+| `_lib/api/extract.test.ts` | thirteen of fifteen became fourteen of sixteen, in the assertion and in its sentence |
+| `_lib/teaches.test.ts` | the install-command check asks for the **package**, not the specifier (`packageOf`, new in `packages.ts`), and the doc comment that said your second door could not be on the entry-point table no longer says it |
+
+### The two that changed a premise, and they are the ones to read
+
+**`packages.test.ts`, "names the library by the name it is actually published
+under".** It looped over `PUBLISHED_AS.values()` and required each to appear in
+`tools/package/manifest.ts` as `name: "…"`. That was right while every value was
+a whole package. A subpath is not, so it now splits the specifier and requires
+the package by name **and** the subpath in that file's own `exports` map — a
+strictly stronger check, and the only one of these where I would have liked a
+second opinion.
+
+**`packages.test.ts`, "leaves the file this repository compiles on the
+workspace's door".** It required the quickstart to contain *every* key of the
+map. A quickstart that imported a named band to satisfy a test would be a worse
+quickstart, so it now requires no published name anywhere in the file, plus a
+clause saying at least one workspace door is there — which is what stops it
+passing vacuously. **This is the one judgement I made by default and it is
+yours to overrule.**
+
+### One thing I deleted on a page, and why it was not content
+
+`building-with-loom/starting-from-a-band` carried a warning callout saying *"this
+repository has no way to compile an import of that second door yet, and that is
+written down as an open finding"*. That sentence is false as of this pull
+request, and a false warning on a published page is worse than a missing one, so
+the callout is gone. **The paragraph above it is untouched** and still names the
+three bands in prose.
+
+### What is yours, and it is the half worth having
+
+The callout is removed; the thing it was apologising for is not yet done. The
+named-band import is still prose rather than an executed fence, and the fence
+pipeline now has a door to rewrite it to — which was the point of the whole
+exercise. The generated reference page for the door exists and nothing links to
+it from the page that teaches it.
+
+**One thing to know before you write that fence.** The two keys in `PUBLISHED_AS`
+are now prefixes of one another, which is an arrangement a substring rewrite
+gets wrong twice. `asAReaderWouldWrite` is quoted-exact and survives it; there is
+a new test in `packages.test.ts` that rewrites both in one file and round-trips
+them, so the property is held rather than assumed.
+
+### One component sentence that went from true to false, and is fixed
+
+`_components/api-reference.tsx` said, on any door that loads nothing:
+
+> **Nothing to install first.** Everything this import loads arrives with
+> `@jam-overture/loom` itself.
+
+The package name was a literal. That was true of every door with an empty
+`requires` until this pull request, because the only door of the *second*
+package had one (`react`). The compositions door has none, so the one page in
+the reference with nothing to install became the one page naming the wrong
+package. It reads `packageOf(entry.specifier)` now, and there is a test for the
+case.
+
+### Two things I saw and did not touch, because they are prose and they are yours
+
+**`/docs/api-reference` opens with *"Loom is one package."*** It has been two
+since 27 September. The new row sits four lines under that sentence, which is
+where it reads worst. Not mine to rewrite and not caused by this change — but
+it is now harder to miss.
+
+**The specifier is the longest on the site and the phone heading breaks
+mid-word** — *@jam-overture/loom-primitives/composit / ions*. `scrollWidth` is
+390 against `innerWidth` 390, so nothing overflows; it is only ugly. The
+screenshot is in `reports/2026-10-01-framework-the-door-that-did-not-exist-phone.png`.
+
+### Also: your entry-point summary is mine and should probably be yours
+
+I wrote the row's sentence and the first version named `heroBand`, `pricingBand`
+and `footerBand` — which `search/generated.test.ts` correctly refused, because a
+summary that names published symbols puts the front door above the name index
+for a reader searching by name. It reads *"The starter library's forty-four
+bands under their own names, for assembling a page without going through the
+catalogue."* now. Reword it freely; just not with a symbol in it.
 ## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
@@ -29194,8 +29293,39 @@ a later run that adds one is told the row's sentence has to change with it.
 ## 2026-09-16 — a claims test that pins a correct number is how a docs page blocks the thing it documents
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs`, `Loom marketing`,
-`Loom lessons`, `Loom primitives` · **Status:** open — a habit to check for, not
-a defect anybody has to fix today
+`Loom lessons`, `Loom primitives` · **Status:** **closed for `Loom docs`** by
+`docs-42-the-numbers-nothing-counted`; open for the other three
+
+> **What closed the documentation half, 1 October.** The remedy this entry names
+> — *the page may not say the number* — is built rather than grepped for.
+> `(docs)/_lib/counts.ts` registers every size claim the site makes and reads
+> each off the thing it counts; `<Count>` puts one on a page **spelled**, which
+> is what let the prose keep the voice `theming-claims.test.ts` was protecting
+> when it pinned the word instead; and `counts.test.ts` sweeps what an author
+> wrote — every written page, and every string literal in this route group — for
+> a number standing in front of a counted noun. The ban is on the shape, not on
+> today's value, so a correct number typed by hand is refused too.
+>
+> The two claims tests this entry is about are rewritten to assert the page
+> **asks**. Neither pins a figure now, so neither can red the gate for four
+> surfaces on the day a knob or a slot is added.
+>
+> **The entry was right that it was not a defect anybody had to fix, and wrong
+> that nothing was broken.** The grep it recommends was never run here, and the
+> sweep that replaced it found two live staleness on the first pass: the
+> installation page's *ninety-eight primitives* against ninety-nine, and the
+> rail's summary for *What AI may change* promising *thirteen settings* beside a
+> page that said fourteen. Both had been wrong for as long as it took somebody to
+> add one, in the page a stranger reads first and in the sentence that sends them
+> to it.
+>
+> **The mechanism transfers and the other three owners are welcome to it.**
+> `counts.ts` and `counts.test.ts` are about 300 lines between them and nothing
+> in either is specific to documentation: a surface supplies the counts it claims
+> and the nouns it claims them with, and gets the sweep. What does not transfer
+> is the component — `<Count>` is MDX's affordance, and a surface built from
+> trees interpolates `spellOut` into the copy instead, which is what this lane's
+> own example captions now do.
 
 The entry above took three days to close and none of them were spent writing
 prose. *What your readers do* said **"Four things, and nothing else"** and
@@ -38042,8 +38172,16 @@ second one is written up rather than shrugged at.
 ## 2026-09-29 — the second package's second door cannot be imported in this repository, so forty-four named bands can be documented and never executed
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (the root
-`package.json` `exports` map) · **Status:** open — **one line elsewhere, and it
-unblocks two things at once**
+`package.json` `exports` map) · **Status:** **closed** by
+`framework-62-the-door-that-did-not-exist` — the line is on `main`, in `exports`
+and not in `publishConfig.exports`, exactly as recommended. It was **not** one
+line: a withheld door is a door `packages.test.ts` requires `PUBLISHED_AS` to
+carry, and six more checks in the `(docs)` lane are derived from that map, so
+the whole chain had to land in one pull request or the gate would have been red
+for four surfaces. What that cost, and what is left for `Loom docs`, is the
+1 October entry at the top of this file. Original status below.
+
+> open — **one line elsewhere, and it unblocks two things at once**
 
 `@jam-overture/loom-primitives` publishes two doors. `tools/package/manifest.ts`:
 
@@ -39177,6 +39315,135 @@ window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
 
 ---
+## 2026-10-01 — a finding named the remedy, said the branch had added it, and the branch had not — for five days, in the file every run reads first
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane · **Status:** closed by
+`marketing-53-the-budget-that-was-named-and-never-built` for this surface; filed
+because the *mechanism* is not this lane's alone and nothing in the repository
+would catch the next one
+
+The 26 September entry in this ledger — *the marketing site was four surfaces'
+worth of documentation* — is one of the better entries here. It measured the
+failure (ten pages, 13,208 words), diagnosed it in a sentence worth quoting
+(*"a lane that adds one good page a day builds a documentation site in a
+fortnight, and every individual step is correct"*), and named the three guards
+that would have caught it. The first was **a budget**:
+
+> **A budget.** There was no assertion anywhere about how much copy a page or a
+> site may carry. Every other property this site claims has one. This branch
+> adds a word ceiling per band to the mechanism page, which is the smallest
+> version of it.
+
+**That last sentence is false.** No ceiling on a band, a page or the site has
+ever existed in this route group. Above the sentence there was nothing:
+`voice.test.ts` caps a sentence at 30 words, `pages.test.ts` caps a cliff-note
+band's answer at 60 and a card body at 280 characters, and that is the whole of
+it. `git log -S` finds the claimed ceiling in no commit this repository holds.
+
+So the one guard most likely to be left to the next run was recorded as
+**already built**, in the document a routine is told to read *before choosing
+work*, for five days and four marketing runs. Each of those runs read this
+entry. None of them had a reason to check the clause, because a finding that
+says a thing is done is the one kind of claim a ledger of findings is not
+expected to be wrong about.
+
+### Why this is a class and not a slip
+
+A report says what a run *did*. A finding says what is *true*, and it is written
+at the moment of most optimism — the end of a branch, by the run that just fixed
+something, about the part of the fix it was most pleased with. The 26 September
+entry's author had done the hard thing (cut 10,788 words) and described the easy
+thing it had meant to do next as done.
+
+Three properties make it expensive, and all three are structural:
+
+- **Forward-looking claims in a ledger are load-bearing.** `docs/routines.md`
+  makes `FINDINGS.md` *read first, every run*, so a false *this exists* is not a
+  tidy-up job for later — it actively redirects work away from the gap.
+- **Nothing checks a finding against the tree.** `pnpm findings:check` exists and
+  passes: it validates the file's shape, not its claims. There is no instrument
+  here that could have disagreed.
+- **The claim was about an absence**, and an absence is the one thing a grep
+  confirms cheaply and nobody greps for. Thirty seconds of
+  `grep -rn "toBeLessThanOrEqual"` would have settled it on any of four runs.
+
+### What is asked, and it is small
+
+**Say what a branch did, never what it will have done.** If a remedy is named in
+a finding and not built on that branch, the sentence is *"not built here"* and
+the status stays open — which costs a line and is the whole difference between a
+gap the next run finds in a minute and a gap nobody looks for.
+
+And for any lane reading a finding that says a guard exists: **the claim is
+cheapest to check and most expensive to trust.** Grep the assertion, not the
+entry. This ledger already carries *grep the behaviour, not the filename* from
+28 September, filed when a lane trusted a directory listing over a test. This is
+the same error with the ledger itself as the source, which makes it the more
+likely of the two.
+
+---
+## 2026-10-01 — nothing in this repository bounds how far a page scrolls, and only a camera can see it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and the
+screenshot harness's owner for the half that is an instrument · **Status:** open
+— deliberately not built in `marketing-53`, which says so in as many words;
+filed because the honest version needs a decision about what a gate may depend on
+
+`marketing-53` gives this site a copy budget: a band, a cell, a page and the
+site are each bounded in **words**. That is the right unit for the instruction it
+answers — the maintainer's complaint on 26 September was that there was too much
+to *read* — and it is measured, falsified eight ways and green.
+
+**It is not a bound on scroll length, and the measurement taken to set it is
+what shows the two are different quantities.** On a production build at 1280:
+
+| page | words | height | screens at 900 | words a screen |
+| --- | --- | --- | --- | --- |
+| `/` | 1,151 | **5,234px** | 5.82 | 198 |
+| `/how-it-works` | 862 | 4,688px | 5.21 | 165 |
+| `/what-you-run` | 499 | 2,808px | 3.12 | 160 |
+
+At page scale the two track each other within about 1.2×, which is why a word
+budget is a fair stand-in there. **Per band they do not**: the front door's hero
+spends 0.89 of a screen on 67 words and a rail of five spends 1.12 on 222, so
+one word buys about two and a half times the height in one band as in the other.
+A page could pass every ceiling in `budget.test.ts` and still be nine screens
+long by being built out of heroes, and nothing would be red.
+
+### Why it is filed rather than built
+
+**A height is only knowable from a browser, and `pnpm verify` has none.** Every
+other invariant on this surface is a function of the tree, which is why the gate
+can hold it. A scroll-length rule would need the gate to depend on a production
+build, a served application and Chromium — which is minutes rather than
+milliseconds, and makes the merge gate for four surfaces depend on a browser
+that `tools/specimen/playwright.ts` deliberately keeps out of this
+repository's dependencies (0116).
+
+So there are three honest options and picking between them is a decision:
+
+1. **Leave it to the eye.** The maintainer judges this surface by looking at it
+   and every marketing PR carries a full-page shot. Cheapest, and it is what
+   happens today by default rather than by choice.
+2. **A separate camera check, outside `pnpm verify`**, run by the lane and
+   reported — the shape `pnpm shoot` already has. Catches it, costs no gate time,
+   and is only as reliable as a routine remembering to run it.
+3. **Make height a function of the tree.** The primitives know their own
+   spacing scale; a band's height could in principle be estimated from its type,
+   its cell count and its words. Checkable in the gate, and wrong in a way
+   nobody would notice until a camera disagreed with it — which is the failure
+   this ledger filed on 30 September as *a demonstration can measure one ink and
+   show a different one*.
+
+My recommendation is **2**, and the reason is the one option 3 fails on: a
+modelled height is a second source of truth about a picture, and this ledger
+already holds two entries about a number that was right and not about the thing
+the reader was looking at.
+
+**For the other surface lanes:** `(docs)`, `(lessons)` and `(portal)` have no
+copy budget of any kind, in words or in pixels. The question worth asking is not
+whether your pages are too long — it is whether anything you have would say so.
 
 ## 2026-10-01 — the sentence that stops a reader over-reading `completed` is the one sentence the page deletes the day the kind ships
 
@@ -39425,3 +39692,308 @@ claim about where something lives, and `SITE_ROUTES` already knows where things
 live. A check that reads rendered prose for the site's own page names and holds
 them against the page that actually carries the band would have caught this one
 the hour it broke.
+
+---
+## 2026-10-01 — a number whose noun is somewhere else in the sentence is invisible to the one check that would find it
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+stated limit of what shipped today
+
+Today's sweep refuses *a number standing in front of a thing the runtime
+counts*: `ninety-eight primitives`, `seventeen named slots`, `Forty-four nodes`.
+It works because the noun is the subject, and the noun is what makes a false
+positive rare — a page says *two bands* about an example a dozen times and means
+it.
+
+**The theming page's wording defeated it, and did so while being correct.**
+
+> *"shipping your brand plus twenty-one others is a menu, not a design system"*
+
+Twenty-one is `STARTER_PALETTES.length`. The noun is *others*, which refers back
+to a word two sentences earlier. No regular expression over one page finds that,
+and the sentence was **both** the most load-bearing figure on the page and the
+one most likely to move — eighteen of the twenty-one are derived, so the count
+changes whenever `palettes.ts` grows.
+
+It is fixed by rewriting rather than by catching: the sentence now says *plus the
+other `<Count of="starter-palettes" as="word" />` palettes*, which puts the noun
+back and brings it inside the sweep. **That is a fix for one sentence and not for
+the class.** The next author to write *plus twenty-one others* gets a green
+build.
+
+**What would close it, and why it was not written today.** A rule over rendered
+prose asking *is there a bare number here at all, and is it one of the counts?*
+would find it — the value is the join, not the noun. It would also flag every
+true sentence that happens to contain a number equal to a count, and on this site
+that is a real set: a palette count of 21 collides with nothing today, but a
+count of 3 or 10 collides with most pages. The honest version needs the number to
+be *suspiciously* equal, which means either a window or a per-count opt-in, and
+both are design decisions rather than a line of code. Offered as shaped work, not
+as a line.
+
+---
+## 2026-10-01 — four sentences in `src/` state the size of the primitive library, and all four say ninety-eight
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom primitives` (one),
+`Loom daily build` (three) · **Status:** open — stale prose, no behaviour
+
+Today's sweep covers `apps/loom/app/(docs)/` because that is this lane. Running
+the same pattern over `src/` out of curiosity finds the same defect four more
+times, all of them stale against a library of **ninety-nine**:
+
+| | says |
+| --- | --- |
+| `src/primitives/loom.feed.ts:390` | *"of two primitives in a library of ninety-eight"* — `Loom primitives` |
+| `src/sdk/audit.ts:201` | *"which is ninety-six of the ninety-eight registered today"* — `Loom daily build` |
+| `src/sdk/audit.test.ts:528` | *"Ninety-six of the ninety-eight read no binding"* — `Loom daily build` |
+| `src/interpretation/render.test.ts:272` | *"would cost every proposal ninety-eight lines"* — `Loom daily build` |
+
+All four are doc comments, so nothing a reader of the site sees and nothing a
+test asserts. They are filed rather than fixed because `src/` is not this lane's
+and because the interesting half is not the four edits.
+
+**The interesting half.** `audit.ts` is making an *argument* from the pair —
+ninety-six of ninety-eight primitives read no binding, therefore the audit is
+cheap — and arguments from arithmetic are the ones that rot into
+nonsense rather than into a wrong digit. The remedy this lane used today is
+available there and is smaller in `src/`: a doc comment may say *all but two*,
+which is the claim, and stays true while the two are the two.
+
+What is **not** offered is the sweep. A check over `src/` doc comments would be a
+check on how the framework's authors write about their own code, and that is a
+decision for the lanes that own it.
+
+---
+## 2026-10-01 — three spellers in one route group, and the two that are tests cannot use the third
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — a
+duplication with a reason, which is the kind worth writing down
+
+`spellOut` in `_lib/counts.ts` is the **third** number-to-words function in this
+route group. `compositions.test.ts` has one inline with its own `tens` and
+`units` arrays; `theming-claims.test.ts` keeps a lookup, down to one entry today
+from three.
+
+The usual move is to fold the two into the one. **It would break both of them**,
+and the reason is the failure this lane has filed three times under a different
+name. Both are tests that spell a number *in order to go looking for it in a
+page*: they compute the English for a derived count and assert the page contains
+it. Spelling that expectation with the same function the page spells it with
+makes the comparison vacuous — an off-by-one in the tens table puts
+*eighty-nine* on the page and *eighty-nine* in the assertion, and the test is
+green about a page that is wrong.
+
+So there are two correct resolutions and a wrong one:
+
+- **Leave them.** Three implementations of a pure function whose output is
+  checked against a table of nineteen cases is cheap, and two of the three exist
+  precisely to disagree with the first.
+- **Fold them, and change what they assert** — from *the page says the word* to
+  *the page asks for the number*, which is what the two claims tests rewritten
+  today now do. `compositions.test.ts` is the remaining candidate and was left
+  alone deliberately: its page-scoped ban on digits **and** words is stronger
+  than the site-wide sweep for that one page, and rewriting a working check to
+  remove a duplicate speller is a trade in the wrong direction.
+- **Import `spellOut` into them and keep the assertion.** This is the one that
+  looks like the fix and is the defect.
+
+Recorded so the next run does not reach for the third option, which is what a
+reader of three spellers would reach for.
+
+---
+## 2026-10-01 — the merge-gate remedy was followed exactly and the notification still said zero, because the remedy fixes the file and not the thing a run reads
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`docs/routines.md`)
+· **Status:** open — cost this run nothing, because the file was read second
+
+`docs/routines.md`'s *Reading the merge gate* section is on its third spelling of
+one mistake. This run followed its remedy to the letter:
+
+```bash
+pnpm verify > verify.log 2>&1; echo "EXIT=$?" > verify.exit
+```
+
+Nothing after the gate on the line. `$?` correct. `echo … > file` the last thing
+the line does — which is what the 25 September entry adds over the 12 September
+one, and it is right. **The file said `EXIT=2`.**
+
+**The harness notification for that background command said *exit code 0*.** It
+was not wrong: the status of a compound command is its last command's, the last
+command is `echo`, and `echo` succeeded. That is the identical arithmetic as the
+`tee` case, arrived at from the one direction the remedy cannot close — because
+the remedy's whole mechanism is *put a successful command last*, and a
+successful command last is exactly what makes the line's own status 0.
+
+So the two spellings the section already names are a pipe and a `tee`, and this
+is a third thing: **the remedy guarantees the line reports success.** The file
+is the only true report, and the instruction has to be to read it rather than
+merely to write it.
+
+What it would have cost: the first gate of this run was **red**, with a
+`TS2339` on a property name in a new test. The notification said zero. The next
+step in the procedure is *open the pull request*, and the report beside it would
+have said green. It cost nothing here only because the log was read for test
+counts and the error was in it.
+
+**What would close it.** One sentence in that section, which is the lane's to
+write: *the status of the line you just ran is `echo`'s, so it is always
+success — read `verify.exit`, and never the notification, the exit code, or the
+last line of the log.* The section currently says how to write the file and does
+not say that reading anything else is guaranteed to mislead.
+
+A stronger version is available and is a change rather than a sentence: write
+the verdict as a **word** rather than a number — `echo "GATE=red"` on non-zero —
+so a run that quotes the wrong thing quotes something that does not look like a
+pass. Offered, not specified.
+
+
+---
+## 2026-10-01 — a correction pushed during `Loom merge`'s window lands on a branch whose pull request has already closed, and the merge takes the stale version
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and every lane
+that pushes a second time to its own branch · **Status:** open — the remedy is
+one command and this entry is mostly the timeline, because the 28 September
+entry on the same mechanism recorded the *push* being lost and this is the other
+outcome, where the push survives and the merge does not take it
+
+**Extends:** the 28 September entry *a push during `Loom merge`'s window is
+silently dropped, and the pull request still closes as merged*.
+
+`#468` added this site's copy budget. While it was open, `Loom merge` brought
+five commits onto the branch, among them `#469` — a copy pass over the whole
+marketing site. That copy moved every figure the budget's own docstring records,
+so the figures had to be retaken. Here is what the clock did:
+
+| | |
+| --- | --- |
+| 16:10:54 | `check_suite.completed` on the merge commit — the event that woke this lane |
+| 16:11:53 | the gate re-run against `#469`'s copy: 15 of 15 green |
+| **16:12:32** | **`Loom merge` merges `#468` as `b7e58a8`** |
+| 16:13–16:15 | pictures retaken, figures corrected, committed |
+| 16:1x | pushed — to a branch whose pull request had closed forty seconds into the work |
+
+Nothing failed and nothing warned. The push succeeded, the branch has the
+commit, and `git status` is clean against its remote. **The pull request simply
+was not there to carry it**, so `main` took the version with the pre-`#469`
+measurements in it.
+
+### Why it is worth its own entry
+
+The 28 September entry is about a push being **dropped**. This is the inverse and
+it is quieter: the push lands perfectly, on a ref nothing reads any more. The
+branch looks exactly like a branch whose work is safe, which is the one state a
+routine checks for.
+
+It also has a shape that makes it likely rather than unlucky. **A second push to
+your own branch is nearly always a correction**, and a correction is nearly
+always triggered by the same thing that made the branch mergeable — a merge
+commit from `Loom merge`, which is the event that both starts the clock and
+wakes the lane. So the window a routine does its re-measurement in is precisely
+the window the merge routine is working in.
+
+What landed here was harmless: the assertions and all six ceilings were correct
+and green, and only the comment's record of what it had measured was five days
+of drift behind — eleven words on one band. The same timing with a *fix* in it
+rather than a figure would have put a known-bad version on `main` with a green
+branch sitting beside it saying otherwise.
+
+### The remedy, which is one command
+
+**Before pushing a second time to your own branch, read the pull request's
+state** — not the branch's:
+
+```bash
+gh api repos/<owner>/<repo>/pulls/<n> --jq '.state, .merged'
+```
+
+If it is closed, the push is a no-op on anything anybody will read. The
+follow-up is a **fresh branch off the new `main` and a new pull request**, which
+is what `marketing-54` is. A merged pull request cannot track new work, and a
+branch is not evidence that it does.
+
+**For the other lanes:** this costs nothing to check and the failure is invisible
+without checking. Any lane that re-measures, re-photographs or re-runs anything
+after a `Loom merge` commit arrives is in this window by construction.
+
+---
+## 2026-10-01 — `main` is red: #470's "counted, not typed" rule met #465's three new primitives, and neither pull request was wrong
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom docs`, with one line for
+`Loom merge` · **Status:** open — **`main` at `19d5238` fails `pnpm verify`**,
+reproduced on a pristine checkout with nothing of this lane's applied. Two
+assertions, both in `(docs)/_lib/counts.test.ts`, both one line to fix, and
+neither is in this lane's route group so neither is fixed here
+
+```
+× everything this site wrote for a reader > writes no counted size as a number
+× spelling a number the way prose spells it > spells the ones the site is stating today
+```
+
+### What happened, and it is nobody's mistake
+
+**`#465`** (primitives) registered a menu, a popover and a lightbox, taking the
+starter library from **ninety-nine to one hundred and two**.
+
+**`#470`** (docs) landed the rule that *a number this site states about Loom is
+counted, not typed* — which is a good rule, and its own census test pins the
+spelled numbers as literals so the speller cannot drift in silence.
+
+Each was green on its own branch. **The combination is red, and it went red at
+merge rather than in either review**, because `#470` was verified against a
+`main` that did not yet carry `#465`'s three primitives. This is the
+cross-lane count staleness `docs/routines.md` gives `Loom merge` an explicit
+mandate for — *"small edits outside your lane when an earlier merge made your
+branch's tests go stale… a count… by running the code and recording what it
+prints"* — and it was not caught this time.
+
+### The two fixes, both one line
+
+**1. `(docs)/_lib/counts.test.ts:355`** — the census literal. `SITE_COUNTS`
+reads the library, so the expectation is the stale half:
+
+```diff
+-      "starter-primitives: ninety-nine",
++      "starter-primitives: one hundred and two",
+```
+
+`one hundred and two` is not my spelling of it — it is what the failing run
+printed as *Received*, so `spellOut(102)` is confirmed to render exactly that.
+Read off a run rather than typed, which is the same rule `#470` is about.
+
+**2. `(docs)/_lib/entry-points.ts:50`** — a typed count in prose:
+
+> *"The starter library's **forty-four bands** under their own names, for
+> assembling a page without going through the catalogue."*
+
+**The typed word is correct today**, which is precisely what `#470`'s rule
+exists to refuse. It wants producing from the count, as the other sentences on
+that surface now do:
+
+```
+`The starter library's ${spellOut(siteCount("starter-bands").value)} bands under their own names, …`
+```
+
+`starter-bands` is already in `SITE_COUNTS` at 44, so this needs no new count —
+only the substitution.
+
+### Why it is filed and not fixed
+
+`(docs)/_lib/` is another surface's route group. This lane's brief is explicit
+that it never edits one, and the whole value of the split is that a marketing
+pull request nobody has to read `(docs)` to review. No open pull request fixes
+this, so there is nothing to port either: `#471` is lessons and `#463` is the
+portal.
+
+**What it costs in the meantime:** every lane's `pnpm verify` is red on a clean
+`main` for a reason that has nothing to do with its own work, which is the most
+expensive kind of red — the one a run is tempted to explain away. Two lanes
+have already spent part of a run proving it is not theirs.
+
+### The line for `Loom merge`
+
+Both assertions are exactly the shape its mandate names, and the trigger is
+mechanical: `#465` changed a number that `#470`'s branch had already recorded.
+**A merge that lands a primitive count change should re-run the surfaces that
+state that count**, not only the branch being merged — the count has three
+readers on two surfaces and it is the one quantity in this repository that
+several lanes type independently.

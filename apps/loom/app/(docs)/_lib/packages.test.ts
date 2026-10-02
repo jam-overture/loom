@@ -82,11 +82,16 @@ describe("the doors this workspace has and the registry does not", () => {
    * is read as text rather than imported — a narrow way to hold a cross-lane
    * fact, and a loud failure if that name ever changes.
    */
-  it("names the library by the name it is actually published under", () => {
+  it("names the library by the name it is actually published under, door by door", () => {
     const assembled = readFileSync(repoRoot("tools/package/manifest.ts"), "utf8")
 
     for (const published of PUBLISHED_AS.values()) {
-      expect(assembled, published).toContain(`name: "${published}"`)
+      const slash = published.indexOf("/", published.indexOf("/") + 1)
+      const packageName = slash === -1 ? published : published.slice(0, slash)
+      const subpath = slash === -1 ? "." : `.${published.slice(slash)}`
+
+      expect(assembled, packageName).toContain(`name: "${packageName}"`)
+      expect(assembled, subpath).toContain(`"${subpath}": {`)
     }
   })
 })
@@ -141,9 +146,33 @@ describe("a whole file, as a reader would write it", () => {
    * a real subpath and so would fail somewhere far away rather than here.
    */
   it("leaves a longer specifier that merely starts with a renamed one alone", () => {
-    const source = 'from "@jam-overture/loom/primitives/compositions"'
+    const source = 'from "@jam-overture/loom/primitives/tokens"'
 
     expect(asAReaderWouldWrite(source)).toBe(source)
+  })
+
+  /**
+   * The case the fixture above used to be, and it changed sides on 1 October
+   * rather than going away: `…/primitives/compositions` is a door of its own
+   * now, so it is renamed — **to its own target, not to the shorter one's.**
+   *
+   * Two keys where one is a prefix of the other is the arrangement in which a
+   * substring rewrite is wrong twice over, and the map has had that shape only
+   * since the second door was added. So both directions are asserted on both
+   * keys in one place.
+   */
+  it("renames two doors where one is a prefix of the other, each to its own", () => {
+    const source =
+      'import { heroBand } from "@jam-overture/loom/primitives/compositions"\n' +
+      'import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"\n'
+
+    const read = asAReaderWouldWrite(source)
+
+    expect(read).toBe(
+      'import { heroBand } from "@jam-overture/loom-primitives/compositions"\n' +
+        'import { createStarterPrimitiveRegistry } from "@jam-overture/loom-primitives"\n'
+    )
+    expect(asThisWorkspaceResolves(read)).toBe(source)
   })
 
   it("changes nothing in a file that never reaches for one", () => {
@@ -174,10 +203,19 @@ describe("the quickstart, as a reader reads it and as this repository runs it", 
     expect(asAReaderWouldWrite(onDisk())).not.toBe(onDisk())
   })
 
+  /**
+   * **It used to require every renamed door to be in the quickstart**, which
+   * was true while there was one and stopped being true the moment the library
+   * gained a second. A quickstart that imported a named band to satisfy a test
+   * would be a worse quickstart, so the requirement is the one that was always
+   * the point — no published name in this file — plus the clause that stops
+   * that from passing vacuously on a file that reaches for neither.
+   */
   it("leaves the file this repository compiles on the workspace's door", () => {
-    for (const [here, published] of PUBLISHED_AS) {
-      expect(onDisk(), here).toContain(`"${here}"`)
+    for (const [, published] of PUBLISHED_AS) {
       expect(onDisk(), published).not.toContain(`"${published}"`)
     }
+
+    expect([...PUBLISHED_AS.keys()].filter((here) => onDisk().includes(`"${here}"`))).not.toEqual([])
   })
 })

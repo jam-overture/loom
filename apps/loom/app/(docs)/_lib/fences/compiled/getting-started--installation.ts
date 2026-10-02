@@ -11,7 +11,7 @@
 import { createStarterPrimitiveRegistry } from "@jam-overture/loom/primitives"
 import { describeRegistryError } from "@jam-overture/loom/sdk"
 
-// page.mdx:88 — a program
+// page.mdx:90 — a program
 const built = createStarterPrimitiveRegistry()
 
 if (!built.ok) {

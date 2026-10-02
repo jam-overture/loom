@@ -1,3 +1,4 @@
+import { Count } from "@/app/(docs)/_components/count"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
 import { PolicyComparison, PolicyKnobs } from "@/app/(docs)/_components/policy"
 
@@ -101,14 +102,15 @@ never a higher one.
 
 ## The whole of a policy
 
-Fourteen settings, and you have now met three of them. Here is all of it — what
+<Count of="policy-settings" as="Word" /> settings, and you have now met three of
+them. Here is all of it — what
 each one is, what you do about it, and what you get if you say nothing.
 
 Every default below is read out of the runtime as this page is built, so the
 number you see is the number in your build. The list itself is the policy's own
 type: a setting added to the runtime and not to this page stops the site
-compiling, rather than quietly leaving you a page that describes thirteen of
-fourteen.
+compiling, rather than quietly leaving you a page that describes all of them but
+one.
 
 <PolicyKnobs />
 

@@ -19,6 +19,8 @@
  * these. This is only the map of doors.
  */
 
+import { siteCount, spellOut } from "./counts"
+
 export type EntryPoint = {
   /** Exactly as it is written in an import. */
   readonly specifier: string
@@ -42,6 +44,12 @@ export const entryPoints: readonly EntryPoint[] = [
     specifier: "@jam-overture/loom-primitives",
     summary:
       "The starter library — the primitives every example on this site is built from. Its own package, installed beside the framework.",
+    audience: "app",
+  },
+  {
+    specifier: "@jam-overture/loom-primitives/compositions",
+    /** The one size stated here, read off the library rather than typed (`_lib/counts.ts`). */
+    summary: `The starter library's ${spellOut(siteCount("starter-bands").value)} bands under their own names, for assembling a page without going through the catalogue.`,
     audience: "app",
   },
   {

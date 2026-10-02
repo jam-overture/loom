@@ -44,6 +44,10 @@
       "types": "./dist/primitives/index.d.ts",
       "default": "./dist/primitives/index.js"
     },
+    "./primitives/compositions": {
+      "types": "./dist/primitives/compositions/index.d.ts",
+      "default": "./dist/primitives/compositions/index.js"
+    },
     "./sdk": {
       "types": "./dist/sdk/index.d.ts",
       "default": "./dist/sdk/index.js"
