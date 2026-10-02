@@ -7,6 +7,7 @@ import type { StoredTally } from "@jam-overture/loom/signals"
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
+import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 
 import { PageReadingCard } from "./page-reading"
 
@@ -54,7 +55,7 @@ const tally = (
  * nobody has touched since it was last counted — and is what every assertion
  * written before the card knew about the page being served was about.
  */
-const cardFor = (tallies: readonly StoredTally[], live?: number) => {
+const cardFor = (tallies: readonly StoredTally[], live?: number, skipping?: PageSkipping) => {
   const reading = pageReadings(revisionReadings(tallies, names))[0]!
 
   return render(
@@ -62,6 +63,13 @@ const cardFor = (tallies: readonly StoredTally[], live?: number) => {
       reading={reading}
       page={page}
       live={live ?? reading.revisions[0]!.revision}
+      /*
+       * Absent unless a case is about it, which is the state of every card on a
+       * deployment whose counted version is not the one being served — and is
+       * what every assertion written before this card knew which parts a page
+       * has is about.
+       */
+      skipping={skipping}
     />
   )
 }

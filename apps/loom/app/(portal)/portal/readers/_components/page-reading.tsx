@@ -16,9 +16,12 @@ import {
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
+import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
+
 import { CountedAgainst } from "./counted-against"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
+import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
 import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
 
 /**
@@ -72,11 +75,18 @@ export const PageReadingCard = ({
   reading,
   page,
   live,
+  skipping,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
   /** The revision of the page being served, or `undefined` if it could not be read. */
   readonly live: number | undefined
+  /**
+   * Which parts of the page nobody got to, or `undefined` when the counted
+   * version is not the one being served — in which case the question cannot be
+   * answered at all and the card says so.
+   */
+  readonly skipping: PageSkipping | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
@@ -157,6 +167,19 @@ export const PageReadingCard = ({
 
         {unplaced !== undefined && <UnplacedUseNote unplaced={unplaced} />}
       </ul>
+
+      {/*
+       * Before the comparison and after the highlights, which is reading order
+       * rather than an arrangement: *which parts did people get to* is a
+       * question about this version of the page, and *what changed since the
+       * last change* is a question about two. A reader who has not yet been
+       * told what happened on the page in front of them has nothing to compare.
+       */}
+      {skipping === undefined ? (
+        <SkippingUnavailable counted={newest.revision} live={live} />
+      ) : (
+        <WhatWasSkipped skipping={skipping} />
+      )}
 
       <SinceTheChange comparison={comparison} standing={standing} />
 

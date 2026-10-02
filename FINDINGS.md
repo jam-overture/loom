@@ -41196,3 +41196,86 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-02 — nothing can ask a store for the tree as it was, and that is now a hole in a shipped screen rather than a cost to know about
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Status:** open — **not a new finding.** It is the 1 October entry from
+`Loom signals`, with the consequence attached and the screen named
+
+That entry ends:
+
+> *Not filed as urgent. No surface compares revisions' readings yet; the portal
+> screen that will is step 4 of `docs/signals.md` and is not built. Filed now
+> because it is cheaper to know before that screen is written than after.*
+
+**One is built.** `/portal/readers` now answers *which parts of this page did
+nobody get to*, which needs the page as well as its counters — a part nobody
+reached has no row at all, so absence is only a measurement once something says
+which parts there were. The join is keyed by page **and** version, deliberately,
+because laying one version's counters over another version's page makes most
+parts read *nobody got to it* while every number stays plausible.
+
+A store answers for exactly one version: the snapshot, which is the head. So the
+section answers for the version being served and **cannot answer for any
+other** — and the version being served is not the counted one for as long as an
+hour after every change, which is exactly when somebody comes to look.
+
+| | |
+| --- | --- |
+| what is missing | a way to ask a store for the tree at a chosen revision |
+| the shape suggested on 1 October | `treeAt(reader, treeId, revision)` — `foldLog` with one more condition |
+| who already walks it | `auditSnapshot`, and the progression on `/portal/history` |
+| what it costs this screen today | one of two sections on each card is a notice instead of a reading |
+| what it would buy | *which parts did people stop getting to after your last change* — the before-and-after on the one measurement no analytics product can produce |
+
+**Said out loud on the screen rather than absorbed**, in `SkippingUnavailable`,
+and the notice names the mechanism rather than apologising: the counts stay
+exactly as they are, and the section answers for whichever version is being
+served once its own window has been counted. That is a true sentence and it is
+not the one a person wants.
+
+**The portal did not reach into `src/` to close it** (0018), and the workaround
+that exists — paging `revisions()` and folding from the seed in the portal —
+was deliberately not taken: a consumer that gets the stopping condition slightly
+wrong draws one revision's counters against another revision's tree, which is
+the one failure this reading can have that looks exactly like success.
+
+---
+## 2026-10-02 — a page cannot report that every one of its parts went unread, and the arithmetic that makes it impossible is worth stating where the vocabulary is
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** open — not a defect, and it cost this
+lane a state it had already designed, written and commented
+
+`PartStanding`'s three members are reachable in every combination but one.
+`skipped` means **no row names this part**, and `PageReading.views` is the
+largest `views` any single row reports — so:
+
+- every part `skipped` requires no row to name any part of the page, and
+- a window with no rows has `views` of 0, which makes every part `unknown`.
+
+So *a page with visits, every part of which went unseen* is unreachable, unless
+a row names a part the page does not have — which is `orphaned`, and is the one
+state a consumer of this join should refuse to draw at all.
+
+**What it cost.** This lane's first shape of the reading carried a flag for it,
+`StopsAt.everything`, with its own branch, its own sentence (*"which is usually
+a page reporting its visits and not its parts"*) and a paragraph of commentary
+arguing that it had to be said apart from the ordinary case. Every word of that
+argument is right about the **situation** and the situation cannot arise. It was
+found by a test that tried to construct it and could not.
+
+The reachable neighbour is worth having and is what shipped instead: **rows
+exist and not one reports reach.** A root is an addressed node and is on screen
+in every visit that draws the page, so a window holding visits and no reach at
+all is a page whose parts are not reporting — a primitive that does not spread
+its identity attributes, or a sender switched on halfway through a release.
+Telling that person *nobody scrolled* sends them to rewrite a page that is fine.
+
+**The suggestion is one sentence in `parts.ts`, not a change.** `PartStanding`'s
+own doc comment already explains why `unknown` exists; the half it does not say
+is that `skipped` and the view floor are read off the same rows, so the two
+cannot both be everywhere. A consumer reading the vocabulary top to bottom has
+no way to learn that except by trying to build the state.
