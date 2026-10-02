@@ -45,6 +45,51 @@ export const action = (
   })
 
 /**
+ * The third control in a row, and the reason it is not `variant: "quiet"`.
+ *
+ * `control.ts` offers three paints and the library's own note says what each is
+ * for: a filled one for the thing you came to do, an outlined one for the thing
+ * beside it, and a quiet one for the thing after that. The quiet one is
+ * `background: transparent`, `border: 1px solid transparent`, and
+ * `color: accent`. Everything it has to tell a reader it can be pressed is that
+ * one colour.
+ *
+ * **On the palette this site is served under, that colour is the colour of the
+ * sentence next to it.** `minimal` sets `accent` to `#0a0a0a` and `fg-default`
+ * to `#0a0a0a`, and it does so deliberately: `src/theme/library.ts` records
+ * that black accent as the maintainer's own call after seeing it green. So the
+ * palette is right and the control is the one that is wrong, which is why this
+ * is a composition change rather than a palette one.
+ *
+ * Measured with the repository's own instrument rather than by eye.
+ * `colourDifference` puts the two at **0.00** on `minimal` against a
+ * just-noticeable difference of 2.3, and under that difference on `graphite`
+ * and `obsidian` as well. What is left of a quiet control on this site is that
+ * it is **bold** — the same mark `loom.emphasis` puts on a stressed word — and
+ * the four places it was used stood it in a row beside a filled pill and an
+ * outlined one, where it read as a caption. Photographed on the front door,
+ * `/how-it-works` and `/what-you-run` before this changed.
+ *
+ * **The framework already knew.** `src/theme/separation.ts` declares
+ * `fg-default` against `accent` as a `colour-only` pairing and its own comment
+ * calls it *"the row that fails"*. Nothing connected that measurement to a site
+ * built on the pair in six places, which is what `controls.test.ts` now does.
+ *
+ * **So the hierarchy is carried by size instead of by colour.** `secondary`
+ * draws `border-strong`, which is above the just-noticeable difference against
+ * both grounds on all twenty-one starter palettes, and `scale: "small"` is the
+ * step down that `quiet` was spending a colour on. A length is relative to the
+ * thing beside it and a second colour token is not, which is the lesson
+ * `tokens.ts` wrote down on 23 August after `loom.emphasis` rendered a stressed
+ * word identically to its sentence under `bold-sans`.
+ *
+ * **It is not a rule against the variant.** The day the palettes this site
+ * offers separate the two slots, `controls.test.ts` says so and this goes back
+ * to `quiet` — the premise is an assertion rather than a sentence.
+ */
+export const TERTIARY_CONTROL: JsonObject = { variant: "secondary", scale: "small" }
+
+/**
  * A link, which is not a button.
  *
  * `loom.action` is the button and this is the link, and the site spent its

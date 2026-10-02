@@ -2,7 +2,7 @@ import { buildElement, buildText, type IdFactory, type LoomNode } from "@jam-ove
 
 import { ANCHOR } from "../bands"
 import type { ChangeRecord } from "../adapt/record"
-import { action, prose, stack } from "../nodes"
+import { action, prose, stack, TERTIARY_CONTROL } from "../nodes"
 import { askHref, type SiteThemeName } from "../site"
 
 /**
@@ -163,9 +163,7 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
      * the address they are already at so that reading the record cannot change
      * what the page is showing.
      */
-    action(ids, "See it on this page", `${where(context)}#${ANCHOR.seeItHappen}`, {
-      variant: "quiet",
-    }),
+    action(ids, "See it on this page", `${where(context)}#${ANCHOR.seeItHappen}`, TERTIARY_CONTROL),
     /**
      * **There was a second control here until 1 October, and it has nowhere
      * left to go.**

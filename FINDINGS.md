@@ -40514,3 +40514,87 @@ two runs chasing its own record. The same timing around a *fix* rather than a
 figure would put a known-bad version on `main` with a green branch beside it
 saying otherwise, and the branch would look exactly like a branch whose work was
 safe.
+
+---
+## 2026-10-02 — a `quiet` control has no mark of its own, so whether a visitor can see it is the product of two theme choices nobody makes together
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives` · **Status:**
+open — the composition half is fixed on this site by `marketing-56`, which
+stopped using the variant and wrote down why. Nothing in `src/` is touched and
+the variant is still in the catalogue for every other host.
+
+`control.ts` paints the library's two controls in three tiers. Two of them draw
+something: `primary` fills with `accent`, `secondary` outlines with
+`border-strong`. The third does not.
+
+```ts
+quiet: {
+  background: "transparent",
+  color: colour("accent"),
+  border: "1px solid transparent",
+},
+```
+
+A quiet control has **no fill, no edge and no underline**. Everything it has to
+tell a reader it can be pressed is that its text is `accent` where the text
+beside it is `fg-default`, and that it is set in `headingWeight` where the text
+beside it is `bodyWeight`. Two differences, both of which are *between two
+tokens of one theme* — and a token promises provenance, never difference. That
+sentence is `tokens.ts`' own, written on 23 August after `loom.emphasis` marked
+a stressed word identically to its sentence under `bold-sans`. This is the same
+shape at the one place on a page where the consequence is that somebody cannot
+find the way out.
+
+**Measured over the starter set**, with `colourDifference` against
+`JUST_NOTICEABLE_DIFFERENCE` (2.3):
+
+| | |
+| --- | --- |
+| palettes where `accent` is within the JND of `fg-default` | **3 of 21** — `minimal` (**0.00**), `graphite` (0.86), `obsidian` (1.03) |
+| font packs declaring `headingWeight === bodyWeight` | **1 of 20** — `bold-sans` |
+| combinations leaving a quiet control **no signal at all** | **3 of 420** |
+| combinations leaving it **one** signal | every one of the other 60 a collapsed palette or a flat pack is in |
+
+**`minimal` is the first row and it is not an edge case.** It is this
+repository's house theme, the marketing site's default, and the palette in
+every screenshot any lane has ever taken. Its `accent` is `#0a0a0a` and its
+`fg-default` is `#0a0a0a` — identical, deliberately: `src/theme/library.ts`
+records the black accent as the maintainer's own call after seeing it green. So
+the palette is right and the control is what is wrong. What was left of six
+controls across three marketing pages was that they were bold, standing in a row
+beside a filled pill and an outlined one, where they read as captions. The
+before and after are in
+[`reports/2026-10-02-marketing-only-bold.md`](reports/2026-10-02-marketing-only-bold.md).
+
+**The part that makes it a finding rather than a bug report.** The framework had
+already measured this and written it down. `src/theme/separation.ts` declares
+`fg-default` against `accent` as a `colour-only` pairing, and the comment above
+that row calls it *"the row that fails"* in as many words. The instrument was
+right, the row was right, and a composition leaned its whole affordance on the
+pair anyway — because a pairing says *these two may be hard to tell apart* and
+nothing said *and this variant has nothing else*. The pairing is about two
+colours; the gap is about a **control with no second signal to fall back on**,
+which is a fact about `control.ts` and not about any palette.
+
+**What a remedy could be**, none taken and none of them this lane's to take:
+
+1. **Give `quiet` a mark that is relative rather than nominal** — an underline,
+   or a border in `currentColor` at a fraction of opacity. `tokens.ts` already
+   names `currentColor` as the reach for exactly this case. It is the smallest
+   change and it costs the variant its quietness on the palettes where it
+   currently works.
+2. **Give it an edge only when it needs one**, which means `control.ts` would
+   have to read the mounted palette, and a primitive deliberately never learns
+   which palette is mounted (0049). Recorded as the obvious idea that the
+   architecture refuses, so nobody spends a run on it.
+3. **Leave the paint and say so in the catalogue** — `quiet` is documented as a
+   control that must not be the only affordance in its row, and the audit that
+   `auditPalette` and `auditMarkGroundings` already perform grows a third
+   question: for each variant, is there a signal that survives every starter
+   palette and font pack? That is the version that would have found this
+   without a camera, and it generalises past controls.
+
+`border-strong` is above the JND against both `bg-canvas` and `bg-surface` on
+**all twenty-one** starter palettes, which is the measurement that made
+`secondary` the safe replacement and is worth having written down wherever this
+is picked up.
