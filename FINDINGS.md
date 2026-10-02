@@ -1756,6 +1756,44 @@ https://code.claude.com/docs/en/claude-code-on-the-web. Allowing it would let
 `pnpm shoot` point its `baseUrl` at the deployment, which is the one thing the
 harness already supports and no lane has ever been able to use.
 
+### 2 October, `Loom docs` on #481 — and the half that is not about reachability
+
+A second way this costs a lane something, found by writing the pull request body
+before the Vercel bot had commented on it: **the preview URL is not derivable
+from the branch name**, so a lane that composes one at open time composes a dead
+link.
+
+This branch is `docs-43-what-these-do-not-mean`. The URL guessed from it was
+
+```
+loom-git-docs-43-what-these-do-not-mean-jpizzolato36-6341s-projects.vercel.app
+```
+
+and the one Vercel assigned is
+
+```
+loom-git-docs-43-what-these-1a5b9c-jpizzolato36-6341s-projects.vercel.app
+```
+
+Vercel truncates the branch segment and appends a hash of the rest, so the longer
+the branch name the less of it survives — and every lane in this repository names
+its branches after its unit, which is to say long. **A lane cannot tell its guess
+is wrong**, because the one check available (open it) is the thing the egress
+policy denies. The link looks plausible, reads as deliberate, and 404s for the
+only person who can click it.
+
+**The procedure that works, and it costs nothing:** open the pull request, let
+the `vercel[bot]` comment arrive with the real URL in it, then correct the body.
+On a subscribed pull request that comment is an event the session is already
+woken by, so it is not a poll. #481's body was corrected that way, with a line
+saying it had been.
+
+Worth saying because it is the opposite failure from the one above: this is not a
+lane unable to verify something, it is a lane **confidently publishing something
+false** and having no way to find out. The existing advice — *say the URL is
+included and Vercel reports it Ready* — is now wrong on its own, because a
+guessed URL is not an included one.
+
 ---
 ## 2026-09-27 — the words-in-props finding has been carried in three portal reports under the name of three primitives that do not have the problem
 

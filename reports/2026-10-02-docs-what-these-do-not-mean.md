@@ -266,8 +266,16 @@ string, so the other four kinds carry theirs too.
   this lane. One instance closed here; the list is recorded so the next run has
   it. Deliberately not turned into a sweep, with the reason.
 
-**Not re-filed:** the preview URL cannot be verified from this sandbox
-(15 September); the screenshot harness photographs an address while the theme
+**Appended to one.** The 27 September entry on the preview deployment, with the
+half that is not about reachability: **the preview URL is not derivable from the
+branch name.** Vercel truncates the branch segment and hashes the rest, so the
+URL this report's pull request was opened with — composed from the branch, as
+every lane composes it — was a dead link, and the egress policy denies the one
+check that would have caught it. The procedure that works is in the entry: let
+the `vercel[bot]` comment arrive, which on a subscribed pull request is an event
+rather than a poll, then correct the body. #481's was corrected that way.
+
+**Not re-filed:** the preview URL's unreachability itself (15 and 27 September); the screenshot harness photographs an address while the theme
 lives in `localStorage`, so the pictures are light (14–16 September); the phone
 heading break on an entry-point page (23 September); the ten British names in the
 published API (27 September).
