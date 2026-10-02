@@ -287,7 +287,18 @@ describe("the ask panel", () => {
     lead: "Pressing this raises a question, not a change.",
     detail: "Some risk — so Loom asks you before the page moves, and writes down what you decide.",
     moves: false,
+    standing: "asks-you",
   } as const
+
+  /**
+   * One verdict, keyed to the ask it is about.
+   *
+   * The prop became a set on 2 October and these five rows did not change
+   * meaning: a set holding only the lead's answer is a panel with a verdict
+   * under its button and no split to count, which is exactly the state they
+   * were written against.
+   */
+  const ONLY_THE_LEAD = { [DEMO_LEADING_PRESET]: WILL_HOLD } as const
 
   it("says what the Gate will do about the ask it is offering", () => {
     render(
@@ -296,7 +307,7 @@ describe("the ask panel", () => {
         available={ALL}
         modelConfigured={false}
         {...led(ALL)}
-        willSay={WILL_HOLD}
+        willSay={ONLY_THE_LEAD}
       />
     )
 
@@ -317,7 +328,7 @@ describe("the ask panel", () => {
         available={ALL}
         modelConfigured={false}
         {...led(ALL)}
-        willSay={WILL_HOLD}
+        willSay={ONLY_THE_LEAD}
       />
     )
 
@@ -341,7 +352,7 @@ describe("the ask panel", () => {
         available={ALL}
         modelConfigured={false}
         {...led(ALL)}
-        willSay={WILL_HOLD}
+        willSay={ONLY_THE_LEAD}
       />
     )
 
@@ -368,7 +379,7 @@ describe("the ask panel", () => {
         available={ALL}
         modelConfigured={false}
         {...led(ALL)}
-        willSay={WILL_HOLD}
+        willSay={ONLY_THE_LEAD}
       />
     )
 
@@ -417,6 +428,161 @@ describe("the ask panel", () => {
     for (const form of forms) {
       expect(form.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe("7")
     }
+  })
+})
+
+/**
+ * What a stranger reads before they have pressed anything, and the one claim on
+ * this surface the next press checks.
+ *
+ * The verdicts are real elsewhere (`what-it-will-say.test.ts`), the count is
+ * right elsewhere (`how-many-wait-for-you.test.ts`) and the count matches the
+ * write path elsewhere (`pipeline.test.ts`). What is held here is that the
+ * panel shows them — the sentence in place of the claim, a word at the end of
+ * every row that has one, and the old behaviour intact wherever a verdict is
+ * missing.
+ */
+describe("the ask panel, telling a stranger what Loom will do about each ask", () => {
+  const says = (standings: Partial<Record<DemoPresetId, "on-its-own" | "asks-you">>) =>
+    Object.fromEntries(
+      Object.entries(standings).map(([id, standing]) => [
+        id,
+        {
+          lead: "…",
+          detail: "…",
+          moves: standing === "on-its-own",
+          standing,
+        },
+      ])
+    )
+
+  /** Two of the five go ahead, three wait — the shipped table, as it stands. */
+  const AS_SHIPPED = says({
+    palette: "on-its-own",
+    backdrop: "on-its-own",
+    band: "asks-you",
+    trim: "asks-you",
+    promote: "asks-you",
+  })
+
+  /**
+   * The sentence that replaced *"Loom weighs every ask before it lands"* — a
+   * claim true of every ask ever made, and therefore a claim about none of
+   * them.
+   */
+  it("leads with the split rather than with a claim about asks in general", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(
+      screen.getByText(
+        "You can ask for 5 changes here. Loom will make 2 on its own and ask you first about 3."
+      )
+    ).toBeTruthy()
+    expect(screen.queryByText(/weighs every ask before it lands/i)).toBeNull()
+  })
+
+  /**
+   * And the rows are what make it checkable. A count a stranger cannot verify
+   * is another promise; four rows that visibly do not read the same is the
+   * product.
+   */
+  it("says at the end of every other ask what Loom will do about that one", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(screen.getAllByText("Goes ahead")).toHaveLength(2)
+    expect(screen.getAllByText("Asks you first")).toHaveLength(2)
+  })
+
+  /**
+   * Two, not three: the lead is not in the list. Its own verdict is the two
+   * sentences under the green button, and a row for it would be the same fact
+   * twice on one screen in two vocabularies.
+   */
+  it("keeps the lead out of the rows it marks", () => {
+    const { container } = render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    const lead = container.querySelector(`li form:has(input[value="${DEMO_LEADING_PRESET}"])`)
+
+    expect(lead).toBeNull()
+    expect(screen.getAllByText(/Goes ahead|Asks you first/)).toHaveLength(4)
+  })
+
+  /**
+   * The sentence counts the panel, not the table. `already-asked.ts` withdraws
+   * an ask while its question is open, and a sentence that went on saying
+   * *five* over four rows would be the first thing on this screen a stranger
+   * could catch out.
+   */
+  it("shrinks with the list it describes", () => {
+    const fewer = ALL.filter((id) => id !== "palette" && id !== "band")
+
+    render(
+      <AskPanel
+        revision={0}
+        available={fewer}
+        modelConfigured={false}
+        {...led(fewer)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(screen.getByText(/You can ask for 3 changes here/)).toBeTruthy()
+    expect(screen.queryByText(/ask for 5 changes/)).toBeNull()
+  })
+
+  /**
+   * Nothing removed, at either size of absence. An ask with no verdict wears
+   * no word and is not counted; a panel with no verdicts at all reads exactly
+   * as it did before any of this existed.
+   */
+  it("says nothing about an ask that reached no verdict, and counts it in nothing", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={says({ palette: "on-its-own", backdrop: "on-its-own", trim: "asks-you" })}
+      />
+    )
+
+    expect(screen.getByText(/You can ask for 3 changes here/)).toBeTruthy()
+    expect(screen.getAllByText(/Goes ahead|Asks you first/)).toHaveLength(2)
+    expect(screen.getByText(labelOf("band"))).toBeTruthy()
+  })
+
+  it("keeps the whole claim when nothing has been answered", () => {
+    render(
+      <AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} willSay={{}} />
+    )
+
+    expect(screen.getByText(/won’t make without asking you/i)).toBeTruthy()
+    expect(screen.queryByText(/You can ask for/)).toBeNull()
+    expect(screen.queryByText(/Goes ahead|Asks you first/)).toBeNull()
   })
 })
 

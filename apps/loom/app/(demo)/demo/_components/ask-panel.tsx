@@ -10,7 +10,9 @@ import {
   ASKS_HEADING_WHILE_WAITING,
   type SetAside,
 } from "@/app/(demo)/_lib/set-aside"
-import type { WillSay } from "@/app/(demo)/_lib/what-it-will-say"
+import { howManyWaitForYou } from "@/app/(demo)/_lib/how-many-wait-for-you"
+import { STANDING_ROW } from "@/app/(demo)/_lib/what-each-row-says"
+import type { AskVerdicts } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { askForChange } from "../actions"
 
@@ -147,19 +149,29 @@ export const AskPanel = ({
     readonly part?: ReactNode
   }
   /**
-   * What the Gate says about the leading ask, run against this tree before
-   * anybody pressed it (`_lib/what-it-will-say.ts`).
+   * What the Gate says about **every** ask on this panel, run against this tree
+   * before anybody pressed anything (`_lib/what-it-will-say.ts`).
    *
    * Computed by the page for the reason the nomination is not: reaching a
    * verdict is `async`, and a client component cannot await one. What crosses
-   * the boundary is two sentences the runtime produced, not a runtime.
+   * the boundary is a record of answers the runtime produced, not a runtime.
+   *
+   * **It was one verdict until 2 October and is now a keyed set, and it is one
+   * prop rather than two on purpose.** `page.tsx` is the one file in this lane
+   * no `vitest` run can mount, so every reading taken there is a reading
+   * nothing can hold — the lane's open finding of 29 September counts the props
+   * arriving here one at a time, and the run before this one added the sixth.
+   * The lead's own verdict is now a lookup and the split is a pure reading over
+   * the values (`how-many-wait-for-you.ts`), so both are taken **here**, where
+   * a test can reach them, and the page gained no argument it could silently
+   * drop.
    *
    * Absent on its own terms rather than with `leading`: there is a lead
    * whenever an ask is on offer, and there is a verdict only when that ask
-   * reached the Gate. The panel reads the two separately and the absence of
-   * this one is what restores the fuller sentence above.
+   * reached the Gate. The panel reads the two separately, and an empty set is
+   * what restores the fuller sentence above.
    */
-  readonly willSay?: WillSay
+  readonly willSay?: AskVerdicts
 }) => {
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
@@ -197,6 +209,26 @@ export const AskPanel = ({
    */
   const lead = leading === undefined ? undefined : presetById(leading.preset)
   const rest = offered.filter((preset) => preset.id !== lead?.id)
+
+  /**
+   * The two readings taken off those verdicts, both here rather than on the
+   * page that fetched them.
+   *
+   * `said` is this panel's old `willSay` by another route — the lead's own
+   * answer, under its own button, unchanged in wording and in position.
+   *
+   * `split` is the new one, and it counts the asks **this panel is offering**,
+   * which is not the same as the preset table: `already-asked.ts` withdraws an
+   * ask while its question is open, so the sentence shrinks with the list it
+   * describes rather than describing a list that is not on the screen.
+   */
+  const said = lead === undefined ? undefined : willSay?.[lead.id]
+  const split = howManyWaitForYou(
+    offered.flatMap((preset) => {
+      const answer = willSay?.[preset.id]
+      return answer === undefined ? [] : [answer]
+    })
+  )
 
   return (
     <div id="ask" className="flex flex-col gap-4">
@@ -249,7 +281,8 @@ export const AskPanel = ({
         */}
       <div className="flex flex-col-reverse gap-4 lg:flex-col">
         <p className="text-ink-secondary text-sm">
-          {willSay === undefined ? WHAT_EVERY_ASK_MEETS : WHAT_EVERY_ASK_MEETS_BRIEFLY}
+          {split?.sentence ??
+            (said === undefined ? WHAT_EVERY_ASK_MEETS : WHAT_EVERY_ASK_MEETS_BRIEFLY)}
         </p>
 
         {lead && (
@@ -327,10 +360,9 @@ export const AskPanel = ({
               * it. The tone is earned by the press, which is the same rule the
               * spotlight follows.
               */}
-            {willSay && (
+            {said && (
               <p className="text-ink-secondary border-edge-subtle mt-0.5 border-l-2 pl-2.5 text-xs">
-                <strong className="text-ink font-medium">{willSay.lead}</strong>{" "}
-                {willSay.detail}
+                <strong className="text-ink font-medium">{said.lead}</strong> {said.detail}
               </p>
             )}
           </form>
@@ -448,22 +480,62 @@ export const AskPanel = ({
             {waiting === undefined ? ASKS_HEADING : ASKS_HEADING_WHILE_WAITING}
           </p>
           <ul className="flex flex-col gap-1">
-            {rest.map((preset) => (
-              <li key={preset.id}>
-                <form action={submit}>
-                  <input type="hidden" name="baseRevision" value={revision} />
-                  <input type="hidden" name="presetId" value={preset.id} />
-                  <button
-                    type="submit"
-                    disabled={pending}
-                    className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3.5 py-2.5 text-left transition-colors disabled:opacity-60"
-                  >
-                    <span className="text-sm">{preset.label}</span>
-                    <span className="text-ink-muted text-2xs">{preset.promise}</span>
-                  </button>
-                </form>
-              </li>
-            ))}
+            {rest.map((preset) => {
+              const answer = willSay?.[preset.id]
+
+              return (
+                <li key={preset.id}>
+                  <form action={submit}>
+                    <input type="hidden" name="baseRevision" value={revision} />
+                    <input type="hidden" name="presetId" value={preset.id} />
+                    <button
+                      type="submit"
+                      disabled={pending}
+                      className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3.5 py-2.5 text-left transition-colors disabled:opacity-60"
+                    >
+                      {/*
+                        * The label, and beside it what Loom will do about it.
+                        *
+                        * **This row is where the sentence above becomes
+                        * checkable.** *Loom will make 2 on its own, and ask you
+                        * first about 3* is a count a stranger has no way to
+                        * verify — until the rows under it visibly do not all
+                        * read the same. That is the whole argument for putting
+                        * two words at the end of a line that already fits, and
+                        * it is why they are here rather than one disclosure
+                        * down with everything else this surface defers.
+                        *
+                        * `items-baseline`, so a label that wraps to two lines
+                        * keeps its marker beside the first of them rather than
+                        * centred against both; `shrink-0` on the marker,
+                        * because the label is the half that may give way.
+                        *
+                        * The chip treatment is the header's, deliberately: a
+                        * bordered mono 2xs is already this screen's word for
+                        * *a fact about the thing beside it, stated flat*, and
+                        * a second vocabulary for the same job would be the
+                        * fifth mark on a rail that has spent five runs keeping
+                        * four straight.
+                        *
+                        * Absent when the ask reached no verdict, which is the
+                        * silence `willSayOf` keeps: a row that could not be
+                        * answered says nothing rather than guessing, and the
+                        * count above has not counted it either.
+                        */}
+                      <span className="flex w-full items-baseline justify-between gap-3">
+                        <span className="text-sm">{preset.label}</span>
+                        {answer && (
+                          <span className="border-edge-subtle text-ink-muted shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-2xs tracking-wide uppercase">
+                            {STANDING_ROW[answer.standing]}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-ink-muted text-2xs">{preset.promise}</span>
+                    </button>
+                  </form>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}
