@@ -210,6 +210,55 @@ record the table now is that this is the fourth consecutive run to measure it
 with a script it then deleted — see the data point appended to the
 30 September entry about what a shot list cannot see.
 
+### 2 October, `Loom demo` — **something now needs the pixels**, and it is the sentence this run put above them
+
+The recommendation above was *leave it until something else needs the pixels*.
+This run is that something, and the recommendation moves to **(2), fold the
+excerpt behind a disclosure.**
+
+`demo-36-what-loom-will-do-about-each-ask` replaced the arrival screen's claim
+with a count the Gate computed — *You can ask for 5 changes here. Loom will make
+2 on its own and ask you first about 3* — and gave each remaining ask the same
+verdict as two words at the end of its row. Measured on the production build of
+that branch, at 1280 × 900, in an **857px** scroller:
+
+| block | top, within the rail | |
+| --- | --- | --- |
+| **the count** | **215** | above the fold |
+| the leading ask's excerpt | 399 → 757 | the 358px still life, unchanged |
+| *or ask for one of these* | 773 | |
+| **the first marked row** | **797 → 860** | **three pixels over the fold** |
+| the last marked row | 998 → 1061 | |
+
+**So the claim landed and its proof did not.** A stranger reads a specific
+number on arrival and the four rows that make it checkable begin 3px past the
+bottom of the screen. The excerpt is 358 of the 582 pixels between them.
+
+**What changed about the trade, exactly.** The entry above argued (1) on the
+grounds that the excerpt *makes the one invited press concrete and the four
+others are deliberately secondary*. The second half of that is no longer true:
+the four others now carry the only evidence on this surface that the governing
+is real rather than a wrapper around a yes, and they are the cheapest proof this
+lane has ever had of the thing the demo exists to show. The excerpt is a
+rendering of a band that, on a wide screen, is on the page eighteen inches to
+the left.
+
+**What (2) costs, stated against itself.** A stranger loses the free preview of
+what the green button names. They keep `presets.ts`' own promise — *the
+appointments, the years and the waiting time come off the page* — and the Gate's
+verdict under it, both above the fold, and the excerpt is one press of a
+disclosure away. On a **phone** the trade is different and worse, because the
+specimen is below the rail rather than beside it, and the excerpt is the only
+thing on the first screen that looks like the page. **A disclosure open by
+default below `lg` and shut above it** is the shape worth weighing, and it is
+the first time this surface would have had a layout-conditional default.
+
+**Not taken in `demo-36`, deliberately.** Reopening a closed, argued decision in
+the same pull request as a new idea costs the maintainer the ability to take one
+and not the other. It is one unit, and it is the next one this lane should do
+unless pointed elsewhere.
+
+---
 ---
 ## 2026-10-01 — the demo's arrival screen now runs the Gate on a render, and nothing in this repository can see what that costs a real request
 
@@ -245,6 +294,37 @@ boundary this surface has kept the registry off. At 0.62ms the right action is
 to know the number and leave it alone — and to re-measure if the preset table
 grows a change that walks more page than a removal of one band does.
 
+### 2 October, `Loom demo` — it is **five** runs per render now, and here are the numbers
+
+`demo-36-what-loom-will-do-about-each-ask` put the same call on the same render
+once per ask the panel offers, because the arrival screen's new claim is a count
+over all of them. Timed the same way, in a `vitest` process against the starting
+tree on this machine:
+
+| ask | |
+| --- | --- |
+| `palette` | **6.57ms** — carries the module's warm-up |
+| `backdrop` | 1.78ms |
+| `band` | 2.14ms |
+| `trim` | 1.86ms |
+| `promote` | 1.73ms |
+| **all five** | **≈14ms warm**, of which ≈7.5ms is the four after the first |
+
+The entry above says the right action at 0.62ms is to know the number and leave
+it alone, and to re-measure *if the preset table grows a change that walks more
+page than a removal of one band does*. The table did not grow; the **number of
+walks** did, which that sentence did not anticipate. The judgement is unchanged
+at 14ms warm and the thing that would change it is unchanged too: **nobody has
+measured a cold serverless invocation**, and this lane still cannot —
+`*.vercel.app` is denied by the environment's network policy.
+
+What is worth adding is that the fix this entry rules out has got cheaper to
+rule in. A verdict cached per `(revision, policy)` would now amortise five calls
+rather than one, and the argument against it — *a second answer to a question
+that has one* — is the same argument at five times the saving. Still not worth
+it at 14ms. Worth re-reading at fifty.
+
+---
 ---
 ## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
 
@@ -39503,6 +39583,27 @@ being able to assert a regression.
 
 The ask is unchanged and still the cheap one: let a shot *print* a named
 selector's box beside the `scrollWidth` line it already prints.
+
+### Fifth instance, 2 October, `Loom demo` — the harness got the picture and could not get the numbers
+
+Fifth throwaway script in five runs, and the first where the split is clean
+enough to name: **`scrollTo` did the half a shot list can do, and the other half
+still needed an instrument that no longer exists.**
+
+The unit was four verdict markers on four asks, 300px below the fold of a rail
+that scrolls on its own. One shot with `{ "scrollTo": "#ask ul li:last-child" }`
+photographed all four in place — no script, no private browser, reviewable as
+four lines of JSON, and it is the picture the pull request leads with. That is
+the harness working exactly as 0182 intended.
+
+The report's box table — eleven rows of `top` and `height` read off two
+production builds, including the one number that moved and nothing would have
+caught (the rail's content, 1,261px → 1,276px, four flex line boxes rounding
+differently) — needed a `playwright-core` script written into a scratch
+directory and deleted with the container. **The same run therefore demonstrates
+both halves of this entry at once**, which is the clearest case yet for how
+small the remaining ask is: everything about reaching the state is solved, and
+reading one number back out of the state is not.
 
 ---
 ## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
