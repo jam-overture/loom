@@ -264,7 +264,7 @@ the last thing on its own line and read in a separate command, which is
 | | `main` at `f4d2b9c` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` | 173 files / 3,560 | **173 / 3,560** — `src/` untouched |
-| `@loom/app` | — | **361 / 6,395**, 0 skipped |
+| `@loom/app` | — | **361 / 6,397**, 0 skipped |
 | the portal lane, measured | **141 files / 2,814** | **143 / 2,889** |
 | findings ledger | 949 | **951**, 0 malformed |
 
