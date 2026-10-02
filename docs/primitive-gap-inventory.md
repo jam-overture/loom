@@ -15,13 +15,20 @@ The short answer: **the honest ceiling on distinct primitives is about 110–120
 not 250.** The number 250 is reachable, and the rest of it is compositions. The
 arithmetic is at the end.
 
-> **Where the count is, 1 October 2026: 102.** Tier A closed on 14 September
-> except the radio group, which is in Tier B's second group below and blocked
-> there. Tier B's first group is **unblocked and three of its four have
-> shipped**; its other two groups are the whole of what is left behind a
-> framework decision. Read the corrected Tier B before planning a run against
-> this document — it said something false for eleven days and that is what the
-> correction is about.
+> **Where the count is, 2 October 2026: 102 primitives, 48 bands, 150 droppable
+> things.** Tier A closed on 14 September except the radio group, which is in
+> Tier B's second group below and blocked there. Tier B's first group is
+> **unblocked and three of its four have shipped**; its other two groups are the
+> whole of what is left behind a framework decision. Read the corrected Tier B
+> before planning a run against this document — it said something false for
+> eleven days and that is what the correction is about.
+>
+> **The vocabulary has not moved since 1 October and that is the
+> recommendation being followed**, not a stall: this document's own arithmetic
+> puts the honest ceiling at 110–120 and says to spend the week on
+> compositions. The instrument for choosing *which* composition is
+> [designs per part](#designs-per-part--measured-2-october), added 2 October,
+> and it is the one to read before the tier tables below.
 
 ## The thing that makes 250 look reasonable, and why it misleads
 
@@ -201,6 +208,57 @@ the landing page of the product that owns it.
 
 **The instrument, for whoever picks this up: measure the catalogue against the
 registry, not the registry against Hermes.**
+
+## Designs per part — measured 2 October
+
+**A third instrument, and the one a run choosing catalogue work should read
+first.** The two above count what the *library* lacks and what the *catalogue*
+cannot reach. Neither can see the gap this one measures, which is the gap
+21st.dev's numbers are actually made of: a part of the page with exactly one
+design is a part where a deployment has no choice at all, and the catalogue
+reads as complete from every other angle while it is true.
+
+Measured with `compositionsForPart` over `COMPOSITION_PARTS`, which is one
+`filter` from any registry and needs no script:
+
+| | 1 Oct | 2 Oct |
+| --- | --- | --- |
+| parts | 22 | 22 |
+| bands | 44 | 48 |
+| **parts with exactly one design** | **9** | **5** |
+
+The nine were `banner`, `nav`, `bento`, `specs`, `comparison`, `credentials`,
+`team`, `changelog` and `footer`. Four of them closed on 2 October — `nav`,
+`bento`, `comparison` and `footer` — and those four rather than any other four
+because **two of them are the bands a page cannot be without.** A page may skip
+its changelog and most do; no page skips its header or its footer, so a single
+design there is the catalogue deciding, for every deployment, what the top and
+the bottom of their page look like.
+
+**The five left, in the order a run should take them:** `specs`, `team`,
+`credentials`, `changelog`, `banner`. Each is one band of work and none is
+blocked by anything.
+
+The bar for a second design is 0162's and `compositions.test.ts` holds it: a
+**different set of nodes**, not the same band with different props. The test
+that catches the near-miss is already written — two designs of a part whose node
+types read the same in the same order fail by name — so the cost of getting this
+wrong is a red build rather than a catalogue entry where a `configure` belongs.
+
+### What the reach measurement says after those four
+
+Reach went 89 → 90 of 102. `loom.popover` came into reach, through
+`comparison-ways`, which is the band that shows its working.
+
+**`loom.menu` did not, and it is the one entry on the unreached list that is not
+waiting for somebody to write a band.** It is waiting on a word. `loom.nav`
+declares `disclose` and names its own control `Menu`; `loom.menu` names its
+control `Menu` too, because a control's word belongs to the primitive and is
+resolved per type (0055, 0063). A bar holding both has two buttons reading *Menu*
+at 390px, one inside the other — so the obvious second nav design, the one whose
+destinations fold behind a button, cannot be built at the quality bar until the
+filing about a control's name moves. Recorded here so the next run reading the
+unreached list does not spend an afternoon rediscovering it.
 
 ## Tier C — things that look missing and are not
 
