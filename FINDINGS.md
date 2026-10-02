@@ -8,6 +8,101 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-02 — lesson 32's sharpest conclusion is now false, and the four numbers under it were updated from outside the lane while the paragraph was left alone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/32-layout.md`) · **Status:** open — **one paragraph, and the lane that
+wrote it should write the replacement.** Nothing is red; `main` is green with the
+numbers corrected and the prose stale.
+
+Exercise G asks which half of the measuring instrument a test in this repository
+can reach, reads `tools/specimen/` off disk, and prints a row per DOM reading
+API. Under the output the lesson draws its conclusion, and it is the first of the
+four rows *in order of how much they should bother you*:
+
+> **No DOM reading API appears in the suite at all.** The `clientWidth` on the
+> `capture.ts` row is in a doc comment explaining which number `width` is — a
+> sentence, not a call.
+
+**That is no longer true, and `framework-64` is what made it untrue.** Unblocking
+`#476` added a unit test for `readBoxes` — the in-page function that takes the
+six numbers — and the only way to test it without a browser is to hand it a
+double:
+
+```ts
+const elementOf = (reading: ElementReading): Element =>
+  ({
+    getBoundingClientRect: () => reading.rect,
+    scrollHeight: reading.scrollHeight,
+    clientHeight: reading.clientHeight,
+  }) as unknown as Element
+```
+
+So the suite now names two of the five faculties, and the transcript says so:
+
+| | before | now |
+| --- | --- | --- |
+| `getBoundingClientRect` | `capture.ts false · playwright.ts true · specimen.test.ts false` | **`true · true · true`** |
+| `querySelectorAll` | `capture.ts false · playwright.ts true · specimen.test.ts false` | **`false · true · true`** |
+| top-level functions in `playwright.ts` | 10 | **11** |
+
+**Three numbers were changed in the lesson from this branch and the paragraph was
+not**, which is the 30 September entry's rule applied deliberately rather than
+discovered afterwards: a forced cross-lane edit may move a number, and the moment
+it moves a sentence it is one lane rewriting another lane's teaching. The lesson
+is self-contradicting on `main` until `Loom lessons` takes it, and a visible
+contradiction between a table and the paragraph under it is a better state than a
+framework routine quietly authoring curriculum.
+
+**What the replacement has to say, if it helps.** The new facts are more
+interesting than the one they displace, and the lesson's altitude is unchanged:
+the two new `true`s are both **doubles**, not calls — a stubbed
+`getBoundingClientRect` on a cast object literal, and a `querySelectorAll` named
+in a doc comment explaining why the reading goes through a locator *instead* of
+one. So the row's original point survives in a sharper form: **the suite still
+cannot read a laid-out page, and what it can now do is pin which six numbers the
+reading asks for.** That is the half 0213 says is testable in Node, finally being
+tested there. Whether that is one paragraph or the exercise's whole conclusion is
+the lane's call.
+
+---
+## 2026-10-02 — `0212` was claimed by two routines on the same day for the third time, and this one was caught by a merge conflict rather than by a check
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **a convention has now failed three times in four days**, and
+the third one cost a pull request a day of visibility.
+
+`#476` wrote `0212` and so did `#477`. `#477` merged first, so this branch's
+record is now **0213** — the rename, nine citations across `tools/specimen/`,
+`tools/screenshot/`, `FINDINGS.md` and the report, and a dated note under the
+header. About fifteen minutes, all of it mechanical.
+
+The two earlier entries (`0205`, `0209`) both end with *take the next free number
+after re-reading `main`*, which is what every routine already does. It cannot
+work: the number is free when the branch opens and taken when it merges, and no
+amount of re-reading closes a window that is hours wide. **Nothing in
+`pnpm verify` can see it either** — each branch is internally consistent, the
+index regenerates cleanly on both, and the collision exists only in the union.
+`decisions/README.md` is the only file that conflicts, and it conflicts textually,
+which is why this is always found by `git merge` and never by a test.
+
+**Two shapes that would actually hold**, neither of them this run's to choose:
+
+1. **The number is assigned at merge, not at write.** A record is drafted under
+   its slug alone and numbered by the tool that regenerates the index. Costs the
+   citation-rewrite on every merge, which is what `pnpm decisions:index` is
+   already for, and makes a branch's own links unresolvable until it lands —
+   which lesson 28's citation sweep reads off disk, so that is not free.
+2. **A lane owns a band.** `Loom daily build` takes `0213–0219`, the next lane
+   the one after. Crude, needs no tooling, and wastes numbers when a band runs
+   out — but the collision becomes structurally impossible rather than unlikely.
+
+**Recommendation: 2.** Three failures in four days is a convention that does not
+work, and the cheap fix that needs no code beats the correct fix that needs a
+numbering pass on every merge. It is four lines in `docs/routines.md` and it is
+yours to call.
+
+---
 ## 2026-10-01 — the defect matrix every lane ends with deletes the run's own work if the run has not committed, and the convention as written says to do exactly that
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
@@ -39273,9 +39368,30 @@ is the property a documentation site actually needs.
 ---
 ## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
-**not blocking**, and recommended as small. Nothing was prevented; the numbers
-in today's report are real
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-63-nothing-can-see-a-box`**
+([0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md))
+— **the shape you asked for, exactly**: `measure` on a shot, a printed line per
+match, and nothing in it touching the exit code. Three things to know. **The
+cap is twenty matches per selector, not five** — `CLIPPED_SHOWN`'s reasoning
+reverses when the box was asked for rather than discovered, and the
+`…and N more matches` line is what makes a truncated table safe to quote.
+**`(n of m)` is on every line of a multi-match selector**, because `aside li`
+on `/demo` is nine of them and three of those nine are the ones you care
+about. **And it is `pnpm shoot`'s only, not a specimen's** — a specimen is
+photographed `fullPage`, so a fold measured against its viewport is a number
+about a boundary its picture does not have.
+
+**The half you asked for that is not here, stated plainly:** nothing can still
+fail if the payoff card grows back past 857px. The number is in the run's output
+and a person reads it. 0213's *Alternatives considered* argues the delay rather
+than glossing it — the first run of this instrument found six blocks past the
+fold on `/demo`, every one a rail scrolling correctly, and 0202's last line is
+what a gate that goes red on all of them on day one does to an instrument. **A
+per-shot height budget is the next ask and it is yours to make**, now with a
+run's worth of readings to make it against.
+
+**Your 857 was right.** The first real output reads `holding 1240 in 857`
 
 Every unit this lane has shipped for a fortnight is argued on a measurement:
 *the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
@@ -40190,6 +40306,75 @@ readers on two surfaces and it is the one quantity in this repository that
 several lanes type independently.
 
 ---
+## 2026-10-01 — a `pnpm verify` started on a clean `main` and edited underneath reports another lane's file, and the one it names is the lesson that reads `tools/` off disk
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and one wrong conclusion**, which was nearly the expensive kind: for a few
+minutes this run believed `main` was red in `(lessons)` and was composing the
+cross-lane patch for it
+
+### What happened
+
+The run opened by starting a baseline `pnpm verify` on a pristine `main` at
+`ee9c1d5`, in the background, and then — because the baseline takes about twenty
+minutes and there was reading to do — started building. The baseline came back
+**exit 1**, with one failing test in a route group this lane does not own:
+
+```
+FAIL  app/(lessons)/_lib/transcripts.test.ts > what a lesson says its exercises print > is what lesson 28 actually prints
+AssertionError: expected [ 'citations the checks refuse: 0' ] to deeply equal []
+```
+
+That reads exactly like the cross-lane count staleness that put `main` red
+earlier the same day, in the same shape, in another lane's file. It is not. It
+is this run's own work, arriving in the middle of its own baseline.
+
+**The mechanism, which is the general part.** Lesson 28's exercise D reads every
+citation in `decisions/`, `src/` and `tools/` **off disk at test time** and
+compares the count against the transcript the lesson has recorded. This run had
+written `[0213](../../decisions/0213-…)` into two files under `tools/specimen/`
+about forty minutes before `decisions/0213-…` existed. Two `link-unknown-record`
+problems, so the exercise printed `citations the checks refuse: 2` where the
+lesson says `0`, and the drift was reported against **the lesson's file** rather
+than against either file this run had touched.
+
+So a baseline is not a baseline if the tree moves under it. `vitest` reads the
+files when it reaches them, and `pnpm verify`'s application half runs last —
+roughly twenty minutes after the command starts, which is a wide enough window
+to do most of a unit's work in.
+
+### Why the symptom was so convincing
+
+Three things lined up. The failure named another lane's file; the repository had
+*actually* been red in a comparable way six hours earlier, and the ledger entry
+about it was on this run's reading list; and `git status` on the branch was
+clean of `(lessons)` entirely, which is the sentence that stops you looking
+further. The thing that broke the spell was that no commit on `main` could
+plausibly have done it.
+
+### What holds
+
+**A baseline run owns the tree for its duration.** Either leave the tree alone
+while it runs, or do not call what comes back a baseline. The cheap version,
+which this run should have used: take the baseline on a **separate checkout** of
+`main`, so the branch is free the whole time.
+
+The stronger version, and the reason this is filed rather than written in a
+report: `docs/routines.md`'s *Reading the merge gate* is where every routine
+learns what a red gate means, and it currently has nothing about **when** a gate
+was read. A number read off a run that overlapped the run's own edits is not a
+measurement of anything — and it is indistinguishable from a real cross-lane
+break, which is the most expensive failure this ledger has on it twice today.
+
+### For whoever writes that paragraph
+
+The one-line rule is *a verify you edited underneath measured neither tree*. The
+corollary worth stating with it is that the drift surfaces **in the file that
+reads**, not the file that changed — so a failure in another lane's route group
+is not evidence that the cause is in another lane's route group, and three of
+today's entries are about lanes spending part of a run proving a red is not
+theirs.
 ## 2026-10-01 — `role` and `copy` now have a reader that turns them into a sentence about readers, and the library still declares neither
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
@@ -40597,3 +40782,154 @@ a bucket that already exists, but it is still the caller's number.
 three paths.** If the maintainer would rather the reader-signal section of that
 file belonged to `Loom signals`, this lane will take it and the brief is the place
 to say so.
+## 2026-10-02 — a presentation's panel is laid out at full width until scripting hydrates, and on a 390px page that is three hundred pixels of sideways scroll
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/presentation.ts`, `src/primitives/stylesheet.ts`) ·
+**Status:** open — **`ARCHITECTURAL` if anyone acts on it.** The behaviour is
+[0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+working exactly as specified and `presentation.test.ts` asserts the rule that
+causes it. Nothing here proposes superseding that record; what is new is the
+cost, measured
+
+`presentation.ts` §2 states the rule and its reason, and both are right:
+
+> Every control in the vocabulary renders `null` until an effect has proved
+> scripting runs. So on a page served without it there is no button, no
+> attribute, and no rule that matches — which means the region must be **visible
+> by default and hidden by the rule**.
+
+The consequence nobody had measured is that *a page with scripting on passes
+through the no-scripting state on every load.* Between first paint and
+hydration there is no control, so `.loom-popover[data-loom-presented="false"]`
+matches nothing, so the panel is laid out — `position: absolute`, at
+`max-inline-size: min(26rem, calc(100vw - 2rem))`, beside a trigger that may be
+most of the way across the page.
+
+**The measurement, from the camera rather than from reading the sheet.** A sheet
+holding one `loom.popover`, shot at 390×844 with an empty step list:
+
+```
+run 1  …-editorial-phone-shut  390x844@2x  scrollWidth 693 / innerWidth 390  ← overflows
+run 2  …-bold-phone-shut       390x844@2x  scrollWidth 697 / innerWidth 390  ← overflows
+```
+
+One overflowing shot per run and a different palette each time — the signature
+of a race rather than of a defect in a band. Three hundred pixels of page that is not there a moment later. Adding
+`{ wait: 400 }` to that one state removes it on every shot under both palettes,
+which is the experiment: the overflow is the pre-hydration layout and nothing
+else.
+
+### Why this is worth an entry rather than a shrug
+
+**It is a real reader's experience, not only a photograph's.** On a phone on a
+slow connection the window between paint and hydration is not four hundred
+milliseconds, and what a reader gets is a page that scrolls sideways and then
+stops doing so. Every page with a menu, a popover or a lightbox on it has this,
+which is to say every page the catalogue will build once those three are
+reachable.
+
+**And it makes the harness's own gate nondeterministic.** `pnpm specimen` fails a
+run on `scrollWidth > innerWidth`, correctly. With a presentation in the sheet it
+fails on *one palette per run and a different palette each run*, because it is
+racing hydration — so the first instinct is to disbelieve the gate, which is the
+worst thing that can happen to a measurement nobody else takes.
+
+### The three shapes a fix could take, smallest first, none of them taken here
+
+1. **A `@media (scripting: none)` escape.** Keep the hide rule in the safe
+   direction, and hide the panel by default where scripting is off. Browser
+   support for `scripting` is good and the no-JS case 0176 protects is exactly
+   what the query names. The risk is that `scripting: enabled` is true during the
+   pre-hydration window too, so this fixes nothing unless the default flips.
+2. **Flip the default and reveal on `"true"`, with a `<noscript>` rule.** The
+   direction 0176 rejected, made safe by the one mechanism that only applies
+   when scripting is off. It costs a `<noscript>` block in a library stylesheet
+   that is otherwise one sheet.
+3. **Clip the root rather than hide the panel.** `overflow: clip` on
+   `PRESENTATION_ROOT` until the control exists bounds the damage without
+   touching the rule's direction — the panel still occupies no width — but a
+   root that clips is a root that clips the open panel too, so it has to be
+   undone by the same attribute that reveals it, which is the rule again.
+
+**Worked around, not fixed:** the sheet that found this waits four hundred
+milliseconds in its `shut` state and says why in its own comment.
+
+---
+## 2026-10-02 — `loom.menu` is the one unreachable primitive that is not waiting for a band, and a second nav design is what proved it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.menu.ts`) · **Status:** open — **not a new finding.** It
+is the 1 October filing about a control's name, with the consequence attached
+and a number on it
+
+The 1 October entry established that a control's word is the primitive's and is
+resolved per type (0055, 0063), and that this is why `loom.dialog` was not built.
+What it did not say is that the same constraint makes an *already shipped*
+primitive unreachable from the catalogue.
+
+`loom.nav` declares `disclose` and names its control `Menu`. `loom.menu` names
+its control `Menu`. A bar holding both has two buttons reading *Menu* at 390px,
+one nested inside the other, and the one in the panel is the one a reader
+reaches second.
+
+**This was found by trying to build the band.** The obvious second design of the
+`nav` part — the bar whose destinations fold behind a button — is the one
+everybody would name first, and `loom.menu`'s own doc comment names a header as
+its first use. It cannot be built at the quality bar today, so `nav-centred`
+shipped instead and `loom.menu` is still at reach zero.
+
+The measured size of it, which is what this entry adds:
+
+| | |
+| --- | --- |
+| registered primitives | 102 |
+| reached by dropping in a band | **90** after 2 October (89 before) |
+| unreached and genuinely waiting for a band | `loom.lightbox`, `loom.pin` |
+| unreached because the catalogue ships no asset | `media`, `embed`, `carousel`, `before-after`, `overlay` |
+| unreached and belonging to a bound or paged region | `link-pager`, `waiting-state`, `link-trail` |
+| structural | `loom.page` |
+| **unreached because of a string** | **`loom.menu`** |
+
+One entry on that list is a different kind of thing from all the others, and it
+is the only one where the work is not in this lane's gift.
+
+---
+## 2026-10-02 — the size of the catalogue is spelled out in three places in `apps/`, and the lane that changes it cannot see any of them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — a hazard with a fresh instance,
+and the instance is already fixed
+
+Adding four bands to `src/primitives/compositions/` turned `main`'s app suite red
+in three places, none of them in this lane:
+
+| | why |
+| --- | --- |
+| `_lib/counts.test.ts` | the expected spelling list holds `"starter-bands: forty-four"` as a literal |
+| `_lib/packages.ts` | a doc comment: *"`…/compositions` is the forty-four bands"* |
+| `_components/bands.tsx` | a doc comment: *"why there are forty-four bands and twenty-two places to put one"* |
+| `_lib/api/reference.generated.json` | a generated artefact, regenerated with the repository's own `pnpm --filter @loom/app docs:api` |
+
+All four are corrected on the branch that caused them, which is the only
+reasonable thing to do with a red build — and it meant a lane whose brief says
+*do not edit `apps/`* editing `apps/`, in a one-word diff it had no way to
+anticipate. Said plainly in the pull request rather than slipped in.
+
+**The interesting half is that `counts.ts` got it right.** `SITE_COUNTS` reads
+`STARTER_COMPOSITIONS.length` from the library, so the *page* a reader sees was
+never wrong for a moment and needed no edit at all. That is the mechanism working
+exactly as designed. What is not covered by it is the test's own expected list —
+which has to be a literal, or it asserts nothing — and two doc comments beside it
+that spell the number in prose.
+
+**What would be useful, and it is the `audit.ts` remedy one directory over.** The
+1 October entry about four sentences in `src/` saying *ninety-eight* ends with
+it: a doc comment may state the *claim* rather than the arithmetic. Here that is
+*"the bands under their own names"* and *"one design of every part, and more than
+one of several"* — both true today, both still true after the next band, and
+neither a number this lane moves without knowing.
+
+The test's literal is a different thing and should stay a literal. It is the one
+place in the repository where the catalogue's size is asserted rather than read,
+and that is its job.
