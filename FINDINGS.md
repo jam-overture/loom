@@ -39618,8 +39618,18 @@ whether your pages are too long — it is whether anything you have would say so
 
 ## 2026-10-01 — the sentence that stops a reader over-reading `completed` is the one sentence the page deletes the day the kind ships
 
-**Filed by:** `Loom signals` · **Owned by:** `Loom docs` · **Status:** open —
-one paragraph, and it is the one that stops the kind being misread
+**Filed by:** `Loom signals` · **Owned by:** `Loom docs` · **Status:** **closed**
+by `docs-43-what-these-do-not-mean`, and wider than it was filed. The caveat is a
+**required field on every kind** rather than a partial table printed beside an
+unbuilt one, so it is on the live row for `completed` and on the other four as
+well — the filing's reasoning (*a kind named after something the page cannot
+observe needs the gap stated beside it permanently*) turned out to hold for all
+of them, so it is a field rather than a second table. Both halves the finding
+asked for are in the `completed` sentence, and `_lib/signals/gaps.test.tsx`
+drives the real broadcaster until each of the five gaps happens, so the sentences
+are held to the code rather than to a belief about it. The `it.skipIf(landed)`
+left behind in `page.test.ts` — the only trace of this in the suite, and the app
+suite's one skipped test — runs unconditionally now
 
 `completed` landed today (0211), so */docs/the-runtime/what-your-readers-do*
 does exactly what it was built to do: `produceApproved` goes empty, the
@@ -40514,3 +40524,138 @@ two runs chasing its own record. The same timing around a *fix* rather than a
 figure would put a known-bad version on `main` with a green branch beside it
 saying otherwise, and the branch would look exactly like a branch whose work was
 safe.
+
+---
+
+## 2026-10-02 — a node that leaves the page while the tab is in the background is credited with the whole time the tab was hidden, and the mutation that proves it passes the runtime's own ledger suite
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/ledger.ts`)
+· **Status:** open — **a latent defect, not a live one.** The code on `main` is
+correct; what is missing is anything that would notice if it stopped being.
+
+Found while holding *What your readers do*'s new caveat for `dwelled` — *"a tab
+nobody has in front of them accrues nothing"* — to the code, by breaking the code
+and checking that the sentence went red.
+
+`createSignalLedger().hid(now)` closes every open stretch and sets `since` to
+`null`, which is what stops a hidden tab accruing time. Delete the one line that
+nulls it:
+
+```ts
+hid: (now) => {
+  if (hidden) return
+  hidden = true
+  for (const entry of onScreen.values()) {
+    accrue(entry, now)
+    entry.since = null   // ← deleted
+  }
+},
+```
+
+and **`pnpm vitest run src/signals/ledger src/signals/broadcast` is green: 54
+passed.** So is every other test in this repository bar one.
+
+### Why nothing sees it
+
+`drain` has its own `if (!hidden)` guard, so a delivery while the tab is hidden
+accrues nothing either way, and `showed` overwrites `since` on the way back — so
+on every path the runtime's suite exercises, the deleted line changes nothing.
+The one path it does change is `left(nodeId, now)`, which is called from the
+visibility observer and from the removal half of the arrivals observer, **both of
+which fire in a hidden tab**. A node that goes out of view or off the page while
+the tab is in the background then accrues from the moment the stretch opened
+rather than from nothing.
+
+Measured, in the docs lane's own harness: a node on screen for **3 seconds**, the
+tab hidden for **5**, the node then removed, is reported as **11,000 ms** of a
+reader's time. Not 8,000 — `accrue` never advances `since`, so the hidden
+stretch is counted *and* the pre-hidden stretch is counted twice.
+
+### The ask, which is one test rather than any change to the code
+
+A ledger case: enter a node, hide, and then `left` it while hidden. Nothing in
+`ledger.test.ts` closes a stretch from that direction, which is why the line is
+unguarded.
+
+Worth one line each for the two guards while somebody is in there: `drain`'s
+`if (!hidden)` is **redundant today** — removing it is an equivalent mutation,
+because `hid` has already nulled `since` and the early return fires first — so
+the two lines are each other's backstop and neither is tested on its own. That
+is the shape that lets one of them go quietly.
+
+`apps/loom/app/(docs)/_lib/signals/gaps.test.tsx` holds the half this lane can:
+the page claims a background tab accrues nothing, so that file drives the case
+where it would not. It will go red if this regresses. It is in the wrong
+repository half to be the guard.
+
+---
+
+## 2026-10-02 — "on screen" is two numbers inside an unexported function, so no page can say what `viewed` actually measures without typing them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`)
+· **Status:** open — **a documentation gap with a one-line remedy**, and the
+page is written around it rather than blocked by it.
+
+`isReadable` decides what *came into view* means:
+
+```ts
+const fills = viewport > 0 && entry.intersectionRect.height / viewport >= 0.3
+return entry.intersectionRatio >= 0.5 || fills
+```
+
+Half the element showing, **or** it filling three tenths of the window — the
+second clause being load-bearing, because an element taller than the viewport can
+never reach half. That is a good rule and its own comment explains it well.
+
+It is also the whole of what `viewed` means, and a page cannot state it. The
+function is not exported, the two thresholds are not constants, and nothing in
+`@jam-overture/loom/signals` or `/signals/broadcast` publishes either number.
+
+**What this lane did instead.** *What your readers do* now says `viewed` means
+*"enough of the element was on screen"* — true, vaguer than it needs to be, and
+deliberately not *"half of it, or a third of the window"*, because those are two
+hand-typed numbers about runtime behaviour standing next to the noun they count.
+That is the 16 September entry's class exactly, and this lane spent 1 October
+building the mechanism that refuses it. A page may not buy precision with a
+number it typed.
+
+**What would close it:** the two thresholds as named exports —
+`READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION`, or one object. A
+page then registers them the way it registers every other count and the sentence
+gets its precision back, produced. Nothing else needs to change, and the
+broadcaster keeps shipping no schema library for it.
+
+---
+
+## 2026-10-02 — every assertion about a produced block on this site is about what the producer computes, and seven components are never rendered by any test at all
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as a
+class — **one instance closed** by `docs-43-what-these-do-not-mean`, which added
+the vocabulary panel's first render test.
+
+The arrangement this site is built on is that a block of furniture asks the
+repository a question and prints the answer, and that the producer is tested
+hard. *What your readers do*'s vocabulary panel had **fifteen assertions** across
+`page.test.ts` and `claims.test.ts` and not one of them rendered it. Every one of
+them stays green when `TheVocabulary` stops printing a row — or stops printing
+anything.
+
+That was not hypothetical this run. The caveat added to each row is produced,
+asserted, held to the broadcaster's real behaviour by a jsdom suite — and if the
+component had simply not printed it, the whole of `pnpm verify` would have been
+green with the line nowhere on the page. The render test was written after
+noticing that, not before.
+
+**The components no `.test.tsx` in this route group so much as names:**
+`callout`, `code-block`, `entry-points`, `mobile-nav`, `sidebar`, `submit-seam`,
+`theme-toggle`. `entry-points` is the one that matches the class exactly — a
+produced block whose producer (`_lib/entry-points.ts`) has a test file of its own
+and whose printing has nothing. The other six are chrome, which is a weaker case
+but not no case: `sidebar` and `mobile-nav` are how a reader reaches any of this.
+
+**Not a sweep, deliberately.** A check that every component has a render test is
+the kind of rule that gets a one-line file written to satisfy it. The useful
+version is narrower: **a component that prints a producer's output is tested by
+rendering it**, and the honest way to get there is one at a time, starting with
+`entry-points`. Recorded here so the next run has the list rather than finding it
+again.

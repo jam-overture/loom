@@ -145,6 +145,57 @@ describe("the size of the vocabulary, which this page may not state", () => {
   })
 })
 
+describe("the paragraph that introduces the caveats", () => {
+  /**
+   * The *does not mean* line on every row is the one thing on this page a reader
+   * could mistake for hedging, so there is a paragraph above the panel saying
+   * what it is for — the plain version first, the concrete case before the rule,
+   * which is this site's own order.
+   *
+   * It is held here because it is the one half of this unit that is prose: the
+   * sentences themselves are produced and `gaps.test.tsx` makes each of them
+   * happen, and nothing would notice if the paragraph that tells a reader to read
+   * them went away.
+   */
+  it("tells a reader the second line is there, before the panel is", () => {
+    const panel = flowed.indexOf("<TheVocabulary />")
+    const promise = flowed.indexOf("says what it means and, behind a line, what it does **not**")
+
+    expect(promise).toBeGreaterThan(-1)
+    expect(promise).toBeLessThan(panel)
+  })
+
+  /** The rule, stated as a property of names rather than as an apology. */
+  it("says why every one of these names falls short of the fact", () => {
+    expect(flowed).toContain("Every one of these names is shorter than the fact it stands for")
+  })
+
+  /**
+   * The concrete case before the general rule, and it is the kind the finding
+   * behind this unit was filed about.
+   */
+  it("makes the case with the kind a page cannot observe", () => {
+    expect(flowed).toContain("`completed` is the plainest case")
+    expect(flowed).toContain(
+      "a page can see a form let go, and it cannot see whether anything, anywhere, accepted it"
+    )
+  })
+
+  /**
+   * Two sections of this page now say *does not*, about different things, and a
+   * reader meeting both needs to be told they are different. One is privacy —
+   * what is deliberately left out of a signal. The other is physics — what a
+   * browser is able to observe at all.
+   */
+  it("separates it from what a signal does not carry", () => {
+    expect(flowed).toContain("Different from *what a signal does not carry*, further down")
+    expect(flowed).toContain("what a browser is able to see at all")
+    expect(flowed.indexOf("## What a signal does not carry")).toBeGreaterThan(
+      flowed.indexOf("Different from *what a signal does not carry*")
+    )
+  })
+})
+
 describe("the rows this page points at", () => {
   /**
    * "The fourth row is the interesting one" is an instruction to look at a

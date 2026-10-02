@@ -1,0 +1,33 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-02-docs-what-these-do-not-mean-vocabulary",
+      "viewport": "wide",
+      "waitFor": "[data-does-not-mean=\"completed\"]",
+      "clip": "[data-vocabulary]"
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-02-docs-what-these-do-not-mean-row",
+      "viewport": "wide",
+      "waitFor": "[data-does-not-mean=\"completed\"]",
+      "clip": "[data-kind=\"completed\"]"
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-02-docs-what-these-do-not-mean-wide",
+      "viewport": "wide",
+      "waitFor": "[data-does-not-mean=\"completed\"]"
+    },
+    {
+      "path": "/docs/the-runtime/what-your-readers-do",
+      "out": "2026-10-02-docs-what-these-do-not-mean-phone",
+      "viewport": "phone",
+      "waitFor": "[data-does-not-mean=\"completed\"]",
+      "do": [{ "scrollTo": "[data-kind=\"dwelled\"]" }]
+    }
+  ]
+}
