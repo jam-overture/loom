@@ -167,6 +167,11 @@ its marker are a baseline-aligned flex row where the label was a bare inline
 span, and a flex line box rounds differently. It is said here because it is the
 one number in the table that moved and nothing would have caught it.
 
+**Every `after` picture here is byte-identical to a fresh shot taken from the
+final committed build**, re-run after the gate went green on the head commit:
+all six `md5`s match. They are pictures of the code in this pull request and not
+of an intermediate one. The shot list is committed beside this report.
+
 **The question frame is byte-identical**, and now across four separately built
 commits: `held-unchanged.png` has `md5` `79cae639175ffc88a14d8c04a2f22cbe`, which
 is the hash the 1 October run recorded for the same frame. The moment a stranger
