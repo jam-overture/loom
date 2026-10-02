@@ -22,7 +22,7 @@ stored anywhere.
 | Read with | `regionReadingOf(rows)` — buckets above the floor, plus what was withheld |
 | Floor | **25 views**, raise-only, applied at read time |
 | Browser cost | **31 bytes minified, 16 gzipped**; 13 bytes on the wire once per page view |
-| Record | [0213](../decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md) |
+| Record | [0214](../decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md) |
 
 The pieces: `src/signals/region.ts` (the vocabulary, the counting, the floor and
 the reading), a region store with memory and Postgres implementations behind one
@@ -66,7 +66,7 @@ plan rather than a thing to tack onto this.
 
 ## Decisions I took that the step did not specify
 
-All five are in 0213 with what I rejected.
+All five are in 0214 with what I rejected.
 
 **1. The floor is applied when the rows are read, not when they are written.**
 The plan says a bucket is *kept* only once it is large enough, and the literal

@@ -231,7 +231,7 @@ knowing anything about it. Three constraints are the design:
   process.
 
 **Done**, and one thing the step did not anticipate turned out to decide the whole
-shape ([0213](../decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)).
+shape ([0214](../decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)).
 
 **A region counter has to count page views, and an intake cannot count them.**
 Rollup counts distinct views by comparing view keys inside a window; the door

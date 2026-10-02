@@ -40709,7 +40709,7 @@ nothing is blocked, and one line of it is a correctness constraint rather than a
 preference
 
 Step 7 of [`docs/signals.md`](docs/signals.md) landed with
-[0213](decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md):
+[0214](decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md):
 page views per country, counted at the intake, per tree and revision. It is a
 fourth table beside the tallies and the funnels, and it needs no rollup to have
 run — a deployment that took one delivery has a number.
@@ -40767,7 +40767,7 @@ the section does not mention them:
 **The default is why this is filed rather than deferred.** A deployment that
 switches intake on starts counting page views per country without typing anything
 — which is the decision
-[0213](decisions/0213-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)
+[0214](decisions/0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md)
 argues for, and which an operator should be able to discover somewhere other than
 a decision record. `GET /api/reader-signals` reports all three in one sentence
 today, so the section has something true to point at.

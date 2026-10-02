@@ -1,8 +1,15 @@
-# 0213. Where readers are is a floored bucket counted at the door, and a page view says when it began
+# 0214. Where readers are is a floored bucket counted at the door, and a page view says when it began
 
 **Status:** Accepted
 **Date:** 2026-10-02
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-02**, from 0213, when the branch that carried it (#479)
+> was merged. `main` had meanwhile accepted a different 0213 — *the harness reads
+> a box, it prints the number, and the judgement stays in the report* (#476) — and
+> two records sharing a number is fatal (0097). This record was written on 2
+> October and nothing in it changed but its number; references on the branch were
+> updated with it.
 
 ## Context
 
