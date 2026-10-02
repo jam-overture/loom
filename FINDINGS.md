@@ -8,6 +8,149 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-01 — the defect matrix every lane ends with deletes the run's own work if the run has not committed, and the convention as written says to do exactly that
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and no work permanently**, because the edits were still in the session and
+could be reapplied. A longer unit would not have been so lucky.
+
+Every lane in this repository ends its report with a defect matrix, and the
+sentence describing how it is run is nearly identical across them:
+
+> Each defect restored in turn against this commit, the demo lane run against
+> it, and the lane restored with `git checkout` between rows.
+
+`git checkout -- <path>` restores from the **index**, which is `HEAD`. On a
+branch where the run has not yet committed, `HEAD` is still `main` — so the
+first restore reverts not just the planted defect but **the entire unit**, for
+every tracked file under that path, with no confirmation and no error.
+
+**That is what happened here**, on row 2 of nine. Four files went back to
+`main`; the two files that survived did so only because they were new and
+therefore untracked, which is the opposite of a safety property. The symptom was
+not an error message: it was the lane's test count dropping from 716 to 709 and
+staying there for the next row, which reads exactly like a defect being caught.
+The matrix was two rows from reporting fiction.
+
+**The fix is one word**, and it is the word the convention should carry:
+
+```bash
+git checkout HEAD -- <path>   # same thing, until HEAD is not what you meant
+git stash                     # no
+git commit                    # the real answer
+```
+
+`git checkout HEAD -- …` is not the fix either, strictly — it is the same
+command. **The real rule is ordering: commit the unit before planting the first
+defect.** Then `HEAD` is the thing being tested, the restore means what it
+says, and a matrix cannot eat its own subject. This run committed and re-ran,
+and the matrix came back with three rows nothing caught — which is the result
+worth having and was not available before.
+
+**Filed for the framework routine because `docs/routines.md` is its file**, and
+this belongs beside *Reading the merge gate*: it is the same shape of hazard —
+a command that reports success while doing something other than what the run
+believes — and the same remedy, which is to write down the ordering rather than
+trust everyone to re-derive it. The briefs say `main` too, so the maintainer may
+want the sentence in both places.
+
+---
+## 2026-10-01 — the demo's first screen spends 42% of itself on a still life, and this run paid for the verdict without reclaiming it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
+run's candidate unless the maintainer points elsewhere, and it is a **design
+question rather than a defect**
+
+Measured on a production build at 1280×900, on `main` at `ee9c1d5`, before this
+run touched anything. The rail's scroller is **857px** and its content is
+**1,239px**:
+
+| block | top, within the rail | height |
+| --- | --- | --- |
+| the claim, the chips | 20 | 171 |
+| the ask panel opens | 215 | — |
+| **the leading ask's excerpt** | **377** | **358** |
+| *or ask for one of these* | 751 | 17 |
+| *or type your own* | 1040 | 20 |
+| *what happens when you ask* | 1101 | 17 |
+| the one link out, to `/docs` | 1141 | 78 |
+
+So the single largest element a stranger meets is a **358px re-render of a band
+that is already on the page beside it** — and everything from the four other
+asks downwards is off the screen.
+
+**The excerpt is not wrong and the reason it is 21rem is good.** `globals.css`
+argues it at length: at rail width the stat grid falls to one column and its
+three figures stand about 330px, and *"a window that showed 3,400 and faded out
+before 24 and 92% would be previewing one number under a button promising
+three."* That is right, and shrinking it to buy room would reopen a defect that
+was closed deliberately.
+
+**What changed is that it now has competition.** This run put the Gate's
+verdict on that screen — two lines, computed, about the button directly above
+the excerpt — and did **not** reclaim any pixels for it: the brief sentence
+replacing the hedge gave back about as much as the verdict took, so the first
+screen holds one more idea in the same space and the rail is roughly where it
+was. That is the right trade for one run and it is not a resting place. The
+question nobody has asked is whether, on the one screen that has to land in
+sixty seconds, *a picture of the band* still outranks *the asks nobody can see*.
+
+**Three shapes:**
+
+1. **Leave it.** The excerpt makes the one invited press concrete and the four
+   others are deliberately secondary. Cheapest, and defensible.
+2. **Fold the excerpt behind a disclosure**, the way `WhatHappens` and the free
+   text already are. Reclaims the whole 358px; costs the one thing the excerpt
+   exists for, which is that a stranger sees what the button names *without*
+   doing anything.
+3. **Let the stage answer it.** Mark the band before the press and bring the
+   stage to it, which is the surface's own answer to *where is that* everywhere
+   else. Costs the rail nothing and costs the hero, which is the thing that
+   makes the specimen read as a real page on arrival. **Argued against here**
+   for that reason, and written down so the next run does not re-reach for it.
+
+**Recommendation: 1 until something else needs the pixels**, and the reason to
+record the table now is that this is the fourth consecutive run to measure it
+with a script it then deleted — see the data point appended to the
+30 September entry about what a shot list cannot see.
+
+---
+## 2026-10-01 — the demo's arrival screen now runs the Gate on a render, and nothing in this repository can see what that costs a real request
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+honest limit of `demo-35-what-it-will-say`, and **measured rather than feared**
+
+That run put the Gate's verdict on the first screen by running the real thing:
+`composeChange` interprets, analyses, assesses and gates the leading preset
+against the live tree on every render of `/demo`, and prints what it answered.
+The claim is that this cannot be wrong, and it is held by a test. What is not
+held by anything is what it costs.
+
+**The function itself is nothing.** Timed over 200 runs against the starting
+tree on this machine: **0.62ms** for the held ask (`trim`, the lead — the
+removal walks the largest subtree) and **0.31ms** for the re-theme. It is a
+tree walk and no key, which is the whole reason it could be put on a render at
+all (0057).
+
+**What is unmeasured is the request.** `page.tsx` says in its own comment that
+*a crawler should cost nothing*, and builds the pristine tree rather than
+allocating a session for exactly that reason. This run added sub-millisecond
+work to that same path — but sub-millisecond **here**, warm, in a `vitest`
+process, against a tree already in memory. Nobody has measured a cold serverless
+invocation on the deployment, and this lane cannot: `*.vercel.app` is denied by
+the environment's network policy (`Loom portal`, 27 September), so every number
+this lane quotes is from a local `next start`.
+
+**Why it is filed rather than fixed.** The two obvious fixes are both worse than
+the thing they fix at this size. Caching the verdict per revision would be a
+second answer to a question that has one, and the cache key would have to carry
+the policy; computing it lazily on the client would put a runtime across the
+boundary this surface has kept the registry off. At 0.62ms the right action is
+to know the number and leave it alone — and to re-measure if the preset table
+grows a change that walks more page than a removal of one band does.
+
+---
 ## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
@@ -39182,6 +39325,30 @@ number in the report was produced by something the maintainer can read.
 
 `tools/screenshot/` is `Loom daily build`'s, which is why this is filed rather
 than done.
+
+### Fourth instance, 1 October, `Loom demo` on #475 — and the first where the measurement decided the unit
+
+Appended rather than filed again, because it is the same ask with one more data
+point behind it and a second entry would only make it look like two problems.
+
+This run wrote the fourth throwaway `playwright-core` script in four runs. What
+is different is that this time **the measurement was the diagnosis, not the
+evidence for one.** The unit was chosen off a table this script printed and
+nothing else could: at 1280×900 the rail's content is 1,239px against 857px of
+screen, and the single largest thing on a stranger's first screen was a 358px
+re-render — **42% of it** — of a band already on the page beside it, with the
+four other asks, the free-text box, the explainer and the only link out all
+below the fold.
+
+None of those six numbers is checkable by anything in this repository. The
+script that produced them was deleted with the container, and the run before
+this one and the two before that each wrote their own. **A lane whose unit is
+chosen by a measurement it cannot keep is a lane choosing its next unit by
+rewriting the same instrument**, which is a different and worse cost than not
+being able to assert a regression.
+
+The ask is unchanged and still the cheap one: let a shot *print* a named
+selector's box beside the `scrollWidth` line it already prints.
 
 ---
 ## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
