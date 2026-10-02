@@ -116,7 +116,7 @@ const UNDER_CEILING: Readonly<Record<StakeLevel, string>> = {
 }
 
 /** Short enough to be the subject of a table row; `ASK_ORIGINS` labels are whole sentences. */
-const ASKER: Readonly<Record<IntentOrigin, string>> = {
+export const ASKER: Readonly<Record<IntentOrigin, string>> = {
   "user-instruction": "Somebody using your site",
   developer: "You, or your own code",
   "system-signal": "Your site, on its own",
@@ -128,7 +128,7 @@ const ASKER: Readonly<Record<IntentOrigin, string>> = {
  * order the policy's record happens to have been written in. Object key order is
  * not a thing to show anybody a table sorted by.
  */
-const ORIGINS: readonly IntentOrigin[] = [
+export const ORIGINS: readonly IntentOrigin[] = [
   "user-instruction",
   "developer",
   "system-signal",

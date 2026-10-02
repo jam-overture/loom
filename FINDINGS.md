@@ -20699,8 +20699,12 @@ routine on the way past.
 
 ## 2026-09-04 — the plain-reading test helper now exists in three copies, and the two it was to be merged with are still unmerged
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open — a
-count on the 2 September entry, not a new argument
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-44-what-if-you-changed-these-rules`**, 1 October — the pair is one
+module at `app/(portal)/_test/rendered.ts` and all four copies are gone. See the
+1 October entry for what the delay cost and why it ended. Original status below.
+
+> **Status:** open — a count on the 2 September entry, not a new argument
 
 `surfaceOf`/`recordOf` — the pair that separates what a reader meets from what is
 behind a `<details>` — is the sharpest test this lane has, because it turns "speak
@@ -40019,6 +40023,110 @@ readers on two surfaces and it is the one quantity in this repository that
 several lanes type independently.
 
 ---
+
+## 2026-10-01 — a host cannot re-measure its own stakes from its own record, and it is two fields short
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+
+`/portal/rules/what-if` replays every judgment this deployment has recorded
+against a policy a reader is editing on the screen. **Seven of a `GatePolicy`'s
+seventeen fields can be played against. The other ten cannot**, and the reason
+is two omissions from one record type.
+
+### What works, and why
+
+The Gate is a pure function of a `ChangeAssessment` and a policy, and every rung
+of `ESCALATION_LADDER` reads one of four facts the journal already holds — the
+stake level, the reversibility, the stake factor codes (0198) and the
+interpreter's confidence. So the two confidence thresholds, `refusalFloor` and
+the four `autoApplyCeiling` entries all replay exactly, and the screen proves it:
+it re-runs the deployment's own policy over the record and keeps only the
+judgments whose recorded verdict it reproduces.
+
+### What does not, and the gap is small
+
+What cannot be replayed is the **measurement** — `removalThresholds`,
+`breadthThreshold`, `shallowDepthThreshold`, `protectedPrimitiveTypes`,
+`protectedPropKeys`. Moving one of those changes the stake *level*, and the
+level is recorded rather than recomputable, so the screen deliberately does not
+offer them. Offering them and holding the level fixed would answer every
+question with "nothing would change", which is a lie shaped like a result.
+
+`assessStakes` is published and takes `{ analysis, discards }` and a policy. It
+reads nine fields of `ChangeAnalysis`. **`AssessmentSummary` carries seven of
+them**:
+
+| `assessStakes` reads | on `AssessmentSummary`? |
+| --- | --- |
+| `insertedNodeCount`, `removedNodeCount`, `movedNodeCount` | yes |
+| `touchedPrimitiveTypes`, `removedPrimitiveTypes`, `relocatedPrimitiveTypes` | yes |
+| `shallowestAffectedDepth` | yes |
+| **`affectedNodeIds`** | **no** |
+| **`configuredPropKeys`** | **no** |
+
+`affectedNodeIds` is read for its **length alone** — `broadChange` compares
+`analysis.affectedNodeIds.length` against `breadthThreshold` — so a count is
+enough and the ids themselves need never be journalled. `configuredPropKeys` is
+read by `protectedProp`, and is the only input to that factor.
+
+### The ask
+
+Two fields on `assessmentSummarySchema`, both optional for 0045's reason:
+
+```
+affectedNodeCount?: number        // analysis.affectedNodeIds.length
+configuredPropKeys?: readonly string[]
+```
+
+With those, a host holding its own journal can rebuild the `StakeInput` for
+every change it ever judged and re-measure it under a policy it is considering —
+which turns a seven-field simulation into a seventeen-field one, and makes
+*"would marking `loom.card` as protected have caught any of this?"* answerable
+from the record rather than from a rebuild of history.
+
+**Two things it is not.** It is not a request to journal the delta — the delta is
+already on the record and this is cheaper than re-analysing it, which would need
+the tree at the base revision as well. And it is not this lane's to do: 0018 is
+explicit that the portal reads the framework through what it publishes, and a
+record type is the framework's.
+
+**Everything else `assessStakes` reads is already summarised.** `nestedTargets`,
+`unknownPrimitives`, `invalidProps`, `unreadBindings`, `redirectedSubmissions`
+and `repointedBindings` each produce exactly one factor code, and the codes are
+on the record — so those factors replay today without carrying the lists.
+
+---
+
+## 2026-10-01 — `surfaceOf` and `recordOf` are one module at last, and the reason the four copies survived has expired
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-44-what-if-you-changed-these-rules`** — this closes the 4 September
+entry, which was itself a count on the 2 September one
+
+The pair that tells what a reader meets from what is behind a `<details>` now
+lives in `app/(portal)/_test/rendered.ts`, beside `_test/plain-language.ts` and
+for the same reason: it is a test concern, so a screen must not be able to
+import the thing it is being judged against.
+
+**Four copies, all identical in substance, now gone** —
+`_components/proposal-effect.test.tsx`,
+`portal/pieces/_components/piece-card.test.tsx`,
+`portal/checkup/_components/checkup-verdict.test.tsx` and
+`portal/rules/_components/rule-card.test.tsx`. Each carried a comment explaining
+why it had been copied rather than shared, and every one of those comments gave
+the same reason: the files it would be merged with were open on unmerged
+branches. All four have been on `main` for weeks, so the reason had quietly
+expired and nobody had been back to check.
+
+**What made this run do it was needing a fifth.** The entry's own sentence —
+*"a helper in four places is not a helper"* — reads as a judgement when you are
+writing the fourth copy and as an instruction when you are about to write the
+fifth.
+
+Two other functions in this lane are called `surfaceOf` and are **not** copies:
+`_lib/checkup-reach.test.ts` and `_lib/rules-view.test.ts` each flatten a view
+object rather than a rendered DOM. They are left alone. A shared name is not a
+duplicate, and folding them in would mean one helper with two unrelated jobs.
 ## 2026-10-01 — the merge-window trap, filed and then walked into forty minutes later, by the run that filed it
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
