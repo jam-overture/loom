@@ -96,37 +96,44 @@ version on `main` with a green branch beside it saying otherwise.
 
 ## Tests
 
-**`pnpm verify` is red on this branch, and it is red on `main` for the same two
-assertions.** Reproduced on a pristine `19d5238` with everything of this lane's
-stashed:
-
-```
-× everything this site wrote for a reader > writes no counted size as a number
-× spelling a number the way prose spells it > spells the ones the site is stating today
-```
-
-Both are `app/(docs)/_lib/counts.test.ts`. **`#465`** took the starter library
-from ninety-nine primitives to one hundred and two; **`#470`** landed the rule
-that a stated count must be produced rather than typed, with a census test
-pinning the spelled numbers as literals. Each was green on its own branch and
-the combination is red, because `#470` was verified against a `main` that did
-not yet carry `#465`.
-
-**Not fixed here.** `(docs)/_lib/` is another surface's route group and this
-lane does not edit one; no open pull request fixes it, so there is nothing to
-port. Filed with both one-line patches and a line for `Loom merge`, whose
-mandate this is.
+`pnpm install && pnpm verify` — status written to a file by the gate as its own
+command and read separately, on a `dist` and a `.next` deleted first.
 
 | | |
 | --- | --- |
-| `pnpm verify` | **exit 1** — the two docs assertions above, red on `main` too |
-| framework | **3,441 tests**, all passing |
-| application | 2 failed, **6,038 passed**, 1 skipped — both failures `(docs)` |
-| marketing suite | 38 files, **1,006 tests**, all passing |
+| `pnpm verify` | **exit 0** |
+| framework | **3,441 tests** |
+| application | **6,040 tests**, 1 skipped |
+| marketing suite | 38 files, **1,006 tests** |
 | `pnpm shoot` | `1280 / 1280`, `390 / 390` — no overflow |
 
-**No test added, changed, weakened or skipped** — this unit is comments and a
-ledger, and it can touch neither failure. The skipped test is
+**No test added, changed, weakened or skipped by this lane** — this unit is
+comments, a ledger and a report. The skipped test is
 `(docs)/_lib/signals/page.test.ts`, which came from `main` with `#466`/`#467`.
+
+### It was red when this branch opened, and `Loom merge` answered it
+
+The gate failed on the two `(docs)/_lib/counts.test.ts` assertions described
+above, red on `main` as well as here. Within the half hour, `Loom merge` pushed
+`68c61d3` — *"Merge: carry the two (docs) numbers an earlier merge moved"* —
+applying both patches this branch had proposed and could not make: the census
+literal to `one hundred and two`, and `entry-points.ts`'s summary produced
+through `spellOut(siteCount("starter-bands").value)`. It also corrected two
+comments that still asserted a library of ninety-nine.
+
+So this branch now carries the fix for a failure it filed and did not touch, and
+merging it takes `main` green again.
+
+**The marketing figures were re-measured after that push rather than assumed
+unaffected** — `99 / 86 / 258 / 1,151 / 2,512`, identical, since `68c61d3`
+touches only `(docs)`. A docs edit cannot move a marketing word count, and
+"cannot" is the reasoning this ledger keeps filing entries about.
+
+**It is also the division of labour working exactly as `0067` describes it**, and
+worth saying plainly because the failures in this run have had more words than
+the successes: a lane found a break it was forbidden to fix, wrote down the patch
+with the reasoning, and the routine whose mandate it is applied it in the lane
+that owned it and said which files and why. Nobody crossed a lane boundary and
+nothing waited on the maintainer.
 
 No decision record.
