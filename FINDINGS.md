@@ -8,6 +8,101 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-02 — lesson 32's sharpest conclusion is now false, and the four numbers under it were updated from outside the lane while the paragraph was left alone
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/32-layout.md`) · **Status:** open — **one paragraph, and the lane that
+wrote it should write the replacement.** Nothing is red; `main` is green with the
+numbers corrected and the prose stale.
+
+Exercise G asks which half of the measuring instrument a test in this repository
+can reach, reads `tools/specimen/` off disk, and prints a row per DOM reading
+API. Under the output the lesson draws its conclusion, and it is the first of the
+four rows *in order of how much they should bother you*:
+
+> **No DOM reading API appears in the suite at all.** The `clientWidth` on the
+> `capture.ts` row is in a doc comment explaining which number `width` is — a
+> sentence, not a call.
+
+**That is no longer true, and `framework-64` is what made it untrue.** Unblocking
+`#476` added a unit test for `readBoxes` — the in-page function that takes the
+six numbers — and the only way to test it without a browser is to hand it a
+double:
+
+```ts
+const elementOf = (reading: ElementReading): Element =>
+  ({
+    getBoundingClientRect: () => reading.rect,
+    scrollHeight: reading.scrollHeight,
+    clientHeight: reading.clientHeight,
+  }) as unknown as Element
+```
+
+So the suite now names two of the five faculties, and the transcript says so:
+
+| | before | now |
+| --- | --- | --- |
+| `getBoundingClientRect` | `capture.ts false · playwright.ts true · specimen.test.ts false` | **`true · true · true`** |
+| `querySelectorAll` | `capture.ts false · playwright.ts true · specimen.test.ts false` | **`false · true · true`** |
+| top-level functions in `playwright.ts` | 10 | **11** |
+
+**Three numbers were changed in the lesson from this branch and the paragraph was
+not**, which is the 30 September entry's rule applied deliberately rather than
+discovered afterwards: a forced cross-lane edit may move a number, and the moment
+it moves a sentence it is one lane rewriting another lane's teaching. The lesson
+is self-contradicting on `main` until `Loom lessons` takes it, and a visible
+contradiction between a table and the paragraph under it is a better state than a
+framework routine quietly authoring curriculum.
+
+**What the replacement has to say, if it helps.** The new facts are more
+interesting than the one they displace, and the lesson's altitude is unchanged:
+the two new `true`s are both **doubles**, not calls — a stubbed
+`getBoundingClientRect` on a cast object literal, and a `querySelectorAll` named
+in a doc comment explaining why the reading goes through a locator *instead* of
+one. So the row's original point survives in a sharper form: **the suite still
+cannot read a laid-out page, and what it can now do is pin which six numbers the
+reading asks for.** That is the half 0213 says is testable in Node, finally being
+tested there. Whether that is one paragraph or the exercise's whole conclusion is
+the lane's call.
+
+---
+## 2026-10-02 — `0212` was claimed by two routines on the same day for the third time, and this one was caught by a merge conflict rather than by a check
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Status:** open — **a convention has now failed three times in four days**, and
+the third one cost a pull request a day of visibility.
+
+`#476` wrote `0212` and so did `#477`. `#477` merged first, so this branch's
+record is now **0213** — the rename, nine citations across `tools/specimen/`,
+`tools/screenshot/`, `FINDINGS.md` and the report, and a dated note under the
+header. About fifteen minutes, all of it mechanical.
+
+The two earlier entries (`0205`, `0209`) both end with *take the next free number
+after re-reading `main`*, which is what every routine already does. It cannot
+work: the number is free when the branch opens and taken when it merges, and no
+amount of re-reading closes a window that is hours wide. **Nothing in
+`pnpm verify` can see it either** — each branch is internally consistent, the
+index regenerates cleanly on both, and the collision exists only in the union.
+`decisions/README.md` is the only file that conflicts, and it conflicts textually,
+which is why this is always found by `git merge` and never by a test.
+
+**Two shapes that would actually hold**, neither of them this run's to choose:
+
+1. **The number is assigned at merge, not at write.** A record is drafted under
+   its slug alone and numbered by the tool that regenerates the index. Costs the
+   citation-rewrite on every merge, which is what `pnpm decisions:index` is
+   already for, and makes a branch's own links unresolvable until it lands —
+   which lesson 28's citation sweep reads off disk, so that is not free.
+2. **A lane owns a band.** `Loom daily build` takes `0213–0219`, the next lane
+   the one after. Crude, needs no tooling, and wastes numbers when a band runs
+   out — but the collision becomes structurally impossible rather than unlikely.
+
+**Recommendation: 2.** Three failures in four days is a convention that does not
+work, and the cheap fix that needs no code beats the correct fix that needs a
+numbering pass on every merge. It is four lines in `docs/routines.md` and it is
+yours to call.
+
+---
 ## 2026-10-01 — the defect matrix every lane ends with deletes the run's own work if the run has not committed, and the convention as written says to do exactly that
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
@@ -39273,9 +39368,30 @@ is the property a documentation site actually needs.
 ---
 ## 2026-09-30 — a shot list can drive a page to a state and cannot say how tall anything in it is, so every geometry claim this lane makes is a script that is thrown away
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:** open —
-**not blocking**, and recommended as small. Nothing was prevented; the numbers
-in today's report are real
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-63-nothing-can-see-a-box`**
+([0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md))
+— **the shape you asked for, exactly**: `measure` on a shot, a printed line per
+match, and nothing in it touching the exit code. Three things to know. **The
+cap is twenty matches per selector, not five** — `CLIPPED_SHOWN`'s reasoning
+reverses when the box was asked for rather than discovered, and the
+`…and N more matches` line is what makes a truncated table safe to quote.
+**`(n of m)` is on every line of a multi-match selector**, because `aside li`
+on `/demo` is nine of them and three of those nine are the ones you care
+about. **And it is `pnpm shoot`'s only, not a specimen's** — a specimen is
+photographed `fullPage`, so a fold measured against its viewport is a number
+about a boundary its picture does not have.
+
+**The half you asked for that is not here, stated plainly:** nothing can still
+fail if the payoff card grows back past 857px. The number is in the run's output
+and a person reads it. 0213's *Alternatives considered* argues the delay rather
+than glossing it — the first run of this instrument found six blocks past the
+fold on `/demo`, every one a rail scrolling correctly, and 0202's last line is
+what a gate that goes red on all of them on day one does to an instrument. **A
+per-shot height budget is the next ask and it is yours to make**, now with a
+run's worth of readings to make it against.
+
+**Your 857 was right.** The first real output reads `holding 1240 in 857`
 
 Every unit this lane has shipped for a fortnight is argued on a measurement:
 *the card is 975px in an 857px rail*, *the caution is 103px*, *the rail's
@@ -40190,6 +40306,75 @@ readers on two surfaces and it is the one quantity in this repository that
 several lanes type independently.
 
 ---
+## 2026-10-01 — a `pnpm verify` started on a clean `main` and edited underneath reports another lane's file, and the one it names is the lesson that reads `tools/` off disk
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **cost this run about twenty minutes
+and one wrong conclusion**, which was nearly the expensive kind: for a few
+minutes this run believed `main` was red in `(lessons)` and was composing the
+cross-lane patch for it
+
+### What happened
+
+The run opened by starting a baseline `pnpm verify` on a pristine `main` at
+`ee9c1d5`, in the background, and then — because the baseline takes about twenty
+minutes and there was reading to do — started building. The baseline came back
+**exit 1**, with one failing test in a route group this lane does not own:
+
+```
+FAIL  app/(lessons)/_lib/transcripts.test.ts > what a lesson says its exercises print > is what lesson 28 actually prints
+AssertionError: expected [ 'citations the checks refuse: 0' ] to deeply equal []
+```
+
+That reads exactly like the cross-lane count staleness that put `main` red
+earlier the same day, in the same shape, in another lane's file. It is not. It
+is this run's own work, arriving in the middle of its own baseline.
+
+**The mechanism, which is the general part.** Lesson 28's exercise D reads every
+citation in `decisions/`, `src/` and `tools/` **off disk at test time** and
+compares the count against the transcript the lesson has recorded. This run had
+written `[0213](../../decisions/0213-…)` into two files under `tools/specimen/`
+about forty minutes before `decisions/0213-…` existed. Two `link-unknown-record`
+problems, so the exercise printed `citations the checks refuse: 2` where the
+lesson says `0`, and the drift was reported against **the lesson's file** rather
+than against either file this run had touched.
+
+So a baseline is not a baseline if the tree moves under it. `vitest` reads the
+files when it reaches them, and `pnpm verify`'s application half runs last —
+roughly twenty minutes after the command starts, which is a wide enough window
+to do most of a unit's work in.
+
+### Why the symptom was so convincing
+
+Three things lined up. The failure named another lane's file; the repository had
+*actually* been red in a comparable way six hours earlier, and the ledger entry
+about it was on this run's reading list; and `git status` on the branch was
+clean of `(lessons)` entirely, which is the sentence that stops you looking
+further. The thing that broke the spell was that no commit on `main` could
+plausibly have done it.
+
+### What holds
+
+**A baseline run owns the tree for its duration.** Either leave the tree alone
+while it runs, or do not call what comes back a baseline. The cheap version,
+which this run should have used: take the baseline on a **separate checkout** of
+`main`, so the branch is free the whole time.
+
+The stronger version, and the reason this is filed rather than written in a
+report: `docs/routines.md`'s *Reading the merge gate* is where every routine
+learns what a red gate means, and it currently has nothing about **when** a gate
+was read. A number read off a run that overlapped the run's own edits is not a
+measurement of anything — and it is indistinguishable from a real cross-lane
+break, which is the most expensive failure this ledger has on it twice today.
+
+### For whoever writes that paragraph
+
+The one-line rule is *a verify you edited underneath measured neither tree*. The
+corollary worth stating with it is that the drift surfaces **in the file that
+reads**, not the file that changed — so a failure in another lane's route group
+is not evidence that the cause is in another lane's route group, and three of
+today's entries are about lanes spending part of a run proving a red is not
+theirs.
 ## 2026-10-01 — `role` and `copy` now have a reader that turns them into a sentence about readers, and the library still declares neither
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
