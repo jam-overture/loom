@@ -74,7 +74,18 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 140 since lesson 32 (layout), which added seven — one per exercise, each a whole
+ * 147 since lesson 33 (shortfall), which added seven — one per exercise, each a
+ * whole transcript in a single block. Four of the seven print a *count of calls*
+ * rather than a value, because the lesson's subject is when a party runs rather
+ * than what it knows: exercise C's `times the component pushed: 0` is the whole
+ * argument of the lesson and is a number about the clock. Exercise G's last three
+ * lines read the starter registry at run time — which primitives read a binding and
+ * which have declared what they could not show — rather than printing a number this
+ * lane typed, and they are expected to change when `Loom primitives` closes
+ * `loom.feed`'s half, which is filed for that lane. That red is the lesson's claim
+ * moving, on lesson 29's exercise C precedent, and not drift.
+ *
+ * It was 140 since lesson 32 (layout), which added seven — one per exercise, each a whole
  * transcript in a single block. Three of the seven print booleans rather than
  * numbers, because the lesson's subject is a fact that is absent from everything a
  * pure function can produce and the honest shape of that is a row of `false`.
@@ -137,7 +148,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 140
+const RECOGNISED_TRANSCRIPTS = 147
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.

@@ -1664,6 +1664,54 @@ understated in the same way every time.
 
 ---
 
+## Set AL — two days after lesson 33
+
+Interleaved with 05, 14, 18, 28, 29 and 32. Heavy on 14, because *what a renderer
+returns is a description and not a page* is the sentence this lesson is built on
+and the one most readers have filed under something else; and on 28, because the
+construction that keeps this seam honest is that lesson's cheapest second copy,
+which is no second copy at all.
+
+1. A source answers twelve rows and a primitive draws eleven. The other ways a
+   binding can be wrong were reported by the walk on its own and this one was not.
+   Say what makes it invisible from outside, and make your answer about *where a
+   shape lives*. *(18, 33)*
+2. The page says some entries could not be shown and carries no figure; the
+   diagnostic carries both figures and no sentence. Give the reason for each, and
+   then say who each one is addressed to. *(33)*
+3. `renderLoomTree` returns an element and an array of diagnostics. Say what an
+   element *is*, and then say what follows about anything a component body wanted
+   to add to that array. The first half is lesson 14's and the second is this
+   lesson's. *(14, 33)*
+4. A component that reports its own count is wrong for three reasons. Give all
+   three, and then say which one would still hold in a system with no component
+   model in it at all. *(33)*
+5. Eight declarations on a primitive are data and one is a function. State the
+   question that decides which, and then apply it to a declaration this course has
+   not discussed: how long a primitive's content takes to read. *(29, 33)*
+6. The declaration is handed the node's props and the node's answers and
+   deliberately nothing more. Give the reason, and say what is lost by handing it
+   the resolved tree as well. Your answer must not be about performance. *(33)*
+7. A declaration returns three readings and the second one is impossible. Say what
+   happens to the other two, give both halves of that argument, and then say what
+   happens to the page — and which promise of this course that last answer is
+   keeping. *(05, 14, 33)*
+8. Compare this seam's remedy with lesson 29's and lesson 32's. All three are
+   about a fact a checker cannot get at, and they end in three different places.
+   Say what decides which, in a sentence about *who owns the inputs* and a second
+   about *when that party runs*. *(29, 32, 33)*
+9. A declaration that says twelve of twelve for a component that drew eleven is
+   silent and believable. Say what makes it unlikely, say why that cannot be
+   enforced, and then name two other declarations on a primitive that carry the
+   same exposure. *(28, 33)*
+
+Question 8 is the point of the set and the one that transfers furthest outside
+this repository. Question 3 is where a confident half-answer is most likely: most
+readers can say the renderer is pure and total and have never had to say what the
+thing it returns actually is.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1715,3 +1763,4 @@ renders this file rather than restating it.
 | AI | 2 days after L30 | | |
 | AJ | 2 days after L31 | | |
 | AK | 2 days after L32 | | |
+| AL | 2 days after L33 | | |
