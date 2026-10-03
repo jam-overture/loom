@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4468,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4514,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5420,7 +5420,7 @@
       "files": 188,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5878,7 +5878,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6686,7 +6686,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7277,7 +7277,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7505,7 +7505,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7922,7 +7922,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8276,7 +8276,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8396,7 +8396,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 31,
+      "files": 32,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8405,11 +8405,11 @@
             "zod"
           ],
           "shared": 14,
-          "files": 9
+          "files": 10
         }
       ],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9030,6 +9030,27 @@
           ]
         },
         {
+          "module": "signals/readable",
+          "title": "Readable",
+          "summary": "What *on screen* means, as the two numbers that decide it.",
+          "symbols": [
+            {
+              "name": "READABLE_VISIBLE_FRACTION",
+              "kind": "value",
+              "signature": "const READABLE_VISIBLE_FRACTION = 0.5",
+              "truncated": false,
+              "summary": "At least this much of the element is visible."
+            },
+            {
+              "name": "READABLE_VIEWPORT_FRACTION",
+              "kind": "value",
+              "signature": "const READABLE_VIEWPORT_FRACTION = 0.3",
+              "truncated": false,
+              "summary": "Or the element fills at least this much of the window."
+            }
+          ]
+        },
+        {
           "module": "signals/region",
           "title": "Region",
           "summary": "Where readers are, as a counter and nothing else.",
@@ -9372,10 +9393,10 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
-      "files": 9,
+      "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9518,7 +9539,7 @@
       "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9585,7 +9606,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10147,7 +10168,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10221,7 +10242,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10658,7 +10679,7 @@
       "files": 71,
       "narrower": [],
       "standing": {
-        "packageNames": 1203,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

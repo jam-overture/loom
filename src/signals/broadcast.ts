@@ -12,6 +12,7 @@ import { err, ok, type Result } from "../result.js"
 
 import { createSignalLedger, type SignalAddress } from "./ledger.js"
 import { READER_SIGNAL_KINDS } from "./kinds.js"
+import { READABLE_VIEWPORT_FRACTION, READABLE_VISIBLE_FRACTION } from "./readable.js"
 import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
 import { mintViewKey, type RandomBytes } from "./view.js"
 
@@ -195,18 +196,17 @@ export type ReaderSignalBroadcastError = {
 const DEFAULT_FLUSH_MS = 5000
 
 /**
- * On screen means a reader could be reading it: at least half of the element is
- * visible, or it fills at least 30% of the viewport. The second clause is not
- * optional — the visible fraction of an element taller than the window can never
- * reach one half, so a long section judged by the first alone is never viewed.
+ * On screen means a reader could be reading it: at least
+ * {@link READABLE_VISIBLE_FRACTION} of the element is visible, **or** it fills
+ * at least {@link READABLE_VIEWPORT_FRACTION} of the viewport.
  */
 const isReadable = (entry: IntersectionObserverEntry): boolean => {
   if (!entry.isIntersecting) return false
 
   const viewport = entry.rootBounds?.height ?? globalThis.innerHeight ?? 0
-  const fills = viewport > 0 && entry.intersectionRect.height / viewport >= 0.3
+  const fills = viewport > 0 && entry.intersectionRect.height / viewport >= READABLE_VIEWPORT_FRACTION
 
-  return entry.intersectionRatio >= 0.5 || fills
+  return entry.intersectionRatio >= READABLE_VISIBLE_FRACTION || fills
 }
 
 const intersectionVisibility: ObserveVisibility = (onChange) => {
