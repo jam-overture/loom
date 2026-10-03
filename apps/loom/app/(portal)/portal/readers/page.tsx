@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { treeIdSchema, type TreeId } from "@jam-overture/loom"
+import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
 import { describeReaderSignalStoreError } from "@jam-overture/loom/signals"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
@@ -13,6 +13,8 @@ import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-name"
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
 import { portalReaderSignals, portalReaderTallies, signalsAreDurable } from "@/app/(portal)/_lib/reader-signals"
+import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { skippingComparable, skippingOf, type PageSkipping } from "@/app/(portal)/_lib/skipped"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
 import { inPageOrder } from "@/app/(portal)/_lib/page-order"
 import { portalStore } from "@/app/(portal)/_lib/store"
@@ -137,6 +139,44 @@ const ReadersPage = async ({
   const names = served.names
 
   /*
+   * Which parts nobody got to, for every page whose counted version is the one
+   * being served.
+   *
+   * Built here rather than in the card for one reason: it is the only reading
+   * on this screen that needs **two** things that disagree — the counters and
+   * the page — and a component handed both would be the place the pairing rule
+   * got broken by whoever wrote the next component. `skippingComparable` is the
+   * rule, and it is applied once, where the pair is assembled.
+   *
+   * No read is added. The pages are the ones `pagesServed` already fetched to
+   * name their parts; what used to be thrown away is the tree itself.
+   */
+  const skipped = new Map<string, PageSkipping>()
+
+  for (const reading of readings) {
+    const newest = reading.revisions[0]!.revision
+    const tree = served.trees.get(reading.treeId)
+
+    if (tree === undefined || !skippingComparable(newest, tree.revision)) continue
+
+    skipped.set(
+      reading.treeId,
+      skippingOf(
+        tree,
+        /*
+         * Scoped to the page and not to the version: the join drops rows filed
+         * under another version and says how many it dropped, which is a
+         * sentence worth having in the record. Rows belonging to another page
+         * are filtered out rather than counted, because a tally of every other
+         * page in the deployment would make that sentence meaningless.
+         */
+        counted.value.filter((tally) => tally.treeId === reading.treeId),
+        portalRegistry
+      )
+    )
+  }
+
+  /*
    * By name, and it used to be by identifier.
    *
    * `revisionReadings` sorts on `treeId.localeCompare(treeId)` so a page's own
@@ -240,6 +280,13 @@ const ReadersPage = async ({
                * the one claim this surface refuses to make without evidence.
                */
               live={served.revisions.get(reading.treeId)}
+              /*
+               * Absent when the counted version is not the one being served,
+               * which the card explains rather than omitting. See
+               * `_lib/skipped.ts` — the question needs the page as well as the
+               * counters, and only one version of the page can be had.
+               */
+              skipping={skipped.get(reading.treeId)}
             />
           ))}
         </>
@@ -296,6 +343,17 @@ type PagesServed = {
    * page whose revision happens to match, and the card keeps them apart.
    */
   readonly revisions: ReadonlyMap<string, number>
+  /**
+   * The page itself, for the one reading that needs it.
+   *
+   * **The fourth answer out of the same read, and it used to be thrown away
+   * too.** Which parts nobody got to is a question about a page as much as
+   * about its counters — absence is only a measurement once something says
+   * which parts there were — so it needs the whole of what was fetched, not the
+   * names taken off it. A page missing here is one whose read did not come
+   * back, exactly as in `revisions`.
+   */
+  readonly trees: ReadonlyMap<string, LoomTree>
 }
 
 const pagesServed = async (treeIds: readonly TreeId[]): Promise<PagesServed> => {
@@ -307,6 +365,7 @@ const pagesServed = async (treeIds: readonly TreeId[]): Promise<PagesServed> => 
   const names = new Map<string, PageName>()
   const partNames = new Map<string, PartName>()
   const revisions = new Map<string, number>()
+  const trees = new Map<string, LoomTree>()
 
   for (const [treeId, head] of heads) {
     /*
@@ -322,6 +381,7 @@ const pagesServed = async (treeIds: readonly TreeId[]): Promise<PagesServed> => 
 
     names.set(treeId, pageNameOf(head.value))
     revisions.set(treeId, head.value.revision)
+    trees.set(treeId, head.value)
 
     /*
      * A part whose node has since been removed is not in the map and is named
@@ -330,7 +390,7 @@ const pagesServed = async (treeIds: readonly TreeId[]): Promise<PagesServed> => 
     for (const [nodeId, name] of namesInTree(head.value)) partNames.set(nodeId, name)
   }
 
-  return { names, partNames, revisions }
+  return { names, partNames, revisions, trees }
 }
 
 export default ReadersPage

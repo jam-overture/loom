@@ -41196,3 +41196,158 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-02 — nothing can ask a store for the tree as it was, and that is now a hole in a shipped screen rather than a cost to know about
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Status:** open — **not a new finding.** It is the 1 October entry from
+`Loom signals`, with the consequence attached and the screen named
+
+That entry ends:
+
+> *Not filed as urgent. No surface compares revisions' readings yet; the portal
+> screen that will is step 4 of `docs/signals.md` and is not built. Filed now
+> because it is cheaper to know before that screen is written than after.*
+
+**One is built.** `/portal/readers` now answers *which parts of this page did
+nobody get to*, which needs the page as well as its counters — a part nobody
+reached has no row at all, so absence is only a measurement once something says
+which parts there were. The join is keyed by page **and** version, deliberately,
+because laying one version's counters over another version's page makes most
+parts read *nobody got to it* while every number stays plausible.
+
+A store answers for exactly one version: the snapshot, which is the head. So the
+section answers for the version being served and **cannot answer for any
+other** — and the version being served is not the counted one for as long as an
+hour after every change, which is exactly when somebody comes to look.
+
+| | |
+| --- | --- |
+| what is missing | a way to ask a store for the tree at a chosen revision |
+| the shape suggested on 1 October | `treeAt(reader, treeId, revision)` — `foldLog` with one more condition |
+| who already walks it | `auditSnapshot`, and the progression on `/portal/history` |
+| what it costs this screen today | one of two sections on each card is a notice instead of a reading |
+| what it would buy | *which parts did people stop getting to after your last change* — the before-and-after on the one measurement no analytics product can produce |
+
+**Said out loud on the screen rather than absorbed**, in `SkippingUnavailable`,
+and the notice names the mechanism rather than apologising: the counts stay
+exactly as they are, and the section answers for whichever version is being
+served once its own window has been counted. That is a true sentence and it is
+not the one a person wants.
+
+**The portal did not reach into `src/` to close it** (0018), and the workaround
+that exists — paging `revisions()` and folding from the seed in the portal —
+was deliberately not taken: a consumer that gets the stopping condition slightly
+wrong draws one revision's counters against another revision's tree, which is
+the one failure this reading can have that looks exactly like success.
+
+---
+## 2026-10-02 — a page cannot report that every one of its parts went unread, and the arithmetic that makes it impossible is worth stating where the vocabulary is
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** open — not a defect, and it cost this
+lane a state it had already designed, written and commented
+
+`PartStanding`'s three members are reachable in every combination but one.
+`skipped` means **no row names this part**, and `PageReading.views` is the
+largest `views` any single row reports — so:
+
+- every part `skipped` requires no row to name any part of the page, and
+- a window with no rows has `views` of 0, which makes every part `unknown`.
+
+So *a page with visits, every part of which went unseen* is unreachable, unless
+a row names a part the page does not have — which is `orphaned`, and is the one
+state a consumer of this join should refuse to draw at all.
+
+**What it cost.** This lane's first shape of the reading carried a flag for it,
+`StopsAt.everything`, with its own branch, its own sentence (*"which is usually
+a page reporting its visits and not its parts"*) and a paragraph of commentary
+arguing that it had to be said apart from the ordinary case. Every word of that
+argument is right about the **situation** and the situation cannot arise. It was
+found by a test that tried to construct it and could not.
+
+The reachable neighbour is worth having and is what shipped instead: **rows
+exist and not one reports reach.** A root is an addressed node and is on screen
+in every visit that draws the page, so a window holding visits and no reach at
+all is a page whose parts are not reporting — a primitive that does not spread
+its identity attributes, or a sender switched on halfway through a release.
+Telling that person *nobody scrolled* sends them to rewrite a page that is fine.
+
+**The suggestion is one sentence in `parts.ts`, not a change.** `PartStanding`'s
+own doc comment already explains why `unknown` exists; the half it does not say
+is that `skipped` and the view floor are read off the same rows, so the two
+cannot both be everywhere. A consumer reading the vocabulary top to bottom has
+no way to learn that except by trying to build the state.
+
+---
+## 2026-10-02 — the author rule was broken for the third time and the preview deployed anyway, which is the first evidence against the rule's own account of itself
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**the rule stands and was still broken.** What is new is a measurement that the
+24 September entry's evidence base of two occurrences does not predict
+
+`portal-45-what-did-people-skip` carries three commits, all of them made with
+
+```
+git -c user.name="Loom portal" -c user.email="portal@loom.local" commit …
+```
+
+which is the **exact spelling** the 24 September entry quotes, under the rule it
+restated to cover the act rather than a flag:
+
+> A lane never sets the author or committer of a commit, by any means.
+
+It was broken anyway, by a run that had read the file. The check that entry
+prescribes — `git log -1 --format="%an <%ae>"` **before pushing** — was not run
+before pushing; it was run afterwards, because a notification about the pull
+request sent this run back to the entry. That is the rule working as a record
+and failing as a practice, which is the distinction worth writing down: a rule
+whose enforcement is *remember to look* is enforced by whoever happens to look.
+
+**And the deployment succeeded.** Vercel's status on `2ee3937` is
+`success` — *"Deployment has completed"* — and #483 carries a live preview URL.
+No refusal, no account-verification notice, no red check.
+
+| | 20 September (#346-ish) | 23 September (#376) | **2 October (#483)** |
+| --- | --- | --- | --- |
+| spelling | `--author` | `-c user.name` / `-c user.email` | `-c user.name` / `-c user.email` |
+| author | `Loom portal <…@gmail.com>` | `Loom portal <portal@loom.local>` | `Loom portal <portal@loom.local>` |
+| Vercel | refused — *"must have access"* | refused — *"couldn't verify an account"* | **deployed** |
+
+**What this does and does not change.**
+
+It does **not** license setting an author. The rule costs one thing not done,
+it protects the one deliverable this lane's brief names in as many words — *open
+the PR with the deployed preview URL* — and two of three occurrences lost it.
+Nothing here is worth re-testing on a run whose pull request the maintainer is
+going to look at.
+
+What it does change is the entry's explanation. The 24 September entry's answer
+is *"the routine session's own identity deploys"* and its implied converse is
+that an overridden one does not. The converse is now false on one occasion, with
+the same email as the occasion where it was true — so **whatever Vercel is
+judging is not simply whether an author was set.** The difference between
+#376 and #483 is not in this repository and this lane cannot see it: a Vercel
+project setting, a change in how an unverifiable author is treated, or
+something about the account the commits were pushed under.
+
+So the honest standing of the rule is: **keep it, and stop explaining it.** It
+is a rule against a thing that has cost this lane two previews and has never
+once bought it anything.
+
+**The remedy is the one the 24 September entry already named and this run is
+the argument for it.** A `pre-push` hook comparing the head commit's author
+against the session's configured identity would make this impossible rather than
+remembered. It is repository tooling, it has to be installed by whoever runs
+`pnpm install`, and it is now the third occurrence of a fault that a
+three-line hook would have made unreachable. **Offered to `Loom daily build`
+and the maintainer rather than taken**, for the reason that entry gives: a
+surface lane should not install a hook that every other lane's commits then
+have to satisfy.
+
+**Not rewritten.** The three commits stand as they are. A force-push would
+churn a pull request whose body links four screenshots by commit, to fix
+something that did not break, and the rule's purpose — the preview — is already
+served. The commits are wrong and they are recorded as wrong, which is the
+cheaper of the two honest options.

@@ -13,6 +13,7 @@ import type {
   EpisodeResolutionKind,
   FailureStage,
 } from "@jam-overture/loom/telemetry"
+import type { PartStanding } from "@jam-overture/loom/signals"
 import {
   describeAddressing,
   type Addressing,
@@ -961,3 +962,63 @@ const UNREADABLE_QUEUES: Readonly<Record<HoldError["code"], string>> = {
 }
 
 export const unreadableQueue = (code: HoldError["code"]): string => UNREADABLE_QUEUES[code]
+
+/**
+ * What a window of counters says about one part of a page, in a person's words.
+ *
+ * ## The one state this table exists for
+ *
+ * Every other reading on `/portal/readers` is arithmetic over rows that exist,
+ * and that is a ceiling rather than a limitation: **a part nobody got to has no
+ * row at all.** So the strongest sentence a counter-reading screen could say was
+ * *"fewest people got as far as the footer"* — picked from among the parts that
+ * did report — and *"nobody got to the footer"* was unsayable, because absence
+ * is only a measurement once something says which parts there were.
+ *
+ * `pageReadingOf` is that something: it joins a window to the tree the window
+ * was filed against, so the parts are the page's and not the counters'. Three
+ * answers come back and the third is the one that keeps the other two honest.
+ *
+ * ## Why `unknown` is not folded into `skipped`
+ *
+ * A page nobody opened is not a page everybody skipped, and the two want
+ * opposite things from a reader — *move this up* against *wait for some
+ * visits*. Folding them would be the plausible-false-number failure this lane
+ * has argued against since 14 September: the right shape, on a screen, about
+ * nothing.
+ *
+ * It is also the answer for the rarer, sharper case the runtime's own note
+ * names: a part that reported *something* and never reported coming into view.
+ * A press delegated to a band no view ever named means a reader plainly had it
+ * in front of them, and calling that skipped would be a lie in the direction
+ * nobody checks.
+ *
+ * ## Tones
+ *
+ * `read` is the state nothing needs doing about, `skipped` is the only one of
+ * the three a person can act on this afternoon, and `unknown` is the record
+ * declining to answer — which is `inapplicable` rather than a quieter shade of
+ * a verdict, because no verdict was reached.
+ */
+export const PART_STANDINGS_PLAIN: Readonly<Record<PartStanding, PlainState>> = {
+  read: {
+    label: "People saw it",
+    meaning: "At least one visit reported this part coming onto the screen.",
+    technical: "read",
+    tone: "applied",
+  },
+  skipped: {
+    label: "Nobody got to it",
+    meaning: "It was on the page, and nobody who visited ever had it on screen.",
+    technical: "skipped",
+    tone: "awaiting",
+  },
+  unknown: {
+    label: "Can’t say yet",
+    meaning: "Nothing came back that could answer either way.",
+    technical: "unknown",
+    tone: "inapplicable",
+  },
+}
+
+export const plainStanding = (standing: PartStanding): PlainState => PART_STANDINGS_PLAIN[standing]
