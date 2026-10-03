@@ -6,13 +6,29 @@
       "path": "/demo",
       "out": "2026-10-03-demo-the-proof-above-the-fold-after-wide",
       "viewport": "wide",
-      "waitFor": "#ask"
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
     },
     {
       "path": "/demo",
       "out": "2026-10-03-demo-the-proof-above-the-fold-after-phone",
       "viewport": "phone",
-      "waitFor": "#ask"
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
     },
     {
       "path": "/demo",
@@ -22,7 +38,15 @@
         "height": 465,
         "label": "embed"
       },
-      "waitFor": "#ask"
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
     },
     {
       "path": "/demo",
