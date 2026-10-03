@@ -4,6 +4,14 @@
 **Date:** 2026-10-03
 **Section:** §4c (reader signals)
 
+> **Renumbered on 2026-10-03**, from 0217, when the branch that carried it
+> (#489) was merged. The branch took 0217 deliberately, to leave 0215 for the two
+> open claims on it — but #487 had claimed 0217 as well, from the primitives
+> lane, and merged first, so `main` holds that number for *choosing a two-region
+> primitive is itself an insert decision*. Two records sharing a number is fatal
+> (0097). This record was written on 3 October and nothing in it changed but its
+> number; references on the branch were updated with it.
+
 ## Context
 
 Every number the portal will show about readers is a rate: how many of the page
