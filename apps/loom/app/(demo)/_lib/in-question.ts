@@ -94,6 +94,37 @@ export type PartInQuestion = {
    * band is not on the stage at all.
    */
   readonly where: "question" | "ask" | "kept"
+  /**
+   * The same sentence in the imperative, for the one moment this excerpt
+   * arrives **shut** — and present exactly when it does.
+   *
+   * On the arrival screen the band under the green button was the largest
+   * thing a stranger met: 358px of a re-rendered stat grid, measured on a
+   * production build at 1280×900 in an 857px scroller, against a rail whose
+   * whole content is 1,277px. The four asks that carry the only evidence this
+   * surface has that the governing is real — *GOES AHEAD*, *ASKS YOU FIRST*,
+   * computed and printed per row — began at 797 and the screen ended at 857.
+   * The claim was above the fold and its proof was three pixels under it.
+   *
+   * So the ask's excerpt is a disclosure, and this is what its control says.
+   * **It is a field rather than a string typed into the markup** for the
+   * reason `where` is one: it is derived from the same operation `lead` is
+   * derived from, by the same function, so the words on the shut control and
+   * the words inside it cannot come to describe different changes. A summary
+   * reading *Show what would come off the page* over an excerpt of something
+   * being **added** is a sentence no test would fail on and no type would
+   * catch, and it is exactly the drift `WEIGHED_QUESTIONS` was made a shared
+   * constant to prevent one surface up.
+   *
+   * **Its absence is how the other two moments say they are not folded.** A
+   * question's excerpt stands open beside the two buttons it is waiting on,
+   * and a kept excerpt is the only place on a wide screen the removed content
+   * exists at all (`globals.css` argues both). Neither is a thing to put
+   * behind a click, so neither gets one — and `part-in-question.tsx` branches
+   * on this field rather than on `where`, which is what keeps a disclosure
+   * from ever rendering with nothing to say on its control.
+   */
+  readonly invitation?: string
 }
 
 const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
@@ -121,6 +152,34 @@ const LEADS: Readonly<Record<TreeOperation["op"], string>> = {
  * case where drawing it is drawing something the record alone is holding.
  */
 const KEPT_LEAD = "This is what came off the page. The record is still holding it."
+
+/**
+ * And the same four, in the imperative, for the control a shut excerpt wears.
+ *
+ * **One table and not a reworded copy of `LEADS`.** The two are read off the
+ * same operation in the same return below, so the only way they can disagree
+ * about what the excerpt is of is if somebody edits one of these tables and
+ * not the other — which is a visible edit in a file of four lines, rather than
+ * a string typed into a component three directories away that nothing will
+ * ever compare against anything.
+ *
+ * **Imperative, and that is the whole difference.** `LEADS` is declarative
+ * because it stands *over* the thing it names — *This is what would come off
+ * the page*, with the band directly under it. A shut disclosure has nothing
+ * under it, so the same words would be pointing at a gap. *Show what would
+ * come off the page* is the same fact as an offer, which is what a control
+ * has to be.
+ *
+ * No capital-letter vocabulary and no full stop: these are labels on a
+ * control, and they are held to `in-question.test.ts`'s sweep over the words a
+ * stranger has not earned yet exactly as the leads are.
+ */
+const INVITATIONS: Readonly<Record<TreeOperation["op"], string>> = {
+  insert: "Show what would be added",
+  remove: "Show what would come off the page",
+  move: "Show the part that would move",
+  configure: "Show the part that would change",
+}
 
 /**
  * The node an operation is about, read against the tree on the stage — except
@@ -228,5 +287,12 @@ export const partFromOperations = (
     tree: { ...tree, root: subject },
     lead: where === "kept" ? KEPT_LEAD : LEADS[operation.op],
     where,
+    /*
+     * The ask's, and only the ask's. Both strings come off `operation.op` on
+     * this one line, which is the property `invitation`'s own comment is for:
+     * the control and the thing behind it are read from one operation by one
+     * function, so a later edit cannot leave them describing different changes.
+     */
+    ...(where === "ask" ? { invitation: INVITATIONS[operation.op] } : {}),
   }
 }

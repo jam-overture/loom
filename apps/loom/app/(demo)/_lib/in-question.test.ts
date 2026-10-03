@@ -251,3 +251,124 @@ describe("the part a change is still holding", () => {
     }
   })
 })
+
+/**
+ * The words on the control of the one excerpt that arrives shut.
+ *
+ * The arrival screen's excerpt is 358px in an 857px scroller and the four asks
+ * carrying the Gate's verdict about themselves began three pixels under the
+ * fold, so it is folded (`part-in-question.tsx`). What a disclosure needs that
+ * a section does not is a sentence on the outside, and the failure this file
+ * exists to prevent is that sentence and the band behind it coming to describe
+ * different changes: the control says *Show what would come off the page* and
+ * opens onto something being added, with every type satisfied and nothing red.
+ *
+ * So the assertions below are mostly about **one operation producing both
+ * strings**, which is the only property that makes that failure unreachable.
+ */
+describe("the sentence a shut excerpt wears", () => {
+  /**
+   * Present on the ask and on neither of the others, and that is how the
+   * component chooses its shape: a question's excerpt stands open beside the
+   * two buttons it is waiting on, and a kept excerpt is the only place a wide
+   * screen has the removed content at all.
+   */
+  it("is on the moment that is folded and on no other", () => {
+    const page = tree()
+    const operations = deltaFor("trim", page).operations
+
+    expect(partFromOperations(page, operations, "ask")?.invitation).toBeDefined()
+    expect(partFromOperations(page, operations, "question")?.invitation).toBeUndefined()
+  })
+
+  /**
+   * The kept moment reads against a tree the band has come off, because that is
+   * the only tree it answers for — and it is still not folded.
+   */
+  it("is absent from the excerpt a landed change is holding", () => {
+    const page = tree()
+    const stats = findNode(page.root, statsId(page))
+    const without: LoomTree = {
+      ...page,
+      root: { ...page.root, children: page.root.children.filter((child) => child.id !== stats!.id) },
+    }
+
+    const part = partFromOperations(
+      without,
+      [{ op: "insert", parentId: without.root.id, index: 0, node: stats! }],
+      "kept"
+    )
+
+    expect(part?.where).toBe("kept")
+    expect(part?.invitation).toBeUndefined()
+  })
+
+  /**
+   * **The one that matters**: the control and the band behind it are read off
+   * the same operation, so there is no operation for which the two disagree.
+   *
+   * Driven through every operation a preset on this table produces rather than
+   * through a hand-written list, for the reason this file opens with — and the
+   * pairing is asserted as a pairing. A test that checked four invitation
+   * strings against four literals would pass just as happily with the tables
+   * crossed.
+   */
+  it("names the same change the band behind it is of", () => {
+    const page = tree()
+
+    const pairs = ["trim", "band", "promote"].map((id) => {
+      const operations = deltaFor(id, page).operations
+      const part = partFromOperations(page, operations, "ask")
+
+      return { op: operations[0]!.op, lead: part?.lead ?? "", invitation: part?.invitation ?? "" }
+    })
+
+    expect(pairs.map((pair) => pair.op)).toEqual(["remove", "insert", "move"])
+
+    for (const pair of pairs) {
+      expect(pair.lead).not.toBe("")
+      expect(pair.invitation).not.toBe("")
+
+      /*
+       * The two sentences are one fact said twice, so each one's distinctive
+       * words are in the other. *This is what would come off the page* and
+       * *Show what would come off the page* share everything after the verb;
+       * a crossed table breaks that on three of the four rows at once.
+       */
+      const tail = pair.lead.toLowerCase().replace(/^this is (what|the part that) /, "").replace(/\.$/, "")
+
+      expect(pair.invitation.toLowerCase(), `${pair.invitation} vs ${pair.lead}`).toContain(tail)
+    }
+  })
+
+  /**
+   * And it is held to the same vocabulary sweep the leads are. A control is the
+   * one string on this surface a stranger reads *before* a record has attached
+   * a word to anything, so it is the last place a registered type belongs.
+   *
+   * Imperative rather than conditional, which is the difference from the lead's
+   * own assertion: a shut disclosure has nothing under it for *this is* to
+   * point at.
+   */
+  it("offers rather than announces, in words a stranger has already been given", () => {
+    const page = tree()
+    const invitations = ["trim", "band", "promote"].map(
+      (id) => partFromOperations(page, deltaFor(id, page).operations, "ask")?.invitation ?? ""
+    )
+
+    expect(invitations.filter((invitation) => invitation === "")).toEqual([])
+
+    for (const invitation of invitations) {
+      const words = invitation.toLowerCase()
+
+      for (const term of ["proposal", "delta", "revision", "policy", "primitive", "tree", "gate", "node"]) {
+        expect(words, `${invitation} says ${term}`).not.toContain(term)
+      }
+
+      expect(words.startsWith("show "), invitation).toBe(true)
+      expect(words).toContain("would")
+      /** No full stop: it is a label on a control rather than a sentence. */
+      expect(invitation.endsWith("."), invitation).toBe(false)
+    }
+  })
+})
