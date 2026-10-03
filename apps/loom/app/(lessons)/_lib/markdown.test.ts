@@ -90,4 +90,35 @@ describe("blocks", () => {
       { kind: "heading", level: 3, text: "Whose capability is it, anyway?" },
     ])
   })
+
+  it("reads a comment as a note rather than as the paragraph it used to be", () => {
+    expect(parseBlocks("<!-- moves: when loom.feed declares one -->")).toEqual([
+      { kind: "note", text: "moves: when loom.feed declares one" },
+    ])
+  })
+
+  it("joins a comment wrapped over several lines, which is how a lesson writes one", () => {
+    const [block] = parseBlocks("<!-- moves: when a primitive gains a prop\n     nothing reads -->")
+
+    expect(block).toEqual({ kind: "note", text: "moves: when a primitive gains a prop nothing reads" })
+  })
+
+  it("ends the paragraph above a comment at the comment", () => {
+    expect(parseBlocks("Predict the fourth line.\n<!-- moves: later -->").map((each) => each.kind)).toEqual([
+      "paragraph",
+      "note",
+    ])
+  })
+
+  it("leaves a comment inside a fence alone, where it is the code", () => {
+    expect(parseBlocks("```html\n<!-- a comment in the output -->\n```")).toEqual([
+      { kind: "code", language: "html", code: "<!-- a comment in the output -->" },
+    ])
+  })
+
+  it("takes an unterminated comment to be the rest of the file, as it does an open fence", () => {
+    expect(parseBlocks("<!-- moves: and then nothing\nA paragraph swallowed by it.")).toEqual([
+      { kind: "note", text: "moves: and then nothing A paragraph swallowed by it." },
+    ])
+  })
 })

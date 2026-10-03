@@ -801,6 +801,16 @@ describe("C", () => {
 })
 ```
 
+<!-- moves: when a primitive in src/primitives/ gains a prop that nothing reads
+     unless an answer arrives. This mark covers the fourth line and the rows
+     under it, which are what the lesson is about, so a new member of that set
+     is news rather than drift and the paragraph below the fence says so to the
+     reader. Loom primitives owns the change that would do it. The three zeros
+     above are the control and move for nobody: if one of those is what drifted,
+     this mark does not cover it and something is wrong. They are in the same
+     fence because they are one comparison and the prose names "the fourth
+     line". -->
+
 ```
   declared slots no component placed:      0
   declared behaviours no component placed: 0

@@ -198,6 +198,15 @@ const exerciseUnits = (
 
   for (const block of blocks) {
     /**
+     * A note is a message to whoever maintains the lesson and is not a unit of
+     * anything. Skipped here rather than relied on to render as nothing: it
+     * would otherwise land in `held`, and a `held` holding only a note flushes
+     * a prose unit whose fragment is empty — a gap on the page where the author
+     * wrote an invisible line.
+     */
+    if (block.kind === "note") continue
+
+    /**
      * A fence with no language on it, inside Try it, is the output the lesson
      * printed for itself — every one of the fifty-odd in lessons 12 to 20 is,
      * and they all sit a line or two under the sentence asking the reader to

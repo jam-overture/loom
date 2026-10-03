@@ -74,16 +74,23 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 147 since lesson 33 (shortfall), which added seven — one per exercise, each a
+ * 148 since 3 October, when lesson 33's exercise G became two blocks rather than
+ * one. A mark governs a whole fence, so a fence carrying a mark has to be the
+ * size of the thing that moves: six of those ten lines are two components
+ * answering and move for nobody, and leaving them under the mark would have had
+ * a real drift in them reported as the expected one. Lesson 31's exercise F
+ * split for the same kind of reason, before there were marks.
+ *
+ * It was 147 since lesson 33 (shortfall), which added seven — one per exercise, each a
  * whole transcript in a single block. Four of the seven print a *count of calls*
  * rather than a value, because the lesson's subject is when a party runs rather
  * than what it knows: exercise C's `times the component pushed: 0` is the whole
  * argument of the lesson and is a number about the clock. Exercise G's last three
  * lines read the starter registry at run time — which primitives read a binding and
  * which have declared what they could not show — rather than printing a number this
- * lane typed, and they are expected to change when `Loom primitives` closes
- * `loom.feed`'s half, which is filed for that lane. That red is the lesson's claim
- * moving, on lesson 29's exercise C precedent, and not drift.
+ * lane typed. That block carries a `moves:` mark, and the sentence that used to be
+ * here is on it: a comment on a constant in a passing assertion was the wrong place
+ * to explain a red somebody else was going to get.
  *
  * It was 140 since lesson 32 (layout), which added seven — one per exercise, each a whole
  * transcript in a single block. Three of the seven print booleans rather than
@@ -112,10 +119,9 @@ const ANSWERS = "Answers"
  * diagnostic and is marked `text` rather than left plain, on lesson 25's
  * precedent: no program in this course prints a compiler error, so a plain fence
  * there would be a transcript nothing could match. That lesson's exercise C is
- * also the one block in the course that is deliberately a second copy of a fact
- * about `src/primitives/` — the set of primitives with a conditionally-read prop —
- * and is expected to go red when a primitive joins it, which is the point of the
- * lesson rather than a cost it forgot to count.
+ * also the first block in the course that was deliberately a second copy of a
+ * fact about `src/primitives/` — the set of primitives with a conditionally-read
+ * prop — and it carries a `moves:` mark for the reason the other one does.
  *
  * It was 111 after lesson 28 (corroboration), which added nine — seven exercises, two
  * of which split their output across two fences so that the half about the
@@ -148,7 +154,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 147
+const RECOGNISED_TRANSCRIPTS = 148
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.
@@ -215,6 +221,70 @@ const ANNOTATED: Readonly<Record<string, number>> = {
  * Applying it to Try it as well changed nothing there: the same 102 blocks are
  * recognised and none of them drifted before or after. One rule, two sections.
  */
+/**
+ * A fence that has signed up to go red, and the sentence it says when it does.
+ *
+ * Two blocks in this course are **deliberately a second copy of a fact about
+ * `src/`**, and both are the point of the lesson they are in rather than a cost
+ * it forgot to count. Lesson 29's exercise C prints the set of primitives with a
+ * declared prop nothing reads, which is that lesson's entire subject; lesson 33's
+ * exercise G prints which primitives have declared what they could not show,
+ * which is `(none)` and is the state of play rather than a conclusion. Both will
+ * go red the day another lane writes the thing the lesson is about, and when they
+ * do, **the red is the lesson's claim following the code, not drift.** The
+ * remedy is to re-run the exercise and paste in what it prints now.
+ *
+ * Until this existed that distinction was written in two places, and neither was
+ * the one a tripping lane would read. Lesson 29 says it in a paragraph under its
+ * own fence — which is prose the check cannot see — and lesson 33's was a
+ * sentence in the doc comment on `RECOGNISED_TRANSCRIPTS` below. That comment
+ * sits on a **passing** assertion. Nobody reads the documentation of a constant
+ * in a test that went green; what they read is the message of the test that went
+ * red, and the message was a bare array of strings.
+ *
+ * So the declaration moves onto the block, as an HTML comment on the line above
+ * the fence:
+ *
+ * ```
+ * <!-- moves: when `Loom primitives` gives loom.feed an `unshown` declaration (0206) -->
+ * ```
+ *
+ * It is invisible in both renderings of the course — GitHub does not draw an HTML
+ * comment and neither does `/lessons` — so it is a message between maintainers
+ * that costs the reader nothing. It travels with the block: moving the fence to
+ * another lesson or deleting it takes the mark too, which is the thing a record
+ * in this file keyed by filename could not have done.
+ *
+ * **It never makes anything pass.** A marked fence that has drifted still fails;
+ * what changes is that the failure leads with the author's own sentence about
+ * what would do this and what to do about it. An exemption here would be the one
+ * change to this file that could make the course less true, since the fences
+ * most worth marking are the ones most likely to be stale.
+ *
+ * **And it governs a fence, not a line**, which is a constraint on the fence
+ * rather than a limitation to live with. A mark over a block whose other lines
+ * are ordinary claims would have a real drift in one of them reported as the
+ * expected one, which is worse than no mark at all — so a fence carrying a mark
+ * has to be the size of the thing that moves, and lesson 33's exercise G was
+ * split in two on the day this was written for exactly that reason. Where a
+ * fence cannot be cut that finely — lesson 29's prints three control zeros and
+ * the census in one comparison, and the prose names *the fourth line* — the mark
+ * says which lines it covers and the failure message puts the judgement back on
+ * whoever is reading it rather than promising that the red is harmless.
+ *
+ * And it buys one thing a comment never could. The heuristic above reads a plain
+ * fence as a transcript only if at least one of its lines appears in the output,
+ * so a transcript whose every line has moved looks like an illustration and is
+ * skipped **in silence** — the known blind spot, currently survivable only
+ * because the recognised count is pinned, which reports it as an off-by-one on a
+ * number rather than as a lesson that has stopped being true. A marked fence is
+ * an author stating that this block *is* a transcript, and the fences carrying a
+ * mark are precisely the ones whose whole content can turn over at once. So a
+ * marked fence that matches nothing is a failure naming the lesson, instead of a
+ * decrement nobody can read.
+ */
+const MOVES = /^moves:\s*(\S.*)$/
+
 const printable = (line: string): string =>
   line.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/ {2,}/g, " ").trim()
 
@@ -224,32 +294,81 @@ const linesOf = (block: string): readonly string[] =>
     .map(printable)
     .filter((line) => line !== "")
 
-type Comparison = { readonly recognised: number; readonly drifted: readonly string[] }
+/** One marked fence, and whichever of its lines the run did not produce. */
+type Movement = { readonly moves: string; readonly lines: readonly string[] }
+
+type Comparison = {
+  readonly recognised: number
+  /** Lines that drifted in a fence which said nothing about moving. */
+  readonly drifted: readonly string[]
+  /** The same, in the fences that did say so. Separated for the message, not for the verdict. */
+  readonly moved: readonly Movement[]
+  /** Marked fences that matched nothing at all, which the heuristic would otherwise pass over. */
+  readonly unmatched: readonly Movement[]
+}
+
+/** An untagged fence, and the mark governing it if it has one. */
+type Recorded = {
+  readonly block: Extract<Block, { kind: "code" }>
+  readonly moves: string | undefined
+}
+
+/**
+ * The untagged fences of a section, each with the mark above it if it has one.
+ *
+ * A mark governs the fence **directly** under it and nothing else: any other
+ * block between the two clears it, so a note left behind by an edit stops
+ * applying to whatever moved up into its place rather than silently adopting
+ * it. Where it governs nothing at all, the describe at the foot of this file
+ * says so — a declaration that reaches nothing is this course's own lesson 23,
+ * and leaving one unread here would be teaching it and not doing it.
+ */
+const recordedIn = (blocks: readonly Block[]): readonly Recorded[] => {
+  const recorded: Recorded[] = []
+  let moves: string | undefined
+
+  for (const block of blocks) {
+    if (block.kind === "note") {
+      moves = MOVES.exec(block.text)?.[1]?.trim()
+      continue
+    }
+
+    if (block.kind === "code" && block.language === undefined) recorded.push({ block, moves })
+
+    moves = undefined
+  }
+
+  return recorded
+}
 
 const compare = (blocks: readonly Block[], printed: readonly string[]): Comparison => {
   const shown = (line: string): boolean => printed.some((one) => one === line || one.includes(line))
 
-  const recorded = blocks.filter(
-    (block): block is Extract<Block, { kind: "code" }> =>
-      block.kind === "code" && block.language === undefined
-  )
-
   let recognised = 0
   const drifted: string[] = []
+  const moved: Movement[] = []
+  const unmatched: Movement[] = []
 
-  for (const block of recorded) {
+  for (const { block, moves } of recordedIn(blocks)) {
     const lines = linesOf(block.code)
 
-    if (lines.length === 0 || !lines.some(shown)) continue
+    if (lines.length === 0) continue
+
+    if (!lines.some(shown)) {
+      if (moves !== undefined) unmatched.push({ moves, lines })
+      continue
+    }
 
     recognised += 1
 
-    for (const line of lines) {
-      if (!shown(line)) drifted.push(line)
-    }
+    const off = lines.filter((line) => !shown(line))
+
+    if (off.length === 0) continue
+    if (moves === undefined) drifted.push(...off)
+    else moved.push({ moves, lines: off })
   }
 
-  return { recognised, drifted }
+  return { recognised, drifted, moved, unmatched }
 }
 
 const transcriptsIn = async (
@@ -260,9 +379,9 @@ const transcriptsIn = async (
   const { run } = await runExercises(exercises)
 
   if (run.kind === "failed") {
-    const failed = { recognised: 0, drifted: [run.message] }
+    const nothing: Comparison = { recognised: 0, drifted: [], moved: [], unmatched: [] }
 
-    return { tryIt: failed, answers: { recognised: 0, drifted: [] } }
+    return { tryIt: { ...nothing, drifted: [run.message] }, answers: nothing }
   }
 
   const printed = run.outputs
@@ -276,6 +395,13 @@ const transcriptsIn = async (
     answers: compare(section(doc, ANSWERS)?.blocks ?? [], printed),
   }
 }
+
+const listed = (movements: readonly Movement[]): string =>
+  movements
+    .map(({ moves, lines }) =>
+      [`  <!-- moves: ${moves} -->`, ...lines.map((line) => `        ${line}`)].join("\n")
+    )
+    .join("\n")
 
 describe("what a lesson says its exercises print", () => {
   let underTryIt = 0
@@ -292,7 +418,41 @@ describe("what a lesson says its exercises print", () => {
       underTryIt += tryIt.recognised
       underAnswers += answers.recognised
 
+      /**
+       * Three verdicts, in the order a reader of the failure wants them.
+       *
+       * A marked fence that matched **nothing** comes first: it is a whole
+       * transcript turned over at once, it is the case the recognised count
+       * would otherwise report as an off-by-one, and it is the one the mark
+       * exists to make legible. Unmarked drift is second, because a lesson
+       * saying something untrue it never warned about is the alarming kind.
+       * Marked drift is last and is the ordinary one — a line of a census
+       * moving, with the author's own sentence attached saying so.
+       *
+       * A lesson with two kinds at once reports the first and the rest on the
+       * next run. That is accepted: each is fixed by the same act, which is
+       * re-running the exercises and pasting in what they printed.
+       */
+      expect(
+        tryIt.unmatched,
+        `${file}: a fence marked "moves:" matched nothing these exercises printed, so the ` +
+          `comparison passed over it as an illustration. Either every line of it has moved at ` +
+          `once — which is what the mark is for, and what it is here to stop happening in ` +
+          `silence — or the mark is on an illustration and belongs on the transcript instead.\n` +
+          listed(tryIt.unmatched)
+      ).toEqual([])
+
       expect(tryIt.drifted).toEqual([])
+
+      expect(
+        tryIt.moved,
+        `${file}: a fence marked "moves:" has drifted. A mark governs the whole fence and ` +
+          `not one line of it, so read what it predicted against what moved: if these are ` +
+          `that, re-run the exercise and paste in what it prints now, and nothing is wrong ` +
+          `with src/. If they are not, this is ordinary drift and the mark does not cover ` +
+          `it.\n` +
+          listed(tryIt.moved)
+      ).toEqual([])
 
       const allowed = ANNOTATED[file] ?? 0
 
@@ -315,5 +475,102 @@ describe("what a lesson says its exercises print", () => {
 
   it("still recognises as many answer transcripts as it did when this was written", () => {
     expect(underAnswers).toBe(RECOGNISED_ANSWERS)
+  })
+})
+
+/**
+ * Where a note is allowed to be, and what it is allowed to say.
+ *
+ * The parser will accept an HTML comment anywhere in a lesson and this surface
+ * draws nothing for one wherever it lands. That is the hazard: a construct
+ * invisible in both renderings is a construct whose mistakes are invisible too,
+ * and the whole value of the mark is that a lane which trips a red test can
+ * trust what it says. A mark two blocks above the fence, a mark misspelled
+ * `moves :`, a mark left behind by an edit that deleted the exercise under it —
+ * each of those is a sentence that reads as a live declaration and governs
+ * nothing, and none of them would otherwise fail anything.
+ *
+ * So the vocabulary is closed and it is held here. One form of note exists; it
+ * reads inside Try it and nowhere else, because Try it is the only section this
+ * file compares and a mark anywhere else would be read by nobody; and it governs
+ * the untagged fence directly beneath it, because that is what `recordedIn`
+ * implements and a convention nothing enforces is a comment with extra steps.
+ */
+describe("the marks on a lesson's transcripts", () => {
+  type Misplaced = { readonly where: string; readonly text: string; readonly why: string }
+
+  const misplacedIn = (file: string): readonly Misplaced[] => {
+    const doc = readLesson(file)
+    const wrong: Misplaced[] = []
+
+    const walk = (where: string, blocks: readonly Block[], nested: boolean): void => {
+      blocks.forEach((block, index) => {
+        if (block.kind === "quote") {
+          walk(where, block.blocks, true)
+          return
+        }
+
+        if (block.kind !== "note") return
+
+        const say = (why: string): number => wrong.push({ where, text: block.text, why })
+
+        if (nested) return void say("a note inside a blockquote is read by nothing")
+        if (where !== TRY_IT) return void say(`a note is only read under ${TRY_IT}`)
+        if (MOVES.exec(block.text) === null) {
+          return void say('the one note this course reads opens "moves: " and says what moves it')
+        }
+
+        const under = blocks[index + 1]
+
+        if (under?.kind !== "code" || under.language !== undefined) {
+          say("a moves: mark governs the untagged fence directly under it, and there is none there")
+        }
+      })
+    }
+
+    walk("the front matter", doc.front, false)
+    for (const each of doc.sections) walk(each.title, each.blocks, false)
+
+    return wrong
+  }
+
+  for (const entry of WRITTEN_LESSONS) {
+    if (entry.file === undefined) continue
+
+    const file = entry.file as string
+
+    it(`each govern a transcript in lesson ${entry.number}`, () => {
+      const wrong = misplacedIn(file)
+
+      expect(
+        wrong,
+        `${file}: a note in this lesson is not a mark this file reads, so it is a sentence ` +
+          `nothing acts on. ${JSON.stringify(wrong, null, 2)}`
+      ).toEqual([])
+    })
+  }
+
+  /**
+   * And the two that exist, by name.
+   *
+   * Pinned for the reason everything else here is pinned: a mark removed is a
+   * fence that goes back to reporting its red as drift, which is a worse message
+   * and a true one, so nothing else in this file would notice. Both of these are
+   * waiting on the same lane, and if a third ever arrives it is worth asking
+   * whether a course that holds three second copies of `src/primitives/` has one
+   * second copy too many.
+   */
+  it("are on the two fences that have signed up for one", () => {
+    const marked = WRITTEN_LESSONS.flatMap((entry) => {
+      if (entry.file === undefined) return []
+
+      const blocks = section(readLesson(entry.file), TRY_IT)?.blocks ?? []
+
+      return recordedIn(blocks)
+        .filter((recorded) => recorded.moves !== undefined)
+        .map(() => entry.number)
+    })
+
+    expect(marked).toEqual([29, 33])
   })
 })
