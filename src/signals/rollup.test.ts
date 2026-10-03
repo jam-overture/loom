@@ -31,7 +31,13 @@ const tallyFor = (rollup: ReturnType<typeof rollUp>, name: string) =>
 
 describe("rollUp", () => {
   it("reads nothing as nothing", () => {
-    expect(rollUp([])).toMatchObject({ tallies: [], funnels: [], views: 0, uncorrelated: 0 })
+    expect(rollUp([])).toMatchObject({
+      tallies: [],
+      funnels: [],
+      views: 0,
+      appearances: [],
+      uncorrelated: 0,
+    })
   })
 
   it("sums occurrences across the views that produced them", () => {
@@ -88,6 +94,83 @@ describe("rollUp", () => {
     ])
 
     expect(rollup.tallies.map((tally) => tally.treeId).sort()).toEqual([OTHER_TREE, TREE].sort())
+  })
+
+  describe("appearances", () => {
+    /**
+     * The number the durable page-view counter keeps beside the exact count of
+     * page views that *began*, so that the difference between the two is the
+     * straddle 0147 bounds. It is per revision because that is how every
+     * durable counter here is keyed and because *before versus after a change*
+     * is the question the subtraction is worth doing for.
+     */
+    it("counts the window's page views, per revision", () => {
+      const rollup = rollUp([
+        batchOf([viewed("hero")], { view: viewKey(1) }),
+        batchOf([viewed("hero")], { view: viewKey(2) }),
+        batchOf([viewed("hero")], { revision: 2, view: viewKey(3) }),
+      ])
+
+      expect(rollup.appearances).toEqual([
+        { treeId: TREE, revision: 1, views: 2 },
+        { treeId: TREE, revision: 2, views: 1 },
+      ])
+    })
+
+    /**
+     * The same reader's batches are one appearance, exactly as they are one
+     * view. A rollup that counted deliveries here would report a drift the
+     * length of every visit and tell a deployment its counters were useless.
+     */
+    it("counts one reader's many batches once", () => {
+      const rollup = rollUp([
+        batchOf([dwelled("hero", 400)], { view: viewKey(1) }),
+        batchOf([dwelled("hero", 600)], { view: viewKey(1) }),
+      ])
+
+      expect(rollup.appearances).toEqual([{ treeId: TREE, revision: 1, views: 1 }])
+    })
+
+    it("keeps trees apart", () => {
+      const rollup = rollUp([
+        batchOf([viewed("hero")], { view: viewKey(1) }),
+        batchOf([viewed("hero")], { treeId: OTHER_TREE, view: viewKey(2) }),
+      ])
+
+      expect(rollup.appearances.map((one) => one.treeId).sort()).toEqual([OTHER_TREE, TREE].sort())
+    })
+
+    /**
+     * Absent rather than nought. A revision whose batches carried no key has
+     * nothing to compare against the openings, and a zero row would be read as
+     * *no readers* rather than as *nobody minted a key* — which is the
+     * distinction `uncorrelated` exists to keep.
+     */
+    it("leaves out a revision whose batches carried no view key", () => {
+      const rollup = rollUp([batchOf([viewed("hero")]), batchOf([viewed("hero")], { revision: 2 })])
+
+      expect(rollup.appearances).toEqual([])
+      expect(rollup.uncorrelated).toBe(2)
+    })
+
+    it("counts the correlated page views of a window that also held uncorrelated batches", () => {
+      const rollup = rollUp([batchOf([viewed("hero")]), batchOf([viewed("hero")], { view: viewKey(1) })])
+
+      expect(rollup.appearances).toEqual([{ treeId: TREE, revision: 1, views: 1 }])
+    })
+
+    /**
+     * An opening marker never reaches a rollup: the buffer drops it at the door
+     * (0214), and a rollup that could see it would be a second place deciding
+     * how many readers arrived. So a window of openings is a window of
+     * appearances like any other.
+     */
+    it("counts an opening batch as an appearance and nothing more", () => {
+      const rollup = rollUp([batchOf([viewed("hero")], { view: viewKey(1), first: true })])
+
+      expect(rollup.appearances).toEqual([{ treeId: TREE, revision: 1, views: 1 }])
+      expect(JSON.stringify(rollup)).not.toContain("first")
+    })
   })
 
   describe("batches with no view key", () => {

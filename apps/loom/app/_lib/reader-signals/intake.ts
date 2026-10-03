@@ -3,10 +3,12 @@ import {
   DEFAULT_INTAKE_POLICY,
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
+  memoryReaderTallyStore,
 } from "@jam-overture/loom/signals"
 import {
   postgresReaderRegionStore,
   postgresReaderSignalJournal,
+  postgresReaderTallyStore,
 } from "@jam-overture/loom/signals/postgres"
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
@@ -66,6 +68,17 @@ const build = (): Intake => {
       portalDatabase === undefined
         ? memoryReaderRegionStore()
         : postgresReaderRegionStore(portalDatabase),
+    /**
+     * The exact page-view counter, which is the counters store rather than a
+     * store of its own: the other side of the same row is written by
+     * `signals:collect` through the handle it already has, and a column nothing
+     * writes is a column nobody can subtract. The door is handed the one method
+     * it needs and cannot read a deployment's tallies through it.
+     */
+    openings:
+      portalDatabase === undefined
+        ? memoryReaderTallyStore()
+        : postgresReaderTallyStore(portalDatabase),
     /**
      * The runtime's own numbers, with nothing in the environment able to widen
      * them. A deployment that needs different limits is a finding and a

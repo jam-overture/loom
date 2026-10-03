@@ -6,6 +6,7 @@ import {
   DEFAULT_REGION_FLOOR,
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
+  memoryReaderTallyStore,
   type IntakePolicy,
   type ReaderRegionStore,
   type ReaderSignalJournal,
@@ -54,6 +55,7 @@ const intakeOf = (over: Partial<Intake> = {}): Intake => ({
   settings: settingsOf(),
   journal: memoryReaderSignalJournal(),
   regions: memoryReaderRegionStore(),
+  openings: memoryReaderTallyStore(),
   gate: createIntakeGate(policy),
   durable: true,
   subjectOf: () => Promise.resolve("a-caller"),
@@ -339,6 +341,47 @@ describe("where a delivery came from", () => {
 
     expect(response.status).toBe(204)
     expect(await bucketsIn(regions)).toEqual([])
+  })
+
+  /**
+   * And still counts how many readers there were. The two counters are written
+   * on the same walk and only one of them has a switch: a region is a fact about
+   * a reader and a page-view count is a fact about a revision, so a deployment
+   * that refuses the first keeps the denominator everything else is a rate
+   * against. A screen with no numerator is a screen; a screen with no
+   * denominator is a wrong number.
+   */
+  it("counts the reader arriving even when regions are off", async () => {
+    const openings = memoryReaderTallyStore()
+    const intake = intakeOf({
+      openings,
+      settings: settingsOf({
+        region: {
+          chosen: readRegionSwitch("off"),
+          header: DEFAULT_REGION_HEADER,
+          floor: { state: "default", floor: DEFAULT_REGION_FLOOR },
+        },
+      }),
+    })
+
+    await receiveReaderSignals(post(opening(), { [DEFAULT_REGION_HEADER]: "GB" }), intake)
+
+    const rows = await openings.pageViews()
+
+    expect(rows.ok && rows.value.map((row) => `${row.opened}:${row.appearances}`)).toEqual(["1:0"])
+  })
+
+  /** One reader is one page view however long they read, which is the whole of the marker. */
+  it("counts one page view however many batches a reader delivers", async () => {
+    const openings = memoryReaderTallyStore()
+    const intake = intakeOf({ openings })
+
+    await receiveReaderSignals(post(opening()), intake)
+    await receiveReaderSignals(post(batch()), intake)
+
+    const rows = await openings.pageViews()
+
+    expect(rows.ok && rows.value.map((row) => row.opened)).toEqual([1])
   })
 
   /**

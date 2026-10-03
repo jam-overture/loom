@@ -11,7 +11,7 @@ import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import { demoPageTree } from "./page-tree"
 import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById } from "./presets"
-import { whatItWillSay, willSayOf } from "./what-it-will-say"
+import { whatEachWillSay, whatItWillSay, willSayOf } from "./what-it-will-say"
 
 /**
  * What the first screen says will happen, and whether it can be wrong.
@@ -73,6 +73,23 @@ describe("willSayOf", () => {
 
     expect(said?.lead).toBe("Loom will not make this change.")
     expect(said?.moves).toBe(false)
+  })
+
+  /**
+   * And each of the three gets its **own** standing, which is the half of the
+   * verdict a row and a count read instead of the sentence.
+   *
+   * Asserted separately from the sentences because it is a separate failure:
+   * a standing that collapses two outcomes into one leaves every sentence on
+   * the screen correct and makes the arithmetic over them wrong. The refusal
+   * is the row that matters here — nothing on the shipped preset table reaches
+   * it against the starting page, so a defect in that one branch is invisible
+   * to every other test in this lane.
+   */
+  it("gives each of the three answers a standing of its own", () => {
+    expect(willSayOf(outcome("awaiting-confirmation", "medium"))?.standing).toBe("asks-you")
+    expect(willSayOf(outcome("applied", "low"))?.standing).toBe("on-its-own")
+    expect(willSayOf(outcome("rejected", "critical"))?.standing).toBe("refuses")
   })
 
   /**
@@ -197,5 +214,65 @@ describe("whatItWillSay", () => {
         systemClock
       )
     ).toBeUndefined()
+  })
+})
+
+describe("whatEachWillSay", () => {
+  const ALL = DEMO_PRESETS.map((preset) => preset.id)
+
+  /**
+   * The whole panel, answered, with no key, no store and no session — which is
+   * the property that lets the arrival screen state a split at all. A demo that
+   * only demonstrates when a key is present is not a demo.
+   */
+  it("reaches a verdict on every ask the panel is offering", async () => {
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+
+    expect(Object.keys(says).sort()).toEqual([...ALL].sort())
+    for (const id of ALL) expect(says[id]?.standing, id).toBeDefined()
+  })
+
+  /**
+   * And the answers are not all the same, which is the only reason any of this
+   * is worth printing. If every ask got the same verdict the sentence above the
+   * button would be a claim again.
+   */
+  it("gives the starting page two answers it goes ahead with and three it stops for", async () => {
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const standings = Object.values(says).map((said) => said.standing)
+
+    expect(standings.filter((standing) => standing === "on-its-own")).toHaveLength(2)
+    expect(standings.filter((standing) => standing === "asks-you")).toHaveLength(3)
+  })
+
+  /** It answers what it is handed and invents nothing about what it is not. */
+  it("answers only the asks on offer", async () => {
+    const says = await whatEachWillSay(
+      demoPageTree(),
+      ["palette", "trim"],
+      randomIdFactory,
+      systemClock
+    )
+
+    expect(Object.keys(says).sort()).toEqual(["palette", "trim"])
+  })
+
+  it("says nothing at all when nothing is on offer", async () => {
+    expect(await whatEachWillSay(demoPageTree(), [], randomIdFactory, systemClock)).toEqual({})
+  })
+
+  /**
+   * Five runs of the Gate on one render, and the tree they were run against is
+   * handed on untouched. `composeChange` computes a tree in the applied branch
+   * and this module drops it — once per ask now rather than once per render,
+   * which is the part of this change worth pinning rather than trusting.
+   */
+  it("leaves the tree exactly as it found it, after answering all five", async () => {
+    const tree = demoPageTree()
+    const before = JSON.stringify(tree)
+
+    await whatEachWillSay(tree, ALL, randomIdFactory, systemClock)
+
+    expect(JSON.stringify(tree)).toBe(before)
   })
 })

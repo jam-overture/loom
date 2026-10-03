@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm"
 import type { LoomDatabase } from "../store/database.js"
 
 /**
- * Creating the four reader-signal tables, with row level security switched on.
+ * Creating the five reader-signal tables, with row level security switched on.
  *
  * The same shape as the store's and the journal's migrations, and here for the
  * same reason: a DDL statement that lives in a document is a DDL statement a
@@ -18,7 +18,7 @@ import type { LoomDatabase } from "../store/database.js"
  */
 
 /**
- * The four tables, as statements a host can run.
+ * The five tables, as statements a host can run.
  *
  * One statement per entry for the same reason the store's DDL is a list: a
  * driver may refuse several commands in a single prepared statement, and
@@ -88,6 +88,15 @@ export const READER_SIGNALS_DDL: readonly string[] = [
     PRIMARY KEY (tree_id, revision, region)
   )`,
   `ALTER TABLE loom_reader_regions ENABLE ROW LEVEL SECURITY`,
+  `CREATE TABLE IF NOT EXISTS loom_reader_page_views (
+    tree_id text NOT NULL,
+    revision integer NOT NULL,
+    opened bigint NOT NULL DEFAULT 0,
+    appearances bigint NOT NULL DEFAULT 0,
+    updated_at timestamptz NOT NULL,
+    PRIMARY KEY (tree_id, revision)
+  )`,
+  `ALTER TABLE loom_reader_page_views ENABLE ROW LEVEL SECURITY`,
 ]
 
 /** Idempotent, so running it against a populated database is a no-op. */

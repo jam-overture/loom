@@ -1,8 +1,9 @@
 import type { ElementNode, LoomTree } from "@jam-overture/loom"
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import { runsIn, wordsIn } from "./measure"
 import { treeFor } from "./render"
+import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
 import { SITE_ROUTES, type SiteRoute } from "./site"
 
 /**
@@ -329,5 +330,212 @@ describe("the site has a copy budget, and every part of it is inside one", () =>
     expect([...new Set(bands.map(({ route }) => route))].sort()).toEqual(
       [...SITE_ROUTES.map((route) => route.path)].sort()
     )
+  })
+})
+
+/**
+ * **And the half of the site this file could not see when it was written.**
+ *
+ * Every ceiling above is measured against `treeFor`, which is the page as it is
+ * *published*. The page a visitor is served is `pageTreeFor`, and on
+ * `/how-it-works` that page carries the record of whatever they asked for.
+ * Measured on the branch that added this section:
+ *
+ * | | as published | as served |
+ * | --- | --- | --- |
+ * | `/how-it-works` | 862 | **1,318** |
+ * | the site | 2,516 | **2,972** |
+ * | the widest band | 259 (*Questions*, on `/`) | **638** (*See it happen*) |
+ *
+ * So **456 words of this site had no ceiling over them at all**, including the
+ * band that is more than twice the number this file calls the most a band may
+ * carry. Nothing was over budget, because nothing was being counted: a budget
+ * that measures the published tree reports a 259-word widest band on a site
+ * that serves a 638-word one.
+ *
+ * It is the same oversight `voice.test.ts` carried and is recorded in
+ * `served.ts`, which is where the sweep lives now so that the next rule written
+ * in this lane inherits it instead of repeating it.
+ *
+ * ## Why the generated half gets its own numbers
+ *
+ * **Because they are a bound on a different thing, and raising one may not
+ * loosen the other.** The ceilings above bound what a writer may write. These
+ * bound what a *request* may add, and the length of that is a function of the
+ * change a visitor asked for: a request at the refusal floor fires five of the
+ * rules and the record names all five. Shortening it would mean truncating the
+ * record, which is the one thing a site whose whole argument is the record may
+ * never do.
+ *
+ * So the authored ceilings stay on the authored tree, where every word was
+ * chosen, and these say how much the machinery may add on top. The page and
+ * site ceilings are the exception and are deliberately *not* duplicated: a
+ * visitor reads one page, and what they read is the served one, so
+ * `MOST_WORDS_ON_A_PAGE` and `MOST_WORDS_ON_THE_SITE` are held over both
+ * readings at the same numbers. Neither was raised to do it — 1,318 against
+ * 1,500, and 2,972 against 3,300.
+ */
+
+/**
+ * The most a request may add to a page, over and above what it publishes.
+ *
+ * 600 against 456 measured, which is 76% used and so inside the binding clause
+ * above. It is stated as a *difference* rather than as a served total on
+ * purpose: a page that grew by 200 authored words and shrank its record by 200
+ * should move the authored figure and leave this one alone, and a served total
+ * would hide exactly that.
+ */
+const MOST_WORDS_A_REQUEST_ADDS = 600
+
+/**
+ * The most one band may carry once a request has been answered in it.
+ *
+ * 700 against the 638 measured, and it is larger than `MOST_WORDS_IN_A_BAND`
+ * because it is a bound on a different kind of reading. A 300-word band is as
+ * much as this site may ask of somebody scrolling past; *See it happen* is
+ * read by somebody who pressed a button in it and is waiting to see what
+ * happened, which is the one band on this site a visitor is reading on purpose.
+ *
+ * **It is the tightest ceiling in this file at 91% used**, and that is the
+ * right side to err on. The band is the site's whole argument and the thing a
+ * competitor cannot copy; it is also where every future rung, every extra
+ * factor and every new stage of the record will land, so a loose number here
+ * would be a number that never says anything.
+ */
+const MOST_WORDS_IN_AN_ANSWERED_BAND = 700
+
+const servedBandsOf = (page: ServedPage): readonly ElementNode[] =>
+  page.tree.root.children.filter((node): node is ElementNode => node.kind === "element")
+
+/** The widest this route publishes, which is what a request is measured on top of. */
+const publishedWidth = (route: SiteRoute): number =>
+  Math.max(...pagesOf(route).map((tree) => wordsIn(tree.root)))
+
+const addedBy = (page: ServedPage): number =>
+  wordsIn(page.tree.root) - publishedWidth(page.route)
+
+describe("what a request adds to a page is inside a budget too", () => {
+  let served: readonly ServedPage[] = []
+
+  beforeAll(async () => {
+    served = await servedPages()
+  })
+
+  /** The sweep says how much it looked at. Same clause, same reason. */
+  it("looked at every state this site can be served in", () => {
+    expect(served.length).toBe(SERVED_STATE_COUNT)
+    expect([...new Set(served.map(({ route }) => route.path))].sort()).toEqual(
+      [...SITE_ROUTES.map((route) => route.path)].sort()
+    )
+  })
+
+  it("no request turns a page into a longer page than the site may have", () => {
+    for (const page of served) {
+      expect(wordsIn(page.tree.root), `${page.route.path} (${page.state})`).toBeLessThanOrEqual(
+        MOST_WORDS_ON_A_PAGE
+      )
+    }
+  })
+
+  it("no request adds more to a page than the page was allowed to publish", () => {
+    for (const page of served) {
+      expect(addedBy(page), `${page.route.path} (${page.state})`).toBeLessThanOrEqual(
+        MOST_WORDS_A_REQUEST_ADDS
+      )
+    }
+  })
+
+  it("no band becomes a page once the request has been answered in it", () => {
+    for (const page of served) {
+      for (const band of servedBandsOf(page)) {
+        expect(
+          wordsIn(band),
+          `${page.route.path} (${page.state}) — ${band.type} ${String(band.props["eyebrow"] ?? band.id)}`
+        ).toBeLessThanOrEqual(MOST_WORDS_IN_AN_ANSWERED_BAND)
+      }
+    }
+  })
+
+  /**
+   * A cell and a plain band are held at the authored numbers on the served page
+   * as well, and that is not an oversight of the paragraph above.
+   *
+   * Those two ceilings bound *one thing a reader takes in at once* — a rung, a
+   * card, a band with no run in it — and a rung built from a record is still a
+   * rung somebody has to read in one go. What the record's length is free to do
+   * is add more rungs and more panels, which is the band and the page, not any
+   * one cell. Measured: the widest cell and the widest plain band are the same
+   * on both readings, 86 and 99, and both are authored copy on the front door.
+   */
+  it("no cell and no plain band grows past its authored ceiling", () => {
+    for (const page of served) {
+      for (const band of servedBandsOf(page)) {
+        const where = `${page.route.path} (${page.state}) — ${band.type}`
+
+        if (runsIn(band).length === 0) {
+          expect(wordsIn(band), where).toBeLessThanOrEqual(MOST_WORDS_IN_A_PLAIN_BAND)
+        }
+
+        for (const run of runsIn(band)) {
+          expect(
+            Math.max(...run.words),
+            `${where} — ${run.container} of ${run.cell} [${run.words.join(", ")}]`
+          ).toBeLessThanOrEqual(MOST_WORDS_IN_A_CELL)
+        }
+      }
+    }
+  })
+
+  it("the site is inside its budget in the state that says the most", () => {
+    const widest = Math.max(
+      ...DEPLOYMENTS.map((counting) =>
+        SITE_ROUTES.reduce((total, route) => {
+          const states = served.filter(
+            (page) => page.route.path === route.path && page.counting === counting
+          )
+
+          return total + Math.max(...states.map((page) => wordsIn(page.tree.root)))
+        }, 0)
+      )
+    )
+
+    expect(widest).toBeLessThanOrEqual(MOST_WORDS_ON_THE_SITE)
+    expect(widest).toBeGreaterThanOrEqual(FEWEST_WORDS_ON_THE_SITE)
+  })
+
+  /** Both new ceilings, held from below like the five above them. */
+  it("every ceiling here is one the site is actually near", () => {
+    const added = served.map(addedBy)
+    const bands = served.flatMap((page) => servedBandsOf(page).map((band) => wordsIn(band)))
+
+    const nearest: Readonly<Record<string, readonly [number, number]>> = {
+      "what a request adds": [Math.max(...added), MOST_WORDS_A_REQUEST_ADDS],
+      "an answered band": [Math.max(...bands), MOST_WORDS_IN_AN_ANSWERED_BAND],
+    }
+
+    for (const [what, [widest, ceiling]] of Object.entries(nearest)) {
+      expect(
+        widest / ceiling,
+        `${what}: widest is ${widest} against a ceiling of ${ceiling} — either the ceiling is too high to mean anything, or the copy it was set for is gone`
+      ).toBeGreaterThanOrEqual(A_CEILING_IS_BINDING_ABOVE)
+    }
+  })
+
+  /**
+   * And the states are genuinely different pages, which is what stops all of
+   * the above from being the published tree measured many times.
+   *
+   * The failure it guards is not a sweep over nothing but a sweep over the same
+   * thing: `servedPages` crossing six choices with two answers and two
+   * deployments is worth nothing if `pageTreeFor` ignored the lot, and the
+   * assertions here would all pass on three identical trees.
+   */
+  it("is looking at pages a request actually changed", () => {
+    const sizes = new Set(served.map((page) => wordsIn(page.tree.root)))
+
+    const added = served.map(addedBy)
+
+    expect(sizes.size).toBeGreaterThanOrEqual(6)
+    expect(Math.max(...added) - Math.min(...added)).toBeGreaterThan(100)
   })
 })

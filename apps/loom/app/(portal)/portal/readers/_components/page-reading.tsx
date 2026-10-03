@@ -16,9 +16,12 @@ import {
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
+import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
+
 import { CountedAgainst } from "./counted-against"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
+import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
 import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
 
 /**
@@ -72,11 +75,18 @@ export const PageReadingCard = ({
   reading,
   page,
   live,
+  skipping,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
   /** The revision of the page being served, or `undefined` if it could not be read. */
   readonly live: number | undefined
+  /**
+   * Which parts of the page nobody got to, or `undefined` when the counted
+   * version is not the one being served — in which case the question cannot be
+   * answered at all and the card says so.
+   */
+  readonly skipping: PageSkipping | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
@@ -105,14 +115,26 @@ export const PageReadingCard = ({
       <CountedAgainst reading={newest} standing={standing} />
 
       <ul className="flex flex-col gap-2 text-xs">
+        {/*
+         * **Scoped to the parts people reported on, and it used to claim the
+         * page.** Every figure in this list is read off rows, and a part nobody
+         * got to has no row — so *fewest people got as far as the opening line*
+         * was being printed directly above *nobody got to the other three
+         * parts*, which is a contradiction a reader meets before they have
+         * finished the card. It was invisible until the section below existed
+         * to disagree with it, and a screenshot is what found it.
+         *
+         * Nothing is removed and no number changes. What changes is that the
+         * sentence now says which parts it compared, which is what it always
+         * meant.
+         */}
         {highlights.fewestSaw === undefined ? (
           <li className="text-ink-muted">
-            Every part of this page was seen by about as many people as every other. Nothing
-            here is being scrolled past.
+            Every part people reported on was seen by about as many of them as every other.
           </li>
         ) : (
           <li className="text-ink">
-            Fewest people got as far as{" "}
+            Of the parts people reported on, fewest got as far as{" "}
             <PartName part={highlights.fewestSaw.name} /> —{" "}
             {outOfVisits(highlights.fewestSaw.reached, newest.views)}. If anything on this page
             is worth moving up, it is what sits above that.
@@ -157,6 +179,19 @@ export const PageReadingCard = ({
 
         {unplaced !== undefined && <UnplacedUseNote unplaced={unplaced} />}
       </ul>
+
+      {/*
+       * Before the comparison and after the highlights, which is reading order
+       * rather than an arrangement: *which parts did people get to* is a
+       * question about this version of the page, and *what changed since the
+       * last change* is a question about two. A reader who has not yet been
+       * told what happened on the page in front of them has nothing to compare.
+       */}
+      {skipping === undefined ? (
+        <SkippingUnavailable counted={newest.revision} live={live} />
+      ) : (
+        <WhatWasSkipped skipping={skipping} />
+      )}
 
       <SinceTheChange comparison={comparison} standing={standing} />
 

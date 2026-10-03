@@ -181,3 +181,63 @@ export const RESERVED_VOCABULARY: readonly string[] = [
   "node",
   "tree",
 ]
+
+/**
+ * The lines on this site the maintainer wrote himself, verbatim.
+ *
+ * **Positioning is his and not this lane's**, which is a standing rule of this
+ * brief rather than anything decided here. What it had never been is a *list*:
+ * his sentences sat in the page builders looking exactly like the ones a
+ * routine wrote, with the provenance in a docblock above them, and every run of
+ * this lane rewrites copy in sweeps.
+ *
+ * Writing them down does two things, and the second is the one that made it
+ * worth a constant.
+ *
+ * **It keeps a sweep off them.** A run told to make the site read plainly has
+ * no way to tell his sentence from its own, and the one it is likeliest to
+ * reach for is the hero — the single most rewritten band on this site and the
+ * only one whose words are not ours to change.
+ *
+ * **And it is what lets the em-dash rule be universal.** The rule exists
+ * because this lane put a dash in roughly a third of its own sentences; the one
+ * in the hero lead is his, it is doing a different job (it introduces a list
+ * rather than pivoting to a second clause), and it was kept deliberately after
+ * being photographed at 1280 and 390. A rule reading *every string a reader
+ * reads, except this one sentence* is a rule that gets edited. A rule reading
+ * *every string except the ones he wrote* is the repository's actual rule,
+ * stated where a test can read it.
+ *
+ * `voice.test.ts` holds this list from both ends: every entry has to still be
+ * rendered somewhere on the site, so a line that was rewritten or deleted
+ * cannot sit here going on exempting nothing.
+ */
+export const MAINTAINERS_OWN: readonly string[] = [
+  /**
+   * The headline, 27 September. It is the one part of the site arguing a build
+   * case while everything under it argues governance, and that tension is a
+   * standing question in this lane's reports rather than something to resolve
+   * by editing it.
+   */
+  "The AI age needs a new way to build web apps.",
+  /**
+   * The lead under it. *What your page becomes* and *how it feels to use* are
+   * his, and so is the closing triad; `pages/home.ts` has the whole of why
+   * each was added.
+   */
+  "AI already writes the components. What your page becomes, and how it feels to use, is still to be built. Loom is where you and the AI build it — adaptive to your users, answerable to your rules, and secure.",
+]
+
+/**
+ * **Two lines of his are deliberately not here**, and the reason is the whole
+ * value of the list being verbatim.
+ *
+ * On 1 October he gave *"Loom is AI model agnostic. Choose your preferred model
+ * or one of your own."* as the register to match rather than as copy to publish,
+ * and the front door says it in his words with a third sentence added:
+ * *"Loom is AI model agnostic. Pick the model you already use, or bring your
+ * own. Loom sends it what your users are doing, and it suggests changes from
+ * there."* That is this lane's sentence built on his, not his sentence — so it
+ * is held to every rule the rest of the site is held to, which is the correct
+ * answer and is why the entries above are matched exactly rather than loosely.
+ */

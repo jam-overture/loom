@@ -9,7 +9,9 @@ import {
   memoryReaderRegionStore,
   memoryReaderSignalJournal,
   memoryReaderTallyStore,
+  pageViewReadingOf,
   regionReadingOf,
+  type ReaderTallyStore,
 } from "@jam-overture/loom/signals"
 
 import type { TreeId } from "@jam-overture/loom"
@@ -60,6 +62,13 @@ const batch = (nodeId: string, dwellMs: number, over: Record<string, unknown> = 
   ],
 })
 
+/** The page-view counter as a screen would read it, which is what the portal will do. */
+const readingOf = async (store: ReaderTallyStore) => {
+  const rows = await store.pageViews()
+
+  return pageViewReadingOf(rows.ok ? rows.value : [])
+}
+
 const post = (body: unknown, headers: Record<string, string> = {}): Request =>
   new Request("https://loom.test/api/reader-signals", {
     method: "POST",
@@ -76,6 +85,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
       settings: SETTINGS,
       journal,
       regions: memoryReaderRegionStore(),
+      openings: store,
       gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
       durable: true,
       subjectOf: () => Promise.resolve("a-reader"),
@@ -129,6 +139,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
       settings: SETTINGS,
       journal,
       regions,
+      openings: memoryReaderTallyStore(),
       gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
       durable: true,
       subjectOf: () => Promise.resolve("a-reader"),
@@ -153,6 +164,46 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
     expect(JSON.stringify(buffered.ok && buffered.value.batches)).not.toContain("GB")
   })
 
+  /**
+   * The denominator, end to end, and the one number in this subsystem that is
+   * exact.
+   *
+   * A reader arrives and keeps reading: four deliveries, one page view. The door
+   * counts the arrival once and the rollup counts the window's appearance of it,
+   * so the portal can read *one page view of revision 4* beside *one appearance
+   * of it* and know the distinct counts it is about to divide by are not
+   * generous. A counter that moved with the deliveries would say four.
+   */
+  it("counts one reader as one page view however long they stay, and says the counters agree", async () => {
+    const journal = memoryReaderSignalJournal(at(0))
+    const store = memoryReaderTallyStore()
+    const intake: Intake = {
+      settings: SETTINGS,
+      journal,
+      regions: memoryReaderRegionStore(),
+      openings: store,
+      gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
+      durable: true,
+      subjectOf: () => Promise.resolve("a-reader"),
+      now: () => 0,
+    }
+
+    await receiveReaderSignals(post(batch("n_hero", 1_000, { first: true })), intake)
+    await receiveReaderSignals(post(batch("n_hero", 2_000)), intake)
+    await receiveReaderSignals(post(batch("n_hero", 3_000)), intake)
+    await receiveReaderSignals(post(batch("n_pricing", 4_000)), intake)
+
+    /** Before any rollup: the arrival is durable and its window is still in the buffer. */
+    expect(await readingOf(store)).toMatchObject({ opened: 1, appearances: 0, drift: 0, pending: 1 })
+
+    await collectReaderSignals(journal, store, { windowMs: 60_000, clock: at(120_000) })
+
+    const reading = await readingOf(store)
+
+    expect(reading).toMatchObject({ opened: 1, appearances: 1, drift: 0, pending: 0, inflation: 0 })
+    expect(reading.revisions.map((one) => one.revision)).toEqual([4])
+  })
+
   /** A refused delivery reaches no counter, which is the half that must also hold. */
   it("counts nothing from a delivery the door turned away", async () => {
     const journal = memoryReaderSignalJournal(at(0))
@@ -162,6 +213,7 @@ describe("a batch a browser posts becomes a number the portal can read", () => {
       settings: { ...SETTINGS, chosen: { state: "off" } },
       journal,
       regions: memoryReaderRegionStore(),
+      openings: store,
       gate: createIntakeGate(DEFAULT_INTAKE_POLICY),
       durable: true,
       subjectOf: () => Promise.resolve("a-reader"),

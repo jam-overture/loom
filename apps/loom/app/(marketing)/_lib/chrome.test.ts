@@ -299,7 +299,7 @@ describe("the footer", () => {
     const words = wordsOf(counting())
 
     expect(words).toContain("This page counts which of its parts you reach")
-    expect(words).toContain("never who you are")
+    expect(words).toContain("never counts who you are")
   })
 
   it("says nothing about counting on a deployment that counts nobody", () => {
