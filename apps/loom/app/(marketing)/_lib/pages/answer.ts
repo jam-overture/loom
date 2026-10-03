@@ -120,7 +120,7 @@ const decision = (ids: IdFactory, context: AnswerContext): LoomNode => {
     record.awaitingYou
       ? action(
           ids,
-          "I say yes — go ahead",
+          "I say yes, go ahead",
           askHref(
             context.origin,
             record.putBack

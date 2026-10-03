@@ -268,7 +268,7 @@ const panelActions = (
                 ),
                 variant: "primary",
               },
-              children: [buildText(ids, "I say yes — go ahead")],
+              children: [buildText(ids, "I say yes, go ahead")],
             }),
           ]
         : []),
@@ -310,7 +310,7 @@ const panelActions = (
  * result rather than a promise.
  */
 const RESTORED =
-  "Nothing here was rebuilt. The pieces came back carried by the undo itself, each with the name it left with — so this is the page you arrived on, not a fresh copy that reads the same."
+  "Nothing here was rebuilt. The pieces came back carried by the undo itself, each with the name it left with. This is the page you arrived on, not a fresh copy that reads the same."
 
 /**
  * And what the same slot says when the rules stopped the undo, which they do.

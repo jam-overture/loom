@@ -119,7 +119,7 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        "When a person asks for a change in their own words, your server sends the model you chose an outline of the page and the list of pieces it may use. It does not send your code, your data, or anything about who is reading."
+        "When a person asks for a change in their own words, your server sends the model you chose an outline of the page. It also sends the list of pieces that model may use. It does not send your code, your data, or anything about who is reading."
       ),
       prose(
         ids,
@@ -161,7 +161,7 @@ const whatIsCounted = (ids: IdFactory, context: PageContext): LoomNode =>
       prose(
         ids,
         context.counting === true
-          ? "Everything above is happening on the page you are reading — counting is on here."
+          ? "Everything above is happening on the page you are reading. Counting is switched on here."
           : "It is switched off on this deployment, so nobody reading this page has been counted.",
         { tone: "muted" }
       ),

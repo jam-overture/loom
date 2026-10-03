@@ -96,13 +96,13 @@ describe("the page a counting deployment serves", () => {
   })
 
   it("says in the foot of every page that it is counting, when it is", async () => {
-    expect(await markup(true)).toContain("never who you are")
+    expect(await markup(true)).toContain("never counts who you are")
   })
 
   it("says nothing about counting anywhere on a page that counts nobody", async () => {
     const page = await markup(false)
 
-    expect(page).not.toContain("never who you are")
+    expect(page).not.toContain("never counts who you are")
     expect(page).not.toContain("counts which of its parts")
   })
 
@@ -112,6 +112,6 @@ describe("the page a counting deployment serves", () => {
    */
   it("tells the reader of the readers page which deployment they are on", async () => {
     expect(await readersPage(false)).toContain("nobody reading this page has been counted")
-    expect(await readersPage(true)).toContain("counting is on here")
+    expect(await readersPage(true)).toContain("Counting is switched on here")
   })
 })
