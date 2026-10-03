@@ -41762,8 +41762,17 @@ deployment has not already run: `db:push` creates the table.
 ## 2026-10-03 — the upsert that refuses to touch one row twice is guarded for one of the four counter tables, and the other three have the same seam
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/postgres.ts`)
-· **Status:** open — **a latent divergence, written down rather than swept.**
-Nothing is red, and no producer in the repository can currently trigger it.
+· **Status:** **closed by `signals-06-where-reading-stops`** — the fold is now in
+front of the driver for all four counters, with a contract case each. The keys
+moved to `src/signals/counters.ts` and **both stores import them from there**,
+which is the half of the remedy this entry did not ask for: the guarantee wanted
+is that the two implementations agree about what one row is, and two spellings of
+a key that are the same today are a thing this subsystem has already been bitten
+by. Four planted defects, four caught — including the one column that is not a
+number, where the later row wins in both stores and in the fold.
+
+Originally filed as: **a latent divergence, written down rather than swept.**
+Nothing was red, and no producer in the repository could trigger it.
 
 Found by the contract suite while adding the page-view counter, which is the
 first counter in this subsystem a caller composes by hand rather than reads off
@@ -42216,7 +42225,13 @@ the one failure this reading can have that looks exactly like success.
 ## 2026-10-02 — a page cannot report that every one of its parts went unread, and the arithmetic that makes it impossible is worth stating where the vocabulary is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals`
-(`src/signals/parts.ts`) · **Status:** open — not a defect, and it cost this
+(`src/signals/parts.ts`) · **Status:** **closed** — the sentence is in
+`PartStanding`'s doc comment on `main`, landed by `signals-04` (#486): *every
+combination of the three is reachable except one*, with the arithmetic that rules
+it out and the reachable neighbour that is worth a screen. Verified rather than
+re-written; this entry was still open because nothing went back to flip it.
+
+Originally filed as: not a defect, and it cost this
 lane a state it had already designed, written and commented
 
 `PartStanding`'s three members are reachable in every combination but one.
@@ -42664,3 +42679,56 @@ Filed rather than guessed at, because the right answer depends on what a loaded
 deployment looks like and **nothing in this repository has ever had one**: the
 screenshots are six staged pages with no history and no waiting changes. Choosing
 a layout for the empty case is how a screen ends up wrong for every real one.
+
+---
+## 2026-10-03 — where a page loses its readers is now a reading, and it is a shape to draw rather than one more row
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/`) · **Status:** open — **nothing is blocked**; the reading is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`, and the
+reader screen is this lane's to shape
+
+`readingProgressOf(reading)` answers *readers get through the first four bands
+and the fifth is where they leave*, from counters that already existed —
+[0221](decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md),
+§9 of [`docs/signals.md`](docs/signals.md). Hand it the output of
+`pageReadingOf`, which is the same join §6 already published:
+
+```ts
+import { pageReadingOf, readingProgressOf } from "@jam-overture/loom/signals"
+
+const progress = readingProgressOf(pageReadingOf(tree, tallies, registry))
+```
+
+**`progress.steepest`** is the one figure a screen can lead with: the two parts a
+page loses most of its readers between, with `lost` (the readers) and `share`
+(the fraction of the ones who got that far). **`progress.runs`** is the shape —
+one run per parent, its children in the order a reader meets them, every fall in
+run order, and `furthest`, the last part anybody reached.
+
+Four things to be careful of, and they are all in the record:
+
+- **`share` is a fraction of the part before it, never of the page.** Both
+  numbers are `reached` counts off the same rows, which is exactly why it can be
+  shown: the window straddle that inflates every `reached` (0147, measured per
+  revision since 0219) divides out of a ratio between two of them. **Do not
+  re-base it on `opened` from `pageViewReadingOf`** — those are different
+  counters written in different places and the ratio can honestly exceed 1.
+  `opened` is still the right denominator for the *rates* §8 filed about; it is
+  the wrong one for a fall.
+- **`unanchored` is a diagnosis, not a number to show a reader.** A long list
+  means presses are being delegated to regions that no `viewed` names — a sender
+  or a primitive not reporting what it is. It previously looked exactly like a
+  quiet page, which is the failure worth surfacing somewhere an operator sees it.
+- **`gained` is not an error.** More readers on a later part than an earlier one
+  is an anchored link, a restored scroll position, or a part that is on screen
+  whatever anybody does. Worth a line; not worth a warning.
+- **`views: 0` means no runs and no steepest**, rather than a page everybody
+  abandoned. A screen needs the empty state, and it is *nothing was measured* and
+  not *nobody read it*.
+
+**What is still thin, and it is not this lane's either.** A run's steps carry the
+role its type declared, and nothing in `src/primitives/` declares one — so a
+reading says *where* readers stop and not *what kind of part* they stop at. Filed
+for `Loom primitives` since 1 October and unchanged by this.
+
