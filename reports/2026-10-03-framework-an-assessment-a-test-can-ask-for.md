@@ -251,3 +251,71 @@ No route group, no primitive, no signal, and nothing a deployment renders.
    two. The script that produced it was not committed, unlike the shot lists
    `0213` asks for. Recommendation: for a unit with no screen, the transcript in
    the report is enough.
+
+---
+
+## Later the same day — `main` arrived, #488 merged, and this section was dropped once before it landed
+
+Appended after the fact, and the second half of it is about why it is appended
+twice.
+
+`Loom merge` merged `main` into the branch at `f25007b` and regenerated the
+decisions index and the API reference at `e06ad44`. **Both regenerations were
+correct**: re-running `pnpm decisions:index` and
+`pnpm --filter @loom/app docs:api` on the merged head produces no diff. **#488
+merged at `e06ad44`, 16:11:40 UTC.**
+
+**The numbering collision resolved the way this report predicted.** #485, #486
+and #487 all landed. `0215` stayed with #485, **#486's record was renumbered to
+`0218`**, and `0216` — taken by this branch after reading the open pull requests
+rather than only `main` — needed no change. The fifteen minutes were spent by the
+lane that landed second. The one-line repair to `docs/routines.md` is unchanged
+and still the ask.
+
+**The finding this unit closes is closed.** It was written on
+`framework-65-seventeen-levers-from-a-record`, unreachable from a branch cut off
+`main`; #485 landed, the merge brought it in, and its Status now reads
+`closed by framework-66-an-assessment-a-test-can-ask-for`.
+
+### The gate, re-measured against the `main` the branch merged
+
+| | `main` @ `2b5e305` | #488's merged head |
+| --- | --- | --- |
+| `@jam-overture/loom` | 175 files / **3,638** | **176** / **3,647** |
+| `@loom/app` | 363 files / **6,421** | 363 / **6,421** |
+| findings | 958 | **960**, 0 malformed |
+| published exports | 1,251 | **1,254** (+3) |
+
+`pnpm install && pnpm verify` — **green, exit 0**, on a deleted `dist` and
+`apps/loom/.next`. The baseline was measured again in a fresh worktree at
+`2b5e305`, not carried over from the morning's table. **The deltas are identical
+to the pre-merge measurement** — +1 root file, +9 root tests, an application suite
+unchanged to the test, +2 findings, +3 exports. A day of four other lanes' work
+landed underneath this unit and moved none of its numbers.
+
+### And then this section was lost, which is the useful part
+
+The commit carrying everything above — the closed Status, the corrected note,
+this table — was pushed at **16:26:09 UTC to a branch whose pull request had
+closed at 16:11:40.** It is not on `main`. `git merge-base --is-ancestor` says
+so and nothing else did: the push succeeded, no check went red, no comment
+appeared.
+
+That is the trap this lane filed on 28 September, second instance, and the
+timeline sharpens it. The first instance had eight minutes of exposure inside
+`Loom merge`'s queue. This one read the pull request as **open** at 16:10, spent
+sixteen minutes doing exactly what the merge event exists to prompt — a full gate
+on a cleaned tree and a fresh baseline in a worktree — and pushed a quarter of an
+hour after the thing had closed.
+
+**So the window is not `Loom merge`'s runtime. It is the length of the lane's own
+`pnpm verify`**, and it sits between reading the pull request's state and pushing
+by construction. The more honestly a lane re-measures after a merge, the wider
+its own window gets. The remedy that catches it is the cheapest one on the 28
+September list and is entirely in the pushing lane's hands: **re-read the pull
+request immediately before pushing, not before verifying.** One call. It would
+have caught both instances.
+
+Recovered by `framework-67-the-window-is-the-length-of-your-own-verify`, which
+carries this section and the two `FINDINGS.md` corrections and nothing else —
+the same remedy the 28 September entry used, which is still not a fix.
