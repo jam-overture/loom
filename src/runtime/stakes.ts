@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { PrimitiveType } from "../primitive-type.js"
+
 import type { ChangeAnalysis } from "./analysis.js"
 import { describeNestedTarget } from "./nesting.js"
 import type { GatePolicy } from "./policy.js"
@@ -101,14 +103,126 @@ export type StakeInput = {
   readonly discards: readonly DiscardedWork[]
 }
 
+/**
+ * The rules whose level is fixed at the code, and the level each one is fixed
+ * at.
+ *
+ * Every rule in this file is one of two kinds, and the difference is which
+ * question it answers. Seven of them ask *how much of this deployment's page
+ * does this touch* — how many nodes went, how broad it was, how shallow, which
+ * of the types this host declared it cares about — so moving a field of the
+ * policy moves the answer. The other seven ask *is this change coherent at all*:
+ * a target nobody can reach, a type nothing is registered for, props the
+ * declaring primitive refuses, a question nothing reads, a form or a region
+ * pointed somewhere else, work written over. None of those consults a policy
+ * field. A host turns them off by declaring no vocabulary (0002) and cannot tune
+ * them, so their level is a property of the rule itself.
+ *
+ * Declared here rather than written into each factor because the level now has
+ * two readers. The Gate computes it while it holds the delta, and
+ * `remeasureStakes` has to state it months later holding only a record — and the
+ * second reader exists *because* these seven cannot be re-measured from a
+ * record: a code says a rule fired and the list of nodes it fired about does not
+ * cross the boundary (0023). What crosses is the code, and this is what turns a
+ * code back into a level without a second copy of these numbers in whatever
+ * reads the journal.
+ */
+const FIXED_LEVELS = {
+  "discards-later-work": "high",
+  "nested-target": "critical",
+  "unknown-primitive": "critical",
+  "invalid-props": "critical",
+  "unread-binding": "critical",
+  "redirected-submission": "high",
+  "repointed-binding": "high",
+} as const satisfies Partial<Record<StakeFactorCode, StakeLevel>>
+
+/** A rule no policy field can move, so its code alone gives its level. */
+export type FixedStakeFactorCode = keyof typeof FIXED_LEVELS
+
+/**
+ * A rule a policy decides, so the same change under two policies is two
+ * answers. The complement of `FixedStakeFactorCode` by construction: a factor
+ * added to the vocabulary belongs to one set or the other and nothing has to
+ * remember to put it there.
+ */
+export type MeasuredStakeFactorCode = Exclude<StakeFactorCode, FixedStakeFactorCode>
+
+/** The level this rule is always raised at, which is the whole of what its code means. */
+export const fixedStakeLevel = (code: FixedStakeFactorCode): StakeLevel => FIXED_LEVELS[code]
+
+export const isFixedStakeFactor = (code: StakeFactorCode): code is FixedStakeFactorCode =>
+  code in FIXED_LEVELS
+
+/**
+ * The two halves of the vocabulary, walkable, in the order the Gate raises them.
+ *
+ * Filtered from `STAKE_FACTOR_CODES` rather than written out, so neither list can
+ * be the stale copy of a partition that lives in one place. A factor added to the
+ * schema joins one of them according to whether `FIXED_LEVELS` names it, and a
+ * reader walking either gets the new member without being told.
+ */
+export const FIXED_STAKE_FACTOR_CODES: readonly FixedStakeFactorCode[] =
+  STAKE_FACTOR_CODES.filter(isFixedStakeFactor)
+
+export const MEASURED_STAKE_FACTOR_CODES: readonly MeasuredStakeFactorCode[] =
+  STAKE_FACTOR_CODES.filter((code): code is MeasuredStakeFactorCode => !isFixedStakeFactor(code))
+
+/**
+ * The facts the policy-dependent rules read, and nothing else.
+ *
+ * Narrower than `ChangeAnalysis` on purpose, and the narrowing is the contract.
+ * An analysis holds six lists of specifics — which targets are unreachable,
+ * which nodes carry refused props — that name parts of a particular page, so
+ * they belong to the moment the delta was weighed and go no further. What is
+ * here is nine numbers and four lists of type and prop names, which is exactly
+ * the part a telemetry record can carry and therefore the part a host can hold
+ * on to and measure again.
+ *
+ * So the seven rules below take this rather than the analysis, and the two
+ * producers — `stakeMeasurementOf` from a delta, `remeasureStakes` from a
+ * journalled record — put the same rules to the same numbers. A second
+ * implementation of *large removal* or *broad change* in whatever wants to
+ * re-run them would be a copy of the Gate that drifts from the Gate, which is
+ * the one failure a simulation of a policy must not have.
+ */
+export type StakeMeasurement = {
+  readonly insertedNodeCount: number
+  readonly removedNodeCount: number
+  readonly movedNodeCount: number
+  /** `affectedNodeIds.length`. Breadth reads the count and never the ids. */
+  readonly affectedNodeCount: number
+  readonly shallowestAffectedDepth: number
+  readonly touchedPrimitiveTypes: readonly PrimitiveType[]
+  readonly removedPrimitiveTypes: readonly PrimitiveType[]
+  readonly relocatedPrimitiveTypes: readonly PrimitiveType[]
+  readonly configuredPropKeys: readonly string[]
+}
+
+/** The measurable half of an analysis, which is what the Gate's own path takes. */
+export const stakeMeasurementOf = (analysis: ChangeAnalysis): StakeMeasurement => ({
+  insertedNodeCount: analysis.insertedNodeCount,
+  removedNodeCount: analysis.removedNodeCount,
+  movedNodeCount: analysis.movedNodeCount,
+  affectedNodeCount: analysis.affectedNodeIds.length,
+  shallowestAffectedDepth: analysis.shallowestAffectedDepth,
+  touchedPrimitiveTypes: analysis.touchedPrimitiveTypes,
+  removedPrimitiveTypes: analysis.removedPrimitiveTypes,
+  relocatedPrimitiveTypes: analysis.relocatedPrimitiveTypes,
+  configuredPropKeys: analysis.configuredPropKeys,
+})
+
 const intersect = <TValue>(
   candidates: readonly TValue[],
   declared: readonly TValue[]
 ): readonly TValue[] => candidates.filter((candidate) => declared.includes(candidate))
 
 /** Destroying a protected primitive outranks merely reconfiguring one. */
-const protectedTypeRemoved = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor | null => {
-  const matches = intersect(analysis.removedPrimitiveTypes, policy.protectedPrimitiveTypes)
+const protectedTypeRemoved = (
+  measurement: StakeMeasurement,
+  policy: GatePolicy
+): StakeFactor | null => {
+  const matches = intersect(measurement.removedPrimitiveTypes, policy.protectedPrimitiveTypes)
   if (matches.length === 0) return null
 
   return {
@@ -118,8 +232,11 @@ const protectedTypeRemoved = ({ analysis }: StakeInput, policy: GatePolicy): Sta
   }
 }
 
-const protectedTypeTouched = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor | null => {
-  const matches = intersect(analysis.touchedPrimitiveTypes, policy.protectedPrimitiveTypes)
+const protectedTypeTouched = (
+  measurement: StakeMeasurement,
+  policy: GatePolicy
+): StakeFactor | null => {
+  const matches = intersect(measurement.touchedPrimitiveTypes, policy.protectedPrimitiveTypes)
   if (matches.length === 0) return null
 
   return {
@@ -137,10 +254,10 @@ const protectedTypeTouched = ({ analysis }: StakeInput, policy: GatePolicy): Sta
  * was rewritten, the other says it is somewhere else now (0044).
  */
 const protectedTypeRelocated = (
-  { analysis }: StakeInput,
+  measurement: StakeMeasurement,
   policy: GatePolicy
 ): StakeFactor | null => {
-  const matches = intersect(analysis.relocatedPrimitiveTypes, policy.protectedPrimitiveTypes)
+  const matches = intersect(measurement.relocatedPrimitiveTypes, policy.protectedPrimitiveTypes)
   if (matches.length === 0) return null
 
   return {
@@ -150,8 +267,8 @@ const protectedTypeRelocated = (
   }
 }
 
-const protectedProp = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor | null => {
-  const matches = intersect(analysis.configuredPropKeys, policy.protectedPropKeys)
+const protectedProp = (measurement: StakeMeasurement, policy: GatePolicy): StakeFactor | null => {
+  const matches = intersect(measurement.configuredPropKeys, policy.protectedPropKeys)
   if (matches.length === 0) return null
 
   return {
@@ -161,8 +278,8 @@ const protectedProp = ({ analysis }: StakeInput, policy: GatePolicy): StakeFacto
   }
 }
 
-const largeRemoval = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor | null => {
-  const { removedNodeCount } = analysis
+const largeRemoval = (measurement: StakeMeasurement, policy: GatePolicy): StakeFactor | null => {
+  const { removedNodeCount } = measurement
   const { removalThresholds } = policy
 
   if (removedNodeCount >= removalThresholds.high) {
@@ -184,27 +301,27 @@ const largeRemoval = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor
   return null
 }
 
-const broadChange = ({ analysis }: StakeInput, policy: GatePolicy): StakeFactor | null => {
-  const touched = analysis.affectedNodeIds.length
+const broadChange = (measurement: StakeMeasurement, policy: GatePolicy): StakeFactor | null => {
+  const touched = measurement.affectedNodeCount
   if (touched < policy.breadthThreshold) return null
 
   return { code: "broad-change", level: "medium", detail: `touches ${touched} nodes` }
 }
 
-const isStructural = (analysis: ChangeAnalysis): boolean =>
-  analysis.insertedNodeCount + analysis.removedNodeCount + analysis.movedNodeCount > 0
+const isStructural = (measurement: StakeMeasurement): boolean =>
+  measurement.insertedNodeCount + measurement.removedNodeCount + measurement.movedNodeCount > 0
 
 const shallowStructuralChange = (
-  { analysis }: StakeInput,
+  measurement: StakeMeasurement,
   policy: GatePolicy
 ): StakeFactor | null => {
-  if (!isStructural(analysis)) return null
-  if (analysis.shallowestAffectedDepth > policy.shallowDepthThreshold) return null
+  if (!isStructural(measurement)) return null
+  if (measurement.shallowestAffectedDepth > policy.shallowDepthThreshold) return null
 
   return {
     code: "shallow-structural-change",
     level: "medium",
-    detail: `restructures at depth ${analysis.shallowestAffectedDepth}`,
+    detail: `restructures at depth ${measurement.shallowestAffectedDepth}`,
   }
 }
 
@@ -228,7 +345,7 @@ const discardsLaterWork = ({ discards }: StakeInput): StakeFactor | null => {
 
   return {
     code: "discards-later-work",
-    level: "high",
+    level: FIXED_LEVELS["discards-later-work"],
     detail: `discards work from revision${revisions.length === 1 ? "" : "s"} ${revisions.join(
       ", "
     )} at ${nodes.size} node${nodes.size === 1 ? "" : "s"}`,
@@ -272,7 +389,7 @@ const nestedTarget = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "nested-target",
-    level: "critical",
+    level: FIXED_LEVELS["nested-target"],
     detail: `puts ${one ? "a target" : `${nestedTargets.length} targets`} where the reader cannot reach ${
       one ? "it" : "them"
     }: ${nestedTargets.map(describeNestedTarget).join("; ")}`,
@@ -316,7 +433,7 @@ const unknownPrimitive = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "unknown-primitive",
-    level: "critical",
+    level: FIXED_LEVELS["unknown-primitive"],
     detail: `adds ${one ? "a node" : `${unknownPrimitives.length} nodes`} no primitive is registered for, so ${
       one ? "it draws" : "they draw"
     } nothing: ${unknownPrimitives.map(describeUnknownPrimitive).join("; ")}`,
@@ -350,7 +467,7 @@ const invalidProps = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "invalid-props",
-    level: "critical",
+    level: FIXED_LEVELS["invalid-props"],
     detail: `leaves ${one ? "a node" : `${invalid.length} nodes`} carrying props the declaring primitive refuses, so ${
       one ? "it draws" : "they draw"
     } nothing: ${invalid.map(describeInvalidProps).join("; ")}`,
@@ -392,7 +509,7 @@ const unreadBinding = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "unread-binding",
-    level: "critical",
+    level: FIXED_LEVELS["unread-binding"],
     detail: `asks ${one ? "a question" : `${unread.length} questions`} no primitive reads, so the ${
       one ? "answer is" : "answers are"
     } fetched and dropped: ${unread.map(describeUnreadBinding).join("; ")}`,
@@ -425,7 +542,7 @@ const redirectedSubmission = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "redirected-submission",
-    level: "high",
+    level: FIXED_LEVELS["redirected-submission"],
     detail: `redirects ${
       redirectedSubmissions.length === 1 ? "a submission" : `${redirectedSubmissions.length} submissions`
     }: ${redirectedSubmissions.map(describeRedirectedSubmission).join("; ")}`,
@@ -457,14 +574,24 @@ const repointedBinding = ({ analysis }: StakeInput): StakeFactor | null => {
 
   return {
     code: "repointed-binding",
-    level: "high",
+    level: FIXED_LEVELS["repointed-binding"],
     detail: `repoints ${
       repointedBindings.length === 1 ? "a binding" : `${repointedBindings.length} bindings`
     }: ${repointedBindings.map(describeRepointedBinding).join("; ")}`,
   }
 }
 
-const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
+/**
+ * The seven a policy decides, in the order the Gate raises them.
+ *
+ * Order is part of the record: `stakeFactorCodes` is written in the order the
+ * factors came out, so the two lists here are the one list this used to be, cut
+ * where the kinds change and not reordered.
+ */
+const MEASURED_FACTORS: readonly ((
+  measurement: StakeMeasurement,
+  policy: GatePolicy
+) => StakeFactor | null)[] = [
   protectedTypeRemoved,
   protectedTypeTouched,
   protectedTypeRelocated,
@@ -472,6 +599,10 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   largeRemoval,
   broadChange,
   shallowStructuralChange,
+]
+
+/** The seven fixed at their code, which read the specifics a record does not carry. */
+const FIXED_FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor | null)[] = [
   discardsLaterWork,
   nestedTarget,
   unknownPrimitive,
@@ -481,8 +612,24 @@ const FACTORS: readonly ((input: StakeInput, policy: GatePolicy) => StakeFactor 
   repointedBinding,
 ]
 
+/**
+ * The policy-dependent half, against a measurement rather than a delta.
+ *
+ * Published because it is the half that can be run twice: once by the Gate on
+ * the change in front of it, and again by anything holding a record of that
+ * change and a policy it is considering. The other half cannot, which is why it
+ * is not here — see `fixedStakeLevel`.
+ */
+export const measureStakes = (
+  measurement: StakeMeasurement,
+  policy: GatePolicy
+): readonly StakeFactor[] => MEASURED_FACTORS.flatMap((factor) => factor(measurement, policy) ?? [])
+
 export const assessStakes = (input: StakeInput, policy: GatePolicy): StakeAssessment => {
-  const factors = FACTORS.flatMap((factor) => factor(input, policy) ?? [])
+  const factors = [
+    ...measureStakes(stakeMeasurementOf(input.analysis), policy),
+    ...FIXED_FACTORS.flatMap((factor) => factor(input, policy) ?? []),
+  ]
 
   return { level: highestStake(factors.map((factor) => factor.level)), factors }
 }

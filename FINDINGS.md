@@ -40677,7 +40677,11 @@ do it.
 
 ## 2026-10-01 — a host cannot re-measure its own stakes from its own record, and it is two fields short
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-65-seventeen-levers-from-a-record`** — the two fields are
+on the record, and `remeasureStakes` is published because the two fields alone
+would not have been enough. See [0215](decisions/0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md)
+and the entry filed below it today, which says what the portal now calls.
 
 `/portal/rules/what-if` replays every judgment this deployment has recorded
 against a policy a reader is editing on the screen. **Seven of a `GatePolicy`'s
@@ -41298,6 +41302,119 @@ The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
 
+## 2026-10-02 — the ten levers `/portal/rules/what-if` turned off are answerable now, and the one thing the screen must not do is show the level without reading `unreadable`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/what-if.ts`) · **Status:** open — the capability is on `main`,
+nothing is broken, and the screen says *these cannot be replayed* about ten
+settings that now can be
+
+The 1 October finding asked for two optional fields so a host could rebuild a
+`StakeInput` and call `assessStakes` itself. **The two fields are there and that
+plan does not work**, which is [0215](decisions/0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md):
+a `ChangeAnalysis` carries six lists of specifics that do not cross the telemetry
+boundary, five of them feed `critical` rules, and a caller passing six empty
+lists would have re-measured every refusal as ordinary. So the re-measure is
+published instead of the raw inputs:
+
+```ts
+import { remeasureStakes } from "@jam-overture/loom/telemetry"
+
+const { level, factors, unreadable } = remeasureStakes(summary, candidatePolicy)
+```
+
+It runs the Gate's own seven measuring rules — `measureStakes`, the same call
+`assessStakes` makes — against the record, and turns each recorded fixed code
+back into its level. `factors` says which half each came from: `remeasured` ran
+again, `recorded` could not and did not need to.
+
+**`removalThresholds`, `breadthThreshold`, `shallowDepthThreshold`,
+`protectedPrimitiveTypes` and `protectedPropKeys` are all answerable.** That is
+the ten fields the screen's own doc comment says it deliberately does not offer,
+and the sentence that explains why is now the sentence that is out of date.
+
+### The one thing to get right
+
+**`unreadable` is not advisory.** It names the rules this record cannot answer
+under this policy, and while it is non-empty `level` is a **floor**: the true
+stakes are that level or higher. The failure to avoid is the one the screen
+already refuses on the ladder — showing a floor as a result. The test that makes
+this concrete is in `src/telemetry/remeasure.test.ts`: a header removal under a
+policy protecting `loom.header` re-measures `critical` from a full record and
+`high` from a record missing `removedPrimitiveTypes`, because the rule that was
+lost is the one that reached the top. A row shown at `high` there is a change the
+Gate refused, presented as one it would have held.
+
+The recommendation, which is the portal's call and not this lane's: set such a
+row aside and count it, beside the ones whose recorded verdict does not
+reproduce. The two are the same kind of honesty and the existing screen has the
+furniture for it.
+
+### What it will mostly be, in practice
+
+Empty. A rule is unreadable only when this policy on this record could have
+reached the missing field, so a deployment protecting nothing is never told it
+cannot answer about protected types, a change that removed no nodes is never
+told it cannot answer about removed types, and breadth is readable whenever the
+four node counts every record carries cannot add up to the threshold. Records
+written before today lose `configuredPropKeys`, so `protectedPropKeys` is the one
+lever with real historical blindness — and it is blind by name rather than
+silently.
+
+### Two things this does not do
+
+It does not re-measure **reversibility**, so `irreversibilityReasons` and the
+ladder's reversibility rung are unchanged. And it does not decide anything: 0031
+and 0200 clause 4 still hold, and a re-measured level is an argument for a lever
+and not a pull of one.
+
+## 2026-10-02 — a hand-built assessment in `(portal)`'s tests goes red whenever the framework reads one more field of an analysis, and there is no double to reach for instead
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/testing/doubles.ts`) · **Status:** open — **fixed where it broke, not where
+it is caused.** `main` is green; the next field anyone adds breaks it again
+
+`framework-65` added `affectedNodeCount` and `configuredPropKeys` to the
+telemetry record, so `summariseAssessment` reads two more fields of
+`ChangeAnalysis`. One test went red:
+
+```
+FAIL app/(portal)/_lib/write.test.ts > beginWrite > keeps the reasoning even when
+     the journal refuses the same event
+AssertionError: expected "record" to be called at least once
+```
+
+The assertion is about ordering and the cause is neither — the test hand-builds a
+`ChangeAssessment` with ten of `ChangeAnalysis`'s eighteen fields and casts the
+gap away with `as never`, so narrowing dereferenced `undefined.length`, the
+narrowing threw, and the journal was never reached. **The failure arrived as a
+missing call in a test about something else**, which is the expensive part.
+
+Fixed on that branch by adding `affectedNodeIds: []` and `configuredPropKeys: []`
+to the fixture — two lines, no behaviour, a cross-lane edit of the kind the
+30 September entry allows to keep `main` green, and the fixture is more truthful
+than it was.
+
+**That is not the finding.** This is the third time in two days that a framework
+field has landed on a hand-built double in another lane: lesson 32 built a
+`ShotResult` without `measured`, and now this. The cast is not carelessness —
+there is nothing else to reach for. `src/testing/doubles.ts` publishes
+`buildIntent` and `buildProposal` and stops there, so a surface that needs an
+assessment either runs `assessChange` against a real tree, which needs a tree and
+a registry it may not have, or writes an object literal and casts.
+
+**The ask, and it is this lane's own:** a `buildAssessment` beside the other two,
+taking the handful of facts a test cares about over a complete default. Then a
+field added to an analysis moves one file in `src/testing/` and no fixture
+anywhere has a hole in it. Not done on `framework-65` because adopting it means
+rewriting another lane's test, which is a bigger edit than the two lines that
+unbroke it — and a PR that fixes a break and redesigns the doubles at the same
+time is two reviews.
+
+**Worth noting for whoever takes it:** the same cast hides the same hole in
+`app/(portal)/_lib/what-if.test.ts` and
+`app/(portal)/portal/activity/_components/proposal-line.test.tsx`. Neither is red,
+because neither narrows an assessment — they are the next two to break.
 ---
 ## 2026-10-02 — nothing can ask a store for the tree as it was, and that is now a hole in a shipped screen rather than a cost to know about
 
