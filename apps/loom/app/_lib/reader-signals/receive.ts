@@ -2,10 +2,11 @@ import {
   describeIngestError,
   ingestReaderSignals,
   readerRegionOf,
+  type DoorCounters,
   type IntakeGate,
+  type ReaderOpeningCounter,
   type ReaderRegionStore,
   type ReaderSignalJournal,
-  type RegionIntake,
 } from "@jam-overture/loom/signals"
 
 import { describeIntakeSwitch, describeRegionSettings, type IntakeSettings } from "./settings"
@@ -45,6 +46,13 @@ export type Intake = {
    * time a window is folded.
    */
   readonly regions: ReaderRegionStore
+  /**
+   * How many page views there were, counted at the door for the region
+   * counter's reason and kept whatever a deployment thinks of regions: a count
+   * of page views of a revision names nowhere and nobody, and it is the
+   * denominator every other number the portal shows is a rate against.
+   */
+  readonly openings: ReaderOpeningCounter
   readonly gate: IntakeGate
   /** Whether what is kept outlives this process. The status says it rather than implying it. */
   readonly durable: boolean
@@ -110,26 +118,33 @@ const readAtMost = async (
 }
 
 /**
- * Where this delivery came from, when the deployment counts that.
+ * What this delivery is counted into, besides being buffered.
  *
- * The region is read from a header the platform wrote and used once, here. It is
- * never put on the batch, never joined to the view key the batch carries, and
- * the address it was derived from is not read at all — the only thing this
- * handler ever looks at an address for is the rate limit, and that digest is
- * minted per process and shared with nothing.
+ * Both counters are read from the request and both move once per page view
+ * rather than once per delivery. The page-view count is unconditional and the
+ * region is not: a region is read from a header the platform wrote, used once,
+ * here — never put on the batch, never joined to the view key the batch
+ * carries, and the address it was derived from is not read at all. The only
+ * thing this handler ever looks at an address for is the rate limit, and that
+ * digest is minted per process and shared with nothing.
  *
- * A deployment that switched regions off, or misspelled the switch, counts
- * nothing: a region is the one part of an intake that is worth having and never
- * worth guessing at.
+ * A deployment that switched regions off, or misspelled the switch, counts no
+ * region and still counts its readers arriving: a region is the one part of an
+ * intake that is worth having and never worth guessing at, and *how many*
+ * carries no such question.
  */
-const whereFrom = (request: Request, intake: Intake): RegionIntake | undefined =>
-  intake.settings.region.chosen.state === "on"
+const countersFor = (request: Request, intake: Intake): DoorCounters => ({
+  at: new Date(intake.now()).toISOString(),
+  openings: intake.openings,
+  ...(intake.settings.region.chosen.state === "on"
     ? {
-        store: intake.regions,
-        region: readerRegionOf(request.headers.get(intake.settings.region.header)),
-        at: new Date(intake.now()).toISOString(),
+        region: {
+          store: intake.regions,
+          region: readerRegionOf(request.headers.get(intake.settings.region.header)),
+        },
       }
-    : undefined
+    : {}),
+})
 
 /**
  * Receive a delivery.
@@ -189,7 +204,7 @@ export const receiveReaderSignals = async (request: Request, intake: Intake): Pr
     return refuse(400, "a delivery is JSON")
   }
 
-  const kept = await ingestReaderSignals(intake.journal, delivery, whereFrom(request, intake))
+  const kept = await ingestReaderSignals(intake.journal, delivery, countersFor(request, intake))
 
   if (!kept.ok) {
     /**
