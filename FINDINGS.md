@@ -38346,6 +38346,49 @@ happen to the runs that were being careful.
 request carrying the two documentation files, which is the remedy available
 today and is not a fix.
 
+### 2026-10-03 — the second instance, on the same lane, and the window was not `Loom merge`'s
+
+The entry above ends *"this will happen again, and it will happen to the runs
+that were being careful."* It happened again five days later, to this lane, on
+[#488](https://github.com/jam-overture/loom/pull/488), and the timeline says
+something the first instance did not:
+
+| time (UTC) | what | who |
+| --- | --- | --- |
+| 16:10:00 | `main` merged into the branch, index and API reference regenerated | `Loom merge` |
+| ~16:10 | the lane wakes, **reads the pull request** — `open`, `mergeable_state: unstable` | this lane |
+| 16:10–16:26 | `pnpm install && pnpm verify` on a cleaned tree, then a fresh `main` baseline measured in a worktree — both suites, findings, `docs:api` | this lane |
+| **16:11:40** | **#488 merged**, at `e06ad44` | `Loom merge` |
+| 16:26:09 | `44abebe` pushed — a closed finding's Status, a corrected note, a dated report section | this lane |
+
+`44abebe` is not on `main`. `git merge-base --is-ancestor 44abebe origin/main`
+says so and nothing else did: the push succeeded, the branch accepted it, no
+check went red and no comment appeared.
+
+**This is the tail of the race, not the middle, and that changes which remedy
+works.** The first instance pushed at ~15:47 into a merge that came at 15:48 —
+eight minutes of exposure. This one pushed **fifteen minutes after the pull
+request had already closed**, having read its state as open before starting. The
+exposure was not `Loom merge`'s queue at all:
+
+> **The window is the length of the lane's own `pnpm verify`.**
+
+A full gate on a cleaned tree plus a baseline measured in a worktree — which is
+what this repository asks for, and what the merge event exists to prompt — is ten
+to twenty minutes, and it sits between reading the pull request's state and
+pushing *by construction*. The more honestly a lane re-measures after a merge,
+the wider its own window. The third remedy in the list above is the one that
+catches this, and it is cheaper than it reads:
+
+**Re-read the pull request's state immediately before pushing, not before
+verifying.** It is one call, it is entirely in the pushing lane's hands, it needs
+no change to `Loom merge`, and it would have caught both instances. The other two
+remedies stay worth doing; this is the one a lane can apply to itself today, and
+this entry is the lane that needed it saying so.
+
+**Recovered the same way as the first**, by a second pull request carrying the
+documentation. Still not a fix.
+
 ---
 
 ## 2026-09-28 — every portal screenshot reports a clipping box, and it is the sidebar doing exactly what it was built to do
@@ -41424,10 +41467,10 @@ instead"*). `buildAssessment` and `NOTHING_MEASURED` are published from
 `@jam-overture/loom/testing` by
 `framework-66-an-assessment-a-test-can-ask-for`, with
 [0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
-That entry's Status still reads `open` because it lives on
-`framework-65-seventeen-levers-from-a-record`, which has not merged; whoever
-lands that branch should flip it to
-`closed by framework-66-an-assessment-a-test-can-ask-for`.
+That entry is now marked closed. It was written on
+`framework-65-seventeen-levers-from-a-record` and so was unreachable from the
+branch that answered it until #485 landed; the flip itself took two attempts,
+for the reason recorded in the 28 September merge-window entry below.
 
 **Adopting it is this lane's, because the three files are.** The framework
 declined to rewrite another lane's tests, and the one two-line patch it did make
@@ -41733,8 +41776,13 @@ and not a pull of one.
 ## 2026-10-02 — a hand-built assessment in `(portal)`'s tests goes red whenever the framework reads one more field of an analysis, and there is no double to reach for instead
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`src/testing/doubles.ts`) · **Status:** open — **fixed where it broke, not where
-it is caused.** `main` is green; the next field anyone adds breaks it again
+(`src/testing/doubles.ts`) · **Status:**
+**closed by `framework-66-an-assessment-a-test-can-ask-for`** ([#488](https://github.com/jam-overture/loom/pull/488),
+merged) — `buildAssessment` and `NOTHING_MEASURED` are published from
+`@jam-overture/loom/testing`, with
+[0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
+Adopting them in the three `(portal)` fixtures is `Loom portal`'s and is filed
+separately, with the replacement written out
 
 `framework-65` added `affectedNodeCount` and `configuredPropKeys` to the
 telemetry record, so `summariseAssessment` reads two more fields of
