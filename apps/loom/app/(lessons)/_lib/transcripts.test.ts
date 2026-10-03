@@ -74,7 +74,31 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 125 since lesson 30 (rendezvous), which added seven — one per exercise, each a
+ * 147 since lesson 33 (shortfall), which added seven — one per exercise, each a
+ * whole transcript in a single block. Four of the seven print a *count of calls*
+ * rather than a value, because the lesson's subject is when a party runs rather
+ * than what it knows: exercise C's `times the component pushed: 0` is the whole
+ * argument of the lesson and is a number about the clock. Exercise G's last three
+ * lines read the starter registry at run time — which primitives read a binding and
+ * which have declared what they could not show — rather than printing a number this
+ * lane typed, and they are expected to change when `Loom primitives` closes
+ * `loom.feed`'s half, which is filed for that lane. That red is the lesson's claim
+ * moving, on lesson 29's exercise C precedent, and not drift.
+ *
+ * It was 140 since lesson 32 (layout), which added seven — one per exercise, each a whole
+ * transcript in a single block. Three of the seven print booleans rather than
+ * numbers, because the lesson's subject is a fact that is absent from everything a
+ * pure function can produce and the honest shape of that is a row of `false`.
+ * Exercise F's first line is the one line in this course that was first produced by
+ * a browser rather than by Vitest — it is `describeShot`'s own formatting of the
+ * reading `pnpm specimen` took on the committed specimen — and it is held here
+ * because the exercise reproduces it from the same function. None of the seven
+ * prints the size of the primitive library, a count of the Gate's ladder, or
+ * anything else `claims.test.ts` holds a sentence against: the lesson's two counts
+ * that could have drifted are `CLIP_TOLERANCE` and `CLIP_VISIBLE_MINIMUM`, and both
+ * are printed from the constants rather than typed.
+ *
+ * It was 133 after lesson 31 (behaviour). It was 125 since lesson 30 (rendezvous), which added seven — one per exercise, each a
  * whole transcript in a single block. Two of them print an empty string as the
  * whole of what a page says, which is the lesson's subject rather than a fence
  * that lost its content: a binding answered under a name nothing reads draws the
@@ -124,7 +148,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 133
+const RECOGNISED_TRANSCRIPTS = 147
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.

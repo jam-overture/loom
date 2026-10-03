@@ -6,11 +6,13 @@ import { commitIntent, confirmHeld, discardHeld, revertRevision } from "@jam-ove
 import { answerNote } from "./answer"
 import { movedOn } from "./moved"
 import { settingsOf } from "./plain-change"
-import { DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
+import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById, presetInterpreter } from "./presets"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
 import { askedLine, isUndo, putsSomethingBack } from "./undo"
+import { howManyWaitForYou } from "./how-many-wait-for-you"
+import { whatEachWillSay, whatItWillSay } from "./what-it-will-say"
 
 /**
  * The demo, end to end, with nothing stubbed but the browser.
@@ -136,6 +138,130 @@ describe("a preset asked for through the demo's write path", () => {
     expect(record.heldProposalId).toBeDefined()
     /** Held means held: the page a visitor is looking at has not moved. */
     expect((await headOf(session)).revision).toBe(0)
+  })
+
+  /**
+   * **What the arrival screen says will happen is what happens**, and this is
+   * the assertion the whole of `what-it-will-say.ts` rests on.
+   *
+   * That module runs `composeChange` on a render to tell a stranger, before
+   * any press, what Loom will do about the button in front of them. Its claim
+   * is not that the sentence is a good guess — it is that there is no guess:
+   * the same function, the same interpreter, the same tree and the same policy
+   * run twice must reach the same verdict.
+   *
+   * Nothing in a type says so. The read path and the write path are two call
+   * sites that could drift — a `propsVocabulary` wired into one, a different
+   * origin, a policy source resolved from somewhere else — and every drift of
+   * that kind is silent, because both halves go on working and only the
+   * sentence becomes a lie. So the two are run against one tree and compared.
+   *
+   * Every preset, not just the lead: the panel nominates whichever ask the
+   * tree can honour (`leadingAsk`), so a page that has lost its stat grid
+   * leads with something else and the promise has to hold for that one too.
+   */
+  it("foretells, for every preset, the verdict the press actually produces", async () => {
+    for (const preset of DEMO_PRESETS) {
+      const session = await sessionFor(`foretold-${preset.id}`)
+      const tree = await headOf(session)
+      if (preset.plan(tree, randomIdFactory) === undefined) continue
+
+      const foretold = await whatItWillSay(tree, preset.id, randomIdFactory, systemClock)
+      const record = await ask(session, preset.id)
+
+      /**
+       * `moves` is the one bit of the sentence a visitor can check against
+       * their own eyes two seconds later: the page either moved or it did not.
+       * A revision past the one the verdict was reached at is the page moving.
+       */
+      expect(foretold?.moves, preset.id).toBe((await headOf(session)).revision > tree.revision)
+      expect(foretold?.moves, preset.id).toBe(record.outcome === "applied")
+    }
+  })
+
+  /**
+   * **And the number on the arrival screen is the number of presses that come
+   * true**, which is the claim the whole of this run rests on.
+   *
+   * The first sentence a stranger reads is now a count — *you can ask for 5
+   * changes here; Loom will make 2 on its own and ask you first about 3* — and
+   * a count is a far stronger claim than the five sentences it summarises. It
+   * is checkable by anybody with sixty seconds and two presses, so it had
+   * better be checked here first.
+   *
+   * The test above holds each verdict against its own press. This one holds
+   * the **arithmetic over all of them** against five real presses: every ask
+   * the panel offers is run through the write path into its own session, the
+   * outcomes are tallied, and the tally has to be the one the sentence claims.
+   * A drift that left every individual verdict right and the count wrong is
+   * not possible — but a count taken over the wrong set is, and that is the
+   * failure this catches: a split counting the preset table rather than the
+   * asks on offer reads *5* over four rows the first time a visitor opens a
+   * question.
+   */
+  it("counts, for the whole panel, the presses that really go ahead and the ones that really wait", async () => {
+    const session = await sessionFor("split")
+    const tree = await headOf(session)
+    const available = DEMO_PRESETS.filter(
+      (preset) => preset.plan(tree, randomIdFactory) !== undefined
+    ).map((preset) => preset.id)
+
+    const says = await whatEachWillSay(tree, available, randomIdFactory, systemClock)
+    const split = howManyWaitForYou(Object.values(says))
+
+    let wentAhead = 0
+    let waited = 0
+
+    for (const presetId of available) {
+      const own = await sessionFor(`split-${presetId}`)
+      const record = await ask(own, presetId)
+      if (record.outcome === "applied") wentAhead += 1
+      if (record.outcome === "awaiting-you") waited += 1
+    }
+
+    expect(split?.total).toBe(available.length)
+    expect(split?.onItsOwn).toBe(wentAhead)
+    expect(split?.asksYou).toBe(waited)
+    expect(split?.sentence).toContain(`make ${wentAhead} on its own`)
+    expect(split?.sentence).toContain(`ask you first about ${waited}`)
+  })
+
+  /**
+   * And the sentence is about the page as it stands, not as it started.
+   *
+   * The verdict is reached on every render against the tree in hand, so an ask
+   * the page has outgrown stops being foretold rather than carrying last
+   * render's answer. The demo's leading ask is the case the tree can produce:
+   * once the stat grid has actually come off, `trim` has nothing to plan, the
+   * interpreter refuses, and the honest answer is no sentence at all.
+   *
+   * It takes a confirmed hold to get there, which is the point — the page has
+   * to have genuinely moved, not merely been asked about. The verdict survives
+   * the ask and dies with the change.
+   */
+  it("stops foretelling an ask the page has outgrown", async () => {
+    const session = await sessionFor("foretold-outgrown")
+
+    expect(
+      await whatItWillSay(await headOf(session), DEMO_LEADING_PRESET, randomIdFactory, systemClock)
+    ).toBeDefined()
+
+    const held = await ask(session, DEMO_LEADING_PRESET)
+    if (!held.heldProposalId) throw new Error("nothing was held")
+
+    /** Still foretold while it is only a question: the band is still there. */
+    expect(
+      await whatItWillSay(await headOf(session), DEMO_LEADING_PRESET, randomIdFactory, systemClock)
+    ).toBeDefined()
+
+    await confirmHeld(beginDemoWrite(session).path, {
+      proposalId: proposalIdSchema.parse(held.heldProposalId),
+      actor: "a demo visitor",
+    })
+
+    expect(
+      await whatItWillSay(await headOf(session), DEMO_LEADING_PRESET, randomIdFactory, systemClock)
+    ).toBeUndefined()
   })
 
   it("carries the whole removed subtree in the inverse, so undo can put it back", async () => {

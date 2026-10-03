@@ -1,5 +1,5 @@
 /*
- * The block at page.mdx:124 of /docs/building-with-loom/what-ai-may-change, read on its own.
+ * The block at page.mdx:126 of /docs/building-with-loom/what-ai-may-change, read on its own.
  *
  * It does the same job as the block above it, a different way, so it is a
  * program of its own rather than a continuation of the page's.
@@ -16,7 +16,7 @@ import { gatePolicySchema } from "@jam-overture/loom"
 
 import { registry } from "../context/building-with-loom--what-ai-may-change"
 
-// page.mdx:124 — the same job as the block above, done differently
+// page.mdx:126 — the same job as the block above, done differently
 export const policy = gatePolicySchema.parse({
   policyId: "acme-storefront-2026-09",
   protectedPrimitiveTypes: ["commerce.checkout", "commerce.price-tag"],

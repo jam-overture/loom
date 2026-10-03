@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 /**
- * Three tables: the buffer batches wait in, and the two counters that outlive
+ * Four tables: the buffer batches wait in, and the three counters that outlive
  * them.
  *
  * The split is 0146's — raw signals are short-lived and aggregates are durable
@@ -77,6 +77,12 @@ export const loomReaderTallies = pgTable(
     activations: bigint("activations", { mode: "number" }).notNull(),
     opens: bigint("opens", { mode: "number" }).notNull(),
     closes: bigint("closes", { mode: "number" }).notNull(),
+    /**
+     * Added with the fifth kind, and defaulted for the same reason `engaged`
+     * is: a deployment whose table predates the question has rows for which
+     * `0` is the true answer, not a missing one.
+     */
+    completions: bigint("completions", { mode: "number" }).notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [primaryKey({ columns: [table.treeId, table.revision, table.nodeId] })]
@@ -114,4 +120,30 @@ export const loomReaderFunnels = pgTable(
       ],
     }),
   ]
+)
+
+/**
+ * One region at one revision, as page views that began there.
+ *
+ * The narrowest table in the subsystem, and the narrowness is the point: a tree,
+ * a revision, a country and a number. There is no view key, no address, no
+ * digest of one and no per-arrival row, so there is nothing here to join against
+ * — which is what makes a region safe to keep for as long as the counters it
+ * sits beside.
+ *
+ * Written on the request path rather than by a rollup, because the request is
+ * the only place the region was ever knowable, and `views` counts openings so
+ * that a long visit is not a large number.
+ */
+export const loomReaderRegions = pgTable(
+  "loom_reader_regions",
+  {
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    /** A country code, or the word for not knowing. A closed set, so this column cannot be written freely. */
+    region: text("region").notNull(),
+    views: bigint("views", { mode: "number" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.treeId, table.revision, table.region] })]
 )

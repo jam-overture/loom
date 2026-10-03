@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest"
 import { action, prose, section } from "../nodes"
 import { bandsOf } from "../outline"
 import { homePageTree } from "../pages/home"
+import { howItWorksPageTree } from "../pages/how-it-works"
 import { DEFAULT_THEME } from "../site"
 
 import { discloseTargetIn, pressTargetIn, UNDECLARED_DISCLOSING_TYPES } from "./aim"
@@ -29,6 +30,15 @@ import { discloseTargetIn, pressTargetIn, UNDECLARED_DISCLOSING_TYPES } from "./
 const ORIGIN = "https://loom.example"
 
 const frontDoor = () => homePageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
+
+/**
+ * The page the five choices live on, as of 1 October.
+ *
+ * Three of these tests are about the band that offers them and the rest are
+ * about the front door's own bands, so the file needs both trees rather than
+ * one. The band moved; what it demonstrates about a reader's aim did not.
+ */
+const mechanism = () => howItWorksPageTree({ origin: ORIGIN, theme: DEFAULT_THEME })
 
 const bandNamed = (page: LoomTree, name: string) => {
   const found = bandsOf(page).find((band) => band.name === name)
@@ -53,7 +63,7 @@ const pageOf = (band: (ids: IdFactory) => LoomNode): LoomTree => {
 
 describe("the thing a reader pressed", () => {
   it("is inside the band and is never the band itself", () => {
-    const page = frontDoor()
+    const page = mechanism()
     const band = bandNamed(page, "See it happen")
     const aim = pressTargetIn(page, band.id, band.name)
 
@@ -68,7 +78,7 @@ describe("the thing a reader pressed", () => {
    * under the band it happened in.
    */
   it("names the regions above it nearest first, ending at the page", () => {
-    const page = frontDoor()
+    const page = mechanism()
     const band = bandNamed(page, "See it happen")
     const within = pressTargetIn(page, band.id, band.name).within
 
@@ -255,7 +265,7 @@ describe("the thing a reader opened", () => {
   })
 
   it("stops the build and names the band when the band holds nothing that opens", () => {
-    const page = frontDoor()
+    const page = mechanism()
     const band = bandNamed(page, "See it happen")
 
     expect(() => discloseTargetIn(page, band.id, band.name)).toThrow(/opened something/)

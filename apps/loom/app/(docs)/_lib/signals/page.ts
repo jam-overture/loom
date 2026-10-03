@@ -61,6 +61,8 @@ export type KindRow = {
   readonly carries: string
   /** The same thing in the words the page opens with, before any of them are named. */
   readonly plainly: string
+  /** The sentence that stops a reader over-reading the name. */
+  readonly doesNotMean: string
   /** One real signal of this kind, as JSON, having been through the schema. */
   readonly example: string
 }
@@ -81,7 +83,34 @@ export type KindRow = {
 const DESCRIPTIONS: Readonly<
   Record<
     DocumentedKind,
-    { readonly means: string; readonly here: string; readonly carries: string; readonly plainly: string }
+    {
+      readonly means: string
+      readonly here: string
+      readonly carries: string
+      readonly plainly: string
+      /**
+       * The gap between the name and the fact, which every one of these has.
+       *
+       * **Required, for every kind, whether the runtime has it or not.** It used
+       * to be a partial table printed only beside a kind that was agreed on and
+       * not built, on the reasoning that once a kind ships what it does is
+       * visible in the signals beside it. That reasoning is wrong and
+       * `Loom signals` filed it on the day `completed` landed: a signal beside
+       * `completed` shows a form that was let go, and shows nothing at all about
+       * the forms this seam cannot see, so the row left behind said only what the
+       * kind *does* mean to a reader about to build a conversion report on it.
+       *
+       * The same argument holds for the other four, which is why this is a field
+       * rather than a second table. Every one of these names is shorter than the
+       * fact it stands for — a name has to be — and in each case the shortfall is
+       * a mechanism in the broadcaster rather than a nuance: a press is reported
+       * without its effect, a disclosure without who caused it, time on screen
+       * without attention. `gaps.test.tsx` makes the broadcaster do each of those
+       * and reads the signals back, so these sentences are held to the code
+       * rather than to this file's belief about it.
+       */
+      readonly doesNotMean: string
+    }
   >
 > = {
   viewed: {
@@ -89,30 +118,40 @@ const DESCRIPTIONS: Readonly<
     here: "The reader scrolled far enough for the questions band to be on screen.",
     carries: "at — when it happened",
     plainly: "which part someone looked at",
+    doesNotMean:
+      "It does not mean anybody read it. Enough of the element was on screen, in a tab that was in front — so a reader who scrolled straight past is counted exactly like one who stopped, and a node sitting on screen in a tab nobody is looking at is not counted at all.",
   },
   dwelled: {
     means: "It was on screen this long, since the last batch went out.",
     here: "They stayed on the first section for eleven seconds before scrolling.",
     carries: "ms — milliseconds, this batch only",
     plainly: "what they stayed on",
+    doesNotMean:
+      "It does not mean time spent reading. A tab nobody has in front of them accrues nothing, which is as close to attention as a browser gets; a window left open behind another window goes on counting.",
   },
   activated: {
     means: "A reader used a link, a button or a field inside it.",
     here: "They pressed “See the frames”.",
     carries: "at — when it happened",
     plainly: "what they pressed",
+    doesNotMean:
+      "It does not mean the press did anything. The page is watched and the outcome is not, so a control whose handler cancelled it, failed, or did nothing at all reports the same signal as one that worked.",
   },
   disclosed: {
     means: "A region was opened, or closed.",
     here: "They opened “How long does a frame take?”.",
     carries: "open — true for opened, false for closed",
     plainly: "what they opened",
+    doesNotMean:
+      "It does not mean a reader opened it. It is read off the region's own state changing, and your own code changing it — a link that arrives with an answer already expanded, an “open all” — looks identical to a person doing it.",
   },
   completed: {
     means: "A form inside it was submitted, and the browser let it go.",
     here: "Nothing on the page above can produce one: there is no form in it.",
     carries: "at — when it happened",
     plainly: "what they finished",
+    doesNotMean:
+      "It does not mean a server accepted it, and it does not mean every submission is counted. The broadcaster watches the page and never the reply: it reports a form the page let go with its constraints satisfied, so a form posted with fetch — which is most forms in a client-rendered app — reports nothing at all.",
   },
 }
 
@@ -248,22 +287,22 @@ export const produceKinds = (): readonly KindRow[] =>
     return { kind, ...description, example: JSON.stringify(acceptedExample(kind)) }
   })
 
-/**
- * The half of an approved kind's meaning that a name cannot carry, which is the
- * half worth printing.
- *
- * Only a kind that is not in the runtime needs one: once it ships, what it does
- * is visible in the signals beside it.
- */
-const NOT_MEANT: Partial<Readonly<Record<DocumentedKind, string>>> = {
-  completed: "It does not mean a server accepted it. The broadcaster watches the page, never the reply — it can see that a form was let go with its constraints satisfied, and a kind that implied more than that would be measuring something it cannot see.",
-}
-
 export type ApprovedRow = {
   readonly kind: DocumentedKind
   readonly means: string
   readonly carries: string
-  /** The sentence that stops a reader over-reading it. */
+  /**
+   * The sentence that stops a reader over-reading it, from the same field the
+   * live rows read.
+   *
+   * There used to be a second table here holding one sentence for one kind, and
+   * the two lists each printed a different amount about the same thing: a kind
+   * that was agreed on and not built got its caveat, and the moment it shipped
+   * the caveat went with the announcement. Reading it off `DESCRIPTIONS` is what
+   * makes that impossible — the sentence belongs to the kind rather than to the
+   * list the kind happens to be on this week, so moving between the lists is the
+   * only thing that happens on the day a kind lands.
+   */
   readonly doesNotMean: string
 }
 
@@ -292,7 +331,7 @@ export const produceApproved = (
       kind,
       means: description.means,
       carries: description.carries,
-      doesNotMean: NOT_MEANT[kind] ?? "",
+      doesNotMean: description.doesNotMean,
     }
   })
 

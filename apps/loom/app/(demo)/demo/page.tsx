@@ -1,4 +1,4 @@
-import { randomIdFactory } from "@jam-overture/loom"
+import { randomIdFactory, systemClock } from "@jam-overture/loom"
 import { renderLoomTree } from "@jam-overture/loom/react"
 
 import { roomToLand } from "@/app/(demo)/_lib/arrival"
@@ -8,6 +8,7 @@ import { whatTheRailShows } from "@/app/(demo)/_lib/rail"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
+import { whatEachWillSay } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { AskPanel } from "./_components/ask-panel"
 import { BackToTheRecord } from "./_components/back-to-the-record"
@@ -143,6 +144,29 @@ const DemoPage = async () => {
     ),
   })
 
+  /**
+   * And what the Gate will say about **every** ask the panel is about to offer,
+   * reached by running each of them — interpreted, analysed, assessed and
+   * gated, stopping at the verdict without writing (0021).
+   *
+   * **This page decides nothing by making the calls.** Which asks are on offer
+   * is `rail.ts`'s reading, taken straight off the view above and handed
+   * through; what comes back is a record of answers the runtime produced, keyed
+   * by the ask they are about. Which of them leads, whose verdict goes under
+   * the green button, and how the rest divide are all `ask-panel.tsx`'s —
+   * deliberately, because this file is an `async` Server Component and no
+   * `vitest` run can reach one. The only thing that has to happen here is the
+   * `await`, which is the one thing a client component cannot do.
+   *
+   * **It was one call until 2 October and is now one per offered ask**, and it
+   * is still a tree walk and no key: the presets are deterministic (0057). What
+   * that buys is the arrival screen's claim — *you can ask for 5 changes here;
+   * Loom will make 2 on its own and ask you first about 3* — which is a count
+   * of these answers rather than a promise about them, and which no deployment
+   * has to be configured to earn.
+   */
+  const willSay = await whatEachWillSay(tree, rail.available, randomIdFactory, systemClock)
+
   return (
     /* On a wide screen the demo is one viewport: the bar is fixed, and the
      * stage and the rail scroll independently, so a visitor reading a record
@@ -191,6 +215,7 @@ const DemoPage = async () => {
             modelConfigured={isDemoModelConfigured}
             {...(rail.waiting === undefined ? {} : { waiting: rail.waiting })}
             {...(rail.leading === undefined ? {} : { leading: rail.leading })}
+            willSay={willSay}
           />
 
           {rendered.diagnostics.length > 0 && (

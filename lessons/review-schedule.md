@@ -1611,6 +1611,107 @@ work.
 
 ---
 
+## Set AK — two days after lesson 32
+
+Interleaved with 09, 14, 17, 25, 28 and 31. Heavy on 25, because *a check is
+bounded by the population of values that pass through the place it runs* is this
+lesson's second half arriving from the other direction; and on 17, because a
+measurement that is not allowed to act on its own verdict is a shape this course
+has met before and in a different lane.
+
+1. *Does this page overflow* is not a question about the page. Name the inputs the
+   answer is a function of, say which of them anybody in Loom owns, and then say
+   which one of the ones you listed a reader can change without touching anything.
+   *(14, 32)*
+2. A `loom.backdrop` sets `overflow: hidden` and has to. State the reason it has
+   to, state what that costs the one automated visual check in this repository,
+   and then say how far the cost reaches — not which primitives clip, but which
+   *pages*. *(32)*
+3. `scrollWidth` is the obvious way to ask how far a clipping box's content
+   reaches, and it is wrong twice over. Name both things in the starter library it
+   reports as defects, and then say what a false line in a report costs. Your
+   answer to the last part must not be "it is inaccurate". *(32)*
+4. The instrument is two functions in two files. Say what decides which side a
+   piece of it goes on, give one exclusion that can live on the arithmetic side
+   and one that cannot, and state the general rule about why. *(25, 32)*
+5. The per-box reading deliberately does not change the exit code, and the record
+   argues that folding it in would have been how the instrument got switched off
+   rather than fixed. Give that argument, give the counter-argument, and then say
+   what would have to be true before the decision is revisited. *(32)*
+6. Compare this seam's remedy with lesson 31's. Both are about a fact that is
+   invisible to a pure function of the tree, and they end up in different places.
+   Say what makes a *declaration at registration* the right answer in one case and
+   impossible in the other, in a sentence about who knows. *(31, 32)*
+7. The only suite that drives this instrument hands its browser double a function
+   and is handed back a clean reading somebody typed into the test. Say exactly
+   what that suite asserts, say what it cannot assert, and then say why lesson
+   29's remedy — instrument the place the thing happens — is unavailable.
+   *(29, 32)*
+8. A primitive handed twelve rows it can read eleven of says so, and a primitive
+   whose heading will not fit a phone does not. Both faults are invisible from
+   outside at the moment they happen. Say what distinguishes them, and make your
+   answer a sentence about a *party* rather than about a mechanism. *(24, 32)*
+9. Lesson 17 has a number that measures something and is not allowed to act on
+   it. This lesson has a reading that names something and does not fail the build.
+   Say what the two have in common, and then say what makes them different —
+   because one of the two separations is permanent and the other has a shelf life.
+   *(17, 28, 32)*
+
+Question 4 is the point of the set and the one that transfers furthest outside
+this repository. Question 2 is where a confident half-answer is most likely: the
+reach of the blindness is the part nearly everybody understates, and it is
+understated in the same way every time.
+
+---
+
+## Set AL — two days after lesson 33
+
+Interleaved with 05, 14, 18, 28, 29 and 32. Heavy on 14, because *what a renderer
+returns is a description and not a page* is the sentence this lesson is built on
+and the one most readers have filed under something else; and on 28, because the
+construction that keeps this seam honest is that lesson's cheapest second copy,
+which is no second copy at all.
+
+1. A source answers twelve rows and a primitive draws eleven. The other ways a
+   binding can be wrong were reported by the walk on its own and this one was not.
+   Say what makes it invisible from outside, and make your answer about *where a
+   shape lives*. *(18, 33)*
+2. The page says some entries could not be shown and carries no figure; the
+   diagnostic carries both figures and no sentence. Give the reason for each, and
+   then say who each one is addressed to. *(33)*
+3. `renderLoomTree` returns an element and an array of diagnostics. Say what an
+   element *is*, and then say what follows about anything a component body wanted
+   to add to that array. The first half is lesson 14's and the second is this
+   lesson's. *(14, 33)*
+4. A component that reports its own count is wrong for three reasons. Give all
+   three, and then say which one would still hold in a system with no component
+   model in it at all. *(33)*
+5. Eight declarations on a primitive are data and one is a function. State the
+   question that decides which, and then apply it to a declaration this course has
+   not discussed: how long a primitive's content takes to read. *(29, 33)*
+6. The declaration is handed the node's props and the node's answers and
+   deliberately nothing more. Give the reason, and say what is lost by handing it
+   the resolved tree as well. Your answer must not be about performance. *(33)*
+7. A declaration returns three readings and the second one is impossible. Say what
+   happens to the other two, give both halves of that argument, and then say what
+   happens to the page — and which promise of this course that last answer is
+   keeping. *(05, 14, 33)*
+8. Compare this seam's remedy with lesson 29's and lesson 32's. All three are
+   about a fact a checker cannot get at, and they end in three different places.
+   Say what decides which, in a sentence about *who owns the inputs* and a second
+   about *when that party runs*. *(29, 32, 33)*
+9. A declaration that says twelve of twelve for a component that drew eleven is
+   silent and believable. Say what makes it unlikely, say why that cannot be
+   enforced, and then name two other declarations on a primitive that carry the
+   same exposure. *(28, 33)*
+
+Question 8 is the point of the set and the one that transfers furthest outside
+this repository. Question 3 is where a confident half-answer is most likely: most
+readers can say the renderer is pure and total and have never had to say what the
+thing it returns actually is.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1661,3 +1762,5 @@ renders this file rather than restating it.
 | AH | 2 days after L29 | | |
 | AI | 2 days after L30 | | |
 | AJ | 2 days after L31 | | |
+| AK | 2 days after L32 | | |
+| AL | 2 days after L33 | | |

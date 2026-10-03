@@ -259,7 +259,7 @@ describe("the spelling a reader meets", () => {
  * half a reader sees.
  *
  * **`cost` is deliberately not caught.** `PRODUCT_SURFACES` prices each
- * destination in *attention* — *Costs you a click*, *Costs you an afternoon* —
+ * destination in *attention* — *Takes one click*, *Takes an afternoon* —
  * which is the most useful thing that band says and is not a price.
  */
 const PRICED = new RegExp(
@@ -288,5 +288,90 @@ describe("what the site says about what it costs", () => {
       route: route.path,
       priced: [],
     })
+  })
+})
+
+/**
+ * **Plain language, and it is the maintainer's instruction of 1 October made
+ * into a test.**
+ *
+ * His words, about two sentences this lane had written:
+ *
+ * > *"Why do you write stuff so weirdly. No one talks like that. … Stop writing
+ * > weird shit. It should sound like common language. Explain things if you
+ * > have to."*
+ *
+ * He was right, and it was not two sentences. Measured across the page builders
+ * the morning he said it, **a quarter to a half of every sentence over forty
+ * characters carried an em dash** — because each run of this lane wrote in the
+ * register of the run before it, and nothing anywhere said that was a register
+ * rather than the house style.
+ *
+ * ## Why the em dash is the thing checked
+ *
+ * It is not punctuation snobbery. In this site's copy the em dash was doing one
+ * job almost every time: joining a plain clause to a second clause that
+ * qualified, inverted or dramatized it. *"Loom is wired to no vendor — point it
+ * at the model you already use."* Take the dash away and the sentence has to
+ * become two, and once it is two it has to be plain, because there is no pivot
+ * left to hide the second thought behind.
+ *
+ * So the dash is a **proxy**, and a good one: it is unambiguous, it needs no
+ * judgement, and removing it forces the rewrite that was actually wanted.
+ *
+ * ## Why only the short copy
+ *
+ * This is scoped to the fields a reader **scans** rather than reads — a step,
+ * a card, a stat, a tile. Those are a glance each, and a sentence doing two
+ * jobs in a glance is a sentence nobody finishes. Running prose keeps its
+ * latitude, because a paragraph has room to earn an aside and because sweeping
+ * a rule across every word on the site would catch the maintainer's own lines,
+ * which are his.
+ *
+ * **If this test ever fails, the fix is to write two sentences, not to delete a
+ * dash.** A rule that gets satisfied by swapping in a comma has bought nothing.
+ */
+const SCANNED_PROPS: readonly string[] = ["title", "body", "label", "caption", "value", "eyebrow"]
+
+const scannedCopyOf = (route: SiteRoute): readonly { field: string; text: string }[] => {
+  const found: { field: string; text: string }[] = []
+
+  const walk = (node: LoomNode): void => {
+    if (node.kind === "element") {
+      for (const prop of SCANNED_PROPS) {
+        const value = node.props[prop]
+
+        if (typeof value === "string") found.push({ field: `${node.type}.${prop}`, text: value })
+      }
+    }
+
+    if (node.kind !== "text") node.children.forEach(walk)
+  }
+
+  walk(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
+
+  return found
+}
+
+describe("the copy a reader scans rather than reads", () => {
+  it.each(SITE_ROUTES)("$path says it without reaching for an em dash", (route) => {
+    const offenders = scannedCopyOf(route)
+      .filter(({ text }) => text.includes("—"))
+      .map(({ field, text }) => `${field}: ${text}`)
+
+    expect({ route: route.path, offenders }).toEqual({ route: route.path, offenders: [] })
+  })
+
+  /**
+   * The other half of the same tic. A step or a card that needs thirty-five
+   * words is a step carrying two ideas, and the second one is always the one
+   * that got written in the mannered voice.
+   */
+  it.each(SITE_ROUTES)("$path keeps a scanned field to something scannable", (route) => {
+    const tooLong = scannedCopyOf(route)
+      .filter(({ text }) => text.split(/\s+/).length > 35)
+      .map(({ field, text }) => `${field} (${text.split(/\s+/).length} words): ${text}`)
+
+    expect({ route: route.path, tooLong }).toEqual({ route: route.path, tooLong: [] })
   })
 })

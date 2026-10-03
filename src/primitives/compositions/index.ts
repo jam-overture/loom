@@ -3,15 +3,19 @@ import { COMPOSITION_PARTS } from "./composition.js"
 import { articlesBand } from "./articles-band.js"
 import { bannerBand } from "./banner-band.js"
 import { bentoBand } from "./bento-band.js"
+import { bentoMixedBand } from "./bento-mixed-band.js"
 import { catalogueBand } from "./catalogue-band.js"
 import { changelogBand } from "./changelog-band.js"
+import { changelogNotesBand } from "./changelog-notes-band.js"
 import { codeBand } from "./code-band.js"
 import { codeSessionBand } from "./code-session-band.js"
 import { comparisonBand } from "./comparison-band.js"
+import { comparisonWaysBand } from "./comparison-ways-band.js"
 import { conversationBand } from "./conversation-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
 import { credentialsBand } from "./credentials-band.js"
+import { credentialsPostureBand } from "./credentials-posture-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
@@ -21,6 +25,7 @@ import { featuresBand } from "./features-band.js"
 import { feedBand } from "./feed-band.js"
 import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
+import { footerSignupBand } from "./footer-signup-band.js"
 import { heroBand } from "./hero-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
@@ -30,6 +35,7 @@ import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
 import { metricsLiveBand } from "./metrics-live-band.js"
 import { navBand } from "./nav-band.js"
+import { navCentredBand } from "./nav-centred-band.js"
 import { offeringsBand } from "./offerings-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
@@ -38,9 +44,11 @@ import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
 import { shelfBand } from "./shelf-band.js"
 import { specsBand } from "./specs-band.js"
+import { specsSheetBand } from "./specs-sheet-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
+import { teamLeadsBand } from "./team-leads-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
 import { whatsOnBand } from "./whats-on-band.js"
@@ -57,15 +65,19 @@ export {
   articlesBand,
   bannerBand,
   bentoBand,
+  bentoMixedBand,
   catalogueBand,
   changelogBand,
+  changelogNotesBand,
   codeBand,
   codeSessionBand,
   comparisonBand,
+  comparisonWaysBand,
   contactBand,
   conversationBand,
   contactDetailsBand,
   credentialsBand,
+  credentialsPostureBand,
   ctaBand,
   ctaSignupBand,
   episodesBand,
@@ -75,6 +87,7 @@ export {
   featuresAlternatingBand,
   feedBand,
   footerBand,
+  footerSignupBand,
   heroBand,
   heroSplitBand,
   integrationsBand,
@@ -84,6 +97,7 @@ export {
   metricsChartBand,
   metricsLiveBand,
   navBand,
+  navCentredBand,
   offeringsBand,
   pricingBand,
   pricingMatrixBand,
@@ -92,9 +106,11 @@ export {
   proofStoryBand,
   shelfBand,
   specsBand,
+  specsSheetBand,
   stepsBand,
   stepsCardsBand,
   teamBand,
+  teamLeadsBand,
   testimonialsBand,
   testimonialsWallBand,
   whatsOnBand,
@@ -146,6 +162,7 @@ export {
 export const STARTER_COMPOSITIONS: readonly Composition[] = [
   bannerBand,
   navBand,
+  navCentredBand,
   heroBand,
   heroSplitBand,
   proofBand,
@@ -157,6 +174,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   shelfBand,
   listingsBand,
   bentoBand,
+  bentoMixedBand,
   stepsBand,
   stepsCardsBand,
   codeBand,
@@ -168,19 +186,24 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   metricsChartBand,
   metricsLiveBand,
   specsBand,
+  specsSheetBand,
   pricingBand,
   pricingMatrixBand,
   offeringsBand,
   comparisonBand,
+  comparisonWaysBand,
   testimonialsBand,
   testimonialsWallBand,
   credentialsBand,
+  credentialsPostureBand,
   teamBand,
+  teamLeadsBand,
   articlesBand,
   feedBand,
   episodesBand,
   whatsOnBand,
   changelogBand,
+  changelogNotesBand,
   faqBand,
   faqGridBand,
   contactBand,
@@ -188,6 +211,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   ctaBand,
   ctaSignupBand,
   footerBand,
+  footerSignupBand,
 ]
 
 /**

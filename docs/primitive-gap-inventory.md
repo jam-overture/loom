@@ -15,6 +15,21 @@ The short answer: **the honest ceiling on distinct primitives is about 110–120
 not 250.** The number 250 is reachable, and the rest of it is compositions. The
 arithmetic is at the end.
 
+> **Where the count is, 3 October 2026: 102 primitives, 52 bands, 154 droppable
+> things.** Tier A closed on 14 September except the radio group, which is in
+> Tier B's second group below and blocked there. Tier B's first group is
+> **unblocked and three of its four have shipped**; its other two groups are the
+> whole of what is left behind a framework decision. Read the corrected Tier B
+> before planning a run against this document — it said something false for
+> eleven days and that is what the correction is about.
+>
+> **The vocabulary has not moved since 1 October and that is the
+> recommendation being followed** — three runs on, not a stall: this document's own arithmetic
+> puts the honest ceiling at 110–120 and says to spend the week on
+> compositions. The instrument for choosing *which* composition is
+> [designs per part](#designs-per-part--measured-2-october), added 2 October,
+> and it is the one to read before the tier tables below.
+
 ## The thing that makes 250 look reasonable, and why it misleads
 
 21st.dev advertises **1152 hero components, 216 pricing sections, 161
@@ -110,22 +125,42 @@ for the other, and it was found by building both.
 is one enum member and one open design question, not two strings, and this
 paragraph is here so the next run does not re-count it as cheap.
 
-## Tier B — blocked on the behaviour vocabulary
+## Tier B — **three groups, not one decision** (corrected 1 October)
 
-Every one of these is a thing a marketing page genuinely has, and every one needs
-the framework to name a behaviour the tree can declare. A tab strip has been
-filed for this since at least 11 September (*"wants a `select` member in the
-behaviour vocabulary"*).
+This section said *"roughly nine, and they arrive together or not at all,
+because they are one framework decision rather than nine"* from 13 September to
+1 October. **That stopped being true on 20 September** and the document a lane
+reads before choosing work said otherwise for eleven days;
+[0176](../decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+sorts the nine by what each actually needs and says of the first group *"This
+record settles the first."* `Loom lessons` filed the correction on 29 September,
+having measured it from the other end — `present` and `dismiss` were in the
+vocabulary and nothing in the library declared either.
 
-tabs · tooltip · popover / hover card · dialog or modal · dropdown menu ·
-toast · lightbox gallery · a monthly/annual pricing toggle · a filter or
-segmented control
+So, split the way 0176 splits them:
 
-**Roughly nine**, and they arrive together or not at all, because they are one
-framework decision rather than nine. They are `Loom daily build`'s to open, not
-this lane's to work around — and working around them individually, with a
-`<details>` here and a CSS-only tab strip there, is how a library ends up with
-nine different answers to one question.
+| group | what it needs | state |
+| --- | --- | --- |
+| **dialog · dropdown · lightbox · tooltip** | a region that opens and can be closed by something other than the opener | **unblocked 20 Sep by `present`/`dismiss`.** Three of the four shipped 1 October — `loom.menu`, `loom.popover`, `loom.lightbox` |
+| **tabs · segmented control · pricing toggle · radio group** | one of *n* children chosen, where the labels are in the children | **blocked, and `ARCHITECTURAL`.** A container receives its children as one rendered node and cannot read a prop off one (0008), so a control that renders *n* labelled buttons cannot learn what to put on them. 0176 filed it and did not build it |
+| **toast** | a region that appears on an event nobody pressed | **blocked.** One primitive, one gap, and the only member of the vocabulary that would render no control the reader aims at |
+
+### What the first group's three cost, and the one it did not buy
+
+`loom.menu` and `loom.popover` are the named and general halves of one shape
+(0062), `loom.lightbox` is the first primitive in the library to declare **both**
+members of the pair, and the gallery row of Tier C — *gallery →
+`loom.mosaic`* — became true the day a tile existed that opens.
+
+**A dialog is the one the group did not deliver, and the reason is the trigger's
+word rather than its behaviour.** A control's name is declared by the primitive
+and resolved through the text seam, which is per *type* — so every
+`loom.lightbox` on every page says `Expand`, and a deployment may translate that
+but a tree may not write it. For an affordance that is the right answer, and for
+the three that shipped the generic word is the word a reader wants. A dialog's
+trigger is the page's call to action, which is content, and the seam has nowhere
+to put it. Filed on 1 October against the framework; until it moves, a dialog
+here would be a modal opened by a chip reading *Open*.
 
 ## The reach of the catalogue over the vocabulary — measured 19 September
 
@@ -174,6 +209,85 @@ the landing page of the product that owns it.
 **The instrument, for whoever picks this up: measure the catalogue against the
 registry, not the registry against Hermes.**
 
+## Designs per part — measured 2 October
+
+**A third instrument, and the one a run choosing catalogue work should read
+first.** The two above count what the *library* lacks and what the *catalogue*
+cannot reach. Neither can see the gap this one measures, which is the gap
+21st.dev's numbers are actually made of: a part of the page with exactly one
+design is a part where a deployment has no choice at all, and the catalogue
+reads as complete from every other angle while it is true.
+
+Measured with `compositionsForPart` over `COMPOSITION_PARTS`, which is one
+`filter` from any registry and needs no script:
+
+| | 1 Oct | 2 Oct | 3 Oct |
+| --- | --- | --- | --- |
+| parts | 22 | 22 | 22 |
+| bands | 44 | 48 | 52 |
+| **parts with exactly one design** | **9** | **5** | **1** |
+
+The nine were `banner`, `nav`, `bento`, `specs`, `comparison`, `credentials`,
+`team`, `changelog` and `footer`. Four of them closed on 2 October — `nav`,
+`bento`, `comparison` and `footer` — and those four rather than any other four
+because **two of them are the bands a page cannot be without.** A page may skip
+its changelog and most do; no page skips its header or its footer, so a single
+design there is the catalogue deciding, for every deployment, what the top and
+the bottom of their page look like.
+
+**The five left, in the order a run should take them:** `specs`, `team`,
+`credentials`, `changelog`, `banner`. Each is one band of work and none is
+blocked by anything.
+
+### Four of the five closed on 3 October, and `banner` is the one left
+
+`specs-sheet`, `team-leads`, `credentials-posture` and `changelog-notes` took the
+first four in the order above. **`banner` is deliberately not the fifth**, and the
+reason is this document's own bar rather than a shortage of time.
+
+A banner is a strip, one sentence, and one thing to do about it. The second design
+anybody would name is *the strip whose action is a button rather than a link* —
+and the honest reading of that is a `loom.button` where a `loom.link` was, which
+is a different set of nodes by the letter of 0162 and is the thinnest entry the
+catalogue would contain. A badge in front of the sentence makes it thinner still,
+because the canonical already carries a `loom.emphasis` doing that work.
+
+So the designs-per-part instrument now has **one row left and the honest answer
+to it may be that a part with a single design is sometimes correct.** A part whose
+whole content is one sentence has less room for a second design than a part that
+is a wall of cards, and forcing one would put a catalogue entry where 0162 says a
+`configure` belongs. The next run reading this list should decide that question
+rather than assume the number should reach zero — and if it does build one, the
+bar is a *region* of the strip the canonical does not have, not a swapped leaf.
+
+**This instrument has done its job and is close to retiring.** Three runs chose
+work from it and it went 9 → 5 → 1. What it cannot see, and what the next
+instrument will have to, is whether the *second* design of a part that now has two
+is the one a deployment actually wants — reach counts whether a primitive is
+buildable, designs-per-part counts whether a part offers a choice, and neither
+counts whether the choice is a real one.
+
+The bar for a second design is 0162's and `compositions.test.ts` holds it: a
+**different set of nodes**, not the same band with different props. The test
+that catches the near-miss is already written — two designs of a part whose node
+types read the same in the same order fail by name — so the cost of getting this
+wrong is a red build rather than a catalogue entry where a `configure` belongs.
+
+### What the reach measurement says after those four
+
+Reach went 89 → 90 of 102. `loom.popover` came into reach, through
+`comparison-ways`, which is the band that shows its working.
+
+**`loom.menu` did not, and it is the one entry on the unreached list that is not
+waiting for somebody to write a band.** It is waiting on a word. `loom.nav`
+declares `disclose` and names its own control `Menu`; `loom.menu` names its
+control `Menu` too, because a control's word belongs to the primitive and is
+resolved per type (0055, 0063). A bar holding both has two buttons reading *Menu*
+at 390px, one inside the other — so the obvious second nav design, the one whose
+destinations fold behind a button, cannot be built at the quality bar until the
+filing about a control's name moves. Recorded here so the next run reading the
+unreached list does not spend an afternoon rediscovering it.
+
 ## Tier C — things that look missing and are not
 
 Checked so the next run does not re-propose them. Each is covered, and the
@@ -188,7 +302,7 @@ accordion → `loom.faq` (*"a disclosure a reader opens"*) · alert → `loom.ca
 + `loom.marquee` · bento → `loom.mosaic` · press / awards → `loom.credential` ·
 video → `loom.embed` · map → `loom.media` (static) or `loom.embed` (live) ·
 newsletter → `loom.form` · changelog → `loom.milestone-list` · integrations →
-`loom.orbit` · comparison → `loom.comparison-table` · gallery → `loom.mosaic`
+`loom.orbit` · comparison → `loom.comparison-table` · gallery → `loom.mosaic` of `loom.lightbox` (the tile that opens, 1 Oct)
 
 A **general** `loom.disclosure` and a **general** `loom.definition-list` were
 both considered again and both rejected again: the first is `loom.faq` with the

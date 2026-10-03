@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest"
 
 import { entryPoints } from "../entry-points"
 
+import { siteCount } from "../counts"
+
 import { KNOB_ORDER } from "./knobs"
 import { COMPARISON_IDS } from "./verdicts"
 
@@ -60,23 +62,6 @@ const fieldsWritten = (): readonly string[] =>
     [...(call[1] ?? "").matchAll(TOP_LEVEL_KEY)].map((key) => key[1] ?? "")
   )
 
-/** Written-out numbers, because the page is prose and prose spells them. */
-const WORDS: Readonly<Record<number, string>> = {
-  12: "twelve",
-  13: "thirteen",
-  14: "fourteen",
-}
-
-const wordFor = (value: number): string => {
-  const word = WORDS[value]
-
-  if (word === undefined) {
-    throw new Error(`loom: this page's claims test has no word for ${value}`)
-  }
-
-  return word
-}
-
 describe("the imports this page prints", () => {
   it("prints some, so the checks below are not vacuous", () => {
     expect(importLines().length).toBeGreaterThan(0)
@@ -129,21 +114,37 @@ describe("the policies this page writes out", () => {
  */
 const prose = page.replace(/\s+/g, " ")
 
-/** The page is prose and starts sentences with these, so the test has to as well. */
-const opening = (word: string): string => `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`
-
+/**
+ * What the page says about how many settings there are.
+ *
+ * **Both assertions here used to pin a spelled number**, derived from
+ * `KNOB_ORDER` and correct every day they ran. They were also the reason a
+ * fifteenth knob could not land without reddening four surfaces until somebody
+ * retyped two words on this page — which is the 16 September finding, filed by
+ * this lane against itself. The remedy it names is that the page may not say
+ * the number.
+ *
+ * So the count is produced, spelled, by `<Count of="policy-settings" />`, and
+ * the sentence that argued from *thirteen of fourteen* makes the same argument
+ * without the arithmetic. What is asserted now is that the page **asks** for
+ * the number. The guarantee is strictly stronger: the old pair could only be
+ * right about the day it ran, and `counts.test.ts` additionally refuses any
+ * number standing in front of *settings* or *knobs* on **any** page of the
+ * site, which is where the stale one actually was.
+ */
 describe("what the page says about the settings", () => {
-  it("says how many there are, and is right", () => {
-    expect(prose).toContain(`${opening(wordFor(KNOB_ORDER.length))} settings`)
+  it("asks for the number of settings rather than spelling it", () => {
+    expect(prose).toContain(siteCount("policy-settings").rendered)
   })
 
   /**
-   * The sentence about the type catching a missing row names both numbers, so a
-   * fifteenth knob would leave the page arguing from arithmetic that no longer
-   * works. Derived here rather than spelled, because that is the whole claim.
+   * And the sentence next to it still makes its case. The claim is about the
+   * type — a knob added to the runtime and not to this page stops the build —
+   * and the page is allowed to say that without counting anything, which is
+   * what it does now.
    */
-  it("keeps its own arithmetic true", () => {
-    expect(prose).toContain(`${wordFor(KNOB_ORDER.length - 1)} of ${wordFor(KNOB_ORDER.length)}`)
+  it("keeps the argument that does not depend on the count", () => {
+    expect(prose).toContain("stops the site compiling")
   })
 })
 

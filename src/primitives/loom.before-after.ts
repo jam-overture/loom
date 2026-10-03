@@ -1,10 +1,12 @@
 import { createElement, type CSSProperties, type ReactNode } from "react"
 import { z } from "zod"
 
+import { ADJUST_PROPERTY } from "../render/behaviour.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
 import { ASPECT_NAMES, ASPECT_RATIOS } from "./layout.js"
+import { libraryStylesheet, LIBRARY_CLASS } from "./stylesheet.js"
 import { colour, family, radius, size, space } from "./tokens.js"
 
 /**
@@ -34,25 +36,45 @@ import { colour, family, radius, size, space } from "./tokens.js"
  * `configure` — 0052's fixed-field clause, in the one place on this primitive
  * where it applies.
  *
- * ## What it does not do, and why that is written down rather than faked
+ * ## It drags, and the paragraph that said it could not was wrong for 29 days
  *
- * **It does not drag.** The divider sits where `position` puts it and stays
- * there. A draggable wipe needs a pointer handler, and a handler is a function
- * — not something a tree's JSON props can carry, and not something this library
- * may implement for itself:
- * [0086](../../decisions/0086-a-behaviour-is-a-control-the-runtime-builds-and-a-primitive-places.md)
- * settled that a behaviour is a control the runtime builds and a primitive
- * places, and the vocabulary has one member. So this is filed as a second
- * member rather than built, and what ships is the still version, which is what
- * most pages that use this actually are.
+ * This file argued at length that a draggable wipe was impossible, and every
+ * clause of the argument was true except the one it turned on:
  *
- * The two pure-CSS routes were both considered and are both worse than the gap.
- * `resize: horizontal` gives a real drag whose grab area is a sixteen-pixel
- * corner nobody finds, and whose grabber is a browser-drawn artefact no palette
- * can reach. An `<input type="range">` cannot drive a clip at all, because CSS
- * has no way to read an input's value. A handle that looks draggable and is not
- * is the same defect `loom.code` refused when it declined to fake a copy
- * button.
+ * > *"a behaviour is a control the runtime builds and a primitive places, and
+ * > the vocabulary has one member. So this is filed as a second member rather
+ * > than built."*
+ *
+ * The vocabulary reached two members on 25 August and
+ * [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
+ * landed the third — `adjust` — on 1 September, **named for this primitive in
+ * its own Context**, with a `clip-path` on an `.after` layer as its worked
+ * example and a docstring saying the `var()` fallback *"should be the position
+ * the primitive's own props declared"*. Nobody placed it. On 29 September
+ * `Loom lessons` measured the vocabulary against the library and found three of
+ * five members with no declaring primitive; this is the first of the three.
+ *
+ * Placing it is four lines and one of them is the interesting one:
+ *
+ * 1. The control goes in **the root**, because `adjust` publishes its number as
+ *    a custom property and a property resolves by inheritance — downwards only.
+ *    On its own element it would be readable by nothing.
+ * 2. The clip reads `var(--loom-adjust, <position>)`, and **the fallback is the
+ *    prop**. That is the whole of why this is additive: the property does not
+ *    exist until the control has mounted and proved scripting runs, so a page
+ *    served without it is the still comparison at the position the tree asked
+ *    for — which is what most pages using this are, and what shipped before.
+ * 3. The divider's offset reads the same value, so the seam and the handle
+ *    travel together.
+ * 4. The slider's own position is a rule, because a control paints itself inline
+ *    and the class the runtime stamps on it is the only handle a primitive has
+ *    (`control.ts`).
+ *
+ * The two pure-CSS routes this file rejected are still rejected and the reasons
+ * are unchanged — `resize: horizontal` gives a grab area nobody finds, and CSS
+ * alone cannot read an input's value. The second of those is exactly the gap a
+ * behaviour fills: the value is read in a component and written where a
+ * stylesheet can reach it.
  *
  * **The after side is in the flow and the before side is over it.** The
  * alternative — both layers absolute inside a box with a declared ratio — needs
@@ -151,20 +173,53 @@ const LAYER: CSSProperties = {
   display: "flex",
 }
 
+/**
+ * The slider's name, which is this primitive's rather than the tree's (0055),
+ * and travels into every deployment where a dictionary may translate it (0063).
+ * A range input with no accessible name is announced as a bare "slider", which
+ * is why the seam drops a control whose key resolves to a blank rather than
+ * rendering it nameless.
+ */
+const BEFORE_AFTER_TEXT = { adjust: "Wipe position" } as const
+
+type BeforeAfterTextKey = keyof typeof BEFORE_AFTER_TEXT
+
 export const loomBeforeAfter = definePrimitive({
   type: "loom.before-after",
   description:
-    "Two states of one thing superimposed, wiped at a fixed position — a before region and an after region, each with an optional corner label.",
+    "Two states of one thing superimposed, wiped by a slider the reader drags — a before region and an after region, each with an optional corner label.",
   props,
   slots: ["before", "after"],
-  component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
+  text: BEFORE_AFTER_TEXT,
+  behaviours: ["adjust"],
+  /**
+   * It renders a target the reader aims at, which it never did before. The
+   * registry refuses a primitive that takes a control without saying so, and
+   * that check is what keeps a draggable comparison out of a linked card —
+   * where the drag and the link would fight over every pointer press.
+   */
+  interactive: "always",
+  component: ({
+    loom,
+    props: given,
+  }: LoomPrimitiveProps<Props, BeforeAfterTextKey, "adjust">) => {
     const position = given.position ?? DEFAULT_POSITION
     const aspect = given.aspect
+
+    /**
+     * The one expression both the clip and the divider read, written once so
+     * they cannot drift. The fallback is the declared position rather than
+     * `ADJUST_RESTING`: the property is absent until the slider has mounted, and
+     * what a page without scripting must show is the comparison the tree asked
+     * for.
+     */
+    const wipe = `var(${ADJUST_PROPERTY}, ${position})`
 
     return createElement(
       "div",
       {
         ...loom.editable,
+        className: LIBRARY_CLASS.beforeAfter,
         style: {
           position: "relative",
           isolation: "isolate",
@@ -175,6 +230,7 @@ export const loomBeforeAfter = definePrimitive({
           ...(aspect === undefined ? {} : { aspectRatio: ASPECT_RATIOS[aspect] }),
         },
       },
+      libraryStylesheet(),
       /**
        * In the flow, so it is what gives the band its height — and first, so
        * the before side stacks over it without either needing a z-index.
@@ -203,7 +259,7 @@ export const loomBeforeAfter = definePrimitive({
              * the before side and the two would no longer be comparable, which
              * is the entire point of putting them on top of each other.
              */
-            clipPath: `inset(0 ${100 - position}% 0 0)`,
+            clipPath: `inset(0 calc(100% - ${wipe} * 1%) 0 0)`,
           },
         },
         loom.slots["before"]
@@ -216,7 +272,7 @@ export const loomBeforeAfter = definePrimitive({
           style: {
             position: "absolute",
             insetBlock: "0",
-            insetInlineStart: `${position}%`,
+            insetInlineStart: `calc(${wipe} * 1%)`,
             width: "2px",
             marginInlineStart: "-1px",
             ...OUTLINED,
@@ -247,7 +303,20 @@ export const loomBeforeAfter = definePrimitive({
         )
       ),
       given.beforeLabel === undefined ? null : chip(given.beforeLabel, "start"),
-      given.afterLabel === undefined ? null : chip(given.afterLabel, "end")
+      given.afterLabel === undefined ? null : chip(given.afterLabel, "end"),
+      /**
+       * Last in the markup and a **direct child of the root**, which is the one
+       * placement that works: `adjust` writes its property on the element it
+       * finds itself in, and the two things that read it — the before layer's
+       * clip and the divider's offset — are the root's other children. A wrapper
+       * around it, for a tidier corner, would publish the number somewhere
+       * neither of them inherits from.
+       *
+       * Last rather than first because a reader tabbing through a band reaches
+       * the comparison before the control that changes it, and because the
+       * labels are `pointer-events: none` chips that must not sit over it.
+       */
+      loom.behaviours.adjust
     )
   },
 })

@@ -473,9 +473,12 @@ a target and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 99
-  of those, declaring a target: 12
+  primitives registered: 102
+  of those, declaring a target: 16
     loom.nav         "always"
+    loom.menu        "always"
+    loom.lightbox    "always"
+    loom.popover     "always"
     loom.card        {"whenProps":["href"]}
     loom.feature     {"whenProps":["href"]}
     loom.article     {"whenProps":["href"]}
@@ -484,12 +487,13 @@ The output:
     loom.logo        {"whenProps":["href"]}
     loom.credential  {"whenProps":["href"]}
     loom.code        "always"
+    loom.before-after "always"
     loom.action      "always"
     loom.button      "always"
     loom.link        "always"
 ```
 
-Twelve, out of whatever the line above it printed. Most of a component library
+Sixteen, out of whatever the line above it printed. Most of a component library
 arranges targets rather than being one, and it is that ratio — not either number
 on its own — that makes this check affordable.
 

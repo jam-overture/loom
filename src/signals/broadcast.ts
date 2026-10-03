@@ -12,6 +12,7 @@ import { err, ok, type Result } from "../result.js"
 
 import { createSignalLedger, type SignalAddress } from "./ledger.js"
 import { READER_SIGNAL_KINDS } from "./kinds.js"
+import { READABLE_VIEWPORT_FRACTION, READABLE_VISIBLE_FRACTION } from "./readable.js"
 import type { ReaderSignal, ReaderSignalBatch, ReaderSignalKind } from "./signal.js"
 import { mintViewKey, type RandomBytes } from "./view.js"
 
@@ -42,7 +43,13 @@ import { mintViewKey, type RandomBytes } from "./view.js"
  * the control rather than the band. The addressed elements above it go on the
  * signal as `within`, read off the walk this was already doing — because which
  * region a node sat in is a fact about the page at the moment of the press, and
- * nothing downstream can recover it afterwards.
+ * nothing downstream can recover it afterwards. A `completed` carries the same
+ * walk, for the same reason and more sharply: *which band converted* is the
+ * question a deployment opens the portal to ask.
+ *
+ * **A completion is a form the browser let go.** Nothing else on the page is a
+ * finish a reader can be said to have reached, and nothing else is observable
+ * without asking the network how it went (0211).
  *
  * **It keeps up with a page that changes.** Nodes that arrive after it started
  * are watched and nodes that leave stop counting, so a band behind a Suspense
@@ -189,18 +196,17 @@ export type ReaderSignalBroadcastError = {
 const DEFAULT_FLUSH_MS = 5000
 
 /**
- * On screen means a reader could be reading it: at least half of the element is
- * visible, or it fills at least 30% of the viewport. The second clause is not
- * optional — the visible fraction of an element taller than the window can never
- * reach one half, so a long section judged by the first alone is never viewed.
+ * On screen means a reader could be reading it: at least
+ * {@link READABLE_VISIBLE_FRACTION} of the element is visible, **or** it fills
+ * at least {@link READABLE_VIEWPORT_FRACTION} of the viewport.
  */
 const isReadable = (entry: IntersectionObserverEntry): boolean => {
   if (!entry.isIntersecting) return false
 
   const viewport = entry.rootBounds?.height ?? globalThis.innerHeight ?? 0
-  const fills = viewport > 0 && entry.intersectionRect.height / viewport >= 0.3
+  const fills = viewport > 0 && entry.intersectionRect.height / viewport >= READABLE_VIEWPORT_FRACTION
 
-  return entry.intersectionRatio >= 0.5 || fills
+  return entry.intersectionRatio >= READABLE_VISIBLE_FRACTION || fills
 }
 
 const intersectionVisibility: ObserveVisibility = (onChange) => {
@@ -329,6 +335,17 @@ export const broadcastReaderSignals = (
   const view = mintViewKey(options.random)
 
 
+  /**
+   * Whether the opening delivery of this page view has gone.
+   *
+   * One batch of a view carries `first` and the rest do not, which is how an
+   * intake counts a reader arriving exactly once — without it, the only
+   * countable unit is the delivery, and a reader who stays ten minutes is a
+   * hundred of them. A new broadcast mints a new view key and gets a new
+   * opening, which is what a client-side navigation needs.
+   */
+  let opened = false
+
   const ledger = createSignalLedger(document.visibilityState === "hidden")
   let stopped = false
 
@@ -375,8 +392,11 @@ export const broadcastReaderSignals = (
       revision: page.value.revision,
       sentAt: now(),
       view,
+      ...(opened ? {} : { first: true as const }),
       signals,
     }
+
+    opened = true
 
     root.dispatchEvent(new CustomEvent(READER_SIGNALS_EVENT, { detail: batch, bubbles: true }))
     deliverSafely(options.send, batch)
@@ -513,6 +533,37 @@ export const broadcastReaderSignals = (
     }))(details)
   }
 
+  /**
+   * A form inside the page was submitted, which is the one completion a page
+   * can witness on its own.
+   *
+   * **Captured rather than delegated**, like `toggle` and unlike `click`: a
+   * handler inside the page may call `stopPropagation`, and a submission the
+   * broadcaster never heard is a conversion nobody counted. The press on the
+   * submit control is a separate fact and is still reported as `activated`
+   * against the control — two kinds about two nodes, not one action counted
+   * twice.
+   *
+   * **`preventDefault` is read once the dispatch is over, never during it.**
+   * Any listener may cancel a submit, and whether this one runs before or after
+   * theirs is registration order — React attaches its own at a root container
+   * which may be this very element. A microtask queued here runs after dispatch
+   * has finished, so what it reads is the final answer rather than whichever
+   * one happened to be true halfway through. The instant is taken at the event,
+   * not in the microtask, because the event is when the reader finished.
+   */
+  const onSubmit = (event: Event): void => {
+    const form = event.target
+    if (!(form instanceof HTMLFormElement) || !root.contains(form)) return
+
+    const at = now()
+
+    queueMicrotask(() => {
+      if (stopped || event.defaultPrevented) return
+      record("completed", (address, within) => ({ kind: "completed", ...address, at, ...within }))(form)
+    })
+  }
+
   const disclosures = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (!(mutation.target instanceof Element)) continue
@@ -561,6 +612,7 @@ export const broadcastReaderSignals = (
 
   root.addEventListener("click", onClick)
   root.addEventListener("toggle", onToggle, true)
+  root.addEventListener("submit", onSubmit, true)
   disclosures.observe(root, {
     attributes: true,
     attributeFilter: [DISCLOSED_ATTRIBUTE],
@@ -582,6 +634,7 @@ export const broadcastReaderSignals = (
     arrivals?.disconnect()
     root.removeEventListener("click", onClick)
     root.removeEventListener("toggle", onToggle, true)
+    root.removeEventListener("submit", onSubmit, true)
     document.removeEventListener("visibilitychange", onVisibility)
     document.defaultView?.removeEventListener("pagehide", onPageHide)
   }

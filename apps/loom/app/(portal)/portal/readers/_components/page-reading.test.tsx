@@ -7,6 +7,7 @@ import type { StoredTally } from "@jam-overture/loom/signals"
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
+import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 
 import { PageReadingCard } from "./page-reading"
 
@@ -27,7 +28,10 @@ const tally = (
   nodeId: string,
   revision: number,
   counts: Partial<
-    Pick<StoredTally, "views" | "reached" | "engaged" | "dwellMs" | "activations" | "opens" | "closes">
+    Pick<
+      StoredTally,
+      "views" | "reached" | "engaged" | "dwellMs" | "activations" | "opens" | "closes" | "completions"
+    >
   >,
   type = "loom.card"
 ): StoredTally => ({
@@ -42,6 +46,7 @@ const tally = (
   activations: counts.activations ?? 0,
   opens: counts.opens ?? 0,
   closes: counts.closes ?? 0,
+  completions: counts.completions ?? 0,
   updatedAt: "2026-09-15T00:00:00.000Z",
 })
 
@@ -50,7 +55,7 @@ const tally = (
  * nobody has touched since it was last counted — and is what every assertion
  * written before the card knew about the page being served was about.
  */
-const cardFor = (tallies: readonly StoredTally[], live?: number) => {
+const cardFor = (tallies: readonly StoredTally[], live?: number, skipping?: PageSkipping) => {
   const reading = pageReadings(revisionReadings(tallies, names))[0]!
 
   return render(
@@ -58,6 +63,13 @@ const cardFor = (tallies: readonly StoredTally[], live?: number) => {
       reading={reading}
       page={page}
       live={live ?? reading.revisions[0]!.revision}
+      /*
+       * Absent unless a case is about it, which is the state of every card on a
+       * deployment whose counted version is not the one being served — and is
+       * what every assertion written before this card knew which parts a page
+       * has is about.
+       */
+      skipping={skipping}
     />
   )
 }
@@ -116,7 +128,7 @@ describe("PageReadingCard", () => {
   it("names the part fewest people got to, in a person's words", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("Fewest people got as far as")
+    expect(container.textContent).toContain("fewest got as far as")
     expect(container.textContent).toContain("the footer “Built with Loom”")
     expect(container.textContent).toContain("3 of the 40 visits")
   })
@@ -160,7 +172,28 @@ describe("PageReadingCard", () => {
       tally("n_foot", 1, { views: 6, reached: 6 }, "loom.footer"),
     ])
 
-    expect(container.textContent).toContain("Nothing here is being scrolled past")
+    expect(container.textContent).toContain("seen by about as many of them as every other")
+  })
+
+  /**
+   * **A sentence read off rows may not make a claim about the page.**
+   *
+   * Every figure in this list comes from a counter, and a part nobody got to
+   * has no counter — so *nothing here is being scrolled past* was a statement
+   * about parts that had reported, printed as a statement about the page. It
+   * was true of its own evidence and wrong about its subject, and it stayed
+   * that way until a reading that knows the page existed to contradict it.
+   *
+   * The claim is made in exactly one place now, by the one reading that holds
+   * the page as well as the counters.
+   */
+  it.each([
+    ["every part equally seen", [tally("n_hero", 1, { views: 6, reached: 6 }), tally("n_foot", 1, { views: 6, reached: 6 }, "loom.footer")]],
+    ["one part seen less", [tally("n_hero", 1, { views: 6, reached: 6 }), tally("n_foot", 1, { views: 6, reached: 2 }, "loom.footer")]],
+  ])("never claims the page is unskipped from the counters alone — %s", (_case, tallies) => {
+    const { container } = cardFor(tallies)
+
+    expect(container.textContent).not.toContain("is being scrolled past")
   })
 
   /** The governing rule, measured with every disclosure taken away. */

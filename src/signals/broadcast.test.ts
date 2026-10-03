@@ -467,6 +467,37 @@ describe("broadcastReaderSignals", () => {
     ])
   })
 
+  /**
+   * The same closing, from the one direction the ledger's own suite could not
+   * reach until today: **a background tab**. A `MutationObserver` delivers in a
+   * hidden tab, so a client navigation while a reader is somewhere else removes
+   * the nodes and closes their stretches with nobody looking — and the time the
+   * tab spent hidden has to stay off the counter. Filed by `Loom docs` on
+   * 2 October, who measured 11 seconds credited for 3 seconds of reading against
+   * a one-line mutation that the whole suite passed.
+   */
+  it("credits no time to a node the page sheds while the tab is in the background", async () => {
+    const batches = start()
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+
+    clock = 4_000
+    Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+    document.dispatchEvent(new Event("visibilitychange"))
+
+    clock = 304_000
+    byId("n_2").remove()
+    await settle()
+    broadcast?.flush()
+
+    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+
+    expect(batches.flatMap((batch) => batch.signals)).toEqual([
+      { kind: "viewed", nodeId: "n_2", type: "loom.section", at: 1_000 },
+      { kind: "dwelled", nodeId: "n_2", type: "loom.section", ms: 3_000 },
+    ])
+  })
+
   it("reports a node that is taken out and put back as viewed once, not twice", async () => {
     const batches = start()
     const band = appendBand("n_9")
@@ -614,6 +645,261 @@ describe("broadcastReaderSignals", () => {
           ],
         ])
       })
+    })
+  })
+
+  /**
+   * The fifth kind, which is the only one about a reader finishing rather than
+   * a reader looking (0211).
+   *
+   * The form is put in by each test rather than into `PAGE`, because almost
+   * every test above counts the signals a page produces and a form sitting in
+   * the markup would change all of them.
+   */
+  describe("a form the browser let go", () => {
+    const addForm = (nodeId: string, into: Element = byId("n_2")): HTMLFormElement => {
+      into.insertAdjacentHTML(
+        "beforeend",
+        `<form data-loom-node="${nodeId}" data-loom-type="loom.form" id="${nodeId}-form">
+           <input name="email" />
+           <button id="${nodeId}-send" type="submit">Send</button>
+         </form>`
+      )
+
+      return document.getElementById(`${nodeId}-form`) as HTMLFormElement
+    }
+
+    /** What a browser dispatches when a form's constraints are satisfied. */
+    const submit = (form: HTMLFormElement): boolean =>
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+
+    const withinOf = (batches: readonly ReaderSignalBatch[]) =>
+      batches.flatMap((batch) => batch.signals).flatMap((signal) => ("within" in signal ? [signal.within] : []))
+
+    it("reports it as completed, against the form's own node", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["completed:n_6"])
+    })
+
+    it("names the bands the form was the end of, so a deployment can ask which one converted", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(withinOf(batches)).toEqual([
+        [
+          { nodeId: "n_2", type: "loom.section" },
+          { nodeId: "n_1", type: "loom.page" },
+        ],
+      ])
+    })
+
+    /**
+     * A page that posts with `fetch` cancels the native submit, and from the
+     * page's side a cancelled submit and a failed one are the same event. The
+     * broadcaster reports what it can attest and nothing else.
+     */
+    it("says nothing when a handler on the page cancelled it", async () => {
+      const form = addForm("n_6")
+      form.addEventListener("submit", (event) => event.preventDefault())
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /**
+     * `preventDefault` may be called by a listener registered after this one —
+     * React attaches its own at a root container that can be this very element
+     * — so the answer is read once the dispatch is over rather than during it.
+     * Registering the broadcaster first is what makes this test the one that
+     * fails if the microtask is ever removed.
+     */
+    it("reads the cancellation even when it is called after the broadcaster heard the event", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+      root.addEventListener("submit", (event) => event.preventDefault())
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /** Captured at the root, so a handler inside the page cannot make a conversion invisible. */
+    it("hears a submit that something inside the page stopped from bubbling", async () => {
+      const form = addForm("n_6")
+      form.addEventListener("submit", (event) => event.stopPropagation())
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["completed:n_6"])
+    })
+
+    /**
+     * The double-count this kind invites. Pressing the control is an activation
+     * of the control and the submission is a completion of the form; they are
+     * two facts about two nodes, and the thing that would be wrong is one
+     * action producing two completions.
+     *
+     * The submit button here is **not** an addressed node, which is the sharper
+     * version: the press is filed against the form as well, so both signals
+     * name `n_6`. One `completed` is still one `completed`.
+     *
+     * Driven by pressing the control rather than by dispatching the event, so
+     * the one click goes through the whole path a reader's would — the click
+     * listener and the implicit submission the press causes.
+     */
+    it("counts one completion for one submission, though the press is also an activation", async () => {
+      addForm("n_6")
+      const batches = start()
+
+      ;(document.getElementById("n_6-send") as HTMLElement).click()
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual(["activated:n_6", "completed:n_6"])
+    })
+
+    it("reports nothing for a submission after the broadcast stopped", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      broadcast?.stop()
+      submit(form)
+      await settle()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("is not reported at all when the host did not ask for the kind", async () => {
+      const form = addForm("n_6")
+      const batches = start({ kinds: ["activated"] })
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("is reported only for the primitive types the host named", async () => {
+      const form = addForm("n_6")
+      const batches = start({ kinds: ["completed"], types: { completed: ["loom.contact-form"] } })
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    /**
+     * A form outside the page this broadcast is pointed at is not this page's
+     * conversion, and the capture listener is on the root rather than the
+     * document, so it should never hear one.
+     */
+    it("ignores a form that is not inside the root", async () => {
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `<form data-loom-node="n_9" data-loom-type="loom.form" id="outside-form"></form>`
+      )
+      const batches = start()
+
+      submit(document.getElementById("outside-form") as HTMLFormElement)
+      await settle()
+      broadcast?.flush()
+
+      expect(kindsIn(batches)).toEqual([])
+    })
+
+    it("sends a batch the parser accepts, ancestry and all", async () => {
+      const form = addForm("n_6")
+      const batches = start()
+
+      submit(form)
+      await settle()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => parseReaderSignalBatch(batch).ok)).toEqual([true])
+    })
+  })
+
+  /**
+   * The flag an intake counts arrivals by. One delivery of a page view carries
+   * it, which is what makes *a reader from here* a number that does not grow
+   * with how long they stayed.
+   */
+  describe("the opening delivery", () => {
+    it("marks the first batch of a page view and no other", () => {
+      const batches = start()
+
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => batch.first)).toEqual([true, undefined])
+    })
+
+    /**
+     * A page that gathered nothing sends nothing, so the opening is the first
+     * batch that actually goes rather than the first time the timer fired.
+     */
+    it("marks the first batch that was sent, not the first flush", () => {
+      const batches = start()
+
+      broadcast?.flush()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches.map((batch) => batch.first)).toEqual([true])
+    })
+
+    it("names the page view it opened, which is what the parser insists on", () => {
+      const batches = start()
+
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(batches[0]?.view).toMatch(/^[0-9a-f]{32}$/)
+      expect(parseReaderSignalBatch(batches[0]).ok).toBe(true)
+    })
+
+    /**
+     * A client-side navigation stops one broadcast and starts another, which is
+     * a second page view and so a second arrival — the same rule the view key
+     * follows.
+     */
+    it("opens again for a second broadcast, because that is a second page view", () => {
+      const first = start()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+      broadcast?.stop()
+
+      const second = start()
+      ;(byId("n_3").querySelector("span") as HTMLElement).click()
+      broadcast?.flush()
+
+      expect(first[0]?.first).toBe(true)
+      expect(second[0]?.first).toBe(true)
+      expect(second[0]?.view).not.toBe(first[0]?.view)
     })
   })
 

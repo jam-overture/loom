@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest"
 
 import { askById, type AskId } from "./adapt/asks"
 import { runAsk, type AskRun } from "./adapt/run"
-import { BAND } from "./bands"
+import { BAND, MECHANISM_BAND, MECHANISM_SHORT_ANSWERS } from "./bands"
 import { bandsOf, outlineDiff, outlineOf, type OutlineRow } from "./outline"
 import { treeFor } from "./render"
-import { DEFAULT_THEME, HOME } from "./site"
+import { DEFAULT_THEME, HOW_IT_WORKS } from "./site"
 
 /**
  * The outline, held against the page it claims to describe.
@@ -18,7 +18,7 @@ import { DEFAULT_THEME, HOME } from "./site"
 
 const ORIGIN = "https://loom.example"
 
-const front = (): LoomTree => treeFor(HOME, { origin: ORIGIN, theme: DEFAULT_THEME })
+const front = (): LoomTree => treeFor(HOW_IT_WORKS, { origin: ORIGIN, theme: DEFAULT_THEME })
 
 /**
  * The page before and after one request, which is all this file ever needed.
@@ -60,8 +60,8 @@ describe("the front door's outline", () => {
     expect(names[1]).toBe("The opening")
     expect(names[names.length - 1]).toBe("The foot of the page, and the way out")
     expect(names).toContain(BAND.seeItHappen)
-    expect(names).toContain(BAND.problems)
-    expect(names).toContain(BAND.questions)
+    expect(names).toContain(MECHANISM_BAND.journey)
+    expect(names).toContain(MECHANISM_BAND.whoAsks)
   })
 
   /**
@@ -88,18 +88,39 @@ describe("the front door's outline", () => {
 })
 
 describe("what the outline says a change did", () => {
+  /**
+   * **Approved, because this request is now held.** *I don't have long* takes
+   * all four short answers away at once, and that is enough of the page in one
+   * go that the rules stop and ask a person first. Without the yes, nothing is
+   * removed and the outline is right to say every band is kept — which is what
+   * this assertion caught when the five choices moved to this page on 1 October.
+   */
   it("marks a band that has been taken off the page", async () => {
-    const history = await after(["shorter", false])
+    const history = await after(["shorter", true])
     const rows = outlineDiff(history.start, history.page)
-    const questions = rowFor(rows, BAND.questions)
 
-    expect(questions).toEqual({
-      name: BAND.questions,
-      state: "taken-away",
-      note: "taken off the page",
-    })
-    /** Last, so the rows above it are the page as it now reads, in order. */
-    expect(rows[rows.length - 1]).toBe(questions)
+    /**
+     * **All four, not one.** This request took a single band away until the five
+     * choices moved to this page; it now takes the four short answers together,
+     * which is what makes it the held one. So the assertion is over the set.
+     */
+    for (const eyebrow of MECHANISM_SHORT_ANSWERS) {
+      expect(rowFor(rows, eyebrow)).toEqual({
+        name: eyebrow,
+        state: "taken-away",
+        note: "taken off the page",
+      })
+    }
+
+    /**
+     * Last, so the rows above them are the page as it now reads, in order. Four
+     * rows rather than one, and still the tail: a taken-away band has no place
+     * left on the page, so it cannot be interleaved with the bands that do.
+     */
+    const tail = rows.slice(-MECHANISM_SHORT_ANSWERS.length)
+
+    expect(tail.map((row) => row.state)).toEqual(MECHANISM_SHORT_ANSWERS.map(() => "taken-away"))
+    expect([...tail.map((row) => row.name)].sort()).toEqual([...MECHANISM_SHORT_ANSWERS].sort())
   })
 
   it("marks a band that was not there when the visitor arrived", async () => {
@@ -123,8 +144,8 @@ describe("what the outline says a change did", () => {
     const rows = outlineDiff(history.start, history.page)
     const moved = rows.filter((row) => row.state === "moved")
 
-    expect(moved.map((row) => row.name)).toContain(BAND.problems)
-    expect(rowFor(rows, BAND.problems)?.note).toBe("moved up the page")
+    expect(moved.map((row) => row.name)).toContain(MECHANISM_BAND.puttingItBack)
+    expect(rowFor(rows, MECHANISM_BAND.puttingItBack)?.note).toBe("moved up the page")
     expect(rows.filter((row) => row.state === "added")).toEqual([])
     expect(rows.filter((row) => row.state === "taken-away")).toEqual([])
   })
@@ -135,7 +156,7 @@ describe("what the outline says a change did", () => {
 
     /** The request asked for that band to go and the rules refused, so it stays. */
     expect(history.steps[0]?.record.verdict).toBe("refused")
-    expect(rowFor(rows, BAND.problems)?.state).toBe("kept")
+    expect(rowFor(rows, MECHANISM_BAND.puttingItBack)?.state).toBe("kept")
   })
 
   it("keeps every band of the changed page, in its order", async () => {

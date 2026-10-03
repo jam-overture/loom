@@ -45,6 +45,23 @@ describe("the vocabulary block", () => {
   })
 
   /**
+   * And the half a name cannot carry, for every row rather than for the one row
+   * somebody happened to write it for.
+   *
+   * `gaps.test.tsx` holds each of these sentences to the broadcaster actually
+   * behaving that way. What is asserted here is the thing that has to be true
+   * before any of that matters: there is one, on every row, in a suite with no
+   * DOM in it — so a kind that arrives with no caveat is red in the node half of
+   * the suite as well as the DOM half.
+   */
+  it("gives every kind the half its name cannot carry", () => {
+    for (const row of produceKinds()) {
+      expect(row.doesNotMean, row.kind).toContain("does not mean")
+      expect(row.doesNotMean.length, row.kind).toBeGreaterThan(60)
+    }
+  })
+
+  /**
    * The address in every printed signal is a node that is really on the page.
    *
    * This is the failure 0136 exists to prevent — a signal filed against a
@@ -256,17 +273,42 @@ describe("the kind that is agreed on and not built", () => {
     expect(row, "completed has fallen off both lists").toBeDefined()
     expect(row?.means.length ?? 0).toBeGreaterThan(20)
     expect(row?.carries ?? "").toContain("at")
+    expect(row?.doesNotMean.length ?? 0).toBeGreaterThan(20)
   })
 
   /**
-   * While it is only agreed on, the sentence worth printing is the one a name
-   * cannot carry. Once it ships, the signals beside it say what it does and the
-   * caveat is no longer the page's job.
+   * The two lists say the same amount about the same kind.
+   *
+   * The defect behind this group was not that a sentence was missing, it was that
+   * the two lists each printed a different number of things — so a kind moving
+   * between them changed what a reader was told about it. `produceApproved`
+   * reads the caveat off the same table the live rows read, and this is that
+   * joined rather than stated.
    */
-  it.skipIf(landed)("says what it is not, while it is still only agreed on", () => {
-    const row = produceApproved().find((one) => one.kind === "completed")
+  it("says the same things about it on either list", () => {
+    const [announced] = produceApproved(vocabulary.filter((kind) => kind !== "completed"))
+    const [live] = produceKinds().filter((row) => row.kind === "completed")
+
+    expect(announced?.means).toBe(live?.means)
+    expect(announced?.carries).toBe(live?.carries)
+    expect(announced?.doesNotMean).toBe(live?.doesNotMean)
+  })
+
+  /**
+   * The sentence a name cannot carry, on whichever list the kind is on.
+   *
+   * This assertion used to be `skipIf(landed)`, on the reasoning that once a kind
+   * ships the signals beside it say what it does. `completed` landed, the
+   * assertion skipped itself, and `Loom signals` filed what was left: the one row
+   * a reader is most likely to over-read lost its caveat on the day it became
+   * real, and the skip in this suite was the only trace of it. The caveat is a
+   * required field now, so this runs in both states and the skip is gone.
+   */
+  it("says what it is not, whichever list it is on", () => {
+    const row = [...produceKinds(), ...produceApproved()].find((one) => one.kind === "completed")
 
     expect(row?.doesNotMean).toContain("does not mean a server accepted it")
+    expect(row?.doesNotMean).toContain("never the reply")
   })
 
   /**

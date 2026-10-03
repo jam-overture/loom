@@ -11,10 +11,10 @@ import { PALETTE_SLOTS, STARTER_PALETTES, type Palette, type PaletteSlot } from 
  * hand-written table would be the one place that claim could quietly stop being
  * true.
  *
- * Three palettes rather than the whole registered set. Twenty-one columns is a
- * catalogue, and the argument the page is making needs only enough width to see
- * that the same seventeen names hold different colors — the count of the rest
- * is stated in prose beside it, and generated too.
+ * Three palettes rather than the whole registered set. A column per registered
+ * palette is a catalogue, and the argument the page is making needs only enough
+ * width to see that the same slot names hold different colors — how many of each
+ * there are is stated in prose beside it, through `<Count>`.
  */
 
 /** The palettes shown, by id. These are the three the four surfaces wear. */

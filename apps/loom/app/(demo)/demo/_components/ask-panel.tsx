@@ -10,6 +10,9 @@ import {
   ASKS_HEADING_WHILE_WAITING,
   type SetAside,
 } from "@/app/(demo)/_lib/set-aside"
+import { howManyWaitForYou } from "@/app/(demo)/_lib/how-many-wait-for-you"
+import { STANDING_ROW } from "@/app/(demo)/_lib/what-each-row-says"
+import type { AskVerdicts } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { askForChange } from "../actions"
 
@@ -84,12 +87,34 @@ import { askForChange } from "../actions"
 const WHAT_EVERY_ASK_MEETS =
   "Loom weighs every ask before it lands: some changes it makes on its own, some it won’t make without asking you first. Either way, it writes down what it did."
 
+/**
+ * The same claim, less the hedge — for the screen where the hedge has been
+ * replaced by the truth about the button under it.
+ *
+ * **Nothing is removed and this is not a second voice.** The sentence above
+ * does two jobs: it says Loom weighs every ask and writes down what it did,
+ * which is the claim; and it says *some* asks wait for you, which is a hedge
+ * standing in for a fact the surface could not state. `what-it-will-say.ts`
+ * can state it — for the one ask this panel invites, computed by the Gate
+ * itself — so on that screen the hedge is three lines of *maybe* directly
+ * above a line of *this one will*. The claim stays; the stand-in goes.
+ *
+ * It is not deleted, because a deployment can still have nothing to foretell:
+ * an ask the tree gives nothing to do, or a panel with no leading ask at all,
+ * gets the full sentence exactly as it has always had it. Both are asserted,
+ * and `ask-panel.test.tsx` holds the property that matters either way — a
+ * visitor meets the claim before they meet anything to press.
+ */
+const WHAT_EVERY_ASK_MEETS_BRIEFLY =
+  "Loom weighs every ask before it lands, and writes down what it did."
+
 export const AskPanel = ({
   revision,
   available,
   modelConfigured,
   waiting,
   leading,
+  willSay,
 }: {
   readonly revision: number
   readonly available: readonly DemoPresetId[]
@@ -123,6 +148,30 @@ export const AskPanel = ({
     /** Absent when the ask names the page itself, which the re-theme does. */
     readonly part?: ReactNode
   }
+  /**
+   * What the Gate says about **every** ask on this panel, run against this tree
+   * before anybody pressed anything (`_lib/what-it-will-say.ts`).
+   *
+   * Computed by the page for the reason the nomination is not: reaching a
+   * verdict is `async`, and a client component cannot await one. What crosses
+   * the boundary is a record of answers the runtime produced, not a runtime.
+   *
+   * **It was one verdict until 2 October and is now a keyed set, and it is one
+   * prop rather than two on purpose.** `page.tsx` is the one file in this lane
+   * no `vitest` run can mount, so every reading taken there is a reading
+   * nothing can hold — the lane's open finding of 29 September counts the props
+   * arriving here one at a time, and the run before this one added the sixth.
+   * The lead's own verdict is now a lookup and the split is a pure reading over
+   * the values (`how-many-wait-for-you.ts`), so both are taken **here**, where
+   * a test can reach them, and the page gained no argument it could silently
+   * drop.
+   *
+   * Absent on its own terms rather than with `leading`: there is a lead
+   * whenever an ask is on offer, and there is a verdict only when that ask
+   * reached the Gate. The panel reads the two separately, and an empty set is
+   * what restores the fuller sentence above.
+   */
+  readonly willSay?: AskVerdicts
 }) => {
   const [report, submit, pending] = useActionState<WriteReport | null, FormData>(askForChange, null)
 
@@ -161,6 +210,26 @@ export const AskPanel = ({
   const lead = leading === undefined ? undefined : presetById(leading.preset)
   const rest = offered.filter((preset) => preset.id !== lead?.id)
 
+  /**
+   * The two readings taken off those verdicts, both here rather than on the
+   * page that fetched them.
+   *
+   * `said` is this panel's old `willSay` by another route — the lead's own
+   * answer, under its own button, unchanged in wording and in position.
+   *
+   * `split` is the new one, and it counts the asks **this panel is offering**,
+   * which is not the same as the preset table: `already-asked.ts` withdraws an
+   * ask while its question is open, so the sentence shrinks with the list it
+   * describes rather than describing a list that is not on the screen.
+   */
+  const said = lead === undefined ? undefined : willSay?.[lead.id]
+  const split = howManyWaitForYou(
+    offered.flatMap((preset) => {
+      const answer = willSay?.[preset.id]
+      return answer === undefined ? [] : [answer]
+    })
+  )
+
   return (
     <div id="ask" className="flex flex-col gap-4">
       {/*
@@ -188,15 +257,33 @@ export const AskPanel = ({
         * promise and this sentence directly under it — which is the same three
         * facts in the same 200 pixels, rather than three facts and no button.
         *
-        * The sentence stays on the first screen either way. That is the
-        * property the placement was chosen for — the lead is a change the Gate
-        * *holds*, so the first press moves nothing, and a stranger who was not
-        * told that has watched a button do nothing — and it is unchanged: at
-        * 348 × 465 the button, its promise and this sentence are all above the
-        * fold together, which is more than was true of any of them before.
+        * **What is on the first screen, re-measured, and the claim this
+        * comment used to make is no longer true.** It said that at 348 × 465
+        * the button, its promise and this sentence were all above the fold
+        * together. Driven against a production build at that size today, the
+        * button is 325–471, the promise 383–415, and the sentence **487–524**:
+        * it is below the fold, and arithmetic says it already was before the
+        * verdict was added — the header has gained a line and a chip row since
+        * the measurement was taken, and nothing re-took it.
+        *
+        * What is above the fold is the thing the property was *for*. The lead
+        * is a change the Gate holds, so the first press moves nothing, and a
+        * stranger who was not told that has watched a button do nothing. The
+        * sentence was the stand-in that said so; `willSay` says it about this
+        * button, computed, and it sits 423–471 — inside the form, where the
+        * reversal keeps it welded to the press. At 390 × 844 all four are on
+        * the first screen. At 348 × 465 the verdict's third line is clipped by
+        * **6px**, which is this run's cost and is in its report.
+        *
+        * A measurement in a comment is a claim with a date on it. This one is
+        * 1 October 2026, and the next run to move anything above this block
+        * owes it another.
         */}
       <div className="flex flex-col-reverse gap-4 lg:flex-col">
-        <p className="text-ink-secondary text-sm">{WHAT_EVERY_ASK_MEETS}</p>
+        <p className="text-ink-secondary text-sm">
+          {split?.sentence ??
+            (said === undefined ? WHAT_EVERY_ASK_MEETS : WHAT_EVERY_ASK_MEETS_BRIEFLY)}
+        </p>
 
         {lead && (
           <form action={submit} className="flex flex-col gap-1.5">
@@ -226,6 +313,58 @@ export const AskPanel = ({
               * stays welded to it rather than being reordered away from it.
               */}
             <p className="text-ink-muted text-xs">{lead.promise}</p>
+
+            {/*
+              * And what Loom will say about it, which is the other half of
+              * what a stranger needs before pressing anything and the half
+              * this panel has never had.
+              *
+              * The promise above is about the *page* — it is `presets.ts`'s
+              * and it is deliberately silent about the verdict, because a
+              * typed label naming one would be a surface predicting a decision
+              * it does not make. This line is about the *Gate*, and it is
+              * silent about nothing because it is not typed: `composeChange`
+              * ran, against this tree, under this policy, with this preset's
+              * own interpreter, and what is printed is its answer
+              * (`_lib/what-it-will-say.ts`).
+              *
+              * **Inside the form, directly under the promise**, for the reason
+              * the promise is: both are facts about this one button and the
+              * narrow layout reorders the block around them. Welded here, the
+              * press, what it does to the page, and what Loom does about it
+              * travel as one thing to whichever end of the screen the layout
+              * puts them.
+              *
+              * The lead is the sentence that stops the first press reading as
+              * a broken button. `DEMO_LEADING_PRESET` is a change the Gate
+              * holds — that is the whole of why it is the lead — so *Pressing
+              * this raises a question, not a change* is the expectation this
+              * surface most needs to set and the one a stranger has had to
+              * infer from a hedge about asks in general.
+              *
+              * **Two lines and no panel**, which is the restraint that keeps
+              * this from being the card's argument made early. The weighing,
+              * the rule and the ceiling comparison stay on the card, where the
+              * tense is right and where a visitor is deciding rather than
+              * browsing; what is here is strictly less than what lands there,
+              * so the press reads as a promise kept.
+              *
+              * **And the rule is the neutral edge, not the awaiting amber**,
+              * although the words say a question is coming. Amber on this rail
+              * means *there is a question open and it is yours* — it is the
+              * badge, the ring on the stage, the sticky caution and the rule
+              * on the card's *what would happen*, all about one live hold. No
+              * hold exists here: nobody has asked for anything, and a fifth
+              * amber mark standing for a question that has not been raised
+              * would make the arrival screen look like a screen with work on
+              * it. The tone is earned by the press, which is the same rule the
+              * spotlight follows.
+              */}
+            {said && (
+              <p className="text-ink-secondary border-edge-subtle mt-0.5 border-l-2 pl-2.5 text-xs">
+                <strong className="text-ink font-medium">{said.lead}</strong> {said.detail}
+              </p>
+            )}
           </form>
         )}
       </div>
@@ -341,22 +480,62 @@ export const AskPanel = ({
             {waiting === undefined ? ASKS_HEADING : ASKS_HEADING_WHILE_WAITING}
           </p>
           <ul className="flex flex-col gap-1">
-            {rest.map((preset) => (
-              <li key={preset.id}>
-                <form action={submit}>
-                  <input type="hidden" name="baseRevision" value={revision} />
-                  <input type="hidden" name="presetId" value={preset.id} />
-                  <button
-                    type="submit"
-                    disabled={pending}
-                    className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3.5 py-2.5 text-left transition-colors disabled:opacity-60"
-                  >
-                    <span className="text-sm">{preset.label}</span>
-                    <span className="text-ink-muted text-2xs">{preset.promise}</span>
-                  </button>
-                </form>
-              </li>
-            ))}
+            {rest.map((preset) => {
+              const answer = willSay?.[preset.id]
+
+              return (
+                <li key={preset.id}>
+                  <form action={submit}>
+                    <input type="hidden" name="baseRevision" value={revision} />
+                    <input type="hidden" name="presetId" value={preset.id} />
+                    <button
+                      type="submit"
+                      disabled={pending}
+                      className="border-edge-subtle hover:border-edge hover:bg-surface-hover flex w-full flex-col items-start gap-0.5 rounded-md border px-3.5 py-2.5 text-left transition-colors disabled:opacity-60"
+                    >
+                      {/*
+                        * The label, and beside it what Loom will do about it.
+                        *
+                        * **This row is where the sentence above becomes
+                        * checkable.** *Loom will make 2 on its own, and ask you
+                        * first about 3* is a count a stranger has no way to
+                        * verify — until the rows under it visibly do not all
+                        * read the same. That is the whole argument for putting
+                        * two words at the end of a line that already fits, and
+                        * it is why they are here rather than one disclosure
+                        * down with everything else this surface defers.
+                        *
+                        * `items-baseline`, so a label that wraps to two lines
+                        * keeps its marker beside the first of them rather than
+                        * centred against both; `shrink-0` on the marker,
+                        * because the label is the half that may give way.
+                        *
+                        * The chip treatment is the header's, deliberately: a
+                        * bordered mono 2xs is already this screen's word for
+                        * *a fact about the thing beside it, stated flat*, and
+                        * a second vocabulary for the same job would be the
+                        * fifth mark on a rail that has spent five runs keeping
+                        * four straight.
+                        *
+                        * Absent when the ask reached no verdict, which is the
+                        * silence `willSayOf` keeps: a row that could not be
+                        * answered says nothing rather than guessing, and the
+                        * count above has not counted it either.
+                        */}
+                      <span className="flex w-full items-baseline justify-between gap-3">
+                        <span className="text-sm">{preset.label}</span>
+                        {answer && (
+                          <span className="border-edge-subtle text-ink-muted shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-2xs tracking-wide uppercase">
+                            {STANDING_ROW[answer.standing]}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-ink-muted text-2xs">{preset.promise}</span>
+                    </button>
+                  </form>
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

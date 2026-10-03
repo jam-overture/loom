@@ -10,6 +10,7 @@ import {
   type ReaderSignalReadRequest,
   type ReceivedBatch,
 } from "./journal.js"
+import type { ReaderRegionCount, ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
 import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
@@ -30,7 +31,16 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
   let batches: ReceivedBatch[] = []
   let nextSeq = 1
 
-  const positioned = (batch: ReaderSignalBatch): ReceivedBatch => ({
+  /**
+   * The opening marker is dropped rather than buffered.
+   *
+   * It says *a page view began with this delivery*, which is a fact the door
+   * uses and rollup has no question about — and a buffer is for what rollup
+   * reads. Postgres drops it by storing the columns it knows, so dropping it
+   * here is what keeps the two implementations the same buffer rather than two
+   * that happen to pass the same tests.
+   */
+  const positioned = ({ first: _opening, ...batch }: ReaderSignalBatch): ReceivedBatch => ({
     ...batch,
     seq: nextSeq++,
     receivedAt: clock.now(),
@@ -110,6 +120,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       activations: (existing?.activations ?? 0) + tally.activations,
       opens: (existing?.opens ?? 0) + tally.opens,
       closes: (existing?.closes ?? 0) + tally.closes,
+      completions: (existing?.completions ?? 0) + tally.completions,
       updatedAt: at,
     })
   }
@@ -139,5 +150,35 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
 
     funnels: (request?: TallyReadRequest) =>
       Promise.resolve(ok([...funnels.values()].filter((row) => matches(row, request)))),
+  }
+}
+
+const regionKey = (count: ReaderRegionCount): string =>
+  `${count.treeId} ${count.revision} ${count.region}`
+
+/**
+ * Where readers were, in the process.
+ *
+ * Additive like the tallies, and for a sharper reason: every call is one
+ * delivery's worth of arrivals, so a store that replaced would report the last
+ * reader rather than the readership.
+ */
+export const memoryReaderRegionStore = (): ReaderRegionStore => {
+  const regions = new Map<string, StoredRegionCount>()
+
+  return {
+    count: (counts, at) => {
+      for (const count of counts) {
+        const key = regionKey(count)
+        const existing = regions.get(key)
+
+        regions.set(key, { ...count, views: (existing?.views ?? 0) + count.views, updatedAt: at })
+      }
+
+      return Promise.resolve(ok(undefined))
+    },
+
+    regions: (request?: TallyReadRequest) =>
+      Promise.resolve(ok([...regions.values()].filter((row) => matches(row, request)))),
   }
 }

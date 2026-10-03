@@ -993,27 +993,42 @@ describe("G", () => {
 ```
 
 ```
-  primitives in the starter library: 99
+  primitives in the starter library: 102
     loom.nav         ["disclose"]
+    loom.menu        ["present"]
+    loom.lightbox    ["present","dismiss"]
+    loom.popover     ["present"]
     loom.code        ["copy"]
+    loom.before-after ["adjust"]
   behaviours with a declaring primitive in the library:
     copy      loom.code
     disclose  loom.nav
-    adjust    nothing declares it
-    present   nothing declares it
-    dismiss   nothing declares it
+    adjust    loom.before-after
+    present   loom.menu, loom.lightbox, loom.popover
+    dismiss   loom.lightbox
 ```
 
-Two primitives, out of whatever the first line printed, take a control at all.
+Six primitives, out of whatever the first line printed, take a control at all.
 That is the closed set doing what a closed set does, and it is the healthy
 reading of this output.
 
-The unhealthy reading is the last three lines, and it is what the next section is
-about.
+**It read differently when this exercise was written**, and the difference is
+what the next section is about. On 29 September the last three lines each said
+*nothing declares it*, and this lesson shipped with that output printed above
+this paragraph.
 
 ---
 
 ## Found by running it: three members with nothing to place them
+
+> **Closed on 1 October**, by `Loom primitives`, in the run that placed all three
+> — which is why the transcript above has six rows where this section describes
+> two. **The section is kept as it was written**, in the present tense it was
+> written in, because what it is teaching is the *measurement* rather than the
+> defect: the nine lines above are a second copy of a fact nobody was doubting,
+> and they are worth as much now that the answer is healthy as they were when it
+> was not. Read it as of 29 September; the closing note at the end of the section
+> says what each line reads today.
 
 Exercise G was written to show the vocabulary's reach, and the number it actually
 measures is the gap between a seam being built and a seam being used.
@@ -1065,6 +1080,22 @@ the exercise that found it. It is nine lines, it reads two things the repository
 already publishes, and it could have been written on 1 September. The reason it
 was not is the reason lesson 28 gives: **nobody manufactures a second copy of a
 fact they are not currently doubting.**
+
+### What those lines read now
+
+Two days after this section was written, all three are placed and the transcript
+above is the proof. `loom.before-after` declares `adjust` and its doc comment no
+longer argues that a draggable wipe is impossible; `loom.menu`, `loom.popover`
+and `loom.lightbox` declare `present`, and the lightbox declares `dismiss` as
+well, because a region that covers the viewport puts its own scrim inside the
+element the trigger was placed in and 0176's outside-press therefore cannot reach
+it. `docs/primitive-gap-inventory.md` no longer says Tier B is one decision.
+
+**None of that makes the exercise less interesting, and this is the part worth
+taking away.** A healthy output and an unhealthy one are the same nine lines; the
+reason anyone knows which they are looking at is that somebody wrote the lines.
+The gap lasted twenty-eight days because no instrument was pointed at it, and it
+lasted two days after one was.
 
 ---
 

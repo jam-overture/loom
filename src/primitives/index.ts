@@ -46,6 +46,7 @@ import { loomHeading } from "./loom.heading.js"
 import { loomHero } from "./loom.hero.js"
 import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
+import { loomLightbox } from "./loom.lightbox.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
 import { loomLinkPager } from "./loom.link-pager.js"
@@ -58,6 +59,7 @@ import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
+import { loomMenu } from "./loom.menu.js"
 import { loomMessage } from "./loom.message.js"
 import { loomMessageList } from "./loom.message-list.js"
 import { loomMeter } from "./loom.meter.js"
@@ -77,6 +79,7 @@ import { loomPerk } from "./loom.perk.js"
 import { loomPerson } from "./loom.person.js"
 import { loomPersonGrid } from "./loom.person-grid.js"
 import { loomPin } from "./loom.pin.js"
+import { loomPopover } from "./loom.popover.js"
 import { loomPerkList } from "./loom.perk-list.js"
 import { loomPerkListItem } from "./loom.perk-list-item.js"
 import { loomProduct } from "./loom.product.js"
@@ -385,6 +388,7 @@ import { loomTierTable } from "./loom.tier-table.js"
 export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPage,
   loomNav,
+  loomMenu,
   loomBanner,
   loomSection,
   loomSplit,
@@ -397,6 +401,8 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomReveal,
   loomBackdrop,
   loomOverlay,
+  loomLightbox,
+  loomPopover,
   loomHalo,
   loomCard,
   loomFrame,

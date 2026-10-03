@@ -7,7 +7,13 @@ import { siteRegistry } from "../registry"
 import { treeFor } from "../render"
 import { DEFAULT_THEME, SITE_ROUTES } from "../site"
 
-import { BAND_TYPES, CONTROL_TYPES, DISCLOSURE_TYPES, SITE_SIGNAL_TYPES } from "./asked"
+import {
+  BAND_TYPES,
+  COMPLETION_TYPES,
+  CONTROL_TYPES,
+  DISCLOSURE_TYPES,
+  SITE_SIGNAL_TYPES,
+} from "./asked"
 
 /**
  * What this site asks to be told about its readers, held against what this site
@@ -96,6 +102,19 @@ describe("what this site asks about its readers", () => {
       dwelled: [...BAND_TYPES],
       activated: [...CONTROL_TYPES],
       disclosed: [...DISCLOSURE_TYPES],
+      completed: [...COMPLETION_TYPES],
     })
+  })
+
+  /**
+   * The empty list is the site's answer to the fifth kind and it is only right
+   * while the site has nothing to submit. Asserted from the pages rather than
+   * from the list, so the day a band grows a form this says the list has
+   * stopped being the answer — the alarm above cannot fire twice for one kind.
+   */
+  it("asks about no completions because there is nothing here to complete", () => {
+    const submittable = ["loom.form", "loom.field"].filter((type) => BANDS.has(type) || ASKED_ABOUT.includes(type))
+
+    expect([submittable, [...COMPLETION_TYPES]]).toEqual([[], []])
   })
 })

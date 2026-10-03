@@ -27,6 +27,7 @@ import {
   planComposition,
   STARTER_COMPOSITIONS,
   type Composition,
+  type CompositionPart,
 } from "./compositions/index.js"
 
 /**
@@ -169,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers forty-four bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(44)
+  it("offers fifty-two bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(52)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -198,9 +199,19 @@ describe("the starter compositions", () => {
     }
   })
 
+  /**
+   * The example of a part with one design was `credentials` until 3 October and
+   * is `banner` now, which is the whole of what this assertion is for: it holds
+   * the *shape* of the answer — canonical first, alternates after it — against a
+   * part that has an alternate and a part that does not, and the second half has
+   * to be edited every time the catalogue closes a gap. `banner` is the last
+   * part in the catalogue with exactly one design, so the day this line needs
+   * editing again is the day `docs/primitive-gap-inventory.md`'s designs-per-part
+   * count reaches zero and the instrument has nothing left to recommend.
+   */
   it("answers which designs a part has, and says none for a part with no alternate", () => {
     expect(compositionsForPart("hero").map((composition) => composition.id)).toEqual(["hero", "hero-split"])
-    expect(compositionsForPart("footer").map((composition) => composition.id)).toEqual(["footer"])
+    expect(compositionsForPart("banner").map((composition) => composition.id)).toEqual(["banner"])
   })
 
   /**
@@ -1276,6 +1287,213 @@ describe("what the assembled page says about itself", () => {
 })
 
 /**
+ * The four second designs that gave four single-design parts a choice, and the
+ * one claim each of them rests on.
+ *
+ * Each of these is invisible in the subtree and invisible to every other test in
+ * this file. A band whose two columns both mark their rows `included` renders
+ * perfectly and says the opposite of what it was written to say; a bento whose
+ * four cells hold four copies of one primitive passes the structural check
+ * against its canonical and is no longer a mixed bento. They are asserted here
+ * rather than per band because what is held is the *design*, not the subtree.
+ */
+describe("the parts that offered no choice", () => {
+  const designsOf = (part: CompositionPart): readonly string[] =>
+    compositionsForPart(part).map((composition) => composition.id)
+
+  const slotIn = (node: LoomNode, name: string): readonly LoomNode[] => {
+    if (node.kind === "text") return []
+    if (node.kind === "slot" && node.name === name) return node.children
+
+    return node.children.flatMap((child) => slotIn(child, name))
+  }
+
+  const bandOf = (id: string): ElementNode => {
+    const band = compositionById(id)
+
+    expect(band, `${id} is not in the phrasebook`).toBeDefined()
+    if (band === undefined) throw new Error(`${id} is not in the phrasebook`)
+
+    return band.build(sequentialIdFactory())
+  }
+
+  /**
+   * The four parts that had one design on 1 October now have two, and the four
+   * that are named here are named rather than counted: a run that added a fifth
+   * design of `features` would move the catalogue's total and say nothing about
+   * whether the bar still has an alternative.
+   */
+  it("gives the bar, the mosaic, the comparison and the footer a second design each", () => {
+    expect(designsOf("nav")).toEqual(["nav", "nav-centred"])
+    expect(designsOf("bento")).toEqual(["bento", "bento-mixed"])
+    expect(designsOf("comparison")).toEqual(["comparison", "comparison-ways"])
+    expect(designsOf("footer")).toEqual(["footer", "footer-signup"])
+  })
+
+  /**
+   * One loud control in the corner of the bar, and the quiet one beside it is a
+   * link.
+   *
+   * This is the band's whole subject and it is the defect it exists to avoid:
+   * `Sign in` and `Start free` as two `loom.action` nodes is two primary buttons
+   * in one region, which `heroBand`'s comment names as the most common defect in
+   * a hand-built band and which no schema can see — `variant: "primary"` twice
+   * is not malformed in any way. Asserted on the actions region rather than on
+   * the whole band, because the menu above it is links by construction.
+   */
+  it("puts one action and one quiet link in the centred bar's corner", () => {
+    const actions = slotIn(bandOf("nav-centred"), "actions")
+
+    expect(actions.map((node) => (node.kind === "element" ? node.type : node.kind))).toEqual([
+      "loom.link",
+      "loom.action",
+    ])
+  })
+
+  /**
+   * Every design of the two bands a page cannot be without calls the site the
+   * same thing.
+   *
+   * The canonical pair is already held, further up this file, against the
+   * wordmark in the bar and the line in the footer. That check reaches
+   * `compositionById(part)` and therefore reaches canonical designs only — so on
+   * the day a part gained an alternate, a host swapping one in could rename
+   * their own site and nothing would notice. The failure is silent and it is
+   * the kind a reader sees immediately: a pill at the top reading one name over
+   * a footer signing off as another.
+   */
+  it("calls the site the same name in every design of the bar and the footer", () => {
+    const names = new Set<string>()
+
+    for (const design of compositionsForPart("nav")) {
+      for (const mark of elementsOfType(design.build(sequentialIdFactory()), "loom.brand")) {
+        expect(typeof mark.props["name"]).toBe("string")
+        names.add(String(mark.props["name"]))
+      }
+    }
+
+    expect(names.size, `the designs of the bar name the site ${[...names].join(" and ")}`).toBe(1)
+
+    const site = [...names][0] as string
+
+    for (const design of compositionsForPart("footer")) {
+      const brand = slotIn(design.build(sequentialIdFactory()), "brand")
+      const note = slotIn(design.build(sequentialIdFactory()), "note")
+
+      expect(brand.map(wordsIn).join(" "), `${design.id} does not name the site`).toContain(site)
+      expect(note.map(wordsIn).join(" "), `${design.id}'s legal line does not name the site`).toContain(site)
+    }
+  })
+
+  /**
+   * The capture goes in the footer's brand region and never into the groups.
+   *
+   * A `loom.form` among the `loom.link-list` children is the edit that suggests
+   * itself — it is one array over — and it renders. What it renders is a form
+   * sized by an `auto-fit` minimum meant for a column of links, which wraps the
+   * button under the field at every width. The groups region is asserted to hold
+   * link lists and nothing else, because that is the invariant rather than the
+   * symptom.
+   */
+  it("keeps the footer's capture in its brand region and its groups all links", () => {
+    const band = bandOf("footer-signup")
+
+    expect(slotIn(band, "brand").some((node) => node.kind === "element" && node.type === "loom.form")).toBe(true)
+
+    const groups = band.children.filter((child) => child.kind === "element")
+
+    expect(groups.map((group) => (group as ElementNode).type)).toEqual(["loom.link-list", "loom.link-list"])
+    expect(elementsOfType(band, "loom.form")).toHaveLength(1)
+  })
+
+  /**
+   * The two columns of the two-ways band disagree about every row.
+   *
+   * `loom.perk`'s `state` is what the whole band is made of: the left column is
+   * four ✕ marks and the right is four ✓. A row moved from one column to the
+   * other keeps the state it was written with, which is the one edit a reader of
+   * this band will actually make and the one the band cannot survive — a ✓ under
+   * *How it goes today* is the page arguing for the thing it is arguing against,
+   * and it renders beautifully.
+   */
+  it("marks every row of the two-ways band against the column it is in", () => {
+    const band = bandOf("comparison-ways")
+
+    const statesUnder = (name: string): readonly unknown[] =>
+      slotIn(band, name).flatMap((node) => elementsOfType(node, "loom.perk").map((perk) => perk.props["state"]))
+
+    const today = statesUnder("start")
+    const instead = statesUnder("end")
+
+    expect(today.length, "the band's first column has no rows").toBeGreaterThan(0)
+    expect(today.length).toBe(instead.length)
+    expect(new Set(today)).toEqual(new Set(["excluded"]))
+    expect(new Set(instead)).toEqual(new Set(["included"]))
+  })
+
+  /**
+   * And it shows its working through the one presentation in the catalogue.
+   *
+   * `loom.popover` shipped on 1 October and the reach measurement taken the same
+   * day found it registered and unreachable — surface every deployment pays for
+   * in every interpretation request and cannot drop in. This is the band that
+   * closed that, so the assertion is on the type being *there* as well as on the
+   * panel having something in it: a popover with an empty panel is a button that
+   * opens nothing, and `uses` alone would still read as reached.
+   */
+  it("gives the two-ways band a panel with the method in it", () => {
+    const panels = elementsOfType(bandOf("comparison-ways"), "loom.popover")
+
+    expect(panels).toHaveLength(1)
+    expect(wordsIn(panels[0] as ElementNode).length, "the popover opens on an empty panel").toBeGreaterThan(40)
+    expect(CATALOGUE_TYPES).toContain("loom.popover")
+  })
+
+  /**
+   * Four cells, four different primitives, one surface.
+   *
+   * The band's claim is that a bento's registers may disagree, and the thing
+   * that would quietly undo it is a cell duplicated and re-worded: two
+   * quotations in four cells still differs structurally from the canonical
+   * bento, still renders, and is no longer a mixed bento. The cards are asserted
+   * uniform in the same test, because the other half of the claim is that only
+   * the contents vary — four cells each drawing a slightly different ground is
+   * four bands pushed together.
+   */
+  it("fills each cell of the mixed mosaic with a different kind of thing, on one surface", () => {
+    const mosaics = elementsOfType(bandOf("bento-mixed"), "loom.mosaic")
+
+    expect(mosaics).toHaveLength(1)
+
+    const cells = (mosaics[0] as ElementNode).children
+
+    expect(cells).toHaveLength(4)
+
+    const tones = new Set<unknown>()
+    const kinds: string[] = []
+
+    for (const cell of cells) {
+      expect(cell.kind).toBe("element")
+      if (cell.kind !== "element") continue
+
+      expect(cell.type).toBe("loom.card")
+      tones.add(`${String(cell.props["tone"])} ${String(cell.props["padding"])}`)
+
+      const inner = cell.children.filter(
+        (child): child is ElementNode => child.kind === "element" && child.type !== "loom.heading"
+      )
+
+      expect(inner.length, "a cell of the mixed mosaic holds nothing but its heading").toBeGreaterThan(0)
+      kinds.push((inner[0] as ElementNode).type)
+    }
+
+    expect(tones.size, `the mixed mosaic's cells draw ${tones.size} different surfaces`).toBe(1)
+    expect(new Set(kinds), `the mixed mosaic repeats a register: ${kinds.join(", ")}`).toEqual(new Set(kinds))
+    expect(new Set(kinds).size, `the mixed mosaic repeats a register: ${kinds.join(", ")}`).toBe(4)
+  })
+})
+
+/**
  * The four bands that made a page for another kind of business, and the claim
  * underneath all of them.
  *
@@ -1974,5 +2192,231 @@ describe("the band that prints instructions", () => {
     const framework: string = "@jam-overture/loom"
 
     expect(words).toContain(`pnpm add ${framework} ${framework}-primitives`)
+  })
+})
+
+/**
+ * The four second designs of 3 October, each held to the one claim it rests on.
+ *
+ * Not one of these is a count, which is the discipline the 2 October run set and
+ * the reason that run's seven tests are still worth reading: a test that asserts
+ * *there are three cards* goes red when somebody writes a fourth release, which
+ * is the change the band exists to make easy. Each test below asserts the
+ * **property that made the design worth a catalogue entry**, and every one of
+ * them is a property the canonical of the same part does not have — so each is
+ * run against the pair rather than against the alternate alone, and a test that
+ * passed because both designs changed together would be a test that asserted
+ * nothing.
+ */
+describe("what the second designs claim", () => {
+  const build = (id: string): LoomNode => {
+    const composition = compositionById(id)
+
+    expect(composition, `no band with the id ${id}`).toBeDefined()
+
+    return (composition as Composition).build(sequentialIdFactory())
+  }
+
+  const elementChildren = (node: LoomNode): readonly ElementNode[] =>
+    node.kind === "text" ? [] : node.children.filter((child): child is ElementNode => child.kind === "element")
+
+  /**
+   * Every element in the subtree paired with the element that encloses it,
+   * looking through slots.
+   *
+   * Slots are skipped rather than counted, because a slot is a region the
+   * primitive places (0051) and not a thing a node is "inside" in the sense any
+   * of these tests mean. A `loom.person` in a card's `footer` is a child of the
+   * card as far as *who holds it* is concerned, and that is the question here.
+   */
+  const parentage = (node: LoomNode, holder?: ElementNode): readonly { child: ElementNode; holder?: ElementNode }[] => {
+    if (node.kind === "text") return []
+
+    const here = node.kind === "element" ? [{ child: node, ...(holder === undefined ? {} : { holder }) }] : []
+    const next = node.kind === "element" ? node : holder
+
+    return [...here, ...node.children.flatMap((child) => parentage(child, next))]
+  }
+
+  /**
+   * `specs-sheet`, and the fact neither primitive involved states.
+   *
+   * The middot between two specifications is `.loom-spec + .loom-spec::before`
+   * — a position selector, because no render of one node can know it has a
+   * sibling (0008). So whether a run of figures is punctuated is decided by
+   * **what the band puts between them**, and the two designs of this part want
+   * opposite answers: the canonical's row is `600 · 2,000 · 90 days` read as one
+   * line, and the sheet's card is four lines each beginning with its own figure.
+   *
+   * Asserted as a pair, which is the only way it means anything. The sheet wraps
+   * every spec in its own `loom.list-item`, so no two are ever adjacent and the
+   * rule never matches; the canonical lays them as siblings in a `loom.stack`,
+   * so it always does. Change either band's container and one half goes red.
+   */
+  it("gives the specification sheet no two adjacent specs, and the canonical nothing else", () => {
+    const sheet = parentage(build("specs-sheet")).filter(({ child }) => child.type === "loom.spec")
+    const table = parentage(build("specs")).filter(({ child }) => child.type === "loom.spec")
+
+    expect(sheet.length, "the sheet ships no specifications").toBeGreaterThan(1)
+    expect(table.length, "the canonical ships no specifications").toBeGreaterThan(1)
+
+    for (const { holder } of sheet) {
+      expect(holder?.type, `a sheet spec is held by ${holder?.type ?? "nothing"}`).toBe("loom.list-item")
+      expect(
+        elementChildren(holder as ElementNode).filter((sibling) => sibling.type === "loom.spec"),
+        "two specs in one row of the sheet would draw a middot between them"
+      ).toHaveLength(1)
+    }
+
+    const row = table[0]?.holder as ElementNode
+    expect(
+      elementChildren(row).filter((sibling) => sibling.type === "loom.spec").length,
+      "the canonical's specs are a punctuated run and have to be siblings to be one"
+    ).toBeGreaterThan(1)
+  })
+
+  /**
+   * `team-leads`, and the near-miss its doc comment runs out loud.
+   *
+   * The first draft held the two foregrounded people in a `loom.split`, which
+   * fixes the count at two in the *primitive* rather than in the content: a
+   * split has exactly two regions (0051), so a third lead is an `insert` with
+   * nowhere to go. A grid at a two-column floor draws the same pair and takes a
+   * third.
+   *
+   * So the assertion is not *there are two leads* — that is the thing a
+   * deployment changes. It is **the two leads share one ordinary parent that
+   * takes children**, which is what makes a third one reachable, and it would go
+   * red the moment somebody reached for the split again.
+   */
+  it("holds the leads in a container that would take a third", () => {
+    const leads = parentage(build("team-leads")).filter(({ child }) => child.type === "loom.person")
+
+    expect(leads.length).toBeGreaterThan(1)
+
+    expect(
+      leads.map(({ holder }) => holder?.type),
+      "a lead is no longer a person in a card"
+    ).toEqual(leads.map(() => "loom.card"))
+
+    /**
+     * The claim is one level above the person: each lead has a card of its own,
+     * and what has to be shared is the thing holding the **cards**. A third lead
+     * is an `insert` into that node, so there has to be exactly one of it and it
+     * has to be a container that takes children rather than a pair of regions.
+     */
+    const cards = parentage(build("team-leads")).filter(({ child }) => child.type === "loom.card")
+    const holders = new Set(cards.map(({ holder }) => holder?.id))
+
+    expect(cards.length).toBe(leads.length)
+    expect(holders.size, "the lead cards are in separate regions, so a third has nowhere to go").toBe(1)
+    expect(
+      new Set(cards.map(({ holder }) => holder?.type)),
+      "a lead card sits in a region a split placed rather than among siblings"
+    ).toEqual(new Set(["loom.grid"]))
+  })
+
+  /**
+   * `credentials-posture`, and the two regions the canonical ships empty.
+   *
+   * `loom.credential` declares `mark` and `meta`, and `credentialsBand` fills
+   * neither — correctly, and its comment says why: a seal is a third party's
+   * trademark fetched from a third party's domain. That reasoning is about
+   * *assets*, and the consequence it left behind is that both regions were
+   * unreachable by dropping in a band.
+   *
+   * A glyph is not an asset, so this band reaches both. Asserted on every
+   * credential rather than on one, because a band that marked three of four
+   * would photograph as an oversight — and asserted against the canonical in the
+   * same breath, so the claim *this is the band that reaches them* is the thing
+   * held rather than the band's own doc comment.
+   */
+  it("fills the credential's mark and meta regions, which the canonical leaves empty", () => {
+    const regionsOf = (id: string): readonly (readonly string[])[] =>
+      parentage(build(id))
+        .filter(({ child }) => child.type === "loom.credential")
+        .map(({ child }) =>
+          child.children
+            .filter((region) => region.kind === "slot" && region.children.length > 0)
+            .map((region) => (region.kind === "slot" ? region.name : ""))
+        )
+
+    const posture = regionsOf("credentials-posture")
+    expect(posture.length).toBeGreaterThan(1)
+
+    for (const regions of posture) {
+      expect(new Set(regions)).toEqual(new Set(["mark", "meta"]))
+    }
+
+    expect(regionsOf("credentials").flat(), "the canonical has started filling these regions").toEqual([])
+
+    /**
+     * And the rule the icon primitive states about itself: a glyph beside a
+     * word that says the same thing must be hidden from assistive technology,
+     * or the name is read twice. `label` present on one of these is the defect,
+     * and it is invisible in every photograph.
+     */
+    for (const { child } of parentage(build("credentials-posture")).filter(({ child }) => child.type === "loom.icon")) {
+      expect(child.props["label"], "a decorative glyph is named, so its credential is read out twice").toBeUndefined()
+    }
+  })
+
+  /**
+   * `changelog-notes`, and the thing a rail of milestones structurally cannot
+   * hold.
+   *
+   * `loom.milestone` carries `body` as one string — one of 0052's fixed fields,
+   * and right for a rail, where a release has one line about it. A release's
+   * *changes* are repeated content, so by the same rule they are child nodes,
+   * and there is nowhere in a milestone for a second one to go.
+   *
+   * The pair is the assertion: every release in the notes carries its changes as
+   * more than one node, and every release on the rail carries its line as a prop
+   * with no nodes under it at all. Either half alone would be satisfied by a
+   * band that had quietly become the other one.
+   */
+  it("carries every release's changes as nodes, where the rail carries one string", () => {
+    const releases = parentage(build("changelog-notes")).filter(({ child }) => child.type === "loom.list")
+
+    expect(releases.length, "the notes ship no release").toBeGreaterThan(1)
+
+    for (const { child } of releases) {
+      const rows = elementChildren(child).filter((row) => row.type === "loom.list-item")
+
+      expect(rows.length, "a release whose changes are one row is a milestone with extra steps").toBeGreaterThan(1)
+      expect(elementChildren(child).length, "a release's list holds something that is not a row").toBe(rows.length)
+    }
+
+    const milestones = parentage(build("changelog")).filter(({ child }) => child.type === "loom.milestone")
+
+    expect(milestones.length).toBeGreaterThan(1)
+
+    for (const { child } of milestones) {
+      expect(typeof child.props["body"], "the rail's line stopped being a prop").toBe("string")
+      expect(child.children, "the rail's milestone grew children, so the pair this asserts has collapsed").toEqual([])
+    }
+  })
+
+  /**
+   * The instrument, asserted rather than reported.
+   *
+   * `docs/primitive-gap-inventory.md` added *designs per part* on 2 October and
+   * it is the measurement that chose this run's work: a part with exactly one
+   * design is a part where a deployment has no choice, and the catalogue reads
+   * as complete from every other angle while it is true. It went 9 → 5 on
+   * 2 October and 5 → 1 here.
+   *
+   * **This is a floor and not a count**, which is the distinction that makes it
+   * a test worth keeping rather than a literal to edit: it says *no part has one
+   * design except `banner`*, so closing `banner` makes it stricter and a part
+   * that somehow lost its alternate makes it red. A new part admitted under
+   * 0171 arrives with one design and is the one case that would fail honestly —
+   * and that is the right moment to be told, because a part with a canonical and
+   * no alternate is exactly what this instrument exists to surface.
+   */
+  it("leaves one part in the catalogue with a single design", () => {
+    const alone = COMPOSITION_PARTS.filter((part) => compositionsForPart(part).length === 1)
+
+    expect(alone).toEqual(["banner"])
   })
 })

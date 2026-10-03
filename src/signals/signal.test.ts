@@ -25,6 +25,7 @@ describe("parseReaderSignalBatch", () => {
         { kind: "dwelled", nodeId: "n_1", type: "loom.section", ms: 4200 },
         { kind: "activated", nodeId: "n_2", type: "loom.card", at },
         { kind: "disclosed", nodeId: "n_3", type: "loom.faq", open: true, at },
+        { kind: "completed", nodeId: "n_4", type: "loom.form", at },
       ])
     )
 
@@ -115,10 +116,88 @@ describe("parseReaderSignalBatch", () => {
     expect([...carrying].sort()).toEqual([...DELEGATED_READER_SIGNAL_KINDS].sort())
   })
 
+  /**
+   * A completion says a form was let go and nothing about what was in it. The
+   * fields are the one thing a submission has that no other signal does, which
+   * makes this the sharpest version of 0136's rule rather than a repeat of it.
+   */
+  it("refuses a completion carrying anything about what was submitted", () => {
+    expect(
+      parseReaderSignalBatch(
+        batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, fields: ["email"] }])
+      ).ok
+    ).toBe(false)
+    expect(
+      parseReaderSignalBatch(
+        batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, action: "/subscribe" }])
+      ).ok
+    ).toBe(false)
+  })
+
+  it("reads the bands a completion says it was the end of", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "completed", nodeId: "n_4", type: "loom.form", at, within: [region] }])
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.signals[0]).toMatchObject({ within: [region] })
+  })
+
   it("says where a batch went wrong instead of throwing", () => {
     const parsed = parseReaderSignalBatch("not a batch")
 
     expect(parsed.ok).toBe(false)
     if (!parsed.ok) expect(parsed.error.code).toBe("invalid-batch")
+  })
+})
+
+describe("the marker that says a page view began", () => {
+  const VIEW = "0123456789abcdef0123456789abcdef"
+
+  it("reads an opening delivery", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW, first: true })
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.first).toBe(true)
+  })
+
+  it("reads a batch that is not one, and does not invent an answer", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW })
+    )
+
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) expect(parsed.value.first).toBeUndefined()
+  })
+
+  /**
+   * The flag means *this page view began here*, so a batch naming no page view
+   * is making a claim it cannot support — and a receiver that dropped it quietly
+   * would undercount arrivals for a reason nobody could see.
+   */
+  it("refuses an opening that names no page view", () => {
+    const parsed = parseReaderSignalBatch(
+      batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { first: true })
+    )
+
+    expect(parsed.ok).toBe(false)
+    if (!parsed.ok) expect(parsed.error.issues[0]?.path).toBe("first")
+  })
+
+  /**
+   * It is a marker and not a counter. Anything other than *yes* is refused, so
+   * no sender can ever send a number here and no consumer has to decide what a
+   * `false` would have meant.
+   */
+  it("refuses anything that is not plainly an opening", () => {
+    for (const given of [false, 1, "true", null]) {
+      expect(
+        parseReaderSignalBatch(
+          batch([{ kind: "viewed", nodeId: "n_1", type: "loom.section", at }], { view: VIEW, first: given })
+        ).ok
+      ).toBe(false)
+    }
   })
 })

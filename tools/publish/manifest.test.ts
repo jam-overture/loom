@@ -140,8 +140,14 @@ describe("this package, as it would go out", () => {
     expect(publicationFaults(manifest).map(describePublicationFault)).toEqual([])
   })
 
-  it("withholds the starter library and nothing else", () => {
-    expect(withheldSubpaths(manifest)).toEqual(["./primitives"])
+  /**
+   * The library has two doors and both are withheld, which is the shape 0194
+   * asks for rather than an oversight: the second one is where the forty-four
+   * bands live under their own names, and it ships as
+   * `@jam-overture/loom-primitives/compositions` or not at all.
+   */
+  it("withholds the starter library's two doors and nothing else", () => {
+    expect(withheldSubpaths(manifest)).toEqual(["./primitives", "./primitives/compositions"])
   })
 
   it("names a file that exists for every subpath a consumer will get", () => {
@@ -153,6 +159,11 @@ describe("this package, as it would go out", () => {
   it("still resolves the starter library inside this workspace, which five surfaces need", () => {
     expect(manifest.exports["./primitives"]).toBeDefined()
     expect(existsSync(join(ROOT, "dist", "primitives", "index.js"))).toBe(true)
+  })
+
+  it("still resolves the bands' own door, which is what the docs fences compile against", () => {
+    expect(manifest.exports["./primitives/compositions"]).toBeDefined()
+    expect(existsSync(join(ROOT, "dist", "primitives", "compositions", "index.js"))).toBe(true)
   })
 
   it("ships a binary whose file the tarball carries", () => {

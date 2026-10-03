@@ -1,9 +1,13 @@
 import {
   createIntakeGate,
   DEFAULT_INTAKE_POLICY,
+  memoryReaderRegionStore,
   memoryReaderSignalJournal,
 } from "@jam-overture/loom/signals"
-import { postgresReaderSignalJournal } from "@jam-overture/loom/signals/postgres"
+import {
+  postgresReaderRegionStore,
+  postgresReaderSignalJournal,
+} from "@jam-overture/loom/signals/postgres"
 
 import { portalDatabase } from "@/app/(portal)/_lib/database"
 
@@ -52,6 +56,16 @@ const build = (): Intake => {
       portalDatabase === undefined
         ? memoryReaderSignalJournal()
         : postgresReaderSignalJournal(portalDatabase),
+    /**
+     * Postgres or memory on the same handle as the buffer, for the same reason —
+     * except that a region bucket is a durable counter rather than a window, so
+     * in memory it is a map that the next cold start has never heard of. The
+     * status endpoint already says whether anything here outlives the process.
+     */
+    regions:
+      portalDatabase === undefined
+        ? memoryReaderRegionStore()
+        : postgresReaderRegionStore(portalDatabase),
     /**
      * The runtime's own numbers, with nothing in the environment able to widen
      * them. A deployment that needs different limits is a finding and a

@@ -180,8 +180,7 @@ const KNOBS: Record<keyof GatePolicy, Knob> = {
   inverseRetentionBudget: {
     group: "shape",
     plain: "How much of the old page an undo may have to carry before undo stops being practical.",
-    yourMove:
-      "Nothing. It exists so that a change whose undo would be enormous is not quietly called reversible, and 200 nodes is well past anything a page ought to be.",
+    yourMove: `Nothing. It exists so that a change whose undo would be enormous is not quietly called reversible, and ${defaultGatePolicy.inverseRetentionBudget} nodes is well past anything a page ought to be.`,
   },
 }
 

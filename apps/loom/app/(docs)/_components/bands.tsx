@@ -66,8 +66,8 @@ export const BandParts = () => (
  * The parts the library draws more than one way, and what each way is called.
  *
  * This is the table that makes *part* and *design* two different words rather
- * than one word used loosely. A reader who has seen it knows why there are
- * forty-four bands and twenty-two places to put one.
+ * than one word used loosely. A reader who has seen it knows why there are more
+ * bands in the catalogue than there are places to put one.
  */
 export const BandDesigns = () => (
   <div className="not-prose border-edge my-6 overflow-x-auto rounded-lg border">
@@ -102,9 +102,9 @@ export const BandDesigns = () => (
 /**
  * One number, in a sentence, read from the library.
  *
- * A page that wants to say *forty-four* asks for it here. The alternative is a
- * digit typed into prose, which is the one thing on a generated page nothing can
- * catch going stale.
+ * A page that wants to state the size of the catalogue asks for it here. The
+ * alternative is a digit typed into prose, which is the one thing on a generated
+ * page nothing can catch going stale.
  */
 export const BandCount = ({ of }: { readonly of: "bands" | "parts" | "largest" | "catalogue" | "registered" }) => {
   const value = {

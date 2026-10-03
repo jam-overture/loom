@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest"
 import { RESERVED_VOCABULARY } from "../copy"
 import type { PageContext } from "../pages/home"
 import { askRunFor, renderTree, treeFor } from "../render"
-import { HOME, askHref, type SiteThemeName } from "../site"
+import { HOW_IT_WORKS, askHref, type SiteThemeName } from "../site"
 import { wordsOf } from "../words"
 import { BAND } from "../bands"
 import { ASKS, askById, type Ask } from "./asks"
@@ -44,7 +44,7 @@ const contextFor = (context: Partial<PageContext> = {}): PageContext => ({
   ...context,
 })
 
-const basePage = (): LoomTree => treeFor(HOME, contextFor())
+const basePage = (): LoomTree => treeFor(HOW_IT_WORKS, contextFor())
 
 /** The shape of the page, ignoring the revision counter each change bumped. */
 const shapeOf = (page: LoomTree): string => JSON.stringify(page.root)
@@ -173,14 +173,25 @@ describe("the undo is a change, and is judged like one", () => {
   /**
    * The one that makes the band worth building, and it was not arranged.
    *
-   * *Get to the point* moves the band this site protects, so the rules hold it
-   * and the visitor answers. Putting it back **moves that same protected band
-   * again**, so the rules hold the undo too — and there is no way round it but
-   * the same yes. Nothing here exempts an undo to make the demonstration tidier,
-   * and this is the assertion that would fail if anything ever did.
+   * **An undo is judged, and this is the assertion that would fail if anything
+   * ever exempted one to make the demonstration tidier.**
+   *
+   * It asserted something stronger until 1 October: that the undo of a held
+   * change is *itself* held. That was true while the five choices ran against
+   * the front door, because the held one moved a protected band and putting it
+   * back moved the same protected band again. On this page the held one removes
+   * four bands, and putting four bands back is an insert, which the rules let
+   * through on its own. Measured across all five choices: **no undo on this
+   * page is held.**
+   *
+   * So what is asserted is what is true here — the undo goes through the same
+   * rules, carries its own record and its own verdict, and restores the page
+   * exactly. That the rules *can* hold an undo is a property of the system
+   * rather than of these five requests, and losing the demonstration of it is
+   * filed rather than hidden.
    */
-  it("holds the undo of a held change, and lets the visitor answer it", async () => {
-    const ask = askById("problem")
+  it("judges the undo by the same rules, and restores the page exactly", async () => {
+    const ask = askById("shorter")
 
     if (ask === undefined) throw new Error("loom: the held choice is not offered")
 
@@ -191,13 +202,14 @@ describe("the undo is a change, and is judged like one", () => {
 
     const asked = await runUndo(run.page, ask, run.undo, false)
 
-    expect(asked.record.awaitingYou).toBe(true)
-    expect(asked.record.landed).toBe(false)
-    expect(shapeOf(asked.page)).toBe(shapeOf(run.page))
+    /** Its own record, its own verdict, decided by the same policy. */
+    expect(asked.record.verdictLine).toContain("front-door")
+    expect(asked.record.landed).toBe(true)
+    expect(shapeOf(asked.page)).toBe(shapeOf(base))
 
+    /** And a yes changes nothing it had already allowed. */
     const answered = await runUndo(run.page, ask, run.undo, true)
 
-    expect(answered.record.verdict).toBe("approved")
     expect(shapeOf(answered.page)).toBe(shapeOf(base))
   })
 
@@ -246,9 +258,9 @@ describe("what the visitor reads afterwards", () => {
 
     if (undone === undefined) throw new Error("loom: the undo did not run")
 
-    const before = markupOf(treeFor(HOME, contextFor({ ask: "proof", record: one.record })))
+    const before = markupOf(treeFor(HOW_IT_WORKS, contextFor({ ask: "proof", record: one.record })))
     const after = markupOf(
-      treeFor(HOME, contextFor({ ask: "proof", back: true, record: two.record, undone }))
+      treeFor(HOW_IT_WORKS, contextFor({ ask: "proof", back: true, record: two.record, undone }))
     )
 
     expect(before).not.toContain(PUT_IT_BACK)
@@ -273,7 +285,7 @@ describe("what the visitor reads afterwards", () => {
 
     if (run === undefined) throw new Error(`loom: ${ask.id} did not run`)
 
-    const page = treeFor(HOME, { ...context, record: run.record })
+    const page = treeFor(HOW_IT_WORKS, { ...context, record: run.record })
     const offered = hrefsIn(bandOf(page, BAND.seeItHappen))
     const pressed = offered.find((href) => new URL(href).searchParams.get("back") === "1")
 
@@ -302,35 +314,49 @@ describe("what the visitor reads afterwards", () => {
   })
 
   /**
-   * A held undo has restored nothing, and the card must not say it has.
+   * **A change the rules are still holding has restored nothing, and the card
+   * must not say it has.**
    *
    * The payoff sentence — *the pieces came back, this is the page you arrived
-   * on* — is true only after something was put back. Printed under an undo the
-   * rules are still holding it would be the same defect this whole change
-   * removes, one card lower and in the state that is most interesting to read.
+   * on* — is true only after something was actually put back. Printed over a
+   * page nothing has happened to, it would be this site failing at its own
+   * claim on the line a reader reads fastest.
+   *
+   * It was asserted against a *held undo* until 1 October. No undo on this page
+   * is held — putting back what the held request removed is an insert, which
+   * the rules allow on their own — so the unanswered state it tests is now the
+   * held **change**: `shorter` without the visitor's yes, where nothing has
+   * been removed and so nothing has been restored either.
    */
-  it("does not claim a restoration the rules have not allowed yet", async () => {
-    const held = await askRunFor(contextFor({ ask: "problem", approve: true, back: true }))
+  it("does not claim a restoration that has not happened", async () => {
+    const waiting = await askRunFor(contextFor({ ask: "shorter", back: true }))
     const done = await askRunFor(
-      contextFor({ ask: "problem", approve: true, back: true, backApprove: true })
+      contextFor({ ask: "shorter", approve: true, back: true, backApprove: true })
     )
 
-    if (held?.undone === undefined || done?.undone === undefined) {
-      throw new Error("loom: the undo did not run")
+    if (waiting === undefined || done?.undone === undefined) {
+      throw new Error("loom: the request did not run")
     }
 
-    expect(held.undone.landed).toBe(false)
+    /** Held, so no undo exists at all: there is nothing yet to put back. */
+    expect(waiting.record.landed).toBe(false)
+    expect(waiting.undone).toBeUndefined()
     expect(done.undone.landed).toBe(true)
 
-    const pageOf = (record: ChangeRecord, undone: ChangeRecord): string =>
+    const pageOf = (record: ChangeRecord, undone?: ChangeRecord): string =>
       wordsOf(
         treeFor(
-          HOME,
-          contextFor({ ask: "problem", approve: true, back: true, record, undone })
+          HOW_IT_WORKS,
+          contextFor({
+            ask: "shorter",
+            back: true,
+            record,
+            ...(undone === undefined ? {} : { approve: true, backApprove: true, undone }),
+          })
         ).root
       )
 
-    expect(pageOf(held.record, held.undone)).not.toContain("the page you arrived on")
+    expect(pageOf(waiting.record)).not.toContain("the page you arrived on")
     expect(pageOf(done.record, done.undone)).toContain("the page you arrived on")
   })
 
@@ -342,12 +368,12 @@ describe("what the visitor reads afterwards", () => {
    * site failing at its own claim on the line a reader reads fastest.
    */
   it("reports the undo at the top of the page rather than the change", async () => {
-    const run = await askRunFor(contextFor({ ask: "shorter", back: true }))
+    const run = await askRunFor(contextFor({ ask: "shorter", approve: true, back: true }))
 
     if (run?.undone === undefined) throw new Error("loom: the undo did not run")
 
     const page = treeFor(
-      HOME,
+      HOW_IT_WORKS,
       contextFor({ ask: "shorter", back: true, record: run.record, undone: run.undone })
     )
     const markup = markupOf(page)
@@ -370,7 +396,7 @@ describe("what the visitor reads afterwards", () => {
 
     const hrefs = hrefsOf(
       treeFor(
-        HOME,
+        HOW_IT_WORKS,
         contextFor({ ask: "calmer", back: true, record: run.record, undone: run.undone })
       )
     )
@@ -383,15 +409,15 @@ describe("what the visitor reads afterwards", () => {
    * cannot send them to a page where the change it reverses never happened.
    */
   it("keeps the visitor's yes in every link it offers afterwards", async () => {
-    const run = await askRunFor(contextFor({ ask: "problem", approve: true, back: true }))
+    const run = await askRunFor(contextFor({ ask: "shorter", approve: true, back: true }))
 
     if (run?.undone === undefined) throw new Error("loom: the undo did not run")
 
     const hrefs = hrefsOf(
       treeFor(
-        HOME,
+        HOW_IT_WORKS,
         contextFor({
-          ask: "problem",
+          ask: "shorter",
           approve: true,
           back: true,
           record: run.record,
@@ -400,10 +426,28 @@ describe("what the visitor reads afterwards", () => {
       )
     )
 
-    expect(run.undone.awaitingYou).toBe(true)
-    expect(hrefs).toContain(
-      askHref(ORIGIN, { theme: THEME, ask: "problem", approve: true, back: true, backApprove: true })
+    /**
+     * The yes the visitor already gave is in every link the page offers.
+     *
+     * It asserted the presence of the *answer the undo was still waiting for*
+     * until 1 October. No undo on this page waits for one, so what is left — and
+     * what the test was always protecting — is that nothing here offers a link
+     * back to a page where the approved change never happened.
+     */
+    expect(run.record.verdict).toBe("approved")
+
+    /**
+     * Scoped to the links **about the change just made** — the ones carrying
+     * `back=1`. The band also offers the five choices again, and those are fresh
+     * requests: carrying a stale approval into one of them would be the opposite
+     * of this property, not an instance of it.
+     */
+    const aboutThisChange = hrefs.filter(
+      (href) => href.includes("ask=shorter") && href.includes("back=1")
     )
+
+    expect(aboutThisChange.length).toBeGreaterThan(0)
+    expect(aboutThisChange.every((href) => href.includes("approve=1"))).toBe(true)
   })
 
   /**
@@ -422,7 +466,7 @@ describe("what the visitor reads afterwards", () => {
 
     const words = wordsOf(
       treeFor(
-        HOME,
+        HOW_IT_WORKS,
         contextFor({
           ask: ask.id,
           approve: true,
@@ -456,7 +500,7 @@ describe("the record and the page it stands on", () => {
 
     if (first?.undone === undefined) throw new Error(`loom: ${ask.id}'s undo did not run`)
 
-    const staged = treeFor(HOME, { ...context, record: first.record, undone: first.undone })
+    const staged = treeFor(HOW_IT_WORKS, { ...context, record: first.record, undone: first.undone })
     const run = await runAsk(staged, ask, true)
 
     if (run.undo === undefined) throw new Error(`loom: ${ask.id} landed without an undo`)

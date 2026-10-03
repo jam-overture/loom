@@ -92,7 +92,8 @@ Each routine owns one part of the repository and does not edit another's.
 
 | Routine | Owns |
 | --- | --- |
-| Framework (`Loom daily build`) | `src/` **except `src/primitives/`**, and the application shell |
+| Framework (`Loom daily build`) | `src/` **except `src/primitives/` and `src/signals/`**, and the application shell |
+| Signals (`Loom signals`) | `src/signals/`, the reader-signal intake under `apps/loom/app/`, and `docs/signals.md` |
 | Primitives (`Loom primitives`) | `src/primitives/` — breadth and quality of the library |
 | Portal (`Loom portal`) | `apps/loom/app/(portal)/` |
 | Documentation (`Loom docs`) | `apps/loom/app/(docs)/` |
@@ -451,6 +452,55 @@ with the change. `--no-semi --print-width 100 --trailing-comma es5` does not
 reproduce the existing formatting either, so there is no options string that
 would. Filed by `Loom marketing` on 23 September after it cost that run a full
 revert and a re-application of eight files' worth of edits.
+
+## The voice a visitor reads
+
+**For every surface a stranger reads — the marketing site above all.** The
+maintainer's instruction of 1 October, after `Loom marketing` had spent weeks
+writing aphorisms:
+
+> *"Why do you write stuff so weirdly. No one talks like that. … Stop writing
+> weird shit. It should sound like common language. Explain things if you have
+> to."*
+
+He was right, and it was not a couple of sentences. Measured across the
+marketing page builders that morning, **a quarter to a half of every sentence
+over forty characters carried an em dash.** No single run decided on that
+register. Each run wrote in the register of the run before it, and nothing
+anywhere said that was a register rather than the house style — which is exactly
+how a voice nobody chose becomes the voice of the product.
+
+So it is written down here, and `(marketing)/_lib/voice.test.ts` enforces the
+checkable half.
+
+**The tics to check a draft against:**
+
+- **No em dash in copy a reader scans** — a step, a card, a stat, a tile. In
+  this repository's copy the dash was almost always joining a plain clause to a
+  second one that qualified, inverted or dramatized it. Write two sentences
+  instead. **If the test fails, the fix is a rewrite, not a comma**: a rule
+  satisfied by swapping punctuation has bought nothing.
+- **No inversions.** *"Loom is wired to no vendor"* → *"Loom is AI model
+  agnostic."* *"What Loom needs from you is…"* → *"Loom needs two things from
+  you:"*
+- **No sentence opening on a negation to set up a reveal.** *"Not a list of code
+  changes. A sentence naming the rule…"* → *"You get a plain sentence saying
+  what changed and which rule allowed it."*
+- **Say the ordinary industry word** when one exists: *AI model agnostic*,
+  *acceptance policy*, *bring your own model*. Plain is not the same as
+  simplified. The reader is a developer, or somebody who buys for one.
+- **Explaining something at length is fine.** Being terse and clever is not the
+  goal; being understood on one read is.
+
+Two lines the maintainer wrote himself, as the register to match:
+
+> *"Loom is AI model agnostic. Choose your preferred model or one of your own."*
+
+> *"Define your acceptance policy so that only the changes you pre-approved an AI
+> model can make. Otherwise Loom will reject it and tell you why."*
+
+**This is about the words a visitor reads**, not about these documents, commit
+messages or code comments, where a long explanation is the point.
 
 ## Decision records
 

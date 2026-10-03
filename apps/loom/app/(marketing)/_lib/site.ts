@@ -336,8 +336,8 @@ export const DEMO: Surface = {
   path: "/demo",
   label: "Demo",
   blurb:
-    "Ask a small business's page to rearrange itself — in your own words — and watch the record fill in beside it.",
-  cost: "Costs you a click",
+    "Ask a small business's page to rearrange itself in your own words, and watch the record fill in beside it.",
+  cost: "Takes one click",
   guarded: false,
   inMenu: true,
 }
@@ -347,7 +347,7 @@ export const DOCS: Surface = {
   label: "Docs",
   blurb:
     "How to install it, hand it the components you already have, and get your first change approved on a page of your own.",
-  cost: "Costs you a read",
+  cost: "Takes a few minutes",
   guarded: false,
   inMenu: true,
 }
@@ -357,7 +357,7 @@ export const LESSONS: Surface = {
   label: "Lessons",
   blurb:
     "A course on why Loom works the way it does. You answer before you read, and it tells you when to come back.",
-  cost: "Costs you an afternoon",
+  cost: "Takes an afternoon",
   guarded: false,
   inMenu: false,
 }
@@ -378,7 +378,7 @@ export const PORTAL: GuardedSurface = {
    * so the thing being asked for is somebody else's decision — which is what
    * *an invitation* says in the same four words and the same shape.
    */
-  cost: "Costs you an invitation",
+  cost: "Needs an invitation",
   guarded: true,
   /**
    * Deliberately about every Loom site and not only this one.
@@ -692,7 +692,7 @@ const askedHref = (origin: string, path: string, options: AskedFor): string => {
 }
 
 export const askHref = (origin: string, options: AskedFor = {}): string =>
-  askedHref(origin, HOME.path, options)
+  askedHref(origin, HOW_IT_WORKS.path, options)
 
 /**
  * The mechanism page, with the request whose record it should print.

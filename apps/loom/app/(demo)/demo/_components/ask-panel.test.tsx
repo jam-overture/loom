@@ -275,6 +275,131 @@ describe("the ask panel", () => {
   })
 
   /**
+   * ## What the Gate says about the button, before anybody presses it
+   *
+   * The arrival screen's whole argument used to be the half of this product
+   * everybody else has — *an AI can rewrite this page* — with the Gate present
+   * only as a hedge covering every ask ever made. `what-it-will-say.ts`
+   * computes the other half for the one ask this panel invites, and these are
+   * the properties the panel owes it.
+   */
+  const WILL_HOLD = {
+    lead: "Pressing this raises a question, not a change.",
+    detail: "Some risk — so Loom asks you before the page moves, and writes down what you decide.",
+    moves: false,
+    standing: "asks-you",
+  } as const
+
+  /**
+   * One verdict, keyed to the ask it is about.
+   *
+   * The prop became a set on 2 October and these five rows did not change
+   * meaning: a set holding only the lead's answer is a panel with a verdict
+   * under its button and no split to count, which is exactly the state they
+   * were written against.
+   */
+  const ONLY_THE_LEAD = { [DEMO_LEADING_PRESET]: WILL_HOLD } as const
+
+  it("says what the Gate will do about the ask it is offering", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={ONLY_THE_LEAD}
+      />
+    )
+
+    expect(screen.getByText(WILL_HOLD.lead)).toBeTruthy()
+    expect(screen.getByText(/asks you before the page moves/)).toBeTruthy()
+  })
+
+  /**
+   * **Welded to the button, not to the panel**, which is what survives the
+   * narrow layout's reversal: the press, what it does to the page and what
+   * Loom does about it are three facts about one control, and a verdict
+   * reordered away from the button it is about is a verdict about nothing.
+   */
+  it("keeps the verdict inside the form it is about", () => {
+    const { container } = render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={ONLY_THE_LEAD}
+      />
+    )
+
+    const form = container.querySelector(`form:has(input[value="${DEMO_LEADING_PRESET}"])`)
+
+    expect(form).toBeTruthy()
+    expect(form?.contains(screen.getByText(WILL_HOLD.lead))).toBe(true)
+  })
+
+  /**
+   * And it follows the promise rather than leading it. The promise is about
+   * the page — *the appointments, the years and the waiting time come off* —
+   * and the verdict is about what Loom does with that. Read the other way
+   * round, a stranger is told a decision about a change they have not been
+   * told the shape of.
+   */
+  it("puts the verdict under the promise, not over it", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={ONLY_THE_LEAD}
+      />
+    )
+
+    const promise = screen.getByText(leadingAsk(ALL)!.promise)
+    const verdict = screen.getByText(WILL_HOLD.lead)
+
+    expect(
+      promise.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  /**
+   * The hedge gives way to the fact, and only to the fact.
+   *
+   * *"Some changes it makes on its own, some it won't make without asking you
+   * first"* is a stand-in for something the surface could not state. With the
+   * statement directly below it, the stand-in is three lines of *maybe* over a
+   * line of *this one will* — so the claim stays and the hedge goes.
+   */
+  it("drops the hedge when it has the fact, and keeps the claim", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={ONLY_THE_LEAD}
+      />
+    )
+
+    expect(screen.queryByText(/won’t make without asking you/i)).toBeNull()
+    expect(screen.getByText(/weighs every ask before it lands/i)).toBeTruthy()
+    expect(screen.getByText(/writes down what it did/i)).toBeTruthy()
+  })
+
+  /**
+   * And restores it when there is nothing to foretell. Nothing is removed from
+   * this surface: a deployment whose leading ask never reaches a verdict shows
+   * the sentence exactly as it has always shown it.
+   */
+  it("keeps the whole sentence when the Gate has said nothing", () => {
+    render(<AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} />)
+
+    expect(screen.getByText(/won’t make without asking you/i)).toBeTruthy()
+  })
+
+  /**
    * A re-theme is one configure against the page root, and an excerpt of the
    * root is the whole page rendered a second time inside the rail beside it. It
    * comes over absent, and absent has to render as nothing rather than as an
@@ -303,6 +428,161 @@ describe("the ask panel", () => {
     for (const form of forms) {
       expect(form.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe("7")
     }
+  })
+})
+
+/**
+ * What a stranger reads before they have pressed anything, and the one claim on
+ * this surface the next press checks.
+ *
+ * The verdicts are real elsewhere (`what-it-will-say.test.ts`), the count is
+ * right elsewhere (`how-many-wait-for-you.test.ts`) and the count matches the
+ * write path elsewhere (`pipeline.test.ts`). What is held here is that the
+ * panel shows them — the sentence in place of the claim, a word at the end of
+ * every row that has one, and the old behaviour intact wherever a verdict is
+ * missing.
+ */
+describe("the ask panel, telling a stranger what Loom will do about each ask", () => {
+  const says = (standings: Partial<Record<DemoPresetId, "on-its-own" | "asks-you">>) =>
+    Object.fromEntries(
+      Object.entries(standings).map(([id, standing]) => [
+        id,
+        {
+          lead: "…",
+          detail: "…",
+          moves: standing === "on-its-own",
+          standing,
+        },
+      ])
+    )
+
+  /** Two of the five go ahead, three wait — the shipped table, as it stands. */
+  const AS_SHIPPED = says({
+    palette: "on-its-own",
+    backdrop: "on-its-own",
+    band: "asks-you",
+    trim: "asks-you",
+    promote: "asks-you",
+  })
+
+  /**
+   * The sentence that replaced *"Loom weighs every ask before it lands"* — a
+   * claim true of every ask ever made, and therefore a claim about none of
+   * them.
+   */
+  it("leads with the split rather than with a claim about asks in general", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(
+      screen.getByText(
+        "You can ask for 5 changes here. Loom will make 2 on its own and ask you first about 3."
+      )
+    ).toBeTruthy()
+    expect(screen.queryByText(/weighs every ask before it lands/i)).toBeNull()
+  })
+
+  /**
+   * And the rows are what make it checkable. A count a stranger cannot verify
+   * is another promise; four rows that visibly do not read the same is the
+   * product.
+   */
+  it("says at the end of every other ask what Loom will do about that one", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(screen.getAllByText("Goes ahead")).toHaveLength(2)
+    expect(screen.getAllByText("Asks you first")).toHaveLength(2)
+  })
+
+  /**
+   * Two, not three: the lead is not in the list. Its own verdict is the two
+   * sentences under the green button, and a row for it would be the same fact
+   * twice on one screen in two vocabularies.
+   */
+  it("keeps the lead out of the rows it marks", () => {
+    const { container } = render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    const lead = container.querySelector(`li form:has(input[value="${DEMO_LEADING_PRESET}"])`)
+
+    expect(lead).toBeNull()
+    expect(screen.getAllByText(/Goes ahead|Asks you first/)).toHaveLength(4)
+  })
+
+  /**
+   * The sentence counts the panel, not the table. `already-asked.ts` withdraws
+   * an ask while its question is open, and a sentence that went on saying
+   * *five* over four rows would be the first thing on this screen a stranger
+   * could catch out.
+   */
+  it("shrinks with the list it describes", () => {
+    const fewer = ALL.filter((id) => id !== "palette" && id !== "band")
+
+    render(
+      <AskPanel
+        revision={0}
+        available={fewer}
+        modelConfigured={false}
+        {...led(fewer)}
+        willSay={AS_SHIPPED}
+      />
+    )
+
+    expect(screen.getByText(/You can ask for 3 changes here/)).toBeTruthy()
+    expect(screen.queryByText(/ask for 5 changes/)).toBeNull()
+  })
+
+  /**
+   * Nothing removed, at either size of absence. An ask with no verdict wears
+   * no word and is not counted; a panel with no verdicts at all reads exactly
+   * as it did before any of this existed.
+   */
+  it("says nothing about an ask that reached no verdict, and counts it in nothing", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={says({ palette: "on-its-own", backdrop: "on-its-own", trim: "asks-you" })}
+      />
+    )
+
+    expect(screen.getByText(/You can ask for 3 changes here/)).toBeTruthy()
+    expect(screen.getAllByText(/Goes ahead|Asks you first/)).toHaveLength(2)
+    expect(screen.getByText(labelOf("band"))).toBeTruthy()
+  })
+
+  it("keeps the whole claim when nothing has been answered", () => {
+    render(
+      <AskPanel revision={0} available={ALL} modelConfigured={false} {...led(ALL)} willSay={{}} />
+    )
+
+    expect(screen.getByText(/won’t make without asking you/i)).toBeTruthy()
+    expect(screen.queryByText(/You can ask for/)).toBeNull()
+    expect(screen.queryByText(/Goes ahead|Asks you first/)).toBeNull()
   })
 })
 

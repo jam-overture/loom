@@ -138,6 +138,16 @@ export const shotSchema = z
     fullPage: z.boolean().default(false),
     /** A selector to photograph instead of the viewport. `CaptureTarget.clip`. */
     clip: z.string().min(1).optional(),
+    /**
+     * Selectors to print a rectangle for. `Shot.measure` says why it prints
+     * and never asserts.
+     *
+     * Resolved in this shot's `frame`, like every other selector it carries.
+     * Any selector the driver understands, `text=` included — which is the
+     * reason this reading goes through a locator rather than through a
+     * `querySelectorAll` in the page.
+     */
+    measure: z.array(z.string().min(1)).default([]),
   })
   /**
    * Strict for the same reason each step is: a misspelled `frame` or `before`
@@ -224,4 +234,5 @@ export const planShots = (list: ShotList): readonly Shot[] =>
     ...(shot.start === undefined ? {} : { start: shot.start }),
     fullPage: shot.fullPage,
     ...(shot.clip === undefined ? {} : { clip: shot.clip }),
+    measure: shot.measure,
   }))

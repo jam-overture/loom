@@ -5,7 +5,9 @@
  * **The plain version.** Loom ships as two packages. `@jam-overture/loom` is the
  * framework — the tree, the change model, the Gate, and the adapters behind
  * their own doors. `@jam-overture/loom-primitives` is the starter library: the
- * ninety-eight primitives every example on this site is built from.
+ * primitives every example on this site is built from. How many there are is a
+ * number no file states — `_lib/counts.ts` reads it off the library, because the
+ * sentence this one used to carry said ninety-eight while there were ninety-nine.
  *
  * They were one package until 27 September, and the seam is the whole reason
  * this file exists.
@@ -42,15 +44,35 @@
  * subpath of the framework at all.
  *
  * Keyed by the specifier that resolves **here**, because that is the one a file
- * in this repository can be written against. One entry today, and
+ * in this repository can be written against. Two entries today, and
  * `packages.test.ts` holds that against the framework's own manifest: the keys
  * are exactly the doors the workspace has and the registry does not, so a
- * seventeenth door that publishes needs no edit here, and a second one that is
- * withheld cannot be forgotten.
+ * seventeenth door that publishes needs no edit here, and one that is withheld
+ * cannot be forgotten.
+ *
+ * **The library publishes two doors, and the second is where the bands live.**
+ * `@jam-overture/loom-primitives` is the catalogue — `STARTER_COMPOSITIONS`,
+ * `compositionById`, `planComposition`. `…/compositions` is the bands under
+ * their own names, `heroBand` and `pricingBand` among them, and
+ * until 1 October this repository had no door to rewrite that one to, so the
+ * page that teaches it could name it in prose and never compile it.
  */
 export const PUBLISHED_AS: ReadonlyMap<string, string> = new Map([
   ["@jam-overture/loom/primitives", "@jam-overture/loom-primitives"],
+  ["@jam-overture/loom/primitives/compositions", "@jam-overture/loom-primitives/compositions"],
 ])
+
+/**
+ * The package a specifier installs from, which stops being the specifier the
+ * moment a package publishes a second door.
+ *
+ * `@jam-overture/loom-primitives/compositions` is one import and no extra
+ * `pnpm add`, and two checks on this site assert over names a reader has to
+ * install. They were both right while every name in the map above was a whole
+ * package; this is what they ask now.
+ */
+export const packageOf = (specifier: string): string =>
+  specifier.split("/").slice(0, specifier.startsWith("@") ? 2 : 1).join("/")
 
 /** The reverse: what a name a reader would type resolves to inside this repository. */
 export const RESOLVES_HERE_AS: ReadonlyMap<string, string> = new Map(

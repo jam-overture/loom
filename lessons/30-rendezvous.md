@@ -943,10 +943,10 @@ describe("G", () => {
 ```
 
 ```
-  primitives registered:     99
+  primitives registered:     102
   declaring what they read:  2 — loom.tally, loom.feed
   declaring they read none:  0
-  saying nothing either way: 97
+  saying nothing either way: 100
 ```
 
 Two, out of whatever the first line printed — and the two are the only
