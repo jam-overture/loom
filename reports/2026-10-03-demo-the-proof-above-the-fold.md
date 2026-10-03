@@ -249,6 +249,11 @@ script, drove the page, read `getBoundingClientRect` in an `evaluate`, and found
 the instrument afterwards by reading the finding that asked for it. About twenty
 minutes. The script is deleted and the selectors are committed instead.
 
+**Every `after` picture here is byte-identical to a fresh shot taken from the
+final committed build**, re-run after the gate went green on the head commit:
+all seven `md5`s match. They are pictures of the code in this pull request and
+not of an intermediate one. The shot list is committed beside this report.
+
 ## Real test numbers
 
 `pnpm install && pnpm verify` — **green, exit 0**, on a deleted `dist` and
@@ -258,13 +263,13 @@ read in a separate command.
 | | `main` at `ef48c4d` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` (`src/`, `tools/`) | 177 files / 3,699 | **177 / 3,699** — `src/` untouched |
-| `@loom/app` (`apps/loom/`) | 374 / 6,662, 0 skipped | **374 / 6,673**, 0 skipped |
-| the demo lane, measured | **740** in 49 files | **751** in 49 files |
+| `@loom/app` (`apps/loom/`) | 374 / 6,662, 0 skipped | **374 / 6,674**, 0 skipped |
+| the demo lane, measured | **740** in 49 files | **752** in 49 files |
 | findings | 978 | **981**, 0 malformed — three filed, one closed |
 
-**+11 lane tests, all written**: four in `in-question.test.ts`, five in
-`part-in-question.test.tsx`, two in `globals.test.ts`. Both totals moved by
-exactly 11, so none of it is a file-driven sweep — no test file was added, and
+**+12 lane tests, all written**: four in `in-question.test.ts`, five in
+`part-in-question.test.tsx`, three in `globals.test.ts`. Both totals moved by
+exactly 12, so none of it is a file-driven sweep — no test file was added, and
 every test was written. One existing test was rewritten and
 one gained two assertions, because their subject changed; nothing was weakened,
 skipped or deleted. 124
@@ -304,7 +309,7 @@ twenty lines away.
 Each defect restored in turn **against the commit**, the demo lane run against
 it, and the lane restored from `HEAD` between rows — safe only because the unit
 was committed first, which is this lane's own finding of 1 October being obeyed
-rather than rediscovered. Baseline **751 passed**.
+rather than rediscovered. Baseline **752 passed**.
 
 | defect restored | caught |
 | --- | --- |
@@ -319,8 +324,10 @@ rather than rediscovered. Baseline **751 passed**.
 | the disclosure arrives open, so it reclaims nothing | **1** |
 | the lead is printed inside the fold as well as on the control | **1** |
 | the group is on the summary, so the chevron never turns | **1** |
+| the reduced-motion rule is written inside a layer, so the utility wins | **1** |
+| the reduced-motion rule names the chevron and not the label | **1** |
 
-**Eleven of eleven**, and the two the matrix was really built for are the fourth
+**Thirteen of thirteen**, and the two the matrix was really built for are the fourth
 and the fifth. *The two tables are crossed* is the failure the whole shape of
 this change exists to make unreachable — a control naming a different change
 from the thing behind it, with every type satisfied — and it is caught by the
@@ -328,6 +335,32 @@ assertion that holds the pair as a pair rather than against four literals, which
 would have passed just as happily with the tables swapped. *The band is not in
 the document* is the one that would have been a lie rather than a bug: pixels
 reclaimed, every picture better, and *nothing is removed* quietly false.
+
+## And one thing the instrument found that nobody was looking for
+
+**Two shots of the opened excerpt, from two separately started servers on the
+same build, came back with different bytes.** At 1280 × 900 the difference was a
+435 × 21 region — the summary's own text. At 390 × 844 it was a 13 × 14 box —
+the chevron. Both were captured part-way through a 150ms transition.
+
+`pnpm shoot` photographs every page with **reduced motion already requested**,
+so a page honouring that request could not have produced two different pictures.
+The flake was the symptom and the product was the defect: this stylesheet's
+`prefers-reduced-motion` rule names `.loom-reach` and nothing else, so a visitor
+who has asked their system for less motion was getting a rotating arrow and a
+fading label from four controls whose whole job is to be instantaneous — the
+three disclosures the rail already had, and the one this run made.
+
+Four lines, unlayered, because the transitions come from Tailwind utilities and
+Tailwind orders its layers `theme, base, components, utilities`: the same rule
+written inside `@layer components` loses to the thing it is turning off and goes
+on animating with every test green. That is the twelfth row of the matrix below,
+and it was **caught by nothing** on the first attempt — the assertion checked
+brace *lines* rather than brace *balance*, which is a check that passes on a
+layered rule. It is balance now and it catches it.
+
+With the rule in, the same two shots from two separately started servers are
+byte-identical, and so are the other five frames.
 
 ## Decisions taken that were not specified
 
@@ -342,6 +375,10 @@ reclaimed, every picture better, and *nothing is removed* quietly false.
   **the clinic's page**, sitting among the promise and the verdict, which are
   sentences in the same register at the same size. The mono uppercase on this
   rail means *a label on the instrument*.
+- **The reduced-motion rule was taken rather than filed**, although it reaches
+  the two disclosures this unit does not otherwise touch. It is four lines of
+  this lane's own stylesheet, it is the fix for a defect the run's own pictures
+  proved, and a `wait` step in the shot list would have hidden it instead.
 - **The chevron is a third copy and was not extracted.** Filed instead; the unit
   is about what a stranger sees, and the extraction opens two files it has no
   other reason to touch.

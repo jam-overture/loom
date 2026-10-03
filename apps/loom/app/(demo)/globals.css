@@ -523,3 +523,44 @@
     display: none;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   A DISCLOSURE DOES NOT ANIMATE FOR SOMEBODY WHO ASKED IT NOT TO
+
+   Every disclosure on this rail turns a chevron and fades a label:
+   `transition-transform group-open:rotate-90` on the arrow,
+   `transition-colors hover:text-ink` on the summary. Four of them now
+   — the three on the rail and the one the arrival screen's excerpt
+   became — and none of them was covered by the `prefers-reduced-motion`
+   rule above, which names `.loom-reach` and nothing else.
+
+   **Found by the instrument rather than argued for.** Two shots of the
+   opened excerpt, taken from two separately started servers on the same
+   build, came back with different bytes: at 1280×900 the 435×21 region
+   of the summary's own text, and at 390×844 the 13×14 box of the
+   chevron. Both were captured part-way through a 150ms transition —
+   and `pnpm shoot` photographs every page with reduced motion already
+   requested, so a page honouring that request could not have produced
+   two different pictures.
+
+   So this is the product being wrong and the flake being the symptom:
+   a visitor who has asked their system for less motion was getting a
+   rotating arrow and a fading label from a control whose whole job is
+   to be instantaneous. `src/primitives/stylesheet.ts` holds the same
+   rule for the library and calls `prefers-reduced-motion` the one media
+   query that is not about layout.
+
+   **Unlayered, which is the only place it can win.** The transitions
+   come from Tailwind utilities, and Tailwind orders its layers
+   `theme, base, components, utilities` — so a rule written in any of
+   them loses to the utility it is trying to turn off. An unlayered
+   declaration beats every layer, which is the same reasoning
+   `.demo-part-stage`'s inline ground is written down with.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  summary,
+  summary svg {
+    transition: none;
+  }
+}

@@ -325,6 +325,47 @@ describe("the part in question", () => {
    * wrong file: the red tests are about the window, and the edit is in the
    * disclosure twenty lines away.
    */
+  /**
+   * **And no disclosure on this rail animates for somebody who asked it not to.**
+   *
+   * Every summary here turns a chevron and fades a label, from Tailwind
+   * utilities, and the `prefers-reduced-motion` rule this stylesheet already
+   * had names `.loom-reach` and nothing else. The symptom was a flake rather
+   * than a complaint: two shots of the opened excerpt, taken from two
+   * separately started servers on the same build, came back with different
+   * bytes in the summary's own 435×21 region — captured part-way through a
+   * 150ms transition, on a harness that photographs every page with reduced
+   * motion already requested.
+   *
+   * **Unlayered is the assertion, not an incidental.** The transitions are
+   * utilities, and Tailwind orders its layers `theme, base, components,
+   * utilities`, so the same rule written inside `@layer base` or
+   * `@layer components` loses to the thing it is turning off and goes on
+   * animating with every test green.
+   */
+  it("stops a disclosure animating when the visitor asked for less motion", () => {
+    const rule = /@media \(prefers-reduced-motion: reduce\) \{\s*summary,\s*summary svg \{\s*transition: none;/
+
+    expect(css).toMatch(rule)
+
+    /*
+     * And it is outside every `@layer`, read by balancing braces up to it: at
+     * the top level of a stylesheet every block above a rule is closed, and a
+     * rule written inside `@layer components` has exactly one brace still
+     * open above it.
+     *
+     * Comments out first — this stylesheet argues with itself at length and
+     * several of its paragraphs contain a brace.
+     */
+    const at = css.search(rule)
+
+    expect(at).toBeGreaterThan(-1)
+
+    const before = css.slice(0, at).replace(/\/\*[\s\S]*?\*\//g, "")
+
+    expect((before.match(/\{/g) ?? []).length).toBe((before.match(/\}/g) ?? []).length)
+  })
+
   it("declares the overridden rules before the disclosure that overrides them", () => {
     const shared = css.indexOf(".demo-part {")
     const window = css.indexOf(".demo-part-stage {")
