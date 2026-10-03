@@ -129,6 +129,23 @@ export const assessmentSummarySchema = z.object({
   relocatedPrimitiveTypes: z.array(primitiveTypeSchema).optional(),
   relocatedNodeCount: z.number().int().nonnegative().optional(),
   shallowestAffectedDepth: z.number().int().nonnegative(),
+  /**
+   * How many nodes the change named, which is the one thing `broad-change`
+   * reads. `affectedNodeIds` itself is content — the ids name parts of a
+   * particular page and do not cross (0023) — and the rule compares its
+   * *length* against `breadthThreshold`, so the count is the whole of what a
+   * later reader needs and the ids never have to be journalled.
+   */
+  affectedNodeCount: z.number().int().nonnegative().optional(),
+  /**
+   * The prop names the change set, which is the only input to
+   * `protected-prop-configured`.
+   *
+   * Names and not values: a key is vocabulary the host registered, where a value
+   * is what a visitor will read. Bounded by the declaration that accepts them,
+   * for the reason `touchedPrimitiveTypes` is bounded by the catalogue.
+   */
+  configuredPropKeys: z.array(z.string().min(1)).optional(),
   /** Nodes the inverse would have to carry — the content a removal destroyed. */
   retainedNodeCount: z.number().int().nonnegative(),
   irreversibilityReasons: z.array(z.string().min(1)),
@@ -167,6 +184,10 @@ export type AssessmentSummary = {
   readonly relocatedPrimitiveTypes?: readonly PrimitiveType[]
   readonly relocatedNodeCount?: number
   readonly shallowestAffectedDepth: number
+  /** Absent on a record written before the field existed, never defaulted (0045). */
+  readonly affectedNodeCount?: number
+  /** Absent on a record written before the field existed, never defaulted (0045). */
+  readonly configuredPropKeys?: readonly string[]
   readonly retainedNodeCount: number
   readonly irreversibilityReasons: readonly string[]
   /** Absent on a record written before the field existed, never defaulted (0045). */
@@ -390,6 +411,8 @@ const summariseAssessment = (assessment: ChangeAssessment): AssessmentSummary =>
   relocatedPrimitiveTypes: assessment.analysis.relocatedPrimitiveTypes,
   relocatedNodeCount: assessment.analysis.relocatedNodeCount,
   shallowestAffectedDepth: assessment.analysis.shallowestAffectedDepth,
+  affectedNodeCount: assessment.analysis.affectedNodeIds.length,
+  configuredPropKeys: assessment.analysis.configuredPropKeys,
   retainedNodeCount: assessment.reversibility.retainedNodeCount,
   irreversibilityReasons: assessment.reversibility.reasons.map((reason) => reason.code),
   stakeFactorCodes: assessment.stakes.factors.map((factor) => factor.code),
