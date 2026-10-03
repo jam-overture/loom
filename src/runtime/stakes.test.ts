@@ -4,6 +4,7 @@ import { bindingNameSchema } from "../data/source.js"
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { endpointIdSchema } from "../submit/endpoint.js"
+import { NOTHING_MEASURED } from "../testing/doubles.js"
 
 import type { ChangeAnalysis } from "./analysis.js"
 import { defaultGatePolicy, gatePolicySchema } from "./policy.js"
@@ -16,24 +17,18 @@ import {
   type StakeAssessment,
 } from "./stakes.js"
 
+/**
+ * A deep, single-prop change, with every other fact measuring nothing.
+ *
+ * The zeroes and the empty lists are `NOTHING_MEASURED`'s rather than this
+ * file's. A complete analysis literal is the thing `buildAssessment` was
+ * published to stop surfaces writing out, and a second copy of one in the lane
+ * that published it would be the first fixture to drift.
+ */
 const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => ({
+  ...NOTHING_MEASURED,
   operationCount: 1,
-  insertedNodeCount: 0,
-  removedNodeCount: 0,
-  movedNodeCount: 0,
   configuredNodeCount: 1,
-  relocatedNodeCount: 0,
-  affectedNodeIds: [],
-  touchedPrimitiveTypes: [],
-  removedPrimitiveTypes: [],
-  relocatedPrimitiveTypes: [],
-  configuredPropKeys: [],
-  nestedTargets: [],
-  unknownPrimitives: [],
-  invalidProps: [],
-  unreadBindings: [],
-  redirectedSubmissions: [],
-  repointedBindings: [],
   shallowestAffectedDepth: 5,
   ...overrides,
 })

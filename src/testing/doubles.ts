@@ -10,6 +10,8 @@ import type {
 } from "../interpretation/client.js"
 import type { IdFactory, IntentId, TreeId } from "../ids.js"
 import { ok, type Result } from "../result.js"
+import type { ChangeAnalysis } from "../runtime/analysis.js"
+import type { ChangeAssessment } from "../runtime/assessment.js"
 import type { Clock, EventSink, RuntimeEventEnvelope } from "../runtime/events.js"
 import type { EditIntent, IntentOrigin } from "../runtime/intent.js"
 import type {
@@ -19,6 +21,9 @@ import type {
   RepairRequest,
 } from "../runtime/interpreter.js"
 import type { AuthorKind, ProposedChange } from "../runtime/proposal.js"
+import type { IrreversibilityReason } from "../runtime/reversibility.js"
+import { highestStake } from "../runtime/stake-level.js"
+import type { StakeFactor } from "../runtime/stakes.js"
 import { defineEndpoint, type EndpointEntry } from "../submit/endpoint.js"
 import type { TreeDelta } from "../tree/delta.js"
 
@@ -322,5 +327,103 @@ export const hangingEndpoint = (id: string, description: string): HangingSeam<En
       },
     }),
     abortedWith: abort.read,
+  }
+}
+
+/**
+ * Every fact an analysis states, measuring nothing.
+ *
+ * The whole of why `buildAssessment` exists is in this one declaration: a field
+ * added to `ChangeAnalysis` stops it compiling, here, in the lane that added
+ * the field. A surface's fixture that spelled the record out itself would
+ * instead keep compiling and start lying — ten of eighteen fields, the gap cast
+ * away, and the failure arriving later in whichever test is the next to narrow
+ * one of the eight it left out.
+ */
+export const NOTHING_MEASURED: ChangeAnalysis = {
+  operationCount: 0,
+  insertedNodeCount: 0,
+  removedNodeCount: 0,
+  movedNodeCount: 0,
+  configuredNodeCount: 0,
+  relocatedNodeCount: 0,
+  affectedNodeIds: [],
+  touchedPrimitiveTypes: [],
+  relocatedPrimitiveTypes: [],
+  removedPrimitiveTypes: [],
+  configuredPropKeys: [],
+  nestedTargets: [],
+  unknownPrimitives: [],
+  invalidProps: [],
+  unreadBindings: [],
+  redirectedSubmissions: [],
+  repointedBindings: [],
+  shallowestAffectedDepth: 0,
+}
+
+/**
+ * The facts a test wants to be true of a judged change. Everything else is
+ * absent, empty or zero.
+ *
+ * What is *not* here is the point. A level, a reversible flag, a retained count
+ * and an inverse delta are all computed below from what this draft says,
+ * because each of the four is something the runtime derives and none is
+ * something a caller may contradict. The Gate's level is the highest of its
+ * factors; a change is reversible exactly when nothing says otherwise; the
+ * inverse retains what a removal destroyed. A draft that could set them
+ * independently could describe an assessment no run of Loom will ever produce,
+ * which is the one thing a published double must not let a test assert against.
+ */
+export type AssessmentDraft = {
+  /** The change being judged. Its delta decides what the inverse is written against. */
+  readonly proposal: ProposedChange
+  /** What the delta does. The fields left out measure zero. */
+  readonly analysis?: Partial<ChangeAnalysis>
+  /** The rules the Gate raised, in the order it raised them. */
+  readonly factors?: readonly StakeFactor[]
+  /** Why the change cannot be taken back. Empty means it can. */
+  readonly irreversibilityReasons?: readonly IrreversibilityReason[]
+}
+
+/**
+ * A complete `ChangeAssessment` from the handful of facts a test cares about.
+ *
+ * The third double of its kind and the first that had to be asked for. A
+ * surface needing one of these had two options and both are bad: run
+ * `assessChange` against a real tree, which means owning a tree and a registry
+ * to get at a number; or write the record out as a literal and cast the gap
+ * away, which is what three fixtures across two lanes did until a field was
+ * added underneath them.
+ *
+ * It is not `assessChange` and does not pretend to be. The real one measures a
+ * delta against a tree, so reaching a particular factor through it means
+ * crafting a delta that raises exactly that rule — which is the right test for
+ * the Gate and the wrong one for a screen that only needs a critical change to
+ * draw. This builds the record directly and keeps the three invariants that
+ * make the record coherent.
+ */
+export const buildAssessment = (
+  idFactory: IdFactory,
+  draft: AssessmentDraft
+): ChangeAssessment => {
+  const analysis: ChangeAnalysis = { ...NOTHING_MEASURED, ...draft.analysis }
+  const factors = draft.factors ?? []
+  const reasons = draft.irreversibilityReasons ?? []
+
+  return {
+    proposal: draft.proposal,
+    analysis,
+    stakes: { level: highestStake(factors.map((factor) => factor.level)), factors },
+    reversibility: {
+      reversible: reasons.length === 0,
+      inverse: {
+        deltaId: idFactory.deltaId(),
+        treeId: draft.proposal.delta.treeId,
+        baseRevision: draft.proposal.delta.baseRevision + 1,
+        operations: [],
+      },
+      retainedNodeCount: analysis.removedNodeCount,
+      reasons,
+    },
   }
 }

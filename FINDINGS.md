@@ -41196,3 +41196,125 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-03 — the assessment double exists; the three fixtures that needed it are still object literals, and one of them asserts against a record no run of Loom can produce
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/write.test.ts`, `app/(portal)/_lib/what-if.test.ts`,
+`app/(portal)/portal/activity/_components/proposal-line.test.tsx`) ·
+**Status:** open — nothing is red, the replacement is written out below, and
+adopting it is what retires the failure mode
+
+**This is the other half of the ask this lane filed against itself on 2 October**
+(*"a hand-built assessment in `(portal)`'s tests goes red whenever the framework
+reads one more field of an analysis, and there is no double to reach for
+instead"*). `buildAssessment` and `NOTHING_MEASURED` are published from
+`@jam-overture/loom/testing` by
+`framework-66-an-assessment-a-test-can-ask-for`, with
+[0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
+That entry's Status still reads `open` because it lives on
+`framework-65-seventeen-levers-from-a-record`, which has not merged; whoever
+lands that branch should flip it to
+`closed by framework-66-an-assessment-a-test-can-ask-for`.
+
+**Adopting it is this lane's, because the three files are.** The framework
+declined to rewrite another lane's tests, and the one two-line patch it did make
+was to stop `main` going red.
+
+### What to write instead
+
+`write.test.ts` builds a `change-assessed` envelope and casts the whole thing
+away. With the double there is nothing to cast:
+
+```ts
+import { sequentialIdFactory } from "@jam-overture/loom"
+import { buildAssessment, buildProposal } from "@jam-overture/loom/testing"
+
+const ids = sequentialIdFactory("w")
+const proposal = buildProposal(ids, {
+  intentId: ids.intentId(),
+  delta: { deltaId: ids.deltaId(), treeId, baseRevision: 0, operations: [] },
+})
+
+write.path.runtime.events.emit({
+  treeId,
+  occurredAt: new Date().toISOString(),
+  event: {
+    type: "change-assessed",
+    assessment: buildAssessment(ids, {
+      proposal,
+      analysis: { operationCount: 1, insertedNodeCount: 1, shallowestAffectedDepth: 2 },
+      factors: [{ code: "invalid-props", level: "critical", detail: "tone" }],
+    }),
+  },
+})
+```
+
+The assertion then reads `proposal.proposalId` rather than the string
+`"p_throws"`, which is the same test and one fewer thing taken on trust.
+
+The other two build an **`AssessmentSummary`**, which is the narrowed record
+rather than the assessment, and they are typed rather than cast — so a required
+field added to that shape stops them compiling, which is the good failure. They
+are still worth converting, because `recordOf` will narrate a built assessment
+into one:
+
+```ts
+const record = recordOf({ treeId, occurredAt, event: { type: "change-assessed", assessment } })
+```
+
+### The reason one of them is worth doing sooner
+
+`proposal-line.test.tsx` holds this:
+
+```ts
+irreversibilityReasons: ["a removal destroys content"],
+```
+
+`summariseAssessment` fills that list from `reversibility.reasons.map(r => r.code)`,
+so every value a real journal ever holds there is `out-of-tree-effect` or
+`retention-budget-exceeded`. The sentence is prose in a field of codes. It is
+inert today — nothing in `apps/` reads `irreversibilityReasons` — and it is
+exactly the thing 0216 is about: the fixture describes a record no run of Loom
+produces, the test is green, and the day a screen renders that list the test will
+go on being green while the page shows a code nobody wrote a sentence for.
+
+The same file also pairs `reversible: false` and `retainedNodeCount: 0` with a
+reason about a removal destroying content. The runtime sets the retained count
+from `removedNodeCount`, so a record saying a removal destroyed content retains
+more than nothing.
+
+---
+## 2026-10-03 — two open pull requests both claim decision `0215`, so this is the fifth same-day collision in six days and the first between two branches that are both still open
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`) · **Status:** open — **a live collision, not a past one.**
+Nothing is red; it goes wrong when the second of the two branches merges
+
+The 2 October entry on this asked for a number band per lane and said it would
+not be raised a fourth time without a ruling. This is not raising it again; it is
+recording that the convention has now produced a collision **ahead of** a merge
+rather than behind one:
+
+| branch | pull request | claims |
+| --- | --- | --- |
+| `signals-04-what-on-screen-means` | [#486](https://github.com/jam-overture/loom/pull/486) | `0215` |
+| `framework-65-seventeen-levers-from-a-record` | [#485](https://github.com/jam-overture/loom/pull/485) | `0215` |
+| `primitives-28-every-part-offers-a-choice` | [#487](https://github.com/jam-overture/loom/pull/487) | `0217` |
+
+`0216` was free, and this branch took it. **`primitives-28` had already skipped
+over it**, which is the convention working better than it is written: that lane
+read the open branches and not only `main`.
+
+**The one-line repair, whatever happens about bands.** `docs/routines.md` and
+every brief say *take the next free number after re-reading `main`*. `main` is
+not where the claims are — an unmerged branch is. The sentence should read
+**after re-reading `main` and the open pull requests**, which is what
+`pnpm decisions:index` already helps with: it prints
+`note: 0215 has no record here — either one was deleted, or the number is claimed
+on a branch that has not merged` for exactly these.
+
+Whichever of #485 and #486 merges second needs a renumber, and the renumbering
+cost is nine citations and about fifteen minutes — measured on 2 October, when
+this lane did it for `0212`.

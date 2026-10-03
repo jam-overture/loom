@@ -43,6 +43,7 @@ export {
 } from "./definitions.js"
 
 export {
+  buildAssessment,
   buildIntent,
   buildProposal,
   collectingEventSink,
@@ -52,9 +53,11 @@ export {
   hangingEndpoint,
   hangingModelClient,
   hangingSource,
+  NOTHING_MEASURED,
   scriptedInterpreter,
   scriptedModelClient,
   scriptedRepairer,
+  type AssessmentDraft,
   type CollectingEventSink,
   type HangingModelClient,
   type HangingSeam,
