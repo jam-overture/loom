@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -2166,6 +2166,69 @@
               "signature": "type StakeInput = {\n    readonly analysis: ChangeAnalysis;\n    /** Empty when the proposal declared nothing, which is not the same as nothing. */\n    readonly discards: readonly DiscardedWork[];\n};",
               "truncated": false,
               "summary": "Everything the damage estimate is computed from: what the delta does, and what its author declared it writes over."
+            },
+            {
+              "name": "FixedStakeFactorCode",
+              "kind": "type",
+              "signature": "type FixedStakeFactorCode = keyof typeof FIXED_LEVELS;",
+              "truncated": false,
+              "summary": "A rule no policy field can move, so its code alone gives its level."
+            },
+            {
+              "name": "MeasuredStakeFactorCode",
+              "kind": "type",
+              "signature": "type MeasuredStakeFactorCode = Exclude<StakeFactorCode, FixedStakeFactorCode>;",
+              "truncated": false,
+              "summary": "A rule a policy decides, so the same change under two policies is two answers. The complement of `FixedStakeFactorCode` by construction: a factor added to the vocabulary belongs to one set or the other and nothing has to remember to put it there."
+            },
+            {
+              "name": "fixedStakeLevel",
+              "kind": "function",
+              "signature": "const fixedStakeLevel: (code: FixedStakeFactorCode) => StakeLevel",
+              "truncated": false,
+              "summary": "The level this rule is always raised at, which is the whole of what its code means."
+            },
+            {
+              "name": "isFixedStakeFactor",
+              "kind": "function",
+              "signature": "const isFixedStakeFactor: (code: StakeFactorCode) => code is FixedStakeFactorCode",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FIXED_STAKE_FACTOR_CODES",
+              "kind": "value",
+              "signature": "const FIXED_STAKE_FACTOR_CODES: readonly FixedStakeFactorCode[]",
+              "truncated": false,
+              "summary": "The two halves of the vocabulary, walkable, in the order the Gate raises them."
+            },
+            {
+              "name": "MEASURED_STAKE_FACTOR_CODES",
+              "kind": "value",
+              "signature": "const MEASURED_STAKE_FACTOR_CODES: readonly MeasuredStakeFactorCode[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "StakeMeasurement",
+              "kind": "type",
+              "signature": "type StakeMeasurement = {\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    /** `affectedNodeIds.length`. Breadth reads the count and never the ids. */\n    readonly affectedNodeCount: number;\n    readonly shallowestAffectedDepth: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The facts the policy-dependent rules read, and nothing else."
+            },
+            {
+              "name": "stakeMeasurementOf",
+              "kind": "function",
+              "signature": "const stakeMeasurementOf: (analysis: ChangeAnalysis) => StakeMeasurement",
+              "truncated": false,
+              "summary": "The measurable half of an analysis, which is what the Gate's own path takes."
+            },
+            {
+              "name": "measureStakes",
+              "kind": "function",
+              "signature": "const measureStakes: (measurement: StakeMeasurement, policy: GatePolicy) => readonly StakeFactor[]",
+              "truncated": false,
+              "summary": "The policy-dependent half, against a measurement rather than a delta."
             },
             {
               "name": "assessStakes",
@@ -4405,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4451,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5357,7 +5420,7 @@
       "files": 188,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5815,7 +5878,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6623,7 +6686,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7214,7 +7277,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7442,7 +7505,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7859,7 +7922,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8213,7 +8276,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8346,7 +8409,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9333,7 +9396,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9476,7 +9539,7 @@
       "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9540,10 +9603,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 40,
+      "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9774,7 +9837,7 @@
             {
               "name": "AssessmentSummary",
               "kind": "type",
-              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
+              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -9942,6 +10005,34 @@
           ]
         },
         {
+          "module": "telemetry/remeasure",
+          "title": "Remeasure",
+          "summary": "What these stakes would have been, under a policy that was not in force.",
+          "symbols": [
+            {
+              "name": "RemeasuredFactor",
+              "kind": "type",
+              "signature": "type RemeasuredFactor = {\n    readonly code: StakeFactorCode;\n    readonly level: StakeLevel;\n    /**\n     * `remeasured` — this rule was run against the policy given here.\n     * `recorded` — no field of a policy can move it, so its code is its level.\n     */\n    readonly source: \"remeasured\" | \"recorded\";\n};",
+              "truncated": false,
+              "summary": "One rule's contribution, and whether it was run again or taken as it stood."
+            },
+            {
+              "name": "RemeasuredStakes",
+              "kind": "type",
+              "signature": "type RemeasuredStakes = {\n    /** A floor, not an answer, whenever `unreadable` is not empty. */\n    readonly level: StakeLevel;\n    readonly factors: readonly RemeasuredFactor[];\n    /**\n     * Rules this record cannot answer under this policy, because a field they read\n     * was not written down. Empty is the claim that `level` is exact.\n     */\n    readonly unreadable: readonly StakeFactorCode[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "remeasureStakes",
+              "kind": "function",
+              "signature": "const remeasureStakes: (summary: AssessmentSummary, policy: GatePolicy) => RemeasuredStakes",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "telemetry/retention",
           "title": "Retention",
           "summary": "How a journal is allowed to forget.",
@@ -10077,7 +10168,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10151,7 +10242,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10585,10 +10676,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 54,
+      "files": 71,
       "narrower": [],
       "standing": {
-        "packageNames": 1193,
+        "packageNames": 1205,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
