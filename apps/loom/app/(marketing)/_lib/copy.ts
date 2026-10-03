@@ -219,13 +219,13 @@ export const MAINTAINERS_OWN: readonly string[] = [
    * standing question in this lane's reports rather than something to resolve
    * by editing it.
    */
-  "The AI age needs a new way to build web apps.",
+  "Make your web page dynamic with AI and Loom",
   /**
    * The lead under it. *What your page becomes* and *how it feels to use* are
    * his, and so is the closing triad; `pages/home.ts` has the whole of why
    * each was added.
    */
-  "AI already writes the components. What your page becomes, and how it feels to use, is still to be built. Loom is where you and the AI build it — adaptive to your users, answerable to your rules, and secure.",
+  "AI already writes the components, but would you trust AI to dynamically change your web page? What your page evolves to is yet to be built. Loom and AI are how your page evolves together.",
 ]
 
 /**
