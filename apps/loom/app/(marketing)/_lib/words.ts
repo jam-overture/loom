@@ -101,3 +101,92 @@ export const wordsOf = (node: LoomNode): string => {
  */
 export const uses = (text: string, term: string): boolean =>
   new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}s?\\b`, "i").test(text)
+
+/**
+ * One string a reader reads, and the field of the tree it came from.
+ *
+ * `wordsOf` above joins everything into one string, which is right for asking
+ * *does this page use a word it should not* and useless for every rule that has
+ * to name the offender. A register failure can be reported as a term and a
+ * route; a sentence that runs too long has to be quoted back, and a quote with
+ * no field beside it sends whoever reads the failure hunting through nine page
+ * builders for it.
+ *
+ * So the two readings are separate functions over the same idea of what counts
+ * as copy, rather than one function that returns both shapes.
+ */
+export type ReaderString = {
+  /** `loom.feature.body` for a prop, `loom.prose#text` for a text node. */
+  readonly field: string
+  readonly text: string
+}
+
+/**
+ * Every string a reader reads, each labelled with where it is.
+ *
+ * **Text nodes and props alike, which is the whole reason this exists.** The
+ * two plain-language rules in `voice.test.ts` read a list of six prop names
+ * until today, so none of them had ever read a paragraph: the site's prose is
+ * `loom.prose` with a text child, and a rule over props cannot see a single
+ * word of it. Measured when this was written, this site served **twelve strings
+ * carrying an em dash and those rules saw none of them** — seven of the twelve
+ * are text nodes, and a list of prop names cannot read one.
+ *
+ * A text node is labelled with the type of the nearest element above it, which
+ * is what makes the label useful: `loom.prose#text` says paragraph and
+ * `loom.action#text` says the words on a button, and those are two different
+ * kinds of copy with two different registers. A node inside a region carries
+ * the region's own element rather than the slot, because a slot is a part of a
+ * primitive rather than a thing on the page (0051).
+ */
+export const readerCopy = (node: LoomNode): readonly ReaderString[] => {
+  const found: ReaderString[] = []
+
+  const walk = (current: LoomNode, within: string): void => {
+    if (current.kind === "text") {
+      found.push({ field: `${within}#text`, text: current.value })
+
+      return
+    }
+
+    const here = current.kind === "element" ? current.type : within
+
+    if (current.kind === "element") {
+      for (const key of PROSE_PROPS) {
+        const value = current.props[key]
+
+        if (typeof value === "string") found.push({ field: `${here}.${key}`, text: value })
+      }
+    }
+
+    current.children.forEach((child) => walk(child, here))
+  }
+
+  walk(node, node.kind === "element" ? node.type : "loom.page")
+
+  return found
+}
+
+/**
+ * The sentences in a string, as a reader would count them.
+ *
+ * Split on terminal punctuation followed by a space, with the closing curly
+ * quote included among the terminators — the record quotes what a visitor said
+ * and ends the quotation outside the full stop, so `“Calm it down.” Decided by…`
+ * is two sentences and a splitter that only knew about `.` would call it one.
+ *
+ * Deliberately simple. It will read "Mr. Smith" as two sentences and there is
+ * nothing on this site it gets wrong, which is the only test that matters for an
+ * instrument this narrow: every string it is pointed at is copy this lane wrote
+ * for a stranger, and if a page ever needs an abbreviation the rule it feeds
+ * will say so by failing rather than by letting something through.
+ */
+export const sentencesOf = (text: string): readonly string[] =>
+  text
+    .split(/(?<=[.!?][”"]?)\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 0)
+
+/** How many words a reader is asked to take in one go. */
+export const wordCountOf = (text: string): number =>
+  text.trim().split(/\s+/).filter(Boolean).length

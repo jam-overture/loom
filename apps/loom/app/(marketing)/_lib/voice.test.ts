@@ -1,10 +1,11 @@
 import type { ElementNode, LoomNode } from "@jam-overture/loom"
 import { beforeAll, describe, expect, it } from "vitest"
 
-import { RESERVED_VOCABULARY } from "./copy"
+import { MAINTAINERS_OWN, RESERVED_VOCABULARY } from "./copy"
 import { pageTreeFor, treeFor } from "./render"
+import { SERVED_STATE_COUNT, servedPages, type ServedPage } from "./served"
 import { DEFAULT_THEME, HOME, SITE_ROUTES, type SiteRoute } from "./site"
-import { uses, wordsOf } from "./words"
+import { readerCopy, sentencesOf, uses, wordCountOf, wordsOf, type ReaderString } from "./words"
 
 /**
  * Who the site is written for, held to by a test.
@@ -319,59 +320,206 @@ describe("what the site says about what it costs", () => {
  * So the dash is a **proxy**, and a good one: it is unambiguous, it needs no
  * judgement, and removing it forces the rewrite that was actually wanted.
  *
- * ## Why only the short copy
+ * ## It read six prop names, and the site's paragraphs are not props
  *
- * This is scoped to the fields a reader **scans** rather than reads — a step,
- * a card, a stat, a tile. Those are a glance each, and a sentence doing two
- * jobs in a glance is a sentence nobody finishes. Running prose keeps its
- * latitude, because a paragraph has room to earn an aside and because sweeping
- * a rule across every word on the site would catch the maintainer's own lines,
- * which are his.
+ * **Scoped to "the fields a reader scans" until today, which turned out to
+ * mean six prop names on the page as it is *written*.** Both halves of that
+ * were holes, and together they were most of the site:
  *
- * **If this test ever fails, the fix is to write two sentences, not to delete a
- * dash.** A rule that gets satisfied by swapping in a comma has bought nothing.
+ * - **The site's prose is text nodes.** `loom.prose` carries its paragraph as a
+ *   child, so a rule over `title`, `body`, `label`, `caption`, `value` and
+ *   `eyebrow` cannot read one word of running copy. Of the 38 strings rewritten
+ *   in the 1 October sweep, the great majority were prose, including every one
+ *   of the four sentences the maintainer quoted back.
+ * - **And it read `treeFor`.** The record panel on `/how-it-works` is built
+ *   from the request a visitor made, so it exists only on the page as *served*:
+ *   59 strings and 456 words, a third of that page, which no rule in this lane
+ *   had ever read.
+ *
+ * Measured on the branch that fixed it, **twelve strings on this site carried
+ * an em dash and these two rules saw none of them.** Seven of the twelve are
+ * text nodes, which a list of six prop names cannot read. The other five are
+ * props, and every one of those is on a page `treeFor` never builds.
+ *
+ * The length rule did no better: **ten scanned fields of 36 to 57 words, every
+ * one of them a rung of the one band on this site that is a list of steps**,
+ * and all ten invisible for the same second reason.
+ *
+ * `served.ts` is where the second half is fixed once rather than per
+ * assertion, and it has the measurement.
+ *
+ * ## Two rules, because a writer controls one of them and not the other
+ *
+ * What the rules now read is **every string a reader reads, in every state the
+ * site can be served in** — and they are two rules rather than one because the
+ * copy underneath them is two kinds of thing.
+ *
+ * **A sentence is bounded everywhere.** Thirty words, which is the ceiling this
+ * file has held every opening band to since it was written, now applied to the
+ * whole site instead of the first screen. It is the maintainer's *one idea per
+ * sentence* and it is the rule that works on generated copy, because a sentence
+ * is a unit a template controls.
+ *
+ * **A scanned field is bounded where somebody wrote it**, which is the page as
+ * published. A rung built from a record is as long as the change was: a request
+ * at the refusal floor fires five of the rules and the record says all five.
+ * Capping *that* at thirty-five words would mean either truncating a record —
+ * the one thing a site selling the record may never do — or capping what a
+ * visitor may ask for. So the 35-word ceiling stays on the written tree, where
+ * a writer chose every word, and the served half is held to the sentence rule
+ * instead. The punctuation is where that bites, and it is what the weighing
+ * sentence in `adapt/record.ts` was changed for.
+ *
+ * **If either fails, the fix is a rewrite, not a comma.** A rule satisfied by
+ * swapping punctuation has bought nothing.
  */
-const SCANNED_PROPS: readonly string[] = ["title", "body", "label", "caption", "value", "eyebrow"]
 
-const scannedCopyOf = (route: SiteRoute): readonly { field: string; text: string }[] => {
-  const found: { field: string; text: string }[] = []
+/** A reader string, and the page and state it was read off. */
+type Read = ReaderString & { readonly route: string; readonly state: string }
 
-  const walk = (node: LoomNode): void => {
-    if (node.kind === "element") {
-      for (const prop of SCANNED_PROPS) {
-        const value = node.props[prop]
+const readOf = (pages: readonly ServedPage[]): readonly Read[] => {
+  const seen = new Set<string>()
 
-        if (typeof value === "string") found.push({ field: `${node.type}.${prop}`, text: value })
-      }
-    }
+  return pages.flatMap(({ route, state, tree }) =>
+    readerCopy(tree.root).flatMap((string) => {
+      const key = `${route.path}|${string.field}|${string.text}`
 
-    if (node.kind !== "text") node.children.forEach(walk)
-  }
+      if (seen.has(key)) return []
+      seen.add(key)
 
-  walk(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root)
-
-  return found
+      return [{ ...string, route: route.path, state }]
+    })
+  )
 }
 
-describe("the copy a reader scans rather than reads", () => {
-  it.each(SITE_ROUTES)("$path says it without reaching for an em dash", (route) => {
-    const offenders = scannedCopyOf(route)
-      .filter(({ text }) => text.includes("—"))
-      .map(({ field, text }) => `${field}: ${text}`)
+const describeRead = ({ route, state, field, text }: Read): string =>
+  `${route} (${state}) ${field}: ${text}`
 
-    expect({ route: route.path, offenders }).toEqual({ route: route.path, offenders: [] })
+/**
+ * Whether this string is one of his, which is a match and not a search.
+ *
+ * Exactly equal after trimming, so a line of his edited into a longer sentence
+ * is not exempted by containing his words. See `MAINTAINERS_OWN`.
+ */
+const isMaintainers = (text: string): boolean =>
+  MAINTAINERS_OWN.some((line) => line.trim() === text.trim())
+
+describe("every string a reader reads", () => {
+  let read: readonly Read[] = []
+  let pages: readonly ServedPage[] = []
+
+  beforeAll(async () => {
+    pages = await servedPages()
+    read = readOf(pages)
   })
 
   /**
-   * The other half of the same tic. A step or a card that needs thirty-five
-   * words is a step carrying two ideas, and the second one is always the one
-   * that got written in the mannered voice.
+   * The sweep says how much it looked at, which is what makes the three
+   * assertions below assertions.
+   *
+   * A test over an empty list passes, and this lane has filed that failure
+   * once already — a test whose expected value came from the code under test,
+   * 27 September. So the state count and the string count are checked before
+   * anything is checked *about* the strings: the first against the arithmetic
+   * `served.ts` publishes, and the second against a floor, because the exact
+   * number moves with every word added to the site and a floor cannot be
+   * satisfied by a sweep that silently stopped finding things.
    */
+  it("looked at every state this site can be served in", () => {
+    expect(pages.length).toBe(SERVED_STATE_COUNT)
+    expect(pages.length).toBeGreaterThanOrEqual(3 * 2 * 21)
+    expect(read.length).toBeGreaterThanOrEqual(200)
+  })
+
+  /**
+   * **And it read copy that only exists once somebody has asked for
+   * something**, which is the half that was missing rather than the half that
+   * was small.
+   *
+   * Held as a floor on the difference between the two readings rather than on
+   * the served count alone, because a regression here would not look like a
+   * failure: a rule quietly moved back onto `treeFor` reads a tree that is
+   * still 194 strings long and still passes every assertion in this file.
+   * What it stops being able to see is the 59 strings this assertion counts.
+   */
+  it("read the copy a request puts on the page, and not only the page as published", () => {
+    const written = new Set(
+      SITE_ROUTES.flatMap((route) =>
+        readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).map(
+          ({ field, text }) => `${field}|${text}`
+        )
+      )
+    )
+
+    const servedOnly = read.filter(({ field, text }) => !written.has(`${field}|${text}`))
+
+    expect(servedOnly.length).toBeGreaterThanOrEqual(40)
+  })
+
+  it("says it without reaching for an em dash", () => {
+    const offenders = read
+      .filter(({ text }) => text.includes("—") && !isMaintainers(text))
+      .map(describeRead)
+
+    expect(offenders).toEqual([])
+  })
+
+  /**
+   * Thirty words, the number this file has held an opening band to since it was
+   * written, now over the whole site. One idea per sentence.
+   */
+  it("keeps every sentence to one idea", () => {
+    const offenders = read.flatMap((string) =>
+      isMaintainers(string.text)
+        ? []
+        : sentencesOf(string.text)
+            .filter((sentence) => wordCountOf(sentence) > 30)
+            .map((sentence) => `${describeRead(string)} → (${wordCountOf(sentence)}w) ${sentence}`)
+    )
+
+    expect(offenders).toEqual([])
+  })
+
+  /**
+   * The list of his lines, held from the other end.
+   *
+   * An exemption that outlives the thing it exempts is the shape this lane
+   * filed on 26 September — a comment stating a library limit outlived the
+   * limit by a fortnight. So a line sitting in `MAINTAINERS_OWN` has to still
+   * be on the page: rewrite or delete one and this says so, rather than the
+   * list going on exempting nothing.
+   */
+  it.each(MAINTAINERS_OWN)("still renders the maintainer's own line: %s", (line) => {
+    expect(read.some(({ text }) => text.trim() === line.trim())).toBe(true)
+  })
+})
+
+/**
+ * The 35-word ceiling, on the fields a reader **scans** and on the page as
+ * **published** — which is to say, on the copy somebody chose every word of.
+ *
+ * A step, a card, a stat, a tile: those are a glance each, and a field doing
+ * two jobs in a glance is a field nobody finishes. See the note above for why
+ * this one did not follow the other two onto the served page.
+ */
+const SCANNED_PROPS: readonly string[] = ["title", "body", "label", "caption", "value", "eyebrow"]
+
+const scannedCopyOf = (route: SiteRoute): readonly ReaderString[] =>
+  readerCopy(treeFor(route, { origin: "https://loom.example", theme: DEFAULT_THEME }).root).filter(
+    ({ field }) => SCANNED_PROPS.includes(field.split(".").slice(-1)[0] ?? "")
+  )
+
+describe("the copy a reader scans rather than reads", () => {
   it.each(SITE_ROUTES)("$path keeps a scanned field to something scannable", (route) => {
     const tooLong = scannedCopyOf(route)
-      .filter(({ text }) => text.split(/\s+/).length > 35)
-      .map(({ field, text }) => `${field} (${text.split(/\s+/).length} words): ${text}`)
+      .filter(({ text }) => wordCountOf(text) > 35)
+      .map(({ field, text }) => `${field} (${wordCountOf(text)} words): ${text}`)
 
     expect({ route: route.path, tooLong }).toEqual({ route: route.path, tooLong: [] })
+  })
+
+  /** And the sweep is not empty: every page has scanned copy on it. */
+  it.each(SITE_ROUTES)("$path has scanned copy to check", (route) => {
+    expect(scannedCopyOf(route).length).toBeGreaterThanOrEqual(8)
   })
 })

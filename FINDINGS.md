@@ -39987,7 +39987,15 @@ exists so that whoever writes that copy knows it is not demonstrable here.
 ## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — **nothing is broken; this is why a sweep was needed at all**
+**half closed** by `marketing-57-the-sentences-nothing-read` on 3 October. The
+register half is done: both plain-language rules now read every string a reader
+reads — text nodes and props alike — and the sweep found a second hole this
+entry did not know about, which the 3 October entry below has. **The staleness
+half is still open and is still the more interesting one:** nothing holds a
+paragraph naming a page of this site against the page that carries the thing it
+names, and `/what-you-run` still carries the one sentence of that shape on the
+site. Originally filed as: *nothing is broken; this is why a sweep was needed at
+all*
 
 `voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
 no more than 35 words in a field a reader scans. Both run over
@@ -41196,3 +41204,87 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-03 — three rules in this lane read the tree a builder returns, and a third of the largest page is not in it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane whose tests read a function that *produces* the thing
+rather than the thing · **Status:** closed for the three rules it names, by
+`marketing-57-the-sentences-nothing-read`; filed because the shape is not
+about copy and the fix was a module rather than three edits
+
+This route group has two functions that return a page. `treeFor` is the page as
+it is **published**. `pageTreeFor` is the page as it is **served** — on
+`/how-it-works` it carries the record of whatever the visitor asked for, which
+is built by running a real request through the whole sequence.
+
+**Every rule in this lane that reads copy was written against the first one**,
+except the register check, which moved to the second on 24 August with a note
+saying why. Measured across all three routes, both deployments and every request
+a visitor can make:
+
+| | the page as written | the page as served |
+| --- | --- | --- |
+| strings a reader reads | 194 | **253** |
+| words on `/how-it-works` | 862 | **1,318** |
+| words on the site | 2,516 | **2,972** |
+| widest band | 259 | **638** |
+
+So **59 strings and 456 words had no rule over them at all** — a third of the
+largest page, and the band the whole site is built to get a visitor to. The copy
+budget reported a 259-word widest band on a site that serves a 638-word one.
+
+### What the two rules actually missed, which is the part that argues for the fix
+
+The em dash rule and the 35-word scanned-field rule were both added on
+1 October, against `treeFor`, and both also read a list of six prop names. Two
+holes, and between them they covered the site:
+
+- **Twelve strings carried an em dash and the rule saw none of them.** Seven are
+  text nodes, which a list of prop names cannot read; the other five are props
+  on a page `treeFor` never builds.
+- **Ten scanned fields ran 36 to 57 words** against a ceiling of 35. Every one
+  of them is a rung of `loom.milestone-list` on the served mechanism page —
+  which is to say, **the one band on this site that is literally a list of
+  steps**, the shape the rule's own docstring was written for.
+
+Nothing was red. Both readings are valid pages, every assertion passed, and the
+figures in three consecutive reports of this lane were each understated by about
+450 words.
+
+### Why it is a module and not three fixed assertions
+
+Because the register check had already learned this once, in this file, four
+weeks earlier — and the two rules added on 1 October were written against
+`treeFor` anyway, by a run that had the earlier note directly above the code it
+was editing. A lesson applied to one assertion is not applied.
+
+`_lib/served.ts` is the sweep: every route crossed with both deployments and
+every request state, 126 pages, with the measurement above in its docstring.
+`voice.test.ts` and `budget.test.ts` read it, and both assert the state count so
+a sweep that silently stopped finding pages says so.
+
+### The one thing that is a judgement rather than an oversight
+
+**A generated field cannot be held to a ceiling written for an authored one**,
+and pretending otherwise is how a budget gets quietly raised. A rung built from
+a record is as long as the change was: a request at the refusal floor fires five
+of the rules and the record names all five. Capping that at 35 words means
+truncating a record, which a site whose whole argument is the record may never
+do.
+
+So the split that shipped is: **a sentence is bounded everywhere** — thirty
+words, the number this file's own opening-band rule has used since it was
+written — and a **scanned field is bounded where somebody wrote it**, which is
+the published tree. The generated half is held by the sentence rule instead, and
+the punctuation is where it bites: `Weighed as the most serious kind: a; b; c;
+d; e.` becomes six short sentences carrying exactly the same five facts.
+
+### What is still open and is this lane's
+
+The staleness half of the 1 October entry above. A paragraph saying *"the
+ready-made changes on the How it works page"* is making a claim about where
+something lives, `SITE_ROUTES` knows where things live, and nothing holds the
+two together. One sentence on the site is of that shape today and it was wrong
+for a day in September.

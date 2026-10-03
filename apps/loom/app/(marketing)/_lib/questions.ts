@@ -60,7 +60,7 @@ export const siteQuestions = (): readonly SiteQuestion[] => [
   {
     question: "What stops a bad change from landing?",
     answer:
-      "Your rules do. Loom measures how much of the page a change moves and whether it can be undone, then gives one of three answers: go ahead, hold it for a person to approve, or reject it.",
+      "Your rules do. Loom measures how much of the page a change moves, and whether it can be undone. Then it gives one of three answers: go ahead, hold it for a person to approve, or reject it.",
   },
   {
     question: "Is this a page builder?",

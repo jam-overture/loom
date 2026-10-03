@@ -99,7 +99,7 @@ const proposedFor = (inverse: TreeDelta): string => {
 
   return `This is the change that reverses the one above, written at the moment that one applied. It is ${steps} ${
     steps === 1 ? "step" : "steps"
-  }, and it carries what it needs to put every piece back where it was — the same pieces, not new ones that read the same.`
+  }, and it carries what it needs to put every piece back where it was. The pieces are the ones that left, not new ones that read the same.`
 }
 
 /** The undo of a given ask, as a request the record can quote. */

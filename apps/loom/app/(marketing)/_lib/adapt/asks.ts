@@ -192,7 +192,7 @@ const evidenceBand = (ids: IdFactory): LoomNode =>
         children: [
           buildText(
             ids,
-            "You asked for evidence, so the page added some. Everything the panel beside this claims is checked by the same tests that decide whether this page may be published at all — and every one of them is in the open.",
+            "You asked for evidence, so the page added some. Everything the panel beside this claims is checked by the tests that decide whether this page may be published. Every one of those tests is in the open.",
           ),
         ],
       }),
