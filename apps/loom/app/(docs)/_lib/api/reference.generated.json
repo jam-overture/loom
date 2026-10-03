@@ -5,7 +5,7 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 92,
+      "files": 93,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -1547,7 +1547,7 @@
             {
               "name": "Disposition",
               "kind": "type",
-              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n};",
+              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n    /**\n     * Absent when nothing fired, and on a judgment recorded before the field\n     * existed. The schema above says which absence is which.\n     */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
               "truncated": false,
               "summary": ""
             }
@@ -1739,6 +1739,20 @@
               "signature": "const inverseInterpreter: (inverse: ComputedInverse, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
               "truncated": false,
               "summary": "An interpreter that has nothing to interpret."
+            }
+          ]
+        },
+        {
+          "module": "runtime/irreversibility",
+          "title": "Irreversibility",
+          "summary": "Why a change cannot be taken back, as data.",
+          "symbols": [
+            {
+              "name": "IrreversibilityReason",
+              "kind": "type",
+              "signature": "type IrreversibilityReason = {\n    readonly code: \"out-of-tree-effect\";\n    readonly primitiveTypes: readonly PrimitiveType[];\n} | {\n    readonly code: \"retention-budget-exceeded\";\n    readonly retainedNodeCount: number;\n    readonly budget: number;\n};",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -2041,13 +2055,6 @@
           "title": "Reversibility",
           "summary": "Reversibility is computed, not guessed: the inverse delta is produced up front, so \"can this be undone\" is answered by handing over the thing that undoes it.",
           "symbols": [
-            {
-              "name": "IrreversibilityReason",
-              "kind": "type",
-              "signature": "type IrreversibilityReason = {\n    readonly code: \"out-of-tree-effect\";\n    readonly primitiveTypes: readonly PrimitiveType[];\n} | {\n    readonly code: \"retention-budget-exceeded\";\n    readonly retainedNodeCount: number;\n    readonly budget: number;\n};",
-              "truncated": false,
-              "summary": ""
-            },
             {
               "name": "Reversibility",
               "kind": "type",
@@ -7975,7 +7982,7 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 53,
+      "files": 54,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -8329,7 +8336,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 27,
+      "files": 28,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -9729,7 +9736,7 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 59,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -9963,7 +9970,7 @@
             {
               "name": "AssessmentSummary",
               "kind": "type",
-              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
+              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent when no out-of-tree reason fired, and before the field existed. */\n    readonly outOfTreeEffectTypes?: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -10291,7 +10298,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 36,
+      "files": 37,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -10365,7 +10372,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 86,
+      "files": 87,
       "narrower": [],
       "standing": {
         "packageNames": 1221,
@@ -10823,7 +10830,7 @@
           "reach": "loaded"
         }
       ],
-      "files": 71,
+      "files": 72,
       "narrower": [],
       "standing": {
         "packageNames": 1221,

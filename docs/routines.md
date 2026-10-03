@@ -253,6 +253,11 @@ install it once per session into a scratch directory and point the harness at it
 mkdir -p /tmp/shot && (cd /tmp/shot && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install playwright-core)
 ```
 
+The image has shipped `playwright-core` at `/opt/node-tools/node_modules` since
+late September, so `LOOM_PLAYWRIGHT=/opt/node-tools/node_modules` skips the
+install. Keep the scratch install in mind as the fallback: the point is that the
+path is an environment variable, not that any one path is guaranteed.
+
 **A tree** — a composition of primitives, with no server anywhere:
 
 ```bash
@@ -290,6 +295,32 @@ needs here, every shot is taken with reduced motion because a page that reveals
 on scroll is otherwise photographed blank below the fold, and every shot prints
 `scrollWidth` against `innerWidth` so a page wider than the phone says so
 instead of being eyeballed.
+
+**`measure` reads boxes off the page you are photographing**, which is the
+option most likely to be rewritten by hand before it is found
+([0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
+It takes a list of selectors — anything the driver understands, `text=`
+included — and prints a line per match beside the shot:
+
+```json
+{ "path": "/demo", "out": "…", "measure": ["aside", "aside li[id]", "text=Put it back"] }
+```
+
+```
+    aside  x 904 y 64  344x857  holding 1277 in 857
+    aside li[id] (1 of 9)  x 920 y 112  312x96
+    text=Put it back  x 920 y 904  312x40  ← 4 past the fold
+```
+
+The lines are indented under the shot's own, after the clipping boxes it
+already printed. `holding N in M` is a scroller with more in it than it shows,
+`← N past the fold` is how far below the viewport something starts,
+`(n of m)` appears whenever a selector matched more than once, and a selector
+that matched nothing says `no match` rather than going quiet.
+
+It **prints and never asserts**: a geometry table in a report or a pull request
+body is this option's output, and a run that wants one does not need a private
+`playwright-core` script. Six were written before this sentence existed.
 
 One rule worth keeping in mind while writing a list: **wait on a selector, not
 on the network.** A form driven by `useActionState` submits by fetch, so the

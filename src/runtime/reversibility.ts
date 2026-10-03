@@ -1,5 +1,4 @@
 import type { DeltaId } from "../ids.js"
-import type { PrimitiveType } from "../primitive-type.js"
 import { mapResult, type Result } from "../result.js"
 import type { TreeDelta } from "../tree/delta.js"
 import type { TreeError } from "../tree/errors.js"
@@ -7,6 +6,7 @@ import { invertDelta } from "../tree/inverse.js"
 import type { LoomTree } from "../tree/tree.js"
 
 import type { ChangeAnalysis } from "./analysis.js"
+import type { IrreversibilityReason } from "./irreversibility.js"
 import type { GatePolicy } from "./policy.js"
 
 /**
@@ -20,13 +20,16 @@ import type { GatePolicy } from "./policy.js"
  * would have to retain more content than the runtime is willing to hold.
  */
 
-export type IrreversibilityReason =
-  | { readonly code: "out-of-tree-effect"; readonly primitiveTypes: readonly PrimitiveType[] }
-  | {
-      readonly code: "retention-budget-exceeded"
-      readonly retainedNodeCount: number
-      readonly budget: number
-    }
+/**
+ * The reason's shape is published from here, where it always was. Its schema and
+ * the narrowing helper beside it are not: both exist so that `disposition.ts`
+ * can validate a stored judgment and `telemetry/event.ts` can journal the types
+ * one reason blames, and neither is something a host composing a runtime has to
+ * reach for. A published door has to be documented on a page a reader can find,
+ * which is the right bar for a name a host needs and the wrong one for an
+ * internal seam between two modules of this package.
+ */
+export type { IrreversibilityReason } from "./irreversibility.js"
 
 export type Reversibility = {
   readonly reversible: boolean
