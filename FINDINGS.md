@@ -39745,7 +39745,7 @@ happens when the version is too far back to reach.
 
 **Filed by:** `Loom portal` · **Owned by:** the maintainer, then `Loom daily build`
 if he wants it · **Status:** open —
-[0216](decisions/0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+[0220](decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
 is `Proposed` and is the long form of this entry
 
 On 1 October the maintainer asked the portal to show *"which apps I have
@@ -39759,7 +39759,7 @@ revision. **There is no identifier anywhere in the system for the thing that own
 a store.**
 
 What this run did with that: built the single-app answer, said on the screen that
-Loom looks after one app per installation, and wrote 0216 rather than inventing a
+Loom looks after one app per installation, and wrote 0220 rather than inventing a
 list of one. A portal that drew a list implies a second could appear, in the one
 place where implying it is most expensive.
 
@@ -39774,7 +39774,7 @@ already varies the *rules* per tree and per ask (0033) — different governance 
 different surfaces of one product, with one store underneath. That is built and
 shipping. If what is wanted is *my marketing site and my docs site judged
 differently*, it exists; if what is wanted is *two customers' data side by side*,
-it does not and 0216 is the cost.
+it does not and 0220 is the cost.
 
 ---
 ## 2026-10-01 — this deployment registers 4 of the 99 pieces Loom ships, so every portal screenshot shows a page that could have been written by hand

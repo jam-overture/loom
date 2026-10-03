@@ -69,10 +69,10 @@ list of one would be inventing a data model the framework does not have — in t
 one place where inventing one is most expensive, because every page, hold and
 signal is addressed under it.
 
-[0216](../decisions/0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+[0220](../decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
 is `Proposed`: it writes down what an app already *is* in Loom's terms, and what
 would have to change for there to be several. **The portal builds the single-app
-answer honestly and says it is one.** Accepting or refusing 0216 is the
+answer honestly and says it is one.** Accepting or refusing 0220 is the
 maintainer's, and §1's to build if it is accepted.
 
 ## What already exists, and is under-used
@@ -105,7 +105,7 @@ portal can measure attention and **not conversion**.
 - **[0199](../decisions/0199-the-outline-may-render-what-it-addresses-and-a-hand-may-yet-move-a-node.md)**
   — rendering the selection in isolation is inside 0019 and buildable now;
   **moving a node by hand is not.** `Proposed`.
-- **[0216](../decisions/0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)**
+- **[0220](../decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)**
   — what an app is, and why there is one. `Proposed`.
 
 **0019's title is now narrower than the surface.** *The portal is a review queue,
@@ -272,7 +272,7 @@ two happened.
 - **Moving a node by hand.** 0199 clause 4 — an open question with the maintainer's
   argument for it recorded, deliberately not built.
 - **A property inspector.** Typing a value into a field is the canvas 0019 refused.
-- **A multi-app data model.** 0216 is `Proposed` and is §1's if it is accepted. The
+- **A multi-app data model.** 0220 is `Proposed` and is §1's if it is accepted. The
   portal says there is one app rather than pretending to a list.
 - **Account tiers, gates or paywalls.** The portal is free and the bar does not
   change if that ever stops being true.

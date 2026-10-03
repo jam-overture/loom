@@ -30,7 +30,7 @@ it is part of.**
 | `_components/shell/nav-items.tsx` | the rail regrouped into four **named** groups, led by the new screen |
 | `_components/shell/sidebar-nav.tsx` | renders the group names |
 | `docs/portal.md` | **rewritten** around the governance model: the four parts, the four asks, and nine units in order |
-| `decisions/0216` | `Proposed` — what an app is, and why Loom has one |
+| `decisions/0220` | `Proposed` — what an app is, and why Loom has one |
 
 ---
 
@@ -46,14 +46,14 @@ owns a store.
 
 So this run did not draw a list of one. The screen is singular, it says *Loom
 looks after one app for each place you install it*, and
-[0216](../decisions/0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+[0220](../decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
 is `Proposed`: it names what an app already *is* in Loom's terms, costs out what a
 second would take item by item, and records the cheap alternative — `PolicySource`
 already varies the **rules** per tree and per ask (0033), which gives different
 governance for different surfaces of one product with one store underneath.
 
 **If what was meant is *my marketing site and my docs site judged differently*,
-that exists today.** If it is *two customers' data side by side*, 0216 is the
+that exists today.** If it is *two customers' data side by side*, 0220 is the
 price. That is the maintainer's call and §1's work, not a screen's.
 
 ### 2. *"Which components are registered as primitives… as the literal tree they are constructed as… select one or many and see how they are rendered"* — **built**
@@ -236,7 +236,7 @@ Where the written ones went:
 
 1. **A decision record with no `## Alternatives considered`.** `decisions.test.ts`
    requires one and it was right to: writing the four alternatives out is what
-   turned 0216 from an assertion into a costing.
+   turned 0220 from an assertion into a costing.
 2. **`TS6133` — an unused `screen` import** in a test that asserts over
    `container.textContent`. `apps/loom` typechecks with settings the root does not,
    and a targeted run before the file existed had passed.
@@ -247,7 +247,7 @@ Where the written ones went:
 
 **Filed four, closed none.**
 
-1. **Loom has no concept of an app** — the long form is 0216, `Proposed`.
+1. **Loom has no concept of an app** — the long form is 0220, `Proposed`.
 2. **This deployment registers 4 of the 99 pieces Loom ships.** Measured while
    building the screen that makes it visible, and it is the sharpest thing this run
    found. The portal's own pages can draw a heading, a paragraph and a box — so the
@@ -301,7 +301,7 @@ the maintainer can paste it at
 2. **Unit 2 next — the policy, read and played against.** It is ask (3), it is the
    largest remaining value in this surface, and every piece of it is already
    published.
-3. **Accept or refuse 0216.** Nothing is blocked on it — the portal is built for
+3. **Accept or refuse 0220.** Nothing is blocked on it — the portal is built for
    the single-app answer either way — but if several apps are wanted, the work
    starts at the store's signatures and not at a screen.
 
@@ -352,7 +352,7 @@ Do not widen the portal into a design tool (0019) — no canvas, no property ins
 - `docs/routines.md` — lanes, the screenshot harness, token discipline.
 - `docs/signals.md` — step 4 is yours.
 - `FINDINGS.md` — before choosing work.
-- `decisions/0018`, `0019`, `0067`, `0199`, `0200`, `0216`.
+- `decisions/0018`, `0019`, `0067`, `0199`, `0200`, `0220`.
 - The most recent `reports/`.
 
 A file named here that is missing is a finding, not a blocker.

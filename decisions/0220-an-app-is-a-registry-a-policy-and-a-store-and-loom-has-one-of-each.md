@@ -1,16 +1,22 @@
-# 0216. An app is a registry, a policy and a store — and Loom has one of each
+# 0220. An app is a registry, a policy and a store — and Loom has one of each
 
 **Status:** Proposed
 **Date:** 2026-10-01
 **Section:** §1, §5
 
-> **Renumbered on 2026-10-03**, from 0209, when `main` was merged into the
-> branch that carries it (#463). `main` had meanwhile accepted a different
-> 0209 — *what an adapter owes the runtime is a suite, not a sentence* (#462) —
-> and two records sharing a number is fatal (0097). 0210 through 0215, and 0217
-> and 0218, were taken while this branch waited, so this record takes 0216. It
-> was written on 1 October and **nothing in it changed but its number**; the
-> citations were updated with it.
+> **Renumbered twice on 2026-10-03**, from 0209 to 0216 and then to 0220, while
+> the branch that carries it (#463) waited for review. `main` accepted a
+> different 0209 — *what an adapter owes the runtime is a suite, not a sentence*
+> (#462) — and two records sharing a number is fatal (0097), so `Loom merge`
+> moved this one to 0216 when it merged `main` in. **0216 was taken too**, by
+> *a published double derives whatever the runtime derives* (#488), which landed
+> on `main` between that choice and this merge; 0217 through 0219 went the same
+> way. 0220 is free on `main` and in every open branch.
+>
+> It was written on 1 October and **nothing in it has changed but its number**,
+> twice. The citations moved with it each time. The sentences elsewhere that
+> describe the collision itself still name the number they are about, because
+> that is what the number was — the rule `Loom merge` set on the first move.
 
 > **Why `Proposed`.** It does not change any code and it contradicts no
 > `Accepted` record. What it does is name a thing the framework has never named,
