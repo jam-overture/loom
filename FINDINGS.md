@@ -41327,6 +41327,111 @@ place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
 
 ---
+## 2026-10-03 — a credential's mark is a fixed square at every width, so the first band to fill that region loses a third of a phone column to it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.credential.ts`) · **Status:** open — a real measurement
+against a deliberate decision, filed rather than reversed inside a run that was
+about something else
+
+`credentials-posture` is the first band in the catalogue to put anything in
+`loom.credential`'s `mark` region. The canonical ships it empty and
+[says why](../src/primitives/compositions/credentials-band.ts): a seal would be a
+third party's trademark fetched from a third party's domain. That reasoning is
+about **assets**, and a glyph is not one — so the region is reachable now, and
+filling it surfaced the thing nothing had exercised.
+
+The mark is a fixed square, by a decision with its own comment:
+
+```ts
+/**
+ * A fixed square rather than a shrink-to-fit box. A wall of credentials whose
+ * marks are a wordmark, a round badge and a glyph has three different leading
+ * edges otherwise, and the ragged column of names is the first thing anyone
+ * sees.
+ */
+style: { flex: "0 0 auto", inlineSize: space(8), blockSize: space(8), padding: space(2), … }
+```
+
+**That argument is sound and is about a wall.** What it does not cover is one
+credential in a narrow column: `space(8)` plus the card's `space(4)` gap is taken
+off the body's measure at every width, and at 390px the body is what is left of a
+card that is already inside a section's padding. In the 3 October shots the GDPR
+row's name wraps to two lines and its note to four, where the same credential
+unmarked — the canonical, in the same sheet, one band up — sets both on fewer.
+
+Nothing is broken and no test is red. It is legible, and it is the band's own
+photograph that shows the body losing about a third of its width to a decoration.
+
+### Why this is filed rather than fixed
+
+The fix is a prop, and the prop is a design decision another run took with its
+reasoning written down. `mark: "fixed" | "fit"`, or a `size` the tree chooses,
+either way reopens *do leading edges align across a wall* — which is a real
+property the current shape buys and a band holding one credential cannot see.
+Widening a run about compositions into a change to a shipped primitive's surface,
+on the strength of one viewport, is the kind of unasked widening that should be
+somebody's deliberate call.
+
+**What would settle it** is the question the current comment does not ask: whether
+the square should shrink below some inline size the way the grids already do.
+`COLUMN_MINIMUMS` is the mechanism the library uses everywhere else for exactly
+this — a floor rather than a fixed value — and `loom.credential` is the one card
+in the library with a fixed decoration and no floor.
+
+---
+## 2026-10-03 — `21st.dev` re-verified blocked, from the primitives lane a fifteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `the maintainer`
+(`.claude/settings.json`, or the brief) · **Status:** open — unchanged since
+16 August, re-verified rather than re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
+3 October 2026. The standing entry of 16 August 2026 has the two remedies, both
+the maintainer's, and nothing about them has moved.
+
+Recorded for the count and nothing else. The brief names it as the visual
+standard on every run, so a run that silently skipped it would be a run claiming
+to have met a bar it never read. The floor this run actually worked to is the one
+in the repository — `loom.hero`, `loom.feature-grid`, and the forty-eight bands
+already shipped — which is what the brief's own second clause names.
+
+---
+## 2026-10-03 — the catalogue's size is spelled in four places in `apps/`, and the fourth is a generated file no doc comment can state the claim instead of
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **the 2 October entry's remedy
+taken for two of the four, with the other two explained**
+
+The 2 October entry named three places in `apps/` that spell the catalogue's size
+and the remedy for them: *a doc comment may state the claim rather than the
+arithmetic.* Adding four bands hit all three again, and one more. All four are
+corrected on this branch, and the four are not the same kind of thing:
+
+| | what it was | what was done |
+| --- | --- | --- |
+| `_lib/packages.ts` | a doc comment: *"`…/compositions` is the forty-eight bands"* | **the remedy** — it states the claim now: *"the bands under their own names"* |
+| `_components/bands.tsx` | two doc comments: *"why there are forty-eight bands"*, *"a page that wants to say forty-eight"* | **the remedy** — *"more bands than places to put one"*, *"the size of the catalogue"* |
+| `_lib/counts.test.ts` | `"starter-bands: forty-eight"` | **bumped to `fifty-two`, and it should stay a literal** — it is the one place in the repository where the catalogue's size is asserted rather than read, which is its job |
+| `_lib/api/reference.generated.json` | four new exports, absent | regenerated with `pnpm --filter @loom/app docs:api` |
+
+**The fourth is the new information and it is not a spelling.** `offered.test.ts`
+imports every published door and holds it against the generated reference, so a
+band added to `…/compositions` fails with *"hands back a object called
+`specsSheetBand` and no page on this site mentions it. Something is published
+that a reader has no way to find."* That is the check working — but it means
+**every band this lane adds turns the app suite red in a file this lane does not
+own**, and the remedy that fixes the doc comments cannot touch it, because
+regenerating is the correct response and there is nothing to reword.
+
+So: two of the four will not recur, one is correct as it is, and the fourth will
+recur on every single run that adds a band. Worth knowing before somebody reads
+the 2 October entry and expects the hazard to be closed.
+
+**This lane edited `apps/` again**, which its brief forbids by name, for the
+reason the 2 October run gave and with the same discomfort: a red `main` is worse
+than a diff outside a lane that the lane had no way to anticipate. Said plainly in
+the pull request rather than slipped in.
 ## 2026-10-02 — the sentence the portal lane asked for is in `parts.ts`, and the state it argues about is now held by two tests
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:**

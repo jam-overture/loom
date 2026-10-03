@@ -15,7 +15,7 @@ The short answer: **the honest ceiling on distinct primitives is about 110–120
 not 250.** The number 250 is reachable, and the rest of it is compositions. The
 arithmetic is at the end.
 
-> **Where the count is, 2 October 2026: 102 primitives, 48 bands, 150 droppable
+> **Where the count is, 3 October 2026: 102 primitives, 52 bands, 154 droppable
 > things.** Tier A closed on 14 September except the radio group, which is in
 > Tier B's second group below and blocked there. Tier B's first group is
 > **unblocked and three of its four have shipped**; its other two groups are the
@@ -24,7 +24,7 @@ arithmetic is at the end.
 > eleven days and that is what the correction is about.
 >
 > **The vocabulary has not moved since 1 October and that is the
-> recommendation being followed**, not a stall: this document's own arithmetic
+> recommendation being followed** — three runs on, not a stall: this document's own arithmetic
 > puts the honest ceiling at 110–120 and says to spend the week on
 > compositions. The instrument for choosing *which* composition is
 > [designs per part](#designs-per-part--measured-2-october), added 2 October,
@@ -221,11 +221,11 @@ reads as complete from every other angle while it is true.
 Measured with `compositionsForPart` over `COMPOSITION_PARTS`, which is one
 `filter` from any registry and needs no script:
 
-| | 1 Oct | 2 Oct |
-| --- | --- | --- |
-| parts | 22 | 22 |
-| bands | 44 | 48 |
-| **parts with exactly one design** | **9** | **5** |
+| | 1 Oct | 2 Oct | 3 Oct |
+| --- | --- | --- | --- |
+| parts | 22 | 22 | 22 |
+| bands | 44 | 48 | 52 |
+| **parts with exactly one design** | **9** | **5** | **1** |
 
 The nine were `banner`, `nav`, `bento`, `specs`, `comparison`, `credentials`,
 `team`, `changelog` and `footer`. Four of them closed on 2 October — `nav`,
@@ -238,6 +238,34 @@ the bottom of their page look like.
 **The five left, in the order a run should take them:** `specs`, `team`,
 `credentials`, `changelog`, `banner`. Each is one band of work and none is
 blocked by anything.
+
+### Four of the five closed on 3 October, and `banner` is the one left
+
+`specs-sheet`, `team-leads`, `credentials-posture` and `changelog-notes` took the
+first four in the order above. **`banner` is deliberately not the fifth**, and the
+reason is this document's own bar rather than a shortage of time.
+
+A banner is a strip, one sentence, and one thing to do about it. The second design
+anybody would name is *the strip whose action is a button rather than a link* —
+and the honest reading of that is a `loom.button` where a `loom.link` was, which
+is a different set of nodes by the letter of 0162 and is the thinnest entry the
+catalogue would contain. A badge in front of the sentence makes it thinner still,
+because the canonical already carries a `loom.emphasis` doing that work.
+
+So the designs-per-part instrument now has **one row left and the honest answer
+to it may be that a part with a single design is sometimes correct.** A part whose
+whole content is one sentence has less room for a second design than a part that
+is a wall of cards, and forcing one would put a catalogue entry where 0162 says a
+`configure` belongs. The next run reading this list should decide that question
+rather than assume the number should reach zero — and if it does build one, the
+bar is a *region* of the strip the canonical does not have, not a swapped leaf.
+
+**This instrument has done its job and is close to retiring.** Three runs chose
+work from it and it went 9 → 5 → 1. What it cannot see, and what the next
+instrument will have to, is whether the *second* design of a part that now has two
+is the one a deployment actually wants — reach counts whether a primitive is
+buildable, designs-per-part counts whether a part offers a choice, and neither
+counts whether the choice is a real one.
 
 The bar for a second design is 0162's and `compositions.test.ts` holds it: a
 **different set of nodes**, not the same band with different props. The test

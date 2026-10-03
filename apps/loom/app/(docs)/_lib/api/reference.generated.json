@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4468,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4514,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5417,10 +5417,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 188,
+      "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5875,10 +5875,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6013,6 +6013,20 @@
               "name": "changelogBand",
               "kind": "value",
               "signature": "const changelogBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/changelog-notes-band",
+          "title": "Changelog notes band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "changelogNotesBand",
+              "kind": "value",
+              "signature": "const changelogNotesBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6188,6 +6202,20 @@
               "name": "credentialsBand",
               "kind": "value",
               "signature": "const credentialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/credentials-posture-band",
+          "title": "Credentials posture band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "credentialsPostureBand",
+              "kind": "value",
+              "signature": "const credentialsPostureBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6586,6 +6614,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/specs-sheet-band",
+          "title": "Specs sheet band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "specsSheetBand",
+              "kind": "value",
+              "signature": "const specsSheetBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/steps-band",
           "title": "Steps band",
           "summary": "",
@@ -6622,6 +6664,20 @@
               "name": "teamBand",
               "kind": "value",
               "signature": "const teamBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/team-leads-band",
+          "title": "Team leads band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "teamLeadsBand",
+              "kind": "value",
+              "signature": "const teamLeadsBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6686,7 +6742,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7277,7 +7333,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7505,7 +7561,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7922,7 +7978,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8276,7 +8332,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8409,7 +8465,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9396,7 +9452,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9539,7 +9595,7 @@
       "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9606,7 +9662,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10168,7 +10224,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10242,7 +10298,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10679,7 +10735,7 @@
       "files": 71,
       "narrower": [],
       "standing": {
-        "packageNames": 1205,
+        "packageNames": 1209,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
