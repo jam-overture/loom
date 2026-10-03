@@ -18,7 +18,7 @@ comments on this lane's #463 are Vercel's and this lane's own.
 open rather than opening a second one, and #463 is open. **This run deliberately
 did not**, and the reason is mechanical rather than a preference:
 
-**#463 adds [0209](../decisions/0209-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+**#463 adds [0216](../decisions/0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
 as `Proposed`, and `Loom merge` skips any pull request carrying a `Proposed`
 record.** So #463 cannot land until the maintainer has answered a question about
 what an "app" is, and anything pushed onto it waits behind that answer. Pushing
@@ -390,7 +390,7 @@ server needed. Both were in the scratch directory; `git status` is clean of them
 
 ## Recommendations
 
-1. **0209, so #463 can land.** It is the only thing holding a finished screen,
+1. **0216 (renumbered from 0209), so #463 can land.** It is the only thing holding a finished screen,
    and the question is short: did *"which apps I have registered"* mean different
    rules for different surfaces of one product — which exists today, via
    `PolicySource` — or two products side by side, which is a schema change the

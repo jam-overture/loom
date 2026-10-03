@@ -55,7 +55,7 @@ import { PieceTally } from "./_components/piece-tally"
  * inventing a data model the framework does not have.
  *
  * So the heading is singular and the lead says it plainly. What an app would have
- * to be for there to be several is `0209`, written `Proposed` — it is §1's
+ * to be for there to be several is `0216`, written `Proposed` — it is §1's
  * business, and the portal's job is to say what is true today rather than to
  * guess at what will be.
  *

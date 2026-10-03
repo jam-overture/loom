@@ -292,4 +292,13 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0206](0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md) | A primitive declares what it could not show, and the runtime decides whether to say so | Accepted | §3 |
 | [0207](0207-a-primitive-that-arranges-only-glyphs-inherits-its-alignment.md) | A primitive that arranges only glyphs inherits its alignment | Accepted | §4b |
 | [0208](0208-a-question-nothing-reads-is-refused-before-it-is-written.md) | A question nothing reads is refused before it is written | Accepted | §2 |
-| [0209](0209-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Proposed | §1, §5 |
+| [0209](0209-what-an-adapter-owes-the-runtime-is-a-suite-not-a-sentence.md) | What an adapter owes the runtime is a suite, not a sentence | Accepted | §2 |
+| [0210](0210-a-primitive-may-lock-the-pages-scroll-from-the-stylesheet-and-only-while-its-own-region-is-open.md) | A primitive may lock the page's scroll from the stylesheet, and only while its own region is open | Accepted | §4b |
+| [0211](0211-a-completion-is-a-form-the-browser-let-go.md) | A completion is a form the browser let go, and it carries the bands it was the end of | Accepted | §6 |
+| [0212](0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md) | What a reader signal means is joined to the tree when it is read, and the tree is what makes silence a measurement | Accepted | §6 |
+| [0213](0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md) | The harness reads a box, it prints the number, and the judgement stays in the report | Accepted | §1 (process) |
+| [0214](0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md) | Where readers are is a floored bucket counted at the door, and a page view says when it began | Accepted | §4c (reader signals) |
+| [0215](0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md) | A stake rule either reads a policy or is fixed at its code, and only the first kind can be asked again | Accepted | §6 (telemetry), binding on §2 |
+| [0216](0216-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Proposed | §1, §5 |
+| [0217](0217-choosing-a-two-region-primitive-is-itself-an-insert-decision.md) | Choosing a two-region primitive is itself an insert decision | Accepted | §4b |
+| [0218](0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md) | What a counter means is published, and the browser pays for the number and not its name | Accepted | §4c (reader signals) |
