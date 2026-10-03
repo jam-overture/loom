@@ -8,6 +8,7 @@ import { CheckupInvitation } from "@/app/(portal)/_components/checkup-invitation
 import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { MIN_CARD_WIDTH, PageCardLink, type PageCard } from "@/app/(portal)/_components/page-card"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
+import { Columns, Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnderConstruction } from "@/app/(portal)/_components/under-construction"
@@ -126,7 +127,7 @@ const PortalHome = async () => {
 
   if (!listed.ok) {
     return (
-      <div className="flex max-w-2xl flex-col gap-4 p-8">
+      <Screen>
         <UnderConstruction />
         <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
         <StateNotice tone="failure" title="We couldn't check what's waiting.">
@@ -142,7 +143,7 @@ const PortalHome = async () => {
             </p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -342,7 +343,7 @@ const PortalHome = async () => {
   })
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6 p-8">
+    <Screen>
       <UnderConstruction />
 
       {/*
@@ -355,12 +356,12 @@ const PortalHome = async () => {
        * "changed without asking you" read as "waiting on you" is the one
        * misreading this screen must not cause.
        */}
-      <header className="flex flex-col gap-1">
+      <Measured>
         <h1 className="text-2xl tracking-tight">{screenName("/portal")}</h1>
         <p className="text-ink-muted text-sm">
           Everything Loom stopped to ask you about, and everything it went ahead with on its own.
         </p>
-      </header>
+      </Measured>
 
       {/*
        * The scope, said once and near the top. Both halves below are read from a
@@ -410,7 +411,7 @@ const PortalHome = async () => {
        */}
       {cards.length > 0 && (
         <section className="flex flex-col gap-3">
-          <header className="flex flex-col gap-1">
+          <Measured>
             <h2 className="text-lg tracking-tight">Your pages</h2>
             {/*
               * What this section is, and deliberately **not** how much is
@@ -422,7 +423,7 @@ const PortalHome = async () => {
               {cards.length} {cards.length === 1 ? "page" : "pages"}, each drawn from what Loom
               has stored for it.
             </p>
-          </header>
+          </Measured>
 
           <ListOrder order="needs-you-first" />
 
@@ -451,6 +452,20 @@ const PortalHome = async () => {
         </section>
       )}
 
+      {/*
+        * **The three questions, side by side rather than stacked.**
+        *
+        * Each of them is about the same deployment and each was using half the
+        * width, so the screen was three times taller than its content. They are
+        * not equals, though: `Waiting on you` is the queue somebody came for and
+        * can run to dozens of rows, while the other two are a paragraph and an
+        * invitation. So the queue takes two thirds and the other two share a
+        * rail — which is also why the rail holds the two that are *withheld on a
+        * deployment with no pages*, so an empty rail simply is not drawn.
+        */}
+      <Columns
+        main={
+          <>
       <section className="flex flex-col gap-4">
         <header className="flex flex-col gap-1">
           <h2 className="text-lg tracking-tight">Waiting on you</h2>
@@ -655,6 +670,10 @@ const PortalHome = async () => {
           </ul>
         )}
       </section>
+          </>
+        }
+        beside={
+          <>
 
       {/*
        * The second subject, and the one that makes this a screen somebody
@@ -734,6 +753,9 @@ const PortalHome = async () => {
        * under the one empty state that matters competes with it.
        */}
       {trees.length > 0 && <CheckupInvitation reach={reach} />}
+          </>
+        }
+      />
 
       {/*
        * The strip that used to sit here is gone, and its own argument is why.
@@ -774,7 +796,7 @@ const PortalHome = async () => {
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

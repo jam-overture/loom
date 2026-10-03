@@ -156,7 +156,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
          * where it stands does not change meaning when the band around it
          * learns to say the same thing.
          */
-        heading(ids, 1, "The AI age needs a new way to build web apps.", {
+        heading(ids, 1, "Make your web page dynamic with AI and Loom", {
           balance: true,
           align: "center",
         }),
@@ -205,7 +205,7 @@ const hero = (ids: IdFactory, context: PageContext): LoomNode =>
        */
       prose(
         ids,
-        "AI already writes the components. What your page becomes, and how it feels to use, is still to be built. Loom is where you and the AI build it — adaptive to your users, answerable to your rules, and secure.",
+        "AI already writes the components, but would you trust AI to dynamically change your web page? What your page evolves to is yet to be built. Loom and AI are how your page evolves together.",
         { size: "lead", measured: true, align: "center" }
       ),
       buildSlot(ids, "actions", [
@@ -385,7 +385,7 @@ const whatIsIt = (ids: IdFactory): LoomNode =>
   section(
     ids,
     { width: "wide", eyebrow: BAND.whatIsIt },
-    "A governance framework for modern AI-enabled web development and adaptation.",
+    "A governance framework for modern AI-enabled adaptive web pages.",
     [
       prose(
         ids,
@@ -499,7 +499,7 @@ const usingIt = (ids: IdFactory): LoomNode =>
     [
       prose(
         ids,
-        "You keep your framework and your components. Loom needs two things from you: which components an AI model is allowed to use, and what it is allowed to do with them.",
+        "You keep your framework and your components. Loom provides the oversight and governance.",
         { size: "lead", measured: true }
       ),
       buildElement(ids, {

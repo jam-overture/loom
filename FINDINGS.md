@@ -42485,3 +42485,182 @@ shape stops them compiling, which is the good failure. Left for the run that nex
 has a reason to open them, under the same rule the screen names move by: a
 fixture is converted on the run that changes the test it belongs to, never as a
 sweep.
+## 2026-10-03 — the portal has never drawn a page in its own theme, and a pane sized to a phone is where that stops being invisible
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**a decision rather than a repair**, which is why it is filed rather than taken
+in the run that found it
+
+`renderRequest` takes a `themes` registry and resolves the theme the tree
+carries (0050). **No surface passes one except the marketing site.** So every
+page the portal has ever previewed has been drawn with `--loom-*` undefined,
+wearing whatever the document around it happened to supply.
+
+Inside the portal that was Geist and a reasonable size, by inheritance from
+`globals.css`, so it has looked plausible for two months. The first screenshot
+of the new pane — the page in a document of its own, 390 pixels wide — came back
+set in **Times**, because a bare root inherits nothing. The regression was mine
+and is fixed by giving the preview root the same font stack the portal gave it;
+what the screenshot actually exposed is that there was never a theme.
+
+**What it costs, now that the pane exists.** *Does this hold up on a phone* is
+the question the pane is for, and a page drawn without its theme answers a
+different one: it has the right **layout** at the right width and the wrong
+type, spacing and colour everywhere. A reviewer judging a change to a hero band
+at 390 pixels is looking at a hero band in nobody's design.
+
+**Why it is not a one-line fix.** It is one line — `themes: portalThemes` — and
+it changes how **every** preview in the portal looks, on four screens, in a
+direction nobody has reviewed. It also needs a decision this lane should not
+take alone: which registry. The tree names a theme; a portal that registers a
+different set than the deployment serving the page would draw a page in a theme
+it is not served in, which is the plausible-false-picture failure one level up
+from the one this pane was built to avoid.
+
+**Recommended**: pass the same themes the deployment serves with, and photograph
+the four preview screens before and after in one unit.
+
+---
+## 2026-10-03 — the library's last three viewport rules are what force an iframe, and a fourth would not change the answer
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`) · **Status:** open — **not a defect and not
+urgent.** It is a measurement of what the migration to `@container` has left,
+taken by the first consumer whose correctness depends on the answer
+
+The pane that sizes a page to a phone, a tablet or a desktop is an iframe, and
+the whole reason is three rules:
+
+| rule | what it decides |
+| --- | --- |
+| `@media (max-width: 47.99rem)` on the comparison band | the scroll-snap peek |
+| `@media (max-width: 47.99rem)` on the table | the prose column measure |
+| `@media (max-width: 47.99rem)` on `loom.nav` | **whether the destinations fold behind a button** |
+
+Everything else the library does responds with `@container`, which a fixed-width
+box satisfies exactly. If those three were container queries, the pane could be
+a `<div>` with a width and the route group, the second root layout and the
+cross-document selection bridge would all be unnecessary.
+
+**The third one is why this could not be shrugged at.** A reader asking for
+*phone* and getting a desktop navigation bar is not a slightly-wrong preview; it
+is the single most visible responsive behaviour the library has, drawn wrong, on
+the screen somebody opened to check exactly that.
+
+`stylesheet.ts` already carries a comment reading *"`@media` here again would be
+that regression"*, so the direction is settled and this is a count rather than
+an argument. **Filed for the lane that owns it, with no claim that it is worth
+doing for this**: an iframe is the correct mechanism for a device preview
+whatever the library does, and what closing this would buy is simplicity rather
+than honesty.
+
+---
+## 2026-10-03 — the library's stylesheet is reachable only as an element, and a document that is not React's has to pick it apart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`) · **Status:** **closed by the design, and filed
+because the next consumer will hit it** — the preview root is a React layout, so
+it never needed the text in the end
+
+The first shape of the preview was a route handler building an HTML document by
+hand, which needed the library's CSS **as a string**. What is published is
+`libraryStylesheet()`, a `ReactElement`, and the only way to the text was
+`libraryStylesheet().props.children` — reaching into an element's props to get at
+a constant.
+
+That shape died for an unrelated reason (Next refuses `react-dom/server` in a
+route handler), and the design that replaced it renders through React, which
+hoists the element properly. So nothing in this lane reaches into props today.
+
+**It is filed anyway because the gap is real and the next consumer is
+predictable**: anything assembling a Loom document outside React — a static
+export, an email, a PDF, a screenshot worker — needs the CSS as text and has the
+same two options, pick an element apart or copy the file. A
+`libraryStylesheetText()` beside the existing export would be a one-line
+addition and would make `libraryStylesheet()` its caller.
+
+---
+## 2026-10-03 — every screen in the portal caps itself at a reading measure, and the grids that were built to fill a screen have never been given one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**two of twenty-four converted**, the rule and the primitive are on `main`, and
+the rest is a queue rather than a question
+
+The maintainer, 3 October: *"The portal is too vertical in the main content
+pane."*
+
+Measured before anything was changed, on a 1280-pixel display:
+
+| | |
+| --- | --- |
+| screens capped at `max-w-3xl` (768px) | **18** |
+| screens capped at `max-w-xl` (576px) | **6** |
+| the front door, photographed | **1280 × 2150** — two and a half screens of scrolling |
+| width it used | **568 of 1280**, so a little over half the display is empty |
+| `/portal/pages` | a single column of text rows at **576px**, with no picture of any page |
+
+**The sharpest instance, and the one that names the cause.** The front door's
+card grid is written `repeat(auto-fill, minmax(288px, 1fr))` — a grid that fills
+whatever it is given — and it had been drawing **two columns** for a fortnight,
+because it was given 672.
+
+### Why nobody had simply removed the cap
+
+Because it is not a mistake. Prose has a measure, and a screen that dropped the
+cap would trade empty space for paragraphs 140 characters wide. **One container
+was answering two questions**: how wide is the screen, and how wide is a
+sentence. `_components/screen.tsx` splits them — `Screen` is as wide as the
+display, `Measured` is 68ch — and the rule is that sentences get the measure and
+grids, cards, rows and panels never do.
+
+### What converting two screens bought, honestly
+
+| | before | after |
+| --- | --- | --- |
+| `/portal` | 2150px tall, 2 card columns | **1774px**, 3 columns, two-column lower half |
+| `/portal/pages` | 958px, a column of names | **1028px**, a full-width grid of drawn pages |
+
+**The index got 7% taller and that is the right trade**, said plainly rather
+than buried: it stopped being a list of names and became a list of pages you can
+tell apart. It will also be taller than the old rows at thirty pages, which is
+the shape `docs/portal.md` phase 1 asked for and what Vercel does with projects.
+
+### What is left, which is most of it
+
+**Sixteen screens still carry a cap**, and 29 `max-w-*` caps remain across the
+lane counting components. `screen.test.ts` holds that number as a **ceiling that
+may only go down**, so the next run that puts one back fails rather than being
+noticed in review — which is how all twenty-four got there, each one reasonable
+on its own.
+
+The two worth doing next are the two with the most stacked sections:
+`/portal/trust` and `/portal/readers`, both of which draw one tall card per page
+in a 768px column.
+
+---
+## 2026-10-03 — a two-column screen leaves a column of white whenever the queue it was built for is empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**measured, not urgent, and the opposite of a reason to go back to stacking**
+
+The front door's lower half is now `Waiting on you` beside `Changed without
+asking you` and `Is everything still accounted for?`. On a deployment with a
+real queue that is right: the queue is the long column and the rail is short.
+
+On a **caught-up** deployment — which is the one every new person meets, and the
+one in the screenshots — the queue is a single green box and the rail is three
+times its height, so about 400 pixels of the left column is white.
+
+Two things that would answer it, neither taken here:
+
+1. **Let the rail reflow under the main column** when the main column is short.
+   CSS cannot ask that question; it needs the server to know the queue is empty,
+   which it does — so this is a prop, not a media query.
+2. **Put the checkup invitation below both columns** rather than in the rail. It
+   is the biggest thing in the rail and the least urgent, and it reads as cramped
+   at a third of the width.
+
+Filed rather than guessed at, because the right answer depends on what a loaded
+deployment looks like and **nothing in this repository has ever had one**: the
+screenshots are six staged pages with no history and no waiting changes. Choosing
+a layout for the empty case is how a screen ends up wrong for every real one.

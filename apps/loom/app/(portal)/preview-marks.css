@@ -1,0 +1,42 @@
+/* ══════════════════════════════════════════════════════════════════
+   POINTING AT A PART — the hover and selection outlines, in the one
+   file both documents that need them can read.
+
+   The portal draws a page in two places now: inside its own document,
+   wherever a page's parts are shown, and inside the iframe that
+   `device-pane.tsx` sizes to a phone, a tablet or a desktop. That
+   second document is a root of its own (`(preview)/layout.tsx`) and
+   deliberately loads neither Tailwind nor the portal's chrome tokens —
+   it is a preview of somebody else's page, and the tool's own stylesheet
+   has no business in it.
+
+   What it does need is these three rules, because without them clicking
+   a part gives no sign that anything was picked. So they live here and
+   are read twice rather than written twice: `globals.css` imports this
+   file, and so does the preview root.
+
+   The two colours are literals here rather than `var(--loom-*)` for
+   exactly the reason `globals.css` gives about every other chrome token:
+   the previewed tree mounts its *own* theme on its root, so a selection
+   ring defined against a Loom variable would change colour with whatever
+   theme the page carries — and a page themed to its own background would
+   have an invisible one. They match the two values `globals.css` defines,
+   and `globals.test.ts` is where that correspondence is pinned.
+   ══════════════════════════════════════════════════════════════════ */
+
+.loom-preview [data-loom-node] {
+  cursor: default;
+}
+
+/* `:hover` matches every ancestor of the pointer, which outlines the whole
+   chain from the root down. Only the innermost hovered node is the one a
+   click would select, so it is the only one that should say so. */
+.loom-preview [data-loom-node]:hover:not(:has([data-loom-node]:hover)) {
+  outline: 1px solid rgba(31, 152, 94, 0.45);
+  outline-offset: 1px;
+}
+
+.loom-preview [data-loom-selected] {
+  outline: 2px solid #1f985e;
+  outline-offset: 2px;
+}

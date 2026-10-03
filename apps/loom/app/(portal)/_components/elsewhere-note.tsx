@@ -44,7 +44,10 @@ export const ElsewhereNote = ({
   const elsewhere = elsewhereFrom(from)
 
   return (
-    <p className="text-ink-muted text-xs">
+    /* The measure travels with the sentence rather than with the screen: this
+       note is one paragraph, it is on six screens, and every one of them is now
+       as wide as the display. See `_components/screen.tsx`. */
+    <p className="text-ink-muted max-w-[68ch] text-xs">
       {elsewhere.clause}{" "}
       <Link href={screenHref(elsewhere.route, treeId)}>{screenName(elsewhere.route)} →</Link>
     </p>
