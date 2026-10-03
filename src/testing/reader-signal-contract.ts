@@ -9,6 +9,7 @@ import {
   type ReaderRegionCount,
   type ReaderRegionStore,
 } from "../signals/region.js"
+import type { RevisionViews } from "../signals/page-views.js"
 import type { FunnelPair, ReaderTally } from "../signals/rollup.js"
 import type { ReaderSignal, ReaderSignalBatch, ViewKey } from "../signals/signal.js"
 import type { ReaderTallyStore } from "../signals/tally.js"
@@ -458,6 +459,120 @@ export const describeReaderTallyStoreContract = (
       await store.apply({ tallies: [], funnels: [{ ...answer, reached: 10, converted: 1 }] }, LATER)
 
       expect(unwrap(await store.funnels())[0]).toMatchObject({ reached: 50, converted: 10 })
+    })
+
+    describe("page views", () => {
+      const opening = (over: Partial<RevisionViews> = {}): RevisionViews => ({
+        treeId: TREE,
+        revision: 1,
+        views: 1,
+        ...over,
+      })
+
+      it("reads nothing before anybody has arrived", async () => {
+        const store = await make()
+
+        expect(unwrap(await store.pageViews())).toEqual([])
+      })
+
+      it("accepts a delivery that opened nothing", async () => {
+        const store = await make()
+
+        expect(unwrap(await store.opened([], AT))).toBeUndefined()
+        expect(unwrap(await store.pageViews())).toEqual([])
+      })
+
+      it("reads back the page views a door counted", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 3 })], AT)
+
+        expect(unwrap(await store.pageViews())[0]).toMatchObject({
+          treeId: TREE,
+          revision: 1,
+          opened: 3,
+          appearances: 0,
+          updatedAt: AT,
+        })
+      })
+
+      /**
+       * The property the exactness rests on. Every call is one delivery's worth
+       * of arrivals, so a store that replaced would report the last reader
+       * rather than the readership — and unlike a distinct count there is no
+       * window here for the error to be bounded by.
+       */
+      it("adds a second delivery's arrivals to the first", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 2 })], AT)
+        await store.opened([opening({ views: 5 })], LATER)
+
+        expect(unwrap(await store.pageViews())[0]).toMatchObject({ opened: 7, updatedAt: LATER })
+      })
+
+      /**
+       * The two numbers are counted from opposite ends and must not land in the
+       * same column: their difference is the over-count in every distinct view
+       * count stored against the revision (0147), and a store that added them
+       * together would report nought drift for ever.
+       */
+      it("keeps a rollup's appearances beside the openings rather than in them", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 10 })], AT)
+        await store.apply({ tallies: [], funnels: [], appearances: [opening({ views: 11 })] }, LATER)
+
+        expect(unwrap(await store.pageViews())[0]).toMatchObject({
+          opened: 10,
+          appearances: 11,
+          updatedAt: LATER,
+        })
+      })
+
+      it("adds a second window's appearances to the first", async () => {
+        const store = await make()
+        await store.apply({ tallies: [], funnels: [], appearances: [opening({ views: 4 })] }, AT)
+        await store.apply({ tallies: [], funnels: [], appearances: [opening({ views: 6 })] }, LATER)
+
+        expect(unwrap(await store.pageViews())[0]).toMatchObject({ opened: 0, appearances: 10 })
+      })
+
+      /**
+       * A rollup applied with no appearances is a caller that has none to
+       * report — a backfill, a fixture — and it must not write a row saying
+       * nobody arrived, which a reading would show as counters that are exact.
+       */
+      it("writes no page-view row for a rollup that reported no window", async () => {
+        const store = await make()
+        await store.apply({ tallies: [tally()], funnels: [] }, AT)
+
+        expect(unwrap(await store.pageViews())).toEqual([])
+      })
+
+      it("keeps revisions apart, which is what before and after a change means here", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 3 }), opening({ revision: 2, views: 8 })], AT)
+
+        expect(unwrap(await store.pageViews({ revision: 2 })).map((row) => row.opened)).toEqual([8])
+      })
+
+      it("keeps trees apart", async () => {
+        const store = await make()
+        await store.opened([opening(), opening({ treeId: OTHER_TREE, views: 4 })], AT)
+
+        expect(
+          unwrap(await store.pageViews({ treeId: OTHER_TREE })).map((row) => row.opened)
+        ).toEqual([4])
+      })
+
+      /** Two arrivals in one call are one row and one addition, not a row each. */
+      it("adds up two openings of the same revision in one call", async () => {
+        const store = await make()
+        await store.opened([opening({ views: 2 }), opening({ views: 3 })], AT)
+
+        const rows = unwrap(await store.pageViews())
+
+        expect(rows).toHaveLength(1)
+        expect(rows[0]).toMatchObject({ opened: 5 })
+      })
     })
 
     it("keeps two funnels that share a starting node apart", async () => {

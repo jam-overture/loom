@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { batchOf, OTHER_TREE, region, TREE, viewed, viewKey } from "../testing/reader-signal-contract.js"
+import { OTHER_TREE, region, TREE } from "../testing/reader-signal-contract.js"
 
 import {
   DEFAULT_REGION_FLOOR,
@@ -54,77 +54,39 @@ describe("readerRegionOf", () => {
 
 describe("regionCountsOf", () => {
   const GB = region("GB")
+  const opening = { treeId: TREE, revision: 1, views: 1 }
 
-  it("counts the page view a delivery opened", () => {
-    const counts = regionCountsOf([batchOf([viewed("a")], { view: viewKey(1), first: true })], GB)
-
-    expect(counts).toEqual([{ treeId: TREE, revision: 1, region: "GB", views: 1 }])
+  it("stamps a region on a page view somebody else counted", () => {
+    expect(regionCountsOf([opening], GB)).toEqual([
+      { treeId: TREE, revision: 1, region: "GB", views: 1 },
+    ])
   })
 
   /**
-   * The counter that makes the floor mean something. A reader who stays on a
-   * page delivers a batch every few seconds, and counting deliveries would make
-   * one visitor clear any floor on their own — which is the protection
-   * inverting rather than failing.
+   * The walk and the deduplication are `openingsOf`'s, and that is the point:
+   * the region counter cannot count a reader the page-view counter did not,
+   * because it is not the thing that counts. A delivery whose openings came to
+   * nothing stamps nothing.
    */
-  it("counts nothing for the deliveries that follow the opening one", () => {
-    const counts = regionCountsOf(
-      [
-        batchOf([viewed("b")], { view: viewKey(1) }),
-        batchOf([viewed("c")], { view: viewKey(1) }),
-      ],
-      GB
-    )
-
-    expect(counts).toEqual([])
-  })
-
-  /**
-   * A queue draining after an outage posts what it held, which may include the
-   * opening batch whose first delivery failed. A view counted twice cannot be
-   * uncounted, so the keys are compared rather than the batches.
-   */
-  it("counts one view when the same opening arrives twice in one delivery", () => {
-    const opening = batchOf([viewed("a")], { view: viewKey(1), first: true })
-
-    expect(regionCountsOf([opening, opening], GB)[0]?.views).toBe(1)
-  })
-
-  it("counts two readers who opened inside the same delivery", () => {
-    const counts = regionCountsOf(
-      [
-        batchOf([viewed("a")], { view: viewKey(1), first: true }),
-        batchOf([viewed("a")], { view: viewKey(2), first: true }),
-      ],
-      GB
-    )
-
-    expect(counts[0]?.views).toBe(2)
-  })
-
-  it("counts nothing for a sender that opens nothing", () => {
-    expect(regionCountsOf([batchOf([viewed("a")])], GB)).toEqual([])
-  })
-
-  /** An opening with no page view to open is not a reader arriving. */
-  it("counts nothing for an opening that names no page view", () => {
-    expect(regionCountsOf([batchOf([viewed("a")], { first: true })], GB)).toEqual([])
-  })
-
-  it("counts the revisions a delivery opened apart", () => {
-    const counts = regionCountsOf(
-      [
-        batchOf([viewed("a")], { view: viewKey(1), first: true }),
-        batchOf([viewed("a")], { view: viewKey(2), first: true, revision: 2 }),
-      ],
-      GB
-    )
-
-    expect(counts.map((count) => `${count.revision}:${count.views}`).sort()).toEqual(["1:1", "2:1"])
-  })
-
-  it("counts nothing from nothing", () => {
+  it("counts nothing when nothing opened", () => {
     expect(regionCountsOf([], GB)).toEqual([])
+  })
+
+  it("keeps the revisions and trees it was handed apart", () => {
+    const counts = regionCountsOf(
+      [opening, { treeId: TREE, revision: 2, views: 4 }, { treeId: OTHER_TREE, revision: 1, views: 2 }],
+      GB
+    )
+
+    expect(counts.map((count) => `${count.treeId}:${count.revision}:${count.views}`)).toEqual([
+      `${TREE}:1:1`,
+      `${TREE}:2:4`,
+      `${OTHER_TREE}:1:2`,
+    ])
+  })
+
+  it("carries however many page views the opening held", () => {
+    expect(regionCountsOf([{ ...opening, views: 9 }], GB)[0]?.views).toBe(9)
   })
 })
 

@@ -23,7 +23,14 @@ import {
   type StoredRegionCount,
 } from "./region.js"
 import { readerSignalKindSchema, readerSignalSchema, viewKeySchema } from "./signal.js"
-import { loomReaderFunnels, loomReaderRegions, loomReaderSignals, loomReaderTallies } from "./schema.js"
+import {
+  loomReaderFunnels,
+  loomReaderPageViews,
+  loomReaderRegions,
+  loomReaderSignals,
+  loomReaderTallies,
+} from "./schema.js"
+import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 
 export * from "./migrate.js"
@@ -124,6 +131,41 @@ const storedFunnelSchema = z
       updatedAt: row.updatedAt,
     })
   )
+
+/**
+ * Counts of the same revision added together before the statement is built.
+ *
+ * `ON CONFLICT … DO UPDATE` refuses to touch one row twice in a single command
+ * — Postgres raises rather than applying the second — so two counts of one
+ * revision in one call would have the whole write refused here while the memory
+ * store added them. That is a disagreement between implementations rather than
+ * a limitation of either, and the contract suite found it: the rollup keys its
+ * output by map and cannot produce a duplicate, but the door composes openings
+ * from whatever a delivery held, and a caller may compose a list by hand.
+ *
+ * So the addition happens once, in front of the driver, and both stores answer
+ * the same.
+ */
+const summed = (counts: readonly RevisionViews[]): readonly RevisionViews[] => {
+  const by = new Map<string, RevisionViews>()
+
+  for (const count of counts) {
+    const key = `${count.treeId} ${count.revision}`
+    const existing = by.get(key)
+
+    by.set(key, existing === undefined ? count : { ...count, views: existing.views + count.views })
+  }
+
+  return [...by.values()]
+}
+
+const storedPageViewsSchema = z.object({
+  treeId: treeIdSchema,
+  revision: z.number().int().nonnegative(),
+  opened: countSchema,
+  appearances: countSchema,
+  updatedAt: instantSchema,
+})
 
 export const postgresReaderSignalJournal = (db: LoomDatabase): ReaderSignalJournal => ({
   receive: async (batches) => {
@@ -241,8 +283,8 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
    * hypothetical — a scheduled one and a manual one is the ordinary way it
    * happens — and this is the version that is correct when they do.
    */
-  apply: async ({ tallies, funnels }, at) => {
-    if (tallies.length === 0 && funnels.length === 0) return ok(undefined)
+  apply: async ({ tallies, funnels, appearances = [] }, at) => {
+    if (tallies.length === 0 && funnels.length === 0 && appearances.length === 0) return ok(undefined)
 
     const updatedAt = new Date(at)
 
@@ -280,6 +322,32 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
                 opens: sql`${loomReaderTallies.opens} + excluded.opens`,
                 closes: sql`${loomReaderTallies.closes} + excluded.closes`,
                 completions: sql`${loomReaderTallies.completions} + excluded.completions`,
+                updatedAt,
+              },
+            })
+        }
+
+        if (appearances.length > 0) {
+          /**
+           * In the same transaction as the tallies, because the two numbers a
+           * reading subtracts have to describe the same window: a page-view row
+           * that moved while the counters it is compared against did not would
+           * report a straddle that never happened.
+           */
+          await tx
+            .insert(loomReaderPageViews)
+            .values(
+              summed(appearances).map((count) => ({
+                treeId: count.treeId,
+                revision: count.revision,
+                appearances: count.views,
+                updatedAt,
+              }))
+            )
+            .onConflictDoUpdate({
+              target: [loomReaderPageViews.treeId, loomReaderPageViews.revision],
+              set: {
+                appearances: sql`${loomReaderPageViews.appearances} + excluded.appearances`,
                 updatedAt,
               },
             })
@@ -325,6 +393,45 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
     }
   },
 
+  /**
+   * One upsert, additive in the statement, for the reason the regions are: this
+   * runs on the request path and two readers arriving together is the ordinary
+   * case rather than the unlucky one.
+   *
+   * It touches one column and leaves the other where it was, so a door and a
+   * rollup writing the same row at the same instant cannot lose each other's
+   * number.
+   */
+  opened: async (openings, at) => {
+    if (openings.length === 0) return ok(undefined)
+
+    const updatedAt = new Date(at)
+
+    try {
+      await db
+        .insert(loomReaderPageViews)
+        .values(
+          summed(openings).map((count) => ({
+            treeId: count.treeId,
+            revision: count.revision,
+            opened: count.views,
+            updatedAt,
+          }))
+        )
+        .onConflictDoUpdate({
+          target: [loomReaderPageViews.treeId, loomReaderPageViews.revision],
+          set: {
+            opened: sql`${loomReaderPageViews.opened} + excluded.opened`,
+            updatedAt,
+          },
+        })
+
+      return ok(undefined)
+    } catch (cause) {
+      return err(failure(cause, `could not count ${openings.length} page views`))
+    }
+  },
+
   tallies: async (request?: TallyReadRequest) => {
     try {
       const rows = await db.select().from(loomReaderTallies).where(within(loomReaderTallies, request))
@@ -354,6 +461,27 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           })
     } catch (cause) {
       return err(failure(cause, "could not read reader funnels"))
+    }
+  },
+
+  pageViews: async (request?: TallyReadRequest) => {
+    try {
+      const rows = await db
+        .select()
+        .from(loomReaderPageViews)
+        .where(within(loomReaderPageViews, request))
+      const parsed = z.array(storedPageViewsSchema).safeParse(rows)
+
+      return parsed.success
+        ? ok(parsed.data as readonly StoredPageViews[])
+        : err<ReaderSignalStoreError>({
+            code: "unavailable",
+            detail: `a stored page-view count did not parse: ${
+              parsed.error.issues[0]?.path.join(".") ?? "unknown"
+            }`,
+          })
+    } catch (cause) {
+      return err(failure(cause, "could not read reader page views"))
     }
   },
 })

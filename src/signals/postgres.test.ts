@@ -71,13 +71,14 @@ const tally = (overrides: Partial<ReaderTally> = {}): ReaderTally => ({
 const AT = "2026-09-14T00:00:00.000Z"
 
 describe("the reader signal tables — Postgres specifics", () => {
-  it("protects all four with row level security", async () => {
+  it("protects all five with row level security", async () => {
     const db = await freshDatabase()
 
     expect(await rowSecurityOn(db, "loom_reader_signals")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_tallies")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_funnels")).toBe(true)
     expect(await rowSecurityOn(db, "loom_reader_regions")).toBe(true)
+    expect(await rowSecurityOn(db, "loom_reader_page_views")).toBe(true)
   })
 
   it("runs its migration twice without complaining", async () => {
@@ -198,6 +199,32 @@ describe("the reader signal tables — Postgres specifics", () => {
 
     expect(rows.ok).toBe(false)
     expect(!rows.ok && rows.error.detail).toContain("region")
+  })
+
+  /**
+   * The one row in this subsystem written by two different things, so the only
+   * one where a careless upsert could lose a column rather than a row: the door
+   * adds arrivals on the request path while a rollup adds its window, and
+   * neither statement may overwrite the other's number with the nought it
+   * inserted. The subtraction a reading does is only worth anything if both
+   * numbers survived.
+   */
+  it("keeps an opening and a window that land at the same moment out of each other's column", async () => {
+    const db = await freshDatabase()
+    const store = postgresReaderTallyStore(db)
+    const revision = { treeId: TREE, revision: 1, views: 1 }
+
+    await Promise.all([
+      store.opened([revision], AT),
+      store.opened([revision], AT),
+      store.apply({ tallies: [], funnels: [], appearances: [{ ...revision, views: 3 }] }, AT),
+      store.apply({ tallies: [], funnels: [], appearances: [{ ...revision, views: 4 }] }, AT),
+    ])
+
+    const rows = await store.pageViews()
+
+    expect(rows.ok && rows.value).toHaveLength(1)
+    expect(rows.ok && rows.value[0]).toMatchObject({ opened: 2, appearances: 7 })
   })
 
   it("refuses to hand back a batch whose stored signals no longer parse", async () => {

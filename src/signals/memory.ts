@@ -10,6 +10,7 @@ import {
   type ReaderSignalReadRequest,
   type ReceivedBatch,
 } from "./journal.js"
+import type { RevisionViews, StoredPageViews } from "./page-views.js"
 import type { ReaderRegionCount, ReaderRegionStore, StoredRegionCount } from "./region.js"
 import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
@@ -89,7 +90,11 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
   }
 }
 
-const tallyKey = (tally: ReaderTally): string => `${tally.treeId} ${tally.revision} ${tally.nodeId}`
+/** A revision, which is the two columns every counter in this file shares. */
+const revisionKey = (row: { readonly treeId: string; readonly revision: number }): string =>
+  `${row.treeId} ${row.revision}`
+
+const tallyKey = (tally: ReaderTally): string => `${revisionKey(tally)} ${tally.nodeId}`
 
 const endOf = (end: FunnelPair["from"]): string => `${end.nodeId}:${end.kind}`
 
@@ -106,6 +111,34 @@ const matches = (
 export const memoryReaderTallyStore = (): ReaderTallyStore => {
   const tallies = new Map<string, StoredTally>()
   const funnels = new Map<string, StoredFunnel>()
+  const pageViews = new Map<string, StoredPageViews>()
+
+  /**
+   * One row written from two sides, so the add is spelled once and told which
+   * column it is moving.
+   *
+   * A row created by either side starts the other column at nought, which is
+   * what it is: openings a rollup has not reached yet, or a window of batches
+   * whose opening went to an instance that has since gone away.
+   */
+  const addPageViews = (
+    counts: readonly RevisionViews[],
+    counted: "opened" | "appearances",
+    at: string
+  ): void => {
+    for (const count of counts) {
+      const key = revisionKey(count)
+      const existing = pageViews.get(key)
+
+      pageViews.set(key, {
+        treeId: count.treeId,
+        revision: count.revision,
+        opened: (existing?.opened ?? 0) + (counted === "opened" ? count.views : 0),
+        appearances: (existing?.appearances ?? 0) + (counted === "appearances" ? count.views : 0),
+        updatedAt: at,
+      })
+    }
+  }
 
   const addTally = (tally: ReaderTally, at: string): void => {
     const key = tallyKey(tally)
@@ -141,6 +174,13 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     apply: (rollup, at) => {
       for (const tally of rollup.tallies) addTally(tally, at)
       for (const answer of rollup.funnels) addFunnel(answer, at)
+      addPageViews(rollup.appearances ?? [], "appearances", at)
+
+      return Promise.resolve(ok(undefined))
+    },
+
+    opened: (openings, at) => {
+      addPageViews(openings, "opened", at)
 
       return Promise.resolve(ok(undefined))
     },
@@ -150,11 +190,13 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
 
     funnels: (request?: TallyReadRequest) =>
       Promise.resolve(ok([...funnels.values()].filter((row) => matches(row, request)))),
+
+    pageViews: (request?: TallyReadRequest) =>
+      Promise.resolve(ok([...pageViews.values()].filter((row) => matches(row, request)))),
   }
 }
 
-const regionKey = (count: ReaderRegionCount): string =>
-  `${count.treeId} ${count.revision} ${count.region}`
+const regionKey = (count: ReaderRegionCount): string => `${revisionKey(count)} ${count.region}`
 
 /**
  * Where readers were, in the process.

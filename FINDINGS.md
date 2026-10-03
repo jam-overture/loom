@@ -210,6 +210,55 @@ record the table now is that this is the fourth consecutive run to measure it
 with a script it then deleted — see the data point appended to the
 30 September entry about what a shot list cannot see.
 
+### 2 October, `Loom demo` — **something now needs the pixels**, and it is the sentence this run put above them
+
+The recommendation above was *leave it until something else needs the pixels*.
+This run is that something, and the recommendation moves to **(2), fold the
+excerpt behind a disclosure.**
+
+`demo-36-what-loom-will-do-about-each-ask` replaced the arrival screen's claim
+with a count the Gate computed — *You can ask for 5 changes here. Loom will make
+2 on its own and ask you first about 3* — and gave each remaining ask the same
+verdict as two words at the end of its row. Measured on the production build of
+that branch, at 1280 × 900, in an **857px** scroller:
+
+| block | top, within the rail | |
+| --- | --- | --- |
+| **the count** | **215** | above the fold |
+| the leading ask's excerpt | 399 → 757 | the 358px still life, unchanged |
+| *or ask for one of these* | 773 | |
+| **the first marked row** | **797 → 860** | **three pixels over the fold** |
+| the last marked row | 998 → 1061 | |
+
+**So the claim landed and its proof did not.** A stranger reads a specific
+number on arrival and the four rows that make it checkable begin 3px past the
+bottom of the screen. The excerpt is 358 of the 582 pixels between them.
+
+**What changed about the trade, exactly.** The entry above argued (1) on the
+grounds that the excerpt *makes the one invited press concrete and the four
+others are deliberately secondary*. The second half of that is no longer true:
+the four others now carry the only evidence on this surface that the governing
+is real rather than a wrapper around a yes, and they are the cheapest proof this
+lane has ever had of the thing the demo exists to show. The excerpt is a
+rendering of a band that, on a wide screen, is on the page eighteen inches to
+the left.
+
+**What (2) costs, stated against itself.** A stranger loses the free preview of
+what the green button names. They keep `presets.ts`' own promise — *the
+appointments, the years and the waiting time come off the page* — and the Gate's
+verdict under it, both above the fold, and the excerpt is one press of a
+disclosure away. On a **phone** the trade is different and worse, because the
+specimen is below the rail rather than beside it, and the excerpt is the only
+thing on the first screen that looks like the page. **A disclosure open by
+default below `lg` and shut above it** is the shape worth weighing, and it is
+the first time this surface would have had a layout-conditional default.
+
+**Not taken in `demo-36`, deliberately.** Reopening a closed, argued decision in
+the same pull request as a new idea costs the maintainer the ability to take one
+and not the other. It is one unit, and it is the next one this lane should do
+unless pointed elsewhere.
+
+---
 ---
 ## 2026-10-01 — the demo's arrival screen now runs the Gate on a render, and nothing in this repository can see what that costs a real request
 
@@ -245,6 +294,37 @@ boundary this surface has kept the registry off. At 0.62ms the right action is
 to know the number and leave it alone — and to re-measure if the preset table
 grows a change that walks more page than a removal of one band does.
 
+### 2 October, `Loom demo` — it is **five** runs per render now, and here are the numbers
+
+`demo-36-what-loom-will-do-about-each-ask` put the same call on the same render
+once per ask the panel offers, because the arrival screen's new claim is a count
+over all of them. Timed the same way, in a `vitest` process against the starting
+tree on this machine:
+
+| ask | |
+| --- | --- |
+| `palette` | **6.57ms** — carries the module's warm-up |
+| `backdrop` | 1.78ms |
+| `band` | 2.14ms |
+| `trim` | 1.86ms |
+| `promote` | 1.73ms |
+| **all five** | **≈14ms warm**, of which ≈7.5ms is the four after the first |
+
+The entry above says the right action at 0.62ms is to know the number and leave
+it alone, and to re-measure *if the preset table grows a change that walks more
+page than a removal of one band does*. The table did not grow; the **number of
+walks** did, which that sentence did not anticipate. The judgement is unchanged
+at 14ms warm and the thing that would change it is unchanged too: **nobody has
+measured a cold serverless invocation**, and this lane still cannot —
+`*.vercel.app` is denied by the environment's network policy.
+
+What is worth adding is that the fix this entry rules out has got cheaper to
+rule in. A verdict cached per `(revision, policy)` would now amortise five calls
+rather than one, and the argument against it — *a second answer to a question
+that has one* — is the same argument at five times the saving. Still not worth
+it at 14ms. Worth re-reading at fifty.
+
+---
 ---
 ## 2026-10-01 — the compositions door is open, and seven checks in the docs lane were edited from outside it to get there
 
@@ -39504,6 +39584,27 @@ being able to assert a regression.
 The ask is unchanged and still the cheap one: let a shot *print* a named
 selector's box beside the `scrollWidth` line it already prints.
 
+### Fifth instance, 2 October, `Loom demo` — the harness got the picture and could not get the numbers
+
+Fifth throwaway script in five runs, and the first where the split is clean
+enough to name: **`scrollTo` did the half a shot list can do, and the other half
+still needed an instrument that no longer exists.**
+
+The unit was four verdict markers on four asks, 300px below the fold of a rail
+that scrolls on its own. One shot with `{ "scrollTo": "#ask ul li:last-child" }`
+photographed all four in place — no script, no private browser, reviewable as
+four lines of JSON, and it is the picture the pull request leads with. That is
+the harness working exactly as 0182 intended.
+
+The report's box table — eleven rows of `top` and `height` read off two
+production builds, including the one number that moved and nothing would have
+caught (the rail's content, 1,261px → 1,276px, four flex line boxes rounding
+differently) — needed a `playwright-core` script written into a scratch
+directory and deleted with the container. **The same run therefore demonstrates
+both halves of this entry at once**, which is the clearest case yet for how
+small the remaining ask is: everything about reaching the state is solved, and
+reading one number back out of the state is not.
+
 ---
 ## 2026-09-30 — the folded reasoning on an answered card is labelled for a card that is still a question
 
@@ -40584,7 +40685,11 @@ do it.
 
 ## 2026-10-01 — a host cannot re-measure its own stakes from its own record, and it is two fields short
 
-**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:**
+**closed by `framework-65-seventeen-levers-from-a-record`** — the two fields are
+on the record, and `remeasureStakes` is published because the two fields alone
+would not have been enough. See [0215](decisions/0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md)
+and the entry filed below it today, which says what the portal now calls.
 
 `/portal/rules/what-if` replays every judgment this deployment has recorded
 against a policy a reader is editing on the screen. **Seven of a `GatePolicy`'s
@@ -40761,7 +40866,19 @@ safe.
 ## 2026-10-02 — a node that leaves the page while the tab is in the background is credited with the whole time the tab was hidden, and the mutation that proves it passes the runtime's own ledger suite
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/ledger.ts`)
-· **Status:** open — **a latent defect, not a live one.** The code on `main` is
+· **Status:** **closed by `signals-04-what-on-screen-means`** — the case asked
+for, the case at the broadcaster, and a sweep of every short sequence. **One
+correction to the finding, in the lane's favour and against its own reading:**
+`drain`'s `if (!hidden)` is **not** redundant. Removing it is not an equivalent
+mutation, because `drain` while hidden sets `since = now` on every entry `hid`
+had closed — so the next `left` in that hidden tab accrues from the delivery. It
+was unfalsifiable rather than redundant: nothing closed a stretch from the hidden
+direction, which is the very gap this finding named. It is also load-bearing on
+*every* tab-hide in the real broadcaster, which calls `ledger.hid(now)` and then
+`flush()` (`broadcast.ts:601`). Three tests now fail against the deleted
+`since = null` and two against the deleted guard; both were at zero.
+
+Originally filed as: **a latent defect, not a live one.** The code on `main` is
 correct; what is missing is anything that would notice if it stopped being.
 
 Found while holding *What your readers do*'s new caveat for `dwelled` — *"a tab
@@ -40824,7 +40941,19 @@ repository half to be the guard.
 ## 2026-10-02 — "on screen" is two numbers inside an unexported function, so no page can say what `viewed` actually measures without typing them
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom signals` (`src/signals/broadcast.ts`)
-· **Status:** open — **a documentation gap with a one-line remedy**, and the
+· **Status:** **closed by `signals-04-what-on-screen-means`** — the two names the
+finding asked for, `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION`,
+published from **`@jam-overture/loom/signals`** (not from `/signals/broadcast`,
+and that is the whole of [0218](decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)):
+a name a browser entry point *exports* survives minification, so exporting them
+there measured **+77 bytes minified, +42 gzipped** on every page that broadcasts,
+against **+0 minified** for the same two numbers imported into `broadcast.ts`
+from `readable.ts`. They are not configuration and changing either is a record,
+because a rollup cannot record the threshold a browser applied. The rule itself
+stays unexported and is now tested through a doubled `IntersectionObserver` —
+`src/signals/readable.test.ts`, the first test in `src/` to reach it.
+
+Originally filed as: **a documentation gap with a one-line remedy**, and the
 page is written around it rather than blocked by it.
 
 `isReadable` decides what *came into view* means:
@@ -41288,3 +41417,607 @@ ready-made changes on the How it works page"* is making a claim about where
 something lives, `SITE_ROUTES` knows where things live, and nothing holds the
 two together. One sentence on the site is of that shape today and it was wrong
 for a day in September.
+## 2026-10-03 — the reader screen can divide by an exact number of page views now, and say how generous the figures above it are
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **a denominator that did not
+exist and now does.** Nothing is broken; what is there to read is better than
+what any screen built before today could have asked for.
+
+Every number the reader screen shows is a rate, and until today the only
+denominator available was `views` summed off the tallies — a distinct count added
+across rollup windows, generous by every page view that straddled one
+([0147](decisions/0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md)),
+with the error bounded by *views per window × page-view duration ÷ window length*
+and therefore unanswerable from the rows.
+
+`ReaderTallyStore.pageViews()` is the new read, and
+`pageViewReadingOf(rows)` is the reading
+([0219](decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)):
+
+| | |
+| --- | --- |
+| `opened` | page views that **began**, per tree and revision. Counted once, at the door, from the marker 0214 added. Exact, and adds across windows, revisions and months |
+| `appearances` | the same page views as the rollups saw them — once per window each appeared in, which is the quantity every `views` figure is made of |
+| `drift` | `appearances − opened`: the over-count in every distinct count stored against that revision, measured rather than bounded |
+| `inflation` | `drift ÷ opened`, or `null` when nothing has opened — the fraction a screen can say out loud |
+| `pending` | openings no rollup has folded yet. The other sign of the same subtraction, and what a stalled `signals:collect` looks like |
+
+**The sentence this makes available**, which is worth more than a more exact
+number would be: *of 1,240 page views of revision 4, 310 reached the pricing band
+— and these figures are 4% generous, because 50 of those readers were counted in
+two windows.* A rate shown without the second clause was wrong by an amount
+nobody could state.
+
+**Two things to be careful of on the screen.**
+
+- **A rate over 100% is now possible and is not a bug.** `reached` on a tally is
+  a summed distinct count and `opened` is exact, so a band everybody reached can
+  read as 104% where the old denominator hid it by being inflated too. Dividing
+  by `appearances` keeps a rate inside its bounds; dividing by `opened` answers
+  *how many readers*. The two are different questions and both rows are there.
+- **`pending` is not a reader count.** It is a collection that has not run,
+  which on a deployment whose cron is wedged will be most of the openings.
+
+Rows are per tree and per revision, so *before versus after a change* is a
+comparison of two exact numbers for the first time. Nothing needs a migration a
+deployment has not already run: `db:push` creates the table.
+
+---
+## 2026-10-03 — the upsert that refuses to touch one row twice is guarded for one of the four counter tables, and the other three have the same seam
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/postgres.ts`)
+· **Status:** open — **a latent divergence, written down rather than swept.**
+Nothing is red, and no producer in the repository can currently trigger it.
+
+Found by the contract suite while adding the page-view counter, which is the
+first counter in this subsystem a caller composes by hand rather than reads off
+a rollup's map.
+
+`ON CONFLICT … DO UPDATE` refuses to affect one row twice in a single command —
+Postgres raises rather than applying the second value. So two counts of the same
+key inside one call behave differently in the two implementations:
+
+| | memory | Postgres |
+| --- | --- | --- |
+| two counts of one revision in one call | adds them | **refuses the whole write** |
+
+For the page-view counter that is fixed: `summed` folds the rows in front of the
+driver and a contract case asserts both stores answer `5`. **The same seam is
+open on `loom_reader_tallies`, `loom_reader_funnels` and
+`loom_reader_regions`** — `rollUp` keys its tallies and funnel ends by map and
+`openingsOf` keys its openings by revision, so none of them can emit a duplicate
+today, and a caller applying counters it composed itself can.
+
+What it would cost if it happened: on the tallies it is an `apply` that fails, so
+`collectReaderSignals` returns `unavailable` and forgets nothing — recoverable
+and loud. On the regions it is a bucket that silently did not move, reported in
+the delivery's outcome and nowhere else.
+
+**The remedy is the same fold with three more key functions**, and it is worth
+doing with a contract case each rather than a comment saying it cannot happen.
+Not done here because it is four tables' worth of change hung off a unit about
+one of them, and because the producers that matter are the ones this unit did
+not add.
+## 2026-10-03 — the assessment double exists; the three fixtures that needed it are still object literals, and one of them asserts against a record no run of Loom can produce
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/write.test.ts`, `app/(portal)/_lib/what-if.test.ts`,
+`app/(portal)/portal/activity/_components/proposal-line.test.tsx`) ·
+**Status:** open — nothing is red, the replacement is written out below, and
+adopting it is what retires the failure mode
+
+**This is the other half of the ask this lane filed against itself on 2 October**
+(*"a hand-built assessment in `(portal)`'s tests goes red whenever the framework
+reads one more field of an analysis, and there is no double to reach for
+instead"*). `buildAssessment` and `NOTHING_MEASURED` are published from
+`@jam-overture/loom/testing` by
+`framework-66-an-assessment-a-test-can-ask-for`, with
+[0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
+That entry's Status still reads `open` because it lives on
+`framework-65-seventeen-levers-from-a-record`, which has not merged; whoever
+lands that branch should flip it to
+`closed by framework-66-an-assessment-a-test-can-ask-for`.
+
+**Adopting it is this lane's, because the three files are.** The framework
+declined to rewrite another lane's tests, and the one two-line patch it did make
+was to stop `main` going red.
+
+### What to write instead
+
+`write.test.ts` builds a `change-assessed` envelope and casts the whole thing
+away. With the double there is nothing to cast:
+
+```ts
+import { sequentialIdFactory } from "@jam-overture/loom"
+import { buildAssessment, buildProposal } from "@jam-overture/loom/testing"
+
+const ids = sequentialIdFactory("w")
+const proposal = buildProposal(ids, {
+  intentId: ids.intentId(),
+  delta: { deltaId: ids.deltaId(), treeId, baseRevision: 0, operations: [] },
+})
+
+write.path.runtime.events.emit({
+  treeId,
+  occurredAt: new Date().toISOString(),
+  event: {
+    type: "change-assessed",
+    assessment: buildAssessment(ids, {
+      proposal,
+      analysis: { operationCount: 1, insertedNodeCount: 1, shallowestAffectedDepth: 2 },
+      factors: [{ code: "invalid-props", level: "critical", detail: "tone" }],
+    }),
+  },
+})
+```
+
+The assertion then reads `proposal.proposalId` rather than the string
+`"p_throws"`, which is the same test and one fewer thing taken on trust.
+
+The other two build an **`AssessmentSummary`**, which is the narrowed record
+rather than the assessment, and they are typed rather than cast — so a required
+field added to that shape stops them compiling, which is the good failure. They
+are still worth converting, because `recordOf` will narrate a built assessment
+into one:
+
+```ts
+const record = recordOf({ treeId, occurredAt, event: { type: "change-assessed", assessment } })
+```
+
+### The reason one of them is worth doing sooner
+
+`proposal-line.test.tsx` holds this:
+
+```ts
+irreversibilityReasons: ["a removal destroys content"],
+```
+
+`summariseAssessment` fills that list from `reversibility.reasons.map(r => r.code)`,
+so every value a real journal ever holds there is `out-of-tree-effect` or
+`retention-budget-exceeded`. The sentence is prose in a field of codes. It is
+inert today — nothing in `apps/` reads `irreversibilityReasons` — and it is
+exactly the thing 0216 is about: the fixture describes a record no run of Loom
+produces, the test is green, and the day a screen renders that list the test will
+go on being green while the page shows a code nobody wrote a sentence for.
+
+The same file also pairs `reversible: false` and `retainedNodeCount: 0` with a
+reason about a removal destroying content. The runtime sets the retained count
+from `removedNodeCount`, so a record saying a removal destroyed content retains
+more than nothing.
+
+---
+## 2026-10-03 — two open pull requests both claim decision `0215`, so this is the fifth same-day collision in six days and the first between two branches that are both still open
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`) · **Status:** open — **a live collision, not a past one.**
+Nothing is red; it goes wrong when the second of the two branches merges
+
+The 2 October entry on this asked for a number band per lane and said it would
+not be raised a fourth time without a ruling. This is not raising it again; it is
+recording that the convention has now produced a collision **ahead of** a merge
+rather than behind one:
+
+| branch | pull request | claims |
+| --- | --- | --- |
+| `signals-04-what-on-screen-means` | [#486](https://github.com/jam-overture/loom/pull/486) | `0215` |
+| `framework-65-seventeen-levers-from-a-record` | [#485](https://github.com/jam-overture/loom/pull/485) | `0215` |
+| `primitives-28-every-part-offers-a-choice` | [#487](https://github.com/jam-overture/loom/pull/487) | `0217` |
+
+`0216` was free, and this branch took it. **`primitives-28` had already skipped
+over it**, which is the convention working better than it is written: that lane
+read the open branches and not only `main`.
+
+**The one-line repair, whatever happens about bands.** `docs/routines.md` and
+every brief say *take the next free number after re-reading `main`*. `main` is
+not where the claims are — an unmerged branch is. The sentence should read
+**after re-reading `main` and the open pull requests**, which is what
+`pnpm decisions:index` already helps with: it prints
+`note: 0215 has no record here — either one was deleted, or the number is claimed
+on a branch that has not merged` for exactly these.
+
+Whichever of #485 and #486 merges second needs a renumber, and the renumbering
+cost is nine citations and about fifteen minutes — measured on 2 October, when
+this lane did it for `0212`.
+## 2026-10-03 — a credential's mark is a fixed square at every width, so the first band to fill that region loses a third of a phone column to it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.credential.ts`) · **Status:** open — a real measurement
+against a deliberate decision, filed rather than reversed inside a run that was
+about something else
+
+`credentials-posture` is the first band in the catalogue to put anything in
+`loom.credential`'s `mark` region. The canonical ships it empty and
+[says why](../src/primitives/compositions/credentials-band.ts): a seal would be a
+third party's trademark fetched from a third party's domain. That reasoning is
+about **assets**, and a glyph is not one — so the region is reachable now, and
+filling it surfaced the thing nothing had exercised.
+
+The mark is a fixed square, by a decision with its own comment:
+
+```ts
+/**
+ * A fixed square rather than a shrink-to-fit box. A wall of credentials whose
+ * marks are a wordmark, a round badge and a glyph has three different leading
+ * edges otherwise, and the ragged column of names is the first thing anyone
+ * sees.
+ */
+style: { flex: "0 0 auto", inlineSize: space(8), blockSize: space(8), padding: space(2), … }
+```
+
+**That argument is sound and is about a wall.** What it does not cover is one
+credential in a narrow column: `space(8)` plus the card's `space(4)` gap is taken
+off the body's measure at every width, and at 390px the body is what is left of a
+card that is already inside a section's padding. In the 3 October shots the GDPR
+row's name wraps to two lines and its note to four, where the same credential
+unmarked — the canonical, in the same sheet, one band up — sets both on fewer.
+
+Nothing is broken and no test is red. It is legible, and it is the band's own
+photograph that shows the body losing about a third of its width to a decoration.
+
+### Why this is filed rather than fixed
+
+The fix is a prop, and the prop is a design decision another run took with its
+reasoning written down. `mark: "fixed" | "fit"`, or a `size` the tree chooses,
+either way reopens *do leading edges align across a wall* — which is a real
+property the current shape buys and a band holding one credential cannot see.
+Widening a run about compositions into a change to a shipped primitive's surface,
+on the strength of one viewport, is the kind of unasked widening that should be
+somebody's deliberate call.
+
+**What would settle it** is the question the current comment does not ask: whether
+the square should shrink below some inline size the way the grids already do.
+`COLUMN_MINIMUMS` is the mechanism the library uses everywhere else for exactly
+this — a floor rather than a fixed value — and `loom.credential` is the one card
+in the library with a fixed decoration and no floor.
+
+---
+## 2026-10-03 — `21st.dev` re-verified blocked, from the primitives lane a fifteenth time
+
+**Filed by:** `Loom primitives` · **Owned by:** `the maintainer`
+(`.claude/settings.json`, or the brief) · **Status:** open — unchanged since
+16 August, re-verified rather than re-argued
+
+`WebFetch("https://21st.dev")` returns `EGRESS_BLOCKED` on the run of
+3 October 2026. The standing entry of 16 August 2026 has the two remedies, both
+the maintainer's, and nothing about them has moved.
+
+Recorded for the count and nothing else. The brief names it as the visual
+standard on every run, so a run that silently skipped it would be a run claiming
+to have met a bar it never read. The floor this run actually worked to is the one
+in the repository — `loom.hero`, `loom.feature-grid`, and the forty-eight bands
+already shipped — which is what the brief's own second clause names.
+
+---
+## 2026-10-03 — the catalogue's size is spelled in four places in `apps/`, and the fourth is a generated file no doc comment can state the claim instead of
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/`) · **Status:** open — **the 2 October entry's remedy
+taken for two of the four, with the other two explained**
+
+The 2 October entry named three places in `apps/` that spell the catalogue's size
+and the remedy for them: *a doc comment may state the claim rather than the
+arithmetic.* Adding four bands hit all three again, and one more. All four are
+corrected on this branch, and the four are not the same kind of thing:
+
+| | what it was | what was done |
+| --- | --- | --- |
+| `_lib/packages.ts` | a doc comment: *"`…/compositions` is the forty-eight bands"* | **the remedy** — it states the claim now: *"the bands under their own names"* |
+| `_components/bands.tsx` | two doc comments: *"why there are forty-eight bands"*, *"a page that wants to say forty-eight"* | **the remedy** — *"more bands than places to put one"*, *"the size of the catalogue"* |
+| `_lib/counts.test.ts` | `"starter-bands: forty-eight"` | **bumped to `fifty-two`, and it should stay a literal** — it is the one place in the repository where the catalogue's size is asserted rather than read, which is its job |
+| `_lib/api/reference.generated.json` | four new exports, absent | regenerated with `pnpm --filter @loom/app docs:api` |
+
+**The fourth is the new information and it is not a spelling.** `offered.test.ts`
+imports every published door and holds it against the generated reference, so a
+band added to `…/compositions` fails with *"hands back a object called
+`specsSheetBand` and no page on this site mentions it. Something is published
+that a reader has no way to find."* That is the check working — but it means
+**every band this lane adds turns the app suite red in a file this lane does not
+own**, and the remedy that fixes the doc comments cannot touch it, because
+regenerating is the correct response and there is nothing to reword.
+
+So: two of the four will not recur, one is correct as it is, and the fourth will
+recur on every single run that adds a band. Worth knowing before somebody reads
+the 2 October entry and expects the hazard to be closed.
+
+**This lane edited `apps/` again**, which its brief forbids by name, for the
+reason the 2 October run gave and with the same discomfort: a red `main` is worse
+than a diff outside a lane that the lane had no way to anticipate. Said plainly in
+the pull request rather than slipped in.
+## 2026-10-02 — the sentence the portal lane asked for is in `parts.ts`, and the state it argues about is now held by two tests
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:**
+**informational — nothing to do.** Written here rather than as a status on the
+entry it answers, because that entry is on `portal-45-what-did-people-skip` and
+has not reached `main`; editing it from this branch would be two lanes writing one
+line.
+
+`Loom portal` filed *a page cannot report that every one of its parts went
+unread* on 2 October, having designed, written and commented a `StopsAt.everything`
+state before a test found it unreachable, and asked for **one sentence where the
+vocabulary is**. It is in `PartStanding`'s doc comment on
+`signals-04-what-on-screen-means`, in the lane's own words and with the reasoning
+the entry supplied:
+
+- `skipped` means no row names the part and `PageReading.views` is the largest
+  `views` any one row reports, **both read off the same rows** — so every part
+  being skipped needs a window with no row for any part, which makes `views` zero,
+  which makes every part `unknown` instead;
+- the one input that does produce it is a row naming a node the revision does not
+  have, which is `orphaned` and is the state a consumer should refuse to draw;
+- and the reachable neighbour worth a screen is **rows exist and not one reports
+  reach** — a page whose parts are not reporting, not a page nobody scrolled.
+
+**Two tests now hold it**, which the entry did not ask for and is the part worth
+knowing about downstream: *cannot report every part skipped, because the rows that
+would say so are the rows that set the floor*, and the orphaned row that does
+produce it — asserting `standings` of `{ read: 0, skipped: 5, unknown: 0 }`
+together with `orphaned` naming the row. So a future change that made the
+impossible state reachable would go red here rather than on a portal screen.
+## 2026-10-02 — the ten levers `/portal/rules/what-if` turned off are answerable now, and the one thing the screen must not do is show the level without reading `unreadable`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/what-if.ts`) · **Status:** open — the capability is on `main`,
+nothing is broken, and the screen says *these cannot be replayed* about ten
+settings that now can be
+
+The 1 October finding asked for two optional fields so a host could rebuild a
+`StakeInput` and call `assessStakes` itself. **The two fields are there and that
+plan does not work**, which is [0215](decisions/0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md):
+a `ChangeAnalysis` carries six lists of specifics that do not cross the telemetry
+boundary, five of them feed `critical` rules, and a caller passing six empty
+lists would have re-measured every refusal as ordinary. So the re-measure is
+published instead of the raw inputs:
+
+```ts
+import { remeasureStakes } from "@jam-overture/loom/telemetry"
+
+const { level, factors, unreadable } = remeasureStakes(summary, candidatePolicy)
+```
+
+It runs the Gate's own seven measuring rules — `measureStakes`, the same call
+`assessStakes` makes — against the record, and turns each recorded fixed code
+back into its level. `factors` says which half each came from: `remeasured` ran
+again, `recorded` could not and did not need to.
+
+**`removalThresholds`, `breadthThreshold`, `shallowDepthThreshold`,
+`protectedPrimitiveTypes` and `protectedPropKeys` are all answerable.** That is
+the ten fields the screen's own doc comment says it deliberately does not offer,
+and the sentence that explains why is now the sentence that is out of date.
+
+### The one thing to get right
+
+**`unreadable` is not advisory.** It names the rules this record cannot answer
+under this policy, and while it is non-empty `level` is a **floor**: the true
+stakes are that level or higher. The failure to avoid is the one the screen
+already refuses on the ladder — showing a floor as a result. The test that makes
+this concrete is in `src/telemetry/remeasure.test.ts`: a header removal under a
+policy protecting `loom.header` re-measures `critical` from a full record and
+`high` from a record missing `removedPrimitiveTypes`, because the rule that was
+lost is the one that reached the top. A row shown at `high` there is a change the
+Gate refused, presented as one it would have held.
+
+The recommendation, which is the portal's call and not this lane's: set such a
+row aside and count it, beside the ones whose recorded verdict does not
+reproduce. The two are the same kind of honesty and the existing screen has the
+furniture for it.
+
+### What it will mostly be, in practice
+
+Empty. A rule is unreadable only when this policy on this record could have
+reached the missing field, so a deployment protecting nothing is never told it
+cannot answer about protected types, a change that removed no nodes is never
+told it cannot answer about removed types, and breadth is readable whenever the
+four node counts every record carries cannot add up to the threshold. Records
+written before today lose `configuredPropKeys`, so `protectedPropKeys` is the one
+lever with real historical blindness — and it is blind by name rather than
+silently.
+
+### Two things this does not do
+
+It does not re-measure **reversibility**, so `irreversibilityReasons` and the
+ladder's reversibility rung are unchanged. And it does not decide anything: 0031
+and 0200 clause 4 still hold, and a re-measured level is an argument for a lever
+and not a pull of one.
+
+## 2026-10-02 — a hand-built assessment in `(portal)`'s tests goes red whenever the framework reads one more field of an analysis, and there is no double to reach for instead
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/testing/doubles.ts`) · **Status:** open — **fixed where it broke, not where
+it is caused.** `main` is green; the next field anyone adds breaks it again
+
+`framework-65` added `affectedNodeCount` and `configuredPropKeys` to the
+telemetry record, so `summariseAssessment` reads two more fields of
+`ChangeAnalysis`. One test went red:
+
+```
+FAIL app/(portal)/_lib/write.test.ts > beginWrite > keeps the reasoning even when
+     the journal refuses the same event
+AssertionError: expected "record" to be called at least once
+```
+
+The assertion is about ordering and the cause is neither — the test hand-builds a
+`ChangeAssessment` with ten of `ChangeAnalysis`'s eighteen fields and casts the
+gap away with `as never`, so narrowing dereferenced `undefined.length`, the
+narrowing threw, and the journal was never reached. **The failure arrived as a
+missing call in a test about something else**, which is the expensive part.
+
+Fixed on that branch by adding `affectedNodeIds: []` and `configuredPropKeys: []`
+to the fixture — two lines, no behaviour, a cross-lane edit of the kind the
+30 September entry allows to keep `main` green, and the fixture is more truthful
+than it was.
+
+**That is not the finding.** This is the third time in two days that a framework
+field has landed on a hand-built double in another lane: lesson 32 built a
+`ShotResult` without `measured`, and now this. The cast is not carelessness —
+there is nothing else to reach for. `src/testing/doubles.ts` publishes
+`buildIntent` and `buildProposal` and stops there, so a surface that needs an
+assessment either runs `assessChange` against a real tree, which needs a tree and
+a registry it may not have, or writes an object literal and casts.
+
+**The ask, and it is this lane's own:** a `buildAssessment` beside the other two,
+taking the handful of facts a test cares about over a complete default. Then a
+field added to an analysis moves one file in `src/testing/` and no fixture
+anywhere has a hole in it. Not done on `framework-65` because adopting it means
+rewriting another lane's test, which is a bigger edit than the two lines that
+unbroke it — and a PR that fixes a break and redesigns the doubles at the same
+time is two reviews.
+
+**Worth noting for whoever takes it:** the same cast hides the same hole in
+`app/(portal)/_lib/what-if.test.ts` and
+`app/(portal)/portal/activity/_components/proposal-line.test.tsx`. Neither is red,
+because neither narrows an assessment — they are the next two to break.
+---
+## 2026-10-02 — nothing can ask a store for the tree as it was, and that is now a hole in a shipped screen rather than a cost to know about
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Status:** open — **not a new finding.** It is the 1 October entry from
+`Loom signals`, with the consequence attached and the screen named
+
+That entry ends:
+
+> *Not filed as urgent. No surface compares revisions' readings yet; the portal
+> screen that will is step 4 of `docs/signals.md` and is not built. Filed now
+> because it is cheaper to know before that screen is written than after.*
+
+**One is built.** `/portal/readers` now answers *which parts of this page did
+nobody get to*, which needs the page as well as its counters — a part nobody
+reached has no row at all, so absence is only a measurement once something says
+which parts there were. The join is keyed by page **and** version, deliberately,
+because laying one version's counters over another version's page makes most
+parts read *nobody got to it* while every number stays plausible.
+
+A store answers for exactly one version: the snapshot, which is the head. So the
+section answers for the version being served and **cannot answer for any
+other** — and the version being served is not the counted one for as long as an
+hour after every change, which is exactly when somebody comes to look.
+
+| | |
+| --- | --- |
+| what is missing | a way to ask a store for the tree at a chosen revision |
+| the shape suggested on 1 October | `treeAt(reader, treeId, revision)` — `foldLog` with one more condition |
+| who already walks it | `auditSnapshot`, and the progression on `/portal/history` |
+| what it costs this screen today | one of two sections on each card is a notice instead of a reading |
+| what it would buy | *which parts did people stop getting to after your last change* — the before-and-after on the one measurement no analytics product can produce |
+
+**Said out loud on the screen rather than absorbed**, in `SkippingUnavailable`,
+and the notice names the mechanism rather than apologising: the counts stay
+exactly as they are, and the section answers for whichever version is being
+served once its own window has been counted. That is a true sentence and it is
+not the one a person wants.
+
+**The portal did not reach into `src/` to close it** (0018), and the workaround
+that exists — paging `revisions()` and folding from the seed in the portal —
+was deliberately not taken: a consumer that gets the stopping condition slightly
+wrong draws one revision's counters against another revision's tree, which is
+the one failure this reading can have that looks exactly like success.
+
+---
+## 2026-10-02 — a page cannot report that every one of its parts went unread, and the arithmetic that makes it impossible is worth stating where the vocabulary is
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals`
+(`src/signals/parts.ts`) · **Status:** open — not a defect, and it cost this
+lane a state it had already designed, written and commented
+
+`PartStanding`'s three members are reachable in every combination but one.
+`skipped` means **no row names this part**, and `PageReading.views` is the
+largest `views` any single row reports — so:
+
+- every part `skipped` requires no row to name any part of the page, and
+- a window with no rows has `views` of 0, which makes every part `unknown`.
+
+So *a page with visits, every part of which went unseen* is unreachable, unless
+a row names a part the page does not have — which is `orphaned`, and is the one
+state a consumer of this join should refuse to draw at all.
+
+**What it cost.** This lane's first shape of the reading carried a flag for it,
+`StopsAt.everything`, with its own branch, its own sentence (*"which is usually
+a page reporting its visits and not its parts"*) and a paragraph of commentary
+arguing that it had to be said apart from the ordinary case. Every word of that
+argument is right about the **situation** and the situation cannot arise. It was
+found by a test that tried to construct it and could not.
+
+The reachable neighbour is worth having and is what shipped instead: **rows
+exist and not one reports reach.** A root is an addressed node and is on screen
+in every visit that draws the page, so a window holding visits and no reach at
+all is a page whose parts are not reporting — a primitive that does not spread
+its identity attributes, or a sender switched on halfway through a release.
+Telling that person *nobody scrolled* sends them to rewrite a page that is fine.
+
+**The suggestion is one sentence in `parts.ts`, not a change.** `PartStanding`'s
+own doc comment already explains why `unknown` exists; the half it does not say
+is that `skipped` and the view floor are read off the same rows, so the two
+cannot both be everywhere. A consumer reading the vocabulary top to bottom has
+no way to learn that except by trying to build the state.
+
+---
+## 2026-10-02 — the author rule was broken for the third time and the preview deployed anyway, which is the first evidence against the rule's own account of itself
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**the rule stands and was still broken.** What is new is a measurement that the
+24 September entry's evidence base of two occurrences does not predict
+
+`portal-45-what-did-people-skip` carries three commits, all of them made with
+
+```
+git -c user.name="Loom portal" -c user.email="portal@loom.local" commit …
+```
+
+which is the **exact spelling** the 24 September entry quotes, under the rule it
+restated to cover the act rather than a flag:
+
+> A lane never sets the author or committer of a commit, by any means.
+
+It was broken anyway, by a run that had read the file. The check that entry
+prescribes — `git log -1 --format="%an <%ae>"` **before pushing** — was not run
+before pushing; it was run afterwards, because a notification about the pull
+request sent this run back to the entry. That is the rule working as a record
+and failing as a practice, which is the distinction worth writing down: a rule
+whose enforcement is *remember to look* is enforced by whoever happens to look.
+
+**And the deployment succeeded.** Vercel's status on `2ee3937` is
+`success` — *"Deployment has completed"* — and #483 carries a live preview URL.
+No refusal, no account-verification notice, no red check.
+
+| | 20 September (#346-ish) | 23 September (#376) | **2 October (#483)** |
+| --- | --- | --- | --- |
+| spelling | `--author` | `-c user.name` / `-c user.email` | `-c user.name` / `-c user.email` |
+| author | `Loom portal <…@gmail.com>` | `Loom portal <portal@loom.local>` | `Loom portal <portal@loom.local>` |
+| Vercel | refused — *"must have access"* | refused — *"couldn't verify an account"* | **deployed** |
+
+**What this does and does not change.**
+
+It does **not** license setting an author. The rule costs one thing not done,
+it protects the one deliverable this lane's brief names in as many words — *open
+the PR with the deployed preview URL* — and two of three occurrences lost it.
+Nothing here is worth re-testing on a run whose pull request the maintainer is
+going to look at.
+
+What it does change is the entry's explanation. The 24 September entry's answer
+is *"the routine session's own identity deploys"* and its implied converse is
+that an overridden one does not. The converse is now false on one occasion, with
+the same email as the occasion where it was true — so **whatever Vercel is
+judging is not simply whether an author was set.** The difference between
+#376 and #483 is not in this repository and this lane cannot see it: a Vercel
+project setting, a change in how an unverifiable author is treated, or
+something about the account the commits were pushed under.
+
+So the honest standing of the rule is: **keep it, and stop explaining it.** It
+is a rule against a thing that has cost this lane two previews and has never
+once bought it anything.
+
+**The remedy is the one the 24 September entry already named and this run is
+the argument for it.** A `pre-push` hook comparing the head commit's author
+against the session's configured identity would make this impossible rather than
+remembered. It is repository tooling, it has to be installed by whoever runs
+`pnpm install`, and it is now the third occurrence of a fault that a
+three-line hook would have made unreachable. **Offered to `Loom daily build`
+and the maintainer rather than taken**, for the reason that entry gives: a
+surface lane should not install a hook that every other lane's commits then
+have to satisfy.
+
+**Not rewritten.** The three commits stand as they are. A force-push would
+churn a pull request whose body links four screenshots by commit, to fix
+something that did not break, and the rule's purpose — the preview — is already
+served. The commits are wrong and they are recorded as wrong, which is the
+cheaper of the two honest options.

@@ -4,7 +4,7 @@ import type { TreeId } from "../ids.js"
 import type { Result } from "../result.js"
 
 import type { ReaderSignalStoreError } from "./journal.js"
-import type { ReaderSignalBatch } from "./signal.js"
+import type { RevisionViews } from "./page-views.js"
 import type { TallyReadRequest } from "./tally.js"
 
 /**
@@ -146,43 +146,25 @@ export interface ReaderRegionStore {
 /**
  * What one delivery adds, which is one view per page view it opened.
  *
- * The dedup inside the delivery is not decoration. A sender draining a queue
- * after an outage posts what it has, which may include the opening batch it
- * failed to send and then retried — and a view counted twice cannot be
- * uncounted (0158). Keys are compared rather than batches, so the same opening
- * delivered twice is one view and two page views that opened in the same
- * delivery are two.
+ * **It is handed the openings rather than the delivery**, so that a region can
+ * only ever be a stamp on a page view somebody already counted. The walk that
+ * finds them, and the deduplication that makes a retried opening one arrival
+ * rather than two, is `openingsOf` in `page-views.ts` — shared deliberately,
+ * because two counters that each decided for themselves how many readers
+ * arrived would sooner or later disagree about it, and the disagreement would
+ * surface as a map whose numbers do not add up to the number of page views
+ * there were.
  *
- * A batch that opened nothing adds nothing, and a sender that never says adds
- * nothing at all — which is the honest answer for a batch synthesised on a
+ * A delivery that opened nothing adds nothing, and a sender that never says
+ * adds nothing at all — which is the honest answer for a batch synthesised on a
  * server or replayed from a fixture, exactly as such a batch adds nothing to
  * any view count.
  */
 export const regionCountsOf = (
-  batches: readonly ReaderSignalBatch[],
+  openings: readonly RevisionViews[],
   region: ReaderRegion
-): readonly ReaderRegionCount[] => {
-  const opened = new Map<string, { readonly count: ReaderRegionCount; readonly views: Set<string> }>()
-
-  for (const batch of batches) {
-    if (batch.first !== true || batch.view === undefined) continue
-
-    const key = `${batch.treeId} ${batch.revision}`
-    const existing = opened.get(key)
-
-    if (existing === undefined) {
-      opened.set(key, {
-        count: { treeId: batch.treeId, revision: batch.revision, region, views: 0 },
-        views: new Set([batch.view]),
-      })
-      continue
-    }
-
-    existing.views.add(batch.view)
-  }
-
-  return [...opened.values()].map(({ count, views }) => ({ ...count, views: views.size }))
-}
+): readonly ReaderRegionCount[] =>
+  openings.map(({ treeId, revision, views }) => ({ treeId, revision, region, views }))
 
 /**
  * The smallest a bucket may be before it is named.

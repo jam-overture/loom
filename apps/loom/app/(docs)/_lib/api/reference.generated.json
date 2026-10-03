@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -2166,6 +2166,69 @@
               "signature": "type StakeInput = {\n    readonly analysis: ChangeAnalysis;\n    /** Empty when the proposal declared nothing, which is not the same as nothing. */\n    readonly discards: readonly DiscardedWork[];\n};",
               "truncated": false,
               "summary": "Everything the damage estimate is computed from: what the delta does, and what its author declared it writes over."
+            },
+            {
+              "name": "FixedStakeFactorCode",
+              "kind": "type",
+              "signature": "type FixedStakeFactorCode = keyof typeof FIXED_LEVELS;",
+              "truncated": false,
+              "summary": "A rule no policy field can move, so its code alone gives its level."
+            },
+            {
+              "name": "MeasuredStakeFactorCode",
+              "kind": "type",
+              "signature": "type MeasuredStakeFactorCode = Exclude<StakeFactorCode, FixedStakeFactorCode>;",
+              "truncated": false,
+              "summary": "A rule a policy decides, so the same change under two policies is two answers. The complement of `FixedStakeFactorCode` by construction: a factor added to the vocabulary belongs to one set or the other and nothing has to remember to put it there."
+            },
+            {
+              "name": "fixedStakeLevel",
+              "kind": "function",
+              "signature": "const fixedStakeLevel: (code: FixedStakeFactorCode) => StakeLevel",
+              "truncated": false,
+              "summary": "The level this rule is always raised at, which is the whole of what its code means."
+            },
+            {
+              "name": "isFixedStakeFactor",
+              "kind": "function",
+              "signature": "const isFixedStakeFactor: (code: StakeFactorCode) => code is FixedStakeFactorCode",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "FIXED_STAKE_FACTOR_CODES",
+              "kind": "value",
+              "signature": "const FIXED_STAKE_FACTOR_CODES: readonly FixedStakeFactorCode[]",
+              "truncated": false,
+              "summary": "The two halves of the vocabulary, walkable, in the order the Gate raises them."
+            },
+            {
+              "name": "MEASURED_STAKE_FACTOR_CODES",
+              "kind": "value",
+              "signature": "const MEASURED_STAKE_FACTOR_CODES: readonly MeasuredStakeFactorCode[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "StakeMeasurement",
+              "kind": "type",
+              "signature": "type StakeMeasurement = {\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    /** `affectedNodeIds.length`. Breadth reads the count and never the ids. */\n    readonly affectedNodeCount: number;\n    readonly shallowestAffectedDepth: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    readonly removedPrimitiveTypes: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes: readonly PrimitiveType[];\n    readonly configuredPropKeys: readonly string[];\n};",
+              "truncated": false,
+              "summary": "The facts the policy-dependent rules read, and nothing else."
+            },
+            {
+              "name": "stakeMeasurementOf",
+              "kind": "function",
+              "signature": "const stakeMeasurementOf: (analysis: ChangeAnalysis) => StakeMeasurement",
+              "truncated": false,
+              "summary": "The measurable half of an analysis, which is what the Gate's own path takes."
+            },
+            {
+              "name": "measureStakes",
+              "kind": "function",
+              "signature": "const measureStakes: (measurement: StakeMeasurement, policy: GatePolicy) => readonly StakeFactor[]",
+              "truncated": false,
+              "summary": "The policy-dependent half, against a measurement rather than a delta."
             },
             {
               "name": "assessStakes",
@@ -4405,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4451,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5354,10 +5417,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 188,
+      "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5812,10 +5875,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5950,6 +6013,20 @@
               "name": "changelogBand",
               "kind": "value",
               "signature": "const changelogBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/changelog-notes-band",
+          "title": "Changelog notes band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "changelogNotesBand",
+              "kind": "value",
+              "signature": "const changelogNotesBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6125,6 +6202,20 @@
               "name": "credentialsBand",
               "kind": "value",
               "signature": "const credentialsBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/credentials-posture-band",
+          "title": "Credentials posture band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "credentialsPostureBand",
+              "kind": "value",
+              "signature": "const credentialsPostureBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6523,6 +6614,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/specs-sheet-band",
+          "title": "Specs sheet band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "specsSheetBand",
+              "kind": "value",
+              "signature": "const specsSheetBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/steps-band",
           "title": "Steps band",
           "summary": "",
@@ -6559,6 +6664,20 @@
               "name": "teamBand",
               "kind": "value",
               "signature": "const teamBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/team-leads-band",
+          "title": "Team leads band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "teamLeadsBand",
+              "kind": "value",
+              "signature": "const teamLeadsBand: Composition",
               "truncated": false,
               "summary": ""
             }
@@ -6623,7 +6742,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7214,7 +7333,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7442,7 +7561,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7859,7 +7978,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8213,7 +8332,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8333,7 +8452,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 31,
+      "files": 33,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8342,11 +8461,11 @@
             "zod"
           ],
           "shared": 14,
-          "files": 9
+          "files": 10
         }
       ],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8652,16 +8771,23 @@
             {
               "name": "IngestOutcome",
               "kind": "type",
-              "signature": "type IngestOutcome = {\n    readonly batches: number;\n    readonly signals: number;\n    /**\n     * Page views counted against a region, which is zero unless the caller said\n     * where the delivery came from and the delivery opened a page view.\n     */\n    readonly regions: number;\n    /**\n     * Why no region was counted, when a region store refused one.\n     *\n     * Present and the delivery still stands: the batch is already kept, and a\n     * sender told to retry would deliver it twice, which is the one failure in\n     * this subsystem that cannot be undone. So a lost region count is a\n     * counter that did not move, reported here rather than raised — the same\n     * trade a sink makes when a browser refuses a beacon.\n     */\n    readonly regionError?: ReaderSignalStoreError;\n};",
+              "signature": "type IngestOutcome = {\n    readonly batches: number;\n    readonly signals: number;\n    /**\n     * Page views this delivery opened, which is what the exact counter moved by.\n     *\n     * Zero unless the caller keeps that counter and the delivery actually opened\n     * something — most deliveries of a page view are the middle of one.\n     */\n    readonly opened: number;\n    /**\n     * Page views counted against a region, which is zero unless the caller said\n     * where the delivery came from and the delivery opened a page view.\n     */\n    readonly regions: number;\n    /**\n     * Why a counter did not move, when a store refused it.\n     *\n     * Present and the delivery still stands: the batch is already kept, and a\n     * sender told to retry would deliver it twice, which is the one failure in\n     * this subsystem that cannot be undone. So a lost count is a counter\n     * that did not move, reported here rather than raised — the same trade a sink\n     * makes when a browser refuses a beacon.\n     */\n    readonly openingError?: ReaderSignalStoreError;\n    readonly regionError?: ReaderSignalStoreError;\n};",
               "truncated": false,
               "summary": ""
             },
             {
-              "name": "RegionIntake",
+              "name": "RegionCounter",
               "kind": "type",
-              "signature": "type RegionIntake = {\n    readonly store: ReaderRegionStore;\n    readonly region: ReaderRegion;\n    /** When, as an instant the counter is stamped with. The caller's clock, like every other. */\n    readonly at: string;\n};",
+              "signature": "type RegionCounter = {\n    readonly store: ReaderRegionStore;\n    readonly region: ReaderRegion;\n};",
               "truncated": false,
-              "summary": "Where a delivery came from, for a caller who can tell."
+              "summary": "Where a delivery came from, and the buckets to count it in."
+            },
+            {
+              "name": "DoorCounters",
+              "kind": "type",
+              "signature": "type DoorCounters = {\n    /** When, as an instant every counter this delivery moves is stamped with. The caller's clock. */\n    readonly at: string;\n    /** Where the delivery came from. Absent on a deployment that does not count regions. */\n    readonly region?: RegionCounter;\n    /**\n     * How many page views began. No switch guards it where it is wired, because a\n     * count of page views of a revision names nowhere and nobody — it is the\n     * denominator everything else is a rate against.\n     */\n    readonly openings?: ReaderOpeningCounter;\n};",
+              "truncated": false,
+              "summary": "What this delivery is counted into, besides being buffered."
             },
             {
               "name": "IngestError",
@@ -8680,7 +8806,7 @@
             {
               "name": "ingestReaderSignals",
               "kind": "function",
-              "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown, where?: RegionIntake) => Promise<Result<IngestOutcome, IngestError>>",
+              "signature": "const ingestReaderSignals: (journal: ReaderSignalJournal, input: unknown, counters?: DoorCounters) => Promise<Result<IngestOutcome, IngestError>>",
               "truncated": false,
               "summary": "Parse a delivery and keep it."
             }
@@ -8890,6 +9016,62 @@
           ]
         },
         {
+          "module": "signals/page-views",
+          "title": "Page views",
+          "summary": "How many page views there were — the number every rate on a screen is taken of, and the one number this subsystem could not state.",
+          "symbols": [
+            {
+              "name": "RevisionViews",
+              "kind": "type",
+              "signature": "type RevisionViews = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly views: number;\n};",
+              "truncated": false,
+              "summary": "One revision's worth of page views, as whichever side counted them."
+            },
+            {
+              "name": "ReaderPageViews",
+              "kind": "type",
+              "signature": "type ReaderPageViews = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * Page views that *began* on this revision.\n     *\n     * Exact, in the sense that matters: counted once, at the instant a page view\n     * opened, never recounted, and therefore addable across windows, revisions,\n     * trees and months. The two things it is not exact against are worth knowing\n     * — a sender that retries an opening delivery after the first one was kept\n     * counts twice, and a count cannot be uncounted; and a sender is what\n     * says it opened at all, so a page that lies inflates this the way it could\n     * already inflate a region bucket. The rate limiter is what bounds both.\n     */\n    readonly opened: number;\n    /**\n     * The same page views as the rollups saw them: once per window each appeared\n     * in.\n     *\n     * Which is why it is kept at all. On its own it is the count a rollup can\n     * only approximate; beside `opened` it is the measurement of that\n     * approximation, because the only way the two can differ for an honest sender\n     * is a page view whose batches landed in more than one window.\n     */\n    readonly appearances: number;\n};",
+              "truncated": false,
+              "summary": "Page views of one revision of one tree, counted from both ends."
+            },
+            {
+              "name": "StoredPageViews",
+              "kind": "type",
+              "signature": "type StoredPageViews = ReaderPageViews & {\n    readonly updatedAt: string;\n};",
+              "truncated": false,
+              "summary": "A page-view row as the store keeps it, which is the pair plus when it last moved."
+            },
+            {
+              "name": "openingsOf",
+              "kind": "function",
+              "signature": "const openingsOf: (batches: readonly ReaderSignalBatch[]) => readonly RevisionViews[]",
+              "truncated": false,
+              "summary": "The page views a delivery opened, per revision, deduplicated by view key."
+            },
+            {
+              "name": "RevisionPageViews",
+              "kind": "type",
+              "signature": "type RevisionPageViews = StoredPageViews & {\n    /**\n     * Appearances in excess of openings — the over-count in every distinct view\n     * count stored against this revision, measured rather than bounded.\n     *\n     * Never negative: a reading taken between a door write and the next rollup\n     * sees openings the counters have not met yet, and that is `pending` rather\n     * than a negative drift.\n     */\n    readonly drift: number;\n    /**\n     * Page views that began and whose batches no rollup has folded yet — the\n     * buffer, as a number.\n     *\n     * It is the other sign of the same subtraction, so a revision never has both.\n     * A reading that showed neither would make a deployment whose collection has\n     * stopped look like a deployment whose readers had left.\n     */\n    readonly pending: number;\n    /**\n     * `drift ÷ opened`: how generous the distinct counts against this revision\n     * are, as a fraction. `null` when nothing has opened, because the question\n     * has no answer rather than the answer nought.\n     */\n    readonly inflation: number | null;\n};",
+              "truncated": false,
+              "summary": "One revision, as a reading reports it — the stored row, and what subtracting its two numbers says."
+            },
+            {
+              "name": "PageViewReading",
+              "kind": "type",
+              "signature": "type PageViewReading = {\n    /** Page views that began, across every row read. Exact, and addable. */\n    readonly opened: number;\n    readonly appearances: number;\n    readonly drift: number;\n    readonly pending: number;\n    readonly inflation: number | null;\n    /** Newest revision first, trees in id order, so a screen does not reorder on a refresh. */\n    readonly revisions: readonly RevisionPageViews[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "pageViewReadingOf",
+              "kind": "function",
+              "signature": "const pageViewReadingOf: (rows: readonly StoredPageViews[]) => PageViewReading",
+              "truncated": false,
+              "summary": "Rows from the store, read as something a screen may show."
+            }
+          ]
+        },
+        {
           "module": "signals/parts",
           "title": "Parts",
           "summary": "What a counter is about, joined on the server from what the page already knows.",
@@ -8967,6 +9149,27 @@
           ]
         },
         {
+          "module": "signals/readable",
+          "title": "Readable",
+          "summary": "What *on screen* means, as the two numbers that decide it.",
+          "symbols": [
+            {
+              "name": "READABLE_VISIBLE_FRACTION",
+              "kind": "value",
+              "signature": "const READABLE_VISIBLE_FRACTION = 0.5",
+              "truncated": false,
+              "summary": "At least this much of the element is visible."
+            },
+            {
+              "name": "READABLE_VIEWPORT_FRACTION",
+              "kind": "value",
+              "signature": "const READABLE_VIEWPORT_FRACTION = 0.3",
+              "truncated": false,
+              "summary": "Or the element fills at least this much of the window."
+            }
+          ]
+        },
+        {
           "module": "signals/region",
           "title": "Region",
           "summary": "Where readers are, as a counter and nothing else.",
@@ -9030,7 +9233,7 @@
             {
               "name": "regionCountsOf",
               "kind": "function",
-              "signature": "const regionCountsOf: (batches: readonly ReaderSignalBatch[], region: ReaderRegion) => readonly ReaderRegionCount[]",
+              "signature": "const regionCountsOf: (openings: readonly RevisionViews[], region: ReaderRegion) => readonly ReaderRegionCount[]",
               "truncated": false,
               "summary": "What one delivery adds, which is one view per page view it opened."
             },
@@ -9114,7 +9317,7 @@
             {
               "name": "Rollup",
               "kind": "type",
-              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n};",
+              "signature": "type Rollup = {\n    readonly tallies: readonly ReaderTally[];\n    readonly funnels: readonly FunnelAnswer[];\n    /** Distinct page views seen, across every tree and revision in the input. */\n    readonly views: number;\n    /**\n     * The same page views, per tree and revision — one appearance each, in this\n     * window.\n     *\n     * Held apart from `views` because it is the number the durable page-view\n     * counter keeps, and it is only worth keeping beside the exact count of page\n     * views that *began*: the difference between the two is the straddle that\n     * makes a distinct count added across windows generous, measured rather than\n     * bounded. A revision whose batches carried no view key is absent\n     * rather than nought — there is nothing to compare, and a zero row would read\n     * as *no readers* rather than as *nobody minted a key*.\n     */\n    readonly appearances: readonly RevisionViews[];\n    /**\n     * Batches that carried no view key.\n     *\n     * Their occurrences are counted like any other; their views are not, because\n     * there is no honest number to add. Treating each uncorrelated batch as its\n     * own view would inflate every denominator by however often a page happened\n     * to flush, which is a number about the network rather than about readers.\n     * Reported so a portal can say the rate is computed over fewer views than the\n     * totals, instead of showing a rate that is quietly wrong.\n     */\n    readonly uncorrelated: number;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -9252,9 +9455,16 @@
               "summary": ""
             },
             {
+              "name": "ReaderOpeningCounter",
+              "kind": "interface",
+              "signature": "interface ReaderOpeningCounter {\n    /**\n     * Add the page views a delivery opened, creating rows that do not exist yet.\n     *\n     * Additive like everything else in this file, and for the sharpest reason of\n     * any of them: every call is one delivery's worth of arrivals, so a store\n     * that replaced would report the last reader rather than the readership.\n     */\n    readonly opened: (openings: readonly RevisionViews[], at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n}",
+              "truncated": false,
+              "summary": "The one write the door makes into the durable counters."
+            },
+            {
               "name": "ReaderTallyStore",
               "kind": "interface",
-              "signature": "interface ReaderTallyStore {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n    }, at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n}",
+              "signature": "interface ReaderTallyStore extends ReaderOpeningCounter {\n    /**\n     * Add a rollup's counters to what is already there, creating rows that do not\n     * exist yet. Atomic over the whole rollup where the backend can be: a partly\n     * applied window is counters that disagree with each other.\n     */\n    readonly apply: (rollup: {\n        readonly tallies: readonly ReaderTally[];\n        readonly funnels: readonly FunnelAnswer[];\n        /**\n         * The window's page views, per revision, for the counter the exact count\n         * is compared against.\n         *\n         * Optional, and absent is not none: a caller applying counters it\n         * composed itself — a backfill, a fixture, a test — has no window to\n         * report, and a nought written there would read as *no page views* and\n         * make a reading claim the node counters were exact.\n         */\n        readonly appearances?: readonly RevisionViews[];\n    }, at: string) => Promise<Result<void, ReaderSignalStoreError>>;\n    readonly tallies: (request?: TallyReadRequest) => Promise<Result<readonly StoredTally[], ReaderSignalStoreError>>;\n    readonly funnels: (request?: TallyReadRequest) => Promise<Result<readonly StoredFunnel[], ReaderSignalStoreError>>;\n    /**\n     * How many page views there were, which is the denominator every rate on a\n     * screen needs and the only row here written from two sides.\n     */\n    readonly pageViews: (request?: TallyReadRequest) => Promise<Result<readonly StoredPageViews[], ReaderSignalStoreError>>;\n}",
               "truncated": false,
               "summary": "Counters are not paged."
             }
@@ -9309,10 +9519,10 @@
       "slug": "signals-broadcast",
       "types": "./dist/signals/broadcast.d.ts",
       "requires": [],
-      "files": 9,
+      "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9455,7 +9665,7 @@
       "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9466,14 +9676,14 @@
         {
           "module": "signals/migrate",
           "title": "Migrate",
-          "summary": "Creating the four reader-signal tables, with row level security switched on.",
+          "summary": "Creating the five reader-signal tables, with row level security switched on.",
           "symbols": [
             {
               "name": "READER_SIGNALS_DDL",
               "kind": "value",
               "signature": "const READER_SIGNALS_DDL: readonly string[]",
               "truncated": false,
-              "summary": "The four tables, as statements a host can run."
+              "summary": "The five tables, as statements a host can run."
             },
             {
               "name": "ensureReaderSignalsSchema",
@@ -9519,10 +9729,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 40,
+      "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9753,7 +9963,7 @@
             {
               "name": "AssessmentSummary",
               "kind": "type",
-              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
+              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -9921,6 +10131,34 @@
           ]
         },
         {
+          "module": "telemetry/remeasure",
+          "title": "Remeasure",
+          "summary": "What these stakes would have been, under a policy that was not in force.",
+          "symbols": [
+            {
+              "name": "RemeasuredFactor",
+              "kind": "type",
+              "signature": "type RemeasuredFactor = {\n    readonly code: StakeFactorCode;\n    readonly level: StakeLevel;\n    /**\n     * `remeasured` — this rule was run against the policy given here.\n     * `recorded` — no field of a policy can move it, so its code is its level.\n     */\n    readonly source: \"remeasured\" | \"recorded\";\n};",
+              "truncated": false,
+              "summary": "One rule's contribution, and whether it was run again or taken as it stood."
+            },
+            {
+              "name": "RemeasuredStakes",
+              "kind": "type",
+              "signature": "type RemeasuredStakes = {\n    /** A floor, not an answer, whenever `unreadable` is not empty. */\n    readonly level: StakeLevel;\n    readonly factors: readonly RemeasuredFactor[];\n    /**\n     * Rules this record cannot answer under this policy, because a field they read\n     * was not written down. Empty is the claim that `level` is exact.\n     */\n    readonly unreadable: readonly StakeFactorCode[];\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "remeasureStakes",
+              "kind": "function",
+              "signature": "const remeasureStakes: (summary: AssessmentSummary, policy: GatePolicy) => RemeasuredStakes",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "telemetry/retention",
           "title": "Retention",
           "summary": "How a journal is allowed to forget.",
@@ -10056,7 +10294,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10130,7 +10368,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10338,6 +10576,27 @@
               "signature": "const hangingEndpoint: (id: string, description: string) => HangingSeam<EndpointEntry>",
               "truncated": false,
               "summary": "An endpoint that never says where a form posts — the same double at the submission seam."
+            },
+            {
+              "name": "NOTHING_MEASURED",
+              "kind": "value",
+              "signature": "const NOTHING_MEASURED: ChangeAnalysis",
+              "truncated": false,
+              "summary": "Every fact an analysis states, measuring nothing."
+            },
+            {
+              "name": "AssessmentDraft",
+              "kind": "type",
+              "signature": "type AssessmentDraft = {\n    /** The change being judged. Its delta decides what the inverse is written against. */\n    readonly proposal: ProposedChange;\n    /** What the delta does. The fields left out measure zero. */\n    readonly analysis?: Partial<ChangeAnalysis>;\n    /** The rules the Gate raised, in the order it raised them. */\n    readonly factors?: readonly StakeFactor[];\n    /** Why the change cannot be taken back. Empty means it can. */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
+              "truncated": false,
+              "summary": "The facts a test wants to be true of a judged change. Everything else is absent, empty or zero."
+            },
+            {
+              "name": "buildAssessment",
+              "kind": "function",
+              "signature": "const buildAssessment: (idFactory: IdFactory, draft: AssessmentDraft) => ChangeAssessment",
+              "truncated": false,
+              "summary": "A complete `ChangeAssessment` from the handful of facts a test cares about."
             }
           ]
         },
@@ -10564,10 +10823,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 54,
+      "files": 71,
       "narrower": [],
       "standing": {
-        "packageNames": 1191,
+        "packageNames": 1221,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

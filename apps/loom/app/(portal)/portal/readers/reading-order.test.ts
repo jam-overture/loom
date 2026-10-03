@@ -131,6 +131,37 @@ describe("the reader screen's reading order", () => {
     expect(source).not.toContain("pageNamesFor")
   })
 
+  /**
+   * **The pairing rule, guarded where it is applied.**
+   *
+   * *Which parts did nobody get to* is the one reading here that needs the page
+   * as well as the counters, and laying one version's counters over another
+   * version's page is the single way it can be wrong and look right — most
+   * parts read *nobody got to it* while every number stays plausible. So the
+   * pair is assembled on the screen, behind `skippingComparable`, and a card is
+   * handed either a reading it may draw or nothing.
+   *
+   * What this pins is that the guard is still in front of the join. A refactor
+   * that moved the pairing into the card, or that dropped the comparison
+   * because every fixture happened to match, would leave every other test on
+   * this screen passing.
+   */
+  it("pairs the counters with a page only when they are about the same version", () => {
+    expect(source).toContain("skippingComparable")
+    expect(source.indexOf("skippingComparable")).toBeLessThan(source.indexOf("skippingOf("))
+  })
+
+  /**
+   * And that the question is never asked of a page whose read did not come back.
+   * `skippingComparable` refuses an undefined version, and the `continue` above
+   * it means a page with no tree never reaches the join at all — two guards,
+   * because the cost of getting this one wrong is a list of invented findings
+   * about parts that were never there.
+   */
+  it("never asks which parts were skipped on a page it could not read", () => {
+    expect(source).toContain("tree === undefined || !skippingComparable")
+  })
+
   it("never reverses a row or a column to place something", () => {
     expect(source).not.toContain("flex-row-reverse")
     expect(source).not.toContain("flex-col-reverse")

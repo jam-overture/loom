@@ -11,7 +11,8 @@ import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoPolicy, demoSession, type DemoSession } from "./session"
 import { askedLine, isUndo, putsSomethingBack } from "./undo"
-import { whatItWillSay } from "./what-it-will-say"
+import { howManyWaitForYou } from "./how-many-wait-for-you"
+import { whatEachWillSay, whatItWillSay } from "./what-it-will-say"
 
 /**
  * The demo, end to end, with nothing stubbed but the browser.
@@ -176,6 +177,53 @@ describe("a preset asked for through the demo's write path", () => {
       expect(foretold?.moves, preset.id).toBe((await headOf(session)).revision > tree.revision)
       expect(foretold?.moves, preset.id).toBe(record.outcome === "applied")
     }
+  })
+
+  /**
+   * **And the number on the arrival screen is the number of presses that come
+   * true**, which is the claim the whole of this run rests on.
+   *
+   * The first sentence a stranger reads is now a count — *you can ask for 5
+   * changes here; Loom will make 2 on its own and ask you first about 3* — and
+   * a count is a far stronger claim than the five sentences it summarises. It
+   * is checkable by anybody with sixty seconds and two presses, so it had
+   * better be checked here first.
+   *
+   * The test above holds each verdict against its own press. This one holds
+   * the **arithmetic over all of them** against five real presses: every ask
+   * the panel offers is run through the write path into its own session, the
+   * outcomes are tallied, and the tally has to be the one the sentence claims.
+   * A drift that left every individual verdict right and the count wrong is
+   * not possible — but a count taken over the wrong set is, and that is the
+   * failure this catches: a split counting the preset table rather than the
+   * asks on offer reads *5* over four rows the first time a visitor opens a
+   * question.
+   */
+  it("counts, for the whole panel, the presses that really go ahead and the ones that really wait", async () => {
+    const session = await sessionFor("split")
+    const tree = await headOf(session)
+    const available = DEMO_PRESETS.filter(
+      (preset) => preset.plan(tree, randomIdFactory) !== undefined
+    ).map((preset) => preset.id)
+
+    const says = await whatEachWillSay(tree, available, randomIdFactory, systemClock)
+    const split = howManyWaitForYou(Object.values(says))
+
+    let wentAhead = 0
+    let waited = 0
+
+    for (const presetId of available) {
+      const own = await sessionFor(`split-${presetId}`)
+      const record = await ask(own, presetId)
+      if (record.outcome === "applied") wentAhead += 1
+      if (record.outcome === "awaiting-you") waited += 1
+    }
+
+    expect(split?.total).toBe(available.length)
+    expect(split?.onItsOwn).toBe(wentAhead)
+    expect(split?.asksYou).toBe(waited)
+    expect(split?.sentence).toContain(`make ${wentAhead} on its own`)
+    expect(split?.sentence).toContain(`ask you first about ${waited}`)
   })
 
   /**

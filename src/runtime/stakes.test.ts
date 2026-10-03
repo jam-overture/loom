@@ -4,36 +4,37 @@ import { bindingNameSchema } from "../data/source.js"
 import { nodeIdSchema } from "../ids.js"
 import { primitiveTypeSchema } from "../primitive-type.js"
 import { endpointIdSchema } from "../submit/endpoint.js"
+import { NOTHING_MEASURED } from "../testing/doubles.js"
 
 import type { ChangeAnalysis } from "./analysis.js"
 import { defaultGatePolicy, gatePolicySchema } from "./policy.js"
 import type { DiscardedWork } from "./proposal.js"
 import {
   assessStakes,
+  FIXED_STAKE_FACTOR_CODES,
+  fixedStakeLevel,
+  isFixedStakeFactor,
+  measureStakes,
+  MEASURED_STAKE_FACTOR_CODES,
   stakeFactor,
   stakeFactorCodeSchema,
+  stakeMeasurementOf,
   STAKE_FACTOR_CODES,
   type StakeAssessment,
 } from "./stakes.js"
 
+/**
+ * A deep, single-prop change, with every other fact measuring nothing.
+ *
+ * The zeroes and the empty lists are `NOTHING_MEASURED`'s rather than this
+ * file's. A complete analysis literal is the thing `buildAssessment` was
+ * published to stop surfaces writing out, and a second copy of one in the lane
+ * that published it would be the first fixture to drift.
+ */
 const analysisOf = (overrides: Partial<ChangeAnalysis> = {}): ChangeAnalysis => ({
+  ...NOTHING_MEASURED,
   operationCount: 1,
-  insertedNodeCount: 0,
-  removedNodeCount: 0,
-  movedNodeCount: 0,
   configuredNodeCount: 1,
-  relocatedNodeCount: 0,
-  affectedNodeIds: [],
-  touchedPrimitiveTypes: [],
-  removedPrimitiveTypes: [],
-  relocatedPrimitiveTypes: [],
-  configuredPropKeys: [],
-  nestedTargets: [],
-  unknownPrimitives: [],
-  invalidProps: [],
-  unreadBindings: [],
-  redirectedSubmissions: [],
-  repointedBindings: [],
   shallowestAffectedDepth: 5,
   ...overrides,
 })
@@ -657,5 +658,60 @@ describe("STAKE_FACTOR_CODES", () => {
 
   it("is the schema's own members rather than a second copy of them", () => {
     expect(STAKE_FACTOR_CODES).toEqual(stakeFactorCodeSchema.options)
+  })
+
+  /**
+   * The partition, held against the one case that raises all fourteen.
+   *
+   * Two readers depend on it being exactly a partition. The Gate runs the
+   * measuring half against a measurement and the fixed half against the delta,
+   * and `remeasureStakes` runs the first half again months later and turns the
+   * second half's codes back into levels. A factor in neither set would drop out
+   * of every answer either one gives, and a factor in both would be counted
+   * twice.
+   */
+  describe("the two kinds of rule", () => {
+    const raised = assessStakes(
+      { analysis: guilty, discards: [{ revision: 4, nodeIds: [nodeIdSchema.parse("n_body")] }] },
+      policy
+    )
+
+    it("is a partition of the vocabulary, derived rather than declared", () => {
+      expect([...MEASURED_STAKE_FACTOR_CODES, ...FIXED_STAKE_FACTOR_CODES].sort()).toEqual(
+        [...STAKE_FACTOR_CODES].sort()
+      )
+      expect(MEASURED_STAKE_FACTOR_CODES.filter(isFixedStakeFactor)).toEqual([])
+    })
+
+    it("raises every fixed rule at exactly the level its code is fixed at", () => {
+      const fixed = raised.factors.filter((factor) => isFixedStakeFactor(factor.code))
+
+      expect(fixed.map((factor) => factor.code)).toEqual(FIXED_STAKE_FACTOR_CODES)
+      for (const factor of fixed) {
+        if (!isFixedStakeFactor(factor.code)) throw new Error("filtered above")
+        expect(factor.level).toBe(fixedStakeLevel(factor.code))
+      }
+    })
+
+    it("runs only the measuring rules when handed a measurement alone", () => {
+      const measured = measureStakes(stakeMeasurementOf(guilty), policy)
+
+      expect(measured.map((factor) => factor.code)).toEqual(MEASURED_STAKE_FACTOR_CODES)
+      expect(measured).toEqual(
+        raised.factors.filter((factor) => !isFixedStakeFactor(factor.code))
+      )
+    })
+
+    /**
+     * Breadth reads a length, so the ids themselves never have to leave the
+     * process — which is what lets a record carry the one number the rule wants
+     * (0023) and is the whole reason the narrowing is shaped this way.
+     */
+    it("carries the count of affected nodes and not the ids", () => {
+      const measurement = stakeMeasurementOf(guilty)
+
+      expect(measurement.affectedNodeCount).toBe(guilty.affectedNodeIds.length)
+      expect(Object.values(measurement).flat()).not.toContain(guilty.affectedNodeIds[0])
+    })
   })
 })

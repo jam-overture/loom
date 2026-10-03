@@ -50,6 +50,10 @@ import type { ReaderTallyStore } from "./tally.js"
  * windows is counted in both — the over-count 0147 accepts. `tally.ts` already
  * states the remedy in its own words: *a deployment that wants the bound small
  * makes the rollup window long relative to a page view.* This is that number.
+ * A deployment no longer has to guess whether it chose well: each run adds its
+ * window's page views to the counter the door counts arrivals into, so the
+ * difference between the two is what this setting actually cost
+ * (`page-views.ts`).
  *
  * **Shorter is more anonymous.** The raw window is the entire mechanism by
  * which a view key stops existing (0146). The key is opaque, random and
