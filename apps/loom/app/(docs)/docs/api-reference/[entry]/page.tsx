@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+import { Specifier } from "@/app/(docs)/_components/specifier"
 import { generatedPageBody } from "@/app/(docs)/_lib/api/body"
 import { apiSlugs } from "@/app/(docs)/_lib/api/reference"
 import { pageMetadata } from "@/app/(docs)/_lib/metadata"
@@ -61,9 +62,18 @@ const ApiReferencePage = async ({ params }: PageParams) => {
        * four longest doors pushed the whole document to 559 pixels and every
        * page on them scrolled sideways. Found by photographing the page at
        * phone width, which is the only instrument that reports it.
+       *
+       * It stays, and it is the floor rather than the answer: it stopped the
+       * page scrolling and it chose nothing about *where* the line gives way.
+       * Ten of these seventeen headings were measured breaking mid-word on
+       * 3 October — `signal` · `s/broadcast`, in the largest type on the page —
+       * and `Specifier` is what offers the breaker a slash to use instead. It
+       * is ten rather than the four the finding named because the package was
+       * renamed on 27 September and every specifier got five characters longer.
+       * `_lib/api/specifier.ts` carries the measurement.
        */}
       <h1 className="font-mono text-3xl! break-words sm:text-4xl!">
-        {listed.page.heading ?? listed.page.title}
+        <Specifier of={listed.page.heading ?? listed.page.title} />
       </h1>
 
       <p className="text-lg">{listed.page.summary}</p>

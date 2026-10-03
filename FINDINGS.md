@@ -33578,7 +33578,15 @@ wrong sentence, and this is the entry that says so.
 ---
 ## 2026-09-23 — the four longest entry-point headings break mid-word on a phone, because `break-words` was the fix that stopped the page scrolling and not the one that made it read
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed** by
+`docs-44-where-a-specifier-breaks`, which did what the remedy below says and
+found the defect twice the size it was filed at — **ten of the seventeen
+headings, not four**, because the package was renamed on 27 September and every
+specifier gained five characters. Re-measured in Chromium at 390 pixels on
+3 October: ten before, none after. One caveat went the other way and is the
+3 October entry below — a `<wbr/>` adds break opportunities and cannot take the
+hyphen's away, so `@jam-overture/loom-primitives/compositions` breaks after
+`loom-` rather than at a slash. Original status: open —
 cosmetic; measured in Chromium against `next start` at 390 pixels, 23 September
 
 On 22 September `/docs/api-reference/[entry]`'s `h1` gained `break-words`,
@@ -39784,6 +39792,158 @@ window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
 
 ---
+## 2026-10-01 — Loom has no concept of an app, so the first thing the maintainer asked the portal for has nothing behind it
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer, then `Loom daily build`
+if he wants it · **Status:** open —
+[0220](decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+is `Proposed` and is the long form of this entry
+
+On 1 October the maintainer asked the portal to show *"which apps I have
+registered with Loom"*. It cannot, and the reason is not a missing screen.
+
+**A deployment is three objects wired at a composition root** — a
+`PrimitiveRegistry`, a `PolicySource` and a `TreeStore` — and everything else is
+addressed under one of them. A `TreeId` is unique within a store, a `NodeId`
+within a tree, a hold names a proposal and a tree, a signal names a node and a
+revision. **There is no identifier anywhere in the system for the thing that owns
+a store.**
+
+What this run did with that: built the single-app answer, said on the screen that
+Loom looks after one app per installation, and wrote 0220 rather than inventing a
+list of one. A portal that drew a list implies a second could appear, in the one
+place where implying it is most expensive.
+
+The record carries what a second app would cost, item by item, so the question is
+answered once rather than estimated every time it is asked. The short version:
+every store signature, or the meaning of every tree id, plus the hold store, the
+journal, the signal ledger, a registry per request and a second half to 0027's
+rule about where an actor comes from.
+
+**And the cheap version, which may be what was actually meant.** `PolicySource`
+already varies the *rules* per tree and per ask (0033) — different governance for
+different surfaces of one product, with one store underneath. That is built and
+shipping. If what is wanted is *my marketing site and my docs site judged
+differently*, it exists; if what is wanted is *two customers' data side by side*,
+it does not and 0220 is the cost.
+
+---
+## 2026-10-01 — this deployment registers 4 of the 99 pieces Loom ships, so every portal screenshot shows a page that could have been written by hand
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with a decision in it
+for the maintainer · **Status:** open — measured while building the screen that
+makes it visible
+
+`apps/loom/app/(portal)/_lib/registry.ts` registers `loom.page`, `loom.card`,
+`loom.heading` and `loom.prose`. `STARTER_PRIMITIVES` on
+`@jam-overture/loom/primitives` holds **99**.
+
+So the portal's own deployment — the one every screenshot in every report of this
+lane is taken on — can draw a heading, a paragraph and a box. Four consequences,
+and the fourth is the one worth acting on:
+
+1. **The new app screen is thin by construction.** Its whole subject is *what your
+   app is made of*, and the answer here is four things.
+2. **The seeded page cannot demonstrate anything.** Every picture of a tree in
+   this portal is a heading over a paragraph over a card.
+3. **The review queue has never judged an interesting change**, because the model
+   is handed a catalogue of four and cannot propose what it cannot name (0013).
+   Nothing with a form, a frame, a data binding or a behaviour has ever been
+   weighed here, so no stake factor that depends on one has ever fired on this
+   deployment.
+4. **The portal is the worst advertisement for the library in the repository**,
+   and it is the surface a developer is told to open daily.
+
+**Why this run did not simply register more.** It is a one-line change and it is
+not obviously right. The registry is what bounds what an AI may do to these pages
+(0013), and widening it on the surface whose whole subject is governance is a
+governance decision rather than a convenience — it changes what every future
+proposal may contain, what the Gate has to weigh, and what a screenshot of this
+portal is evidence *of*. A routine that quietly turned ninety-five pieces on would
+be making that decision on the maintainer's behalf, in his own review tool.
+
+**Recommendation:** register the starter set, or a named subset of it, on the
+portal deployment. `createStarterPrimitiveRegistry` already exists on the same
+entry point and does exactly this. The cost is one import; the gain is that every
+screen in this portal starts being about a page somebody might actually have.
+
+---
+## 2026-10-01 — what a page reports about itself is declared per node, and the maintainer wants it per piece
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— the framework half of `docs/portal.md` unit 3, filed before the portal builds
+its half
+
+The maintainer, 1 October:
+
+> *"I should be able to manage tracked events by primitive and have a better way
+> to do this (maybe policy level) than going one by one."*
+
+He is right about the altitude and the reason is structural. A reader signal is
+filed against a **node** — `viewed`, `dwelled`, `activated`, `disclosed`, each
+against an addressed element and a revision. But what makes an element addressable
+at all is its **primitive**: `loom.editable` is what puts `data-loom-node` on it,
+`decorationFromAudit` is how a host learns which types do, and the broadcaster
+walks for the delegated kinds by element. **Every fact that decides whether a node
+can be tracked is a fact about its type**, and the only thing that is per-node is
+the switch.
+
+So *manage tracked events by piece* is not a convenience over a per-node list. It
+is the altitude the declaration already lives at, and the per-node version is the
+projection of it.
+
+**What this lane cannot decide, and is asking for:**
+
+1. **Where the rule is stored.** A `GatePolicy` is consulted when a change is
+   *judged*; a tracking rule is consulted when a page is *rendered*. Those are
+   different seams and putting the second on the first would make the policy a
+   bag of unrelated switches — the argument 0179 already made for keeping a props
+   vocabulary off the policy.
+2. **Whether a piece may decline.** A primitive declares `interactive`, `submits`,
+   `frames`, `copy` and `reads` — all of them the author saying what the component
+   *is*. Whether a deployment *tracks* it is the host's choice rather than the
+   author's, so this is probably not a sixth declaration on `definePrimitive`.
+3. **What a per-piece rule means for a node that already has one.** Most specific
+   wins is the obvious answer and it is the one that makes bulk management useless
+   if anybody has ever set a node by hand.
+
+The portal's half is a matrix — every registered piece against the four kinds —
+and the vocabulary that makes it readable. It is cheap once the seam exists and
+guesswork before it, so it is filed rather than built.
+
+---
+## 2026-10-01 — the shot harness cannot hover, and the rail is the one thing in this portal that only exists on hover
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the harness is
+`tools/screenshot`) · **Status:** open — this is the finding `docs/routines.md`
+invited by name
+
+> *"Hovering is simply not asked for yet and would be a finding rather than an
+> argument."* — `docs/routines.md`, on what a shot list cannot do
+
+It is asked for now. The rail is 14 pixels wide and widens on `hover` and
+`focus-within`; its labels and, as of this run, its **group names** are
+`opacity-0` until one of the two happens. So the navigation change at the centre
+of this pull request — four named groups, which is most of what makes the portal
+legible — **cannot be photographed at all**, and the maintainer judges this
+surface by eye.
+
+Neither existing route reaches it:
+
+- A `click` step carries `detail: 1`, and `sidebar-nav.tsx` deliberately blurs on
+  a pointer press — that is the fix for *"super annoying to have to click again to
+  close it"*, and it is correct. The harness cannot send a keyboard activation.
+- `scrollTo` brings an element into view without pressing it and does not focus
+  it.
+
+**What would close it**, smallest first: a `{ "hover": "<selector>" }` step, which
+is one `page.hover` behind the same one-element rule `click` already keeps. It is
+not an instrument reaching a state it may not assert (0159, 0182) — it is the same
+kind of act as `click`, and the same argument that admitted `scrollTo`.
+
+Filed rather than built because `tools/` is not this lane's, and because a step
+that can reach a hover state is a small widening of what a shot may do, which is
+the sort of thing 0182 settled deliberately rather than by accident.
 ## 2026-10-01 — a finding named the remedy, said the branch had added it, and the branch had not — for five days, in the file every run reads first
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
@@ -40131,7 +40291,15 @@ exists so that whoever writes that copy knows it is not demonstrable here.
 ## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-open — **nothing is broken; this is why a sweep was needed at all**
+**half closed** by `marketing-57-the-sentences-nothing-read` on 3 October. The
+register half is done: both plain-language rules now read every string a reader
+reads — text nodes and props alike — and the sweep found a second hole this
+entry did not know about, which the 3 October entry below has. **The staleness
+half is still open and is still the more interesting one:** nothing holds a
+paragraph naming a page of this site against the page that carries the thing it
+names, and `/what-you-run` still carries the one sentence of that shape on the
+site. Originally filed as: *nothing is broken; this is why a sweep was needed at
+all*
 
 `voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
 no more than 35 words in a field a reader scans. Both run over
@@ -41026,7 +41194,20 @@ broadcaster keeps shipping no schema library for it.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as a
 class — **one instance closed** by `docs-43-what-these-do-not-mean`, which added
-the vocabulary panel's first render test.
+the vocabulary panel's first render test; **the second and the one that matched
+the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
+`_components/entry-points.test.tsx`. **Six chrome components remain**: `callout`,
+`code-block`, `mobile-nav`, `sidebar`, `submit-seam`, `theme-toggle`.
+
+The `entry-points` row is worth two sentences of its own, because it is the
+whole shape of the class in one table. `entry-points.test.ts` holds the list of
+doors against the package's own `exports` map in **both** directions, which is
+as hard as a producer gets tested anywhere on this site — and the table that
+prints it is the first thing a reader is shown after `npm install`. A component
+that printed no rows at all passed every one of those assertions. It now prints
+each specifier in order, each summary beside its door and each audience in words
+rather than in the key, and the row count is held against the list's length and
+against being more than one.
 
 The arrangement this site is built on is that a block of furniture asks the
 repository a question and prints the answer, and that the producer is tested
@@ -41370,6 +41551,167 @@ place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
 
 ---
+## 2026-10-03 — a break opportunity can be added to a heading and the one inside `loom-primitives` cannot be taken away, so one door of seventeen still breaks at its hyphen
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+stated limit of what shipped today, cosmetic, and the remedy costs more than
+the defect
+
+`docs-44-where-a-specifier-breaks` closed the 23 September entry by rendering
+each API reference heading as its slash-separated segments with a `<wbr/>`
+between them. Measured in Chromium at 390 pixels, on the real heading in the
+real font, across all seventeen doors: **ten broke mid-word before and none
+does now.**
+
+One door is imperfect rather than fixed:
+
+| | lines at 390px |
+| --- | --- |
+| before | `@jam-overture/loom-` · `primitives/compositi` · `ons` |
+| now | `@jam-overture/loom-` · `primitives/` · `compositions` |
+
+A hyphen **is** a soft wrap opportunity, so the breaker takes the last one that
+fits and `@jam-overture/loom-` fits. A `<wbr/>` can only add a place to break; it
+cannot remove the hyphen's. The orphan and the mid-word break are gone, which is
+the whole of what the finding asked for, and the first line still ends on a
+hyphen rather than on a slash.
+
+**Two remedies were measured and neither is worth taking today.**
+
+- **`word-break: keep-all` on each segment buys nothing.** Measured against all
+  six multi-segment doors: byte-identical line breaks to the plain `<wbr/>`.
+  Chromium does not treat the break after a hyphen as a break "between
+  typographic letter units", so the property that reads as if it would suppress
+  it does not. Recorded because it is the obvious thing for the next author to
+  reach for.
+- **`white-space: nowrap` on each segment is the only markup that breaks at
+  slashes and nowhere else** — `@jam-overture/` · `loom-primitives/` ·
+  `compositions`, measured. It gets there by **turning off wrapping inside a
+  segment**, which is also turning off `break-words`, which is the floor that
+  stopped these pages being 559 pixels wide on 22 September. Today's longest
+  segment is sixteen characters against a line that holds about twenty; a door
+  published next year with a longer one would scroll the page sideways again,
+  and nothing in the suite would say so. **Trading a floor that holds for every
+  future door against one better line break on one door today is the wrong
+  direction**, so the floor stays.
+
+What would actually resolve it is a shorter package name, which is not this
+lane's to propose, or a CSS property that sets break priority, which does not
+exist.
+
+---
+## 2026-10-03 — the remedy for the defect `prerender:check` was built to catch lands in the one place `prerender:check` says it cannot look
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as a
+note on an existing open question, with nothing asked of anybody — **no check
+should be widened on the strength of it**
+
+[0119](decisions/0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md)
+ends with a limit stated plainly in the module and in the record:
+
+> What it does not catch is a space lost across a tag: `16<!-- --><span>of</span>`
+> reads `16of` and passes here, because the character after the separator is `<`.
+
+Every junction this lane added today is across a tag. `Specifier` prints a
+heading as *n* text runs with *n−1* `<wbr/>` elements between them, so if that
+markup ever came back with a word reordered, a slash dropped or a space gained,
+the built artefact would carry a heading telling a reader to type an import that
+does not resolve — and the instrument that exists precisely to read the built
+artefact would pass it, by its own documented design.
+
+It is worth saying out loud that this is **not an argument for widening the
+check**, and 0119 is why: the rule it sets for adding a hazard class is *a defect
+that reached a reader, not a hazard somebody imagined*. Nothing has reached a
+reader. What this lane did instead is the proportionate thing — assert the text
+locally, through `react-dom/server`, which is the transform the artefact comes
+out of: `_components/specifier.test.tsx` holds every published specifier through
+both renderers and asserts that no hydration separator is emitted at all.
+
+So this entry exists for one purpose: **if a defect of this class ever does
+reach a reader, the first place to look is a `<wbr/>`,** and 0119's bar will
+have been met. Filed as a note rather than an ask.
+## 2026-10-03 — three rules in this lane read the tree a builder returns, and a third of the largest page is not in it
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane whose tests read a function that *produces* the thing
+rather than the thing · **Status:** closed for the three rules it names, by
+`marketing-57-the-sentences-nothing-read`; filed because the shape is not
+about copy and the fix was a module rather than three edits
+
+This route group has two functions that return a page. `treeFor` is the page as
+it is **published**. `pageTreeFor` is the page as it is **served** — on
+`/how-it-works` it carries the record of whatever the visitor asked for, which
+is built by running a real request through the whole sequence.
+
+**Every rule in this lane that reads copy was written against the first one**,
+except the register check, which moved to the second on 24 August with a note
+saying why. Measured across all three routes, both deployments and every request
+a visitor can make:
+
+| | the page as written | the page as served |
+| --- | --- | --- |
+| strings a reader reads | 194 | **253** |
+| words on `/how-it-works` | 862 | **1,318** |
+| words on the site | 2,516 | **2,972** |
+| widest band | 259 | **638** |
+
+So **59 strings and 456 words had no rule over them at all** — a third of the
+largest page, and the band the whole site is built to get a visitor to. The copy
+budget reported a 259-word widest band on a site that serves a 638-word one.
+
+### What the two rules actually missed, which is the part that argues for the fix
+
+The em dash rule and the 35-word scanned-field rule were both added on
+1 October, against `treeFor`, and both also read a list of six prop names. Two
+holes, and between them they covered the site:
+
+- **Twelve strings carried an em dash and the rule saw none of them.** Seven are
+  text nodes, which a list of prop names cannot read; the other five are props
+  on a page `treeFor` never builds.
+- **Ten scanned fields ran 36 to 57 words** against a ceiling of 35. Every one
+  of them is a rung of `loom.milestone-list` on the served mechanism page —
+  which is to say, **the one band on this site that is literally a list of
+  steps**, the shape the rule's own docstring was written for.
+
+Nothing was red. Both readings are valid pages, every assertion passed, and the
+figures in three consecutive reports of this lane were each understated by about
+450 words.
+
+### Why it is a module and not three fixed assertions
+
+Because the register check had already learned this once, in this file, four
+weeks earlier — and the two rules added on 1 October were written against
+`treeFor` anyway, by a run that had the earlier note directly above the code it
+was editing. A lesson applied to one assertion is not applied.
+
+`_lib/served.ts` is the sweep: every route crossed with both deployments and
+every request state, 126 pages, with the measurement above in its docstring.
+`voice.test.ts` and `budget.test.ts` read it, and both assert the state count so
+a sweep that silently stopped finding pages says so.
+
+### The one thing that is a judgement rather than an oversight
+
+**A generated field cannot be held to a ceiling written for an authored one**,
+and pretending otherwise is how a budget gets quietly raised. A rung built from
+a record is as long as the change was: a request at the refusal floor fires five
+of the rules and the record names all five. Capping that at 35 words means
+truncating a record, which a site whose whole argument is the record may never
+do.
+
+So the split that shipped is: **a sentence is bounded everywhere** — thirty
+words, the number this file's own opening-band rule has used since it was
+written — and a **scanned field is bounded where somebody wrote it**, which is
+the published tree. The generated half is held by the sentence rule instead, and
+the punctuation is where it bites: `Weighed as the most serious kind: a; b; c;
+d; e.` becomes six short sentences carrying exactly the same five facts.
+
+### What is still open and is this lane's
+
+The staleness half of the 1 October entry above. A paragraph saying *"the
+ready-made changes on the How it works page"* is making a claim about where
+something lives, `SITE_ROUTES` knows where things live, and nothing holds the
+two together. One sentence on the site is of that shape today and it was wrong
+for a day in September.
 ## 2026-10-03 — the reader screen can divide by an exact number of page views now, and say how generous the figures above it are
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

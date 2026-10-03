@@ -37,7 +37,7 @@ const routeExists = (href: string): boolean =>
   GROUPS().some((group) => existsSync(join(group, href.replace(/^\//, ""), "page.tsx")))
 
 describe("NAV_GROUPS", () => {
-  const items = NAV_GROUPS.flat()
+  const items = NAV_GROUPS.flatMap((group) => group.items)
 
   it("points every item at a route that exists", () => {
     const broken = items.filter((item) => !routeExists(item.href)).map((item) => item.href)
@@ -65,16 +65,49 @@ describe("NAV_GROUPS", () => {
    * a redirect.
    */
   /**
-   * The rail's first entry is the screen with something urgent on it. It is also
-   * the only href that is a prefix of every other one here, so it has to declare
-   * itself exact — otherwise it is the active item on every page in the portal
-   * and the rail stops distinguishing anything.
+   * The rail leads with the thing every other entry is about.
+   *
+   * It led with the front door until 1 October, and the argument for that was
+   * right while the portal was a review queue with screens around it: the queue
+   * is the one screen with something urgent on it. It is wrong for a governance
+   * surface. A reader who does not know what they have cannot read a list of
+   * changes to it, and the queue is empty on every deployment nobody has asked
+   * anything of — which is every deployment on its first day, which is every
+   * deployment a new person meets.
    */
-  it("leads with the front door, and claims only its own path", () => {
-    const first = NAV_GROUPS[0]?.[0]
+  it("leads with the app, which is what everything else here is about", () => {
+    expect(NAV_GROUPS[0]?.name).toBe("Your app")
+    expect(NAV_GROUPS[0]?.items[0]?.href).toBe("/portal/app")
+  })
 
-    expect(first?.href).toBe("/portal")
-    expect(first?.exact).toBe(true)
+  /**
+   * The front door is still exact wherever it sits. `/portal` is the prefix of
+   * every other href in this rail, so without it the front door is the active
+   * item on every screen in the portal and the rail stops distinguishing
+   * anything. Asserted by href rather than by position, which is the half that
+   * survived the reordering above.
+   */
+  it("keeps the front door claiming only its own path", () => {
+    expect(items.find((item) => item.href === "/portal")?.exact).toBe(true)
+  })
+
+  /**
+   * Every group is named, which is the change this rearrangement is for. A
+   * divider says *these are not the same kind of thing* and cannot say what kind
+   * either of them is — so a reader met twelve nouns in three heaps and had to
+   * infer the model from the nouns.
+   */
+  it("names every group, and gives no two the same name", () => {
+    const names = NAV_GROUPS.map((group) => group.name)
+
+    expect(names.filter((name) => name.trim() === "")).toEqual([])
+    expect(new Set(names).size).toBe(names.length)
+    expect(names.length).toBeGreaterThan(2)
+  })
+
+  /** A group with nothing in it is a heading over a gap. */
+  it("puts at least one place in every group", () => {
+    expect(NAV_GROUPS.filter((group) => group.items.length === 0)).toEqual([])
   })
 
   /**

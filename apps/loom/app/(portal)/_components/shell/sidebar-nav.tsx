@@ -52,9 +52,28 @@ export const SidebarNav = () => {
   return (
     <nav className="flex-1">
       {NAV_GROUPS.map((group, index) => (
-        <div key={group[0]?.href ?? index}>
-          {index > 0 && <div className="border-edge-subtle mx-4 my-2 border-t" />}
-          {group.map((item) => {
+        <div key={group.name}>
+          {index > 0 && <div className="border-edge-subtle mx-4 mt-2 border-t" />}
+          {/*
+            * The group's name, revealed with the labels and on the same trigger.
+            *
+            * It cannot be shown when the rail is closed — there are fourteen
+            * pixels of it — so it fades in exactly as every label does, and it
+            * reserves its height either way so the icons do not move when the
+            * rail opens. A rail whose contents jumped on hover would be a worse
+            * failure than the unnamed groups this replaces.
+            *
+            * `aria-hidden`, because the heading is a visual grouping of links a
+            * screen reader already reads as a list, and the one thing it must
+            * not become is a fifteenth thing to tab past.
+            */}
+          <p
+            aria-hidden="true"
+            className="text-ink-placeholder px-4 pt-2 pb-1 text-[10px] tracking-wide whitespace-nowrap uppercase opacity-0 transition-opacity delay-100 duration-150 group-focus-within:opacity-100 group-hover:opacity-100"
+          >
+            {group.name}
+          </p>
+          {group.items.map((item) => {
             const active = isNavItemActive(pathname, item.href, item.exact)
 
             return (

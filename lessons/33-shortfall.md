@@ -1063,6 +1063,18 @@ describe("G", () => {
   loom.confident
     rows on the page: 11
     what it told the walk: nothing
+```
+
+<!-- moves: when Loom primitives gives loom.feed the `unshown` declaration 0206
+     names, which this lesson filed for that lane. These three lines read the
+     starter registry at run time rather than printing a number this lane typed,
+     so their red is this lesson's claim following the code. Re-run G and paste
+     in what it prints; the prose below already says "on the day this lesson was
+     written". They are a fence of their own so that the six lines above — which
+     are two components answering, and move for nobody — are not covered by this
+     mark. -->
+
+```
   primitives that read a binding: loom.tally, loom.feed
   primitives that declare what they could not show: (none)
   what the registry answers for loom.feed: undefined

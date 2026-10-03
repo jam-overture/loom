@@ -186,6 +186,9 @@ export const RECORD_VOCABULARY: readonly string[] = [
 const plural = (count: number, one: string, many: string): string =>
   `${count} ${count === 1 ? one : many}`
 
+/** A clause written to be joined, standing on its own as a sentence. */
+const opening = (clause: string): string => `${clause.slice(0, 1).toUpperCase()}${clause.slice(1)}`
+
 /**
  * The counts, as a sentence.
  *
@@ -218,13 +221,38 @@ const measurementOf = (analysis: ChangeAnalysis): string => {
   return `${counted}, in ${plural(analysis.operationCount, "step", "steps")}.`
 }
 
+/**
+ * What raised the weight, one sentence each rather than one sentence of five.
+ *
+ * `RAISED_BY` is written as a list of clauses — *it takes a lot off the page at
+ * once* — and this joined them with semicolons, which is how the heaviest
+ * change this site can be asked for came to print **one fifty-word sentence**
+ * inside a rung of a five-step rail. Measured rather than supposed: a request
+ * at the refusal floor fires five factors, and *"Weighed as the most serious
+ * kind: it destroys something you marked as protected; it rewrites something
+ * you marked as protected; it takes a lot off the page at once; it reaches
+ * across a lot of the page; it changes the shape of the page rather than the
+ * wording inside it."* is the sentence that came out.
+ *
+ * Nothing is dropped, because a record that shortened itself to read better
+ * would be the one thing this site may never do. What changes is the
+ * punctuation between the clauses: each factor is its own sentence, which is
+ * six short ones in place of a colon and four semicolons, and the longest of
+ * the six is fifteen words. The weight itself is the first of them, so a reader
+ * who takes in one sentence has taken in the answer.
+ *
+ * The clauses are written lower-case to be joined, so the first letter is
+ * raised here rather than fourteen times in `RAISED_BY` — the map is read by
+ * `adapt.test.ts` as the sentences this module can print, and a capital in it
+ * would be a fact about this one join.
+ */
 const weighingOf = (assessment: ChangeAssessment): string => {
   const raised = assessment.stakes.factors.map((factor) => RAISED_BY[factor.code])
   const weight = WEIGHT[assessment.stakes.level]
 
   return raised.length === 0
-    ? `Weighed as ${weight}: nothing about it gave your rules pause.`
-    : `Weighed as ${weight}: ${raised.join("; ")}.`
+    ? `Weighed as ${weight}. Nothing about it gave your rules pause.`
+    : `Weighed as ${weight}. ${raised.map(opening).join(". ")}.`
 }
 
 const VERDICT_LABEL = {
@@ -259,7 +287,7 @@ const VERDICT_LINE = {
   held: "",
   refused: "",
   approved:
-    " You said yes, so it went through — and your rules having stopped it first is part of the record too.",
+    " You said yes, so it went through. The record also says your rules stopped it first.",
   "nothing-to-do": "",
 } satisfies Record<Verdict, string>
 
@@ -282,7 +310,7 @@ const undoingOf = (assessment: ChangeAssessment, landed: boolean): string => {
         retainedNodeCount,
         "piece",
         "pieces"
-      )} — so putting it back restores every word rather than writing them out again.`
+      )}. Putting it back restores every word rather than writing them out again.`
     : `The change that reverses this was written at the same time. It is ${steps}, and it is recorded like anything else.`
 }
 

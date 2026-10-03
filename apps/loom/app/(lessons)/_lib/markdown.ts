@@ -27,6 +27,25 @@ export type Block =
   | { readonly kind: "paragraph"; readonly text: string }
   | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] }
   | { readonly kind: "code"; readonly language: string | undefined; readonly code: string }
+  /**
+   * An HTML comment: a line the reader never sees, in either rendering of the
+   * course.
+   *
+   * It is here because one thing a lesson needs to say is addressed to whoever
+   * maintains it rather than to whoever is reading it — see the `moves:` mark in
+   * `transcripts.test.ts`, which is the only kind of note this course currently
+   * writes. GitHub does not render an HTML comment and neither does this
+   * surface, so the note is invisible in both and present in the source, which
+   * is the whole of why that shape was chosen over a visible aside.
+   *
+   * Before this existed, a comment in a lesson parsed as a **paragraph** and was
+   * drawn on the page as the punctuation the reader has to ignore — the exact
+   * outcome the module comment above says a lesson will fail loudly rather than
+   * produce. No lesson had one, so nothing had ever shown it; the construct is
+   * handled now rather than the hazard being left for the first author who
+   * reaches for it.
+   */
+  | { readonly kind: "note"; readonly text: string }
   | { readonly kind: "quote"; readonly blocks: readonly Block[] }
   | { readonly kind: "table"; readonly headers: TableRow; readonly rows: readonly TableRow[] }
   | { readonly kind: "rule" }
@@ -40,6 +59,8 @@ const BULLET = /^[-*]\s+(.*)$/
 const CONTINUATION = /^\s+\S/
 const TABLE_ROW = /^\|(.*)\|\s*$/
 const TABLE_RULE = /^\|[\s:|-]+\|\s*$/
+const COMMENT_OPEN = /^<!--/
+const COMMENT_CLOSE = /-->/
 
 const cells = (line: string): TableRow => {
   const inner = TABLE_ROW.exec(line)?.[1] ?? ""
@@ -69,6 +90,15 @@ export const parseBlocks = (markdown: string): readonly Block[] => {
       if (HEADING.test(line) || FENCE.test(line) || RULE.test(line)) break
       if (QUOTE.test(line) || TABLE_ROW.test(line)) break
       if (ORDERED.test(line) || BULLET.test(line)) break
+      /**
+       * A comment ends a paragraph even with no blank line between them, which
+       * is not how markdown treats arbitrary inline HTML and is how every note
+       * this course writes is laid out: a sentence of prose, then the mark, then
+       * the fence it governs. Absorbing it would put the note's text into a
+       * rendered paragraph, and the point of the construct is that no reader
+       * ever sees it.
+       */
+      if (COMMENT_OPEN.test(line.trim())) break
 
       held.push(line.trim())
       at += 1
@@ -153,6 +183,35 @@ export const parseBlocks = (markdown: string): readonly Block[] => {
     blocks.push({ kind: "code", language: language === "" ? undefined : language, code: held.join("\n") })
   }
 
+  /**
+   * From `<!--` to the first `-->`, which may be the same line or a later one.
+   *
+   * An unterminated comment is the rest of the file, matching what `fence` does
+   * with an unterminated fence: both are the author having left something open,
+   * and swallowing the remainder makes that loud at the first thing that counts
+   * blocks rather than quietly dropping one line.
+   */
+  const comment = (): void => {
+    const held: string[] = []
+
+    while (at < lines.length) {
+      const line = lines[at] ?? ""
+      held.push(line)
+      at += 1
+
+      if (COMMENT_CLOSE.test(line)) break
+    }
+
+    const text = held
+      .join(" ")
+      .replace(/^\s*<!--/, "")
+      .replace(/-->\s*$/, "")
+      .replace(/\s+/g, " ")
+      .trim()
+
+    blocks.push({ kind: "note", text })
+  }
+
   const quote = (): void => {
     const held: string[] = []
 
@@ -193,6 +252,11 @@ export const parseBlocks = (markdown: string): readonly Block[] => {
     if (heading?.[1] !== undefined) {
       blocks.push({ kind: "heading", level: heading[1].length, text: heading[2] ?? "" })
       at += 1
+      continue
+    }
+
+    if (COMMENT_OPEN.test(line.trim())) {
+      comment()
       continue
     }
 

@@ -12,7 +12,13 @@ const AUDIENCE: Record<EntryPoint["audience"], string> = {
  * adding an entry point is one edit, not one edit per page that lists them.
  */
 export const EntryPoints = () => (
-  <div className="not-prose border-edge my-6 overflow-x-auto rounded-lg border">
+  /*
+   * `data-doors` so this table can be named. The installation page carries two
+   * tables — this one and the peer dependencies — and `table` alone resolves to
+   * both, which is a screenshot the harness refuses to take and a selector a
+   * test should not be using either.
+   */
+  <div data-doors className="not-prose border-edge my-6 overflow-x-auto rounded-lg border">
     <table className="w-full border-collapse text-sm">
       <thead>
         <tr className="bg-surface-sunken text-ink">
