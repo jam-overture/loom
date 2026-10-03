@@ -42321,3 +42321,167 @@ churn a pull request whose body links four screenshots by commit, to fix
 something that did not break, and the rule's purpose — the preview — is already
 served. The commits are wrong and they are recorded as wrong, which is the
 cheaper of the two honest options.
+
+---
+## 2026-10-03 — the Gate computes exactly why a change cannot be undone and joins it into prose on the way to the queue, so the one screen that is asking somebody to decide is the one screen that cannot read it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/runtime/disposition.ts`, `src/runtime/gate.ts`) · **Status:** open — not a
+defect, and it is the reason this lane shipped the answer on `/portal/activity`
+and not on the review queue
+
+`assessReversibility` produces `IrreversibilityReason[]`, a two-member union, and
+the two members ask **opposite** things of the person reading:
+
+| code | what it means | what a reader should do |
+| --- | --- | --- |
+| `out-of-tree-effect` | the page is fully recoverable and *reality* is not — the change configures a part that takes a payment or sends something | go and look at whatever that part is wired to, before saying yes |
+| `retention-budget-exceeded` | reality is fine and the *page* is not fully recoverable — undoing it would hold more removed content than the policy allows | decide whether the content is worth keeping, because the rest of it will not come back |
+
+Three consumers, three fidelities:
+
+| what it holds | what a screen can say |
+| --- | --- |
+| `ChangeAssessment.reversibility.reasons` | everything, types and budget included |
+| `AssessmentSummary.irreversibilityReasons` (journal) | **the codes**, as `readonly string[]` |
+| `Disposition` (what a hold carries) | `reversible: boolean`, and the codes **joined into `reason.detail`** by `confirmIrreversible` |
+
+The third is the review queue. `HeldProposal` carries a `Disposition` and nothing
+else about the assessment, and `confirmIrreversible` has already done
+`reasons.map((reason) => reason.code).join("; ")` into a sentence beginning
+*"cannot be undone cleanly: "*. So the screen that renders **Apply this change**
+and **No thanks**, beside the words *"This one can't be undone afterwards."*, is
+the one place in this repository where the reason exists and cannot be read as
+data.
+
+**The workaround was available and deliberately not taken.** Mining the two code
+tokens out of `reason.detail` works today — the codes are a published union and
+the sentence is derived — and it breaks silently the first time anybody rewords a
+detail line, which is prose written for a reader and documented as such
+(`DispositionReason.detail` is `z.string()`, beside a `code` that is an enum).
+This lane would then be confidently wrong on a decision screen rather than
+absent from it, which is the worse of the two. Same reasoning as the 2 October
+`treeAt` entry: a consumer that gets a derived reading slightly wrong fails in a
+way that looks exactly like success.
+
+| | |
+| --- | --- |
+| what is missing | the structured reasons on the thing a hold carries |
+| the smallest shape | `readonly irreversibilityReasons?: readonly IrreversibilityReason[]` on `Disposition`, set by `decide` from the assessment it already holds — optional and never defaulted (0045), because a judgment restored from storage predates it |
+| the alternative | the assessment on `HeldProposal`, which is a bigger row and gives §6 a second copy of a record the journal already keeps |
+| what it would buy | `answerOutcomes` in `app/(portal)/_lib/waiting.ts` saying *why*, on `/portal` and `/portal/pages/[treeId]`, from the table that already exists (`IRREVERSIBILITY_PLAIN`) |
+
+Nothing is red and nothing is blocked: `app/(portal)/_lib/undoing.ts` takes an
+`AssessmentSummary`, so the day a hold carries the reasons it is one call and no
+new words.
+
+---
+## 2026-10-03 — `out-of-tree-effect` names the primitive types that caused it and the journal keeps only the code, so a screen can explain the mechanism and can never name the part
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/event.ts`) · **Status:** open — small, and it is the difference
+between a true sentence and an actionable one
+
+`summariseAssessment` writes `reasons.map((reason) => reason.code)`. For
+`retention-budget-exceeded` that is almost lossless — `retainedNodeCount` is
+journalled beside it, so a screen can say *this one takes 9 parts off the page*.
+For `out-of-tree-effect` the reason's own `primitiveTypes` — the exact subset of
+what the change touched that this deployment declared reaches outside the tree —
+is dropped.
+
+So the sentence this lane shipped says *"This change sets up a part that reaches
+beyond the page — the kind of thing that takes a payment or sends a message"*,
+and it has to say *the kind of thing* because the record cannot say **which**.
+The reader is sent to check something and not told what. `touchedPrimitiveTypes`
+is on the summary and is not an answer: it is a superset, and naming one of its
+members as the offender would be the portal guessing on the one screen where a
+guess is most expensive.
+
+The types are already judged safe to journal — `touchedPrimitiveTypes`,
+`removedPrimitiveTypes` and `relocatedPrimitiveTypes` are all
+`z.array(primitiveTypeSchema)` and bounded by the catalogue, which is the
+argument `removedPrimitiveTypes`' own doc comment makes. The suggestion is the
+same shape beside them:
+
+```ts
+/** Which touched types this policy declared reach outside the page. */
+outOfTreeEffectTypes: z.array(primitiveTypeSchema).optional(),
+```
+
+Absent and never defaulted (0045), set from the reason when it fires. One field,
+and the sentence stops ending in a shrug.
+
+---
+## 2026-10-03 — a revision carries no judgment, so the screen with the undo button on it is the one screen that cannot say undoing will not undo everything
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/store.ts`) ·
+**Status:** open — filed as the consequence of the two entries above rather than
+as a separate ask, and the cheapest of the three to decline
+
+`/portal/history` has `ReversalNote`, which is the best thing on this surface: it
+inverts the log and says what undoing a revision would put back and what later
+work it would write over. Every word of it is about the **tree**, because
+`planRevert` is about the tree.
+
+The Gate's irreversibility is the other question, and the two look identical from
+the outside. A tree-level inverse always exists — 0016 guarantees it — so a
+change that took a payment has a perfectly clean `Reversal`, and the screen
+offers the button with no notice at all. *"If you undo this, Loom puts back: the
+card “Autumn sign-up”"* is true, complete about the page, and silent about the
+charge.
+
+`StoredRevision` holds `treeId`, `revision`, `proposalId`, `delta`, `provenance`,
+`appliedAt` and `answeredBy`. No disposition, no assessment. It holds the
+`proposalId`, so the fact is reachable by joining the journal — which is a read
+per row on a paged screen, against a journal that may be `undefined` on a
+deployment with none.
+
+**This is a question rather than a request**, and the honest version of it is:
+*is reversibility a property of a revision that the log should carry, or a
+property of the judgment that should be joined to it?* 0016 makes the log the
+truth about the page, and whether the change reached outside the page is not a
+fact about the page — which argues for the join. If the answer is the join, the
+useful thing is not a field here but the one above: an `AssessmentSummary` a
+consumer can fetch by `proposalId` without paging the whole journal.
+
+Not built in this lane either way, and the screen says nothing untrue today — it
+simply does not say this. Named here so that whoever reaches it finds it already
+thought about.
+
+---
+## 2026-10-03 — the assessment double is adopted in one of the three fixtures named for it, and the untruthful one was the one a screen started reading
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/write.test.ts`, `app/(portal)/_lib/what-if.test.ts`) ·
+**Status:** open — two of three left, and they are the two the 3 October entry
+calls the lower priority
+
+`portal/activity/_components/proposal-line.test.tsx` now builds its assessment
+with `buildAssessment` and narrates it through the real `recordOf` (0216), which
+is exactly the replacement `Loom daily build` wrote out this morning. Both
+untruths it named are gone with it: `irreversibilityReasons` held the sentence
+*"a removal destroys content"* where the runtime only ever puts one of two
+codes, and it paired that with `retainedNodeCount: 0` while the runtime sets the
+retained count **from** the removal.
+
+The entry's prediction is worth recording as having come true within the day:
+
+> *"It is inert today — nothing in `apps/` reads `irreversibilityReasons` — and
+> it is exactly the thing 0216 is about: the fixture describes a record no run of
+> Loom produces, the test is green, and the day a screen renders that list the
+> test will go on being green while the page shows a code nobody wrote a
+> sentence for."*
+
+The screen that renders that list shipped on the same branch. Had the fixture not
+been converted first, every assertion on this line would have passed while the
+card showed *"Loom gave a reason this screen has no words for — a removal
+destroys content"*, which is the unnamed-code state firing on a string the
+runtime cannot produce.
+
+`write.test.ts` and `what-if.test.ts` are untouched and are the remaining two.
+Neither is red and neither is untruthful in the same way — they build an
+`AssessmentSummary`, typed rather than cast, so a required field added to that
+shape stops them compiling, which is the good failure. Left for the run that next
+has a reason to open them, under the same rule the screen names move by: a
+fixture is converted on the run that changes the test it belongs to, never as a
+sweep.
