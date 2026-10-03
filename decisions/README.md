@@ -302,3 +302,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0216](0216-a-published-double-derives-whatever-the-runtime-derives.md) | A published double derives whatever the runtime derives | Accepted | §2 |
 | [0217](0217-choosing-a-two-region-primitive-is-itself-an-insert-decision.md) | Choosing a two-region primitive is itself an insert decision | Accepted | §4b |
 | [0218](0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md) | What a counter means is published, and the browser pays for the number and not its name | Accepted | §4c (reader signals) |
+| [0219](0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md) | A page view is counted once at the door, and the over-count in the node counters is a measurement | Accepted | §4c (reader signals) |

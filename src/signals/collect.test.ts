@@ -180,6 +180,56 @@ describe("collectReaderSignals", () => {
   })
 
   /**
+   * The wiring that makes the exact page-view count worth having: nothing had to
+   * be passed to this function for the comparison half to work, because a rollup
+   * already carries its window's page views and `apply` already takes a rollup.
+   *
+   * The two numbers here mean different things and the test says so — two page
+   * views opened at the door, and the two appearances this window saw of them.
+   */
+  it("counts the window's page views into the counter the door also writes", async () => {
+    const { journal, store, time } = await ripeBuffer()
+    await store.opened([{ treeId: TREE, revision: 1, views: 2 }], at(0))
+
+    await collectReaderSignals(journal, store, { clock: time.clock })
+
+    expect(unwrap(await store.pageViews())).toEqual([
+      expect.objectContaining({ treeId: TREE, revision: 1, opened: 2, appearances: 2 }),
+    ])
+  })
+
+  /**
+   * The straddle, end to end and for once visible. One page view's batches are
+   * ripe in this window and the rest of them in the next, so the two windows
+   * report three appearances of two page views — and the counter says the
+   * distinct counts stored against the revision are one view generous rather
+   * than *bounded by something a deployment would have to work out*.
+   */
+  it("measures the page view that straddled two windows rather than bounding it", async () => {
+    const time = movingClock(-2 * HOUR)
+    const journal = memoryReaderSignalJournal(time.clock)
+    const store = memoryReaderTallyStore()
+
+    await journal.receive([
+      batchOf([viewed("pricing")], { view: viewKey(1) }),
+      batchOf([viewed("pricing")], { view: viewKey(2) }),
+    ])
+    await store.opened([{ treeId: TREE, revision: 1, views: 2 }], at(-2 * HOUR))
+    time.moveTo(0)
+    await collectReaderSignals(journal, store, { clock: time.clock })
+
+    /** The same reader again, an hour later, still on the page they opened. */
+    await journal.receive([batchOf([dwelled("pricing", 900)], { view: viewKey(2) })])
+    time.moveTo(2 * HOUR)
+    await collectReaderSignals(journal, store, { clock: time.clock })
+
+    const [row] = unwrap(await store.pageViews())
+
+    expect(row).toMatchObject({ opened: 2, appearances: 3 })
+    expect(unwrap(await store.tallies())[0]).toMatchObject({ views: 3 })
+  })
+
+  /**
    * The property the whole design rests on, and the reason counting and
    * forgetting are one call. A rollup reports what one window *added*, so a
    * batch counted twice is counted twice forever — there is no idempotence to

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { batchOf, region, viewed, viewKey } from "../testing/reader-signal-contract.js"
+import { batchOf, dwelled, region, viewed, viewKey } from "../testing/reader-signal-contract.js"
 
 import { describeIngestError, ingestReaderSignals, MAX_BATCHES_PER_DELIVERY } from "./ingest.js"
 import type { ReaderSignalJournal } from "./journal.js"
-import { memoryReaderRegionStore, memoryReaderSignalJournal } from "./memory.js"
+import { memoryReaderRegionStore, memoryReaderSignalJournal, memoryReaderTallyStore } from "./memory.js"
 import type { ReaderRegionStore } from "./region.js"
+import type { ReaderTallyStore } from "./tally.js"
 
 const refusing = (): ReaderSignalJournal => ({
   ...memoryReaderSignalJournal(),
@@ -21,7 +22,7 @@ describe("ingestReaderSignals", () => {
 
     const outcome = await ingestReaderSignals(journal, asSent(batchOf([viewed("a"), viewed("b")])))
 
-    expect(outcome.ok && outcome.value).toEqual({ batches: 1, signals: 2, regions: 0 })
+    expect(outcome.ok && outcome.value).toEqual({ batches: 1, signals: 2, opened: 0, regions: 0 })
   })
 
   it("takes a list, because a queue draining after an outage posts one", async () => {
@@ -32,7 +33,7 @@ describe("ingestReaderSignals", () => {
       asSent([batchOf([viewed("a")]), batchOf([viewed("b")])])
     )
 
-    expect(outcome.ok && outcome.value).toEqual({ batches: 2, signals: 2, regions: 0 })
+    expect(outcome.ok && outcome.value).toEqual({ batches: 2, signals: 2, opened: 0, regions: 0 })
   })
 
   it("keeps what it accepted, in order", async () => {
@@ -159,6 +160,161 @@ describe("ingestReaderSignals", () => {
   })
 })
 
+describe("how many page views began", () => {
+  const AT = "2026-10-03T00:00:00.000Z"
+  const GB = region("GB")
+
+  const opening = (nth: number) =>
+    asSent(batchOf([viewed("a")], { view: viewKey(nth), first: true }))
+
+  const openedIn = async (store: ReaderTallyStore) => {
+    const rows = await store.pageViews()
+
+    return rows.ok ? rows.value.map((row) => `${row.revision}:${row.opened}:${row.appearances}`) : ["unavailable"]
+  }
+
+  it("counts a reader arriving, once, against the exact counter", async () => {
+    const openings = memoryReaderTallyStore()
+
+    const outcome = await ingestReaderSignals(memoryReaderSignalJournal(), opening(1), { at: AT, openings })
+
+    expect(outcome.ok && outcome.value.opened).toBe(1)
+    expect(await openedIn(openings)).toEqual(["1:1:0"])
+  })
+
+  /**
+   * The counter would be worthless otherwise. A reader who stays ten minutes
+   * posts a hundred deliveries, and a page-view count that moved with each of
+   * them would make one visitor a readership — which is the same inversion
+   * 0214 refused for the region buckets, in the number everything else is a
+   * rate against.
+   */
+  it("counts nothing for the deliveries that follow the opening one", async () => {
+    const openings = memoryReaderTallyStore()
+    const counters = { at: AT, openings }
+    const journal = memoryReaderSignalJournal()
+
+    await ingestReaderSignals(journal, opening(1), counters)
+    await ingestReaderSignals(journal, asSent(batchOf([viewed("b")], { view: viewKey(1) })), counters)
+    await ingestReaderSignals(journal, asSent(batchOf([dwelled("b", 400)], { view: viewKey(1) })), counters)
+
+    expect(await openedIn(openings)).toEqual(["1:1:0"])
+  })
+
+  /**
+   * A queue draining after an outage re-posts what it could not confirm, and a
+   * page view counted twice cannot be uncounted (0158). Inside one delivery the
+   * keys are compared; the retry that arrives as its own delivery is the bound
+   * this counter has and the record says so.
+   */
+  it("counts one arrival when a delivery carries the same opening twice", async () => {
+    const openings = memoryReaderTallyStore()
+
+    const outcome = await ingestReaderSignals(
+      memoryReaderSignalJournal(),
+      asSent([
+        batchOf([viewed("a")], { view: viewKey(1), first: true }),
+        batchOf([viewed("a")], { view: viewKey(1), first: true }),
+      ]),
+      { at: AT, openings }
+    )
+
+    expect(outcome.ok && outcome.value.opened).toBe(1)
+    expect(await openedIn(openings)).toEqual(["1:1:0"])
+  })
+
+  it("counts two readers who arrived in one delivery", async () => {
+    const openings = memoryReaderTallyStore()
+
+    const outcome = await ingestReaderSignals(
+      memoryReaderSignalJournal(),
+      asSent([
+        batchOf([viewed("a")], { view: viewKey(1), first: true }),
+        batchOf([viewed("a")], { view: viewKey(2), first: true }),
+      ]),
+      { at: AT, openings }
+    )
+
+    expect(outcome.ok && outcome.value.opened).toBe(2)
+    expect(await openedIn(openings)).toEqual(["1:2:0"])
+  })
+
+  it("counts nothing for a caller that keeps no such counter", async () => {
+    const outcome = await ingestReaderSignals(memoryReaderSignalJournal(), opening(1))
+
+    expect(outcome.ok && outcome.value.opened).toBe(0)
+  })
+
+  /**
+   * The two counters are stamped onto one walk, so a delivery can never be one
+   * arrival to the page-view counter and two to the region buckets. A map whose
+   * numbers did not add up to the page views there were would be unexplainable
+   * from the rows.
+   */
+  it("tells the region buckets and the exact counter the same number", async () => {
+    const openings = memoryReaderTallyStore()
+    const regions = memoryReaderRegionStore()
+
+    const outcome = await ingestReaderSignals(
+      memoryReaderSignalJournal(),
+      asSent([
+        batchOf([viewed("a")], { view: viewKey(1), first: true }),
+        batchOf([viewed("a")], { view: viewKey(1), first: true }),
+        batchOf([viewed("a")], { view: viewKey(2), first: true }),
+      ]),
+      { at: AT, openings, region: { store: regions, region: GB } }
+    )
+
+    expect(outcome.ok && outcome.value).toMatchObject({ opened: 2, regions: 2 })
+  })
+
+  /**
+   * The batch is already kept, so refusing the delivery would invite a retry
+   * that counted every signal in it twice. A counter that could not be written
+   * is a counter that did not move, reported rather than raised.
+   */
+  it("keeps a delivery whose arrival could not be counted, and says why", async () => {
+    const openings: ReaderTallyStore = {
+      ...memoryReaderTallyStore(),
+      opened: () => Promise.resolve({ ok: false, error: { code: "unavailable", detail: "no database" } }),
+    }
+    const journal = memoryReaderSignalJournal()
+
+    const outcome = await ingestReaderSignals(journal, opening(1), { at: AT, openings })
+
+    expect(outcome.ok && outcome.value.opened).toBe(0)
+    expect(outcome.ok && outcome.value.openingError?.detail).toBe("no database")
+
+    const page = await journal.read()
+    expect(page.ok && page.value.batches).toHaveLength(1)
+  })
+
+  /** A reader who arrived and read nothing, which the ordering is what prevents. */
+  it("counts no arrival for a delivery the buffer refused", async () => {
+    const openings = memoryReaderTallyStore()
+
+    const refused = await ingestReaderSignals(refusing(), opening(1), { at: AT, openings })
+
+    expect(refused.ok).toBe(false)
+    expect(await openedIn(openings)).toEqual([])
+  })
+
+  /**
+   * The marker is read at the door and goes no further (0214). The buffer is
+   * for what a rollup reads, and a rollup counting arrivals as well would be a
+   * second place deciding how many readers there were.
+   */
+  it("never writes the opening marker onto the buffered batch", async () => {
+    const journal = memoryReaderSignalJournal()
+    await ingestReaderSignals(journal, opening(1), { at: AT, openings: memoryReaderTallyStore() })
+
+    const page = await journal.read()
+
+    expect(page.ok && page.value.batches[0]?.first).toBeUndefined()
+    expect(page.ok && page.value.batches[0]?.view).toBe(viewKey(1))
+  })
+})
+
 describe("where a delivery came from", () => {
   const AT = "2026-10-02T00:00:00.000Z"
   const GB = region("GB")
@@ -176,9 +332,8 @@ describe("where a delivery came from", () => {
     const regions = memoryReaderRegionStore()
 
     const outcome = await ingestReaderSignals(memoryReaderSignalJournal(), opening(1), {
-      store: regions,
-      region: GB,
       at: AT,
+      region: { store: regions, region: GB },
     })
 
     expect(outcome.ok && outcome.value.regions).toBe(1)
@@ -187,7 +342,7 @@ describe("where a delivery came from", () => {
 
   it("counts nothing for the deliveries that follow", async () => {
     const regions = memoryReaderRegionStore()
-    const where = { store: regions, region: GB, at: AT }
+    const where = { at: AT, region: { store: regions, region: GB } }
     const journal = memoryReaderSignalJournal()
 
     await ingestReaderSignals(journal, opening(1), where)
@@ -212,7 +367,10 @@ describe("where a delivery came from", () => {
    */
   it("never writes the region onto the buffered batch", async () => {
     const journal = memoryReaderSignalJournal()
-    await ingestReaderSignals(journal, opening(1), { store: memoryReaderRegionStore(), region: GB, at: AT })
+    await ingestReaderSignals(journal, opening(1), {
+      at: AT,
+      region: { store: memoryReaderRegionStore(), region: GB },
+    })
 
     const page = await journal.read()
     const stored = page.ok ? page.value.batches[0] : undefined
@@ -232,7 +390,10 @@ describe("where a delivery came from", () => {
     }
     const journal = memoryReaderSignalJournal()
 
-    const outcome = await ingestReaderSignals(journal, opening(1), { store: refusing, region: GB, at: AT })
+    const outcome = await ingestReaderSignals(journal, opening(1), {
+      at: AT,
+      region: { store: refusing, region: GB },
+    })
 
     expect(outcome.ok && outcome.value.regions).toBe(0)
     expect(outcome.ok && outcome.value.regionError?.detail).toBe("no database")
@@ -252,9 +413,8 @@ describe("where a delivery came from", () => {
     const regions = memoryReaderRegionStore()
 
     const refused = await ingestReaderSignals(refusing(), opening(1), {
-      store: regions,
-      region: GB,
       at: AT,
+      region: { store: regions, region: GB },
     })
 
     expect(refused.ok).toBe(false)

@@ -41327,6 +41327,88 @@ place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
 
 ---
+## 2026-10-03 — the reader screen can divide by an exact number of page views now, and say how generous the figures above it are
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **a denominator that did not
+exist and now does.** Nothing is broken; what is there to read is better than
+what any screen built before today could have asked for.
+
+Every number the reader screen shows is a rate, and until today the only
+denominator available was `views` summed off the tallies — a distinct count added
+across rollup windows, generous by every page view that straddled one
+([0147](decisions/0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md)),
+with the error bounded by *views per window × page-view duration ÷ window length*
+and therefore unanswerable from the rows.
+
+`ReaderTallyStore.pageViews()` is the new read, and
+`pageViewReadingOf(rows)` is the reading
+([0219](decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)):
+
+| | |
+| --- | --- |
+| `opened` | page views that **began**, per tree and revision. Counted once, at the door, from the marker 0214 added. Exact, and adds across windows, revisions and months |
+| `appearances` | the same page views as the rollups saw them — once per window each appeared in, which is the quantity every `views` figure is made of |
+| `drift` | `appearances − opened`: the over-count in every distinct count stored against that revision, measured rather than bounded |
+| `inflation` | `drift ÷ opened`, or `null` when nothing has opened — the fraction a screen can say out loud |
+| `pending` | openings no rollup has folded yet. The other sign of the same subtraction, and what a stalled `signals:collect` looks like |
+
+**The sentence this makes available**, which is worth more than a more exact
+number would be: *of 1,240 page views of revision 4, 310 reached the pricing band
+— and these figures are 4% generous, because 50 of those readers were counted in
+two windows.* A rate shown without the second clause was wrong by an amount
+nobody could state.
+
+**Two things to be careful of on the screen.**
+
+- **A rate over 100% is now possible and is not a bug.** `reached` on a tally is
+  a summed distinct count and `opened` is exact, so a band everybody reached can
+  read as 104% where the old denominator hid it by being inflated too. Dividing
+  by `appearances` keeps a rate inside its bounds; dividing by `opened` answers
+  *how many readers*. The two are different questions and both rows are there.
+- **`pending` is not a reader count.** It is a collection that has not run,
+  which on a deployment whose cron is wedged will be most of the openings.
+
+Rows are per tree and per revision, so *before versus after a change* is a
+comparison of two exact numbers for the first time. Nothing needs a migration a
+deployment has not already run: `db:push` creates the table.
+
+---
+## 2026-10-03 — the upsert that refuses to touch one row twice is guarded for one of the four counter tables, and the other three have the same seam
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/postgres.ts`)
+· **Status:** open — **a latent divergence, written down rather than swept.**
+Nothing is red, and no producer in the repository can currently trigger it.
+
+Found by the contract suite while adding the page-view counter, which is the
+first counter in this subsystem a caller composes by hand rather than reads off
+a rollup's map.
+
+`ON CONFLICT … DO UPDATE` refuses to affect one row twice in a single command —
+Postgres raises rather than applying the second value. So two counts of the same
+key inside one call behave differently in the two implementations:
+
+| | memory | Postgres |
+| --- | --- | --- |
+| two counts of one revision in one call | adds them | **refuses the whole write** |
+
+For the page-view counter that is fixed: `summed` folds the rows in front of the
+driver and a contract case asserts both stores answer `5`. **The same seam is
+open on `loom_reader_tallies`, `loom_reader_funnels` and
+`loom_reader_regions`** — `rollUp` keys its tallies and funnel ends by map and
+`openingsOf` keys its openings by revision, so none of them can emit a duplicate
+today, and a caller applying counters it composed itself can.
+
+What it would cost if it happened: on the tallies it is an `apply` that fails, so
+`collectReaderSignals` returns `unavailable` and forgets nothing — recoverable
+and loud. On the regions it is a bucket that silently did not move, reported in
+the delivery's outcome and nowhere else.
+
+**The remedy is the same fold with three more key functions**, and it is worth
+doing with a contract case each rather than a comment saying it cannot happen.
+Not done here because it is four tables' worth of change hung off a unit about
+one of them, and because the producers that matter are the ones this unit did
+not add.
 ## 2026-10-03 — the assessment double exists; the three fixtures that needed it are still object literals, and one of them asserts against a record no run of Loom can produce
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
