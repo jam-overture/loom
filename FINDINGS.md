@@ -40831,7 +40831,7 @@ repository half to be the guard.
 · **Status:** **closed by `signals-04-what-on-screen-means`** — the two names the
 finding asked for, `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION`,
 published from **`@jam-overture/loom/signals`** (not from `/signals/broadcast`,
-and that is the whole of [0215](decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)):
+and that is the whole of [0218](decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)):
 a name a browser entry point *exports* survives minification, so exporting them
 there measured **+77 bytes minified, +42 gzipped** on every page that broadcasts,
 against **+0 minified** for the same two numbers imported into `broadcast.ts`

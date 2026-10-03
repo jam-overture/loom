@@ -34,7 +34,7 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader |
-| What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0215](../decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
+| What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -77,7 +77,7 @@ call inside a pull request.
    took 314 ms. Anything added stays behind both.
 
    One limit found in it on 2 October, measured and recorded in
-   [0215](../decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md):
+   [0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md):
    **a name the browser entry point *exports* survives minification.** Two
    exported constants cost 77 bytes minified where the same two numbers imported
    into `broadcast.ts` cost nothing, and the two spellings are

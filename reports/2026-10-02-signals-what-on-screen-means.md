@@ -55,7 +55,7 @@ mangled to a letter, with the value inlined. The two spellings are
 indistinguishable in a diff and 77 bytes apart on every page of every deployment
 that broadcasts, for ever, to serve a sentence on a documentation site. So the
 constants live in `src/signals/readable.ts`, `broadcast.ts` imports them, and
-`@jam-overture/loom/signals` publishes them. [0215](../decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)
+`@jam-overture/loom/signals` publishes them. [0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)
 carries it as the general rule for any constant that is both applied in a browser
 and quoted elsewhere.
 
@@ -146,7 +146,7 @@ on their screen.
 
 **1. The constants are published from their own module, not from the
 broadcaster.** The finding asked for "two named exports" and the obvious reading
-costs 77 bytes a reader. In 0215 with the measurement, as the general rule.
+costs 77 bytes a reader. In 0218 with the measurement, as the general rule.
 
 **2. They are not configuration, and changing either is a record.** Nobody asked
 for a setting; I am writing down that there will not be one, because *threshold
@@ -175,7 +175,7 @@ same 6,477.
 
 ## Records added
 
-[0215](../decisions/0215-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)
+[0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)
 — *What a counter means is published, and the browser pays for the number and not
 its name.* Accepted; it contradicts nothing and supersedes nothing. Four
 alternatives recorded with why they lost, including the two that look free
@@ -222,7 +222,7 @@ constants and nothing else.
 
 **Browser cost, measured rather than estimated** — `esbuild --bundle --minify`
 over `src/signals/broadcast.ts`: **6,477 → 6,477 bytes minified**, 2,944 → 2,945
-gzipped. Zero, which is the whole of 0215. The rejected spelling of the same
+gzipped. Zero, which is the whole of 0218. The rejected spelling of the same
 change was 6,554. `browser-weight.test.ts` still reports the broadcaster reaching
 no package; `readable.ts` imports nothing.
 

@@ -1,8 +1,15 @@
-# 0215 — What a counter means is published, and the browser pays for the number and not its name
+# 0218 — What a counter means is published, and the browser pays for the number and not its name
 
 **Status:** Accepted
 **Date:** 2026-10-02
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-03**, from 0215, when the branch that carried it
+> (#486) was merged. `main` had meanwhile accepted a different 0215 — *a stake
+> rule either reads a policy or is fixed at its code* (#485, merged earlier the
+> same morning) — and two records sharing a number is fatal (0097). This record
+> was written on 2 October and nothing in it changed but its number; references
+> on the branch were updated with it.
 
 ## Context
 

@@ -183,7 +183,7 @@ describe("what on screen means", () => {
 
   /**
    * The one assertion here that is about the numbers rather than the rule, and it
-   * is deliberately a tautology: 0215 makes these two a published promise, so
+   * is deliberately a tautology: 0218 makes these two a published promise, so
    * moving either is a breaking change to what every stored counter meant and to
    * a sentence on a page that quotes them. This is where a silent edit stops.
    */
