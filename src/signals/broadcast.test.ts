@@ -467,6 +467,37 @@ describe("broadcastReaderSignals", () => {
     ])
   })
 
+  /**
+   * The same closing, from the one direction the ledger's own suite could not
+   * reach until today: **a background tab**. A `MutationObserver` delivers in a
+   * hidden tab, so a client navigation while a reader is somewhere else removes
+   * the nodes and closes their stretches with nobody looking — and the time the
+   * tab spent hidden has to stay off the counter. Filed by `Loom docs` on
+   * 2 October, who measured 11 seconds credited for 3 seconds of reading against
+   * a one-line mutation that the whole suite passed.
+   */
+  it("credits no time to a node the page sheds while the tab is in the background", async () => {
+    const batches = start()
+
+    reportVisibility([{ target: byId("n_2"), visible: true }])
+
+    clock = 4_000
+    Object.defineProperty(document, "visibilityState", { value: "hidden", configurable: true })
+    document.dispatchEvent(new Event("visibilitychange"))
+
+    clock = 304_000
+    byId("n_2").remove()
+    await settle()
+    broadcast?.flush()
+
+    Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true })
+
+    expect(batches.flatMap((batch) => batch.signals)).toEqual([
+      { kind: "viewed", nodeId: "n_2", type: "loom.section", at: 1_000 },
+      { kind: "dwelled", nodeId: "n_2", type: "loom.section", ms: 3_000 },
+    ])
+  })
+
   it("reports a node that is taken out and put back as viewed once, not twice", async () => {
     const batches = start()
     const band = appendBand("n_9")

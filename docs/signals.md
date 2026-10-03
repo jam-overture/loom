@@ -34,6 +34,7 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
+| What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -74,6 +75,15 @@ call inside a pull request.
    reaches no package; `browser-weight.test.ts` fails if one creeps back in. The
    ledger is linear, not quadratic — it was quadratic once, and a 6,000-node page
    took 314 ms. Anything added stays behind both.
+
+   One limit found in it on 2 October, measured and recorded in
+   [0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md):
+   **a name the browser entry point *exports* survives minification.** Two
+   exported constants cost 77 bytes minified where the same two numbers imported
+   into `broadcast.ts` cost nothing, and the two spellings are
+   indistinguishable in a diff. A value the browser applies and a page needs to
+   quote lives in its own module, imported there and re-exported from
+   `@jam-overture/loom/signals`.
 5. **Aggregates are the durable artefact.** Raw batches are a short-lived buffer,
    rolled up and expired. Retention is per-deployment configuration with a short
    default, never a constant (0146).
@@ -288,7 +298,7 @@ count added across rollup windows, generous by every page view that straddled on
 (0147), bounded by arithmetic a deployment cannot evaluate from its own rows.
 
 **Done**, and the shape is in
-[0217](../decisions/0217-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md).
+[0219](../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md).
 `loom_reader_page_views` is a tree, a revision and two numbers. `opened` is
 counted at the door from the opening markers of a delivery, once per page view,
 deduplicated by view key — the same walk the region buckets are stamped onto, so

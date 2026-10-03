@@ -87,18 +87,24 @@ straddles and the page would claim counters more exact than any revision on it.
 
 ## Records
 
-- [0217 — A page view is counted once at the door, and the over-count in the
+- [0219 — A page view is counted once at the door, and the over-count in the
   node counters is a
-  measurement](../decisions/0217-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md),
+  measurement](../decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md),
   **Accepted**. It contradicts nothing: 0214 anticipated this column, and 0147's
   bound is still true — it has simply stopped being all a deployment has.
 
-**On the number 0217.** The next number free on `main` is 0215, and **both #485
-and #486 claim it** — the second time in a month that one number has been
-claimed twice. I took 0217 and left the two numbers for the two open claims, so
-that `Loom merge` has one renumbering to do rather than three. `pnpm
-decisions:index` prints a note for a hole and passes, which is how `main` already
-reads for 0152–0154.
+**On the number 0217, and why this record is 0219.** The next number free on
+`main` was 0215, and **both #485 and #486 claimed it** — the second time in a
+month that one number has been claimed twice. I took 0217 and left the two
+numbers for the two open claims, so that `Loom merge` would have one renumbering
+to do rather than three. `pnpm decisions:index` prints a note for a hole and
+passes, which is how `main` already reads for 0152–0154.
+
+*Renumbered to 0219 on 3 October by `Loom merge`:* #487 had claimed 0217 too,
+from the primitives lane, and merged first. So there were three claims on two
+numbers rather than two on one, and this record moved to the next number free on
+`main` and on the open branches. 0215 went to #485, 0216 to #488, 0217 to #487,
+0218 to #486.
 
 ## Findings
 

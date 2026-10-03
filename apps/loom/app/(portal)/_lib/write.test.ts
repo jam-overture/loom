@@ -132,9 +132,11 @@ describe("beginWrite", () => {
             movedNodeCount: 0,
             configuredNodeCount: 0,
             relocatedNodeCount: 0,
+            affectedNodeIds: [],
             touchedPrimitiveTypes: [],
             removedPrimitiveTypes: [],
             relocatedPrimitiveTypes: [],
+            configuredPropKeys: [],
             shallowestAffectedDepth: 2,
           },
           stakes: {

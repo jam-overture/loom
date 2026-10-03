@@ -1,0 +1,17 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-after-wide", "viewport": "wide", "waitFor": "#ask" },
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-after-phone", "viewport": "phone", "waitFor": "#ask" },
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-wide", "viewport": "wide", "waitFor": "#ask ul li",
+      "do": [{ "scrollTo": "#ask ul li:last-child" }] },
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-after-asks-phone", "viewport": "phone", "waitFor": "#ask ul li",
+      "do": [{ "scrollTo": "#ask ul li:last-child" }] },
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-held-unchanged", "viewport": "wide", "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" }] },
+    { "path": "/demo", "out": "2026-10-02-demo-what-loom-will-do-about-each-ask-after-applied-wide", "viewport": "wide", "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" },
+             { "click": "li form button.bg-affirm" }, { "waitFor": "li button.bg-neutral" }] }
+  ]
+}

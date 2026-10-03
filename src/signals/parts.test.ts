@@ -137,6 +137,34 @@ describe("pageReadingOf", () => {
     expect(reading.standings).toEqual({ read: 3, skipped: 2, unknown: 0 })
   })
 
+  /**
+   * The sentence `PartStanding` now carries, held to the arithmetic rather than
+   * left as a claim: `skipped` and the view floor are read off the same rows, so
+   * a window cannot report visits and no part at once. The portal lane designed,
+   * wrote and commented a state for it before a test found it unreachable.
+   */
+  it("cannot report every part skipped, because the rows that would say so are the rows that set the floor", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [tally("page", "loom.stack", { views: 9, reached: 9 })],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.standings.skipped).toBe(reading.parts.length - 1)
+    expect(reading.standings).toEqual({ read: 1, skipped: 4, unknown: 0 })
+  })
+
+  it("reports every part skipped only when a row names a node the page does not have, which the reading also says", () => {
+    const reading = pageReadingOf(
+      treeOf(PAGE),
+      [tally("gone", "loom.section", { views: 9, reached: 9 })],
+      NOTHING_DECLARED
+    )
+
+    expect(reading.standings).toEqual({ read: 0, skipped: 5, unknown: 0 })
+    expect(reading.orphaned).toEqual([nodeId("gone")])
+  })
+
   it("will not call a part skipped when something other than a view named it", () => {
     const reading = pageReadingOf(
       treeOf(PAGE),

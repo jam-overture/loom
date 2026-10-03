@@ -6,6 +6,7 @@ import { bentoBand } from "./bento-band.js"
 import { bentoMixedBand } from "./bento-mixed-band.js"
 import { catalogueBand } from "./catalogue-band.js"
 import { changelogBand } from "./changelog-band.js"
+import { changelogNotesBand } from "./changelog-notes-band.js"
 import { codeBand } from "./code-band.js"
 import { codeSessionBand } from "./code-session-band.js"
 import { comparisonBand } from "./comparison-band.js"
@@ -14,6 +15,7 @@ import { conversationBand } from "./conversation-band.js"
 import { contactBand } from "./contact-band.js"
 import { contactDetailsBand } from "./contact-details-band.js"
 import { credentialsBand } from "./credentials-band.js"
+import { credentialsPostureBand } from "./credentials-posture-band.js"
 import { ctaBand } from "./cta-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
@@ -42,9 +44,11 @@ import { proofFacesBand } from "./proof-faces-band.js"
 import { proofStoryBand } from "./proof-story-band.js"
 import { shelfBand } from "./shelf-band.js"
 import { specsBand } from "./specs-band.js"
+import { specsSheetBand } from "./specs-sheet-band.js"
 import { stepsBand } from "./steps-band.js"
 import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
+import { teamLeadsBand } from "./team-leads-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
 import { whatsOnBand } from "./whats-on-band.js"
@@ -64,6 +68,7 @@ export {
   bentoMixedBand,
   catalogueBand,
   changelogBand,
+  changelogNotesBand,
   codeBand,
   codeSessionBand,
   comparisonBand,
@@ -72,6 +77,7 @@ export {
   conversationBand,
   contactDetailsBand,
   credentialsBand,
+  credentialsPostureBand,
   ctaBand,
   ctaSignupBand,
   episodesBand,
@@ -100,9 +106,11 @@ export {
   proofStoryBand,
   shelfBand,
   specsBand,
+  specsSheetBand,
   stepsBand,
   stepsCardsBand,
   teamBand,
+  teamLeadsBand,
   testimonialsBand,
   testimonialsWallBand,
   whatsOnBand,
@@ -178,6 +186,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   metricsChartBand,
   metricsLiveBand,
   specsBand,
+  specsSheetBand,
   pricingBand,
   pricingMatrixBand,
   offeringsBand,
@@ -186,12 +195,15 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   testimonialsBand,
   testimonialsWallBand,
   credentialsBand,
+  credentialsPostureBand,
   teamBand,
+  teamLeadsBand,
   articlesBand,
   feedBand,
   episodesBand,
   whatsOnBand,
   changelogBand,
+  changelogNotesBand,
   faqBand,
   faqGridBand,
   contactBand,
