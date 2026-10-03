@@ -112,22 +112,52 @@ describe("every page's opening band", () => {
 
   /**
    * One idea per sentence. Thirty words is not a style, it is the point at which
-   * a sentence has started carrying two — and the sentence this replaced carried
+   * a sentence has started carrying two, and the sentence this replaced carried
    * four clauses and forty-five words on the first screen of the site.
+   *
+   * ## It measured sentences that were not on the page
+   *
+   * This read `wordsOf(hero)` until 3 October, which is every string in the band
+   * **joined with a space** and then split on terminal punctuation. A band is not
+   * a paragraph: an eyebrow, a headline and two button labels have no full stops
+   * at the end of them, because none of them is a sentence. So the splitter ran
+   * them into whatever came next and measured the join.
+   *
+   * On the front door it was reading this as one sentence of thirty-three words:
+   *
+   * > *For pages that AI is allowed to change Make your web page dynamic with AI
+   * > and Loom AI already writes the components, but would you trust AI to
+   * > dynamically change your web page?*
+   *
+   * That is the eyebrow, the headline and the lead's opening clause, and the
+   * longest real sentence in the band is sixteen words. It also read the two
+   * actions as *"See how a change travels Try it yourself"*.
+   *
+   * **And it passed for seven weeks**, because the headline it was written
+   * against ended in a full stop — which broke the blob in the one place that
+   * made the arithmetic come out. The maintainer's headline of 3 October does
+   * not end in one, as headlines generally do not, and the test reported a
+   * thirty-three-word sentence nobody had written.
+   *
+   * So it measures each string the band carries on its own, which is what the
+   * site-wide rule below has done since the day it was written. A headline is
+   * one unit and the paragraph under it is another, and the only honest
+   * alternative — punctuating a headline to satisfy a splitter — is a test
+   * editing the page it is supposed to be reading.
    */
   it.each(SITE_ROUTES)("$path keeps its opening sentences short enough to follow", (route) => {
-    const sentences = wordsOf(heroOf(route))
-      .split(/(?<=[.!?])\s+/)
-      .map((sentence) => sentence.trim())
-      .filter((sentence) => sentence.length > 0)
+    const tooLong = readerCopy(heroOf(route)).flatMap(({ field, text }) =>
+      sentencesOf(text)
+        .filter((sentence) => wordCountOf(sentence) > 30)
+        .map((sentence) => `${field} (${wordCountOf(sentence)}w): ${sentence}`)
+    )
 
-    for (const sentence of sentences) {
-      expect({ sentence, words: sentence.split(/\s+/).length }).toEqual({
-        sentence,
-        words: expect.any(Number),
-      })
-      expect(sentence.split(/\s+/).length).toBeLessThanOrEqual(30)
-    }
+    expect({ route: route.path, tooLong }).toEqual({ route: route.path, tooLong: [] })
+  })
+
+  /** And it is reading something: every opening band has copy in it. */
+  it.each(SITE_ROUTES)("$path has an opening band with words in it", (route) => {
+    expect(readerCopy(heroOf(route)).length).toBeGreaterThanOrEqual(3)
   })
 })
 
