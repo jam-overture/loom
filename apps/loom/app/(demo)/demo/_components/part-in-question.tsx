@@ -52,6 +52,22 @@ import { demoRegistry } from "@/app/(demo)/_lib/registry"
  * excerpt rendered with edit mode on would carry the same attribute, match the
  * same rule, and draw a second amber ring and a second chip inside the card that
  * is asking about the first one.
+ *
+ * ## Two shapes, and the field that chooses between them
+ *
+ * **An excerpt that arrives shut is a `<details>`; one that arrives open is a
+ * `<section>`.** `invitation` is present on exactly the moment that is folded,
+ * so the branch is a presence check rather than a second reading of `where` —
+ * which is what makes it impossible to render a disclosure whose control has no
+ * words on it.
+ *
+ * `<details>` rather than state, for the reasons `technical-detail.tsx` already
+ * records and one more that belongs to this excerpt in particular: this
+ * component is rendered on the **server**, through a callback `page.tsx` hands
+ * the rail, so a disclosure built out of `useState` would mean the first thing
+ * under the demo's one green button could not exist until a bundle arrived.
+ * The browser supplies the control, the keyboard, the screen-reader semantics
+ * and find-in-page for nothing.
  */
 export const PartInQuestionView = ({
   part,
@@ -67,6 +83,70 @@ export const PartInQuestionView = ({
 }) => {
   const rendered = renderLoomTree(part.tree, { resolver: demoRegistry, validator: demoRegistry })
 
+  /*
+   * `loom-stage` for the same reason the stage has it: the excerpt is the
+   * clinic's page and everything around it is Loom's chrome, and a band wearing
+   * the rail's ground would be neither. It brings a stacking context of its
+   * own, which is what keeps a hero's backdrop from painting over the card, and
+   * a ground and a `color-scheme` for the unthemed case.
+   *
+   * When there *is* a theme the ground comes from it and not from the
+   * stylesheet — an inline style, which beats every layer, so the two can be
+   * read in one place rather than resolved between a CSS variable and its
+   * fallback.
+   *
+   * One element, named once, used by both shapes below. The two moments differ
+   * in what stands above the band and in whether the band arrives visible; what
+   * the band *is* is not one of the things they are allowed to disagree about.
+   */
+  const band = (
+    <div
+      className="demo-part-stage loom-stage"
+      style={theme ? { ...themeStyle(theme), ...pageGround(theme) } : undefined}
+    >
+      {rendered.element}
+    </div>
+  )
+
+  /*
+   * **The shut one: the sentence becomes the control.**
+   *
+   * There is no second copy of the words and no second sentence. `LEADS` says
+   * what the excerpt is of and `INVITATIONS` says the same thing as an offer,
+   * both off one operation (`in-question.ts`), and the open disclosure shows
+   * the band directly under the control rather than under a restatement of it —
+   * which is what the `<p>` here used to be and would now read as a stutter
+   * two lines high.
+   *
+   * **And the markup is better than the thing it replaces.** That paragraph
+   * existed because the ask panel has no heading for an `h4` to be a sibling
+   * of, so this excerpt had to be the one of the three that announced no
+   * subsection. A `<summary>` announces none either — it is a control, and the
+   * only one on the arrival screen that is about the band rather than about
+   * the press.
+   */
+  if (part.invitation !== undefined) {
+    return (
+      <details className={`demo-part demo-part--${part.where} group`}>
+        <summary className="text-ink-secondary hover:text-ink flex cursor-pointer list-none items-center gap-1.5 text-xs transition-colors select-none">
+          <svg
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden="true"
+            className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90"
+          >
+            <path d="M4 2.5L8 6l-4 3.5" />
+          </svg>
+          {part.invitation}
+        </summary>
+
+        {band}
+      </details>
+    )
+  }
+
   return (
     <section className={`demo-part demo-part--${part.where}`}>
       {/*
@@ -76,44 +156,18 @@ export const PartInQuestionView = ({
         * caption. Both cards: the question's, and the landed one holding what it
         * took off.
         *
-        * Which is why the condition names the **ask** rather than the question.
-        * It named the question when there were two moments, and a third moment
-        * that is also in a card would have silently taken the panel's markup —
-        * the failure being a level-four heading demoted to a paragraph on the
-        * one card where it has a sibling to be level with.
-        *
-        * **In the ask panel, a paragraph.** There is no second reading for it to
-        * be a sibling of, and the only heading on that rail is the `h1` three
-        * inches above it — so an `h4` there announces a level four subsection of
-        * nothing, two levels below the nearest real one, to every visitor
-        * navigating by headings. The words and the size are identical either
-        * way; what changes is the claim the markup makes about the document.
+        * It is unconditional now, and the condition that used to be here is the
+        * reason the branch above exists. There were three moments and one of
+        * them — the ask's, on a rail whose only heading is the `h1` three
+        * inches up — had to print a paragraph instead, because an `h4` there
+        * announces a level four subsection of nothing to every visitor
+        * navigating by headings. That moment is a `<summary>` now, so the two
+        * left are the two that are in a card, and both of them have a sibling
+        * to be level with.
         */}
-      {part.where === "ask" ? (
-        <p className="text-ink-secondary text-xs">{part.lead}</p>
-      ) : (
-        <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
-      )}
+      <h4 className="text-ink-secondary text-xs">{part.lead}</h4>
 
-      {/*
-        * `loom-stage` for the same reason the stage has it: the excerpt is the
-        * clinic's page and everything around it is Loom's chrome, and a band
-        * wearing the rail's ground would be neither. It brings a stacking
-        * context of its own, which is what keeps a hero's backdrop from
-        * painting over the card, and a ground and a `color-scheme` for the
-        * unthemed case.
-        *
-        * When there *is* a theme the ground comes from it and not from the
-        * stylesheet — an inline style, which beats every layer, so the two can
-        * be read in one place rather than resolved between a CSS variable and
-        * its fallback.
-        */}
-      <div
-        className="demo-part-stage loom-stage"
-        style={theme ? { ...themeStyle(theme), ...pageGround(theme) } : undefined}
-      >
-        {rendered.element}
-      </div>
+      {band}
     </section>
   )
 }

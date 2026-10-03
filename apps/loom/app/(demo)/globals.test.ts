@@ -199,6 +199,14 @@ describe("the part in question", () => {
    * page a stranger has not scrolled, and the excerpt under the button is the
    * only place on the arrival screen it exists.
    *
+   * **It arrives shut as of 3 October and that makes this stricter, not
+   * looser.** The band is behind a `<details>` the visitor opens
+   * (`part-in-question.tsx`), so a `display: none` reaching it would not hide
+   * a preview a visitor can see — it would leave a control on the arrival
+   * screen offering to show the page and opening onto nothing, at the one
+   * width this surface is judged at. Folding is *nothing is removed*; hiding
+   * is not, and the difference is this rule.
+   *
    * Written as a sweep over every `display: none` in the file rather than as
    * the absence of one string, because the failure this is for is a later run
    * tidying the modifier back off the selector — which puts the rule back on
@@ -283,6 +291,50 @@ describe("the part in question", () => {
    */
   it("keeps the preview's own layout out of the utilities layer", () => {
     expect(block(".demo-part")).toContain("display: flex")
+  })
+
+  /**
+   * **Except the ask's, which is a `<details>` and lays itself out.**
+   *
+   * A disclosure's contents are a slot the browser supplies and hides, and
+   * `display: flex` on the element makes that slot a flex item — true of the
+   * browsers this surface is photographed in and written down nowhere. The
+   * block rule is the shape a `<details>` has always had, so nothing about the
+   * arrival screen's first 358 reclaimed pixels depends on how a shadow slot
+   * is boxed, and the 6px the flex `gap` was giving moves onto the band.
+   */
+  it("lays the shut excerpt out as a disclosure rather than as a flex column", () => {
+    expect(css).toMatch(/details\.demo-part\s*\{[^}]*display: block/)
+    expect(css).toMatch(/details\.demo-part > \.demo-part-stage\s*\{[^}]*margin-top: 6px/)
+  })
+
+  /**
+   * And the disclosure's two rules stay **last**, which is the one thing about
+   * them that is invisible from either side.
+   *
+   * `block()` reads the **first** match in the file, and both selectors above
+   * contain the names it is given: `details.demo-part {` contains
+   * `.demo-part {`, and `details.demo-part > .demo-part-stage {` contains
+   * `.demo-part-stage {`. Written before the rules they override, they quietly
+   * become what three other assertions in this file are about — *clips the
+   * band to a window* starts reading a `margin-top` and fails for a reason
+   * that has nothing to do with its name, which is exactly what happened on
+   * the run that added them.
+   *
+   * It is asserted rather than remembered because the symptom points at the
+   * wrong file: the red tests are about the window, and the edit is in the
+   * disclosure twenty lines away.
+   */
+  it("declares the overridden rules before the disclosure that overrides them", () => {
+    const shared = css.indexOf(".demo-part {")
+    const window = css.indexOf(".demo-part-stage {")
+    const laidOut = css.indexOf("details.demo-part {")
+    const spaced = css.indexOf("details.demo-part > .demo-part-stage {")
+
+    expect(shared).toBeGreaterThan(-1)
+    expect(window).toBeGreaterThan(-1)
+    expect(laidOut).toBeGreaterThan(shared)
+    expect(spaced).toBeGreaterThan(window)
   })
 
   /**
