@@ -33498,7 +33498,15 @@ wrong sentence, and this is the entry that says so.
 ---
 ## 2026-09-23 — the four longest entry-point headings break mid-word on a phone, because `break-words` was the fix that stopped the page scrolling and not the one that made it read
 
-**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open —
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed** by
+`docs-44-where-a-specifier-breaks`, which did what the remedy below says and
+found the defect twice the size it was filed at — **ten of the seventeen
+headings, not four**, because the package was renamed on 27 September and every
+specifier gained five characters. Re-measured in Chromium at 390 pixels on
+3 October: ten before, none after. One caveat went the other way and is the
+3 October entry below — a `<wbr/>` adds break opportunities and cannot take the
+hyphen's away, so `@jam-overture/loom-primitives/compositions` breaks after
+`loom-` rather than at a slash. Original status: open —
 cosmetic; measured in Chromium against `next start` at 390 pixels, 23 September
 
 On 22 September `/docs/api-reference/[entry]`'s `h1` gained `break-words`,
@@ -40854,7 +40862,20 @@ broadcaster keeps shipping no schema library for it.
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as a
 class — **one instance closed** by `docs-43-what-these-do-not-mean`, which added
-the vocabulary panel's first render test.
+the vocabulary panel's first render test; **the second and the one that matched
+the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
+`_components/entry-points.test.tsx`. **Six chrome components remain**: `callout`,
+`code-block`, `mobile-nav`, `sidebar`, `submit-seam`, `theme-toggle`.
+
+The `entry-points` row is worth two sentences of its own, because it is the
+whole shape of the class in one table. `entry-points.test.ts` holds the list of
+doors against the package's own `exports` map in **both** directions, which is
+as hard as a producer gets tested anywhere on this site — and the table that
+prints it is the first thing a reader is shown after `npm install`. A component
+that printed no rows at all passed every one of those assertions. It now prints
+each specifier in order, each summary beside its door and each audience in words
+rather than in the key, and the row count is held against the list's length and
+against being more than one.
 
 The arrangement this site is built on is that a block of furniture asks the
 repository a question and prints the answer, and that the producer is tested
@@ -41196,3 +41217,84 @@ neither a number this lane moves without knowing.
 The test's literal is a different thing and should stay a literal. It is the one
 place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
+
+---
+## 2026-10-03 — a break opportunity can be added to a heading and the one inside `loom-primitives` cannot be taken away, so one door of seventeen still breaks at its hyphen
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open — the
+stated limit of what shipped today, cosmetic, and the remedy costs more than
+the defect
+
+`docs-44-where-a-specifier-breaks` closed the 23 September entry by rendering
+each API reference heading as its slash-separated segments with a `<wbr/>`
+between them. Measured in Chromium at 390 pixels, on the real heading in the
+real font, across all seventeen doors: **ten broke mid-word before and none
+does now.**
+
+One door is imperfect rather than fixed:
+
+| | lines at 390px |
+| --- | --- |
+| before | `@jam-overture/loom-` · `primitives/compositi` · `ons` |
+| now | `@jam-overture/loom-` · `primitives/` · `compositions` |
+
+A hyphen **is** a soft wrap opportunity, so the breaker takes the last one that
+fits and `@jam-overture/loom-` fits. A `<wbr/>` can only add a place to break; it
+cannot remove the hyphen's. The orphan and the mid-word break are gone, which is
+the whole of what the finding asked for, and the first line still ends on a
+hyphen rather than on a slash.
+
+**Two remedies were measured and neither is worth taking today.**
+
+- **`word-break: keep-all` on each segment buys nothing.** Measured against all
+  six multi-segment doors: byte-identical line breaks to the plain `<wbr/>`.
+  Chromium does not treat the break after a hyphen as a break "between
+  typographic letter units", so the property that reads as if it would suppress
+  it does not. Recorded because it is the obvious thing for the next author to
+  reach for.
+- **`white-space: nowrap` on each segment is the only markup that breaks at
+  slashes and nowhere else** — `@jam-overture/` · `loom-primitives/` ·
+  `compositions`, measured. It gets there by **turning off wrapping inside a
+  segment**, which is also turning off `break-words`, which is the floor that
+  stopped these pages being 559 pixels wide on 22 September. Today's longest
+  segment is sixteen characters against a line that holds about twenty; a door
+  published next year with a longer one would scroll the page sideways again,
+  and nothing in the suite would say so. **Trading a floor that holds for every
+  future door against one better line break on one door today is the wrong
+  direction**, so the floor stays.
+
+What would actually resolve it is a shorter package name, which is not this
+lane's to propose, or a CSS property that sets break priority, which does not
+exist.
+
+---
+## 2026-10-03 — the remedy for the defect `prerender:check` was built to catch lands in the one place `prerender:check` says it cannot look
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as a
+note on an existing open question, with nothing asked of anybody — **no check
+should be widened on the strength of it**
+
+[0119](decisions/0119-the-page-a-reader-gets-is-the-one-pnpm-verify-reads-last.md)
+ends with a limit stated plainly in the module and in the record:
+
+> What it does not catch is a space lost across a tag: `16<!-- --><span>of</span>`
+> reads `16of` and passes here, because the character after the separator is `<`.
+
+Every junction this lane added today is across a tag. `Specifier` prints a
+heading as *n* text runs with *n−1* `<wbr/>` elements between them, so if that
+markup ever came back with a word reordered, a slash dropped or a space gained,
+the built artefact would carry a heading telling a reader to type an import that
+does not resolve — and the instrument that exists precisely to read the built
+artefact would pass it, by its own documented design.
+
+It is worth saying out loud that this is **not an argument for widening the
+check**, and 0119 is why: the rule it sets for adding a hazard class is *a defect
+that reached a reader, not a hazard somebody imagined*. Nothing has reached a
+reader. What this lane did instead is the proportionate thing — assert the text
+locally, through `react-dom/server`, which is the transform the artefact comes
+out of: `_components/specifier.test.tsx` holds every published specifier through
+both renderers and asserts that no hydration separator is emitted at all.
+
+So this entry exists for one purpose: **if a defect of this class ever does
+reach a reader, the first place to look is a `<wbr/>`,** and 0119's bar will
+have been met. Filed as a note rather than an ask.

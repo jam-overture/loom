@@ -1,0 +1,52 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/api-reference/signals-broadcast",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-broadcast-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/api-reference/primitives-compositions",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-compositions-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/api-reference/telemetry-postgres",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-telemetry-phone",
+      "viewport": "phone",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/api-reference/signals-broadcast",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-broadcast-wide",
+      "viewport": "wide",
+      "waitFor": "h1"
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-doors-phone",
+      "viewport": "phone",
+      "waitFor": "[data-doors]",
+      "do": [
+        {
+          "scrollTo": "[data-doors]"
+        }
+      ]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-03-docs-where-a-specifier-breaks-doors-wide",
+      "viewport": "wide",
+      "waitFor": "[data-doors]",
+      "do": [
+        {
+          "scrollTo": "[data-doors]"
+        }
+      ]
+    }
+  ]
+}
