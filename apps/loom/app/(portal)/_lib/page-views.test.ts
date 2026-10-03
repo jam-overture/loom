@@ -272,8 +272,19 @@ describe("every view's screen", () => {
   it("comes after the page's own name, and before the page", () => {
     const frame = sourceOf(["portal", "pages", "[treeId]", "_components", "preview-frame.tsx"])
 
+    /*
+     * The page itself moved into a pane of its own that can be sized to a
+     * phone, so the frame no longer renders it and there is no `{children}` to
+     * be before. What the rule is about survives: the strip comes after the
+     * page's own name, and the whole header comes before the pane, which
+     * `[treeId]/page.tsx` places and the case below pins.
+     */
     expect(frame.indexOf("{views}")).toBeGreaterThan(frame.indexOf("</header>"))
-    expect(frame.indexOf("{views}")).toBeLessThan(frame.indexOf("{children}"))
+    expect(frame).not.toContain("{children}")
+
+    const screen = sourceOf(["portal", "pages", "[treeId]", "page.tsx"])
+
+    expect(screen.indexOf("<PreviewFrame")).toBeLessThan(screen.indexOf("<DevicePane"))
   })
 
   /**

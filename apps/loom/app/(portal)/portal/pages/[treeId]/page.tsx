@@ -18,11 +18,12 @@ import { describeProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { unreadableChangesIn } from "@/app/(portal)/_lib/unreadable-change"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
 import { ensureSeeded, portalStore } from "@/app/(portal)/_lib/store"
+import { viewportFrom } from "@/app/(portal)/_lib/viewports"
 import { portalHolds } from "@/app/(portal)/_lib/write"
 
+import { DevicePane } from "./_components/device-pane"
 import { PickedParts } from "./_components/picked-parts"
 import { PreviewFrame } from "./_components/preview-frame"
-import { PreviewSurface } from "./_components/preview-surface"
 import { PromptBox } from "./_components/prompt-box"
 import { ReviewQueue } from "./_components/review-queue"
 import { SelectedNode } from "./_components/selected-node"
@@ -37,11 +38,25 @@ import { TreeOutline } from "./_components/tree-outline"
  * so every element carries `data-loom-node` — which is what makes the outline's
  * rows addresses rather than labels.
  */
-const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => {
+const TreePage = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ treeId: string }>
+  searchParams: Promise<{ as?: string }>
+}) => {
   const { treeId } = await params
+  const { as } = await searchParams
   const parsed = treeIdSchema.safeParse(treeId)
 
   if (!parsed.success) notFound()
+
+  /*
+   * The size the pane is showing, read from the address so that it is a link
+   * somebody can send. An unknown value is the default rather than a refusal —
+   * see `_lib/viewports.ts`.
+   */
+  const viewport = viewportFrom(as)
 
   await requireActor(`/portal/pages/${parsed.data}`)
   await ensureSeeded()
@@ -163,43 +178,63 @@ const TreePage = async ({ params }: { params: Promise<{ treeId: string }> }) => 
         * tab order ran right-hand column first, which is the mismatch between
         * reading order and focus order that reversing a row always buys.
         */}
-      <div className="flex flex-col gap-6 p-8 lg:flex-row lg:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-8">
-          <PreviewFrame
-            page={page}
-            treeId={rendered.value.tree.treeId}
-            revision={rendered.value.tree.revision}
-            diagnostics={rendered.value.diagnostics}
-            views={<PageViews treeId={rendered.value.tree.treeId} current="page" />}
-          >
-            <PreviewSurface>{rendered.value.element}</PreviewSurface>
-          </PreviewFrame>
+      <div className="flex flex-col gap-6 p-8">
+        {/*
+          * Above both columns, and that placement is the answer to the one cost
+          * of putting the page on the right.
+          *
+          * The pane is second in the source so that it lands on the right of a
+          * row without the row being reversed — reversing one costs a keyboard
+          * user the same mismatch at every width, which is why nothing in this
+          * lane does it. The consequence is that on a narrow screen the
+          * controls come before the page. Leading with the page's own name, its
+          * id and what has happened to it means a reader still meets *which
+          * page is this* first, which was the whole of what the old order
+          * protected.
+          */}
+        <PreviewFrame
+          page={page}
+          treeId={rendered.value.tree.treeId}
+          revision={rendered.value.tree.revision}
+          diagnostics={rendered.value.diagnostics}
+          views={<PageViews treeId={rendered.value.tree.treeId} current="page" />}
+        />
 
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/*
-            * The parts a reader picked, between the page and the box that acts
-            * on them, and it renders nothing at all until something is picked.
-            *
-            * It takes the tree rather than a map of rendered excerpts, which is
-            * the one interesting decision on this line: the excerpt is drawn in
-            * the browser from data this screen sends once, instead of the server
-            * pre-rendering one excerpt per part and shipping the page's markup
-            * down once per level of nesting. `picked-parts.tsx` has the three
-            * options and why this is the cheapest of them.
+            * The controls, in a column of their own. Narrower than the pane
+            * deliberately: the thing being judged should be the biggest thing
+            * on the screen, and until now it was whatever width was left over
+            * beside the outline.
             */}
-          <PickedParts tree={rendered.value.tree} />
+          <div className="flex w-full flex-col gap-8 lg:w-80 lg:shrink-0">
+            {/*
+              * The parts a reader picked, above the box that acts on them, and
+              * it renders nothing at all until something is picked.
+              *
+              * It takes the tree rather than a map of rendered excerpts, which
+              * is the one interesting decision on this line: the excerpt is
+              * drawn in the browser from data this screen sends once, instead
+              * of the server pre-rendering one excerpt per part and shipping
+              * the page's markup down once per level of nesting.
+              */}
+            <PickedParts tree={rendered.value.tree} />
 
-          <PromptBox
-            treeId={rendered.value.tree.treeId}
-            revision={rendered.value.tree.revision}
-            configured={isInterpreterConfigured}
-          />
+            <PromptBox
+              treeId={rendered.value.tree.treeId}
+              revision={rendered.value.tree.revision}
+              configured={isInterpreterConfigured}
+            />
 
-          <ReviewQueue changes={changes} unreadable={unreadable} />
-        </div>
+            <TreeOutline />
+            <SelectedNode credits={credits} treeId={rendered.value.tree.treeId} />
 
-        <div className="flex w-full flex-col gap-4 lg:w-72 lg:shrink-0">
-          <TreeOutline />
-          <SelectedNode credits={credits} treeId={rendered.value.tree.treeId} />
+            <ReviewQueue changes={changes} unreadable={unreadable} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <DevicePane treeId={rendered.value.tree.treeId} viewport={viewport} />
+          </div>
         </div>
       </div>
     </SelectionProvider>

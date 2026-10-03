@@ -38,9 +38,7 @@ const badProps: RenderDiagnostic = {
 describe("PreviewFrame", () => {
   it("leads with the page's own name rather than with the name of the pane", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Autumn arrivals")
@@ -54,9 +52,7 @@ describe("PreviewFrame", () => {
    */
   it("keeps the id on the surface, under the name rather than instead of it", () => {
     const { container } = render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     const heading = screen.getByRole("heading", { level: 1 })
@@ -78,9 +74,7 @@ describe("PreviewFrame", () => {
         treeId={treeId}
         revision={4}
         diagnostics={[]}
-      >
-        <p>rendered</p>
-      </PreviewFrame>
+      />
     )
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Untitled page")
@@ -93,9 +87,7 @@ describe("PreviewFrame", () => {
    */
   it("says the page can be clicked, and what clicking it is for", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     expect(document.body.textContent).toContain("Click anything on it")
@@ -104,9 +96,7 @@ describe("PreviewFrame", () => {
 
   it("counts the changes behind the page rather than printing a bare number", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     expect(document.body.textContent).toContain("4 changes have been applied")
@@ -120,9 +110,7 @@ describe("PreviewFrame", () => {
    */
   it("says a page nothing has happened to yet has had nothing happen to it", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={0} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={0} diagnostics={[]}/>
     )
 
     expect(document.body.textContent).toContain("Nothing has been changed here yet.")
@@ -131,9 +119,7 @@ describe("PreviewFrame", () => {
 
   it("leads with the sentence and follows it with the version, never the reverse", () => {
     const { container } = render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     const line = [...container.querySelectorAll("p")].find((element) =>
@@ -160,9 +146,7 @@ describe("PreviewFrame", () => {
    */
   it("keeps a space on both sides of the separator", () => {
     const { container } = render(
-      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={4} diagnostics={[]}/>
     )
 
     const line = [...container.querySelectorAll("p")].find((element) =>
@@ -175,9 +159,7 @@ describe("PreviewFrame", () => {
 
   it("says one change in the singular", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}/>
     )
 
     expect(document.body.textContent).toContain("1 change has been applied")
@@ -185,9 +167,7 @@ describe("PreviewFrame", () => {
 
   it("shows nothing about drawing when everything drew", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={1} diagnostics={[]}/>
     )
 
     expect(document.querySelector("details")).toBeNull()
@@ -200,9 +180,7 @@ describe("PreviewFrame", () => {
    */
   it("says the rest of the page is fine before it says what failed", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered]}/>
     )
 
     expect(document.body.textContent).toContain("One part of this page didn't draw.")
@@ -211,9 +189,7 @@ describe("PreviewFrame", () => {
 
   it("counts them when there is more than one", () => {
     render(
-      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}/>
     )
 
     expect(document.body.textContent).toContain("2 parts of this page didn't draw.")
@@ -225,9 +201,7 @@ describe("PreviewFrame", () => {
    */
   it("keeps the renderer's own account of every diagnostic, one click down", () => {
     const { container } = render(
-      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}>
-        <p>rendered</p>
-      </PreviewFrame>
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[unregistered, badProps]}/>
     )
 
     const details = container.querySelector("details")
@@ -238,13 +212,22 @@ describe("PreviewFrame", () => {
     expect(details?.textContent).toContain("loom.heading")
   })
 
-  it("renders the tree it was given", () => {
-    render(
-      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[]}>
-        <p>the page itself</p>
-      </PreviewFrame>
+  /**
+   * **It no longer renders the tree, and that is the change rather than a
+   * regression.** The page moved into a pane that can be sized to a phone, a
+   * tablet or a desktop, and a pane that owns a viewport cannot be something
+   * this component puts a border around. What is left here is the half that was
+   * always about the page rather than about the drawing of it.
+   *
+   * Pinned as an absence so that a later refactor cannot quietly put a second
+   * copy of the page back above the pane.
+   */
+  it("does not draw the page, which the pane beside it owns", () => {
+    const { container } = render(
+      <PreviewFrame page={page} treeId={treeId} revision={2} diagnostics={[]} />
     )
 
-    expect(document.body.textContent).toContain("the page itself")
+    expect(container.querySelector("iframe")).toBeNull()
+    expect(container.querySelector(".loom-preview")).toBeNull()
   })
 })

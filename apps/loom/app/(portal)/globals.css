@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* The hover and selection outlines, shared with the preview root — see the
+   POINTING AT A PART section below for why they are not in this file. */
+@import "./preview-marks.css" layer(base);
 
 /* ══════════════════════════════════════════════════════════════════
    DESIGN TOKENS — Minimal
@@ -283,24 +286,11 @@
    addresses.
    ══════════════════════════════════════════════════════════════════ */
 
-@layer base {
-  .loom-preview [data-loom-node] {
-    cursor: default;
-  }
-
-  /* `:hover` matches every ancestor of the pointer, which outlines the whole
-     chain from the root down. Only the innermost hovered node is the one a
-     click would select, so it is the only one that should say so. */
-  .loom-preview [data-loom-node]:hover:not(:has([data-loom-node]:hover)) {
-    outline: 1px solid var(--node-hover-outline);
-    outline-offset: 1px;
-  }
-
-  .loom-preview [data-loom-selected] {
-    outline: 2px solid var(--node-selected-outline);
-    outline-offset: 2px;
-  }
-}
+/* The three rules are in `preview-marks.css`, imported at the top of this file
+   because `@import` is only valid there. They moved because the preview root
+   reads them too: the iframe that sizes a page to a phone is a document of its
+   own and loads none of this file. Imported rather than copied, so a change to
+   the selection ring cannot apply in one of the two places a page is drawn. */
 
 /* ══════════════════════════════════════════════════════════════════
    WHAT WOULD CHANGE — the same decoration, over a page nobody has
