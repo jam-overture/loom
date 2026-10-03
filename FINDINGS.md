@@ -42273,3 +42273,98 @@ churn a pull request whose body links four screenshots by commit, to fix
 something that did not break, and the rule's purpose — the preview — is already
 served. The commits are wrong and they are recorded as wrong, which is the
 cheaper of the two honest options.
+
+---
+## 2026-10-03 — the portal has never drawn a page in its own theme, and a pane sized to a phone is where that stops being invisible
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**a decision rather than a repair**, which is why it is filed rather than taken
+in the run that found it
+
+`renderRequest` takes a `themes` registry and resolves the theme the tree
+carries (0050). **No surface passes one except the marketing site.** So every
+page the portal has ever previewed has been drawn with `--loom-*` undefined,
+wearing whatever the document around it happened to supply.
+
+Inside the portal that was Geist and a reasonable size, by inheritance from
+`globals.css`, so it has looked plausible for two months. The first screenshot
+of the new pane — the page in a document of its own, 390 pixels wide — came back
+set in **Times**, because a bare root inherits nothing. The regression was mine
+and is fixed by giving the preview root the same font stack the portal gave it;
+what the screenshot actually exposed is that there was never a theme.
+
+**What it costs, now that the pane exists.** *Does this hold up on a phone* is
+the question the pane is for, and a page drawn without its theme answers a
+different one: it has the right **layout** at the right width and the wrong
+type, spacing and colour everywhere. A reviewer judging a change to a hero band
+at 390 pixels is looking at a hero band in nobody's design.
+
+**Why it is not a one-line fix.** It is one line — `themes: portalThemes` — and
+it changes how **every** preview in the portal looks, on four screens, in a
+direction nobody has reviewed. It also needs a decision this lane should not
+take alone: which registry. The tree names a theme; a portal that registers a
+different set than the deployment serving the page would draw a page in a theme
+it is not served in, which is the plausible-false-picture failure one level up
+from the one this pane was built to avoid.
+
+**Recommended**: pass the same themes the deployment serves with, and photograph
+the four preview screens before and after in one unit.
+
+---
+## 2026-10-03 — the library's last three viewport rules are what force an iframe, and a fourth would not change the answer
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`) · **Status:** open — **not a defect and not
+urgent.** It is a measurement of what the migration to `@container` has left,
+taken by the first consumer whose correctness depends on the answer
+
+The pane that sizes a page to a phone, a tablet or a desktop is an iframe, and
+the whole reason is three rules:
+
+| rule | what it decides |
+| --- | --- |
+| `@media (max-width: 47.99rem)` on the comparison band | the scroll-snap peek |
+| `@media (max-width: 47.99rem)` on the table | the prose column measure |
+| `@media (max-width: 47.99rem)` on `loom.nav` | **whether the destinations fold behind a button** |
+
+Everything else the library does responds with `@container`, which a fixed-width
+box satisfies exactly. If those three were container queries, the pane could be
+a `<div>` with a width and the route group, the second root layout and the
+cross-document selection bridge would all be unnecessary.
+
+**The third one is why this could not be shrugged at.** A reader asking for
+*phone* and getting a desktop navigation bar is not a slightly-wrong preview; it
+is the single most visible responsive behaviour the library has, drawn wrong, on
+the screen somebody opened to check exactly that.
+
+`stylesheet.ts` already carries a comment reading *"`@media` here again would be
+that regression"*, so the direction is settled and this is a count rather than
+an argument. **Filed for the lane that owns it, with no claim that it is worth
+doing for this**: an iframe is the correct mechanism for a device preview
+whatever the library does, and what closing this would buy is simplicity rather
+than honesty.
+
+---
+## 2026-10-03 — the library's stylesheet is reachable only as an element, and a document that is not React's has to pick it apart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom primitives`
+(`src/primitives/stylesheet.ts`) · **Status:** **closed by the design, and filed
+because the next consumer will hit it** — the preview root is a React layout, so
+it never needed the text in the end
+
+The first shape of the preview was a route handler building an HTML document by
+hand, which needed the library's CSS **as a string**. What is published is
+`libraryStylesheet()`, a `ReactElement`, and the only way to the text was
+`libraryStylesheet().props.children` — reaching into an element's props to get at
+a constant.
+
+That shape died for an unrelated reason (Next refuses `react-dom/server` in a
+route handler), and the design that replaced it renders through React, which
+hoists the element properly. So nothing in this lane reaches into props today.
+
+**It is filed anyway because the gap is real and the next consumer is
+predictable**: anything assembling a Loom document outside React — a static
+export, an email, a PDF, a screenshot worker — needs the CSS as text and has the
+same two options, pick an element apart or copy the file. A
+`libraryStylesheetText()` beside the existing export would be a one-line
+addition and would make `libraryStylesheet()` its caller.

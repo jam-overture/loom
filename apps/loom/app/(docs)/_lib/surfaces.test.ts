@@ -60,9 +60,22 @@ const groups = (): readonly string[] =>
 
 describe("the other surfaces of this application", () => {
   it("is every route group except this one", () => {
+    /*
+     * A group with no address of its own is not a surface, and filtering on
+     * that rather than on a list of names is the rule rather than an exception.
+     *
+     * `(preview)` is the first of them: a root layout whose only route is
+     * `…/[treeId]/surface`, the document inside the iframe that
+     * `/portal/pages/[treeId]` sizes to a phone, a tablet or a desktop. Nothing
+     * links to it, it is behind the portal's session, and offering it to a
+     * reader as somewhere to go would be offering them the inside of a frame.
+     * `frontDoorOf` already answers "" for such a group, because every route it
+     * holds is under a dynamic segment.
+     */
     const doors = groups()
       .filter((group) => group !== "(docs)")
       .map(frontDoorOf)
+      .filter((door) => door !== "")
       .sort()
 
     expect([...OTHER_SURFACES].map((surface) => surface.path).sort()).toEqual(doors)

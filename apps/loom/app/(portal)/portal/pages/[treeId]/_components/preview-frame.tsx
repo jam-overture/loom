@@ -8,8 +8,17 @@ import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import type { PageName } from "@/app/(portal)/_lib/page-name"
 
 /**
- * The chrome around a rendered tree: whose page it is, how much has happened to
- * it, and anything the renderer could not honour.
+ * Whose page this is, how much has happened to it, and anything the renderer
+ * could not honour.
+ *
+ * **It used to wrap the page and no longer does.** The rendered tree moved into
+ * a pane of its own that can be sized to a phone, a tablet or a desktop
+ * (`device-pane.tsx`), and a pane that owns a viewport cannot be something this
+ * component puts a border around. What is left here is the half that was always
+ * about the page rather than about the drawing of it — its name, its id, what
+ * has happened to it, and what the renderer could not do — and that half now
+ * sits above both columns, so a narrow screen still meets *which page is this*
+ * before it meets anything to press.
  *
  * It used to open with an `h1` reading `preview`, which named the pane rather
  * than the thing in it. A person who has opened one of their own pages knows
@@ -41,7 +50,6 @@ export const PreviewFrame = ({
   revision,
   diagnostics,
   views,
-  children,
 }: {
   /** What this page is called, and the id it is called by. Both are shown. */
   readonly page: PageName
@@ -67,7 +75,6 @@ export const PreviewFrame = ({
    * the one thing about it this component does get to decide.
    */
   readonly views?: ReactNode
-  readonly children: ReactNode
 }) => (
   <div className="flex flex-col gap-4">
     <header className="flex flex-col gap-1">
@@ -82,8 +89,8 @@ export const PreviewFrame = ({
         */}
       <p className="text-ink-muted truncate font-mono text-xs">{page.treeId}</p>
       <p className="text-ink-muted text-sm">
-        This is your page as people are being served it right now. Click anything on it to point
-        at that part, then ask for a change below.
+        This is your page as people are being served it right now, in the pane beside it. Click
+        anything on it to point at that part, then ask for a change.
       </p>
       {/*
         * The plain sentence leads and the revision follows it as a handle, not
@@ -130,6 +137,5 @@ export const PreviewFrame = ({
       </div>
     )}
 
-    <div className="bg-surface-preview border-edge-subtle rounded-md border p-6">{children}</div>
   </div>
 )
