@@ -67,6 +67,24 @@ import type { ReaderTally } from "./rollup.js"
  * reading that only said *read* or *skipped* would have to call a page nobody
  * opened a page everybody skipped, which is the plausible-false-number failure:
  * a figure that is the right shape, drawn on a screen, and about nothing.
+ *
+ * **Every combination of the three is reachable except one, and the arithmetic
+ * that rules it out is worth having here.** `skipped` means *no row names this
+ * part*, and {@link PageReading.views} is the largest `views` any one row
+ * reports — both read off the same rows. So every part being `skipped` would
+ * need the window to hold no row for any part of the page, which makes `views`
+ * zero, which makes every part `unknown` instead. *A page with visits, every
+ * part of which went unseen* cannot be drawn from counters, and the one input
+ * that produces it is a row naming a node this revision does not have — which is
+ * {@link PageReading.orphaned}, and is the one state a consumer should refuse to
+ * draw rather than render.
+ *
+ * The reachable neighbour is the one worth a screen: **rows exist and not one
+ * reports reach.** A root is addressed and is in the viewport of every view that
+ * draws the page, so that is a page whose parts are not reporting — a primitive
+ * not spreading its identity attributes, or a sender switched on halfway through
+ * a release — and not a page nobody scrolled. Filed by `Loom portal` on 2 October
+ * after a test that tried to build the impossible state and could not.
  */
 export type PartStanding =
   /** At least one view reported it coming into view. */

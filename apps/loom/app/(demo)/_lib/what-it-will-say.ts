@@ -9,7 +9,7 @@ import {
 
 import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
-import { presetById, presetInterpreter, type DemoPresetId } from "./presets"
+import { offeredPresets, presetById, presetInterpreter, type DemoPresetId } from "./presets"
 import { demoPolicy } from "./session"
 import { DEMO_ACTOR } from "./visitor"
 
@@ -86,7 +86,29 @@ export type WillSay = {
   readonly detail: string
   /** Whether the page will move on the press — what the surface styles on. */
   readonly moves: boolean
+  /**
+   * Which of the three answers the Gate gave, as one word.
+   *
+   * `lead` and `detail` are sentences about *this* button and are the right
+   * shape for the one press the panel invites. They are the wrong shape for a
+   * list: four of them stacked down the rail is the record dumped on arrival,
+   * which is the trap this surface is named for. So the same verdict is also
+   * carried as a value nothing has to parse — which is what lets a row wear two
+   * words (`what-each-row-says.ts`) and a panel count them
+   * (`how-many-wait-for-you.ts`).
+   */
+  readonly standing: AskStanding
 }
+
+/**
+ * The Gate's answer to one ask, before anybody pressed it.
+ *
+ * Not a fourth vocabulary: these are the three outcomes `composeChange` can
+ * reach that this surface can offer a press for, named from the visitor's side
+ * rather than the runtime's — *what happens to me when I press it*, rather than
+ * `awaiting-confirmation`.
+ */
+export type AskStanding = "on-its-own" | "asks-you" | "refuses"
 
 /**
  * The three endings a verdict can have, as a sentence about a press that has
@@ -135,18 +157,21 @@ export const willSayOf = (outcome: CompositionOutcome): WillSay | undefined => {
         lead: SAID.held.lead,
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.held.tail}`,
         moves: false,
+        standing: "asks-you",
       }
     case "applied":
       return {
         lead: SAID.applied.lead,
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.applied.tail}`,
         moves: true,
+        standing: "on-its-own",
       }
     case "rejected":
       return {
         lead: SAID.refused.lead,
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.refused.tail}`,
         moves: false,
+        standing: "refuses",
       }
     case "not-interpreted":
     case "not-applicable":
@@ -209,4 +234,76 @@ export const whatItWillSay = async (
   )
 
   return willSayOf(outcome)
+}
+
+/** What the Gate answered about each ask on offer, by preset id. */
+export type AskVerdicts = Readonly<Partial<Record<DemoPresetId, WillSay>>>
+
+/**
+ * The Gate's answer to **every** ask the panel is offering, reached the same
+ * way the lead's is: by running it.
+ *
+ * ## Why this is the fact the arrival screen was missing
+ *
+ * One verdict proves one button honest. Five of them prove the *product*,
+ * because the five answers are not the same — and that difference is the thing
+ * no screenshot, no video and no other AI demonstration can carry. Everybody
+ * can show a model rewriting a page; `docs/rollout.md` names that as the least
+ * novel thing here. Only a governed one can say, before a stranger has pressed
+ * anything, *this one I will just do, and that one I will stop and ask you
+ * about* — and be checked on it fifteen seconds later.
+ *
+ * Until this run the arrival screen's claim was *"Loom weighs every ask before
+ * it lands, and writes down what it did"*, which is true of every ask ever made
+ * and therefore proves nothing about any of them. `how-many-wait-for-you.ts`
+ * turns these answers into the same claim with the hedge taken out: a count,
+ * over this page, at this revision, under `demoPolicy`.
+ *
+ * ## Why it is allowed to say it before the press
+ *
+ * The same reason the lead's verdict is, and it does not weaken by being said
+ * five times: nothing here is **typed**. `presets.ts` refuses to let a preset's
+ * label name a verdict, and it is right to — a typed label would be a surface
+ * predicting a decision it does not make, and would be wrong the first time the
+ * policy or the page moved. These are not predictions. Each one *is*
+ * `composeChange`'s own answer, so retune the policy or move the page and the
+ * words move with it. A prediction can be wrong; a value cannot disagree with
+ * itself. `pipeline.test.ts` holds that against the real write path rather than
+ * against this paragraph.
+ *
+ * ## What it costs, said plainly
+ *
+ * Five tree walks instead of one, on a render, with no key, no store and no
+ * session. The presets are deterministic interpreters (0057), which is the
+ * whole reason a governed verdict can be free at all.
+ *
+ * **What is still unmeasured is a cold serverless invocation**, which is this
+ * lane's open finding of 1 October — and this run does not improve it, it
+ * multiplies it: that entry was filed about one such call per render and there
+ * are now one per offered ask. The entry is appended to with this run's numbers
+ * rather than quietly outgrown.
+ *
+ * ## Keyed, and omitting rather than guessing
+ *
+ * A plain record rather than a `Map`, because it crosses to a client component
+ * and an object is the one shape nothing has to be told about. An ask that
+ * reached no verdict — not interpretable against this tree, not applicable to
+ * it — is **absent** rather than present with a hedge, which is the restraint
+ * `willSayOf` exercises one level down, and is what keeps the count honest:
+ * what is counted is what was answered.
+ */
+export const whatEachWillSay = async (
+  tree: LoomTree,
+  available: readonly DemoPresetId[],
+  ids: IdFactory,
+  clock: Clock
+): Promise<AskVerdicts> => {
+  const says: Partial<Record<DemoPresetId, WillSay>> = {}
+
+  for (const preset of offeredPresets(available)) {
+    const said = await whatItWillSay(tree, preset.id, ids, clock)
+    if (said !== undefined) says[preset.id] = said
+  }
+
+  return says
 }

@@ -52,8 +52,8 @@
  *
  * **The library publishes two doors, and the second is where the bands live.**
  * `@jam-overture/loom-primitives` is the catalogue — `STARTER_COMPOSITIONS`,
- * `compositionById`, `planComposition`. `…/compositions` is the forty-eight
- * bands under their own names, `heroBand` and `pricingBand` among them, and
+ * `compositionById`, `planComposition`. `…/compositions` is the bands under
+ * their own names, `heroBand` and `pricingBand` among them, and
  * until 1 October this repository had no door to rewrite that one to, so the
  * page that teaches it could name it in prose and never compile it.
  */
