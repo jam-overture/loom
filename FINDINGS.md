@@ -39741,6 +39741,158 @@ window rule (`MOST_VERSIONS_DRAWN`, contiguous, newest-end) already answers what
 happens when the version is too far back to reach.
 
 ---
+## 2026-10-01 — Loom has no concept of an app, so the first thing the maintainer asked the portal for has nothing behind it
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer, then `Loom daily build`
+if he wants it · **Status:** open —
+[0220](decisions/0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md)
+is `Proposed` and is the long form of this entry
+
+On 1 October the maintainer asked the portal to show *"which apps I have
+registered with Loom"*. It cannot, and the reason is not a missing screen.
+
+**A deployment is three objects wired at a composition root** — a
+`PrimitiveRegistry`, a `PolicySource` and a `TreeStore` — and everything else is
+addressed under one of them. A `TreeId` is unique within a store, a `NodeId`
+within a tree, a hold names a proposal and a tree, a signal names a node and a
+revision. **There is no identifier anywhere in the system for the thing that owns
+a store.**
+
+What this run did with that: built the single-app answer, said on the screen that
+Loom looks after one app per installation, and wrote 0220 rather than inventing a
+list of one. A portal that drew a list implies a second could appear, in the one
+place where implying it is most expensive.
+
+The record carries what a second app would cost, item by item, so the question is
+answered once rather than estimated every time it is asked. The short version:
+every store signature, or the meaning of every tree id, plus the hold store, the
+journal, the signal ledger, a registry per request and a second half to 0027's
+rule about where an actor comes from.
+
+**And the cheap version, which may be what was actually meant.** `PolicySource`
+already varies the *rules* per tree and per ask (0033) — different governance for
+different surfaces of one product, with one store underneath. That is built and
+shipping. If what is wanted is *my marketing site and my docs site judged
+differently*, it exists; if what is wanted is *two customers' data side by side*,
+it does not and 0220 is the cost.
+
+---
+## 2026-10-01 — this deployment registers 4 of the 99 pieces Loom ships, so every portal screenshot shows a page that could have been written by hand
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`, with a decision in it
+for the maintainer · **Status:** open — measured while building the screen that
+makes it visible
+
+`apps/loom/app/(portal)/_lib/registry.ts` registers `loom.page`, `loom.card`,
+`loom.heading` and `loom.prose`. `STARTER_PRIMITIVES` on
+`@jam-overture/loom/primitives` holds **99**.
+
+So the portal's own deployment — the one every screenshot in every report of this
+lane is taken on — can draw a heading, a paragraph and a box. Four consequences,
+and the fourth is the one worth acting on:
+
+1. **The new app screen is thin by construction.** Its whole subject is *what your
+   app is made of*, and the answer here is four things.
+2. **The seeded page cannot demonstrate anything.** Every picture of a tree in
+   this portal is a heading over a paragraph over a card.
+3. **The review queue has never judged an interesting change**, because the model
+   is handed a catalogue of four and cannot propose what it cannot name (0013).
+   Nothing with a form, a frame, a data binding or a behaviour has ever been
+   weighed here, so no stake factor that depends on one has ever fired on this
+   deployment.
+4. **The portal is the worst advertisement for the library in the repository**,
+   and it is the surface a developer is told to open daily.
+
+**Why this run did not simply register more.** It is a one-line change and it is
+not obviously right. The registry is what bounds what an AI may do to these pages
+(0013), and widening it on the surface whose whole subject is governance is a
+governance decision rather than a convenience — it changes what every future
+proposal may contain, what the Gate has to weigh, and what a screenshot of this
+portal is evidence *of*. A routine that quietly turned ninety-five pieces on would
+be making that decision on the maintainer's behalf, in his own review tool.
+
+**Recommendation:** register the starter set, or a named subset of it, on the
+portal deployment. `createStarterPrimitiveRegistry` already exists on the same
+entry point and does exactly this. The cost is one import; the gain is that every
+screen in this portal starts being about a page somebody might actually have.
+
+---
+## 2026-10-01 — what a page reports about itself is declared per node, and the maintainer wants it per piece
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Status:** open
+— the framework half of `docs/portal.md` unit 3, filed before the portal builds
+its half
+
+The maintainer, 1 October:
+
+> *"I should be able to manage tracked events by primitive and have a better way
+> to do this (maybe policy level) than going one by one."*
+
+He is right about the altitude and the reason is structural. A reader signal is
+filed against a **node** — `viewed`, `dwelled`, `activated`, `disclosed`, each
+against an addressed element and a revision. But what makes an element addressable
+at all is its **primitive**: `loom.editable` is what puts `data-loom-node` on it,
+`decorationFromAudit` is how a host learns which types do, and the broadcaster
+walks for the delegated kinds by element. **Every fact that decides whether a node
+can be tracked is a fact about its type**, and the only thing that is per-node is
+the switch.
+
+So *manage tracked events by piece* is not a convenience over a per-node list. It
+is the altitude the declaration already lives at, and the per-node version is the
+projection of it.
+
+**What this lane cannot decide, and is asking for:**
+
+1. **Where the rule is stored.** A `GatePolicy` is consulted when a change is
+   *judged*; a tracking rule is consulted when a page is *rendered*. Those are
+   different seams and putting the second on the first would make the policy a
+   bag of unrelated switches — the argument 0179 already made for keeping a props
+   vocabulary off the policy.
+2. **Whether a piece may decline.** A primitive declares `interactive`, `submits`,
+   `frames`, `copy` and `reads` — all of them the author saying what the component
+   *is*. Whether a deployment *tracks* it is the host's choice rather than the
+   author's, so this is probably not a sixth declaration on `definePrimitive`.
+3. **What a per-piece rule means for a node that already has one.** Most specific
+   wins is the obvious answer and it is the one that makes bulk management useless
+   if anybody has ever set a node by hand.
+
+The portal's half is a matrix — every registered piece against the four kinds —
+and the vocabulary that makes it readable. It is cheap once the seam exists and
+guesswork before it, so it is filed rather than built.
+
+---
+## 2026-10-01 — the shot harness cannot hover, and the rail is the one thing in this portal that only exists on hover
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (the harness is
+`tools/screenshot`) · **Status:** open — this is the finding `docs/routines.md`
+invited by name
+
+> *"Hovering is simply not asked for yet and would be a finding rather than an
+> argument."* — `docs/routines.md`, on what a shot list cannot do
+
+It is asked for now. The rail is 14 pixels wide and widens on `hover` and
+`focus-within`; its labels and, as of this run, its **group names** are
+`opacity-0` until one of the two happens. So the navigation change at the centre
+of this pull request — four named groups, which is most of what makes the portal
+legible — **cannot be photographed at all**, and the maintainer judges this
+surface by eye.
+
+Neither existing route reaches it:
+
+- A `click` step carries `detail: 1`, and `sidebar-nav.tsx` deliberately blurs on
+  a pointer press — that is the fix for *"super annoying to have to click again to
+  close it"*, and it is correct. The harness cannot send a keyboard activation.
+- `scrollTo` brings an element into view without pressing it and does not focus
+  it.
+
+**What would close it**, smallest first: a `{ "hover": "<selector>" }` step, which
+is one `page.hover` behind the same one-element rule `click` already keeps. It is
+not an instrument reaching a state it may not assert (0159, 0182) — it is the same
+kind of act as `click`, and the same argument that admitted `scrollTo`.
+
+Filed rather than built because `tools/` is not this lane's, and because a step
+that can reach a hover state is a small widening of what a shot may do, which is
+the sort of thing 0182 settled deliberately rather than by accident.
 ## 2026-10-01 — a finding named the remedy, said the branch had added it, and the branch had not — for five days, in the file every run reads first
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a

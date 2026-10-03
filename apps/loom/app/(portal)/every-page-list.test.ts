@@ -83,6 +83,7 @@ describe("every list of pages in this portal", () => {
   it("finds the lists that exist, so an empty sweep cannot pass as clean", () => {
     expect(lists.map((list) => list.where).sort()).toEqual([
       "_components/unreadable-pages.tsx",
+      "portal/app/_components/app-composition.tsx",
       "portal/checkup/_components/checkup-choices.tsx",
       "portal/checkup/_components/sweep-rows.tsx",
       "portal/history/_components/tree-chooser.tsx",
@@ -145,7 +146,7 @@ describe("every list of pages in this portal", () => {
    * above would report zero cases — which vitest treats as a pass.
    */
   it("recognises a list of pages by something React makes compulsory", () => {
-    expect(lists.length).toBeGreaterThanOrEqual(8)
+    expect(lists.length).toBeGreaterThanOrEqual(9)
     expect(KEYED_ON_A_PAGE.test("<li key={listing.treeId}>")).toBe(true)
     expect(KEYED_ON_A_PAGE.test("<li key={change.proposalId}>")).toBe(false)
   })
