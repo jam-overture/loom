@@ -379,6 +379,43 @@ describe("recordOf", () => {
     expect(parsed.event.assessment.stakeFactorCodes).toBeUndefined()
   })
 
+  /**
+   * The two fields that make the measurement re-runnable, and the reason each is
+   * a number or a list of names rather than the thing the rule was handed.
+   * `broad-change` compares a length against a threshold, so the count is the
+   * whole of it and the ids stay here; `protected-prop-configured` reads the
+   * keys, which are vocabulary the host registered, where the values are what a
+   * visitor would have read.
+   */
+  it("records what the measuring rules read, so a policy can be asked about it later", () => {
+    const configured = recordOf(
+      envelopeOf({
+        type: "change-assessed",
+        assessment: assessUnder(
+          defaultGatePolicy,
+          buildProposal(ids, {
+            intentId: intent.intentId,
+            delta: {
+              deltaId: ids.deltaId(),
+              treeId: tree.treeId,
+              baseRevision: 0,
+              operations: [
+                { op: "configure", nodeId: nodes.card, set: { variant: "filled" }, unset: ["elevation"] },
+              ],
+            },
+          })
+        ),
+      })
+    )
+
+    expect(configured.event.type === "change-assessed" && configured.event.assessment).toMatchObject({
+      affectedNodeCount: 1,
+      configuredPropKeys: ["variant", "elevation"],
+    })
+    expect(JSON.stringify(configured)).not.toContain("filled")
+    expect(JSON.stringify(configured)).not.toContain(nodes.card)
+  })
+
   it("reads a record written before those fields existed rather than defaulting them", () => {
     const record = recordOf(envelopeOf({ type: "change-assessed", assessment }))
     const stored = JSON.parse(JSON.stringify(record)) as {
@@ -387,12 +424,16 @@ describe("recordOf", () => {
     delete stored.event.assessment.removedPrimitiveTypes
     delete stored.event.assessment.relocatedPrimitiveTypes
     delete stored.event.assessment.relocatedNodeCount
+    delete stored.event.assessment.affectedNodeCount
+    delete stored.event.assessment.configuredPropKeys
 
     const parsed = telemetryRecordSchema.parse(stored)
     if (parsed.event.type !== "change-assessed") throw new Error("the fixture is an assessment")
 
     expect(parsed.event.assessment.removedPrimitiveTypes).toBeUndefined()
     expect(parsed.event.assessment.relocatedNodeCount).toBeUndefined()
+    expect(parsed.event.assessment.affectedNodeCount).toBeUndefined()
+    expect(parsed.event.assessment.configuredPropKeys).toBeUndefined()
   })
 
   it("records a failure as its code and a sentence about it", () => {
