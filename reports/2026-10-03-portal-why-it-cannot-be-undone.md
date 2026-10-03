@@ -64,7 +64,9 @@ small set of things this portal exists to be the only place for.
 | `activity/_components/proposal-line.tsx` | the block, and the codes added to the technical record |
 | `activity/_components/proposal-line.test.tsx` | +5, and its fixture converted to `buildAssessment` (0216) |
 
-**+27 tests. Nothing weakened, nothing skipped, nothing removed from any screen.**
+**+27 tests written, +30 in the suite** (`every-screen.test.ts` walks this route
+group and generates three more over the two new files). **Nothing weakened,
+nothing skipped, nothing removed from any screen.**
 
 ---
 
@@ -256,12 +258,15 @@ act of its own line.
 | | `main` at `cddf61e` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` | 177 files / 3,699 | **177 / 3,699** — `src/` untouched |
-| `@loom/app` | 370 / 6,598 | **372 / 6,625** |
+| `@loom/app` | 370 / 6,595 | **372 / 6,625** |
 | findings | 969 | **973**, 0 malformed |
 | `prerender:check` | — | 124 pages, 1,470 junctions, 0 run together |
 | `pnpm shoot` | — | `1280 / 1280`, `390 / 390` — no overflow |
 
-**+27 tests across two new files and one existing one.** No decision record: this
+**+30 tests.** Twenty-seven are written here, across two new files and one
+existing one; the other three are `every-screen.test.ts` generating its per-file
+assertions over the two files this adds, which is that guard working. Nothing
+weakened, nothing skipped. No decision record: this
 adds a reading of a record the runtime already writes, on a screen that already
 showed the flag. Nothing touches the tree schema, the delta model, or an Accepted
 record.
