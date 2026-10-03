@@ -41342,10 +41342,9 @@ instead"*). `buildAssessment` and `NOTHING_MEASURED` are published from
 `@jam-overture/loom/testing` by
 `framework-66-an-assessment-a-test-can-ask-for`, with
 [0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
-That entry's Status still reads `open` because it lives on
-`framework-65-seventeen-levers-from-a-record`, which has not merged; whoever
-lands that branch should flip it to
-`closed by framework-66-an-assessment-a-test-can-ask-for`.
+That entry is now marked closed. It was written on
+`framework-65-seventeen-levers-from-a-record` and so was unreachable from this
+branch until #485 landed; this branch merged `main` and flipped it.
 
 **Adopting it is this lane's, because the three files are.** The framework
 declined to rewrite another lane's tests, and the one two-line patch it did make
@@ -41651,8 +41650,12 @@ and not a pull of one.
 ## 2026-10-02 — a hand-built assessment in `(portal)`'s tests goes red whenever the framework reads one more field of an analysis, and there is no double to reach for instead
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`src/testing/doubles.ts`) · **Status:** open — **fixed where it broke, not where
-it is caused.** `main` is green; the next field anyone adds breaks it again
+(`src/testing/doubles.ts`) · **Status:**
+**closed by `framework-66-an-assessment-a-test-can-ask-for`** — `buildAssessment`
+and `NOTHING_MEASURED` are published from `@jam-overture/loom/testing`, with
+[0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
+Adopting them in the three `(portal)` fixtures is `Loom portal`'s and is filed
+separately, with the replacement written out
 
 `framework-65` added `affectedNodeCount` and `configuredPropKeys` to the
 telemetry record, so `summariseAssessment` reads two more fields of

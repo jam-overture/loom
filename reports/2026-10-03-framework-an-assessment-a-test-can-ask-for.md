@@ -251,3 +251,47 @@ No route group, no primitive, no signal, and nothing a deployment renders.
    two. The script that produced it was not committed, unlike the shot lists
    `0213` asks for. Recommendation: for a unit with no screen, the transcript in
    the report is enough.
+
+---
+
+## Later the same day — `main` arrived, and two of this report's open items closed themselves
+
+`Loom merge` merged `main` into this branch at `f25007b` and regenerated the
+decisions index and the API reference at `e06ad44`. **Both regenerations were
+correct**: re-running `pnpm decisions:index` and
+`pnpm --filter @loom/app docs:api` on the merged head produces no diff.
+
+**The numbering collision resolved the way it had to.** #485, #486 and #487 all
+landed. `0215` stayed with #485, **#486's record was renumbered to `0218`**, and
+`0216` — taken by this branch after reading the open pull requests rather than
+only `main` — needed no change. The prediction in the section above was that
+whichever landed second would need a renumber; that is what happened, and the
+fifteen minutes were spent by the lane that had to spend them. The one-line
+repair to `docs/routines.md` is unchanged and still the ask.
+
+**The finding this unit closes is now closed in this file.** It was written on
+`framework-65-seventeen-levers-from-a-record` and so was unreachable from a
+branch cut off `main`; #485 landed, the merge brought it in, and its Status now
+reads `closed by framework-66-an-assessment-a-test-can-ask-for`. The note in the
+entry filed earlier today, which told whoever landed #485 to flip it, has been
+corrected to say it is done. Nothing else in that entry changed.
+
+### The gate, re-measured against the `main` this branch now sits on
+
+| | `main` @ `2b5e305` | this branch @ merged head |
+| --- | --- | --- |
+| `@jam-overture/loom` | 175 files / **3,638** | **176** / **3,647** |
+| `@loom/app` | 363 files / **6,421** | 363 / **6,421** |
+| findings | 958 | **960**, 0 malformed |
+| published exports | 1,251 | **1,254** (+3) |
+
+`pnpm install && pnpm verify` — **green, exit 0**, on a deleted `dist` and
+`apps/loom/.next`, status written to a file and read in a separate command. The
+baseline was measured again in a fresh worktree at `2b5e305`, not carried over
+from the morning's table.
+
+**The deltas are identical to the pre-merge measurement** — +1 root file, +9 root
+tests, an application suite unchanged to the test, +2 findings, +3 exports. A day
+of four other lanes' work landed underneath this unit and moved none of its
+numbers, which is what an additive change to `src/testing/` should look like and
+is worth having measured rather than assumed.
