@@ -3,15 +3,16 @@ import Link from "next/link"
 import { describeStoreError } from "@jam-overture/loom/store"
 
 import { ListOrder } from "@/app/(portal)/_components/list-order"
-import { PageName } from "@/app/(portal)/_components/page-name"
+import { MIN_CARD_WIDTH, PageCardLink } from "@/app/(portal)/_components/page-card"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
-import { nameFrom, namesOf } from "@/app/(portal)/_lib/page-name"
+import { headsOf, nameFrom, namesIn } from "@/app/(portal)/_lib/page-name"
 import { inPageOrder, needsYouRank } from "@/app/(portal)/_lib/page-order"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
 import { portalHolds } from "@/app/(portal)/_lib/write"
-import { pagesWaitingSummary, unreadableMark } from "@/app/(portal)/_lib/unreadable-change"
+import { pagesWaitingSummary } from "@/app/(portal)/_lib/unreadable-change"
 
 /**
  * Every page this deployment holds, and the one number that decides whether a
@@ -49,7 +50,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
 
   if (!listed.ok) {
     return (
-      <div className="flex max-w-xl flex-col gap-4 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">Your pages</h1>
         <StateNotice tone="failure" title="We couldn't load your pages.">
           <p>
@@ -65,7 +66,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
             </p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -80,9 +81,22 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
    * read costs the name only: the row still lists, still links, and still shows
    * its id.
    */
-  const names = await namesOf(
+  /*
+   * The pages themselves, and the names taken off them — one read, not two.
+   *
+   * `namesOf` was already calling `headsOf` and discarding everything but the
+   * name, which is the third time this lane has found that shape: a bounded
+   * fan-out whose result is thrown away one field later. The trees are what a
+   * card draws, so the thumbnails below cost **no read at all** — they cost the
+   * line that stopped dropping them.
+   */
+  const heads = await headsOf(
     portalStore,
     trees.map((listing) => listing.treeId)
+  )
+  const names = namesIn(
+    trees.map((listing) => listing.treeId),
+    heads
   )
 
   const unordered = await Promise.all(
@@ -93,6 +107,15 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         page: nameFrom(names, listing.treeId),
         treeId: listing.treeId,
         revision: listing.revision,
+        /** The same number under the name `PageCard` gives it. */
+        version: listing.revision,
+        /*
+         * The page itself, which this screen has always read and never kept.
+         * Absent when the read did not come back, which the card says out loud
+         * rather than drawing an empty frame — a page that would not read and a
+         * page with nothing on it are opposites.
+         */
+        tree: heads.get(listing.treeId),
         waiting: holds.ok ? holds.value.held.length : null,
         /*
          * The rows this build could place and could not read, counted but never
@@ -124,15 +147,16 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
   }))
 
   return (
-    <div className="flex max-w-xl flex-col gap-4 p-8">
-      <header className="flex flex-col gap-1">
+    <Screen>
+      {/* The words keep a measure; the grid below does not — see `_components/screen.tsx`. */}
+      <Measured>
         <h1 className="text-2xl tracking-tight">Your pages</h1>
         <p className="text-ink-muted text-sm">
           {summaries.length === 0
             ? "Pages that Loom is looking after will show up here."
             : pagesWaitingSummary(summaries)}
         </p>
-      </header>
+      </Measured>
 
       {summaries.length === 0 ? (
         <StateNotice
@@ -165,44 +189,28 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
         <>
           <ListOrder order="needs-you-first" />
 
-          <ul className="flex flex-col gap-2">
+          {/*
+            * The same cards the front door draws, in a grid that fills the
+            * screen — and this index is where the change is worth the most.
+            *
+            * It was a single column of text rows capped at 576 pixels: a list
+            * of your own pages with no picture of any of them, on the one
+            * screen whose whole subject is *which of these is which*. Six pages
+            * took three screens of scrolling to show nothing but their names.
+            *
+            * **The thumbnails cost no read.** `headsOf` was already fetching
+            * every page to take its name off it; the tree was being dropped one
+            * line later. What this grid spends is layout, not requests.
+            */}
+          <ul
+            className="grid gap-3"
+            style={{
+              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${MIN_CARD_WIDTH}px), 1fr))`,
+            }}
+          >
             {summaries.map((page) => (
-              <li key={page.treeId}>
-                <Link
-                  href={`/portal/pages/${page.treeId}`}
-                  className="border-edge-subtle bg-surface-base hover:bg-surface-hover flex items-center justify-between gap-3 rounded-md border p-4 no-underline"
-                >
-                  <span className="flex min-w-0 flex-col gap-1">
-                    <PageName page={page.page} />
-                    <span className="text-ink-muted text-xs">
-                      {page.revision} {page.revision === 1 ? "change" : "changes"} applied
-                    </span>
-                  </span>
-
-                  {/*
-                   * Two marks, never one number covering both.
-                   *
-                   * A page with four answerable changes and one row from a later
-                   * build reads "4 waiting on you · 1 can't be read", and a page
-                   * whose only row is the second one gets the second mark alone.
-                   * That last case is the one worth the second element: before
-                   * this it was a row with no mark on it, which on an index whose
-                   * whole job is "which of these needs me" reads as *nothing is
-                   * happening here*.
-                   */}
-                  <span className="flex shrink-0 items-center gap-1.5">
-                    {page.waiting !== null && page.waiting > 0 && (
-                      <span className="bg-awaiting text-awaiting-ink rounded-sm px-2 py-1 text-xs">
-                        {page.waiting} waiting on you
-                      </span>
-                    )}
-                    {page.unreadable > 0 && (
-                      <span className="border-edge-subtle text-ink-muted rounded-sm border border-dashed px-2 py-1 text-xs">
-                        {unreadableMark(page.unreadable)}
-                      </span>
-                    )}
-                  </span>
-                </Link>
+              <li key={page.treeId} className="flex">
+                <PageCardLink card={page} />
               </li>
             ))}
           </ul>
@@ -240,7 +248,7 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

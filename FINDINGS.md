@@ -42416,3 +42416,89 @@ export, an email, a PDF, a screenshot worker — needs the CSS as text and has t
 same two options, pick an element apart or copy the file. A
 `libraryStylesheetText()` beside the existing export would be a one-line
 addition and would make `libraryStylesheet()` its caller.
+
+---
+## 2026-10-03 — every screen in the portal caps itself at a reading measure, and the grids that were built to fill a screen have never been given one
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**two of twenty-four converted**, the rule and the primitive are on `main`, and
+the rest is a queue rather than a question
+
+The maintainer, 3 October: *"The portal is too vertical in the main content
+pane."*
+
+Measured before anything was changed, on a 1280-pixel display:
+
+| | |
+| --- | --- |
+| screens capped at `max-w-3xl` (768px) | **18** |
+| screens capped at `max-w-xl` (576px) | **6** |
+| the front door, photographed | **1280 × 2150** — two and a half screens of scrolling |
+| width it used | **568 of 1280**, so a little over half the display is empty |
+| `/portal/pages` | a single column of text rows at **576px**, with no picture of any page |
+
+**The sharpest instance, and the one that names the cause.** The front door's
+card grid is written `repeat(auto-fill, minmax(288px, 1fr))` — a grid that fills
+whatever it is given — and it had been drawing **two columns** for a fortnight,
+because it was given 672.
+
+### Why nobody had simply removed the cap
+
+Because it is not a mistake. Prose has a measure, and a screen that dropped the
+cap would trade empty space for paragraphs 140 characters wide. **One container
+was answering two questions**: how wide is the screen, and how wide is a
+sentence. `_components/screen.tsx` splits them — `Screen` is as wide as the
+display, `Measured` is 68ch — and the rule is that sentences get the measure and
+grids, cards, rows and panels never do.
+
+### What converting two screens bought, honestly
+
+| | before | after |
+| --- | --- | --- |
+| `/portal` | 2150px tall, 2 card columns | **1774px**, 3 columns, two-column lower half |
+| `/portal/pages` | 958px, a column of names | **1028px**, a full-width grid of drawn pages |
+
+**The index got 7% taller and that is the right trade**, said plainly rather
+than buried: it stopped being a list of names and became a list of pages you can
+tell apart. It will also be taller than the old rows at thirty pages, which is
+the shape `docs/portal.md` phase 1 asked for and what Vercel does with projects.
+
+### What is left, which is most of it
+
+**Sixteen screens still carry a cap**, and 29 `max-w-*` caps remain across the
+lane counting components. `screen.test.ts` holds that number as a **ceiling that
+may only go down**, so the next run that puts one back fails rather than being
+noticed in review — which is how all twenty-four got there, each one reasonable
+on its own.
+
+The two worth doing next are the two with the most stacked sections:
+`/portal/trust` and `/portal/readers`, both of which draw one tall card per page
+in a 768px column.
+
+---
+## 2026-10-03 — a two-column screen leaves a column of white whenever the queue it was built for is empty
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**measured, not urgent, and the opposite of a reason to go back to stacking**
+
+The front door's lower half is now `Waiting on you` beside `Changed without
+asking you` and `Is everything still accounted for?`. On a deployment with a
+real queue that is right: the queue is the long column and the rail is short.
+
+On a **caught-up** deployment — which is the one every new person meets, and the
+one in the screenshots — the queue is a single green box and the rail is three
+times its height, so about 400 pixels of the left column is white.
+
+Two things that would answer it, neither taken here:
+
+1. **Let the rail reflow under the main column** when the main column is short.
+   CSS cannot ask that question; it needs the server to know the queue is empty,
+   which it does — so this is a prop, not a media query.
+2. **Put the checkup invitation below both columns** rather than in the rail. It
+   is the biggest thing in the rail and the least urgent, and it reads as cramped
+   at a third of the width.
+
+Filed rather than guessed at, because the right answer depends on what a loaded
+deployment looks like and **nothing in this repository has ever had one**: the
+screenshots are six staged pages with no history and no waiting changes. Choosing
+a layout for the empty case is how a screen ends up wrong for every real one.
