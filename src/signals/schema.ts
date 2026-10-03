@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 /**
- * Four tables: the buffer batches wait in, and the three counters that outlive
+ * Five tables: the buffer batches wait in, and the four counters that outlive
  * them.
  *
  * The split is 0146's — raw signals are short-lived and aggregates are durable
@@ -146,4 +146,35 @@ export const loomReaderRegions = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [primaryKey({ columns: [table.treeId, table.revision, table.region] })]
+)
+
+/**
+ * One revision's page views, counted from both ends.
+ *
+ * Two columns rather than two tables, because they are two counts of the same
+ * page views and the only question anybody asks of them is their difference:
+ * `opened` is written at the door, once per page view that began, and
+ * `appearances` by each rollup that saw that page view in its window. Keeping
+ * them in one row makes the subtraction a column expression instead of a join,
+ * and makes it impossible for a reading to find one and not the other.
+ *
+ * Both default to nought because either side may create the row, and nought is
+ * the true answer for the column that has not been written yet rather than a
+ * missing one.
+ *
+ * As narrow as the regions table and for the same reason: a tree, a revision
+ * and two numbers. No view key, no region, nothing per arrival, nothing to join.
+ */
+export const loomReaderPageViews = pgTable(
+  "loom_reader_page_views",
+  {
+    treeId: text("tree_id").notNull(),
+    revision: integer("revision").notNull(),
+    /** Page views that began. Counted once, at the door, never recounted. */
+    opened: bigint("opened", { mode: "number" }).notNull().default(0),
+    /** The same page views, once per rollup window each appeared in (0147). */
+    appearances: bigint("appearances", { mode: "number" }).notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.treeId, table.revision] })]
 )

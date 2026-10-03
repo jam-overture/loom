@@ -41479,6 +41479,208 @@ place in the repository where the catalogue's size is asserted rather than read,
 and that is its job.
 
 ---
+## 2026-10-03 — the reader screen can divide by an exact number of page views now, and say how generous the figures above it are
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **a denominator that did not
+exist and now does.** Nothing is broken; what is there to read is better than
+what any screen built before today could have asked for.
+
+Every number the reader screen shows is a rate, and until today the only
+denominator available was `views` summed off the tallies — a distinct count added
+across rollup windows, generous by every page view that straddled one
+([0147](decisions/0147-a-rollup-is-added-to-what-is-stored-and-a-distinct-view-count-is-therefore-approximate.md)),
+with the error bounded by *views per window × page-view duration ÷ window length*
+and therefore unanswerable from the rows.
+
+`ReaderTallyStore.pageViews()` is the new read, and
+`pageViewReadingOf(rows)` is the reading
+([0219](decisions/0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md)):
+
+| | |
+| --- | --- |
+| `opened` | page views that **began**, per tree and revision. Counted once, at the door, from the marker 0214 added. Exact, and adds across windows, revisions and months |
+| `appearances` | the same page views as the rollups saw them — once per window each appeared in, which is the quantity every `views` figure is made of |
+| `drift` | `appearances − opened`: the over-count in every distinct count stored against that revision, measured rather than bounded |
+| `inflation` | `drift ÷ opened`, or `null` when nothing has opened — the fraction a screen can say out loud |
+| `pending` | openings no rollup has folded yet. The other sign of the same subtraction, and what a stalled `signals:collect` looks like |
+
+**The sentence this makes available**, which is worth more than a more exact
+number would be: *of 1,240 page views of revision 4, 310 reached the pricing band
+— and these figures are 4% generous, because 50 of those readers were counted in
+two windows.* A rate shown without the second clause was wrong by an amount
+nobody could state.
+
+**Two things to be careful of on the screen.**
+
+- **A rate over 100% is now possible and is not a bug.** `reached` on a tally is
+  a summed distinct count and `opened` is exact, so a band everybody reached can
+  read as 104% where the old denominator hid it by being inflated too. Dividing
+  by `appearances` keeps a rate inside its bounds; dividing by `opened` answers
+  *how many readers*. The two are different questions and both rows are there.
+- **`pending` is not a reader count.** It is a collection that has not run,
+  which on a deployment whose cron is wedged will be most of the openings.
+
+Rows are per tree and per revision, so *before versus after a change* is a
+comparison of two exact numbers for the first time. Nothing needs a migration a
+deployment has not already run: `db:push` creates the table.
+
+---
+## 2026-10-03 — the upsert that refuses to touch one row twice is guarded for one of the four counter tables, and the other three have the same seam
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/postgres.ts`)
+· **Status:** open — **a latent divergence, written down rather than swept.**
+Nothing is red, and no producer in the repository can currently trigger it.
+
+Found by the contract suite while adding the page-view counter, which is the
+first counter in this subsystem a caller composes by hand rather than reads off
+a rollup's map.
+
+`ON CONFLICT … DO UPDATE` refuses to affect one row twice in a single command —
+Postgres raises rather than applying the second value. So two counts of the same
+key inside one call behave differently in the two implementations:
+
+| | memory | Postgres |
+| --- | --- | --- |
+| two counts of one revision in one call | adds them | **refuses the whole write** |
+
+For the page-view counter that is fixed: `summed` folds the rows in front of the
+driver and a contract case asserts both stores answer `5`. **The same seam is
+open on `loom_reader_tallies`, `loom_reader_funnels` and
+`loom_reader_regions`** — `rollUp` keys its tallies and funnel ends by map and
+`openingsOf` keys its openings by revision, so none of them can emit a duplicate
+today, and a caller applying counters it composed itself can.
+
+What it would cost if it happened: on the tallies it is an `apply` that fails, so
+`collectReaderSignals` returns `unavailable` and forgets nothing — recoverable
+and loud. On the regions it is a bucket that silently did not move, reported in
+the delivery's outcome and nowhere else.
+
+**The remedy is the same fold with three more key functions**, and it is worth
+doing with a contract case each rather than a comment saying it cannot happen.
+Not done here because it is four tables' worth of change hung off a unit about
+one of them, and because the producers that matter are the ones this unit did
+not add.
+## 2026-10-03 — the assessment double exists; the three fixtures that needed it are still object literals, and one of them asserts against a record no run of Loom can produce
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal`
+(`app/(portal)/_lib/write.test.ts`, `app/(portal)/_lib/what-if.test.ts`,
+`app/(portal)/portal/activity/_components/proposal-line.test.tsx`) ·
+**Status:** open — nothing is red, the replacement is written out below, and
+adopting it is what retires the failure mode
+
+**This is the other half of the ask this lane filed against itself on 2 October**
+(*"a hand-built assessment in `(portal)`'s tests goes red whenever the framework
+reads one more field of an analysis, and there is no double to reach for
+instead"*). `buildAssessment` and `NOTHING_MEASURED` are published from
+`@jam-overture/loom/testing` by
+`framework-66-an-assessment-a-test-can-ask-for`, with
+[0216](decisions/0216-a-published-double-derives-whatever-the-runtime-derives.md).
+That entry's Status still reads `open` because it lives on
+`framework-65-seventeen-levers-from-a-record`, which has not merged; whoever
+lands that branch should flip it to
+`closed by framework-66-an-assessment-a-test-can-ask-for`.
+
+**Adopting it is this lane's, because the three files are.** The framework
+declined to rewrite another lane's tests, and the one two-line patch it did make
+was to stop `main` going red.
+
+### What to write instead
+
+`write.test.ts` builds a `change-assessed` envelope and casts the whole thing
+away. With the double there is nothing to cast:
+
+```ts
+import { sequentialIdFactory } from "@jam-overture/loom"
+import { buildAssessment, buildProposal } from "@jam-overture/loom/testing"
+
+const ids = sequentialIdFactory("w")
+const proposal = buildProposal(ids, {
+  intentId: ids.intentId(),
+  delta: { deltaId: ids.deltaId(), treeId, baseRevision: 0, operations: [] },
+})
+
+write.path.runtime.events.emit({
+  treeId,
+  occurredAt: new Date().toISOString(),
+  event: {
+    type: "change-assessed",
+    assessment: buildAssessment(ids, {
+      proposal,
+      analysis: { operationCount: 1, insertedNodeCount: 1, shallowestAffectedDepth: 2 },
+      factors: [{ code: "invalid-props", level: "critical", detail: "tone" }],
+    }),
+  },
+})
+```
+
+The assertion then reads `proposal.proposalId` rather than the string
+`"p_throws"`, which is the same test and one fewer thing taken on trust.
+
+The other two build an **`AssessmentSummary`**, which is the narrowed record
+rather than the assessment, and they are typed rather than cast — so a required
+field added to that shape stops them compiling, which is the good failure. They
+are still worth converting, because `recordOf` will narrate a built assessment
+into one:
+
+```ts
+const record = recordOf({ treeId, occurredAt, event: { type: "change-assessed", assessment } })
+```
+
+### The reason one of them is worth doing sooner
+
+`proposal-line.test.tsx` holds this:
+
+```ts
+irreversibilityReasons: ["a removal destroys content"],
+```
+
+`summariseAssessment` fills that list from `reversibility.reasons.map(r => r.code)`,
+so every value a real journal ever holds there is `out-of-tree-effect` or
+`retention-budget-exceeded`. The sentence is prose in a field of codes. It is
+inert today — nothing in `apps/` reads `irreversibilityReasons` — and it is
+exactly the thing 0216 is about: the fixture describes a record no run of Loom
+produces, the test is green, and the day a screen renders that list the test will
+go on being green while the page shows a code nobody wrote a sentence for.
+
+The same file also pairs `reversible: false` and `retainedNodeCount: 0` with a
+reason about a removal destroying content. The runtime sets the retained count
+from `removedNodeCount`, so a record saying a removal destroyed content retains
+more than nothing.
+
+---
+## 2026-10-03 — two open pull requests both claim decision `0215`, so this is the fifth same-day collision in six days and the first between two branches that are both still open
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`) · **Status:** open — **a live collision, not a past one.**
+Nothing is red; it goes wrong when the second of the two branches merges
+
+The 2 October entry on this asked for a number band per lane and said it would
+not be raised a fourth time without a ruling. This is not raising it again; it is
+recording that the convention has now produced a collision **ahead of** a merge
+rather than behind one:
+
+| branch | pull request | claims |
+| --- | --- | --- |
+| `signals-04-what-on-screen-means` | [#486](https://github.com/jam-overture/loom/pull/486) | `0215` |
+| `framework-65-seventeen-levers-from-a-record` | [#485](https://github.com/jam-overture/loom/pull/485) | `0215` |
+| `primitives-28-every-part-offers-a-choice` | [#487](https://github.com/jam-overture/loom/pull/487) | `0217` |
+
+`0216` was free, and this branch took it. **`primitives-28` had already skipped
+over it**, which is the convention working better than it is written: that lane
+read the open branches and not only `main`.
+
+**The one-line repair, whatever happens about bands.** `docs/routines.md` and
+every brief say *take the next free number after re-reading `main`*. `main` is
+not where the claims are — an unmerged branch is. The sentence should read
+**after re-reading `main` and the open pull requests**, which is what
+`pnpm decisions:index` already helps with: it prints
+`note: 0215 has no record here — either one was deleted, or the number is claimed
+on a branch that has not merged` for exactly these.
+
+Whichever of #485 and #486 merges second needs a renumber, and the renumbering
+cost is nine citations and about fifteen minutes — measured on 2 October, when
+this lane did it for `0212`.
 ## 2026-10-03 — a credential's mark is a fixed square at every width, so the first band to fill that region loses a third of a phone column to it
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
