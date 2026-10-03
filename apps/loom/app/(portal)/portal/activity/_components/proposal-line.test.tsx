@@ -1,8 +1,17 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { deltaIdSchema, nodeIdSchema, proposalIdSchema, treeIdSchema } from "@jam-overture/loom"
-import type { ProposalEpisode } from "@jam-overture/loom/telemetry"
+import {
+  deltaIdSchema,
+  nodeIdSchema,
+  proposalIdSchema,
+  sequentialIdFactory,
+  treeIdSchema,
+  type IrreversibilityReason,
+  type PrimitiveType,
+} from "@jam-overture/loom"
+import { recordOf, type AssessmentSummary, type ProposalEpisode } from "@jam-overture/loom/telemetry"
+import { buildAssessment, buildProposal } from "@jam-overture/loom/testing"
 
 import { ProposalLine } from "./proposal-line"
 
@@ -38,26 +47,71 @@ const proposal = (overrides: Partial<ProposalEpisode> = {}): ProposalEpisode => 
   ...overrides,
 })
 
-const held = (): ProposalEpisode =>
+/**
+ * A judged change, narrated by the runtime rather than written out here.
+ *
+ * This fixture used to be an `AssessmentSummary` literal, and two of its values
+ * described a record no run of Loom can produce: `irreversibilityReasons` held
+ * the sentence *"a removal destroys content"* where the runtime only ever puts
+ * one of two codes, and it paired that claim with `retainedNodeCount: 0` while
+ * the runtime sets the retained count *from* the removal. It was green and
+ * inert for as long as nothing read the field — and this line reads it now, so
+ * the fixture would have gone on passing while the screen rendered a reason
+ * nobody wrote a sentence for. Filed on 3 October by `Loom daily build`, with
+ * this replacement written out, and this is it adopted (0216).
+ *
+ * `buildAssessment` derives the level from the factors, the reversible flag from
+ * the reasons and the retained count from the removal, so none of the three can
+ * be set to disagree with the others. `recordOf` then narrows it exactly as the
+ * journal does — which is what makes the `AssessmentSummary` below the real
+ * shape rather than this test's idea of it.
+ */
+const summaryOf = (reasons: readonly IrreversibilityReason[]): AssessmentSummary => {
+  const ids = sequentialIdFactory("a")
+  const built = buildProposal(ids, {
+    intentId: ids.intentId(),
+    delta: { deltaId: deltaIdSchema.parse("d_1"), treeId, baseRevision: 0, operations: [] },
+    confidence: 0.82,
+  })
+
+  const record = recordOf({
+    treeId,
+    occurredAt: "2026-07-31T00:00:00.000Z",
+    event: {
+      type: "change-assessed",
+      assessment: buildAssessment(ids, {
+        proposal: built,
+        analysis: { operationCount: 1, removedNodeCount: 4, shallowestAffectedDepth: 1 },
+        factors: [
+          { code: "large-removal", level: "high", detail: "removes 4 parts of the page" },
+        ],
+        irreversibilityReasons: reasons,
+      }),
+    },
+  })
+
+  if (record.event.type !== "change-assessed") throw new Error("narrated the wrong event")
+
+  /*
+   * The one field replaced afterwards. The episode this line is handed is keyed
+   * by `p_1` throughout the file, and the double mints its own id — so the id is
+   * put back and nothing else is, which keeps the hand-written half down to the
+   * single fact the surrounding tests depend on.
+   */
+  return { ...record.event.assessment, proposalId }
+}
+
+const held = (
+  reasons: readonly IrreversibilityReason[] = [
+    { code: "retention-budget-exceeded", retainedNodeCount: 4, budget: 2 },
+  ]
+): ProposalEpisode =>
   proposal({
     held: true,
-    assessment: {
-      proposalId,
-      stakes: "high",
-      reversible: false,
-      operationCount: 1,
-      insertedNodeCount: 0,
-      removedNodeCount: 0,
-      movedNodeCount: 0,
-      configuredNodeCount: 1,
-      touchedPrimitiveTypes: [],
-      shallowestAffectedDepth: 1,
-      retainedNodeCount: 0,
-      irreversibilityReasons: ["a removal destroys content"],
-    },
+    assessment: summaryOf(reasons),
     disposition: {
       kind: "requires-confirmation",
-      reason: { code: "irreversible", detail: "reversibility below the policy floor" },
+      reason: { code: "irreversible", detail: "cannot be undone cleanly: retention-budget-exceeded" },
       stakes: "high",
       reversible: false,
       confidence: 0.82,
@@ -166,7 +220,7 @@ describe("ProposalLine", () => {
     expect(disclosure?.textContent).toContain("irreversible")
     expect(disclosure?.textContent).toContain("default@2")
     expect(disclosure?.textContent).toContain("requires-confirmation")
-    expect(disclosure?.textContent).toContain("reversibility below the policy floor")
+    expect(disclosure?.textContent).toContain("cannot be undone cleanly")
     expect(disclosure?.textContent).toContain("claude-test-1")
   })
 
@@ -262,6 +316,89 @@ describe("ProposalLine", () => {
     expect(unasked(container)).toContain("Nothing was lost")
     expect(unasked(container)).not.toContain("the base revision moved")
     expect(container.querySelector("details")?.textContent).toContain("the base revision moved")
+  })
+
+  /**
+   * The change of 3 October, and the defect it closes is one sentence long:
+   * this line has said `this one can't be undone` since it was written and has
+   * never said *why*. The runtime computes two obstacles that ask opposite
+   * things of the reader — go and check a payment, or decide whether content is
+   * worth keeping — and the journal has carried the codes for both the whole
+   * time.
+   */
+  it("says why a change cannot be undone, not only that it cannot", () => {
+    const { container } = render(
+      <ul>
+        <ProposalLine proposal={held()} />
+      </ul>
+    )
+
+    expect(unasked(container)).toContain("Too much would have to be kept to put it back.")
+    expect(unasked(container)).toContain("gone for good")
+    expect(unasked(container)).toContain("This one takes 4 parts off the page.")
+  })
+
+  it("sends a reader to look outside the page when that is the obstacle", () => {
+    const { container } = render(
+      <ul>
+        <ProposalLine
+          proposal={held([
+            { code: "out-of-tree-effect", primitiveTypes: ["loom.form" as PrimitiveType] },
+          ])}
+        />
+      </ul>
+    )
+
+    expect(unasked(container)).toContain("Check whatever that part is wired to before you say yes")
+    expect(unasked(container)).not.toContain("Too much would have to be kept")
+  })
+
+  /** The codes go where every other code on this line already is. */
+  it("keeps the obstacle's code and the retained count one click down", () => {
+    const { container } = render(
+      <ul>
+        <ProposalLine proposal={held()} />
+      </ul>
+    )
+
+    expect(unasked(container)).not.toContain("retention-budget-exceeded")
+    expect(container.querySelector("details")?.textContent).toContain("retention-budget-exceeded")
+    expect(container.querySelector("details")?.textContent).toContain("retained")
+  })
+
+  /**
+   * The explanation belongs with the fact it explains. `this one can't be
+   * undone` is a property of the change; what Loom then decided to do about it
+   * is a separate question, and a refactor that files the reason under the
+   * verdict has moved the answer away from the question.
+   */
+  it("explains the undo before saying what Loom decided", () => {
+    const { container } = render(
+      <ul>
+        <ProposalLine proposal={held()} />
+      </ul>
+    )
+    const read = unasked(container)
+
+    expect(read.indexOf("can't be undone")).toBeLessThan(
+      read.indexOf("Too much would have to be kept")
+    )
+    expect(read.indexOf("Too much would have to be kept")).toBeLessThan(
+      read.indexOf("Loom stopped and asked first")
+    )
+  })
+
+  /** A change that can be undone gets no block. The clause above it says so. */
+  it("says nothing more about undo for a change that can be undone", () => {
+    const { container } = render(
+      <ul>
+        <ProposalLine proposal={held([])} />
+      </ul>
+    )
+
+    expect(unasked(container)).toContain("you could undo it")
+    expect(unasked(container)).not.toContain("gone for good")
+    expect(unasked(container)).not.toContain("Check whatever that part is wired to")
   })
 
   /**

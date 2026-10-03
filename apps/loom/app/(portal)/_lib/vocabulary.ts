@@ -3,6 +3,7 @@ import type {
   DispositionKind,
   DispositionReasonCode,
   IntentOrigin,
+  IrreversibilityReason,
   LoomNode,
   NodeKind,
   StakeFactorCode,
@@ -639,6 +640,96 @@ export const confidenceWord = (confidence: number): string => {
  */
 export const reversibilityWord = (reversible: boolean): string =>
   reversible ? "you could undo it" : "this one can't be undone"
+
+/**
+ * *Why* a change cannot be cleanly undone — the half the clause above cannot say.
+ *
+ * `reversibilityWord` has been the whole of what this portal says about undo
+ * since it was written, and it is a boolean read aloud. The runtime computes
+ * **two** obstacles and they ask opposite things of the person reading:
+ * `out-of-tree-effect` means the page is fully recoverable and the world is not,
+ * and `retention-budget-exceeded` means the world is fine and the page is not.
+ * One sends somebody to check a payment or an outbox; the other asks them
+ * whether content is worth keeping. `this one can't be undone` is both of those
+ * with the actionable half removed.
+ *
+ * Keyed by the published union rather than by `string`, so a third obstacle
+ * added to `IrreversibilityReason` stops this file compiling instead of
+ * quietly rendering as the unnamed case. The record itself carries codes as
+ * `readonly string[]` — see `irreversibilityPlain` for the one place that gap
+ * is crossed.
+ *
+ * `technical` is the runtime's own code, kept for the record and not for the
+ * sentence. The reason the whole table is a `PlainWord` and not a bare string
+ * is the rule this module exists for: the words lead, the code is one click
+ * down, and neither is ever dropped.
+ */
+export const IRREVERSIBILITY_PLAIN: Readonly<Record<IrreversibilityReason["code"], PlainWord>> = {
+  /*
+   * The strongest claim on this surface, and the wording is careful about what
+   * it does *not* say. It cannot name the part: the reason carries the offending
+   * primitive types and the journal keeps only the code, so a sentence naming
+   * one would be this portal guessing. What it can say is the mechanism and the
+   * move, and the move is the point — a reader whose change took a payment is
+   * being told to go and look at the payment, which is not something any other
+   * tool they own would think to tell them.
+   */
+  "out-of-tree-effect": {
+    label: "Putting the page back would not put everything back",
+    meaning:
+      "This change sets up a part that reaches beyond the page — the kind of thing that takes a payment or sends a message. Loom can always put the page back exactly as it was, but it cannot un-take a payment or un-send a message. Check whatever that part is wired to before you say yes.",
+    technical: "out-of-tree-effect",
+  },
+  /*
+   * Two sentences, and the second one is the half a reader weighs the decision
+   * against: *what is beyond that is gone for good*. A rule exceeded is a fact
+   * about the rule; content that will not come back is a fact about them.
+   *
+   * How much is counted but not written here. `undoing.ts` adds the number as a
+   * third sentence rather than splicing it into either of these, because the
+   * count is on every assessment and is only ever *the* number for this one
+   * code — printed beside an out-of-tree effect it is a true number answering a
+   * question nobody asked.
+   */
+  "retention-budget-exceeded": {
+    label: "Too much would have to be kept to put it back",
+    meaning:
+      "Undoing this means putting back what it takes off the page, and that is more than this project has agreed to hold on to. What is beyond that is gone for good — the request for it stays in the record, the words and pictures do not.",
+    technical: "retention-budget-exceeded",
+  },
+}
+
+/**
+ * The same table, read by the code a record actually holds.
+ *
+ * `irreversibilityReasons` is `readonly string[]` in the journal and not the
+ * union — deliberately, because a record outlives the version that wrote it. So
+ * exactly one place in this portal crosses from a stored string to a sentence,
+ * and it answers `undefined` rather than throwing: a code from a newer runtime
+ * is a thing this portal does not know, which is a state worth drawing, not a
+ * crash on a history screen.
+ */
+export const irreversibilityPlain = (code: string): PlainWord | undefined =>
+  (IRREVERSIBILITY_PLAIN as Readonly<Record<string, PlainWord>>)[code]
+
+/**
+ * What to show for an obstacle this portal has no words for.
+ *
+ * The tempting alternative is to drop it, and dropping it is the one move the
+ * governing rule forbids outright: a reader would be shown a change that cannot
+ * be undone, a list of reasons that is empty, and no way to tell that from a
+ * change with no reason recorded at all. So the code arrives unreworded, said to
+ * be unreworded, with the two things a reader can still do about it.
+ *
+ * It is here beside the table rather than in the reading, because this *is* an
+ * entry in the table — the one whose words are not written in advance.
+ */
+export const unnamedObstacle = (code: string): PlainWord => ({
+  label: "Loom gave a reason this screen has no words for",
+  meaning:
+    "Something about this change makes it impossible to take back cleanly, and this portal is older than whatever decided that. The reason is kept exactly as Loom wrote it, below. Treat the change as one you cannot undo.",
+  technical: code,
+})
 
 /**
  * A clause, shaped to stand on its own.

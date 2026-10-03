@@ -1,0 +1,85 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-wide.png",
+      "path": "/portal/activity",
+      "viewport": "wide",
+      "fullPage": true,
+      "waitFor": "text=What’s been asked",
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-phone.png",
+      "path": "/portal/activity",
+      "viewport": "phone",
+      "fullPage": true,
+      "waitFor": "text=What’s been asked",
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-03-portal-why-it-cannot-be-undone-record-wide.png",
+      "path": "/portal/activity",
+      "viewport": "wide",
+      "fullPage": true,
+      "waitFor": "text=What’s been asked",
+      "do": [
+        {
+          "click": "summary:has-text(\"What the AI proposed\") >> nth=1"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "h1"
+        },
+        {
+          "wait": 200
+        }
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    }
+  ]
+}

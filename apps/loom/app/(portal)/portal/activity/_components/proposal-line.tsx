@@ -1,8 +1,10 @@
 import type { ProposalEpisode } from "@jam-overture/loom/telemetry"
 
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UndoStandingNote } from "@/app/(portal)/_components/undo-standing"
 import { summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { describeAnswer } from "@/app/(portal)/_lib/episode-view"
+import { undoStandingOf } from "@/app/(portal)/_lib/undoing"
 import {
   FAILURE_STAGES,
   GATE_VERDICTS,
@@ -50,11 +52,27 @@ export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode 
           STAKES[assessment.stakes].label
         } · ${reversibilityWord(assessment.reversible)}`
 
+  /**
+   * And *why* it cannot be undone, when it cannot — which the clause in `shape`
+   * has never been able to say. `undefined` for an ask that never reached the
+   * Gate, which is the same reason `shape` gets shorter there: there is no
+   * judgement to read, rather than a judgement that found nothing wrong.
+   */
+  const undoing = assessment === undefined ? undefined : undoStandingOf(assessment)
+
   return (
     <li className="border-edge-subtle flex flex-col gap-1.5 border-l-2 pl-3">
       <p className="text-xs">{proposal.rationale}</p>
 
       <p className="text-ink-muted text-2xs">{shape}</p>
+
+      {/*
+        * Immediately under the clause that raises the question, and above the
+        * verdict. The order is the reader's: `this one can't be undone` is a
+        * fact about the change, so its explanation belongs with it rather than
+        * after the separate question of what Loom then decided to do about it.
+        */}
+      {undoing !== undefined && <UndoStandingNote standing={undoing} />}
 
       {/*
         * The stop is inside the emphasis on purpose. This is a verdict followed
@@ -110,6 +128,31 @@ export const ProposalLine = ({ proposal }: { readonly proposal: ProposalEpisode 
                 <dt className="text-ink-muted">reversible</dt>
                 <dd className="font-mono">{assessment.reversible ? "yes" : "no"}</dd>
               </div>
+              {/*
+                * The codes themselves, unreworded, which is the other half of
+                * the note above the verdict. A record holding a code this
+                * portal has no sentence for says so in words up there and
+                * prints the code here, so the reader always has the string to
+                * go and look up.
+                */}
+              {assessment.irreversibilityReasons.length > 0 && (
+                <div className="flex gap-1">
+                  <dt className="text-ink-muted">cannot undo</dt>
+                  <dd className="font-mono">{assessment.irreversibilityReasons.join(" ")}</dd>
+                </div>
+              )}
+              {/*
+                * Printed whenever the change removed anything, not only when
+                * the budget was the obstacle: it is what an undo would have to
+                * carry, and that is worth knowing about a change that *is*
+                * undoable too.
+                */}
+              {assessment.retainedNodeCount > 0 && (
+                <div className="flex gap-1">
+                  <dt className="text-ink-muted">retained</dt>
+                  <dd className="font-mono">{assessment.retainedNodeCount}</dd>
+                </div>
+              )}
             </>
           )}
           <div className="flex gap-1">
