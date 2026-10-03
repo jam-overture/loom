@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4468,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4514,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5420,7 +5420,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5878,7 +5878,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6742,7 +6742,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7333,7 +7333,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7561,7 +7561,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7978,7 +7978,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8332,7 +8332,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8465,7 +8465,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9452,7 +9452,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9595,7 +9595,7 @@
       "files": 13,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9662,7 +9662,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10224,7 +10224,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10298,7 +10298,7 @@
       "files": 86,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10506,6 +10506,27 @@
               "signature": "const hangingEndpoint: (id: string, description: string) => HangingSeam<EndpointEntry>",
               "truncated": false,
               "summary": "An endpoint that never says where a form posts — the same double at the submission seam."
+            },
+            {
+              "name": "NOTHING_MEASURED",
+              "kind": "value",
+              "signature": "const NOTHING_MEASURED: ChangeAnalysis",
+              "truncated": false,
+              "summary": "Every fact an analysis states, measuring nothing."
+            },
+            {
+              "name": "AssessmentDraft",
+              "kind": "type",
+              "signature": "type AssessmentDraft = {\n    /** The change being judged. Its delta decides what the inverse is written against. */\n    readonly proposal: ProposedChange;\n    /** What the delta does. The fields left out measure zero. */\n    readonly analysis?: Partial<ChangeAnalysis>;\n    /** The rules the Gate raised, in the order it raised them. */\n    readonly factors?: readonly StakeFactor[];\n    /** Why the change cannot be taken back. Empty means it can. */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
+              "truncated": false,
+              "summary": "The facts a test wants to be true of a judged change. Everything else is absent, empty or zero."
+            },
+            {
+              "name": "buildAssessment",
+              "kind": "function",
+              "signature": "const buildAssessment: (idFactory: IdFactory, draft: AssessmentDraft) => ChangeAssessment",
+              "truncated": false,
+              "summary": "A complete `ChangeAssessment` from the handful of facts a test cares about."
             }
           ]
         },
@@ -10735,7 +10756,7 @@
       "files": 71,
       "narrower": [],
       "standing": {
-        "packageNames": 1209,
+        "packageNames": 1212,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
