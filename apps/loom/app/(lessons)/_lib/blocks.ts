@@ -131,6 +131,15 @@ export const blockNodes = (
         return listNodes(ids, block.ordered, block.items)
       case "code":
         return [codeNode(ids, block.language, block.code)]
+      case "note":
+        /**
+         * Addressed to whoever maintains the lesson, so nothing is drawn for it
+         * — here, or in the held documents, which are built through this same
+         * function. A note is invisible in the markdown on GitHub too, and a
+         * construct that is invisible in one rendering and punctuation in the
+         * other would be worse than not having it.
+         */
+        return []
       case "quote":
         return [quoteNode(ids, block.blocks, from)]
       case "table":

@@ -24,6 +24,7 @@ import type { ExerciseRun } from "./exercises"
 const ANSWER = "the-answer-nobody-has-earned-yet"
 const PRINTED = "the-output-nobody-should-see"
 const LESSON_PRINTED = "the-output-the-lesson-prints-for-itself"
+const NOTE = "the-mark-no-reader-is-meant-to-see"
 
 const LESSON = `# 99 — A lesson that exists only in this test
 
@@ -92,6 +93,38 @@ describe("cutting a lesson into what may be sent", () => {
 
     expect(JSON.stringify(parts)).not.toContain(LESSON_PRINTED)
     expect(JSON.stringify(cut().held.get(TRANSCRIPTS)?.slots["p1"])).toContain(LESSON_PRINTED)
+  })
+
+  /**
+   * A mark on a transcript is addressed to whoever maintains the lesson, and
+   * the two ways it could reach a reader are different faults with one cause.
+   * It could be *drawn* — the parser used to read an HTML comment as a
+   * paragraph — or it could be drawn as nothing and still occupy a unit, which
+   * is a blank gap on the page where the author wrote an invisible line.
+   *
+   * The second is the one worth a test, because it leaves no text to search
+   * for. It needs the layout the two marked lessons actually have, which is the
+   * one below: a mark alone between the program and the transcript, with no
+   * prose either side of it to absorb it into a unit that was going to exist
+   * anyway. The first version of this test put the mark under a paragraph and
+   * passed with the guard removed.
+   */
+  it("draws nothing and occupies nothing for a mark between two fences", () => {
+    const between = "Predict what that prints, before you read on.\n\nThe output:\n\n"
+
+    expect(LESSON).toContain(between)
+
+    const bare = LESSON.replace(between, "")
+    const marked = LESSON.replace(between, `<!-- moves: ${NOTE} -->\n\n`)
+
+    const units = (source: string) =>
+      lessonParts(parseLesson(source), RUN)
+        .parts.find((part) => part.kind === "exercises")
+        ?.units.map((unit) => unit.kind)
+
+    expect(units(bare)).toEqual(["code", "printed"])
+    expect(units(marked)).toEqual(units(bare))
+    expect(JSON.stringify(lessonParts(parseLesson(marked), RUN).parts)).not.toContain(NOTE)
   })
 
   it("gives the page the address instead, and the address is the lesson's", () => {

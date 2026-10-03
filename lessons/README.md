@@ -99,6 +99,23 @@ exercise calls the seam through a double and a double satisfies both signatures.
 The paragraph that used to sit here named exactly that fault as the kind nothing
 would reach.
 
+**And since 3 October a transcript may say, in a line you will never see, that
+its red is expected.** Two exercises in this course print a second copy of a
+fact about `src/primitives/` on purpose — lesson 29's exercise C prints the
+primitives with a prop nothing reads, lesson 33's exercise G prints which of
+them have declared what they could not show — because in each case that set is
+what the lesson is *about*, so a new member of it is news. Both will go red the
+day another lane writes the thing the lesson describes, and the right response
+is to re-run the exercise and paste in what it prints now, not to go hunting for
+a mistake. That was written down in two places and neither was the one a lane
+tripping over it would read: a paragraph for the reader under one fence, and a
+comment on a constant in a *passing* assertion for the other. It is now an HTML
+comment on the line above the fence — invisible on GitHub, invisible at
+`/lessons`, and printed by the check at the moment the check fails. It never
+excuses anything: a marked fence that has drifted still fails, and a marked
+fence that matches *nothing* now fails too, which is the one case the comparison
+used to pass over in silence.
+
 Two things it still does not reach, said here rather than discovered later. A
 count is the cheapest second copy a sentence can carry and **most of what a
 lesson says carries none** — rungs numbered one too low, and an argument about
