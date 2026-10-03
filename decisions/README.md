@@ -298,3 +298,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0212](0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md) | What a reader signal means is joined to the tree when it is read, and the tree is what makes silence a measurement | Accepted | §6 |
 | [0213](0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md) | The harness reads a box, it prints the number, and the judgement stays in the report | Accepted | §1 (process) |
 | [0214](0214-where-readers-are-is-a-floored-bucket-counted-at-the-door-and-a-page-view-says-when-it-began.md) | Where readers are is a floored bucket counted at the door, and a page view says when it began | Accepted | §4c (reader signals) |
+| 0215 | *No record on this branch* | — | — |
+| 0216 | *No record on this branch* | — | — |
+| [0217](0217-choosing-a-two-region-primitive-is-itself-an-insert-decision.md) | Choosing a two-region primitive is itself an insert decision | Accepted | §4b |
