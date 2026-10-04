@@ -1,0 +1,114 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-after-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-after-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-embed-unchanged",
+      "viewport": {
+        "width": 348,
+        "height": 465,
+        "label": "embed"
+      },
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "#ask > div > p",
+        "#ask form",
+        "#ask .demo-part--ask",
+        "#ask ul li",
+        "aside footer"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-after-opened-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        {
+          "click": "#ask details.demo-part--ask > summary"
+        },
+        {
+          "waitFor": "#ask details.demo-part--ask[open] .demo-part-stage"
+        }
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-after-opened-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        {
+          "click": "#ask details.demo-part--ask > summary"
+        },
+        {
+          "waitFor": "#ask details.demo-part--ask[open] .demo-part-stage"
+        }
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-held-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        {
+          "click": "#ask form button.bg-affirm"
+        },
+        {
+          "waitFor": "li button.bg-refuse"
+        }
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-03-demo-the-proof-above-the-fold-applied-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        {
+          "click": "#ask form button.bg-affirm"
+        },
+        {
+          "waitFor": "li button.bg-refuse"
+        },
+        {
+          "click": "li form button.bg-affirm"
+        },
+        {
+          "waitFor": "li button.bg-neutral"
+        }
+      ]
+    }
+  ]
+}

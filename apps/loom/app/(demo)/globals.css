@@ -279,6 +279,7 @@
     gap: 6px;
   }
 
+
   /*
    * The exemption is the *question's*, and it is on the modifier rather
    * than on `.demo-part` because an ask has no ring to be redundant
@@ -371,6 +372,36 @@
    */
   .demo-part--kept .demo-part-stage {
     max-height: 21rem;
+  }
+
+  /*
+   * And the ask's is a `<details>`, which lays itself out.
+   *
+   * The arrival screen's excerpt is the one of the three that arrives **shut**
+   * (`part-in-question.tsx` has the measurement and the argument), so it is a
+   * disclosure rather than a section. A disclosure's contents are a single
+   * slot the browser supplies and hides, and `display: flex` on the element
+   * makes that slot a flex item — which works in the browsers this surface is
+   * photographed in and is a property of their shadow DOM rather than of
+   * anything written down. `display: block` is the shape a `<details>` has
+   * always had, so the 6px the flex `gap` was giving moves onto the band and
+   * nothing about the first screen depends on how a shadow slot is boxed.
+   *
+   * **Both rules are last in this block and that is not tidiness.**
+   * `globals.test.ts` reads `.demo-part` and `.demo-part-stage` by name, and
+   * its reader takes the *first* match in the file — which `details.demo-part`
+   * and `details.demo-part > .demo-part-stage` are both substrings of. Written
+   * above the rules they override, they silently become what two other tests
+   * are about: the window's own assertions started reading a `margin-top` and
+   * went red under names that had nothing to do with them, which is how this
+   * paragraph was earned. The order is asserted now rather than remembered.
+   */
+  details.demo-part {
+    display: block;
+  }
+
+  details.demo-part > .demo-part-stage {
+    margin-top: 6px;
   }
 }
 
@@ -490,5 +521,46 @@
 @layer base {
   summary::-webkit-details-marker {
     display: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   A DISCLOSURE DOES NOT ANIMATE FOR SOMEBODY WHO ASKED IT NOT TO
+
+   Every disclosure on this rail turns a chevron and fades a label:
+   `transition-transform group-open:rotate-90` on the arrow,
+   `transition-colors hover:text-ink` on the summary. Four of them now
+   — the three on the rail and the one the arrival screen's excerpt
+   became — and none of them was covered by the `prefers-reduced-motion`
+   rule above, which names `.loom-reach` and nothing else.
+
+   **Found by the instrument rather than argued for.** Two shots of the
+   opened excerpt, taken from two separately started servers on the same
+   build, came back with different bytes: at 1280×900 the 435×21 region
+   of the summary's own text, and at 390×844 the 13×14 box of the
+   chevron. Both were captured part-way through a 150ms transition —
+   and `pnpm shoot` photographs every page with reduced motion already
+   requested, so a page honouring that request could not have produced
+   two different pictures.
+
+   So this is the product being wrong and the flake being the symptom:
+   a visitor who has asked their system for less motion was getting a
+   rotating arrow and a fading label from a control whose whole job is
+   to be instantaneous. `src/primitives/stylesheet.ts` holds the same
+   rule for the library and calls `prefers-reduced-motion` the one media
+   query that is not about layout.
+
+   **Unlayered, which is the only place it can win.** The transitions
+   come from Tailwind utilities, and Tailwind orders its layers
+   `theme, base, components, utilities` — so a rule written in any of
+   them loses to the utility it is trying to turn off. An unlayered
+   declaration beats every layer, which is the same reasoning
+   `.demo-part-stage`'s inline ground is written down with.
+   ══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  summary,
+  summary svg {
+    transition: none;
   }
 }
