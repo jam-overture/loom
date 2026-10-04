@@ -15,7 +15,7 @@ list and it is not a report.
 **Status:** open — **the tree is green and nothing is broken**; this is here so
 you review two edits made from outside your lane rather than discovering them.
 
-Your 1 October finding is closed by #PR. Closing it needed a declaration from the
+Your 1 October finding is closed by #515. Closing it needed a declaration from the
 *primitive* side, because the whole shape of
 [0226](decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md)
 is that the number does not come through the seam — `build` still never sees a
@@ -782,7 +782,7 @@ group now reads *three of four*.
 ## 2026-10-01 — a wipe's declared `position` is discarded the moment its slider mounts, so the prop is visible only on a page with no scripting
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/render/behaviour.ts`) · **Status:** **closed by #PR**, by neither of the
+(`src/render/behaviour.ts`) · **Status:** **closed by #515**, by neither of the
 three remedies alone: a primitive declares where its control rests
 (`ADJUST_RESTING_PROPERTY`, which is (1) made per-node rather than per-type) and
 the control publishes nothing until the reader moves it (which is (3)). Option
