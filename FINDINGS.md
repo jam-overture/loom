@@ -40546,15 +40546,18 @@ exists so that whoever writes that copy knows it is not demonstrable here.
 ## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-**half closed** by `marketing-57-the-sentences-nothing-read` on 3 October. The
-register half is done: both plain-language rules now read every string a reader
-reads — text nodes and props alike — and the sweep found a second hole this
-entry did not know about, which the 3 October entry below has. **The staleness
-half is still open and is still the more interesting one:** nothing holds a
-paragraph naming a page of this site against the page that carries the thing it
-names, and `/what-you-run` still carries the one sentence of that shape on the
-site. Originally filed as: *nothing is broken; this is why a sweep was needed at
-all*
+**closed** by `marketing-59-the-pages-it-names` on 4 October, in two halves a
+day apart. The register half was done on 3 October by
+`marketing-57-the-sentences-nothing-read`: both plain-language rules now read
+every string a reader reads, text nodes and props alike. **The staleness half
+is done now**, and not as the check this entry proposed — see the 4 October
+entry below. `naming.ts` does not read a paragraph for the name of a page and
+look the page up. It asks the band a question the build can answer on its own:
+a band that names a page offers the way there, and a link into another page of
+this site lands on an anchor that page declares in every state. The
+`/what-you-run` sentence this entry names is the one that was not offering the
+way there, and it is fixed on the same branch. Originally filed as: *nothing is
+broken; this is why a sweep was needed at all*. Original status below.
 
 `voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
 no more than 35 words in a field a reader scans. Both run over
@@ -43168,6 +43171,109 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+---
+## 2026-10-04 — a link inside a sentence is the one kind of link this library cannot draw
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **nothing is blocked**; the marketing
+site shipped the control the library does have and the sentence it wanted is
+written down here
+
+`loom.link`'s own props docblock says what its accent tone is for: *"the one
+link in a paragraph that is the point of the paragraph."* That link cannot
+currently be drawn. `/what-you-run` has the only sentence on the site that
+names another page of it, the branch above had to give the reader a way there,
+and the inline link was built, photographed on all three palettes and taken
+out again.
+
+Three things stop it, and none of them is a mistake in the primitive. Each is
+right for the job it was written for, which is a menu item and a footer column.
+
+- **No underline at rest.** The underline is a wipe-in on hover, pinned open
+  only for `aria-current="page"`. In a nav bar, position says the word is a
+  link. Inside a sentence nothing does, so the phrase reads as emphasis and a
+  reader never learns it can be pressed.
+- **`color: accent`, and on `minimal` the accent is `#0a0a0a`.** That is the
+  same black as `fg-default`, deliberately, and it is the palette every visitor
+  and every screenshot gets. Photographed: in a `tone: "muted"` paragraph the
+  phrase is darker than its sentence and looks bold; in a default paragraph it
+  would be the same colour as the words either side of it. This is the trap
+  `nodes.ts` records against `variant: "quiet"` on `loom.action`, one primitive
+  over.
+- **`display: "inline-block"`, and its own `fontSize` and `lineHeight`.** The
+  inline-block is load-bearing for the underline animation and its comment says
+  so — a wrapped inline box paints two underlines at two widths. The cost is
+  that the phrase cannot break mid-phrase inside a paragraph, and `lineHeight:
+  1.4` against `loom.prose`'s 1.6 sets the line it sits on at a different
+  height from the lines above it.
+
+**What would close it.** A way to say *this link is inside a sentence*: the
+underline drawn at rest rather than on hover, `display: "inline"`, and font
+size, weight and line height inherited from the paragraph instead of set. Most
+plainly a `tone` or a prop of its own on `loom.link`; possibly a primitive of
+its own, since the three differences are a different thing rather than a
+variant of this one. Either is `Loom primitives`' call, and nothing on this
+site needs it before then: the control under the paragraph is honest, it works
+on all three palettes, and it is photographed in the 4 October report.
+
+---
+## 2026-10-04 — a claim about another surface can be held to the link beside it and never to what is on the page
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+line from `Loom docs` · **Status:** open — a stated limit of what shipped on
+4 October, not a defect today
+
+`naming.ts` holds three rules over what this site says about its own pages, and
+the third one stops at the route group boundary. A link from `/what-you-run` to
+`/how-it-works#see-it-happen` is checked against the anchors `/how-it-works`
+declares in every state it can be served in. A link to `/docs#something` is
+checked for nothing, and the same is true of `/demo` and `/lessons`.
+
+That is the same line `anchors.test.ts` drew on 8 September and for the same
+reason: a lane cannot build another lane's page, and a test here asserting over
+another surface's chrome would be this lane testing somebody else's work. It
+is recorded rather than argued with.
+
+**What it leaves uncovered**, and the site has two of them today. *"The
+documentation has the long one: what a rule can say, what the record holds
+field by field, and how to wire it into a page you already have"* is a claim
+about three things being on `/docs`. *"To ask for something in your own words,
+try the demo. It is a page you can type into"* is a claim about `/demo`. Both
+are true today and both were checked by a person. Nothing would say so if
+either stopped being.
+
+**What would close it**, and it is small: a surface publishing the list of
+things it promises to carry — a few strings, exported from its own route group
+— for anybody pointing at it to assert against. It is a shape rather than a
+request. Filed so that whoever finds a stale sentence about the documentation
+knows it was seen coming.
+
+---
+## 2026-10-04 — nine test files in one route group had each written the same walk over a tree
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — one of the nine is now a shared function and eight are not
+
+`const elementsOf = (node: LoomNode): readonly ElementNode[] => …`, the
+four-line walk that returns every element in a tree, appears in nine test files
+under `app/(marketing)/`: `anchors`, `controls`, `alignment`, `facts`,
+`adapt/adapt`, `pages/waiting`, `pages/using-it`, `pages/answer`, and a tenth
+spelling in `facing` that takes a type as well.
+
+A tenth reader arrived on 4 October and is a module rather than a test, so it
+was written once instead: `elementsIn` in `_lib/measure.ts`, beside `piecesIn`
+and `wordsIn`, which is where this route group's readings of a tree already
+live. `anchors.test.ts` was moved onto it in the same branch because the new
+module extends it directly. **The other eight were left alone**, deliberately:
+eight unrelated files in one diff is a diff nobody reads, and each is correct
+as it stands.
+
+This is the third duplication of this shape this lane has filed — `surfaceOf`
+on 1 October, and before that the screenshot recipe written nine times across
+five lanes and filed four times. The pattern is worth naming on its own: **a
+helper small enough to retype is a helper that gets retyped**, and the cost is
+not the lines. It is that the ninth copy and the first can disagree about what
+counts, and nothing anywhere compares them.
 
 ---
 ## 2026-10-04 — what a change did to the reading of a page is now one call, and it is the sentence the reader screen should lead with
