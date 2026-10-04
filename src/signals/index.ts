@@ -18,6 +18,7 @@
  */
 
 export * from "./broadcast.js"
+export * from "./change.js"
 export * from "./collect.js"
 export * from "./deliver.js"
 export * from "./fold.js"

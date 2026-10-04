@@ -43099,6 +43099,77 @@ for `Loom primitives` since 1 October and unchanged by this.
 
 
 ---
+## 2026-10-04 — what a change did to the reading of a page is now one call, and it is the sentence the reader screen should lead with
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/`) · **Status:** open — **nothing is blocked**; the reading is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`
+
+`readingChangeOf(was, now)` takes two `PageReading`s and answers *six in ten
+readers left at the pricing band and now four in ten do* —
+[0224](decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md),
+§10 of [`docs/signals.md`](docs/signals.md). It is the comparison the product
+exists to make, and it needed nothing new on the wire, in a browser or in a
+store.
+
+```ts
+import { pageReadingOf, readingChangeOf } from "@jam-overture/loom/signals"
+
+const change = readingChangeOf(
+  pageReadingOf(before, beforeTallies, registry),
+  pageReadingOf(after, afterTallies, registry)
+)
+```
+
+**`change.mostKept`** is the one figure a screen can lead with: the pair of parts
+the change keeps most readers at, with `was.share`, `now.share`, `improvement`
+(the share of readers who no longer stop there) and `readersKept` (that share at
+the volume the page has now). **`change.mostLost`** is the same for the pairs it
+made worse. Both are `null` on a page where nothing moved by more than one
+reader, which is the honest empty state and a common one.
+
+**`change.progress`** carries the two `ReadingProgress` readings it was made of,
+so *the steepest fall before, and what happened to it* is a lookup rather than a
+second derivation: take `change.progress.was.steepest` and find its two node ids
+in `change.stops` or `change.incomparable`.
+
+Five things to be careful of, and they are all in the record:
+
+- **Never divide one side's count by the other's.** Only `share` is comparable
+  across two revisions; `reached` is not, because two revisions are two trees
+  read by two sets of readers in two windows. *Three hundred reached it and now
+  four hundred do* is a sentence about traffic. `improvement` and `readersKept`
+  are already the right shape; nothing else on the screen should subtract two
+  `reached` counts from different sides.
+- **`improvement` is positive where fewer readers stop**, and `readersKept`
+  carries the same sign deliberately. A screen that subtracts the other way round
+  has one figure pointing the wrong way, which is the defect a reviewer cannot
+  see.
+- **`change.incomparable` is where the interesting change is**, not a list of
+  errors. The `separated` fate means *something now sits between these two
+  parts* — a band inserted into the gap readers were leaving at, which is the
+  commonest change anybody will make. `unreached` means nobody reaches the first
+  part of the pair any more, and it is **not** a fall that was fixed. Worth a
+  line each on the screen; `moved`, `reordered` and `absent` are quieter.
+- **`beyondOneReader` is the gate for anything you lead with.** It says the move
+  is at least one reader's worth on whichever side counted fewer, and `resolution`
+  is what one reader is worth there. It is a statement about resolution and not a
+  confidence interval — two readers out of three against one out of two is two
+  readers, however it is drawn.
+- **Never add `readersKept` across stops.** One reader who got past two bands is
+  in both pairs' figures, which is why the reading has no page-level total. A sum
+  would be the most headline-shaped wrong number on the screen.
+
+And `change.silence`: `"nothing-measured"` still fills `change.parts`, so a page
+with no views yet can say *three bands moved and one was reworded, and nothing
+has been measured since*. `"different-trees"` answers nothing at all.
+
+**What is still thin is still not this lane's.** `change.parts.reworded` names the
+parts whose own words changed, and a part whose type declares no `copy` (0122) has
+no words to compare — so it is a floor, with `change.parts.unreadable` counting how
+many parts could not be seen either way. It grows with no change here the day
+`src/primitives/` declares across itself, which is where #503 was heading when
+this was written.
 ## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`

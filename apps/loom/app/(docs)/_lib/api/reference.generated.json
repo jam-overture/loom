@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5427,7 +5427,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5885,7 +5885,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6749,7 +6749,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7340,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7568,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7985,7 +7985,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8339,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8459,7 +8459,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 35,
+      "files": 36,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8472,7 +8472,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8564,6 +8564,97 @@
               "signature": "const broadcastReaderSignals: (root: Element, options?: ReaderSignalOptions) => Result<ReaderSignalBroadcast, ReaderSignalBroadcastError>",
               "truncated": false,
               "summary": "Start broadcasting reader signals from the page under `root`."
+            }
+          ]
+        },
+        {
+          "module": "signals/change",
+          "title": "Change",
+          "summary": "What a change did to the reading of a page.",
+          "symbols": [
+            {
+              "name": "ChangeSilence",
+              "kind": "type",
+              "signature": "type ChangeSilence = \n/**\n * The two readings are of different trees.\n *\n * Nothing is comparable: not a pair, not a part, not a word. Two pages are\n * two pages, and the plausible-false-number failure here would be a screen\n * reporting that a change removed every part of a page it was never about.\n */\n\"different-trees\"\n/**\n * One of the two windows held no views.\n *\n * Every standing on that side is `unknown` (`parts.ts`), so there is no share\n * to compare against — and *every fall was fixed* is what a naive subtraction\n * would say about a page nobody has opened yet. The parts census still\n * answers, because what the change did to the tree is a fact about the tree:\n * a reading may say *three bands moved and one was reworded, and nothing has\n * been measured since.*\n */\n | \"nothing-measured\";",
+              "truncated": false,
+              "summary": "Why a comparison answered nothing."
+            },
+            {
+              "name": "CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const CHANGE_SILENCES: readonly ChangeSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeChangeSilence",
+              "kind": "function",
+              "signature": "const describeChangeSilence: (silence: ChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface putting the comparison in front of a person."
+            },
+            {
+              "name": "PairFate",
+              "kind": "type",
+              "signature": "type PairFate =\n/** One of its two parts is not in the other revision at all: removed by the change, or added by it. */\n\"absent\"\n/** Both parts are there and no longer children of the same node, so they are not siblings to compare. */\n | \"moved\"\n/**\n * Both parts are still children of one node and no longer next to each other.\n *\n * Something was inserted between them, or a part between them that could not\n * anchor a stop now can. This is the fate worth looking at hardest: a change\n * made where readers were leaving shows up here and nowhere else.\n */\n | \"separated\"\n/**\n * They are still adjacent and the other way round, so the fall between them\n * is a fall in the other direction.\n *\n * A reader meets them in the opposite order, which makes the two shares\n * answers to two different questions rather than two answers to one. Reported\n * once per side, because each orientation is an adjacency somebody really\n * read.\n */\n | \"reordered\"\n/**\n * They are still adjacent, and one of them reported something other than\n * coming into view there.\n *\n * Its `reached` of 0 is an absence of evidence rather than an absence of\n * readers, so no fall can be measured between them on that side — and\n * a side-by-side that quietly read it as zero would report a cliff appearing\n * or vanishing that no reader walked off.\n */\n | \"unanchorable\"\n/**\n * They are adjacent and anchorable on both sides, and on one side nobody\n * reached the first of them.\n *\n * `lost ÷ reached` has no value there, and the tempting reading is the\n * dangerous one: a share of 0.6 beside a share nobody can compute looks like a\n * fall that was fixed, when what happened is that readers stopped arriving.\n */\n | \"unreached\";",
+              "truncated": false,
+              "summary": "Why a pair of siblings has no counterpart in the other reading."
+            },
+            {
+              "name": "PAIR_FATES",
+              "kind": "value",
+              "signature": "const PAIR_FATES: readonly PairFate[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describePairFate",
+              "kind": "function",
+              "signature": "const describePairFate: (fate: PairFate) => string",
+              "truncated": false,
+              "summary": "One line per fate, for a surface putting the comparison in front of a person."
+            },
+            {
+              "name": "StopSide",
+              "kind": "type",
+              "signature": "type StopSide = {\n    /** Views that reached the first of the pair, which is the denominator of `share`. */\n    readonly reached: number;\n    /** Views that reached the first and not the second. Zero where none did. */\n    readonly lost: number;\n    /** `lost ÷ reached`, in `[0, 1]`. Zero is a pair nobody stopped at. */\n    readonly share: number;\n};",
+              "truncated": false,
+              "summary": "What one reading said about one pair of siblings."
+            },
+            {
+              "name": "ComparedStop",
+              "kind": "type",
+              "signature": "type ComparedStop = {\n    /** The part they reached. */\n    readonly after: NodeId;\n    /** The next part in the run, which fewer reached. */\n    readonly before: NodeId;\n    /** The parent whose run they are both steps of, which is the same node in both readings. */\n    readonly parentId: NodeId;\n    readonly was: StopSide;\n    readonly now: StopSide;\n    /**\n     * `was.share − now.share`: the share of readers that no longer stop here.\n     *\n     * **Positive is better**, because a stop is a loss, and\n     * {@link ComparedStop.readersKept} carries the same sign for the same reason.\n     * A screen that subtracted the other way round would have one of its two\n     * figures pointing the wrong way, which is the defect a reviewer cannot see.\n     */\n    readonly improvement: number;\n    /**\n     * The smallest share one reader could move, on whichever side counted fewer.\n     *\n     * `1 ÷ min(was.reached, now.reached)`. It is the resolution of the comparison\n     * and not a confidence interval: two readers out of three against one out of\n     * two is a third of a share point apart and is two readers, and no amount of\n     * arithmetic makes it more than that.\n     */\n    readonly resolution: number;\n    /**\n     * Whether `improvement` is at least one reader's worth on the coarser side.\n     *\n     * False is *nothing happened here that a reader did*, and it is the field that\n     * keeps a sparsely-read page off the top of a screen. Evaluated in integers\n     * rather than by comparing two divisions, so a rounding error never decides\n     * whether a reader exists.\n     */\n    readonly beyondOneReader: boolean;\n    /**\n     * `improvement × now.reached`: the readers the change no longer loses here, at\n     * the volume the page has now.\n     *\n     * The ranking key, and it ranks by readers rather than by share for the same\n     * reason a fall does — a stop two readers out of three abandoned is a\n     * worse rate and a smaller problem than one four hundred out of a thousand\n     * did. Not rounded, because it is a rate times a count and a magnitude rather\n     * than a census, and **never added across stops**: one reader is in every stop\n     * they walked past.\n     */\n    readonly readersKept: number;\n};",
+              "truncated": false,
+              "summary": "One pair of siblings, as two readings measured it."
+            },
+            {
+              "name": "IncomparablePair",
+              "kind": "type",
+              "signature": "type IncomparablePair = {\n    readonly after: NodeId;\n    readonly before: NodeId;\n    readonly parentId: NodeId;\n    /** Which reading this pair is from, and therefore which reading `reached` and `share` are off. */\n    readonly side: \"was\" | \"now\";\n    readonly fate: PairFate;\n    readonly reached: number;\n    readonly share: number;\n};",
+              "truncated": false,
+              "summary": "A pair one reading measured and the other cannot be asked about."
+            },
+            {
+              "name": "PartsChanged",
+              "kind": "type",
+              "signature": "type PartsChanged = {\n    /** Element nodes in both revisions, {@link PartsChanged.moved} among them. */\n    readonly shared: number;\n    /** In the later revision and not the earlier one, in reading order. */\n    readonly added: readonly NodeId[];\n    /** In the earlier revision and not the later one, in reading order. */\n    readonly removed: readonly NodeId[];\n    /** Shared parts whose parent is a different node, in reading order. */\n    readonly moved: readonly NodeId[];\n    /**\n     * Shared parts whose own words are not the words they were, in reading order.\n     *\n     * **A floor and not a count.** A part's words are the props its type declared\n     * as copy and its direct text children, so a part whose type declares\n     * nothing has no words to compare and a rewording of it is invisible here.\n     * {@link PartsChanged.unreadable} is how many parts that is, which is what\n     * stops the floor from reading as a total.\n     */\n    readonly reworded: readonly NodeId[];\n    /**\n     * Shared parts whose words were the same as far as this reading could see, and\n     * where something about them went unread on one side or the other.\n     *\n     * *Nobody has said whether these props are words* is a different answer from\n     * *these words did not change*, and keeping them apart is the bargain `copy`\n     * was declared under and the join carried into a reading.\n     */\n    readonly unreadable: number;\n};",
+              "truncated": false,
+              "summary": "What the change did to the page itself, as the two trees say it."
+            },
+            {
+              "name": "ReadingChange",
+              "kind": "type",
+              "signature": "type ReadingChange = {\n    /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */\n    readonly treeId: TreeId;\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /**\n     * The two progress readings this comparison is made of.\n     *\n     * Carried rather than left to the caller, because deriving them twice is how\n     * two screens come to disagree — and because the headline of each side is\n     * already on them: a consumer that wants *the steepest fall before, and what\n     * happened to it* takes `progress.was.steepest` and finds that pair in\n     * {@link ReadingChange.stops} or {@link ReadingChange.incomparable} by its two\n     * node ids.\n     */\n    readonly progress: {\n        readonly was: ReadingProgress;\n        readonly now: ReadingProgress;\n    };\n    readonly parts: PartsChanged;\n    /** Every pair both readings could measure, in the earlier reading's reading order. */\n    readonly stops: readonly ComparedStop[];\n    /** Every pair only one of them could, each once, with the reason. */\n    readonly incomparable: readonly IncomparablePair[];\n    /**\n     * The pair the change keeps most readers at, among those beyond one reader.\n     *\n     * Null where no pair improved by more than a reader, which includes every page\n     * the change did not help.\n     */\n    readonly mostKept: ComparedStop | null;\n    /** The pair it loses most readers at, on the same terms. Null where none worsened. */\n    readonly mostLost: ComparedStop | null;\n    /** Why nothing was compared, or `null` where something was. */\n    readonly silence: ChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readingChangeOf",
+              "kind": "function",
+              "signature": "const readingChangeOf: (was: PageReading, now: PageReading) => ReadingChange",
+              "truncated": false,
+              "summary": "What a change did to the reading of a page, from a reading of each side."
             }
           ]
         },
@@ -9571,7 +9662,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9714,7 +9805,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9781,7 +9872,7 @@
       "files": 59,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10343,7 +10434,7 @@
       "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10417,7 +10508,7 @@
       "files": 87,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10875,7 +10966,7 @@
       "files": 72,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1238,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
