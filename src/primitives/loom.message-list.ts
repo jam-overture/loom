@@ -61,6 +61,7 @@ export const loomMessageList = definePrimitive({
     "A conversation in order — a run of loom.message turns down the page. The chat, interview or transcript band.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "ol",

@@ -242,6 +242,7 @@ export const loomHalo = definePrimitive({
     "Light around one thing so it is read before the things beside it: a gradient rim, a rim the light travels round, or a soft glow outside the edge. Wraps anything, draws nothing of its own, and takes the corner radius of whatever it is lighting.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const light = LIGHTS[given.light ?? "ring"]
     const rootRadius =

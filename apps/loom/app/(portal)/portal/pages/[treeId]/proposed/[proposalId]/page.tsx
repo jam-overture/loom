@@ -6,6 +6,7 @@ import { renderLoomTree, renderRequest } from "@jam-overture/loom/react"
 import { treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { PageName } from "@/app/(portal)/_components/page-name"
+import { Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalDecoration } from "@/app/(portal)/_lib/addressing"
@@ -123,7 +124,7 @@ const ProposedChangePage = async ({
     if (held.ok) notFound()
 
     return (
-      <div className="flex max-w-xl flex-col gap-4 p-8">
+      <Screen>
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl tracking-tight">This one has already been answered.</h1>
         </header>
@@ -136,7 +137,7 @@ const ProposedChangePage = async ({
             nothing to show you. If it was accepted, your page has it now.
           </p>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -147,7 +148,7 @@ const ProposedChangePage = async ({
 
   if (!rendered.ok) {
     return (
-      <div className="flex max-w-xl flex-col gap-4 p-8">
+      <Screen>
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl tracking-tight">We couldn&rsquo;t draw this page.</h1>
         </header>
@@ -163,7 +164,7 @@ const ProposedChangePage = async ({
             <p className="font-mono">{rendered.error.code}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 

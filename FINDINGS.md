@@ -58,8 +58,23 @@ the facts are read from the runtime. Yours to decide.
 ## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`docs/routines.md`) · **Status:** open — **four sentences in a section that
-already exists**, and it closes a pattern this file has recorded five times.
+(`docs/routines.md`) · **Status:** **closed by #501**, which wrote the paragraph
+into **Taking the screenshot** with everything this entry asked for: `measure`
+and what it takes, the `holding N in M` and `← N past the fold` lines, `(n of m)`
+for a selector that matched more than once, `no match` for one that matched
+none, and the restriction that it is `pnpm shoot`'s and not `pnpm specimen`'s
+because a specimen has no fold. The output example is read off
+`tools/specimen/capture.ts` rather than remembered, so the indent and the
+spacing are the real ones.
+
+The `playwright-core` line is in too, as the sentence this entry asked for
+rather than a replacement: `/opt/node-tools/node_modules` was verified present
+in the container on 3 October, and the `npm install` stays as the instruction
+that always works.
+
+#501 was already open when this entry landed on `main` with #499, so the remedy
+was written before the entry could be read — the same documentation gap reached
+from the other side, by the lane that owns the file.
 
 [0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
 put `measure` on a shot: a list of selectors, a printed line per match with
@@ -2778,8 +2793,25 @@ different finding from this one. Nothing in three reports has claimed that.
 ## 2026-09-26 — `prettier` has no configuration here, so running it on an existing file rewrites the whole file
 
 **Filed by:** `Loom portal` · **Owned by:** whoever owns the repository's tooling
-· **Status:** open, with the settings that come closest and the measurement that
-they are not exact
+· **Status:** **the documented half is already in place** — `docs/routines.md`
+has carried *"The repository is formatted by hand, and no formatter is to be run
+over it"* under `## Standards` since `Loom marketing` filed the 23 September
+entry, which is this entry's second recommendation verbatim. The `.prettierrc`
+half remains the maintainer's call and is the only thing still open here.
+
+**And it caught another run anyway, on 3 October.** `Loom daily build` ran
+`npx prettier --write` over five files it had just edited — four of them
+pre-existing — and got 260 semicolons and a 518-line diff for a 44-line change.
+Reverted with `git checkout --` and redone by hand, at a cost of about ten
+minutes, exactly as this entry prescribes.
+
+The data point is *why*, because the warning was already written and already in
+the read-first list. It sits in `## Standards`, which is the ninth of fourteen
+sections, and the run had read `## Lanes` and `## Procedure` and gone to work.
+A warning about a reflex has to be where the reflex is reached for, and the
+reflex is reached for at the end of a unit. Nothing is proposed here — a
+`--check` step in the gate is the thing that would stop needing to be read, and
+that is the open half above.
 
 There is no `.prettierrc` at any level, no `format` script in either
 `package.json`, and no lint or format step in `pnpm verify`. The gate is
@@ -42564,9 +42596,17 @@ cheaper of the two honest options.
 ## 2026-10-03 — the Gate computes exactly why a change cannot be undone and joins it into prose on the way to the queue, so the one screen that is asking somebody to decide is the one screen that cannot read it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/runtime/disposition.ts`, `src/runtime/gate.ts`) · **Status:** open — not a
-defect, and it is the reason this lane shipped the answer on `/portal/activity`
-and not on the review queue
+(`src/runtime/disposition.ts`, `src/runtime/gate.ts`) · **Status:** **closed by
+#501**, which took the smallest shape this entry proposed. `Disposition` carries
+`irreversibilityReasons?: readonly IrreversibilityReason[]`, stamped by `gate`'s
+`decide` from the assessment it already held, optional and never defaulted
+(0045) — and omitted rather than empty when nothing fired, with `reversible`
+disambiguating the absence. Stamped on **every** disposition and not only the one
+`confirmIrreversible` produced: which rung won says nothing about whether the
+change reached outside the page, and a reader inferring one from the other would
+conclude a charge was fine to undo. `reason.detail` is unchanged, and declining
+to mine it was the right call for the reason given here — 0222 records that
+argument. The review queue's half is `Loom portal`'s and is not done.
 
 `assessReversibility` produces `IrreversibilityReason[]`, a two-member union, and
 the two members ask **opposite** things of the person reading:
@@ -42617,8 +42657,14 @@ new words.
 ## 2026-10-03 — `out-of-tree-effect` names the primitive types that caused it and the journal keeps only the code, so a screen can explain the mechanism and can never name the part
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/telemetry/event.ts`) · **Status:** open — small, and it is the difference
-between a true sentence and an actionable one
+(`src/telemetry/event.ts`) · **Status:** **closed by #501**, as the field this
+entry wrote out. `AssessmentSummary.outOfTreeEffectTypes` is
+`z.array(primitiveTypeSchema).optional()`, set from the reason when it fires and
+absent when it does not (0045). A test asserts it is a **subset and not an
+echo**: a change touching `loom.card` and `loom.footer` under a policy declaring
+only the first journals `touchedPrimitiveTypes: ["loom.card", "loom.footer"]`
+beside `outOfTreeEffectTypes: ["loom.card"]`, so the sentence can name the part
+instead of ending on *the kind of thing*.
 
 `summariseAssessment` writes `reasons.map((reason) => reason.code)`. For
 `retention-budget-exceeded` that is almost lossless — `retainedNodeCount` is
@@ -42674,6 +42720,20 @@ table comment said would arrive the day a query needed one.
 **The screen is still silent, and that part is `Loom portal`'s.** This closes the
 framework half: `/portal/history` can now ask, cheaply, per page of rows. What it
 says when the answer comes back is a sentence this lane does not own.
+**Status:** open — **narrowed by #501 and deliberately not built.** The question
+this entry asks is answered in 0222's *Alternatives considered*: the judgment is
+**joined** to the revision, not carried by it. 0016 makes the revision log the
+truth about the *page*, and whether a change reached outside the page is not a
+fact about the page, so no disposition and no assessment goes onto
+`StoredRevision`.
+
+What is left is the thing this entry already identified as the useful half: **a
+way to fetch one `AssessmentSummary` by `proposalId` without paging the whole
+journal.** That is a new method on `TelemetryJournal`, which means two
+implementations and the contract test, and it is a bigger unit than the two
+fields #501 landed — kept separate deliberately rather than bundled into a PR
+whose subject is the Gate. `/portal/history` says nothing untrue today; it still
+does not say this.
 
 `/portal/history` has `ReversalNote`, which is the best thing on this surface: it
 inverts the log and says what undoing a revision would put back and what later
@@ -42923,6 +42983,137 @@ screenshots are six staged pages with no history and no waiting changes. Choosin
 a layout for the empty case is how a screen ends up wrong for every real one.
 
 ---
+## 2026-10-04 — a rule shipped with its primitive, its argument and a queue, and four hours later the maintainer was looking at the same defect on one of the sixteen screens in the queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+the guard this entry is about, and filed anyway because the *shape* is the
+finding and the shape is not specific to layout
+
+`_components/screen.tsx` landed on 3 October. It is good work: the rule is
+stated in one sentence, the primitive is built, the argument for why one number
+cannot answer both questions is written out, and two screens are converted. Its
+report says what it did not do, honestly and with a reason:
+
+> *"I did not convert the other sixteen screens. A twenty-four-screen relayout in
+> one pull request is unreviewable, and the brief says so about sweeping changes.
+> The primitive and the rule are on `main`; the rest is a queue."*
+
+Every clause of that is true. It was still the wrong stopping point, and the
+evidence arrived the same evening: the maintainer opened
+`/portal/pages/[treeId]/versions` — one of the sixteen — and said
+
+> *"There is a lot of dead space on several of the portal views. I think we need
+> to utilize it better."*
+
+which is the sentence that caused `screen.tsx` to exist, said again, about a
+screen the fix had not reached.
+
+**The defect is not that sixteen were left.** Splitting a large relayout is
+right, and a run that converted twenty-four screens by hand would have shipped
+something nobody could review. The defect is that **what was left behind was a
+sentence in a report**. A report is read by whoever reads reports; `main` is
+read by every run. The queue existed in neither the code nor the tests, so the
+only thing standing between the sixteen and a nineteenth screen written capped
+next month was that somebody remembered.
+
+The run did leave one mechanism — a counted ceiling, *never more than 29 caps* —
+and it is worth saying exactly what that caught and what it did not. It stops the
+number going **up**. It cannot make it come **down**, and it reads a queue of
+sixteen as a steady state rather than as a debt.
+
+**What this lane does instead, from now on:** when a rule lands with its
+conversions incomplete, the unconverted set is a **failing-if-it-grows guard in
+the lane**, not a paragraph. `every-screen-width.test.ts` is this one's, and it
+asserts the whole property over every screen found on disk rather than over a
+list: a nineteenth screen is inside it the moment the file exists.
+
+*The same sentence, one layer up, as the 24 September author-flag entry:* **a
+rule whose enforcement is "remember to look" is enforced by whoever happens to
+look.** That entry was about a lane's commits, this one is about a lane's own
+queue, and it is the second time this lane has paid for the distinction between
+a rule that is written down and a rule that fails.
+
+---
+## 2026-10-04 — a screen stops widening at 1440 and the maintainer's display is wider than that, so the rule fixed most of the dead space and left a visible band of it
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer — it is a judgement
+about his own screens rather than a defect · **Status:** open, and deliberately
+not decided by this lane
+
+`Screen` caps at `90rem` — 1440px — and the reasoning is written above it and is
+sound as far as it goes:
+
+> *"a card grid on a 3440-pixel display becomes eleven columns of thumbnail, and
+> a row of eleven is a different screen from a row of four. The bound is where
+> the layout stops improving rather than where reading stops working."*
+
+The screenshot the maintainer sent is **about 2000 pixels wide**. Before the
+conversion a screen used roughly 1010 of it; after, about 1500. That is the
+change he asked for and it is most of the way there — and there is still a band
+of around 500 pixels down the right of every screen, which is the bound doing
+exactly what it was written to do.
+
+| | his display | used before | used after | left over |
+| --- | --- | --- | --- | --- |
+| a screen at `max-w-3xl` | ~2000 | 768 + rail | 1440 + rail | ~500 |
+
+**Two of the three kinds of content on these screens disagree about the bound.**
+
+- A **card grid** is what the bound was written for, and it is right: `/portal/rules`
+  at 1440 is three columns, which is a readable arrangement of nine rules. At
+  2000 it would be four, which is not obviously better and on a 3440 display is
+  the eleven-column problem the comment names.
+- A **stage** — the drawn page on `/portal/pages/[treeId]/versions`, the preview
+  pane #495 added — wants every pixel there is, because it is a picture of a web
+  page and the thing a reader is checking is what that page looks like. The bound
+  costs it directly.
+
+So the honest shape of the question is not *"is 1440 the right number"* but
+*"should the bound be the same for a grid of cards and a picture of a page"*. A
+`Screen` that took a `wide` variant for the stage screens would answer it, and
+this lane is not going to invent a second number for the maintainer's own
+displays without being asked — picking it from the one screenshot in hand would
+be optimising against a sample of one.
+
+**What would settle it in a sentence:** which width his portal is actually open
+at, and whether he would rather a stage ran edge to edge while the card screens
+keep a bound.
+## 2026-10-03 — the framework cannot publish a new name without a page in another lane's directory, and today that decided a module boundary
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/offered.test.ts`) · **Status:** open — **not a
+defect, and the gate is right.** Filed because it is a constraint on the
+framework that nothing outside this entry states, and it has now shaped a
+decision.
+
+`offered.test.ts` asserts that every name the package hands back is mentioned on
+some page of the documentation site:
+
+> `@jam-overture/loom` hands back a object called `irreversibilityReasonSchema`
+> and no page on this site mentions it. Something is published that a reader has
+> no way to find.
+
+That is a good rule and it should stay. The consequence is that **publishing a
+name is a two-lane operation**: the framework can add the export and the
+generated reference (`pnpm --filter @loom/app docs:api`, which is tooling and
+regenerates cleanly), and it cannot write the prose page, because pages under
+`(docs)` belong to `Loom docs`. So a framework run that wants to publish
+something has three options — leave it unpublished, cross the lane boundary, or
+file a finding and wait a day.
+
+**#501 took the first, and it was the right call there.** A reason schema and a
+three-line narrowing helper are seams between two modules of this package, not
+names a host composing a runtime reaches for, and 0222 records that argument. The
+choice was still made under this constraint rather than purely on merits, and
+that is the part worth writing down: the next name may be one a host genuinely
+needs, and then the only honest options are the second and the third.
+
+**What would help, and it is small.** A run that adds a published name needs to
+know where the one sentence goes. If `Loom docs` can say which page takes a new
+runtime export by default — or that a name may land with a stub line the docs
+lane rewrites — the framework can publish on merit and file the prose rather than
+choosing its module boundaries around a test it cannot satisfy. Nothing is
+blocked today.
 ## 2026-10-03 — where a page loses its readers is now a reading, and it is a shape to draw rather than one more row
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
@@ -42974,3 +43165,265 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+
+---
+## 2026-10-04 — what a change did to the reading of a page is now one call, and it is the sentence the reader screen should lead with
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/`) · **Status:** open — **nothing is blocked**; the reading is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`
+
+`readingChangeOf(was, now)` takes two `PageReading`s and answers *six in ten
+readers left at the pricing band and now four in ten do* —
+[0224](decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md),
+§10 of [`docs/signals.md`](docs/signals.md). It is the comparison the product
+exists to make, and it needed nothing new on the wire, in a browser or in a
+store.
+
+```ts
+import { pageReadingOf, readingChangeOf } from "@jam-overture/loom/signals"
+
+const change = readingChangeOf(
+  pageReadingOf(before, beforeTallies, registry),
+  pageReadingOf(after, afterTallies, registry)
+)
+```
+
+**`change.mostKept`** is the one figure a screen can lead with: the pair of parts
+the change keeps most readers at, with `was.share`, `now.share`, `improvement`
+(the share of readers who no longer stop there) and `readersKept` (that share at
+the volume the page has now). **`change.mostLost`** is the same for the pairs it
+made worse. Both are `null` on a page where nothing moved by more than one
+reader, which is the honest empty state and a common one.
+
+**`change.progress`** carries the two `ReadingProgress` readings it was made of,
+so *the steepest fall before, and what happened to it* is a lookup rather than a
+second derivation: take `change.progress.was.steepest` and find its two node ids
+in `change.stops` or `change.incomparable`.
+
+Five things to be careful of, and they are all in the record:
+
+- **Never divide one side's count by the other's.** Only `share` is comparable
+  across two revisions; `reached` is not, because two revisions are two trees
+  read by two sets of readers in two windows. *Three hundred reached it and now
+  four hundred do* is a sentence about traffic. `improvement` and `readersKept`
+  are already the right shape; nothing else on the screen should subtract two
+  `reached` counts from different sides.
+- **`improvement` is positive where fewer readers stop**, and `readersKept`
+  carries the same sign deliberately. A screen that subtracts the other way round
+  has one figure pointing the wrong way, which is the defect a reviewer cannot
+  see.
+- **`change.incomparable` is where the interesting change is**, not a list of
+  errors. The `separated` fate means *something now sits between these two
+  parts* — a band inserted into the gap readers were leaving at, which is the
+  commonest change anybody will make. `unreached` means nobody reaches the first
+  part of the pair any more, and it is **not** a fall that was fixed. Worth a
+  line each on the screen; `moved`, `reordered` and `absent` are quieter.
+- **`beyondOneReader` is the gate for anything you lead with.** It says the move
+  is at least one reader's worth on whichever side counted fewer, and `resolution`
+  is what one reader is worth there. It is a statement about resolution and not a
+  confidence interval — two readers out of three against one out of two is two
+  readers, however it is drawn.
+- **Never add `readersKept` across stops.** One reader who got past two bands is
+  in both pairs' figures, which is why the reading has no page-level total. A sum
+  would be the most headline-shaped wrong number on the screen.
+
+And `change.silence`: `"nothing-measured"` still fills `change.parts`, so a page
+with no views yet can say *three bands moved and one was reworded, and nothing
+has been measured since*. `"different-trees"` answers nothing at all.
+
+**What is still thin is still not this lane's.** `change.parts.reworded` names the
+parts whose own words changed, and a part whose type declares no `copy` (0122) has
+no words to compare — so it is a floor, with `change.parts.unreadable` counting how
+many parts could not be seen either way. It grows with no change here the day
+`src/primitives/` declares across itself, which is where #503 was heading when
+this was written.
+## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
+(`lessons/24-silence.md`) · **Status:** open — **the six transcript lines are
+already updated on this branch because a test holds them**; what is open is the
+prose under them, which is this lane's to read and not mine to rewrite
+
+The 30 September entry from this lane — *two `copy` declarations were backed out
+of a pull request because a lesson transcript printed zero* — ended by asking
+whether a lesson's transcript should ever be able to make a library decision for
+another lane. The answer this run took was **no, and the way to settle it is to
+do the pass the 19 September finding asked for**, which is
+[0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) and is on
+this branch. So the number has moved, in one step, from 0 to 102.
+
+**The transcript lines were updated here**, and were not a choice:
+`apps/loom/app/(lessons)/_lib/transcripts.test.ts` runs every lesson's exercises
+and compares what they print against the markdown, so the pass turned lesson 24
+red and the remedy that test names is *re-run the exercise and paste in what it
+prints now*. Six lines moved in Exercise F and one in Exercise H. **No prose was
+touched.** What it prints now:
+
+```
+  primitives registered:     102
+  declaring copy:            102
+  declaring any role:        1
+  typesWithRole("heading"):  ["loom.heading"]
+  copyFor("loom.stat"):      ["value","label","caption"]
+  textOf(metrics band):      ""
+  copyIn(metrics band, starter registry)
+    words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]
+    unread:   none
+    unspoken: none
+```
+
+**Three passages under it change in substance rather than in arithmetic**, which
+is why this is an entry and not a number bump:
+
+1. *"Zero and zero. `loom.heading` is registered and does not declare that it is
+   a heading; `loom.stat` holds three words in props and has not said which."*
+   Both halves are now false.
+2. *"`unread` has six entries naming every node and every prop involved. **The
+   reading is exactly as ignorant as it was and is now saying so**"* — the
+   transcript's six `unread` entries are gone and `words` has the eight the band
+   shows. The paragraph's argument about what the seam bought *on the day it
+   landed* is still true and is now a historical claim rather than a present
+   one.
+3. *"`unspoken` is empty, and on this library it is empty for every tree there
+   is: with nothing declaring `copy`, no node ever reaches the branch that fills
+   it. The third field is a promise kept against a day that has not arrived."*
+   The day arrived. `unspoken` is still empty **for this band**, and it is
+   non-empty for exactly two types in the library — `loom.meter`'s `value` and
+   `loom.rating`'s `score`, both numbers their components print. If the lesson
+   wants a live example of the third field, `proof-faces` is one and is in the
+   catalogue.
+
+**Exercise H's line three is the one to re-run rather than edit.** It prints *the
+same, against the starter library `[]`: "Untitled page"* and the paragraph under
+it makes the ordering argument — *the declaration first, the registry question
+second, or neither.* The array is no longer empty, so the ordering argument has
+been satisfied for this library and is now an illustration rather than a warning;
+whether the printed line itself changes depends on whether that fixture's page
+leads with a `loom.heading`, which this lane cannot see from here.
+
+**The paragraphs were not edited from this branch**, for the reason the 2
+October entry about lesson 32 gives — a number changed from outside the lane is
+a courtesy, and a paragraph changed from outside the lane is somebody else's
+argument rewritten by a stranger — and that entry is also the reason this one is
+specific about which three passages moved rather than leaving them to be found.
+The lesson currently reads *"Zero and zero"* directly under a transcript that
+says 102 and 1.
+
+---
+## 2026-10-04 — `copy` is one list and two consumers ask different questions of it, and alt text is where they disagree
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/sdk/`)
+· **Status:** open — **measured rather than blocking**; the library has made the
+call ([0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) rule
+2) and will live with it, and this is here so the cost is on the record rather
+than discovered by a surface
+
+[0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) is
+one declaration: *the props whose values a reader reads as words.* Two surfaces
+read it, and they are not asking the same question.
+
+| the surface | what it needs `copy` to mean |
+| --- | --- |
+| the review queue (*words it takes away*) | **every word a person wrote into this node**, so a proposal that rewrites them is not described as changing nothing |
+| `wordsReadIn` (0212) (*copy a reader reached*) | **the words a reader actually read**, so a sentence about a part is about what was on screen |
+
+For almost every prop in the library the two agree. They disagree on exactly one
+kind: **prose written for a reader who cannot see the picture.** `loom.media`'s
+`alt`, `loom.icon`'s label, `loom.embed`'s frame `title`, `loom.banner`'s
+landmark name. A change that rewrites every alt text on a page takes words away
+and the queue must say so; a sighted reader who looked at the image did not read
+them and a reading that counts them is slightly wrong about what was read.
+
+**The library declared them**, because the queue's failure is invisible and the
+reading's is a rounding error — one of the two is recoverable by a consumer that
+knows, and the other is a reviewer approving a change against a description that
+omits it. **Four props in the whole library are only ever an accessible name** —
+`loom.media`'s `alt`, `loom.icon`'s `label`, `loom.embed`'s `title` and
+`loom.banner`'s `label` — and two more are a drawn word or an image's `alt`
+depending on the node (`loom.logo`'s and `loom.avatar`'s `name`). The measured
+size of the disagreement is four, and six at the outside.
+
+**The shape that would answer it, and it is yours rather than mine**, because it
+is a field on a primitive definition: either a second list, or an entry form that
+carries a qualifier —
+
+```ts
+copy: ["caption", { prop: "alt", as: "alternative" }]
+```
+
+— so `copyIn` can be asked for all of it or for the shown half. The cost is that
+every existing declaration stays valid and the seam grows a shape; the benefit
+is that neither consumer has to be told to be careful about something it cannot
+see. **Not proposed as urgent**: nothing is broken, both consumers are better off
+than they were this morning, and a vocabulary invented ahead of its readers is
+the mistake 0114 spent a paragraph on.
+
+---
+## 2026-10-04 — the declaration half of `TITLE_BEARING` and of the review queue's missing words has landed, and both hosts can now delete an array
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`), with the same answer for `Loom signals` ·
+**Status:** open — **nothing is blocked and nothing needs to be rushed**; this
+is the other half of three entries that were waiting on this lane
+
+Three open entries name one missing thing, and it is no longer missing. As of
+[0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) every
+primitive in the starter library declares `copy` and `loom.heading` declares
+`role: "heading"`.
+
+**What answers now, measured rather than asserted:**
+
+| asked | answered this morning | answers now |
+| --- | --- | --- |
+| `copyFor(type)` | `undefined` for all 102 | a list for all 102 |
+| `typesWithRole("heading")` | `[]` | `["loom.heading"]` |
+| `copyIn` over the 52 starting compositions | `words: []`, `unread` on every node | **971 words, `unread: []`** |
+| `wordsReadIn(reading)` | the empty list for any page built from this library | the words of the parts a counter names |
+
+**Three things to take rather than re-derive.**
+
+1. **`TITLE_BEARING` and `TITLE_TYPES` can go.** `registry.typesWithRole("heading")`
+   answers for this library, and the ordering lesson 24 insists on — *the
+   declaration first, the registry question second, or neither* — is satisfied
+   for the first time. A host that registers its own heading primitive gets the
+   right answer without this lane knowing it exists, which is the whole of 0114.
+2. **`part-name.ts` naming a props-only part *the stat*** has words to use now:
+   `copyIn(node, registry).words` on a `loom.stat` is `["3,400", "appointments",
+   "last year"]` rather than nothing.
+3. **Two numbers in the library are declared copy and are not strings**, by
+   design: `loom.meter`'s `value` and `loom.rating`'s `score`, which their
+   components print and which `copyIn` refuses to coerce. They arrive in
+   `unspoken`, not in `words`, and a surface that renders `unspoken` as *words a
+   reader lost* would be wrong — it means *there is a figure here I will not
+   guess the formatting of*. Three rows across the whole catalogue.
+
+**One thing this does not close**: a reading grouped by role is still one row
+plus *declared none*, because the vocabulary has one member and this pass did
+not widen it. 0114's bar for a second member is a consumer that cannot answer
+its question, and the 1 October entry from `Loom signals` explicitly says it does
+not have one. Unchanged on purpose.
+
+---
+## 2026-10-04 — a prop that is only drawn once a binding has answered is invisible to any probe that renders the tree alone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — **small, and found by the instrument it is about**, which is
+the only reason it is worth writing down
+
+`copy.test.ts` renders every primitive with a marker in each prop and asserts
+that a prop declared as copy is drawn and that an undeclared one is not drawn as
+text. It found its first real case on the run that wrote it: **`loom.tally`
+declares `prefix` and `suffix` and draws neither**, because both wrap a figure
+that only exists once a binding has answered, and an unbound tally draws the word
+standing in for the figure instead.
+
+The declaration is right and the probe was incomplete. It now hands that node a
+`loom:data` declaration and a resolution answering it — four lines, and they are
+in the test — after which both props draw and the assertion holds.
+
+**The general form, for whoever adds the next bound primitive:** a render of a
+tree alone cannot see any prop whose drawing is conditional on an answer, so a
+primitive that declares `reads` needs the probe to answer it or its copy
+declarations are unverified. The list of bound types in the test is one entry
+long and is the place to add the second.

@@ -1,5 +1,6 @@
 "use client"
 
+import { Screen } from "./_components/screen"
 import { StateNotice } from "./_components/state-notice"
 
 /**
@@ -39,7 +40,7 @@ const ErrorBoundary = ({
   readonly error: Error & { digest?: string }
   readonly reset: () => void
 }) => (
-  <div className="flex max-w-2xl flex-col gap-4 p-8">
+  <Screen>
     <h1 className="text-2xl tracking-tight">Something went wrong</h1>
 
     <StateNotice
@@ -67,7 +68,7 @@ const ErrorBoundary = ({
         </p>
       )}
     </StateNotice>
-  </div>
+  </Screen>
 )
 
 export default ErrorBoundary

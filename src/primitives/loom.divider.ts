@@ -105,6 +105,7 @@ export const loomDivider = definePrimitive({
   description: "A visual break between sections, as a plain rule, a row of dots, or a diamond.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

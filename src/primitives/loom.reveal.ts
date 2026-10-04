@@ -107,6 +107,7 @@ export const loomReveal = definePrimitive({
     "A band that lifts and fades into place as the reader scrolls to it. Wraps anything; holds still while the page is being edited.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

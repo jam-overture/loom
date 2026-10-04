@@ -108,6 +108,7 @@ export const loomListing = definePrimitive({
    * off. Nothing on this card covers anything else.
    */
   slots: ["flags", "action"],
+  copy: ["address", "price"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const flags = loom.slots["flags"]
     const action = loom.slots["action"]

@@ -25,6 +25,7 @@ export const loomProse = definePrimitive({
   description: "A paragraph of body copy. Its text is child nodes, so it stays addressable.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "p",

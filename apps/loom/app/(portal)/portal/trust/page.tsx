@@ -6,6 +6,7 @@ import { calibrationOf, describeTelemetryError, episodesOf } from "@jam-overture
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -74,7 +75,7 @@ const TrustPage = async ({
 
   if (!page.ok) {
     return (
-      <div className="flex max-w-3xl flex-col gap-4 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">Can you trust the AI?</h1>
         <StateNotice tone="failure" title="We couldn't check the AI's track record.">
           <p>
@@ -89,7 +90,7 @@ const TrustPage = async ({
             <p className="font-mono">{describeTelemetryError(page.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -150,8 +151,8 @@ const TrustPage = async ({
   const nothingScored = report.overall.judged === 0
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">Can you trust the AI?</h1>
 
         {/*
@@ -173,7 +174,7 @@ const TrustPage = async ({
             <ScopedLead view="trust" page={pageName} />
           )}
         </p>
-      </header>
+      </Measured>
 
       {scope?.success && <PageViews treeId={scope.data} current="trust" />}
 
@@ -323,7 +324,7 @@ const TrustPage = async ({
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

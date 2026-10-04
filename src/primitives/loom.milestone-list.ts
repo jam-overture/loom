@@ -77,6 +77,7 @@ export const loomMilestoneList = definePrimitive({
     "A run of loom.milestone entries down a vertical rail — a timeline, roadmap, changelog, or the steps of a process.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "ol",

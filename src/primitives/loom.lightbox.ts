@@ -106,6 +106,7 @@ export const loomLightbox = definePrimitive({
     "A thumbnail a reader opens: a preview region on the page and a full region drawn over it, with a caption and a close control.",
   props,
   slots: ["preview", "full"],
+  copy: ["caption"],
   text: LIGHTBOX_TEXT,
   /** `dismiss` requires `present`, which the registry checks at registration (0176). */
   behaviours: ["present", "dismiss"],
