@@ -4,7 +4,7 @@ import { describeStoreError } from "@jam-overture/loom/store"
 
 import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { MIN_CARD_WIDTH, PageCardLink } from "@/app/(portal)/_components/page-card"
-import { Measured, Screen } from "@/app/(portal)/_components/screen"
+import { CardGrid, Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -202,18 +202,13 @@ const PagesPage = async ({ searchParams }: { searchParams: Promise<{ after?: str
             * every page to take its name off it; the tree was being dropped one
             * line later. What this grid spends is layout, not requests.
             */}
-          <ul
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${MIN_CARD_WIDTH}px), 1fr))`,
-            }}
-          >
+          <CardGrid min={MIN_CARD_WIDTH}>
             {summaries.map((page) => (
               <li key={page.treeId} className="flex">
                 <PageCardLink card={page} />
               </li>
             ))}
-          </ul>
+          </CardGrid>
         </>
       )}
 

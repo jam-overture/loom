@@ -42664,3 +42664,100 @@ Filed rather than guessed at, because the right answer depends on what a loaded
 deployment looks like and **nothing in this repository has ever had one**: the
 screenshots are six staged pages with no history and no waiting changes. Choosing
 a layout for the empty case is how a screen ends up wrong for every real one.
+
+---
+## 2026-10-04 — a rule shipped with its primitive, its argument and a queue, and four hours later the maintainer was looking at the same defect on one of the sixteen screens in the queue
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** closed by
+the guard this entry is about, and filed anyway because the *shape* is the
+finding and the shape is not specific to layout
+
+`_components/screen.tsx` landed on 3 October. It is good work: the rule is
+stated in one sentence, the primitive is built, the argument for why one number
+cannot answer both questions is written out, and two screens are converted. Its
+report says what it did not do, honestly and with a reason:
+
+> *"I did not convert the other sixteen screens. A twenty-four-screen relayout in
+> one pull request is unreviewable, and the brief says so about sweeping changes.
+> The primitive and the rule are on `main`; the rest is a queue."*
+
+Every clause of that is true. It was still the wrong stopping point, and the
+evidence arrived the same evening: the maintainer opened
+`/portal/pages/[treeId]/versions` — one of the sixteen — and said
+
+> *"There is a lot of dead space on several of the portal views. I think we need
+> to utilize it better."*
+
+which is the sentence that caused `screen.tsx` to exist, said again, about a
+screen the fix had not reached.
+
+**The defect is not that sixteen were left.** Splitting a large relayout is
+right, and a run that converted twenty-four screens by hand would have shipped
+something nobody could review. The defect is that **what was left behind was a
+sentence in a report**. A report is read by whoever reads reports; `main` is
+read by every run. The queue existed in neither the code nor the tests, so the
+only thing standing between the sixteen and a nineteenth screen written capped
+next month was that somebody remembered.
+
+The run did leave one mechanism — a counted ceiling, *never more than 29 caps* —
+and it is worth saying exactly what that caught and what it did not. It stops the
+number going **up**. It cannot make it come **down**, and it reads a queue of
+sixteen as a steady state rather than as a debt.
+
+**What this lane does instead, from now on:** when a rule lands with its
+conversions incomplete, the unconverted set is a **failing-if-it-grows guard in
+the lane**, not a paragraph. `every-screen-width.test.ts` is this one's, and it
+asserts the whole property over every screen found on disk rather than over a
+list: a nineteenth screen is inside it the moment the file exists.
+
+*The same sentence, one layer up, as the 24 September author-flag entry:* **a
+rule whose enforcement is "remember to look" is enforced by whoever happens to
+look.** That entry was about a lane's commits, this one is about a lane's own
+queue, and it is the second time this lane has paid for the distinction between
+a rule that is written down and a rule that fails.
+
+---
+## 2026-10-04 — a screen stops widening at 1440 and the maintainer's display is wider than that, so the rule fixed most of the dead space and left a visible band of it
+
+**Filed by:** `Loom portal` · **Owned by:** the maintainer — it is a judgement
+about his own screens rather than a defect · **Status:** open, and deliberately
+not decided by this lane
+
+`Screen` caps at `90rem` — 1440px — and the reasoning is written above it and is
+sound as far as it goes:
+
+> *"a card grid on a 3440-pixel display becomes eleven columns of thumbnail, and
+> a row of eleven is a different screen from a row of four. The bound is where
+> the layout stops improving rather than where reading stops working."*
+
+The screenshot the maintainer sent is **about 2000 pixels wide**. Before the
+conversion a screen used roughly 1010 of it; after, about 1500. That is the
+change he asked for and it is most of the way there — and there is still a band
+of around 500 pixels down the right of every screen, which is the bound doing
+exactly what it was written to do.
+
+| | his display | used before | used after | left over |
+| --- | --- | --- | --- | --- |
+| a screen at `max-w-3xl` | ~2000 | 768 + rail | 1440 + rail | ~500 |
+
+**Two of the three kinds of content on these screens disagree about the bound.**
+
+- A **card grid** is what the bound was written for, and it is right: `/portal/rules`
+  at 1440 is three columns, which is a readable arrangement of nine rules. At
+  2000 it would be four, which is not obviously better and on a 3440 display is
+  the eleven-column problem the comment names.
+- A **stage** — the drawn page on `/portal/pages/[treeId]/versions`, the preview
+  pane #495 added — wants every pixel there is, because it is a picture of a web
+  page and the thing a reader is checking is what that page looks like. The bound
+  costs it directly.
+
+So the honest shape of the question is not *"is 1440 the right number"* but
+*"should the bound be the same for a grid of cards and a picture of a page"*. A
+`Screen` that took a `wide` variant for the stage screens would answer it, and
+this lane is not going to invent a second number for the maintainer's own
+displays without being asked — picking it from the one screenshot in hand would
+be optimising against a sample of one.
+
+**What would settle it in a sentence:** which width his portal is actually open
+at, and whether he would rather a stage ran edge to edge while the card screens
+keep a bound.

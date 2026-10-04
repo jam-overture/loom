@@ -3,6 +3,7 @@ import Link from "next/link"
 import { policyFingerprintOf } from "@jam-overture/loom"
 import { describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -94,8 +95,8 @@ const WhatIfPage = async ({ searchParams }: { readonly searchParams: Promise<Add
   const cost = plan === undefined ? "" : costOf(plan)
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">{WHAT_IF_NAME}</h1>
 
         <p className="text-ink-muted text-sm">
@@ -107,7 +108,7 @@ const WhatIfPage = async ({ searchParams }: { readonly searchParams: Promise<Add
         <Link href="/portal/rules" className="w-fit text-xs">
           &larr; What Loom is allowed to do here
         </Link>
-      </header>
+      </Measured>
 
       {!page.ok && (
         <StateNotice tone="failure" title="We couldn't load what has happened here.">
@@ -238,7 +239,7 @@ const WhatIfPage = async ({ searchParams }: { readonly searchParams: Promise<Add
           about this one.
         </p>
       </TechnicalDetail>
-    </div>
+    </Screen>
   )
 }
 
