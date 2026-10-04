@@ -11,8 +11,23 @@ list and it is not a report.
 ## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`docs/routines.md`) · **Status:** open — **four sentences in a section that
-already exists**, and it closes a pattern this file has recorded five times.
+(`docs/routines.md`) · **Status:** **closed by #501**, which wrote the paragraph
+into **Taking the screenshot** with everything this entry asked for: `measure`
+and what it takes, the `holding N in M` and `← N past the fold` lines, `(n of m)`
+for a selector that matched more than once, `no match` for one that matched
+none, and the restriction that it is `pnpm shoot`'s and not `pnpm specimen`'s
+because a specimen has no fold. The output example is read off
+`tools/specimen/capture.ts` rather than remembered, so the indent and the
+spacing are the real ones.
+
+The `playwright-core` line is in too, as the sentence this entry asked for
+rather than a replacement: `/opt/node-tools/node_modules` was verified present
+in the container on 3 October, and the `npm install` stays as the instruction
+that always works.
+
+#501 was already open when this entry landed on `main` with #499, so the remedy
+was written before the entry could be read — the same documentation gap reached
+from the other side, by the lane that owns the file.
 
 [0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
 put `measure` on a shot: a list of selectors, a printed line per match with
@@ -2731,8 +2746,25 @@ different finding from this one. Nothing in three reports has claimed that.
 ## 2026-09-26 — `prettier` has no configuration here, so running it on an existing file rewrites the whole file
 
 **Filed by:** `Loom portal` · **Owned by:** whoever owns the repository's tooling
-· **Status:** open, with the settings that come closest and the measurement that
-they are not exact
+· **Status:** **the documented half is already in place** — `docs/routines.md`
+has carried *"The repository is formatted by hand, and no formatter is to be run
+over it"* under `## Standards` since `Loom marketing` filed the 23 September
+entry, which is this entry's second recommendation verbatim. The `.prettierrc`
+half remains the maintainer's call and is the only thing still open here.
+
+**And it caught another run anyway, on 3 October.** `Loom daily build` ran
+`npx prettier --write` over five files it had just edited — four of them
+pre-existing — and got 260 semicolons and a 518-line diff for a 44-line change.
+Reverted with `git checkout --` and redone by hand, at a cost of about ten
+minutes, exactly as this entry prescribes.
+
+The data point is *why*, because the warning was already written and already in
+the read-first list. It sits in `## Standards`, which is the ninth of fourteen
+sections, and the run had read `## Lanes` and `## Procedure` and gone to work.
+A warning about a reflex has to be where the reflex is reached for, and the
+reflex is reached for at the end of a unit. Nothing is proposed here — a
+`--check` step in the gate is the thing that would stop needing to be read, and
+that is the open half above.
 
 There is no `.prettierrc` at any level, no `format` script in either
 `package.json`, and no lint or format step in `pnpm verify`. The gate is
@@ -42517,9 +42549,17 @@ cheaper of the two honest options.
 ## 2026-10-03 — the Gate computes exactly why a change cannot be undone and joins it into prose on the way to the queue, so the one screen that is asking somebody to decide is the one screen that cannot read it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/runtime/disposition.ts`, `src/runtime/gate.ts`) · **Status:** open — not a
-defect, and it is the reason this lane shipped the answer on `/portal/activity`
-and not on the review queue
+(`src/runtime/disposition.ts`, `src/runtime/gate.ts`) · **Status:** **closed by
+#501**, which took the smallest shape this entry proposed. `Disposition` carries
+`irreversibilityReasons?: readonly IrreversibilityReason[]`, stamped by `gate`'s
+`decide` from the assessment it already held, optional and never defaulted
+(0045) — and omitted rather than empty when nothing fired, with `reversible`
+disambiguating the absence. Stamped on **every** disposition and not only the one
+`confirmIrreversible` produced: which rung won says nothing about whether the
+change reached outside the page, and a reader inferring one from the other would
+conclude a charge was fine to undo. `reason.detail` is unchanged, and declining
+to mine it was the right call for the reason given here — 0222 records that
+argument. The review queue's half is `Loom portal`'s and is not done.
 
 `assessReversibility` produces `IrreversibilityReason[]`, a two-member union, and
 the two members ask **opposite** things of the person reading:
@@ -42570,8 +42610,14 @@ new words.
 ## 2026-10-03 — `out-of-tree-effect` names the primitive types that caused it and the journal keeps only the code, so a screen can explain the mechanism and can never name the part
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
-(`src/telemetry/event.ts`) · **Status:** open — small, and it is the difference
-between a true sentence and an actionable one
+(`src/telemetry/event.ts`) · **Status:** **closed by #501**, as the field this
+entry wrote out. `AssessmentSummary.outOfTreeEffectTypes` is
+`z.array(primitiveTypeSchema).optional()`, set from the reason when it fires and
+absent when it does not (0045). A test asserts it is a **subset and not an
+echo**: a change touching `loom.card` and `loom.footer` under a policy declaring
+only the first journals `touchedPrimitiveTypes: ["loom.card", "loom.footer"]`
+beside `outOfTreeEffectTypes: ["loom.card"]`, so the sentence can name the part
+instead of ending on *the kind of thing*.
 
 `summariseAssessment` writes `reasons.map((reason) => reason.code)`. For
 `retention-budget-exceeded` that is almost lossless — `retainedNodeCount` is
@@ -42606,8 +42652,20 @@ and the sentence stops ending in a shrug.
 ## 2026-10-03 — a revision carries no judgment, so the screen with the undo button on it is the one screen that cannot say undoing will not undo everything
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/store.ts`) ·
-**Status:** open — filed as the consequence of the two entries above rather than
-as a separate ask, and the cheapest of the three to decline
+**Status:** open — **narrowed by #501 and deliberately not built.** The question
+this entry asks is answered in 0222's *Alternatives considered*: the judgment is
+**joined** to the revision, not carried by it. 0016 makes the revision log the
+truth about the *page*, and whether a change reached outside the page is not a
+fact about the page, so no disposition and no assessment goes onto
+`StoredRevision`.
+
+What is left is the thing this entry already identified as the useful half: **a
+way to fetch one `AssessmentSummary` by `proposalId` without paging the whole
+journal.** That is a new method on `TelemetryJournal`, which means two
+implementations and the contract test, and it is a bigger unit than the two
+fields #501 landed — kept separate deliberately rather than bundled into a PR
+whose subject is the Gate. `/portal/history` says nothing untrue today; it still
+does not say this.
 
 `/portal/history` has `ReversalNote`, which is the best thing on this surface: it
 inverts the log and says what undoing a revision would put back and what later
@@ -42857,6 +42915,42 @@ screenshots are six staged pages with no history and no waiting changes. Choosin
 a layout for the empty case is how a screen ends up wrong for every real one.
 
 ---
+## 2026-10-03 — the framework cannot publish a new name without a page in another lane's directory, and today that decided a module boundary
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`apps/loom/app/(docs)/_lib/api/offered.test.ts`) · **Status:** open — **not a
+defect, and the gate is right.** Filed because it is a constraint on the
+framework that nothing outside this entry states, and it has now shaped a
+decision.
+
+`offered.test.ts` asserts that every name the package hands back is mentioned on
+some page of the documentation site:
+
+> `@jam-overture/loom` hands back a object called `irreversibilityReasonSchema`
+> and no page on this site mentions it. Something is published that a reader has
+> no way to find.
+
+That is a good rule and it should stay. The consequence is that **publishing a
+name is a two-lane operation**: the framework can add the export and the
+generated reference (`pnpm --filter @loom/app docs:api`, which is tooling and
+regenerates cleanly), and it cannot write the prose page, because pages under
+`(docs)` belong to `Loom docs`. So a framework run that wants to publish
+something has three options — leave it unpublished, cross the lane boundary, or
+file a finding and wait a day.
+
+**#501 took the first, and it was the right call there.** A reason schema and a
+three-line narrowing helper are seams between two modules of this package, not
+names a host composing a runtime reaches for, and 0222 records that argument. The
+choice was still made under this constraint rather than purely on merits, and
+that is the part worth writing down: the next name may be one a host genuinely
+needs, and then the only honest options are the second and the third.
+
+**What would help, and it is small.** A run that adds a published name needs to
+know where the one sentence goes. If `Loom docs` can say which page takes a new
+runtime export by default — or that a name may land with a stub line the docs
+lane rewrites — the framework can publish on merit and file the prose rather than
+choosing its module boundaries around a test it cannot satisfy. Nothing is
+blocked today.
 ## 2026-10-03 — where a page loses its readers is now a reading, and it is a shape to draw rather than one more row
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`

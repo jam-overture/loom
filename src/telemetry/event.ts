@@ -21,6 +21,7 @@ import {
 } from "../runtime/disposition.js"
 import type { RuntimeEvent, RuntimeEventEnvelope } from "../runtime/events.js"
 import { intentOriginSchema, type EditIntent, type IntentOrigin } from "../runtime/intent.js"
+import { outOfTreeEffectTypesOf } from "../runtime/irreversibility.js"
 import { policyFingerprintOf } from "../runtime/policy-fingerprint.js"
 import { proposedChangeSchema, type ProposedChange } from "../runtime/proposal.js"
 import { stakeLevelSchema, type StakeLevel } from "../runtime/stake-level.js"
@@ -150,6 +151,23 @@ export const assessmentSummarySchema = z.object({
   retainedNodeCount: z.number().int().nonnegative(),
   irreversibilityReasons: z.array(z.string().min(1)),
   /**
+   * Which of the touched types this policy declared reach outside the page.
+   *
+   * `irreversibilityReasons` above keeps the codes, and for
+   * `retention-budget-exceeded` that is almost lossless — `retainedNodeCount`
+   * is journalled beside it, so a screen can say *this one takes nine parts off
+   * the page*. For `out-of-tree-effect` the code alone leaves a reader told to
+   * go and check something and not told what, and `touchedPrimitiveTypes` above
+   * cannot answer it: it is a superset, and naming one of its members as the
+   * offender would be a guess on the screen where a guess costs most.
+   *
+   * Non-identifying for the reason `removedPrimitiveTypes` above is: a type
+   * name is vocabulary the deployment registered, not content a visitor typed.
+   * Absent when no out-of-tree reason fired, and on a record written before the
+   * field existed (0045).
+   */
+  outOfTreeEffectTypes: z.array(primitiveTypeSchema).optional(),
+  /**
    * Which rules the Gate raised, in the order it raised them (0198).
    *
    * `stakes` above is the highest level any of them reached, which is what the
@@ -190,6 +208,8 @@ export type AssessmentSummary = {
   readonly configuredPropKeys?: readonly string[]
   readonly retainedNodeCount: number
   readonly irreversibilityReasons: readonly string[]
+  /** Absent when no out-of-tree reason fired, and before the field existed (0045). */
+  readonly outOfTreeEffectTypes?: readonly PrimitiveType[]
   /** Absent on a record written before the field existed, never defaulted (0045). */
   readonly stakeFactorCodes?: readonly StakeFactorCode[]
 }
@@ -397,26 +417,31 @@ const summariseIntent = (intent: EditIntent): IntentSummary => ({
   observedAt: intent.observedAt,
 })
 
-const summariseAssessment = (assessment: ChangeAssessment): AssessmentSummary => ({
-  proposalId: assessment.proposal.proposalId,
-  stakes: assessment.stakes.level,
-  reversible: assessment.reversibility.reversible,
-  operationCount: assessment.analysis.operationCount,
-  insertedNodeCount: assessment.analysis.insertedNodeCount,
-  removedNodeCount: assessment.analysis.removedNodeCount,
-  movedNodeCount: assessment.analysis.movedNodeCount,
-  configuredNodeCount: assessment.analysis.configuredNodeCount,
-  touchedPrimitiveTypes: assessment.analysis.touchedPrimitiveTypes,
-  removedPrimitiveTypes: assessment.analysis.removedPrimitiveTypes,
-  relocatedPrimitiveTypes: assessment.analysis.relocatedPrimitiveTypes,
-  relocatedNodeCount: assessment.analysis.relocatedNodeCount,
-  shallowestAffectedDepth: assessment.analysis.shallowestAffectedDepth,
-  affectedNodeCount: assessment.analysis.affectedNodeIds.length,
-  configuredPropKeys: assessment.analysis.configuredPropKeys,
-  retainedNodeCount: assessment.reversibility.retainedNodeCount,
-  irreversibilityReasons: assessment.reversibility.reasons.map((reason) => reason.code),
-  stakeFactorCodes: assessment.stakes.factors.map((factor) => factor.code),
-})
+const summariseAssessment = (assessment: ChangeAssessment): AssessmentSummary => {
+  const outOfTreeEffectTypes = outOfTreeEffectTypesOf(assessment.reversibility.reasons)
+
+  return {
+    proposalId: assessment.proposal.proposalId,
+    stakes: assessment.stakes.level,
+    reversible: assessment.reversibility.reversible,
+    operationCount: assessment.analysis.operationCount,
+    insertedNodeCount: assessment.analysis.insertedNodeCount,
+    removedNodeCount: assessment.analysis.removedNodeCount,
+    movedNodeCount: assessment.analysis.movedNodeCount,
+    configuredNodeCount: assessment.analysis.configuredNodeCount,
+    touchedPrimitiveTypes: assessment.analysis.touchedPrimitiveTypes,
+    removedPrimitiveTypes: assessment.analysis.removedPrimitiveTypes,
+    relocatedPrimitiveTypes: assessment.analysis.relocatedPrimitiveTypes,
+    relocatedNodeCount: assessment.analysis.relocatedNodeCount,
+    shallowestAffectedDepth: assessment.analysis.shallowestAffectedDepth,
+    affectedNodeCount: assessment.analysis.affectedNodeIds.length,
+    configuredPropKeys: assessment.analysis.configuredPropKeys,
+    retainedNodeCount: assessment.reversibility.retainedNodeCount,
+    irreversibilityReasons: assessment.reversibility.reasons.map((reason) => reason.code),
+    ...(outOfTreeEffectTypes.length > 0 ? { outOfTreeEffectTypes } : {}),
+    stakeFactorCodes: assessment.stakes.factors.map((factor) => factor.code),
+  }
+}
 
 /**
  * The narrowing, as one total function. Every variant is handled and the
