@@ -5,7 +5,13 @@ import { createRoot, type Root } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
+import {
+  ADJUST_MAXIMUM,
+  ADJUST_MINIMUM,
+  ADJUST_PROPERTY,
+  ADJUST_RESTING,
+  ADJUST_RESTING_PROPERTY,
+} from "./behaviour.js"
 import { AdjustControl } from "./behaviour-adjust.js"
 import { controlClass, controlDisplay } from "./control.js"
 
@@ -34,6 +40,16 @@ const mount = async (label = "Reveal"): Promise<void> => {
   await act(async () => {
     root.render(createElement(AdjustControl, { label }))
   })
+}
+
+/**
+ * What a primitive does to say where its control starts: one custom property on
+ * the element it places the control in, which is this container. Declared
+ * *before* mounting, because the control reads it once and the thing being
+ * tested is that it reads it at all.
+ */
+const declareResting = (value: string): void => {
+  container.style.setProperty(ADJUST_RESTING_PROPERTY, value)
 }
 
 const slider = (): HTMLInputElement | null => container.querySelector("input")
@@ -116,8 +132,9 @@ describe("where an adjust control puts its value", () => {
    */
   it("publishes on the element the primitive placed it in, not on itself", async () => {
     await mount()
+    await dragTo(37)
 
-    expect(published()).toBe(String(ADJUST_RESTING))
+    expect(published()).toBe("37")
     expect(slider()?.style.getPropertyValue(ADJUST_PROPERTY)).toBe("")
   })
 
@@ -158,7 +175,184 @@ describe("where an adjust control puts its value", () => {
 
     expect(published()).toBe("")
   })
+})
 
+describe("when an adjust control publishes anything at all", () => {
+  /**
+   * The defect this suite exists for, and the one assertion that would have
+   * caught it. A band authored at 35 rendered at 35 in the server's markup and
+   * jumped to the runtime's midpoint the instant hydration landed, because the
+   * control wrote its own resting value in a mount effect. On every page a
+   * reader actually visits, the declared position did nothing.
+   *
+   * Appearing is not an instruction. The primitive's `var()` fallback already
+   * says where the divider is, and a control that has not been touched has
+   * nothing to add to it.
+   */
+  it("publishes nothing until the reader has moved it", async () => {
+    declareResting("35")
+    await mount()
+
+    expect(slider()).not.toBeNull()
+    expect(published()).toBe("")
+  })
+
+  it("publishes nothing on mount even where no position was declared", async () => {
+    await mount()
+
+    expect(published()).toBe("")
+  })
+
+  /**
+   * The reader's first move is what the property is for, and it is published
+   * whole — not as a delta from wherever the control happened to rest.
+   */
+  it("publishes from the reader's first move onward", async () => {
+    declareResting("35")
+    await mount()
+
+    await dragTo(60)
+    expect(published()).toBe("60")
+
+    await dragTo(35)
+    expect(published()).toBe("35")
+  })
+
+  /**
+   * The position a reader cannot ask for is the one the control already rests
+   * at, and that costs nothing — which is worth asserting rather than assuming,
+   * because it is the one case where "publishes only when moved" could have left
+   * a page wrong. A press that does not change the input's value fires no
+   * `input` event, in a browser or in React, so nothing is published and the
+   * primitive's own fallback is still what the divider reads: 35, which is the
+   * number the reader was asking for. The two routes to 35 differ in which
+   * declaration supplies it and in nothing a reader can see.
+   */
+  it("needs no publication to sit at the position it already rests at", async () => {
+    declareResting("35")
+    await mount()
+
+    await dragTo(35)
+
+    expect(slider()?.value).toBe("35")
+    expect(published()).toBe("")
+  })
+
+  /**
+   * And once a reader has been somewhere else, coming back is an ordinary move
+   * with an ordinary value — the property is not sticky in one direction.
+   */
+  it("publishes the declared position again once the reader has left it", async () => {
+    declareResting("35")
+    await mount()
+
+    await dragTo(70)
+    await dragTo(35)
+
+    expect(published()).toBe("35")
+  })
+})
+
+describe("where an adjust control starts", () => {
+  /**
+   * `build` receives a node's text and its content, not its props, which is
+   * 0086's shape and not an omission. So the number arrives through the DOM
+   * instead, off the one element the primitive already chose by deciding where
+   * to place the control — the same route `present` and `dismiss` agree by.
+   */
+  it("starts at the position the primitive declared on the element it was placed in", async () => {
+    declareResting("35")
+    await mount()
+
+    expect(slider()?.value).toBe("35")
+  })
+
+  it("starts at the runtime's resting point where a primitive declared none", async () => {
+    await mount()
+
+    expect(slider()?.value).toBe(String(ADJUST_RESTING))
+  })
+
+  /**
+   * A custom property is a cascaded value, so a primitive may declare this in a
+   * rule as readily as in a style attribute, and it inherits — which is the
+   * same reach `--loom-adjust` has in the other direction.
+   */
+  it("reads a declared position out of a stylesheet, not just a style attribute", async () => {
+    const sheet = document.createElement("style")
+
+    sheet.textContent = `.rests-at-20 { ${ADJUST_RESTING_PROPERTY}: 20 }`
+    document.head.appendChild(sheet)
+    container.className = "rests-at-20"
+
+    await mount()
+
+    expect(slider()?.value).toBe("20")
+
+    sheet.remove()
+  })
+
+  /**
+   * The range is the runtime's (0096), so a number outside it is not a position
+   * this control can take. Clamped rather than refused: the comparison is the
+   * thing that ships, and the still version is right there in the `var()`
+   * fallback.
+   */
+  it("clamps a declared position into the range the runtime owns", async () => {
+    declareResting("140")
+    await mount()
+
+    expect(slider()?.value).toBe(String(ADJUST_MAXIMUM))
+  })
+
+  it("clamps a negative declared position to the bottom of the range", async () => {
+    declareResting("-10")
+    await mount()
+
+    expect(slider()?.value).toBe(String(ADJUST_MINIMUM))
+  })
+
+  /**
+   * A step-1 input cannot hold a fraction, so state and thumb would disagree
+   * from the first frame if this were taken as given.
+   */
+  it("rounds a fractional declared position to something the input can hold", async () => {
+    declareResting("35.6")
+    await mount()
+
+    expect(slider()?.value).toBe("36")
+  })
+
+  /**
+   * A control that refused to render because a stylesheet said `thirty` would be
+   * a missing comparison. Falling back is the same answer a primitive declaring
+   * nothing gets.
+   */
+  it("falls back to the runtime's resting point when the declaration is not a number", async () => {
+    declareResting("thirty")
+    await mount()
+
+    expect(slider()?.value).toBe(String(ADJUST_RESTING))
+  })
+
+  /**
+   * Read once, at mount. Where the slider goes after that is the reader's, and a
+   * primitive that re-declared its resting position mid-life would otherwise
+   * drag the control out from under somebody's hand.
+   */
+  it("does not follow a declaration that changes after it has started", async () => {
+    declareResting("35")
+    await mount()
+
+    await act(async () => {
+      declareResting("80")
+    })
+
+    expect(slider()?.value).toBe("35")
+  })
+})
+
+describe("the classes and display an adjust control carries", () => {
   it("carries the classes a primitive aims a rule at", async () => {
     await mount()
 

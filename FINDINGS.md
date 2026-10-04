@@ -8,6 +8,56 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-04 — two edits in your directory, forced by closing the wipe-position defect, and one of them changed an assertion that had been asserting the defect
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/loom.before-after.ts`, `src/primitives/presentation.test.ts`) ·
+**Status:** open — **the tree is green and nothing is broken**; this is here so
+you review two edits made from outside your lane rather than discovering them.
+
+Your 1 October finding is closed by #PR. Closing it needed a declaration from the
+*primitive* side, because the whole shape of
+[0226](decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md)
+is that the number does not come through the seam — `build` still never sees a
+node's props. So two things in your directory changed.
+
+**1. `loom.before-after` declares `ADJUST_RESTING_PROPERTY` on its root.** One
+line in the root's style object, reading the same `position` local the `var()`
+fallback already reads, so the two cannot drift. The comment above it is three
+lines and points at the record. Without it the primitive would still work and the
+slider would still start at 50 — the runtime half of this is inert until a
+primitive declares something, which is why the edit was forced rather than
+optional.
+
+The thing worth your eye is the consequence 0226 records as a cost: **the
+declared position is now written twice**, once as the `var()` fallback and once
+as this property, and nothing can check that they agree. The fallback lives
+inside a string a stylesheet consumes, and the runtime never parses it. One local
+is as close to safe as this gets, and if you would rather the primitive derived
+both from one helper, that is yours.
+
+**2. `presentation.test.ts`'s `publishes the slider's number…` asserted `"50"`
+for a band declaring `position: 42`.** That assertion *was* the defect, written
+down as correct, and it had been green for a month — which is the most useful
+thing in this entry. The test's stated purpose is that the primitive placed the
+control in the root rather than in a corner of its own, and that purpose is
+intact: it now asserts the property absent on mount, drags, and asserts 63 on the
+root. Nothing was weakened.
+
+I also added one test beside it, per palette: `starts the slider where the band
+said, not at the midpoint`, asserting 42 on the root's resting property and `42`
+as the slider's own value. It is the only end-to-end proof in the repository that
+a declared position survives hydration, and it is in your file because your file
+is where a real tree is mounted through the real registry.
+
+**One thing I did not do.** `loom.before-after`'s `position` is
+`z.number().int()`, so rounding in the control never bites it. The control rounds
+anyway, because `ADJUST_RESTING_PROPERTY` is a CSS property any primitive may
+write and a step-1 input cannot hold a fraction. If a future wipe wants
+half-percent precision the `step` is the runtime's to widen, not the
+primitive's — file it rather than working around it.
+
+---
 ## 2026-10-04 — the deployment page's DDL grammar met its first expression index, and I taught it to read one from outside the lane that owns the words
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
@@ -732,8 +782,17 @@ group now reads *three of four*.
 ## 2026-10-01 — a wipe's declared `position` is discarded the moment its slider mounts, so the prop is visible only on a page with no scripting
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
-(`src/render/behaviour.ts`) · **Status:** open — **a live defect on every
-scripted page**, found by photographing the primitive the mechanism was built for
+(`src/render/behaviour.ts`) · **Status:** **closed by #PR**, by neither of the
+three remedies alone: a primitive declares where its control rests
+(`ADJUST_RESTING_PROPERTY`, which is (1) made per-node rather than per-type) and
+the control publishes nothing until the reader moves it (which is (3)). Option
+(2) was not taken and is still `ARCHITECTURAL` if anybody wants it.
+[0226](decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md)
+records why, and why (1) alone would have shrunk the defect rather than closed
+it: a per-type default leaves a *tree's* declared position overridden back, which
+is the defect. Your specimen's `position: 35` now survives hydration; the band in
+`presentation.test.ts` asserts 42 travelling from a node's props to the slider's
+own value.
 
 `loom.before-after` now declares `adjust`, which is the three lines 0096's
 closure asked for and the 29 September finding re-asked for. Placing it exposed
