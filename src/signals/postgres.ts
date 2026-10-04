@@ -9,6 +9,17 @@ import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
 import {
+  addFunnelAnswers,
+  addPageViewCounts,
+  addRegionCounts,
+  addTallies,
+  foldedBy,
+  funnelKey,
+  pageViewKey,
+  regionKey,
+  tallyKey,
+} from "./counters.js"
+import {
   clampReaderSignalLimit,
   type ForgetOutcome,
   type ReaderSignalJournal,
@@ -30,7 +41,7 @@ import {
   loomReaderSignals,
   loomReaderTallies,
 } from "./schema.js"
-import type { RevisionViews, StoredPageViews } from "./page-views.js"
+import type { StoredPageViews } from "./page-views.js"
 import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 
 export * from "./migrate.js"
@@ -131,33 +142,6 @@ const storedFunnelSchema = z
       updatedAt: row.updatedAt,
     })
   )
-
-/**
- * Counts of the same revision added together before the statement is built.
- *
- * `ON CONFLICT … DO UPDATE` refuses to touch one row twice in a single command
- * — Postgres raises rather than applying the second — so two counts of one
- * revision in one call would have the whole write refused here while the memory
- * store added them. That is a disagreement between implementations rather than
- * a limitation of either, and the contract suite found it: the rollup keys its
- * output by map and cannot produce a duplicate, but the door composes openings
- * from whatever a delivery held, and a caller may compose a list by hand.
- *
- * So the addition happens once, in front of the driver, and both stores answer
- * the same.
- */
-const summed = (counts: readonly RevisionViews[]): readonly RevisionViews[] => {
-  const by = new Map<string, RevisionViews>()
-
-  for (const count of counts) {
-    const key = `${count.treeId} ${count.revision}`
-    const existing = by.get(key)
-
-    by.set(key, existing === undefined ? count : { ...count, views: existing.views + count.views })
-  }
-
-  return [...by.values()]
-}
 
 const storedPageViewsSchema = z.object({
   treeId: treeIdSchema,
@@ -294,7 +278,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           await tx
             .insert(loomReaderTallies)
             .values(
-              tallies.map((tally) => ({
+              foldedBy(tallies, tallyKey, addTallies).map((tally) => ({
                 treeId: tally.treeId,
                 revision: tally.revision,
                 nodeId: tally.nodeId,
@@ -337,7 +321,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           await tx
             .insert(loomReaderPageViews)
             .values(
-              summed(appearances).map((count) => ({
+              foldedBy(appearances, pageViewKey, addPageViewCounts).map((count) => ({
                 treeId: count.treeId,
                 revision: count.revision,
                 appearances: count.views,
@@ -357,7 +341,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
           await tx
             .insert(loomReaderFunnels)
             .values(
-              funnels.map((answer) => ({
+              foldedBy(funnels, funnelKey, addFunnelAnswers).map((answer) => ({
                 treeId: answer.treeId,
                 revision: answer.revision,
                 fromNodeId: answer.pair.from.nodeId,
@@ -411,7 +395,7 @@ export const postgresReaderTallyStore = (db: LoomDatabase): ReaderTallyStore => 
       await db
         .insert(loomReaderPageViews)
         .values(
-          summed(openings).map((count) => ({
+          foldedBy(openings, pageViewKey, addPageViewCounts).map((count) => ({
             treeId: count.treeId,
             revision: count.revision,
             opened: count.views,
@@ -514,7 +498,7 @@ export const postgresReaderRegionStore = (db: LoomDatabase): ReaderRegionStore =
       await db
         .insert(loomReaderRegions)
         .values(
-          counts.map((count) => ({
+          foldedBy(counts, regionKey, addRegionCounts).map((count) => ({
             treeId: count.treeId,
             revision: count.revision,
             region: count.region,

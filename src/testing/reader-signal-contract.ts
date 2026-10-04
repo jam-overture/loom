@@ -409,6 +409,50 @@ export const describeReaderTallyStoreContract = (
       expect(row).toMatchObject({ engaged: 5, updatedAt: LATER })
     })
 
+    /**
+     * The same seam the page views were bitten by, held on the counter it would
+     * matter most on: `ON CONFLICT … DO UPDATE` refuses to affect one row twice
+     * in one command, so a rollup handed a list with a node in it twice must be
+     * folded before the statement rather than refused by the driver. Nothing in
+     * the repository can produce that list — `rollUp` keys its output by map —
+     * and a caller composing counters of its own can.
+     */
+    it("adds up two tallies of the same node in one call", async () => {
+      const store = await make()
+      await store.apply(
+        {
+          tallies: [
+            tally({ dwellMs: 500, views: 1, reached: 1, activations: 1 }),
+            tally({ dwellMs: 250, views: 2, reached: 2, activations: 3 }),
+          ],
+          funnels: [],
+        },
+        AT
+      )
+
+      const rows = unwrap(await store.tallies())
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ dwellMs: 750, views: 3, reached: 3, activations: 4 })
+    })
+
+    /** The later row wins the one column that is not a number, in both stores. */
+    it("takes the last type given for a node named twice in one call", async () => {
+      const store = await make()
+      await store.apply(
+        {
+          tallies: [
+            tally({ type: primitiveType("loom.section") }),
+            tally({ type: primitiveType("loom.hero") }),
+          ],
+          funnels: [],
+        },
+        AT
+      )
+
+      expect(unwrap(await store.tallies())[0]).toMatchObject({ type: "loom.hero" })
+    })
+
     it("keeps revisions of the same node apart", async () => {
       const store = await make()
       await store.apply(
@@ -459,6 +503,26 @@ export const describeReaderTallyStoreContract = (
       await store.apply({ tallies: [], funnels: [{ ...answer, reached: 10, converted: 1 }] }, LATER)
 
       expect(unwrap(await store.funnels())[0]).toMatchObject({ reached: 50, converted: 10 })
+    })
+
+    /** The funnels' half of the same fold, keyed by both ends of the pair. */
+    it("adds up two answers about the same pair in one call", async () => {
+      const store = await make()
+      await store.apply(
+        {
+          tallies: [],
+          funnels: [
+            { treeId: TREE, revision: 1, pair: PAIR, reached: 40, converted: 9 },
+            { treeId: TREE, revision: 1, pair: PAIR, reached: 10, converted: 1 },
+          ],
+        },
+        AT
+      )
+
+      const rows = unwrap(await store.funnels())
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ reached: 50, converted: 10 })
     })
 
     describe("page views", () => {
@@ -653,6 +717,22 @@ export const describeReaderRegionStoreContract = (
 
       expect(rows).toHaveLength(1)
       expect(rows[0]).toMatchObject({ views: 5, updatedAt: LATER })
+    })
+
+    /**
+     * The sharpest of the four, because of where it runs. A delivery whose
+     * batches place two readers in one country reaches this with the bucket
+     * named twice — and a refused write at the door is a bucket that silently
+     * did not move, reported in the delivery's outcome and nowhere else.
+     */
+    it("adds up two counts of the same bucket in one call", async () => {
+      const store = await make()
+      await store.count([count({ views: 3 }), count({ views: 2 })], AT)
+
+      const rows = unwrap(await store.regions())
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]).toMatchObject({ region: "GB", views: 5 })
     })
 
     it("keeps two regions apart", async () => {
