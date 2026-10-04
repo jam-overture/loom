@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-04 — the demo's stage and its rail are both dark on arrival, and the comment that says otherwise is the argument for why they must not be
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/page.tsx`, `app/(demo)/_lib/page-tree.ts`) · **Status:**
+open — a diagnosis with a screenshot behind it and no recommendation, because
+the honest reading is that it is *less* wrong than the comment implies.
+
+`page.tsx` carries this, as the load-bearing decision of the layout rather than
+a taste:
+
+> **The stage is light and the rail is dark.** … Both halves used to be white,
+> so the specimen page's own hero — 60px of "Your AI can change this page",
+> with a primary button going to GitHub — read as the demo's promise and the
+> demo's actual controls read as furniture beside it. A visitor could not tell
+> which words were Loom's.
+
+Every clause of the argument is right. The first sentence is no longer a
+description of what a stranger sees. `--surface-stage` is `#ffffff` and
+`.loom-stage` sets `color-scheme: light`, so the *ground* this lane controls is
+light — and `DEMO_STARTING_THEME` is `midnight`, so the tree paints itself dark
+over that ground and the visitor arrives on **dark navy beside near-black**.
+The pictures in `reports/2026-10-04-demo-the-one-press-record.md` are what this
+is read off.
+
+**Why it is filed rather than fixed.** The two panes *are* still told apart —
+by hue, by a border, and by the fact that one is a clinic's page and the other
+is an instrument — so this is not the failure the comment describes coming back.
+What is true is that the property the layout was built to guarantee is now being
+supplied by the specimen's own theme, which a visitor can change with one press
+(`palette` re-themes to `editorial`, and the stage goes cream — the picture is
+in the same report). A guarantee that the page under test can withdraw is not a
+guarantee.
+
+**Three things a run that takes this would have to settle**, and none of them is
+obviously right: whether the ground should assert itself where the theme is dark
+(a border, an inset, a shadow — this lane's, not the tree's), whether the
+arrival theme should be the light one (which costs the re-theme its drama,
+measured: the dark→cream press is the most arresting fifteen seconds on this
+surface), or whether the comment is simply stale and should say *the stage is
+the page's and the rail is Loom's* — which is the claim that actually survives
+a re-theme. **Changing the comment alone is a legitimate outcome** and is
+probably the cheapest honest one.
+
+---
+## 2026-10-04 — the demo's phone frame after a one-press change is not byte-reproducible, and it is not reproducible on `main` either
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/globals.css`) · **Status:** open — **small, and below the
+threshold of sight**, filed because this lane's reports lean on byte-identical
+frames and one of them cannot be claimed.
+
+Four shots of `/demo` at 390 × 844 after pressing *Re-theme the whole page*, two
+from this branch's build and two from `main`'s, came back with **four different
+hashes**. The geometry is identical in all four — the record card at `y 962`,
+`350 × 512`, `← 631 past the fold` — and so is every word.
+
+Measured by decoding both PNGs and differencing them: the region is
+**x 20, y 325, 350 × 282** in CSS pixels — the green lead button and the two
+paragraphs under it — across **53 distinct rows**, and the **largest channel
+difference is 5 of 255**. Nothing is visible to an eye at any zoom; the two
+pictures are indistinguishable.
+
+**What it is probably not.** The 3 October run found a flake of this shape that
+was a real product defect — four disclosures animating for a visitor who had
+asked for reduced motion, because the `prefers-reduced-motion` rule named
+`.loom-reach` and nothing else. That rule now also names `summary` and
+`summary svg`, and a transition caught mid-flight does not look like this: it
+moves a box or fades a whole element, and would show a delta far larger than 5
+somewhere. A ceiling of 5 across a smooth region is the shape of **gradient
+dithering**, which Chromium does with noise and does not promise to repeat.
+
+**What it costs, which is why it is written down rather than shrugged at.** This
+lane's convention is that an unchanged frame is proved unchanged by its hash,
+and the 1280 × 900 frames and the 348 × 465 embed all still do that — the
+question frame's `79cae639175ffc88a14d8c04a2f22cbe` is now the same across six
+separately built commits. One frame at one size cannot, so a run that needs to
+prove the phone unchanged has to fall back to geometry plus a pixel difference,
+which is what this run did. Worth about twenty minutes of a future run to name
+the element and either pin it or write the exemption down beside the recipe;
+not worth more.
+
+---
 ## 2026-10-04 — the deployment page's DDL grammar met its first expression index, and I taught it to read one from outside the lane that owns the words
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
@@ -164,6 +246,22 @@ two a stranger meets first**, with both visible either way.
 this surface. What would settle it is the one thing this lane cannot do from a
 sandbox — and the signals work (`docs/signals.md`) is where a *which press came
 first* reading would come from, if it is ever worth asking for.
+
+**Appended 4 October by the lane that owns it, and it changes the terms again
+rather than the recommendation.** `demo-38` found that the press which *does*
+move the page had never been finished: both asks marked **GOES AHEAD** landed
+their record card under the rail's fold — *Re-theme the whole page* with its top
+at 848 of a 900px viewport, *Repaint the top band* at 872 — so a stranger taking
+the one-press path watched the stage transform and never saw the Gate's verdict,
+the reversibility or **Put it back**. Both now land at the top of the rail,
+whole.
+
+So shape (2), *lead with a change that goes ahead*, costs less than it did when
+this was written: the path it would lead with is now a complete demonstration
+rather than half of one. The recommendation is still **1 and measure before
+moving**, for the reason that has not changed — nobody has watched a stranger
+use this surface — but the argument against (2) was partly that it led with the
+weaker frame, and that part of it is spent.
 
 ---
 ## 2026-10-03 — the same disclosure chevron is now drawn in three components of one directory, and the third copy is this run's
