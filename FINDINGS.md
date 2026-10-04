@@ -202,9 +202,19 @@ the excerpt's own sentence in the imperative.
 ## 2026-10-02 — lesson 32's sharpest conclusion is now false, and the four numbers under it were updated from outside the lane while the paragraph was left alone
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
-(`lessons/32-layout.md`) · **Status:** open — **one paragraph, and the lane that
-wrote it should write the replacement.** Nothing is red; `main` is green with the
-numbers corrected and the prose stale.
+(`lessons/32-layout.md`) · **Status:** **closed 4 October** — rewritten on the
+lessons branch for this date, as the exercise's whole conclusion rather than the one
+paragraph. The entry's own suggestion was taken and went further: *in the page*
+against *in Node* is not where the line falls, **what a function reaches for** is,
+and `readBoxes` is runnable by a test because it is *handed* its elements — which is
+lesson 05's injected clock arriving in a measuring instrument. The two new `true`s
+are now printed as `in code` / `in prose` rather than classified by hand in a
+sentence, so the claim that rotted is output; the fence carries a `moves:` mark
+whose message says the prose under it is load-bearing, which is the half of this
+entry no file said anywhere; and the derivation found a second prose sighting on the
+`capture.ts` column that the hand-written paragraph had missed since the day it
+shipped. Set AK's question 7 asked the reader to recite the false claim and is
+rewritten too.
 
 Exercise G asks which half of the measuring instrument a test in this repository
 can reach, reads `tools/specimen/` off disk, and prints a row per DOM reading

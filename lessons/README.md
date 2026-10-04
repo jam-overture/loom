@@ -100,14 +100,15 @@ The paragraph that used to sit here named exactly that fault as the kind nothing
 would reach.
 
 **And since 3 October a transcript may say, in a line you will never see, that
-its red is expected.** Two exercises in this course print a second copy of a
-fact about `src/primitives/` on purpose — lesson 29's exercise C prints the
-primitives with a prop nothing reads, lesson 33's exercise G prints which of
-them have declared what they could not show — because in each case that set is
-what the lesson is *about*, so a new member of it is news. Both will go red the
-day another lane writes the thing the lesson describes, and the right response
-is to re-run the exercise and paste in what it prints now, not to go hunting for
-a mistake. That was written down in two places and neither was the one a lane
+its red is expected.** Three exercises in this course print a second copy of a
+fact another lane owns, on purpose, because in each case that set is what the
+lesson is *about* and so a new member of it is news: lesson 29's exercise C prints
+the primitives with a prop nothing reads, lesson 33's exercise G prints which of
+them have declared what they could not show, and lesson 32's exercise G prints
+what `tools/specimen/` hands to a browser and what a test can do with it. Each
+will go red the day another lane writes the thing its lesson describes, and the
+right response is to re-run the exercise and paste in what it prints now, not to
+go hunting for a mistake. That was written down in two places and neither was the one a lane
 tripping over it would read: a paragraph for the reader under one fence, and a
 comment on a constant in a *passing* assertion for the other. It is now an HTML
 comment on the line above the fence — invisible on GitHub, invisible at
@@ -115,6 +116,17 @@ comment on the line above the fence — invisible on GitHub, invisible at
 excuses anything: a marked fence that has drifted still fails, and a marked
 fence that matches *nothing* now fails too, which is the one case the comparison
 used to pass over in silence.
+
+**What it buys is a message and never a verdict, and the third mark is there
+because the message was the thing that failed.** Lesson 32's numbers moved on
+2 October, were corrected from outside this lane the same day — which is what the
+convention asks of a lane that has just made somebody's suite red — and the
+paragraph drawing the conclusion under them was left saying the opposite, on `main`,
+for two days. Nothing was wrong with how that was handled; what was missing was
+anywhere for the next lane to read that the prose under the fence is load-bearing.
+So that mark says it, and the limit is worth stating where the construct is
+described: a lane that pastes in a corrected line and says nothing still leaves the
+paragraph as stale as it was.
 
 Two things it still does not reach, said here rather than discovered later. A
 count is the cheapest second copy a sentence can carry and **most of what a
@@ -337,7 +349,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [29](29-readership.md) | Readership: the declaration with more than one reader | Why the registry can hold four of a primitive's declarations against its props schema and cannot hold the schema against its own component; what property a dropped slot has that an unread prop does not, and what that rules out for any check built on watching output; how to make a read observable, and why the seven suspects that turns up include no defects and one security boundary working exactly as designed — and what it means that *does the component read this* was a question about the wrong party. |
 | [30](30-rendezvous.md) | Rendezvous: the name two parties have to spell the same | Why two of the three parts of a binding can be refused before anything is drawn and the third could not be; what a system does when the fact it wants to check exists in exactly one place, and who pays for the second copy; why the declaration that closes the seam is a rule rather than a list, and how a plain list of names turns out to be silent on the broken page and loud on the working one — and what it meant that the write path, asked about the same node, refused a page with nothing wrong with it. |
 | [31](31-behaviour.md) | Behaviour: the thing a page does | Why a copy button cannot be a prop, and why that is the thesis of this system in its smallest form; what a control is handed, who names it, and what the primitive is left to decide; why the four things a registry can check about a behaviour are all checked at registration; where a control that hands back a boolean writes it and why a control that hands back a number cannot write it in the same place — and what it means that a page with a copy button on it, rendered to static markup, contains no button. |
-| [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it — and what it means that the only suite driving this instrument asserts that the measurement was requested and nothing at all about what it returns. |
+| [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it; which of the functions this harness hands to a browser a test can run and what decides it, which is a signature and not anybody's diligence — and what it meant that the sentence this lesson used to draw under that transcript was left contradicting it on `main` for two days. |
 | [33](33-shortfall.md) | Shortfall: the fact whose only witness runs too late to report it | Why the ways a binding can be wrong divide into the ones a walk sees from outside the primitive and the one it cannot; who the sentence on the page is for and who the count is for; the three reasons a component may not raise a diagnostic and which of them would hold in a system with no component model at all; why one declaration on a primitive is a function where eight are data; what a guard around another author's code owes the page it is inside — and the one thing this seam cannot catch, with the construction that makes it unlikely and the reason that construction cannot be enforced. |
 
 Parts I to IV are the system, and the [review
@@ -578,13 +590,29 @@ is a feature announcing itself, and a one-pixel box holding a sentence is an
 accessibility pattern — all three indistinguishable from the real fault in the
 numbers alone. Two of the four exclusions are arithmetic; the other two have to be
 made at the point the reading is taken, which is the last place the reason still
-exists — and the
-half that *can* be arithmetic is in a second file precisely so that something can
-test it, which leaves the other half testable by nothing at all. That cost is
-stated rather than discovered: the one suite that drives the instrument hands its
-browser double a function and gets back a reading somebody typed, so what it
-asserts is that the measurement was requested and nothing whatever about what it
-would return.
+exists — and the half that *can* be arithmetic is in a second file precisely so
+that something can test it, which leaves the rules that make the instrument good
+testable by nothing at all. That cost is stated rather than discovered.
+
+**And then the lesson was corrected by a test somebody else wrote, two days after
+it shipped.** *In the page* against *in Node* turned out not to be where the line
+falls; **what a function reaches for** is. A function that fetches its own subject
+can run nowhere but a page, and one that is handed its subject runs against six
+numbers on an object literal in Node — which is lesson 05's injected clock, eleven
+lessons later, in a measuring instrument. So one of the functions this harness
+hands to a browser is now driven by a test and the others cannot be, and what
+decides it is a signature rather than anybody's diligence. The rest of the cost is
+unchanged, because every rule worth checking lives in the kind that fetches.
+
+That correction is also the better half of what the lesson now teaches, for the
+reason it was needed at all. The sentence that went stale was prose — a
+hand-written classification of a boolean — and the numbers beside it were corrected
+from outside this lane on the day they moved, exactly as the convention asks, while
+the paragraph was left contradicting its own transcript on `main` for two days.
+Every check in this course was green throughout and each had a reason: *no DOM
+reading API at all* counts nothing, and a count is the cheapest second copy a
+sentence can carry. The remedy is lesson 28's first: the classification is printed
+now, so the claim is output.
 
 The question to carry into a sixteenth seam is the one that lesson's own Predict
 opens with, and most first answers get it wrong by two rows: **what is this fact a
