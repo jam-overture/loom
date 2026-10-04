@@ -42908,3 +42908,194 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+
+---
+## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
+(`lessons/24-silence.md`) · **Status:** open — **the six transcript lines are
+already updated on this branch because a test holds them**; what is open is the
+prose under them, which is this lane's to read and not mine to rewrite
+
+The 30 September entry from this lane — *two `copy` declarations were backed out
+of a pull request because a lesson transcript printed zero* — ended by asking
+whether a lesson's transcript should ever be able to make a library decision for
+another lane. The answer this run took was **no, and the way to settle it is to
+do the pass the 19 September finding asked for**, which is
+[0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) and is on
+this branch. So the number has moved, in one step, from 0 to 102.
+
+**The transcript lines were updated here**, and were not a choice:
+`apps/loom/app/(lessons)/_lib/transcripts.test.ts` runs every lesson's exercises
+and compares what they print against the markdown, so the pass turned lesson 24
+red and the remedy that test names is *re-run the exercise and paste in what it
+prints now*. Six lines moved in Exercise F and one in Exercise H. **No prose was
+touched.** What it prints now:
+
+```
+  primitives registered:     102
+  declaring copy:            102
+  declaring any role:        1
+  typesWithRole("heading"):  ["loom.heading"]
+  copyFor("loom.stat"):      ["value","label","caption"]
+  textOf(metrics band):      ""
+  copyIn(metrics band, starter registry)
+    words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]
+    unread:   none
+    unspoken: none
+```
+
+**Three passages under it change in substance rather than in arithmetic**, which
+is why this is an entry and not a number bump:
+
+1. *"Zero and zero. `loom.heading` is registered and does not declare that it is
+   a heading; `loom.stat` holds three words in props and has not said which."*
+   Both halves are now false.
+2. *"`unread` has six entries naming every node and every prop involved. **The
+   reading is exactly as ignorant as it was and is now saying so**"* — the
+   transcript's six `unread` entries are gone and `words` has the eight the band
+   shows. The paragraph's argument about what the seam bought *on the day it
+   landed* is still true and is now a historical claim rather than a present
+   one.
+3. *"`unspoken` is empty, and on this library it is empty for every tree there
+   is: with nothing declaring `copy`, no node ever reaches the branch that fills
+   it. The third field is a promise kept against a day that has not arrived."*
+   The day arrived. `unspoken` is still empty **for this band**, and it is
+   non-empty for exactly two types in the library — `loom.meter`'s `value` and
+   `loom.rating`'s `score`, both numbers their components print. If the lesson
+   wants a live example of the third field, `proof-faces` is one and is in the
+   catalogue.
+
+**Exercise H's line three is the one to re-run rather than edit.** It prints *the
+same, against the starter library `[]`: "Untitled page"* and the paragraph under
+it makes the ordering argument — *the declaration first, the registry question
+second, or neither.* The array is no longer empty, so the ordering argument has
+been satisfied for this library and is now an illustration rather than a warning;
+whether the printed line itself changes depends on whether that fixture's page
+leads with a `loom.heading`, which this lane cannot see from here.
+
+**The paragraphs were not edited from this branch**, for the reason the 2
+October entry about lesson 32 gives — a number changed from outside the lane is
+a courtesy, and a paragraph changed from outside the lane is somebody else's
+argument rewritten by a stranger — and that entry is also the reason this one is
+specific about which three passages moved rather than leaving them to be found.
+The lesson currently reads *"Zero and zero"* directly under a transcript that
+says 102 and 1.
+
+---
+## 2026-10-04 — `copy` is one list and two consumers ask different questions of it, and alt text is where they disagree
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/sdk/`)
+· **Status:** open — **measured rather than blocking**; the library has made the
+call ([0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) rule
+2) and will live with it, and this is here so the cost is on the record rather
+than discovered by a surface
+
+[0122](decisions/0122-a-primitive-says-which-of-its-props-a-reader-reads.md) is
+one declaration: *the props whose values a reader reads as words.* Two surfaces
+read it, and they are not asking the same question.
+
+| the surface | what it needs `copy` to mean |
+| --- | --- |
+| the review queue (*words it takes away*) | **every word a person wrote into this node**, so a proposal that rewrites them is not described as changing nothing |
+| `wordsReadIn` (0212) (*copy a reader reached*) | **the words a reader actually read**, so a sentence about a part is about what was on screen |
+
+For almost every prop in the library the two agree. They disagree on exactly one
+kind: **prose written for a reader who cannot see the picture.** `loom.media`'s
+`alt`, `loom.icon`'s label, `loom.embed`'s frame `title`, `loom.banner`'s
+landmark name. A change that rewrites every alt text on a page takes words away
+and the queue must say so; a sighted reader who looked at the image did not read
+them and a reading that counts them is slightly wrong about what was read.
+
+**The library declared them**, because the queue's failure is invisible and the
+reading's is a rounding error — one of the two is recoverable by a consumer that
+knows, and the other is a reviewer approving a change against a description that
+omits it. **Four props in the whole library are only ever an accessible name** —
+`loom.media`'s `alt`, `loom.icon`'s `label`, `loom.embed`'s `title` and
+`loom.banner`'s `label` — and two more are a drawn word or an image's `alt`
+depending on the node (`loom.logo`'s and `loom.avatar`'s `name`). The measured
+size of the disagreement is four, and six at the outside.
+
+**The shape that would answer it, and it is yours rather than mine**, because it
+is a field on a primitive definition: either a second list, or an entry form that
+carries a qualifier —
+
+```ts
+copy: ["caption", { prop: "alt", as: "alternative" }]
+```
+
+— so `copyIn` can be asked for all of it or for the shown half. The cost is that
+every existing declaration stays valid and the seam grows a shape; the benefit
+is that neither consumer has to be told to be careful about something it cannot
+see. **Not proposed as urgent**: nothing is broken, both consumers are better off
+than they were this morning, and a vocabulary invented ahead of its readers is
+the mistake 0114 spent a paragraph on.
+
+---
+## 2026-10-04 — the declaration half of `TITLE_BEARING` and of the review queue's missing words has landed, and both hosts can now delete an array
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`), with the same answer for `Loom signals` ·
+**Status:** open — **nothing is blocked and nothing needs to be rushed**; this
+is the other half of three entries that were waiting on this lane
+
+Three open entries name one missing thing, and it is no longer missing. As of
+[0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) every
+primitive in the starter library declares `copy` and `loom.heading` declares
+`role: "heading"`.
+
+**What answers now, measured rather than asserted:**
+
+| asked | answered this morning | answers now |
+| --- | --- | --- |
+| `copyFor(type)` | `undefined` for all 102 | a list for all 102 |
+| `typesWithRole("heading")` | `[]` | `["loom.heading"]` |
+| `copyIn` over the 52 starting compositions | `words: []`, `unread` on every node | **971 words, `unread: []`** |
+| `wordsReadIn(reading)` | the empty list for any page built from this library | the words of the parts a counter names |
+
+**Three things to take rather than re-derive.**
+
+1. **`TITLE_BEARING` and `TITLE_TYPES` can go.** `registry.typesWithRole("heading")`
+   answers for this library, and the ordering lesson 24 insists on — *the
+   declaration first, the registry question second, or neither* — is satisfied
+   for the first time. A host that registers its own heading primitive gets the
+   right answer without this lane knowing it exists, which is the whole of 0114.
+2. **`part-name.ts` naming a props-only part *the stat*** has words to use now:
+   `copyIn(node, registry).words` on a `loom.stat` is `["3,400", "appointments",
+   "last year"]` rather than nothing.
+3. **Two numbers in the library are declared copy and are not strings**, by
+   design: `loom.meter`'s `value` and `loom.rating`'s `score`, which their
+   components print and which `copyIn` refuses to coerce. They arrive in
+   `unspoken`, not in `words`, and a surface that renders `unspoken` as *words a
+   reader lost* would be wrong — it means *there is a figure here I will not
+   guess the formatting of*. Three rows across the whole catalogue.
+
+**One thing this does not close**: a reading grouped by role is still one row
+plus *declared none*, because the vocabulary has one member and this pass did
+not widen it. 0114's bar for a second member is a consumer that cannot answer
+its question, and the 1 October entry from `Loom signals` explicitly says it does
+not have one. Unchanged on purpose.
+
+---
+## 2026-10-04 — a prop that is only drawn once a binding has answered is invisible to any probe that renders the tree alone
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** open — **small, and found by the instrument it is about**, which is
+the only reason it is worth writing down
+
+`copy.test.ts` renders every primitive with a marker in each prop and asserts
+that a prop declared as copy is drawn and that an undeclared one is not drawn as
+text. It found its first real case on the run that wrote it: **`loom.tally`
+declares `prefix` and `suffix` and draws neither**, because both wrap a figure
+that only exists once a binding has answered, and an unbound tally draws the word
+standing in for the figure instead.
+
+The declaration is right and the probe was incomplete. It now hands that node a
+`loom:data` declaration and a resolution answering it — four lines, and they are
+in the test — after which both props draw and the assertion holds.
+
+**The general form, for whoever adds the next bound primitive:** a render of a
+tree alone cannot see any prop whose drawing is conditional on an answer, so a
+primitive that declares `reads` needs the probe to answer it or its copy
+declarations are unverified. The list of bound types in the test is one entry
+long and is the place to add the second.

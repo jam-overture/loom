@@ -94,6 +94,7 @@ export const loomComparisonTable = definePrimitive({
     "A feature-by-feature comparison — a region of loom.comparison subjects across the top, and a loom.comparison-row per criterion.",
   props,
   slots: ["columns"],
+  copy: ["caption"],
   text: BAND_TEXT,
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, BandTextKey>) => {
     const columns = loom.slots["columns"]

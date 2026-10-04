@@ -89,6 +89,11 @@ export const loomLogo = definePrimitive({
   /** The mark becomes the anchor when the tree gives it a destination (0064). */
   interactive: { whenProps: ["href"] },
   slots: [],
+  /**
+   * Drawn as a word when there is no image and as that image's `alt` when there
+   * is, so it is read either way.
+   */
+  copy: ["name"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const plate = given.surface === "card" ? PLATE : {}
 

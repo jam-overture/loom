@@ -226,6 +226,11 @@ export const loomEmbed = definePrimitive({
     "A third-party document — a video, a map, a prototype — framed at a fixed aspect ratio with a required accessible name.",
   props,
   slots: [],
+  /**
+   * The frame's accessible name, and the only sentence about an embed that is in
+   * the tree rather than on the other side of the `iframe`.
+   */
+  copy: ["title", "caption"],
   text: EMBED_TEXT,
   /**
    * The declaration, and the whole of this primitive's part in the check. Which

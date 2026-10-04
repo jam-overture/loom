@@ -37,6 +37,11 @@ export const loomOption = definePrimitive({
     "One choice in a loom.field of type select. Its label is child text; value defaults to that text.",
   props,
   slots: [],
+  /**
+   * Its label is children. `value` is what the form posts, and a posted string is
+   * not a word on a page — the distinction `loom.field`'s `name` makes too.
+   */
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "option",

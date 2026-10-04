@@ -159,6 +159,7 @@ export const loomRecording = definePrimitive({
    */
   interactive: { whenProps: ["href"] },
   slots: ["meta"],
+  copy: ["title", "byline", "duration", "note"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]
     const playable = given.href !== undefined

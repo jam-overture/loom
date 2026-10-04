@@ -129,6 +129,7 @@ export const loomComparison = definePrimitive({
     "One cell of a loom.comparison-row — a yes/no/partial mark, a short value, or both. Set role to subject for a column header.",
   props,
   slots: [],
+  copy: ["note"],
   text: CELL_TEXT,
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, MarkKey>) => {
     const subject = given.role === "subject"

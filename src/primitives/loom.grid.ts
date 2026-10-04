@@ -48,6 +48,7 @@ export const loomGrid = definePrimitive({
     "Its children in as many columns as fit, wrapping intrinsically. The general grid; prefer a named band where one fits.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

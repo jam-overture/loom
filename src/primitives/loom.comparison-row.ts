@@ -69,6 +69,7 @@ export const loomComparisonRow = definePrimitive({
     "One row of a loom.comparison-table — a criterion, and a loom.comparison answering it for each subject.",
   props,
   slots: [],
+  copy: ["heading", "note"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "tr",

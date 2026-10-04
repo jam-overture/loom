@@ -167,6 +167,7 @@ export const loomMessage = definePrimitive({
     "One turn of a conversation — who is speaking, when, and what they said. A row of a loom.message-list.",
   props,
   slots: [],
+  copy: ["name", "stamp"],
   text: {
     /** Named rather than mute: three dots with no accessible name are silence. */
     pending: "Still writing",
