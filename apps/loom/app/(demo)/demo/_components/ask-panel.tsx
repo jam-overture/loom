@@ -370,7 +370,8 @@ export const AskPanel = ({
       </div>
 
       {/*
-        * What that press is about, as the thing itself.
+        * What that press is about, as the thing itself — **one click away, as
+        * of 3 October.**
         *
         * **The one control this surface invites names a part of the page a
         * stranger has never seen.** *Take the numbers off* promises "the
@@ -378,20 +379,27 @@ export const AskPanel = ({
         * are no appointments, years or waiting time on the screen: the band is
         * below the fold at 1280×900 and about four thousand pixels down at
         * 390×844. `before-the-press.ts` argues it and the rail computes it.
+        * None of that has changed and none of it is withdrawn.
         *
-        * **After the block, not inside it**, and that is the one placement
-        * decision here. Inside, it would ride the `flex-col-reverse` above and
-        * push `WHAT_EVERY_ASK_MEETS` down by the height of a band — off the
-        * narrow first screen, which is the exact property that block was built
-        * to hold. A stranger who has not read that sentence and presses a
-        * change the Gate holds has watched a button do nothing. That outranks
-        * adjacency, so the sentence keeps its place and the preview takes the
-        * one after it.
+        * **What changed is what it was competing with.** Open, this excerpt
+        * was 358px of an 857px scroller — measured on a production build at
+        * 1280×900 — and the four asks under it, each carrying the Gate's own
+        * verdict about itself, began at **797**. The arrival screen made a
+        * counted claim and put every piece of its evidence three pixels under
+        * the fold. The excerpt is now a `<details>` (`part-in-question.tsx`),
+        * its sentence is its control, and the rows are on the first screen at
+        * both sizes this surface is judged at. Nothing is removed: one press
+        * of a native control, with no script, puts the band back exactly as it
+        * was.
         *
-        * What it costs, measured rather than assumed, is in the report: on a
-        * wide screen it is on the arrival screen and the secondary asks move
-        * down; on a phone it is the first thing below the fold, which is also
-        * where the page it is about is.
+        * **Still after the block and not inside it**, and the reason survives
+        * the fold rather than being made moot by it. Inside, it would ride the
+        * `flex-col-reverse` above, and at 348 × 465 — the embed on a phone —
+        * everything below the verdict moves down by the control's 21px and its
+        * gap. That is the frame where the whole argument is already fighting
+        * for 465 pixels, and the sentence this block exists to keep on it is
+        * `WHAT_EVERY_ASK_MEETS`. Adjacency is worth less than that, so the
+        * control takes the position the band had.
         */}
       {leading?.part}
 

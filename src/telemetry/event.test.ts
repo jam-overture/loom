@@ -330,6 +330,99 @@ describe("recordOf", () => {
     })
   })
 
+  /**
+   * The code says a reason fired; this says what it fired about. Without it the
+   * screen holding the decision can explain the mechanism — *this sets up a part
+   * that reaches beyond the page* — and has to end on *the kind of thing*,
+   * because `touchedPrimitiveTypes` is a superset and guessing which member is
+   * the offender is the one guess that screen must not make.
+   */
+  it("names which touched types reach outside the page, not merely that some do", () => {
+    const assessedOutOfTree = assessUnder(
+      gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.footer"] })
+    )
+
+    const record = recordOf(envelopeOf({ type: "change-assessed", assessment: assessedOutOfTree }))
+
+    expect(record.event.type === "change-assessed" && record.event.assessment).toMatchObject({
+      reversible: false,
+      irreversibilityReasons: ["out-of-tree-effect"],
+      outOfTreeEffectTypes: ["loom.footer"],
+    })
+  })
+
+  /**
+   * A subset and not an echo, which is the whole point of the field. This change
+   * touches two parts and the policy declares one of them, so a field that
+   * simply repeated what the change touched would send a reader to look at the
+   * footer as well — and the screen's one job here is to name the part that
+   * actually reaches a payment.
+   */
+  it("narrows to the declared types rather than repeating what the change touched", () => {
+    const touchingTwo = buildProposal(ids, {
+      intentId: intent.intentId,
+      delta: {
+        deltaId: ids.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: 0,
+        operations: [
+          { op: "configure", nodeId: nodes.card, set: { variant: "filled" }, unset: [] },
+          { op: "configure", nodeId: nodes.footer, set: { note: "see terms" }, unset: [] },
+        ],
+      },
+    })
+
+    const assessedOutOfTree = assessUnder(
+      gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] }),
+      touchingTwo
+    )
+
+    const { event } = recordOf(
+      envelopeOf({ type: "change-assessed", assessment: assessedOutOfTree })
+    )
+    if (event.type !== "change-assessed") throw new Error("the fixture is an assessment")
+
+    expect(event.assessment.touchedPrimitiveTypes).toEqual(["loom.card", "loom.footer"])
+    expect(event.assessment.outOfTreeEffectTypes).toEqual(["loom.card"])
+  })
+
+  /** Absent and never defaulted (0045), like every other field added later. */
+  it("leaves the types out when no out-of-tree reason fired", () => {
+    const { event } = recordOf(envelopeOf({ type: "change-assessed", assessment }))
+    if (event.type !== "change-assessed") throw new Error("the fixture is an assessment")
+
+    expect(event.assessment.reversible).toBe(true)
+    expect("outOfTreeEffectTypes" in event.assessment).toBe(false)
+  })
+
+  /**
+   * The budget reason journals its numbers already — `retainedNodeCount` is
+   * beside the codes — so it is the one member the codes nearly cover, and the
+   * new field must not fire for it.
+   */
+  it("leaves the types out when the reason is the retention budget", () => {
+    const assessedOverBudget = assessUnder(
+      gatePolicySchema.parse({ inverseRetentionBudget: 1 }),
+      buildProposal(ids, {
+        intentId: intent.intentId,
+        delta: {
+          deltaId: ids.deltaId(),
+          treeId: tree.treeId,
+          baseRevision: 0,
+          operations: [{ op: "remove", nodeId: nodes.main }],
+        },
+      })
+    )
+
+    const { event } = recordOf(
+      envelopeOf({ type: "change-assessed", assessment: assessedOverBudget })
+    )
+    if (event.type !== "change-assessed") throw new Error("the fixture is an assessment")
+
+    expect(event.assessment.irreversibilityReasons).toEqual(["retention-budget-exceeded"])
+    expect("outOfTreeEffectTypes" in event.assessment).toBe(false)
+  })
+
   it("tells a refusal for an invented part from a refusal for a risky one", () => {
     const codesOf = (change: ChangeAssessment): readonly StakeFactorCode[] | undefined => {
       const { event } = recordOf(envelopeOf({ type: "change-assessed", assessment: change }))

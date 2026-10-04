@@ -296,23 +296,31 @@ describe("the moment it is standing in", () => {
   })
 
   /**
-   * Same words, same size, different element — and the element is the claim
-   * about the document. In the card the lead is a sibling of the card's own
-   * heading; in the ask panel the nearest heading is the rail's `h1`, two
-   * levels up, so an `h4` there announces a subsection of nothing.
+   * Same fact, different element — and the element is the claim about the
+   * document. In the card the lead is a sibling of the card's own heading; in
+   * the ask panel the nearest heading is the rail's `h1`, two levels up, so an
+   * `h4` there announces a subsection of nothing.
+   *
+   * **The panel's used to be a paragraph and is now a control**, which is the
+   * same decision carried one step further: the ask's excerpt is the one that
+   * arrives shut, so its sentence is the thing you press and a `<summary>`
+   * announces no subsection at all.
    */
-  it("says what would happen as a heading in a card and as a paragraph in the panel", () => {
+  it("says what would happen as a heading in a card and as a control in the panel", () => {
     const tree = page()
     const lead = "This is what would come off the page."
 
     const asked = render(<PartInQuestionView part={askFor("trim", tree)} />)
 
     expect(asked.container.querySelector("h4")).toBeNull()
-    expect(asked.container.querySelector("p")?.textContent).toBe(lead)
+    expect(asked.container.querySelector("summary")?.textContent).toBe(
+      "Show what would come off the page"
+    )
 
     const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
 
     expect(questioned.container.querySelector("h4")?.textContent).toBe(lead)
+    expect(questioned.container.querySelector("summary")).toBeNull()
   })
 
   /**
@@ -363,5 +371,112 @@ describe("the moment it is standing in", () => {
       questioned.container.querySelector(".demo-part-stage")?.textContent
     )
     expect(asked.container.textContent).toContain("3,400")
+  })
+})
+
+/**
+ * ## The arrival screen's excerpt arrives shut
+ *
+ * Measured on a production build at 1280×900, before this unit: the rail's
+ * scroller is **857px**, the excerpt under the green button is **358px** of it,
+ * and the four asks carrying the Gate's own verdict about themselves — *GOES
+ * AHEAD*, *ASKS YOU FIRST* — begin at **797**. The arrival screen stated a
+ * counted claim and put every piece of its evidence under the fold.
+ *
+ * So the ask's excerpt is a `<details>`. These assertions are about the three
+ * things that makes true and the one it must not: the band is still in the
+ * document and still the same band, the control carries the sentence, and
+ * **nothing is removed** — which on a surface whose whole argument is that the
+ * record is complete is the property that outranks the pixels it bought.
+ */
+describe("the one excerpt that arrives shut", () => {
+  it("is a disclosure on the ask and a section everywhere else", () => {
+    const tree = page()
+
+    const asked = render(<PartInQuestionView part={askFor("trim", tree)} />)
+
+    expect(asked.container.querySelector("details.demo-part--ask")).not.toBeNull()
+    expect(asked.container.querySelector("section")).toBeNull()
+
+    const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    expect(questioned.container.querySelector("details")).toBeNull()
+    expect(questioned.container.querySelector("section.demo-part--question")).not.toBeNull()
+
+    const { part } = keptFor(tree)
+    const kept = render(<PartInQuestionView part={part} />)
+
+    expect(kept.container.querySelector("details")).toBeNull()
+    expect(kept.container.querySelector("section.demo-part--kept")).not.toBeNull()
+  })
+
+  /**
+   * **Shut, and not a second thing to press that is already open.** A
+   * `<details>` rendered with `open` reclaims nothing and leaves a control on
+   * the screen whose only effect is to take the band away — the worst of both
+   * and the easiest thing to reach for when a picture of the open state is
+   * wanted.
+   */
+  it("arrives shut, which is the whole of what it reclaims", () => {
+    const tree = page()
+    const { container } = render(<PartInQuestionView part={askFor("trim", tree)} />)
+
+    expect(container.querySelector<HTMLDetailsElement>("details")?.open).toBe(false)
+  })
+
+  /**
+   * **Nothing is removed**, and this is the assertion that says so. The band is
+   * in the document, with the clinic's own figures in it, behind a control the
+   * browser supplies — not conditionally rendered, not fetched on open, and not
+   * a `display: none` on a wide screen, which `globals.test.ts` sweeps for
+   * separately.
+   *
+   * Word for word the same band the question's excerpt draws, because it is the
+   * same band: one tree, rendered twice, which is the demo's own claim about
+   * itself.
+   */
+  it("keeps the band in the document, byte for byte, behind the control", () => {
+    const tree = page()
+    const asked = render(<PartInQuestionView part={askFor("trim", tree)} />)
+    const questioned = render(<PartInQuestionView part={partFor("trim", tree)} />)
+
+    const band = asked.container.querySelector("details > .demo-part-stage")
+
+    expect(band).not.toBeNull()
+    expect(band?.textContent).toBe(
+      questioned.container.querySelector(".demo-part-stage")?.textContent
+    )
+    expect(asked.container.textContent).toContain("3,400")
+    expect(asked.container.textContent).toContain("92%")
+  })
+
+  /**
+   * The control is the sentence and there is no second copy of it. An excerpt
+   * that printed its lead inside as well would open onto *Show what would come
+   * off the page* above *This is what would come off the page*, which is the
+   * stutter the `<p>` became the moment the fold went in.
+   */
+  it("says it once, on the control, and not again inside", () => {
+    const tree = page()
+    const { container } = render(<PartInQuestionView part={askFor("trim", tree)} />)
+
+    expect(container.querySelector("summary")?.textContent).toBe(
+      "Show what would come off the page"
+    )
+    expect(container.textContent).not.toContain("This is what would come off the page.")
+  })
+
+  /**
+   * And the control's own hook, which `globals.css` rotates the chevron by.
+   * `group-open:` is a Tailwind variant on the `<details>`, so the class has to
+   * be on the element the browser toggles `open` on and nowhere else.
+   */
+  it("puts the group on the element the browser marks open", () => {
+    const tree = page()
+    const { container } = render(<PartInQuestionView part={askFor("trim", tree)} />)
+    const details = container.querySelector("details")
+
+    expect(details?.classList.contains("group")).toBe(true)
+    expect(details?.querySelector("summary svg")).not.toBeNull()
   })
 })

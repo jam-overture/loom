@@ -5,10 +5,10 @@
       "slug": "runtime",
       "types": "./dist/index.d.ts",
       "requires": [],
-      "files": 92,
+      "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -1547,7 +1547,7 @@
             {
               "name": "Disposition",
               "kind": "type",
-              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n};",
+              "signature": "type Disposition = {\n    readonly kind: DispositionKind;\n    readonly reason: DispositionReason;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly confidence: number;\n    readonly policyId: string;\n    /** Absent on a judgment recorded before the Gate fingerprinted policies. */\n    readonly policyFingerprint?: string;\n    /**\n     * Absent when nothing fired, and on a judgment recorded before the field\n     * existed. The schema above says which absence is which.\n     */\n    readonly irreversibilityReasons?: readonly IrreversibilityReason[];\n};",
               "truncated": false,
               "summary": ""
             }
@@ -1739,6 +1739,20 @@
               "signature": "const inverseInterpreter: (inverse: ComputedInverse, idFactory: IdFactory, clock: Clock) => ChangeInterpreter",
               "truncated": false,
               "summary": "An interpreter that has nothing to interpret."
+            }
+          ]
+        },
+        {
+          "module": "runtime/irreversibility",
+          "title": "Irreversibility",
+          "summary": "Why a change cannot be taken back, as data.",
+          "symbols": [
+            {
+              "name": "IrreversibilityReason",
+              "kind": "type",
+              "signature": "type IrreversibilityReason = {\n    readonly code: \"out-of-tree-effect\";\n    readonly primitiveTypes: readonly PrimitiveType[];\n} | {\n    readonly code: \"retention-budget-exceeded\";\n    readonly retainedNodeCount: number;\n    readonly budget: number;\n};",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -2041,13 +2055,6 @@
           "title": "Reversibility",
           "summary": "Reversibility is computed, not guessed: the inverse delta is produced up front, so \"can this be undone\" is answered by handing over the thing that undoes it.",
           "symbols": [
-            {
-              "name": "IrreversibilityReason",
-              "kind": "type",
-              "signature": "type IrreversibilityReason = {\n    readonly code: \"out-of-tree-effect\";\n    readonly primitiveTypes: readonly PrimitiveType[];\n} | {\n    readonly code: \"retention-budget-exceeded\";\n    readonly retainedNodeCount: number;\n    readonly budget: number;\n};",
-              "truncated": false,
-              "summary": ""
-            },
             {
               "name": "Reversibility",
               "kind": "type",
@@ -4468,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4514,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5420,7 +5427,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5878,7 +5885,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6742,7 +6749,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7333,7 +7340,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7561,7 +7568,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7975,10 +7982,10 @@
       "slug": "write",
       "types": "./dist/write/index.d.ts",
       "requires": [],
-      "files": 53,
+      "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8329,10 +8336,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 27,
+      "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8452,7 +8459,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 33,
+      "files": 35,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8465,7 +8472,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9149,6 +9156,48 @@
           ]
         },
         {
+          "module": "signals/progress",
+          "title": "Progress",
+          "summary": "Where in a page reading stops.",
+          "symbols": [
+            {
+              "name": "ReadingStep",
+              "kind": "type",
+              "signature": "type ReadingStep = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    readonly standing: PartStanding;\n    /**\n     * Distinct page views that reported it coming into view, and `0` where no row\n     * named it at all.\n     *\n     * Zero means two different things and {@link ReadingStep.anchors} is which:\n     * nobody got here, or nothing can say.\n     */\n    readonly reached: number;\n    /**\n     * Whether this step can be either end of a stop.\n     *\n     * False for a part that reported something other than a view, whose `reached`\n     * of 0 is an absence of evidence rather than an absence of readers.\n     */\n    readonly anchors: boolean;\n};",
+              "truncated": false,
+              "summary": "One part as a point on its parent's sequence."
+            },
+            {
+              "name": "ReadingStop",
+              "kind": "type",
+              "signature": "type ReadingStop = {\n    /** The part they reached. */\n    readonly after: NodeId;\n    /** The next part in the run that could anchor a stop, which fewer reached. */\n    readonly before: NodeId;\n    /** Views that reached `after`, which is the denominator of `share`. */\n    readonly reached: number;\n    /** Views that reached `after` and not `before`. */\n    readonly lost: number;\n    /**\n     * `lost ÷ reached`, in `(0, 1]`.\n     *\n     * Both numbers are `reached` counts off the same rows, so this is the figure\n     * that survives the over-count the counts themselves carry. It is never\n     * divided by the page's views or by the page views counted at the door — those\n     * are a different measurement of a different thing, and dividing across the\n     * two would put a number on a screen that no two rows agree about.\n     */\n    readonly share: number;\n};",
+              "truncated": false,
+              "summary": "Two parts of one run, and the readers who reached the first and not the second."
+            },
+            {
+              "name": "ReadingRun",
+              "kind": "type",
+              "signature": "type ReadingRun = {\n    readonly parentId: NodeId;\n    /** The depth of the steps, which is one below the parent's. */\n    readonly depth: number;\n    readonly steps: readonly ReadingStep[];\n    /** Every fall, in run order. */\n    readonly stops: readonly ReadingStop[];\n    /**\n     * The last step in run order that any view reached, or `null` where none did.\n     *\n     * *How far down they got*, as a node rather than a fraction.\n     */\n    readonly furthest: NodeId | null;\n    /**\n     * Pairs where more views reached the later part than the earlier one.\n     *\n     * Scrolling cannot do this, so it is a reader who arrived somewhere other than\n     * the top — an anchored link, a restored scroll position — or a part that is\n     * on screen whatever the reader does, such as a footer a short page never\n     * pushes down. Worth seeing and not worth reporting as a negative stop.\n     */\n    readonly gained: number;\n};",
+              "truncated": false,
+              "summary": "One parent's children, in the order a reader meets them."
+            },
+            {
+              "name": "ReadingProgress",
+              "kind": "type",
+              "signature": "type ReadingProgress = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /**\n     * The page's view floor, carried through from the reading unchanged.\n     *\n     * Zero is the whole answer: nothing was measured, so nothing stopped\n     * anywhere, and `runs` is empty rather than a page of parts that all look\n     * skipped.\n     */\n    readonly views: number;\n    /**\n     * Every run of two or more children, in reading order.\n     *\n     * A run of one is left out: a stop is between two parts, and an only child has\n     * nowhere for reading to stop. Every part of the page is a step in at most one\n     * run — its parent's — so no reader's progress is counted at two depths.\n     */\n    readonly runs: readonly ReadingRun[];\n    /**\n     * The sharpest fall on the page: most views lost, then largest share, then\n     * first in reading order.\n     *\n     * By views lost rather than by share, because *where does this page lose\n     * readers* is a question about readers. A band two readers out of three\n     * abandoned is a worse rate and a smaller problem than one four hundred out of\n     * a thousand did, and ranking by share would put the former at the top of\n     * every screen for ever.\n     */\n    readonly steepest: ReadingStop | null;\n    /**\n     * Parts that could not anchor a stop, because they reported something other\n     * than coming into view.\n     *\n     * Empty on an ordinary page. A long list is a diagnosis: presses are being\n     * delegated to regions that no `viewed` names, which is a sender or a\n     * primitive not reporting what it is, rather than a page nobody read.\n     */\n    readonly unanchored: readonly NodeId[];\n    /** Every run's {@link ReadingRun.gained}, added. */\n    readonly gained: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readingProgressOf",
+              "kind": "function",
+              "signature": "const readingProgressOf: (reading: PageReading) => ReadingProgress",
+              "truncated": false,
+              "summary": "Where reading stops, from a reading of one revision."
+            }
+          ]
+        },
+        {
           "module": "signals/readable",
           "title": "Readable",
           "summary": "What *on screen* means, as the two numbers that decide it.",
@@ -9522,7 +9571,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9662,10 +9711,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 13,
+      "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9729,10 +9778,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 59,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9963,7 +10012,7 @@
             {
               "name": "AssessmentSummary",
               "kind": "type",
-              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
+              "signature": "type AssessmentSummary = {\n    readonly proposalId: ProposalId;\n    readonly stakes: StakeLevel;\n    readonly reversible: boolean;\n    readonly operationCount: number;\n    readonly insertedNodeCount: number;\n    readonly removedNodeCount: number;\n    readonly movedNodeCount: number;\n    readonly configuredNodeCount: number;\n    readonly touchedPrimitiveTypes: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly removedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedPrimitiveTypes?: readonly PrimitiveType[];\n    readonly relocatedNodeCount?: number;\n    readonly shallowestAffectedDepth: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly affectedNodeCount?: number;\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly configuredPropKeys?: readonly string[];\n    readonly retainedNodeCount: number;\n    readonly irreversibilityReasons: readonly string[];\n    /** Absent when no out-of-tree reason fired, and before the field existed. */\n    readonly outOfTreeEffectTypes?: readonly PrimitiveType[];\n    /** Absent on a record written before the field existed, never defaulted. */\n    readonly stakeFactorCodes?: readonly StakeFactorCode[];\n};",
               "truncated": false,
               "summary": ""
             },
@@ -10291,10 +10340,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 36,
+      "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10365,10 +10414,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 86,
+      "files": 87,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10823,10 +10872,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 71,
+      "files": 72,
       "narrower": [],
       "standing": {
-        "packageNames": 1221,
+        "packageNames": 1226,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

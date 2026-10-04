@@ -10,9 +10,10 @@ import {
   type ReaderSignalReadRequest,
   type ReceivedBatch,
 } from "./journal.js"
+import { funnelKey, pageViewKey, regionKey, tallyKey } from "./counters.js"
 import type { RevisionViews, StoredPageViews } from "./page-views.js"
-import type { ReaderRegionCount, ReaderRegionStore, StoredRegionCount } from "./region.js"
-import type { FunnelAnswer, FunnelPair, ReaderTally } from "./rollup.js"
+import type { ReaderRegionStore, StoredRegionCount } from "./region.js"
+import type { FunnelAnswer, ReaderTally } from "./rollup.js"
 import type { ReaderSignalBatch } from "./signal.js"
 import type { ReaderTallyStore, StoredFunnel, StoredTally, TallyReadRequest } from "./tally.js"
 
@@ -90,17 +91,6 @@ export const memoryReaderSignalJournal = (clock: Clock = systemClock): ReaderSig
   }
 }
 
-/** A revision, which is the two columns every counter in this file shares. */
-const revisionKey = (row: { readonly treeId: string; readonly revision: number }): string =>
-  `${row.treeId} ${row.revision}`
-
-const tallyKey = (tally: ReaderTally): string => `${revisionKey(tally)} ${tally.nodeId}`
-
-const endOf = (end: FunnelPair["from"]): string => `${end.nodeId}:${end.kind}`
-
-const funnelKey = (answer: FunnelAnswer): string =>
-  `${answer.treeId} ${answer.revision} ${endOf(answer.pair.from)} ${endOf(answer.pair.to)}`
-
 const matches = (
   row: { readonly treeId: string; readonly revision: number },
   request: TallyReadRequest | undefined
@@ -127,7 +117,7 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
     at: string
   ): void => {
     for (const count of counts) {
-      const key = revisionKey(count)
+      const key = pageViewKey(count)
       const existing = pageViews.get(key)
 
       pageViews.set(key, {
@@ -195,8 +185,6 @@ export const memoryReaderTallyStore = (): ReaderTallyStore => {
       Promise.resolve(ok([...pageViews.values()].filter((row) => matches(row, request)))),
   }
 }
-
-const regionKey = (count: ReaderRegionCount): string => `${revisionKey(count)} ${count.region}`
 
 /**
  * Where readers were, in the process.
