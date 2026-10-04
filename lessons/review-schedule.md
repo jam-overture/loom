@@ -1613,11 +1613,13 @@ work.
 
 ## Set AK — two days after lesson 32
 
-Interleaved with 09, 14, 17, 25, 28 and 31. Heavy on 25, because *a check is
+Interleaved with 05, 09, 14, 17, 25, 28 and 31. Heavy on 25, because *a check is
 bounded by the population of values that pass through the place it runs* is this
 lesson's second half arriving from the other direction; and on 17, because a
 measurement that is not allowed to act on its own verdict is a shape this course
-has met before and in a different lane.
+has met before and in a different lane. Question 7 reaches back to 05 for a reason
+the lesson only learned after it shipped: what makes the one testable function
+testable is that it is handed what it reads.
 
 1. *Does this page overflow* is not a question about the page. Name the inputs the
    answer is a function of, say which of them anybody in Loom owns, and then say
@@ -1642,11 +1644,12 @@ has met before and in a different lane.
    invisible to a pure function of the tree, and they end up in different places.
    Say what makes a *declaration at registration* the right answer in one case and
    impossible in the other, in a sentence about who knows. *(31, 32)*
-7. The only suite that drives this instrument hands its browser double a function
-   and is handed back a clean reading somebody typed into the test. Say exactly
-   what that suite asserts, say what it cannot assert, and then say why lesson
-   29's remedy — instrument the place the thing happens — is unavailable.
-   *(29, 32)*
+7. Of the functions this harness hands to a browser, a test in this repository can
+   run one and cannot run the others. Say what decides that — the answer is about
+   their signatures and not about anybody's effort — then say what the suite is left
+   asserting about the ones it cannot run, and what it still cannot assert about the
+   one it can. Finish on why lesson 29's remedy, instrument the place the thing
+   happens, reaches none of them. *(05, 29, 32)*
 8. A primitive handed twelve rows it can read eleven of says so, and a primitive
    whose heading will not fit a phone does not. Both faults are invisible from
    outside at the moment they happen. Say what distinguishes them, and make your
