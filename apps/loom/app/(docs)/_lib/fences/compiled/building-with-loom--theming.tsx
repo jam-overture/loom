@@ -52,7 +52,7 @@ const Excerpt = ({ tree, theme }: { tree: LoomTree; theme: ResolvedTheme }) => (
 // page.mdx:277 — a program
 const scheme = paletteScheme(theme.palette)
 
-// page.mdx:346 — a program
+// page.mdx:347 — a program
 const MARKS = { light: "/mark-on-light.svg", dark: "/mark-on-dark.svg" } as const
 
 const markFor = (resolved: ResolvedTheme): string | undefined => {

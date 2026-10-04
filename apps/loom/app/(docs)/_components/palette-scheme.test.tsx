@@ -1,7 +1,14 @@
 import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { COLOUR_FORMS, palettesAnswering, SCHEMED_PALETTES, schemeWorkingFor } from "@/app/(docs)/_lib/scheme"
+import {
+  COLOUR_FORMS,
+  noGapsLine,
+  palettesAnswering,
+  SCHEMED_PALETTES,
+  schemeWorkingFor,
+  unreadablePalettes,
+} from "@/app/(docs)/_lib/scheme"
 
 import { ColourForms, PaletteSchemes, SchemeWorking } from "./palette-scheme"
 
@@ -55,10 +62,19 @@ describe("every registered palette, under the word it answers", () => {
    * In order within each group, because the groups are read as lists and a
    * shuffled one passes a membership check — the slip `entry-points.test.tsx`
    * was written for, in a second place.
+   *
+   * **The expectation deliberately does not come from `palettesAnswering`.**
+   * The first version of this test did, and a planted sort inside that function
+   * moved the page and the expectation together: thirteen other mutations were
+   * caught and this one was invisible. That is this lane's own 28 September
+   * entry — *a test derived from the list it checks cannot see the list shrink*
+   * — arriving in the file written three days after it. `SCHEMED_PALETTES` is
+   * the registry's order, held against `STARTER_PALETTES` in `scheme.test.ts`,
+   * so filtering it here is a second opinion rather than the same one twice.
    */
   it.each(["light", "dark"] as const)("prints the %s palettes, in order", (answer) => {
     const rows = groupRows(schemes(), answer)
-    const expected = palettesAnswering(answer)
+    const expected = SCHEMED_PALETTES.filter((row) => row.scheme === answer)
 
     expect(expected.length).toBeGreaterThan(0)
     expect(rows.map((row) => row.dataset.palette)).toEqual(expected.map((row) => row.id))
@@ -119,6 +135,7 @@ describe("every registered palette, under the word it answers", () => {
     const line = container.querySelector<HTMLElement>("[data-unreadable]")
 
     expect(line?.dataset.unreadable).toBe("0")
+    expect(line?.textContent).toBe(noGapsLine(unreadablePalettes))
     expect(line?.textContent).toContain("Every registered palette answers")
   })
 })

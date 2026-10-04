@@ -5,6 +5,7 @@ import {
   COLOUR_FORMS,
   declinedForms,
   LUMINANCE_PLACES,
+  noGapsLine,
   palettesAnswering,
   printLuminance,
   SCHEMED_PALETTES,
@@ -80,6 +81,24 @@ describe("what every registered palette answers", () => {
     expect(new Set(grouped.map((row) => row.id)).size).toBe(SCHEMED_PALETTES.length)
   })
 
+  /**
+   * The order a group comes back in, held against the registry rather than
+   * against the function that produced it.
+   *
+   * A sort planted inside `palettesAnswering` is invisible to any assertion
+   * that asks `palettesAnswering` what it should have returned — which is how
+   * the first draft of the component's order test passed with the defect in
+   * place. `STARTER_PALETTES` is the only list here that is nobody's output.
+   */
+  it.each(["light", "dark"] as const)("gives the %s group in the registry's order", (answer) => {
+    const fromRegistry = STARTER_PALETTES.filter(
+      (palette) => comparedHere(palette.slots["bg-canvas"] ?? "", palette.slots["fg-default"] ?? "") === answer
+    )
+
+    expect(fromRegistry.length).toBeGreaterThan(0)
+    expect(palettesAnswering(answer).map((row) => row.id)).toEqual(fromRegistry.map((palette) => palette.id))
+  })
+
   it("puts only the palettes that answer one way into that group", () => {
     for (const answer of ["light", "dark"] as const) {
       for (const row of palettesAnswering(answer)) {
@@ -95,6 +114,32 @@ describe("what every registered palette answers", () => {
    */
   it("has no palette the measurement cannot read", () => {
     expect(unreadablePalettes).toEqual([])
+  })
+
+  /**
+   * Both branches of the sentence, including the one nothing on this site can
+   * reach today.
+   *
+   * It is the whole reason `noGapsLine` is a function. A conditional inside the
+   * component is a branch that only ever runs one way here, so a defect pinning
+   * it to that way is invisible — which a planted mutation proved before this
+   * existed.
+   */
+  it("says that nothing is missing when nothing is", () => {
+    expect(noGapsLine([])).toContain("Every registered palette answers")
+  })
+
+  it("names the palettes it could not read, when there are any", () => {
+    const unreadable = [
+      { id: "ours", name: "Ours", canvas: "hsl(0 0% 4%)", ink: "hsl(0 0% 96%)", scheme: undefined },
+      { id: "theirs", name: "Theirs", canvas: "rebeccapurple", ink: "white", scheme: undefined },
+    ]
+
+    const line = noGapsLine(unreadable)
+
+    expect(line).toContain("2 of them")
+    expect(line).toContain("ours, theirs")
+    expect(line).not.toContain("Every registered palette answers")
   })
 })
 

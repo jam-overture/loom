@@ -1,5 +1,6 @@
 import {
   COLOUR_FORMS,
+  noGapsLine,
   palettesAnswering,
   printLuminance,
   schemeWorkingFor,
@@ -95,11 +96,7 @@ export const PaletteSchemes = () => (
       <Group answer="dark" rows={palettesAnswering("dark")} />
     </div>
     <p className="text-ink-muted text-sm" data-unreadable={String(unreadablePalettes.length)}>
-      {unreadablePalettes.length === 0
-        ? "Every registered palette answers. None of them comes back undefined."
-        : `${unreadablePalettes.length} of them come back undefined: ${unreadablePalettes
-            .map((row) => row.id)
-            .join(", ")}.`}
+      {noGapsLine(unreadablePalettes)}
     </p>
   </div>
 )

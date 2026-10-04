@@ -94,6 +94,21 @@ export const unreadablePalettes: readonly SchemedPalette[] = SCHEMED_PALETTES.fi
 )
 
 /**
+ * The sentence under the two groups, which is the section's one claim about an
+ * absence.
+ *
+ * A function rather than a conditional inside the component, and the reason is
+ * a mutation that survived the first pass: with the list empty, *always take
+ * the empty branch* and *take the branch the list says* print the same words,
+ * so nothing rendering the real list could tell them apart. Pulled out here,
+ * the branch nobody can reach today is a branch a test can hand a list to.
+ */
+export const noGapsLine = (unreadable: readonly SchemedPalette[]): string =>
+  unreadable.length === 0
+    ? "Every registered palette answers. None of them comes back undefined."
+    : `${unreadable.length} of them come back undefined: ${unreadable.map((row) => row.id).join(", ")}.`
+
+/**
  * The same pair of colors, written the ways a palette may be written.
  *
  * This is the half of the section that is not about Loom's own palettes. The
