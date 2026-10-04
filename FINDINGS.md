@@ -41375,6 +41375,14 @@ the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
 `_components/entry-points.test.tsx`. **Six chrome components remain**: `callout`,
 `code-block`, `mobile-nav`, `sidebar`, `submit-seam`, `theme-toggle`.
 
+> **Noted, 4 October.** `docs-45-which-way-round-a-theme-is` adds three produced
+> blocks to the theming page and `_components/palette-scheme.test.tsx` in the
+> same commit, so the class gained no instance. The list of six is unchanged —
+> all six are still chrome, and `sidebar` and `mobile-nav` are still the two of
+> them that are not decoration. Written here rather than as a new entry because
+> *a run did the thing the class asks for* is not a finding; it is what the
+> entry is for.
+
 The `entry-points` row is worth two sentences of its own, because it is the
 whole shape of the class in one table. `entry-points.test.ts` holds the list of
 doors against the package's own `exports` map in **both** directions, which is
@@ -42908,3 +42916,55 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+
+---
+## 2026-10-04 — a palette may be written six ways, a registry takes all six, and four of them silently switch off every measurement Loom makes of a palette
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/theme/`) ·
+**Extends:** the 20 August entry *a host's own palette is not held to the bar the
+starter palettes now clear* · **Status:** open — **a measurement and a new
+instance, explicitly not a request to build the diagnostic 0076 deferred.**
+
+`colourSchema` accepts more than hex. `channelsOf` reads only three- and
+six-digit hex and answers `undefined` for everything else, each refusal argued
+for in its own doc comment and none of them wrong. The 20 August entry recorded
+the consequence for `auditPalette`: a host writing in `hsl()` is told the pair
+could not be measured rather than told it passed.
+
+**What is new is the size of it.** Writing a page about `paletteScheme` meant
+asking the question of a registry rather than of one function, and the answer is
+wider than that entry's:
+
+| the pair written as | `paletteSchema` | `paletteScheme` |
+| --- | --- | --- |
+| `#111827` · `#f3f4f7` | registers | `"dark"` |
+| `#123` · `#eef` | registers | `"dark"` |
+| `hsl(220 30% 11%)` · `hsl(220 25% 95%)` | **registers** | `undefined` |
+| `rgb(17 24 39)` · `rgb(243 244 247)` | **registers** | `undefined` |
+| `midnightblue` · `whitesmoke` | **registers** | `undefined` |
+| `#111827ff` · `#f3f4f7ff` | **registers** | `undefined` |
+
+Every row is a legal palette — `paletteSchema.safeParse` returns `ok` for all
+six — and every row is the same dark canvas under the same light ink, so every
+row has one right answer and four do not give it.
+
+**It is four measurements rather than one.** A palette written in `hsl()` loses
+`paletteScheme`, `paletteScrim`, `slotChroma` and the contrast audit together.
+Measured on a palette whose every slot is `hsl()`: `auditPalette` comes back
+`26 unmeasured, 0 failures`, `paletteScrim` `undefined`, `slotChroma`
+`undefined` — against `0.0857` for the same color as hex. A host in that state
+has a palette that registers, resolves, re-themes and renders, and has quietly
+lost every number Loom can produce about it.
+
+**Nothing here is a defect and nothing is asked for.** 0076 settled that Loom
+offers the bar rather than imposing it, and the 20 August entry recorded the
+`RenderOutput` diagnostic as deferred rather than rejected. This entry is the
+figures that argument would need if it is ever reopened, and the record that the
+list of what a host loses has grown by one since it was written —
+`paletteScheme` did not exist on 20 August.
+
+**What was done instead, and it is this lane's whole remedy:** the limit is now
+on a page a reader reaches, with the table above rendered from the runtime
+rather than typed, on
+`/docs/building-with-loom/theming`. Before today the only statements of it were
+a doc comment and this ledger, neither of which a host reads.
