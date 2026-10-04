@@ -67,6 +67,7 @@ export const loomBadge = definePrimitive({
   description: "A short label attached to something else — “Most popular”, “Beta”. Its text is a child.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "span",

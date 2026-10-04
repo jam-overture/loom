@@ -118,6 +118,7 @@ export const loomEmptyState = definePrimitive({
     "The empty state: what a region says when it holds nothing — a glyph, a title, a line, and the action that would fill it. Regions: media, heading, actions.",
   props,
   slots: ["media", "heading", "actions"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const centred = given.align !== "start"
     const compact = given.stature === "compact"

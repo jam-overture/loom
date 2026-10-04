@@ -3,6 +3,7 @@ import Link from "next/link"
 import { policyFingerprintOf } from "@jam-overture/loom"
 import { describeTelemetryError, episodesOf } from "@jam-overture/loom/telemetry"
 
+import { CardGrid, Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -75,7 +76,7 @@ const RulesPage = async () => {
     : undefined
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
+    <Screen>
       {/*
        * The way out comes after the sentence rather than beside the heading.
        * Beside it, `justify-between` puts the two on one line at 1280 and wraps
@@ -85,12 +86,14 @@ const RulesPage = async () => {
        * defect was found on 29 August.
        */}
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl tracking-tight">What Loom is allowed to do here</h1>
+        <Measured className="gap-2">
+          <h1 className="text-2xl tracking-tight">What Loom is allowed to do here</h1>
 
-        <p className="text-ink-muted text-sm">
-          Every change the AI writes is judged against these before it goes anywhere near your
-          page. Some of them turn a change down; most of them stop and put it in front of you.
-        </p>
+          <p className="text-ink-muted text-sm">
+            Every change the AI writes is judged against these before it goes anywhere near your
+            page. Some of them turn a change down; most of them stop and put it in front of you.
+          </p>
+        </Measured>
 
         <div className="flex flex-wrap gap-4">
           {/*
@@ -133,7 +136,18 @@ const RulesPage = async () => {
         </StateNotice>
       )}
 
-      <ul className="flex flex-col gap-3">
+      {/*
+        * The ladder, two or three abreast instead of one.
+        *
+        * The order still reads left to right and then down, which is the order
+        * the Gate consults them in and the reason this is a list rather than a
+        * set. What it stops being is a column of eight cards a reader has to
+        * scroll to the end of to find out how many there are.
+        *
+        * 380, which is wider than the pieces: a rule card carries a sentence of
+        * what the rule does, a second of what it costs, and a count under them.
+        */}
+      <CardGrid min={380}>
         {rules.map((rule) => (
           <li key={rule.id}>
             <RuleCard
@@ -142,7 +156,7 @@ const RulesPage = async () => {
             />
           </li>
         ))}
-      </ul>
+      </CardGrid>
 
       <TechnicalDetail summary="Where these come from, and how to change one">
         <p className="text-ink-secondary">
@@ -189,7 +203,7 @@ const RulesPage = async () => {
           to tell the two apart after the fact.
         </p>
       </TechnicalDetail>
-    </div>
+    </Screen>
   )
 }
 

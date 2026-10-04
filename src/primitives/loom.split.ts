@@ -84,6 +84,7 @@ export const loomSplit = definePrimitive({
   description: "Two side-by-side regions, start and end, that stack when the page is narrow.",
   props,
   slots: ["start", "end"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const [startBasis, endBasis] = RATIOS[given.ratio ?? "even"]
 

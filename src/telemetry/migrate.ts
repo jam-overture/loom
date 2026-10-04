@@ -33,6 +33,13 @@ export const TELEMETRY_DDL: readonly string[] = [
     recorded_at timestamptz NOT NULL DEFAULT now()
   )`,
   `CREATE INDEX IF NOT EXISTS loom_telemetry_tree_seq_idx ON loom_telemetry (tree_id, seq)`,
+  /**
+   * Additive, idempotent, and the only statement here that is not about the
+   * table's shape: it is what makes `assessments` on the journal a seek rather
+   * than a scan of everything ever narrated. A deployment that runs the DDL
+   * again gets it; one that never does keeps a correct journal and a slow lookup.
+   */
+  `CREATE INDEX IF NOT EXISTS loom_telemetry_assessed_proposal_idx ON loom_telemetry ((event -> 'assessment' ->> 'proposalId')) WHERE event ->> 'type' = 'change-assessed'`,
   `ALTER TABLE loom_telemetry ENABLE ROW LEVEL SECURITY`,
 ]
 

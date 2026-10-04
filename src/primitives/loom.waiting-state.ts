@@ -161,6 +161,7 @@ export const loomWaitingState = definePrimitive({
     "The waiting state: a loading skeleton shaped like the thing that has not arrived — a paragraph, a card, a media box, or a person.",
   props,
   slots: [],
+  copy: [],
   text: { loading: "Loading" },
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props, "loading">) => {
     const shape: Shape = given.shape ?? "lines"

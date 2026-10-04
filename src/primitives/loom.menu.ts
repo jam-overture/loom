@@ -90,6 +90,7 @@ export const loomMenu = definePrimitive({
     "A run of loom.link behind one button, dropped over the page — the nested menu in a header or the folded column in a footer.",
   props,
   slots: [],
+  copy: [],
   text: MENU_TEXT,
   behaviours: ["present"],
   interactive: "always",

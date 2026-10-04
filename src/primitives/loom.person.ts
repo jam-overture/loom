@@ -55,6 +55,7 @@ export const loomPerson = definePrimitive({
     "A person — face, name, role, and an optional sentence. A cell of a loom.person-grid; falls back to a monogram with no photo.",
   props,
   slots: [],
+  copy: ["name", "role", "bio"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const centred = given.align === "center"
     const linked = given.href !== undefined

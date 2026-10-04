@@ -1048,14 +1048,14 @@ The output:
 
 ```
   primitives registered:     102
-  declaring copy:            0
-  declaring any role:        0
-  typesWithRole("heading"):  []
-  copyFor("loom.stat"):      undefined
+  declaring copy:            102
+  declaring any role:        1
+  typesWithRole("heading"):  ["loom.heading"]
+  copyFor("loom.stat"):      ["value","label","caption"]
   textOf(metrics band):      ""
   copyIn(metrics band, starter registry)
-    words:    []
-    unread:   n_6 (loom.section) ["tone","width"] | n_5 (loom.stat-grid) ["columns","align"] | n_1 (loom.stat) ["value","label"] | n_2 (loom.stat) ["value","label"] | n_3 (loom.stat) ["value","label"] | n_4 (loom.stat) ["value","label"]
+    words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]
+    unread:   none
     unspoken: none
 ```
 
@@ -1146,7 +1146,7 @@ The output:
 ```
   hard-coded ["loom.heading"]: "Untitled page"
   typesWithRole("heading") ["acme.hero"]: "Bright Lane Clinic"
-  the same, against the starter library []: "Untitled page"
+  the same, against the starter library ["loom.heading"]: "Untitled page"
 ```
 
 Line one is the failure 0114 was filed about: a host that registered its own

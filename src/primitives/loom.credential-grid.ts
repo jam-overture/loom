@@ -55,6 +55,7 @@ export const loomCredentialGrid = definePrimitive({
     "A wall of loom.credential cells — awards, certifications, memberships, or the tools behind the work.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

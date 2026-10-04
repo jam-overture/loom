@@ -43,6 +43,7 @@ export const loomFaq = definePrimitive({
   description: "One question and answer, as a disclosure a reader opens. A row of a loom.faq-list.",
   props,
   slots: [],
+  copy: ["question", "answer"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
     createElement(
       "details",

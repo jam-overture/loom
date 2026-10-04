@@ -107,6 +107,7 @@ export const loomPopover = definePrimitive({
     "A panel a reader opens beside the thing it explains, holding whatever it is given; prefer a named presentation where one fits.",
   props,
   slots: [],
+  copy: [],
   text: POPOVER_TEXT,
   behaviours: ["present"],
   /** It renders a button, so the Gate must not let it sit inside an anchor. */

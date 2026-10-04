@@ -37,6 +37,7 @@ export const loomLogoCloud = definePrimitive({
   description: "A row of loom.logo marks under an optional label — the “trusted by” band.",
   props,
   slots: [],
+  copy: ["label"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const centred = given.align !== "start"
 

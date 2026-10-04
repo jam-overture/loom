@@ -8,7 +8,7 @@ import { CheckupInvitation } from "@/app/(portal)/_components/checkup-invitation
 import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { MIN_CARD_WIDTH, PageCardLink, type PageCard } from "@/app/(portal)/_components/page-card"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
-import { Columns, Measured, Screen } from "@/app/(portal)/_components/screen"
+import { CardGrid, Columns, Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { UnderConstruction } from "@/app/(portal)/_components/under-construction"
@@ -427,18 +427,13 @@ const PortalHome = async () => {
 
           <ListOrder order="needs-you-first" />
 
-          <ul
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${MIN_CARD_WIDTH}px), 1fr))`,
-            }}
-          >
+          <CardGrid min={MIN_CARD_WIDTH}>
             {cards.map((card) => (
               <li key={card.treeId} className="flex">
                 <PageCardLink card={card} />
               </li>
             ))}
-          </ul>
+          </CardGrid>
 
           {/*
             * The way out of the summary and into the paged index, at the end of

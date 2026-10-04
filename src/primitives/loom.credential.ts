@@ -102,6 +102,7 @@ export const loomCredential = definePrimitive({
    */
   interactive: { whenProps: ["href"] },
   slots: ["mark", "meta"],
+  copy: ["name", "issuer", "year", "note"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const mark = loom.slots["mark"]
     const meta = loom.slots["meta"]

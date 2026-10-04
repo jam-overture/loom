@@ -1,9 +1,11 @@
 import { render } from "@testing-library/react"
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
-import { Columns, Measured, Screen } from "./screen"
+import { screenSource } from "@/app/(portal)/_lib/screen-source"
+
+import { CardGrid, Columns, Measured, Screen } from "./screen"
 
 describe("a screen's width", () => {
   /**
@@ -49,6 +51,82 @@ describe("the measure on the words", () => {
     const { container } = render(<Measured>words</Measured>)
 
     expect(container.firstElementChild?.className).toContain("max-w-[68ch]")
+  })
+})
+
+describe("the element a measure is", () => {
+  /**
+   * The reason the prop exists. Fourteen of the fifteen places a measure is
+   * wanted are a screen's opening `<header>`, and the landmark is not
+   * decoration: it is what a screen reader offers to jump to.
+   */
+  it("renders the element it is given, so a header stays a header", () => {
+    const { container } = render(
+      <Measured as="header" className="gap-2">
+        <h1>Your pages</h1>
+      </Measured>
+    )
+
+    expect(container.querySelector("header")).not.toBeNull()
+    expect(container.querySelector("header")?.className).toContain("max-w-[68ch]")
+  })
+
+  it("is still a div when nothing says otherwise", () => {
+    const { container } = render(<Measured>a sentence</Measured>)
+
+    expect(container.firstElementChild?.tagName).toBe("DIV")
+  })
+})
+
+describe("a list of cards that fills the width", () => {
+  /**
+   * The property, and the only one worth asserting about a grid in jsdom: the
+   * number of columns is the browser's answer to `auto-fill`, which jsdom does
+   * not compute. What a test can hold is that the track is written to fill
+   * rather than to a fixed count — `auto-fill` and `1fr` — because a
+   * `grid-cols-3` written here would be three columns at 390px too.
+   */
+  it("fills the width it is given rather than taking a fixed number of columns", () => {
+    const { container } = render(
+      <CardGrid min={320}>
+        <li>one</li>
+      </CardGrid>
+    )
+
+    const columns = (container.firstElementChild as HTMLElement).style.gridTemplateColumns
+
+    expect(columns).toContain("auto-fill")
+    expect(columns).toContain("320px")
+    expect(columns).toContain("1fr")
+  })
+
+  /**
+   * The inner `min(100%, …)`, which is the whole difference between a grid and
+   * a horizontal scrollbar. Without it a 320px track on a 300px screen is a
+   * track wider than its grid, and the card goes off the side of the phone.
+   */
+  it("never asks for a column wider than the grid itself", () => {
+    const { container } = render(
+      <CardGrid min={520}>
+        <li>one</li>
+      </CardGrid>
+    )
+
+    expect((container.firstElementChild as HTMLElement).style.gridTemplateColumns).toContain(
+      "min(100%"
+    )
+  })
+
+  it("is a list, so a card is one of several rather than a stack of divs", () => {
+    const { container } = render(
+      <CardGrid min={320}>
+        <li>one</li>
+        <li>two</li>
+      </CardGrid>
+    )
+
+    expect(container.firstElementChild?.tagName).toBe("UL")
+    expect(container.querySelectorAll("li")).toHaveLength(2)
   })
 })
 
@@ -99,10 +177,15 @@ describe("a screen's main subject and what sits beside it", () => {
  * regression — and it would look completely reasonable in review, because every
  * one of the twenty-four that existed did.
  *
- * This is a counted ceiling rather than a ban: sixteen screens still carry one
- * and will until each is moved onto `Screen`. What it stops is the number
- * going **up**, which is the only direction that matters while the rest are
- * being converted.
+ * This was a counted ceiling of 29 rather than a ban, because sixteen screens
+ * still carried one. **The sixteen are converted**, so the ceiling is now 1 and
+ * the one left is named below. What it stops is unchanged and is the only
+ * direction that ever mattered: the number going **up**.
+ *
+ * It counts comment-free source now. At 29 it did not, and three of the last
+ * four "caps" it was counting were the words `max-w-3xl` inside this file's own
+ * explanation of why screens should not have one — a ceiling that a paragraph
+ * can raise is a ceiling that drifts away from the thing it bounds.
  */
 describe("the caps that are left", () => {
   const GROUP = join(process.cwd(), "app", "(portal)")
@@ -114,7 +197,7 @@ describe("the caps that are left", () => {
       if (entry.isDirectory()) return sourcesUnder(path)
       if (!entry.name.endsWith(".tsx") || entry.name.includes(".test.")) return []
 
-      return [readFileSync(path, "utf8")]
+      return [screenSource(path)]
     })
 
   const capped = sourcesUnder(GROUP).flatMap((source) =>
@@ -126,14 +209,21 @@ describe("the caps that are left", () => {
   })
 
   /**
-   * **29 on 3 October**, counted over every `.tsx` in the lane rather than over
-   * its screens — components carry them too, and a cap inside a card is the
-   * same defect one level down.
+   * **29 on 3 October, 1 the same evening.** Counted over every `.tsx` in the
+   * lane rather than over its screens — components carry them too, and a cap
+   * inside a card is the same defect one level down.
+   *
+   * The survivor is the one-item list on `/portal/pages/[treeId]/proposed/
+   * [proposalId]` that holds the decision card, and it is deliberate rather
+   * than missed: that screen's subject is two full-width drawings of a page,
+   * and the card under them is a paragraph, a verdict and two buttons. It is
+   * the one place in this group where a cap is doing the job `Measured` does
+   * everywhere else, on something that is not quite prose.
    *
    * **Lower it when something converts; never raise it.** A run that finds this
    * failing because the count went up has put a cap back.
    */
-  it("is never more than the 29 still waiting to be converted", () => {
-    expect(capped.length).toBeLessThanOrEqual(29)
+  it("is never more than the 1 that is left", () => {
+    expect(capped.length).toBeLessThanOrEqual(1)
   })
 })

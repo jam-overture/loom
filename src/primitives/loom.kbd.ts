@@ -46,6 +46,7 @@ export const loomKbd = definePrimitive({
     "One key cap — ⌘, K, Esc. Its legend is a child; compose a chord as several of these in a loom.stack row.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "kbd",

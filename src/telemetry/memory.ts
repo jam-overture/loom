@@ -1,16 +1,20 @@
+import type { ProposalId } from "../ids.js"
 import { cursorPosition, pageEnds } from "../paging.js"
 import { ok } from "../result.js"
 import { systemClock, type Clock } from "../runtime/events.js"
 
-import type { TelemetryRecord } from "./event.js"
+import type { AssessmentSummary, TelemetryRecord } from "./event.js"
 import {
   clampTelemetryLimit,
+  type AssessmentLookup,
+  type AssessmentLookupResult,
   type ForgetOutcome,
   type RecordedTelemetry,
   type TelemetryJournal,
   type TelemetryPage,
   type TelemetryReadRequest,
 } from "./journal.js"
+import { splitLookup } from "./lookup.js"
 
 /**
  * The telemetry journal that keeps its records in the process.
@@ -81,6 +85,29 @@ export const memoryTelemetryJournal = (clock: Clock = systemClock): TelemetryJou
           }),
         })
       )
+    },
+
+    /**
+     * A scan, because an array has no index — and the reference implementation
+     * is where the contract is written, not where it is made fast. What it has
+     * to get right is the answer: the *latest* assessment of a proposal wins, so
+     * it folds in arrival order and lets a later record overwrite an earlier
+     * one.
+     */
+    assessments: ({ proposalIds, treeId }: AssessmentLookup) => {
+      const { asked, unasked } = splitLookup(proposalIds)
+      const wanted = new Set<string>(asked)
+      const found = new Map<ProposalId, AssessmentSummary>()
+
+      for (const record of records) {
+        if (treeId !== undefined && record.treeId !== treeId) continue
+        if (record.event.type !== "change-assessed") continue
+        if (!wanted.has(record.event.assessment.proposalId)) continue
+
+        found.set(record.event.assessment.proposalId, record.event.assessment)
+      }
+
+      return Promise.resolve(ok<AssessmentLookupResult>({ assessments: found, unasked }))
     },
 
     /**

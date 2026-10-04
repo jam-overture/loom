@@ -1,16 +1,20 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { describeRenderDiagnostic, renderLoomTree } from "@jam-overture/loom/react"
+import {
+  describeRenderDiagnostic,
+  renderLoomTree,
+} from "@jam-overture/loom/react";
 
-import { StateNotice } from "@/app/(portal)/_components/state-notice"
-import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
-import type { Version } from "@/app/(portal)/_lib/progression"
-import { portalRegistry } from "@/app/(portal)/_lib/registry"
-import { versionHeading } from "@/app/(portal)/_lib/version"
+import { Columns } from "@/app/(portal)/_components/screen";
+import { StateNotice } from "@/app/(portal)/_components/state-notice";
+import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail";
+import type { Version } from "@/app/(portal)/_lib/progression";
+import { portalRegistry } from "@/app/(portal)/_lib/registry";
+import { versionHeading } from "@/app/(portal)/_lib/version";
 
-import { VersionNote } from "./version-note"
+import { VersionNote } from "./version-note";
 
 /**
  * A page, at every version it has been, with a way to watch it get there.
@@ -77,45 +81,45 @@ import { VersionNote } from "./version-note"
  * pace of the thing playing itself and never the pace of anything a reader is
  * doing by hand.
  */
-const FRAME_MS = 900
+const FRAME_MS = 900;
 
 const STEP =
   "border-edge-subtle text-ink-secondary hover:bg-surface-hover hover:text-ink " +
-  "disabled:text-ink-placeholder disabled:hover:bg-transparent rounded-md border px-2.5 py-1 text-sm disabled:cursor-not-allowed"
+  "disabled:text-ink-placeholder disabled:hover:bg-transparent rounded-md border px-2.5 py-1 text-sm disabled:cursor-not-allowed";
 
 export const VersionPlayer = ({
   versions,
   newest,
 }: {
   /** Oldest first, contiguous, never empty. */
-  readonly versions: readonly Version[]
+  readonly versions: readonly Version[];
   /** The highest version the page's record names, which may be one this screen does not hold. */
-  readonly newest: number
+  readonly newest: number;
 }) => {
-  const last = versions.length - 1
-  const [at, setAt] = useState(last)
-  const [playing, setPlaying] = useState(false)
-  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
+  const last = versions.length - 1;
+  const [at, setAt] = useState(last);
+  const [playing, setPlaying] = useState(false);
+  const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
-  const stop = useCallback(() => setPlaying(false), [])
+  const stop = useCallback(() => setPlaying(false), []);
 
   useEffect(() => {
-    if (!playing) return
+    if (!playing) return;
 
     timer.current = setInterval(() => {
       setAt((was) => {
         if (was >= last) {
-          setPlaying(false)
+          setPlaying(false);
 
-          return was
+          return was;
         }
 
-        return was + 1
-      })
-    }, FRAME_MS)
+        return was + 1;
+      });
+    }, FRAME_MS);
 
-    return () => clearInterval(timer.current)
-  }, [playing, last])
+    return () => clearInterval(timer.current);
+  }, [playing, last]);
 
   /**
    * Pressing it from anywhere goes back to the beginning first. A reader at the
@@ -124,151 +128,191 @@ export const VersionPlayer = ({
    * all on the version it opens on.
    */
   const watch = () => {
-    setAt(0)
-    setPlaying(true)
-  }
+    setAt(0);
+    setPlaying(true);
+  };
 
-  const showing = versions[at]!
+  const showing = versions[at]!;
   const drawn = renderLoomTree(showing.tree, {
     resolver: portalRegistry,
     validator: portalRegistry,
-  })
+  });
 
+  /**
+   * The page on one side, what made it on the other.
+   *
+   * It was a single column: a label, a drawing, a row of controls, then the
+   * account of the change, each using about half the display and the drawing
+   * least of all — a whole page rendered into 830 pixels with a thousand empty
+   * beside it. The maintainer's words, looking at this exact screen: *"There is
+   * a lot of dead space on several of the portal views."*
+   *
+   * The split is the screen's own subject, not a tidy-up. A reader here is
+   * comparing two things — *what the page looks like* and *what the change did
+   * to make it look like that* — and a single column makes that a scroll
+   * between them. Side by side it is one glance, and stepping a version moves
+   * both halves at once where before the second one moved off-screen.
+   *
+   * The drawing takes `main` and so gets two thirds, which is the proportion
+   * `Columns` exists for: a rendered page has no measure and wants everything
+   * it is given, while the note beside it is sentences and would be worse at
+   * 900 pixels than at 450.
+   */
   return (
-    <section className="flex flex-col gap-3">
-      {/*
-        * What is being looked at, before it is looked at. `Version 3 of 8` is
-        * the whole of it: the number is identity and travels — into a URL, a
-        * message, a report — so it stays on the surface, and the count beside it
-        * is what stops a reader assuming the newest one they can see is the
-        * newest there is.
-        */}
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="text-lg tracking-tight">{versionHeading(showing.version)}</h2>
-        {/*
-          * "The newest one" and not "the page as it is being served". They are
-          * the same thing on a page whose record still adds up and they are not
-          * the same claim, and this screen is in no position to make the second
-          * one: every picture here is folded from the record, and whether the
-          * record still produces what is actually being served is the question
-          * `/portal/checkup` exists to answer. A caption that quietly asserted
-          * it would be this screen telling a reader the one thing it cannot
-          * check.
-          */}
-        <p className="text-ink-muted text-xs">
-          {showing.version === newest
-            ? "This is the newest one."
-            : `The newest one is ${newest}.`}
-        </p>
-      </div>
-
-      <div className="bg-surface-preview border-edge-subtle rounded-md border p-6" data-stage>
-        {drawn.element}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            stop()
-            setAt((was) => Math.max(0, was - 1))
-          }}
-          disabled={at === 0}
-          className={STEP}
-        >
-          ←<span className="sr-only"> Go back one</span>
-        </button>
-
-        {/*
-          * A range with a step of one, so there is nothing between two versions
-          * to land on. Dragging it stops the playback for the same reason a step
-          * button does: two things moving the same slider is a reader fighting
-          * the screen.
-          */}
-        <input
-          type="range"
-          min={0}
-          max={last}
-          step={1}
-          value={at}
-          onChange={(event) => {
-            stop()
-            setAt(Number(event.target.value))
-          }}
-          aria-label="Jump to a version"
-          aria-valuetext={versionHeading(showing.version)}
-          className="accent-affirm-edge min-w-32 flex-1"
-        />
-
-        <button
-          type="button"
-          onClick={() => {
-            stop()
-            setAt((was) => Math.min(last, was + 1))
-          }}
-          disabled={at === last}
-          className={STEP}
-        >
-          →<span className="sr-only"> Go forward one</span>
-        </button>
-        {/*
-          * The one obvious action, and it stays one button through all three of
-          * its states. `versions.length > 1` is the honest condition: a page
-          * that has only ever been one thing has nothing to watch, and offering
-          * to play it would be a control that does nothing.
-          */}
-        {versions.length > 1 && (
-          <button
-            type="button"
-            onClick={playing ? stop : watch}
-            className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 text-sm"
-          >
-            {playing ? "Stop" : at === last ? "Watch it change" : "Watch it from the start"}
-          </button>
-        )}
-      </div>
-
-      {drawn.diagnostics.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-ink-muted text-xs">
-            {drawn.diagnostics.length === 1
-              ? "One part of the page didn’t draw at this version."
-              : `${drawn.diagnostics.length} parts of the page didn’t draw at this version.`}{" "}
-            The rest is exactly as it was — Loom leaves out what it can’t draw rather than failing
-            the whole page.
-          </p>
-          <TechnicalDetail summary="What the renderer said">
-            <ul className="flex flex-col gap-1">
-              {drawn.diagnostics.map((diagnostic, index) => (
-                <li key={index} className="font-mono">
-                  {describeRenderDiagnostic(diagnostic)}
-                </li>
-              ))}
-            </ul>
-          </TechnicalDetail>
-        </div>
-      )}
-
-      {showing.change === undefined ? (
-        /*
-         * The oldest one this screen holds, which is two different facts and the
-         * screen says which. Version 0 is where the page began and nothing
-         * produced it. Any other oldest version is simply where the window
-         * starts, and what produced it is real and one tab away.
-         */
-        <StateNotice tone="notice">
-          {showing.version === 0 ? (
-            <p>This is where the page started. Nothing had happened to it yet.</p>
-          ) : (
-            <p>
-              This is as far back as this screen goes. What made this one, and everything before
-              it, is still kept — it is in the list of changes.
+    <Columns
+      main={
+        <section className="flex flex-col gap-3">
+          {/*
+           * What is being looked at, before it is looked at. `Version 3 of 8` is
+           * the whole of it: the number is identity and travels — into a URL, a
+           * message, a report — so it stays on the surface, and the count beside it
+           * is what stops a reader assuming the newest one they can see is the
+           * newest there is.
+           */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="text-lg tracking-tight">
+              {versionHeading(showing.version)}
+            </h2>
+            {/*
+             * "The newest one" and not "the page as it is being served". They are
+             * the same thing on a page whose record still adds up and they are not
+             * the same claim, and this screen is in no position to make the second
+             * one: every picture here is folded from the record, and whether the
+             * record still produces what is actually being served is the question
+             * `/portal/checkup` exists to answer. A caption that quietly asserted
+             * it would be this screen telling a reader the one thing it cannot
+             * check.
+             */}
+            <p className="text-ink-muted text-xs">
+              {showing.version === newest
+                ? "This is the newest one."
+                : `The newest one is ${newest}.`}
             </p>
+          </div>
+
+          <div
+            className="bg-surface-preview border-edge-subtle rounded-md border p-6"
+            data-stage
+          >
+            {drawn.element}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                stop();
+                setAt((was) => Math.max(0, was - 1));
+              }}
+              disabled={at === 0}
+              className={STEP}
+            >
+              ←<span className="sr-only"> Go back one</span>
+            </button>
+
+            {/*
+             * A range with a step of one, so there is nothing between two versions
+             * to land on. Dragging it stops the playback for the same reason a step
+             * button does: two things moving the same slider is a reader fighting
+             * the screen.
+             */}
+            <input
+              type="range"
+              min={0}
+              max={last}
+              step={1}
+              value={at}
+              onChange={(event) => {
+                stop();
+                setAt(Number(event.target.value));
+              }}
+              aria-label="Jump to a version"
+              aria-valuetext={versionHeading(showing.version)}
+              className="accent-affirm-edge min-w-32 flex-1"
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                stop();
+                setAt((was) => Math.min(last, was + 1));
+              }}
+              disabled={at === last}
+              className={STEP}
+            >
+              →<span className="sr-only"> Go forward one</span>
+            </button>
+            {/*
+             * The one obvious action, and it stays one button through all three of
+             * its states. `versions.length > 1` is the honest condition: a page
+             * that has only ever been one thing has nothing to watch, and offering
+             * to play it would be a control that does nothing.
+             */}
+            {versions.length > 1 && (
+              <button
+                type="button"
+                onClick={playing ? stop : watch}
+                className="bg-affirm text-affirm-ink border-affirm-edge rounded-md border px-3 py-1.5 text-sm"
+              >
+                {playing
+                  ? "Stop"
+                  : at === last
+                    ? "Watch it change"
+                    : "Watch it from the start"}
+              </button>
+            )}
+          </div>
+        </section>
+      }
+      beside={
+        <div className="flex flex-col gap-3">
+          {drawn.diagnostics.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <p className="text-ink-muted text-xs">
+                {drawn.diagnostics.length === 1
+                  ? "One part of the page didn’t draw at this version."
+                  : `${drawn.diagnostics.length} parts of the page didn’t draw at this version.`}{" "}
+                The rest is exactly as it was — Loom leaves out what it can’t
+                draw rather than failing the whole page.
+              </p>
+              <TechnicalDetail summary="What the renderer said">
+                <ul className="flex flex-col gap-1">
+                  {drawn.diagnostics.map((diagnostic, index) => (
+                    <li key={index} className="font-mono">
+                      {describeRenderDiagnostic(diagnostic)}
+                    </li>
+                  ))}
+                </ul>
+              </TechnicalDetail>
+            </div>
           )}
-        </StateNotice>
-      ) : (
-        <VersionNote change={showing.change} />
-      )}
-    </section>
-  )
-}
+
+          {showing.change === undefined ? (
+            /*
+             * The oldest one this screen holds, which is two different facts and the
+             * screen says which. Version 0 is where the page began and nothing
+             * produced it. Any other oldest version is simply where the window
+             * starts, and what produced it is real and one tab away.
+             */
+            <StateNotice tone="notice">
+              {showing.version === 0 ? (
+                <p>
+                  This is where the page started. Nothing had happened to it
+                  yet.
+                </p>
+              ) : (
+                <p>
+                  This is as far back as this screen goes. What made this one,
+                  and everything before it, is still kept — it is in the list of
+                  changes.
+                </p>
+              )}
+            </StateNotice>
+          ) : (
+            <VersionNote change={showing.change} />
+          )}
+        </div>
+      }
+    />
+  );
+};

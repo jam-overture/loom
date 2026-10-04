@@ -3,6 +3,7 @@ import Link from "next/link"
 import { STARTER_PRIMITIVES } from "@jam-overture/loom/primitives"
 import { describeStoreError } from "@jam-overture/loom/store"
 
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalDecoration } from "@/app/(portal)/_lib/addressing"
@@ -75,10 +76,10 @@ const AppPage = async () => {
 
   if (!listed.ok) {
     return (
-      <div className="flex max-w-xl flex-col gap-4 p-8">
-        <header className="flex flex-col gap-1">
+      <Screen>
+        <Measured as="header" className="gap-1">
           <h1 className="text-2xl tracking-tight">We couldn&rsquo;t read your app just now.</h1>
-        </header>
+        </Measured>
         <StateNotice tone="failure">
           <p>
             Nothing has been lost or changed — listing your pages only reads them. What Loom can
@@ -89,7 +90,7 @@ const AppPage = async () => {
             <p className="font-mono">{describeStoreError(listed.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -125,8 +126,8 @@ const AppPage = async () => {
   const note = windowNote(pages.length, everyPage.length)
 
   return (
-    <div className="flex max-w-4xl flex-col gap-8 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">Your app</h1>
         <p className="text-ink-muted text-sm">{appSummary(pages.length, pieces)}</p>
         {/*
@@ -138,7 +139,7 @@ const AppPage = async () => {
         <p className="text-ink-placeholder text-xs">
           Loom looks after one app for each place you install it. This is that one.
         </p>
-      </header>
+      </Measured>
 
       <PieceTally
         pieces={pieces}
@@ -183,7 +184,7 @@ const AppPage = async () => {
           <p className="font-mono">{portalPolicy.policyId}</p>
         </TechnicalDetail>
       </section>
-    </div>
+    </Screen>
   )
 }
 

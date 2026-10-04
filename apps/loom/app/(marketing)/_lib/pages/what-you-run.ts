@@ -9,7 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
-import { COUNTED_ANCHOR } from "../bands"
+import { ANCHOR, COUNTED_ANCHOR } from "../bands"
 import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../chrome"
 import {
   action,
@@ -111,7 +111,7 @@ const whatYouBring = (ids: IdFactory): LoomNode =>
  * The measurement is the documentation's, and the code that made it is still in
  * the repository for anyone who wants to run it.
  */
-const whatLeaves = (ids: IdFactory): LoomNode =>
+const whatLeaves = (ids: IdFactory, context: PageContext): LoomNode =>
   splitSection(
     ids,
     { width: "wide", eyebrow: "What leaves your server" },
@@ -125,6 +125,30 @@ const whatLeaves = (ids: IdFactory): LoomNode =>
         ids,
         "The ready-made changes on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
         { tone: "muted" }
+      ),
+      /**
+       * The only sentence on this site that names another page of it, and
+       * until now the only one that made the reader go and find it.
+       *
+       * It named the front door for a day after the band it is about had moved
+       * to `/how-it-works`, which is the failure `naming.ts` exists to catch.
+       * The control carries that band's own anchor rather than the page's
+       * address, so the paragraph goes red the day the band moves again
+       * instead of going quietly wrong.
+       *
+       * It is a control under the paragraph rather than a link inside it, and
+       * that is not the first choice. A link on the words *the ready-made
+       * changes* is what the sentence wants and `loom.link` cannot be one: it
+       * draws no underline until it is hovered, so inside a sentence there is
+       * nothing to say it can be pressed, and on `minimal` its accent is the
+       * same black as the body text. Filed for `Loom primitives` on 4 October
+       * rather than worked around here.
+       */
+      action(
+        ids,
+        "See the ready-made changes",
+        `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`,
+        TERTIARY_CONTROL
       ),
     ]
   )
@@ -209,7 +233,7 @@ export const whatYouRunPageTree = (context: PageContext): LoomTree => {
         siteHeader(ids, chrome),
         hero(ids),
         whatYouBring(ids),
-        whatLeaves(ids),
+        whatLeaves(ids, context),
         whatIsCounted(ids, context),
         closing(ids, context),
         ...siteReadingBand(ids, chrome),

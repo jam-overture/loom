@@ -145,6 +145,7 @@ export const loomForm = definePrimitive({
     "A form: loom.field children, a loom.button in its submit region, and the destination the deployment resolved.",
   props,
   slots: ["submit", "note"],
+  copy: [],
   /**
    * The one primitive in this library that posts, saying so
    * ([0087](../../decisions/0087-a-primitive-that-posts-declares-it-and-the-audit-checks.md)).

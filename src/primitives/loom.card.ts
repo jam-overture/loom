@@ -116,6 +116,7 @@ export const loomCard = definePrimitive({
   /** The root becomes the anchor when the tree gives it a destination (0064). */
   interactive: { whenProps: ["href"] },
   slots: ["media", "footer"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const linked = given.href !== undefined
     const raised = given.elevation === undefined ? linked : given.elevation === "raised"
