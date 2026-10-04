@@ -308,7 +308,7 @@ environment variables meanwhile, and this step added none.
 ## Postscript, the same day — `Loom merge` brought `main` in, and one of my own caveats expired
 
 `Loom merge` merged `main` into this branch and regenerated the two generated
-files, as [0139](../decisions/0139-two-generated-files-merge-with-ours-and-the-generator-is-the-resolution.md)
+files, as [0139](../decisions/0139-a-shared-ledger-is-union-merged-and-a-generated-file-is-regenerated.md)
 says it does. Re-verified on the merged head: `pnpm verify` **green, exit 0** —
 **180 files, 3,784 runtime tests**; 375 files, 6,713 application tests; 990
 findings, 0 malformed; 124 prerendered pages, 1,474 junctions. Vercel redeployed
