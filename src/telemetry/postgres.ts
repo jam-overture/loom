@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, lt } from "drizzle-orm"
+import { and, asc, desc, eq, gt, inArray, lt, sql } from "drizzle-orm"
 import { z } from "zod"
 
 import { treeIdSchema } from "../ids.js"
@@ -6,9 +6,11 @@ import { cursorPosition, pageEnds } from "../paging.js"
 import { err, ok } from "../result.js"
 import type { LoomDatabase } from "../store/database.js"
 
-import { telemetryEventSchema } from "./event.js"
+import { assessmentSummarySchema, telemetryEventSchema, type AssessmentSummary } from "./event.js"
 import {
   clampTelemetryLimit,
+  type AssessmentLookup,
+  type AssessmentLookupResult,
   type ForgetOutcome,
   type RecordedTelemetry,
   type TelemetryError,
@@ -16,6 +18,7 @@ import {
   type TelemetryPage,
   type TelemetryReadRequest,
 } from "./journal.js"
+import { splitLookup } from "./lookup.js"
 import { loomTelemetry } from "./schema.js"
 
 export * from "./migrate.js"
@@ -56,6 +59,19 @@ const recordedSchema = z.object({
     .transform((value) => value.toISOString()),
   event: telemetryEventSchema,
 })
+
+/**
+ * The three JSON paths the assessment lookup reads, named once.
+ *
+ * `event` is one document and its type is not also a column, which 0022's table
+ * comment argued for and this is the first query to pay for: the discriminant
+ * has to be read out of the JSON rather than compared against a column. That is
+ * the trade the comment described — an index on a path, available the day a
+ * query needs one — and not a duplicated column that can disagree.
+ */
+const ASSESSED_TYPE = sql<string>`${loomTelemetry.event} ->> 'type'`
+const ASSESSED_PROPOSAL_ID = sql<string>`${loomTelemetry.event} -> 'assessment' ->> 'proposalId'`
+const ASSESSMENT = sql<unknown>`${loomTelemetry.event} -> 'assessment'`
 
 const failure = (cause: unknown, detail: string): TelemetryError => ({
   code: "unavailable",
@@ -141,6 +157,63 @@ export const postgresTelemetryJournal = (db: LoomDatabase): TelemetryJournal => 
       })
     } catch (cause) {
       return err(failure(cause, "could not read telemetry"))
+    }
+  },
+
+  /**
+   * One statement, one row per proposal, and the index the table's own comment
+   * said would arrive the day a query needed it.
+   *
+   * `DISTINCT ON` is what makes this bounded by construction rather than by a
+   * limit: the row count *is* the number of ids asked about, whatever the
+   * journal holds, so a proposal narrated twice cannot widen the read. Ordering
+   * by `seq DESC` within each id picks the latest assessment, which is the same
+   * answer the in-memory journal folds its way to.
+   *
+   * The two JSON paths are the shape of a `change-assessed` record and nothing
+   * else, which is why the index below them is partial: the predicate is the
+   * discriminant, so the index holds one entry per assessed proposal rather than
+   * one per row of a journal that is mostly other event types.
+   */
+  assessments: async ({ proposalIds, treeId }: AssessmentLookup) => {
+    const { asked, unasked } = splitLookup(proposalIds)
+
+    if (asked.length === 0) {
+      return ok<AssessmentLookupResult>({ assessments: new Map(), unasked })
+    }
+
+    try {
+      const rows = await db
+        .selectDistinctOn([ASSESSED_PROPOSAL_ID], { assessment: ASSESSMENT })
+        .from(loomTelemetry)
+        .where(
+          and(
+            eq(ASSESSED_TYPE, "change-assessed"),
+            inArray(ASSESSED_PROPOSAL_ID, asked),
+            treeId === undefined ? undefined : eq(loomTelemetry.treeId, treeId)
+          )
+        )
+        .orderBy(ASSESSED_PROPOSAL_ID, desc(loomTelemetry.seq))
+
+      const parsed = z.array(assessmentSummarySchema).safeParse(rows.map((row) => row.assessment))
+
+      if (!parsed.success) {
+        return err<TelemetryError>({
+          code: "unavailable",
+          detail: `a stored assessment did not parse: ${
+            parsed.error.issues[0]?.path.join(".") ?? "unknown"
+          }`,
+        })
+      }
+
+      const assessments = parsed.data as readonly AssessmentSummary[]
+
+      return ok<AssessmentLookupResult>({
+        assessments: new Map(assessments.map((assessment) => [assessment.proposalId, assessment])),
+        unasked,
+      })
+    } catch (cause) {
+      return err(failure(cause, `could not look up ${asked.length} assessments`))
     }
   },
 

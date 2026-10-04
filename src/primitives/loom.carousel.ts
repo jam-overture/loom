@@ -104,6 +104,7 @@ export const loomCarousel = definePrimitive({
   props,
   text: CAROUSEL_TEXT,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, CarouselTextKey>) => {
     const width = ITEM_WIDTHS[given.item ?? "medium"]
 

@@ -44,7 +44,17 @@ export type SchemaColumn = {
 
 export type SchemaIndex = {
   readonly name: string
+  /** One entry per comma at the top level, so an expression index has exactly one. */
   readonly columns: readonly string[]
+  /**
+   * The predicate of a partial index, absent when it covers every row.
+   *
+   * Carried rather than dropped because an index the reader is told about and
+   * not told the condition of is the one kind of half-truth this generated
+   * block can tell: `loom_telemetry_assessed_proposal_idx` covers one event type
+   * out of fourteen, and "indexed on that path" would read as all of them.
+   */
+  readonly where?: string
 }
 
 export type SchemaTable = {
@@ -58,7 +68,17 @@ export type SchemaTable = {
 const CREATE_TABLE = /^CREATE TABLE IF NOT EXISTS (\w+) \(([\s\S]*)\)$/
 const ADD_COLUMN = /^ALTER TABLE (\w+) ADD COLUMN IF NOT EXISTS (\w+) (\w+)$/
 const ENABLE_ROW_SECURITY = /^ALTER TABLE (\w+) ENABLE ROW LEVEL SECURITY$/
-const CREATE_INDEX = /^CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([^)]*)\)$/
+/**
+ * An index on columns, on an expression, and partial or not.
+ *
+ * The body is `[\s\S]*` rather than `[^)]*` because an expression index's
+ * brackets nest — `((event -> 'x' ->> 'y'))` — and greedy matching takes it to
+ * the last bracket, which is the right one as long as the predicate after
+ * `WHERE` has none. A predicate with a bracket in it would be misread, so this
+ * refuses it below rather than guessing.
+ */
+const CREATE_INDEX =
+  /^CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([\s\S]*)\)(?: WHERE ([\s\S]+))?$/
 const PRIMARY_KEY_CONSTRAINT = /^PRIMARY KEY \(([^)]*)\)$/
 
 /** Everything between the outer brackets, one entry per top-level comma. */
@@ -204,9 +224,16 @@ export const tablesIn = (ddl: readonly string[]): readonly SchemaTable[] => {
     const indexed = statement.match(CREATE_INDEX)
     if (indexed?.[1] !== undefined && indexed[2] !== undefined && indexed[3] !== undefined) {
       const table = requireTable(tables, indexed[2], statement)
+      const predicate = indexed[4]
+
+      if (predicate !== undefined && predicate.includes(")")) {
+        throw new Error(`loom: this page cannot read the condition on "${statement}"`)
+      }
+
       const index: SchemaIndex = {
         name: indexed[1],
         columns: indexed[3].split(",").map((column) => column.trim()),
+        ...(predicate === undefined ? {} : { where: predicate.trim() }),
       }
 
       tables = replacing(tables, { ...table, indexes: [...table.indexes, index] })

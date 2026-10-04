@@ -3,6 +3,7 @@ import { BrandColor } from "@/app/(docs)/_components/brand-color"
 import { Count } from "@/app/(docs)/_components/count"
 import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
 import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
+import { ColourForms, PaletteSchemes, SchemeWorking } from "@/app/(docs)/_components/palette-scheme"
 import { MountedGround, ThemeMount } from "@/app/(docs)/_components/theme-mount"
 
 export const metadata = pageMetadata("building-with-loom", "theming")
@@ -265,6 +266,108 @@ const Excerpt = ({ tree, theme }: { tree: LoomTree; theme: ResolvedTheme }) => (
 If you are drawing whole pages, you will never need the second one. Reach for
 `themeGround` when there is no `loom.page` above what you are rendering, and not
 before.
+
+## Light or dark, as a word
+
+You have two versions of your logo — one drawn for a light page, one for a dark
+one. The tree names a palette. **Which file do you serve?**
+
+`themeGround` cannot answer that. It hands you colors, and a PNG is not a color.
+
+```ts
+import { paletteScheme } from "@jam-overture/loom"
+
+const scheme = paletteScheme(theme.palette)
+// "light" | "dark" | undefined
+```
+
+Here is the whole measurement, in a sentence you can repeat: **it compares the
+palette's own ink to its own canvas and tells you which of the two is lighter.**
+Dark letters on pale paper is `"light"`. The other way round is `"dark"`.
+
+That is the entire calculation, done on the palette this site is built from:
+
+<SchemeWorking />
+
+No threshold, no list of palettes it knows about, and no field on a palette for
+somebody to fill in wrongly. It is a comparison between two colors that are
+already in the same palette, which is why it keeps working for a palette nobody
+here has ever seen.
+
+### The one you paint with, and the one you choose with
+
+- **`themeGround(theme)` hands you three colors.** They are what you *paint*
+  the frame with.
+- **`paletteScheme(theme.palette)` hands you one word.** It is what you
+  *choose* between two things of your own with.
+
+Everything in your chrome that is made of Loom's colors is handled by the first
+of those. This is for the things that are not, and the giveaway is always the
+same:
+**they take the word, and there is nowhere to put a hex.**
+
+- the logo, the illustration, the screenshot with a pale background baked into it
+- an embed you do not control — a map, a chart, somebody's code sample — whose
+  options are `"light"` and `"dark"`
+- `<meta name="theme-color">`, and anything else the browser reads rather than a
+  primitive
+
+<Callout kind="note">
+  You have met its answer already. The third declaration `themeGround` hands
+  back, `colorScheme`, **is this function** — the same comparison, spent on
+  getting the browser's own scrollbars and form controls the right way round
+  ([0197](/docs/architecture/decision-records)).
+</Callout>
+
+Every palette you start with answers, and you can check each one against your
+own eyes: the swatch is that palette's ink on that palette's canvas.
+
+<PaletteSchemes />
+
+### The third answer is `undefined`, and it is the one to plan for
+
+`paletteScheme` reads colors written as hex — three digits or six, `#eef` or
+`#f3f4f7`, and nothing else.
+
+A palette may be written other ways, and **a registry accepts all of them.**
+That is the part worth knowing: you can write a perfectly legal palette and lose
+this measurement, and nothing will tell you that you have.
+
+<ColourForms />
+
+It answers `undefined` rather than guessing, for the reason that also makes the
+contrast figures further up this page come back unmeasured. Reading `hsl()`
+means writing a parser, and a parser that is subtly wrong does not fail — it
+reports `"light"` about a dark palette, and the logo you then serve is the one
+nobody can see. *I could not tell* is something your chrome can handle. A
+confident wrong answer is not.
+
+So two rules, and the second is the one that gets written wrong:
+
+```tsx
+const MARKS = { light: "/mark-on-light.svg", dark: "/mark-on-dark.svg" } as const
+
+const markFor = (resolved: ResolvedTheme): string | undefined => {
+  const scheme = paletteScheme(resolved.palette)
+
+  return scheme === undefined ? undefined : MARKS[scheme]
+}
+```
+
+- **Write your palette's colors as hex** and you get an answer. Every registered
+  palette does, which is why the table above has no gaps.
+- **Do not fall back to `"light"`.** `undefined` means *the measurement is
+  unavailable*, not *the palette is pale*. The line above returns nothing so that
+  the caller keeps doing whatever it would have done if it had never asked — one
+  `scheme === "dark" ? dark : light` instead, and a palette written in `hsl()`
+  silently gets the mark for a white page.
+
+<Callout kind="warning">
+  Those same four spellings cost you the same silence elsewhere: `auditPalette`
+  reports them as `unmeasured` rather than as passing, and `paletteScrim` and
+  `slotChroma` decline them too. If you write palettes by hand, hex is the form
+  that keeps all of it working.
+</Callout>
 
 ## What a model gets shown
 

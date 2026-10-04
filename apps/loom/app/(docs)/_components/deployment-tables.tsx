@@ -53,6 +53,11 @@ const Table = ({ table }: { readonly table: SchemaTable }) => (
     {table.indexes.map((index) => (
       <p key={index.name} className="text-ink-faint border-edge border-t px-3 py-2 text-xs">
         Indexed on <span className="font-mono">{index.columns.join(", ")}</span>
+        {index.where === undefined ? null : (
+          <>
+            , for rows where <span className="font-mono">{index.where}</span>
+          </>
+        )}
       </p>
     ))}
   </div>

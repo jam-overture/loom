@@ -82,6 +82,7 @@ export const loomSpec = definePrimitive({
     "One measured fact — a figure and the unit it counts, set inline. Beds, baths, square feet, vCPUs, gigabytes. Runs together with its siblings behind a middot.",
   props,
   slots: [],
+  copy: ["value", "label"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
     createElement(
       "span",

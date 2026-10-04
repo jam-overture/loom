@@ -28,6 +28,27 @@ export const piecesIn = (node: LoomNode): number =>
 const isElement = (node: LoomNode): node is ElementNode => node.kind === "element"
 
 /**
+ * Every element in a tree, in document order, with the root included when it is
+ * one.
+ *
+ * Nine test files in this route group had written this same four-line walk by
+ * the time a tenth needed it, and the tenth is a module rather than a test, so
+ * it is written here instead. It is the same argument the top of this file
+ * makes about a measurement and the same one `words.ts` makes about copy: a
+ * walk copied into ten files is ten chances to disagree about what counts as a
+ * node on the page.
+ *
+ * `piecesIn` above counts text nodes too, because a piece is what the record
+ * calls a node and a word is a piece. This does not, because everything that
+ * reads it is asking about a prop — an `href`, an `anchor`, a `tone` — and only
+ * an element has one.
+ */
+export const elementsIn = (node: LoomNode): readonly ElementNode[] => [
+  ...(isElement(node) ? [node] : []),
+  ...(node.kind === "text" ? [] : node.children.flatMap(elementsIn)),
+]
+
+/**
  * What a node says, counted in words, through its children and its props alike.
  *
  * Both halves are needed and neither is enough. `loom.card` is given its lines

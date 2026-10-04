@@ -91,6 +91,7 @@ export const loomTier = definePrimitive({
     "One pricing plan — name, price, and a region for its badge and its call to action. A cell of a loom.tier-table.",
   props,
   slots: ["badge", "action"],
+  copy: ["name", "price", "period", "note"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const badge = loom.slots["badge"]
     const action = loom.slots["action"]

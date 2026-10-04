@@ -9,7 +9,12 @@ import { createTree } from "../tree/tree.js"
 
 import { episodesOf } from "./episode.js"
 import { recordOf, type TelemetryRecord } from "./event.js"
-import type { RecordedTelemetry, TelemetryError, TelemetryJournal } from "./journal.js"
+import type {
+  RecordedTelemetry,
+  TelemetryError,
+  TelemetryJournal,
+  TelemetryPruner,
+} from "./journal.js"
 import { memoryTelemetryJournal } from "./memory.js"
 import {
   applyRetention,
@@ -402,8 +407,7 @@ describe("applyRetention", () => {
   const unavailable: TelemetryError = { code: "unavailable", detail: "the database went away" }
 
   it("reports a journal it could not read, rather than forgetting on a guess", async () => {
-    const journal: TelemetryJournal = {
-      record: () => Promise.resolve(ok(undefined)),
+    const journal: TelemetryPruner = {
       read: () => Promise.resolve(err(unavailable)),
       forget: () => Promise.resolve(ok({ removed: 0 })),
     }
@@ -416,8 +420,7 @@ describe("applyRetention", () => {
 
   it("reports a deletion that failed", async () => {
     const backing = await journalWith([old("a", "committed")])
-    const journal: TelemetryJournal = {
-      record: backing.record,
+    const journal: TelemetryPruner = {
       read: backing.read,
       forget: () => Promise.resolve(err(unavailable)),
     }

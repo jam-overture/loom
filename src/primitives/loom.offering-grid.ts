@@ -75,6 +75,7 @@ export const loomOfferingGrid = definePrimitive({
     "A band of loom.offering cells — services, packages, a class schedule, a menu, or the ways to give. Set columns to one for a full-width list.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

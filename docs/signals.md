@@ -35,6 +35,7 @@ the portal every day.
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
+| What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
@@ -386,6 +387,63 @@ of a thousand did.
 
 **What it leaves for the portal**, which is `Loom portal`'s and filed: the shape
 of the reader screen, rather than one more row on it.
+
+### 10. Before and after the change · `Loom signals` · **done, 4 October**
+
+Everything above reads **one window of one revision**. The measurement Loom
+exists for is the comparison of two — a model proposed, a gate recorded, the page
+changed, and the question that justifies all of it is whether readers got
+further. §1 made that honest at the collection end, where a broadcaster used to
+go blind at exactly the bands the Gate had just changed. Nothing read it.
+
+**Done.** `readingChangeOf(was, now)` in
+[`src/signals/change.ts`](../src/signals/change.ts) takes two `PageReading`s and
+answers *six in ten readers left at the pricing band and now four in ten do*. It
+is the fourth thing taken out of the server-side join rather than collected (§6,
+§7, §8 and §9 being the others): **nothing was added to a payload, a browser, a
+column, a store or the vocabulary**, and the broadcaster was not touched, so its
+weight is unchanged.
+
+Three things decided the shape, all of them about what is comparable
+([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)):
+
+- **A `reached` count is not comparable across two revisions and a share is.**
+  Two revisions are two trees read by two sets of readers in two windows, so the
+  counts differ for three reasons at once and nothing divides out. A stop's share
+  is `lost ÷ reached` off two rows of one revision, so 0221's cancellation has
+  already happened on each side before the two sides meet. So the unit of
+  comparison is the **stop**, and nothing here divides one side's count by the
+  other's.
+- **A pair the change dissolved is an answer, not a gap.** A change can remove an
+  end of a pair, move one away, swap them, or insert a band between them — and a
+  comparison that joined on pairs and dropped the misses would be silent about
+  *the commonest change anybody will make*. Five fates are reported with the
+  side's own figure: `absent`, `unanchorable`, `moved`, `reordered` and
+  `separated`. The last is the one worth looking at hardest.
+- **The measurement that looks most like success can mean the page stopped being
+  read.** A share of 0.6 beside a pair nobody now reaches subtracts to a perfect
+  fix. It is `unreached`, filed on whichever side somebody reached, and it is
+  never a fall that was fixed.
+
+Four more settled in the building: the threshold for a real move is **one
+reader**, evaluated by cross-multiplying integers so no rounding error decides
+whether a reader exists; the ranking key is **readers kept at the volume the page
+has now**, not share, for 0221's reason; there is **no page-level total** of
+readers kept, because one reader who got past two bands is in both stops'
+figures (0147, 0167); and **two readings of one revision is a first-class
+question** — hand it two windows of the same page and the same function answers
+*this week against last week*.
+
+And the tree half of the answer stands when the reader half cannot: a window with
+no views still reports what the change did to the page — parts added, removed,
+moved and reworded — because *three bands moved and one was reworded, and nothing
+has been measured since* is a true and useful sentence. `reworded` is a **floor**
+and says so: a part whose type declares no `copy` has no words to compare, which
+is the §6 thinness showing up in a second place, and `unreadable` counts how many
+parts that is rather than calling them unchanged.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+sentence a reader screen can lead with, and the four things to be careful of.
 
 ## Still not in scope
 

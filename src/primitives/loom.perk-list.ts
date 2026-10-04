@@ -39,6 +39,7 @@ export const loomPerkList = definePrimitive({
   description: "A checklist of loom.perk rows — what a plan includes and what it does not.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "ul",

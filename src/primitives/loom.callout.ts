@@ -102,6 +102,7 @@ export const loomCallout = definePrimitive({
     "An aside a page steps out of its flow to make — a note or a caveat, with an optional title and a marker region. Its body is children.",
   props,
   slots: ["marker"],
+  copy: ["title"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const tone = TONES[given.tone ?? "accent"]
     const marker = loom.slots["marker"]

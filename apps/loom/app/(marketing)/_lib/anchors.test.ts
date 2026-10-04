@@ -1,9 +1,11 @@
-import type { ElementNode, LoomNode, LoomTree } from "@jam-overture/loom"
+import type { LoomTree } from "@jam-overture/loom"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
 import { ASKS, type AskId } from "./adapt/asks"
 import { ANCHOR } from "./bands"
+import { elementsIn } from "./measure"
+import { anchorsIn as anchorsDeclaredIn } from "./naming"
 import type { PageContext } from "./pages/home"
 import { pageTreeFor, renderTree } from "./render"
 import { HOW_IT_WORKS } from "./site"
@@ -58,16 +60,17 @@ const pageFor = async (context: PageContext): Promise<LoomTree> => pageTreeFor(H
 const markupFor = (page: LoomTree): string =>
   renderToStaticMarkup(renderTree(page, { origin: ORIGIN }).element)
 
-const elementsOf = (node: LoomNode): readonly ElementNode[] =>
-  node.kind === "text"
-    ? []
-    : [...(node.kind === "element" ? [node] : []), ...node.children.flatMap(elementsOf)]
-
-/** Every anchor declared in a tree, in document order and including repeats. */
-const anchorsIn = (page: LoomTree): readonly string[] =>
-  elementsOf(page.root).flatMap((element) =>
-    typeof element.props["anchor"] === "string" ? [element.props["anchor"]] : []
-  )
+/**
+ * Every anchor declared in a tree, in document order and including repeats.
+ *
+ * The walk and the read of it both moved out on 4 October — the walk to
+ * `measure.ts`, which nine test files in this route group had each written for
+ * themselves, and the read to `naming.ts`, which needed the same list to check
+ * that a link from one page of this site to a place on another lands on
+ * something. Two readings of *where can a fragment land* would eventually
+ * disagree, and the one that disagreed would be whichever was not looked at.
+ */
+const anchorsIn = (page: LoomTree): readonly string[] => anchorsDeclaredIn(page.root)
 
 /**
  * Every fragment a control on this page points at, on this page.
@@ -87,7 +90,7 @@ const resolved = (href: string): URL | undefined => {
 }
 
 const samePageFragmentsIn = (page: LoomTree): readonly string[] =>
-  elementsOf(page.root).flatMap((element) => {
+  elementsIn(page.root).flatMap((element) => {
     const href = element.props["href"]
 
     if (typeof href !== "string") return []
@@ -202,7 +205,7 @@ describe("the way back to what happened", () => {
     "%s keeps the whole of the address the visitor is at",
     async (_name, context) => {
       const page = await pageFor(context)
-      const link = elementsOf(page.root)
+      const link = elementsIn(page.root)
         .flatMap((element) =>
           typeof element.props["href"] === "string" &&
           element.props["href"].endsWith(`#${ANCHOR.seeItHappen}`)

@@ -69,6 +69,7 @@ export const loomArticleGrid = definePrimitive({
     "A responsive grid of loom.article cells — the blog index, the press page, the case studies. Set lead to run the first piece across the top.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",
