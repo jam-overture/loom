@@ -94,6 +94,7 @@ export const loomQuote = definePrimitive({
     "A testimonial: a quote with its author, their role, and a portrait — their initials when there is no photograph.",
   props,
   slots: [],
+  copy: ["quote", "author", "role"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const feature = given.emphasis === "feature"
 

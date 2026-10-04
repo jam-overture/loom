@@ -50,6 +50,7 @@ export const loomTierTable = definePrimitive({
   description: "The pricing band — a responsive row of loom.tier plans, compared side by side.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

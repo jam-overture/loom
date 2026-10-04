@@ -42,6 +42,7 @@ export const loomPerk = definePrimitive({
     "A single perk standing on its own — a marker, a claim, and an optional note. Use loom.perk-list-item inside a list.",
   props: perkProps,
   slots: [],
+  copy: ["label", "note"],
   text: PERK_TEXT,
   component: ({ loom, props: given }: LoomPrimitiveProps<PerkProps, PerkTextKey>) =>
     createElement(

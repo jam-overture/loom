@@ -124,6 +124,11 @@ export const loomPin = definePrimitive({
     "A numbered mark placed at a point over a loom.frame's surface, with a short label beside it. Becomes a row of a legend under the screen where the frame is narrow.",
   props,
   slots: [],
+  /**
+   * `marker` is three characters of glyph, and a glyph is not a word: a change
+   * that swaps one is a change a reading should report as taking no words away.
+   */
+  copy: ["label"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

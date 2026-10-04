@@ -74,6 +74,17 @@ const decide = (
    * means what it meant. Neither is trustworthy from the caller.
    */
   policyFingerprint: policyFingerprintOf(policy),
+  /**
+   * Stamped on every disposition rather than only on the one
+   * `confirmIrreversible` produced. Which rung fired and why a change cannot be
+   * taken back are separate facts: a change can be held for discarding later
+   * work *and* be irreversible, and the rung that won says nothing about the
+   * second. Reading it off the assessment here is what keeps a reader of the
+   * record from inferring one from the other.
+   */
+  ...(assessment.reversibility.reasons.length > 0
+    ? { irreversibilityReasons: assessment.reversibility.reasons }
+    : {}),
 })
 
 /** Too unsure to act on at all — asking the user to confirm a guess is noise. */

@@ -40,6 +40,7 @@ export const loomStatGrid = definePrimitive({
   description: "A responsive grid of loom.stat children — the “by the numbers” band.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

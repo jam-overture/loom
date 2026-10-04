@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { screenName } from "./_lib/screen-names"
 
+import { Screen } from "./_components/screen"
 import { StateNotice } from "./_components/state-notice"
 import { TechnicalDetail } from "./_components/technical-detail"
 
@@ -16,7 +17,7 @@ import { TechnicalDetail } from "./_components/technical-detail"
  * here, so this says both.
  */
 const NotFound = () => (
-  <div className="flex max-w-2xl flex-col gap-4 p-8">
+  <Screen>
     <h1 className="text-2xl tracking-tight">There&rsquo;s nothing here</h1>
 
     <StateNotice
@@ -48,7 +49,7 @@ const NotFound = () => (
         </p>
       </TechnicalDetail>
     </StateNotice>
-  </div>
+  </Screen>
 )
 
 export default NotFound

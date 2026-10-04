@@ -7,6 +7,7 @@ import { describeReaderSignalStoreError } from "@jam-overture/loom/signals"
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
 import { ListOrder } from "@/app/(portal)/_components/list-order"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -89,7 +90,7 @@ const ReadersPage = async ({
 
   if (!counted.ok) {
     return (
-      <div className="flex max-w-3xl flex-col gap-4 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">What did people do on your pages?</h1>
         <StateNotice tone="failure" title="We couldn’t read what your readers did.">
           <p>
@@ -104,7 +105,7 @@ const ReadersPage = async ({
             <p className="font-mono">{describeReaderSignalStoreError(counted.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -201,8 +202,8 @@ const ReadersPage = async ({
   const scopedName = scoped === undefined ? undefined : (names.get(scoped) ?? (await nameOnly(scoped)))
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">What did people do on your pages?</h1>
 
         <p className="text-ink-muted text-sm">
@@ -217,7 +218,7 @@ const ReadersPage = async ({
             <ScopedLead view="readers" page={scopedName} />
           )}
         </p>
-      </header>
+      </Measured>
 
       {scoped !== undefined && <PageViews treeId={scoped} current="readers" />}
 
@@ -308,7 +309,7 @@ const ReadersPage = async ({
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

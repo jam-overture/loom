@@ -39,6 +39,7 @@ export const loomFaqList = definePrimitive({
   description: "A stack of loom.faq disclosures — the questions band at the foot of a page.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

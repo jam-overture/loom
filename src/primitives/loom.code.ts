@@ -142,6 +142,11 @@ export const loomCode = definePrimitive({
   props,
   slots: [],
   /**
+   * `language` is drawn in the bar where a filename goes, so it is read rather
+   * than only configured.
+   */
+  copy: ["language", "caption"],
+  /**
    * The two strings the `copy` control needs a name from. They are the
    * primitive's own rather than the tree's — a model writes no part of a
    * button's label — and they travel with it into every deployment, where a

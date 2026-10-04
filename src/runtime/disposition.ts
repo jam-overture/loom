@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { irreversibilityReasonSchema, type IrreversibilityReason } from "./irreversibility.js"
 import { stakeLevelSchema, type StakeLevel } from "./stake-level.js"
 
 /**
@@ -69,6 +70,30 @@ export const dispositionSchema = z.object({
    * to check.
    */
   policyFingerprint: z.string().min(1).optional(),
+  /**
+   * Why it cannot be taken back, for the one screen that has to ask somebody.
+   *
+   * `reversible` above says *whether*, and `reason.detail` says why in a
+   * sentence — and a sentence is the wrong thing to read, because the two
+   * reasons ask opposite things of the person holding the decision. One sends
+   * them to go and look at a payment flow; the other asks whether some content
+   * is worth keeping. The detail line is prose written for a reader and
+   * documented as such, so a consumer recovering the codes out of it would be
+   * parsing somebody else's wording, and would break silently the first time
+   * anybody improved it.
+   *
+   * Absent and never defaulted (0045), and omitted rather than empty when
+   * nothing fired. `reversible` is what disambiguates the absence, which leaves
+   * three states readable and the fourth impossible:
+   *
+   * | `reversible` | this field | what it means |
+   * | --- | --- | --- |
+   * | `true` | absent | nothing fired, which is what `true` already said |
+   * | `false` | present | these are the reasons |
+   * | `false` | absent | judged before this field existed |
+   * | `true` | present | never written; asserted in `gate.test.ts` |
+   */
+  irreversibilityReasons: z.array(irreversibilityReasonSchema).optional(),
 })
 
 export type Disposition = {
@@ -80,4 +105,9 @@ export type Disposition = {
   readonly policyId: string
   /** Absent on a judgment recorded before the Gate fingerprinted policies. */
   readonly policyFingerprint?: string
+  /**
+   * Absent when nothing fired, and on a judgment recorded before the field
+   * existed. The schema above says which absence is which.
+   */
+  readonly irreversibilityReasons?: readonly IrreversibilityReason[]
 }
