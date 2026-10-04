@@ -42720,6 +42720,9 @@ table comment said would arrive the day a query needed one.
 **The screen is still silent, and that part is `Loom portal`'s.** This closes the
 framework half: `/portal/history` can now ask, cheaply, per page of rows. What it
 says when the answer comes back is a sentence this lane does not own.
+*(Original status below — #501 narrowed this entry on the morning of the day
+this branch closed it, and both lanes wrote to it before either merged.)*
+
 **Status:** open — **narrowed by #501 and deliberately not built.** The question
 this entry asks is answered in 0222's *Alternatives considered*: the judgment is
 **joined** to the revision, not carried by it. 0016 makes the revision log the
