@@ -6,6 +6,7 @@ import { auditSnapshot, describeStoreError } from "@jam-overture/loom/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
@@ -48,15 +49,15 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
 
   if (tree === undefined) {
     return (
-      <div className="flex max-w-3xl flex-col gap-6 p-8">
-        <header className="flex flex-col gap-1">
+      <Screen>
+        <Measured as="header" className="gap-1">
           <h1 className="text-2xl tracking-tight">Does everything add up?</h1>
           <p className="text-ink-muted text-sm">
             Loom keeps a record of every change it has made to a page. A checkup replays that
             record from the beginning and compares the result with the page people are actually
             being served — so you can tell whether everything on it is accounted for.
           </p>
-        </header>
+        </Measured>
 
         {/*
          * The one obvious thing to do, and until this run there was not one.
@@ -90,7 +91,7 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
           <h2 className="text-ink-secondary text-sm">Or check one page</h2>
           <CheckupTreeChooser />
         </section>
-      </div>
+      </Screen>
     )
   }
 
@@ -127,8 +128,8 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
   const scopeQuery = `tree=${encodeURIComponent(scope.data)}`
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">Does this page add up?</h1>
         {/*
          * The heading asks about "this page" and the only thing that said which
@@ -138,7 +139,7 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
         <p className="text-ink-muted text-sm">
           <ScopedLead view="checkup" page={pageName} />
         </p>
-      </header>
+      </Measured>
 
       <PageViews treeId={scope.data} current="checkup" />
 
@@ -210,7 +211,7 @@ const CheckupPage = async ({ searchParams }: { searchParams: Promise<{ tree?: st
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

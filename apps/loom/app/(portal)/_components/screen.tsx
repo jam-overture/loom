@@ -76,10 +76,25 @@ export const Screen = ({
 export const Measured = ({
   children,
   className = "",
+  as: Element = "div",
 }: {
   readonly children: ReactNode
   readonly className?: string
-}) => <div className={`flex max-w-[68ch] flex-col gap-1 ${className}`.trimEnd()}>{children}</div>
+  /**
+   * The element to render, for the case that turned out to be almost all of
+   * them: a screen's opening heading and lead are prose *and* a `<header>`.
+   *
+   * Added when the other sixteen screens were converted, because the two ways of
+   * writing it without this are both worse. A `<div>` inside the `<header>`
+   * keeps the landmark and adds a wrapper that exists only to hold one number;
+   * putting `max-w-[68ch]` on the `<header>` itself drops the wrapper and puts
+   * the number in fourteen files, which is how a measure stops being one
+   * measure. The element is the thing that varies, so the element is the prop.
+   */
+  readonly as?: "div" | "header" | "section"
+}) => (
+  <Element className={`flex max-w-[68ch] flex-col gap-1 ${className}`.trimEnd()}>{children}</Element>
+)
 
 /**
  * A screen's main subject, and the smaller things that sit beside it.
@@ -116,3 +131,44 @@ export const Columns = ({
       <div className="flex min-w-0 flex-1 flex-col gap-6">{beside}</div>
     </div>
   )
+
+/**
+ * A list of cards that fills the width it is given.
+ *
+ * The third thing a wide screen needs, after a width and a measure, and the one
+ * that decides whether the width was worth taking. A stack of cards in a 768px
+ * column and the same stack in a 1440px column are the same screen with longer
+ * rows; the same stack as a grid is three columns and a third of the scrolling.
+ *
+ * It is a component rather than a line of CSS because by the time the other
+ * sixteen screens were converted there were **five** copies of it, written out
+ * by hand, and two of them were reaching into `page-card.tsx` for the minimum —
+ * a *page* card's number, borrowed by a screen about pieces. The shape is the
+ * shared thing and the number is the caller's.
+ *
+ * `minmax(min(100%, ...), 1fr)` rather than `minmax(..., 1fr)`: the inner `min`
+ * is what stops the track being wider than the grid on a phone, which is a
+ * single column of card plus a horizontal scrollbar.
+ */
+export const CardGrid = ({
+  children,
+  min,
+  className = "",
+}: {
+  readonly children: ReactNode
+  /**
+   * The narrowest a card may be drawn, in pixels, which is what decides how many
+   * columns a given width becomes. The caller's, because it is a fact about the
+   * card rather than about the grid: a page thumbnail stops being legible at a
+   * different width than a row of three short facts does.
+   */
+  readonly min: number
+  readonly className?: string
+}) => (
+  <ul
+    className={`grid list-none gap-3 p-0 ${className}`.trimEnd()}
+    style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${min}px), 1fr))` }}
+  >
+    {children}
+  </ul>
+)

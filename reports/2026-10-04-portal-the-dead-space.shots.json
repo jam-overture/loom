@@ -1,0 +1,10 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-04-portal-dead-space-versions-wide.png", "path": "/portal/pages/t_seed1/versions", "viewport": { "width": 1680, "height": 1000, "label": "wide" }, "fullPage": true, "waitFor": "text=How did it get here?", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-dead-space-pieces-wide.png", "path": "/portal/pieces", "viewport": { "width": 1680, "height": 1000, "label": "wide" }, "fullPage": true, "waitFor": "text=What Loom can put on your page", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-dead-space-rules-wide.png", "path": "/portal/rules", "viewport": { "width": 1680, "height": 1000, "label": "wide" }, "fullPage": true, "waitFor": "text=What Loom is allowed to do here", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-dead-space-versions-phone.png", "path": "/portal/pages/t_seed1/versions", "viewport": "phone", "fullPage": true, "waitFor": "text=How did it get here?", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-dead-space-pieces-phone.png", "path": "/portal/pieces", "viewport": "phone", "fullPage": true, "waitFor": "text=What Loom can put on your page", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } }
+  ]
+}
