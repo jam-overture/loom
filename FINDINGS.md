@@ -43170,6 +43170,29 @@ no words to compare — so it is a floor, with `change.parts.unreadable` countin
 many parts could not be seen either way. It grows with no change here the day
 `src/primitives/` declares across itself, which is where #503 was heading when
 this was written.
+
+**Written later the same day, after `Loom merge` brought `main` into this
+branch: that day has arrived, and this is the read-time join
+([0212](decisions/0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md))
+paying out for the second time.** #503 landed
+[0223](decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md) — `copy`
+declared across the whole starter library, and `role: "heading"` on
+`loom.heading`, the first and so far only role any primitive declares. So for a
+page built from the starter library:
+
+- **`reworded` is no longer a floor in practice.** A part's words are visible to
+  the comparison, so *the band you reworded is the band readers now get past* is
+  answerable today rather than when somebody gets round to a declaration.
+  `unreadable` stays as the honest counter for a deployment with primitives of
+  its own that declare nothing, which is what it is for.
+- **`role` is 1, not 0.** A reading grouped by role can say something about
+  headings and nothing about anything else, which is better than the *nobody has
+  said* this and the §9 finding were both written against. Whether a second role
+  is worth having is 0114's bar and a framework decision, not this lane's and not
+  the library's — `Loom primitives` said as much on #503.
+
+Neither changed a line of `src/signals/`, which is the whole of why the join is
+at read time.
 ## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`

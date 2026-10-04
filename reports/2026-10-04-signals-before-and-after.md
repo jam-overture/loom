@@ -302,3 +302,36 @@ the kind of inference §9 refused a spine heuristic for.
 not your number. Whether the reader-signal half of `docs/deployment.md` is this
 lane's is still one line of your reading; `docs/signals.md` carries the
 environment variables meanwhile, and this step added none.
+
+---
+
+## Postscript, the same day — `Loom merge` brought `main` in, and one of my own caveats expired
+
+`Loom merge` merged `main` into this branch and regenerated the two generated
+files, as [0139](../decisions/0139-two-generated-files-merge-with-ours-and-the-generator-is-the-resolution.md)
+says it does. Re-verified on the merged head: `pnpm verify` **green, exit 0** —
+**180 files, 3,784 runtime tests**; 375 files, 6,713 application tests; 990
+findings, 0 malformed; 124 prerendered pages, 1,474 junctions. Vercel redeployed
+and the combined status is success. Nothing in `src/signals/` needed a line.
+
+**What came in with it changes one thing I wrote above.** #503 landed
+[0223](../decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md): `copy`
+is now declared across the whole starter library, and `loom.heading` declares
+`role: "heading"` — verified in the merged tree, and still the only role any
+primitive declares.
+
+So **`parts.reworded` is no longer a floor in practice** for a page built from
+the starter library. *The band you reworded is the band readers now get past* is
+answerable today rather than when somebody gets round to a declaration, and
+`parts.unreadable` goes back to being what it is for: the honest counter for a
+deployment whose own primitives declare nothing. 0224's consequence —
+*`reworded` grows the day `src/primitives/` declares `copy`, with no change
+here* — was satisfied about six hours after it was written, by a merge, which is
+the read-time join of 0212 paying out for the second time. The record stands as
+written; the finding for `Loom portal` carries the update.
+
+And the §9 sentence *nothing in `src/primitives/` declares a role* is now *one
+thing does*. A reading grouped by role can say something about headings and
+nothing else. Whether a second role is worth having is 0114's bar and a framework
+decision — `Loom primitives` put the same question on #503, and it is still not
+this lane's to answer.
