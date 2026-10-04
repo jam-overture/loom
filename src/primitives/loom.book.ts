@@ -134,6 +134,7 @@ export const loomBook = definePrimitive({
    */
   interactive: { whenProps: ["href"] },
   slots: [],
+  copy: ["title", "author", "marker", "note"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const cover = createElement(
       "div",

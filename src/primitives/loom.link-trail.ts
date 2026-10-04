@@ -85,6 +85,7 @@ export const loomLinkTrail = definePrimitive({
   props,
   text: TRAIL_TEXT,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, TrailTextKey>) => {
     const crumbs = Children.toArray(children).map((child, index) =>
       createElement("span", { key: `crumb-${index}`, className: LIBRARY_CLASS.trailCrumb }, child)

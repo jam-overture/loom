@@ -69,6 +69,7 @@ export const loomEventGrid = definePrimitive({
     "A band of loom.event cells — a what's-on, tour dates, the next three. A full-width column by default; set columns for a teaser band of cards.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

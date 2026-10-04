@@ -72,6 +72,11 @@ export const loomStat = definePrimitive({
     "A single figure with a short label — one cell of a loom.stat-grid. Give it a magnitude as well as a value to plot it in a loom.stat-chart.",
   props,
   slots: [],
+  /**
+   * `magnitude` is where the figure sits on a scale, which draws a bar and prints
+   * nothing. A reader reads `value`; the two are not one fact twice.
+   */
+  copy: ["value", "label", "caption"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

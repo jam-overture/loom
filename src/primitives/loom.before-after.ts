@@ -190,6 +190,7 @@ export const loomBeforeAfter = definePrimitive({
     "Two states of one thing superimposed, wiped by a slider the reader drags — a before region and an after region, each with an optional corner label.",
   props,
   slots: ["before", "after"],
+  copy: ["beforeLabel", "afterLabel"],
   text: BEFORE_AFTER_TEXT,
   behaviours: ["adjust"],
   /**

@@ -116,6 +116,7 @@ export const loomBackdrop = definePrimitive({
     "Atmosphere behind whatever is put inside it: drifting colour, a ruled grid, a lattice of dots, beams from above, or one pool of light. Wraps anything and draws nothing of its own. The grid and dots need a band a few hundred pixels tall to read as a ground; the other three work at any height.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

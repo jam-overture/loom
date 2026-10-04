@@ -36,6 +36,7 @@ export const loomPage = definePrimitive({
   description: "The root of a page. Mounts the theme and stacks its children in one column.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const width: WidthName = given.width ?? "wide"
     const fills = given.fills !== false

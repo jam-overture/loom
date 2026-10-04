@@ -89,6 +89,19 @@ export const loomHeading = definePrimitive({
   description: "A heading. Its level sets both the document outline and the size.",
   props,
   slots: [],
+  /**
+   * Its words are its children, so there are none of its own in props — and `[]`
+   * rather than nothing is the whole of what this says: *a heading shows no words
+   * a reading cannot already see* (0122).
+   */
+  copy: [],
+  /**
+   * The library's one role, and the declaration `TITLE_BEARING` in two hosts was
+   * standing in for: *this is what a reader takes as the title of what follows.*
+   * Which heading leads is a fact about a tree and stays one — a role is not a
+   * position ([0114](../../decisions/0114-a-primitive-declares-what-part-it-plays-and-the-registry-is-asked.md)).
+   */
+  role: "heading",
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       `h${given.level}`,

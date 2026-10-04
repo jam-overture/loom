@@ -90,6 +90,7 @@ export const loomArticle = definePrimitive({
    */
   interactive: { whenProps: ["href"] },
   slots: ["meta"],
+  copy: ["kicker", "title", "excerpt"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]
 

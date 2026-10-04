@@ -259,6 +259,12 @@ export const loomField = definePrimitive({
     "One question on a loom.form: a label, its control, and an optional hint. A select's choices are loom.option children.",
   props,
   slots: [],
+  /**
+   * `name` is what the form posts under, which is the one string here a reader
+   * never sees. `placeholder` sits in an attribute and is read until it is typed
+   * over, so where the value lives in the DOM is not the test.
+   */
+  copy: ["label", "hint", "placeholder"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const type: FieldType = given.type ?? "text"
     const control = String(loom.nodeId)

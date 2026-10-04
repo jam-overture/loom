@@ -57,6 +57,7 @@ export const loomListingGrid = definePrimitive({
     "A responsive band of loom.listing cells — properties, rentals, vehicles, anything on offer at a place.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

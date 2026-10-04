@@ -90,6 +90,14 @@ export const loomMeter = definePrimitive({
     "A proportion drawn as a bar or a ring — how much of a whole, with its label and its figure.",
   props,
   slots: [],
+  /**
+   * `value` is a number and is declared anyway, because the component prints it:
+   * with no `readout` the text a reader sees is `${Math.round(percent)}%`. A
+   * reading will not coerce it, so it comes back in `unspoken` — *there is a
+   * figure here I cannot print* — which is the honest answer and the one 0122
+   * built that field for.
+   */
+  copy: ["label", "readout", "value", "caption"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const percent = proportion(given.value)
     const readout = given.readout ?? `${Math.round(percent)}%`

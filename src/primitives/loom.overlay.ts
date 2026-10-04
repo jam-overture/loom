@@ -156,6 +156,7 @@ export const loomOverlay = definePrimitive({
     "Content set over a ground — a headline across a photograph, a label on a tile. The picture goes in the ground slot; its children are what sits on top.",
   props,
   slots: ["ground"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const ground = loom.slots["ground"]
     const justify: Placement = given.justify ?? "end"

@@ -157,6 +157,7 @@ export const loomOrbit = definePrimitive({
     "Its children circling a mark it places in the middle — the “works with” band. Holds still while the page is being edited.",
   props,
   slots: ["mark"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const rings = given.rings ?? "one"
     const still = loom.editable !== undefined

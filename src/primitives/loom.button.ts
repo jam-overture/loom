@@ -58,6 +58,7 @@ export const loomButton = definePrimitive({
   /** The whole of it is the thing a reader aims at, however it is configured (0068). */
   interactive: "always",
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "button",

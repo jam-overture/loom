@@ -306,3 +306,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0220](0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Proposed | §1, §5 |
 | [0221](0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md) | Where reading stops is a fall between two siblings, and a ratio of two counts off one row set | Accepted | §4c (reader signals) |
 | [0222](0222-a-structured-reason-travels-with-the-judgment-and-the-prose-is-for-readers-only.md) | A structured reason travels with the judgment, and the prose is for readers only | Accepted | §2 |
+| [0223](0223-a-prop-is-copy-when-a-reader-could-quote-it.md) | A prop is copy when a reader could quote it, and a glyph is not a quote | Accepted | §1 |

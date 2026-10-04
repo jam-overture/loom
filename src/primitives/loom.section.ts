@@ -71,6 +71,7 @@ export const loomSection = definePrimitive({
   description: "A band of the page: an optional heading region above its content.",
   props,
   slots: ["heading"],
+  copy: ["eyebrow"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const tone = TONES[given.tone ?? "canvas"]
     const width: WidthName = given.width ?? "full"

@@ -99,6 +99,7 @@ export const loomMosaic = definePrimitive({
     "Its children in cells of unequal width on a repeating rhythm — the bento band. The general mosaic; prefer a named band where one fits.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

@@ -350,6 +350,11 @@ export const loomFeed = definePrimitive({
   props,
   slots: ["empty"],
   /**
+   * Every word in a feed is in the rows an answer brings or in the children of its
+   * `empty` slot. `binding` is the name the answer arrives under.
+   */
+  copy: [],
+  /**
    * The name this looks its entries up under: whichever name the `binding` prop
    * gives, and `entries` when it gives none.
    *

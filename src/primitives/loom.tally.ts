@@ -113,6 +113,11 @@ export const loomTally = definePrimitive({
   props,
   slots: [],
   /**
+   * `binding` is the name an answer arrives under, not a word on the page. The
+   * figure itself comes from the answer and is no part of the tree to declare.
+   */
+  copy: ["label", "caption", "prefix", "suffix"],
+  /**
    * The name this looks its figure up under, which is whichever name the
    * `binding` prop gives and `value` when it gives none.
    *

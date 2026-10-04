@@ -95,6 +95,11 @@ export const loomFeature = definePrimitive({
   /** The whole tile becomes the anchor when the tree gives it a destination (0064). */
   interactive: { whenProps: ["href"] },
   slots: ["media"],
+  /**
+   * `icon` is four characters at most — an emoji or a mark, not a word. Same
+   * reading as `loom.pin`'s marker.
+   */
+  copy: ["title", "body"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const card = given.surface !== "plain"
     const linked = given.href !== undefined

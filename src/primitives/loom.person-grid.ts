@@ -43,6 +43,7 @@ export const loomPersonGrid = definePrimitive({
   description: "A responsive grid of loom.person cells — the team, the staff, the speakers.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

@@ -92,6 +92,11 @@ export const loomMilestone = definePrimitive({
     "One entry on a rail — a marker (date, version, step number), a title, and what happened. A row of a loom.milestone-list.",
   props,
   slots: [],
+  /**
+   * `marker` is free text here rather than a glyph — *Q1 2025*, *v2.1*, *March* —
+   * so unlike `loom.pin`'s it is read.
+   */
+  copy: ["marker", "title", "body"],
   text: {
     current: "In progress",
     planned: "Planned",
