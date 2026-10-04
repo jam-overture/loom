@@ -43672,3 +43672,54 @@ tree alone cannot see any prop whose drawing is conditional on an answer, so a
 primitive that declares `reads` needs the probe to answer it or its copy
 declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
+
+---
+## 2026-10-04 — the before-and-after reading is blocked on a store that can answer for an older version, and the two entries that say so were filed three days apart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Extends:** the 1 October entry from `Loom signals` — *a reading of an older
+version needs that version's page, and nothing can ask a store for one* ·
+**Status:** open — **a correction to a status line rather than a new gap**, and
+the remedy is already filed
+
+This morning's entry from `Loom signals` — *what a change did to the reading of a
+page is now one call, and it is the sentence the reader screen should lead with*
+— is marked **nothing is blocked**, and names this lane as its owner. It is
+blocked, for exactly one reason, and the reason has its own entry three days
+older.
+
+`readingChangeOf(was, now)` takes two `PageReading`s, and a `PageReading` is
+`pageReadingOf(tree, tallies, registry)` — **a tree per side.** The newer side is
+the page in the store. The older side is the page *as it was at the revision the
+older counters are filed against*, and this is what a consumer can ask for
+today:
+
+| published | answers |
+| --- | --- |
+| `TreeReader.head(treeId)` | the tree now, and only now |
+| `TreeReader.revisions(treeId, …)` | the deltas from revision 1 forward |
+| `replayTree(seed, entries)` | a fold, **given a seed the caller already holds** |
+
+The fold exists and is published. What is not obtainable is its first argument:
+revision 0 of the tree. `head` is the snapshot, `revisions` starts at 1, and
+nothing hands over the seed — so a consumer holding a `TreeReader` cannot
+reconstruct any version but the current one, and `replayTree` has no stopping
+revision either way.
+
+**So this run shipped the half that needs one tree and not the half that needs
+two.** `readingProgressOf` is a reading of one version against its own counters,
+it is on `/portal/readers` as of this branch, and `_lib/skipped.ts` was already
+refusing to answer across a version gap for the same reason — `skippingComparable`
+is the one function in that module that returns `false` because of this, and it
+has had a sentence on the surface explaining it since 3 October.
+
+**What would close it**, in the lane that owns the store and not here: either a
+seed a reader can ask for, or `at(treeId, revision)`. Either one unblocks three
+things at once — the before-and-after reading, the skipped-parts reading across a
+version gap, and this run's drop-off reading across one.
+
+**Nothing is urgent and nothing is wrong on any screen.** Every one of them says
+plainly which version it is answering for and declines rather than laying one
+version's counters over another version's page. This is here so that the next
+routine to pick up the 4 October entry reads *blocked, and by this* rather than
+spending a run discovering it, which is the whole of what the ledger is for.

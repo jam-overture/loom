@@ -2,7 +2,11 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
-import { describeReaderSignalStoreError } from "@jam-overture/loom/signals"
+import {
+  describeReaderSignalStoreError,
+  pageReadingOf,
+  readingProgressOf,
+} from "@jam-overture/loom/signals"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
@@ -15,7 +19,8 @@ import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-nam
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
 import { portalReaderSignals, portalReaderTallies, signalsAreDurable } from "@/app/(portal)/_lib/reader-signals"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
-import { skippingComparable, skippingOf, type PageSkipping } from "@/app/(portal)/_lib/skipped"
+import { skippingComparable, skippingFrom, type PageSkipping } from "@/app/(portal)/_lib/skipped"
+import { stoppingOf, type PageStopping } from "@/app/(portal)/_lib/stopping"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
 import { inPageOrder } from "@/app/(portal)/_lib/page-order"
 import { portalStore } from "@/app/(portal)/_lib/store"
@@ -154,27 +159,47 @@ const ReadersPage = async ({
    */
   const skipped = new Map<string, PageSkipping>()
 
+  /*
+   * And where it falls off, which is the other half of the same join.
+   *
+   * **One `pageReadingOf` per page, and two readings taken off it.** Both
+   * questions are a window laid over the page it was filed against, so joining
+   * twice would be two chances to hand one of them a different window or a
+   * different set of pieces — and a card whose two sections disagreed about how
+   * many visits there were would be wrong in the way nobody checks. The join is
+   * the expensive half and it happens here, once.
+   */
+  const stopped = new Map<string, PageStopping>()
+
   for (const reading of readings) {
     const newest = reading.revisions[0]!.revision
     const tree = served.trees.get(reading.treeId)
 
     if (tree === undefined || !skippingComparable(newest, tree.revision)) continue
 
-    skipped.set(
-      reading.treeId,
-      skippingOf(
-        tree,
-        /*
-         * Scoped to the page and not to the version: the join drops rows filed
-         * under another version and says how many it dropped, which is a
-         * sentence worth having in the record. Rows belonging to another page
-         * are filtered out rather than counted, because a tally of every other
-         * page in the deployment would make that sentence meaningless.
-         */
-        counted.value.filter((tally) => tally.treeId === reading.treeId),
-        portalRegistry
-      )
+    const joined = pageReadingOf(
+      tree,
+      /*
+       * Scoped to the page and not to the version: the join drops rows filed
+       * under another version and says how many it dropped, which is a
+       * sentence worth having in the record. Rows belonging to another page
+       * are filtered out rather than counted, because a tally of every other
+       * page in the deployment would make that sentence meaningless.
+       */
+      counted.value.filter((tally) => tally.treeId === reading.treeId),
+      portalRegistry
     )
+
+    /*
+     * The page's own names, walked once for both readings — and they are the
+     * same walk `pagesServed` already made for the sentences at the top of the
+     * card, which is why this is a lookup into a map rather than a third pass
+     * over the page.
+     */
+    const names = namesInTree(tree)
+
+    skipped.set(reading.treeId, skippingFrom(joined, names))
+    stopped.set(reading.treeId, stoppingOf(readingProgressOf(joined), names))
   }
 
   /*
@@ -288,6 +313,12 @@ const ReadersPage = async ({
                * counters, and only one version of the page can be had.
                */
               skipping={skipped.get(reading.treeId)}
+              /*
+               * Absent for exactly the same reason and in exactly the same
+               * cases, because it comes off the same join. One notice on the
+               * card covers both rather than two identical ones.
+               */
+              stopping={stopped.get(reading.treeId)}
             />
           ))}
         </>
