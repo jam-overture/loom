@@ -151,6 +151,7 @@ export const loomEvent = definePrimitive({
    * differ on: no overlay is emitted here, so the reader's aim is the control's.
    */
   slots: ["meta", "action"],
+  copy: ["name", "date", "location", "note"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]
     const action = loom.slots["action"]

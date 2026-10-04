@@ -61,6 +61,14 @@ export const loomMedia = definePrimitive({
   description: "An image with alt text, an optional caption, and a fixed or natural aspect ratio.",
   props,
   slots: [],
+  /**
+   * `alt` is declared, and it is the judgement in this pass worth arguing with.
+   * It is prose a person wrote for a reader who cannot see the picture, and a
+   * change that rewrites every alt text on a page takes words away. It is also
+   * the one declared prop a sighted reader does not read — see the finding filed
+   * with this pass about one list and two consumers.
+   */
+  copy: ["alt", "caption"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const ratio = ASPECTS[given.aspect ?? "auto"]
     const corners = given.corners ?? "md"

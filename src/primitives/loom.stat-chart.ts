@@ -124,6 +124,7 @@ export const loomStatChart = definePrimitive({
     "A run of loom.stat children plotted as columns against a scale — a trend or a comparison, rather than a row of separate figures. Each child needs a magnitude to be drawn; max is the top of the scale.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

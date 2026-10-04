@@ -170,6 +170,7 @@ export const loomHero = definePrimitive({
     "The opening band of a page: heading, supporting copy, actions, and an optional media region, over a chosen backdrop.",
   props,
   slots: ["heading", "actions", "media"],
+  copy: ["eyebrow"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const backdrop = given.backdrop ?? "none"
     const centred = given.align === "center"

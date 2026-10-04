@@ -61,6 +61,7 @@ export const loomQuoteGrid = definePrimitive({
   description: "A wall of loom.quote testimonials — the social-proof band.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

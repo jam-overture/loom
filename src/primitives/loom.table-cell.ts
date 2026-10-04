@@ -99,6 +99,7 @@ export const loomTableCell = definePrimitive({
     "One cell of a loom.table, holding whatever is put in it. Set role to column or row for a heading a screen reader can read back.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const { element, scope } = ELEMENTS[given.role ?? "data"]
     const heading = element === "th"

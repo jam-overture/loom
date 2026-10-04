@@ -77,6 +77,7 @@ export const loomListItem = definePrimitive({
     "One point in a loom.list. Its text is a child, so it may hold a link, an emphasis or a code span rather than only a string.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "li",

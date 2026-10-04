@@ -97,6 +97,7 @@ export const loomBookGrid = definePrimitive({
     "A shelf of loom.book cells — books written, recommended, or being read. Set columns to one for a full-width reading list.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

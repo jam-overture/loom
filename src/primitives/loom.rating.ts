@@ -107,6 +107,12 @@ export const loomRating = definePrimitive({
   description: "A score out of five drawn as stars, with the numeral and an optional caption beside it.",
   props,
   slots: [],
+  /**
+   * `score` is a number the component prints — `score.toFixed(1)` beside *out of
+   * five* — so it is declared and comes back in `unspoken` rather than silently
+   * leaving the reading. Same call as `loom.meter`'s `value`.
+   */
+  copy: ["score", "caption"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const scale = SIZES[given.size ?? "medium"]
     const score = scoreOf(given.score)

@@ -195,6 +195,85 @@ describe("reversibility rules", () => {
 })
 
 /**
+ * The reason is on the disposition as data, because the disposition is the whole
+ * of what a hold carries and the review queue is the screen that has to ask
+ * somebody. `reason.detail` says the same thing in a sentence, and a consumer
+ * recovering these codes out of that sentence would be parsing prose.
+ */
+describe("the structured irreversibility reason", () => {
+  it("names the types that reach outside the tree, not just that some do", () => {
+    const policy = gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] })
+
+    const disposition = decide({
+      build: (ids) => [{ op: "configure", nodeId: ids.card, set: { variant: "x" }, unset: [] }],
+      policy,
+      origin: "user-instruction",
+    })
+
+    expect(disposition.irreversibilityReasons).toEqual([
+      { code: "out-of-tree-effect", primitiveTypes: ["loom.card"] },
+    ])
+  })
+
+  it("carries the retention numbers the budget was measured against", () => {
+    const policy = gatePolicySchema.parse({ inverseRetentionBudget: 1 })
+
+    const disposition = decide({
+      build: (ids) => [{ op: "remove", nodeId: ids.main }],
+      policy,
+      origin: "user-instruction",
+    })
+
+    const reason = disposition.irreversibilityReasons?.[0]
+    if (reason?.code !== "retention-budget-exceeded") throw new Error("expected the budget reason")
+
+    expect(reason.budget).toBe(1)
+    expect(reason.retainedNodeCount).toBeGreaterThan(reason.budget)
+    expect(reason.retainedNodeCount).toBe(3)
+  })
+
+  /**
+   * The fourth state of the table in `disposition.ts`: present reasons on a
+   * disposition that says the change can be taken back. Nothing should ever
+   * write one, which is only worth asserting on the function that writes them
+   * all.
+   */
+  it("is absent, rather than empty, when nothing fired", () => {
+    const disposition = decide({ build: tweak })
+
+    expect(disposition.reversible).toBe(true)
+    expect("irreversibilityReasons" in disposition).toBe(false)
+  })
+
+  /**
+   * Which rung fired and why a change cannot be undone are separate facts, and
+   * `confirmIrreversible` sits third on the ladder — so the only rungs that can
+   * outrank it are the two refusals. This change is refused for low confidence
+   * *and* is irreversible, and the reason is on the record either way: a
+   * reader of a refusal who inferred reversibility from `reason.code` would be
+   * reading a code about the interpreter and concluding something about a
+   * payment.
+   */
+  it("is stamped on a refusal, where a rung above it won the ladder", () => {
+    const policy = gatePolicySchema.parse({ outOfTreeEffectTypes: ["loom.card"] })
+
+    const disposition = decide({
+      build: (ids) => [{ op: "configure", nodeId: ids.card, set: { variant: "x" }, unset: [] }],
+      policy,
+      origin: "user-instruction",
+      confidence: 0.1,
+    })
+
+    expect(disposition.kind).toBe("rejected")
+    expect(disposition.reason.code).toBe("confidence-below-floor")
+    expect(disposition.reversible).toBe(false)
+    expect(disposition.irreversibilityReasons).toEqual([
+      { code: "out-of-tree-effect", primitiveTypes: ["loom.card"] },
+    ])
+  })
+})
+
+/**
  * A change can write over work already in the log without its delta showing it
  * (0035). The declaration reaches the Gate as a stakes factor; these are the
  * rules that make the declaration mean something.

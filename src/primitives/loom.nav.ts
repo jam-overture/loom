@@ -138,6 +138,7 @@ export const loomNav = definePrimitive({
     "The bar across the top of a page: a brand region, loom.link children as the menu, and an actions region.",
   props,
   slots: ["brand", "actions"],
+  copy: [],
   /**
    * One key, and the same word open and closed — `aria-expanded` carries the
    * state, which is the disclosure pattern as the ARIA practices state it. The

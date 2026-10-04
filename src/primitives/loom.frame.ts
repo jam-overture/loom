@@ -257,6 +257,7 @@ export const loomFrame = definePrimitive({
     "A browser, app-window or phone chrome around a product surface. The screen goes in the surface slot; its children are the loom.pin marks placed over it.",
   props,
   slots: ["surface"],
+  copy: ["label"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const chrome = given.chrome ?? "browser"
     const handset = chrome === "phone"

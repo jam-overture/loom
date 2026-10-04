@@ -60,6 +60,7 @@ export const loomCodeSpan = definePrimitive({
     "A symbol name set in monospace inside a sentence — the inline counterpart of loom.code. Its text is a child.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "code",

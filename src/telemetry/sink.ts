@@ -2,7 +2,7 @@ import { ok, type Result } from "../result.js"
 import type { EventSink, RuntimeEventEnvelope } from "../runtime/events.js"
 
 import { recordOf, type TelemetryRecord } from "./event.js"
-import type { TelemetryError, TelemetryJournal } from "./journal.js"
+import type { TelemetryError, TelemetryWriter } from "./journal.js"
 
 /**
  * The seam between a runtime narrating itself and a journal that outlives the
@@ -43,7 +43,7 @@ export type TelemetryCollector = {
   readonly flush: () => Promise<Result<void, TelemetryError>>
 }
 
-export const collectTelemetry = (journal: TelemetryJournal): TelemetryCollector => {
+export const collectTelemetry = (journal: TelemetryWriter): TelemetryCollector => {
   let buffered: TelemetryRecord[] = []
   let dropped = 0
 

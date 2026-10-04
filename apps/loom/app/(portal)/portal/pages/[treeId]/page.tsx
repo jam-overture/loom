@@ -6,6 +6,7 @@ import { renderRequest } from "@jam-overture/loom/react"
 import { attributeTree, treeSourceFromStore } from "@jam-overture/loom/store"
 
 import { PageViews } from "@/app/(portal)/_components/page-views"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { portalDecoration } from "@/app/(portal)/_lib/addressing"
@@ -82,7 +83,7 @@ const TreePage = async ({
      * something they can fix by trying harder.
      */
     return (
-      <div className="flex max-w-xl flex-col gap-4 p-8">
+      <Screen>
         {/*
           * The heading names the failure rather than the page, and this is the
           * one screen in the portal where that is right. Everywhere else a page
@@ -92,10 +93,10 @@ const TreePage = async ({
           * first here is what went wrong; which page it went wrong on is the
           * line under it, verbatim, as it is everywhere else.
           */}
-        <header className="flex flex-col gap-1">
+        <Measured as="header" className="gap-1">
           <h1 className="text-2xl tracking-tight">We couldn&rsquo;t draw this page.</h1>
           <p className="text-ink-muted truncate font-mono text-xs">{parsed.data}</p>
-        </header>
+        </Measured>
         <StateNotice
           tone="failure"
           action={
@@ -112,7 +113,7 @@ const TreePage = async ({
             <p className="font-mono">{rendered.error.code}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 

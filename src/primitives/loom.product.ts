@@ -84,6 +84,7 @@ export const loomProduct = definePrimitive({
    * the two answers differ on.
    */
   slots: ["meta", "action"],
+  copy: ["name", "price", "description"],
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props>) => {
     const meta = loom.slots["meta"]
     const action = loom.slots["action"]

@@ -44,6 +44,7 @@ export const loomProductGrid = definePrimitive({
   description: "A responsive grid of loom.product cells — the shop, the downloads, the categories.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",
