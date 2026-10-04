@@ -1,3 +1,4 @@
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { attemptLogIsDurable, portalAttemptLog } from "@/app/(portal)/_lib/auth/attempt-log"
@@ -44,14 +45,14 @@ const SignInsPage = async () => {
   const survey = await portalAttemptLog.survey(forgetBefore(now, policy), SURVEY_LIMIT)
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-1">
+    <Screen>
+      <Measured as="header" className="gap-1">
         <h1 className="text-2xl tracking-tight">Is anybody trying to get in?</h1>
         <p className="text-ink-muted text-sm">
           Sign-ins to this portal that failed recently, and whether anyone is currently locked
           out because of them.
         </p>
-      </header>
+      </Measured>
 
       {survey.ok ? (
         <PressureSummary pressure={readPressure(survey.value, now, policy)} now={now} />
@@ -117,7 +118,7 @@ const SignInsPage = async () => {
           </p>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

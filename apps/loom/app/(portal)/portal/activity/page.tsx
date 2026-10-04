@@ -7,6 +7,7 @@ import { describeTelemetryError, episodesOf, tallyEpisodes } from "@jam-overture
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -67,7 +68,7 @@ const ActivityPage = async ({
 
   if (!page.ok) {
     return (
-      <div className="flex max-w-3xl flex-col gap-4 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">{screenName("/portal/activity")}</h1>
         <StateNotice tone="failure" title="We couldn't read the record.">
           <p>
@@ -82,7 +83,7 @@ const ActivityPage = async ({
             <p className="font-mono">{describeTelemetryError(page.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -103,8 +104,8 @@ const ActivityPage = async ({
   const pageName = scope?.success ? await nameFor(portalStore, scope.data) : undefined
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">{screenName("/portal/activity")}</h1>
         {/*
          * Scoped, this screen used to make the deployment's claim over one
@@ -124,7 +125,7 @@ const ActivityPage = async ({
             <ScopedLead view="asked" page={pageName} />
           )}
         </p>
-      </header>
+      </Measured>
 
       {scope?.success && <PageViews treeId={scope.data} current="asked" />}
 
@@ -228,7 +229,7 @@ const ActivityPage = async ({
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

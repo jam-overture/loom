@@ -3,6 +3,7 @@ import Link from "next/link"
 import type { TreeId } from "@jam-overture/loom"
 import { auditSnapshot, describeStoreError } from "@jam-overture/loom/store"
 
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { describeAudit } from "@/app/(portal)/_lib/audit-view"
@@ -81,7 +82,7 @@ const EverythingPage = async () => {
 
   if (!listing.ok) {
     return (
-      <div className="flex max-w-3xl flex-col gap-6 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">Every page, checked</h1>
         <StateNotice tone="failure" title="We couldn&rsquo;t list your pages.">
           <p>
@@ -95,7 +96,7 @@ const EverythingPage = async () => {
         <Link href="/portal/checkup" className="text-xs">
           Back to the checkup →
         </Link>
-      </div>
+      </Screen>
     )
   }
 
@@ -124,14 +125,14 @@ const EverythingPage = async () => {
   const reading = sweepReading(checks, { everyPage: listing.value.cursor === null })
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-1">
+    <Screen>
+      <Measured as="header" className="gap-1">
         <h1 className="text-2xl tracking-tight">Every page, checked</h1>
         <p className="text-ink-muted text-sm">
           Loom replayed the changes it has recorded for each of your pages and compared the result
           with the page people are being served.
         </p>
-      </header>
+      </Measured>
 
       <SweepVerdict reading={reading} />
 
@@ -182,7 +183,7 @@ const EverythingPage = async () => {
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 
