@@ -112,6 +112,43 @@ describe("tablesIn", () => {
     ])
   })
 
+  /**
+   * The first expression index in the runtime's DDL arrived with the journal's
+   * assessment lookup, and this grammar had no way to read it: the brackets nest
+   * and the statement ends in a condition.
+   */
+  it("reads an index on an expression as one covered thing", () => {
+    const [table] = tablesIn([
+      CREATE,
+      "CREATE INDEX IF NOT EXISTS widgets_note_idx ON widgets ((note ->> 'kind'))",
+    ])
+
+    expect(table?.indexes).toEqual([
+      { name: "widgets_note_idx", columns: ["(note ->> 'kind')"] },
+    ])
+  })
+
+  it("carries the condition of a partial index rather than dropping it", () => {
+    const [table] = tablesIn([
+      CREATE,
+      "CREATE INDEX IF NOT EXISTS widgets_heavy_idx ON widgets (weight) WHERE weight > 10",
+    ])
+
+    expect(table?.indexes).toEqual([
+      { name: "widgets_heavy_idx", columns: ["weight"], where: "weight > 10" },
+    ])
+  })
+
+  /** Greedy brackets would take the wrong one, so this refuses instead of guessing. */
+  it("refuses a condition with a bracket in it rather than misreading the index", () => {
+    expect(() =>
+      tablesIn([
+        CREATE,
+        "CREATE INDEX IF NOT EXISTS widgets_odd_idx ON widgets (weight) WHERE length(note) > 1",
+      ])
+    ).toThrow(/cannot read the condition/)
+  })
+
   it("says a table is unlocked until a statement locks it", () => {
     expect(tablesIn([CREATE])[0]?.rowLevelSecurity).toBe(false)
     expect(

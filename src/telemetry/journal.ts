@@ -1,8 +1,8 @@
-import type { TreeId } from "../ids.js"
+import type { ProposalId, TreeId } from "../ids.js"
 import { clampLimit, type PageDirection, type PageEnds } from "../paging.js"
 import type { Result } from "../result.js"
 
-import type { TelemetryRecord } from "./event.js"
+import type { AssessmentSummary, TelemetryRecord } from "./event.js"
 
 /**
  * Where the narrated runtime goes to be read later.
@@ -90,6 +90,59 @@ export const clampTelemetryLimit = (limit: number | undefined): number =>
   clampLimit(limit, { fallback: DEFAULT_TELEMETRY_LIMIT, max: MAX_TELEMETRY_LIMIT })
 
 /**
+ * What a consumer asks when it is holding a list of proposals and wants the
+ * Gate's reading of each one.
+ *
+ * This is the join 0225 chose over a copy. The revision log holds a
+ * `proposalId` and no judgment, because 0016 makes the log the truth about the
+ * *page* and whether a change reached outside the page is not a fact about the
+ * page. The fact is therefore reachable, and until now only by paging a journal
+ * that grows forever — which on a screen showing twenty revisions is either
+ * twenty reads or a scan of everything ever narrated about the tree.
+ *
+ * `treeId` is the same filter `read` takes and the same thing it is there: a
+ * narrowing, not a boundary. What a handle may see at all is settled when the
+ * host builds it (0020), and a `proposalId` is unique without it.
+ */
+export type AssessmentLookup = {
+  readonly proposalIds: readonly ProposalId[]
+  /** Absent looks across every tree the handle can see, as `read` does. */
+  readonly treeId?: TreeId
+}
+
+/**
+ * The assessments that were found, and the ids this lookup did not reach.
+ *
+ * **A proposal nothing was recorded about is absent from the map, not an
+ * error** — the same reason there is no `not-found` above: a journal makes no
+ * claim that anything exists. A disposition without an assessment is a real
+ * history, not a fault; the Gate narrates `assessment-failed` when analysis
+ * itself fell over, and that record carries no summary to find.
+ *
+ * `unasked` exists because the alternative is a screen that quietly says
+ * nothing about a row. Every read in Loom is bounded, so a lookup naming more
+ * than `MAX_ASSESSMENT_LOOKUP` proposals cannot answer all of them in one call
+ * — and truncating silently would make *not looked up* and *nothing recorded*
+ * the same empty answer at the one place a reader is being asked to decide
+ * something. Naming the remainder costs one array and lets a caller chunk
+ * without arithmetic.
+ */
+export type AssessmentLookupResult = {
+  readonly assessments: ReadonlyMap<ProposalId, AssessmentSummary>
+  readonly unasked: readonly ProposalId[]
+}
+
+/**
+ * How many proposals one lookup answers, and it is a cap rather than a clamp.
+ *
+ * Deliberately larger than `MAX_LISTING_LIMIT`, so a caller that paged
+ * revisions at the store's widest page and asked about every one of them never
+ * meets this number. It bounds a hostile or careless caller and not the real
+ * one, which is the only job it has.
+ */
+export const MAX_ASSESSMENT_LOOKUP = 400
+
+/**
  * What a journal is asked to forget, expressed as a position rather than a rule.
  *
  * Every record below `before` goes; nothing else is touched. A journal is not
@@ -108,7 +161,7 @@ export type ForgetOutcome = {
 }
 
 /**
- * Three operations, and the asymmetry is deliberate: writes arrive in batches
+ * Four operations, and the asymmetry is deliberate: writes arrive in batches
  * because a request narrates several stages and should pay for one round trip
  * (0024), while reads are paged because a journal only grows.
  *
@@ -116,6 +169,12 @@ export type ForgetOutcome = {
  * can make the batch atomic. Half a request's narration is worse than none of
  * it: an episode missing its disposition reads as a change that was proposed
  * and never judged, which is a fault report rather than a gap.
+ *
+ * `assessments` is the only read that is not a page, and the exception earns
+ * itself: it answers about a *set of proposals a caller already holds* rather
+ * than about a position in the journal, so a cursor would be answering a
+ * question nobody asked. It is bounded all the same — by how many ids it will
+ * look at, which is the same promise a limit makes in a different currency.
  *
  * `forget` is the only destructive operation anywhere in Loom's storage, and it
  * is on the journal rather than the store for the reason 0016 gives: telemetry
@@ -129,7 +188,23 @@ export interface TelemetryJournal {
   readonly read: (
     request?: TelemetryReadRequest
   ) => Promise<Result<TelemetryPage, TelemetryError>>
+  readonly assessments: (
+    request: AssessmentLookup
+  ) => Promise<Result<AssessmentLookupResult, TelemetryError>>
   readonly forget: (
     request: ForgetRequest
   ) => Promise<Result<ForgetOutcome, TelemetryError>>
 }
+
+/**
+ * The halves of the journal its two in-package consumers actually use.
+ *
+ * The argument is `TreeReader`'s, and a fourth method is the event that made it
+ * worth repeating here: depending on the whole journal to prune it or to write
+ * to it makes every stub of either grow a method the code under test never
+ * calls, which is how a test starts describing the interface instead of the
+ * behaviour. A `TelemetryJournal` satisfies both, so nothing a host builds
+ * changes.
+ */
+export type TelemetryPruner = Pick<TelemetryJournal, "read" | "forget">
+export type TelemetryWriter = Pick<TelemetryJournal, "record">

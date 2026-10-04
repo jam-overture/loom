@@ -8,6 +8,53 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-04 — the deployment page's DDL grammar met its first expression index, and I taught it to read one from outside the lane that owns the words
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/deployment/schema.ts`, `app/(docs)/_components/deployment-tables.tsx`) ·
+**Status:** open — **the tree is green and nothing is broken**; this is here so
+you review a parser and one phrase that were changed from outside your lane,
+rather than discovering them.
+
+`tablesIn` reads the runtime's own `TELEMETRY_DDL`, `TREE_STORE_DDL` and
+`HOLD_STORE_DDL` and builds the storage tables the page prints. It understands
+four kinds of statement and throws on anything else, which is the right design
+and is exactly what caught this: 0225 adds a **partial index on a JSON path** to
+`TELEMETRY_DDL`, and `CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([^)]*)\)$`
+cannot read one. Brackets nest in an expression index, and the statement ends in
+a condition. `pnpm verify` went red at `Failed to collect page data for
+/docs/the-runtime/going-to-production` — a page build, not a test, which is a
+good failure.
+
+**What I changed, and it is three things.**
+
+1. `CREATE_INDEX` takes `[\s\S]*` for the body and an optional ` WHERE …`. Greedy
+   matching takes the body to the last bracket, which is the right one as long as
+   the predicate has none — so a predicate containing a bracket now **throws**
+   (`cannot read the condition on …`) rather than being misparsed. A grammar that
+   guesses wrong is worse than one that refuses, which is the argument your own
+   file already makes.
+2. `SchemaIndex` gained `where?: string`. An index the page mentions without its
+   condition is the one half-truth this generated block can tell: this index
+   covers one event type out of fourteen, and *indexed on that path* reads as all
+   of them.
+3. `deployment-tables.tsx` prints `, for rows where <predicate>` after the
+   covered columns. **That phrase is the part I am least confident about** and the
+   only cross-lane *copy* change — three words on a generated block, chosen to
+   match the existing *Indexed on* register.
+
+Three tests came with it, in your `schema.test.ts`: an expression index read as
+one covered thing, a partial index carrying its condition, and the bracketed
+predicate refused.
+
+**One thing I did not do.** An expression index's columns come back with the
+brackets Postgres requires — `(event -> 'assessment' ->> 'proposalId')` — so the
+page prints them. That is accurate SQL and slightly ugly prose. Stripping them
+would make the page print something that is not a statement anyone could run,
+which felt like the wrong trade for a generated block whose whole claim is that
+the facts are read from the runtime. Yours to decide.
+
+---
 ## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
@@ -42652,6 +42699,30 @@ and the sentence stops ending in a shrug.
 ## 2026-10-03 — a revision carries no judgment, so the screen with the undo button on it is the one screen that cannot say undoing will not undo everything
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/store.ts`) ·
+**Status:** **closed** by `framework-the-judgment-joined-to-the-revision`
+([0225](decisions/0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md)),
+and closed as the **join** rather than as the field this entry asks about.
+
+The question — *is reversibility a property of a revision the log should carry,
+or a property of the judgment that should be joined to it?* — is answered as the
+join, for the reason this entry itself gives: 0016 makes the log the truth about
+the page. Nothing goes onto `StoredRevision`, and nothing in `src/store/` changed.
+
+What was built is the thing the entry names as the useful half: an
+`AssessmentSummary` a consumer can fetch by `proposalId` without paging the
+journal. `TelemetryJournal.assessments` takes a set of proposal ids and answers
+with a map, bounded at `MAX_ASSESSMENT_LOOKUP` ids, naming in `unasked` any it
+did not reach — because on this screen *nothing was recorded* and *nobody looked*
+must not be the same blank. Both implementations answer it, the contract suite
+runs over both, and `loom_telemetry` gained the partial JSON-path index its own
+table comment said would arrive the day a query needed one.
+
+**The screen is still silent, and that part is `Loom portal`'s.** This closes the
+framework half: `/portal/history` can now ask, cheaply, per page of rows. What it
+says when the answer comes back is a sentence this lane does not own.
+*(Original status below — #501 narrowed this entry on the morning of the day
+this branch closed it, and both lanes wrote to it before either merged.)*
+
 **Status:** open — **narrowed by #501 and deliberately not built.** The question
 this entry asks is answered in 0222's *Alternatives considered*: the judgment is
 **joined** to the revision, not carried by it. 0016 makes the revision log the
