@@ -1,8 +1,15 @@
-# 0224. A judgment is joined to a revision by a bounded lookup, and the lookup says what it did not reach
+# 0225. A judgment is joined to a revision by a bounded lookup, and the lookup says what it did not reach
 
 **Status:** Accepted
 **Date:** 2026-10-04
 **Section:** §6
+
+> **Renumbered on 2026-10-04**, from 0224, when this branch (#505) was merged.
+> `Loom signals` had written a different 0224 the same morning on #504 — *a
+> before-and-after reading compares two shares* — and that one reached `main`
+> first; two records sharing a number is fatal (0097). Nothing in this record
+> changed but its number, and the references to it on this branch were updated
+> with it.
 
 > **Why this number.** `0221` is the highest record on `main` at `e1b33d8`. Two
 > open pull requests add one each — #501 takes `0222`, #503 takes `0223` — so

@@ -93,7 +93,7 @@ export const clampTelemetryLimit = (limit: number | undefined): number =>
  * What a consumer asks when it is holding a list of proposals and wants the
  * Gate's reading of each one.
  *
- * This is the join 0224 chose over a copy. The revision log holds a
+ * This is the join 0225 chose over a copy. The revision log holds a
  * `proposalId` and no judgment, because 0016 makes the log the truth about the
  * *page* and whether a change reached outside the page is not a fact about the
  * page. The fact is therefore reachable, and until now only by paging a journal

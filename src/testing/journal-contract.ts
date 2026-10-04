@@ -278,7 +278,7 @@ export const describeTelemetryJournalContract = (
     /**
      * The join, not a page.
      *
-     * A revision log holds a `proposalId` and no judgment (0016, 0224), so the
+     * A revision log holds a `proposalId` and no judgment (0016, 0225), so the
      * only way a screen can say *undoing this will not undo everything* is to
      * ask the journal about the proposals it is already holding. What a journal
      * owes is that both implementations answer the same way about an id it has

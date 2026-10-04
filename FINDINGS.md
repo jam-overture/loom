@@ -19,7 +19,7 @@ rather than discovering them.
 `tablesIn` reads the runtime's own `TELEMETRY_DDL`, `TREE_STORE_DDL` and
 `HOLD_STORE_DDL` and builds the storage tables the page prints. It understands
 four kinds of statement and throws on anything else, which is the right design
-and is exactly what caught this: 0224 adds a **partial index on a JSON path** to
+and is exactly what caught this: 0225 adds a **partial index on a JSON path** to
 `TELEMETRY_DDL`, and `CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([^)]*)\)$`
 cannot read one. Brackets nest in an expression index, and the statement ends in
 a condition. `pnpm verify` went red at `Failed to collect page data for
@@ -42654,7 +42654,7 @@ and the sentence stops ending in a shrug.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/store.ts`) ·
 **Status:** **closed** by `framework-the-judgment-joined-to-the-revision`
-([0224](decisions/0224-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md)),
+([0225](decisions/0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md)),
 and closed as the **join** rather than as the field this entry asks about.
 
 The question — *is reversibility a property of a revision the log should carry,

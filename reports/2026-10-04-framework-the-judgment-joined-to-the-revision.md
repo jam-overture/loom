@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04 · **Section:** §6 (telemetry) · **Lane:** `Loom daily build`
 **Branch:** `framework-the-judgment-joined-to-the-revision`
-**Records:** [0224](../decisions/0224-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md).
+**Records:** [0225](../decisions/0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md).
 **None superseded.**
 
 ---
@@ -110,15 +110,18 @@ assessment was considered and refused: a refused proposal never becomes a
 revision, so a history screen reads assessments, and the irreversibility codes are
 on both.
 
-**The number is 0224.** `0221` is the highest on `main`; #501 takes `0222` and
-#503 takes `0223`. The procedure says to re-read `main` before choosing — on a
-repository with five same-day collisions in six days, reading the open branches is
-the part that works.
+**The number is 0225.** It was written as `0224`: `0221` was the highest on
+`main`, #501 took `0222` and #503 took `0223`. The procedure says to re-read
+`main` before choosing — on a repository with five same-day collisions in six
+days, reading the open branches is the part that works. It was not enough here:
+`Loom signals` wrote its own `0224` on #504 the same morning, neither branch
+could see the other, and `Loom merge` renumbered this one to `0225` on the day
+both landed.
 
 **0222 is cited nowhere in the code.** It is the record that decided this join,
 and it is on #501, which has not merged. `tools/decisions` fails the build on a
 citation that does not resolve, and it caught exactly that on the first verify —
-so the doc comments carry the argument and name 0224 instead. When #501 lands the
+so the doc comments carry the argument and name 0225 instead. When #501 lands the
 two records sit beside each other and neither needs editing.
 
 ---
