@@ -80,6 +80,7 @@ export const loomMilestoneRow = definePrimitive({
     "A run of loom.milestone entries laid across the page — the “how it works” band of numbered steps. Wraps to one column on a narrow screen.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "ol",

@@ -68,6 +68,7 @@ export const loomLink = definePrimitive({
   /** `href` is required, so it is a target however it is configured (0064). */
   interactive: "always",
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const current = given.current === true
 

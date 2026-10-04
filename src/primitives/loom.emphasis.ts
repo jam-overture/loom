@@ -185,6 +185,7 @@ export const loomEmphasis = definePrimitive({
     "A span inside a sentence that matters more than the words around it — bold, italic, highlighted, or washed in the palette's two accent colours. Its text is a child.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const tone = TONES[given.tone ?? "strong"]
 

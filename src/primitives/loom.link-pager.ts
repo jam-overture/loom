@@ -86,6 +86,7 @@ export const loomLinkPager = definePrimitive({
     "A page-through control: loom.link children as the numbers, with previous and next regions at the ends. Mark the page the reader is on with a link's current prop.",
   props,
   slots: ["previous", "next"],
+  copy: [],
   text: { pagination: "Pagination" },
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, "pagination">) =>
     createElement(

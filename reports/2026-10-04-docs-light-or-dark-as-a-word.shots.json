@@ -1,0 +1,51 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-as-a-word-wide",
+      "viewport": "wide",
+      "waitFor": "[data-scheme-working]",
+      "do": [{ "scrollTo": "[data-scheme-working]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-as-a-word-phone",
+      "viewport": "phone",
+      "waitFor": "[data-scheme-working]",
+      "do": [{ "scrollTo": "[data-scheme-working]" }],
+      "measure": ["[data-scheme-working]", "[data-scheme-working] table"]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-palettes-wide",
+      "viewport": "wide",
+      "waitFor": "[data-palette-schemes]",
+      "do": [{ "scrollTo": "[data-palette-schemes]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-palettes-phone",
+      "viewport": "phone",
+      "waitFor": "[data-palette-schemes]",
+      "do": [{ "scrollTo": "[data-palette-schemes]" }],
+      "measure": ["[data-scheme-group=\"light\"]", "[data-scheme-group=\"dark\"]"]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-forms-wide",
+      "viewport": "wide",
+      "waitFor": "[data-colour-forms]",
+      "do": [{ "scrollTo": "[data-colour-forms]" }]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-04-docs-light-or-dark-forms-phone",
+      "viewport": "phone",
+      "waitFor": "[data-colour-forms]",
+      "do": [{ "scrollTo": "[data-colour-forms]" }],
+      "measure": ["[data-colour-forms]", "[data-colour-forms] table"]
+    }
+  ]
+}

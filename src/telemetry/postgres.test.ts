@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/pglite"
 import { describe, expect, it, vi } from "vitest"
 
-import { treeIdSchema } from "../ids.js"
+import { proposalIdSchema, treeIdSchema } from "../ids.js"
 import type { LoomDatabase } from "../store/database.js"
 import { describeTelemetryJournalContract, sampleEpisode } from "../testing/journal-contract.js"
 import { rowSecurityOn } from "../testing/row-security.js"
@@ -94,6 +94,78 @@ describe("postgresTelemetryJournal — Postgres specifics", () => {
 
     expect(forgotten.ok).toBe(false)
     expect(forgotten.ok ? "" : forgotten.error.code).toBe("unavailable")
+  })
+
+  it("reports a failed assessment lookup rather than throwing at the caller", async () => {
+    const db = await freshDatabase()
+    const journal = postgresTelemetryJournal(db)
+    await db.execute(sql.raw("DROP TABLE loom_telemetry"))
+
+    const found = await journal.assessments({ proposalIds: [proposalIdSchema.parse("p_gone")] })
+
+    expect(found.ok).toBe(false)
+    expect(found.ok ? "" : found.error.code).toBe("unavailable")
+  })
+
+  /**
+   * A stored assessment is parsed on the way out like everything else, and the
+   * lookup reads a narrower path than `read` does — so a record whose `event`
+   * carries the right discriminant and the wrong payload has to fail here too.
+   */
+  it("reports a stored assessment that no longer parses rather than returning it", async () => {
+    const db = await freshDatabase()
+    const journal = postgresTelemetryJournal(db)
+
+    await db.insert(loomTelemetry).values({
+      treeId: treeIdSchema.parse("t_oldshape"),
+      occurredAt: FIXED_INSTANT,
+      event: { type: "change-assessed", assessment: { proposalId: "p_old" } },
+    })
+
+    const found = await journal.assessments({ proposalIds: [proposalIdSchema.parse("p_old")] })
+
+    expect(found.ok).toBe(false)
+    expect(found.ok ? "" : found.error.code).toBe("unavailable")
+  })
+
+  /**
+   * The claim the whole unit rests on, and the only way to check it is to ask
+   * the planner.
+   *
+   * `enable_seqscan` is switched off because a table holding four rows is faster
+   * to scan than to seek, and the planner is right about that — what this needs
+   * to know is whether the index is *usable* for the query the journal writes,
+   * which is a question about the expression and the predicate matching and not
+   * about which plan wins today. A partial index on a JSON path is easy to write
+   * so that it can never be used: one `->>` where the query has `->`, or a
+   * predicate the query does not repeat, and the index is built, empty of
+   * purpose, and silent about it.
+   */
+  it("can answer an assessment lookup from the index rather than a scan", async () => {
+    const db = await freshDatabase()
+    await postgresTelemetryJournal(db).record(sampleEpisode())
+    await db.execute(sql.raw("SET enable_seqscan = off"))
+
+    const explained = await db.execute(
+      sql.raw(`EXPLAIN SELECT DISTINCT ON (event -> 'assessment' ->> 'proposalId')
+          event -> 'assessment'
+        FROM loom_telemetry
+        WHERE event ->> 'type' = 'change-assessed'
+          AND event -> 'assessment' ->> 'proposalId' IN ('p_1')
+        ORDER BY event -> 'assessment' ->> 'proposalId', seq DESC`)
+    )
+
+    const plan = JSON.stringify(explained)
+
+    expect(plan).toContain("Index Scan using loom_telemetry_assessed_proposal_idx")
+    /**
+     * The condition and not only the index name: a partial index is usable for
+     * its *predicate* alone, so a query that only matched the discriminant would
+     * name this index too and seek nothing. The proposal path has to be what the
+     * index is being searched by.
+     */
+    expect(plan).toContain("Index Cond")
+    expect(plan).toContain("proposalId")
   })
 
   it("stamps recorded_at itself rather than taking it from the writer", async () => {

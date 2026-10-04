@@ -7,6 +7,7 @@ import { describeStoreError } from "@jam-overture/loom/store"
 import { ElsewhereNote } from "@/app/(portal)/_components/elsewhere-note"
 import { PageViews } from "@/app/(portal)/_components/page-views"
 import { ScopedLead } from "@/app/(portal)/_components/scoped-lead"
+import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -76,7 +77,7 @@ const HistoryPage = async ({
 
   if (tree === undefined) {
     return (
-      <div className="flex max-w-3xl flex-col gap-6 p-8">
+      <Screen>
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
           <p className="text-ink-muted text-sm">
@@ -86,7 +87,7 @@ const HistoryPage = async ({
         </div>
         <ElsewhereNote from="/portal/history" />
         <TreeChooser />
-      </div>
+      </Screen>
     )
   }
 
@@ -104,7 +105,7 @@ const HistoryPage = async ({
     if (page.error.code === "not-found") notFound()
 
     return (
-      <div className="flex max-w-3xl flex-col gap-4 p-8">
+      <Screen>
         <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         <StateNotice tone="failure" title="We couldn&rsquo;t read this page&rsquo;s history.">
           <p>
@@ -119,7 +120,7 @@ const HistoryPage = async ({
             <p className="font-mono">{describeStoreError(page.error)}</p>
           </TechnicalDetail>
         </StateNotice>
-      </div>
+      </Screen>
     )
   }
 
@@ -192,8 +193,8 @@ const HistoryPage = async ({
   })
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
-      <header className="flex flex-col gap-2">
+    <Screen>
+      <Measured as="header" className="gap-2">
         <h1 className="text-2xl tracking-tight">{screenName("/portal/history")}</h1>
         {/*
          * "this page" meant the tree and nothing on screen said which tree it
@@ -204,7 +205,7 @@ const HistoryPage = async ({
         <p className="text-ink-muted text-sm">
           <ScopedLead view="changed" page={pageName} />
         </p>
-      </header>
+      </Measured>
 
       <PageViews treeId={scope.data} current="changed" />
 
@@ -292,7 +293,7 @@ const HistoryPage = async ({
           </TechnicalDetail>
         </StateNotice>
       )}
-    </div>
+    </Screen>
   )
 }
 

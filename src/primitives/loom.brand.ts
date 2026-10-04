@@ -117,6 +117,11 @@ export const loomBrand = definePrimitive({
     "This site's own mark and name, as one node. The mark is SVG path data drawn inline, so it takes the page's ink on every palette; it is not an image and there is no URL to fetch.",
   props,
   slots: [],
+  /**
+   * `mark` and `viewBox` are an SVG path and a coordinate system. The name is the
+   * only thing here anybody reads.
+   */
+  copy: ["name"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     /**
      * `aria-hidden`, and the word beside it carries the name. A mark and a word

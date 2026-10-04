@@ -77,6 +77,10 @@ export const loomAvatar = definePrimitive({
     "One person's face — a photograph, or their initials when there is none. A leaf; a row of them is a loom.avatar-row.",
   props,
   slots: [],
+  /**
+   * Drawn as a monogram when there is no image and as its `alt` when there is.
+   */
+  copy: ["name"],
   component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
     const scale = SIZES[given.size ?? "medium"]
 

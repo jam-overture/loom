@@ -51,6 +51,7 @@ export const loomTableRow = definePrimitive({
   description: "One row of a loom.table — a loom.table-cell per column.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "tr",

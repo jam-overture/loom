@@ -95,6 +95,11 @@ export const loomBanner = definePrimitive({
     "The announcement strip above a page: a short message as children, and a region for the one thing to do about it.",
   props,
   slots: ["action"],
+  /**
+   * Its message is children; `label` is the strip's accessible name, which is
+   * words somebody wrote for a reader even though no sighted one sees them.
+   */
+  copy: ["label"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const centred = given.align === "center"
     const action = loom.slots["action"]

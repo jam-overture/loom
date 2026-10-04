@@ -67,6 +67,7 @@ export const loomStack = definePrimitive({
     "Its children in one direction — a column or a row — with a gap, alignment, and wrapping. The general arranger; prefer a named band where one fits.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const row = given.direction === "row"
 

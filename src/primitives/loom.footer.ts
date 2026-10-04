@@ -137,6 +137,7 @@ export const loomFooter = definePrimitive({
     "The band that closes a page: a brand region, loom.link-list children as its columns, and a note beneath a rule.",
   props,
   slots: ["brand", "note"],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const tone = given.tone ?? "plain"
     const brand = loom.slots["brand"]

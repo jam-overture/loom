@@ -85,6 +85,11 @@ export const loomIcon = definePrimitive({
   description: "One glyph, bare or on a tile. Its glyph is a child; name it with label, or leave it decorative.",
   props,
   slots: [],
+  /**
+   * A glyph with a name is `role="img"` with that name as its label; a glyph
+   * without one is `aria-hidden`. The label is the words the icon stands for.
+   */
+  copy: ["label"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const named = given.label !== undefined
     const shape = given.shape ?? "soft"

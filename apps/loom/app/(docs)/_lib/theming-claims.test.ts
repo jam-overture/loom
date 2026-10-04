@@ -111,3 +111,38 @@ describe("what the theming page shows in its code blocks", () => {
     }
   })
 })
+
+describe("what the scheme section shows rather than types", () => {
+  /**
+   * The hole every other assertion about this section leaves open.
+   *
+   * `scheme.test.ts` holds every answer against a second comparison of the same
+   * luminances, and `palette-scheme.test.tsx` reads all three blocks back out of
+   * the document — and **both stay green if the page stops asking for any of
+   * them.** A section that lost its tables and went back to a typed list of
+   * palettes would pass the lot.
+   *
+   * So the page is read off disk, which is how the assertions above hold its
+   * counts and how `_lib/content.test.ts` holds each page's metadata call: a
+   * thin assertion about the one step nothing else covers.
+   */
+  it.each(["SchemeWorking", "PaletteSchemes", "ColourForms"])("asks for <%s /> rather than typing it", (block) => {
+    expect(page).toContain(`<${block} `)
+  })
+
+  it("imports the three blocks from this route group", () => {
+    expect(page).toContain(
+      'import { ColourForms, PaletteSchemes, SchemeWorking } from "@/app/(docs)/_components/palette-scheme"'
+    )
+  })
+
+  /**
+   * The function the section is about, named in the one import a reader copies.
+   * It is published from the root door, and a page telling them to reach for it
+   * through `@jam-overture/loom/react` — where `themeGround` lives, one section
+   * up — would be a paste that does not resolve.
+   */
+  it("tells a reader the door paletteScheme is published from", () => {
+    expect(page).toContain('import { paletteScheme } from "@jam-overture/loom"')
+  })
+})

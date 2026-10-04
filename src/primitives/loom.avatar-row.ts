@@ -61,6 +61,7 @@ export const loomAvatarRow = definePrimitive({
     "A run of loom.avatar faces, overlapping into a cluster or set apart — the “and four thousand others” band.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",

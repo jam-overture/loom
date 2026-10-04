@@ -6,7 +6,7 @@ import type { RuntimeEvent, RuntimeEventEnvelope } from "../runtime/events.js"
 import { FIXED_INSTANT } from "../testing/doubles.js"
 
 import type { TelemetryRecord } from "./event.js"
-import type { TelemetryError, TelemetryJournal } from "./journal.js"
+import type { TelemetryError, TelemetryWriter } from "./journal.js"
 import { memoryTelemetryJournal } from "./memory.js"
 import { collectTelemetry, MAX_BUFFERED_RECORDS } from "./sink.js"
 
@@ -23,7 +23,7 @@ const confirmed = (name = "p_1"): RuntimeEvent => ({
   proposalId: name as ProposalId,
 })
 
-type FailingJournal = TelemetryJournal & { readonly attempts: () => number }
+type FailingJournal = TelemetryWriter & { readonly attempts: () => number }
 
 const failingJournal = (error: TelemetryError): FailingJournal => {
   let attempts = 0
@@ -34,8 +34,6 @@ const failingJournal = (error: TelemetryError): FailingJournal => {
 
       return Promise.resolve(err(error))
     },
-    read: () => Promise.resolve(ok({ records: [], older: null, newer: null })),
-    forget: () => Promise.resolve(err(error)),
     attempts: () => attempts,
   }
 }
@@ -121,14 +119,12 @@ describe("collectTelemetry", () => {
 
   it("hands the journal exactly what was narrowed", async () => {
     const written: TelemetryRecord[] = []
-    const journal: TelemetryJournal = {
+    const journal: TelemetryWriter = {
       record: (batch) => {
         written.push(...batch)
 
         return Promise.resolve(ok(undefined))
       },
-      read: () => Promise.resolve(ok({ records: [], older: null, newer: null })),
-      forget: () => Promise.resolve(ok({ removed: 0 })),
     }
 
     const collector = collectTelemetry(journal)

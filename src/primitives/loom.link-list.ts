@@ -52,6 +52,7 @@ export const loomLinkList = definePrimitive({
   description: "A named run of loom.link — one column of a footer, or a row of secondary links.",
   props,
   slots: [],
+  copy: ["label"],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const row = given.direction === "row"
     const labelled = given.label !== undefined

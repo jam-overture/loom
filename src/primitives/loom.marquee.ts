@@ -105,6 +105,7 @@ export const loomMarquee = definePrimitive({
     "A band whose children scroll past continuously — a logo wall, a ticker, a strip of quotes. Holds still while the page is being edited.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const still = loom.editable !== undefined
     const gap = GAPS[given.density ?? "roomy"]

@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest"
 
-import { sequentialIdFactory, treeIdSchema, type TreeId } from "../ids.js"
+import { sequentialIdFactory, treeIdSchema, type ProposalId, type TreeId } from "../ids.js"
 import type { RuntimeEvent } from "../runtime/events.js"
-import { recordOf, type TelemetryJournal, type TelemetryRecord } from "../telemetry/index.js"
+import {
+  MAX_ASSESSMENT_LOOKUP,
+  recordOf,
+  type TelemetryJournal,
+  type TelemetryRecord,
+} from "../telemetry/index.js"
 import { buildElement } from "../tree/builders.js"
 import { createTree } from "../tree/tree.js"
 
-import { buildIntent, buildProposal, FIXED_INSTANT } from "./doubles.js"
+import { buildAssessment, buildIntent, buildProposal, FIXED_INSTANT } from "./doubles.js"
 
 /**
  * One suite, run against every `TelemetryJournal`.
@@ -72,6 +77,38 @@ const recordsFor = (treeId: TreeId, count: number): readonly TelemetryRecord[] =
 
 const typesOf = (records: readonly TelemetryRecord[]): readonly string[] =>
   records.map((record) => record.event.type)
+
+/**
+ * One `change-assessed` record, narrowed the way a host's would be.
+ *
+ * Through `buildAssessment` and `recordOf` rather than written out as a literal,
+ * so the suite is asserting against a record a real run of Loom could produce —
+ * the rule the 3 October fixture entry was filed about.
+ */
+const assessedRecord = (
+  treeId: TreeId,
+  namespace: string,
+  options: { readonly removedNodeCount?: number } = {}
+): { readonly record: TelemetryRecord; readonly proposalId: ProposalId } => {
+  const ids = sequentialIdFactory(namespace)
+  const proposal = buildProposal(ids, {
+    intentId: ids.intentId(),
+    delta: { deltaId: ids.deltaId(), treeId, baseRevision: 0, operations: [] },
+  })
+  const assessment = buildAssessment(ids, {
+    proposal,
+    analysis: { removedNodeCount: options.removedNodeCount ?? 0 },
+  })
+
+  return {
+    record: recordOf({
+      treeId,
+      occurredAt: FIXED_INSTANT,
+      event: { type: "change-assessed", assessment },
+    }),
+    proposalId: proposal.proposalId,
+  }
+}
 
 export const describeTelemetryJournalContract = (
   name: string,
@@ -235,6 +272,145 @@ export const describeTelemetryJournalContract = (
         const past = await journal.read({ cursor: String(last?.seq ?? 0) })
 
         expect(past).toEqual({ ok: true, value: { records: [], older: null, newer: null } })
+      })
+    })
+
+    /**
+     * The join, not a page.
+     *
+     * A revision log holds a `proposalId` and no judgment (0016, 0225), so the
+     * only way a screen can say *undoing this will not undo everything* is to
+     * ask the journal about the proposals it is already holding. What a journal
+     * owes is that both implementations answer the same way about an id it has
+     * never heard of, about an id narrated twice, and about more ids than one
+     * lookup reaches.
+     */
+    describe("looking an assessment up by proposal", () => {
+      it("answers about the proposals it was asked about and no others", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_lookup")
+        const wanted = assessedRecord(treeId, "want", { removedNodeCount: 3 })
+        const other = assessedRecord(treeId, "other")
+        await journal.record([wanted.record, other.record])
+
+        const found = await journal.assessments({ proposalIds: [wanted.proposalId] })
+
+        expect(found.ok && [...found.value.assessments.keys()]).toEqual([wanted.proposalId])
+        expect(found.ok && found.value.assessments.get(wanted.proposalId)?.removedNodeCount).toBe(3)
+        expect(found.ok && found.value.unasked).toEqual([])
+      })
+
+      /** The same reason there is no `not-found`: a journal claims nothing exists. */
+      it("leaves a proposal it has never heard of out of the map rather than failing", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_absentlookup")
+        const known = assessedRecord(treeId, "known")
+        const stranger = assessedRecord(treeId, "stranger")
+        await journal.record([known.record])
+
+        const found = await journal.assessments({
+          proposalIds: [known.proposalId, stranger.proposalId],
+        })
+
+        expect(found.ok && found.value.assessments.has(known.proposalId)).toBe(true)
+        expect(found.ok && found.value.assessments.has(stranger.proposalId)).toBe(false)
+        expect(found.ok && found.value.unasked).toEqual([])
+      })
+
+      it("asks nothing and answers emptily for an empty lookup", async () => {
+        const journal = await freshJournal()
+
+        expect(await journal.assessments({ proposalIds: [] })).toEqual({
+          ok: true,
+          value: { assessments: new Map(), unasked: [] },
+        })
+      })
+
+      /**
+       * A journal is append-only, so a proposal narrated twice is a history
+       * rather than a fault — and the later record is the one that describes
+       * what the Gate last read.
+       */
+      it("answers with the latest assessment when a proposal was narrated twice", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_twice")
+        const first = assessedRecord(treeId, "twice", { removedNodeCount: 1 })
+        const second = assessedRecord(treeId, "twice", { removedNodeCount: 9 })
+        await journal.record([first.record, second.record])
+
+        const found = await journal.assessments({ proposalIds: [first.proposalId] })
+
+        expect(first.proposalId).toEqual(second.proposalId)
+        expect(found.ok && found.value.assessments.get(first.proposalId)?.removedNodeCount).toBe(9)
+      })
+
+      it("counts a repeated id once rather than spending the lookup on it", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_repeat")
+        const one = assessedRecord(treeId, "repeat")
+        await journal.record([one.record])
+
+        const found = await journal.assessments({
+          proposalIds: Array.from({ length: MAX_ASSESSMENT_LOOKUP + 1 }, () => one.proposalId),
+        })
+
+        expect(found.ok && found.value.assessments.size).toBe(1)
+        expect(found.ok && found.value.unasked).toEqual([])
+      })
+
+      /**
+       * Every read in Loom is bounded. What this pins is that going over the
+       * bound is *said* rather than silently dropped: on the screen this exists
+       * for, "nothing was recorded" and "nobody looked" would otherwise be the
+       * same blank.
+       */
+      it("names the ids beyond the cap instead of dropping them", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_cap")
+        const asked = Array.from(
+          { length: MAX_ASSESSMENT_LOOKUP + 2 },
+          (_, index) => assessedRecord(treeId, `cap${index}`).proposalId
+        )
+
+        const found = await journal.assessments({ proposalIds: asked })
+
+        expect(found.ok && found.value.unasked).toEqual(asked.slice(MAX_ASSESSMENT_LOOKUP))
+      })
+
+      it("keeps trees apart when a lookup names one", async () => {
+        const journal = await freshJournal()
+        const mine = treeIdSchema.parse("t_minelookup")
+        const yours = treeIdSchema.parse("t_yourslookup")
+        const ours = assessedRecord(yours, "ours")
+        await journal.record([ours.record])
+
+        const wrongTree = await journal.assessments({
+          proposalIds: [ours.proposalId],
+          treeId: mine,
+        })
+        const rightTree = await journal.assessments({
+          proposalIds: [ours.proposalId],
+          treeId: yours,
+        })
+
+        expect(wrongTree.ok && wrongTree.value.assessments.size).toBe(0)
+        expect(rightTree.ok && rightTree.value.assessments.size).toBe(1)
+      })
+
+      /** A record a prune has forgotten is a record nothing can join against. */
+      it("stops answering about a proposal whose record was forgotten", async () => {
+        const journal = await freshJournal()
+        const treeId = treeIdSchema.parse("t_forgotten")
+        const gone = assessedRecord(treeId, "gone")
+        await journal.record([gone.record])
+
+        const page = await journal.read()
+        const last = page.ok ? page.value.records.at(-1) : undefined
+        await journal.forget({ before: (last?.seq ?? 0) + 1 })
+
+        const found = await journal.assessments({ proposalIds: [gone.proposalId] })
+
+        expect(found.ok && found.value.assessments.size).toBe(0)
       })
     })
 

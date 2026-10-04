@@ -146,6 +146,7 @@ export const loomTable = definePrimitive({
     "Rows and columns of whatever it is given — the general table, with a region of column headings and a loom.table-row per row. Set prose when its cells hold sentences rather than values.",
   props,
   slots: ["columns"],
+  copy: ["caption"],
   text: BAND_TEXT,
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, BandTextKey>) => {
     const columns = loom.slots["columns"]

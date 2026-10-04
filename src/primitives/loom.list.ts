@@ -87,6 +87,7 @@ export const loomList = definePrimitive({
     "A bulleted or numbered list of loom.list-item rows — the points a page makes in prose, with no marker meaning attached.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) => {
     const marker = MARKERS[given.marker ?? "bullet"]
     const density = DENSITY_CLASS[given.density ?? "comfortable"]

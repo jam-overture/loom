@@ -1,4 +1,4 @@
-import type { FontPack, Palette, StylePreset } from "@jam-overture/loom"
+import type { FontPack, Palette, ResolvedTheme, StylePreset } from "@jam-overture/loom"
 import type { PrimitiveRegistry } from "@jam-overture/loom/sdk"
 
 /**
@@ -25,3 +25,17 @@ export declare const ourStylePreset: StylePreset
  * section's one interesting line at the bottom of a block about something else.
  */
 export declare const registry: PrimitiveRegistry
+
+/**
+ * The theme the story has already resolved.
+ *
+ * *Light or dark, as a word* is written from inside a host that is drawing
+ * something beside a tree, which means it has a resolved theme in hand — the
+ * section above is where it came from, and re-resolving one here would put the
+ * paragraph's one interesting line under three that are about the registry.
+ *
+ * Named rather than imported, because *the host has a theme by now* is the
+ * narrator's, exactly as `registry` is. `paletteScheme` is the runtime's and
+ * arrives the way it would arrive in your own project.
+ */
+export declare const theme: ResolvedTheme

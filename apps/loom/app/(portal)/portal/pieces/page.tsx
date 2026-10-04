@@ -3,6 +3,7 @@ import Link from "next/link"
 import { renderCatalogue } from "@jam-overture/loom"
 import { catalogueOf } from "@jam-overture/loom/sdk"
 
+import { CardGrid, Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
@@ -41,7 +42,7 @@ const PiecesPage = async () => {
   const catalogue = catalogueOf(portalRegistry)
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6 p-8">
+    <Screen>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h1 className="text-2xl tracking-tight">What Loom can put on your page</h1>
@@ -61,11 +62,13 @@ const PiecesPage = async () => {
          * lane has now shipped and photographed four times. Found by looking at
          * the page.
          */}
-        <p className="text-ink-muted text-sm">
-          {catalogue.length === 0
-            ? "This is the list of pieces the AI is handed every time you ask for a change."
-            : `Your project is set up with ${catalogue.length} kinds of piece. The AI is handed this exact list every time you ask for a change — anything that is not on it has nothing to draw it, so it would never appear on your page.`}
-        </p>
+        <Measured>
+          <p className="text-ink-muted text-sm">
+            {catalogue.length === 0
+              ? "This is the list of pieces the AI is handed every time you ask for a change."
+              : `Your project is set up with ${catalogue.length} kinds of piece. The AI is handed this exact list every time you ask for a change — anything that is not on it has nothing to draw it, so it would never appear on your page.`}
+          </p>
+        </Measured>
       </header>
 
       {catalogue.length === 0 ? (
@@ -97,13 +100,24 @@ const PiecesPage = async () => {
           </p>
         </StateNotice>
       ) : (
-        <ul className="flex flex-col gap-3">
+        /*
+         * A grid, which is what the eighteen of these were always waiting for.
+         * They were a single column: eighteen self-contained cards, each a name,
+         * a sentence and a row of chips, stacked down a 768-pixel strip. Nothing
+         * on one of them refers to the one above it, which is the test for
+         * whether a list wants to be a column at all.
+         *
+         * 320 rather than the page cards' 288. A piece card's widest line is its
+         * description — a real sentence — and at 288 the common ones wrap to four
+         * lines and the cards stop being the same height as each other.
+         */
+        <CardGrid min={320}>
           {catalogue.map((primitive) => (
             <li key={primitive.type}>
               <PieceCard primitive={primitive} />
             </li>
           ))}
-        </ul>
+        </CardGrid>
       )}
 
       {catalogue.length > 0 && (
@@ -122,7 +136,7 @@ const PiecesPage = async () => {
           </p>
         </TechnicalDetail>
       )}
-    </div>
+    </Screen>
   )
 }
 

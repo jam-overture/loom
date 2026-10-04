@@ -91,6 +91,7 @@ export const loomRecordingGrid = definePrimitive({
     "A band of loom.recording cells — a video reel, an episode feed, a playlist. Set columns to one for a full-width queue.",
   props,
   slots: [],
+  copy: [],
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props>) =>
     createElement(
       "div",
