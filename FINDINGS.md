@@ -8,6 +8,53 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-04 — the deployment page's DDL grammar met its first expression index, and I taught it to read one from outside the lane that owns the words
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom docs`
+(`app/(docs)/_lib/deployment/schema.ts`, `app/(docs)/_components/deployment-tables.tsx`) ·
+**Status:** open — **the tree is green and nothing is broken**; this is here so
+you review a parser and one phrase that were changed from outside your lane,
+rather than discovering them.
+
+`tablesIn` reads the runtime's own `TELEMETRY_DDL`, `TREE_STORE_DDL` and
+`HOLD_STORE_DDL` and builds the storage tables the page prints. It understands
+four kinds of statement and throws on anything else, which is the right design
+and is exactly what caught this: 0225 adds a **partial index on a JSON path** to
+`TELEMETRY_DDL`, and `CREATE INDEX IF NOT EXISTS (\w+) ON (\w+) \(([^)]*)\)$`
+cannot read one. Brackets nest in an expression index, and the statement ends in
+a condition. `pnpm verify` went red at `Failed to collect page data for
+/docs/the-runtime/going-to-production` — a page build, not a test, which is a
+good failure.
+
+**What I changed, and it is three things.**
+
+1. `CREATE_INDEX` takes `[\s\S]*` for the body and an optional ` WHERE …`. Greedy
+   matching takes the body to the last bracket, which is the right one as long as
+   the predicate has none — so a predicate containing a bracket now **throws**
+   (`cannot read the condition on …`) rather than being misparsed. A grammar that
+   guesses wrong is worse than one that refuses, which is the argument your own
+   file already makes.
+2. `SchemaIndex` gained `where?: string`. An index the page mentions without its
+   condition is the one half-truth this generated block can tell: this index
+   covers one event type out of fourteen, and *indexed on that path* reads as all
+   of them.
+3. `deployment-tables.tsx` prints `, for rows where <predicate>` after the
+   covered columns. **That phrase is the part I am least confident about** and the
+   only cross-lane *copy* change — three words on a generated block, chosen to
+   match the existing *Indexed on* register.
+
+Three tests came with it, in your `schema.test.ts`: an expression index read as
+one covered thing, a partial index carrying its condition, and the bracketed
+predicate refused.
+
+**One thing I did not do.** An expression index's columns come back with the
+brackets Postgres requires — `(event -> 'assessment' ->> 'proposalId')` — so the
+page prints them. That is accurate SQL and slightly ugly prose. Stripping them
+would make the page print something that is not a statement anyone could run,
+which felt like the wrong trade for a generated block whose whole claim is that
+the facts are read from the runtime. Yours to decide.
+
+---
 ## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
@@ -155,9 +202,19 @@ the excerpt's own sentence in the imperative.
 ## 2026-10-02 — lesson 32's sharpest conclusion is now false, and the four numbers under it were updated from outside the lane while the paragraph was left alone
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
-(`lessons/32-layout.md`) · **Status:** open — **one paragraph, and the lane that
-wrote it should write the replacement.** Nothing is red; `main` is green with the
-numbers corrected and the prose stale.
+(`lessons/32-layout.md`) · **Status:** **closed 4 October** — rewritten on the
+lessons branch for this date, as the exercise's whole conclusion rather than the one
+paragraph. The entry's own suggestion was taken and went further: *in the page*
+against *in Node* is not where the line falls, **what a function reaches for** is,
+and `readBoxes` is runnable by a test because it is *handed* its elements — which is
+lesson 05's injected clock arriving in a measuring instrument. The two new `true`s
+are now printed as `in code` / `in prose` rather than classified by hand in a
+sentence, so the claim that rotted is output; the fence carries a `moves:` mark
+whose message says the prose under it is load-bearing, which is the half of this
+entry no file said anywhere; and the derivation found a second prose sighting on the
+`capture.ts` column that the hand-written paragraph had missed since the day it
+shipped. Set AK's question 7 asked the reader to recite the false claim and is
+rewritten too.
 
 Exercise G asks which half of the measuring instrument a test in this repository
 can reach, reads `tools/specimen/` off disk, and prints a row per DOM reading
@@ -40499,15 +40556,18 @@ exists so that whoever writes that copy knows it is not demonstrable here.
 ## 2026-10-01 — the voice check reads props and nothing else, so every sentence in a paragraph is unchecked
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
-**half closed** by `marketing-57-the-sentences-nothing-read` on 3 October. The
-register half is done: both plain-language rules now read every string a reader
-reads — text nodes and props alike — and the sweep found a second hole this
-entry did not know about, which the 3 October entry below has. **The staleness
-half is still open and is still the more interesting one:** nothing holds a
-paragraph naming a page of this site against the page that carries the thing it
-names, and `/what-you-run` still carries the one sentence of that shape on the
-site. Originally filed as: *nothing is broken; this is why a sweep was needed at
-all*
+**closed** by `marketing-59-the-pages-it-names` on 4 October, in two halves a
+day apart. The register half was done on 3 October by
+`marketing-57-the-sentences-nothing-read`: both plain-language rules now read
+every string a reader reads, text nodes and props alike. **The staleness half
+is done now**, and not as the check this entry proposed — see the 4 October
+entry below. `naming.ts` does not read a paragraph for the name of a page and
+look the page up. It asks the band a question the build can answer on its own:
+a band that names a page offers the way there, and a link into another page of
+this site lands on an anchor that page declares in every state. The
+`/what-you-run` sentence this entry names is the one that was not offering the
+way there, and it is fixed on the same branch. Originally filed as: *nothing is
+broken; this is why a sweep was needed at all*. Original status below.
 
 `voice.test.ts` holds marketing copy to two mechanical rules: no em dash, and
 no more than 35 words in a field a reader scans. Both run over
@@ -41406,6 +41466,14 @@ the vocabulary panel's first render test; **the second and the one that matched
 the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
 `_components/entry-points.test.tsx`. **Six chrome components remain**: `callout`,
 `code-block`, `mobile-nav`, `sidebar`, `submit-seam`, `theme-toggle`.
+
+> **Noted, 4 October.** `docs-45-which-way-round-a-theme-is` adds three produced
+> blocks to the theming page and `_components/palette-scheme.test.tsx` in the
+> same commit, so the class gained no instance. The list of six is unchanged —
+> all six are still chrome, and `sidebar` and `mobile-nav` are still the two of
+> them that are not decoration. Written here rather than as a new entry because
+> *a run did the thing the class asks for* is not a finding; it is what the
+> entry is for.
 
 The `entry-points` row is worth two sentences of its own, because it is the
 whole shape of the class in one table. `entry-points.test.ts` holds the list of
@@ -42652,6 +42720,30 @@ and the sentence stops ending in a shrug.
 ## 2026-10-03 — a revision carries no judgment, so the screen with the undo button on it is the one screen that cannot say undoing will not undo everything
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/store.ts`) ·
+**Status:** **closed** by `framework-the-judgment-joined-to-the-revision`
+([0225](decisions/0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md)),
+and closed as the **join** rather than as the field this entry asks about.
+
+The question — *is reversibility a property of a revision the log should carry,
+or a property of the judgment that should be joined to it?* — is answered as the
+join, for the reason this entry itself gives: 0016 makes the log the truth about
+the page. Nothing goes onto `StoredRevision`, and nothing in `src/store/` changed.
+
+What was built is the thing the entry names as the useful half: an
+`AssessmentSummary` a consumer can fetch by `proposalId` without paging the
+journal. `TelemetryJournal.assessments` takes a set of proposal ids and answers
+with a map, bounded at `MAX_ASSESSMENT_LOOKUP` ids, naming in `unasked` any it
+did not reach — because on this screen *nothing was recorded* and *nobody looked*
+must not be the same blank. Both implementations answer it, the contract suite
+runs over both, and `loom_telemetry` gained the partial JSON-path index its own
+table comment said would arrive the day a query needed one.
+
+**The screen is still silent, and that part is `Loom portal`'s.** This closes the
+framework half: `/portal/history` can now ask, cheaply, per page of rows. What it
+says when the answer comes back is a sentence this lane does not own.
+*(Original status below — #501 narrowed this entry on the morning of the day
+this branch closed it, and both lanes wrote to it before either merged.)*
+
 **Status:** open — **narrowed by #501 and deliberately not built.** The question
 this entry asks is answered in 0222's *Alternatives considered*: the judgment is
 **joined** to the revision, not carried by it. 0016 makes the revision log the
@@ -43097,6 +43189,204 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+
+---
+## 2026-10-04 — a hold can say what the rules keep and the journal cannot, so one sentence is shorter when you read it back than when you decided it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/event.ts`) · **Status:** open — small, and filed only because
+the asymmetry is now **visible on two screens** rather than theoretical
+
+[0222] gave a `Disposition` the reasons whole, so the review queue can say:
+
+> *"Too much would have to be kept to put it back. … This one takes 9 parts off
+> the page, **and your rules keep at most 4**."*
+
+`AssessmentSummary` keeps `retainedNodeCount` and the codes, and `0222` added
+`outOfTreeEffectTypes` beside them — but **not** `budget`. So the same judgment,
+read back on `/portal/activity` an hour later, says:
+
+> *"…This one takes 9 parts off the page."*
+
+and stops. The number a reader would otherwise have to open `/portal/rules` to
+find is in the record of the decision and not in the record of what happened.
+
+**Why it is worth a field rather than a shrug.** `retainedNodeCount` alone is a
+quantity with no scale: *9 parts* is alarming or unremarkable depending entirely
+on a threshold the sentence cannot name. It is the same argument
+`stakeFactorCodes`' own doc comment makes for why `large-removal`'s level is
+recoverable — *decided by `removedNodeCount` here against the `removalThresholds`
+of the policy `policyFingerprint` names* — and the budget is the one threshold
+with no such route back, because `inverseRetentionBudget` is not a removal
+threshold.
+
+| | |
+| --- | --- |
+| the shape | `retentionBudget?: number` on `assessmentSummarySchema`, from the reason that fired |
+| absent when | no `retention-budget-exceeded` reason, and on a record written before the field — never defaulted (0045) |
+| what it buys | the queue's sentence and the record's sentence become the same sentence |
+
+**`app/(portal)/_lib/undoing.ts` already takes it as an optional argument**, so
+this is one field and no new words: the clause appears when the number is there
+and the sentence is correct without it either way. Deliberately built that way
+when the two paths were joined, rather than filed as a blocker.
+
+**Not urgent, and not a defect.** Nothing on either screen is wrong. One of them
+is simply shorter than the other about the same fact, and a reader who moves
+between them will notice before anybody files it again.
+## 2026-10-04 — a palette may be written six ways, a registry takes all six, and four of them silently switch off every measurement Loom makes of a palette
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (`src/theme/`) ·
+**Extends:** the 20 August entry *a host's own palette is not held to the bar the
+starter palettes now clear* · **Status:** open — **a measurement and a new
+instance, explicitly not a request to build the diagnostic 0076 deferred.**
+
+`colourSchema` accepts more than hex. `channelsOf` reads only three- and
+six-digit hex and answers `undefined` for everything else, each refusal argued
+for in its own doc comment and none of them wrong. The 20 August entry recorded
+the consequence for `auditPalette`: a host writing in `hsl()` is told the pair
+could not be measured rather than told it passed.
+
+**What is new is the size of it.** Writing a page about `paletteScheme` meant
+asking the question of a registry rather than of one function, and the answer is
+wider than that entry's:
+
+| the pair written as | `paletteSchema` | `paletteScheme` |
+| --- | --- | --- |
+| `#111827` · `#f3f4f7` | registers | `"dark"` |
+| `#123` · `#eef` | registers | `"dark"` |
+| `hsl(220 30% 11%)` · `hsl(220 25% 95%)` | **registers** | `undefined` |
+| `rgb(17 24 39)` · `rgb(243 244 247)` | **registers** | `undefined` |
+| `midnightblue` · `whitesmoke` | **registers** | `undefined` |
+| `#111827ff` · `#f3f4f7ff` | **registers** | `undefined` |
+
+Every row is a legal palette — `paletteSchema.safeParse` returns `ok` for all
+six — and every row is the same dark canvas under the same light ink, so every
+row has one right answer and four do not give it.
+
+**It is four measurements rather than one.** A palette written in `hsl()` loses
+`paletteScheme`, `paletteScrim`, `slotChroma` and the contrast audit together.
+Measured on a palette whose every slot is `hsl()`: `auditPalette` comes back
+`26 unmeasured, 0 failures`, `paletteScrim` `undefined`, `slotChroma`
+`undefined` — against `0.0857` for the same color as hex. A host in that state
+has a palette that registers, resolves, re-themes and renders, and has quietly
+lost every number Loom can produce about it.
+
+**Nothing here is a defect and nothing is asked for.** 0076 settled that Loom
+offers the bar rather than imposing it, and the 20 August entry recorded the
+`RenderOutput` diagnostic as deferred rather than rejected. This entry is the
+figures that argument would need if it is ever reopened, and the record that the
+list of what a host loses has grown by one since it was written —
+`paletteScheme` did not exist on 20 August.
+
+**What was done instead, and it is this lane's whole remedy:** the limit is now
+on a page a reader reaches, with the table above rendered from the runtime
+rather than typed, on
+`/docs/building-with-loom/theming`. Before today the only statements of it were
+a doc comment and this ledger, neither of which a host reads.
+---
+## 2026-10-04 — a link inside a sentence is the one kind of link this library cannot draw
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/`) · **Status:** open — **nothing is blocked**; the marketing
+site shipped the control the library does have and the sentence it wanted is
+written down here
+
+`loom.link`'s own props docblock says what its accent tone is for: *"the one
+link in a paragraph that is the point of the paragraph."* That link cannot
+currently be drawn. `/what-you-run` has the only sentence on the site that
+names another page of it, the branch above had to give the reader a way there,
+and the inline link was built, photographed on all three palettes and taken
+out again.
+
+Three things stop it, and none of them is a mistake in the primitive. Each is
+right for the job it was written for, which is a menu item and a footer column.
+
+- **No underline at rest.** The underline is a wipe-in on hover, pinned open
+  only for `aria-current="page"`. In a nav bar, position says the word is a
+  link. Inside a sentence nothing does, so the phrase reads as emphasis and a
+  reader never learns it can be pressed.
+- **`color: accent`, and on `minimal` the accent is `#0a0a0a`.** That is the
+  same black as `fg-default`, deliberately, and it is the palette every visitor
+  and every screenshot gets. Photographed: in a `tone: "muted"` paragraph the
+  phrase is darker than its sentence and looks bold; in a default paragraph it
+  would be the same colour as the words either side of it. This is the trap
+  `nodes.ts` records against `variant: "quiet"` on `loom.action`, one primitive
+  over.
+- **`display: "inline-block"`, and its own `fontSize` and `lineHeight`.** The
+  inline-block is load-bearing for the underline animation and its comment says
+  so — a wrapped inline box paints two underlines at two widths. The cost is
+  that the phrase cannot break mid-phrase inside a paragraph, and `lineHeight:
+  1.4` against `loom.prose`'s 1.6 sets the line it sits on at a different
+  height from the lines above it.
+
+**What would close it.** A way to say *this link is inside a sentence*: the
+underline drawn at rest rather than on hover, `display: "inline"`, and font
+size, weight and line height inherited from the paragraph instead of set. Most
+plainly a `tone` or a prop of its own on `loom.link`; possibly a primitive of
+its own, since the three differences are a different thing rather than a
+variant of this one. Either is `Loom primitives`' call, and nothing on this
+site needs it before then: the control under the paragraph is honest, it works
+on all three palettes, and it is photographed in the 4 October report.
+
+---
+## 2026-10-04 — a claim about another surface can be held to the link beside it and never to what is on the page
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+line from `Loom docs` · **Status:** open — a stated limit of what shipped on
+4 October, not a defect today
+
+`naming.ts` holds three rules over what this site says about its own pages, and
+the third one stops at the route group boundary. A link from `/what-you-run` to
+`/how-it-works#see-it-happen` is checked against the anchors `/how-it-works`
+declares in every state it can be served in. A link to `/docs#something` is
+checked for nothing, and the same is true of `/demo` and `/lessons`.
+
+That is the same line `anchors.test.ts` drew on 8 September and for the same
+reason: a lane cannot build another lane's page, and a test here asserting over
+another surface's chrome would be this lane testing somebody else's work. It
+is recorded rather than argued with.
+
+**What it leaves uncovered**, and the site has two of them today. *"The
+documentation has the long one: what a rule can say, what the record holds
+field by field, and how to wire it into a page you already have"* is a claim
+about three things being on `/docs`. *"To ask for something in your own words,
+try the demo. It is a page you can type into"* is a claim about `/demo`. Both
+are true today and both were checked by a person. Nothing would say so if
+either stopped being.
+
+**What would close it**, and it is small: a surface publishing the list of
+things it promises to carry — a few strings, exported from its own route group
+— for anybody pointing at it to assert against. It is a shape rather than a
+request. Filed so that whoever finds a stale sentence about the documentation
+knows it was seen coming.
+
+---
+## 2026-10-04 — nine test files in one route group had each written the same walk over a tree
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — one of the nine is now a shared function and eight are not
+
+`const elementsOf = (node: LoomNode): readonly ElementNode[] => …`, the
+four-line walk that returns every element in a tree, appears in nine test files
+under `app/(marketing)/`: `anchors`, `controls`, `alignment`, `facts`,
+`adapt/adapt`, `pages/waiting`, `pages/using-it`, `pages/answer`, and a tenth
+spelling in `facing` that takes a type as well.
+
+A tenth reader arrived on 4 October and is a module rather than a test, so it
+was written once instead: `elementsIn` in `_lib/measure.ts`, beside `piecesIn`
+and `wordsIn`, which is where this route group's readings of a tree already
+live. `anchors.test.ts` was moved onto it in the same branch because the new
+module extends it directly. **The other eight were left alone**, deliberately:
+eight unrelated files in one diff is a diff nobody reads, and each is correct
+as it stands.
+
+This is the third duplication of this shape this lane has filed — `surfaceOf`
+on 1 October, and before that the screenshot recipe written nine times across
+five lanes and filed four times. The pattern is worth naming on its own: **a
+helper small enough to retype is a helper that gets retyped**, and the cost is
+not the lines. It is that the ninth copy and the first can disagree about what
+counts, and nothing anywhere compares them.
 
 ---
 ## 2026-10-04 — what a change did to the reading of a page is now one call, and it is the sentence the reader screen should lead with

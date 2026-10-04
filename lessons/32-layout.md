@@ -11,8 +11,8 @@ can live on each side of it; say why `scrollWidth` is the obvious reading and
 wrong twice over, with the two features it reports as defects; explain why a
 measurement that had never been taken was deliberately kept out of the exit code
 in the change that first took it; and — the part this lesson found by running
-rather than by reading — say what the only test in this repository that drives
-this instrument actually asserts about the measurement.
+rather than by reading — say which of the functions this harness hands to a
+browser a test in this repository can run, and what decides that.
 
 **Prerequisites:** [01](01-why-a-runtime.md), [02](02-ui-as-data.md),
 [03](03-change-as-data.md), [04](04-identity.md),
@@ -276,18 +276,27 @@ D tests it, at both of its boundaries, in a file you can run in two seconds.
 Before the split, the only way to check the rule that drops a visually-hidden
 label was to take a photograph and read the output.
 
-The cost is the honest half, and exercise G is it: **what is left on the browser's
-side of the line is checkable by nothing.** Not by a weaker test. By nothing. The
-walk, the stop condition, the text range, the out-of-flow skip — the four rules
-that decide whether this instrument is any good — live inside a function this
-repository hands to a browser and never calls itself, so there is nothing for a
-test to call. And the suite that drives the code path *around* it, which is real
-and does exist, replaces the measurement with a reading somebody typed into the
-test.
+The cost is the honest half, and exercise G is it: **the rules that decide whether
+this instrument is any good are checkable by nothing.** Not by a weaker test. By
+nothing. The walk, the stop condition, the text range, the out-of-flow skip all
+live inside `readClippingBoxes`, which reaches for `document` itself — so there is
+nothing a test can hand it and nothing for a test to call. The suite that drives
+the code path *around* it, which is real and does exist, is handed a reading
+somebody typed into the test instead.
 
-That is not a defect and there is nothing to fix. It is what it costs to have an
-instrument at all, stated out loud, in the place where somebody would otherwise
-discover it by trusting a green suite.
+And then the part of that sentence which was too strong, discovered by a test
+somebody else wrote two days after this lesson shipped. *In the page* against *in
+Node* is not where the line falls. **What a function reaches for** is: one that
+fetches its own subject can only run in a page, and one that is *handed* its
+subject can be run anywhere, including against six numbers on an object literal in
+Node. `readBoxes` is the second kind and a test does now run it. That is the same
+move as the injected clock in lesson 05 and it buys the same thing, and exercise G
+is where it is worth following — including which of the two kinds every rule above
+turns out to be in.
+
+None of which is a defect, and there is nothing here to fix. It is what it costs to
+have an instrument at all, stated out loud, in the place where somebody would
+otherwise discover it by trusting a green suite.
 
 ### Four exclusions, and only two of them could be arithmetic
 
@@ -369,6 +378,7 @@ say it. When nobody does, go and measure.
 | --- | --- |
 | the document reading, in the page | `measureDocument` in `tools/specimen/playwright.ts` |
 | the per-box reading, in the page | `readClippingBoxes` in the same file — unexported, and run by `page.evaluate` |
+| the per-element reading, in the page | `readBoxes` in the same file — **handed** its elements rather than fetching them, which is the whole reason a test can run it |
 | what a reading is, as data | `ClippedOverflow` and `ClippingBox` in `tools/specimen/capture.ts` |
 | which readings are defects | `clippedFrom`, with `CLIP_TOLERANCE` and `CLIP_VISIBLE_MINIMUM` |
 | the two verdicts | `overflows` and `clips`, separate on purpose |
@@ -377,6 +387,7 @@ say it. When nobody does, go and measure.
 | the committed subject | `tools/specimen/a-clip-hides-an-overflow.specimen.ts` |
 | the harness, explained | [`tools/specimen/README.md`](../tools/specimen/README.md) |
 | the decision | [0202](../decisions/0202-the-harness-measures-the-content-a-clip-hides-and-it-is-not-scrollwidth.md) |
+| where the reading stops and the judgement starts | [0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md) |
 | a paint measured the same way | [0196](../decisions/0196-a-paint-is-sized-by-the-box-it-is-given-and-says-so-when-it-cannot-be.md) |
 | why an instrument may not assert | [0159](../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md) |
 
@@ -394,8 +405,9 @@ The directory boundary *is* the line this lesson is about.
 ## Try it
 
 Seven exercises. **Predict every output in writing, then run.** Exercise B is
-Predict 2's other half and is the one to commit to hardest; exercise G is the one
-whose last three lines are the lesson.
+Predict 2's other half and is the one to commit to hardest; in exercise G the lines
+to predict hardest are the four that say what each function handed to the page
+takes as an argument.
 
 Put each snippet into `src/scratch.test.ts` and run
 
@@ -867,78 +879,140 @@ forty is a page with one cause and forty lines is a wall a lane scrolls past.
 describe("G", () => {
   it("asks which half of the instrument a test in this repository can reach", () => {
     const read = (file: string) => readFileSync(join(ROOT, "tools", "specimen", file), "utf8")
-    const arithmetic = read("capture.ts")
-    const browser = read("playwright.ts")
+    const files = { "capture.ts": read("capture.ts"), "playwright.ts": read("playwright.ts") }
     const suite = read("specimen.test.ts")
+    const browser = files["playwright.ts"]
+
+    /** Present as something that runs, present only in a sentence about it, or absent. */
+    const how = (src: string, api: string): string =>
+      withoutComments(src).includes(api) ? "in code" : src.includes(api) ? "in prose" : "no"
 
     for (const api of ["getComputedStyle", "getBoundingClientRect", "createRange", "clientWidth", "querySelectorAll"]) {
+      const where = Object.entries({ ...files, "specimen.test.ts": suite })
       console.log(
-        `  ${api.padEnd(22)} capture.ts ${String(arithmetic.includes(api)).padEnd(5)}` +
-          ` playwright.ts ${String(browser.includes(api)).padEnd(5)} specimen.test.ts ${suite.includes(api)}`
+        `  ${api.padEnd(22)} ${where.map(([file, src]) => `${file} ${how(src, api).padEnd(8)}`).join(" ").trimEnd()}`
       )
     }
 
-    const canned = /evaluate ?\$\{body\.name\}[\s\S]{0,80}?return (\{[^\n]*?\}) as TValue/.exec(suite)
-    console.log(`  what the suite's browser double returns from every evaluate:`)
-    console.log(`    ${canned?.[1] ?? "(nothing matched)"}`)
-
     const declared = [...browser.matchAll(/^(export )?const (\w+) = /gm)]
-    const run = declared.filter(([, , name]) => new RegExp(`evaluate\\(${name}\\)`).test(browser))
-    console.log(`  top-level functions in playwright.ts: ${declared.length}`)
-    console.log(`  of those, handed to page.evaluate: ${run.length}`)
-    for (const [, exported, name] of run) {
-      console.log(`    ${name.padEnd(18)} exported ${exported !== undefined}  named in the suite ${suite.includes(name)}`)
+    const shipped = declared.flatMap(([, , name]) => {
+      const sent = ["evaluate", "evaluateAll"].find((one) =>
+        new RegExp(`\\b${one}\\(${name}\\)`).test(browser)
+      )
+      const took = new RegExp(`const ${name} = \\(([\\s\\S]*?)\\)(: [^\\n]*)? =>`).exec(browser)?.[1]
+
+      return sent === undefined ? [] : [{ name, sent, took: took === "" ? "nothing" : (took ?? "?") }]
+    })
+
+    console.log(`  top-level consts in playwright.ts: ${declared.length}`)
+    console.log(`  of those, handed to the page: ${shipped.length}`)
+    for (const { name, sent, took } of shipped) {
+      console.log(
+        `    ${name.padEnd(18)} ${sent.padEnd(12)} takes ${took.padEnd(24)}` +
+          ` named in the suite ${withoutComments(suite).includes(name)}`
+      )
+    }
+
+    console.log(`  what the suite's two doubles do with the function they are handed:`)
+    for (const double of ["evaluate", "evaluateAll"]) {
+      const answer = new RegExp(`${double}: async <TValue,>[\\s\\S]*?\\n\\s*return ([^\\n]*)`).exec(suite)
+      console.log(`    ${double.padEnd(12)} return ${answer?.[1] ?? "(nothing matched)"}`)
     }
   })
 })
 ```
 
+<!-- moves: this fence is a second copy of facts about tools/specimen/, which is
+     Loom daily build's. A function added to playwright.ts, a sixth faculty, or a
+     change to either of the suite's two doubles moves it, and the right response
+     is to re-run the exercise and paste in what it prints now. Then say so on
+     the pull request, because the paragraphs under it are prose about these lines
+     and no check reads prose: on 2 October a test for readBoxes moved
+     three of them, the numbers were corrected from outside this lane and the
+     paragraph was left asserting the opposite, and the lesson contradicted its
+     own transcript on main for two days. -->
+
 ```
-  getComputedStyle       capture.ts false playwright.ts true  specimen.test.ts false
-  getBoundingClientRect  capture.ts true  playwright.ts true  specimen.test.ts true
-  createRange            capture.ts false playwright.ts true  specimen.test.ts false
-  clientWidth            capture.ts true  playwright.ts true  specimen.test.ts false
-  querySelectorAll       capture.ts false playwright.ts true  specimen.test.ts true
-  what the suite's browser double returns from every evaluate:
-    { scrollWidth: 390, innerWidth: 390, clipped: [] }
-  top-level functions in playwright.ts: 11
-  of those, handed to page.evaluate: 3
-    measureDocument    exported false  named in the suite false
-    readClippingBoxes  exported false  named in the suite false
-    pinNavigation      exported false  named in the suite true
+  getComputedStyle       capture.ts no       playwright.ts in code  specimen.test.ts no
+  getBoundingClientRect  capture.ts in prose playwright.ts in code  specimen.test.ts in code
+  createRange            capture.ts no       playwright.ts in code  specimen.test.ts no
+  clientWidth            capture.ts in prose playwright.ts in code  specimen.test.ts no
+  querySelectorAll       capture.ts no       playwright.ts in code  specimen.test.ts in prose
+  top-level consts in playwright.ts: 11
+  of those, handed to the page: 4
+    measureDocument    evaluate     takes nothing                  named in the suite false
+    readClippingBoxes  evaluate     takes nothing                  named in the suite false
+    readBoxes          evaluateAll  takes elements: Element[]      named in the suite false
+    pinNavigation      evaluate     takes nothing                  named in the suite true
+  what the suite's two doubles do with the function they are handed:
+    evaluate     return { scrollWidth: 390, innerWidth: 390, clipped: [] } as TValue
+    evaluateAll  return body((matched[where] ?? []).map(elementOf))
 ```
 
-Four rows, in order of how much they should bother you.
+Five things, in the order they should bother you. And one change to the program
+before them: the first column is a classification rather than a boolean, because
+the paragraph that used to sit here did that classifying by hand — *that one is in
+a doc comment, a sentence rather than a call* — and a hand-written sentence under
+a transcript is the one thing nothing in this course checks. The second section
+after this one is the account of what that cost.
 
-**No DOM reading API appears in the suite at all.** The `clientWidth` on the
-`capture.ts` row is in a doc comment explaining which number `width` is — a
-sentence, not a call. So the five faculties the measurement is made of are named
-in exactly one file in this repository and executed by no test in it.
+**The faculties the reading is made of are executed against a laid-out page by
+nothing in this repository.** `playwright.ts` is `in code` on every row and is the
+only file that is. Both of the suite's own sightings are something else:
+`getBoundingClientRect` is `in code` there because the suite *stubs* it — a function
+property on an object literal cast to `Element`, with the numbers `readBoxes` reads
+sitting behind it and no layout anywhere near them — and `querySelectorAll` is `in
+prose`, a doc comment explaining why the reading goes through a locator *instead
+of* one. The two `in prose` rows on `capture.ts` are the same kind of thing: a
+sentence naming which number `width` is, and a note that `getBoundingClientRect`
+is fractional and so this reading is too.
 
-**The double returns a clean reading, hard-coded.** Every `page.evaluate` the
-adapter makes comes back as `{ scrollWidth: 390, innerWidth: 390, clipped: [] }`
-regardless of which function was handed over. It has to: there is no page, so
-there is nothing to measure, so the only thing a double can do is answer. What
-that means for the suite is precise and worth saying slowly — **it asserts that
-the measurement was requested and nothing whatsoever about what it would return.**
+**One of the functions handed to the page can now be run by a test, and what
+decides that is its signature.** This is the one to sit with. `measureDocument`,
+`readClippingBoxes` and `pinNavigation` take **nothing**: each reaches for
+`document` or `window` itself, so a double has nothing to hand them and the only
+thing it can do is answer in their place. `readBoxes` takes `elements:
+Element[]`. It is handed what it reads, so a test can hand it six numbers on a
+cast object literal and the real loop — the one that actually ships to the
+browser — runs in Node.
 
-**Three functions are handed to the page and none is exported.** They cannot be:
-Playwright serialises them with `toString` and runs the text in the browser, so
-they are not functions this process calls and there is nothing a test could call
-either. (That serialisation has a trap of its own, written down beside the walk:
-the compiler wraps every *named inner* function in a `__name` call that exists in
-this process and not in the page, so a helper inside one of these is a
-`ReferenceError` from a line number in generated source. The flat loop in
-`readClippingBoxes` is that rule and not a style.)
+That is lesson 05's injected clock, arriving in a measuring instrument eleven
+lessons later and not announcing itself. Nothing was made testable by trying
+harder. **A function that is handed what it reads can be run where there is
+nothing to read**, and a function that fetches its own subject cannot be run
+anywhere but a page. The split that mattered here was never *in the page* against
+*in Node* — it is *passed in* against *reached for*, and it cuts across the
+browser's side of the line rather than along it.
 
-**And one of the three is named in the suite — which is the row that teaches the
-most.** `pinNavigation` appears there because the double's journal records
-`evaluate ${body.name}`, so a test can assert that the adapter asked the page to
-run it. That is a real assertion and it is worth having. It is also the whole of
-what is available: the suite knows the function's **name** and can never know its
-**result**. Lesson 29 made a read observable by instrumenting the place the read
-happened. There is no equivalent move here, because the place is not in this
-process.
+**So the two doubles are not two attempts at one thing.** The last two lines are
+the whole difference, printed from the suite rather than described: the
+`page.evaluate` double returns a reading somebody typed, discarding the function;
+the `evaluateAll` double returns `body(...)`, running it. The first asserts that
+the measurement was requested and nothing whatsoever about what it would return.
+The second asserts the reading itself — and both are correct, because the
+function the first one is handed cannot be run here and the function the second
+one is handed can.
+
+**And the function the suite names is not the function it runs.** `pinNavigation`
+is the only one of them named in the suite's code, because the double's
+journal records `evaluate ${body.name}` and a test can assert that the adapter
+asked the page to run it. That is a real assertion and it is worth having; it is
+also the whole of what is available for that function, which is a name and never
+a result. `readBoxes` is named in the suite's code **nowhere** — only in a doc
+comment — and it is the one the suite actually executes, through two layers of
+double, under a test about selectors. *Is it named* and *is it run* are
+independent here and distributed opposite ways round, which is lesson 29's
+mistake in a new coat: a question about a declaration that names one reader as
+*the* reader answers correctly and tells you nothing.
+
+None of this moves the lesson's own thesis, and it is worth saying why rather
+than leaving it implied. What a test can now reach is what `readBoxes` does
+**with six numbers it was given**. Where those numbers come from — a real element
+in a real layout, under whichever font loaded — is exactly as unreachable as it
+was, which is the fault this lesson is about. The functions that reach for their own
+subject are also, between them, where every rule that makes this instrument any good
+lives: the walk, the stop condition, the text range, the out-of-flow skip. The one
+that became testable is the shortest of them and has no rule in it at all.
 
 ---
 
@@ -974,6 +1048,67 @@ type.** Exercise E derives the field list from the object at run time instead �
 cannot drift from it, because it *is* it. Widening the checker to a second source
 root is the other remedy, it is a real one, and it is a change to the surface
 rather than to a lesson.
+
+---
+
+## Found by being wrong for two days: the number moved and the sentence under it did not
+
+On 2 October a change to the harness added a unit test for `readBoxes`, and this
+lesson's exercise G went red within the hour — which is the course working, since
+every exercise here is compiled and run against the checkout on every build. The
+lane that made the change did what the convention asks: it read the new output and
+corrected the three lines that had moved, from outside this lane, because leaving
+a red suite for somebody else is worse.
+
+What it did not do is rewrite the paragraph underneath, and it was right not to.
+A forced cross-lane edit may move a **number**; the moment it moves a **sentence**
+it is one routine quietly authoring another's teaching. So it filed the
+contradiction in `FINDINGS.md` and left it visible, and `main` carried a lesson
+whose transcript said `specimen.test.ts in code` directly above a paragraph that
+read *no DOM reading API appears in the suite at all*. For two days this lesson's
+own output was the thing that falsified it.
+
+**Every check in this course passed throughout, and each for its own reason.** The
+exercise compiled and ran. The transcript matched the run, because it had been
+corrected. The claims registry holds a *counted* phrase against the list it counts,
+and *no DOM reading API at all* counts nothing — it is a claim about a list with no
+number in it, which is the cheapest second copy a sentence can carry and the one
+this sentence declined. The declarations check holds a printed type against its
+declaration, and this exercise prints none. Four mechanisms, all green, none of
+them asked.
+
+That is lesson 28 happening to the course that teaches lesson 28. A paragraph of
+prose about four files has no second copy anywhere, so there is nothing to compare
+it to, and *check harder* is not on the menu. Three things were done about it, in
+increasing order of what they buy:
+
+1. **The classification is printed rather than asserted.** The first column used to
+   be `true` or `false` and the paragraph did the interesting work in prose — *that
+   one is in a doc comment, a sentence rather than a call*. It is `in code`, `in
+   prose` or `no` now, derived by stripping the comments and looking again, so the
+   claim that went stale is output and drifts like any other line. This is the
+   first of lesson 28's three remedies and the only one whose obligation is
+   discharged by a program.
+2. **The fence carries a `moves:` mark** — the third in this course, and the first
+   that is not about `src/primitives/`. Its message says that the lines are a
+   second copy of another lane's files, that re-running and pasting is the right
+   response, and then the part that is the actual lesson of 2 October: *say so on
+   the pull request, because the paragraphs under it are prose about these lines.*
+3. **What the mark cannot do is written down instead of implied.** It buys a
+   message and never a verdict, and a lane that pastes in a corrected line and
+   says nothing leaves this paragraph exactly as stale as it was on 3 October. The
+   construct is a channel between maintainers, and the value of a channel is that
+   somebody reads it.
+
+**And the derivation immediately found something the hand-classification had been
+wrong about since the day it was written.** The old paragraph accounted for one
+prose sighting on the `capture.ts` column — the `clientWidth` in the doc comment
+naming which number `width` is. There are two: `getBoundingClientRect` is in that
+file as well, in the note explaining that layout is fractional and so this reading
+is too. Nobody noticed, nobody could have, and the first run of the classifier
+printed it. Which is the smaller half of the same finding: a sentence that
+enumerates is a sentence that can be incomplete, and the only cheap defence is to
+stop enumerating by hand.
 
 ---
 
@@ -1087,11 +1222,12 @@ answer, then check.**
 6. The new reading deliberately does not change the exit code. Give the argument,
    give the counter-argument, and then say what would have to be true for the
    decision to be revisited.
-7. The only suite that drives this instrument hands its browser double a function
-   and gets back `{ scrollWidth: 390, innerWidth: 390, clipped: [] }`. Say exactly
-   what that suite is asserting, say what it cannot assert, and then say why
-   lesson 29's remedy — instrument the place the thing happens — is unavailable
-   here.
+7. Of the functions this harness hands to a browser, a test in this repository can
+   run one and cannot run the others. Say what decides that — your answer has to be
+   about the functions' own signatures and not about anybody's effort — and then say
+   what the suite is left asserting about the ones it cannot run, and what it is
+   still unable to assert about the one it can. Finish by saying why lesson 29's
+   remedy, instrument the place the thing happens, reaches none of them.
 
 Question 1 is the one the rest of the lesson exists to support. Question 3 is
 where a confident half-answer is most likely: *four bands in the catalogue* comes

@@ -6,7 +6,7 @@ import { systemClock, type Clock } from "../runtime/events.js"
 
 import { episodesOf, type EpisodeResolutionKind } from "./episode.js"
 import { intentIdOf, proposalIdOf } from "./event.js"
-import type { RecordedTelemetry, TelemetryError, TelemetryJournal } from "./journal.js"
+import type { RecordedTelemetry, TelemetryError, TelemetryPruner } from "./journal.js"
 
 /**
  * How a journal is allowed to forget.
@@ -210,7 +210,7 @@ export type RetentionOutcome =
   | { readonly outcome: "unavailable"; readonly error: TelemetryError }
 
 const scanFrom = async (
-  journal: TelemetryJournal,
+  journal: TelemetryPruner,
   horizon: string,
   scanLimit: number
 ): Promise<
@@ -257,7 +257,7 @@ const scanFrom = async (
  * host's history on a timer it chose would be making it.
  */
 export const applyRetention = async (
-  journal: TelemetryJournal,
+  journal: TelemetryPruner,
   request: RetentionRequest
 ): Promise<RetentionOutcome> => {
   const policy = retentionPolicySchema.safeParse(request.policy)

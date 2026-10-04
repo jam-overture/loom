@@ -229,10 +229,12 @@ const ANNOTATED: Readonly<Record<string, number>> = {
  * it forgot to count. Lesson 29's exercise C prints the set of primitives with a
  * declared prop nothing reads, which is that lesson's entire subject; lesson 33's
  * exercise G prints which primitives have declared what they could not show,
- * which is `(none)` and is the state of play rather than a conclusion. Both will
- * go red the day another lane writes the thing the lesson is about, and when they
- * do, **the red is the lesson's claim following the code, not drift.** The
- * remedy is to re-run the exercise and paste in what it prints now.
+ * which is `(none)` and is the state of play rather than a conclusion; and lesson
+ * 32's exercise G prints what `tools/specimen/` hands to a browser and what a test
+ * can do with each one, which is the whole of what that lesson found by running.
+ * Each will go red the day another lane writes the thing its lesson is about, and
+ * when they do, **the red is the lesson's claim following the code, not drift.**
+ * The remedy is to re-run the exercise and paste in what it prints now.
  *
  * Until this existed that distinction was written in two places, and neither was
  * the one a tripping lane would read. Lesson 29 says it in a paragraph under its
@@ -551,16 +553,23 @@ describe("the marks on a lesson's transcripts", () => {
   }
 
   /**
-   * And the two that exist, by name.
+   * And the three that exist, by name.
    *
    * Pinned for the reason everything else here is pinned: a mark removed is a
    * fence that goes back to reporting its red as drift, which is a worse message
-   * and a true one, so nothing else in this file would notice. Both of these are
-   * waiting on the same lane, and if a third ever arrives it is worth asking
-   * whether a course that holds three second copies of `src/primitives/` has one
-   * second copy too many.
+   * and a true one, so nothing else in this file would notice.
+   *
+   * Two of the three are waiting on the same lane and are second copies of
+   * `src/primitives/`. The third, on lesson 32, is the first that is not, and it
+   * arrived for a different reason than the other two: that lesson's fence had
+   * already moved — a test somebody else wrote on 2 October added a row — and the
+   * numbers were corrected from outside this lane while the paragraph drawing the
+   * conclusion under them was left asserting the opposite on `main` for two days.
+   * The other two marks exist so that an expected red is not mistaken for drift.
+   * That one exists so that a lane correcting a line is told the prose under it is
+   * load-bearing, which is the half of 2 October that no file said anywhere.
    */
-  it("are on the two fences that have signed up for one", () => {
+  it("are on the three fences that have signed up for one", () => {
     const marked = WRITTEN_LESSONS.flatMap((entry) => {
       if (entry.file === undefined) return []
 
@@ -571,6 +580,6 @@ describe("the marks on a lesson's transcripts", () => {
         .map(() => entry.number)
     })
 
-    expect(marked).toEqual([29, 33])
+    expect(marked).toEqual([29, 32, 33])
   })
 })
