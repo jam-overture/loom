@@ -11,8 +11,23 @@ list and it is not a report.
 ## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
-(`docs/routines.md`) · **Status:** open — **four sentences in a section that
-already exists**, and it closes a pattern this file has recorded five times.
+(`docs/routines.md`) · **Status:** **closed by #501**, which wrote the paragraph
+into **Taking the screenshot** with everything this entry asked for: `measure`
+and what it takes, the `holding N in M` and `← N past the fold` lines, `(n of m)`
+for a selector that matched more than once, `no match` for one that matched
+none, and the restriction that it is `pnpm shoot`'s and not `pnpm specimen`'s
+because a specimen has no fold. The output example is read off
+`tools/specimen/capture.ts` rather than remembered, so the indent and the
+spacing are the real ones.
+
+The `playwright-core` line is in too, as the sentence this entry asked for
+rather than a replacement: `/opt/node-tools/node_modules` was verified present
+in the container on 3 October, and the `npm install` stays as the instruction
+that always works.
+
+#501 was already open when this entry landed on `main` with #499, so the remedy
+was written before the entry could be read — the same documentation gap reached
+from the other side, by the lane that owns the file.
 
 [0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
 put `measure` on a shot: a list of selectors, a printed line per match with

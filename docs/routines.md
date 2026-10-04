@@ -322,6 +322,12 @@ It **prints and never asserts**: a geometry table in a report or a pull request
 body is this option's output, and a run that wants one does not need a private
 `playwright-core` script. Six were written before this sentence existed.
 
+**It is `pnpm shoot`'s and not `pnpm specimen`'s.** A specimen is photographed
+whole, so its picture has no fold in it, and a past-the-fold number against the
+viewport it was laid out at would describe a boundary the artefact does not have
+(0213). A lane wanting a band measured against a screen is asking about a
+screen, which is this harness's other subject.
+
 One rule worth keeping in mind while writing a list: **wait on a selector, not
 on the network.** A form driven by `useActionState` submits by fetch, so the
 page is idle *before* the cookie it sets exists — one run photographed a sign-in
