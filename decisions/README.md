@@ -305,3 +305,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0219](0219-a-page-view-is-counted-once-at-the-door-and-the-over-count-in-the-node-counters-is-a-measurement.md) | A page view is counted once at the door, and the over-count in the node counters is a measurement | Accepted | §4c (reader signals) |
 | [0220](0220-an-app-is-a-registry-a-policy-and-a-store-and-loom-has-one-of-each.md) | An app is a registry, a policy and a store — and Loom has one of each | Proposed | §1, §5 |
 | [0221](0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md) | Where reading stops is a fall between two siblings, and a ratio of two counts off one row set | Accepted | §4c (reader signals) |
+| 0222 | *No record on this branch* | — | — |
+| 0223 | *No record on this branch* | — | — |
+| [0224](0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md) | A before-and-after reading compares two shares, and a pair the change dissolved is an answer | Accepted | §4c (reader signals) |
