@@ -69,9 +69,17 @@ describe("the part the ask would touch", () => {
     expect(asked?.tree.root.id).toBe(questioned?.tree.root.id)
     expect(asked?.lead).toBe(questioned?.lead)
 
-    /** The same node and the same sentence, and the one thing that differs. */
+    /** The same node and the same sentence, and the two things that differ. */
     expect(asked?.where).toBe("ask")
     expect(questioned?.where).toBe("question")
+
+    /*
+     * And the second of them: the ask's excerpt arrives shut, so it carries
+     * the sentence a control needs and the question's — which stands open
+     * beside the two buttons it is waiting on — carries none.
+     */
+    expect(asked?.invitation).toBeDefined()
+    expect(questioned?.invitation).toBeUndefined()
   })
 
   /**

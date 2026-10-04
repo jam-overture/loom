@@ -33,6 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
 
@@ -335,6 +336,56 @@ Three things settled in the building:
 denominator for every rate on the reader screen, and a figure for how generous
 the per-node numbers are beside it. A rate shown without that was quietly wrong
 by an amount nobody could state.
+
+### 9. Where in a page reading stops · `Loom signals` · **done, 3 October**
+
+§6 made the tree the universe a window is read against, so a part nobody reached
+has an answer instead of no row. What it stopped short of is the **shape** of
+that answer, which its own doc comment named: *where in the page the reading
+stops, and a set of rows keyed by id cannot show it.*
+
+**Done.** `readingProgressOf(reading)` in
+[`src/signals/progress.ts`](../src/signals/progress.ts) takes a `PageReading` and
+returns the falls — *readers get through the first four bands and the fifth is
+where they leave*. It is the first thing this lane has built that tells a
+**model** something to act on rather than telling a person something true, and it
+is the third thing derived from the server-side join rather than collected
+(§6, §7 and §8 being the others). **Nothing was added to a payload, a browser, a
+column or the vocabulary**; the broadcaster was not touched, so its weight is
+unchanged.
+
+Two things decided the shape, and both are about honesty rather than mechanics
+([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)):
+
+- **The obvious answer — a page-wide curve of `reached` in reading order — is
+  not a curve.** A part deep inside the first band comes before the second band
+  in document order and is reached by fewer readers than either, so the sequence
+  does not descend and a fall in it is not a reader leaving. The unit is a **run**
+  instead: one parent's children, in the order a reader meets them. Siblings are
+  comparable, cousins are not, and every part is a step in at most one run — so
+  no reader's progress is counted at two depths.
+- **A fall is reported as a ratio of two `reached` counts off the same rows, and
+  that is what makes it showable.** A reader who straddled a rollup window
+  straddled it for the whole page, so the over-count 0147 names is very nearly
+  common to the numerator and the denominator and divides out. *Four in ten
+  readers stopped here* survives an inflation that *four hundred readers* does
+  not — and the exact denominator §8 added is deliberately **not** used here,
+  because `opened` and `reached` are different counters written in different
+  places and their ratio can honestly exceed 1.
+
+Three more settled in the building: a part that reported something other than a
+view **cannot anchor a stop** (its `reached` of 0 means *unknown*, not *nobody*,
+so a stop names the two nearest parts that can anchor one and the rest are
+counted in `unanchored` — which is a diagnosis nobody had, since a sender
+delegating presses to regions no `viewed` names previously looked exactly like a
+quiet page); a **rise** is counted rather than reported as a negative fall,
+because scrolling cannot produce one; and the page's one headline figure is
+ranked by **readers lost** rather than by share, because a band two readers out of
+three abandoned is a worse rate and a smaller problem than one four hundred out
+of a thousand did.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the shape
+of the reader screen, rather than one more row on it.
 
 ## Still not in scope
 

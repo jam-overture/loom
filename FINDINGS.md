@@ -8,6 +8,135 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-03 — `measure` shipped on a shot three days ago and the recipe every routine reads first does not mention it, so this run wrote the sixth private script before finding it
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom daily build`
+(`docs/routines.md`) · **Status:** open — **four sentences in a section that
+already exists**, and it closes a pattern this file has recorded five times.
+
+[0213](decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)
+put `measure` on a shot: a list of selectors, a printed line per match with
+`x y w×h`, `holding N in M` for a scroller, and `← N past the fold` against that
+shot's own viewport. It closed this lane's 30 September entry — *a shot list can
+drive a page to a state and cannot say how tall anything in it is* — which had
+by then been filed, re-filed and appended to across five consecutive runs, every
+one of them ending with a throwaway `playwright-core` script.
+
+**It works, and this run is the first use of it by this lane.** The whole
+geometry table in `reports/2026-10-03-demo-the-proof-above-the-fold.md` is
+`pnpm shoot` output, the selectors are committed in the shot list beside the
+report, and anyone can re-run it. That is exactly the shape the entry asked for.
+
+**It was reached for second.** `docs/routines.md` is named *read first, every
+run* by every brief in this repository, and its **Taking the screenshot**
+section — the place a lane goes to find out what a shot list can do — lists
+`path`, `out`, `viewport`, `waitFor` and `fullPage`, says every shot prints
+`scrollWidth` against `innerWidth`, and does not contain the word `measure`
+anywhere. So this run did what the five before it did: wrote a private script,
+drove the page, read `getBoundingClientRect` in an `evaluate`, and found the
+instrument afterwards by reading the finding that asked for it. About twenty
+minutes, and the script is deleted, which is the sixth time this file has
+recorded that sentence.
+
+**The gap is documentation and not code**, which is why this is four sentences
+and not a decision record. A capability that exists and is not in the recipe is,
+to a routine with no memory of the last run, a capability that does not exist —
+the lanes are *designed* to have no continuity but the repository, so the
+repository has to carry it. The paragraph wants `measure`, the `← N past the
+fold` line (because *past the fold* is the thing every lane in this repository
+argues about), and the one restriction 0213 states: it is `pnpm shoot`'s and not
+`pnpm specimen`'s, since a specimen is photographed `fullPage` and has no fold.
+
+**And one line beside it, which is smaller and saves every lane a step.** The
+section says `playwright-core` is deliberately not a dependency and to
+`npm install` it into `/tmp/shot` once per session. The install works — the
+registry is reachable — but the image already ships it: `playwright@1.56.1` is
+global and `playwright-core` sits at `/opt/node-tools/node_modules`, so
+`LOOM_PLAYWRIGHT=/opt/node-tools/node_modules pnpm shoot …` needs no install at
+all. Worth a sentence rather than a replacement, because an image is a thing
+that changes and the `npm install` is the instruction that always works.
+
+---
+## 2026-10-03 — the demo's one invited press still does not move the page, and for the first time the press that does is on the arrival screen
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**next run's candidate unless the maintainer points elsewhere**, and it is a
+design question rather than a defect.
+
+The demo invites exactly one press. `DEMO_LEADING_PRESET` is *Take the numbers
+off*, and it is the lead **because the Gate holds it** — that is the whole
+reasoning in `presets.ts`, and it is right: a governed runtime's most novel
+moment is the one where it stops and asks, and a demonstration that never
+reached it would be the AI-rewrites-a-page demo `docs/rollout.md` says is the
+least novel thing here.
+
+The cost is that a stranger's first press moves nothing. The page changes on the
+**second** press, *Apply this change*, down inside the card. Three runs have
+worked on making that expectation honest rather than surprising — the promise
+under the button, then the Gate's own verdict under the promise (*Pressing this
+raises a question, not a change*), both computed — and all three were the right
+work. None of them changes the fact that the surface whose claim is *the page
+really changes* opens by inviting a press that does not change it.
+
+**What this run changed about the question.** Folding the still life put the
+four secondary asks on the first screen at 1280×900 for the first time, and two
+of them are marked **GOES AHEAD** — a one-press change, in view, on arrival,
+needing no answer. So the arrival screen now offers both paths rather than one,
+and the question is no longer *should the lead move the page* but **which of the
+two a stranger meets first**, with both visible either way.
+
+**Three shapes, none of them taken here:**
+
+1. **Leave it.** The lead is the Gate and the Gate is the argument; the
+   one-press asks are a row away and now on screen. Cheapest, and it is what
+   this run did.
+2. **Lead with a change that goes ahead** and put the held one second. A
+   stranger watches the page move in one press, *then* meets the question with
+   the expectation already set that pressing does something. Costs the surface
+   its sharpest moment at the moment of highest attention.
+3. **Lead with both**, as two primary controls. Argued against before it is
+   reached for: a panel with two greens has no primary action, which is the
+   defect `ask-panel.tsx` was built to fix and its own comment opens with.
+
+**Recommendation: 1, and measure before moving.** Nobody has seen a stranger use
+this surface. What would settle it is the one thing this lane cannot do from a
+sandbox — and the signals work (`docs/signals.md`) is where a *which press came
+first* reading would come from, if it is ever worth asking for.
+
+---
+## 2026-10-03 — the same disclosure chevron is now drawn in three components of one directory, and the third copy is this run's
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open —
+**small, and deliberately not taken in `demo-37`.**
+
+`what-happens.tsx`, `technical-detail.tsx` and now `part-in-question.tsx` each
+contain the same nine lines:
+
+```tsx
+<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"
+     aria-hidden="true" className="h-3 w-3 shrink-0 transition-transform group-open:rotate-90">
+  <path d="M4 2.5L8 6l-4 3.5" />
+</svg>
+```
+
+Identical in all three, including the `group-open:` variant that couples each of
+them to a `group` class on the `<details>` above it. Two copies is a coincidence;
+three in one directory is a component.
+
+**Why it was not extracted in the same pull request.** The unit is about what the
+arrival screen shows a stranger, and the extraction touches two files it
+otherwise has no reason to open — which costs the maintainer the ability to take
+one and not the other, and is this lane's own stated rule from 2 October.
+
+**What it should be**, if it helps: `_components/disclosure-chevron.tsx`, no
+props, one `aria-hidden` SVG. It is not a Loom primitive and must not become
+one — it is demo chrome, not a thing a tree can name, and the rule that a surface
+composes registered primitives is about the **page**, not about the chrome
+around it. The three disclosures keep their own summary copy, which is where
+they actually differ: *what happens when you ask*, *Show the full record*, and
+the excerpt's own sentence in the imperative.
+
+---
 ## 2026-10-02 — lesson 32's sharpest conclusion is now false, and the four numbers under it were updated from outside the lane while the paragraph was left alone
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
@@ -153,9 +282,10 @@ want the sentence in both places.
 ---
 ## 2026-10-01 — the demo's first screen spends 42% of itself on a still life, and this run paid for the verdict without reclaiming it
 
-**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — next
-run's candidate unless the maintainer points elsewhere, and it is a **design
-question rather than a defect**
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:**
+**closed by `demo-37-the-proof-above-the-fold`** — the 3 October note at the
+foot of this entry has the measurement. It was a **design question rather than a
+defect**, and (2) is what was built.
 
 Measured on a production build at 1280×900, on `main` at `ee9c1d5`, before this
 run touched anything. The rail's scroller is **857px** and its content is
@@ -257,6 +387,52 @@ the first time this surface would have had a layout-conditional default.
 the same pull request as a new idea costs the maintainer the ability to take one
 and not the other. It is one unit, and it is the next one this lane should do
 unless pointed elsewhere.
+
+### 3 October, `Loom demo` — **closed by `demo-37-the-proof-above-the-fold`**, and (2) is what was built
+
+The excerpt is a `<details>`. Its own sentence becomes its control — *Show what
+would come off the page*, the lead in the imperative, derived from the same
+operation the lead is derived from by the same function, so the words on the
+control and the words inside it cannot come to describe different changes.
+
+**Measured with `pnpm shoot`'s `measure` rather than with a private script**,
+which is the first time this lane has had that instrument; the selectors are in
+the shot list committed beside the report, so the table is re-runnable. Viewport
+coordinates, two separately built production commits, at 1280 × 900 where the
+fold is 900:
+
+| | before (`main` at `ef48c4d`) | after |
+| --- | --- | --- |
+| the rail | 857px scroller holding **1,277** | 857 holding **935** |
+| the count | y 259 | 259 — unmoved |
+| the lead, its promise and its verdict | y 312, 115 tall | 312 — unmoved |
+| **the excerpt** | y 442, **391 × 358** | y 442, **391 × 16** |
+| ask row 1 | y 841 — **4 past the fold** | y **499** |
+| ask row 4 | y 1042 — **205 past the fold** | y **700** |
+| *or type your own* | y 1149 — 349 past | y 807 — 7 past |
+| the one link out | y 1223 — 401 past | y 881 — 59 past |
+
+**All four rows are on the first screen and the whole rail but 59px of its
+footer is with them.** At 390 × 844 the rail goes 1,355 → **1,013** and three of
+the four rows land on the first screen where none did. At 348 × 465 the picture
+is **byte-identical** — everything that moved is below that frame's fold
+already.
+
+**The layout-conditional default this entry floated was refused, and the reason
+is worth keeping.** *A disclosure open by default below `lg` and shut above it*
+cannot be written: CSS cannot set `open`, so the shapes available are a
+`matchMedia` read at mount — which this surface has already refused in writing,
+for the reason the record bar gives — or a second copy of the excerpt in the
+document. And the measurement says it is not needed: the phone's loss was
+assumed rather than measured here, and what the phone actually had was the
+**top 304px** of a 358px band — the harness reports it 54 past the fold —
+and not one of the four rows. It now has three rows whole. The one honest cost
+is that a phone visitor who wants to see the band presses for it, and the band
+it is a rendering of is four thousand pixels down the stage.
+
+**What is not closed by this** is the entry two above about the lead press
+itself, filed today: the arrival screen is now readable in one screen, and the
+one press it invites still does not move the page.
 
 ---
 ---
@@ -41779,8 +41955,17 @@ deployment has not already run: `db:push` creates the table.
 ## 2026-10-03 — the upsert that refuses to touch one row twice is guarded for one of the four counter tables, and the other three have the same seam
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/postgres.ts`)
-· **Status:** open — **a latent divergence, written down rather than swept.**
-Nothing is red, and no producer in the repository can currently trigger it.
+· **Status:** **closed by `signals-06-where-reading-stops`** — the fold is now in
+front of the driver for all four counters, with a contract case each. The keys
+moved to `src/signals/counters.ts` and **both stores import them from there**,
+which is the half of the remedy this entry did not ask for: the guarantee wanted
+is that the two implementations agree about what one row is, and two spellings of
+a key that are the same today are a thing this subsystem has already been bitten
+by. Four planted defects, four caught — including the one column that is not a
+number, where the later row wins in both stores and in the fold.
+
+Originally filed as: **a latent divergence, written down rather than swept.**
+Nothing was red, and no producer in the repository could trigger it.
 
 Found by the contract suite while adding the page-view counter, which is the
 first counter in this subsystem a caller composes by hand rather than reads off
@@ -42233,7 +42418,13 @@ the one failure this reading can have that looks exactly like success.
 ## 2026-10-02 — a page cannot report that every one of its parts went unread, and the arithmetic that makes it impossible is worth stating where the vocabulary is
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals`
-(`src/signals/parts.ts`) · **Status:** open — not a defect, and it cost this
+(`src/signals/parts.ts`) · **Status:** **closed** — the sentence is in
+`PartStanding`'s doc comment on `main`, landed by `signals-04` (#486): *every
+combination of the three is reachable except one*, with the arithmetic that rules
+it out and the reachable neighbour that is worth a screen. Verified rather than
+re-written; this entry was still open because nothing went back to flip it.
+
+Originally filed as: not a defect, and it cost this
 lane a state it had already designed, written and commented
 
 `PartStanding`'s three members are reachable in every combination but one.
@@ -42745,3 +42936,54 @@ runtime export by default — or that a name may land with a stub line the docs
 lane rewrites — the framework can publish on merit and file the prose rather than
 choosing its module boundaries around a test it cannot satisfy. Nothing is
 blocked today.
+## 2026-10-03 — where a page loses its readers is now a reading, and it is a shape to draw rather than one more row
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/`) · **Status:** open — **nothing is blocked**; the reading is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`, and the
+reader screen is this lane's to shape
+
+`readingProgressOf(reading)` answers *readers get through the first four bands
+and the fifth is where they leave*, from counters that already existed —
+[0221](decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md),
+§9 of [`docs/signals.md`](docs/signals.md). Hand it the output of
+`pageReadingOf`, which is the same join §6 already published:
+
+```ts
+import { pageReadingOf, readingProgressOf } from "@jam-overture/loom/signals"
+
+const progress = readingProgressOf(pageReadingOf(tree, tallies, registry))
+```
+
+**`progress.steepest`** is the one figure a screen can lead with: the two parts a
+page loses most of its readers between, with `lost` (the readers) and `share`
+(the fraction of the ones who got that far). **`progress.runs`** is the shape —
+one run per parent, its children in the order a reader meets them, every fall in
+run order, and `furthest`, the last part anybody reached.
+
+Four things to be careful of, and they are all in the record:
+
+- **`share` is a fraction of the part before it, never of the page.** Both
+  numbers are `reached` counts off the same rows, which is exactly why it can be
+  shown: the window straddle that inflates every `reached` (0147, measured per
+  revision since 0219) divides out of a ratio between two of them. **Do not
+  re-base it on `opened` from `pageViewReadingOf`** — those are different
+  counters written in different places and the ratio can honestly exceed 1.
+  `opened` is still the right denominator for the *rates* §8 filed about; it is
+  the wrong one for a fall.
+- **`unanchored` is a diagnosis, not a number to show a reader.** A long list
+  means presses are being delegated to regions that no `viewed` names — a sender
+  or a primitive not reporting what it is. It previously looked exactly like a
+  quiet page, which is the failure worth surfacing somewhere an operator sees it.
+- **`gained` is not an error.** More readers on a later part than an earlier one
+  is an anchored link, a restored scroll position, or a part that is on screen
+  whatever anybody does. Worth a line; not worth a warning.
+- **`views: 0` means no runs and no steepest**, rather than a page everybody
+  abandoned. A screen needs the empty state, and it is *nothing was measured* and
+  not *nobody read it*.
+
+**What is still thin, and it is not this lane's either.** A run's steps carry the
+role its type declared, and nothing in `src/primitives/` declares one — so a
+reading says *where* readers stop and not *what kind of part* they stop at. Filed
+for `Loom primitives` since 1 October and unchanged by this.
+
