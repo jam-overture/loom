@@ -676,6 +676,15 @@ export const IRREVERSIBILITY_PLAIN: Readonly<Record<IrreversibilityReason["code"
    */
   "out-of-tree-effect": {
     label: "Putting the page back would not put everything back",
+    /*
+     * The sentence for a record that cannot say *which* part. It opened this
+     * table on 3 October as the only sentence, with a finding beside it saying
+     * the record dropped the types on the way in; `outOfTreeEffectTypes` and the
+     * reason's own `primitiveTypes` closed that the next day, so the version a
+     * reader usually meets now is `withOutOfTreeParts` below. This stays, for a
+     * judgment recorded before the field existed — the honest shrug, kept rather
+     * than deleted, because the alternative is naming a piece on a guess.
+     */
     meaning:
       "This change sets up a part that reaches beyond the page — the kind of thing that takes a payment or sends a message. Loom can always put the page back exactly as it was, but it cannot un-take a payment or un-send a message. Check whatever that part is wired to before you say yes.",
     technical: "out-of-tree-effect",
@@ -698,6 +707,30 @@ export const IRREVERSIBILITY_PLAIN: Readonly<Record<IrreversibilityReason["code"
     technical: "retention-budget-exceeded",
   },
 }
+
+/**
+ * The same obstacle, naming the pieces that caused it.
+ *
+ * The difference between a sentence a reader can act on and one they cannot.
+ * *"Check whatever that part is wired to"* sends somebody looking and does not
+ * say where; *"Check what your Form is wired to"* names the thing. Your
+ * deployment declared which of its registered pieces reach outside a page, and
+ * this is the only screen in the world that can cross that declaration with
+ * what a model just proposed.
+ *
+ * It replaces the clause rather than appending one, which is why the sentence is
+ * split around it rather than written twice. An empty list falls back to the
+ * table's own wording: a record that knows no types is a judgment made before
+ * the Gate kept them, and inventing a name for it would be the one thing this
+ * table must not do.
+ */
+export const withOutOfTreeParts = (word: PlainWord, pieces: string): PlainWord =>
+  pieces === ""
+    ? word
+    : {
+        ...word,
+        meaning: `This change sets up ${pieces}, which reaches beyond the page — the kind of thing that takes a payment or sends a message. Loom can always put the page back exactly as it was, but it cannot un-take a payment or un-send a message. Check what ${pieces} is wired to before you say yes.`,
+      }
 
 /**
  * The same table, read by the code a record actually holds.

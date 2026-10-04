@@ -2,6 +2,7 @@ import type { Disposition } from "@jam-overture/loom"
 import { describeHoldError, type HeldProposal, type HoldError } from "@jam-overture/loom/write"
 
 import { proposedHref } from "./proposed-view"
+import { undoStandingFor, type UndoStanding } from "./undoing"
 import { screenName } from "./screen-names"
 import { unreadableClause, type UnreadableChange } from "./unreadable-change"
 import type { WaitingTriage } from "./waiting-effect"
@@ -146,6 +147,21 @@ export type WaitingChange = {
    * type in. This one is *this* change, and nothing else.
    */
   readonly pictureHref: string
+  /**
+   * Why saying yes could not be taken back, when it could not.
+   *
+   * `answers.yes` says *that* — *"This one can't be undone afterwards."* — and
+   * has said only that since it was written, which is the worst kind of warning:
+   * it tells a reviewer to be careful at the exact moment they are deciding, and
+   * nothing about what to be careful of. The Gate computes two obstacles that
+   * ask opposite things of them, and until [0222] a hold carried the reasons
+   * only as prose inside `reason.detail`.
+   *
+   * Always present rather than conditional, because `UndoStanding` already holds
+   * the undoable case and says there is nothing to draw. A `undefined` here
+   * would be a third state meaning the same as one that exists.
+   */
+  readonly undoing: UndoStanding
 }
 
 export const waitingChange = (
@@ -164,6 +180,7 @@ export const waitingChange = (
   stakes: STAKES[held.disposition.stakes],
   confidence: confidenceWord(held.disposition.confidence),
   answers: answerOutcomes(held.disposition),
+  undoing: undoStandingFor(held.disposition),
   effect,
   href: `/portal/pages/${held.treeId}`,
   pictureHref: proposedHref(held.treeId, held.proposalId),

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { PageName } from "@/app/(portal)/_components/page-name"
 import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UndoStandingNote } from "@/app/(portal)/_components/undo-standing"
 import type { PageName as PageNameValue } from "@/app/(portal)/_lib/page-name"
 import type { WaitingChange } from "@/app/(portal)/_lib/waiting"
 
@@ -170,9 +171,17 @@ export const WaitingCard = ({
       * motion before they arrive at the screen with the buttons on it.
       */}
     <dl className="flex flex-col gap-2 text-xs">
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         <dt className="font-medium">If you say yes</dt>
         <dd className="text-ink-muted">{change.answers.yes}</dd>
+        {/*
+          * And *why* it could not be undone, under the sentence that says
+          * it cannot. The explanation belongs with the claim rather than
+          * below the second answer: a reviewer reads "If you say yes",
+          * meets the warning at the end of it, and the next thing they
+          * read should be what to do about it.
+          */}
+        <UndoStandingNote standing={change.undoing} />
       </div>
       <div className="flex flex-col gap-0.5">
         <dt className="font-medium">If you say no</dt>

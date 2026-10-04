@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   sequentialIdFactory,
+  type Disposition,
   type IrreversibilityReason,
   type PrimitiveType,
   type ProposalId,
@@ -12,7 +13,7 @@ import { buildAssessment, buildProposal } from "@jam-overture/loom/testing"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 
-import { hasUndoObstacle, undoStandingOf } from "./undoing"
+import { hasUndoObstacle, undoStandingFor, undoStandingOf } from "./undoing"
 import { IRREVERSIBILITY_PLAIN } from "./vocabulary"
 
 const treeId = "t_undo" as TreeId
@@ -296,5 +297,168 @@ describe("against a record the runtime actually wrote", () => {
     expect(named.map((obstacle) => obstacle.label)).not.toContain(
       "Loom gave a reason this screen has no words for"
     )
+  })
+})
+
+/**
+ * The review queue's path — the one this module could not serve when it shipped.
+ *
+ * A `Disposition` is what a hold carries, and since 0222 it carries the reasons
+ * whole rather than joined into the prose of `reason.detail`. Richer than the
+ * journal's in two ways a reader can see: the budget is a number, and the
+ * pieces have names.
+ */
+describe("undoStandingFor", () => {
+  const judgment = (fields: Partial<Disposition>): Disposition => ({
+    kind: "requires-confirmation",
+    reason: { code: "irreversible", detail: "cannot be undone cleanly: out-of-tree-effect" },
+    stakes: "high",
+    reversible: false,
+    confidence: 0.82,
+    policyId: "portal@1",
+    ...fields,
+  })
+
+  it("names the piece that reaches outside the page", () => {
+    const standing = undoStandingFor(
+      judgment({ irreversibilityReasons: [{ code: "out-of-tree-effect", primitiveTypes: [aForm] }] })
+    )
+
+    expect(standing.undoable).toBe(false)
+    expect(standing.obstacles[0]?.meaning).toContain("sets up Form, which reaches beyond the page")
+    expect(standing.obstacles[0]?.meaning).toContain("Check what Form is wired to")
+    /** The registered identifier is for the record, never for the sentence. */
+    expect(standing.obstacles[0]?.meaning).not.toContain("loom.form")
+    expect(standing.obstacles[0]?.technical).toBe("out-of-tree-effect")
+  })
+
+  it("names every piece when more than one reaches outside", () => {
+    const standing = undoStandingFor(
+      judgment({
+        irreversibilityReasons: [
+          { code: "out-of-tree-effect", primitiveTypes: [aForm, "loom.checkout" as PrimitiveType] },
+        ],
+      })
+    )
+
+    expect(standing.obstacles[0]?.meaning).toContain("sets up Form and Checkout")
+  })
+
+  /**
+   * The budget is the half the journal cannot say, and it is the number a
+   * reviewer would otherwise have to open another screen for.
+   */
+  it("says what the rules actually keep, which only a judgment knows", () => {
+    const standing = undoStandingFor(
+      judgment({
+        irreversibilityReasons: [
+          { code: "retention-budget-exceeded", retainedNodeCount: 9, budget: 4 },
+        ],
+      })
+    )
+
+    expect(standing.obstacles[0]?.meaning).toContain(
+      "This one takes 9 parts off the page, and your rules keep at most 4."
+    )
+  })
+
+  it("draws nothing for a judgment that allowed an undo", () => {
+    const standing = undoStandingFor(judgment({ reversible: true, kind: "accepted" }))
+
+    expect(standing.undoable).toBe(true)
+    expect(hasUndoObstacle(standing)).toBe(false)
+    expect(standing.unexplained).toBe(false)
+  })
+
+  /**
+   * The framework's own table, consumed rather than restated: the field is
+   * **omitted** rather than empty when nothing fired, so `reversible` is what
+   * tells "nothing fired" from "judged before this field existed". The second
+   * is `unexplained`, which this module had a sentence for from the first day
+   * and which was until now unreachable from any real run.
+   */
+  it("tells a judgment with nothing to report from one that predates the field", () => {
+    expect(undoStandingFor(judgment({ reversible: true })).unexplained).toBe(false)
+    expect(undoStandingFor(judgment({ reversible: false })).unexplained).toBe(true)
+  })
+
+  /**
+   * Both obstacles on one judgment, in the Gate's order. A change can reach
+   * outside the page *and* take more off it than the budget keeps.
+   */
+  it("keeps both obstacles, in the order the judgment holds them", () => {
+    const standing = undoStandingFor(
+      judgment({
+        irreversibilityReasons: [
+          { code: "out-of-tree-effect", primitiveTypes: [aForm] },
+          { code: "retention-budget-exceeded", retainedNodeCount: 2, budget: 1 },
+        ],
+      })
+    )
+
+    expect(standing.obstacles.map((obstacle) => obstacle.technical)).toEqual([
+      "out-of-tree-effect",
+      "retention-budget-exceeded",
+    ])
+  })
+
+  it("says none of the runtime's words in either sentence", () => {
+    const standing = undoStandingFor(
+      judgment({
+        irreversibilityReasons: [
+          { code: "out-of-tree-effect", primitiveTypes: [aForm] },
+          { code: "retention-budget-exceeded", retainedNodeCount: 2, budget: 1 },
+        ],
+      })
+    )
+
+    for (const obstacle of standing.obstacles) {
+      expect(runtimeWordsIn(obstacle.meaning)).toEqual([])
+    }
+  })
+})
+
+/**
+ * The two records, held to saying the same thing.
+ *
+ * A hold and a journal entry describe one judgment, and a reader meets one of
+ * them on `/portal` and the other on `/portal/activity`. The sentences may be
+ * *richer* on the queue — it knows the budget — and they may never **disagree**,
+ * which is the drift two readings of one fact always produce and the reason
+ * both narrow through this module rather than at their points of use.
+ */
+describe("the two paths, on one judgment", () => {
+  it("reads the same obstacle off a hold and off the record of it", () => {
+    const ids = sequentialIdFactory("b")
+    const proposal = buildProposal(ids, {
+      intentId: ids.intentId(),
+      delta: { deltaId: ids.deltaId(), treeId, baseRevision: 0, operations: [] },
+    })
+    const reasons: readonly IrreversibilityReason[] = [
+      { code: "out-of-tree-effect", primitiveTypes: [aForm] },
+    ]
+
+    const record = recordOf({
+      treeId,
+      occurredAt: "2026-10-04T00:00:00.000Z",
+      event: {
+        type: "change-assessed",
+        assessment: buildAssessment(ids, { proposal, irreversibilityReasons: reasons }),
+      },
+    })
+    if (record.event.type !== "change-assessed") throw new Error("narrated the wrong event")
+
+    const fromJournal = undoStandingOf(record.event.assessment)
+    const fromHold = undoStandingFor({
+      kind: "requires-confirmation",
+      reason: { code: "irreversible", detail: "cannot be undone cleanly: out-of-tree-effect" },
+      stakes: "low",
+      reversible: false,
+      confidence: 0.9,
+      policyId: "portal@1",
+      irreversibilityReasons: reasons,
+    })
+
+    expect(fromHold.obstacles).toEqual(fromJournal.obstacles)
   })
 })

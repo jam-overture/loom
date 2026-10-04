@@ -338,7 +338,13 @@ describe("ProposalLine", () => {
     expect(unasked(container)).toContain("This one takes 4 parts off the page.")
   })
 
-  it("sends a reader to look outside the page when that is the obstacle", () => {
+  /**
+   * Strengthened on 4 October, when `outOfTreeEffectTypes` landed. It asserted
+   * the generic clause — *"Check whatever that part is wired to"* — because the
+   * record could not say **which** part, which this lane filed as a finding on
+   * the 3rd. It can now, so the sentence names the piece and so does this.
+   */
+  it("names the piece that reaches outside the page, and says to go and look at it", () => {
     const { container } = render(
       <ul>
         <ProposalLine
@@ -349,8 +355,12 @@ describe("ProposalLine", () => {
       </ul>
     )
 
-    expect(unasked(container)).toContain("Check whatever that part is wired to before you say yes")
+    expect(unasked(container)).toContain("Check what Form is wired to before you say yes")
+    expect(unasked(container)).toContain("This change sets up Form, which reaches beyond the page")
     expect(unasked(container)).not.toContain("Too much would have to be kept")
+    /* The runtime's own identifier stays where every other code on this line is. */
+    expect(unasked(container)).not.toContain("loom.form")
+    expect(container.querySelector("details")?.textContent).toContain("out-of-tree-effect")
   })
 
   /** The codes go where every other code on this line already is. */

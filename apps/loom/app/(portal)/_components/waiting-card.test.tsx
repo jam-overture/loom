@@ -6,6 +6,8 @@ import {
   intentIdSchema,
   proposalIdSchema,
   treeIdSchema,
+  type IrreversibilityReason,
+  type PrimitiveType,
   type TreeDelta,
 } from "@jam-overture/loom"
 import type { HeldProposal } from "@jam-overture/loom/write"
@@ -120,6 +122,24 @@ const disclosure = (container: HTMLElement, summary: string): HTMLDetailsElement
 
 const judgment = (container: HTMLElement) => disclosure(container, "How Loom decided this")
 const steps = (container: HTMLElement) => disclosure(container, "Every step")
+
+/**
+ * The same hold, judged irreversible, with the reasons the Gate kept.
+ *
+ * `reversible: false` and the reasons together, never one without the other —
+ * that pairing is the runtime's invariant and a fixture that broke it would be
+ * describing a judgment no run of Loom produces, which is what 0216 exists
+ * about and what this lane got wrong in a fixture two days ago.
+ */
+const irreversible = (reasons: readonly IrreversibilityReason[]): HeldProposal => ({
+  ...held,
+  disposition: {
+    ...held.disposition,
+    reason: { code: "irreversible", detail: "cannot be undone cleanly: out-of-tree-effect" },
+    reversible: false,
+    irreversibilityReasons: reasons,
+  },
+})
 
 describe("WaitingCard", () => {
   it("leads with what somebody typed", () => {
@@ -238,6 +258,71 @@ describe("WaitingCard", () => {
     details?.remove()
     expect(container.textContent).not.toContain("confidence-below-minimum")
     expect(container.textContent).not.toContain("user-instruction")
+  })
+
+  /**
+   * The change of 4 October, and the sentence it finishes.
+   *
+   * `If you say yes` has ended in *"This one can't be undone afterwards."* since
+   * this card was written. That is a warning delivered at the one moment a
+   * person is deciding, with nothing about what to be careful of — and the Gate
+   * has always known which of two very different things happened. Until 0222 a
+   * hold carried the reasons only inside the prose of `reason.detail`.
+   */
+  describe("why saying yes could not be taken back", () => {
+    it("names the piece that reaches outside the page, under the sentence that warns", () => {
+      const { container } = card(
+        irreversible([{ code: "out-of-tree-effect", primitiveTypes: ["loom.form" as PrimitiveType] }])
+      )
+
+      expect(container.textContent).toContain("This one can't be undone afterwards.")
+      expect(container.textContent).toContain("Check what Form is wired to before you say yes")
+    })
+
+    it("says what the rules keep when the budget is the obstacle", () => {
+      const { container } = card(
+        irreversible([{ code: "retention-budget-exceeded", retainedNodeCount: 9, budget: 4 }])
+      )
+
+      expect(container.textContent).toContain(
+        "This one takes 9 parts off the page, and your rules keep at most 4."
+      )
+    })
+
+    /**
+     * The explanation goes under the claim, not under the second answer. A
+     * reviewer reads "If you say yes", meets the warning at the end of it, and
+     * the next thing they read should be what to do about it — which a refactor
+     * that files it after "If you say no" would silently undo.
+     */
+    it("puts the reason between the two answers rather than after both", () => {
+      const { container } = card(
+        irreversible([{ code: "out-of-tree-effect", primitiveTypes: ["loom.form" as PrimitiveType] }])
+      )
+      const read = container.textContent ?? ""
+
+      expect(read.indexOf("can't be undone afterwards")).toBeLessThan(read.indexOf("Check what Form"))
+      expect(read.indexOf("Check what Form")).toBeLessThan(read.indexOf("If you say no"))
+    })
+
+    /** The ordinary case gets nothing: the row is long enough already. */
+    it("says nothing more about undo on a change that can be undone", () => {
+      const { container } = card()
+
+      expect(container.textContent).toContain("where you can undo it")
+      expect(container.textContent).not.toContain("Check what")
+      expect(container.textContent).not.toContain("gone for good")
+    })
+
+    /** The runtime's codes stay off a card nobody has opened a disclosure on. */
+    it("prints no runtime code in the sentence a reviewer meets unasked", () => {
+      const { container } = card(
+        irreversible([{ code: "out-of-tree-effect", primitiveTypes: ["loom.form" as PrimitiveType] }])
+      )
+
+      expect(container.textContent).not.toContain("out-of-tree-effect")
+      expect(container.textContent).not.toContain("loom.form")
+    })
   })
 
   describe("what it would do", () => {

@@ -43097,3 +43097,48 @@ role its type declared, and nothing in `src/primitives/` declares one — so a
 reading says *where* readers stop and not *what kind of part* they stop at. Filed
 for `Loom primitives` since 1 October and unchanged by this.
 
+
+---
+## 2026-10-04 — a hold can say what the rules keep and the journal cannot, so one sentence is shorter when you read it back than when you decided it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/event.ts`) · **Status:** open — small, and filed only because
+the asymmetry is now **visible on two screens** rather than theoretical
+
+[0222] gave a `Disposition` the reasons whole, so the review queue can say:
+
+> *"Too much would have to be kept to put it back. … This one takes 9 parts off
+> the page, **and your rules keep at most 4**."*
+
+`AssessmentSummary` keeps `retainedNodeCount` and the codes, and `0222` added
+`outOfTreeEffectTypes` beside them — but **not** `budget`. So the same judgment,
+read back on `/portal/activity` an hour later, says:
+
+> *"…This one takes 9 parts off the page."*
+
+and stops. The number a reader would otherwise have to open `/portal/rules` to
+find is in the record of the decision and not in the record of what happened.
+
+**Why it is worth a field rather than a shrug.** `retainedNodeCount` alone is a
+quantity with no scale: *9 parts* is alarming or unremarkable depending entirely
+on a threshold the sentence cannot name. It is the same argument
+`stakeFactorCodes`' own doc comment makes for why `large-removal`'s level is
+recoverable — *decided by `removedNodeCount` here against the `removalThresholds`
+of the policy `policyFingerprint` names* — and the budget is the one threshold
+with no such route back, because `inverseRetentionBudget` is not a removal
+threshold.
+
+| | |
+| --- | --- |
+| the shape | `retentionBudget?: number` on `assessmentSummarySchema`, from the reason that fired |
+| absent when | no `retention-budget-exceeded` reason, and on a record written before the field — never defaulted (0045) |
+| what it buys | the queue's sentence and the record's sentence become the same sentence |
+
+**`app/(portal)/_lib/undoing.ts` already takes it as an optional argument**, so
+this is one field and no new words: the clause appears when the number is there
+and the sentence is correct without it either way. Deliberately built that way
+when the two paths were joined, rather than filed as a blocker.
+
+**Not urgent, and not a defect.** Nothing on either screen is wrong. One of them
+is simply shorter than the other about the same fact, and a reader who moves
+between them will notice before anybody files it again.

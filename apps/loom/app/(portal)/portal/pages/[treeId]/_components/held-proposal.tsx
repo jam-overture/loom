@@ -7,10 +7,12 @@ import type { HeldProposal } from "@jam-overture/loom/write"
 
 import { ProposalEffectView } from "@/app/(portal)/_components/proposal-effect"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UndoStandingNote } from "@/app/(portal)/_components/undo-standing"
 import { summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { type WriteReport } from "@/app/(portal)/_lib/outcome"
 import type { ProposalEffect } from "@/app/(portal)/_lib/proposal-effect"
 import { answerOutcomes } from "@/app/(portal)/_lib/waiting"
+import { undoStandingFor } from "@/app/(portal)/_lib/undoing"
 import {
   STAKES,
   confidenceWord,
@@ -80,6 +82,7 @@ export const HeldProposalCard = ({
   const answered = report !== null
   const stakes = STAKES[held.disposition.stakes]
   const answers = answerOutcomes(held.disposition)
+  const undoing = undoStandingFor(held.disposition)
 
   return (
     <li className="border-edge-subtle bg-surface-base flex flex-col gap-3 rounded-md border p-3">
@@ -136,9 +139,17 @@ export const HeldProposalCard = ({
         */}
       {!answered && (
         <dl className="flex flex-col gap-2 text-xs">
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-1">
             <dt className="font-medium">If you say yes</dt>
             <dd className="text-ink-muted">{answers.yes}</dd>
+            {/*
+              * And *why* it could not be undone, under the sentence that says
+              * it cannot. The explanation belongs with the claim rather than
+              * below the second answer: a reviewer reads "If you say yes",
+              * meets the warning at the end of it, and the next thing they
+              * read should be what to do about it.
+              */}
+            <UndoStandingNote standing={undoing} />
           </div>
           <div className="flex flex-col gap-0.5">
             <dt className="font-medium">If you say no</dt>
