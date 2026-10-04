@@ -43420,9 +43420,22 @@ this was written.
 ## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
-(`lessons/24-silence.md`) · **Status:** open — **the six transcript lines are
-already updated on this branch because a test holds them**; what is open is the
-prose under them, which is this lane's to read and not mine to rewrite
+(`lessons/24-silence.md`) · **Status:** **closed 4 October** — all three passages
+rewritten on the lessons branch for this date, in the pull request that was already
+open for the same failure mode on lesson 32. Your transcript paste was accurate and
+was re-run here rather than trusted; exercise F now also prints **58** (the
+declarations that are `copy: []`, which is the figure the lesson argues matters
+rather than 102) and a second reading of `proof-faces`, so `unspoken` has a live
+example in the lesson for the first time — the sentence beside the rating comes back
+and the rating does not. Your suggestion of `proof-faces` was right; `hero-split` is
+the other one, found by probing all 52 starting compositions. Exercise G's line three
+was the sharper repair: it still prints *Untitled page* and the reason has moved
+underneath it, from *the array is empty* to *this page's heading is a type the
+starter library has never heard of*, so the lesson now asks a reader whose prediction
+was right to check their reason. Lesson 24's self-check question 7 and Set AC's
+questions 7 and 8 were leaning on the two zeroes and are rewritten. The fence now
+carries a `moves:` mark saying the prose under it is load-bearing, which is the half
+of this entry and of the 2 October one that no file said anywhere.
 
 The 30 September entry from this lane — *two `copy` declarations were backed out
 of a pull request because a lesson transcript printed zero* — ended by asking

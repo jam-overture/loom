@@ -1209,14 +1209,17 @@ and the comparison is where the general rule is.
    the same shape — then say what a *drifted* declaration has in common with a
    misspelled one. *(15, 19, 24)*
 7. Swapping a hard-coded `TITLE_TYPES` for `registry.typesWithRole("heading")` is
-   strictly better and one line. Say what it does to this repository today, why,
-   and what order the two edits have to land in. Then state the general form of
-   that trap without mentioning headings. *(12, 24)*
-8. Lesson 23 found a mechanism that is correct, tested and reaches nothing;
-   lesson 24 found two declarations that are correct, tested and made by nobody.
-   Say what the two have in common, why neither can fail loudly, and what would
-   have to exist to notice either — given that no test in either lane is going to
-   say anything. *(22, 23, 24)*
+   strictly better and one line, and what it would do to this repository is not what
+   it would have done when lesson 24 was written. Say what it would have done then,
+   what it does now, what changed, and what order the two edits had to land in. Then
+   state the general form of that trap without mentioning headings. *(12, 24)*
+8. Lesson 23 found a mechanism that is correct, tested and reaches nothing; lesson
+   24 found two declarations that were correct, tested and made by nobody. One of
+   those two has since been declared right across the library and the other has
+   barely moved. Say what the two findings have in common, why neither could fail
+   loudly, and what would have had to exist to notice either — then say what
+   actually moved the first one, and whether it was something the repository could
+   have relied on. *(22, 23, 24)*
 9. The gap in question 4 was closed by a third field rather than by naming the
    prop in the list that already existed, which was one line shorter and named
    the node just as well. Give the test that decides between those two designs
