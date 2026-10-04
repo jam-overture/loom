@@ -8,7 +8,7 @@
       "files": 92,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4468,7 +4468,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4514,7 +4514,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5420,7 +5420,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5878,7 +5878,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6742,7 +6742,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7333,7 +7333,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7561,7 +7561,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7978,7 +7978,7 @@
       "files": 53,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8332,7 +8332,7 @@
       "files": 27,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8465,7 +8465,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9564,7 +9564,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9707,7 +9707,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9771,10 +9771,10 @@
       "slug": "telemetry",
       "types": "./dist/telemetry/index.d.ts",
       "requires": [],
-      "files": 58,
+      "files": 59,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10136,6 +10136,27 @@
               "summary": ""
             },
             {
+              "name": "AssessmentLookup",
+              "kind": "type",
+              "signature": "type AssessmentLookup = {\n    readonly proposalIds: readonly ProposalId[];\n    /** Absent looks across every tree the handle can see, as `read` does. */\n    readonly treeId?: TreeId;\n};",
+              "truncated": false,
+              "summary": "What a consumer asks when it is holding a list of proposals and wants the Gate's reading of each one."
+            },
+            {
+              "name": "AssessmentLookupResult",
+              "kind": "type",
+              "signature": "type AssessmentLookupResult = {\n    readonly assessments: ReadonlyMap<ProposalId, AssessmentSummary>;\n    readonly unasked: readonly ProposalId[];\n};",
+              "truncated": false,
+              "summary": "The assessments that were found, and the ids this lookup did not reach."
+            },
+            {
+              "name": "MAX_ASSESSMENT_LOOKUP",
+              "kind": "value",
+              "signature": "const MAX_ASSESSMENT_LOOKUP = 400",
+              "truncated": false,
+              "summary": "How many proposals one lookup answers, and it is a cap rather than a clamp."
+            },
+            {
               "name": "ForgetRequest",
               "kind": "type",
               "signature": "type ForgetRequest = {\n    readonly before: number;\n};",
@@ -10152,9 +10173,23 @@
             {
               "name": "TelemetryJournal",
               "kind": "interface",
-              "signature": "interface TelemetryJournal {\n    readonly record: (records: readonly TelemetryRecord[]) => Promise<Result<void, TelemetryError>>;\n    readonly read: (request?: TelemetryReadRequest) => Promise<Result<TelemetryPage, TelemetryError>>;\n    readonly forget: (request: ForgetRequest) => Promise<Result<ForgetOutcome, TelemetryError>>;\n}",
+              "signature": "interface TelemetryJournal {\n    readonly record: (records: readonly TelemetryRecord[]) => Promise<Result<void, TelemetryError>>;\n    readonly read: (request?: TelemetryReadRequest) => Promise<Result<TelemetryPage, TelemetryError>>;\n    readonly assessments: (request: AssessmentLookup) => Promise<Result<AssessmentLookupResult, TelemetryError>>;\n    readonly forget: (request: ForgetRequest) => Promise<Result<ForgetOutcome, TelemetryError>>;\n}",
               "truncated": false,
-              "summary": "Three operations, and the asymmetry is deliberate: writes arrive in batches because a request narrates several stages and should pay for one round trip, while reads are paged because a journal only grows."
+              "summary": "Four operations, and the asymmetry is deliberate: writes arrive in batches because a request narrates several stages and should pay for one round trip, while reads are paged because a journal only grows."
+            },
+            {
+              "name": "TelemetryPruner",
+              "kind": "type",
+              "signature": "type TelemetryPruner = Pick<TelemetryJournal, \"read\" | \"forget\">;",
+              "truncated": false,
+              "summary": "The halves of the journal its two in-package consumers actually use."
+            },
+            {
+              "name": "TelemetryWriter",
+              "kind": "type",
+              "signature": "type TelemetryWriter = Pick<TelemetryJournal, \"record\">;",
+              "truncated": false,
+              "summary": ""
             }
           ]
         },
@@ -10278,7 +10313,7 @@
             {
               "name": "applyRetention",
               "kind": "function",
-              "signature": "const applyRetention: (journal: TelemetryJournal, request: RetentionRequest) => Promise<RetentionOutcome>",
+              "signature": "const applyRetention: (journal: TelemetryPruner, request: RetentionRequest) => Promise<RetentionOutcome>",
               "truncated": false,
               "summary": "Reads the oldest end of a journal, decides what may go, and drops it."
             },
@@ -10313,7 +10348,7 @@
             {
               "name": "collectTelemetry",
               "kind": "function",
-              "signature": "const collectTelemetry: (journal: TelemetryJournal) => TelemetryCollector",
+              "signature": "const collectTelemetry: (journal: TelemetryWriter) => TelemetryCollector",
               "truncated": false,
               "summary": ""
             }
@@ -10333,10 +10368,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 36,
+      "files": 37,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10407,10 +10442,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 86,
+      "files": 87,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10865,10 +10900,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 71,
+      "files": 72,
       "narrower": [],
       "standing": {
-        "packageNames": 1226,
+        "packageNames": 1231,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

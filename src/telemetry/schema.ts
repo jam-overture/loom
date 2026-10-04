@@ -34,5 +34,20 @@ export const loomTelemetry = pgTable(
       .notNull()
       .default(sql`now()`),
   },
-  (table) => [index("loom_telemetry_tree_seq_idx").on(table.treeId, table.seq)]
+  (table) => [
+    index("loom_telemetry_tree_seq_idx").on(table.treeId, table.seq),
+    /**
+     * The JSON-path index the comment above promised, partial on the one event
+     * type that carries an assessment. `assessments` on the journal looks a set
+     * of proposals up by this path; without it that is a sequential scan of
+     * every record the deployment has ever narrated.
+     *
+     * Partial rather than whole because the predicate is the discriminant: only
+     * `change-assessed` records have the path at all, and an index over the rest
+     * would be an entry per row holding nothing.
+     */
+    index("loom_telemetry_assessed_proposal_idx")
+      .on(sql`(${table.event} -> 'assessment' ->> 'proposalId')`)
+      .where(sql`${table.event} ->> 'type' = 'change-assessed'`),
+  ]
 )
