@@ -41464,8 +41464,11 @@ broadcaster keeps shipping no schema library for it.
 class — **one instance closed** by `docs-43-what-these-do-not-mean`, which added
 the vocabulary panel's first render test; **the second and the one that matched
 the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
-`_components/entry-points.test.tsx`. **Six chrome components remain**: `callout`,
-`code-block`, `mobile-nav`, `sidebar`, `submit-seam`, `theme-toggle`.
+`_components/entry-points.test.tsx`; **the two of the six chrome components that
+were not decoration closed** by `docs-46-the-only-way-to-any-of-this`, which
+added `_components/sidebar.test.tsx` and `_components/mobile-nav.test.tsx` and
+found a defect in the second of them. **Four chrome components remain**, all of
+them decoration: `callout`, `code-block`, `submit-seam`, `theme-toggle`.
 
 > **Noted, 4 October.** `docs-45-which-way-round-a-theme-is` adds three produced
 > blocks to the theming page and `_components/palette-scheme.test.tsx` in the
@@ -41474,6 +41477,16 @@ the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
 > them that are not decoration. Written here rather than as a new entry because
 > *a run did the thing the class asks for* is not a finding; it is what the
 > entry is for.
+
+> **Noted, 5 October.** `docs-46-the-only-way-to-any-of-this` closes `sidebar`
+> and `mobile-nav` — twenty-five assertions, and the first of the two kinds of
+> evidence this entry was written to ask for. `nav.test.ts` holds the model the
+> rail reads about as hard as a model gets held on this site, and **every one of
+> its assertions stays green if the rail prints nothing at all**; the rail is
+> also the only way a reader reaches a second page. What rendering it found is
+> in the 5 October entry below: a menu whose open state outlived every
+> navigation it had no part in. Written as its own entry rather than here
+> because it is a defect in a component and not a gap in the tests.
 
 The `entry-points` row is worth two sentences of its own, because it is the
 whole shape of the class in one table. `entry-points.test.ts` holds the list of
@@ -43672,3 +43685,57 @@ tree alone cannot see any prop whose drawing is conditional on an answer, so a
 primitive that declares `reads` needs the probe to answer it or its copy
 declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
+
+---
+## 2026-10-05 — state in a component a layout mounts outlives every navigation inside that layout, so the phone menu closed on the one navigation it caused and stayed open for all the others
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` (fixed on this branch) ·
+**Status:** closed for `(docs)` — **one other instance of the shape named below
+for `Loom lessons` to judge**, which is why this is an entry rather than a line
+in a report
+
+`MobileNav` is the whole of how a reader on a phone reaches a second page of the
+documentation: the desktop rail is `hidden lg:block`, and on a narrow screen it
+lives behind a *Browse the documentation* button. It held `useState(false)`, and
+set it back to `false` from `Sidebar`'s `onNavigate` — which is the press of a
+link **inside the menu**, and the only navigation it knew about.
+
+It is mounted by `docs/layout.tsx`. A layout is preserved across every
+navigation inside it, which is what a layout is for, so the flag was preserved
+too. **Every other way of leaving a documentation page left the menu open over
+the page the reader arrived at**, and on a phone that is most of them:
+
+- the search dialog in the header, which `router.push`es its result;
+- a cross-reference in the prose, which is the commonest of all;
+- the pager at the foot of the page;
+- the wordmark, which goes to `/docs` and from there to the first page.
+
+In each case the reader asks for a page, gets it, and sees a list of forty links
+over the top of it — with the one control that would clear it being a *Close*
+button for something they do not remember opening.
+
+**What makes this worth an entry is that nothing in the component is wrong.**
+`onNavigate` does exactly what it was written to do. The gap is between a
+component's lifetime and a route's, and it is invisible from inside the
+component: none of the four navigations above is something `MobileNav` could be
+told about.
+
+**The fix is to stop holding a flag.** The state is now *which page the menu was
+opened on* — `openAt: string | undefined` — and `open` is `openAt === pathname`.
+Every navigation closes it, including the ones nobody has thought of, with no
+effect to run and nothing to clean up. `onNavigate` stays, and both halves are
+load-bearing: a route pushed from inside the panel takes a moment to commit, and
+without the callback the menu is over the page for as long as it is pending.
+
+Two tests in `_components/mobile-nav.test.tsx` hold it, and both are red against
+the version that shipped — confirmed by restoring it.
+
+**The general form, for the three other surfaces:** *a client component a layout
+mounts keeps its state across every navigation inside that layout, so any
+disclosure in one is open on pages the reader never opened it on.* A grep for
+`useState` in a layout-mounted client component finds one other instance today:
+`(lessons)/_components/notice.tsx` holds `showing` for the details of a
+record-storage warning. That is **not** being filed as a defect — the warning it
+belongs to is a property of the browser rather than of the page, so a panel that
+stays expanded across a navigation may well be what its owner wants. It is named
+here so the judgement is made rather than inherited.
