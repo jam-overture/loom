@@ -99,16 +99,16 @@ exercise calls the seam through a double and a double satisfies both signatures.
 The paragraph that used to sit here named exactly that fault as the kind nothing
 would reach.
 
-**And since 3 October a transcript may say, in a line you will never see, that
-its red is expected.** Three exercises in this course print a second copy of a
-fact another lane owns, on purpose, because in each case that set is what the
-lesson is *about* and so a new member of it is news: lesson 29's exercise C prints
-the primitives with a prop nothing reads, lesson 33's exercise G prints which of
-them have declared what they could not show, and lesson 32's exercise G prints
-what `tools/specimen/` hands to a browser and what a test can do with it. Each
-will go red the day another lane writes the thing its lesson describes, and the
-right response is to re-run the exercise and paste in what it prints now, not to
-go hunting for a mistake. That was written down in two places and neither was the one a lane
+**And since 3 October a transcript may say, in a line you will never see, what
+moves it.** Four fences carry such a mark, for two different reasons. Two of them
+print a set that *is* the lesson's subject — lesson 29's exercise C prints the
+primitives with a prop nothing reads, lesson 33's exercise G prints which of them
+have declared what they could not show — so a new member of that set is news, and
+the mark is there to stop an expected red being read as drift: re-run the exercise
+and paste in what it prints now, rather than hunting for a mistake. The other two,
+on lessons 32 and 24, are there because **the paragraphs under them are a function
+of the lines in them**, which is a thing the lane correcting a line has no other way
+to find out. That was written down in two places and neither was the one a lane
 tripping over it would read: a paragraph for the reader under one fence, and a
 comment on a constant in a *passing* assertion for the other. It is now an HTML
 comment on the line above the fence — invisible on GitHub, invisible at
@@ -117,16 +117,19 @@ excuses anything: a marked fence that has drifted still fails, and a marked
 fence that matches *nothing* now fails too, which is the one case the comparison
 used to pass over in silence.
 
-**What it buys is a message and never a verdict, and the third mark is there
-because the message was the thing that failed.** Lesson 32's numbers moved on
-2 October, were corrected from outside this lane the same day — which is what the
-convention asks of a lane that has just made somebody's suite red — and the
-paragraph drawing the conclusion under them was left saying the opposite, on `main`,
-for two days. Nothing was wrong with how that was handled; what was missing was
-anywhere for the next lane to read that the prose under the fence is load-bearing.
-So that mark says it, and the limit is worth stating where the construct is
-described: a lane that pastes in a corrected line and says nothing still leaves the
-paragraph as stale as it was.
+**What it buys is a message and never a verdict, and the second pair of marks is
+there because the message was the thing that failed.** Lesson 32's numbers moved on
+2 October and lesson 24's on 4 October. Both times they were corrected from outside
+this lane the same day — which is exactly what the convention asks of a lane that
+has just made somebody's suite red — and both times the paragraphs drawing the
+conclusion under them were left saying the opposite, on `main`. Nothing was wrong
+with how either was handled; what was missing was anywhere for the correcting lane
+to read that the prose was load-bearing. So those two marks say it. The limit
+belongs here too: a lane that pastes in a corrected line and says nothing still
+leaves the paragraph as stale as it was, and **the marks are on the two fences whose
+prose leans on them** — lessons 22 and 23 pin the size of the library as well and
+have none, because their prose declines to lean on the number, deliberately and in
+as many words.
 
 Two things it still does not reach, said here rather than discovered later. A
 count is the cheapest second copy a sentence can carry and **most of what a
@@ -341,7 +344,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [21](21-appearance.md) | Appearance: the look a tree names and cannot check | Why a model may not write a colour and the reason has nothing to do with colour; why there is no default theme; and where a property belonging to no single party can possibly be checked. |
 | [22](22-reach.md) | Reach: the fault that belongs to two nodes | Why a page can be valid node by node and broken as a whole; what a primitive is allowed to declare about itself and what it is not; and the one thing the Gate refuses for being wrong rather than for being consequential. |
 | [23](23-anchors.md) | Anchors: the name a page gives a place inside itself | Why the one link a page could not make was the one pointing at itself; which of the three questions a name raises a per-node schema can answer, and why the other two decided the design; and what it costs when a check is correct, tested, and reaches nothing. |
-| [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, what shape an answer needs in order to say it and what decides how many fields that shape has; why replacing a correct guess with an authoritative source is a regression until the authority has been told — and what it meant that the seam built to stop a missing word going silent did exactly that, in a case its own lesson printed. |
+| [24](24-silence.md) | Silence: what a system says when nobody has told it | Why the words a page shows are knowable by exactly one party; what a reading owes a caller about the primitives that have not spoken yet, what shape an answer needs in order to say it and what decides how many fields that shape has; why replacing a correct guess with an authoritative source is a regression until the authority has been told, and what it means for that argument that the authority has since been told; what it meant that the seam built to stop a missing word going silent did exactly that, in a case its own lesson printed — and what it says for a result type that the day its library finally spoke, nothing about its shape had to move. |
 | [25](25-exhaustiveness.md) | Exhaustiveness: the one question of three a compiler answers | Why "this union is handled everywhere" is three different claims and a compiler checks one of them; where to put a list so that making it incomplete is a build failure rather than a habit; why a test that restates the value it is testing is a second copy with a tick beside it — and what was still wrong after the repository read this lesson and fixed the list. |
 | [26](26-liveness.md) | Liveness: what a queue of changes cannot say about itself | Why a list assembled from one store cannot be judged without a second one, and why the field you want to add is the wrong half of the comparison; why the obvious `>` is wrong and which authority settles it; and what a third answer buys over the friendlier of the two you already have. |
 | [27](27-scale.md) | Scale: the fact a sibling holds and a renderer may not reach | Why a container cannot read its own children and what the obvious way round it spends; what you inherit when you hand a computation to a different machine, and which ordinary chart features that machine's data model forbids; why the number the whole design was built to deliver is computed by nobody and is not supposed to be — and what it costs that a record's argument for authoring it is implemented as an optional prop with a default. |
@@ -417,6 +420,19 @@ sound alike. The rest of the story is the part worth keeping: the seam had been
 wrong since the day it shipped, its test suite was green, the test for this exact
 case asserted the one field that looked right, and what found it was writing the
 worked example out and reading what it printed.
+
+**And on 4 October it got a third half, which is the one the lesson was waiting
+for without being able to say so.** It shipped describing two declarations that
+nothing in the library had made, a reading that was *exactly as ignorant as before
+and saying so*, and a third field that was a promise kept against a day that had
+not arrived. The library then answered `copy` for every primitive in it. So the
+exercise now prints the same return shape from the other direction — the words the
+band shows, `unread: none`, and an `unspoken` naming the one rating whose number it
+will not guess the formatting of — and **nothing about the shape had to move on the
+day the data arrived**, which is the strongest thing that can be said for a result
+type and could not be said until it happened. The seam that is still empty is
+`role`, and the lesson now has to distinguish two kinds of empty: one was waiting
+on a library and the other is waiting on a reason.
 
 Lesson 25 turns that question on the checker every one of the first seven took
 for granted, which is the compiler — and finds a third axis. It sees everything,

@@ -566,23 +566,32 @@ describe("the marks on a lesson's transcripts", () => {
   }
 
   /**
-   * And the three that exist, by name.
+   * And the four that exist, by name.
    *
    * Pinned for the reason everything else here is pinned: a mark removed is a
    * fence that goes back to reporting its red as drift, which is a worse message
    * and a true one, so nothing else in this file would notice.
    *
-   * Two of the three are waiting on the same lane and are second copies of
-   * `src/primitives/`. The third, on lesson 32, is the first that is not, and it
-   * arrived for a different reason than the other two: that lesson's fence had
-   * already moved — a test somebody else wrote on 2 October added a row — and the
-   * numbers were corrected from outside this lane while the paragraph drawing the
-   * conclusion under them was left asserting the opposite on `main` for two days.
-   * The other two marks exist so that an expected red is not mistaken for drift.
-   * That one exists so that a lane correcting a line is told the prose under it is
-   * load-bearing, which is the half of 2 October that no file said anywhere.
+   * They are there for two different reasons, and the difference is what decides
+   * whether a fence wants one.
+   *
+   * **An expected red.** Lessons 29 and 33 print a set that *is* the lesson's
+   * subject — the primitives with a prop nothing reads, the primitives that have
+   * declared what they could not show — so a new member of it is news rather than
+   * a mistake, and the mark stops the red being read as drift.
+   *
+   * **Load-bearing prose.** Lessons 32 and 24 had their numbers moved from outside
+   * this lane, correctly, on 2 and 4 October, and both times the paragraph drawing
+   * the conclusion under them was left asserting the opposite on `main`. Their
+   * marks say that the prose below is a function of these lines, which is the half
+   * of both incidents that no file said anywhere.
+   *
+   * That second reason is also why lessons 22 and 23 have no mark, though their
+   * fences pin the size of the library too: their prose declines to lean on the
+   * number, deliberately and in as many words. **A fence wants a mark when
+   * correcting a line of it is not the whole repair.**
    */
-  it("are on the three fences that have signed up for one", () => {
+  it("are on the four fences that have signed up for one", () => {
     const marked = WRITTEN_LESSONS.flatMap((entry) => {
       if (entry.file === undefined) return []
 
@@ -593,6 +602,6 @@ describe("the marks on a lesson's transcripts", () => {
         .map(() => entry.number)
     })
 
-    expect(marked).toEqual([29, 32, 33])
+    expect(marked).toEqual([24, 29, 32, 33])
   })
 })

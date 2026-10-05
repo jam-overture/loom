@@ -9,6 +9,7 @@ import {
 } from "@jam-overture/loom"
 import { commitIntent, confirmHeld, type HeldProposal } from "@jam-overture/loom/write"
 
+import { roomToLand } from "./arrival"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"
 import { askedWith, DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
@@ -661,7 +662,7 @@ describe("what a landed change is still holding", () => {
  * scroll is taken to another is the pair of half-decisions the whole unit
  * exists to stop.
  */
-describe("the card the visitor's answer landed", () => {
+describe("the card the visitor's press landed", () => {
   it("names the record whose answer produced the revision the page is at", async () => {
     const session = await sessionFor("landing")
     const asked = await ask(session, DEMO_LEADING_PRESET)
@@ -683,27 +684,35 @@ describe("the card the visitor's answer landed", () => {
   })
 
   /**
-   * **And nothing for a change that applied on its own**, which is the row that
-   * separates this from *the newest applied record*. Nobody was asked, so
-   * nothing is being held still for them: the page moving is its own
-   * announcement, and the rail dragging itself to the card would be the surface
-   * moving for its own reasons (`answer-in-view.tsx`).
+   * **And the one the Gate let through on its own, which is the row this run
+   * added.** `palette` is marked **GOES AHEAD** on the arrival screen: one
+   * press, no question, and the record of it is the only place the Gate's
+   * verdict, the reversibility and **Put it back** exist. It got no landing
+   * until today, and measured at 1280 × 900 that left its card's top at 848 of
+   * a 900px viewport.
+   *
+   * Asserted through the wiring rather than against `landed.ts` alone, because
+   * the wiring is what was wrong: the reading was right about the card it named
+   * and was being asked too narrow a question.
    */
-  it("names nothing for a change nobody was asked about", async () => {
+  it("names a change that went ahead with nobody asked", async () => {
     const session = await sessionFor("landing-alone")
     const asked = await ask(session, "palette")
 
     const { view } = await railOf(asked.session)
 
     expect(asked.record.outcome).toBe("applied")
-    expect(view.landing).toBeUndefined()
+    expect(asked.record.answeredBy).toBeUndefined()
+    expect(view.landing).toBe(asked.record.recordId)
   })
 
   /**
    * And it goes quiet on its own once anything else has moved the page — no
    * flag to clear, because the revision it is compared against is the page's.
+   * Two changes, and the landing is the second: the card the visitor answered
+   * is the one the page has moved past.
    */
-  it("goes quiet once a later change has moved the page", async () => {
+  it("moves to the newest card once a later change has moved the page", async () => {
     const session = await sessionFor("landing-past")
     const asked = await ask(session, DEMO_LEADING_PRESET)
     const landed = await allow(asked.session, asked.record)
@@ -712,6 +721,66 @@ describe("the card the visitor's answer landed", () => {
     const { view } = await railOf(after.session)
 
     expect(after.record.outcome).toBe("applied")
-    expect(view.landing).toBeUndefined()
+    expect(view.landing).toBe(after.record.recordId)
+    expect(view.landing).not.toBe(landed.record.recordId)
+  })
+
+  /**
+   * **And it is the one card left to carry a visitor to, in the sequence a
+   * stranger actually makes.** The caution the rail pins exists because they
+   * press a second ask before answering the first — and a one-press change
+   * moves the page past the hold's base revision, so the question stops being
+   * answerable (`movedOn`) and the caution goes with it. The card the press
+   * landed is then the only thing on this rail that happened.
+   *
+   * Which `TheRecord` would hand the scroll to if both were live is its own
+   * ordering and asserted there: a question the demo cannot proceed without
+   * outranks a card that has already landed. Here the pair is asserted at the
+   * other end — the room the landing needs (`arrival.ts`) is owed for it, which
+   * is the half that used to be withheld from a change nobody was asked about.
+   */
+  it("is what is left to carry a visitor to once a second ask has set the question aside", async () => {
+    const session = await sessionFor("landing-beside-question")
+    const open = await ask(session, DEMO_LEADING_PRESET)
+    const after = await ask(open.session, "palette")
+
+    const { view } = await railOf(after.session)
+
+    expect(view.readings.get(open.record.recordId)?.moved).toBeDefined()
+    expect(view.waiting).toBeUndefined()
+    expect(view.landing).toBe(after.record.recordId)
+    expect(roomToLand(view)).toBe("lg:pb-[70vh]")
+  })
+
+  /**
+   * **One card per revision, which is what makes the reading a lookup rather
+   * than a search** — and it is asserted here, against records the pipeline
+   * actually produced, because the defect matrix for this unit found it by its
+   * absence. *The reading takes the last match instead of the first* was
+   * restored and the whole lane stayed green: not because the ordering tests
+   * are weak, but because a revision is produced once, so there is no second
+   * record for an ordering to choose between.
+   *
+   * It is a claim about what `record.ts` emits and not about a fixture, so it
+   * is made over a real sequence: a question asked and answered, then two asks
+   * the Gate let through. A later record shape that let two cards claim one
+   * revision — a repair minting its own, an undo folded onto the record it
+   * undoes — fails here rather than showing a stranger whichever card
+   * `Array.prototype.find` reached first.
+   */
+  it("leaves at most one record claiming any revision the page can be at", async () => {
+    const session = await sessionFor("landing-unique")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const answered = await allow(asked.session, asked.record)
+    const second = await ask(answered.session, "palette")
+    const third = await ask(second.session, "backdrop")
+
+    const { view } = await railOf(third.session)
+    const claimed = third.session.records.flatMap((record) => record.revision?.produced ?? [])
+
+    expect(third.record.outcome).toBe("applied")
+    expect(claimed.length).toBeGreaterThan(2)
+    expect(new Set(claimed).size).toBe(claimed.length)
+    expect(view.landing).toBe(third.record.recordId)
   })
 })
