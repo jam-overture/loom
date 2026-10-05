@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5427,7 +5427,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5885,7 +5885,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6749,7 +6749,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7340,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7568,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7712,7 +7712,7 @@
         {
           "module": "store/replay",
           "title": "Replay",
-          "summary": "Replay, and the audit it exists for.",
+          "summary": "Replay: folding the log, and the two questions a fold answers.",
           "symbols": [
             {
               "name": "ReplayMismatch",
@@ -7748,6 +7748,48 @@
               "signature": "const auditSnapshot: (store: TreeReader, treeId: TreeId, seed: LoomTree) => Promise<Result<SnapshotAudit, StoreError>>",
               "truncated": false,
               "summary": "Folds a tree's log from a known seed and compares the result to the stored snapshot. A host runs this in a test or a scheduled job; nothing on a request path needs it, which is the point."
+            },
+            {
+              "name": "TreeAtTarget",
+              "kind": "type",
+              "signature": "type TreeAtTarget = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly seed: LoomTree;\n};",
+              "truncated": false,
+              "summary": "One revision of one tree, and the seed to reach it from."
+            },
+            {
+              "name": "TreeAtTargets",
+              "kind": "type",
+              "signature": "type TreeAtTargets = {\n    readonly treeId: TreeId;\n    readonly revisions: readonly number[];\n    readonly seed: LoomTree;\n};",
+              "truncated": false,
+              "summary": "The same question asked about several revisions of one tree, in one read."
+            },
+            {
+              "name": "TreeAtRevision",
+              "kind": "type",
+              "signature": "type TreeAtRevision =\n/**\n * The fold reached the named revision. `replayed.tree.revision` equals the\n * revision asked for, and `replayed.idHistory` is the tenancy of every id from\n * the seed up to it — which is the half a caller reading counters by node id\n * needs, because an id that returned in between names two different nodes\n * either side of the comparison.\n */\n{\n    readonly outcome: \"replayed\";\n    readonly revision: number;\n    readonly replayed: ReplayedTree;\n}\n/**\n * Not a revision this seed and this log can reach: before the seed, after the\n * head, or not an integer — revisions are dense integers and nothing\n * lies between two of them, so a fractional one is not a position the log has.\n *\n * `earliest` is the seed's own revision rather than one past it, which is the\n * one place this differs from a revert's span: the tree at the seed is the\n * seed, and a revision cannot be undone by inverting a delta the seed already\n * contains.\n */\n | {\n    readonly outcome: \"out-of-range\";\n    readonly revision: number;\n    readonly earliest: number;\n    readonly headRevision: number;\n} | {\n    readonly outcome: \"unreplayable\";\n    readonly revision: number;\n    readonly mismatch: ReplayMismatch;\n};",
+              "truncated": false,
+              "summary": "The tree as it was, or why the log cannot say."
+            },
+            {
+              "name": "describeTreeAt",
+              "kind": "function",
+              "signature": "const describeTreeAt: (answer: TreeAtRevision) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "treeAt",
+              "kind": "function",
+              "signature": "const treeAt: (reader: TreeReader, target: TreeAtTarget) => Promise<Result<TreeAtRevision, StoreError>>",
+              "truncated": false,
+              "summary": "The tree as it was at a chosen revision."
+            },
+            {
+              "name": "treesAt",
+              "kind": "function",
+              "signature": "const treesAt: (reader: TreeReader, targets: TreeAtTargets) => Promise<Result<ReadonlyMap<number, TreeAtRevision>, StoreError>>",
+              "truncated": false,
+              "summary": "The same answers for several revisions, from one read of the log."
             }
           ]
         },
@@ -7985,7 +8027,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8381,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8472,7 +8514,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9662,7 +9704,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9805,7 +9847,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9872,7 +9914,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10469,7 +10511,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10543,7 +10585,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11001,7 +11043,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1249,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
