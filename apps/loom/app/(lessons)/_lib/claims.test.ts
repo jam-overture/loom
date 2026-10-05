@@ -4,6 +4,9 @@ import { join } from "node:path"
 import {
   dispositionReasonCodeSchema,
   ESCALATION_LADDER,
+  FIXED_STAKE_FACTOR_CODES,
+  MEASURED_STAKE_FACTOR_CODES,
+  STAKE_FACTOR_CODES,
   treeOperationSchema,
 } from "@jam-overture/loom"
 import { BEHAVIOUR_NAMES } from "@jam-overture/loom/react"
@@ -90,6 +93,8 @@ const NUMBER_WORDS = [
   "ten",
   "eleven",
   "twelve",
+  "thirteen",
+  "fourteen",
 ] as const
 
 const wordFor = (count: number): string => {
@@ -179,6 +184,31 @@ const CLAIMS: readonly CourseClaim[] = [
     count: treeOperationSchema.options.length,
     occurrences: 10,
     matters: "the count five lessons and the schedule lean on, and the limit that makes a delta gateable",
+  },
+  {
+    what: "the Gate's stakes rules",
+    phrase: /stakes vocabulary has (\w+) rules/,
+    count: STAKE_FACTOR_CODES.length,
+    occurrences: 3,
+    matters:
+      "the sentence lesson 34 states the partition in, its self-check, and Set AM — the same " +
+      "three places lesson 09's ladder was wrong in twice, about the list one level down",
+  },
+  {
+    what: "the stakes rules a policy field decides",
+    phrase: /(\w+) of those rules read a field of the policy/,
+    count: MEASURED_STAKE_FACTOR_CODES.length,
+    occurrences: 1,
+    matters:
+      "the half lesson 34 says can be asked again — a rule that joins it by derivation reaches " +
+      "both exported lists and neither sentence",
+  },
+  {
+    what: "the stakes rules fixed at their code",
+    phrase: /(\w+) are fixed at their code/,
+    count: FIXED_STAKE_FACTOR_CODES.length,
+    occurrences: 1,
+    matters: "the other half, where the recorded code is the whole of the answer",
   },
 ]
 
