@@ -157,26 +157,53 @@ closed, the reply is schema-constrained, and the Gate catches what gets through.
 6. **Every arm is attributable.** A reading that cannot name the revision it
    belongs to is dropped rather than pooled.
 
-## The plan, in order
+## The game plan
 
-Each step is worth having if the next one never happens.
+Seven milestones. **Each is worth having if the next never happens** — that is
+the test every one of them had to pass to be on this list, because an adaptation
+loop is exactly the kind of project that is abandoned four fifths of the way
+through and leaves nothing behind.
 
-1. **A prototype, not a framework change.** The ski page is the precedent: the
-   loop is discovered end to end on a real page and hardened afterwards.
-   `prototypes/` belongs to no lane.
-2. **Serve a revision, and attribute to it.** Assignment per view, the chosen
-   revision rendered, signals landing under it. At this point the page can answer
-   *where do readers stop* per revision, and nothing is being optimised.
-3. **Derivation from tallies.** Counters to one sentence, deterministic, with the
-   numbers that produced it carried alongside.
-4. **The model seam, with a small local model.** Sentence to operations, through
-   the Gate, held for a person — which at this traffic is where it stops.
-5. **The allocator.** Deliberately dumb, swappable, and reporting *no winner*
-   when there is none.
-6. **Promotion and guardrails.** The floor before promotion, the early stop, and
-   the guard metric above.
-7. **Harden what proved stable** into `src/`, which is where the lane question
-   gets answered rather than guessed.
+Status is kept here. A run that finishes one marks it, and a run that learns the
+plan was wrong says so here rather than in a report nobody reads again.
+
+| # | Milestone | Owner | Done looks like | Status |
+| --- | --- | --- | --- | --- |
+| 1 | **A page with an ask, addressed and broadcasting** | maintainer session | Signals arriving at an intake, filed under one tree and revision. No model, no variants | **blocked** — needs the page, and which node is the ask |
+| 2 | **Serve a revision, and attribute to it** | maintainer session | Two revisions served, assignment randomised per view, tallies accumulating separately under each. The page can answer *where do readers stop*, per revision | not started |
+| 3 | **Derivation from tallies** | maintainer session | Counters → one sentence a person could argue with, deterministic, with the numbers that produced it carried alongside. Tested against a case where it should say nothing | not started |
+| 4 | **The model seam, with a small local model** | maintainer session | Sentence → operations → the Gate → held for a person, and the record reads correctly: rationale, origin `system-signal`, inverse | not started |
+| 5 | **The allocator** | undecided | Recommends an arm, reports *no winner* when there is none, and cannot promote below the evidence floor | not started |
+| 6 | **Promotion and guardrails** | undecided | Promotion goes through the Gate like any change and is revertible; the guard metric stops a variant that wins reach and loses conversion | not started |
+| 7 | **Harden what proved stable into `src/`** | a lane, decided then | The parts that stopped changing move out of the prototype. This is when the lane question gets answered rather than guessed | not started |
+
+**Milestones 1 to 4 are a maintainer session's**, in the open, on a prototype —
+the ski page is the precedent and `prototypes/` belongs to no lane. Nothing here
+is a routine's until step 7, and making it one earlier would hand a nightly agent
+a design that has never run.
+
+### If this stalls, milestone 2 is the one to finish
+
+A page that can say *readers get this far and stop*, per revision, pays for
+itself with no model, no allocator and no statistics. Everything after it is
+optimisation; it is description, and description is what nobody has today.
+
+### What is blocked on the maintainer
+
+1. **The page, and which node is the ask.** Milestone 1 cannot start without it,
+   and it is a page-design decision rather than an engineering one.
+2. **Confirming the objective** above — reach as the target, conversion rate as
+   the guard — or naming a different one.
+3. **The evidence floor**: how many views per arm before anything may be promoted
+   without a person. The arithmetic above says a few hundred for reach; the number
+   is a judgement about how much being wrong costs.
+
+### Where this is written down
+
+- **This file** is the plan and the status. It is the only place either lives.
+- `docs/signals.md` ends where this begins and points here.
+- `docs/rollout.md` carries it as a phase, so it is visible from the plan that
+  tracks launch.
 
 ## Still not in scope
 
