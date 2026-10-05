@@ -25,6 +25,8 @@ import {
 import { previewReversal, type Reversal } from "@/app/(portal)/_lib/reversal"
 import { seedFor } from "@/app/(portal)/_lib/seeds"
 import { ensureSeeded, portalStore, storeIsDurable } from "@/app/(portal)/_lib/store"
+import { checkUndo } from "@/app/(portal)/_lib/undo-check"
+import { portalTelemetry } from "@/app/(portal)/_lib/telemetry"
 
 import { RevisionBox } from "./_components/revision-box"
 import { RevisionRow } from "./_components/revision-row"
@@ -180,6 +182,24 @@ const HistoryPage = async ({
         )
 
   /**
+   * And whether undoing one would undo everything it did, which the log cannot
+   * answer and the journal can (0225).
+   *
+   * `reversals` above is about the **page** — what an undo puts back, and what
+   * later work it writes over. This is about the **world**: the Gate recorded,
+   * at the moment it judged each change, whether putting the page back would
+   * put everything back. A tree-level inverse always exists (0016), so a change
+   * that took a payment has a perfectly clean reversal and this screen has been
+   * drawing the undo button over it with nothing said.
+   *
+   * One lookup for the whole page rather than one per row, which is the shape
+   * `assessments` was built for: it answers about a set of proposals a caller
+   * already holds. Where `reversals` spends a bounded read per row because a
+   * plan is per revision, this spends one for all of them.
+   */
+  const undo = await checkUndo(portalTelemetry, scope.data, newestFirst)
+
+  /**
    * A revision this log does not hold is not an error to the store — it answers
    * with the entries on that side of the number instead — so the page lands
    * looking exactly like an ordinary visit. Saying which of the ways it missed
@@ -215,6 +235,25 @@ const HistoryPage = async ({
 
       {anchorMiss && <p className="text-ink-muted text-sm">{anchorMiss}</p>}
 
+      {/*
+        * What the screen could not find out, said once and above the rows it is
+        * about rather than on each of them. It is a fact about the read, not
+        * about any one change — and the common absence, *nothing was recorded
+        * about this change*, is deliberately not here: that is an answer, and a
+        * line on every row claiming otherwise would be noise on every history
+        * screen of every deployment with no journal.
+        */}
+      {undo.gap !== null && (
+        <StateNotice tone="notice" title="Loom couldn’t check all of these.">
+          <p>{undo.gap.reading}</p>
+          {undo.gap.technical !== undefined && (
+            <TechnicalDetail summary="What went wrong">
+              <p className="font-mono">{undo.gap.technical}</p>
+            </TechnicalDetail>
+          )}
+        </StateNotice>
+      )}
+
       {newestFirst.length === 0 ? (
         <StateNotice
           tone="empty"
@@ -238,6 +277,7 @@ const HistoryPage = async ({
               stored={stored}
               anchored={stored.revision === anchor}
               reversal={reversals.get(stored.revision)}
+              undoing={undo.standings.get(stored.revision)}
               standing={standing}
             />
           ))}

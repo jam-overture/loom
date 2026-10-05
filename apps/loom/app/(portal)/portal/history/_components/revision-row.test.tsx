@@ -239,6 +239,95 @@ describe("RevisionRow", () => {
    * row shows the restore preview *and* keeps the button; without one it falls
    * back to the button alone, which is what it did before the preview existed.
    */
+  /**
+   * The gap this screen had and nothing else did. `ReversalNote` says what
+   * undoing puts back, and every word of it is about the page — so a change
+   * that took a payment has a perfectly clean reversal, and the undo button sat
+   * over it with nothing said. The judgment reaches this row through the
+   * journal (0225); what it says is the same sentence the review queue says.
+   */
+  describe("whether undoing would undo everything it did", () => {
+    const clean = {
+      kind: "revertable" as const,
+      restores: [{ before: "Puts ", subject: "n_card", after: "'s variant back." }],
+      inverse: [],
+      discards: [],
+    }
+
+    it("warns above the button, after the note that says the page comes back", () => {
+      const { container } = render(
+        <RevisionRow
+          stored={entryAt(4)}
+          reversal={clean}
+          undoing={{
+            undoable: false,
+            unexplained: false,
+            obstacles: [
+              {
+                label: "Putting the page back would not put everything back",
+                meaning: "Check what Card is wired to before you say yes.",
+                technical: "out-of-tree-effect",
+              },
+            ],
+          }}
+        />
+      )
+      const read = rowOf(container).textContent ?? ""
+
+      expect(read).toContain("Putting the page back would not put everything back")
+      expect(read.indexOf("variant back")).toBeLessThan(read.indexOf("Putting the page back"))
+      expect(read.indexOf("Putting the page back")).toBeLessThan(read.indexOf("Undo this change"))
+    })
+
+    /**
+     * The button stays. A change that is irreversible *outside* the page is
+     * still invertible inside it — 0016 guarantees the inverse — so hiding the
+     * control would refuse something the runtime will do. The reader is told,
+     * and decides, which is the same posture the page screen takes.
+     */
+    it("still offers the button, because the page itself does come back", () => {
+      const { container } = render(
+        <RevisionRow
+          stored={entryAt(4)}
+          reversal={clean}
+          undoing={{
+            undoable: false,
+            unexplained: false,
+            obstacles: [
+              { label: "Too much would have to be kept", meaning: "Nine parts.", technical: "retention-budget-exceeded" },
+            ],
+          }}
+        />
+      )
+
+      expect(within(rowOf(container)).getByRole("button", { name: "Undo this change" })).toBeTruthy()
+    })
+
+    it("says nothing extra for a change the Gate called undoable", () => {
+      const { container } = render(
+        <RevisionRow
+          stored={entryAt(4)}
+          reversal={clean}
+          undoing={{ undoable: true, unexplained: false, obstacles: [] }}
+        />
+      )
+
+      expect(rowOf(container).textContent).not.toContain("would not put everything back")
+    })
+
+    /**
+     * The common case on every deployment with no journal, and the one the row
+     * must be silent about: nothing was recorded, which is an answer rather
+     * than a gap. What the screen could not *find out* is said once by the page.
+     */
+    it("says nothing when no judgment was recorded about the change", () => {
+      const { container } = render(<RevisionRow stored={entryAt(4)} reversal={clean} />)
+
+      expect(rowOf(container).textContent).not.toContain("would not put everything back")
+      expect(within(rowOf(container)).getByRole("button", { name: "Undo this change" })).toBeTruthy()
+    })
+  })
+
   describe("the reversal preview", () => {
     it("shows what undoing would restore, and still offers the button", () => {
       const { container } = render(
