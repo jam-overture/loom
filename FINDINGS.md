@@ -30,7 +30,7 @@ reports, and the exact count of readers has been sitting in a second row since
 `StoredPageViews` rows for the same tree and revision, in, and a share of the
 readers there were out, per part, in reading order. `src/signals/reach.ts`,
 exported from `@loom/runtime/signals`, recorded in
-[0226](decisions/0226-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md).
+[0229](decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md).
 
 **Four things to know, and the first is the one that decides your copy.**
 

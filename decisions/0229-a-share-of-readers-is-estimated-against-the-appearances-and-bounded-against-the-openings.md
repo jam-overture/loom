@@ -1,8 +1,16 @@
-# 0226 — A share of readers is estimated against the appearances and bounded against the openings
+# 0229 — A share of readers is estimated against the appearances and bounded against the openings
 
 **Status:** Accepted
 **Date:** 2026-10-04
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-05**, from 0226, when the branch that carried it
+> (#516) was merged. `main` had meanwhile accepted a different 0226 — *a
+> primitive declares where its control rests, and the control publishes nothing
+> until the reader moves it* (#515) — and two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> This record was written on 4 October and nothing in it changed but its number;
+> the references to it were updated with it.
 
 ## Context
 

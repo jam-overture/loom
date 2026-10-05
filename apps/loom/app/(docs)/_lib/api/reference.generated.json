@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4674,11 +4674,18 @@
               "summary": "The top of an adjust control's range."
             },
             {
+              "name": "ADJUST_RESTING_PROPERTY",
+              "kind": "value",
+              "signature": "const ADJUST_RESTING_PROPERTY = \"--loom-adjust-resting\"",
+              "truncated": false,
+              "summary": "The property a primitive declares to say **where its control should start**, on the element it places the control in. Read once, at mount, and never again — where the slider goes after that is the reader's."
+            },
+            {
               "name": "ADJUST_RESTING",
               "kind": "value",
               "signature": "const ADJUST_RESTING = 50",
               "truncated": false,
-              "summary": "Where the control sits before anybody moves it."
+              "summary": "Where the control sits when nothing declared otherwise."
             },
             {
               "name": "BEHAVIOURS",
@@ -5427,7 +5434,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5885,7 +5892,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6749,7 +6756,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7347,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7575,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7985,7 +7992,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8346,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8472,7 +8479,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9711,7 +9718,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9854,7 +9861,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9921,7 +9928,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10518,7 +10525,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10592,7 +10599,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11050,7 +11057,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1249,
+        "packageNames": 1250,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

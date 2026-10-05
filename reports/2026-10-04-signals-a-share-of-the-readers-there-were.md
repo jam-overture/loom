@@ -28,7 +28,7 @@ vocabulary**, and the broadcaster was not touched — the diff for
 `src/signals/broadcast.ts` and every module it reaches is empty.
 
 Recorded in
-[0226](../decisions/0226-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md).
+[0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md).
 
 ### The shape, and why there are two denominators
 
@@ -121,16 +121,18 @@ made rather than being told the old figure was wrong.
 
 ## Records
 
-- [0226 — A share of readers is estimated against the appearances and bounded
+- [0229 — A share of readers is estimated against the appearances and bounded
   against the
-  openings](../decisions/0226-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md),
+  openings](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md),
   **Accepted**. It contradicts nothing. 0221's refusal of the exact denominator
   for a fall is restated and kept; 0147's bound and 0219's measurement are used
   as they stand; 0212's read-time join is where this one lives; nothing on the
   wire, in the browser, in a schema, in a store or in the vocabulary moved.
-  **0226 is the next number free on `main`** — 0225 is the highest there, and I
-  checked all four open branches for a claim on 0226 and found none, so no
-  renumber is set up.
+  **Written as 0226** — 0225 was the highest on `main`, and the four open
+  branches checked that day carried no claim on it. #515 claimed 0226 on a
+  branch opened eleven minutes earlier and merged first, so `Loom merge`
+  renumbered this record to **0229** on 5 October; the note under its header
+  records that, and every link and citation of it moved with it.
 
 ## Findings
 
