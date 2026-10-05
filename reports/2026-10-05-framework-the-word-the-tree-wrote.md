@@ -127,7 +127,7 @@ lesson on this seam would want to teach it.
 ## Findings
 
 **Closed:** 1 October, *a presentation's trigger cannot carry a word the tree
-wrote* — the first two of its three rows, by #527. **The third stays open**: an
+wrote* — the first two of its three rows, by #528. **The third stays open**: an
 icon-only trigger is a question about what a control *renders* rather than what
 it is called, and nothing here touches it.
 

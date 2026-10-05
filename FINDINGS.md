@@ -1001,7 +1001,7 @@ catalogue."* now. Reword it freely; just not with a symbol in it.
 ## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
-· **Status:** **closed by #527** for the first two rows, by the second of the
+· **Status:** **closed by #528** for the first two rows, by the second of the
 three shapes below. A primitive may now name one of its own props as where a
 control takes its name from — `names: { present: "label" }` — and the string it
 declared stays underneath as the floor, so a node that writes nothing is
