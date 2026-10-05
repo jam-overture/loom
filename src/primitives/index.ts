@@ -47,6 +47,7 @@ import { loomHero } from "./loom.hero.js"
 import { loomIcon } from "./loom.icon.js"
 import { loomKbd } from "./loom.kbd.js"
 import { loomLightbox } from "./loom.lightbox.js"
+import { loomInlineLink } from "./loom.inline-link.js"
 import { loomLink } from "./loom.link.js"
 import { loomLinkList } from "./loom.link-list.js"
 import { loomLinkPager } from "./loom.link-pager.js"
@@ -488,6 +489,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomAction,
   loomButton,
   loomLink,
+  loomInlineLink,
 ]
 
 /**

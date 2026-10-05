@@ -31,7 +31,7 @@ vocabulary.** The diff for `src/signals/broadcast.ts` and every module it
 reaches is empty.
 
 Recorded in
-[0228](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md).
+[0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md).
 
 ### The one thing that decided everything else
 
@@ -142,7 +142,7 @@ the previous line, verified by reverting it.
 
 **What it would have cost here is worse and quieter than in `parts.ts`.** Missing
 words make a part's reading time look shorter than it is, which biases *away*
-from `skimmed` — so the verdict 0228 builds its whole safety argument on would
+from `skimmed` — so the verdict 0230 builds its whole safety argument on would
 have held, and `paced` would have been handed out to parts nobody could possibly
 have read. The bias that is safe for one verdict is exactly the one that
 silently fabricates the other.
@@ -153,17 +153,20 @@ reference was still publishing.
 
 ## Records
 
-- [0228 — A part was read when readers had time for its words, and only the skim
+- [0230 — A part was read when readers had time for its words, and only the skim
   is a safe
-  claim](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md),
+  claim](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md),
   **Accepted**. It contradicts nothing: 0212's read-time join is what makes the
   rate overridable, 0218's argument against configuring a published number is
   applied at the one remove where it still holds, 0221's ranking rule is reused
   as it stands, 0219's measurement is consumed, and nothing on the wire, in the
   browser, in a schema or in the vocabulary moved.
-- **0228 is the next number free on `main`** (0225 is the highest there); 0226 is
-  claimed by both #515 and #516 and 0227 by #517, all open, so I took the next
-  one after theirs rather than setting up a renumber.
+- **Written as 0228** — 0225 was the highest on `main`, 0226 was claimed by both
+  #515 and #516 and 0227 by #517, all open, so this run took the next one after
+  theirs rather than setting up a renumber. #518 took 0228 for a different
+  question twelve minutes earlier and neither branch could see the other, so
+  `Loom merge` renumbered this record to **0230** on 5 October; the note under
+  its header records that, and every link and citation of it moved with it.
 
 ## Findings
 

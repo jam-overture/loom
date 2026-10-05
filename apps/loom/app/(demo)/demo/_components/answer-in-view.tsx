@@ -40,21 +40,32 @@ const inItsOwnScroller = (card: HTMLElement): boolean => {
  * the screen. That is not a copy problem and no amount of tightening the rail
  * would have fixed it reliably at every height.
  *
- * **Only when something is actually waiting, or when the visitor's own answer
- * has just landed.** A change that applied on its own has already moved the
- * page, which is its own announcement, and its *Put it back* is an offer rather
- * than a question — dragging the rail to it would be the surface moving for its
- * own reasons. Two states are not that: a hold, where the demo has asked the
- * visitor something and cannot proceed until they answer, and the card that
- * answer produced, where the visitor pressed a button *on this card* and the
- * rail must not let it drift out from under them (`landed.ts`, and the 91px is
+ * **Only when something is actually waiting, or when the visitor's own press
+ * has just landed a change.** Not on arrival, not on a card four presses old:
+ * both are the rail moving for its own reasons. Two states are not that — a
+ * hold, where the demo has asked the visitor something and cannot proceed until
+ * they answer, and the card their press produced (`landed.ts`, and the 91px is
  * in `arrival.ts`).
  *
- * **The second of those is not a second opinion about scrolling, it is the
- * absence of one.** The card was at the top of the rail when the visitor
- * pressed the button on it; putting it back there is the rail declining to move
- * rather than deciding to. That is why it reads as re-landing and not as an
- * arrival, and why nothing about it is announced.
+ * **The second used to mean *the card their answer produced*, and that was the
+ * narrower claim by one press.** The argument for the narrowness was that a
+ * change which applied on its own has already moved the page, which is its own
+ * announcement, so its *Put it back* is an offer rather than a question.
+ * Measured on a production build at 1280 × 900, that left the record of
+ * *Re-theme the whole page* — one press, no question, the whole stage going
+ * from dark navy to cream — with its top at **848** in a 900px viewport: 52px
+ * of a 496px card. The premise is true of the **stage**, and on a wide screen
+ * the stage and the rail are two scrollers, so it is a reason for this one to
+ * carry the record rather than to sit still. `landed.ts` has the table.
+ *
+ * **One movement, two things to a reader, and the difference is where they
+ * pressed.** When the press was *on the card* — answering a question that was
+ * already at the top of this rail — the card was at the top when they pressed
+ * and putting it back there is the rail declining to move rather than deciding
+ * to, which is why it reads as a re-landing and why nothing about it is
+ * announced. When the press was in the panel above, the card is new and this is
+ * its arrival. Neither needs a word: in both the visitor pressed something a
+ * moment ago and the thing under their eye is what it produced.
  *
  * **Both layouts, and the stacked one is not an exception — it is the same
  * intent.** `SpotlightScroll` declines to move the narrow layout's scroller for
@@ -94,7 +105,10 @@ const inItsOwnScroller = (card: HTMLElement): boolean => {
  * cursor rather than have the panel they were reading thrown across the rail —
  * except that the press withdraws the green button the panel was made with
  * (`AskPanel`) and takes the preset out of the list (`already-asked.ts`), so
- * there is no panel left under the cursor to be continuous with.
+ * there is no panel left under the cursor to be continuous with. The second
+ * half of that is what carries the case of a secondary ask: the row a visitor
+ * pressed is the one `already-asked.ts` removes, so what the minimum movement
+ * would hold still under them is the gap where it was.
  */
 export const AnswerInView = ({
   recordId,

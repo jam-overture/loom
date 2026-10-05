@@ -5,7 +5,12 @@ import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { sequentialIdFactory, type IdFactory } from "../ids.js"
-import { PRESENTED_ATTRIBUTE, DISMISS_EVENT, ADJUST_PROPERTY } from "../render/behaviour.js"
+import {
+  PRESENTED_ATTRIBUTE,
+  DISMISS_EVENT,
+  ADJUST_PROPERTY,
+  ADJUST_RESTING_PROPERTY,
+} from "../render/behaviour.js"
 import { renderLoomTree } from "../render/render.js"
 import { THEME_PROP_KEY } from "../reserved-props.js"
 import { describeRegistryError, type PrimitiveRegistry } from "../sdk/registry.js"
@@ -392,11 +397,37 @@ describe("the wipe that drags", () => {
        * only — so the control's parent has to be an ancestor of the two
        * elements that read it. That is the root, and this is the assertion that
        * the primitive placed it there rather than in a corner of its own.
+       *
+       * After a drag rather than on mount, because that is when there is a
+       * number to publish (0226). This test asserted `"50"` on a band declaring
+       * `position: 42` and was right about where the property goes and wrong
+       * about what was in it — the defect the record is named for, asserted as
+       * correct for a month.
        */
       const wipe = presented(LIBRARY_CLASS.beforeAfter) as HTMLElement
 
-      expect(wipe.style.getPropertyValue(ADJUST_PROPERTY)).toBe("50")
+      expect(wipe.style.getPropertyValue(ADJUST_PROPERTY)).toBe("")
+
+      await dragTo(63)
+
+      expect(wipe.style.getPropertyValue(ADJUST_PROPERTY)).toBe("63")
       expect(slider().getAttribute("aria-label")).toBe("Wipe position")
+    })
+
+    /**
+     * The whole of the defect, end to end and through the real primitive: a band
+     * authored at 42 renders at 42, and the handle a reader is given is at 42
+     * too. Nothing here mocks the seam — the position travels from the node's
+     * props to the root's `ADJUST_RESTING_PROPERTY` to the slider's own value,
+     * which is the only route `build` leaves open.
+     */
+    it(`starts the slider where the band said, not at the midpoint — ${name}`, async () => {
+      await mount(pageOf(palette, wipeBand))
+
+      const wipe = presented(LIBRARY_CLASS.beforeAfter) as HTMLElement
+
+      expect(wipe.style.getPropertyValue(ADJUST_RESTING_PROPERTY)).toBe("42")
+      expect(slider().value).toBe("42")
     })
   }
 

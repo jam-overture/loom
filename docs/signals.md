@@ -33,10 +33,11 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
-| Whether readers had time to read it | time on screen against the time its words take ([0228](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
+| Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
+| How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
@@ -446,10 +447,64 @@ parts that is rather than calling them unchanged.
 **What it leaves for the portal**, which is `Loom portal`'s and filed: the one
 sentence a reader screen can lead with, and the four things to be careful of.
 
-### 11. A share of the readers there were · `Loom signals` · **in flight**
+### 11. The denominator every rate was missing · `Loom signals` · **done, 4 October**
 
-Open as #516 and not yet on `main`, so it is numbered here and described there.
-This step was written against `main` without it and depends on none of it.
+§8 counted page views exactly and §6 joined the counters to the tree, and the two
+halves of every rate in this subsystem were then one row apart and never met. A
+part's `reached` is a distinct count added across rollup windows, so it is
+generous by every visit that straddled one (0147); the denominator a reading used
+was the largest `views` any single row reported, which it calls a floor because
+that is honestly all it is. The exact number sat in `loom_reader_page_views` and
+nothing took both.
+
+The lane that owns the screen said the same thing from the other side the same
+morning: on a reader card **the exact counts are the misleading figures and the
+rounded share is the honest one**, which is backwards from how every other number
+on it reads.
+
+**Done.** `pageReachOf(reading, rows)` in
+[`src/signals/reach.ts`](../src/signals/reach.ts) answers *about two hundred of
+the three hundred and twenty readers who arrived got as far as the pricing band*.
+It is the **fifth** thing taken out of the server-side join rather than collected
+(§6, §7, §8, §9 and §10 being the others): **nothing was added to a payload, a
+browser, a column, a store or the vocabulary**, and the broadcaster was not
+touched, so its weight is unchanged.
+
+Two denominators decide the shape, and the reason there are two is that they fail
+in opposite directions
+([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)):
+
+- **The estimate is taken of the appearances**, which are the same page views as
+  the rollups counted them — so the straddle over-count is in the numerator and
+  the denominator and very nearly divides out. That is 0221's cancellation one
+  level up: a part against its page rather than a part against its neighbour.
+- **The ceiling is taken of the openings**, which are exact, so the true share
+  cannot be above it. For a part nearly everybody reaches it is 1 and says
+  nothing, and that is the ordinary state rather than a fault — which is exactly
+  why §9 refused this denominator for a fall between two siblings and why that
+  refusal still stands.
+- **The gap between the two is the straddle**, which is the measurement §8
+  published and nothing had used. It closes to nothing where nobody's visit
+  spanned two windows, and that is the first time the one control a deployment
+  has over this error — the window length — can be checked against a number after
+  it is turned.
+
+Four more settled in the building. The headcount is **one division of two whole
+numbers** rather than the share multiplied back up, because seven in a hundred
+times a hundred is seven and a quadrillionth in a float, which breaks its own
+ceiling. It is **withheld while any opening is pending**, because projecting the
+folded rate onto page views no rollup has reached answers a question about
+readers nobody measured. **Three silences rather than a null**, of which
+`unopened` is the one worth having: a row with appearances and no openings is a
+deployment whose **senders are not marking their openings**, every rate
+denominator-less while the counters look healthy, and nothing else here would
+say so. And **reach above the appearances is named**, because rows written by the
+same rollups cannot produce it — node counters older than the page-view column
+can, which is what an upgraded deployment's first reading looks like.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+honest figure for every rate on the reader screen, the inflation to print beside
+it, and the one state to refuse to draw.
 
 ### 12. Reached is not read · `Loom signals` · **done, 5 October**
 
@@ -474,7 +529,7 @@ unchanged. It is the fifth thing taken out of the server-side join rather than
 collected.
 
 The shape is in
-[0228](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md),
+[0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md),
 and one thing in it decides everything else:
 
 - **Only the skim is a claim.** Three things bias the comparison and all three

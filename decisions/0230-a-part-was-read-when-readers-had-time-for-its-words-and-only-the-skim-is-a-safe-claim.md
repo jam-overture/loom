@@ -1,8 +1,18 @@
-# 0228 — A part was read when readers had time for its words, and only the skim is a safe claim
+# 0230 — A part was read when readers had time for its words, and only the skim is a safe claim
 
 **Status:** Accepted
 **Date:** 2026-10-05
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-05**, from 0228, when the branch that carried it
+> (#519) was merged. #518 wrote the same number for a different question — *the
+> tree as it was is a fold bounded at both ends* — twelve minutes earlier, and
+> merged first; two records sharing a number is fatal
+> ([0097](0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)).
+> Both runs read the open branches before choosing, and neither could see the
+> other, which is the fifth occurrence of what the 5 October entry in
+> `FINDINGS.md` describes. Nothing in this record changed but its number; the
+> references to it were updated with it.
 
 ## Context
 

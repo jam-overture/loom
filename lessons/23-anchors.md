@@ -819,7 +819,7 @@ The output:
   the prop, on two bands
     ids:         ["pricing","pricing"]
     diagnostics: none
-  primitives registered: 102
+  primitives registered: 103
   declaring an "anchor" prop: loom.section, loom.hero, loom.callout
   "loom:anchor" anywhere in the catalogue: false
 ```

@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers fifty-two bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(52)
+  it("offers fifty-four bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(54)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -200,18 +200,31 @@ describe("the starter compositions", () => {
   })
 
   /**
-   * The example of a part with one design was `credentials` until 3 October and
-   * is `banner` now, which is the whole of what this assertion is for: it holds
-   * the *shape* of the answer — canonical first, alternates after it — against a
-   * part that has an alternate and a part that does not, and the second half has
-   * to be edited every time the catalogue closes a gap. `banner` is the last
-   * part in the catalogue with exactly one design, so the day this line needs
-   * editing again is the day `docs/primitive-gap-inventory.md`'s designs-per-part
-   * count reaches zero and the instrument has nothing left to recommend.
+   * The example of a part with one design was `credentials` until 3 October,
+   * `banner` from then until 5 October, and **there is no longer one** — which
+   * the previous version of this comment named as the day the line would need
+   * editing, and is why the second half of this assertion has changed shape
+   * rather than changing its literal.
+   *
+   * What it holds is the *shape* of the answer: canonical first, alternates
+   * after it. The half that used to be a part with no alternate is now the
+   * invariant that replaced it — **every part answers with at least its
+   * canonical, and the canonical is the entry whose id is the part's own
+   * name.** That is the property `PAGE_SEQUENCE` is derived from, it cannot go
+   * stale as the catalogue grows, and it is red for exactly the case the old
+   * line could no longer see: a part admitted under 0171 whose canonical was
+   * never written.
    */
-  it("answers which designs a part has, and says none for a part with no alternate", () => {
+  it("answers which designs a part has, canonical first, for every part", () => {
     expect(compositionsForPart("hero").map((composition) => composition.id)).toEqual(["hero", "hero-split"])
-    expect(compositionsForPart("banner").map((composition) => composition.id)).toEqual(["banner"])
+    expect(compositionsForPart("banner").map((composition) => composition.id)).toEqual(["banner", "banner-inline"])
+
+    for (const part of COMPOSITION_PARTS) {
+      const designs = compositionsForPart(part)
+
+      expect(designs.length, `the ${part} band has no designs at all`).toBeGreaterThan(0)
+      expect(designs[0]?.id, `the ${part} band does not answer with its canonical first`).toBe(part)
+    }
   })
 
   /**
@@ -2407,16 +2420,21 @@ describe("what the second designs claim", () => {
    * 2 October and 5 → 1 here.
    *
    * **This is a floor and not a count**, which is the distinction that makes it
-   * a test worth keeping rather than a literal to edit: it says *no part has one
-   * design except `banner`*, so closing `banner` makes it stricter and a part
-   * that somehow lost its alternate makes it red. A new part admitted under
-   * 0171 arrives with one design and is the one case that would fail honestly —
-   * and that is the right moment to be told, because a part with a canonical and
-   * no alternate is exactly what this instrument exists to surface.
+   * a test worth keeping rather than a literal to edit: it said *no part has one
+   * design except `banner`*, closing `banner` made it stricter, and it is now at
+   * its floor — **no part in the catalogue leaves a deployment without a
+   * choice.** It went 9 → 5 on 2 October, 5 → 1 on 3 October and 1 → 0 on
+   * 5 October, by `banner-inline`.
+   *
+   * It stays as an assertion rather than retiring with the instrument, because
+   * the one thing that can still make it red is the thing it was always for: a
+   * new part admitted under 0171 arrives with one design, and the moment to be
+   * told is then rather than three runs later. That failure is honest and the
+   * remedy is a second design, not an edit to this line.
    */
-  it("leaves one part in the catalogue with a single design", () => {
+  it("leaves no part in the catalogue without a choice of design", () => {
     const alone = COMPOSITION_PARTS.filter((part) => compositionsForPart(part).length === 1)
 
-    expect(alone).toEqual(["banner"])
+    expect(alone).toEqual([])
   })
 })

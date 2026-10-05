@@ -214,6 +214,13 @@ export const WhatWasSkipped = ({ skipping }: { readonly skipping: PageSkipping }
  *
  * So the honest answer is to say what is missing and why, which is also the
  * only way the gap is ever reported to the lane that can close it.
+ *
+ * ## It speaks for two readings and that is deliberate
+ *
+ * `WhereTheyStop` is the second reading off the same join and is missing in
+ * exactly the same cases, for exactly the same reason. Two notices carrying one
+ * sentence twice would read as two separate faults, so this one names both
+ * questions and the other section draws nothing at all.
  */
 export const SkippingUnavailable = ({
   counted,
@@ -226,7 +233,7 @@ export const SkippingUnavailable = ({
   <StateNotice tone="notice">
     <p>
       <strong className="font-medium">
-        We can’t say which parts people got to on this page yet.
+        We can’t say which parts people got to on this page yet, or where they stop reading.
       </strong>{" "}
       {live === undefined
         ? "Working that out needs the page itself as well as the counts, and the page didn’t come back just now. Everything above is still true."
