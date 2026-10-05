@@ -1,7 +1,7 @@
 import { createElement, type CSSProperties, type ReactNode } from "react"
 import { z } from "zod"
 
-import { ADJUST_PROPERTY } from "../render/behaviour.js"
+import { ADJUST_PROPERTY, ADJUST_RESTING_PROPERTY } from "../render/behaviour.js"
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
@@ -210,9 +210,9 @@ export const loomBeforeAfter = definePrimitive({
     /**
      * The one expression both the clip and the divider read, written once so
      * they cannot drift. The fallback is the declared position rather than
-     * `ADJUST_RESTING`: the property is absent until the slider has mounted, and
-     * what a page without scripting must show is the comparison the tree asked
-     * for.
+     * `ADJUST_RESTING`: the property is absent until the reader has moved the
+     * slider, and what a page nobody has touched must show — scripting or no
+     * scripting — is the comparison the tree asked for.
      */
     const wipe = `var(${ADJUST_PROPERTY}, ${position})`
 
@@ -228,6 +228,13 @@ export const loomBeforeAfter = definePrimitive({
           width: "100%",
           borderRadius: radius("md"),
           background: colour("bg-surface-muted"),
+          /**
+           * The same number the clip falls back to, written where the slider can
+           * read it, so the handle arrives at the declared position rather than
+           * at the runtime's midpoint. Declared on the root because that is
+           * where the control is placed; see `ADJUST_RESTING_PROPERTY` and 0226.
+           */
+          [ADJUST_RESTING_PROPERTY]: position,
           ...(aspect === undefined ? {} : { aspectRatio: ASPECT_RATIOS[aspect] }),
         },
       },

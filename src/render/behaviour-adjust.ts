@@ -1,8 +1,22 @@
 "use client"
 
-import { createElement, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react"
+import {
+  createElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react"
 
-import { ADJUST_MAXIMUM, ADJUST_MINIMUM, ADJUST_PROPERTY, ADJUST_RESTING } from "./behaviour.js"
+import {
+  ADJUST_MAXIMUM,
+  ADJUST_MINIMUM,
+  ADJUST_PROPERTY,
+  ADJUST_RESTING,
+  ADJUST_RESTING_PROPERTY,
+} from "./behaviour.js"
 import { controlClass, controlDisplay } from "./control.js"
 
 /**
@@ -26,10 +40,19 @@ import { controlClass, controlDisplay } from "./control.js"
  *
  * **It renders nothing until it knows scripting runs**, for the reason the other
  * two give, and here the fallback is the whole point rather than a consolation.
- * A primitive reads the value as `var(--loom-adjust, 50)` with its own declared
+ * A primitive reads the value as `var(--loom-adjust, 35)` with its own declared
  * position as the fallback, so a page served with scripting off shows the still
  * comparison at the position the tree asked for — which is what most pages using
  * this actually are. Nothing is hidden behind a control that never arrives.
+ *
+ * **And it publishes nothing until the reader moves it**, which is the half that
+ * had to be learned from a photograph. Appearing is not an instruction: a
+ * control that wrote its own resting value the moment it mounted overwrote the
+ * fallback it was built to defend, so a band authored at 35 rendered at 35 and
+ * jumped to the runtime's midpoint as hydration landed. Where it starts is the
+ * primitive's to declare — {@link ADJUST_RESTING_PROPERTY}, read off the
+ * element it was placed in — and what it publishes is the reader's alone. See
+ * [0226](../../decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md).
  *
  * **A range input rather than a hand-built handle.** Dragging, arrow keys, Home
  * and End, the announced role and the announced value are all a browser's to get
@@ -75,24 +98,70 @@ const INPUT_STYLE = {
   verticalAlign: "middle",
 } as const
 
-export const AdjustControl = ({ label }: AdjustControlProps) => {
-  const [usable, setUsable] = useState(false)
-  const [value, setValue] = useState(ADJUST_RESTING)
+/**
+ * Where the primitive asked its control to start, read off the element the
+ * control was placed in.
+ *
+ * The **computed** value rather than the inline one, because a custom property
+ * is a cascaded value and a primitive may declare it in a rule as readily as in
+ * a style attribute. It inherits, like any custom property, which is the same
+ * reach `ADJUST_PROPERTY` has in the other direction.
+ *
+ * Clamped and rounded rather than trusted. The range is the runtime's (0096), so
+ * a number outside it is not a position this control can take, and a fractional
+ * one is not a position a step-1 input can hold — state and thumb would disagree
+ * from the first frame. Anything unreadable falls back to {@link ADJUST_RESTING},
+ * which is also what a primitive declaring nothing gets: a control that refused
+ * to render because a stylesheet said `--loom-adjust-resting: thirty` would be a
+ * missing comparison, and the still version is right there in the `var()`
+ * fallback.
+ */
+const restingIn = (element: HTMLElement): number => {
+  const declared = getComputedStyle(element).getPropertyValue(ADJUST_RESTING_PROPERTY).trim()
+
+  if (declared === "") return ADJUST_RESTING
+
+  const value = Number(declared)
+
+  if (!Number.isFinite(value)) return ADJUST_RESTING
+
+  return Math.min(ADJUST_MAXIMUM, Math.max(ADJUST_MINIMUM, Math.round(value)))
+}
+
+/**
+ * The input itself, split from the capability check so that the two things that
+ * must happen in a browser are not conditioned on each other.
+ *
+ * It exists for the adoption below. Reading the parent needs the input mounted,
+ * which needs the check to have passed — so the read cannot share an effect with
+ * the check, and a `useLayoutEffect` in the component that also renders on the
+ * server is a warning about a hook that does nothing there. A component that
+ * mounts only once scripting is proved has no server render to warn about.
+ */
+const AdjustSlider = ({ label }: AdjustControlProps) => {
   const input = useRef<HTMLInputElement | null>(null)
+  const [position, setPosition] = useState(ADJUST_RESTING)
+  const [moved, setMoved] = useState(false)
 
   /**
-   * Deliberately an effect rather than a render-time check, for the reason the
-   * other two controls give: anything read while rendering would make the
-   * server's markup and the browser's first render disagree, and React resolves
-   * that by keeping the server's — so the control would be missing exactly where
-   * it works. That the effect ran is the whole of the capability check.
+   * Before the first paint, not after it. A passive effect here would let the
+   * browser paint one frame with the thumb at the runtime's midpoint on a page
+   * that declared something else — the whole defect in miniature, a sixtieth of
+   * a second long. A layout effect's `setPosition` re-renders synchronously, so
+   * the first frame the reader sees is already the declared one.
    */
-  useEffect(() => setUsable(true), [])
+  useLayoutEffect(() => {
+    const parent = input.current?.parentElement
+
+    if (parent) setPosition(restingIn(parent))
+  }, [])
 
   /**
-   * `usable` is a dependency and not a redundant one: the first run happens
-   * while the control is still rendering nothing, so the ref is empty and there
-   * is no parent to write to. The write has to happen again once there is.
+   * `moved` is the whole of the contract this effect keeps: until the reader has
+   * moved the control there is nothing to publish, because the primitive's own
+   * `var()` fallback already says where the divider is and this agrees with it.
+   * Writing the same number anyway would be indistinguishable on a page whose
+   * fallback matches and wrong on every page whose fallback does not.
    *
    * The cleanup removes the property rather than leaving the last value behind.
    * A primitive that unmounts its control — a media query that stops offering
@@ -103,20 +172,19 @@ export const AdjustControl = ({ label }: AdjustControlProps) => {
   useEffect(() => {
     const parent = input.current?.parentElement
 
-    if (!parent) return undefined
+    if (!parent || !moved) return undefined
 
-    parent.style.setProperty(ADJUST_PROPERTY, String(value))
+    parent.style.setProperty(ADJUST_PROPERTY, String(position))
 
     return () => {
       parent.style.removeProperty(ADJUST_PROPERTY)
     }
-  }, [value, usable])
+  }, [moved, position])
 
   const change = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setValue(Number(event.target.value))
+    setPosition(Number(event.target.value))
+    setMoved(true)
   }, [])
-
-  if (!usable) return null
 
   return createElement("input", {
     ref: input,
@@ -124,9 +192,24 @@ export const AdjustControl = ({ label }: AdjustControlProps) => {
     className: controlClass("adjust"),
     min: ADJUST_MINIMUM,
     max: ADJUST_MAXIMUM,
-    value,
+    value: position,
     "aria-label": label,
     onChange: change,
     style: INPUT_STYLE,
   })
+}
+
+export const AdjustControl = ({ label }: AdjustControlProps) => {
+  const [usable, setUsable] = useState(false)
+
+  /**
+   * Deliberately an effect rather than a render-time check, for the reason the
+   * other two controls give: anything read while rendering would make the
+   * server's markup and the browser's first render disagree, and React resolves
+   * that by keeping the server's — so the control would be missing exactly where
+   * it works. That the effect ran is the whole of the capability check.
+   */
+  useEffect(() => setUsable(true), [])
+
+  return usable ? createElement(AdjustSlider, { label }) : null
 }
