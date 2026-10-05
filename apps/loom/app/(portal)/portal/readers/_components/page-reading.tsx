@@ -17,12 +17,14 @@ import {
 } from "@/app/(portal)/_lib/reading-view"
 
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
+import type { PageStopping } from "@/app/(portal)/_lib/stopping"
 
 import { CountedAgainst } from "./counted-against"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
 import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
 import { UnplacedUseNote, WhatWasUsed } from "./what-was-used"
+import { WhereTheyStop } from "./where-they-stop"
 
 /**
  * One page, and what people did on it.
@@ -76,6 +78,7 @@ export const PageReadingCard = ({
   page,
   live,
   skipping,
+  stopping,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
@@ -87,6 +90,13 @@ export const PageReadingCard = ({
    * answered at all and the card says so.
    */
   readonly skipping: PageSkipping | undefined
+  /**
+   * Where reading falls off, or `undefined` for exactly the same reason and from
+   * exactly the same pair: both readings are a window joined to the page it was
+   * filed against, so neither is answerable without the other's page. One notice
+   * covers both rather than two identical ones.
+   */
+  readonly stopping: PageStopping | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
@@ -136,8 +146,23 @@ export const PageReadingCard = ({
           <li className="text-ink">
             Of the parts people reported on, fewest got as far as{" "}
             <PartName part={highlights.fewestSaw.name} /> —{" "}
-            {outOfVisits(highlights.fewestSaw.reached, newest.views)}. If anything on this page
-            is worth moving up, it is what sits above that.
+            {outOfVisits(highlights.fewestSaw.reached, newest.views)}.
+            {/*
+             * **The fact stays and the advice that used to end this line is
+             * gone.** It read *"If anything on this page is worth moving up, it
+             * is what sits above that."* — a claim about reading order drawn
+             * from a page-wide minimum, and 0221 is explicit that a minimum does
+             * not support one: a part three levels inside the first band comes
+             * before the second band in reading order and is reached by fewer
+             * visits than either, so the part with the smallest reach is
+             * routinely a part nothing stopped at.
+             *
+             * `WhereTheyStop` asks it between two siblings, which is the only
+             * comparison that answers it, and names the part to look at there.
+             * Nothing is removed from this screen by that: an unsound inference
+             * is not a fact somebody loses, and the number it was drawn from is
+             * still the first half of this very sentence.
+             */}
           </li>
         )}
 
@@ -192,6 +217,17 @@ export const PageReadingCard = ({
       ) : (
         <WhatWasSkipped skipping={skipping} />
       )}
+
+      {/*
+       * After it, because it is the sharper question and it needs the looser one
+       * first. *Which parts did people get to* establishes that the page was
+       * read at all; *between which two parts do they leave* is only a sentence
+       * once a reader has that. They also come apart: a page whose every part is
+       * read, with nothing trailing, can still lose four in ten people at one
+       * gap, and before this section there was nothing on the screen that could
+       * say so.
+       */}
+      {stopping !== undefined && <WhereTheyStop stopping={stopping} />}
 
       <SinceTheChange comparison={comparison} standing={standing} />
 

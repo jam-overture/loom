@@ -1,6 +1,7 @@
 import type { LoomTree, NodeId, PrimitiveType, TreeId } from "@jam-overture/loom"
 import {
   pageReadingOf,
+  type PageReading,
   type PartDeclarations,
   type PartStanding,
   type ReaderTally,
@@ -121,27 +122,49 @@ export type PageSkipping = {
  * `tallies` may be the whole window for the page — rows for other versions are
  * dropped and counted by the join, which is what `foreign` reports — so a
  * caller does not have to filter correctly for the answer to be right.
+ *
+ * **A screen that wants a second reading of the same window should join once and
+ * call {@link skippingFrom}.** `_lib/stopping.ts` is the second reading, and two
+ * joins of one window to one page is how two sections of one card come to
+ * disagree about how many visits there were.
  */
 export const skippingOf = (
   tree: LoomTree,
   tallies: readonly ReaderTally[],
   declarations: PartDeclarations
-): PageSkipping => {
-  const reading = pageReadingOf(tree, tallies, declarations)
-
+): PageSkipping =>
   /*
    * Named from the page being served, so a part is called what it says rather
    * than what it is.
-   *
-   * The fallback cannot fire — every part of the reading is an element of this
-   * same page — and it is written anyway, to the noun in the registered type,
-   * which is the arm `reading-view.ts` uses for a part the page has since lost.
-   * A fallback that threw, or that printed an identifier, would turn a naming
-   * miss into either a failed screen or a row a reader cannot read; this one
-   * costs a name and nothing else.
    */
-  const names = namesInTree(tree)
+  skippingFrom(pageReadingOf(tree, tallies, declarations), namesInTree(tree))
 
+/**
+ * The same reading, from a join somebody else already made.
+ *
+ * Split out of `skippingOf` on the run `stopping.ts` arrived, which needed the
+ * other half of the same `PageReading`. The join is linear in the parts of the
+ * page and pure, so calling it twice was not expensive — it was *divergent*: two
+ * `pageReadingOf` calls are two chances for a screen to pass a different window
+ * or a different registry to one of them, and a card that drew one section's
+ * visit floor above another's would be wrong in the way nobody checks.
+ *
+ * The names are the caller's for the same reason they are a map: the screen has
+ * already walked the page to name its parts for every other sentence on the
+ * card, and walking it again per reading would be a quadratic read of one tree.
+ */
+export const skippingFrom = (
+  reading: PageReading,
+  names: ReadonlyMap<string, PartName>
+): PageSkipping => {
+  /*
+   * The fallback cannot fire — every part of the reading is an element of the
+   * page the reading was joined to — and it is written anyway, to the noun in
+   * the registered type, which is the arm `reading-view.ts` uses for a part the
+   * page has since lost. A fallback that threw, or that printed an identifier,
+   * would turn a naming miss into either a failed screen or a row a reader
+   * cannot read; this one costs a name and nothing else.
+   */
   const parts = reading.parts.map((part): SkippedPart => ({
     nodeId: part.nodeId,
     name: names.get(part.nodeId) ?? { name: `the ${nounOf(part.type)}`, nodeId: part.nodeId },

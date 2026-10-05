@@ -993,7 +993,7 @@ describe("G", () => {
 ```
 
 ```
-  primitives in the starter library: 102
+  primitives in the starter library: 103
     loom.nav         ["disclose"]
     loom.menu        ["present"]
     loom.lightbox    ["present","dismiss"]

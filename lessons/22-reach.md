@@ -473,8 +473,8 @@ a target and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 102
-  of those, declaring a target: 16
+  primitives registered: 103
+  of those, declaring a target: 17
     loom.nav         "always"
     loom.menu        "always"
     loom.lightbox    "always"
@@ -491,9 +491,10 @@ The output:
     loom.action      "always"
     loom.button      "always"
     loom.link        "always"
+    loom.inline-link "always"
 ```
 
-Sixteen, out of whatever the line above it printed. Most of a component library
+Seventeen, out of whatever the line above it printed. Most of a component library
 arranges targets rather than being one, and it is that ratio — not either number
 on its own — that makes this check affordable.
 

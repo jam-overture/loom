@@ -15,7 +15,7 @@ The short answer: **the honest ceiling on distinct primitives is about 110–120
 not 250.** The number 250 is reachable, and the rest of it is compositions. The
 arithmetic is at the end.
 
-> **Where the count is, 3 October 2026: 102 primitives, 52 bands, 154 droppable
+> **Where the count is, 5 October 2026: 103 primitives, 54 bands, 157 droppable
 > things.** Tier A closed on 14 September except the radio group, which is in
 > Tier B's second group below and blocked there. Tier B's first group is
 > **unblocked and three of its four have shipped**; its other two groups are the
@@ -23,12 +23,18 @@ arithmetic is at the end.
 > before planning a run against this document — it said something false for
 > eleven days and that is what the correction is about.
 >
-> **The vocabulary has not moved since 1 October and that is the
-> recommendation being followed** — three runs on, not a stall: this document's own arithmetic
-> puts the honest ceiling at 110–120 and says to spend the week on
-> compositions. The instrument for choosing *which* composition is
-> [designs per part](#designs-per-part--measured-2-october), added 2 October,
-> and it is the one to read before the tier tables below.
+> **The vocabulary moved by one on 5 October and the recommendation is
+> unchanged** — this document's own arithmetic puts the honest ceiling at
+> 110–120 and says to spend the week on compositions. `loom.inline-link` is the
+> hundred and third and it is the kind of addition that recommendation leaves
+> room for: it was not chosen off a gap list, it was **filed by a consuming lane
+> that had built the thing and deleted it** (`Loom marketing`, 4 October), which
+> is the instrument this document has said twice is better than a taxonomy.
+>
+> **The designs-per-part instrument reached zero on 5 October** and the question
+> it was left open on is answered below. The instrument for choosing the next
+> composition is [reach](#what-the-reach-measurement-says-after-those-four),
+> which stands at 92 of 103.
 
 ## The thing that makes 250 look reasonable, and why it misleads
 
@@ -260,8 +266,34 @@ is a wall of cards, and forcing one would put a catalogue entry where 0162 says 
 rather than assume the number should reach zero — and if it does build one, the
 bar is a *region* of the strip the canonical does not have, not a swapped leaf.
 
-**This instrument has done its job and is close to retiring.** Three runs chose
-work from it and it went 9 → 5 → 1. What it cannot see, and what the next
+### The answer, 5 October: zero, and the bar as written could not have been met
+
+`banner-inline` closed the row, and the paragraph above is left standing because
+half of it was right and the half that was wrong is worth seeing.
+
+**The bar as written cannot be cleared by anything**, and that is a fact about
+`loom.banner` rather than about any band: the strip declares exactly one region,
+`action`, and the canonical fills it. There is no second region for an alternate
+to find. Phrased as *a region the canonical does not have*, the bar says `banner`
+may never have a second design — a stronger claim than this document meant and
+not one 0162 supports.
+
+The question is answered the other way and the answer is narrow: **a part whose
+content is one sentence earns a second design when the sentence can be built a
+way the canonical closed off.** Until 5 October it could not be. News-then-a-
+button is the only shape a library with no inline link can draw, and
+`loom.inline-link` (0227) is what made the other shape exist. A second design
+that required a primitive to be written is not a swapped leaf by any reading —
+and it is a different *reader's job* rather than a different paint: one strip is
+scanned for a control, the other is read as a sentence whose destination is one
+of its phrases.
+
+The caution was still right about the two designs it named. *A `loom.button`
+where a `loom.link` was* and *a badge in front of the sentence* are both still
+too thin, and neither is what shipped.
+
+**This instrument is now retired as a chooser of work, at zero.** Four runs chose
+work from it and it went 9 → 5 → 1 → 0. What it cannot see, and what the next
 instrument will have to, is whether the *second* design of a part that now has two
 is the one a deployment actually wants — reach counts whether a primitive is
 buildable, designs-per-part counts whether a part offers a choice, and neither
@@ -277,6 +309,25 @@ wrong is a red build rather than a catalogue entry where a `configure` belongs.
 
 Reach went 89 → 90 of 102. `loom.popover` came into reach, through
 `comparison-ways`, which is the band that shows its working.
+
+**5 October: 92 of 103.** `loom.inline-link` arrives reached, through
+`banner-inline`, and `loom.link-pager` came into reach through
+`articles-index` — a band written for exactly that, because the pager had been
+registered since 21 September, rendered by `library.test.ts`, and **never put on
+a page by anything**. It is the clearest case this document has for why reach is
+the instrument that replaces designs-per-part: a primitive nobody can see is a
+primitive nobody has reviewed, whatever the registry says about it.
+
+The eleven still unreached split three ways and the split is the thing to plan
+against, not the number:
+
+| | why | what would close it |
+| --- | --- | --- |
+| `loom.media`, `loom.embed`, `loom.lightbox`, `loom.carousel`, `loom.before-after`, `loom.overlay`, `loom.pin` | **an image source.** `mediaUrlSchema` excludes `data:` with a good reason and a `/path` is a broken image on every deployment that does not host it | not a band. A framework answer — an asset the catalogue may name, or a binding (0058) that supplies one |
+| `loom.menu` | **a word**, unchanged from 3 October | the filing about a control's name |
+| `loom.link-trail`, `loom.waiting-state`, `loom.page` | **a page that is not a landing page.** A breadcrumb belongs above an interior document and a skeleton belongs to a band that is waiting on an answer | a catalogue of pages rather than of bands, which is a larger question than a band |
+
+Seven of eleven are one blocker, and it is not in this lane.
 
 **`loom.menu` did not, and it is the one entry on the unreached list that is not
 waiting for somebody to write a band.** It is waiting on a word. `loom.nav`

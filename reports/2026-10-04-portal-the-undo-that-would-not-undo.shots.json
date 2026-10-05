@@ -1,0 +1,7 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-04-portal-undo-history-wide.png", "path": "/portal/history?tree=t_seed1", "viewport": { "width": 1680, "height": 1000, "label": "wide" }, "fullPage": true, "waitFor": "text=What’s changed", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-undo-history-phone.png", "path": "/portal/history?tree=t_seed1", "viewport": "phone", "fullPage": true, "waitFor": "text=What’s changed", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } }
+  ]
+}

@@ -561,7 +561,7 @@ import { z } from "zod"
 import { sequentialIdFactory } from "./ids.js"
 import type { JsonObject } from "./json.js"
 import { createStarterPrimitiveRegistry } from "./primitives/index.js"
-import { metricsBand } from "./primitives/compositions/index.js"
+import { compositionById, metricsBand } from "./primitives/compositions/index.js"
 import type { LoomPrimitiveProps } from "./render/primitive.js"
 import { PRIMITIVE_ROLES, describePrimitiveRole, type PrimitiveRole } from "./role.js"
 import { copyIn, type CopyDeclarations, type NodeCopy } from "./sdk/copy.js"
@@ -1019,10 +1019,14 @@ component this?", and it has to be answerable without reading the runtime.
 
 ### Exercise F — the same questions, asked of the library
 
-A whole library — the first line will say how big — against a seam for `copy`
-that is three days old and one for `role` that is six. Predict the two counts as
-fractions of that first number, then predict what `copyIn` says about a band
-taken straight out of the starter catalogue.
+A whole library — the first line will say how big — against two seams that each
+shipped with nothing declaring anything: `copy`, three days old when this lesson
+was written, and `role`, six. Predict the two counts as fractions of that first
+number, **for today rather than for the day this was written**, and the difference
+between those two predictions is worth writing down on its own. Then predict what
+`copyIn` says about a band taken straight out of the starter catalogue, and what it
+says about the one starting composition in that catalogue with something *unspoken*
+in it.
 
 ```ts
 describe("F", () => {
@@ -1035,44 +1039,94 @@ describe("F", () => {
     console.log(`  declaring any role:        ${withRole.length}`)
     console.log(`  typesWithRole("heading"):  ${JSON.stringify(starter.typesWithRole("heading"))}`)
     console.log(`  copyFor("loom.stat"):      ${JSON.stringify(starter.copyFor("loom.stat"))}`)
+    console.log(`  declaring copy as []:      ${starter.primitives.filter((one) => one.copy?.length === 0).length}`)
 
     const band = metricsBand.build(sequentialIdFactory())
 
     console.log(`  textOf(metrics band):      ${JSON.stringify(textOf(band))}`)
     report("copyIn(metrics band, starter registry)", copyIn(band, starter))
+
+    const faces = compositionById("proof-faces")?.build(sequentialIdFactory())
+
+    if (faces !== undefined) report("copyIn(proof-faces, starter registry)", copyIn(faces, starter))
   })
 })
 ```
 
 The output:
 
+<!-- moves: every line of this fence is a second copy of a fact about
+     src/primitives/, which is Loom primitives'. A primitive added, a copy or role
+     declaration made or withdrawn, or a change to the proof-faces or metrics-band
+     composition moves it, and the right response is to re-run F and paste in what
+     it prints now. Then say so on the pull request, because the paragraphs under
+     it are prose about these lines and no check reads prose: on 4 October the
+     declaration pass moved seven of them, the numbers were corrected from outside
+     this lane exactly as the convention asks, and three paragraphs were left
+     saying "Zero and zero" under a transcript saying 102. -->
+
 ```
-  primitives registered:     102
-  declaring copy:            102
+  primitives registered:     103
+  declaring copy:            103
   declaring any role:        1
   typesWithRole("heading"):  ["loom.heading"]
   copyFor("loom.stat"):      ["value","label","caption"]
+  declaring copy as []:      59
   textOf(metrics band):      ""
   copyIn(metrics band, starter registry)
     words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]
     unread:   none
     unspoken: none
+  copyIn(proof-faces, starter registry)
+    words:    ["Ada Okonkwo","Rui Tavares","Martine Lefèvre","Jonas Kirk","Priya Raman","Tom Hedlund","on G2, from 214 reviews","Two thousand teams have shipped a change through Loom this month."]
+    unread:   none
+    unspoken: n_8 (loom.rating) ["score"]
 ```
 
-Zero and zero. `loom.heading` is registered and does not declare that it is a
-heading; `loom.stat` holds three words in props and has not said which.
+**Both of those counts were zero when this lesson was written, and the day they
+stopped being zero is the better half of what the exercise now teaches.** Then,
+`loom.heading` was registered without declaring that it was a heading and
+`loom.stat` held three words in props without having said which. Now every
+primitive in the library has answered for `copy` — and the figure worth your
+attention is not that one, it is the line below it. More than half of those
+declarations are `copy: []`, a primitive saying **I show no words of my own**, and
+that is the half that pays for the rest: a reading cannot tell an arrangement that
+holds no words from one that forgot to declare, so one undeclared `loom.stack` puts
+a whole page's reading in doubt. Declaring the absence is what makes the presence
+worth anything.
 
-The last line is the whole argument for the shape, printed by the system it is an
-argument about. `words` is empty — the same empty a caller would have got before
-any of this existed. `unread` has six entries naming every node and every prop
-involved. **The reading is exactly as ignorant as it was and is now saying so**,
-and that difference is the only thing this seam bought on the day it landed. It is
-also, on today's `main`, the entire thing it has bought.
+`role` has not moved the same way, and the transcript says how far it has. The two
+seams were filed three days apart on the same argument, and only one of them has
+had its pass — because 0114's bar for widening that vocabulary is a consumer that
+cannot answer its question, and nobody has brought one. One seam was waiting on a
+library and the other is waiting on a reason, which are different kinds of empty.
 
-`unspoken` is empty, and on this library it is empty for every tree there is:
-with nothing declaring `copy`, no node ever reaches the branch that fills it. The
-third field is a promise kept against a day that has not arrived — which is the
-two zeroes above it, said once more, one level along.
+The readings under them are the whole argument for the shape, printed by the system
+they are an argument about — and they now print it from the opposite direction. On
+the day the seam landed, `words` was empty, `unread` named every node and every prop
+involved, and the reading was *exactly as ignorant as it had been before any of this
+existed and was saying so.* That difference was the only thing the seam had bought.
+Today `words` is the eight words the band shows and `unread` is `none`.
+
+**Those are the same return shape, unchanged, and that is the thing to take from
+it.** The fields were designed for a library that had told them nothing, and on the
+day the library spoke, nothing about them had to move: the honest gap became the
+answer, in place. A shape that is only right once the data arrives is a shape
+somebody has to replace on the day it arrives — and that somebody is whoever
+happens to be doing the pass, under a deadline, in a lane that does not own the
+seam.
+
+`unspoken` is empty **for this band**, and it is no longer empty for every tree
+there is, which is why there is a second reading. `proof-faces` comes out of the
+same catalogue, and its `loom.rating` declares `score` as copy while its component
+prints that number itself. So the reading hands over the sentence beside the rating
+— *on G2, from 214 reviews* — and declines the rating: *there is a figure here and I
+am not going to guess the formatting of it*, one node, one prop, named. That is the
+third field doing the only job it was added for, and it took sixteen days from
+[0169](../decisions/0169-a-declaration-is-what-makes-a-value-a-missing-word.md)
+adding it to anything in this repository being able to produce it. Which is worth
+sitting with: it was argued for, had its cheaper one-line form rejected, and was
+built, tested and shipped for a day that had not arrived.
 
 Two smaller things in that transcript are worth a second look.
 
@@ -1158,17 +1212,29 @@ to get words out of it. The two records were filed by different lanes three days
 apart and compose without either having planned for the other, because both put
 the fact where the author is.
 
-Line three is the answer to Predict 4, and it is the one worth having got wrong.
-Making the improvement *today* — swapping a correct hard-coded array for a correct
-registry question — names every page in this repository *Untitled page*, because
-nothing declares the role yet. The finding that filed 0114 says so in as many
-words, and gives the order the two edits have to land in: the declaration first,
-the question second, or neither.
+Line three is the answer to Predict 4, and what it means has changed since this
+lesson was written — which is the most useful thing that could have happened to it.
+When this was written the starter library's answer was the **empty array**, so
+making the improvement then — swapping a correct hard-coded array for a correct
+registry question — would have named every page in this repository *Untitled page*.
+The declaration has since landed, in exactly the order the finding behind 0114
+insisted on: the declaration first, the question second, or neither. The array holds
+`loom.heading` now and the swap is finally the improvement it always looked like.
+
+**The line still prints *Untitled page*, and the reason underneath it has moved.**
+This page's heading is `acme.hero`, a type the starter library has never heard of,
+so asking the starter library about somebody else's page gets a correct answer to
+the wrong question. That is line one's failure in line two's clothes: **a registry
+question is only as good as the registry you ask it of**, and the hard-coded array
+was never wrong about `loom.heading` either. If your prediction for this line was
+*Untitled page*, check your reason against that one before you count it right.
 
 **The general form is worth more than the instance.** Replacing a local guess with
 an authoritative source is not an improvement on its own. It is an improvement
 *once the authority has been told*, and in between it is a regression — with the
 particular nastiness that the guess was right and the authority is merely empty.
+This instance is now out the other side of that *in between*, which is the only way
+a rule like that ever gets confirmed rather than merely believed.
 
 ---
 
@@ -1305,10 +1371,12 @@ answer, then check.**
 6. "The page's title" is two facts rather than one. Name both, say which of them
    belongs in the registry and which belongs to whoever holds the tree, and give
    the consumer this separation serves that a combined answer would have shut out.
-7. Nothing in the runtime reads `copy` or `role`. Say what that buys, then say
-   what it costs — and use the starter library's two zeroes to explain why this
-   particular kind of seam cannot fail loudly and what a course, a review or a
-   test would have to do instead to notice it.
+7. Nothing in the runtime reads `copy` or `role`. Say what that buys, then say what
+   it costs — and use what this library had declared on the day each seam shipped
+   against what it has declared since to explain why this particular kind of seam
+   cannot fail loudly, and what a course, a review or a test would have to do
+   instead to notice it. One of the two seams is the evidence and the other is the
+   control; say which way round.
 8. A `loom.divider` that has declared nothing holds `weight: 2`; a `demo.stat`
    that has declared `value` holds `value: 3400`. One of those numbers is
    reported and one is not. Say which, say why that is not one hole seen from two

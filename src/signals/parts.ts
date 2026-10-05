@@ -3,7 +3,7 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import { PRIMITIVE_ROLES, type PrimitiveRole } from "../role.js"
 import { copyIn, type CopyDeclarations, type NodeCopy } from "../sdk/copy.js"
-import type { ElementNode } from "../tree/node.js"
+import type { ElementNode, LoomNode } from "../tree/node.js"
 import { outlineTree } from "../tree/outline.js"
 import type { LoomTree } from "../tree/tree.js"
 
@@ -174,20 +174,21 @@ export type PartReading = {
    */
   readonly counters: ReaderTally | undefined
   /**
-   * The words this part says itself: its declared copy props, and its direct
-   * text children.
+   * The words this part says itself: its declared copy props, and the text
+   * handed to it directly or through a slot.
    *
-   * **Its own, never its subtree's.** A text node is not an element, so it can
-   * never be a part of its own and its words would otherwise be lost; every
-   * other descendant is a part in this same list. So the words of a page are
+   * **Its own, never its subtree's.** Neither a text node nor a slot node is an
+   * element, so neither can ever be a part of its own and the words handed into
+   * one would otherwise be lost; every other descendant is a part in this same
+   * list. So the words of a page are
    * partitioned across its parts exactly once, and a caller may add two rows
    * together without reading a headline twice.
    *
    * `unread` and `unspoken` mean what they mean in the reading they come from
    * (0122): nobody has said whether these props are words, and somebody said
-   * these were words and what is in them is not one. Nothing in the starter library declares `copy`
-   * yet, so today this answers `unread` for almost every part — which is the
-   * honest answer and not a failure.
+   * these were words and what is in them is not one. The starter library
+   * declares `copy` across itself (0223), so `unread` on a page built from it
+   * is a deployment's own primitives rather than the framework's silence.
    */
   readonly copy: NodeCopy
 }
@@ -313,17 +314,41 @@ const rolesByType = (declarations: RoleDeclarations): ReadonlyMap<PrimitiveType,
 }
 
 /**
+ * The children that are not parts in their own right, which is what a node
+ * contributes itself.
+ *
+ * Text is kept and an element is dropped, because every element is a part of
+ * this reading and would otherwise be counted at two depths. **A slot is kept
+ * and pruned the same way**, because a slot is not an element and so is never a
+ * part: text handed into one belongs to the nearest element above it, and a slot
+ * treated as an element would lose those words to a node this reading never
+ * reports. The words of a page are partitioned across its parts exactly once,
+ * and that sentence is only true with this clause in it.
+ */
+const ownChildren = (children: readonly LoomNode[]): readonly LoomNode[] =>
+  children.flatMap<LoomNode>((child) => {
+    switch (child.kind) {
+      case "element":
+        return []
+      case "text":
+        return [child]
+      case "slot":
+        return [{ ...child, children: ownChildren(child.children) }]
+    }
+  })
+
+/**
  * What a part says on its own, read with `copyIn` against a node stripped of
  * everything that is a part in its own right.
  *
  * `copyIn` walks a subtree, which is right for its callers and wrong here — a
  * root would carry every word on the page and so would every band on the way
  * down. Rather than reimplement its rules about blank strings, non-string values
- * and what counts as declared, this hands it the node with only its text
- * children, which is exactly the part's own contribution.
+ * and what counts as declared, this hands it the node with only the children
+ * that are nobody else's, which is exactly the part's own contribution.
  */
 const ownCopy = (node: ElementNode, declarations: CopyDeclarations): NodeCopy =>
-  copyIn({ ...node, children: node.children.filter((child) => child.kind === "text") }, declarations)
+  copyIn({ ...node, children: ownChildren(node.children) }, declarations)
 
 const standingOf = (counters: ReaderTally | undefined, views: number): PartStanding => {
   if (counters !== undefined && counters.reached > 0) return "read"
