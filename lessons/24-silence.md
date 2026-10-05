@@ -1047,8 +1047,8 @@ describe("F", () => {
 The output:
 
 ```
-  primitives registered:     102
-  declaring copy:            102
+  primitives registered:     103
+  declaring copy:            103
   declaring any role:        1
   typesWithRole("heading"):  ["loom.heading"]
   copyFor("loom.stat"):      ["value","label","caption"]

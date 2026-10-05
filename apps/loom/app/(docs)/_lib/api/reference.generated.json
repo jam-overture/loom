@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5424,10 +5424,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 192,
+      "files": 195,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5750,7 +5750,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a table\n     * with a column that stays put cannot do without.\n     */\n    readonly scrollX: \"loom-scroll-x\";\n    /**\n     * The comparison band's scroller, which differs from the general table's in\n     * one line: it holds its criterion column in place, so a snap has to land a\n     * subject *beside* that column rather than behind it.\n     */\n    readonly compareScroll: \"loom-compare-scroll\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly com\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /**\n     * A link inside a sentence: underlined at rest, in the paragraph's own ink.\n     *\n     * The whole of `loom.inline-link`'s appearance is here and none of it is on\n     * the element, which is this file's first mechanic being used rather than\n     * worked around — an inline `color` would be a colour no paragraph could\n     * lend it, and being lent the paragraph's colour is that primitive's entire\n     * design.\n     */\n    readonly inlineLink: \"loom-inline-link\";\n    /** The `↗` after an outbound phrase, in its own decoration context. */\n    readonly inlineLinkOutward: \"loom-inline-link-outward\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a tab\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -5760,6 +5760,13 @@
               "signature": "const libraryStylesheet: () => ReactElement",
               "truncated": false,
               "summary": "Emitted beside a primitive's own root element rather than around it, for the reason `editable.ts` gives for never wrapping: a wrapper changes what `>`, `:first-child` and `:nth-child` select. A hoisted `<style>` is removed from the flow entirely, and an un-hoisted one is a metadata element siblings do not count."
+            },
+            {
+              "name": "libraryStylesheetText",
+              "kind": "function",
+              "signature": "const libraryStylesheetText: () => string",
+              "truncated": false,
+              "summary": "The same rules as text, for a document React is not assembling."
             }
           ]
         },
@@ -5882,10 +5889,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 62,
+      "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5956,6 +5963,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/articles-index-band",
+          "title": "Articles index band",
+          "summary": "The writing band as an archive rather than as a shop window — every piece in two columns, and the way to the rest of them underneath.",
+          "symbols": [
+            {
+              "name": "articlesIndexBand",
+              "kind": "value",
+              "signature": "const articlesIndexBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/banner-band",
           "title": "Banner band",
           "summary": "",
@@ -5966,6 +5987,20 @@
               "signature": "const bannerBand: Composition",
               "truncated": false,
               "summary": "The strip above everything — the first thing on the page and the first part this catalogue has ever had that sits above the navigation."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/banner-inline-band",
+          "title": "Banner inline band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bannerInlineBand",
+              "kind": "value",
+              "signature": "const bannerInlineBand: Composition",
+              "truncated": false,
+              "summary": "The strip whose sentence *is* the link, and the answer to the one row the designs-per-part instrument had left."
             }
           ]
         },
@@ -6749,7 +6784,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7375,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7603,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7985,7 +8020,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8374,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8472,7 +8507,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9662,7 +9697,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9805,7 +9840,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9872,7 +9907,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10469,7 +10504,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10543,7 +10578,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11001,7 +11036,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1246,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

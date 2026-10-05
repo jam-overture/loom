@@ -87,6 +87,18 @@ export const LIBRARY_CLASS = {
   lift: "loom-lift",
   /** Wipes an underline in from the left on hover — a link that is a whole tile. */
   underline: "loom-underline",
+  /**
+   * A link inside a sentence: underlined at rest, in the paragraph's own ink.
+   *
+   * The whole of `loom.inline-link`'s appearance is here and none of it is on
+   * the element, which is this file's first mechanic being used rather than
+   * worked around — an inline `color` would be a colour no paragraph could
+   * lend it, and being lent the paragraph's colour is that primitive's entire
+   * design.
+   */
+  inlineLink: "loom-inline-link",
+  /** The `↗` after an outbound phrase, in its own decoration context. */
+  inlineLinkOutward: "loom-inline-link-outward",
   /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */
   aurora: "loom-aurora",
   /** The disclosure marker of a `details`, rotated when its section is open. */
@@ -841,6 +853,52 @@ const CSS = `
 }
 .loom-underline[aria-current="page"] {
   background-size: 100% 2px;
+}
+/**
+ * The rest state is the thing \`.loom-underline\` above cannot have, and the
+ * reason the two are separate rules rather than one with a modifier: that
+ * underline is a background the element paints under its own box, and a box is
+ * exactly what a phrase inside a sentence does not get. This is
+ * \`text-decoration\`, so it wraps across lines, skips descenders, and adds
+ * nothing to the line box it sits in.
+ *
+ * \`color: inherit\` is the primitive's whole design and is stated here rather
+ * than inline so that a paragraph can lend its ink to it. \`1px\` rather than
+ * \`from-font\`: that keyword hands the thickness to whatever face the pack
+ * declares, so the same phrase would be underlined differently under each
+ * palette for no reason anybody chose, and the two pixels the hover moves to
+ * would be a smaller step under some packs than under others.
+ */
+.loom-inline-link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  transition: text-decoration-thickness var(--loom-motion-fast) ease, text-underline-offset var(--loom-motion-fast) ease;
+}
+/**
+ * Thickness and not colour, for the reason the primitive gives at length: the
+ * accent is \`fg-default\` under \`minimal\`, so an accent hover is no hover at all
+ * on the palette every screenshot is taken in. Two pixels is visible in
+ * greyscale, under forced colours, and to a reader who cannot tell the two
+ * hues apart.
+ */
+.loom-inline-link:hover, .loom-inline-link:focus-visible {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+/**
+ * \`inline-block\` is load-bearing and not a layout habit. \`text-decoration\`
+ * propagates from an ancestor and cannot be cancelled on a descendant inline
+ * box, so an inline arrow is an arrow with a line under it; a block box starts
+ * a new decoration context, which is the only way to keep the rule on the words
+ * and off the mark.
+ */
+.loom-inline-link-outward {
+  display: inline-block;
+  font-size: 0.85em;
+  margin-inline-start: 0.15em;
+  text-decoration: none;
 }
 .loom-aurora {
   animation: loom-aurora calc(var(--loom-motion-slow) * 40) ease-in-out infinite;
@@ -2208,7 +2266,7 @@ html:has(.loom-lightbox[data-loom-presented="true"]) {
   .loom-marquee-echo {
     display: none;
   }
-  .loom-lift, .loom-underline, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play, .loom-pager .loom-link {
+  .loom-lift, .loom-underline, .loom-inline-link, .loom-marker, .loom-mark, .loom-input, .loom-compare-row > *, .loom-table-row > *, .loom-recording-play, .loom-pager .loom-link {
     transition: none;
   }
   /**
@@ -2249,5 +2307,25 @@ export const libraryStylesheet = (): ReactElement =>
   createElement("style", {
     href: STYLESHEET_HREF,
     precedence: STYLESHEET_PRECEDENCE,
-    children: CSS,
+    children: libraryStylesheetText(),
   })
+
+/**
+ * The same rules as text, for a document React is not assembling.
+ *
+ * Filed by `Loom portal` on 3 October, from the shape of a preview that died
+ * for an unrelated reason: a route handler building an HTML document by hand
+ * needed this library's CSS **as a string**, and the only published export was
+ * a `ReactElement`, so the only way to the text was
+ * `libraryStylesheet().props.children` — reaching into an element's props to
+ * get at a constant. That consumer renders through React in the end and reaches
+ * into nothing. The next one is predictable and the finding names it: anything
+ * assembling a Loom document outside React — a static export, an email, a PDF,
+ * a screenshot worker — has the same two bad options, pick an element apart or
+ * copy the file.
+ *
+ * `libraryStylesheet()` is its caller rather than its twin, which is the half
+ * that matters: there is one copy of the rules and no second export that could
+ * come to disagree with the first.
+ */
+export const libraryStylesheetText = (): string => CSS
