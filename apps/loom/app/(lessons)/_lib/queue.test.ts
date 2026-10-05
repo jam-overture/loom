@@ -99,7 +99,7 @@ describe("the queue on a given day", () => {
   it("leaves a reader who has done nothing with every set and no queue", () => {
     const entries = queueFor(REVIEW_SETS, EMPTY_PROGRESS, PART_LESSONS, "2026-03-09")
 
-    expect(entries).toHaveLength(38)
+    expect(entries).toHaveLength(39)
     expect(entries.every((entry) => entry.status === "unscheduled")).toBe(true)
     expect(dueNow(entries)).toEqual([])
   })
@@ -113,7 +113,7 @@ describe("the queue on a given day", () => {
   it("orders the two-letter sets last rather than second", () => {
     const entries = queueFor(REVIEW_SETS, EMPTY_PROGRESS, PART_LESSONS, "2026-03-09")
 
-    expect(entries.map((entry) => entry.set.letter).slice(-3)).toEqual(["AJ", "AK", "AL"])
+    expect(entries.map((entry) => entry.set.letter).slice(-3)).toEqual(["AK", "AL", "AM"])
   })
 
   it("gives a reader who has finished Part I exactly the sets Part I earns", () => {

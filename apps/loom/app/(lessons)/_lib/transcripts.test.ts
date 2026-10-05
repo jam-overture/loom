@@ -74,7 +74,20 @@ const ANSWERS = "Answers"
  * make every block stop matching and so stop being recognised — fails here
  * rather than quietly checking nothing.
  *
- * 148 since 3 October, when lesson 33's exercise G became two blocks rather than
+ * 155 since lesson 34 (hindsight), which added seven — one per exercise, each a whole
+ * transcript in a single block. None of the seven carries a `moves:` mark and none
+ * needs one: every line is read off `src/runtime/stakes.ts` and
+ * `src/telemetry/remeasure.ts` at run time, so the day the Gate gains a fifteenth
+ * rule these transcripts move **and so do three sentences**, which
+ * `claims.test.ts` now holds against the same two lists. A count that is checked in
+ * prose and printed in a fence has no need of a note explaining its red.
+ *
+ * Exercise B is the one to read first if this file sends you here: it prints `low`
+ * for a change recorded as `critical`, which looks exactly like drift and is the
+ * lesson's central claim. Exercise G prints the same two words for the opposite
+ * reason, which is why they are separate blocks.
+ *
+ * It was 148 since 3 October, when lesson 33's exercise G became two blocks rather than
  * one. A mark governs a whole fence, so a fence carrying a mark has to be the
  * size of the thing that moves: six of those ten lines are two components
  * answering and move for nobody, and leaving them under the mark would have had
@@ -154,7 +167,7 @@ const ANSWERS = "Answers"
  * one of which prints its transcript in two blocks — 73 after lesson 23, and 66
  * when this was written.
  */
-const RECOGNISED_TRANSCRIPTS = 148
+const RECOGNISED_TRANSCRIPTS = 155
 
 /**
  * The same, for the `## Answers` sections of lessons 01 to 11.

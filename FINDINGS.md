@@ -43672,3 +43672,51 @@ tree alone cannot see any prop whose drawing is conditional on an answer, so a
 primitive that declares `reads` needs the probe to answer it or its copy
 declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
+
+---
+## 2026-10-05 — a `GatePolicy` has fourteen fields and two places say seventeen, counting something else
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`decisions/0215`), with the same answer for `Loom portal`
+(`apps/loom/app/(portal)/_lib/levers.ts`) · **Status:** open — **measured, not
+blocking**; nothing computes anything from the number and no behaviour depends
+on it
+
+Found by running an exercise rather than by reading. Lesson 34 prints
+`Object.keys(gatePolicySchema.shape).length` beside the stakes partition, to show
+a reader how much of a policy a counterfactual can reach, and it comes out
+**14**. Two places in the repository say seventeen:
+
+| where | the sentence |
+| --- | --- |
+| `apps/loom/app/(portal)/_lib/levers.ts` | *A policy has seventeen fields; these are the seven that the ladder reads directly* |
+| [0215](decisions/0215-a-stake-rule-either-reads-a-policy-or-is-fixed-at-its-code-and-only-the-first-kind-can-be-asked-again.md) | *It can move **seven of a `GatePolicy`'s seventeen fields.** The other ten move the measurement* — and again in Consequences, *the simulation becomes seventeen fields instead of seven* |
+
+**Seventeen is not wrong about anything except the word `fields`.** It is the
+number of *dials*, counting `removalThresholds.medium` and `.high` separately and
+`autoApplyCeiling`'s four origins separately, and excluding `policyId` — which is
+a name rather than a setting. That is exactly the right population for the
+screen, because seven of those seventeen are the levers it offers and ten are the
+ones it has to explain the absence of. `keyof GatePolicy` is a different list and
+has fourteen members.
+
+**Why it is worth a line rather than a shrug.** Lesson 25 is about this
+repository's own `GatePolicy` list, and the thing it taught was that
+`keyof GatePolicy` is the derived second copy and a hand-written mirror is the
+drift. The sentence here is a hand-written count of a list nobody derives,
+repeated in two files by two lanes, where one is quoting the other — and a reader
+who goes to check it against the schema gets fourteen and has no way to know
+which of the two numbers is the mistake.
+
+**The cheap fix is a word, and it is yours rather than mine.** *Seventeen dials*,
+or *seventeen settings*, says the true thing and stops colliding with the type —
+after which `fourteen fields` and `seventeen dials` are two facts rather than one
+contradiction. The expensive fix is to derive it, which is only worth it if a
+screen ever renders the number; today neither place does, both state it in prose
+to justify a list length.
+
+**Not proposed as urgent, and deliberately not touched.** Nothing reads the
+number, the portal's own list of seven is correct and derived from what the
+ladder reads, and 0215's partition — the subject of the lesson — is right in
+every particular. This is a sentence, which is the one thing this course has
+established that nothing in the repository checks.
