@@ -8,6 +8,7 @@ import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
+import type { PageStopping } from "@/app/(portal)/_lib/stopping"
 
 import { PageReadingCard } from "./page-reading"
 
@@ -55,7 +56,12 @@ const tally = (
  * nobody has touched since it was last counted — and is what every assertion
  * written before the card knew about the page being served was about.
  */
-const cardFor = (tallies: readonly StoredTally[], live?: number, skipping?: PageSkipping) => {
+const cardFor = (
+  tallies: readonly StoredTally[],
+  live?: number,
+  skipping?: PageSkipping,
+  stopping?: PageStopping
+) => {
   const reading = pageReadings(revisionReadings(tallies, names))[0]!
 
   return render(
@@ -70,6 +76,11 @@ const cardFor = (tallies: readonly StoredTally[], live?: number, skipping?: Page
        * has is about.
        */
       skipping={skipping}
+      /*
+       * Absent in exactly the same cases and for the same reason: it is the
+       * other reading off the same join, so a card without the one has neither.
+       */
+      stopping={stopping}
     />
   )
 }
@@ -133,10 +144,52 @@ describe("PageReadingCard", () => {
     expect(container.textContent).toContain("3 of the 40 visits")
   })
 
-  it("says what to do about it", () => {
+  /**
+   * **The advice that used to end that sentence is gone, and this is the test
+   * that used to pin it.**
+   *
+   * It read *"If anything on this page is worth moving up, it is what sits
+   * above that."* — drawn from a page-wide minimum, which
+   * [0221](../../../../../../../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)
+   * is explicit does not support a claim about reading order: a part three
+   * levels inside the first band comes before the second band and is reached by
+   * fewer visits than either, so the part with the smallest reach is routinely a
+   * part nothing stopped at. On `BUSY` it is the footer, and the footer is the
+   * last part of the page — there is nothing below it for anybody to have
+   * failed to reach.
+   *
+   * `WhereTheyStop` makes the same recommendation between two siblings, which is
+   * the only comparison that supports one. **The number the old advice was drawn
+   * from is untouched** and is asserted directly above; what went is an
+   * inference, and an inference is not a fact a reader loses.
+   */
+  it("no longer says which part to move up from a page-wide smallest reach", () => {
     const { container } = cardFor(BUSY)
 
-    expect(container.textContent).toContain("worth moving up")
+    expect(container.textContent).toContain("fewest got as far as")
+    expect(container.textContent).not.toContain("worth moving up")
+  })
+
+  /**
+   * And the sound version of it, when the card is handed the reading that can
+   * make it. The card draws nothing at all where it is not — one notice already
+   * says why, and two would read as two faults.
+   */
+  it("draws where people stop when it is handed that reading, and nothing when it is not", () => {
+    expect(cardFor(BUSY).container.textContent).not.toContain("Where do people stop reading?")
+
+    const drawn = cardFor(BUSY, undefined, undefined, {
+      treeId,
+      revision: 2,
+      views: 40,
+      runs: [],
+      steepest: undefined,
+      places: 0,
+      unanchored: [],
+      gained: 0,
+    })
+
+    expect(drawn.container.textContent).toContain("Where do people stop reading?")
   })
 
   it("names where people stayed longest per person, not where they stayed longest in total", () => {

@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4674,11 +4674,18 @@
               "summary": "The top of an adjust control's range."
             },
             {
+              "name": "ADJUST_RESTING_PROPERTY",
+              "kind": "value",
+              "signature": "const ADJUST_RESTING_PROPERTY = \"--loom-adjust-resting\"",
+              "truncated": false,
+              "summary": "The property a primitive declares to say **where its control should start**, on the element it places the control in. Read once, at mount, and never again — where the slider goes after that is the reader's."
+            },
+            {
               "name": "ADJUST_RESTING",
               "kind": "value",
               "signature": "const ADJUST_RESTING = 50",
               "truncated": false,
-              "summary": "Where the control sits before anybody moves it."
+              "summary": "Where the control sits when nothing declared otherwise."
             },
             {
               "name": "BEHAVIOURS",
@@ -5424,10 +5431,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 192,
+      "files": 195,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5750,7 +5757,7 @@
             {
               "name": "LIBRARY_CLASS",
               "kind": "value",
-              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a table\n     * with a column that stays put cannot do without.\n     */\n    readonly scrollX: \"loom-scroll-x\";\n    /**\n     * The comparison band's scroller, which differs from the general table's in\n     * one line: it holds its criterion column in place, so a snap has to land a\n     * subject *beside* that column rather than behind it.\n     */\n    readonly compareScroll: \"loom-compare-scroll\";\n    /** A `loom.comparison-table`'s `<table>`: separators, padding, and the featured column. */\n    readonly compare: \"loom-compare\";\n    /** The same table set as a spec to scan rather than a page to read. */\n    readonly com\n…",
+              "signature": "const LIBRARY_CLASS: {\n    /** Fades and lifts into place once, on entry. Stagger with `animationDelay`. */\n    readonly rise: \"loom-rise\";\n    /** Raises a card on hover, and marks it as a surface that responds. */\n    readonly lift: \"loom-lift\";\n    /** Wipes an underline in from the left on hover — a link that is a whole tile. */\n    readonly underline: \"loom-underline\";\n    /**\n     * A link inside a sentence: underlined at rest, in the paragraph's own ink.\n     *\n     * The whole of `loom.inline-link`'s appearance is here and none of it is on\n     * the element, which is this file's first mechanic being used rather than\n     * worked around — an inline `color` would be a colour no paragraph could\n     * lend it, and being lent the paragraph's colour is that primitive's entire\n     * design.\n     */\n    readonly inlineLink: \"loom-inline-link\";\n    /** The `↗` after an outbound phrase, in its own decoration context. */\n    readonly inlineLinkOutward: \"loom-inline-link-outward\";\n    /** Two slow-drifting colour fields, for a hero backdrop that is not a flat wash. */\n    readonly aurora: \"loom-aurora\";\n    /** The disclosure marker of a `details`, rotated when its section is open. */\n    readonly marker: \"loom-marker\";\n    /** A logo held back to grey until it is pointed at. */\n    readonly mark: \"loom-mark\";\n    /** A `loom.milestone-list`: spaces its entries, ends its rail, sizes its marker column. */\n    readonly rail: \"loom-rail\";\n    /** The same list, set tighter — a changelog to scan rather than a history to read. */\n    readonly railTight: \"loom-rail-tight\";\n    /** The same list with the connecting line dropped, dots kept. */\n    readonly railNone: \"loom-rail-none\";\n    /**\n     * One `loom.milestone`, and the reason its own layout is here rather than on\n     * the element: **a child that lays itself out inline cannot be rearranged by\n     * the container it is in.** An inline style beats a rule, so the marker\n     * column, the rail's direction and the dot's optical offset were all\n     * unreachable from any parent — and a second arrangement of the same content\n     * model is exactly what the naming rule — a container is its child's name\n     * plus the arrangement — says a second container is for. Moving four\n     * declarations into this file is what let `loom.milestone-row` exist without\n     * a second child type that renders the same three fields.\n     *\n     * It stays on the *entry* rather than on the list, which is the property the\n     * inline version was protecting: a milestone that finds itself outside a\n     * list still lays itself out, because the class travels with the child.\n     */\n    readonly milestone: \"loom-milestone\";\n    /** Its marker cell — right-aligned on a rail, above the title in a row. */\n    readonly railMarker: \"loom-rail-marker\";\n    /** Its dot-and-line cell, which runs down the page on a rail and across it in a row. */\n    readonly railTrack: \"loom-rail-track\";\n    /** The dot itself, offset onto the marker's first line where the marker is beside it. */\n    readonly railDot: \"loom-rail-dot\";\n    /** One entry's connector, hidden on the last entry because only CSS knows which that is. */\n    readonly railLine: \"loom-rail-line\";\n    /** One entry's content cell, which carries the gap to the entry below it. */\n    readonly railBody: \"loom-rail-body\";\n    /** A `loom.milestone-row`: the same entries laid across, as a process band. */\n    readonly milestoneRow: \"loom-milestone-row\";\n    /**\n     * A `loom.embed` frame whose shape follows its own width — portrait while it\n     * is narrow, 16/10 once it is not. The one shape that cannot be an inline\n     * `aspect-ratio`, because there is no single ratio to write down.\n     */\n    readonly frameAdaptive: \"loom-frame-adaptive\";\n    /** A card whose title anchor is stretched over the whole surface. */\n    readonly cover: \"loom-cover\";\n    /** That anchor. Its `::after` is what makes the surface clickable. */\n    readonly coverLink: \"loom-cover-link\";\n    /** A card's cover image, cropped to a ratio the card owns rather than the file does. */\n    readonly coverMedia: \"loom-cover-media\";\n    /** A card's padded interior, so a lead layout can set it beside the cover. */\n    readonly coverBody: \"loom-cover-body\";\n    /** A `loom.article-grid` running its first piece across the top. */\n    readonly lead: \"loom-lead\";\n    /** One `loom.field`. Named so the form it sits in can size it in a row. */\n    readonly field: \"loom-field\";\n    /** Any control inside a field: the focus ring, the hover, the placeholder. */\n    readonly input: \"loom-input\";\n    /** The wrapper that draws a select's chevron, since the native one is not the palette's. */\n    readonly select: \"loom-select\";\n    /** A `loom.form` laid out as a single row — see the rule about sizing children. */\n    readonly formInline: \"loom-form-inline\";\n    /**\n     * A `loom.avatar-row` cluster: each face overlaps the one before it and rings\n     * itself in the page's ground so the edge reads. The ring is `bg-canvas`\n     * because a primitive cannot know what it is sitting on — a cluster placed\n     * inside a `loom.card` rings itself in the canvas colour rather than the\n     * card's, which is a hair off and the honest limit of a static stylesheet.\n     */\n    readonly cluster: \"loom-cluster\";\n    /**\n     * The region a band too wide for the screen scrolls inside — `loom.table`'s\n     * and `loom.comparison-table`'s, which had one each and neither had anything\n     * but `overflow-x`.\n     *\n     * It is a class rather than the inline pair it replaces because three of the\n     * four things a scroller needs cannot be said on the element: the snap\n     * positions belong to the children, the focus ring is a state selector, and\n     * the scrollbar is the browser's own furniture. `loom.carousel` worked all of\n     * this out on 28 August and the only thing added here is\n     * `scroll-padding-inline-start`, which a carousel has no use for and a tab\n…",
               "truncated": true,
               "summary": "Class names the library's primitives apply. Exported so a test can name them."
             },
@@ -5760,6 +5767,13 @@
               "signature": "const libraryStylesheet: () => ReactElement",
               "truncated": false,
               "summary": "Emitted beside a primitive's own root element rather than around it, for the reason `editable.ts` gives for never wrapping: a wrapper changes what `>`, `:first-child` and `:nth-child` select. A hoisted `<style>` is removed from the flow entirely, and an un-hoisted one is a metadata element siblings do not count."
+            },
+            {
+              "name": "libraryStylesheetText",
+              "kind": "function",
+              "signature": "const libraryStylesheetText: () => string",
+              "truncated": false,
+              "summary": "The same rules as text, for a document React is not assembling."
             }
           ]
         },
@@ -5882,10 +5896,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 62,
+      "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5956,6 +5970,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/articles-index-band",
+          "title": "Articles index band",
+          "summary": "The writing band as an archive rather than as a shop window — every piece in two columns, and the way to the rest of them underneath.",
+          "symbols": [
+            {
+              "name": "articlesIndexBand",
+              "kind": "value",
+              "signature": "const articlesIndexBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/banner-band",
           "title": "Banner band",
           "summary": "",
@@ -5966,6 +5994,20 @@
               "signature": "const bannerBand: Composition",
               "truncated": false,
               "summary": "The strip above everything — the first thing on the page and the first part this catalogue has ever had that sits above the navigation."
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/banner-inline-band",
+          "title": "Banner inline band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "bannerInlineBand",
+              "kind": "value",
+              "signature": "const bannerInlineBand: Composition",
+              "truncated": false,
+              "summary": "The strip whose sentence *is* the link, and the answer to the one row the designs-per-part instrument had left."
             }
           ]
         },
@@ -6749,7 +6791,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7382,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7610,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7712,7 +7754,7 @@
         {
           "module": "store/replay",
           "title": "Replay",
-          "summary": "Replay, and the audit it exists for.",
+          "summary": "Replay: folding the log, and the two questions a fold answers.",
           "symbols": [
             {
               "name": "ReplayMismatch",
@@ -7748,6 +7790,48 @@
               "signature": "const auditSnapshot: (store: TreeReader, treeId: TreeId, seed: LoomTree) => Promise<Result<SnapshotAudit, StoreError>>",
               "truncated": false,
               "summary": "Folds a tree's log from a known seed and compares the result to the stored snapshot. A host runs this in a test or a scheduled job; nothing on a request path needs it, which is the point."
+            },
+            {
+              "name": "TreeAtTarget",
+              "kind": "type",
+              "signature": "type TreeAtTarget = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    readonly seed: LoomTree;\n};",
+              "truncated": false,
+              "summary": "One revision of one tree, and the seed to reach it from."
+            },
+            {
+              "name": "TreeAtTargets",
+              "kind": "type",
+              "signature": "type TreeAtTargets = {\n    readonly treeId: TreeId;\n    readonly revisions: readonly number[];\n    readonly seed: LoomTree;\n};",
+              "truncated": false,
+              "summary": "The same question asked about several revisions of one tree, in one read."
+            },
+            {
+              "name": "TreeAtRevision",
+              "kind": "type",
+              "signature": "type TreeAtRevision =\n/**\n * The fold reached the named revision. `replayed.tree.revision` equals the\n * revision asked for, and `replayed.idHistory` is the tenancy of every id from\n * the seed up to it — which is the half a caller reading counters by node id\n * needs, because an id that returned in between names two different nodes\n * either side of the comparison.\n */\n{\n    readonly outcome: \"replayed\";\n    readonly revision: number;\n    readonly replayed: ReplayedTree;\n}\n/**\n * Not a revision this seed and this log can reach: before the seed, after the\n * head, or not an integer — revisions are dense integers and nothing\n * lies between two of them, so a fractional one is not a position the log has.\n *\n * `earliest` is the seed's own revision rather than one past it, which is the\n * one place this differs from a revert's span: the tree at the seed is the\n * seed, and a revision cannot be undone by inverting a delta the seed already\n * contains.\n */\n | {\n    readonly outcome: \"out-of-range\";\n    readonly revision: number;\n    readonly earliest: number;\n    readonly headRevision: number;\n} | {\n    readonly outcome: \"unreplayable\";\n    readonly revision: number;\n    readonly mismatch: ReplayMismatch;\n};",
+              "truncated": false,
+              "summary": "The tree as it was, or why the log cannot say."
+            },
+            {
+              "name": "describeTreeAt",
+              "kind": "function",
+              "signature": "const describeTreeAt: (answer: TreeAtRevision) => string",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "treeAt",
+              "kind": "function",
+              "signature": "const treeAt: (reader: TreeReader, target: TreeAtTarget) => Promise<Result<TreeAtRevision, StoreError>>",
+              "truncated": false,
+              "summary": "The tree as it was at a chosen revision."
+            },
+            {
+              "name": "treesAt",
+              "kind": "function",
+              "signature": "const treesAt: (reader: TreeReader, targets: TreeAtTargets) => Promise<Result<ReadonlyMap<number, TreeAtRevision>, StoreError>>",
+              "truncated": false,
+              "summary": "The same answers for several revisions, from one read of the log."
             }
           ]
         },
@@ -7985,7 +8069,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8423,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8459,7 +8543,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 36,
+      "files": 38,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8472,7 +8556,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9114,6 +9198,104 @@
           ]
         },
         {
+          "module": "signals/pace",
+          "title": "Pace",
+          "summary": "Whether a part was read or scrolled past.",
+          "symbols": [
+            {
+              "name": "READING_WORDS_PER_MINUTE",
+              "kind": "value",
+              "signature": "const READING_WORDS_PER_MINUTE = 240",
+              "truncated": false,
+              "summary": "The rate a page's words are costed at, in words per minute."
+            },
+            {
+              "name": "SKIMMED_BELOW",
+              "kind": "value",
+              "signature": "const SKIMMED_BELOW = 0.5",
+              "truncated": false,
+              "summary": "Below this much of the time its words take, a part was not read."
+            },
+            {
+              "name": "LINGERED_ABOVE",
+              "kind": "value",
+              "signature": "const LINGERED_ABOVE = 3",
+              "truncated": false,
+              "summary": "Above this much, readers stayed longer than the words account for."
+            },
+            {
+              "name": "PaceStanding",
+              "kind": "type",
+              "signature": "type PaceStanding = \n/**\n * Readers had less than {@link SKIMMED_BELOW} of the time the words take.\n *\n * The one verdict here that is safe against every bias in the module\n * documentation, and the one a screen should lead with.\n */\n\"skimmed\"\n/** Time enough for the words, and not conspicuously more. */\n | \"paced\"\n/** More than {@link LINGERED_ABOVE} times the time the words take. */\n | \"lingered\"\n/** Nothing can be said, and {@link PacedPart.silence} says which nothing. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What the time readers spent says about the words a part puts in front of them."
+            },
+            {
+              "name": "PACE_STANDINGS",
+              "kind": "value",
+              "signature": "const PACE_STANDINGS: readonly PaceStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PaceSilence",
+              "kind": "type",
+              "signature": "type PaceSilence =\n/**\n * No view reported it coming into view, so there is no time to divide and no\n * reader to divide it between.\n *\n * On a window with no views at all, this is every part — which is the same\n * refusal `parts.ts` makes one level down, arrived at rather than special-cased.\n */\n\"unreached\"\n/**\n * Its words are a floor, and the verdict that floor would support is not the\n * safe one.\n *\n * Some type in its subtree declares no `copy`, or declared a prop holding\n * something that is not a string. `skimmed` is still reported where it is\n * reached, because more words only make a part more skimmed; anything else\n * would be a claim resting on words nobody counted.\n */\n | \"unreadable\"\n/**\n * It says nothing, as far as anything can tell: no words, and nothing\n * undeclared either.\n *\n * A spacer, a rule, an image with no caption. There is no time its words take,\n * so there is no ratio — and this is kept apart from `unreadable` because\n * *there are none* and *nobody said* are different answers.\n */\n | \"wordless\";",
+              "truncated": false,
+              "summary": "Why a part has no pace."
+            },
+            {
+              "name": "PACE_SILENCES",
+              "kind": "value",
+              "signature": "const PACE_SILENCES: readonly PaceSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describePaceStanding",
+              "kind": "function",
+              "signature": "const describePaceStanding: (standing: PaceStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface putting the reading in front of a person."
+            },
+            {
+              "name": "describePaceSilence",
+              "kind": "function",
+              "signature": "const describePaceSilence: (silence: PaceSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for the same surface."
+            },
+            {
+              "name": "PacedPart",
+              "kind": "type",
+              "signature": "type PacedPart = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    /** Distinct page views that reported it coming into view; `0` where no row named it. */\n    readonly readers: number;\n    /** The words this part says itself, counted. Its own, never its subtree's. */\n    readonly words: number;\n    /**\n     * The words of this part and everything under it.\n     *\n     * The denominator, because the text on screen while a band was up is the\n     * band's and its children's. Nests, and is therefore never added across parts.\n     */\n    readonly wordsWithin: number;\n    /**\n     * Whether {@link wordsWithin} is a floor rather than a count.\n     *\n     * True when anything in the subtree declared no `copy`, or declared a prop\n     * holding something other than a string.\n     */\n    readonly floored: boolean;\n    /** Time on screen, summed across every view in the window. */\n    readonly dwellMs: number;\n    /**\n     * The same time per reader, after {@link PaceOptions.inflation}.\n     *\n     * `null` where nobody reached it. Generous by the two biases nothing measures:\n     * dwell counts a part that was merely up, and an ancestor's dwell covers its\n     * children's reading.\n     */\n    readonly spentMs: number | null;\n    /** What {@link wordsWithin} takes at the costing rate. `0` where it says nothing. */\n    readonly needMs: number;\n    /**\n     * Time spent for every unit of time the words take. `1` is exactly enough.\n     *\n     * `null` where there is nothing to divide: no reader, or no words.\n     */\n    readonly pace: number | null;\n    readonly standing: PaceStanding;\n    /** Why there is no verdict, and `null` where there is one. */\n    readonly silence: PaceSilence | null;\n    /**\n     * Readers times the words they were shown here — the ranking key, and a\n     * magnitude rather than a census.\n     *\n     * Nests like {@link wordsWithin} does, so it ranks and is never summed.\n     */\n    readonly wordsPassed: number;\n};",
+              "truncated": false,
+              "summary": "One part, with the time its readers had against the time its words take."
+            },
+            {
+              "name": "PagePace",
+              "kind": "type",
+              "signature": "type PagePace = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The page's view floor, carried through from the reading unchanged. */\n    readonly views: number;\n    /** Every element part of the revision, in reading order. */\n    readonly parts: readonly PacedPart[];\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Why the parts with no verdict have none. Counts only the silent ones. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * The root, judged against the whole page.\n     *\n     * *Readers spend a third of the time this page's words take* is a true\n     * sentence and the one a reader screen opens with — and it is kept out of\n     * {@link mostSkimmed} because the page contains every part, so by words passed\n     * it would win every ranking it was entered in.\n     *\n     * `null` where the revision's root is not an element, which is the one tree\n     * shape with no part at depth 0.\n     */\n    readonly whole: PacedPart | null;\n    /**\n     * The part of the page most words went unread in: most words passed, then\n     * first in reading order.\n     *\n     * By words passed rather than by the lowest pace, for the same reason a stop\n     * is ranked by the readers it loses: a caption two readers hurried\n     * past is a worse ratio and a smaller problem than a band four hundred of\n     * them did.\n     */\n    readonly mostSkimmed: PacedPart | null;\n    /** The inflation that was applied; `0` when none was given. */\n    readonly inflation: number;\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PaceOptions",
+              "kind": "type",
+              "signature": "type PaceOptions = {\n    /**\n     * How generous the reader counts are, as `drift ÷ opened` off the page-view\n     * rows.\n     *\n     * `reached` over-counts by the page views that straddled a rollup window, so\n     * the mean time per reader is short by the same proportion — and short means\n     * **more parts called skimmed than should be**, which is the one direction\n     * this module's safe verdict cannot afford to be wrong in. A deployment that\n     * has the measurement hands it over and the correction is applied; one that\n     * does not gets the uncorrected figure and the bias stated here.\n     *\n     * Absent, zero, negative or not finite are all *no correction*: a negative\n     * inflation is not a thing a rollup can produce, and silently trusting one\n     * would widen the claim rather than narrow it.\n     */\n    readonly inflation?: number;\n    /**\n     * The costing rate, where {@link READING_WORDS_PER_MINUTE} is wrong for this\n     * deployment's text.\n     *\n     * Zero, negative or not finite are refused the same way, and the published\n     * default applies.\n     */\n    readonly wordsPerMinute?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readingPaceOf",
+              "kind": "function",
+              "signature": "const readingPaceOf: (reading: PageReading, options?: PaceOptions) => PagePace",
+              "truncated": false,
+              "summary": "Whether readers had time to read what each part of a page says."
+            }
+          ]
+        },
+        {
           "module": "signals/page-views",
           "title": "Page views",
           "summary": "How many page views there were — the number every rate on a screen is taken of, and the one number this subsystem could not state.",
@@ -9212,7 +9394,7 @@
             {
               "name": "PartReading",
               "kind": "type",
-              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     *\n     * Undefined is not zero and is kept apart from it on purpose. A part with a\n     * row of zeroes was reported on; a part with no row was not, and the\n     * difference is the whole of how `skipped` is told from a quiet page.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and its direct\n     * text children.\n     *\n     * **Its own, never its subtree's.** A text node is not an element, so it can\n     * never be a part of its own and its words would otherwise be lost; every\n     * other descendant is a part in this same list. So the words of a page are\n     * partitioned across its parts exactly once, and a caller may add two rows\n     * together without reading a headline twice.\n     *\n     * `unread` and `unspoken` mean what they mean in the reading they come from\n     *: nobody has said whether these props are words, and somebody said\n     * these were words and what is in them is not one. Nothing in the starter library declares `copy`\n     * yet, so today this answers `unread` for almost every part — which is the\n     * honest answer and not a failure.\n     */\n    readonly copy: NodeCopy;\n};",
+              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     *\n     * Undefined is not zero and is kept apart from it on purpose. A part with a\n     * row of zeroes was reported on; a part with no row was not, and the\n     * difference is the whole of how `skipped` is told from a quiet page.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and the text\n     * handed to it directly or through a slot.\n     *\n     * **Its own, never its subtree's.** Neither a text node nor a slot node is an\n     * element, so neither can ever be a part of its own and the words handed into\n     * one would otherwise be lost; every other descendant is a part in this same\n     * list. So the words of a page are\n     * partitioned across its parts exactly once, and a caller may add two rows\n     * together without reading a headline twice.\n     *\n     * `unread` and `unspoken` mean what they mean in the reading they come from\n     *: nobody has said whether these props are words, and somebody said\n     * these were words and what is in them is not one. The starter library\n     * declares `copy` across itself, so `unread` on a page built from it\n     * is a deployment's own primitives rather than the framework's silence.\n     */\n    readonly copy: NodeCopy;\n};",
               "truncated": false,
               "summary": "One element node of one revision, with whatever the window said about it."
             },
@@ -9285,6 +9467,55 @@
               "signature": "const readingProgressOf: (reading: PageReading) => ReadingProgress",
               "truncated": false,
               "summary": "Where reading stops, from a reading of one revision."
+            }
+          ]
+        },
+        {
+          "module": "signals/reach",
+          "title": "Reach",
+          "summary": "How far into a page readers get, as a share of the readers there were.",
+          "symbols": [
+            {
+              "name": "ReachSilence",
+              "kind": "type",
+              "signature": "type ReachSilence = \n/**\n * No page-view row for this tree and revision.\n *\n * Either the counter has never been written for it — a deployment whose\n * intake predates the column, or one whose rows have expired — or the caller\n * read the rows for something else. The counters are still a floor on how\n * many readers there were, which is what a reading reported before this\n * join existed, so a surface has something to fall back to and should say\n * which it is showing.\n */\n\"unmeasured\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this and the second is the one worth catching.\n * If no rollup has counted an appearance either, nobody has read this\n * revision and there is nothing to divide. If appearances have been counted,\n * **the senders are not marking their openings** — a page running a\n * broadcaster from before the marker shipped, or one whose opening delivery\n * is being lost — and every rate on the screen has no denominator while the\n * counters look healthy. That is a diagnosis nothing else in this subsystem\n * offers.\n */\n | \"unopened\"\n/**\n * Readers arrived and no rollup has folded a window yet.\n *\n * Everything is `pending`. It is what the first minutes of a deployment look\n * like, and what a stalled collection looks like for ever, and the two are\n * told apart by whether the number moves.\n */\n | \"uncounted\";",
+              "truncated": false,
+              "summary": "Why a share of readers cannot be given at all."
+            },
+            {
+              "name": "REACH_SILENCES",
+              "kind": "value",
+              "signature": "const REACH_SILENCES: readonly ReachSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeReachSilence",
+              "kind": "function",
+              "signature": "const describeReachSilence: (silence: ReachSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface putting the reading in front of a person."
+            },
+            {
+              "name": "PartReach",
+              "kind": "type",
+              "signature": "type PartReach = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root, as the reading's outline gives it. */\n    readonly depth: number;\n    readonly standing: PartStanding;\n    /**\n     * Distinct page views that saw it, exactly as stored: added across rollup\n     * windows and therefore generous.\n     *\n     * Published beside the shares rather than hidden behind them, because it is\n     * the only figure here that is not a division and the one to fall back to\n     * when the pair cannot be reconciled.\n     */\n    readonly reached: number;\n    /**\n     * The share of page views that got this far, as the rollups counted both\n     * ends: `reached ÷ appearances`.\n     *\n     * The straddle over-count is in the numerator and the denominator and very\n     * nearly divides out, which is what makes this the figure to show. It is an\n     * estimate and not a bound, and the direction it leans is worth knowing: a\n     * reader who stayed long enough to span two windows is counted twice on both\n     * sides, and a reader who stays longer is likelier to have got deep into the\n     * page — so for a part near the bottom this reads a little generous.\n     *\n     * **Its denominator is the page views that have been counted, which is not\n     * every reader who arrived.** While openings are pending the two are\n     * different populations, so this can sit above\n     * {@link PartReach.atMost} — that is not a contradiction and the pending\n     * figure is the explanation.\n     *\n     * `null` under a silence.\n     */\n    readonly share: number | null;\n    /**\n     * The most the share could be: `reached ÷ opened`, never above 1.\n     *\n     * A ceiling rather than an estimate. The openings are a count of readers that\n     * no window boundary can inflate, and `reached` is at least the number of\n     * readers who really got here, so the true share is at or below this.\n     *\n     * **For a part nearly everybody reaches it is 1 and says nothing**, and that\n     * is the ordinary state rather than a fault: a root is in the viewport of\n     * every page view, so where any visit spanned two windows its `reached` is\n     * above the openings on its own. The estimate is the figure with information\n     * in it there; this is the one that bounds a part further down.\n     *\n     * `null` under a silence.\n     */\n    readonly atMost: number | null;\n    /**\n     * The share applied to the exact count of readers who arrived — the number a\n     * sentence can say out loud.\n     *\n     * Deliberately not rounded: it is a magnitude and not a census, and a surface\n     * that rounds it is saying how precise it thinks it is.\n     *\n     * **One division of two whole numbers, not the share multiplied back up.**\n     * The two are the same arithmetic in exact numbers and not in a float —\n     * seven readers out of a hundred, times a hundred, is seven and a\n     * quadrillionth, which is above the most readers who could have got there and\n     * would make this figure break its own ceiling.\n     *\n     * Withheld in three states rather than given as a number nobody could stand\n     * behind: under a silence; whenever the collection is behind, because\n     * openings a rollup has not reached yet are readers whose reading nobody has\n     * counted and projecting the folded rate onto them would answer a question\n     * about people who were never measured; and where the two counters cannot be\n     * reconciled, because a count of people above the number of people who\n     * arrived is the one figure a screen must never show.\n     */\n    readonly readers: number | null;\n    /**\n     * The most readers who could have got here: the smaller of `reached` and the\n     * openings, which is a whole number of real page views either way.\n     *\n     * `null` under a silence. Where {@link PartReach.readers} is given it is\n     * never above this.\n     */\n    readonly atMostReaders: number | null;\n    /**\n     * More reach than there were page views to be reached in, so the share sits\n     * above 1 and no figure here can be drawn.\n     *\n     * Reach is counted out of the same windows as the appearances it is divided\n     * by, and a view that reached a part in a window is a view that appeared in\n     * it — so rows written by the same rollups cannot produce this. Two things\n     * can. **Node counters older than the page-view column**, added up over\n     * windows whose appearances were never kept, which is what an upgraded\n     * deployment's first reading looks like. Or a caller who concatenated two\n     * reads of the counters instead of letting the store add them, which the\n     * reading upstream reports as a duplicated node.\n     *\n     * It is not the ordinary straddle: `reached` above the *openings* is\n     * expected, and is what {@link PartReach.atMost} being 1 means.\n     *\n     * A surface should show `reached` and say it cannot yet be put as a share.\n     */\n    readonly unreconciled: boolean;\n};",
+              "truncated": false,
+              "summary": "How far one part of a page got, against the readers there were."
+            },
+            {
+              "name": "PageReach",
+              "kind": "type",
+              "signature": "type PageReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /**\n     * The floor the counters give on their own: the largest `views` any one row\n     * reports.\n     *\n     * What a reading had to use as a denominator before there was an exact one,\n     * kept so that a deployment can see the difference the join made rather than\n     * being told it was wrong. Against an honest sender it sits at or below the\n     * openings plus the straddle.\n     */\n    readonly countedViews: number;\n    /**\n     * Set where no share can be given, and the reason. `null` where they can.\n     */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * estimate and the ceiling are the same number and the shares are exact.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /** Every part of the revision, in reading order, as the reading had them. */\n    readonly parts: readonly PartReach[];\n    /**\n     * The parts whose reach could not be reconciled with the openings.\n     *\n     * Empty is the healthy state. A non-empty list on a deployment whose drift is\n     * nought is not a straddle and not a lie: it is node counters older than the\n     * column they are being divided by.\n     */\n    readonly unreconciled: readonly NodeId[];\n    /**\n     * Page-view rows handed in for another tree or another revision, and ignored.\n     *\n     * Dividing one revision's counters by another's readers is the mistake that\n     * would make every rate here quietly wrong, so this filters rather than\n     * trusts its caller — and says how much it dropped, because a caller who\n     * passed a whole store's rows and one who passed the wrong revision's look\n     * identical from the inside.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this tree and revision beyond the first, where every one after it\n     * was ignored.\n     *\n     * A store keeps one row per revision, so this cannot happen from one read —\n     * it happens when a caller concatenates two reads. Adding them is wrong,\n     * because the openings are already a total and would double; taking the last\n     * is wrong, because it is not the truer one. So the first row stands and the\n     * fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "A window of counters, read against the exact number of readers that window had."
+            },
+            {
+              "name": "pageReachOf",
+              "kind": "function",
+              "signature": "const pageReachOf: (reading: PageReading, rows: readonly StoredPageViews[]) => PageReach",
+              "truncated": false,
+              "summary": "Read a window's counters against the readers that window had."
             }
           ]
         },
@@ -9662,7 +9893,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9805,7 +10036,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9872,7 +10103,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10469,7 +10700,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10543,7 +10774,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11001,7 +11232,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1272,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

@@ -88,7 +88,7 @@ describe("the room the card needs to land in", () => {
    * so the landing is a clamp. What a stranger saw of that frame was decided by
    * whether the card was taller or shorter than the rail.
    */
-  it("is given for the change the visitor's answer just landed", () => {
+  it("is given for the change the visitor's press just landed", () => {
     expect(roomToLand({ landing: "i_2" })).toBe("lg:pb-[70vh]")
   })
 
@@ -102,12 +102,26 @@ describe("the room the card needs to land in", () => {
   })
 
   /**
-   * A change that applied on its own is not a landing this file owes room to:
-   * nothing is being carried to the top of the rail for it, because nobody was
-   * asked anything (`landed.ts`).
+   * **And a change that went ahead on its own is owed exactly the same room**,
+   * which this file needed no edit for and this test did: it asserted the
+   * opposite, in prose, against two `undefined`s that could not have told the
+   * two cases apart.
+   *
+   * It is a property of the field rather than of the press behind it. `landing`
+   * widened in `landed.ts` to name the card a one-press change lands as well as
+   * the card an answer does, and if the room did not follow, the surface would
+   * carry a visitor to a card the rail cannot put at its top: after *Re-theme
+   * the whole page* the rail holds 1,520 in 857, so the furthest it can scroll
+   * is 663 against a card top of 848 and the landing is a clamp. Asserted as
+   * *every truthy landing is owed the room*, so a third kind of landing gets it
+   * by arriving rather than by being remembered here.
    */
-  it("is nothing at all for a change nobody answered", () => {
-    expect(roomToLand({ waiting: undefined, landing: undefined })).toBe("")
+  it("is given for any card that just landed, however the press reached it", () => {
+    const landings = ["i_answered", "i_went_ahead_on_its_own", "i_undid_something"]
+
+    expect(landings.map((landing) => roomToLand({ landing }))).toEqual(
+      landings.map(() => "lg:pb-[70vh]")
+    )
   })
 
   /**

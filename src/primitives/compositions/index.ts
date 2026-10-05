@@ -1,7 +1,9 @@
 import type { Composition, CompositionPart } from "./composition.js"
 import { COMPOSITION_PARTS } from "./composition.js"
 import { articlesBand } from "./articles-band.js"
+import { articlesIndexBand } from "./articles-index-band.js"
 import { bannerBand } from "./banner-band.js"
+import { bannerInlineBand } from "./banner-inline-band.js"
 import { bentoBand } from "./bento-band.js"
 import { bentoMixedBand } from "./bento-mixed-band.js"
 import { catalogueBand } from "./catalogue-band.js"
@@ -63,7 +65,9 @@ export {
 
 export {
   articlesBand,
+  articlesIndexBand,
   bannerBand,
+  bannerInlineBand,
   bentoBand,
   bentoMixedBand,
   catalogueBand,
@@ -161,6 +165,7 @@ export {
  */
 export const STARTER_COMPOSITIONS: readonly Composition[] = [
   bannerBand,
+  bannerInlineBand,
   navBand,
   navCentredBand,
   heroBand,
@@ -199,6 +204,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   teamBand,
   teamLeadsBand,
   articlesBand,
+  articlesIndexBand,
   feedBand,
   episodesBand,
   whatsOnBand,
