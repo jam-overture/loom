@@ -483,16 +483,16 @@ describe("the card the visitor answered", () => {
 
 /**
  * Which card the rail is carried to, and it is a list-level fact: the two
- * moments that move this scroller are a question arriving and the answer to one
- * landing, and the way they fail is by both firing at once or by the wrong one
- * firing.
+ * moments that move this scroller are a question arriving and a change the
+ * visitor's press just landed, and the way they fail is by both firing at once
+ * or by the wrong one firing.
  *
  * The drift itself is `arrival.ts`'s measurement and the scroller rule is
  * `answer-in-view.test.tsx`'s; what is asserted here is that this list mounts
  * one of them, for the right card, with the right rule attached.
  */
 describe("the card the rail is carried to", () => {
-  it("is the card the visitor's answer just landed, once nothing is waiting", () => {
+  it("is the card the visitor's press just landed, once nothing is waiting", () => {
     render(
       <TheRecord
         records={[APPLIED]}
@@ -508,13 +508,13 @@ describe("the card the rail is carried to", () => {
   })
 
   /**
-   * **A waiting question outranks a landed answer**, and this is the ordering
+   * **A waiting question outranks a landed change**, and this is the ordering
    * that makes it one movement rather than two. A visitor may leave one
-   * question open and answer another; two components hauling one scroller to
-   * two cards is settled by whichever effect happened to run last, which is not
-   * a decision anybody made.
+   * question open and ask for something that goes ahead on its own; two
+   * components hauling one scroller to two cards is settled by whichever effect
+   * happened to run last, which is not a decision anybody made.
    */
-  it("is the open question, when a question is open and an answer has also just landed", () => {
+  it("is the open question, when a question is open and a change has also just landed", () => {
     render(
       <TheRecord
         records={[HELD, APPLIED]}
@@ -535,7 +535,7 @@ describe("the card the rail is carried to", () => {
    * the mark the change left on the page, and this yields rather than fighting
    * it for the one scroller there is.
    */
-  it("holds still for a landed answer where the rail does not scroll by itself", () => {
+  it("holds still for a landed change where the rail does not scroll by itself", () => {
     render(
       <TheRecord
         records={[APPLIED]}
@@ -549,8 +549,8 @@ describe("the card the rail is carried to", () => {
     expect(carriedTo()).toEqual([])
   })
 
-  /** And nothing at all for a change nobody was asked about. */
-  it("holds still when no answer landed the newest change", () => {
+  /** And nothing at all when the page has moved on past every card here. */
+  it("holds still when nothing landed at the revision the page is at", () => {
     render(
       <TheRecord records={[OTHER]} marked={NOTHING_MARKED} held={NO_READINGS} revision={2} />,
       { container: scrollingRail() }

@@ -1,0 +1,7 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-04-portal-stop-reading-wide.png", "path": "/portal/readers", "viewport": { "width": 1680, "height": 1000, "label": "wide" }, "fullPage": true, "waitFor": "text=Where do people stop reading?", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } },
+    { "out": "2026-10-04-portal-stop-reading-phone.png", "path": "/portal/readers", "viewport": "phone", "fullPage": true, "waitFor": "text=Where do people stop reading?", "before": { "path": "/portal/sign-in", "do": [{ "fill": "input[name=key]", "text": "portal-photograph-key-0123456789" }, { "click": "button[type=submit]" }, { "waitFor": "text=What Loom has been doing" }] } }
+  ]
+}

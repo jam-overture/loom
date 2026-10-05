@@ -8,7 +8,7 @@ import { stillToAsk } from "./already-asked"
 import { partTheAskWouldTouch } from "./before-the-press"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { partTheRecordKept } from "./kept"
-import { landedOnYourAnswer } from "./landed"
+import { landedOnYourPress } from "./landed"
 import { markedPage, type MarkedPage } from "./marked"
 import { movedOn, type MovedNote } from "./moved"
 import { plainChange, settingsOf, type PlainChange } from "./plain-change"
@@ -96,14 +96,21 @@ export type RailView<TPart> = {
   /** The caution at the controls, when a question is still open. */
   readonly waiting?: SetAside
   /**
-   * The card the visitor's own answer just landed — the demo's payoff frame,
-   * and the one card the rail has to hold still under them.
+   * The card the visitor's own press just landed — the demo's payoff frame, and
+   * the one card the rail has to put in front of them.
+   *
+   * **Both ways a change can land, which is this run's correction.** It used to
+   * be the card an *answer* produced and nothing else, so the two asks the rail
+   * marks **GOES AHEAD** — the only one-press changes this surface offers —
+   * left their record four hundred pixels under the rail's fold. `landed.ts`
+   * carries the measurement and why *the page moving is its own announcement*
+   * is a reason for the rail to carry the record rather than to sit still.
    *
    * A record id rather than the record, because both readers of it already have
    * the record: the rail asks it for the trailing room the landing needs
    * (`arrival.ts`) and the list asks it which card to keep at the top
    * (`AnswerInView`). `landed.ts` has the reading and why neither *newest* nor
-   * `answeredBy` alone is it.
+   * *newest applied* is it.
    */
   readonly landing?: string
   /**
@@ -360,7 +367,7 @@ export const whatTheRailShows = <TPart>({
 
   const about = spotlit[0]
   const waiting = setAside(records, openQuestions)
-  const landing = landedOnYourAnswer(records, tree.revision)
+  const landing = landedOnYourPress(records, tree.revision)
   const available = stillToAsk(availablePresets(tree, ids), records, openQuestions)
 
   /**
