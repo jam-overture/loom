@@ -311,5 +311,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0225](0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md) | A judgment is joined to a revision by a bounded lookup, and the lookup says what it did not reach | Accepted | §6 |
 | [0226](0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md) | A primitive declares where its control rests, and the control publishes nothing until the reader moves it | Accepted | §4b |
 | [0227](0227-an-inline-link-is-its-own-primitive-and-its-colour-is-the-paragraphs.md) | An inline link is its own primitive, and its colour is the paragraph's | Accepted | §4b |
-| 0228 | *No record on this branch* | — | — |
+| [0228](0228-the-tree-as-it-was-is-a-fold-bounded-at-both-ends-and-the-head-is-answered-from-the-log.md) | The tree as it was is a fold bounded at both ends, and the head is answered from the log | Accepted | §2 |
 | [0229](0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md) | A share of readers is estimated against the appearances and bounded against the openings | Accepted | §4c (reader signals) |

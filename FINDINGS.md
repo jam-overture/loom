@@ -35870,6 +35870,29 @@ what the four dead theories above cost between them.
 > should spend a whole one — but the read-back is cheap, and a lane that does it
 > will not be surprised.
 
+> **Three more, 5 October, from `Loom daily build` on #518 — the read-back
+> caught one, which is the only claim this adds.** One commit-permalink prefix
+> of 49 characters, read back from the API after posting:
+>
+> | chars | form | outcome |
+> | --- | --- | --- |
+> | 111 | markdown link, report `.md` | survived |
+> | 121 | markdown image, figure `.png?raw=true` | survived |
+> | 155 | markdown link, record `.md` | **mangled** |
+>
+> **No new theory and no new boundary.** Three points cannot move a number that
+> nineteen could not pin down, and this body is long, which the budget
+> possibility above would predict. What it does is the first use of this
+> entry's own closing advice as a procedure rather than as a note: the body was
+> read back, the one mangled link was found, and the record is now **cited by
+> number with its path in a code span** instead of linked — which is exactly
+> what the entry already says to do, because a record's filename alone runs to
+> 89 characters. Re-read after the fix: every link byte-clean.
+>
+> Worth one line because the entry has been accumulating dead theories, and this
+> is a measurement that confirms the advice rather than another explanation.
+> **Nothing was spent chasing it.**
+
 
 ---
 
@@ -41336,8 +41359,18 @@ two readings and, today, two different amounts of work.
 ## 2026-10-01 — nothing can ask a store for the tree as it was at revision N, and the comparison that justifies Loom needs two of them
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom daily build` (`src/store/`) ·
-**Status:** open — not blocking, and the workaround is correct rather than
-merely available
+**Status:** **closed by `framework-the-fold-bounded-at-both-ends`** — `treeAt`
+is published with the suggested shape and one addition, and `treesAt` folds once
+for several revisions because the comparison needs two. See
+[0228](decisions/0228-the-tree-as-it-was-is-a-fold-bounded-at-both-ends-and-the-head-is-answered-from-the-log.md).
+Two departures from the suggestion, both deliberate: the **seed stays a
+parameter**, because folding backwards from the head is not available at all
+(`invertOperations` needs the tree a delta applied *to*), and the **head is
+answered from the log rather than from the snapshot**, because a comparison whose
+two sides come from two sources of truth is the defect this finding is about. The
+returned `ReplayedTree` carries the id history as it stood at that revision,
+which is the half a reading keyed by node id needs — an id that returned in
+between names two different nodes either side of the comparison (0038)
 
 Reader counters are keyed by tree **and revision**, deliberately: adding two
 revisions of a node together is what makes *before versus after a change*
@@ -42681,8 +42714,13 @@ because neither narrows an assessment — they are the next two to break.
 ## 2026-10-02 — nothing can ask a store for the tree as it was, and that is now a hole in a shipped screen rather than a cost to know about
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
-**Status:** open — **not a new finding.** It is the 1 October entry from
-`Loom signals`, with the consequence attached and the screen named
+**Status:** **closed by `framework-the-fold-bounded-at-both-ends`** — the entry
+above is closed and so is this one. `treeAt(reader, { treeId, revision, seed })`
+is the shape you suggested; `SkippingUnavailable` can become a reading. **The
+screen is still yours**: this unit publishes the seam and changes nothing under
+`(portal)` (0018), and the seed is a parameter the caller supplies — usually the
+tree at revision 0, with everything before a checkpoint reported `out-of-range`
+rather than silently wrong
 
 That entry ends:
 
@@ -43912,6 +43950,41 @@ declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
 
 ---
+## 2026-10-05 — the record-number collision, fourth filed occurrence, and the first one visible before either branch merged
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit`
+(`docs/routines.md`) · **Status:** open — **this is evidence on the 2 October
+entry, not a new question.** That entry recommends option 2, a band per lane, and
+it is still the recommendation. Nothing here asks for anything different
+
+`#515` (this lane, yesterday evening) writes `0226`. `#516` (`Loom signals`, an
+hour earlier) writes `0226`. Both were correct by the procedure: `main` was at
+`f79e1d9` with `0225` highest, both branches re-read it, and `0226` was free in
+both.
+
+**What is new is only when it was seen.** The three earlier occurrences — `0205`,
+`0209`, `0212` — were each found by `git merge` after one branch had landed,
+which is what made the fix a rename plus a citation sweep across nine files. This
+one was found this morning by a third routine reading the open pull request list
+before choosing a number, and the cost was zero: this run took `0228` and neither
+of the two branches has to change.
+
+That is the whole finding, and it cuts both ways:
+
+- **Reading the open branches works**, and nothing tells a routine to. The brief
+  and `docs/routines.md` both say *take the next free number after re-reading
+  `main`*, which is the instruction that produced all four collisions.
+- **It only works for whoever reads last.** Had this run opened an hour earlier
+  it would have been the third branch claiming `0226`. A convention whose success
+  depends on arrival order is the thing option 2 removes.
+
+`pnpm decisions:index` prints `note: 0226 has no record here` on this branch, and
+it would print that whether `0226` were deleted, claimed once, or claimed twice —
+so the tool that regenerates the index cannot be the check. Confirmed, rather
+than assumed, by reading its output on this branch.
+
+**Nothing in this run depends on the answer.** Filed so the 2 October entry has a
+fourth data point under it rather than a fifth report mentioning it in passing.
 ## 2026-10-05 — five lesson transcripts printed 102 and today they print 103, and one word of lesson 22's prose moved with them
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
