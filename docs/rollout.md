@@ -93,6 +93,21 @@ It costs one to two weeks and it is the cheapest insurance available.
 
 **Late September at the earliest**, and only if Phase 2 holds.
 
+## Phase 5 — The loop that closes · not scheduled
+
+The premise, end to end and running once: a page reports how it is read,
+something proposes a change from it, the Gate decides, and the result is measured
+against what came before. Every part of that exists except the measuring half —
+serving two revisions and attributing readers to one.
+
+Planned in [`adaptation.md`](adaptation.md), as seven milestones on a prototype
+rather than a lane's work, each worth having if the next never happens.
+
+It is **not a launch blocker and is the most valuable thing after one**: it is the
+difference between a product that can be told what to change and one that works
+out what to change. Phase 3's private alpha is the cheaper insurance; this is the
+thing the insurance protects.
+
 ## What would move these dates
 
 In order of likelihood:
