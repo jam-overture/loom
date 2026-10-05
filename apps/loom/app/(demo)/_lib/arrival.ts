@@ -144,9 +144,18 @@ export const clearanceFor = (block: ScrollLogicalPosition): string =>
  * without the room would have moved that arithmetic rather than removed it.
  *
  * So the room is given for **both** moments the rail has to put a card at its
- * own top: a question waiting on an answer, and the change that answer landed
+ * own top: a question waiting on an answer, and the change a press just landed
  * (`landed.ts`). It is the same promise in the same file, made twice, and it
  * costs the same band of empty rail for one press longer.
+ *
+ * **And the second of those now covers a change that went ahead on its own**,
+ * which this file needs no edit for and its test did. `landing` widened in
+ * `landed.ts`, and the arithmetic is the reason the room has to follow it
+ * rather than stay behind: after *Re-theme the whole page* the rail holds 1,520
+ * in 857, so its furthest scroll is 663 and a card whose top is at 848 lands at
+ * 185 — wholly on screen, and at a position decided by the height of the card
+ * rather than by anything here. That is the clamp this whole file exists to
+ * take out of the surface, not a landing.
  *
  * **It is handed the rail rather than a boolean**, and that is this run's other
  * small correction. `page.tsx` is an `async` Server Component no `vitest` run

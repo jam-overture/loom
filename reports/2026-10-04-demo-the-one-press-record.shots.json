@@ -1,0 +1,62 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-retheme-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask ul li:nth-child(1) form button" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside", "aside li[id]", "text=Put it back"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-repaint-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask ul li:nth-child(2) form button" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside", "aside li[id]", "text=Put it back"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-arrival-wide-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask ul li", "aside footer"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-retheme-phone-unchanged",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask ul li:nth-child(1) form button" }, { "waitFor": "aside li[id]" }],
+      "measure": ["aside li[id]"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-held-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" }]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-applied-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" },
+        { "click": "li form button.bg-affirm" },
+        { "waitFor": "li button.bg-neutral" }
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-04-demo-one-press-embed-unchanged",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask"
+    }
+  ]
+}

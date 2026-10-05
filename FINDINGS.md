@@ -56,6 +56,86 @@ anyway, because `ADJUST_RESTING_PROPERTY` is a CSS property any primitive may
 write and a step-1 input cannot hold a fraction. If a future wipe wants
 half-percent precision the `step` is the runtime's to widen, not the
 primitive's — file it rather than working around it.
+## 2026-10-04 — the demo's stage and its rail are both dark on arrival, and the comment that says otherwise is the argument for why they must not be
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/page.tsx`, `app/(demo)/_lib/page-tree.ts`) · **Status:**
+open — a diagnosis with a screenshot behind it and no recommendation, because
+the honest reading is that it is *less* wrong than the comment implies.
+
+`page.tsx` carries this, as the load-bearing decision of the layout rather than
+a taste:
+
+> **The stage is light and the rail is dark.** … Both halves used to be white,
+> so the specimen page's own hero — 60px of "Your AI can change this page",
+> with a primary button going to GitHub — read as the demo's promise and the
+> demo's actual controls read as furniture beside it. A visitor could not tell
+> which words were Loom's.
+
+Every clause of the argument is right. The first sentence is no longer a
+description of what a stranger sees. `--surface-stage` is `#ffffff` and
+`.loom-stage` sets `color-scheme: light`, so the *ground* this lane controls is
+light — and `DEMO_STARTING_THEME` is `midnight`, so the tree paints itself dark
+over that ground and the visitor arrives on **dark navy beside near-black**.
+The pictures in `reports/2026-10-04-demo-the-one-press-record.md` are what this
+is read off.
+
+**Why it is filed rather than fixed.** The two panes *are* still told apart —
+by hue, by a border, and by the fact that one is a clinic's page and the other
+is an instrument — so this is not the failure the comment describes coming back.
+What is true is that the property the layout was built to guarantee is now being
+supplied by the specimen's own theme, which a visitor can change with one press
+(`palette` re-themes to `editorial`, and the stage goes cream — the picture is
+in the same report). A guarantee that the page under test can withdraw is not a
+guarantee.
+
+**Three things a run that takes this would have to settle**, and none of them is
+obviously right: whether the ground should assert itself where the theme is dark
+(a border, an inset, a shadow — this lane's, not the tree's), whether the
+arrival theme should be the light one (which costs the re-theme its drama,
+measured: the dark→cream press is the most arresting fifteen seconds on this
+surface), or whether the comment is simply stale and should say *the stage is
+the page's and the rail is Loom's* — which is the claim that actually survives
+a re-theme. **Changing the comment alone is a legitimate outcome** and is
+probably the cheapest honest one.
+
+---
+## 2026-10-04 — the demo's phone frame after a one-press change is not byte-reproducible, and it is not reproducible on `main` either
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/globals.css`) · **Status:** open — **small, and below the
+threshold of sight**, filed because this lane's reports lean on byte-identical
+frames and one of them cannot be claimed.
+
+Four shots of `/demo` at 390 × 844 after pressing *Re-theme the whole page*, two
+from this branch's build and two from `main`'s, came back with **four different
+hashes**. The geometry is identical in all four — the record card at `y 962`,
+`350 × 512`, `← 631 past the fold` — and so is every word.
+
+Measured by decoding both PNGs and differencing them: the region is
+**x 20, y 325, 350 × 282** in CSS pixels — the green lead button and the two
+paragraphs under it — across **53 distinct rows**, and the **largest channel
+difference is 5 of 255**. Nothing is visible to an eye at any zoom; the two
+pictures are indistinguishable.
+
+**What it is probably not.** The 3 October run found a flake of this shape that
+was a real product defect — four disclosures animating for a visitor who had
+asked for reduced motion, because the `prefers-reduced-motion` rule named
+`.loom-reach` and nothing else. That rule now also names `summary` and
+`summary svg`, and a transition caught mid-flight does not look like this: it
+moves a box or fades a whole element, and would show a delta far larger than 5
+somewhere. A ceiling of 5 across a smooth region is the shape of **gradient
+dithering**, which Chromium does with noise and does not promise to repeat.
+
+**What it costs, which is why it is written down rather than shrugged at.** This
+lane's convention is that an unchanged frame is proved unchanged by its hash,
+and the 1280 × 900 frames and the 348 × 465 embed all still do that — the
+question frame's `79cae639175ffc88a14d8c04a2f22cbe` is now the same across six
+separately built commits. One frame at one size cannot, so a run that needs to
+prove the phone unchanged has to fall back to geometry plus a pixel difference,
+which is what this run did. Worth about twenty minutes of a future run to name
+the element and either pin it or write the exemption down beside the recipe;
+not worth more.
 
 ---
 ## 2026-10-04 — the deployment page's DDL grammar met its first expression index, and I taught it to read one from outside the lane that owns the words
@@ -214,6 +294,22 @@ two a stranger meets first**, with both visible either way.
 this surface. What would settle it is the one thing this lane cannot do from a
 sandbox — and the signals work (`docs/signals.md`) is where a *which press came
 first* reading would come from, if it is ever worth asking for.
+
+**Appended 4 October by the lane that owns it, and it changes the terms again
+rather than the recommendation.** `demo-38` found that the press which *does*
+move the page had never been finished: both asks marked **GOES AHEAD** landed
+their record card under the rail's fold — *Re-theme the whole page* with its top
+at 848 of a 900px viewport, *Repaint the top band* at 872 — so a stranger taking
+the one-press path watched the stage transform and never saw the Gate's verdict,
+the reversibility or **Put it back**. Both now land at the top of the rail,
+whole.
+
+So shape (2), *lead with a change that goes ahead*, costs less than it did when
+this was written: the path it would lead with is now a complete demonstration
+rather than half of one. The recommendation is still **1 and measure before
+moving**, for the reason that has not changed — nobody has watched a stranger
+use this surface — but the argument against (2) was partly that it led with the
+weaker frame, and that part of it is spent.
 
 ---
 ## 2026-10-03 — the same disclosure chevron is now drawn in three components of one directory, and the third copy is this run's
@@ -43545,9 +43641,22 @@ at read time.
 ## 2026-10-04 — lesson 24's Exercise F prints `declaring copy: 0` and three paragraphs rest on it, and as of today the number is 102
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
-(`lessons/24-silence.md`) · **Status:** open — **the six transcript lines are
-already updated on this branch because a test holds them**; what is open is the
-prose under them, which is this lane's to read and not mine to rewrite
+(`lessons/24-silence.md`) · **Status:** **closed 4 October** — all three passages
+rewritten on the lessons branch for this date, in the pull request that was already
+open for the same failure mode on lesson 32. Your transcript paste was accurate and
+was re-run here rather than trusted; exercise F now also prints **58** (the
+declarations that are `copy: []`, which is the figure the lesson argues matters
+rather than 102) and a second reading of `proof-faces`, so `unspoken` has a live
+example in the lesson for the first time — the sentence beside the rating comes back
+and the rating does not. Your suggestion of `proof-faces` was right; `hero-split` is
+the other one, found by probing all 52 starting compositions. Exercise G's line three
+was the sharper repair: it still prints *Untitled page* and the reason has moved
+underneath it, from *the array is empty* to *this page's heading is a type the
+starter library has never heard of*, so the lesson now asks a reader whose prediction
+was right to check their reason. Lesson 24's self-check question 7 and Set AC's
+questions 7 and 8 were leaning on the two zeroes and are rewritten. The fence now
+carries a `moves:` mark saying the prose under it is load-bearing, which is the half
+of this entry and of the 2 October one that no file said anywhere.
 
 The 30 September entry from this lane — *two `copy` declarations were backed out
 of a pull request because a lesson transcript printed zero* — ended by asking
@@ -43731,3 +43840,54 @@ tree alone cannot see any prop whose drawing is conditional on an answer, so a
 primitive that declares `reads` needs the probe to answer it or its copy
 declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
+
+---
+## 2026-10-04 — the before-and-after reading is blocked on a store that can answer for an older version, and the two entries that say so were filed three days apart
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·
+**Extends:** the 1 October entry from `Loom signals` — *a reading of an older
+version needs that version's page, and nothing can ask a store for one* ·
+**Status:** open — **a correction to a status line rather than a new gap**, and
+the remedy is already filed
+
+This morning's entry from `Loom signals` — *what a change did to the reading of a
+page is now one call, and it is the sentence the reader screen should lead with*
+— is marked **nothing is blocked**, and names this lane as its owner. It is
+blocked, for exactly one reason, and the reason has its own entry three days
+older.
+
+`readingChangeOf(was, now)` takes two `PageReading`s, and a `PageReading` is
+`pageReadingOf(tree, tallies, registry)` — **a tree per side.** The newer side is
+the page in the store. The older side is the page *as it was at the revision the
+older counters are filed against*, and this is what a consumer can ask for
+today:
+
+| published | answers |
+| --- | --- |
+| `TreeReader.head(treeId)` | the tree now, and only now |
+| `TreeReader.revisions(treeId, …)` | the deltas from revision 1 forward |
+| `replayTree(seed, entries)` | a fold, **given a seed the caller already holds** |
+
+The fold exists and is published. What is not obtainable is its first argument:
+revision 0 of the tree. `head` is the snapshot, `revisions` starts at 1, and
+nothing hands over the seed — so a consumer holding a `TreeReader` cannot
+reconstruct any version but the current one, and `replayTree` has no stopping
+revision either way.
+
+**So this run shipped the half that needs one tree and not the half that needs
+two.** `readingProgressOf` is a reading of one version against its own counters,
+it is on `/portal/readers` as of this branch, and `_lib/skipped.ts` was already
+refusing to answer across a version gap for the same reason — `skippingComparable`
+is the one function in that module that returns `false` because of this, and it
+has had a sentence on the surface explaining it since 3 October.
+
+**What would close it**, in the lane that owns the store and not here: either a
+seed a reader can ask for, or `at(treeId, revision)`. Either one unblocks three
+things at once — the before-and-after reading, the skipped-parts reading across a
+version gap, and this run's drop-off reading across one.
+
+**Nothing is urgent and nothing is wrong on any screen.** Every one of them says
+plainly which version it is answering for and declines rather than laying one
+version's counters over another version's page. This is here so that the next
+routine to pick up the 4 October entry reads *blocked, and by this* rather than
+spending a run discovering it, which is the whole of what the ledger is for.
