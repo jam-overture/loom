@@ -8,6 +8,67 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-05 — four links, one body, same syntax: the mangling is the URL and it is neither the branch name nor `decisions/`
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 28 September entry *the mangling, with one variable changed* and
+the 28 September entry *a `reports/*.md` link was mangled too, so the
+`decisions/` correlation is not the rule* · **Status:** open, and filed as
+**evidence that rules out both theories the ledger carries**, taken by accident
+rather than on purpose
+
+#528's body went in three times with four links in it. I was not testing
+anything the first time; I was writing a pull request. What came back makes a
+better experiment than either of the deliberate ones above, because all four
+links were in **one body, written in one syntax, posted in one call**.
+
+**Round one — inline `[text](url)`:**
+
+| link | came back |
+| --- | --- |
+| `decisions/0231-….md` (branch in path) | mangled — ``` `` ``` injected, and the wrap swallowed the `),` after it |
+| `reports/2026-10-05-….md` (branch in path) | **clean** |
+| `reports/…-presented.png?raw=true` (branch in path) | mangled |
+| `decisions/0176-….md` (**`main` in path**) | mangled |
+
+**Round two — reference-style, the four definitions in a block at the foot, one
+per line, nothing else on the line:**
+
+| link | came back |
+| --- | --- |
+| `[record]` → `decisions/0231-….md` | mangled |
+| `[report]` → `reports/2026-10-05-….md` | **clean** |
+| `[shot]` → `…-presented.png?raw=true` | mangled, **and the `!` was stripped**, so the image became a link |
+| `[p176]` → `decisions/0176-….md` (`main`) | mangled |
+
+**The same URL survived both rounds and the same three failed both rounds.** So:
+
+- **It is not the link syntax.** Inline and reference-style gave identical
+  verdicts, link for link.
+- **It is not the branch name.** The surviving URL *has* the branch name in it —
+  `framework-55-the-word-the-tree-wrote`, 36 characters — and `0176`, which has
+  `main` in it and no branch name anywhere, mangled. That is the 28 September
+  entry's variable held still and pointing the other way.
+- **It is not `decisions/` either**, which the second 28 September entry already
+  said. The `.png` is under `reports/` and mangled.
+
+**What is left, and I am naming it as a candidate rather than a conclusion:
+length.** The surviving URL is ~133 characters. The three that failed are ~141,
+~152 and ~177. If there is a threshold it is somewhere between 133 and 141,
+which is a thing one deliberate pair of posts could settle and I did not spend
+the calls on.
+
+**It also strips a `!`.** That is new and it is the worst of the four effects,
+because a mangled link still reads as a link and announces itself; an image
+silently demoted to a link reads as a pull request where somebody forgot the
+screenshot. Every lane's brief asks for a picture on the pull request.
+
+**What I did about it, which is the part worth copying.** I shortened two URLs
+to dodge it, and that was wrong — the shortened names did not exist, so I had
+replaced three mangled links with two 404s. #528's body now carries the
+repository-relative **paths in code spans** and no links at all, with a line
+saying why. A path you paste is worse than a link you click and much better than
+a link that lies.
 ## 2026-10-05 — a teaching paragraph in lesson 31 was rewritten from outside the lane, because the sentence it ends on was the thing this run made false
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
