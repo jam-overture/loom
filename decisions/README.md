@@ -313,3 +313,4 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0227](0227-an-inline-link-is-its-own-primitive-and-its-colour-is-the-paragraphs.md) | An inline link is its own primitive, and its colour is the paragraph's | Accepted | §4b |
 | [0228](0228-the-tree-as-it-was-is-a-fold-bounded-at-both-ends-and-the-head-is-answered-from-the-log.md) | The tree as it was is a fold bounded at both ends, and the head is answered from the log | Accepted | §2 |
 | [0229](0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md) | A share of readers is estimated against the appearances and bounded against the openings | Accepted | §4c (reader signals) |
+| [0230](0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md) | A part was read when readers had time for its words, and only the skim is a safe claim | Accepted | §4c (reader signals) |

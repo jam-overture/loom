@@ -4,7 +4,7 @@ import type { JsonObject } from "../json.js"
 import type { PrimitiveRole } from "../role.js"
 import { copyIn } from "../sdk/copy.js"
 import { nodeId, OTHER_TREE, primitiveType, TREE } from "../testing/reader-signal-contract.js"
-import type { ElementNode, LoomNode, TextNode } from "../tree/node.js"
+import type { ElementNode, LoomNode, SlotNode, TextNode } from "../tree/node.js"
 import { TREE_SCHEMA_VERSION, type LoomTree } from "../tree/tree.js"
 
 import { pageReadingOf, wordsReadIn, type PartDeclarations, type ReaderTally } from "./index.js"
@@ -234,6 +234,31 @@ describe("what the registry adds", () => {
     expect(partFor(reading, "footer")?.copy.words).toEqual(["All rights reserved"])
     expect(partFor(reading, "pricing")?.copy.words).toEqual([])
     expect(partFor(reading, "buy")?.copy.words).toEqual(["Buy"])
+  })
+
+  /**
+   * The clause the partition rests on, and the one it was missing: a slot is
+   * not an element, so it is never a part, so text handed into one belongs to
+   * the nearest element above it or to nobody at all.
+   */
+  it("reads text handed into a slot as the words of the part the slot is in", () => {
+    const slotted = element("page", "loom.stack", {}, [
+      {
+        kind: "slot",
+        id: nodeId("hole"),
+        name: "children" as SlotNode["name"],
+        children: [
+          text("handed", "Handed in"),
+          element("band", "loom.section", {}, [text("inside", "Inside the band")]),
+        ],
+      },
+    ])
+
+    const reading = pageReadingOf(treeOf(slotted), [], declaring({ "loom.stack": [], "loom.section": [] }))
+
+    expect(partFor(reading, "page")?.copy.words).toEqual(["Handed in"])
+    expect(partFor(reading, "band")?.copy.words).toEqual(["Inside the band"])
+    expect(wordsReadIn(reading)).toEqual([])
   })
 
   it("names what nobody declared rather than reporting a part as wordless", () => {
