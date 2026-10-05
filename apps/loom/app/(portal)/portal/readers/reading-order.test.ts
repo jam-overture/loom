@@ -141,14 +141,33 @@ describe("the reader screen's reading order", () => {
    * pair is assembled on the screen, behind `skippingComparable`, and a card is
    * handed either a reading it may draw or nothing.
    *
-   * What this pins is that the guard is still in front of the join. A refactor
-   * that moved the pairing into the card, or that dropped the comparison
-   * because every fixture happened to match, would leave every other test on
-   * this screen passing.
+   * **It is now two readings behind the one guard.** *Where do people stop*
+   * needs the same pair for the same reason, and both come off one
+   * `pageReadingOf` — so the thing to pin is that the guard is still in front
+   * of the join itself rather than in front of either derivation. A refactor
+   * that moved the pairing into a card, or that dropped the comparison because
+   * every fixture happened to match, would leave every other test on this
+   * screen passing.
    */
   it("pairs the counters with a page only when they are about the same version", () => {
     expect(source).toContain("skippingComparable")
-    expect(source.indexOf("skippingComparable")).toBeLessThan(source.indexOf("skippingOf("))
+    expect(source.indexOf("skippingComparable")).toBeLessThan(source.indexOf("pageReadingOf("))
+  })
+
+  /**
+   * **One join, two readings.**
+   *
+   * Both sections are a window laid over the page it was filed against. Joining
+   * twice is two chances to hand one of them a different window or a different
+   * set of pieces, and a card whose two sections disagreed about how many
+   * visits there were would be wrong in the way nobody checks — so the join
+   * happens once and `skippingFrom` and `stoppingOf` are both handed its result.
+   */
+  it("joins the counters to the page once and takes both readings off it", () => {
+    expect(source.match(/pageReadingOf\(/gu)).toHaveLength(1)
+    expect(source).toContain("skippingFrom(joined")
+    expect(source).toContain("readingProgressOf(joined)")
+    expect(source).not.toContain("skippingOf(")
   })
 
   /**
