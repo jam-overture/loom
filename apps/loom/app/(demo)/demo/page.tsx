@@ -18,6 +18,7 @@ import { PartInQuestionView } from "./_components/part-in-question"
 import { RailHeader } from "./_components/rail-header"
 import { ReadTheDocs } from "./_components/read-the-docs"
 import { TheRecord } from "./_components/the-record"
+import { WhatElseToAsk } from "./_components/what-else"
 import { WhatHappens } from "./_components/what-happens"
 
 /**
@@ -245,6 +246,22 @@ const DemoPage = async () => {
             revision={tree.revision}
             {...(rail.landing === undefined ? {} : { landing: rail.landing })}
           />
+
+          {/*
+            * The end of the sixty seconds, and it draws only once a change the
+            * visitor pressed for is on the page.
+            *
+            * It sits here — under the record, above the frame the record is
+            * read through — because it is a caption on the card directly above
+            * it rather than a new topic, and because this is the 92 pixels the
+            * landing leaves: the record card goes to the top of the rail and is
+            * 765 of an 857px scroller after the one sequence the demo invites,
+            * which put the ask panel at `y −470` and the footer's way out ten
+            * pixels from the bottom edge. `what-else.ts` has the measurement
+            * and the three silences; `rail.ts` decides whether there is
+            * anything to say.
+            */}
+          {rail.whatElse && <WhatElseToAsk end={rail.whatElse} />}
 
           {/*
             * The sequence stays whether or not there are records, because it is
