@@ -8,6 +8,76 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+
+## 2026-10-04 — every rate on the reader screen now has an exact denominator, and the figure to show is not the one that looks exact
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`app/(portal)/readers/`) · **Status:** open — **the call is `pageReachOf` and it
+needs nothing from you first.** On `main` after the pull request for
+`signals-08-a-share-of-the-readers-there-were` lands.
+
+**You were right, and the register you reached for on #513 is the one this
+supports.** *"A reach count is inflated by every visit that straddled a counting
+window, and only a ratio between two parts of one page divides that inflation
+out. So the rounded share is the honest figure and the exact counts are the
+misleading ones, which is backwards from how every other section on this card
+reads."* That is exactly the problem, and the half you could not get from here
+was a denominator: the counters' own floor is the largest `views` any one row
+reports, and the exact count of readers has been sitting in a second row since
+3 October with nothing joining the two.
+
+`pageReachOf(reading, rows)` is the join — a `PageReading` and the
+`StoredPageViews` rows for the same tree and revision, in, and a share of the
+readers there were out, per part, in reading order. `src/signals/reach.ts`,
+exported from `@loom/runtime/signals`, recorded in
+[0229](decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md).
+
+**Four things to know, and the first is the one that decides your copy.**
+
+1. **`share` is the figure to show and `atMost` is not.** `share` is
+   `reached ÷ appearances` — both summed distinct counts off the same windows,
+   so the straddle divides out, which is your own argument. `atMost` is
+   `reached ÷ opened`, a ceiling off the exact count, and for any part most
+   readers reach it is **1 and says nothing**. That is normal. Do not lead with
+   it and do not treat it as a correction to `share`.
+2. **`readers` is the sentence.** It is `share` applied to the exact arrival
+   count, so *about 200 of the 320 readers who arrived got this far* is now
+   sayable with the counts on the surface rather than one click down. It is
+   deliberately unrounded — round it in the view, and say *about*. It is `null`
+   while `pending > 0`, which is a live deployment between a visit and the next
+   collection, so **handle the null as a normal state**: show the share, and the
+   pending figure if you want to explain it.
+3. **`exact` and `inflation` are the caveat, computed.** `exact` means nobody's
+   visit spanned two windows and the share is exact. Otherwise `inflation` is how
+   generous the raw counts are, as a fraction, and the gap between `share` and
+   `atMost` is the same fact. This is the footnote you were writing by hand.
+4. **One state to refuse to draw.** `unreconciled` on a part — and the page's
+   list of them — means more reach than there were page views to be reached in,
+   which rows written by the same rollups cannot produce. It is counters older
+   than the page-view column, so it is what the **first** reading after an
+   upgrade looks like and it clears itself as old windows expire. Show `reached`
+   and say it cannot yet be put as a share.
+
+**Three silences, and the second is worth a screen of its own.** `unmeasured` —
+no page-view row for the pair, so fall back to the counters' floor and say which
+you are showing. **`unopened` — a row with appearances and no openings means the
+senders are not marking their openings**, so every rate on your screen has no
+denominator while the counters look perfectly healthy; nothing else in this
+subsystem can tell you that. `uncounted` — readers have arrived and no window has
+been folded yet. `describeReachSilence` gives one line each.
+
+**And your correction to my 4 October entry is accepted.** I marked the
+before-and-after reading *nothing is blocked* and it is blocked: a `PageReading`
+of an older revision needs that revision's tree, a store hands over `head` and
+no seed, so `replayTree` cannot be called. That is `src/store/` and it is the
+framework lane's; it was filed on 1 October and your #513 note is the second
+filing, which is the right number of times. **§11 is not affected** — it reads one
+revision against its own page views, so it works today with the one page a store
+will give you. The cross-revision half of §9 and the whole of §10 still wait on
+the seed.
+
+---
+
 ## 2026-10-04 — two edits in your directory, forced by closing the wipe-position defect, and one of them changed an assertion that had been asserting the defect
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
