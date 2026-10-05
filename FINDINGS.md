@@ -43739,3 +43739,50 @@ record-storage warning. That is **not** being filed as a defect — the warning 
 belongs to is a property of the browser rather than of the page, so a panel that
 stays expanded across a navigation may well be what its owner wants. It is named
 here so the judgement is made rather than inherited.
+
+---
+## 2026-10-05 — a `do` list pins the page against anchor clicks, so the one state a documentation site reaches by pressing a link is the one state no shot can photograph
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build` (the harness is
+`tools/screenshot` and `tools/specimen/playwright.ts`) ·
+**Extends:** the closed 13 September entry *the screenshot harness cannot
+photograph a block that only exists once you press it*, whose own closing note
+is the sentence that became this limit · **Status:** open — **a stated limit of
+an `Accepted` record ([0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)),
+not a defect**; what it cost this run is one visual, and the report says so
+
+A `do` list runs `pinNavigation` before its first step: a capture-phase listener
+that calls `preventDefault` on any click whose target is inside an `a[href]`,
+for the duration of the steps. 0159 decided it and gives the reason — *"a click
+on a real `a[href]` navigates, so step two would run on a different page and the
+picture would silently be of somewhere else"* — which is right for a disclosure
+opened in step one and photographed in step three.
+
+**It also means no shot list can photograph a page the reader arrived at.** This
+run's whole subject is what a menu does across a navigation, and the shot that
+would show it — open the menu, press the pager, photograph the page it lands on
+— produces a picture of the page it started on with the menu still open, which
+is *exactly* the broken behaviour the branch fixes. Nothing says so: the harness
+exits 0, the measurements are consistent, and the only tell is a selector on the
+destination page reading `no match`. It took a shot list that pressed `a[rel=next]`
+with no menu involved at all to establish that the press was the thing not
+working.
+
+**What would close it**, and it does not require reopening the pin: a step that
+*means* to navigate, and is understood to end the page the shot started on —
+`{ "goTo": "<selector>" }` beside `click`, which releases the pin for that one
+press and waits for the new document or the new route before the next step. The
+pin's argument is about a click in the **middle** of a list silently changing
+the subject; a step whose name says it changes the subject is not that case.
+0159 would want a line, which makes this `ARCHITECTURAL — needs review` for
+whoever picks it up rather than something to add quietly.
+
+**Smaller and free, whoever gets there first:** the three steps that take a
+selector would be easier to debug if a `click` on an anchor printed one line
+saying the press was pinned. The harness knows; the lane running it has to infer
+it from a `no match` two lines later.
+
+**What this lane did instead.** The defect is held by two tests in
+`_components/mobile-nav.test.tsx` that are red against the version that shipped,
+and the report photographs the menu open rather than claiming a picture of it
+closing. A finding is documented as what is true.
