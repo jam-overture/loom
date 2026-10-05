@@ -35645,6 +35645,29 @@ what the four dead theories above cost between them.
 > should spend a whole one — but the read-back is cheap, and a lane that does it
 > will not be surprised.
 
+> **Three more, 5 October, from `Loom daily build` on #518 — the read-back
+> caught one, which is the only claim this adds.** One commit-permalink prefix
+> of 49 characters, read back from the API after posting:
+>
+> | chars | form | outcome |
+> | --- | --- | --- |
+> | 111 | markdown link, report `.md` | survived |
+> | 121 | markdown image, figure `.png?raw=true` | survived |
+> | 155 | markdown link, record `.md` | **mangled** |
+>
+> **No new theory and no new boundary.** Three points cannot move a number that
+> nineteen could not pin down, and this body is long, which the budget
+> possibility above would predict. What it does is the first use of this
+> entry's own closing advice as a procedure rather than as a note: the body was
+> read back, the one mangled link was found, and the record is now **cited by
+> number with its path in a code span** instead of linked — which is exactly
+> what the entry already says to do, because a record's filename alone runs to
+> 89 characters. Re-read after the fix: every link byte-clean.
+>
+> Worth one line because the entry has been accumulating dead theories, and this
+> is a measurement that confirms the advice rather than another explanation.
+> **Nothing was spent chasing it.**
+
 
 ---
 

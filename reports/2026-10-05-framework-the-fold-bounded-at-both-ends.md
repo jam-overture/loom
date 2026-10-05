@@ -190,6 +190,15 @@ file under any route group was edited by hand. Nothing in `src/primitives/` or
 from `Loom portal`, both naming this branch and both saying what departed from
 the shape they suggested.
 
+**Measured onto one, after the pull request was opened:** the 23 September
+URL-mangling entry. Its closing advice is to read the body back from the API
+after posting and look, which I did — the report link (111 characters) and the
+figure (121) came back byte-clean and **the record link (155) came back wrapped
+in backticks**. The record is now cited by number with its path in a code span,
+which is what that entry already says to do, and the re-read is clean. Three
+measurements appended; no new theory, because three points cannot move a number
+nineteen could not pin down.
+
 **Filed, one:** the record-number collision, fourth filed occurrence. `#515` and
 `#516` both write `0226` and both were correct by the procedure — `main` was at
 `0225`, both re-read it, `0226` was free in both. It is evidence under the
