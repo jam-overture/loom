@@ -1,0 +1,59 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-10-05-docs-menu-closed-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": ["text=Browse the documentation", "nav[aria-label='Documentation']"]
+    },
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-10-05-docs-menu-open-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "do": [
+        { "click": "text=Browse the documentation" },
+        { "waitFor": "nav[aria-label='Documentation'] a[aria-current]" }
+      ],
+      "measure": [
+        "nav[aria-label='Documentation']",
+        "text=Close",
+        "nav[aria-label='Documentation'] a[aria-current]"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-10-05-docs-menu-open-whole-phone",
+      "viewport": "phone",
+      "clip": "div:has(> nav[aria-label='Documentation'])",
+      "waitFor": "h1",
+      "do": [
+        { "click": "text=Browse the documentation" },
+        { "waitFor": "nav[aria-label='Documentation'] a[aria-current]" }
+      ]
+    },
+    {
+      "path": "/docs/api-reference",
+      "out": "2026-10-05-docs-rail-wide",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='Documentation'] a[aria-current]",
+      "measure": [
+        "nav[aria-label='Documentation']",
+        "nav[aria-label='Documentation'] a[aria-current]"
+      ]
+    },
+    {
+      "path": "/docs/the-runtime/what-the-gate-decides",
+      "out": "2026-10-05-docs-rail-inside-a-section-wide",
+      "viewport": "wide",
+      "waitFor": "nav[aria-label='Documentation'] a[aria-current]",
+      "measure": [
+        "nav[aria-label='Documentation'] a[aria-current]",
+        "nav[aria-label='Documentation'] a.font-mono"
+      ]
+    }
+  ]
+}
