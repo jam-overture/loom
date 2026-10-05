@@ -1071,7 +1071,7 @@ The output:
   declaring any role:        1
   typesWithRole("heading"):  ["loom.heading"]
   copyFor("loom.stat"):      ["value","label","caption"]
-  declaring copy as []:      58
+  declaring copy as []:      59
   textOf(metrics band):      ""
   copyIn(metrics band, starter registry)
     words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]

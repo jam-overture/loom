@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4674,11 +4674,18 @@
               "summary": "The top of an adjust control's range."
             },
             {
+              "name": "ADJUST_RESTING_PROPERTY",
+              "kind": "value",
+              "signature": "const ADJUST_RESTING_PROPERTY = \"--loom-adjust-resting\"",
+              "truncated": false,
+              "summary": "The property a primitive declares to say **where its control should start**, on the element it places the control in. Read once, at mount, and never again — where the slider goes after that is the reader's."
+            },
+            {
               "name": "ADJUST_RESTING",
               "kind": "value",
               "signature": "const ADJUST_RESTING = 50",
               "truncated": false,
-              "summary": "Where the control sits before anybody moves it."
+              "summary": "Where the control sits when nothing declared otherwise."
             },
             {
               "name": "BEHAVIOURS",
@@ -5427,7 +5434,7 @@
       "files": 195,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5892,7 +5899,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6784,7 +6791,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7375,7 +7382,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7603,7 +7610,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8020,7 +8027,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8374,7 +8381,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8494,7 +8501,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 36,
+      "files": 37,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8507,7 +8514,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9324,6 +9331,55 @@
           ]
         },
         {
+          "module": "signals/reach",
+          "title": "Reach",
+          "summary": "How far into a page readers get, as a share of the readers there were.",
+          "symbols": [
+            {
+              "name": "ReachSilence",
+              "kind": "type",
+              "signature": "type ReachSilence = \n/**\n * No page-view row for this tree and revision.\n *\n * Either the counter has never been written for it — a deployment whose\n * intake predates the column, or one whose rows have expired — or the caller\n * read the rows for something else. The counters are still a floor on how\n * many readers there were, which is what a reading reported before this\n * join existed, so a surface has something to fall back to and should say\n * which it is showing.\n */\n\"unmeasured\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this and the second is the one worth catching.\n * If no rollup has counted an appearance either, nobody has read this\n * revision and there is nothing to divide. If appearances have been counted,\n * **the senders are not marking their openings** — a page running a\n * broadcaster from before the marker shipped, or one whose opening delivery\n * is being lost — and every rate on the screen has no denominator while the\n * counters look healthy. That is a diagnosis nothing else in this subsystem\n * offers.\n */\n | \"unopened\"\n/**\n * Readers arrived and no rollup has folded a window yet.\n *\n * Everything is `pending`. It is what the first minutes of a deployment look\n * like, and what a stalled collection looks like for ever, and the two are\n * told apart by whether the number moves.\n */\n | \"uncounted\";",
+              "truncated": false,
+              "summary": "Why a share of readers cannot be given at all."
+            },
+            {
+              "name": "REACH_SILENCES",
+              "kind": "value",
+              "signature": "const REACH_SILENCES: readonly ReachSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeReachSilence",
+              "kind": "function",
+              "signature": "const describeReachSilence: (silence: ReachSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface putting the reading in front of a person."
+            },
+            {
+              "name": "PartReach",
+              "kind": "type",
+              "signature": "type PartReach = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root, as the reading's outline gives it. */\n    readonly depth: number;\n    readonly standing: PartStanding;\n    /**\n     * Distinct page views that saw it, exactly as stored: added across rollup\n     * windows and therefore generous.\n     *\n     * Published beside the shares rather than hidden behind them, because it is\n     * the only figure here that is not a division and the one to fall back to\n     * when the pair cannot be reconciled.\n     */\n    readonly reached: number;\n    /**\n     * The share of page views that got this far, as the rollups counted both\n     * ends: `reached ÷ appearances`.\n     *\n     * The straddle over-count is in the numerator and the denominator and very\n     * nearly divides out, which is what makes this the figure to show. It is an\n     * estimate and not a bound, and the direction it leans is worth knowing: a\n     * reader who stayed long enough to span two windows is counted twice on both\n     * sides, and a reader who stays longer is likelier to have got deep into the\n     * page — so for a part near the bottom this reads a little generous.\n     *\n     * **Its denominator is the page views that have been counted, which is not\n     * every reader who arrived.** While openings are pending the two are\n     * different populations, so this can sit above\n     * {@link PartReach.atMost} — that is not a contradiction and the pending\n     * figure is the explanation.\n     *\n     * `null` under a silence.\n     */\n    readonly share: number | null;\n    /**\n     * The most the share could be: `reached ÷ opened`, never above 1.\n     *\n     * A ceiling rather than an estimate. The openings are a count of readers that\n     * no window boundary can inflate, and `reached` is at least the number of\n     * readers who really got here, so the true share is at or below this.\n     *\n     * **For a part nearly everybody reaches it is 1 and says nothing**, and that\n     * is the ordinary state rather than a fault: a root is in the viewport of\n     * every page view, so where any visit spanned two windows its `reached` is\n     * above the openings on its own. The estimate is the figure with information\n     * in it there; this is the one that bounds a part further down.\n     *\n     * `null` under a silence.\n     */\n    readonly atMost: number | null;\n    /**\n     * The share applied to the exact count of readers who arrived — the number a\n     * sentence can say out loud.\n     *\n     * Deliberately not rounded: it is a magnitude and not a census, and a surface\n     * that rounds it is saying how precise it thinks it is.\n     *\n     * **One division of two whole numbers, not the share multiplied back up.**\n     * The two are the same arithmetic in exact numbers and not in a float —\n     * seven readers out of a hundred, times a hundred, is seven and a\n     * quadrillionth, which is above the most readers who could have got there and\n     * would make this figure break its own ceiling.\n     *\n     * Withheld in three states rather than given as a number nobody could stand\n     * behind: under a silence; whenever the collection is behind, because\n     * openings a rollup has not reached yet are readers whose reading nobody has\n     * counted and projecting the folded rate onto them would answer a question\n     * about people who were never measured; and where the two counters cannot be\n     * reconciled, because a count of people above the number of people who\n     * arrived is the one figure a screen must never show.\n     */\n    readonly readers: number | null;\n    /**\n     * The most readers who could have got here: the smaller of `reached` and the\n     * openings, which is a whole number of real page views either way.\n     *\n     * `null` under a silence. Where {@link PartReach.readers} is given it is\n     * never above this.\n     */\n    readonly atMostReaders: number | null;\n    /**\n     * More reach than there were page views to be reached in, so the share sits\n     * above 1 and no figure here can be drawn.\n     *\n     * Reach is counted out of the same windows as the appearances it is divided\n     * by, and a view that reached a part in a window is a view that appeared in\n     * it — so rows written by the same rollups cannot produce this. Two things\n     * can. **Node counters older than the page-view column**, added up over\n     * windows whose appearances were never kept, which is what an upgraded\n     * deployment's first reading looks like. Or a caller who concatenated two\n     * reads of the counters instead of letting the store add them, which the\n     * reading upstream reports as a duplicated node.\n     *\n     * It is not the ordinary straddle: `reached` above the *openings* is\n     * expected, and is what {@link PartReach.atMost} being 1 means.\n     *\n     * A surface should show `reached` and say it cannot yet be put as a share.\n     */\n    readonly unreconciled: boolean;\n};",
+              "truncated": false,
+              "summary": "How far one part of a page got, against the readers there were."
+            },
+            {
+              "name": "PageReach",
+              "kind": "type",
+              "signature": "type PageReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /**\n     * The floor the counters give on their own: the largest `views` any one row\n     * reports.\n     *\n     * What a reading had to use as a denominator before there was an exact one,\n     * kept so that a deployment can see the difference the join made rather than\n     * being told it was wrong. Against an honest sender it sits at or below the\n     * openings plus the straddle.\n     */\n    readonly countedViews: number;\n    /**\n     * Set where no share can be given, and the reason. `null` where they can.\n     */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * estimate and the ceiling are the same number and the shares are exact.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /** Every part of the revision, in reading order, as the reading had them. */\n    readonly parts: readonly PartReach[];\n    /**\n     * The parts whose reach could not be reconciled with the openings.\n     *\n     * Empty is the healthy state. A non-empty list on a deployment whose drift is\n     * nought is not a straddle and not a lie: it is node counters older than the\n     * column they are being divided by.\n     */\n    readonly unreconciled: readonly NodeId[];\n    /**\n     * Page-view rows handed in for another tree or another revision, and ignored.\n     *\n     * Dividing one revision's counters by another's readers is the mistake that\n     * would make every rate here quietly wrong, so this filters rather than\n     * trusts its caller — and says how much it dropped, because a caller who\n     * passed a whole store's rows and one who passed the wrong revision's look\n     * identical from the inside.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this tree and revision beyond the first, where every one after it\n     * was ignored.\n     *\n     * A store keeps one row per revision, so this cannot happen from one read —\n     * it happens when a caller concatenates two reads. Adding them is wrong,\n     * because the openings are already a total and would double; taking the last\n     * is wrong, because it is not the truer one. So the first row stands and the\n     * fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "A window of counters, read against the exact number of readers that window had."
+            },
+            {
+              "name": "pageReachOf",
+              "kind": "function",
+              "signature": "const pageReachOf: (reading: PageReading, rows: readonly StoredPageViews[]) => PageReach",
+              "truncated": false,
+              "summary": "Read a window's counters against the readers that window had."
+            }
+          ]
+        },
+        {
           "module": "signals/readable",
           "title": "Readable",
           "summary": "What *on screen* means, as the two numbers that decide it.",
@@ -9697,7 +9753,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9840,7 +9896,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9907,7 +9963,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10504,7 +10560,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10578,7 +10634,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11036,7 +11092,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1246,
+        "packageNames": 1253,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
