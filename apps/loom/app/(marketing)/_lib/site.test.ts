@@ -1,8 +1,6 @@
-import { existsSync, readdirSync } from "node:fs"
-import { fileURLToPath } from "node:url"
-
 import { describe, expect, it } from "vitest"
 
+import { servedBy } from "./routes"
 import {
   DEFAULT_THEME,
   DEMO,
@@ -282,23 +280,24 @@ describe("the rest of the product", () => {
  * four surfaces are one Next application (0067), a route group contributes
  * nothing to a URL, so `/docs` is served by `(docs)/docs/page.tsx` and the file
  * being there is the same fact as the page answering.
+ *
+ * **It asks `routes.ts` rather than looking for the file itself, as of 5
+ * October**, and the four assertions are unchanged. What it used to read was
+ * `app/(group)/<path>/page.tsx`, which is true of these four paths and of no
+ * other shape this application serves — not a page written as prose, not an
+ * address with two segments in it, not a dynamic segment. That reading has been
+ * generalised one file over so that every address this site emits can be held
+ * to it, and a second copy of *does this application serve that* living here
+ * would be the pair this route group keeps writing notes about: two readings of
+ * one question, disagreeing eventually, and the one that disagreed is whichever
+ * was not looked at.
  */
 describe("every surface named here", () => {
-  /** `app/`, from `app/(marketing)/_lib/`. The route groups are its children. */
-  const app = fileURLToPath(new URL("../../", import.meta.url)).replace(/\/$/, "")
-
-  const routeGroups = (): readonly string[] =>
-    readdirSync(app, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && entry.name.startsWith("("))
-      .map((entry) => entry.name)
-
   it.each(PRODUCT_SURFACES)("$label has a page on this deployment at $path", (surface) => {
-    const segment = surface.path.replace(/^\//, "")
-    const serving = routeGroups().filter((group) =>
-      existsSync(`${app}/${group}/${segment}/page.tsx`)
-    )
-
-    expect(serving).toHaveLength(1)
+    expect({ path: surface.path, servedBy: servedBy(surface.path) }).toEqual({
+      path: surface.path,
+      servedBy: expect.stringContaining("apps/loom/app/"),
+    })
   })
 })
 
