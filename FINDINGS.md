@@ -43672,3 +43672,81 @@ tree alone cannot see any prop whose drawing is conditional on an answer, so a
 primitive that declares `reads` needs the probe to answer it or its copy
 declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
+
+---
+## 2026-10-05 — a reader screen can now say why readers left, not only where, and there is one figure on it that must never be drawn as engagement
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/`) · **Status:** open — **nothing is blocked**, this is
+a call and four cautions
+
+`readingPaceOf(reading, options)` in `src/signals/pace.ts` is on `main` as of
+this run. Handed the same `PageReading` the reader screen already builds, it
+answers whether readers had time to read what each part of a page says: time on
+screen per reader, against the time that part's words take at a published rate.
+
+**The call.** §9 says *where* reading stops; this says *what was not taken in
+before it stopped*, and the two read together into the one sentence a reader
+screen can open with — *readers spend eight seconds on a band that takes fifty
+to read, and it is the band they leave at*. `whole` is the page's own version of
+that figure and is the headline; `mostSkimmed` is the part the most words went
+unread in.
+
+**Four cautions, and the first is the only one that can embarrass you.**
+
+1. **`lingered` is a question, not an answer, and must never be drawn as
+   engagement.** Dwell is time on screen, so the tall thing at the bottom of a
+   page lingers by construction, and so does a band while its own children are
+   being read. It means *is this where people get stuck* — which is sometimes a
+   defect in the page and sometimes a reader reading carefully.
+2. **`skimmed` is the only verdict that is a claim** (0228). Every bias in the
+   arithmetic points the same way, so a skim stands after all of them and
+   `paced` does not. Lead with skims.
+3. **Never add a word figure across parts.** `wordsWithin` and `wordsPassed`
+   nest — a band's words are in the page's — so a total charges one reader once
+   per level. There is deliberately no page-wide word count to reach for, and
+   `whole` is held out of the ranking for the same reason.
+4. **Hand in the inflation if you have it.** `PaceOptions.inflation` takes
+   `drift ÷ opened` off the page-view rows (0219). Without it the means are
+   short, which calls marginally more parts skimmed than should be — the one
+   direction the safe verdict cannot afford to be wrong in.
+
+**And one thing to show rather than hide.** `silences.unreadable` counts the
+parts whose verdict was withheld because some type in them declares no `copy`. On
+the starter library that is now near zero; on a deployment's own primitives it
+may be most of the page, and the screen that says so plainly is the one that gets
+the declarations written.
+
+---
+## 2026-10-05 — text handed into a slot belonged to no part of the reading, so a page's words were not partitioned after all
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/parts.ts`)
+· **Status:** **closed by `signals-09-reached-is-not-read`** — filed and fixed in
+the same run, and written down because the claim it broke is quoted in three
+records
+
+`PartReading.copy` promises that a part's words are its own and that *the words
+of a page are partitioned across its parts exactly once* — which is what makes a
+role row addable (0212) and what every word figure in `pace.ts` rests on.
+
+`ownCopy` built that by handing `copyIn` the node with only its **text**
+children, on the reasoning that every element child is a part in its own right.
+A slot node is neither: it is not an element, so it is never a part, and it was
+not kept — so text handed into a slot belonged to nobody and left the reading
+entirely. A page whose whole body arrives through a slot reported itself as
+saying nothing.
+
+Found by building a word count on top of the promise rather than by reading it.
+Nothing was red: the fixture every test used nested text directly under
+elements.
+
+**The fix is the clause the rule was missing**, not a new rule: a slot's children
+are pruned the same way and kept, so its text belongs to the nearest element
+above it and its elements stay parts of their own. One test, red against the
+previous line.
+
+**What it would have cost.** In `parts.ts`, a word nobody could find. In
+`pace.ts`, worse and quieter: missing words make a part's reading time look
+shorter than it is, which biases *away* from `skimmed` — so the verdict 0228
+builds its safety argument on would have held, and `paced` would have been
+handed out to parts nobody could possibly have read.

@@ -309,3 +309,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0223](0223-a-prop-is-copy-when-a-reader-could-quote-it.md) | A prop is copy when a reader could quote it, and a glyph is not a quote | Accepted | §1 |
 | [0224](0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md) | A before-and-after reading compares two shares, and a pair the change dissolved is an answer | Accepted | §4c (reader signals) |
 | [0225](0225-a-judgment-is-joined-to-a-revision-by-a-bounded-lookup-and-the-lookup-says-what-it-did-not-reach.md) | A judgment is joined to a revision by a bounded lookup, and the lookup says what it did not reach | Accepted | §6 |
+| 0226 | *No record on this branch* | — | — |
+| 0227 | *No record on this branch* | — | — |
+| [0228](0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md) | A part was read when readers had time for its words, and only the skim is a safe claim | Accepted | §4c (reader signals) |

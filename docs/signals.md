@@ -33,6 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| Whether readers had time to read it | time on screen against the time its words take ([0228](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
@@ -444,6 +445,67 @@ parts that is rather than calling them unchanged.
 
 **What it leaves for the portal**, which is `Loom portal`'s and filed: the one
 sentence a reader screen can lead with, and the four things to be careful of.
+
+### 11. A share of the readers there were · `Loom signals` · **in flight**
+
+Open as #516 and not yet on `main`, so it is numbered here and described there.
+This step was written against `main` without it and depends on none of it.
+
+### 12. Reached is not read · `Loom signals` · **done, 5 October**
+
+§6 answers *which parts came into view* and is careful to say only that: `read`
+there means **a row says this part was on a reader's screen**. A band a reader
+scrolled through in two seconds satisfies it, a page of them reports as a page
+read top to bottom, and nobody looking at the result can tell. This document's
+first priority names the other half directly — *which parts of a page are read
+and which are scrolled past* — and until 4 October it was unanswerable, because
+nothing knew how much there was to read.
+
+**Done.** `readingPaceOf(reading, options)` in
+[`src/signals/pace.ts`](../src/signals/pace.ts) sets the time each reader had
+against the time a part's words take. Both sides were already in hand: a tally
+has carried `dwellMs` beside `reached` since the counters existed, and
+[0223](../decisions/0223-a-prop-is-copy-when-a-reader-could-quote-it.md)
+supplied the words the day before this was built — reinterpreting every counter
+already stored, with no change here, which is 0212's read-time join paying out
+for the third time. **Nothing was added to a payload, a browser, a column, a
+store or the vocabulary**; the broadcaster was not touched, so its weight is
+unchanged. It is the fifth thing taken out of the server-side join rather than
+collected.
+
+The shape is in
+[0228](../decisions/0228-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md),
+and one thing in it decides everything else:
+
+- **Only the skim is a claim.** Three things bias the comparison and all three
+  bias it the same way — dwell is time on screen rather than time reading
+  (0218), a word count is a floor where a type declared no `copy` (0122), and
+  `reached` is generous by the page views that straddled a window (0147). So the
+  time credited is generous and the words are a floor, and `skimmed` says the
+  time was short **even after every doubt has been resolved in the page's
+  favour**. `paced` and `lingered` are the weaker claims and are withheld where
+  the words are a floor, which is why `skimmed` is reached before the floor is
+  consulted and everything else after it. *Readers are not reading this* is
+  worth being sure of; *readers read this* is not a sentence anybody acts on.
+- **The rate is published and overridable; the thresholds are published and
+  not.** `READING_WORDS_PER_MINUTE` is 240 and may be replaced, because the pace
+  of a page's text is a fact about that text and its language. `SKIMMED_BELOW`
+  and `LINGERED_ABOVE` are the framework's statement of how much margin a claim
+  needs, which is a promise rather than a local fact — 0218's argument at the
+  one remove where it still holds.
+- **The straddle correction is handed in rather than assumed.**
+  `PaceOptions.inflation` takes `drift ÷ opened` off §8's rows and credits each
+  reader with proportionally more time. The third thing derived from that
+  counter.
+- **A part is judged against its subtree's words, so nothing is added up.** The
+  words on screen while a band was up are the band's and its children's, so the
+  figures nest and there is no page-wide word count at all. The root is reported
+  apart, as `whole`, because it contains every part it would outrank.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+sentence that names a cause rather than a location — §9 says where reading
+stops, this says what was not taken in before it stopped — and the one figure on
+it that must never be drawn as engagement.
 
 ## Still not in scope
 

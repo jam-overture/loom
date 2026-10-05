@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5427,7 +5427,7 @@
       "files": 192,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5885,7 +5885,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6749,7 +6749,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7340,7 +7340,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7568,7 +7568,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7985,7 +7985,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8339,7 +8339,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8459,7 +8459,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 36,
+      "files": 37,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8472,7 +8472,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9114,6 +9114,104 @@
           ]
         },
         {
+          "module": "signals/pace",
+          "title": "Pace",
+          "summary": "Whether a part was read or scrolled past.",
+          "symbols": [
+            {
+              "name": "READING_WORDS_PER_MINUTE",
+              "kind": "value",
+              "signature": "const READING_WORDS_PER_MINUTE = 240",
+              "truncated": false,
+              "summary": "The rate a page's words are costed at, in words per minute."
+            },
+            {
+              "name": "SKIMMED_BELOW",
+              "kind": "value",
+              "signature": "const SKIMMED_BELOW = 0.5",
+              "truncated": false,
+              "summary": "Below this much of the time its words take, a part was not read."
+            },
+            {
+              "name": "LINGERED_ABOVE",
+              "kind": "value",
+              "signature": "const LINGERED_ABOVE = 3",
+              "truncated": false,
+              "summary": "Above this much, readers stayed longer than the words account for."
+            },
+            {
+              "name": "PaceStanding",
+              "kind": "type",
+              "signature": "type PaceStanding = \n/**\n * Readers had less than {@link SKIMMED_BELOW} of the time the words take.\n *\n * The one verdict here that is safe against every bias in the module\n * documentation, and the one a screen should lead with.\n */\n\"skimmed\"\n/** Time enough for the words, and not conspicuously more. */\n | \"paced\"\n/** More than {@link LINGERED_ABOVE} times the time the words take. */\n | \"lingered\"\n/** Nothing can be said, and {@link PacedPart.silence} says which nothing. */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What the time readers spent says about the words a part puts in front of them."
+            },
+            {
+              "name": "PACE_STANDINGS",
+              "kind": "value",
+              "signature": "const PACE_STANDINGS: readonly PaceStanding[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PaceSilence",
+              "kind": "type",
+              "signature": "type PaceSilence =\n/**\n * No view reported it coming into view, so there is no time to divide and no\n * reader to divide it between.\n *\n * On a window with no views at all, this is every part — which is the same\n * refusal `parts.ts` makes one level down, arrived at rather than special-cased.\n */\n\"unreached\"\n/**\n * Its words are a floor, and the verdict that floor would support is not the\n * safe one.\n *\n * Some type in its subtree declares no `copy`, or declared a prop holding\n * something that is not a string. `skimmed` is still reported where it is\n * reached, because more words only make a part more skimmed; anything else\n * would be a claim resting on words nobody counted.\n */\n | \"unreadable\"\n/**\n * It says nothing, as far as anything can tell: no words, and nothing\n * undeclared either.\n *\n * A spacer, a rule, an image with no caption. There is no time its words take,\n * so there is no ratio — and this is kept apart from `unreadable` because\n * *there are none* and *nobody said* are different answers.\n */\n | \"wordless\";",
+              "truncated": false,
+              "summary": "Why a part has no pace."
+            },
+            {
+              "name": "PACE_SILENCES",
+              "kind": "value",
+              "signature": "const PACE_SILENCES: readonly PaceSilence[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describePaceStanding",
+              "kind": "function",
+              "signature": "const describePaceStanding: (standing: PaceStanding) => string",
+              "truncated": false,
+              "summary": "One line per standing, for a surface putting the reading in front of a person."
+            },
+            {
+              "name": "describePaceSilence",
+              "kind": "function",
+              "signature": "const describePaceSilence: (silence: PaceSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for the same surface."
+            },
+            {
+              "name": "PacedPart",
+              "kind": "type",
+              "signature": "type PacedPart = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    /** Distinct page views that reported it coming into view; `0` where no row named it. */\n    readonly readers: number;\n    /** The words this part says itself, counted. Its own, never its subtree's. */\n    readonly words: number;\n    /**\n     * The words of this part and everything under it.\n     *\n     * The denominator, because the text on screen while a band was up is the\n     * band's and its children's. Nests, and is therefore never added across parts.\n     */\n    readonly wordsWithin: number;\n    /**\n     * Whether {@link wordsWithin} is a floor rather than a count.\n     *\n     * True when anything in the subtree declared no `copy`, or declared a prop\n     * holding something other than a string.\n     */\n    readonly floored: boolean;\n    /** Time on screen, summed across every view in the window. */\n    readonly dwellMs: number;\n    /**\n     * The same time per reader, after {@link PaceOptions.inflation}.\n     *\n     * `null` where nobody reached it. Generous by the two biases nothing measures:\n     * dwell counts a part that was merely up, and an ancestor's dwell covers its\n     * children's reading.\n     */\n    readonly spentMs: number | null;\n    /** What {@link wordsWithin} takes at the costing rate. `0` where it says nothing. */\n    readonly needMs: number;\n    /**\n     * Time spent for every unit of time the words take. `1` is exactly enough.\n     *\n     * `null` where there is nothing to divide: no reader, or no words.\n     */\n    readonly pace: number | null;\n    readonly standing: PaceStanding;\n    /** Why there is no verdict, and `null` where there is one. */\n    readonly silence: PaceSilence | null;\n    /**\n     * Readers times the words they were shown here — the ranking key, and a\n     * magnitude rather than a census.\n     *\n     * Nests like {@link wordsWithin} does, so it ranks and is never summed.\n     */\n    readonly wordsPassed: number;\n};",
+              "truncated": false,
+              "summary": "One part, with the time its readers had against the time its words take."
+            },
+            {
+              "name": "PagePace",
+              "kind": "type",
+              "signature": "type PagePace = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The page's view floor, carried through from the reading unchanged. */\n    readonly views: number;\n    /** Every element part of the revision, in reading order. */\n    readonly parts: readonly PacedPart[];\n    readonly standings: Readonly<Record<PaceStanding, number>>;\n    /** Why the parts with no verdict have none. Counts only the silent ones. */\n    readonly silences: Readonly<Record<PaceSilence, number>>;\n    /**\n     * The root, judged against the whole page.\n     *\n     * *Readers spend a third of the time this page's words take* is a true\n     * sentence and the one a reader screen opens with — and it is kept out of\n     * {@link mostSkimmed} because the page contains every part, so by words passed\n     * it would win every ranking it was entered in.\n     *\n     * `null` where the revision's root is not an element, which is the one tree\n     * shape with no part at depth 0.\n     */\n    readonly whole: PacedPart | null;\n    /**\n     * The part of the page most words went unread in: most words passed, then\n     * first in reading order.\n     *\n     * By words passed rather than by the lowest pace, for the same reason a stop\n     * is ranked by the readers it loses: a caption two readers hurried\n     * past is a worse ratio and a smaller problem than a band four hundred of\n     * them did.\n     */\n    readonly mostSkimmed: PacedPart | null;\n    /** The inflation that was applied; `0` when none was given. */\n    readonly inflation: number;\n    /** The costing rate that was applied, which is the default unless one was given. */\n    readonly wordsPerMinute: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "PaceOptions",
+              "kind": "type",
+              "signature": "type PaceOptions = {\n    /**\n     * How generous the reader counts are, as `drift ÷ opened` off the page-view\n     * rows.\n     *\n     * `reached` over-counts by the page views that straddled a rollup window, so\n     * the mean time per reader is short by the same proportion — and short means\n     * **more parts called skimmed than should be**, which is the one direction\n     * this module's safe verdict cannot afford to be wrong in. A deployment that\n     * has the measurement hands it over and the correction is applied; one that\n     * does not gets the uncorrected figure and the bias stated here.\n     *\n     * Absent, zero, negative or not finite are all *no correction*: a negative\n     * inflation is not a thing a rollup can produce, and silently trusting one\n     * would widen the claim rather than narrow it.\n     */\n    readonly inflation?: number;\n    /**\n     * The costing rate, where {@link READING_WORDS_PER_MINUTE} is wrong for this\n     * deployment's text.\n     *\n     * Zero, negative or not finite are refused the same way, and the published\n     * default applies.\n     */\n    readonly wordsPerMinute?: number;\n};",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "readingPaceOf",
+              "kind": "function",
+              "signature": "const readingPaceOf: (reading: PageReading, options?: PaceOptions) => PagePace",
+              "truncated": false,
+              "summary": "Whether readers had time to read what each part of a page says."
+            }
+          ]
+        },
+        {
           "module": "signals/page-views",
           "title": "Page views",
           "summary": "How many page views there were — the number every rate on a screen is taken of, and the one number this subsystem could not state.",
@@ -9212,7 +9310,7 @@
             {
               "name": "PartReading",
               "kind": "type",
-              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     *\n     * Undefined is not zero and is kept apart from it on purpose. A part with a\n     * row of zeroes was reported on; a part with no row was not, and the\n     * difference is the whole of how `skipped` is told from a quiet page.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and its direct\n     * text children.\n     *\n     * **Its own, never its subtree's.** A text node is not an element, so it can\n     * never be a part of its own and its words would otherwise be lost; every\n     * other descendant is a part in this same list. So the words of a page are\n     * partitioned across its parts exactly once, and a caller may add two rows\n     * together without reading a headline twice.\n     *\n     * `unread` and `unspoken` mean what they mean in the reading they come from\n     *: nobody has said whether these props are words, and somebody said\n     * these were words and what is in them is not one. Nothing in the starter library declares `copy`\n     * yet, so today this answers `unread` for almost every part — which is the\n     * honest answer and not a failure.\n     */\n    readonly copy: NodeCopy;\n};",
+              "signature": "type PartReading = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** null at the root. */\n    readonly parentId: NodeId | null;\n    readonly standing: PartStanding;\n    /**\n     * The counters, or `undefined` where no signal in the window named it.\n     *\n     * Undefined is not zero and is kept apart from it on purpose. A part with a\n     * row of zeroes was reported on; a part with no row was not, and the\n     * difference is the whole of how `skipped` is told from a quiet page.\n     */\n    readonly counters: ReaderTally | undefined;\n    /**\n     * The words this part says itself: its declared copy props, and the text\n     * handed to it directly or through a slot.\n     *\n     * **Its own, never its subtree's.** Neither a text node nor a slot node is an\n     * element, so neither can ever be a part of its own and the words handed into\n     * one would otherwise be lost; every other descendant is a part in this same\n     * list. So the words of a page are\n     * partitioned across its parts exactly once, and a caller may add two rows\n     * together without reading a headline twice.\n     *\n     * `unread` and `unspoken` mean what they mean in the reading they come from\n     *: nobody has said whether these props are words, and somebody said\n     * these were words and what is in them is not one. The starter library\n     * declares `copy` across itself, so `unread` on a page built from it\n     * is a deployment's own primitives rather than the framework's silence.\n     */\n    readonly copy: NodeCopy;\n};",
               "truncated": false,
               "summary": "One element node of one revision, with whatever the window said about it."
             },
@@ -9662,7 +9760,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -9805,7 +9903,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -9872,7 +9970,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10469,7 +10567,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10543,7 +10641,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11001,7 +11099,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1243,
+        "packageNames": 1256,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
