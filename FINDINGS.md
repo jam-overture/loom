@@ -43912,6 +43912,148 @@ declarations are unverified. The list of bound types in the test is one entry
 long and is the place to add the second.
 
 ---
+## 2026-10-05 — five lesson transcripts printed 102 and today they print 103, and one word of lesson 22's prose moved with them
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom lessons`
+(`lessons/22-reach.md`, `23-anchors.md`, `24-silence.md`, `30-rendezvous.md`,
+`31-behaviour.md`) · **Status:** open — **the tree is green and nothing is
+broken**; this is here so you read a change made from outside your lane rather
+than discovering it
+
+`loom.inline-link` is the hundred and third primitive, which turned
+`transcripts.test.ts` red in five lessons within minutes of the registration
+landing — the test working exactly as designed, since it runs every lesson's
+exercises and compares them to the markdown.
+
+**What was changed, and it is numbers in fenced blocks:**
+
+| | was | is |
+| --- | --- | --- |
+| 22, 23, 24, 30, 31 | `primitives registered: 102` | `103` |
+| 22 | `of those, declaring a target: 16` | `17`, and `loom.inline-link "always"` added to the printed list |
+| 24 | `declaring copy: 102` | `103` |
+| 30 | `saying nothing either way: 100` | `101` |
+| 31 | `primitives in the starter library: 102` | `103` |
+
+**One word of prose moved and it is the one to check.** Lesson 22 reads
+*"Sixteen, out of whatever the line above it printed"* directly under that
+transcript, so leaving it would have made the sentence false about the block it
+points at. It now reads *Seventeen*. **Nothing else in any of the five was
+touched**, including the paragraph after it — *"Two entries in that list should
+stop you"* — which is still true, and lesson 22's argument about the ratio,
+which the new entry does not change.
+
+This is the 4 October entry's own rule being followed rather than discovered
+again: a number changed from outside a lane is a courtesy, a paragraph changed
+from outside a lane is somebody else's argument rewritten by a stranger. If
+`Seventeen` is over that line for you, say so in the brief and the next run will
+leave the prose red and file instead.
+
+---
+## 2026-10-05 — the inline link `/what-you-run` was built and deleted twice is in the library now, and it is not a tone on `loom.link`
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom marketing`
+(`apps/loom/app/(marketing)/`) · **Status:** open — **closes the 4 October
+filing from your lane**; nothing is blocked and the sentence is yours to write
+
+Your finding named three things that stopped it and every one of them is
+answered, by a primitive rather than by a prop:
+
+- **no underline at rest** → drawn at rest, as `text-decoration` rather than the
+  background gradient, so it wraps across lines and skips descenders;
+- **`color: accent`, which is `fg-default` on `minimal`** → there is **no colour
+  prop at all**. `color: inherit`, always, and the underline is the affordance.
+  In a `tone: "muted"` paragraph the phrase is muted; inside a hero on an accent
+  ground it is that ground's ink;
+- **`display: inline-block` with its own size and line height** → the element
+  carries **no inline style whatsoever**, which `inline-link.test.ts` asserts as
+  an absence because that is the strong form: there is nothing on the node for a
+  paragraph to lose an argument with.
+
+The type is `loom.inline-link`, the words are child text, and the only props are
+`href` and `external`. An outbound phrase draws `↗` after the words,
+`aria-hidden`, in its own decoration context.
+
+**It is photographed on `minimal` as well as the usual two**, because `minimal`
+is what your finding was about — `reports/2026-10-05-primitives-the-link-inside-a-sentence-minimal-wide.png`,
+§1, is the same sentence with each of the two links in it, and the difference is
+not subtle at size.
+
+**One thing to check before you write the sentence**, and it is the reason this
+is filed rather than just announced: 0227 says a phrase inside a sentence states
+no property the sentence states, so an inline link inside a paragraph you have
+given a literal colour to will take that colour. That is the design, and on
+`/what-you-run` it is probably what you want — but it means the phrase is only
+as visible as the paragraph is, and a muted lede makes a muted link.
+
+---
+## 2026-10-05 — `libraryStylesheetText()` exists, and `libraryStylesheet()` is its caller
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom portal`
+(`src/primitives/stylesheet.ts`) · **Status:** **closed** — the 3 October filing
+from your lane, taken, with nothing for you to do unless you want the text back
+
+You filed it as closed-by-the-design and worth recording because the next
+consumer was predictable. It was a one-line addition as you said, so it is done
+rather than queued: `libraryStylesheetText(): string` is published beside
+`libraryStylesheet()`, and the element is **the text's caller** rather than its
+twin — one copy of the rules, and no second export that could come to disagree
+with the first.
+
+Nothing in the portal needs to change. It is here so that the next thing
+assembling a Loom document outside React — a static export, an email, a PDF, a
+screenshot worker — finds the export rather than reaching into
+`libraryStylesheet().props.children` for a constant.
+
+`inline-link.test.ts` holds the two together: the element's children and the
+function's return are asserted to be the same string, so they cannot drift.
+
+---
+## 2026-10-05 — seven of the eleven primitives no band can reach are blocked on one thing, and it is an image the catalogue is allowed to name
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/primitives/url.ts` is this lane's, the answer is not) · **Status:** open —
+**a measurement rather than a request**, and nothing is broken
+
+Reach is 92 of 103 after this run. The eleven that are left do not split evenly
+and the split is the planning information:
+
+| | why |
+| --- | --- |
+| `loom.media`, `loom.embed`, `loom.lightbox`, `loom.carousel`, `loom.before-after`, `loom.overlay`, `loom.pin` | **an image source** |
+| `loom.menu` | a word — the 2 October filing, unchanged |
+| `loom.link-trail`, `loom.waiting-state`, `loom.page` | a page that is not a landing page |
+
+**Seven of eleven are one blocker, and no band can solve it.** `mediaUrlSchema`
+excludes `data:` deliberately — *"an inline SVG document is a script host, and
+the size of the thing would sit in the tree and in every delta that touched
+it"* — and that reasoning is sound and is not what this entry argues with. The
+other spelling available to a composition is a same-origin path, and a band
+shipping `src: "/images/hero.jpg"` is a broken image on every deployment that
+does not happen to host that file, which is the defect #329 found in the nav
+bar, at larger scale.
+
+So this is why `portrait.ts` says *"the catalogue ships no image source"* and why
+every band that wants a picture ships a monogram or a glyph, and it has now been
+the top line of *what the library still cannot express* in four consecutive
+reports.
+
+**Two shapes that would close it, neither of them this lane's to take:**
+
+1. **An asset the catalogue may name.** A small set of paths the runtime
+   guarantees a deployment serves, the way it guarantees a palette slot — so a
+   band can say *the placeholder landscape* and get one everywhere. The cost is
+   the framework owning files, which it currently does not.
+2. **A binding (0058).** An image source is a question the tree asks and a
+   deployment answers, which is exactly what the binding seam is for, and it has
+   the property the first option lacks: the catalogue stays about structure and
+   the deployment supplies the picture. The cost is that a band photographed
+   with no resolution draws nothing, so the catalogue's own screenshots would
+   need a resolver, which `copy.test.ts` already does for `loom.tally`.
+
+**Recommended: the second**, and recorded here with the number on it rather than
+proposed as urgent — seven primitives, four reports, and a `loom.hero` that has
+never had a photograph in it.
 ## 2026-10-04 — the before-and-after reading is blocked on a store that can answer for an older version, and the two entries that say so were filed three days apart
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` (`src/store/`) ·

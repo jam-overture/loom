@@ -193,8 +193,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 102 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(102)
+  it("registers as 103 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(103)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -298,6 +298,7 @@ describe("the starter library", () => {
       "loom.action",
       "loom.button",
       "loom.link",
+      "loom.inline-link",
     ])
   })
 
@@ -3288,6 +3289,19 @@ const prosePage = (theme: Record<string, string>, idFactory: IdFactory = sequent
   const emphasis = (tone: string, value: string) =>
     buildElement(idFactory, { type: "loom.emphasis", props: { tone }, children: [text(value)] })
 
+  /**
+   * The two branches of `loom.inline-link`, both inside a paragraph, which is
+   * the only place it is allowed to be. The fixture carries the outbound one as
+   * well as the plain one because the arrow is a child element the primitive
+   * adds rather than a style, so a page without one renders the half of it that
+   * cannot go wrong.
+   */
+  const inline = (href: string, value: string) =>
+    buildElement(idFactory, { type: "loom.inline-link", props: { href }, children: [text(value)] })
+
+  const outward = (href: string, value: string) =>
+    buildElement(idFactory, { type: "loom.inline-link", props: { href, external: true }, children: [text(value)] })
+
   const point = (...children: readonly ReturnType<typeof text>[]) =>
     buildElement(idFactory, { type: "loom.list-item", children: [...children] })
 
@@ -3312,7 +3326,11 @@ const prosePage = (theme: Record<string, string>, idFactory: IdFactory = sequent
           symbol("ChangeInterpreter"),
           text(", which re-plans it against the tree it is actually given — "),
           emphasis("subtle", "not"),
-          text(" the tree it was written against."),
+          text(" the tree it was written against. The rule every primitive here is held to is "),
+          inline("/granularity", "written down in one page"),
+          text(", and the record that settled it is "),
+          outward("https://example.com/decisions/0052", "published with its reasoning"),
+          text("."),
         ],
       }),
     ],

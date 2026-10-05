@@ -39,7 +39,14 @@ const props = z
     /**
      * `default` for a menu across the top, `muted` for the columns in a footer
      * where the links are a reference rather than an invitation, and `accent`
-     * for the one link in a paragraph that is the point of the paragraph.
+     * for the one item in either that is louder than the rest.
+     *
+     * **`accent` used to say *the one link in a paragraph that is the point of
+     * the paragraph*, and that job is `loom.inline-link`'s** (0227). It was
+     * never a job this primitive could do: the sentence survived a month
+     * because nothing had tried it, and when `Loom marketing` did, all three of
+     * the properties below defeated it. The prop is unchanged and still right
+     * for a louder footer item; only the claim about where it goes was wrong.
      */
     tone: z.enum(["default", "muted", "accent"]).optional(),
     scale: z.enum(["small", "medium"]).optional(),
