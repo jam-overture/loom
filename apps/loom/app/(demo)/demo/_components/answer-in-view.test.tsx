@@ -142,7 +142,7 @@ describe("the card waiting on an answer", () => {
 })
 
 /**
- * And the same component one press later, for the card the answer landed.
+ * And the same component one press later, for the card the press landed.
  *
  * The rail keeps the scroll it took for the question; answering it takes the
  * caution out of the panel and puts the green button back, and everything above
