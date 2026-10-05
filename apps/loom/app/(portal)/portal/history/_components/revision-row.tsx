@@ -2,10 +2,12 @@ import type { StoredRevision } from "@jam-overture/loom/store"
 
 import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { UndoStandingNote } from "@/app/(portal)/_components/undo-standing"
 import { describeOperation, summariseOperations } from "@/app/(portal)/_lib/delta-summary"
 import { revisionAnchorId } from "@/app/(portal)/_lib/history-link"
 import { firstNamed, namesInOperations, type PartName } from "@/app/(portal)/_lib/part-name"
 import type { Reversal } from "@/app/(portal)/_lib/reversal"
+import type { UndoStanding } from "@/app/(portal)/_lib/undoing"
 import { revisionView } from "@/app/(portal)/_lib/revision-view"
 import { versionHeading, versionOnTheRecord } from "@/app/(portal)/_lib/version"
 import { readingOf } from "@/app/(portal)/_lib/vocabulary"
@@ -64,6 +66,7 @@ export const RevisionRow = ({
   stored,
   anchored = false,
   reversal,
+  undoing,
   standing = new Map(),
 }: {
   readonly stored: StoredRevision
@@ -71,6 +74,17 @@ export const RevisionRow = ({
   readonly anchored?: boolean
   /** What undoing this would restore and cost, read from the log (0035, 0016). */
   readonly reversal?: Reversal | undefined
+  /**
+   * Whether undoing this would undo everything it did (0225).
+   *
+   * `reversal` above answers for the page; this answers for the world. Absent
+   * is *nothing was recorded about this change* — a revision the runtime
+   * authored has no model's judgment behind it, and a deployment with no
+   * journal has none for anything — which is an answer rather than a gap, so an
+   * absent one draws nothing. What the screen could **not find out** is said
+   * once, above the list, by the page.
+   */
+  readonly undoing?: UndoStanding | undefined
   /**
    * The parts of the page as it stands now, named, by id.
    *
@@ -154,6 +168,16 @@ export const RevisionRow = ({
       </p>
 
       {reversal !== undefined && <ReversalNote reversal={reversal} />}
+
+      {/*
+        * Above the button, and that is the whole point of it being here rather
+        * than in the disclosure below. `ReversalNote` has just told a reader
+        * what undoing puts back — which is true, complete about the page, and
+        * silent about a charge the change set in motion. A reader who stops
+        * reading at the end of that note and presses undo is exactly the reader
+        * this note is for.
+        */}
+      {undoing !== undefined && <UndoStandingNote standing={undoing} />}
 
       {(reversal === undefined || reversal.kind === "revertable") && (
         <UndoButton treeId={stored.treeId} revision={stored.revision} />
