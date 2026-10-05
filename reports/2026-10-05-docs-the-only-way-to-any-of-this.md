@@ -227,6 +227,23 @@ picks it up and not something to add quietly.
 So the pictures are of the components the tests are about, and the report says
 what is true rather than claiming a picture of a menu closing.
 
+### The deployment
+
+`https://loom-git-docs-46-the-only-wa-2bfae9-jpizzolato36-6341s-projects.vercel.app`
+
+Taken from the `vercel[bot]` comment after the pull request was opened and the
+body corrected, which is the procedure the 27 September / 2 October entry
+records — a URL guessed from the branch name is a dead link a lane cannot check.
+This branch would have been guessed as `…docs-46-the-only-way-to-any-of-this…`
+and Vercel assigned `…docs-46-the-only-wa-2bfae9…`.
+
+**Vercel reports it Ready and the commit status is green.** The screenshots
+above are from a local production build of the same commit, because the
+deployment is not reachable from the sandbox: `pnpm shoot` with its `baseUrl`
+pointed at the preview fails at the first `page.goto` with
+`net::ERR_TUNNEL_CONNECTION_FAILED`, which is the egress policy in that entry
+doing exactly what it is set to do. Re-confirmed this run rather than assumed.
+
 ## At 390 pixels and at 1280
 
 `scrollWidth 390 / innerWidth 390` on all three phone shots and `1280 / 1280` on
