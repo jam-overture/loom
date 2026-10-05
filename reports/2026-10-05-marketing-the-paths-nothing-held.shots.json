@@ -1,0 +1,9 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-05-marketing-paths-ways-in-wide.png", "path": "/", "viewport": { "width": 1280, "height": 820, "label": "wide" }, "waitFor": "text=Where to go from here", "do": [{ "scrollTo": "text=Where to go from here" }] },
+    { "out": "2026-10-05-marketing-paths-ways-in-bold.png", "path": "/?theme=bold", "viewport": { "width": 1280, "height": 820, "label": "wide" }, "waitFor": "text=Where to go from here", "do": [{ "scrollTo": "text=Where to go from here" }] },
+    { "out": "2026-10-05-marketing-paths-bar-wide.png", "path": "/what-you-run", "viewport": { "width": 1280, "height": 420, "label": "wide" }, "waitFor": "text=It runs in your app" },
+    { "out": "2026-10-05-marketing-paths-ways-in-phone.png", "path": "/", "viewport": "phone", "waitFor": "text=Where to go from here", "do": [{ "scrollTo": "text=Where to go from here" }] }
+  ]
+}

@@ -8,6 +8,80 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-05 — the one page of this product that looks like nothing was built, and it is the page a wrong link lands on
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/app/not-found.tsx`) · **Status:** open — **nothing is broken and the
+file's own reasoning is right**; what is filed is that the result is a screen,
+and nobody had looked at it
+
+![what a visitor gets](reports/2026-10-05-marketing-paths-not-found.png)
+
+That is a real photograph, at 1280×760, of this application serving an address
+it has no route for. Times New — the browser's own default, through
+`system-ui` — an unstyled `h1`, and a blue underlined `a`. No bar, no wordmark,
+no palette, nothing a visitor has seen on any other page of the product.
+
+It was found on the way to something else. This lane spent today holding every
+address the marketing site points at to an address this application serves, and
+the falsification for the headline rule is to move a surface out from under its
+links and see what a reader gets. What a reader gets is the picture.
+
+**The file's argument is correct and I am not disputing it.** Each route group
+is a root layout of its own (0067), an address matching no route is outside all
+four, so there is no layout to inherit and the file carries its own document.
+Its docblock also says it names the front door and nothing else *because listing
+the four surfaces here would be a fifth place that has to be kept true* — which
+is the same instinct as everything else in this repository and is right.
+
+What follows from both is only that it should be **styled like the product**,
+not that it should say more. Three things about where it sits:
+
+- It is the last page of the product a confused visitor sees, and the only one
+  that gives them no way to tell they are still on the same site.
+- It is reachable from a mistyped address, a stale external link, a search
+  result for a page that moved — none of which anything in this repository
+  controls.
+- It is **not reachable from a link on the marketing site**, as of today: the
+  rule shipped in `app/(marketing)/_lib/routes.test.ts` is what now says so, in
+  every one of the 126 states the site can be served in.
+
+**Why it is yours and not mine.** It is the application shell, outside all four
+route groups, and `docs/routines.md` puts the shell with the framework routine.
+It also cannot compose Loom primitives the way a surface does without a
+registry and a theme, and *which* registry is a decision about the shell rather
+than about any one lane — which may be the reason it looks like this, in which
+case that reason is worth a sentence in the file.
+
+A marketing lane cannot say what it should look like without editing it, so
+this is a photograph and a question rather than a proposal.
+
+---
+## 2026-10-05 — the props vocabulary is wired at all three of this lane's roots, and the entry asking for it is still open
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom framework` (the entry),
+`Loom portal`, `Loom docs` (the two rows that are left) · **Status:** closed for
+`Loom marketing` — the two marketing rows of the 21 September finding are done
+and were done on 23 September; the portal's and the documentation's are open
+
+The 21 September entry *nothing in this repository wires a props vocabulary, so
+the check 0179 built is off on all four surfaces* names four composition roots
+and two of them are this lane's. Both were wired on 23 September in
+`adapt/run.ts`, as `SITE_PROPS_VOCABULARY = propsVocabularyFor(siteRegistry)`,
+and `adapt/undo.ts` imports that one value rather than calling it again — the
+module says why: three roots in one lane asking the same question is one
+deployment, and a root that quietly computed its own would be a second answer to
+*what can this site draw* with nothing holding the two together.
+
+**Filed as its own entry rather than as a note inside that one**, because the
+ledger's first line says to append and not to rewrite somebody else's, and
+because this lane's run today needed two reads to establish that the work was
+already done. The entry is still the right place to look for the other two rows.
+
+The caution that entry gives whoever wires one first is worth repeating now that
+somebody has: the check is measured against what a change *introduces*, so an
+existing page carrying a node a later schema tightened past is still editable.
+Nothing on this site has met it.
 
 ## 2026-10-04 — every rate on the reader screen now has an exact denominator, and the figure to show is not the one that looks exact
 
