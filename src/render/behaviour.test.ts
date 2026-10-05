@@ -1,4 +1,4 @@
-import { createElement } from "react"
+import { createElement, type ReactElement, type ReactNode } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
@@ -288,6 +288,76 @@ describe("resolveBehaviours", () => {
 
     expect(Object.keys(resolved.behaviours)).toEqual([])
     expect(resolved.unnamed).toEqual([{ behaviour: "adjust", key: "adjust" }])
+  })
+})
+
+/**
+ * The word a node carried, at the seam rather than on a page — which is where the
+ * ordering between it and the declared string is decided.
+ */
+describe("a control named from the tree", () => {
+  const labelOf = (node: ReactNode): unknown => (node as ReactElement<{ label: string }>).props.label
+
+  it("announces the control by the word the node carried", () => {
+    const resolved = resolveBehaviours(["present"], "", { present: "Open" }, {
+      present: "Watch the demo",
+    })
+
+    expect(labelOf(resolved.behaviours.present)).toBe("Watch the demo")
+  })
+
+  it("announces it by the declared string where the node carried nothing", () => {
+    const resolved = resolveBehaviours(["present"], "", { present: "Open" })
+
+    expect(labelOf(resolved.behaviours.present)).toBe("Open")
+  })
+
+  /**
+   * The ordering, and the reason it is this way round. A primitive declaring no
+   * strings has a control no deployment can translate, and one node happening to
+   * carry a usable word does not make it translatable — so the floor is checked
+   * first and a tree cannot talk a nameless control onto the page.
+   */
+  it("is still dropped when the primitive's own string is blank", () => {
+    const resolved = resolveBehaviours(["present"], "", { present: "  " }, {
+      present: "Watch the demo",
+    })
+
+    expect(Object.keys(resolved.behaviours)).toEqual([])
+    expect(resolved.unnamed).toEqual([{ behaviour: "present", key: "present" }])
+  })
+
+  /**
+   * `copy` declares two strings and only one of them is a name. What a tree may
+   * rename is the button; what it says once it has copied is a state message, and
+   * each member decides which of its strings is reachable.
+   */
+  it("renames the copy button and leaves what it says afterwards alone", () => {
+    const resolved = resolveBehaviours(
+      ["copy"],
+      "pnpm add loom",
+      { copy: "Copy", copied: "Copied" },
+      { copy: "Copy the command" }
+    )
+    const control = resolved.behaviours.copy as ReactElement<{
+      label: string
+      copiedLabel: string
+    }>
+
+    expect(control.props.label).toBe("Copy the command")
+    expect(control.props.copiedLabel).toBe("Copied")
+  })
+
+  it("names only the control the name was given for", () => {
+    const resolved = resolveBehaviours(
+      ["present", "dismiss"],
+      "",
+      { present: "Open", dismiss: "Close" },
+      { present: "Watch the demo" }
+    )
+
+    expect(labelOf(resolved.behaviours.present)).toBe("Watch the demo")
+    expect(labelOf(resolved.behaviours.dismiss)).toBe("Close")
   })
 })
 
