@@ -126,14 +126,26 @@ export type BehaviourName = (typeof BEHAVIOUR_NAMES)[number]
  * .after { clip-path: inset(0 calc(100% - var(--loom-adjust, 50) * 1%) 0 0) }
  * ```
  *
- * **The fallback is not optional and not decoration.** The property is absent
- * until the control has mounted and proved scripting runs, and absent again the
- * moment it unmounts — so the second argument to `var()` is what a page served
- * with scripting off renders, and it should be the position the primitive's own
- * props declared. That is what keeps the still version of a comparison the thing
- * that ships, rather than a blank waiting on a control that may never arrive.
+ * **The fallback is not optional and not decoration**, and it holds for longer
+ * than it first appeared to. The property is absent until **the reader has
+ * moved the control**, and absent again the moment it unmounts — so the second
+ * argument to `var()` is what a page renders both with scripting off and with
+ * scripting on and nobody having touched it yet. It should be the position the
+ * primitive's own props declared.
  *
- * See [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md).
+ * It was written as absent until the control *mounted*, which made a declared
+ * position visible only on an unscripted page: the control published the
+ * runtime's midpoint in its mount effect, so a band authored at 35 rendered at
+ * 35 and jumped to 50 as hydration landed. A control now publishes nothing it
+ * was not asked for, and says where it starts through
+ * {@link ADJUST_RESTING_PROPERTY} instead. Every taker was already required to
+ * write a fallback, so the narrower contract takes nothing away from one that
+ * followed it.
+ *
+ * See [0096](../../decisions/0096-a-behaviour-publishes-a-value-on-the-element-the-primitive-placed-it-in.md)
+ * for where the property goes and
+ * [0226](../../decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md)
+ * for when it is written.
  */
 export const ADJUST_PROPERTY = "--loom-adjust"
 
@@ -151,14 +163,46 @@ export const ADJUST_MINIMUM = 0
 export const ADJUST_MAXIMUM = 100
 
 /**
- * Where the control sits before anybody moves it.
+ * The property a primitive declares to say **where its control should start**,
+ * on the element it places the control in. Read once, at mount, and never
+ * again — where the slider goes after that is the reader's.
  *
- * The midpoint, and it is the control's rather than the primitive's on purpose.
- * `build` receives the node's text and its content, not its props, so there is
- * nothing here that could read a declared position — and nothing that needs to:
- * the primitive supplies its own position as the `var()` fallback, which covers
- * the case that actually matters, the page where the control never mounts. Once
- * a reader has a slider in front of them, where it started is theirs to change.
+ * It exists because the obvious route to the same number is closed. `build`
+ * receives a node's text and its content, not its props, and that is 0086's
+ * shape rather than an omission: props are AI-authored, and a control a model
+ * configures is the thing the behaviour seam exists to prevent. So the number
+ * does not come through the seam. It comes the way `present` and `dismiss`
+ * agree (0176) — **through the DOM**, off the one element the primitive already
+ * chose by deciding where the control goes.
+ *
+ * Nothing new is exposed by that. A primitive taking `adjust` already renders
+ * its declared position into the page, as the `var()` fallback the still
+ * version is built on; this is the same number written where the control can
+ * read it, so the control starts where the page already is:
+ *
+ * ```ts
+ * const wipe = `var(${ADJUST_PROPERTY}, ${position})`
+ * // on the element the control is placed in:
+ * style: { [ADJUST_RESTING_PROPERTY]: position, ... }
+ * ```
+ *
+ * Declaring it is optional and a primitive that leaves it out gets
+ * {@link ADJUST_RESTING}. What it may not do is declare one number here and a
+ * different one as the `var()` fallback — the first is where the control
+ * starts, the second is what a page with no scripting shows, and a page where
+ * those disagree is a page that moves on hydration. See
+ * [0226](../../decisions/0226-a-primitive-declares-where-its-control-rests-and-the-control-publishes-nothing-until-the-reader-moves-it.md).
+ */
+export const ADJUST_RESTING_PROPERTY = "--loom-adjust-resting"
+
+/**
+ * Where the control sits when nothing declared otherwise.
+ *
+ * The midpoint, and it is the runtime's floor rather than the answer: a
+ * primitive that has a position of its own says so with
+ * {@link ADJUST_RESTING_PROPERTY}, and this is what a primitive with no opinion
+ * gets. Fixed rather than declarable per node, for the reason the range is
+ * fixed — what a control rests at is not a model's to write.
  */
 export const ADJUST_RESTING = 50
 

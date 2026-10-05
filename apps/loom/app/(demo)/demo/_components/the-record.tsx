@@ -97,11 +97,12 @@ export const TheRecord = ({
    */
   readonly revision: number
   /**
-   * The card the visitor's own answer just landed, when there is one. Read by
-   * `rail.ts` rather than worked out here, because the rail asks the same
-   * reading for the trailing room that landing needs — and a room given on one
-   * answer and a scroll taken on another is the pair of half-decisions this
-   * whole unit exists to stop.
+   * The card the visitor's own press just landed, when there is one — whether
+   * they answered a question to land it or the Gate let it through on its own.
+   * Read by `rail.ts` rather than worked out here, because the rail asks the
+   * same reading for the trailing room that landing needs — and a room given
+   * on one card and a scroll taken to another is the pair of half-decisions
+   * this whole unit exists to stop.
    */
   readonly landing?: string
 }) => {
@@ -187,7 +188,9 @@ export const TheRecord = ({
 
       {/*
         * The rail's own scroll, at the two moments this demonstration turns on:
-        * the question it cannot proceed without, and the answer to it.
+        * the question it cannot proceed without, and the change a press just
+        * landed — the answer to that question, or an ask the Gate let straight
+        * through.
         *
         * The stage scrolls itself (`ChangeSpotlight`); on a wide screen that is a
         * different scroller, so a marked band arriving in view says nothing about
@@ -203,11 +206,18 @@ export const TheRecord = ({
         * back is the rail holding still rather than moving — `landed.ts` names
         * the card, `arrival.ts` carries the numbers.
         *
+        * **And for a change that went ahead with nobody asked, which is the
+        * press this used to leave behind.** Measured at 1280 × 900: the record
+        * of *Re-theme the whole page* — one press, the whole stage going from
+        * dark navy to cream — had its top at 848 of a 900px viewport, so the
+        * Gate's verdict, the reversibility and **Put it back** were off the
+        * screen while the page beside them shouted. `landed.ts` has the table.
+        *
         * **One at a time, and a waiting question wins.** A visitor may leave
-        * one question open and answer another, and two components hauling one
-        * scroller to two cards is settled by whichever effect ran last. A
-        * question the demo cannot proceed without outranks a card that has
-        * already landed.
+        * one question open and ask for something that lands on its own, and two
+        * components hauling one scroller to two cards is settled by whichever
+        * effect ran last. A question the demo cannot proceed without outranks a
+        * card that has already landed.
         */}
       {awaiting ? (
         <AnswerInView recordId={awaiting.recordId} token={`${revision}`} />
