@@ -4,6 +4,7 @@ import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
 import type { PageReading, PartReading } from "./parts.js"
+import { countWords } from "./words.js"
 
 /**
  * Whether a part was read or scrolled past.
@@ -330,21 +331,9 @@ const NO_SILENCES: Readonly<Record<PaceSilence, number>> = Object.freeze({
 
 const MS_PER_MINUTE = 60_000
 
-/**
- * Words in a run of strings.
- *
- * Whitespace-separated, which is the same rule `copy.ts` uses to decide a blank
- * value is not a word, and the same one a person counting a paragraph would
- * use. It is wrong for a language that does not put spaces between words, and
- * {@link PaceOptions.wordsPerMinute} is the handle for that: a rate expressed in
- * whatever this function calls a word stays internally consistent.
- */
-const wordsIn = (values: readonly string[]): number =>
-  values.reduce((count, value) => count + (value.match(/\S+/g)?.length ?? 0), 0)
-
 /** What a part contributes on its own: its words, and whether any of them got away. */
 const ownWords = (part: PartReading): { readonly words: number; readonly floored: boolean } => ({
-  words: wordsIn(part.copy.words),
+  words: countWords(part.copy.words),
   floored: part.copy.unread.length > 0 || part.copy.unspoken.length > 0,
 })
 
