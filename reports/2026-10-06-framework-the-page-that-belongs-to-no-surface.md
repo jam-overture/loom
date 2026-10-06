@@ -146,8 +146,8 @@ reads the mark and the message together.
 
 ## The defect matrix
 
-Twelve defects planted, one at a time, each reverted before the next. **Twelve
-went red — eleven on the first attempt, and the twelfth is the story above.**
+Sixteen defects planted, one at a time, each reverted before the next. **Sixteen
+went red — fifteen on the first attempt, and the sixteenth is the story above.**
 
 | planted | |
 | --- | --- |
