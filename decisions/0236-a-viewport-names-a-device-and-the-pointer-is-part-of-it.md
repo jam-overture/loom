@@ -128,6 +128,13 @@ numbers instead of importing `PHONE`, and the duplication is the reason the
 compiler had to ask them at all; collapsing it is theirs to do and is not
 required by anything here.
 
+**What a required field buys is that nobody can forget, not that nobody can be
+wrong**, and the defect matrix measured the difference. Twelve planted defects
+went red; the thirteenth — a specimen sheet declaring `touch: false` on a
+viewport it calls `phone` — went **green**, because nothing in the repository
+holds a label to a pointer. That is the rejected sweep test's job and the
+rejection stands, but its cost is now a number rather than a claim.
+
 **What a lane writing a size into a shot list gets is a window with a mouse.**
 `touch` defaults to `false` in the shot schema, which is the one place the schema
 and the type disagree, and it is the honest default there: a size written into a

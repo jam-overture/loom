@@ -190,24 +190,48 @@ field wrote it into the two files a lane reads first:
 
 ## The defect matrix
 
-Fourteen defects planted, one at a time, each reverted before the next.
+Thirteen defects planted, one at a time, each reverted before the next.
+**Twelve went red. One went green, and it is the one this run's own record
+predicted would.**
 
 | planted | |
 | --- | --- |
-| `PHONE.touch` is false | |
-| `WIDE.touch` is true | |
-| `contextOptionsFor` hard-codes `hasTouch: true` | |
-| `contextOptionsFor` hard-codes `hasTouch: false` | |
-| `hasTouch` is dropped from `ContextOptions` | |
-| `isMobile: true` is added to the context | |
-| `describeShot` prints the pointer on every shot | |
-| `describeShot` prints the pointer on none | |
-| `describeShot` prints the pointer in the wrong place | |
-| the shot schema's `touch` defaults to `true` | |
-| the shot schema drops `touch` | |
-| the shot schema's `touch` is not passed through to the plan | |
-| a specimen sheet's `phone` literal is set to `touch: false` | |
-| `touch` is made optional on `SpecimenViewport` | |
+| `PHONE.touch` is false | **8 red** |
+| `WIDE.touch` is true | 5 red |
+| `contextOptionsFor` hard-codes `hasTouch: true` | 1 red |
+| `contextOptionsFor` hard-codes `hasTouch: false` | 2 red |
+| `hasTouch` is dropped from `ContextOptions` | **4 `tsc` errors** |
+| `isMobile: true` is added to the context | 2 red |
+| `describeShot` prints the pointer on every shot | 2 red |
+| `describeShot` prints the pointer on none | 4 red |
+| `describeShot` prints the pointer after the overflow reading | 4 red |
+| the shot schema's `touch` defaults to `true` | 2 red |
+| the shot schema drops `touch` | 1 `tsc` error |
+| `touch` is made optional on `SpecimenViewport` | 1 `tsc` error |
+| a specimen sheet's `phone` literal is set to `touch: false` | **green — nothing caught it** |
+
+**The green row is the honest limit of what a required field buys**, and it is
+worth stating precisely because 0236 argues the field is the right instrument.
+The field makes *forgetting* impossible — the compiler asks every author, which
+is the whole reason twelve literals were corrected rather than six left silent.
+It does not make *saying the wrong thing* impossible. If a sheet writes
+`touch: false` on a viewport it calls `phone`, the repository is green and the
+picture is a desktop again.
+
+The check that would catch it is the source sweep this record rejects: a test in
+this lane asserting that every viewport labelled `phone` anywhere declares
+`touch: true`. The rejection stands and the reason is unchanged — it is this
+lane's rule failing inside another lane's pull request — but the cost of it is
+now measured rather than asserted, which is why the row is in the table rather
+than left out of it.
+
+**Two rows need a sentence.** `touch` made optional was planted expecting green
+and came back **red**, which is better than designed: `contextOptionsFor`'s
+`hasTouch: viewport.touch` then hands `boolean | undefined` to a field typed
+`boolean`, so the seam refuses the looser type without anyone having written an
+assertion about it. And `PHONE.touch is false` is the loudest row at 8 red
+because it is the defect this branch exists to remove: it trips the viewport
+tests, the plan tests and every `describeShot` line at once.
 
 ## Measured, not asserted
 
@@ -247,6 +271,39 @@ Three files' worth, all mechanical, all filed:
   copy button — it is correct, it is now photographable, and it is theirs.
 
 ## Gate
+
+`pnpm verify` on a deleted `dist` and `.next` — **exit 0**, with the status
+written to a file as the last act of its own line and read in a separate
+command.
+
+| | this branch |
+| --- | --- |
+| `@jam-overture/loom` | **186 files / 4,029 tests**, 0 failed, 0 skipped |
+| `@loom/app` | **398 / 7,087**, 0 failed, 0 skipped |
+| `findings:check` | **1,039**, 0 malformed |
+| `prerender:check` | 126 pages, 1,542 junctions, 0 run together; 3 metadata conventions, 0 unserved |
+
+**+7 tests, in the two test files that already covered these seams**, and no new
+test file. **No existing test was deleted, skipped or weakened.** Four
+assertions were *edited* and all four for the same reason: they pin
+`describeShot`'s exact output for a `phone` shot, and that line now carries the
+word `touch`. Each is still an exact-string assertion on the whole line — the
+change is the expected string, not the strictness.
+
+The application's 398/7,087 is `main`'s: nothing under any route group was
+opened, and the only application-adjacent file touched in the whole branch is
+none.
+
+**One thing cost this run time and is worth recording.** Two `pnpm verify`
+processes were left running at once, racing over one log file, which made a
+green run look like it was hanging and an exit code from a *previous* run look
+like this one's. The number above is a single run, started from a deleted `dist`
+and `.next` with nothing else running, and its exit code was read from the file
+it wrote.
+
+One warning in the build is pre-existing and belongs to `Loom lessons` — the NFT
+trace on `next.config.ts` through `(lessons)/_lib/run.ts`. It is on `main` and
+is untouched here.
 
 ## Findings
 
