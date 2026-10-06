@@ -44578,6 +44578,65 @@ routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
 
 ---
+## 2026-10-05 — the four lines every consumer of the pace reading was writing are now one call, and the matching rule lives beside the counter
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-10-the-funnel-against-the-readers-who-arrived`**
+— shape 1, `inflationFor(where, rows)`, published from
+`@jam-overture/loom/signals`
+
+The entry is right that the matching is the part that fails quietly, and it was
+right that the next consumer was predictable: it turned out to be this lane's
+own, one run later. `funnelReachOf` needs exactly the same pairing, and a second
+hand-written copy of it is the thing the entry was warning about.
+
+**What shipped is shape 1 and a little more.** `pageViewsFor(where, rows)` picks
+the door row a reading belongs to and reports what it dropped — rows for another
+revision as `foreign`, rows beyond the first as `duplicated`.
+`inflationFor(where, rows)` is `drift ÷ opened` off that row, which is the number
+`PaceOptions.inflation` wants. **`pageReachOf` was moved onto the same rule**, so
+there is one definition rather than two that agree today, and the funnel reading
+was built on it rather than on a fourth copy.
+
+Shape 2 — `PaceOptions.inflation` accepting the rows instead of the fraction —
+was **not** taken, and the reason is worth leaving here. `readingPaceOf` does not
+know where its counts came from, which is what lets two windows of one revision
+be handed to it, and a fixture or a backfill has no door rows at all. Taking
+rows would make the function reach for a correction in a shape its caller may
+honestly not have. A published rule the caller applies keeps that open; a
+parameter that only accepts rows closes it.
+
+`null` is kept for *no row for this revision* and for *nothing has opened*,
+rather than `0`. A correction of nought is a measured claim that nobody
+straddled, and the two states are not that.
+
+---
+## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
+· **Status:** open — **named rather than built**, because it needs the tree and
+this unit deliberately took only the counters
+
+A `FunnelPair` is two node ids a deployment wrote down in advance, and a
+revision is a tree a proposal changed. So a pair whose `from` was moved, renamed
+or removed by a change answers `reached 0, converted 0` against every revision
+after it — which `funnelReachOf` reports as a pair nobody reached, with
+`worse: "before"` and an entry share of nought. **That reads exactly like a band
+readers never scroll to**, and the remedies are opposite: one is a page to fix
+and the other is a question to re-point.
+
+The fix is the §6 join one step further: `pageReadingOf` already holds every
+element node of a revision, so a pair's two ends can be looked up in it and
+given a standing. §10's five fates for a dissolved stop — `absent`,
+`unanchorable`, `moved`, `reordered`, `separated` — are the vocabulary, and the
+argument there is the same argument: *a pair the change dissolved is an answer,
+not a gap.* It was left out of this unit on scope rather than on doubt, because
+`funnelReachOf` takes counters and rows and giving it a tree is a different
+signature.
+
+**Nothing is wrong on `main`.** Every figure a pair reports is correct; what is
+missing is the sentence that says the question is stale. It is the most useful
+thing left in this lane's queue and it is this lane's to take.
 ## 2026-10-05 — the pace reading is on the reader screen, and the figure that can embarrass a surface is drawn as a question
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal`
