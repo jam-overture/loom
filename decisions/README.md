@@ -314,5 +314,8 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0228](0228-the-tree-as-it-was-is-a-fold-bounded-at-both-ends-and-the-head-is-answered-from-the-log.md) | The tree as it was is a fold bounded at both ends, and the head is answered from the log | Accepted | §2 |
 | [0229](0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md) | A share of readers is estimated against the appearances and bounded against the openings | Accepted | §4c (reader signals) |
 | [0230](0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md) | A part was read when readers had time for its words, and only the skim is a safe claim | Accepted | §4c (reader signals) |
-| 0231 | *No record on this branch* | — | — |
+| [0231](0231-a-funnel-is-three-shares-of-the-arrivals-and-the-straddle-is-the-one-error-here-that-leans-down.md) | A funnel is three shares of the arrivals, and the straddle is the one error here that leans down | Accepted | §4c (reader signals) |
 | [0232](0232-the-shell-mounts-a-theme-and-registers-no-primitives.md) | The shell mounts a theme and registers no primitives | Accepted | §4 (the application shell) |
+| [0233](0233-a-bound-twin-is-earned-by-a-system-of-record-and-a-row-shape-the-primitive-can-declare.md) | A bound twin is earned by a system of record and a row shape the primitive can declare | Accepted | §4b |
+| [0234](0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md) | A primitive may name a control from the tree, and its declared string is the floor | Accepted | §4h — the behaviour seam |
+| [0235](0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md) | How much of a page gets read is a share of words that partition it, and the typical reader's figure is a ceiling | Accepted | §4c (reader signals) |
