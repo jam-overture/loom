@@ -4,6 +4,7 @@ import {
   buildText,
   sequentialIdFactory,
   type IdFactory,
+  type JsonObject,
   type LoomNode,
 } from "@jam-overture/loom"
 import { describe, expect, it } from "vitest"
@@ -39,7 +40,7 @@ const text = (value: string): LoomNode => buildText(ids, value)
 const link = (value: string, href = "/how-it-works#see-it-happen"): LoomNode =>
   buildElement(ids, { type: "loom.inline-link", props: { href }, children: [text(value)] })
 
-const prose = (children: readonly LoomNode[], props: Record<string, unknown> = {}): LoomNode =>
+const prose = (children: readonly LoomNode[], props: JsonObject = {}): LoomNode =>
   buildElement(ids, { type: "loom.prose", props, children: [...children] })
 
 describe("a sentence the tree has split", () => {
