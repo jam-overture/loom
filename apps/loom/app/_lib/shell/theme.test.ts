@@ -89,7 +89,9 @@ describe("the shell's theme", () => {
    * it, which is this unit's own defect arriving one layer down.
    */
   it("serialises every property it mounts, and nothing else", () => {
-    const declared = [...SHELL_ROOT_CSS.matchAll(/^ {2}([a-z0-9-]+):/gm)].map(([, property]) => property)
+    const declared = [...SHELL_ROOT_CSS.matchAll(/^ {2}([a-z0-9-]+):/gm)].flatMap((match) =>
+      match[1] === undefined ? [] : [match[1]]
+    )
 
     const expected = [
       ...Object.keys(SHELL_THEME_STYLE),

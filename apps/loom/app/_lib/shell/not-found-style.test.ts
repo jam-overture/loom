@@ -14,9 +14,21 @@ import { SHELL_THEME_STYLE } from "./theme"
  * padding, or its colour, and looks deliberate while doing it.
  */
 
-/** Every custom property the rules read, once each. */
+/**
+ * Every custom property the rules read, once each.
+ *
+ * A capture group is `string | undefined` under this repository's strict
+ * settings, and it is not a formality here: a group that failed to capture
+ * would silently drop out of the list and leave the assertion below passing on
+ * a shorter one. `flatMap` over an explicit check keeps the type honest and the
+ * behaviour the same.
+ */
 const propertiesRead = (css: string): readonly string[] => [
-  ...new Set([...css.matchAll(/var\((--loom-[a-z0-9-]+)/g)].map(([, property]) => property)),
+  ...new Set(
+    [...css.matchAll(/var\((--loom-[a-z0-9-]+)/g)].flatMap((match) =>
+      match[1] === undefined ? [] : [match[1]]
+    )
+  ),
 ]
 
 describe("the shell's stylesheet", () => {
