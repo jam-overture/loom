@@ -44621,3 +44621,113 @@ the index being exactly honest about both.
 naming a control from the tree*, which is the filing `loom.menu` has been
 unreachable behind since 2 October. That one lands in this lane's territory, and
 this entry is also the note that this lane is watching for it.
+
+---
+## 2026-10-06 — the mangling is URL **length**, measured at a threshold between 148 and 159 characters, and the commit-SHA workaround is a coincidence that makes it worse for short branch names
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Closes:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it*, the 28 September entry above
+it, and the 28 September controlled comparison *a branch name in the URL broke
+twice, the commit SHA came through clean* · **Status:** open — **a mechanism,
+with the measurement that produces it, and it falsifies the standing theory**
+
+The 28 September entry ends: *"What would settle it is one more controlled pair
+on a different pull request: the same body posted with a branch-name ref and
+then a SHA ref, changing nothing else. Two data points from two lanes would make
+it a rule."*
+
+This is that pair, from a second lane, on #529 — **and the SHA ref broke
+identically.** The theory is wrong, and the reason it looked right for seven
+data points is worth more than the correction.
+
+### The measurement
+
+One body, posted once, containing URLs of many lengths. Every URL in it, sorted:
+
+| length | URL | outcome |
+| --- | --- | --- |
+| 22 | `https://claude.ai/code` | clean |
+| 30 | `https://claude.com/claude-code` | clean |
+| 55 | a session link | clean |
+| 82 | the Vercel preview | clean |
+| 138 | `…/blob/<sha>/reports/2026-10-06-primitives-given-rather-than-told.md` | clean |
+| 147 | `…/reports/2026-10-06-primitives-trend-overflow-before.png` | clean |
+| 148 | `…/reports/2026-10-06-primitives-trend-overflow-after.png` | clean |
+| **159** | `…/reports/2026-10-06-primitives-given-rather-than-told-bold-phone.png` | **mangled** |
+| **160** | `…-editorial-phone.png` | **mangled** |
+| **164** | `…-bold-wide.png` | **mangled** |
+| **165** | `…-editorial-wide.png` | **mangled** |
+| **187** | `…/decisions/0233-a-bound-twin-is-earned-by-a-system-of-record-….md` | **mangled** |
+
+**Nothing else varies.** Same body, same write, same host for rows 5 through 11,
+same `blob`/`raw` mix on both sides of the line. **The threshold is between 148
+and 159 characters.**
+
+### What this explains, including every data point that did not fit
+
+The 28 September comparison changed one variable and read it as *branch name
+versus SHA*. What it actually changed was **length**: the branch was
+`framework-58-the-keys-the-runtime-puts-there` — **44 characters**, against a
+40-character SHA. Swapping it took 4 characters off a URL that was sitting near
+the threshold, and the URL came back clean. The conclusion drawn was the name;
+the cause was the four characters.
+
+That also explains #442, the data point the entry says *"does not fit it"*:
+branch-name refs, reported clean. Its links were short enough.
+
+**And on this pull request the recommended workaround made things worse.** This
+branch is `primitives-53-given-rather-than-told` — **35 characters, five shorter
+than a SHA.** Following *reference a blob by its commit SHA, never by the branch
+name* lengthened every URL in the body by five and pushed two of them further
+past the line. The workaround is not merely a coincidence; **it is backwards for
+any branch name shorter than 40 characters.**
+
+### What the mangler does, exactly
+
+It wraps the URL in a double backtick, opening before it and closing after the
+closing delimiter — which is the shape every previous entry described:
+
+```
+<img src="``https://…-editorial-wide.png"`` width="380">
+![…](``https://…-bold-phone.png)``
+```
+
+**It is syntax-independent.** All four forms were posted in one body and the
+long ones broke in all four: a bare URL, an HTML `<img src>`, a markdown link,
+and a markdown image. Previous entries ruled markdown images in and then out
+again; the syntax was never the variable either.
+
+**It is write-side, not read-side**, and it is deterministic: five consecutive
+`GET`s of a mangled body return the same mangling, and a body posted clean comes
+back mangled on the first read.
+
+### What to do about it, which is now a rule rather than a guess
+
+**Keep every URL in a pull request body under about 148 characters.** The lever
+with the most slack is the *filename*, not the ref. This run's screenshots were
+renamed from `2026-10-06-primitives-given-rather-than-told-editorial-wide.png`
+(63) to `2026-10-06-primitives-given-editorial-wide.png` (45), which brings the
+URL to 145 and it posts clean.
+
+That is worth a convention, because **the report naming convention this
+repository already uses generates filenames that break**: every
+`YYYY-MM-DD-<lane>-<long-slug>-<theme>-<width>.png` in `reports/` is 60 to 70
+characters, and `https://raw.githubusercontent.com/jam-overture/loom/` plus a
+ref plus `/reports/` is already 100 before the filename starts. **Every picture
+in every pull request body this repository has posted with a full-slug
+screenshot name was mangled**, which is consistent with the three-week history
+of this entry and with *"every picture in every merged pull request body that
+used one is already broken."*
+
+**Suggested, and it is one line in a specimen:** let a specimen's `name` be a
+short slug and let the *report* keep the long one. They do not have to agree,
+nothing joins them but a relative link inside the report, and the report's own
+`![](…)` references are repository-relative and have no length problem at all.
+
+**What I have not established:** which hop does it. It is not `gh api` versus
+the GitHub MCP tool — this body was posted both ways and long URLs broke both
+times — so the candidates are the agent proxy named in this container's
+environment notes, or something between it and GitHub. That is a question about
+infrastructure rather than about this repository, which is why this is owned by
+a person rather than a lane.

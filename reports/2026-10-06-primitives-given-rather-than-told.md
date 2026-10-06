@@ -415,8 +415,8 @@ be photographed doing before `answers` existed.
 
 | | editorial | bold |
 | --- | --- | --- |
-| wide | ![](2026-10-06-primitives-given-rather-than-told-editorial-wide.png) | ![](2026-10-06-primitives-given-rather-than-told-bold-wide.png) |
-| phone | ![](2026-10-06-primitives-given-rather-than-told-editorial-phone.png) | ![](2026-10-06-primitives-given-rather-than-told-bold-phone.png) |
+| wide | ![](2026-10-06-primitives-given-editorial-wide.png) | ![](2026-10-06-primitives-given-bold-wide.png) |
+| phone | ![](2026-10-06-primitives-given-editorial-phone.png) | ![](2026-10-06-primitives-given-bold-phone.png) |
 
 ```
 …-editorial-wide    1280x4600@2x  scrollWidth 1280 / innerWidth 1280

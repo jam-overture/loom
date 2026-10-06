@@ -412,7 +412,14 @@ const REVIEWS = [
 const REVIEWS_PARTIAL = [...REVIEWS.slice(0, 4), { reviewer: "renamed", body: "nothing reads this" }]
 
 export default defineSpecimen({
-  name: "2026-10-06-primitives-given-rather-than-told",
+  /**
+   * Deliberately shorter than the report's own slug, and the reason is measured
+   * rather than stylistic: a raw.githubusercontent URL past roughly 150
+   * characters is rewritten on its way into a pull request body, and
+   * `…-given-rather-than-told-editorial-wide.png` puts it at 163. Filed, with
+   * the threshold.
+   */
+  name: "2026-10-06-primitives-given",
   title:
     "A series, a wall of testimonials and a picture, each read from a source rather than authored — in every state a source can put them in, and the three bands that drop them on a page",
   build,
