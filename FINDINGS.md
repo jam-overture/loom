@@ -197,9 +197,21 @@ the ending.
 ## 2026-10-05 — the one page of this product that looks like nothing was built, and it is the page a wrong link lands on
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
-(`apps/loom/app/not-found.tsx`) · **Status:** open — **nothing is broken and the
-file's own reasoning is right**; what is filed is that the result is a screen,
-and nobody had looked at it
+(`apps/loom/app/not-found.tsx`) · **Status:** **closed by
+`framework-56-the-page-that-belongs-to-no-surface`.** The page wears the house
+theme, mounted by the shell rather than by a root primitive, and carries the
+mark. Its words are unchanged, byte for byte, because the filing was explicit
+that what followed was *styled like the product*, not *says more* — and a test
+now fails if a future run adds a surface's name to it. The question the filing
+asked — *which registry is a decision about the shell* — is answered in
+[0232](decisions/0232-the-shell-mounts-a-theme-and-registers-no-primitives.md):
+a theme registry and **no primitive registry**, so the shell borrows the
+product's vocabulary of appearance and composes none of its content. The
+photographs are in `reports/2026-10-06-framework-not-found-wide.png` and
+`-phone.png`. Original status below.
+
+**Status:** open — **nothing is broken and the file's own reasoning is right**;
+what is filed is that the result is a screen, and nobody had looked at it
 
 ![what a visitor gets](reports/2026-10-05-marketing-paths-not-found.png)
 
@@ -36163,6 +36175,30 @@ what the four dead theories above cost between them.
 > is a measurement that confirms the advice rather than another explanation.
 > **Nothing was spent chasing it.**
 
+> **One more, 6 October, from `Loom daily build` on #531 — a 147-character
+> image, on a 47-character branch name, survived with its `!` intact.**
+>
+> | chars | form | outcome |
+> | --- | --- | --- |
+> | 147 | markdown **image**, `…-wide.png?raw=true` on a branch ref | **survived, `!` intact** |
+>
+> Read back from the API after posting, as this entry's closing advice says to.
+> Two long paths in the same body — the record at 161 and the report at 158 —
+> were **not linked at all**, on the strength of this entry's own threshold, so
+> they are not evidence either way.
+>
+> It is one point and it does not move the boundary. What it is worth is the
+> `!`: the 5 October note above reports that the mangler *"strips a leading
+> `!`, so an image becomes a link"*, and that was the half called most worth
+> acting on because a demoted image reads as a pull request where somebody
+> forgot the screenshot. **At 147 characters it does not.** So the `!` strip is
+> not unconditional, and the most likely reading is that it is the same length
+> threshold with nothing separate about images — which would mean the remedy is
+> the one already written down (keep the URL short) rather than a second one.
+>
+> Costed nothing: the body was written with paths for the long two and read back
+> once.
+
 
 ---
 
@@ -44682,6 +44718,125 @@ routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
 
 ---
+## 2026-10-06 — a component that imports a stylesheet cannot be rendered in a test at all, and the first one to try was the shell's
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`apps/loom/vitest.config.ts`) · **Status:** open — **worked around, and the
+workaround is better than the thing it replaces**, which is the only reason this
+is a note rather than a fix
+
+Importing a `.css` file from a component that a `.test.tsx` renders fails the
+whole suite file before a single assertion runs:
+
+```
+Failed to load PostCSS config (searchPath: apps/loom):
+[TypeError] Invalid PostCSS Plugin found at: plugins[0]
+  Plugin: vite:css
+  File: apps/loom/app/not-found.css
+```
+
+The import reaches Vite's `vite:css`, which loads `postcss.config.mjs`, whose
+one plugin is `@tailwindcss/postcss` — a Tailwind v4 plugin Vite's own PostCSS
+runner does not accept.
+
+**Nothing in this repository had met it, and the reason is worth stating
+because it is load-bearing.** Every stylesheet in this application is imported
+by a layout, and a layout is never rendered in a `.test.tsx`. Four `(demo)` and
+`(portal)` components *mention* `globals.css` in their comments and none of them
+import it. So the constraint has been true since the suite was written and has
+never cost anything: **surfaces put their CSS in a layout, and the shell has no
+layout.**
+
+**Worked around here by holding the rules as text** (`app/_lib/shell/not-found-style.ts`)
+and serving them in a React-hoisted `<style>`. That is argued for on its own
+merits in 0232 — the rules cannot fail to be emitted, and every `var(--loom-*)`
+in them is now held mechanically against the properties the mounted theme
+carries, which a real stylesheet is opaque to. It is not a general answer: a
+surface component that wanted a stylesheet of its own would still be stuck.
+
+**What would close it**, if anyone ever needs it: a `css: { postcss: false }` or
+a CSS stub in the `dom` project of `vitest.config.ts`. Not done here, because
+that file is the configuration for all four surfaces' suites and changing how
+they see CSS to serve one page of the shell is the wrong trade on an unattended
+run. Filed so the next lane that hits it reads *known, and here is the line* —
+rather than spending the twenty minutes this one did.
+
+---
+## 2026-10-06 — `font-packs.ts` says four surfaces link Geist and two of them do, which is the kind of sentence a reader believes
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`src/theme/font-packs.ts`) · **Status:** open — **a stale premise in a comment,
+not a defect**; nothing renders wrong and no behaviour should change
+
+`src/theme/font-packs.ts` opens with *"`minimal-sans` set the precedent by
+naming Geist, and the four surfaces link it."* Measured on `main` at `6686895`,
+by grep rather than from memory:
+
+| surface | how it supplies the face |
+| --- | --- |
+| `(marketing)` | `<link>` to `fonts.googleapis.com`, family `Geist` |
+| `(lessons)` | the same `<link>`, same URL, byte for byte |
+| `(portal)` | the `geist` npm package, family `__GeistSans_*` |
+| `(docs)` | the `geist` npm package |
+
+Two link it. The other two serve the face **under a name the font pack's stack
+does not contain** — which the pack's own docblock elsewhere warns is the
+failure mode that *"downloads the face and renders the fallback while looking
+entirely deliberate"* — and then read their own `--font-geist-sans` variable in
+their stylesheets, which is a legitimate second arrangement and not what the
+sentence describes.
+
+**Two separate things, and only the first is cheap.** The sentence is wrong and
+is one line to correct. Whether four surfaces ought to supply one face four
+ways — two URLs and two package imports, now three and two with the shell — is
+a question rather than a defect, and the one place a shared constant would
+belong is a module every route group imports, which is four cross-lane edits.
+
+**Not corrected on this run**, deliberately: the brief puts refinement inside
+finished sections as reactive, and nothing failed. It was found by needing the
+answer — the shell is now a third host supplying this face, and the comment was
+the thing that was read to decide how.
+
+---
+## 2026-10-06 — a test that renders cannot see whether a page rendered a document, because React hoists the evidence
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`apps/loom/app/not-found.test.tsx`) · **Status:** open — **a trap, caught here
+by a planted defect**; the instrument is fixed in this lane and the shape
+generalises
+
+The shell's 404 shipped its first draft rendering its own `<html>`, the way a
+surface's layout does. On a production build that produced:
+
+```
+<body><div hidden=""><!--$--><!--/$--></div><html lang="en" style="--loom-…">
+```
+
+— nested inside the document Next supplies for a page outside every route group.
+The theme reached the page only because the HTML parser merges a stray `<html>`'s
+attributes onto the real element. It works. It is error recovery.
+
+**Six tests passed over it, including one written specifically to catch it.**
+`expect(container.querySelector("html")).toBeNull()` was green with an `<html>`
+in the component, because React 19 hoists a rendered `<html>`, `<head>` and
+`<body>` — attributes and all — onto the real document before any query runs.
+So jsdom showed the outcome the browser only arrives at by accident, and the
+guard for the defect confirmed the defect was absent while it was present.
+
+**It was found by the defect matrix and by nothing else**, which is the entry's
+point: the matrix planted *renders its own `<html>` again* expecting red, got
+green, and that is the only reason anyone looked.
+
+**Fixed here by asking the component rather than the DOM** — walking what
+`NotFound()` returns for intrinsic element types and asserting none of `html`,
+`head`, `body` appears. A rendered tree is the wrong instrument for a question
+about what was rendered.
+
+**The general form, for any lane:** React's hoisting silently normalises
+`<html>`, `<head>`, `<body>`, `<title>`, `<link>` and `<style>` out of where
+they were written. Any assertion about *where* one of those was placed is an
+assertion jsdom cannot make, and a test that appears to make it is passing for
+a reason unrelated to the claim.
 ## 2026-10-06 — how much of a page gets read is now two shares and a list, and the two shares must be drawn as different sentences
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
