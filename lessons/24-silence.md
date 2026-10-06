@@ -1066,12 +1066,12 @@ The output:
      saying "Zero and zero" under a transcript saying 102. -->
 
 ```
-  primitives registered:     103
-  declaring copy:            103
+  primitives registered:     106
+  declaring copy:            106
   declaring any role:        1
   typesWithRole("heading"):  ["loom.heading"]
   copyFor("loom.stat"):      ["value","label","caption"]
-  declaring copy as []:      59
+  declaring copy as []:      61
   textOf(metrics band):      ""
   copyIn(metrics band, starter registry)
     words:    ["12k+","Teams shipping weekly","99.98%","Uptime last quarter","4 min","Median time to first board","40+","Tools it reads and writes"]

@@ -359,12 +359,12 @@ describe("an exemption", () => {
 describe("spelling a number the way prose spells it", () => {
   it("spells the ones the site is stating today", () => {
     expect(SITE_COUNTS.map((count) => `${count.id}: ${spellOut(count.value)}`)).toEqual([
-      "starter-primitives: one hundred and three",
+      "starter-primitives: one hundred and six",
       "palette-slots: seventeen",
       "starter-palettes: twenty-one",
       "policy-settings: fourteen",
       "pricing-band-nodes: forty-four",
-      "starter-bands: fifty-four",
+      "starter-bands: fifty-seven",
     ])
   })
 

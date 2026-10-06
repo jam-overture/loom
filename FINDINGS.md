@@ -8,6 +8,192 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-05 — four links, one body, same syntax: the mangling is the URL and it is neither the branch name nor `decisions/`
+
+**Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
+**Extends** the 28 September entry *the mangling, with one variable changed* and
+the 28 September entry *a `reports/*.md` link was mangled too, so the
+`decisions/` correlation is not the rule* · **Status:** open, and filed as
+**evidence that rules out both theories the ledger carries**, taken by accident
+rather than on purpose
+
+#528's body went in three times with four links in it. I was not testing
+anything the first time; I was writing a pull request. What came back makes a
+better experiment than either of the deliberate ones above, because all four
+links were in **one body, written in one syntax, posted in one call**.
+
+**Round one — inline `[text](url)`:**
+
+| link | came back |
+| --- | --- |
+| `decisions/0231-….md` (branch in path) | mangled — ``` `` ``` injected, and the wrap swallowed the `),` after it |
+| `reports/2026-10-05-….md` (branch in path) | **clean** |
+| `reports/…-presented.png?raw=true` (branch in path) | mangled |
+| `decisions/0176-….md` (**`main` in path**) | mangled |
+
+**Round two — reference-style, the four definitions in a block at the foot, one
+per line, nothing else on the line:**
+
+| link | came back |
+| --- | --- |
+| `[record]` → `decisions/0231-….md` | mangled |
+| `[report]` → `reports/2026-10-05-….md` | **clean** |
+| `[shot]` → `…-presented.png?raw=true` | mangled, **and the `!` was stripped**, so the image became a link |
+| `[p176]` → `decisions/0176-….md` (`main`) | mangled |
+
+**The same URL survived both rounds and the same three failed both rounds.** So:
+
+- **It is not the link syntax.** Inline and reference-style gave identical
+  verdicts, link for link.
+- **It is not the branch name.** The surviving URL *has* the branch name in it —
+  `framework-55-the-word-the-tree-wrote`, 36 characters — and `0176`, which has
+  `main` in it and no branch name anywhere, mangled. That is the 28 September
+  entry's variable held still and pointing the other way.
+- **It is not `decisions/` either**, which the second 28 September entry already
+  said. The `.png` is under `reports/` and mangled.
+
+**What is left, and I am naming it as a candidate rather than a conclusion:
+length.** The surviving URL is ~133 characters. The three that failed are ~141,
+~152 and ~177. If there is a threshold it is somewhere between 133 and 141,
+which is a thing one deliberate pair of posts could settle and I did not spend
+the calls on.
+
+**It also strips a `!`.** That is new and it is the worst of the four effects,
+because a mangled link still reads as a link and announces itself; an image
+silently demoted to a link reads as a pull request where somebody forgot the
+screenshot. Every lane's brief asks for a picture on the pull request.
+
+**What I did about it, which is the part worth copying.** I shortened two URLs
+to dodge it, and that was wrong — the shortened names did not exist, so I had
+replaced three mangled links with two 404s. #528's body now carries the
+repository-relative **paths in code spans** and no links at all, with a line
+saying why. A path you paste is worse than a link you click and much better than
+a link that lies.
+## 2026-10-05 — a teaching paragraph in lesson 31 was rewritten from outside the lane, because the sentence it ends on was the thing this run made false
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/31-behaviour.md`) · **Status:** open — **the tree is green and the
+lesson is true as it stands**; this is here so you read the edit rather than
+find it, and because one half of it is a judgement somebody has to make and I
+made it by default
+
+`declarations.test.ts` holds that lesson's fence of the `Behaviour` type against
+`src/render/behaviour.ts` character for character, and
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+gave `build` a third parameter. The fence is mechanical and I would not file it.
+
+**The paragraph under it is not.** It read:
+
+> *`build` is the whole of the implementation seam, and its **two** arguments are
+> the two things a control may be given: the node's own text, and the primitive's
+> resolved strings. There is no third argument, and the absence is the design — a
+> control cannot be handed the node's props, the tree, or the page.*
+
+The count is now wrong and the sentence after it is the part that matters: the
+absence it names *was* the design, and it still is — a control still cannot be
+handed props — but the lesson spent that sentence teaching **three** is
+impossible when what was impossible is **props**. I rewrote it to say the third
+argument is a string the runtime resolved, that keeping it a string is what keeps
+the rest true, and that there is no fourth. That is accurate and it is not
+necessarily how the author of a lesson on this seam would want to teach it; the
+honest shape may be a paragraph about *why* a word was the one thing worth a
+third parameter, which is a teaching decision and yours.
+
+Nothing else in the lesson cites the shape. The seven exercises and the preamble
+import `resolveBehaviours` and never call `build`, so they are untouched and
+still pass.
+## 2026-10-05 — on a phone the demo's arrival screen never shows the page it is about
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
+`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
+remaining instance of this lane's brief's own *nothing to react to on
+arrival***.
+
+Measured on a production build of `main` at `6686895`, 390 × 844, with
+`pnpm shoot`'s `measure`:
+
+| | |
+| --- | --- |
+| the rail | `y 82`, **390 × 1,013** |
+| so the stage — the page — begins at | **`y 1,095`** |
+| the fold | **844** |
+| which puts the page | **251px past it** |
+
+A visitor on a phone arrives on a full screen of instrument. The heading says
+**“Ask that page for a change.”** and the line under the chips says **“It’s the
+page below.”** Neither is pointing at anything on screen. `rail-header.tsx`
+already knows this is the risk — its comment says *“that page” is only pointing
+at something when the page is beside you*, and draws the referent **only** on
+narrow screens, which is the width where it is least true.
+
+**Nothing here is a regression and no run did this.** The rail is 1,013px
+because every one of the five runs that fought for the phone fold won: the
+button is at `y 325`, `ask-panel.tsx` reverses its own reading order below `lg`
+so the press is above the fold, the explainer is folded, and the four asks run
+`597 → 877`. All of it is right, and the sum of it is a screen with no page on
+it.
+
+**Why it was not taken in `demo-39`.** Every shape costs more than one unit and
+two of the three reopen a decision another run argued:
+
+1. **Put the page's top band in the rail**, above the asks, as a shallow
+   non-interactive window. It is the only shape that adds rather than moves —
+   and it is a second rendering of the tree, which is the one thing `page.tsx`
+   passes callbacks around precisely to avoid.
+2. **Interleave**: header, lead ask, *the page*, then the secondary asks. Puts
+   a real page on the first screen at the cost of splitting the panel in two,
+   which `ask-panel.tsx` is one component to prevent.
+3. **Take 251px out of the phone rail.** There is nothing left to take that a
+   previous run did not already measure and keep.
+
+**Recommendation: (1), and measure the first screen before and after.** It is
+the only one that removes nothing. What would settle it instead is the thing
+this lane cannot do from a sandbox — watching a stranger on a phone — which is
+the same answer this lane's open design question has.
+
+---
+## 2026-10-04 — the ask list is further from the visitor's eye after a change than it was
+
+*(Appended 5 October by `Loom demo`, the lane that owns it — this was recorded
+as a cost inside `reports/2026-10-04-demo-the-one-press-record.md` rather than
+filed, and half of it is now closed.)*
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+half that is left is named below.
+
+The 4 October run landed a record card at the top of the rail and wrote down
+what that cost: *a stranger who wants a second change now scrolls for it where
+before they did not.* What was not measured then is that the landing takes the
+**way out** with it. On a production build of `main` at `6686895`, 1280 × 900,
+after the one sequence the demo invites:
+
+| | |
+| --- | --- |
+| the record card | `y 44`, **765px of an 857px rail** |
+| the ask panel | `y −470` — above the viewport |
+| its three remaining rows | `y −262`, `y −195`, `y −128` |
+| the footer's *Want this on a page of your own? Read the docs →* | `y 891` of a rail whose last pixel is **901** |
+
+So the end of the demonstration offered exactly one press, **Put it back**,
+which undoes the thing the visitor came to see.
+
+**Closed by `demo-39-the-end-of-the-sixty-seconds`:** a caption under the card
+says what the loop just proved, and *N more changes to ask for ↑* is a link to
+`#ask` with `stillToAsk`'s own count on it. It lands whole, 12px clear of the
+bottom edge.
+
+**What is left open, and it is the cost that unit paid rather than dodged.** On
+that path the footer's docs link goes from ten pixels visible to none. Ten
+pixels was not a way out, and repeating the link in the new row is the duplicate
+`rail-header.tsx` argues against — but the demonstration's **way out** is still
+reachable only by scrolling, on the one path a stranger is invited down. The
+honest fix is probably that the two should be one row rather than two, which
+means deciding whether the footer keeps a link at all on a screen where nothing
+has landed, and that is a decision about the arrival screen rather than about
+the ending.
+
+---
 ## 2026-10-05 — the one page of this product that looks like nothing was built, and it is the page a wrong link lands on
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
@@ -978,8 +1164,18 @@ catalogue."* now. Reword it freely; just not with a symbol in it.
 ## 2026-10-01 — a presentation's trigger cannot carry a word the tree wrote, so three of 0176's four primitives shipped and the dialog did not
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build` (`src/render/`)
-· **Status:** open — **not a defect and not a blocker**; three primitives shipped
-around it and the fourth is what it costs
+· **Status:** **closed by #528** for the first two rows, by the second of the
+three shapes below. A primitive may now name one of its own props as where a
+control takes its name from — `names: { present: "label" }` — and the string it
+declared stays underneath as the floor, so a node that writes nothing is
+announced by the library's word rather than by none.
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+records it, and the thing that made the second shape cheaper than this entry
+judged it is that no props cross the seam: the runtime reads the one prop the
+primitive named and hands `build` a string, so the `ARCHITECTURAL` half is still
+untaken. **A dialog can be built, and so can the header with two menus** — both
+are yours. **The third row is still open**: an icon-only trigger is a question
+about what a control *renders*, and this changed only what it is called.
 
 [0176](decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
 unblocked four primitives: dialog, dropdown, lightbox, tooltip. This run built
@@ -44641,3 +44837,476 @@ about what was rendered.
 they were written. Any assertion about *where* one of those was placed is an
 assertion jsdom cannot make, and a test that appears to make it is passing for
 a reason unrelated to the claim.
+## 2026-10-06 — how much of a page gets read is now two shares and a list, and the two shares must be drawn as different sentences
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+· **Status:** open — **nothing is needed from anyone**; `copyReadingOf` is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`
+
+§14 of [`docs/signals.md`](docs/signals.md), recorded in
+[0235](decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md).
+Hand it the output of `pageReadingOf` — the same input `readingProgressOf` and
+`readingPaceOf` take, so a screen that already has a reading has this for one
+more call:
+
+```ts
+import { copyReadingOf, pageReadingOf } from "@jam-overture/loom/signals"
+
+const reading = copyReadingOf(pageReadingOf(tree, tallies, registry))
+```
+
+**The call, and it is one sentence rather than a row.** *This page says 1,240
+words; every one of them reached somebody, and the average reader gets to 260.*
+`share` and `typical` are the two halves and they are **different sentences**:
+
+| | what it says |
+| --- | --- |
+| `words` | every word this revision says, counted once |
+| `share` | the share of them **at least one** reader reached — near 1 on a busy page, and true |
+| `typical` | the words the **average** reader reached, **at most** |
+| `unseen` | the passages nobody reached, longest first, with their text |
+| `roles` | the same per role, and the word figures add up where a `RoleReading`'s view counts cannot |
+
+**Four cautions, and the first is the one that would make a screen lie.**
+
+1. **Never draw `share` as how much of the page gets read.** It is *somebody
+   reached these words*, which on three hundred readers is nearly all of them. The
+   figure a person means is `typical`. Showing `share` alone is the
+   plausible-false-number failure this subsystem keeps finding in new places.
+2. **`typical` is a ceiling and may be absent.** `silence` says why —
+   `wordless`, `unmeasured`, `floored` or `inconsistent` — and
+   `describeCopySilence` has a line for each. `floored` is the common one and it
+   means the deployment's own primitives have not declared `copy`; a screen that
+   drew nought there would report a page nobody reads.
+3. **`unseen` is `skipped` only**, so it is safe to label *nobody reached this*.
+   Words at the `unknown` standing are in `wordsByStanding` and are **not** a
+   claim — a window with no views at all puts the whole page there.
+4. **No word figure is compared across revisions as a count.** Two revisions say
+   different numbers of words for reasons that have nothing to do with readers.
+   The comparable unit is `share`, the same way 0224 compares stops.
+
+**The one thing on it a model can act on without reading anything else** is
+`unseen`: it carries each passage's own text. Where `readingProgressOf` says
+*reading stops at the fifth band*, this says *and these are the four hundred
+words below it that nobody has read.*
+
+---
+## 2026-10-06 — the stale funnel pair cannot be taken from `main`, and it is this lane's own branch in the way
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **extends the 5 October entry on a funnel pair naming a node
+its revision no longer has.** Nothing is wrong and nothing is needed from another
+lane; this says why the next run and not this one
+
+That entry calls itself the most useful thing left in this lane's queue and it is
+right. It cannot be built yet, for a reason that is governance rather than
+design: `funnelReachOf` is on
+[#527](https://github.com/jam-overture/loom/pull/527), which is open and not on
+`main`, and a routine does not stack one branch on another. Giving the pair's two
+ends a standing means changing that function's signature to take a reading, so
+there is nothing to change here until it lands.
+
+**What this run did instead is the question the same join answers from the other
+side** — §14, how much of what a page says gets read — which needed only
+`pageReadingOf`, and so is off `main` and races nothing.
+
+So: whoever runs next, if #527 has landed, this is the unit. If it has not,
+it still is not available, and §14's own leftovers are smaller than it.
+## 2026-10-06 — the remedy this lane recommended for the image blocker was already in this lane's gift, and it closes one of the seven rather than all seven
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**a correction to yesterday's entry**, filed against myself
+
+The 5 October entry — *seven of the eleven primitives no band can reach are
+blocked on one thing* — ends **"Recommended: the second"**, the second being a
+binding (0058), and files it as *"neither of them this lane's to take"*.
+
+Both halves of that need correcting and they fail in opposite directions.
+
+**It was this lane's to take.** The binding seam has been built and published
+since 15 August. Making a primitive read one is `reads:` on the definition, a
+`binding` prop, and `loom.data[name]` in the component — three things, all of
+them in `src/primitives/`, with `loom.feed` and `loom.tally` as worked
+precedents. Nothing was waiting on another lane. What was actually true is that
+option **one** (an asset the framework owns) is not this lane's, and option two
+got carried along with it in the same sentence.
+
+**And it closes one of the seven, not seven.** A binding is read by a primitive
+that *declares* `reads`, so reaching `loom.embed`, `loom.lightbox`,
+`loom.carousel`, `loom.overlay`, `loom.pin` and `loom.before-after` this way
+means six more bound twins. None of the six passes
+[0233](decisions/0233-a-bound-twin-is-earned-by-a-system-of-record-and-a-row-shape-the-primitive-can-declare.md)'s
+first clause: an embedded document, a tile that opens and a draggable wipe are
+*arrangements of* a picture, not records a deployment holds. Six near-duplicate
+primitives for one missing placeholder is 0052's shades-of-one at scale and
+would not survive the grammar budget.
+
+So `loom.plate` ships and **reach moves by one of the seven**. The other six are
+still waiting on option one, which is still the framework's, and the entry's
+numbers on it still stand.
+
+**Why this is worth a filing rather than a quiet edit.** The recommendation was
+read and acted on by the lane that wrote it, one day later, and it was wrong in
+a way that only showed up when somebody tried to carry it out — which is the
+same shape as the two stale docstrings this run also found. A recommendation
+that names a remedy should name who can perform it, and this one named the wrong
+answer to that question about itself.
+
+---
+## 2026-10-06 — two palette assertions in this lane's own test file have been comparing one character to itself since they were written
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/bound.test.ts`) · **Status:** **fixed on this branch**, filed
+because the failure mode is reusable and the fix is not the interesting part
+
+`bound.test.ts` held this, twice:
+
+```ts
+const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
+```
+
+**`loom.page` renders a `div`.** There is no `<main>` anywhere in that output,
+`indexOf` returns `-1`, and `slice(-1)` is the last character of the document —
+`">"`. So *renders every state identically under both starter palettes, with no
+colour of its own* was asserting that `">"` equals `">"` and that `">"` contains
+no hexadecimal colour, for every state of `loom.feed` and `loom.tally`, since the
+day it was written. Both were green throughout.
+
+It was found by writing a third copy of it for three new primitives and then
+asking it to assert something *positive* — `toContain("loom-scroll-x")` — which
+is the only kind of assertion that could have failed.
+
+**The general shape, which is why this is filed rather than just fixed:** a
+helper that narrows a subject before asserting on it is a silent `true` whenever
+the narrowing finds nothing, and every assertion of the form *X is absent from
+the narrowed thing* then passes. The library's negative assertions are mostly of
+exactly that form, because *no literal colour below the root* and *no inline
+style* are the two standing rules. `grep -n 'indexOf(' src/primitives/*.test.ts`
+is a five-second audit and I have not run it over the other files; this entry is
+the note that it is worth running.
+
+The replacement strips the hoisted `<style>` and then the root element's own
+opening tag, which is what the two removals are actually for: the stylesheet
+carries every class name in the library, and the root carries the theme's
+seventeen hexes.
+
+---
+## 2026-10-06 — a bound chart cannot know how many columns it will have, and the shared rule assumes somebody chose
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** **fixed on this branch for `loom.trend`**; the note about
+`loom.stat-chart` is deliberately left open
+
+`.loom-stat-chart` sets `grid-auto-columns: minmax(0, 1fr)`, which lets a column
+shrink to nothing. That is correct for the primitive it was written for: an
+author writes four or six `loom.stat` children and looks at the result.
+
+`loom.trend` reads its points from an answer, so its column count is the
+*database's*. A twelve-month series on a 390-pixel page came out nineteen pixels
+a column, the printed figures overlapped each other, and the last one hung off
+the right of the document — `scrollWidth 401 / innerWidth 390`, caught by the
+specimen harness's own overflow check rather than by any test.
+
+Fixed by a floor (`loom-trend-plot`) and the library's existing `loom-scroll-x`
+region, which is what `loom.table` and `loom.comparison-table` already do with a
+band too wide for the screen. It is the one rule `loom.trend` adds; everything
+that decides a bar's *height* is still the authored chart's, so the two cannot
+come to disagree about what a height means.
+
+**What is left open, and it is a judgement rather than a defect.**
+`loom.stat-chart` has the same latent behaviour: twelve authored `loom.stat`
+children in a chart would do the same thing. It is left alone because nobody
+writes twelve, because changing a shared rule changes every chart in every lane's
+committed screenshots, and because the honest statement of the problem is *a
+column count nobody chose* rather than *a column count that is large*. If a
+second taker turns up, the floor should move to the shared rule and this entry is
+the argument for it.
+
+---
+## 2026-10-06 — 0231 is claimed by two open pull requests, and this run took 0233 to avoid widening it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom merge` · **Status:** open —
+**nothing is broken**, and it needs a person rather than a rule
+
+`#527` (`signals-10`) and `#528` (`framework-55`) both add a record numbered
+**0231**:
+
+| PR | record |
+| --- | --- |
+| #527 | `0231-a-funnel-is-three-shares-of-the-arrivals-and-the-straddle-is-the-one-error-here-that-leans-down.md` |
+| #528 | `0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md` |
+
+Whichever is renumbered wants **0232**, on the precedent the 0205 collision set.
+So this run's record is **0233** rather than 0232, which leaves a gap if only one
+of the two moves — and a gap is cheaper than a third claim on a number two
+branches are already arguing over. `pnpm decisions:index` prints
+`0231 has no record here` and `0232 has no record here` on this branch, which is
+the index being exactly honest about both.
+
+**Worth noting for whoever resolves it:** #528's record is about *a primitive
+naming a control from the tree*, which is the filing `loom.menu` has been
+unreachable behind since 2 October. That one lands in this lane's territory, and
+this entry is also the note that this lane is watching for it.
+
+---
+## 2026-10-06 — the mangling is URL **length**, measured at a threshold between 148 and 159 characters, and the commit-SHA workaround is a coincidence that makes it worse for short branch names
+
+**Filed by:** `Loom primitives` · **Owned by:** `@jonathanbravecredit` ·
+**Closes:** the 22 September entry *a markdown link to `decisions/*.md` comes
+back from GitHub with backticks injected into it*, the 28 September entry above
+it, and the 28 September controlled comparison *a branch name in the URL broke
+twice, the commit SHA came through clean* · **Status:** open — **a mechanism,
+with the measurement that produces it, and it falsifies the standing theory**
+
+The 28 September entry ends: *"What would settle it is one more controlled pair
+on a different pull request: the same body posted with a branch-name ref and
+then a SHA ref, changing nothing else. Two data points from two lanes would make
+it a rule."*
+
+This is that pair, from a second lane, on #529 — **and the SHA ref broke
+identically.** The theory is wrong, and the reason it looked right for seven
+data points is worth more than the correction.
+
+### The measurement
+
+One body, posted once, containing URLs of many lengths. Every URL in it, sorted:
+
+| length | URL | outcome |
+| --- | --- | --- |
+| 22 | `https://claude.ai/code` | clean |
+| 30 | `https://claude.com/claude-code` | clean |
+| 55 | a session link | clean |
+| 82 | the Vercel preview | clean |
+| 138 | `…/blob/<sha>/reports/2026-10-06-primitives-given-rather-than-told.md` | clean |
+| 147 | `…/reports/2026-10-06-primitives-trend-overflow-before.png` | clean |
+| 148 | `…/reports/2026-10-06-primitives-trend-overflow-after.png` | clean |
+| **159** | `…/reports/2026-10-06-primitives-given-rather-than-told-bold-phone.png` | **mangled** |
+| **160** | `…-editorial-phone.png` | **mangled** |
+| **164** | `…-bold-wide.png` | **mangled** |
+| **165** | `…-editorial-wide.png` | **mangled** |
+| **187** | `…/decisions/0233-a-bound-twin-is-earned-by-a-system-of-record-….md` | **mangled** |
+
+**Nothing else varies.** Same body, same write, same host for rows 5 through 11,
+same `blob`/`raw` mix on both sides of the line. **The threshold is between 148
+and 159 characters.**
+
+### What this explains, including every data point that did not fit
+
+The 28 September comparison changed one variable and read it as *branch name
+versus SHA*. What it actually changed was **length**: the branch was
+`framework-58-the-keys-the-runtime-puts-there` — **44 characters**, against a
+40-character SHA. Swapping it took 4 characters off a URL that was sitting near
+the threshold, and the URL came back clean. The conclusion drawn was the name;
+the cause was the four characters.
+
+That also explains #442, the data point the entry says *"does not fit it"*:
+branch-name refs, reported clean. Its links were short enough.
+
+**And on this pull request the recommended workaround made things worse.** This
+branch is `primitives-53-given-rather-than-told` — **35 characters, five shorter
+than a SHA.** Following *reference a blob by its commit SHA, never by the branch
+name* lengthened every URL in the body by five and pushed two of them further
+past the line. The workaround is not merely a coincidence; **it is backwards for
+any branch name shorter than 40 characters.**
+
+### What the mangler does, exactly
+
+It wraps the URL in a double backtick, opening before it and closing after the
+closing delimiter — which is the shape every previous entry described:
+
+```
+<img src="``https://…-editorial-wide.png"`` width="380">
+![…](``https://…-bold-phone.png)``
+```
+
+**It is syntax-independent.** All four forms were posted in one body and the
+long ones broke in all four: a bare URL, an HTML `<img src>`, a markdown link,
+and a markdown image. Previous entries ruled markdown images in and then out
+again; the syntax was never the variable either.
+
+**It is write-side, not read-side**, and it is deterministic: five consecutive
+`GET`s of a mangled body return the same mangling, and a body posted clean comes
+back mangled on the first read.
+
+### What to do about it, which is now a rule rather than a guess
+
+**Keep every URL in a pull request body under about 148 characters.** The lever
+with the most slack is the *filename*, not the ref. This run's screenshots were
+renamed from `2026-10-06-primitives-given-rather-than-told-editorial-wide.png`
+(63) to `2026-10-06-primitives-given-editorial-wide.png` (45), which brings the
+URL to 145 and it posts clean.
+
+That is worth a convention, because **the report naming convention this
+repository already uses generates filenames that break**: every
+`YYYY-MM-DD-<lane>-<long-slug>-<theme>-<width>.png` in `reports/` is 60 to 70
+characters, and `https://raw.githubusercontent.com/jam-overture/loom/` plus a
+ref plus `/reports/` is already 100 before the filename starts. **Every picture
+in every pull request body this repository has posted with a full-slug
+screenshot name was mangled**, which is consistent with the three-week history
+of this entry and with *"every picture in every merged pull request body that
+used one is already broken."*
+
+**Suggested, and it is one line in a specimen:** let a specimen's `name` be a
+short slug and let the *report* keep the long one. They do not have to agree,
+nothing joins them but a relative link inside the report, and the report's own
+`![](…)` references are repository-relative and have no length problem at all.
+
+**What I have not established:** which hop does it. It is not `gh api` versus
+the GitHub MCP tool — this body was posted both ways and long URLs broke both
+times — so the candidates are the agent proxy named in this container's
+environment notes, or something between it and GitHub. That is a question about
+infrastructure rather than about this repository, which is why this is owned by
+a person rather than a lane.
+## 2026-10-05 — the four lines every consumer of the pace reading was writing are now one call, and the matching rule lives beside the counter
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-10-the-funnel-against-the-readers-who-arrived`**
+— shape 1, `inflationFor(where, rows)`, published from
+`@jam-overture/loom/signals`
+
+The entry is right that the matching is the part that fails quietly, and it was
+right that the next consumer was predictable: it turned out to be this lane's
+own, one run later. `funnelReachOf` needs exactly the same pairing, and a second
+hand-written copy of it is the thing the entry was warning about.
+
+**What shipped is shape 1 and a little more.** `pageViewsFor(where, rows)` picks
+the door row a reading belongs to and reports what it dropped — rows for another
+revision as `foreign`, rows beyond the first as `duplicated`.
+`inflationFor(where, rows)` is `drift ÷ opened` off that row, which is the number
+`PaceOptions.inflation` wants. **`pageReachOf` was moved onto the same rule**, so
+there is one definition rather than two that agree today, and the funnel reading
+was built on it rather than on a fourth copy.
+
+Shape 2 — `PaceOptions.inflation` accepting the rows instead of the fraction —
+was **not** taken, and the reason is worth leaving here. `readingPaceOf` does not
+know where its counts came from, which is what lets two windows of one revision
+be handed to it, and a fixture or a backfill has no door rows at all. Taking
+rows would make the function reach for a correction in a shape its caller may
+honestly not have. A published rule the caller applies keeps that open; a
+parameter that only accepts rows closes it.
+
+`null` is kept for *no row for this revision* and for *nothing has opened*,
+rather than `0`. A correction of nought is a measured claim that nobody
+straddled, and the two states are not that.
+
+---
+## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
+· **Status:** open — **named rather than built**, because it needs the tree and
+this unit deliberately took only the counters
+
+A `FunnelPair` is two node ids a deployment wrote down in advance, and a
+revision is a tree a proposal changed. So a pair whose `from` was moved, renamed
+or removed by a change answers `reached 0, converted 0` against every revision
+after it — which `funnelReachOf` reports as a pair nobody reached, with
+`worse: "before"` and an entry share of nought. **That reads exactly like a band
+readers never scroll to**, and the remedies are opposite: one is a page to fix
+and the other is a question to re-point.
+
+The fix is the §6 join one step further: `pageReadingOf` already holds every
+element node of a revision, so a pair's two ends can be looked up in it and
+given a standing. §10's five fates for a dissolved stop — `absent`,
+`unanchorable`, `moved`, `reordered`, `separated` — are the vocabulary, and the
+argument there is the same argument: *a pair the change dissolved is an answer,
+not a gap.* It was left out of this unit on scope rather than on doubt, because
+`funnelReachOf` takes counters and rows and giving it a tree is a different
+signature.
+
+**Nothing is wrong on `main`.** Every figure a pair reports is correct; what is
+missing is the sentence that says the question is stale. It is the most useful
+thing left in this lane's queue and it is this lane's to take.
+## 2026-10-05 — the pace reading is on the reader screen, and the figure that can embarrass a surface is drawn as a question
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/readers/`) · **Status:** **closed** — this
+morning's call from `Loom signals`, taken, with all four cautions answered in
+code and one of them answered by a test
+
+`readingPaceOf` is the third reading taken off the join `/portal/readers`
+already makes, beside *which parts did anybody get to* and *where do people stop
+going*. `_lib/pacing.ts` names it and `_components/had-time-to-read.tsx` draws
+it.
+
+**The four cautions, each as the thing that answers it:**
+
+| the caution | what holds it |
+| --- | --- |
+| `lingered` is never engagement | the label is the only one in `vocabulary.ts` that ends in a question mark, the tone is grey, and the sentence says *both* things it can mean. A rendered test asserts the surface matches neither `/engage/i` nor `/longest/i` |
+| lead with skims | `paced` never appears above the disclosure at all, which a test asserts from both ends — absent on the surface, present in the record |
+| never add a word figure across parts | there is no total anywhere, and the page's own figure comes off the root rather than a sum. The page is held out of the ranking, as the runtime holds it out of `mostSkimmed` |
+| hand in the inflation | the screen now reads the door rows and matches **per page and per version**, not a deployment-wide average. `0.050` is printed in the record so the figure is checkable |
+
+**The sentence the call named is real and it is drawn.** When the part the most
+words went past unread in is the same part people stop going at, the card says
+so — *two separate readings point at the same part of this page … it is the
+strongest thing this page has to tell you*. It is drawn **only** on an identical
+node id, never a parent or a sibling: the whole value of it is that two
+arithmetics arrived at one place, and a sentence that stretched across two parts
+would read as one finding and be two. The screenshot on #523 is that case.
+
+**`silences.unreadable` is shown rather than hidden**, with the remedy in the
+sentence and the mechanism one click under it. On this repository's own
+primitives it is zero, which is the point — the deployment it is for is the one
+whose own primitives have not declared their copy, and a screen that dropped
+those parts would report that page as timed.
+
+---
+## 2026-10-05 — one list in the portal is still capped at a reading measure, and it is exactly the case the rule names
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/pages/[treeId]/proposed/[proposalId]/page.tsx`)
+· **Status:** open — **one line**, and filed rather than taken because it is not
+this branch's screen
+
+The 3 October entry's queue is finished: the sixteen screens were converted and
+`screen.test.ts` holds the ceiling. Counted on this branch, `max-w-*` survives in
+nine places in the lane and seven of them are the primitive itself or its own
+documentation. Of the two that are not:
+
+- `_components/elsewhere-note.tsx` — `max-w-[68ch]` on a `<p>`. That is the
+  measure, written out rather than wrapped in `Measured`, and it is a sentence.
+  Correct either way.
+- `portal/pages/[treeId]/proposed/[proposalId]/page.tsx:251` — **`max-w-3xl` on a
+  `<ul>`**. The rule `screen.tsx` states is *sentences get the measure and grids,
+  cards, rows and panels never do*, and a list of rows is the second noun in
+  that sentence.
+
+It is one line and it is on the proposal screen, which this branch does not open.
+Recorded with the line number so the next run that touches that screen can take
+it without measuring the lane again.
+
+---
+## 2026-10-05 — every consumer of `readingPaceOf` will write the same four lines to find its correction, and the pairing is the part that can be got wrong
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a measurement rather than a request**, and nothing is
+blocked; the four lines are written and working on `main`'s next branch
+
+`PaceOptions.inflation` is one number, and the number that belongs there is a
+property of **one revision of one page**: `drift ÷ opened` off that page's own
+door row. A consumer holding a window of counters over several pages therefore
+has to read `pageViews`, call `pageViewReadingOf`, and match each reading to its
+row on `treeId` **and** `revision` before it can call `readingPaceOf` once per
+page. That is what `/portal/readers` now does, and it is four lines per consumer.
+
+**The part that can be got wrong is the matching, and it fails quietly.** The
+reading's aggregate `inflation` is published on `PageViewReading` and is the
+obvious thing to reach for — and handing a busy page's inflation to a quiet one
+is an invented correction that looks exactly like a measured one, with three
+decimal places on it. Nothing anywhere would fail; the verdicts would simply be
+a little wrong in the direction the module's own safety argument depends on
+being right.
+
+Two shapes that would close it, neither of them this lane's to take and neither
+urgent:
+
+1. **`inflationFor(reading, rows)`** — the four lines, published, so the matching
+   rule lives beside the counters it is a rule about.
+2. **`PaceOptions.inflation` accepting the rows** instead of the fraction, so the
+   function that knows which revision it is reading does the lookup itself.
+
+Recorded because the next consumer is predictable: the same pairing is owed by
+anything that reads `readingChangeOf` across two versions, which is the entry
+from 4 October that is still waiting on a store that can answer for an older
+version.

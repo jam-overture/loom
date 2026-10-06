@@ -29,6 +29,7 @@ import { featuresAlternatingBand } from "./features-alternating-band.js"
 import { footerBand } from "./footer-band.js"
 import { footerSignupBand } from "./footer-signup-band.js"
 import { heroBand } from "./hero-band.js"
+import { heroShotBand } from "./hero-shot-band.js"
 import { heroSplitBand } from "./hero-split-band.js"
 import { integrationsBand } from "./integrations-band.js"
 import { integrationsGridBand } from "./integrations-grid-band.js"
@@ -36,6 +37,7 @@ import { listingsBand } from "./listings-band.js"
 import { metricsBand } from "./metrics-band.js"
 import { metricsChartBand } from "./metrics-chart-band.js"
 import { metricsLiveBand } from "./metrics-live-band.js"
+import { metricsTrendBand } from "./metrics-trend-band.js"
 import { navBand } from "./nav-band.js"
 import { navCentredBand } from "./nav-centred-band.js"
 import { offeringsBand } from "./offerings-band.js"
@@ -52,6 +54,7 @@ import { stepsCardsBand } from "./steps-cards-band.js"
 import { teamBand } from "./team-band.js"
 import { teamLeadsBand } from "./team-leads-band.js"
 import { testimonialsBand } from "./testimonials-band.js"
+import { testimonialsCollectedBand } from "./testimonials-collected-band.js"
 import { testimonialsWallBand } from "./testimonials-wall-band.js"
 import { whatsOnBand } from "./whats-on-band.js"
 
@@ -93,6 +96,7 @@ export {
   footerBand,
   footerSignupBand,
   heroBand,
+  heroShotBand,
   heroSplitBand,
   integrationsBand,
   integrationsGridBand,
@@ -100,6 +104,7 @@ export {
   metricsBand,
   metricsChartBand,
   metricsLiveBand,
+  metricsTrendBand,
   navBand,
   navCentredBand,
   offeringsBand,
@@ -116,6 +121,7 @@ export {
   teamBand,
   teamLeadsBand,
   testimonialsBand,
+  testimonialsCollectedBand,
   testimonialsWallBand,
   whatsOnBand,
 }
@@ -170,6 +176,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   navCentredBand,
   heroBand,
   heroSplitBand,
+  heroShotBand,
   proofBand,
   proofFacesBand,
   proofStoryBand,
@@ -190,6 +197,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   metricsBand,
   metricsChartBand,
   metricsLiveBand,
+  metricsTrendBand,
   specsBand,
   specsSheetBand,
   pricingBand,
@@ -199,6 +207,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   comparisonWaysBand,
   testimonialsBand,
   testimonialsWallBand,
+  testimonialsCollectedBand,
   credentialsBand,
   credentialsPostureBand,
   teamBand,
