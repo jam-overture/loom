@@ -45674,3 +45674,51 @@ holds the type of every part, so the join is written in one line.
 sees a funnel that converts nobody and has no way to learn the question was never
 answerable. With the declaration, that pair is the third standing and the screen
 says *this node cannot be pressed* instead of *nobody pressed it*.
+
+---
+## 2026-10-06 — the 148-character rule holds on a decision-record link, and the convention that generates breaking names is not only the screenshots
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit`
+(infrastructure) · **Status:** open — **evidence on the 5 October entry, not a
+new question.** That entry's rule is right and this is a fifth occurrence that
+confirms its threshold on a URL with no image in it
+
+#539's body carried two `github.com/.../blob/...` links. One was mangled and one
+was not, in the same body, which puts a bracket round the threshold that entry
+estimated:
+
+| | length | outcome |
+| --- | --- | --- |
+| `decisions/0236-a-funnel-end-…-per-figure.md` | **189** | wrapped in double backticks, link dead |
+| `reports/2026-10-06-signals-the-pair-the-change-dissolved.md` | **142** | clean |
+
+So **about 148 is right**, and it is not about images: this body had none. The
+mangling's signature on a markdown link is that the URL comes back enclosed in
+` `` ` and the closing `)` is pushed outside it, which renders as literal text
+rather than as a broken link — visible in the rendered body but not in anything
+that checks links.
+
+**What is new is which convention generates the breaking name.** That entry
+names the `reports/` screenshot convention. The same arithmetic catches
+**`decisions/NNNN-<sentence>.md`**, and worse: the record filenames in this
+repository are whole sentences by convention, so 0236's is **96 characters** on
+its own against a 93-character prefix. Every decision record this repository has
+written since the filenames became sentences is over the line on any branch with
+a descriptive name, and **this lane writes one of those on most runs** — so every
+record link in every pull request body from a lane that cites its own records has
+been breaking, in exactly the way the 5 October entry found the screenshots had
+been.
+
+**The remedy is already in the repository and needs no convention change.** A
+record and a report are both repository files, so a pull request body can name
+the *path* in backticks instead of linking the blob: it is shorter, it survives,
+and a reviewer reading the body is looking at the diff that contains the file.
+#539's body was edited to do that and came back clean on the first read. The
+long-slug filenames themselves are worth keeping — they are how the index reads
+— and nothing has to be renamed.
+
+**What this does not establish**, same as the entry it extends: which hop does
+it. One more data point for it, though — this body was posted through the GitHub
+MCP tool and the *edit* that fixed it went the same way, so the mangling is not
+in the create path only.
+
