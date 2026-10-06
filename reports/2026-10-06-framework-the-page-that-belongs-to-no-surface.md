@@ -174,6 +174,11 @@ harness read as zero before I looked at the output. It is caught, and loudly; th
 number is just in a different column. **The `<html>` row is the one that matters
 and is written up above.**
 
+One row was re-run after the matrix, and is reported from the second run: the
+property-name sweep in `not-found-style.test.ts` was rewritten for strict-mode
+capture groups after `tsc` rejected it (below), so *reads a property no theme
+supplies* was planted again against the final code. Still 1 red.
+
 ## Measured, not asserted
 
 Counted on the built output rather than claimed:
@@ -181,14 +186,25 @@ Counted on the built output rather than claimed:
 | | `main` at `6686895` | this branch |
 | --- | --- | --- |
 | `<html>` elements in the served `_not-found.html` | **2** | **1** |
-| the theme reaches the page by | parser error recovery | a `:root` rule in `<head>` |
-| `--loom-*` properties mounted | 0 — nothing read them | **52** |
+| `--loom-*` properties the page mounts | **0** — no theme was resolved | **53**, plus the ground's three, as one `:root` rule of 56 declarations |
+| values decided outside the theme, in the markup | **3** — `system-ui, sans-serif`, `4rem auto`, `32rem` | **0** |
 | what the stylesheet reads that the theme does not carry | — | **0**, checked mechanically |
-| literal colours in the page's own markup | 1 (`#…` via the browser) | **0** |
+| lengths in the stylesheet that are not a theme step | — | **0** beyond a 1px rule and a 2px ring |
 | horizontal scroll at 390px | none | none (`scrollWidth 390 / innerWidth 390`) |
+
+**The middle row is the whole change stated precisely.** `main`'s page was not
+unstyled by oversight — it carried a font stack, a margin and a measure, chosen
+on that page and reaching nothing else. Those three are what a theme is for, and
+the page now takes all three from the one the rest of the product wears.
 
 The three sentences on the page are unchanged, and the only text added is
 *Loom*.
+
+**The intermediate `<html>` defect was real on `main` too**, and this is worth
+being exact about: `main`'s page rendered its own `<html>` and was therefore
+nested inside Next's in exactly the same way. It mounted no theme, so nothing
+depended on the attribute merge and nothing was visibly wrong. The first draft
+of this branch kept the shape and added a dependency on it.
 
 ## Cross-lane diffs
 
@@ -213,16 +229,27 @@ separate command.
 | | `main` at `6686895` | this branch |
 | --- | --- | --- |
 | `@jam-overture/loom` | 183 files / 3,906 tests | 183 / 3,906 — **`src/` was not opened** |
-| `@loom/app` | 384 / 6,917 | **PLACEHOLDER_APP** |
+| `@loom/app` | 384 / 6,917 | **388 / 6,940** |
 | `findings:check` | 1,013 | **1,016**, 0 malformed |
-| `prerender:check` | — | **PLACEHOLDER_PRERENDER** |
+| `prerender:check` | — | 126 pages, 1,539 junctions, 0 run together; 3 metadata conventions, 0 unserved |
 
-**PLACEHOLDER_DELTA** No existing test was changed, weakened, skipped or
-deleted, and no test file was removed. Four assertions in the tests I wrote were
-corrected before anything was committed: the property-name sweep missed every
-token with a digit in it (`--loom-scale-7`, `--loom-spacing-1`), and the three
-assertions that read a rendered `<html>` were replaced with ones that read what
-the component returns.
+**+23 tests in 4 new test files**, and no file outside this unit added one. **No
+existing test was changed, weakened, skipped or deleted**, and no test file was
+removed.
+
+**The first full run was red, and it is worth saying what caught it.** `tsc`
+rejected two capture groups in my own tests — `[, property]` off a `matchAll` is
+`string | undefined` under this repository's settings, and Vitest does not
+typecheck, so four green test files were sitting on code that does not compile.
+Both were rewritten to check the group rather than assert it away, which is not
+a formality: a group that failed to capture would have dropped out of the list
+and left the assertion passing on a shorter one. `pnpm verify` was then re-run
+from a deleted `dist` and `.next`, and the numbers above are that run's.
+
+Three other corrections, before anything was committed: the property-name sweep
+missed every token with a digit in it (`--loom-scale-7`, `--loom-spacing-1`),
+and the assertions that read a rendered `<html>` were replaced with ones that
+read what the component returns — the defect-matrix row above.
 
 One warning in the build is pre-existing and belongs to `Loom lessons` — the NFT
 trace on `next.config.ts` through `(lessons)/_lib/run.ts`. It is on `main` and
