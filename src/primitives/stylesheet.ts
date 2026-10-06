@@ -768,6 +768,31 @@ export const LIBRARY_CLASS = {
    * rhythm, and the one a heading's container-query cap makes for its own width.
    */
   statChart: "loom-stat-chart",
+  /**
+   * The plot inside a `loom.trend`, and the one rule that primitive adds where
+   * it otherwise emits `loom.stat-chart`'s markup exactly.
+   *
+   * **It is the one way the two primitives' situations differ.** An authored
+   * chart's column count is a thing its author chose, and nobody writes twelve
+   * `loom.stat` children and then looks at the result on a phone. A bound
+   * chart's column count is whatever the answer carried, so the primitive has to
+   * be correct for a series of three and a series of forty without being told
+   * which it is getting.
+   *
+   * `grid-auto-columns: minmax(0, 1fr)` — the shared rule — makes a column free
+   * to shrink to nothing, and the figure printed over it is not: at twelve
+   * points on a 390-pixel page the columns come out nineteen pixels wide, the
+   * values overlap each other, and the last one hangs off the side of the
+   * document. Photographed before this rule existed.
+   *
+   * So a column has a floor instead, and the plot is put in a `loom-scroll-x`
+   * region by the primitive — which is what `loom.table` and
+   * `loom.comparison-table` already do with a band too wide for the screen, and
+   * is the honest answer here too: a year of months is a chart you swipe, not a
+   * chart with unreadable numbers on it. The floor is sized for a five-character
+   * figure at the chart's own type step.
+   */
+  trendPlot: "loom-trend-plot",
 } as const
 
 /**
@@ -2224,6 +2249,9 @@ html:has(.loom-lightbox[data-loom-presented="true"]) {
   font-size: var(--loom-scale-2);
   color: var(--loom-fg-muted);
   overflow-wrap: anywhere;
+}
+.loom-trend-plot {
+  grid-auto-columns: minmax(3.5rem, 1fr);
 }
 @media (prefers-reduced-motion: reduce) {
   .loom-halo-trace {
