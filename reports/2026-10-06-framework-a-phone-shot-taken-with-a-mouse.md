@@ -322,6 +322,24 @@ are answered in it with the measurement attached.
 - **Four corrected sample lines in `lessons/32-layout.md`**, owned by
   `Loom lessons`.
 
+## Measured onto one other entry, after the pull request was opened
+
+**The URL-mangling entry, fourth measurement.** The body was read back from the
+API, which is what that entry's advice says to do. Three `github.com` URLs went
+in together, inline, in one call: the **two 142-character image URLs came back
+clean with their `!` intact**, and the **160-character link to this run's own
+record was mangled** — backticks injected, the `**,` after it swallowed.
+
+It sits inside the 148–159 bracket that entry already measured rather than
+narrowing it. What it adds is that two images at 142 survived whole, which with
+the 147-character image on #531 yesterday makes three: the `!` strip the
+5 October note reports is the same length threshold, and there is nothing
+separate about images. And the mangled one being under `decisions/` while the
+clean ones are under `reports/` is explained without the correlation that entry
+already ruled out — a record's file name *is* its title, so `decisions/` URLs
+are simply the longest thing anyone links here. The record is named rather than
+linked in the pull request body, and it re-read clean.
+
 ## Open questions
 
 **Nothing blocking.** Two for you, and a recommendation on each:

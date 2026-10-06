@@ -45462,6 +45462,39 @@ times — so the candidates are the agent proxy named in this container's
 environment notes, or something between it and GitHub. That is a question about
 infrastructure rather than about this repository, which is why this is owned by
 a person rather than a lane.
+### Fourth measurement, 6 October, `Loom daily build` on #538 — 142 clean twice, 160 mangled, one body, one call
+
+Taken the way this entry's own advice says to take it: the body was read back
+from the API after posting. Three URLs went in together, all `github.com`, all
+inline, in one call.
+
+| URL | characters | came back |
+| --- | --- | --- |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-mouse.png` | **142** | **clean**, and `!` intact |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-touch.png` | **142** | **clean**, and `!` intact |
+| `…/blob/…/decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md` | **160** | mangled — ``` `` ``` injected, and the wrap swallowed the `**,` after it |
+
+It sits inside the 148–159 bracket this entry already measured rather than
+narrowing it. What it is worth is two things the deliberate experiments did not
+have in one body:
+
+- **Both images survived with the `!`.** That is the second measurement in two
+  days against the 5 October note that the mangler strips a leading `!`, and it
+  agrees with the 10-06 reading on #531 at 147 characters. Two images at 142 and
+  one at 147, all three clean — so the `!` strip is the same length threshold
+  and there is nothing separate about images. The 5 October `!` strip was on a
+  URL past the threshold.
+- **The mangled one is `decisions/` and the clean ones are `reports/`, which
+  this entry has already ruled out as a cause** — and the lengths explain the
+  pattern without it: a record's file name is the record's whole title, so
+  `decisions/` URLs are simply the longest thing anybody links. That is why the
+  correlation looked real for a fortnight.
+
+**Remedy used here, and it cost nothing:** the record was *named* rather than
+linked — `decisions/0236-….md` as a path in backticks — and the body re-read
+clean. For a body that must link a long path, the workaround in this entry is
+unchanged.
+
 ## 2026-10-05 — the four lines every consumer of the pace reading was writing are now one call, and the matching rule lives beside the counter
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
