@@ -1,8 +1,17 @@
-# 0233 — How much of a page gets read is a share of words that partition it, and the typical reader's figure is a ceiling
+# 0235 — How much of a page gets read is a share of words that partition it, and the typical reader's figure is a ceiling
 
 **Status:** Accepted
 **Date:** 2026-10-06
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-06**, from 0233, when the branch that carried it
+> (#530) was merged. `main` had meanwhile accepted a different 0233 — *a bound
+> twin is earned by a system of record and a row shape the primitive can
+> declare* (#529, merged the same morning) — and two records sharing a number is
+> fatal (0097). 0234 had gone to #528's record for the same reason and 0232 is
+> claimed by an open pull request, so this took the next number free on `main`
+> and on every open branch. This record was written on 6 October and nothing in
+> it changed but its number; references were updated with it.
 
 ## Context
 

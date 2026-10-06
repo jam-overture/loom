@@ -106,6 +106,9 @@ const readFigure = (outcome: DataOutcome | undefined): string | undefined => {
   return figure.success ? String(figure.data) : undefined
 }
 
+const bindingNameOf = (props_: Readonly<Record<string, unknown>>): string =>
+  typeof props_["binding"] === "string" ? props_["binding"] : DEFAULT_BINDING
+
 export const loomTally = definePrimitive({
   type: "loom.tally",
   description:
@@ -143,6 +146,26 @@ export const loomTally = definePrimitive({
    * absence.
    */
   text: { unavailable: "Unavailable" },
+  /**
+   * The figure that arrived and could not be printed (0206).
+   *
+   * **One row, and it is the case a reader can see and nobody could diagnose.**
+   * A source answering `{ total: 12480 }` where this expects a number resolves
+   * cleanly, costs the round trip, and puts the word *Unavailable* at display
+   * size on a landing page — indistinguishable, from outside, from a source that
+   * was down. `1` given and `0` shown separates them for the author.
+   *
+   * It is deliberately silent where the source did not answer: `unavailable` is
+   * reported by the walk already, and there were no rows to be given.
+   */
+  unshown: (props_, data) => {
+    const name = bindingNameOf(props_)
+    const outcome = data[name]
+
+    return outcome !== undefined && outcome.status === "ready" && readFigure(outcome) === undefined
+      ? [{ name, given: 1, shown: 0 }]
+      : []
+  },
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props, "unavailable">) => {
     const figure = readFigure(loom.data[given.binding ?? DEFAULT_BINDING])
 

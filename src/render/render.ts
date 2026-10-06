@@ -25,7 +25,9 @@ import {
 import {
   isBehaviourResolver,
   NO_RESOLVED_BEHAVIOURS,
+  NO_CONTROL_NAME_PROPS,
   resolveBehaviours,
+  resolveControlNames,
   type BehaviourName,
   type BehaviourResolver,
   type PrimitiveBehaviours,
@@ -645,19 +647,31 @@ const nodeAnchorFor = (
  * rather than from the markup around it, so a copy button copies what the page
  * says and not the language label its own primitive rendered beside it.
  *
+ * A control's *name* is read from the tree too, where the primitive named a prop
+ * for it (0234), and from nowhere else: a type that named none, or a node that
+ * left the prop out, gets the string the primitive declared. Read here rather
+ * than in the seam because this is where a node's props are, and a behaviour
+ * receives the resolved word rather than the props it came out of.
+ *
  * A behaviour whose name could not be resolved is left out and reported, for
  * the reason `resolveBehaviours` gives: a control a screen reader announces as
  * "button" is worse than no control, and this is the only place that can say so.
  */
 const nodeBehavioursFor = (
   node: ElementNode,
+  props: JsonObject,
   text: PrimitiveText<string>,
   context: RenderContext
 ): PrimitiveBehaviours<BehaviourName> => {
   const declared = context.behaviours?.behavioursFor(node.type) ?? []
   if (declared.length === 0) return NO_RESOLVED_BEHAVIOURS.behaviours
 
-  const resolved = resolveBehaviours(declared, textOf(node), text)
+  const named = resolveControlNames(
+    props,
+    context.behaviours?.controlNamePropsFor?.(node.type) ?? NO_CONTROL_NAME_PROPS
+  )
+
+  const resolved = resolveBehaviours(declared, textOf(node), text, named)
 
   for (const { behaviour, key } of resolved.unnamed) {
     context.collect({ code: "behaviour-unnamed", nodeId: node.id, behaviour, key })
@@ -763,7 +777,7 @@ const renderElement = (node: ElementNode, context: RenderContext): ReactNode => 
     reserved[ANCHOR_PROP_KEY] === undefined ? undefined : nodeAnchorFor(node, reserved, context)
 
   const text = context.text?.textFor(node.type) ?? NO_TEXT
-  const behaviours = nodeBehavioursFor(node, text, context)
+  const behaviours = nodeBehavioursFor(node, props, text, context)
   const body = renderElementBody(node, context)
 
   const rendered = {

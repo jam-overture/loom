@@ -14,7 +14,7 @@ import type {
   EpisodeResolutionKind,
   FailureStage,
 } from "@jam-overture/loom/telemetry"
-import type { PartStanding } from "@jam-overture/loom/signals"
+import type { PaceSilence, PaceStanding, PartStanding } from "@jam-overture/loom/signals"
 import {
   describeAddressing,
   type Addressing,
@@ -1146,3 +1146,110 @@ export const PART_STANDINGS_PLAIN: Readonly<Record<PartStanding, PlainState>> = 
 }
 
 export const plainStanding = (standing: PartStanding): PlainState => PART_STANDINGS_PLAIN[standing]
+
+/**
+ * What the time readers spent says about the words a part puts in front of
+ * them, in a person's words.
+ *
+ * ## Why this table is not the one above
+ *
+ * `PART_STANDINGS_PLAIN` answers *did this part come onto anybody's screen*.
+ * This answers *did the people it came onto have time to read it*, and the two
+ * disagree on the most ordinary page there is: every part of a page can be
+ * `read` by the first table's definition — a row says it was on screen — while
+ * readers had eight seconds on a band whose words take fifty. A page in that
+ * state reported as read from top to bottom and nothing on this surface could
+ * say otherwise.
+ *
+ * ## The one verdict here that is a claim
+ *
+ * Three things bias the comparison and all three bias it the same way: time on
+ * screen is generous, a word count is a floor, and the reader count is
+ * inflated by every visit that straddled a roll-up window. So **`skimmed` is
+ * the only standing that survives having every doubt resolved in the page's
+ * favour**, and it is the one a person may act on. Its label says what was
+ * measured rather than what it implies — *too fast to have read it* — because
+ * the sentence a reader would otherwise supply for themselves is *nobody read
+ * this*, and that is a claim about people where this is a claim about time.
+ *
+ * ## `lingered` is a question and its label has to look like one
+ *
+ * This is the only entry in any table in this file whose label ends in a
+ * question mark, and it is deliberate. Time on screen is not attention: a tall
+ * part at the foot of a page lingers because nothing ever scrolled past it, and
+ * a band lingers for the whole time its own children were being read. So the
+ * figure means *is this where people get stuck* — sometimes a defect in the
+ * page, sometimes somebody reading carefully — and a label reading *people
+ * stayed longest here* would be this surface printing engagement, which is the
+ * one thing the runtime's own record asks it not to do.
+ *
+ * The tone carries the same restraint. `applied` is the theme's green and would
+ * make the question an achievement; `uninterpreted` is grey, which is what a
+ * figure nobody should draw a conclusion from ought to look like.
+ */
+export const PACE_STANDINGS_PLAIN: Readonly<Record<PaceStanding, PlainState>> = {
+  skimmed: {
+    label: "Too fast to have read it",
+    meaning:
+      "Readers had less than half the time its words take. This is the one reading here that holds however generously you count.",
+    technical: "skimmed",
+    tone: "awaiting",
+  },
+  paced: {
+    label: "There was time for it",
+    meaning: "Readers had roughly as long as its words take, and not conspicuously more.",
+    technical: "paced",
+    tone: "applied",
+  },
+  lingered: {
+    label: "Is this where people get stuck?",
+    meaning:
+      "Readers stayed far longer than the words account for. That can mean the part is hard going, and it can equally mean it was simply on screen while they read something inside it.",
+    technical: "lingered",
+    tone: "uninterpreted",
+  },
+  unknown: {
+    label: "Can’t say",
+    meaning: "There was no time to divide, or no words to divide it by.",
+    technical: "unknown",
+    tone: "inapplicable",
+  },
+}
+
+export const plainPace = (standing: PaceStanding): PlainState => PACE_STANDINGS_PLAIN[standing]
+
+/**
+ * Why a part has no reading of its pace — three different nothings.
+ *
+ * A `PlainWord` rather than a `PlainState`, for `PlainWord`'s stated reason:
+ * the thing with a tone is the verdict, and these are all the same absence of
+ * one. The standing above already carries the grey.
+ *
+ * **The middle one is the entry worth having on a screen.** A part whose words
+ * could not all be counted is a part some type in it has not said what it says
+ * — and on a deployment's own primitives that can be most of the page. A
+ * surface that quietly dropped those parts would report a page as read for
+ * time when the honest answer is that nobody can tell, and the deployment would
+ * have no reason to go and write the declarations. So it is shown, with the
+ * remedy in it.
+ */
+export const PACE_SILENCES_PLAIN: Readonly<Record<PaceSilence, PlainWord>> = {
+  unreached: {
+    label: "Nobody got to it",
+    meaning: "No visit reported this part coming onto the screen, so there is no time to divide.",
+    technical: "unreached",
+  },
+  unreadable: {
+    label: "Some of its words can’t be counted",
+    meaning:
+      "Something in this part has not said which of its text is words a reader would read, so the only thing that could be claimed about it is a skim.",
+    technical: "unreadable",
+  },
+  wordless: {
+    label: "It says nothing to read",
+    meaning: "No words, and nothing left unsaid either — a spacer, a rule, a picture with no caption.",
+    technical: "wordless",
+  },
+}
+
+export const plainPaceSilence = (silence: PaceSilence): PlainWord => PACE_SILENCES_PLAIN[silence]

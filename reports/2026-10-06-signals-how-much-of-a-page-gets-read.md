@@ -28,7 +28,7 @@ made them real by declaring `copy` across the starter library. So this is the
 vocabulary.** The broadcaster was not touched and bundles to the same byte count.
 
 Recorded in
-[0233](../decisions/0233-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md).
+[0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md).
 
 ### The one thing that had to be settled before any of it could be built
 
@@ -140,21 +140,21 @@ that fails. Seventeen planted, seventeen red.
 
 ## Records
 
-- [0233 — How much of a page gets read is a share of words that partition it, and
+- [0235 — How much of a page gets read is a share of words that partition it, and
   the typical reader's figure is a
-  ceiling](../decisions/0233-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md),
+  ceiling](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md),
   **Accepted**. It contradicts nothing and supersedes nothing. 0230's refusal of a
   page-wide word total stands for the nesting figure it was about; 0212's
   partition is what licenses this one; 0122's bargain about undeclared props is
   reported rather than rounded; 0147's over-count is the reason `typical` is a
   ceiling; 0221's cancellation is reused one level up; and nothing on the wire, in
   the browser, in a schema or in the vocabulary moved.
-- **Written as 0233.** 0230 is highest on `main`. **0231 is claimed by two open
+- **Written as 0233; renumbered to 0235 on merge.** 0230 is highest on `main`. **0231 is claimed by two open
   branches at once** — #527 (this lane) and #528 (the framework lane) — so one of
   them will be renumbered to 0232 when `Loom merge` lands them, and taking 0233
   leaves both numbers alone rather than setting up a third renumber. This is the
   fifth filed occurrence of the collision and the open entry on it already has the
-  recommendation; I have not added a sixth.
+  recommendation; I have not added a sixth. *(`Loom merge`, 6 October: both 0231 claims landed the same morning — #527 kept 0231 and #528 took 0234 — and #529 had meanwhile taken 0233 on `main`, so this record is 0235. A dated note under its header says so.)*
 
 ## Findings
 

@@ -193,8 +193,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 103 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(103)
+  it("registers as 106 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(106)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -225,6 +225,7 @@ describe("the starter library", () => {
       "loom.milestone",
       "loom.stat-grid",
       "loom.stat-chart",
+      "loom.trend",
       "loom.stat",
       "loom.tally",
       "loom.meter",
@@ -247,6 +248,7 @@ describe("the starter library", () => {
       "loom.spec",
       "loom.quote-grid",
       "loom.quote",
+      "loom.voices",
       "loom.person-grid",
       "loom.person",
       "loom.avatar-row",
@@ -293,6 +295,7 @@ describe("the starter library", () => {
       "loom.perk",
       "loom.divider",
       "loom.media",
+      "loom.plate",
       "loom.embed",
       "loom.before-after",
       "loom.action",
@@ -430,6 +433,12 @@ describe("the starter library", () => {
       "loom.pin",
       "loom.feature",
       "loom.milestone",
+      /**
+       * A leaf that is also a container, which nothing else in this list is: it
+       * arranges the columns it draws and holds no child nodes, because the
+       * columns are an answer's rows. 0233 works that exception.
+       */
+      "loom.trend",
       "loom.stat",
       "loom.tally",
       "loom.meter",
@@ -437,6 +446,8 @@ describe("the starter library", () => {
       "loom.product",
       "loom.spec",
       "loom.quote",
+      /** The same exception as `loom.trend`: it arranges n cards and none of them is a node. */
+      "loom.voices",
       "loom.person",
       "loom.article",
       "loom.book",
@@ -464,6 +475,13 @@ describe("the starter library", () => {
       "loom.avatar",
       "loom.perk",
       "loom.divider",
+      /**
+       * A leaf where its twin is not. `loom.media` renders `children` after its
+       * caption, so a tree may put something under an authored picture; a plate
+       * draws a frame whose whole content is an answer or the `empty` region it
+       * places, and a child node in it would be a node nothing draws.
+       */
+      "loom.plate",
       "loom.embed",
       "loom.before-after",
     ])
@@ -9589,6 +9607,72 @@ const boundPage = (theme: Record<string, string>, idFactory: IdFactory = sequent
             type: "loom.stat",
             props: { value: "99.98%", label: "Uptime last quarter" },
           }),
+        ],
+      }),
+      /**
+       * The three bound twins 0233 admits, each drawn as this fixture draws
+       * every bound primitive: unresolved, so what renders is the `empty`
+       * region. That is not a weaker test than the answered case — it is the
+       * state a catalogue band drops in as and the one a deployment sees before
+       * it connects anything, and it is the state nothing photographed before
+       * these existed. The answered renderings are in `bound.test.ts`, which
+       * drives the real seam.
+       */
+      buildElement(idFactory, {
+        type: "loom.trend",
+        props: { max: 100, plot: "standard", suffix: "%" },
+        children: [
+          buildSlot(idFactory, "empty", [
+            buildElement(idFactory, {
+              type: "loom.empty-state",
+              props: { outline: "dashed", align: "center", cause: "empty", stature: "compact" },
+              children: [
+                buildSlot(idFactory, "heading", [
+                  buildElement(idFactory, {
+                    type: "loom.heading",
+                    props: { level: 3 },
+                    children: [text("No figures yet")],
+                  }),
+                ]),
+                text("Point this at the table your numbers already live in."),
+              ],
+            }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.voices",
+        props: { columns: "three", density: "loose", limit: "six" },
+        children: [
+          buildSlot(idFactory, "empty", [
+            buildElement(idFactory, {
+              type: "loom.empty-state",
+              props: { outline: "dashed", align: "center", cause: "empty", stature: "compact" },
+              children: [
+                buildSlot(idFactory, "heading", [
+                  buildElement(idFactory, {
+                    type: "loom.heading",
+                    props: { level: 3 },
+                    children: [text("No testimonials yet")],
+                  }),
+                ]),
+                text("Nobody may write these for you — connect where you collect them."),
+              ],
+            }),
+          ]),
+        ],
+      }),
+      buildElement(idFactory, {
+        type: "loom.plate",
+        props: { aspect: "wide", fit: "cover", corners: "lg" },
+        children: [
+          buildSlot(idFactory, "empty", [
+            buildElement(idFactory, {
+              type: "loom.icon",
+              props: { shape: "bare", tone: "neutral", size: "medium" },
+              children: [text("▣")],
+            }),
+          ]),
         ],
       }),
     ],

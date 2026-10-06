@@ -158,15 +158,36 @@ const filled: readonly Filled[] = (() => {
  * looks a node's data up only where its props declare a binding, which is
  * `loom:data` doing exactly what 0058 says it does.
  */
-const isBound = (one: Filled): boolean => one.entry.type === "loom.tally"
+/**
+ * The answer each bound primitive needs before its declared copy is on the
+ * page, by type, and the default binding name it arrives under when the probe
+ * did not fill the `binding` prop.
+ *
+ * Two of them rather than one as of 0233: `loom.trend` declares `prefix` and
+ * `suffix` for `loom.tally`'s reason — a currency mark and a percent sign are
+ * words a translation changes — and like `loom.tally` it has nothing to set them
+ * against until a figure arrives. The other two twins this run added declare
+ * `copy: []` and need no answer here.
+ */
+const ANSWERS: Readonly<Record<string, { readonly name: string; readonly value: JsonValue }>> = {
+  "loom.tally": { name: "value", value: 12480 },
+  "loom.trend": { name: "series", value: [{ label: "Jan", value: 62 }] },
+}
+
+const isBound = (one: Filled): boolean => one.entry.type in ANSWERS
 
 const bindingNameOf = (one: Filled): string =>
-  typeof one.props["binding"] === "string" ? one.props["binding"] : "value"
+  typeof one.props["binding"] === "string"
+    ? one.props["binding"]
+    : (ANSWERS[one.entry.type]?.name ?? "value")
 
 const dataFor = (one: Filled): DataResolution => {
-  if (!isBound(one)) return EMPTY_DATA_RESOLUTION
+  const answer = ANSWERS[one.entry.type]
+  if (answer === undefined) return EMPTY_DATA_RESOLUTION
 
-  const answers = nodeDataOf({ [bindingNameOf(one)]: { status: "ready", value: 12480 } })
+  const answers = nodeDataOf({
+    [bindingNameOf(one)]: { status: "ready", value: answer.value },
+  })
 
   return { lookup: () => answers, problemsFor: () => [] }
 }
