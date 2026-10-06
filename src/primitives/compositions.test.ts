@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers fifty-four bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(54)
+  it("offers fifty-seven bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(57)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -216,7 +216,11 @@ describe("the starter compositions", () => {
    * never written.
    */
   it("answers which designs a part has, canonical first, for every part", () => {
-    expect(compositionsForPart("hero").map((composition) => composition.id)).toEqual(["hero", "hero-split"])
+    expect(compositionsForPart("hero").map((composition) => composition.id)).toEqual([
+      "hero",
+      "hero-split",
+      "hero-shot",
+    ])
     expect(compositionsForPart("banner").map((composition) => composition.id)).toEqual(["banner", "banner-inline"])
 
     for (const part of COMPOSITION_PARTS) {
@@ -928,12 +932,12 @@ describe("what a band puts on a page", () => {
    * band that opens a document is fine in the phrasebook and is only a defect
    * *on a page*. Two heroes each carrying one `level: 1` is exactly right.
    */
-  it("lets the phrasebook hold two bands that each open a document", () => {
+  it("lets the phrasebook hold three bands that each open a document", () => {
     const ids = sequentialIdFactory()
     const opens = (composition: Composition): boolean =>
       JSON.stringify(composition.build(ids)).includes('"level":1')
 
-    expect(compositionsForPart("hero").filter(opens)).toHaveLength(2)
+    expect(compositionsForPart("hero").filter(opens)).toHaveLength(3)
   })
 })
 
