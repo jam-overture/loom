@@ -562,6 +562,75 @@ sentence that names a cause rather than a location — §9 says where reading
 stops, this says what was not taken in before it stopped — and the one figure on
 it that must never be drawn as engagement.
 
+### 13. The funnel against the readers who arrived · `Loom signals` · **done, 5 October**
+
+§8 counted page views exactly and §11 joined that count to the node counters.
+The funnel was left out of both, which made it the last counter here with no
+honest share of its own. A `FunnelAnswer` is two counts off one window, so
+`converted ÷ reached` needed no denominator handed to it — and it is not the
+number anybody quotes. *Of the readers who arrived* is what a deployment means
+by a conversion rate, and a pair whose first end sits at the bottom of a long
+page can post a magnificent rate while converting four people.
+
+**Done.** `funnelReachOf(where, funnels, rows)` in
+[`src/signals/funnel.ts`](../src/signals/funnel.ts) answers *a hundred readers
+arrived, forty reached the pricing band and six bought*. It is the **sixth**
+thing taken out of the server-side reading rather than collected (§6, §8, §9,
+§10, §11 and §12 being the others): **nothing was added to a payload, a browser,
+a column, a store or the vocabulary**, and the broadcaster was not touched, so
+its weight is unchanged.
+
+Two things decide the shape, and the second is a correction to an accepted
+record ([0231](../decisions/0231-a-funnel-is-three-shares-of-the-arrivals-and-the-straddle-is-the-one-error-here-that-leans-down.md)):
+
+- **The unit is three shares of the arrivals, and they partition them.**
+  `lostBefore` never reached the first end, `lostBetween` reached it and did not
+  convert, and the conversion share did both; the three sum to 1. Reporting all
+  three rather than the rate is the whole value, because **the two losses have
+  opposite remedies** and `rate` cannot tell them apart — the first loss is
+  entirely inside its denominator. `worse` names the stage that costs more
+  readers, by headcount rather than share, which is 0221's ranking rule at its
+  two-element case.
+- **The straddle leans *down* on this one counter, and 0147 says it does not.**
+  0147's consequences record that *a conversion rate is honest and a view count
+  is slightly generous*, because a funnel answer is computed inside one rollup
+  run where distinctness is exact. True of one answer, and not of the stored row,
+  which adds every window's. A reader who met the first end in one window and
+  converted in the next contributes `reached 1, converted 0` to the first and
+  nothing to the second: **the conversion is lost, not duplicated.** So `rate` is
+  the only figure in this subsystem biased downward — the safe direction for
+  *readers convert* and the unsafe one for *this funnel is broken* — and
+  `rateAtMost` spends §8's drift on the only error bar a funnel can have. It
+  closes onto `rate` where nobody straddled, and it opens wide where the rollup
+  window is short, which is the second time that counter has turned an argument
+  into a number. 0147 is **not superseded**: its decision stands and one
+  sentence of its consequences is corrected.
+
+Three more settled in the building. **`ReachSilence` is reused rather than
+restated**, because the three reasons there is no denominator are states of the
+deployment and not of the question asked, so `unopened` — *senders are not
+marking their openings* — reads the same on a funnel card as on a part. **There
+is no ranking across pairs and no page-level total of conversions**: two pairs
+are two questions about different nodes, and the pair losing the most readers is
+reliably whichever first end is deepest in the page, while a total would count
+one page view once per pair it satisfied (0167). And `rateAtMost` carries **no
+cap of its own on the recovery**, because the honest-looking clause cannot change
+the result and a clause nothing can falsify is not a safeguard.
+
+**The pairing rule is now published once.** `pageViewsFor` and `inflationFor` in
+[`page-views.ts`](../src/signals/page-views.ts) pick the door row a reading
+belongs to; `pageReachOf` and `funnelReachOf` both use it. The matching is the
+part of every join here that fails quietly when it is got wrong, because the
+aggregate inflation published beside the rows is the obvious thing to reach for
+and handing a busy page's straddle rate to a quiet one is an invented correction
+with three decimal places on it. That closes `Loom portal`'s finding of
+5 October with its first shape.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: a
+conversion rate that can be said out loud, with the stage that is costing the
+readers named beside it, and an interval rather than a point wherever the
+deployment's rollup window is short.
+
 ## Still not in scope
 
 - **Signal-to-intent derivation** — a signal automatically becoming a

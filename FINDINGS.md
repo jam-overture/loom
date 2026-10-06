@@ -102,6 +102,96 @@ third parameter, which is a teaching decision and yours.
 Nothing else in the lesson cites the shape. The seven exercises and the preamble
 import `resolveBehaviours` and never call `build`, so they are untouched and
 still pass.
+## 2026-10-05 — on a phone the demo's arrival screen never shows the page it is about
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
+`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
+remaining instance of this lane's brief's own *nothing to react to on
+arrival***.
+
+Measured on a production build of `main` at `6686895`, 390 × 844, with
+`pnpm shoot`'s `measure`:
+
+| | |
+| --- | --- |
+| the rail | `y 82`, **390 × 1,013** |
+| so the stage — the page — begins at | **`y 1,095`** |
+| the fold | **844** |
+| which puts the page | **251px past it** |
+
+A visitor on a phone arrives on a full screen of instrument. The heading says
+**“Ask that page for a change.”** and the line under the chips says **“It’s the
+page below.”** Neither is pointing at anything on screen. `rail-header.tsx`
+already knows this is the risk — its comment says *“that page” is only pointing
+at something when the page is beside you*, and draws the referent **only** on
+narrow screens, which is the width where it is least true.
+
+**Nothing here is a regression and no run did this.** The rail is 1,013px
+because every one of the five runs that fought for the phone fold won: the
+button is at `y 325`, `ask-panel.tsx` reverses its own reading order below `lg`
+so the press is above the fold, the explainer is folded, and the four asks run
+`597 → 877`. All of it is right, and the sum of it is a screen with no page on
+it.
+
+**Why it was not taken in `demo-39`.** Every shape costs more than one unit and
+two of the three reopen a decision another run argued:
+
+1. **Put the page's top band in the rail**, above the asks, as a shallow
+   non-interactive window. It is the only shape that adds rather than moves —
+   and it is a second rendering of the tree, which is the one thing `page.tsx`
+   passes callbacks around precisely to avoid.
+2. **Interleave**: header, lead ask, *the page*, then the secondary asks. Puts
+   a real page on the first screen at the cost of splitting the panel in two,
+   which `ask-panel.tsx` is one component to prevent.
+3. **Take 251px out of the phone rail.** There is nothing left to take that a
+   previous run did not already measure and keep.
+
+**Recommendation: (1), and measure the first screen before and after.** It is
+the only one that removes nothing. What would settle it instead is the thing
+this lane cannot do from a sandbox — watching a stranger on a phone — which is
+the same answer this lane's open design question has.
+
+---
+## 2026-10-04 — the ask list is further from the visitor's eye after a change than it was
+
+*(Appended 5 October by `Loom demo`, the lane that owns it — this was recorded
+as a cost inside `reports/2026-10-04-demo-the-one-press-record.md` rather than
+filed, and half of it is now closed.)*
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+half that is left is named below.
+
+The 4 October run landed a record card at the top of the rail and wrote down
+what that cost: *a stranger who wants a second change now scrolls for it where
+before they did not.* What was not measured then is that the landing takes the
+**way out** with it. On a production build of `main` at `6686895`, 1280 × 900,
+after the one sequence the demo invites:
+
+| | |
+| --- | --- |
+| the record card | `y 44`, **765px of an 857px rail** |
+| the ask panel | `y −470` — above the viewport |
+| its three remaining rows | `y −262`, `y −195`, `y −128` |
+| the footer's *Want this on a page of your own? Read the docs →* | `y 891` of a rail whose last pixel is **901** |
+
+So the end of the demonstration offered exactly one press, **Put it back**,
+which undoes the thing the visitor came to see.
+
+**Closed by `demo-39-the-end-of-the-sixty-seconds`:** a caption under the card
+says what the loop just proved, and *N more changes to ask for ↑* is a link to
+`#ask` with `stillToAsk`'s own count on it. It lands whole, 12px clear of the
+bottom edge.
+
+**What is left open, and it is the cost that unit paid rather than dodged.** On
+that path the footer's docs link goes from ten pixels visible to none. Ten
+pixels was not a way out, and repeating the link in the new row is the duplicate
+`rail-header.tsx` argues against — but the demonstration's **way out** is still
+reachable only by scrolling, on the one path a stranger is invited down. The
+honest fix is probably that the two should be one row rather than two, which
+means deciding whether the footer keeps a link at all on a screen where nothing
+has landed, and that is a decision about the arrival screen rather than about
+the ending.
 
 ---
 ## 2026-10-05 — the one page of this product that looks like nothing was built, and it is the page a wrong link lands on
@@ -44590,3 +44680,158 @@ plainly which version it is answering for and declines rather than laying one
 version's counters over another version's page. This is here so that the next
 routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
+
+---
+## 2026-10-05 — the four lines every consumer of the pace reading was writing are now one call, and the matching rule lives beside the counter
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** **closed by `signals-10-the-funnel-against-the-readers-who-arrived`**
+— shape 1, `inflationFor(where, rows)`, published from
+`@jam-overture/loom/signals`
+
+The entry is right that the matching is the part that fails quietly, and it was
+right that the next consumer was predictable: it turned out to be this lane's
+own, one run later. `funnelReachOf` needs exactly the same pairing, and a second
+hand-written copy of it is the thing the entry was warning about.
+
+**What shipped is shape 1 and a little more.** `pageViewsFor(where, rows)` picks
+the door row a reading belongs to and reports what it dropped — rows for another
+revision as `foreign`, rows beyond the first as `duplicated`.
+`inflationFor(where, rows)` is `drift ÷ opened` off that row, which is the number
+`PaceOptions.inflation` wants. **`pageReachOf` was moved onto the same rule**, so
+there is one definition rather than two that agree today, and the funnel reading
+was built on it rather than on a fourth copy.
+
+Shape 2 — `PaceOptions.inflation` accepting the rows instead of the fraction —
+was **not** taken, and the reason is worth leaving here. `readingPaceOf` does not
+know where its counts came from, which is what lets two windows of one revision
+be handed to it, and a fixture or a backfill has no door rows at all. Taking
+rows would make the function reach for a correction in a shape its caller may
+honestly not have. A published rule the caller applies keeps that open; a
+parameter that only accepts rows closes it.
+
+`null` is kept for *no row for this revision* and for *nothing has opened*,
+rather than `0`. A correction of nought is a measured claim that nobody
+straddled, and the two states are not that.
+
+---
+## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
+· **Status:** open — **named rather than built**, because it needs the tree and
+this unit deliberately took only the counters
+
+A `FunnelPair` is two node ids a deployment wrote down in advance, and a
+revision is a tree a proposal changed. So a pair whose `from` was moved, renamed
+or removed by a change answers `reached 0, converted 0` against every revision
+after it — which `funnelReachOf` reports as a pair nobody reached, with
+`worse: "before"` and an entry share of nought. **That reads exactly like a band
+readers never scroll to**, and the remedies are opposite: one is a page to fix
+and the other is a question to re-point.
+
+The fix is the §6 join one step further: `pageReadingOf` already holds every
+element node of a revision, so a pair's two ends can be looked up in it and
+given a standing. §10's five fates for a dissolved stop — `absent`,
+`unanchorable`, `moved`, `reordered`, `separated` — are the vocabulary, and the
+argument there is the same argument: *a pair the change dissolved is an answer,
+not a gap.* It was left out of this unit on scope rather than on doubt, because
+`funnelReachOf` takes counters and rows and giving it a tree is a different
+signature.
+
+**Nothing is wrong on `main`.** Every figure a pair reports is correct; what is
+missing is the sentence that says the question is stale. It is the most useful
+thing left in this lane's queue and it is this lane's to take.
+## 2026-10-05 — the pace reading is on the reader screen, and the figure that can embarrass a surface is drawn as a question
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/readers/`) · **Status:** **closed** — this
+morning's call from `Loom signals`, taken, with all four cautions answered in
+code and one of them answered by a test
+
+`readingPaceOf` is the third reading taken off the join `/portal/readers`
+already makes, beside *which parts did anybody get to* and *where do people stop
+going*. `_lib/pacing.ts` names it and `_components/had-time-to-read.tsx` draws
+it.
+
+**The four cautions, each as the thing that answers it:**
+
+| the caution | what holds it |
+| --- | --- |
+| `lingered` is never engagement | the label is the only one in `vocabulary.ts` that ends in a question mark, the tone is grey, and the sentence says *both* things it can mean. A rendered test asserts the surface matches neither `/engage/i` nor `/longest/i` |
+| lead with skims | `paced` never appears above the disclosure at all, which a test asserts from both ends — absent on the surface, present in the record |
+| never add a word figure across parts | there is no total anywhere, and the page's own figure comes off the root rather than a sum. The page is held out of the ranking, as the runtime holds it out of `mostSkimmed` |
+| hand in the inflation | the screen now reads the door rows and matches **per page and per version**, not a deployment-wide average. `0.050` is printed in the record so the figure is checkable |
+
+**The sentence the call named is real and it is drawn.** When the part the most
+words went past unread in is the same part people stop going at, the card says
+so — *two separate readings point at the same part of this page … it is the
+strongest thing this page has to tell you*. It is drawn **only** on an identical
+node id, never a parent or a sibling: the whole value of it is that two
+arithmetics arrived at one place, and a sentence that stretched across two parts
+would read as one finding and be two. The screenshot on #523 is that case.
+
+**`silences.unreadable` is shown rather than hidden**, with the remedy in the
+sentence and the mechanism one click under it. On this repository's own
+primitives it is zero, which is the point — the deployment it is for is the one
+whose own primitives have not declared their copy, and a screen that dropped
+those parts would report that page as timed.
+
+---
+## 2026-10-05 — one list in the portal is still capped at a reading measure, and it is exactly the case the rule names
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/pages/[treeId]/proposed/[proposalId]/page.tsx`)
+· **Status:** open — **one line**, and filed rather than taken because it is not
+this branch's screen
+
+The 3 October entry's queue is finished: the sixteen screens were converted and
+`screen.test.ts` holds the ceiling. Counted on this branch, `max-w-*` survives in
+nine places in the lane and seven of them are the primitive itself or its own
+documentation. Of the two that are not:
+
+- `_components/elsewhere-note.tsx` — `max-w-[68ch]` on a `<p>`. That is the
+  measure, written out rather than wrapped in `Measured`, and it is a sentence.
+  Correct either way.
+- `portal/pages/[treeId]/proposed/[proposalId]/page.tsx:251` — **`max-w-3xl` on a
+  `<ul>`**. The rule `screen.tsx` states is *sentences get the measure and grids,
+  cards, rows and panels never do*, and a list of rows is the second noun in
+  that sentence.
+
+It is one line and it is on the proposal screen, which this branch does not open.
+Recorded with the line number so the next run that touches that screen can take
+it without measuring the lane again.
+
+---
+## 2026-10-05 — every consumer of `readingPaceOf` will write the same four lines to find its correction, and the pairing is the part that can be got wrong
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a measurement rather than a request**, and nothing is
+blocked; the four lines are written and working on `main`'s next branch
+
+`PaceOptions.inflation` is one number, and the number that belongs there is a
+property of **one revision of one page**: `drift ÷ opened` off that page's own
+door row. A consumer holding a window of counters over several pages therefore
+has to read `pageViews`, call `pageViewReadingOf`, and match each reading to its
+row on `treeId` **and** `revision` before it can call `readingPaceOf` once per
+page. That is what `/portal/readers` now does, and it is four lines per consumer.
+
+**The part that can be got wrong is the matching, and it fails quietly.** The
+reading's aggregate `inflation` is published on `PageViewReading` and is the
+obvious thing to reach for — and handing a busy page's inflation to a quiet one
+is an invented correction that looks exactly like a measured one, with three
+decimal places on it. Nothing anywhere would fail; the verdicts would simply be
+a little wrong in the direction the module's own safety argument depends on
+being right.
+
+Two shapes that would close it, neither of them this lane's to take and neither
+urgent:
+
+1. **`inflationFor(reading, rows)`** — the four lines, published, so the matching
+   rule lives beside the counters it is a rule about.
+2. **`PaceOptions.inflation` accepting the rows** instead of the fraction, so the
+   function that knows which revision it is reading does the lookup itself.
+
+Recorded because the next consumer is predictable: the same pairing is owed by
+anything that reads `readingChangeOf` across two versions, which is the entry
+from 4 October that is still waiting on a store that can answer for an older
+version.

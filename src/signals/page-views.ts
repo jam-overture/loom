@@ -219,3 +219,93 @@ export const pageViewReadingOf = (rows: readonly StoredPageViews[]): PageViewRea
     revisions,
   }
 }
+
+/**
+ * The page-view row a reading of one revision should be divided by, picked out
+ * of a window of rows.
+ *
+ * **This exists because the pairing is the part that can be got wrong, and it
+ * fails quietly.** The number a correction wants belongs to *one revision of
+ * one page*; the obvious thing to reach for is the aggregate
+ * {@link PageViewReading.inflation} published beside it, and handing a busy
+ * page's straddle rate to a quiet one is an invented correction with three
+ * decimal places on it. Nothing would fail — the figures downstream would
+ * simply be a little wrong, in whichever direction their own safety argument
+ * needs them right. So the rule lives once, here, beside the counter it is a
+ * rule about, rather than four lines in every consumer.
+ *
+ * **It filters rather than trusts its caller, and says what it dropped.** A
+ * caller who handed in a whole store's rows and one who handed in the wrong
+ * revision's look identical from the inside, so both are counted.
+ */
+export type PageViewsFor = {
+  /**
+   * The row, read through {@link pageViewReadingOf}, or `null` where this
+   * revision has none.
+   *
+   * Read through the reading rather than subtracted again, because one
+   * definition of drift, pending and inflation is the point: a second would be
+   * a second place for them to disagree with the counter they describe.
+   */
+  readonly measured: RevisionPageViews | null
+  /**
+   * Rows for another tree or another revision, and ignored.
+   *
+   * Dividing one revision's counters by another's readers is the mistake that
+   * would make every rate taken off them quietly wrong.
+   */
+  readonly foreign: number
+  /**
+   * Rows for this tree and revision beyond the first, where every one after it
+   * was ignored.
+   *
+   * A store keeps one row per revision, so this cannot happen from one read —
+   * it happens when a caller concatenates two. Adding them is wrong, because
+   * the openings are already a total and would double; taking the last is
+   * wrong, because it is not the truer one. So the first row stands and the
+   * fact is reported.
+   */
+  readonly duplicated: number
+}
+
+/** A revision of a tree, which is all this rule needs to be asked. */
+export type RevisionOf = {
+  readonly treeId: TreeId
+  readonly revision: number
+}
+
+/**
+ * Pick the page-view row for one revision out of a window of rows.
+ *
+ * Linear in the rows, with one pass.
+ */
+export const pageViewsFor = (
+  where: RevisionOf,
+  rows: readonly StoredPageViews[]
+): PageViewsFor => {
+  const matching = rows.filter(
+    (row) => row.treeId === where.treeId && row.revision === where.revision
+  )
+  const first = matching[0]
+
+  return {
+    measured: first === undefined ? null : (pageViewReadingOf([first]).revisions[0] ?? null),
+    foreign: rows.length - matching.length,
+    duplicated: Math.max(0, matching.length - 1),
+  }
+}
+
+/**
+ * The straddle correction for one revision of one page: `drift ÷ opened` off
+ * that page's own door row.
+ *
+ * The number `PaceOptions.inflation` wants, published so that a consumer
+ * holding a window of counters over several pages does not write the matching
+ * itself. `null` where there is no row for the revision, or where nothing has
+ * opened — which is *the question has no answer* rather than *the answer is
+ * nought*, and is the reason this is not simply `0`.
+ */
+export const inflationFor = (
+  where: RevisionOf,
+  rows: readonly StoredPageViews[]
+): number | null => pageViewsFor(where, rows).measured?.inflation ?? null
