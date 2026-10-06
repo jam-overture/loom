@@ -8,6 +8,98 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-05 — on a phone the demo's arrival screen never shows the page it is about
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
+`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
+remaining instance of this lane's brief's own *nothing to react to on
+arrival***.
+
+Measured on a production build of `main` at `6686895`, 390 × 844, with
+`pnpm shoot`'s `measure`:
+
+| | |
+| --- | --- |
+| the rail | `y 82`, **390 × 1,013** |
+| so the stage — the page — begins at | **`y 1,095`** |
+| the fold | **844** |
+| which puts the page | **251px past it** |
+
+A visitor on a phone arrives on a full screen of instrument. The heading says
+**“Ask that page for a change.”** and the line under the chips says **“It’s the
+page below.”** Neither is pointing at anything on screen. `rail-header.tsx`
+already knows this is the risk — its comment says *“that page” is only pointing
+at something when the page is beside you*, and draws the referent **only** on
+narrow screens, which is the width where it is least true.
+
+**Nothing here is a regression and no run did this.** The rail is 1,013px
+because every one of the five runs that fought for the phone fold won: the
+button is at `y 325`, `ask-panel.tsx` reverses its own reading order below `lg`
+so the press is above the fold, the explainer is folded, and the four asks run
+`597 → 877`. All of it is right, and the sum of it is a screen with no page on
+it.
+
+**Why it was not taken in `demo-39`.** Every shape costs more than one unit and
+two of the three reopen a decision another run argued:
+
+1. **Put the page's top band in the rail**, above the asks, as a shallow
+   non-interactive window. It is the only shape that adds rather than moves —
+   and it is a second rendering of the tree, which is the one thing `page.tsx`
+   passes callbacks around precisely to avoid.
+2. **Interleave**: header, lead ask, *the page*, then the secondary asks. Puts
+   a real page on the first screen at the cost of splitting the panel in two,
+   which `ask-panel.tsx` is one component to prevent.
+3. **Take 251px out of the phone rail.** There is nothing left to take that a
+   previous run did not already measure and keep.
+
+**Recommendation: (1), and measure the first screen before and after.** It is
+the only one that removes nothing. What would settle it instead is the thing
+this lane cannot do from a sandbox — watching a stranger on a phone — which is
+the same answer this lane's open design question has.
+
+---
+## 2026-10-04 — the ask list is further from the visitor's eye after a change than it was
+
+*(Appended 5 October by `Loom demo`, the lane that owns it — this was recorded
+as a cost inside `reports/2026-10-04-demo-the-one-press-record.md` rather than
+filed, and half of it is now closed.)*
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo` · **Status:** open — the
+half that is left is named below.
+
+The 4 October run landed a record card at the top of the rail and wrote down
+what that cost: *a stranger who wants a second change now scrolls for it where
+before they did not.* What was not measured then is that the landing takes the
+**way out** with it. On a production build of `main` at `6686895`, 1280 × 900,
+after the one sequence the demo invites:
+
+| | |
+| --- | --- |
+| the record card | `y 44`, **765px of an 857px rail** |
+| the ask panel | `y −470` — above the viewport |
+| its three remaining rows | `y −262`, `y −195`, `y −128` |
+| the footer's *Want this on a page of your own? Read the docs →* | `y 891` of a rail whose last pixel is **901** |
+
+So the end of the demonstration offered exactly one press, **Put it back**,
+which undoes the thing the visitor came to see.
+
+**Closed by `demo-39-the-end-of-the-sixty-seconds`:** a caption under the card
+says what the loop just proved, and *N more changes to ask for ↑* is a link to
+`#ask` with `stillToAsk`'s own count on it. It lands whole, 12px clear of the
+bottom edge.
+
+**What is left open, and it is the cost that unit paid rather than dodged.** On
+that path the footer's docs link goes from ten pixels visible to none. Ten
+pixels was not a way out, and repeating the link in the new row is the duplicate
+`rail-header.tsx` argues against — but the demonstration's **way out** is still
+reachable only by scrolling, on the one path a stranger is invited down. The
+honest fix is probably that the two should be one row rather than two, which
+means deciding whether the footer keeps a link at all on a screen where nothing
+has landed, and that is a decision about the arrival screen rather than about
+the ending.
+
+---
 ## 2026-10-05 — the one page of this product that looks like nothing was built, and it is the page a wrong link lands on
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
