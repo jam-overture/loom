@@ -18,7 +18,7 @@ import { createTree, type LoomTree } from "../tree/tree.js"
 import { createStarterPrimitiveRegistry } from "./index.js"
 
 /**
- * The two primitives that read an answer, held to the thing the rest of the
+ * The five primitives that read an answer, held to the thing the rest of the
  * library is never asked: **that the same node draws four different pages
  * depending on what came back, and that a reader can tell which one they got.**
  *
@@ -116,10 +116,18 @@ const boundTree = (
     }),
   ])
 
+  /**
+   * Every bound primitive but `loom.tally` places a region for an answer of
+   * none, which is 0233's first obligation on a twin and the state a catalogue
+   * band drops in as. The list is written out rather than derived from the
+   * registry so that a primitive quietly losing its region fails here.
+   */
+  const PLACES_A_REGION: readonly string[] = ["loom.feed", "loom.trend", "loom.voices", "loom.plate"]
+
   const node = buildElement(ids, {
     type,
     props: (declared === undefined ? props : { ...props, [DATA_PROP_KEY]: declared }) as JsonObject,
-    children: type === "loom.feed" ? [empty] : [],
+    children: PLACES_A_REGION.includes(type) ? [empty] : [],
   })
 
   return createTree(
@@ -381,11 +389,9 @@ describe("what a bound region looks like under a second palette", () => {
       const editorial = await renderWith(boundTree("loom.feed", {}, ASKING, EDITORIAL), entry)
       const bold = await renderWith(boundTree("loom.feed", {}, ASKING, BOLD), entry)
 
-      const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
-
-      expect(bodyOf(bold.markup), name).toBe(bodyOf(editorial.markup))
-      expect(bodyOf(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-      expect(bodyOf(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
+      expect(bodyOnly(bold.markup), name).toBe(bodyOnly(editorial.markup))
+      expect(bodyOnly(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(bodyOnly(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
     }
   })
 
@@ -397,10 +403,552 @@ describe("what a bound region looks like under a second palette", () => {
       const editorial = await renderWith(tally(EDITORIAL), entry)
       const bold = await renderWith(tally(BOLD), entry)
 
-      const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
-
-      expect(bodyOf(bold.markup)).toBe(bodyOf(editorial.markup))
-      expect(bodyOf(bold.markup)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(bodyOnly(bold.markup)).toBe(bodyOnly(editorial.markup))
+      expect(bodyOnly(bold.markup)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     }
   })
+})
+
+/**
+ * The series, the wall and the picture — the three twins 0233 admits, each
+ * driven through the same real seam as the two above.
+ *
+ * Every one of them is tested in the four states 0058 insists are four and not
+ * two: answered, answered with nothing, unreachable, and answered in a shape
+ * the primitive cannot draw. The last two are the pair whose collapsing is the
+ * mistake the record names — a reader who takes *we could not reach your
+ * reviews* for *you have no reviews* concludes their data is gone.
+ */
+
+const SERIES = [
+  { label: "Apr", value: 99.1 },
+  { label: "May", value: 99.4 },
+  { label: "Jun", value: 98.8 },
+  { label: "Jul", value: 99.9 },
+] as const
+
+const REVIEWS = [
+  {
+    quote: "We moved four tools onto this in a fortnight and nobody asked for the old ones back.",
+    author: "Hanna Ochoa",
+    role: "Head of Platform, Northwind",
+  },
+  {
+    quote: "The record of who asked for what is the part I did not know I needed.",
+    author: "Theo Barros",
+    role: "Founder, Keelhaul",
+    avatar: "javascript:alert(1)",
+  },
+] as const
+
+const PICTURE = {
+  src: "https://example.com/shots/board.png",
+  alt: "The board view, with three columns of work in progress",
+  caption: "The board, mid-sprint",
+} as const
+
+/**
+ * The page below its own root, with the hoisted stylesheet taken out.
+ *
+ * Both removals are load-bearing and each one was found by this helper being
+ * wrong. The **stylesheet** has to go because the library's whole CSS is in the
+ * output of every page, so a test asserting that a class or a custom property is
+ * *absent* finds it in the rules rather than on an element. The **root element's
+ * own style attribute** has to go because that is where the theme's palette is
+ * written as seventeen literal hexes — which is the point of a theme and is
+ * exactly what an assertion about literal colour must not read.
+ *
+ * It replaces `markup.slice(markup.indexOf("<main"))`, which this file used in
+ * two palette assertions and which **never matched anything**: `loom.page`
+ * renders a `div`, there is no `main` in this output, `indexOf` returned `-1`,
+ * and `slice(-1)` is the last character of the document. Both assertions were
+ * comparing `">"` to `">"` and finding no hex in `">"`. They were green for as
+ * long as they have existed and were proving nothing, which is the shape lesson
+ * 28 costs: a check nobody had reason to doubt.
+ */
+const bodyOnly = (markup: string): string => {
+  const withoutStylesheet = markup.replace(/<style[^>]*>[\s\S]*?<\/style>/g, "")
+
+  return withoutStylesheet.slice(withoutStylesheet.indexOf(">") + 1)
+}
+
+describe("loom.trend — a series plotted from a source", () => {
+  const ASKING_SERIES = { series: { source: "catalogue.posts" } }
+
+  it("plots a column per point, in the order the answer carried them", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.trend", { max: 100, suffix: "%" }, ASKING_SERIES),
+      sourceAnswering([...SERIES])
+    )
+
+    expect(diagnostics).toEqual([])
+    for (const point of SERIES) expect(markup).toContain(point.label)
+    expect(markup.indexOf("Apr")).toBeLessThan(markup.indexOf("Jul"))
+
+    /** The region for an answer of none is not on a page that had points. */
+    expect(markup).not.toContain("Nothing published yet")
+  })
+
+  /**
+   * The whole of why this primitive emits its twin's markup: the bar's height is
+   * a `calc` in the stylesheet against a ceiling this element declares and a
+   * magnitude each column declares. If either stopped being written the chart
+   * would render as a row of labels with no bars and nothing else would fail.
+   */
+  it("declares the ceiling once and each column's magnitude on the column", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", { max: 100 }, ASKING_SERIES),
+      sourceAnswering([...SERIES])
+    )
+
+    expect(markup).toContain("--loom-chart-max:100")
+    expect(markup).toContain("--loom-chart-plot")
+    expect(markup).toContain("--loom-stat-magnitude:99.9")
+    expect(markup).toContain("loom-stat-plotted")
+  })
+
+  /**
+   * The one way this primitive's situation differs from its twin's, asserted so
+   * that a future simplification that drops the wrapper fails here rather than
+   * in a photograph. An author picks four columns; an answer carried twelve, and
+   * twelve columns under the shared rule are nineteen pixels wide with their
+   * figures hanging off the page.
+   */
+  it("puts a plot it did not choose the width of inside a named, focusable scroll region", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", {}, ASKING_SERIES),
+      sourceAnswering([...SERIES])
+    )
+
+    const body = bodyOnly(markup)
+
+    expect(body).toContain("loom-scroll-x")
+    expect(body).toContain("loom-trend-plot")
+    expect(body).toMatch(/tabindex="0"[^>]*role="group"|role="group"[^>]*tabindex="0"/)
+    /** A focus stop with no name is a focus stop a screen reader arrives at and cannot describe. */
+    expect(body).toContain('aria-label="Chart"')
+  })
+
+  it("puts the page's own mark against each figure rather than asking the row for it", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", { suffix: "%", prefix: "~" }, ASKING_SERIES),
+      sourceAnswering([{ label: "Apr", value: 99.1 }])
+    )
+
+    expect(markup).toContain("~")
+    expect(markup).toContain("99.1")
+    expect(markup).toContain("%")
+  })
+
+  it("places the region the tree gave it when the answer is none", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.trend", {}, ASKING_SERIES),
+      sourceAnswering([])
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Nothing published yet")
+    /**
+     * The custom property rather than the class: `.loom-stat-plotted` is in the
+     * hoisted stylesheet on every page, and only an element carries a magnitude.
+     */
+    expect(bodyOnly(markup)).not.toContain("--loom-stat-magnitude")
+  })
+
+  it("says a source that could not answer is a different thing from one with nothing to plot", async () => {
+    const { markup } = await renderWith(boundTree("loom.trend", {}, ASKING_SERIES), sourceDown())
+
+    expect(markup).toContain("This chart could not be loaded.")
+    expect(markup).not.toContain("Nothing published yet")
+  })
+
+  it("calls an answer where no point reads a shape it cannot draw, not a plot with holes", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", {}, ASKING_SERIES),
+      sourceAnswering([{ month: "Apr", uptime: 99.1 }])
+    )
+
+    expect(markup).toContain("This chart could not be shown.")
+    expect(bodyOnly(markup)).not.toContain("--loom-stat-magnitude")
+  })
+
+  it("skips a point it cannot read, plots the rest, and says that it did", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", {}, ASKING_SERIES),
+      sourceAnswering([{ label: "Apr", value: 99.1 }, { label: "May" }])
+    )
+
+    expect(markup).toContain("Apr")
+    expect(markup).toContain("Some points could not be plotted.")
+  })
+})
+
+describe("loom.voices — a wall of testimonials nobody authored", () => {
+  const ASKING_REVIEWS = { voices: { source: "catalogue.posts" } }
+
+  it("draws a card per row, with the words and the attribution the row carried", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.voices", { columns: "three" }, ASKING_REVIEWS),
+      sourceAnswering([...REVIEWS])
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("nobody asked for the old ones back")
+    expect(markup).toContain("Hanna Ochoa")
+    expect(markup).toContain("Head of Platform, Northwind")
+    expect(markup).toContain("Theo Barros")
+  })
+
+  /**
+   * The one field whose failure must not cost the row. A review whose avatar URL
+   * is on a scheme the allowlist refuses is still a review worth reading, so the
+   * address is dropped and the initials are drawn — and the refused string must
+   * not reach the page at all.
+   */
+  it("refuses a portrait address the allowlist does not link to and keeps the quote", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.voices", {}, ASKING_REVIEWS),
+      sourceAnswering([...REVIEWS])
+    )
+
+    expect(markup).not.toContain("javascript:alert")
+    expect(markup).toContain("The record of who asked for what")
+    /** `portrait.ts`'s fallback, from the author's name. */
+    expect(markup).toContain("TB")
+  })
+
+  it("caps the wall where the band said, without calling the rest unshown", async () => {
+    const many = Array.from({ length: 9 }, (_, index) => ({
+      quote: `The ${index + 1}th thing somebody said about it, at length.`,
+      author: `Reviewer ${index + 1}`,
+    }))
+
+    const { markup } = await renderWith(
+      boundTree("loom.voices", { limit: "three" }, ASKING_REVIEWS),
+      sourceAnswering(many)
+    )
+
+    expect(markup).toContain("Reviewer 3")
+    expect(markup).not.toContain("Reviewer 4")
+    /** A cap is not a row that could not be read, and must not be reported as one. */
+    expect(markup).not.toContain("Some testimonials could not be shown.")
+  })
+
+  it("places the region the tree gave it when the answer is none", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.voices", {}, ASKING_REVIEWS),
+      sourceAnswering([])
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Nothing published yet")
+  })
+
+  it("says a source that could not answer is a different thing from one with nothing to say", async () => {
+    const { markup } = await renderWith(boundTree("loom.voices", {}, ASKING_REVIEWS), sourceDown())
+
+    expect(markup).toContain("These testimonials could not be loaded.")
+    expect(markup).not.toContain("Nothing published yet")
+  })
+
+  it("skips a row with no attribution, draws the rest, and says that it did", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.voices", {}, ASKING_REVIEWS),
+      sourceAnswering([{ ...REVIEWS[0] }, { quote: "Said by nobody in particular." }])
+    )
+
+    expect(markup).toContain("nobody asked for the old ones back")
+    expect(markup).not.toContain("Said by nobody in particular")
+    expect(markup).toContain("Some testimonials could not be shown.")
+  })
+})
+
+describe("loom.plate — a picture read from a source", () => {
+  const ASKING_IMAGE = { image: { source: "catalogue.posts" } }
+
+  it("draws the picture the row carried, with the row's own alt text", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.plate", { aspect: "wide" }, ASKING_IMAGE),
+      sourceAnswering({ ...PICTURE })
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain('src="https://example.com/shots/board.png"')
+    expect(markup).toContain("The board view, with three columns of work in progress")
+    expect(markup).toContain("The board, mid-sprint")
+    expect(markup).not.toContain("Nothing published yet")
+  })
+
+  /**
+   * The primitive's whole argument, asserted: a row with no alt text does not
+   * read, so there is no route by which this primitive puts an undescribed image
+   * on a page.
+   */
+  it("refuses a row with no alt text rather than drawing an undescribed picture", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.plate", {}, ASKING_IMAGE),
+      sourceAnswering({ src: "https://example.com/shots/board.png" })
+    )
+
+    expect(markup).not.toContain("https://example.com/shots/board.png")
+    expect(markup).toContain("This picture could not be shown.")
+  })
+
+  it("refuses an address the allowlist does not serve pictures from", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.plate", {}, ASKING_IMAGE),
+      sourceAnswering({ src: "javascript:alert(1)", alt: "Nothing good" })
+    )
+
+    expect(markup).not.toContain("javascript:alert")
+    expect(markup).toContain("This picture could not be shown.")
+  })
+
+  /**
+   * The page says this picture plays a decorative part, the row still carries
+   * its description, and the convention wins: an empty `alt` and
+   * `role="presentation"`.
+   */
+  it("empties the alt text when the tree says the picture is decorative on this page", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.plate", { decorative: true }, ASKING_IMAGE),
+      sourceAnswering({ ...PICTURE })
+    )
+
+    expect(markup).toContain('alt=""')
+    expect(markup).toContain('role="presentation"')
+    expect(markup).not.toContain("three columns of work in progress")
+  })
+
+  it("places the region the tree gave it when the source says it has no picture", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.plate", {}, ASKING_IMAGE),
+      sourceAnswering(null)
+    )
+
+    expect(diagnostics).toEqual([])
+    expect(markup).toContain("Nothing published yet")
+  })
+
+  /**
+   * The reason this primitive has a frame where `loom.media` has none: the box
+   * holds its shape in every state, so connecting a source changes what is in
+   * the frame and never the shape of the band around it.
+   */
+  it("holds the declared aspect whether or not a picture arrived", async () => {
+    const answered = await renderWith(
+      boundTree("loom.plate", { aspect: "square" }, ASKING_IMAGE),
+      sourceAnswering({ ...PICTURE })
+    )
+    const unanswered = await renderWith(
+      boundTree("loom.plate", { aspect: "square" }, ASKING_IMAGE),
+      sourceAnswering(null)
+    )
+
+    expect(answered.markup).toContain("aspect-ratio:1 / 1")
+    expect(unanswered.markup).toContain("aspect-ratio:1 / 1")
+  })
+})
+
+/**
+ * What each of them says it could not show, which is the half of 0206 the
+ * library owed from 30 September — and now the only instrument that reaches the
+ * one person who can fix any of it.
+ *
+ * Every case here resolves cleanly. There is no error, no unavailable source
+ * and nothing on the page a reader would read as broken: a shorter band, a
+ * placeholder, a word where a figure goes. That is exactly why the diagnostic
+ * is the whole point — these are the failures that were invisible from both
+ * ends before it existed.
+ */
+describe("what a bound primitive says it could not show", () => {
+  const unshownIn = (diagnostics: readonly unknown[]): readonly Record<string, unknown>[] =>
+    diagnostics.filter(
+      (diagnostic): diagnostic is Record<string, unknown> =>
+        typeof diagnostic === "object" &&
+        diagnostic !== null &&
+        (diagnostic as Record<string, unknown>)["code"] === "data-unshown"
+    )
+
+  it("counts eleven of twelve rows for a feed whose source renamed a column", async () => {
+    const rows = [
+      ...POSTS.slice(0, 1),
+      ...Array.from({ length: 11 }, (_, index) => ({ headline: `renamed ${index}` })),
+    ]
+
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.feed", {}, ASKING),
+      sourceAnswering(rows)
+    )
+
+    /** The reader's sentence, which 0175 keeps countless. */
+    expect(markup).toContain("Some entries could not be shown.")
+
+    const reported = unshownIn(diagnostics)
+    expect(reported).toHaveLength(1)
+    expect(reported[0]?.["given"]).toBe(12)
+    expect(reported[0]?.["shown"]).toBe(1)
+    expect(reported[0]?.["binding"] ?? reported[0]?.["name"]).toBe("entries")
+  })
+
+  it("says nothing at all about a feed that read every row it was given", async () => {
+    const { diagnostics } = await renderWith(
+      boundTree("loom.feed", {}, ASKING),
+      sourceAnswering([...POSTS])
+    )
+
+    expect(unshownIn(diagnostics)).toEqual([])
+  })
+
+  /**
+   * The case that is otherwise indistinguishable from a source being down. A
+   * figure that arrived and could not be printed puts the declared word on the
+   * page at display size, and nothing anywhere said the answer had in fact
+   * arrived.
+   */
+  it("reports one row for a figure that arrived and could not be printed", async () => {
+    const { markup, diagnostics } = await renderWith(
+      boundTree("loom.tally", { label: "Teams" }, { value: { source: "catalogue.posts" } }),
+      sourceAnswering({ total: 12480 })
+    )
+
+    expect(markup).toContain("Unavailable")
+
+    const reported = unshownIn(diagnostics)
+    expect(reported).toHaveLength(1)
+    expect(reported[0]?.["given"]).toBe(1)
+    expect(reported[0]?.["shown"]).toBe(0)
+  })
+
+  it("says nothing about a figure that printed, or about a source that was down", async () => {
+    const printed = await renderWith(
+      boundTree("loom.tally", { label: "Teams" }, { value: { source: "catalogue.posts" } }),
+      sourceAnswering(12480)
+    )
+    const down = await renderWith(
+      boundTree("loom.tally", { label: "Teams" }, { value: { source: "catalogue.posts" } }),
+      sourceDown()
+    )
+
+    expect(unshownIn(printed.diagnostics)).toEqual([])
+    expect(unshownIn(down.diagnostics)).toEqual([])
+  })
+
+  it("counts the points a trend could not plot", async () => {
+    const { diagnostics } = await renderWith(
+      boundTree("loom.trend", {}, { series: { source: "catalogue.posts" } }),
+      sourceAnswering([{ label: "Apr", value: 99.1 }, { label: "May" }, { label: "Jun" }])
+    )
+
+    const reported = unshownIn(diagnostics)
+    expect(reported).toHaveLength(1)
+    expect(reported[0]?.["given"]).toBe(3)
+    expect(reported[0]?.["shown"]).toBe(1)
+  })
+
+  /**
+   * The sharpest one in the run. A reviews table whose `author` column was
+   * renamed answers perfectly and draws a wall that is simply shorter than it
+   * was — and the count must be of the rows that could not be *read*, never of
+   * the rows the band's own cap chose not to draw.
+   */
+  it("counts the reviews a wall could not read, and not the ones its cap left out", async () => {
+    const rows = [
+      { quote: "A real one, with a name on it.", author: "Hanna Ochoa" },
+      { quote: "Another real one.", author: "Theo Barros" },
+      { quote: "A third." , author: "Ida Melville" },
+      { quote: "A fourth." , author: "Jun Watanabe" },
+      { reviewer: "renamed", body: "nothing reads this" },
+    ]
+
+    const { diagnostics } = await renderWith(
+      boundTree("loom.voices", { limit: "three" }, { voices: { source: "catalogue.posts" } }),
+      sourceAnswering(rows)
+    )
+
+    const reported = unshownIn(diagnostics)
+    expect(reported).toHaveLength(1)
+    expect(reported[0]?.["given"]).toBe(5)
+    /** Four read; the cap drew three of them, and the cap is nobody's defect. */
+    expect(reported[0]?.["shown"]).toBe(4)
+  })
+
+  it("reports the one row a plate could not draw, and nothing for a source with no picture", async () => {
+    const unreadable = await renderWith(
+      boundTree("loom.plate", {}, { image: { source: "catalogue.posts" } }),
+      sourceAnswering({ src: "https://example.com/a.png" })
+    )
+    const none = await renderWith(
+      boundTree("loom.plate", {}, { image: { source: "catalogue.posts" } }),
+      sourceAnswering(null)
+    )
+
+    expect(unshownIn(unreadable.diagnostics)).toHaveLength(1)
+    expect(unshownIn(unreadable.diagnostics)[0]?.["given"]).toBe(1)
+    expect(unshownIn(none.diagnostics)).toEqual([])
+  })
+})
+
+/**
+ * The library's standing rule over all three, which is the one the brief sets:
+ * the markup is identical under both starter palettes and no colour in it is the
+ * primitive's own. Taken over every state each of them can be in, because a
+ * literal hex in a failure branch is a literal hex nobody photographs.
+ */
+describe("what the three new twins look like under a second palette", () => {
+  const cases: readonly (readonly [string, string, JsonObject, unknown, readonly SourceEntry[]])[] = [
+    [
+      "loom.trend",
+      "series",
+      { max: 100, suffix: "%" },
+      { series: { source: "catalogue.posts" } },
+      [
+        sourceAnswering([...SERIES]),
+        sourceAnswering([]),
+        sourceDown(),
+        sourceAnswering({ months: 4 }),
+        sourceAnswering([{ label: "Apr", value: 99.1 }, { label: "May" }]),
+      ],
+    ],
+    [
+      "loom.voices",
+      "voices",
+      { columns: "three" },
+      { voices: { source: "catalogue.posts" } },
+      [
+        sourceAnswering([...REVIEWS]),
+        sourceAnswering([]),
+        sourceDown(),
+        sourceAnswering({ reviews: 2 }),
+        sourceAnswering([{ ...REVIEWS[0] }, { quote: "No name." }]),
+      ],
+    ],
+    [
+      "loom.plate",
+      "image",
+      { aspect: "wide" },
+      { image: { source: "catalogue.posts" } },
+      [
+        sourceAnswering({ ...PICTURE }),
+        sourceAnswering(null),
+        sourceDown(),
+        sourceAnswering({ src: "https://example.com/a.png" }),
+      ],
+    ],
+  ]
+
+  for (const [type, , props, declared, entries] of cases) {
+    it(`renders every state of ${type} identically under both starter palettes, with no colour of its own`, async () => {
+      for (const [index, entry] of entries.entries()) {
+        const editorial = await renderWith(boundTree(type, props, declared, EDITORIAL), entry)
+        const bold = await renderWith(boundTree(type, props, declared, BOLD), entry)
+
+        const name = `${type} state ${index}`
+
+        expect(bodyOnly(bold.markup), name).toBe(bodyOnly(editorial.markup))
+        expect(bodyOnly(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+        expect(bodyOnly(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
+      }
+    })
+  }
 })

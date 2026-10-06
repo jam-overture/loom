@@ -6,10 +6,18 @@ import { AdjustControl } from "./behaviour-adjust.js"
 import { CopyControl } from "./behaviour-copy.js"
 import { DiscloseControl } from "./behaviour-disclose.js"
 import { DismissControl, PresentControl } from "./behaviour-present.js"
+import { NO_CONTROL_NAMES, type ControlNameProps, type ControlNames } from "./control-name.js"
 import type { PrimitiveText } from "./text.js"
 
 export { DISCLOSED_ATTRIBUTE } from "./disclosed.js"
 export { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./presented.js"
+export {
+  NO_CONTROL_NAME_PROPS,
+  NO_CONTROL_NAMES,
+  resolveControlNames,
+  type ControlNameProps,
+  type ControlNames,
+} from "./control-name.js"
 
 /**
  * The behaviour seam: the things a primitive *does* that its props cannot carry.
@@ -85,6 +93,19 @@ export { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./presented.js"
  * `present`, which is a fourth thing the registry checks at registration, and
  * the two agree through the DOM rather than through the seam. `presented.ts`
  * carries why, and [0176](../../decisions/0176-a-control-may-be-answerable-to-another-control-and-they-agree-through-the-dom.md)
+ * records what was rejected.
+ *
+ * A fifth axis arrived with the first control whose word is not the framework's:
+ * **where a control's name comes from.** Every member's name is a string its
+ * primitive declared, per type, so every code panel's button reads *Copy* and a
+ * dictionary can translate all of them at once. That is right for an affordance
+ * and wrong for a trigger whose words are the page's own — *Watch the demo* is
+ * content, and a dialog opened by a chip reading *Open* is a worse page than no
+ * dialog. So a primitive may name one of its own props as where a control takes
+ * its name from, the runtime reads it off the node, and the declared string stays
+ * underneath as the floor; `control-name.ts` carries why that is narrower than a
+ * reserved prop, and
+ * [0234](../../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
  * records what was rejected.
  *
  * What a control hands back is not the same question as what a primitive may say
@@ -234,7 +255,23 @@ type Behaviour = {
    * judgement the seam already makes about a control with no accessible name.
    */
   readonly requires?: BehaviourName
-  readonly build: (content: string, text: PrimitiveText<string>) => ReactNode
+  /**
+   * Builds the control.
+   *
+   * Three arguments, and each is a different answer to *where does a control's
+   * word come from*. `content` is the node's own text, which is what a copy
+   * button acts on. `text` is the primitive's declared strings, laid over by
+   * whatever dictionary the deployment supplied. `name` is the word this node
+   * named its control with, or `undefined` where its primitive named no prop or
+   * the node filled none in — so every member decides for itself which of its
+   * strings a tree is allowed to replace, and `copy` lets a tree rename the
+   * button without touching what it says once it has copied.
+   */
+  readonly build: (
+    content: string,
+    text: PrimitiveText<string>,
+    name: string | undefined
+  ) => ReactNode
 }
 
 export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
@@ -243,10 +280,10 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
       "A control that puts the node's own text on the clipboard, and shows itself only where the clipboard is actually available.",
     text: ["copy", "copied"],
     rendersControl: true,
-    build: (content, text) =>
+    build: (content, text, name) =>
       createElement(CopyControl, {
         value: content,
-        label: text.copy ?? "",
+        label: name ?? text.copy ?? "",
         copiedLabel: text.copied ?? "",
       }),
   },
@@ -266,9 +303,9 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
       "A control that opens and closes a region the primitive lays out beside it, and shows itself only where scripting actually runs.",
     text: ["disclose"],
     rendersControl: true,
-    build: (_content, text) =>
+    build: (_content, text, name) =>
       createElement(DiscloseControl, {
-        label: text.disclose ?? "",
+        label: name ?? text.disclose ?? "",
       }),
   },
   /**
@@ -290,9 +327,9 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
       "A control the reader drags to choose a number, published to the primitive as a CSS custom property so a stylesheet can compute a length from it.",
     text: ["adjust"],
     rendersControl: true,
-    build: (_content, text) =>
+    build: (_content, text, name) =>
       createElement(AdjustControl, {
-        label: text.adjust ?? "",
+        label: name ?? text.adjust ?? "",
       }),
   },
   /**
@@ -311,9 +348,9 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
       "A control that opens a region the primitive lays out inside it and closes again on Escape, on a press outside, or on a dismiss control within it.",
     text: ["present"],
     rendersControl: true,
-    build: (_content, text) =>
+    build: (_content, text, name) =>
       createElement(PresentControl, {
-        label: text.present ?? "",
+        label: name ?? text.present ?? "",
       }),
   },
   /**
@@ -331,9 +368,9 @@ export const BEHAVIOURS: Readonly<Record<BehaviourName, Behaviour>> = {
     text: ["dismiss"],
     rendersControl: true,
     requires: "present",
-    build: (_content, text) =>
+    build: (_content, text, name) =>
       createElement(DismissControl, {
-        label: text.dismiss ?? "",
+        label: name ?? text.dismiss ?? "",
       }),
   },
 }
@@ -379,6 +416,17 @@ export const NO_BEHAVIOURS: PrimitiveBehaviours<BehaviourName> = Object.freeze(
  */
 export interface BehaviourResolver {
   readonly behavioursFor: (type: PrimitiveType) => readonly BehaviourName[]
+  /**
+   * The prop each of this type's controls takes its name from, where its author
+   * said so.
+   *
+   * Optional on the interface, and that is the only concession this seam makes
+   * to compatibility: a resolver written before a control could be named from a
+   * tree answers nothing here and is read as a library whose primitives all name
+   * their controls themselves, which is what it is. A registry built by the SDK
+   * always answers.
+   */
+  readonly controlNamePropsFor?: (type: PrimitiveType) => ControlNameProps
 }
 
 export const isBehaviourResolver = (value: object): value is BehaviourResolver =>
@@ -422,7 +470,8 @@ export const NO_RESOLVED_BEHAVIOURS: ResolvedBehaviours = Object.freeze({
 export const resolveBehaviours = (
   names: readonly BehaviourName[],
   content: string,
-  text: PrimitiveText<string>
+  text: PrimitiveText<string>,
+  named: ControlNames = NO_CONTROL_NAMES
 ): ResolvedBehaviours => {
   if (names.length === 0) return NO_RESOLVED_BEHAVIOURS
 
@@ -433,12 +482,19 @@ export const resolveBehaviours = (
     const behaviour = BEHAVIOURS[name]
     const missing = behaviour.text.find((key) => (text[key] ?? "").trim() === "")
 
+    /**
+     * Checked before the node's own word is considered, and that order is the
+     * decision rather than a detail. A primitive declaring no strings is a
+     * primitive whose control has no name in a deployment that translates, and
+     * one node happening to carry a usable word does not make it translatable —
+     * so a tree cannot talk a nameless control onto the page.
+     */
     if (missing !== undefined) {
       unnamed.push({ behaviour: name, key: missing })
       continue
     }
 
-    behaviours[name] = behaviour.build(content, text)
+    behaviours[name] = behaviour.build(content, text, named[name])
   }
 
   return {

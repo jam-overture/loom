@@ -784,3 +784,105 @@ describe("the card the visitor's press landed", () => {
     expect(view.landing).toBe(third.record.recordId)
   })
 })
+
+/**
+ * The end of the sixty seconds, wired.
+ *
+ * `what-else.test.ts` holds the reading's three silences against values. What
+ * is held here is that the rail hands it the three answers it already has —
+ * the landing, the open question and the asks that survived — rather than a
+ * fourth opinion of its own, over records the pipeline really produced.
+ */
+describe("what the rail has left to say", () => {
+  /**
+   * The screen this unit exists for, reached the way a stranger reaches it:
+   * the one press the demo invites, then the answer to it. Measured on a
+   * production build at 1280 × 900, that leaves the ask panel at `y −470`, its
+   * three remaining rows above the viewport with it, and the footer's way out
+   * ten pixels from the bottom edge of the scroller.
+   */
+  it("speaks once the visitor's own press has put a change on the page", async () => {
+    const session = await sessionFor("end-after-answer")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const answered = await allow(asked.session, asked.record)
+
+    const { view } = await railOf(answered.session)
+
+    expect(view.landing).toBe(answered.record.recordId)
+    expect(view.whatElse?.count).toBe(view.available.length)
+    expect(view.whatElse?.label).toContain(`${view.available.length} more changes`)
+  })
+
+  /**
+   * And on the other path through this surface, which is the one a stranger
+   * reaches in fifteen seconds: an ask the Gate lets through unattended. The
+   * record lands with no question anywhere, so the ending is owed there too.
+   */
+  it("speaks for a change that went ahead on its own", async () => {
+    const session = await sessionFor("end-after-one-press")
+    const landed = await ask(session, "palette")
+
+    const { view } = await railOf(landed.session)
+
+    expect(landed.record.outcome).toBe("applied")
+    expect(view.waiting).toBeUndefined()
+    expect(view.whatElse).toBeDefined()
+  })
+
+  /**
+   * **The arrival screen is untouched**, and it is asserted here rather than
+   * left to a screenshot: nothing has landed, so there is no loop to have
+   * closed and nothing to caption.
+   */
+  it("says nothing on the screen a stranger arrives at", async () => {
+    const { view } = await railOf(await sessionFor("end-arrival"))
+
+    expect(view.landing).toBeUndefined()
+    expect(view.whatElse).toBeUndefined()
+  })
+
+  /**
+   * A visitor with a question open has a next move already, with a green
+   * button under it, and the caution pinned to the top of the rail says what
+   * asking for something else would cost them. Counting other asks underneath
+   * that is the surface arguing with its own caution.
+   */
+  it("says nothing while a question is still waiting on the visitor", async () => {
+    const session = await sessionFor("end-while-waiting")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+
+    const { view } = await railOf(asked.session)
+
+    expect(view.waiting).toBeDefined()
+    expect(view.whatElse).toBeUndefined()
+  })
+
+  /**
+   * **The count is the list's**, not the preset table's — which is what makes
+   * it a number the next press checks rather than a promise.
+   *
+   * The sequence is the one the demo invites, and it is the case that moves
+   * the number: *Take the numbers off* removes the `loom.stat-grid` the preset
+   * plans against, so `availablePresets` stops offering it and the panel is
+   * five rows before the press and four after. A visitor who follows the link
+   * finds exactly four.
+   *
+   * The two toggles are the reason this is asserted against `available` rather
+   * than against a literal: `palette` and `backdrop` swap back, so they stay
+   * on offer after they land and a count written here as a constant would be
+   * a second opinion about the panel.
+   */
+  it("counts the asks the panel is actually about to offer", async () => {
+    const session = await sessionFor("end-counts-the-panel")
+    const before = await railOf(session)
+
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+    const answered = await allow(asked.session, asked.record)
+    const { view } = await railOf(answered.session)
+
+    expect(before.view.available).toContain(DEMO_LEADING_PRESET)
+    expect(view.available).not.toContain(DEMO_LEADING_PRESET)
+    expect(view.available.length).toBe(before.view.available.length - 1)
+    expect(view.whatElse?.count).toBe(view.available.length)
+  })
+})

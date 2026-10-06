@@ -473,7 +473,7 @@ a target and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 103
+  primitives registered: 106
   of those, declaring a target: 17
     loom.nav         "always"
     loom.menu        "always"

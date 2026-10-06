@@ -19,11 +19,20 @@ import { mediaUrlSchema } from "./url.js"
  * says it, so the difference between "no alt text" and "deliberately none"
  * survives in the tree.
  *
- * This is also where a Hermes *binding* would have been. Hermes' image field
- * could resolve from a connected integration at render time; Loom has no
- * resolution layer, so a src is a plain URL in the tree and a host that wants
- * dynamic media resolves it before rendering and projects it through a slot
- * (0008).
+ * This is also where a Hermes *binding* would have been, and that sentence stood
+ * here arguing the case was closed for seven weeks after it stopped being true.
+ * What it said was *"Loom has no resolution layer, so a src is a plain URL in
+ * the tree"*; the resolution layer arrived on 15 August with
+ * [0058](../../decisions/0058-a-binding-is-a-question-the-tree-asks-answered-before-the-walk.md),
+ * and `loom.plate` is the half of it that belongs to a picture.
+ *
+ * **This primitive is unchanged and is still the right one for an authored
+ * image.** `src` stays required, which is the guarantee every image in every
+ * stored tree relies on and the reason the bound case is a second primitive
+ * rather than an optional prop here
+ * ([0233](../../decisions/0233-a-bound-twin-is-earned-by-a-system-of-record-and-a-row-shape-the-primitive-can-declare.md)).
+ * A host that resolves its media before rendering and projects it through a slot
+ * still may, and for a one-off picture that is still the simplest thing.
  */
 
 const props = z

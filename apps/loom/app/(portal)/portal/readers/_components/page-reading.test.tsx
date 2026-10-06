@@ -8,6 +8,7 @@ import type { PageName } from "@/app/(portal)/_lib/page-name"
 import type { PartName } from "@/app/(portal)/_lib/part-name"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
+import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
 
 import { PageReadingCard } from "./page-reading"
@@ -60,7 +61,8 @@ const cardFor = (
   tallies: readonly StoredTally[],
   live?: number,
   skipping?: PageSkipping,
-  stopping?: PageStopping
+  stopping?: PageStopping,
+  pacing?: PagePacing
 ) => {
   const reading = pageReadings(revisionReadings(tallies, names))[0]!
 
@@ -81,6 +83,11 @@ const cardFor = (
        * other reading off the same join, so a card without the one has neither.
        */
       stopping={stopping}
+      /*
+       * And absent in the same cases again, off the same join: whether the
+       * people who got to a part had time to read its words.
+       */
+      pacing={pacing}
     />
   )
 }

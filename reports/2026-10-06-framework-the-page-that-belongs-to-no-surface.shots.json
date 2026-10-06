@@ -1,0 +1,7 @@
+{
+  "outDir": "reports",
+  "shots": [
+    { "out": "2026-10-06-framework-not-found-wide.png", "path": "/this-address-has-no-route", "viewport": { "width": 1280, "height": 760, "label": "wide" }, "waitFor": "text=Not found" },
+    { "out": "2026-10-06-framework-not-found-phone.png", "path": "/this-address-has-no-route", "viewport": "phone", "waitFor": "text=Not found" }
+  ]
+}

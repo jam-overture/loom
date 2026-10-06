@@ -5,6 +5,8 @@ import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
 import {
   describeReaderSignalStoreError,
   pageReadingOf,
+  pageViewReadingOf,
+  readingPaceOf,
   readingProgressOf,
 } from "@jam-overture/loom/signals"
 
@@ -19,6 +21,7 @@ import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-nam
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
 import { portalReaderSignals, portalReaderTallies, signalsAreDurable } from "@/app/(portal)/_lib/reader-signals"
 import { portalRegistry } from "@/app/(portal)/_lib/registry"
+import { pacingOf, type PagePacing } from "@/app/(portal)/_lib/pacing"
 import { skippingComparable, skippingFrom, type PageSkipping } from "@/app/(portal)/_lib/skipped"
 import { stoppingOf, type PageStopping } from "@/app/(portal)/_lib/stopping"
 import { pageReadings, revisionReadings } from "@/app/(portal)/_lib/reading-view"
@@ -123,6 +126,31 @@ const ReadersPage = async ({
   const arriving = buffered.ok ? buffered.value.batches.length > 0 : false
 
   /*
+   * How generous the counters are, measured rather than argued.
+   *
+   * Every distinct count in this subsystem is inflated by the page views that
+   * straddled a roll-up boundary, and these rows are the one place a deployment
+   * can see by how much: a page view is counted a second time at the door, as a
+   * single event, so the difference between the two numbers *is* the straddle.
+   *
+   * It matters here and nowhere else on the screen. A reader count that is too
+   * high makes the mean time per reader too short, and too short calls more
+   * parts hurried than should be — the one direction a verdict built to be safe
+   * cannot afford to be wrong in. The drop-off reading is a ratio between two
+   * parts of one page, so the same inflation is on both sides of it and very
+   * nearly divides out; the pace reading divides a time by a count and has
+   * nothing to cancel against.
+   *
+   * **A failed read costs the correction and not the screen.** It is applied
+   * where it is available and the section says which figure it used, which is
+   * the honest version of a number nobody can check.
+   */
+  const doors = await portalReaderTallies.pageViews(
+    scoped === undefined ? undefined : { treeId: scoped }
+  )
+  const inflations = doors.ok ? pageViewReadingOf(doors.value).revisions : []
+
+  /*
    * One read of each page the counters mention, serving three questions at
    * once: what the page is called, what its parts are called, and — the one
    * this screen used to throw away — which revision of it is being served.
@@ -171,6 +199,14 @@ const ReadersPage = async ({
    */
   const stopped = new Map<string, PageStopping>()
 
+  /*
+   * And whether the people who got to a part had time to read it, which is the
+   * third reading off the same join and the one the other two cannot contradict
+   * without it. Reach says a part was on screen; this says what that was long
+   * enough for.
+   */
+  const paced = new Map<string, PagePacing>()
+
   for (const reading of readings) {
     const newest = reading.revisions[0]!.revision
     const tree = served.trees.get(reading.treeId)
@@ -200,6 +236,23 @@ const ReadersPage = async ({
 
     skipped.set(reading.treeId, skippingFrom(joined, names))
     stopped.set(reading.treeId, stoppingOf(readingProgressOf(joined), names))
+
+    /*
+     * The correction for *this page at this version*, not the deployment's
+     * average. Straddling is a property of how long a page's own readers stay
+     * against how long its roll-up window is, so a busy page's inflation
+     * applied to a quiet one would be a made-up number with three decimal
+     * places on it. Absent is `0`, which is no correction and is stated on the
+     * surface as the figure that was used.
+     */
+    const door = inflations.find(
+      (row) => row.treeId === reading.treeId && row.revision === newest
+    )
+
+    paced.set(
+      reading.treeId,
+      pacingOf(readingPaceOf(joined, { inflation: door?.inflation ?? 0 }), names)
+    )
   }
 
   /*
@@ -319,6 +372,10 @@ const ReadersPage = async ({
                * card covers both rather than two identical ones.
                */
               stopping={stopped.get(reading.treeId)}
+              /*
+               * Absent in the same cases as the two above, off the same join.
+               */
+              pacing={paced.get(reading.treeId)}
             />
           ))}
         </>
