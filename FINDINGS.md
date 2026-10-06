@@ -41799,8 +41799,10 @@ the class exactly closed** by `docs-44-where-a-specifier-breaks`, which added
 `_components/entry-points.test.tsx`; **the two of the six chrome components that
 were not decoration closed** by `docs-46-the-only-way-to-any-of-this`, which
 added `_components/sidebar.test.tsx` and `_components/mobile-nav.test.tsx` and
-found a defect in the second of them. **Four chrome components remain**, all of
-them decoration: `callout`, `code-block`, `submit-seam`, `theme-toggle`.
+found a defect in the second of them. **Closed**, 6 October, by
+`docs-47-the-controls-nothing-rendered`: the last four — `callout`,
+`code-block`, `submit-seam`, `theme-toggle` — have render tests, and two of the
+four were not decoration at all.
 
 > **Noted, 4 October.** `docs-45-which-way-round-a-theme-is` adds three produced
 > blocks to the theming page and `_components/palette-scheme.test.tsx` in the
@@ -41809,6 +41811,30 @@ them decoration: `callout`, `code-block`, `submit-seam`, `theme-toggle`.
 > them that are not decoration. Written here rather than as a new entry because
 > *a run did the thing the class asks for* is not a finding; it is what the
 > entry is for.
+
+> **Closed, 6 October**, by `docs-47-the-controls-nothing-rendered`: fifty-seven
+> assertions over the last four, and **this entry was wrong about them.** It
+> called all four decoration. Two of them are the only controls on the site that
+> are not navigation — the copy button on every fenced block, and the theme
+> toggle in the header — and both were broken, one of them severely:
+>
+> - the **theme toggle** read `localStorage` unguarded inside an effect, so a
+>   reader who has blocked site data got *This page couldn't load* instead of
+>   every page of this site. Photographed both ways in the 6 October report;
+>   and `system` never followed the machine after the page had loaded, which is
+>   the one thing `system` means.
+> - the **copy button** was `opacity-0` revealed by `group-hover`, which
+>   Tailwind 4 compiles inside `@media (hover: hover)` — invisible, full-size
+>   and clickable, on every phone and tablet. Its own entry is below.
+> - the **callout** and the seven **submit-seam** blocks were as this entry
+>   expected: correct, and held by nothing.
+>
+> The correction worth carrying forward is not about these four. It is that
+> *decoration* was a judgement made from the outside, about components nobody
+> had rendered — which is the same move the entry was written to argue against.
+> Forty-six mutations were introduced one at a time against the four and none
+> survived, so the sorting into decoration and not can now be done by reading
+> what goes red.
 
 > **Noted, 5 October.** `docs-46-the-only-way-to-any-of-this` closes `sidebar`
 > and `mobile-nav` — twenty-five assertions, and the first of the two kinds of
@@ -44484,3 +44510,182 @@ plainly which version it is answering for and declines rather than laying one
 version's counters over another version's page. This is here so that the next
 routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
+## 2026-10-06 — Tailwind 4 compiles every hover variant inside `@media (hover: hover)`, so a control revealed on hover is a control no phone can ever show
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/_components/shell/`) for the one instance outside this
+lane · **Status:** open — **the docs instance is fixed on
+`docs-47-the-controls-nothing-rendered`**; the portal instance is named for its
+owner to judge rather than changed from here
+
+`group-hover:opacity-100` does not compile to a bare `:hover` rule. Checked
+against the compiler this repository installs (`tailwindcss@4.3.3`), given the
+four classes the docs copy button carried:
+
+```
+  .opacity-0 { opacity: 0% }
+  @media (hover: hover) {
+    .group-hover\:opacity-100:is(:where(.group):hover *) { opacity: 100% }
+  }
+  .focus-visible\:opacity-100:focus-visible { opacity: 100% }
+```
+
+**The reveal is inside the media query and the hiding is not.** On any device
+whose primary pointer cannot hover — every phone, every tablet — the rule that
+would show the element is never evaluated, and the one that hides it always is.
+The element keeps its box, its size and its hit area, so what a reader gets is
+not a missing control: it is an invisible one, in front of the content, that
+works when tapped.
+
+This is new in Tailwind 4. Under 3.x `hover:` was a plain `:hover` rule, so the
+pattern worked on touch by accident of the sticky-hover behaviour browsers have
+for taps. Nothing warns, nothing fails, and both halves of the class list read
+correctly to anybody who has written this pattern before.
+
+**Two instances in `apps/loom`, and they are the only two.** A sweep for every
+`group-hover:`, `hover:w-`, `hover:block`, `hover:flex` and `hover:visible`
+outside tests finds seven uses. Three are `translate` on `aria-hidden` arrows in
+`(demo)`, which lose nothing on a phone. The other four are these:
+
+| | what hover was the only way to reach |
+| --- | --- |
+| `(docs)/_components/code-block.tsx` | the **copy button** on every fenced block on the documentation site, 100% opaque in the layout and invisible at every width a phone has. Fixed on this branch |
+| `(portal)/_components/shell/sidebar.tsx` + `sidebar-nav.tsx` | the rail's **width and every label in it**. `hover:w-[275px]` is gated the same way; `group-focus-within:opacity-100` is **not** (`focus-within` is not a hover variant), so the labels do come back once something in the rail has focus |
+
+**The portal instance is filed and not touched, and the judgement is genuinely
+open.** The rail is `fixed … w-14` with no breakpoint prefix, so it renders at
+390 pixels as well as at 1280; on a phone the first thing a reader sees is six
+icons with no way to widen them, and the labels arrive only after they have
+tapped one — which is to say after they have already navigated somewhere. Whether
+that matters depends on something this lane does not know: whether the portal
+intends to be used on a phone at all, and whether another control covers it. The
+rail's own docblock argues that *"a rail would be navigable and unreadable at the
+same time, which is worse than either"*, about a keyboard; the same sentence
+applies to a thumb, which is why it is worth putting in front of its owner.
+
+**What fixes it, where it needs fixing.** Not removing the reveal: gate the
+*hiding* instead, so the base state is visible and only a device that can hover
+hides it.
+
+```
+transition-opacity [@media(hover:hover)]:opacity-0 group-hover:opacity-100 focus-visible:opacity-100
+```
+
+**Specificity decides this, not source order**, which is the part worth copying.
+The gate compiles to `0,1,0` and both reveals to `0,2,0`, so the reveals win
+wherever they apply no matter which rule Tailwind emits first — and Tailwind does
+emit the gate last, so a version of this written with `opacity-100` as the base
+class would be a coin toss between two `0,1,0` rules. Checked rather than
+assumed.
+
+**What holds it, honestly.** jsdom has no stylesheet, so the render test added
+this run asserts the *class name* — that the hiding carries a hover condition and
+that a bare `opacity-0` is not on the button. That is a weaker instrument than
+the compiled rule and it is the one a unit test has. A check that compiled the
+site's CSS and asserted the cascade would be the real thing and is nobody's today;
+named here rather than built, because it belongs beside whatever reads the built
+stylesheet rather than in one route group.
+## 2026-10-06 — an effect that reads `localStorage` is a page that fails for a reader who blocked it, and the inline script beside it had guarded the same read since the day it was written
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` (fixed on this branch) ·
+**Status:** open as a **class**, with the docs instance closed — a sweep for the
+shape in the other route groups is what remains, and it is each owner's
+
+`window.localStorage` is not a store that comes back empty where a reader has
+blocked site data. **It is a property whose getter throws.** This repository
+already knows that and says so in the one place it had to: `start-state.ts` blocks
+storage for a screenshot by replacing the accessor with one that throws a
+`SecurityError`, because that is what the browser does
+([0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)).
+
+`(docs)/_components/theme-toggle.tsx` read the same key the inline theme script
+reads, and read it unguarded, **inside `useEffect`**. The two halves of that
+sentence are what make it expensive:
+
+- The inline script in the root layout has had `try { … } catch` around its read
+  since it was written, and a docblock explaining why.
+- An exception thrown in an effect is not a control that does not work. It
+  propagates to the nearest error boundary, which in the App Router is the route's
+  — so **every documentation page became an error screen** for a reader with site
+  data blocked. The toggle is in the layout, so there is no page of the site that
+  escapes it.
+
+Nothing on this site could have caught it. jsdom's `localStorage` works, so a
+render test passes; the shot harness can produce the state and no shot asked for
+it; and the reader it fails for never files a bug, because what they see is a site
+that is broken rather than a preference that was not kept.
+
+**The fix, which is the whole of it:** read inside `try`, treat a refusal as *no
+choice stored*, and let the write fail the same way. A reader who blocked storage
+gets the theme they ask for and does not get it remembered, which is the most any
+page can offer somewhere it may not write.
+
+**The sweep is done and there is nothing to assign, which is the useful half.**
+`localStorage` and `sessionStorage` appear outside tests in exactly two route
+groups. `(lessons)/_lib/reading.ts` is the model and had already got this right
+before this run: it wraps the read, treats a throw as a distinct `storage-blocked`
+reason rather than as an empty record, probes separately for whether a write
+would land, and says in a docblock why *a browser that will not be read from will
+not be written to either*. `(docs)` is the one that did not, and it is fixed here.
+
+So this is filed as a **pattern to recognise** rather than as work owed. What
+makes it worth an entry is that the two lanes reached opposite answers with no
+disagreement between them: the lessons lane was building a feature *about* the
+record, so the blocked case was in front of it, and the docs lane was writing a
+toggle, where the storage is incidental. The shape to watch for is the second
+one — storage read in passing, by something mounted in a layout. The one extra
+thing to know when the next surface reaches for it: a guard in a `use client`
+component that runs at **render** rather than in an effect is a different and
+worse bug, because it takes the server render with it.
+## 2026-10-06 — the screenshot harness's `phone` is a width and not a device, so every phone shot in this repository was taken by a browser with a mouse
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
+(`tools/screenshot/`, `tools/specimen/`) · **Status:** open — **not urgent and
+not nothing**; what it cost this run is one visual, and what it costs generally
+is that a class of defect is invisible to the instrument this repository
+photographs phones with
+
+`VIEWPORTS.phone` is `390x844` at `deviceScaleFactor: 2`. That is the whole of
+it: there is no `hasTouch`, no `isMobile` and no `pointer`/`hover` emulation
+anywhere in either harness. Chromium therefore reports a **fine, hovering
+pointer** in a 390-pixel window, so `@media (hover: hover)` and
+`@media (pointer: fine)` are both true in every phone shot this repository has
+ever taken.
+
+For most of what gets photographed that changes nothing, which is why it has
+never come up. It changes everything for anything *gated on the pointer*, and
+Tailwind 4 gates a great deal on it by default: every `hover:` and `group-hover:`
+utility compiles inside `@media (hover: hover)` (see the entry above). So a
+control that is revealed on hover is photographed in its **hidden** state at
+phone width and in its hidden state at desktop width, and the two pictures agree
+— while the real phone is in a third state the harness cannot produce, where the
+reveal never comes.
+
+**What it cost this run, concretely.** The copy button on every code block was
+invisible on touch devices and is fixed on `docs-47-the-controls-nothing-rendered`.
+The fix cannot be photographed. `2026-10-06-docs-copy-button-phone.png` in that
+report is the clipped code block with no button on it, and **the same picture
+comes back from the fixed build and the shipped one**, because at a hover-capable
+390 pixels both are `opacity: 0`. The evidence in the report is the compiled CSS
+and a class-name assertion instead, and both are weaker than a picture would have
+been.
+
+**What would close it**, smallest first, and none of it is this lane's:
+
+1. A `touch: true` member on a shot, which maps to Playwright's
+   `hasTouch` and `isMobile` on the context. It is a context property, so it
+   belongs with `start` rather than in a `do` list, and it stays data in the
+   sense 0159 and 0195 mean.
+2. Making it the **default for the `phone` viewport**, which is the honest
+   version — a named viewport called `phone` that is not a phone is a trap, and
+   the measurement every lane quotes beside a phone shot (`scrollWidth` against
+   `innerWidth`) is exactly the kind of number people read as *this is what a
+   phone gets*.
+
+The second changes existing pictures, so it is a judgement rather than an
+addition: it would be worth knowing how many of the repository's phone shots move
+before choosing. Flagged rather than decided.
+
+**Related and not the same.** The 5 October entry about `pinNavigation` is also a
+limit of this harness and is about a *state* a shot cannot reach. This one is
+about the *device* a shot is taken on, which no step could fix.
