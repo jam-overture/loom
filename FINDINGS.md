@@ -79,7 +79,7 @@ made it by default
 
 `declarations.test.ts` holds that lesson's fence of the `Behaviour` type against
 `src/render/behaviour.ts` character for character, and
-[0231](decisions/0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
 gave `build` a third parameter. The fence is mechanical and I would not file it.
 
 **The paragraph under it is not.** It read:
@@ -1157,7 +1157,7 @@ three shapes below. A primitive may now name one of its own props as where a
 control takes its name from — `names: { present: "label" }` — and the string it
 declared stays underneath as the floor, so a node that writes nothing is
 announced by the library's word rather than by none.
-[0231](decisions/0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
 records it, and the thing that made the second shape cheaper than this entry
 judged it is that no props cross the seam: the runtime reads the one prop the
 primitive named and hands `build` a string, so the `ARCHITECTURAL` half is still

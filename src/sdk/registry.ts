@@ -76,7 +76,7 @@ export type RegisteredPrimitive = {
   readonly behaviours: readonly BehaviourName[]
   /**
    * The prop each of those controls is named by, where its author said so
-   * (0231). Empty for almost every primitive that takes a control at all: a
+   * (0234). Empty for almost every primitive that takes a control at all: a
    * control's name is normally a string the primitive declared, and this is the
    * exception for the trigger whose words are the page's.
    */

@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-05 · **Section:** §4h (the behaviour seam) · **Lane:** `Loom daily build`
 **Branch:** `framework-55-the-word-the-tree-wrote`, cut from `main` at `6686895`. Not stacked.
-**Records:** [0231](../decisions/0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md). **None superseded.**
+**Records:** [0234](../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md). **None superseded.**
 
 ![Three triggers of one primitive, two named by their nodes and one by the library](2026-10-05-framework-the-word-the-tree-wrote-presented.png)
 
@@ -63,7 +63,7 @@ had the same problem about a *number* and solved it by letting the primitive
 declare, through a channel the runtime owns, rather than by opening props to a
 control. The difference is that where a slider rests is a fact about the
 primitive and a call to action is a fact about the node, so this one had to be
-per node — and what may carry it there is the whole of what 0231 decides.
+per node — and what may carry it there is the whole of what 0234 decides.
 
 ## Decisions I took that nothing specified
 

@@ -1,8 +1,17 @@
-# 0231. A primitive may name a control from the tree, and its declared string is the floor
+# 0234. A primitive may name a control from the tree, and its declared string is the floor
 
 **Status:** Accepted
 **Date:** 2026-10-05
 **Section:** §4h — the behaviour seam
+
+> **Renumbered on 2026-10-06**, from 0231, when the branch that carried it
+> (#528) was merged. `main` had meanwhile accepted a different 0231 — *a funnel
+> is three shares of the arrivals, and the straddle is the one error here that
+> leans down* (#527, merged the same morning) — and two records sharing a number
+> is fatal (0097). 0232 and 0233 are claimed by open pull requests, so this took
+> the next number free on `main` and on every open branch. This record was
+> written on 5 October and nothing in it changed but its number; references were
+> updated with it.
 
 ## Context
 

@@ -105,7 +105,7 @@ export {
  * its name from, the runtime reads it off the node, and the declared string stays
  * underneath as the floor; `control-name.ts` carries why that is narrower than a
  * reserved prop, and
- * [0231](../../decisions/0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+ * [0234](../../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
  * records what was rejected.
  *
  * What a control hands back is not the same question as what a primitive may say

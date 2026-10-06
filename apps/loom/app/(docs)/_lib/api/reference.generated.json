@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5476,7 +5476,7 @@
       "files": 196,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5941,7 +5941,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6833,7 +6833,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7424,7 +7424,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7652,7 +7652,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8111,7 +8111,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8465,7 +8465,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8585,7 +8585,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 38,
+      "files": 39,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8598,7 +8598,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8977,6 +8977,62 @@
               "signature": "const nodeReadingsOf: (readings: ReaderReadings) => readonly NodeReading[]",
               "truncated": false,
               "summary": "Readings as rows, longest on screen first."
+            }
+          ]
+        },
+        {
+          "module": "signals/funnel",
+          "title": "Funnel",
+          "summary": "A funnel, read against the readers who arrived.",
+          "symbols": [
+            {
+              "name": "FunnelStage",
+              "kind": "type",
+              "signature": "type FunnelStage = \n/** Arrivals that never satisfied the pair's first end. */\n\"before\"\n/** Arrivals that satisfied the first end and not the second. */\n | \"between\";",
+              "truncated": false,
+              "summary": "Where a funnel loses readers, of the two places it can."
+            },
+            {
+              "name": "FUNNEL_STAGES",
+              "kind": "value",
+              "signature": "const FUNNEL_STAGES: readonly FunnelStage[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeFunnelStage",
+              "kind": "function",
+              "signature": "const describeFunnelStage: (stage: FunnelStage) => string",
+              "truncated": false,
+              "summary": "One line per stage, for a surface putting the reading in front of a person."
+            },
+            {
+              "name": "FunnelShare",
+              "kind": "type",
+              "signature": "type FunnelShare = {\n    /**\n     * The estimate, against the page views the rollups counted:\n     * `count ÷ appearances`.\n     *\n     * The figure to show. `null` under a silence or where the counters and the\n     * row cannot be reconciled.\n     */\n    readonly share: number | null;\n    /**\n     * The ceiling, against the page views that began: `count ÷ opened`, never\n     * above 1.\n     *\n     * For an end nearly every reader satisfies it is 1 and says nothing, which is\n     * the ordinary state rather than a fault. `null` under a silence.\n     */\n    readonly atMost: number | null;\n    /**\n     * The share applied to the exact count of arrivals — the number a sentence\n     * says out loud.\n     *\n     * One division of two whole numbers rather than the share multiplied back up\n     *: seven in a hundred times a hundred is seven and a quadrillionth in\n     * a float, which breaks its own ceiling. Deliberately not rounded; a surface\n     * that rounds it is saying how precise it thinks it is.\n     *\n     * Withheld while any opening is pending, because projecting a folded rate\n     * onto page views no rollup has reached answers a question about readers\n     * nobody measured.\n     */\n    readonly readers: number | null;\n    /**\n     * The most readers it could be: the smaller of the count and the openings,\n     * which is a whole number of real page views either way. `null` under a\n     * silence.\n     */\n    readonly atMostReaders: number | null;\n};",
+              "truncated": false,
+              "summary": "A count of page views, put as a share of the readers there were."
+            },
+            {
+              "name": "PairReach",
+              "kind": "type",
+              "signature": "type PairReach = {\n    readonly pair: FunnelPair;\n    /**\n     * Page views that satisfied `from`, exactly as stored: added across rollup\n     * windows and therefore generous.\n     */\n    readonly reached: number;\n    /**\n     * Page views that satisfied both ends, exactly as stored.\n     *\n     * Added across windows like everything else, and **the one counter here that\n     * a straddle can lose rather than duplicate** — see the module note. Never\n     * above {@link PairReach.reached}, because every window's answer satisfies\n     * that and a sum of such answers does too.\n     */\n    readonly converted: number;\n    /** When the funnel row last moved. */\n    readonly updatedAt: string;\n    /**\n     * `converted ÷ reached` — of the readers who got to the first end, the share\n     * that finished.\n     *\n     * Two counts off one row, so the straddle over-count is in both and very\n     * nearly divides out. What does *not* divide out is the conversion a straddle\n     * splits across two windows and loses, so this is a **floor** on the true\n     * rate wherever {@link FunnelReach.exact} is false.\n     *\n     * `null` where nothing reached the first end: the question has no answer\n     * rather than the answer nought.\n     */\n    readonly rate: number | null;\n    /**\n     * The most the true rate could be, given the straddle §8 measured.\n     *\n     * A page view that straddled a window could have had its conversion split\n     * and lost, so the true `converted` is at most `converted + split` where\n     * `split` is the smaller of the drift and the conversions still missing. The\n     * same straddle inflates `reached`, so the true `reached` is at least\n     * `reached − drift`. Both worst cases together, capped at 1.\n     *\n     * It closes onto {@link PairReach.rate} where nobody's visit spanned two\n     * windows, and it opens wide where a deployment's rollup window is short\n     * relative to how long readers stay — which is the first time the rollup\n     * window's length can be read off a funnel rather than argued about.\n     *\n     * `null` under a silence, where there is no measured drift to bound it with,\n     * and `null` wherever {@link PairReach.rate} is.\n     */\n    readonly rateAtMost: number | null;\n    /** Of the readers who arrived, the share that got to the first end. */\n    readonly entry: FunnelShare;\n    /** Of the readers who arrived, the share that got to both. */\n    readonly conversion: FunnelShare;\n    /**\n     * The share of arrivals that never reached the first end.\n     *\n     * `null` under a silence or where {@link PairReach.unreconciled}. Where it is\n     * given it is one of three shares that sum to 1.\n     */\n    readonly lostBefore: number | null;\n    /**\n     * The share of arrivals that reached the first end and did not convert.\n     *\n     * `null` on the same terms as {@link PairReach.lostBefore}.\n     */\n    readonly lostBetween: number | null;\n    /**\n     * Which of the two stages cost more readers, by headcount rather than by\n     * share, which is the ranking rule for a fall between two siblings at its\n     * two-element case.\n     *\n     * `null` where neither is worse: the two losses are equal, which includes the\n     * funnel that loses nobody. It is *neither stage is the one to look at*\n     * rather than *there is nothing to look at*, and the two losses are published\n     * beside it either way.\n     */\n    readonly worse: FunnelStage | null;\n    /**\n     * More readers reached the first end than there were page views to reach it\n     * in, so no share here can be drawn.\n     *\n     * Rows written by the same rollups cannot produce this: a view that satisfied\n     * an end in a window is a view that appeared in it. What can is a funnel row\n     * older than the page-view column, which is what an upgraded deployment's\n     * first reading looks like, or a caller who concatenated two reads of the\n     * counters.\n     *\n     * It is not the ordinary straddle — `reached` above the *openings* is\n     * expected, and is what an {@link FunnelShare.atMost} of 1 means.\n     */\n    readonly unreconciled: boolean;\n};",
+              "truncated": false,
+              "summary": "One pair of a revision, as stored and as a share of the readers there were."
+            },
+            {
+              "name": "FunnelReach",
+              "kind": "type",
+              "signature": "type FunnelReach = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** Page views that began on this revision. Exact, and addable. */\n    readonly opened: number;\n    /** The same page views as the rollups counted them: once per window each appeared in. */\n    readonly appearances: number;\n    /** Appearances in excess of openings — the straddle, measured. Never negative. */\n    readonly drift: number;\n    /** Openings whose reading no rollup has folded yet. The other sign of the same subtraction. */\n    readonly pending: number;\n    /** `drift ÷ opened`: how generous every distinct count here is. `null` when nothing opened. */\n    readonly inflation: number | null;\n    /** When the page-view row last moved, or `null` where there is no row. */\n    readonly updatedAt: string | null;\n    /** Set where no share can be given, and the reason. `null` where they can. */\n    readonly silence: ReachSilence | null;\n    /**\n     * Nobody's visit spanned two windows, so there is nothing to divide out: the\n     * rates are exact and each `rateAtMost` equals its `rate`.\n     *\n     * False under a silence, and false while any opening is pending.\n     */\n    readonly exact: boolean;\n    /**\n     * The revision's pairs, ordered by their two ends so a screen does not\n     * reorder on a refresh. Deliberately not ranked — see the module note.\n     */\n    readonly pairs: readonly PairReach[];\n    /** Page-view rows for another tree or revision, and ignored. */\n    readonly foreign: number;\n    /** Page-view rows for this revision beyond the first, where the first stands. */\n    readonly duplicated: number;\n    /**\n     * Funnel rows for another tree or revision, and ignored.\n     *\n     * Filtered rather than trusted for the same reason the page-view rows are:\n     * answering one revision's question with another revision's counters is a\n     * figure nothing downstream could catch.\n     */\n    readonly foreignPairs: number;\n    /**\n     * Funnel rows naming a pair already seen, where every one after the first was\n     * ignored.\n     *\n     * A store keeps one row per pair per revision, so this is a caller who\n     * concatenated two reads. Adding them would double a total that is already\n     * one.\n     */\n    readonly duplicatedPairs: number;\n};",
+              "truncated": false,
+              "summary": "A revision's funnels, read against the exact number of readers that revision had."
+            },
+            {
+              "name": "funnelReachOf",
+              "kind": "function",
+              "signature": "const funnelReachOf: (where: RevisionOf, funnels: readonly StoredFunnel[], rows: readonly StoredPageViews[]) => FunnelReach",
+              "truncated": false,
+              "summary": "Read a revision's funnels against the readers that revision had."
             }
           ]
         },
@@ -9390,6 +9446,34 @@
               "signature": "const pageViewReadingOf: (rows: readonly StoredPageViews[]) => PageViewReading",
               "truncated": false,
               "summary": "Rows from the store, read as something a screen may show."
+            },
+            {
+              "name": "PageViewsFor",
+              "kind": "type",
+              "signature": "type PageViewsFor = {\n    /**\n     * The row, read through {@link pageViewReadingOf}, or `null` where this\n     * revision has none.\n     *\n     * Read through the reading rather than subtracted again, because one\n     * definition of drift, pending and inflation is the point: a second would be\n     * a second place for them to disagree with the counter they describe.\n     */\n    readonly measured: RevisionPageViews | null;\n    /**\n     * Rows for another tree or another revision, and ignored.\n     *\n     * Dividing one revision's counters by another's readers is the mistake that\n     * would make every rate taken off them quietly wrong.\n     */\n    readonly foreign: number;\n    /**\n     * Rows for this tree and revision beyond the first, where every one after it\n     * was ignored.\n     *\n     * A store keeps one row per revision, so this cannot happen from one read —\n     * it happens when a caller concatenates two. Adding them is wrong, because\n     * the openings are already a total and would double; taking the last is\n     * wrong, because it is not the truer one. So the first row stands and the\n     * fact is reported.\n     */\n    readonly duplicated: number;\n};",
+              "truncated": false,
+              "summary": "The page-view row a reading of one revision should be divided by, picked out of a window of rows."
+            },
+            {
+              "name": "RevisionOf",
+              "kind": "type",
+              "signature": "type RevisionOf = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n};",
+              "truncated": false,
+              "summary": "A revision of a tree, which is all this rule needs to be asked."
+            },
+            {
+              "name": "pageViewsFor",
+              "kind": "function",
+              "signature": "const pageViewsFor: (where: RevisionOf, rows: readonly StoredPageViews[]) => PageViewsFor",
+              "truncated": false,
+              "summary": "Pick the page-view row for one revision out of a window of rows."
+            },
+            {
+              "name": "inflationFor",
+              "kind": "function",
+              "signature": "const inflationFor: (where: RevisionOf, rows: readonly StoredPageViews[]) => number | null",
+              "truncated": false,
+              "summary": "The straddle correction for one revision of one page: `drift ÷ opened` off that page's own door row."
             }
           ]
         },
@@ -9935,7 +10019,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10078,7 +10162,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10145,7 +10229,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10742,7 +10826,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10816,7 +10900,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11274,7 +11358,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1277,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

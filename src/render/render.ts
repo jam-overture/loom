@@ -648,7 +648,7 @@ const nodeAnchorFor = (
  * says and not the language label its own primitive rendered beside it.
  *
  * A control's *name* is read from the tree too, where the primitive named a prop
- * for it (0231), and from nowhere else: a type that named none, or a node that
+ * for it (0234), and from nowhere else: a type that named none, or a node that
  * left the prop out, gets the string the primitive declared. Read here rather
  * than in the seam because this is where a node's props are, and a behaviour
  * receives the resolved word rather than the props it came out of.
