@@ -68,7 +68,9 @@ The five sentences, each the load-bearing one under its fence:
 | 29 | *the **three** zeros are the control* | the fence's lines ending `: 0` |
 | 32 | *the **four** that say what each function handed to the page takes* | `of those, handed to the page: 4` |
 | 32 | *the **two** `in prose` rows on `capture.ts`* | the rows reading `capture.ts in prose` |
-| 33 | ***two** primitives in the starter library read a binding* | the names on `primitives that read a binding:` |
+| 33 | *Today **five** primitives read a binding* | the names on `primitives that read a binding:` |
+
+*(`Loom merge`, 6 October: the lesson-33 pin above was written against the sentence *two primitives in the starter library read a binding*. #529 landed three bound twins while this branch was open, and lesson 33 now carries that sentence as history — *on the day it was written* — with the state of play in a *Today five…* sentence below it. The pin was moved to that sentence rather than the historical one edited, which is the remedy the check's own message names.)*
 
 Lesson 29's is the one worth pointing at. The mark on that fence says the three
 control zeros *are not covered by it* — "if one of those is what drifted, this

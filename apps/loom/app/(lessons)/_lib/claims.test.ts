@@ -489,13 +489,15 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
     lesson: 33,
     file: "33-shortfall.md",
     what: "the starter primitives that read a binding",
-    phrase: /(\w+) primitives in the starter library read a binding/,
+    phrase: /Today (\w+) primitives read a binding/,
     occurrences: 1,
     fence: /^primitives that read a binding:/,
     count: (lines) => namesOn(lines, /^primitives that read a binding: (.+)$/),
     matters:
       "the sentence under the last three lines of lesson 33, where the state of play is the " +
-      "point and a third primitive reading a binding would make it wrong",
+      "point and a further primitive reading a binding would make it wrong. The pin is the " +
+      "`Today …` sentence and not the `On the day it was written …` one above it, which is " +
+      "history and says two on purpose",
   },
 ]
 
