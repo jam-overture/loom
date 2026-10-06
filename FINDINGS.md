@@ -8,6 +8,64 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/`, `src/role.ts`) · **Status:** open — **nothing is blocked**;
+the site composes the primitive today and the list is three lines, with the
+trade stated and asserted
+
+`loom.inline-link` landed in #517 and `/what-you-run` composes it today, which
+closes the 4 October entry above. Using it turned up two things the library
+does not say about it, and both are the same missing declaration.
+
+**The register needs to know which types sit inside a sentence, and has to
+guess.** Every paragraph on the marketing site was one text node until this
+primitive arrived. A paragraph with a link in it is three children, so every
+rule in `voice.test.ts` would have been handed three fragments where a reader
+sees one sentence — and the 30-word ceiling would have stopped applying to any
+sentence containing a link, silently, with the whole sweep still green. The fix
+was to join a run of inline children back into the one string a reader reads,
+and joining needs a rule for which children are inline. So
+`app/(marketing)/_lib/words.ts` now carries:
+
+```ts
+export const INLINE_TYPES: readonly string[] = [
+  "loom.inline-link",
+  "loom.emphasis",
+  "loom.code-span",
+]
+```
+
+**That is matching on the type string, which is what `role` exists to stop.**
+0114's own reasoning is that a consumer should be able to ask the registry a
+categorical question rather than keep a list of names, and `PrimitiveRole` has
+exactly one member. A second one — `"phrase"`, or whatever it should be called
+— would let this read the registry, and would let the next surface that
+composes a sentence read it too. The three above are the whole of the inline
+layer today, so the list is right and it is right by inspection rather than by
+construction.
+
+It is read off a list rather than off the stylesheet on purpose, and that half
+is not a complaint: `display: inline` is in a component or a CSS rule, and
+reading a rendering decision back out of either would be guessing. The
+declaration is the thing that is missing, not a better way to infer it.
+
+**And nothing holds the primitive's own placement rule.** Its docblock, and
+`library.test.ts`'s fixture comment, both say a paragraph is the only place it
+is allowed to be — which is correct and is the consequence of `color: inherit`:
+a phrase with no sentence around it borrows the colour of whatever block it
+landed in, underlined, at that block's font size, with nothing either side of
+it to say what it is part of. Nothing in `src/` refuses that. A composition, a
+model-authored tree, or another surface can put one as a direct child of a
+`loom.section` and get exactly that, with every test in the repository green.
+
+`app/(marketing)/_lib/inline.test.ts` now holds it for **this** route group, in
+every one of the 126 states this site can be served in. That is one surface. The
+rule is the library's and the other three get it for free if it moves.
+
+**Neither is this lane's to fix.** A role is a member of a closed set in `src/`
+and a placement refusal is the registry's; §4d adds pages and files findings.
 ## 2026-10-05 — four links, one body, same syntax: the mangling is the URL and it is neither the branch name nor `decisions/`
 
 **Filed by:** `Loom daily build` · **Owned by:** `@jonathanbravecredit` ·
@@ -43870,9 +43928,14 @@ a doc comment and this ledger, neither of which a host reads.
 ## 2026-10-04 — a link inside a sentence is the one kind of link this library cannot draw
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
-(`src/primitives/`) · **Status:** open — **nothing is blocked**; the marketing
-site shipped the control the library does have and the sentence it wanted is
-written down here
+(`src/primitives/`) · **Status:** **closed, 6 October** — `loom.inline-link`
+landed in #517, and the sentence this was filed for carries it in
+`marketing-61-the-link-inside-the-sentence`. The primitive answered all three
+objections below rather than one: `color: inherit` instead of `accent`, an
+underline at rest instead of on hover, and `inline` instead of
+`inline-block`. The `loom.action` that stood in for it under the paragraph is
+gone. Closed by the lane that filed it, because the remedy is only finished
+once the page it was filed about uses it
 
 `loom.link`'s own props docblock says what its accent tone is for: *"the one
 link in a paragraph that is the point of the paragraph."* That link cannot

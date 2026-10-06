@@ -1,0 +1,63 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/what-you-run",
+      "out": "2026-10-06-marketing-inline-link-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": [
+        "p a[href*='see-it-happen']",
+        "text=ready-made changes"
+      ],
+      "do": [
+        {
+          "scrollTo": "p a[href*='see-it-happen']"
+        }
+      ]
+    },
+    {
+      "path": "/what-you-run?theme=bold",
+      "out": "2026-10-06-marketing-inline-link-bold",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": [
+        "p a[href*='see-it-happen']"
+      ],
+      "do": [
+        {
+          "scrollTo": "p a[href*='see-it-happen']"
+        }
+      ]
+    },
+    {
+      "path": "/what-you-run?theme=editorial",
+      "out": "2026-10-06-marketing-inline-link-editorial",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "measure": [
+        "p a[href*='see-it-happen']"
+      ],
+      "do": [
+        {
+          "scrollTo": "p a[href*='see-it-happen']"
+        }
+      ]
+    },
+    {
+      "path": "/what-you-run",
+      "out": "2026-10-06-marketing-inline-link-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "measure": [
+        "p a[href*='see-it-happen']"
+      ],
+      "do": [
+        {
+          "scrollTo": "p a[href*='see-it-happen']"
+        }
+      ]
+    }
+  ]
+}

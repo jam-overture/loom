@@ -138,9 +138,78 @@ export type ReaderString = {
  * kinds of copy with two different registers. A node inside a region carries
  * the region's own element rather than the slot, because a slot is a part of a
  * primitive rather than a thing on the page (0051).
+ *
+ * ## A sentence is one string even when the tree splits it
+ *
+ * Every paragraph on this site was a single text node until `loom.inline-link`
+ * arrived, and a rule reading one text node at a time was therefore reading one
+ * whole sentence at a time. A link in the middle of a paragraph ends that: the
+ * sentence becomes three children, and a walk that pushed each of them would
+ * hand every rule in `voice.test.ts` three fragments where a reader sees one
+ * sentence.
+ *
+ * **What that would have cost is the 30-word rule, silently.** A 44-word
+ * sentence split by a link into 6 words, 2 and 36 passes a ceiling of 30 three
+ * times over, and the register would have gone on reporting the site clean. It
+ * is the same shape as the failure at the top of this file — copy a check
+ * cannot see reads exactly like copy with nothing wrong with it — and it would
+ * have arrived on the first page that used the primitive rather than four weeks
+ * later.
+ *
+ * So a maximal run of inline children is joined back into the one string a
+ * reader reads. **On the trees this site served before the primitive it changes
+ * nothing**, because a run of one text node joins to itself, and
+ * `words.test.ts` holds that from both ends.
  */
+
+/**
+ * The types that sit *inside* a sentence rather than being a thing on the page.
+ *
+ * Three of them, and the list is the library's rather than this lane's choice:
+ * `loom.inline-link`, `loom.emphasis` and `loom.code-span` are the primitives
+ * whose whole design is that they render `inline` and borrow the line box
+ * around them. Everything else the site composes is a block, a cell or a
+ * control, and a block interrupts a sentence rather than joining one.
+ *
+ * It is a list and not a lookup on the registry because a registry entry does
+ * not say this. `display: inline` is in a primitive's component or its
+ * stylesheet, and reading a rendering decision back out of either would be
+ * guessing. A primitive added to the library and used here without being added
+ * to this list reads as a break in a sentence — which is the safe direction: a
+ * sentence measured in halves is over the ceiling sooner, never later.
+ */
+export const INLINE_TYPES: readonly string[] = [
+  "loom.inline-link",
+  "loom.emphasis",
+  "loom.code-span",
+]
+
+const isInlineContent = (node: LoomNode): boolean =>
+  node.kind === "text" || (node.kind === "element" && INLINE_TYPES.includes(node.type))
+
+/**
+ * The words in an inline run, with nothing put between them.
+ *
+ * **No separator, and that is the whole point.** The parts of a split sentence
+ * carry their own spaces — `"The "`, the phrase, `" on the How it works page…"`
+ * — so joining them with anything reconstructs a sentence nobody wrote. A space
+ * inserted here would put one in front of every comma that follows a link.
+ */
+const inlineTextOf = (node: LoomNode): string =>
+  node.kind === "text" ? node.value : node.children.map(inlineTextOf).join("")
+
 export const readerCopy = (node: LoomNode): readonly ReaderString[] => {
   const found: ReaderString[] = []
+
+  const propsOf = (current: LoomNode, within: string): void => {
+    if (current.kind !== "element") return
+
+    for (const key of PROSE_PROPS) {
+      const value = current.props[key]
+
+      if (typeof value === "string") found.push({ field: `${within}.${key}`, text: value })
+    }
+  }
 
   const walk = (current: LoomNode, within: string): void => {
     if (current.kind === "text") {
@@ -151,15 +220,46 @@ export const readerCopy = (node: LoomNode): readonly ReaderString[] => {
 
     const here = current.kind === "element" ? current.type : within
 
-    if (current.kind === "element") {
-      for (const key of PROSE_PROPS) {
-        const value = current.props[key]
+    propsOf(current, here)
 
-        if (typeof value === "string") found.push({ field: `${here}.${key}`, text: value })
+    let run: LoomNode[] = []
+
+    /**
+     * An inline element's own prose props are read after the sentence it is in,
+     * rather than being lost with its text nodes. None of the three carries one
+     * today; a fourth that did would otherwise be copy nothing could see, which
+     * is the failure this module exists to prevent and not one to reintroduce
+     * at the inline layer.
+     */
+    const flush = (): void => {
+      if (run.length === 0) return
+
+      found.push({ field: `${here}#text`, text: run.map(inlineTextOf).join("") })
+
+      const propsWithin = (current: LoomNode): void => {
+        if (current.kind === "text") return
+
+        propsOf(current, current.kind === "element" ? current.type : here)
+        current.children.forEach(propsWithin)
       }
+
+      run.forEach(propsWithin)
+
+      run = []
     }
 
-    current.children.forEach((child) => walk(child, here))
+    for (const child of current.children) {
+      if (isInlineContent(child)) {
+        run.push(child)
+
+        continue
+      }
+
+      flush()
+      walk(child, here)
+    }
+
+    flush()
   }
 
   walk(node, node.kind === "element" ? node.type : "loom.page")
