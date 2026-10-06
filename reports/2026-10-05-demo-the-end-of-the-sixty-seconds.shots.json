@@ -1,0 +1,76 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-applied-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" },
+        { "click": "li form button.bg-affirm" },
+        { "waitFor": "li button.bg-neutral" }
+      ],
+      "measure": [
+        "aside",
+        "aside li[id]",
+        "#ask",
+        "section[aria-label='What you just saw']",
+        "text=4 more changes to ask for",
+        "aside footer",
+        "text=Want this on a page of your own? Read the docs"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-retheme-wide",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask ul li:nth-child(1) form button" }, { "waitFor": "aside li[id]" }],
+      "measure": [
+        "aside",
+        "aside li[id]",
+        "section[aria-label='What you just saw']",
+        "aside footer",
+        "text=Want this on a page of your own? Read the docs"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-arrival-wide-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask ul li", "aside footer", "section[aria-label='What you just saw']"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-held-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" }],
+      "measure": ["aside", "aside li[id]", "section[aria-label='What you just saw']"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-applied-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [
+        { "click": "#ask form button.bg-affirm" },
+        { "waitFor": "li button.bg-refuse" },
+        { "click": "li form button.bg-affirm" },
+        { "waitFor": "li button.bg-neutral" },
+        { "scrollTo": "section[aria-label='What you just saw']" }
+      ],
+      "measure": ["aside li[id]", "section[aria-label='What you just saw']", "aside footer"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-05-demo-end-embed-unchanged",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask"
+    }
+  ]
+}

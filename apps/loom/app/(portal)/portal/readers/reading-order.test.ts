@@ -155,19 +155,60 @@ describe("the reader screen's reading order", () => {
   })
 
   /**
-   * **One join, two readings.**
+   * **One join, three readings.**
    *
-   * Both sections are a window laid over the page it was filed against. Joining
+   * Every section is a window laid over the page it was filed against. Joining
    * twice is two chances to hand one of them a different window or a different
-   * set of pieces, and a card whose two sections disagreed about how many
-   * visits there were would be wrong in the way nobody checks — so the join
-   * happens once and `skippingFrom` and `stoppingOf` are both handed its result.
+   * set of pieces, and a card whose sections disagreed about how many visits
+   * there were would be wrong in the way nobody checks — so the join happens
+   * once and `skippingFrom`, `stoppingOf` and `readingPaceOf` are all handed
+   * its result.
+   *
+   * It was two readings until 5 October. The count in the assertion is the
+   * point rather than the names: a fourth reading taken off a second join would
+   * pass every other test on this screen.
    */
-  it("joins the counters to the page once and takes both readings off it", () => {
+  it("joins the counters to the page once and takes all three readings off it", () => {
     expect(source.match(/pageReadingOf\(/gu)).toHaveLength(1)
     expect(source).toContain("skippingFrom(joined")
     expect(source).toContain("readingProgressOf(joined)")
+    expect(source).toContain("readingPaceOf(joined")
     expect(source).not.toContain("skippingOf(")
+  })
+
+  /**
+   * **The correction, per page and per version.**
+   *
+   * The pace reading divides a time by a reader count, and that count is
+   * generous by every visit that straddled a roll-up window — so without the
+   * correction the mean time per reader is short, and short calls more parts
+   * hurried than should be. That is the one direction a verdict built to be
+   * safe cannot afford to be wrong in, which is why the door rows are read at
+   * all.
+   *
+   * Matched on the page **and** the version, because straddling is a property
+   * of how long a page's own readers stay against how long the window is. A
+   * deployment-wide average applied to a quiet page would be an invented number
+   * with three decimal places on it, and it would look exactly like a measured
+   * one.
+   */
+  it("hands the pace reading the correction measured for that page at that version", () => {
+    expect(source).toContain("portalReaderTallies.pageViews(")
+    expect(source).toContain("pageViewReadingOf(")
+    expect(source).toContain("row.treeId === reading.treeId && row.revision === newest")
+    expect(source).toContain("inflation: door?.inflation ?? 0")
+  })
+
+  /**
+   * And that a failed read of them costs the correction rather than the screen.
+   *
+   * The same split the buffer read is held to one test above: the counters are
+   * the screen, and everything else on it is a sentence or a refinement whose
+   * failure must not take the screen down with it.
+   */
+  it("survives a failed read of the door counts without failing the screen", () => {
+    expect(source).toContain("doors.ok ?")
+    expect(source).not.toContain("if (!doors.ok)")
   })
 
   /**
