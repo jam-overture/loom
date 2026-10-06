@@ -44576,3 +44576,99 @@ plainly which version it is answering for and declines rather than laying one
 version's counters over another version's page. This is here so that the next
 routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
+
+---
+## 2026-10-05 — the pace reading is on the reader screen, and the figure that can embarrass a surface is drawn as a question
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/readers/`) · **Status:** **closed** — this
+morning's call from `Loom signals`, taken, with all four cautions answered in
+code and one of them answered by a test
+
+`readingPaceOf` is the third reading taken off the join `/portal/readers`
+already makes, beside *which parts did anybody get to* and *where do people stop
+going*. `_lib/pacing.ts` names it and `_components/had-time-to-read.tsx` draws
+it.
+
+**The four cautions, each as the thing that answers it:**
+
+| the caution | what holds it |
+| --- | --- |
+| `lingered` is never engagement | the label is the only one in `vocabulary.ts` that ends in a question mark, the tone is grey, and the sentence says *both* things it can mean. A rendered test asserts the surface matches neither `/engage/i` nor `/longest/i` |
+| lead with skims | `paced` never appears above the disclosure at all, which a test asserts from both ends — absent on the surface, present in the record |
+| never add a word figure across parts | there is no total anywhere, and the page's own figure comes off the root rather than a sum. The page is held out of the ranking, as the runtime holds it out of `mostSkimmed` |
+| hand in the inflation | the screen now reads the door rows and matches **per page and per version**, not a deployment-wide average. `0.050` is printed in the record so the figure is checkable |
+
+**The sentence the call named is real and it is drawn.** When the part the most
+words went past unread in is the same part people stop going at, the card says
+so — *two separate readings point at the same part of this page … it is the
+strongest thing this page has to tell you*. It is drawn **only** on an identical
+node id, never a parent or a sibling: the whole value of it is that two
+arithmetics arrived at one place, and a sentence that stretched across two parts
+would read as one finding and be two. The screenshot on #523 is that case.
+
+**`silences.unreadable` is shown rather than hidden**, with the remedy in the
+sentence and the mechanism one click under it. On this repository's own
+primitives it is zero, which is the point — the deployment it is for is the one
+whose own primitives have not declared their copy, and a screen that dropped
+those parts would report that page as timed.
+
+---
+## 2026-10-05 — one list in the portal is still capped at a reading measure, and it is exactly the case the rule names
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/pages/[treeId]/proposed/[proposalId]/page.tsx`)
+· **Status:** open — **one line**, and filed rather than taken because it is not
+this branch's screen
+
+The 3 October entry's queue is finished: the sixteen screens were converted and
+`screen.test.ts` holds the ceiling. Counted on this branch, `max-w-*` survives in
+nine places in the lane and seven of them are the primitive itself or its own
+documentation. Of the two that are not:
+
+- `_components/elsewhere-note.tsx` — `max-w-[68ch]` on a `<p>`. That is the
+  measure, written out rather than wrapped in `Measured`, and it is a sentence.
+  Correct either way.
+- `portal/pages/[treeId]/proposed/[proposalId]/page.tsx:251` — **`max-w-3xl` on a
+  `<ul>`**. The rule `screen.tsx` states is *sentences get the measure and grids,
+  cards, rows and panels never do*, and a list of rows is the second noun in
+  that sentence.
+
+It is one line and it is on the proposal screen, which this branch does not open.
+Recorded with the line number so the next run that touches that screen can take
+it without measuring the lane again.
+
+---
+## 2026-10-05 — every consumer of `readingPaceOf` will write the same four lines to find its correction, and the pairing is the part that can be got wrong
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a measurement rather than a request**, and nothing is
+blocked; the four lines are written and working on `main`'s next branch
+
+`PaceOptions.inflation` is one number, and the number that belongs there is a
+property of **one revision of one page**: `drift ÷ opened` off that page's own
+door row. A consumer holding a window of counters over several pages therefore
+has to read `pageViews`, call `pageViewReadingOf`, and match each reading to its
+row on `treeId` **and** `revision` before it can call `readingPaceOf` once per
+page. That is what `/portal/readers` now does, and it is four lines per consumer.
+
+**The part that can be got wrong is the matching, and it fails quietly.** The
+reading's aggregate `inflation` is published on `PageViewReading` and is the
+obvious thing to reach for — and handing a busy page's inflation to a quiet one
+is an invented correction that looks exactly like a measured one, with three
+decimal places on it. Nothing anywhere would fail; the verdicts would simply be
+a little wrong in the direction the module's own safety argument depends on
+being right.
+
+Two shapes that would close it, neither of them this lane's to take and neither
+urgent:
+
+1. **`inflationFor(reading, rows)`** — the four lines, published, so the matching
+   rule lives beside the counters it is a rule about.
+2. **`PaceOptions.inflation` accepting the rows** instead of the fraction, so the
+   function that knows which revision it is reading does the lookup itself.
+
+Recorded because the next consumer is predictable: the same pairing is owed by
+anything that reads `readingChangeOf` across two versions, which is the entry
+from 4 October that is still waiting on a store that can answer for an older
+version.
