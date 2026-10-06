@@ -33,6 +33,7 @@ the portal every day.
 | Configuration | the host's argument, never a prop in the tree |
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
+| How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
@@ -630,6 +631,67 @@ with three decimal places on it. That closes `Loom portal`'s finding of
 conversion rate that can be said out loud, with the stage that is costing the
 readers named beside it, and an interval rather than a point wherever the
 deployment's rollup window is short.
+
+### 14. How much of what a page says gets read · `Loom signals` · **done, 6 October**
+
+This document's first priority names three questions, and until today the third
+of them had an answer that was not a measurement. `wordsReadIn` filters the
+reading of §6 and hands back the text of every part a row says was seen — which
+is exactly *which copy a reader actually reached*, and is a list of strings. It
+cannot be put on a screen as a figure, compared between two windows, or ranked,
+and it cannot say what is on the other side of it: **the words nobody got to**,
+which are the ones a page is changed because of.
+
+**Done.** `copyReadingOf(reading)` in [`src/signals/copy.ts`](../src/signals/copy.ts)
+counts both sides. *This page says twelve hundred words, every one of them
+reached somebody, the average reader got to two hundred and sixty, and the three
+hundred nobody saw are these.* It is the **seventh** thing taken out of the
+server-side join rather than collected (§6, §8, §9, §10, §11, §12 and §13 being
+the others): **nothing was added to a payload, a browser, a column, a store or
+the vocabulary**, and the broadcaster was not touched, so its weight is
+unchanged.
+
+Two things decide the shape ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)):
+
+- **A page-wide word total is sound here, and §12's refusal of one still
+  stands**, because they are two different quantities. A pace reading judges a
+  part against its **subtree's** words, which nest — so a sum charges one reader
+  once per level and 0230 refused a page total of it. This takes a part's **own**
+  words, which nest nothing: a text node and a slot node are never parts, every
+  element descendant is a part in its own right, and a part's copy is therefore a
+  partition of the page's words across its parts exactly once. That is the
+  property 0212 published so a role row could be added up, and a page total is
+  the same addition one level further. Nothing is superseded. It is also why the
+  root needs no special case here where §12 had to report it apart.
+- **Two shares, because *the words somebody read* and *the words a reader reads*
+  are different sentences and only one of them is what a person hears.** `share`
+  is the share of the page's words at least one reader reached, which is what a
+  standing of `read` asserts and nothing more — on a busy page it is near 1 and
+  it is true. `typical` is the words the average reader got to, and it is a
+  **ceiling**: `reached` is generous by the straddle (0147) and the view floor it
+  is divided by is short of the page views there were (0212), so it leans up in
+  both terms. The straddle very nearly divides out, which is §9's cancellation
+  one level up and the only reason the figure is worth publishing.
+
+Four more settled in the building. `typical` is **withheld rather than
+qualified** in four states, of which `floored` is the one that matters — a type
+declaring no `copy` leaves the numerator short one way and the denominator short
+the other, so the two errors stop leaning together and a mean can no longer be
+published as *at most*; a share survives a floor and says so. The floor is
+counted **per standing**, because undeclared words on a part readers reached are
+missing from both halves of a share while undeclared words on a part nobody
+reached are missing from the denominator only, and the share then reads high.
+`unseen` is **`skipped` only** and ranked by words, since putting an `unknown`
+part's words under *nobody read this* would turn *nothing can be said* into a
+claim. And the word-counting rule now lives in
+[`words.ts`](../src/signals/words.ts) and both readings import it, because two
+spellings of one rule that agree today is what the counter keys did before they
+were published once.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the two
+shares side by side as the sentence a reader screen can lead with, and the
+passages nobody saw as the one list on it a person can act on without reading
+anything else.
 
 ## Still not in scope
 

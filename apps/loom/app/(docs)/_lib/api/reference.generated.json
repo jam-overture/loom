@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5476,7 +5476,7 @@
       "files": 203,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5941,7 +5941,7 @@
       "files": 67,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6875,7 +6875,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7466,7 +7466,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7694,7 +7694,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8153,7 +8153,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8507,7 +8507,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8627,7 +8627,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 39,
+      "files": 41,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8640,7 +8640,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -8928,6 +8928,62 @@
               "signature": "const describeCollection: (outcome: CollectionOutcome) => string",
               "truncated": false,
               "summary": "One line for an operator, because an outcome nobody can read is one nobody acts on."
+            }
+          ]
+        },
+        {
+          "module": "signals/copy",
+          "title": "Copy",
+          "summary": "How much of what a page says gets read, and which of it nobody saw.",
+          "symbols": [
+            {
+              "name": "Passage",
+              "kind": "type",
+              "signature": "type Passage = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    /** What part it plays, or `null` where its type declared none. */\n    readonly role: PrimitiveRole | null;\n    /** 0 at the root. */\n    readonly depth: number;\n    /** Carried through from the part, so a passage and a part say the same thing. */\n    readonly standing: PartStanding;\n    /** Distinct page views that reported the part coming into view; `0` where no row named it. */\n    readonly readers: number;\n    /**\n     * The words themselves, in reading order, exactly as the page says them.\n     *\n     * **Its own, never its subtree's**, so the text of two passages may be\n     * concatenated and no sentence is read twice.\n     */\n    readonly text: readonly string[];\n    /** {@link text}, counted. */\n    readonly words: number;\n    /**\n     * Whether this passage is short of words it cannot see.\n     *\n     * True where the part's type declared no `copy`, or declared a prop holding\n     * something that is not a string. The words it does hold are still its\n     * own; what is not knowable is whether there are more.\n     */\n    readonly floored: boolean;\n};",
+              "truncated": false,
+              "summary": "One part's own words, with what the window said about the part saying them."
+            },
+            {
+              "name": "RoleCopy",
+              "kind": "type",
+              "signature": "type RoleCopy = {\n    /** `null` is the row for parts whose type declared no role. */\n    readonly role: PrimitiveRole | null;\n    /** Parts of this role that say something, which is the rule {@link CopyReading.passages} applies. */\n    readonly passages: number;\n    readonly words: number;\n    /**\n     * Words by the standing of the part saying them. The three add to\n     * {@link words}.\n     */\n    readonly wordsByStanding: Readonly<Record<PartStanding, number>>;\n    /**\n     * The share of this role's words at least one reader reached. `null` where the\n     * role says nothing.\n     *\n     * Addable across roles — unlike every view count on a `RoleReading`, which is\n     * absent there because distinctness cannot be added. Words can: they\n     * are a property of the page rather than of the readers.\n     */\n    readonly share: number | null;\n    /** Passages of this role whose words are a floor. */\n    readonly floored: number;\n};",
+              "truncated": false,
+              "summary": "Every part playing one role, with the words they say between them."
+            },
+            {
+              "name": "CopySilence",
+              "kind": "type",
+              "signature": "type CopySilence = \n/** The page says nothing that could have been read. */\n\"wordless\"\n/** The window held no views of this revision, so there is no reader to be typical of. */\n | \"unmeasured\"\n/**\n * Some part's words are a floor, so a mean of them is neither a count nor a\n * ceiling.\n *\n * The share survives a floor and says so; this does not. The numerator is\n * short by the words nobody declared and the denominator is a view floor that\n * is short the other way, so the two errors no longer both lean one way and\n * the figure cannot be published as *at most*.\n */\n | \"floored\"\n/**\n * A part reports more readers than the page has views, which no rollup\n * produces.\n *\n * `reached` counts the views that saw a part and `views` the views that said\n * anything about it, so a row's `reached` can never exceed its own `views` and\n * {@link CopyReading.views} is the largest `views` of any row. A reading where\n * this holds was assembled by hand or by a sender that is not one — the same\n * alarm `PageReading.orphaned` is, at the one other place a figure here would\n * stay plausible while being about nothing.\n */\n | \"inconsistent\";",
+              "truncated": false,
+              "summary": "Why there is no typical reader's figure."
+            },
+            {
+              "name": "COPY_SILENCES",
+              "kind": "value",
+              "signature": "const COPY_SILENCES: readonly CopySilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every reason a figure is absent."
+            },
+            {
+              "name": "describeCopySilence",
+              "kind": "function",
+              "signature": "const describeCopySilence: (silence: CopySilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "CopyReading",
+              "kind": "type",
+              "signature": "type CopyReading = {\n    readonly treeId: TreeId;\n    readonly revision: number;\n    /** The page's view floor, carried through from the reading unchanged. */\n    readonly views: number;\n    /**\n     * Every word this revision says, counted once.\n     *\n     * The one page-wide word figure in this subsystem, sound for the one reason\n     * the module documentation gives: these are the parts' own words, which\n     * partition the page, rather than the subtree words a pace reading nests.\n     */\n    readonly words: number;\n    /** Words by the standing of the part saying them. The three add to {@link words}. */\n    readonly wordsByStanding: Readonly<Record<PartStanding, number>>;\n    /**\n     * The share of the page's words at least one reader reached. `null` where the\n     * page says nothing.\n     *\n     * *At least one*, which is what a standing of `read` means and not what a\n     * person reads this sentence as. {@link typical} is the per-reader figure.\n     */\n    readonly share: number | null;\n    /** Every part that says something, in reading order. */\n    readonly passages: readonly Passage[];\n    /**\n     * Parts that say nothing at all, counted rather than listed.\n     *\n     * A spacer, a rule, a stack that only holds other parts. They are not in\n     * {@link passages} because a passage of no words is not one, and they are\n     * counted because *a page of two hundred parts, ten of which say anything* is\n     * a fact about the page worth having and is otherwise invisible here.\n     */\n    readonly silent: number;\n    /**\n     * The passages no reader reached, most words first and then in reading order.\n     *\n     * **`skipped` only.** A part whose standing is `unknown` reported something\n     * other than coming into view, or was in a window with no views at all, and\n     * putting its words here would turn *nothing can be said* into *nobody read\n     * this* — the one direction a reading of a quiet window must not be wrong in.\n     * Those words are in {@link wordsByStanding} under `unknown`, where they can\n     * be seen and not acted on.\n     *\n     * By words rather than by depth or position, for the reason a stop is ranked\n     * by the readers it loses: the passage nobody saw that costs the page\n     * most is the long one, not the first one.\n     */\n    readonly unseen: readonly Passage[];\n    /** Every role in the vocabulary, then the row for parts that declared none. */\n    readonly roles: readonly RoleCopy[];\n    /**\n     * Passages whose words are a floor, by the standing of the part saying them.\n     *\n     * The direction every share here is wrong in, handed over rather than\n     * summarised. Undeclared words under `read` understate the numerator and the\n     * denominator together; under `skipped` they understate the denominator only,\n     * so a share reads high. One boolean could not have said which.\n     */\n    readonly floored: Readonly<Record<PartStanding, number>>;\n    /**\n     * The words the typical reader reached, at most. `null` where {@link silence}\n     * says why not.\n     *\n     * Every word, weighted by the readers who reached the part saying it, over the\n     * page's views. Generous in both terms and therefore a ceiling: `reached` is\n     * over-counted by the page views that straddled a rollup window, and\n     * {@link views} is a floor on the page views there were, so the numerator\n     * leans up and the denominator leans down.\n     *\n     * The straddle very nearly divides out, which is the only reason this is worth\n     * publishing at all: the same inflation is in every `reached` here and in the\n     * view floor they are divided by, so what is left is a correction too small to\n     * be the headline. It is the cancellation a fall between two siblings already\n     * rests on, taken one level up — a page against its own readers rather\n     * than a part against its neighbour.\n     *\n     * It cannot exceed {@link words}, and `inconsistent` is the input that would\n     * have made it.\n     */\n    readonly typical: number | null;\n    /** Why {@link typical} is not there, and `null` where it is. */\n    readonly silence: CopySilence | null;\n};",
+              "truncated": false,
+              "summary": "What one window of one revision says about how much of the page is read."
+            },
+            {
+              "name": "copyReadingOf",
+              "kind": "function",
+              "signature": "const copyReadingOf: (reading: PageReading) => CopyReading",
+              "truncated": false,
+              "summary": "How much of what a page says is getting read."
             }
           ]
         },
@@ -10061,7 +10117,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10204,7 +10260,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10271,7 +10327,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10868,7 +10924,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10942,7 +10998,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11400,7 +11456,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1291,
+        "packageNames": 1298,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

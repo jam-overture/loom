@@ -44682,6 +44682,81 @@ routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
 
 ---
+## 2026-10-06 — how much of a page gets read is now two shares and a list, and the two shares must be drawn as different sentences
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+· **Status:** open — **nothing is needed from anyone**; `copyReadingOf` is on
+`main` behind `pnpm verify`, published from `@jam-overture/loom/signals`
+
+§14 of [`docs/signals.md`](docs/signals.md), recorded in
+[0235](decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md).
+Hand it the output of `pageReadingOf` — the same input `readingProgressOf` and
+`readingPaceOf` take, so a screen that already has a reading has this for one
+more call:
+
+```ts
+import { copyReadingOf, pageReadingOf } from "@jam-overture/loom/signals"
+
+const reading = copyReadingOf(pageReadingOf(tree, tallies, registry))
+```
+
+**The call, and it is one sentence rather than a row.** *This page says 1,240
+words; every one of them reached somebody, and the average reader gets to 260.*
+`share` and `typical` are the two halves and they are **different sentences**:
+
+| | what it says |
+| --- | --- |
+| `words` | every word this revision says, counted once |
+| `share` | the share of them **at least one** reader reached — near 1 on a busy page, and true |
+| `typical` | the words the **average** reader reached, **at most** |
+| `unseen` | the passages nobody reached, longest first, with their text |
+| `roles` | the same per role, and the word figures add up where a `RoleReading`'s view counts cannot |
+
+**Four cautions, and the first is the one that would make a screen lie.**
+
+1. **Never draw `share` as how much of the page gets read.** It is *somebody
+   reached these words*, which on three hundred readers is nearly all of them. The
+   figure a person means is `typical`. Showing `share` alone is the
+   plausible-false-number failure this subsystem keeps finding in new places.
+2. **`typical` is a ceiling and may be absent.** `silence` says why —
+   `wordless`, `unmeasured`, `floored` or `inconsistent` — and
+   `describeCopySilence` has a line for each. `floored` is the common one and it
+   means the deployment's own primitives have not declared `copy`; a screen that
+   drew nought there would report a page nobody reads.
+3. **`unseen` is `skipped` only**, so it is safe to label *nobody reached this*.
+   Words at the `unknown` standing are in `wordsByStanding` and are **not** a
+   claim — a window with no views at all puts the whole page there.
+4. **No word figure is compared across revisions as a count.** Two revisions say
+   different numbers of words for reasons that have nothing to do with readers.
+   The comparable unit is `share`, the same way 0224 compares stops.
+
+**The one thing on it a model can act on without reading anything else** is
+`unseen`: it carries each passage's own text. Where `readingProgressOf` says
+*reading stops at the fifth band*, this says *and these are the four hundred
+words below it that nobody has read.*
+
+---
+## 2026-10-06 — the stale funnel pair cannot be taken from `main`, and it is this lane's own branch in the way
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **extends the 5 October entry on a funnel pair naming a node
+its revision no longer has.** Nothing is wrong and nothing is needed from another
+lane; this says why the next run and not this one
+
+That entry calls itself the most useful thing left in this lane's queue and it is
+right. It cannot be built yet, for a reason that is governance rather than
+design: `funnelReachOf` is on
+[#527](https://github.com/jam-overture/loom/pull/527), which is open and not on
+`main`, and a routine does not stack one branch on another. Giving the pair's two
+ends a standing means changing that function's signature to take a reading, so
+there is nothing to change here until it lands.
+
+**What this run did instead is the question the same join answers from the other
+side** — §14, how much of what a page says gets read — which needed only
+`pageReadingOf`, and so is off `main` and races nothing.
+
+So: whoever runs next, if #527 has landed, this is the unit. If it has not,
+it still is not available, and §14's own leftovers are smaller than it.
 ## 2026-10-06 — the remedy this lane recommended for the image blocker was already in this lane's gift, and it closes one of the seven rather than all seven
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
