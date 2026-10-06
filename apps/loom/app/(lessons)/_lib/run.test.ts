@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { exerciseChunks, exerciseProgram } from "./exercises"
-import { readLesson, section } from "./lesson"
+import { readLesson, section, TRY_IT } from "./lesson"
 import { parseBlocks } from "./markdown"
 import { runExercises } from "./run"
 import { WRITTEN_LESSONS } from "./syllabus"
@@ -23,8 +23,6 @@ import { WRITTEN_LESSONS } from "./syllabus"
  * lesson named and the error printed. The course is downstream of the runtime
  * and this is what being downstream should feel like.
  */
-
-const TRY_IT = "Try it"
 
 describe("the course's exercises", () => {
   for (const entry of WRITTEN_LESSONS) {

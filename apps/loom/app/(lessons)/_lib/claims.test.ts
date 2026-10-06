@@ -12,7 +12,10 @@ import {
 import { BEHAVIOUR_NAMES } from "@jam-overture/loom/react"
 import { describe, expect, it } from "vitest"
 
+import { readLesson, section, TRY_IT } from "./lesson"
+import { linesOf, recordedIn } from "./marks"
 import { COURSE_DIR } from "./source"
+import { WRITTEN_LESSONS } from "./syllabus"
 
 /**
  * Sentences in `lessons/` that count a list in the runtime, held against it.
@@ -337,5 +340,242 @@ describe("a sentence that counts the list under it", () => {
       word.toLowerCase(),
       `${file} counts ${what} and the list under it has ${itemsAfter(lines, at)} items`
     ).toBe(wordFor(itemsAfter(lines, at)))
+  })
+})
+
+/**
+ * A sentence in a lesson, held against a number the transcript above it printed.
+ *
+ * This is the third place a second copy can come from, and lesson 28 puts them
+ * in order of preference: **derive it**, duplicate it in a form that can
+ * disagree, register it by hand. The registry at the top of this file is the
+ * third of those — somebody writes down a phrase and the list in `src/` that
+ * settles it. `SELF_COUNTED` is the first, with the source four lines below the
+ * sentence. This is the first as well, with the source one step further away and
+ * the step is what makes it worth having: **the number is read off the
+ * transcript, and the transcript is already held against a real run** by
+ * `transcripts.test.ts`. Nothing new is derived and no third copy is
+ * manufactured. Two checks compose, and a sentence becomes a function of what
+ * the code actually printed.
+ *
+ * ## Why this exists, which is an incident rather than a tidiness
+ *
+ * Four fences in this course carry a `moves:` mark (`marks.ts`), and two of them
+ * carry it for this reason in as many words: *the paragraphs under it are prose
+ * about these lines and no check reads prose.*
+ *
+ * On 2 October a test for `readBoxes` moved three rows of lesson 32's table. On
+ * 4 October the declaration pass moved seven lines of lesson 24's. Both times
+ * the numbers were corrected from outside this lane, the same day, which is
+ * exactly what the convention asks of a lane that has just made somebody's suite
+ * red. Both times the paragraph drawing the conclusion under them was left
+ * saying the opposite, on `main` — three paragraphs reading "Zero and zero"
+ * under a transcript saying 102. Nothing was wrong with how either was handled.
+ * What was missing was any way for a check to notice, so the mark asked a human
+ * to, twice, and twice nobody did.
+ *
+ * A mark is a sentence addressed to whoever trips over it. This is the half of
+ * it a program can do: where the prose under a marked fence **counts** something
+ * the fence prints, correcting the fence without reading the paragraph now fails,
+ * naming the sentence and the file. The remedy is one word, in prose, and the
+ * message says which word — which is the same class of edit `docs/routines.md`
+ * already expects of a lane that corrects a lesson transcript.
+ *
+ * ## What it does not reach, stated here rather than discovered later
+ *
+ * **A sentence about the past looks exactly like a claim about now.** Lesson 24
+ * says *both of those counts were zero when this lesson was written*, which is
+ * true, historical, and indistinguishable to a regular expression from the stale
+ * sentence it replaced. So a claim is registered per sentence by somebody who has
+ * read it, never found by pattern — the same rule the registry above follows, for
+ * the same reason.
+ *
+ * **And most of what a marked fence's prose says carries no count at all.**
+ * Lesson 32's own account of what drifted on 2 October is a *classification* —
+ * `in code` against `in prose` — and only one sentence of it counts anything.
+ * That sentence is registered below and the rest is reached by reading. A count
+ * is the cheapest second copy a sentence can carry and it is not the only thing
+ * a sentence says.
+ */
+type TranscriptClaim = {
+  readonly lesson: number
+  readonly file: string
+  /** What the sentence is counting, for the failure message. */
+  readonly what: string
+  /** The sentence, with the number word as its one capture group. */
+  readonly phrase: RegExp
+  /** How many times the course says it. Pinned, so a rewording fails rather than escapes. */
+  readonly occurrences: number
+  /** A line only the settling fence has, which is how it is found among the untagged ones. */
+  readonly fence: RegExp
+  /** The number the sentence is counting, read off that fence. */
+  readonly count: (lines: readonly string[]) => number
+  readonly matters: string
+}
+
+/** The quoted strings of a `words:` line under a heading, counted. */
+const quotedAfter = (lines: readonly string[], heading: RegExp): number => {
+  const at = lines.findIndex((line) => heading.test(line))
+  const words = lines.slice(at + 1).find((line) => line.startsWith("words:"))
+
+  return [...(words ?? "").matchAll(/"[^"]*"/g)].length
+}
+
+/** The comma-separated names a line ends in, counted. */
+const namesOn = (lines: readonly string[], label: RegExp): number => {
+  const names = lines.flatMap((line) => label.exec(line)?.[1] ?? [])
+
+  return names.length === 0 ? 0 : (names[0] ?? "").split(/,\s*/).filter((name) => name !== "").length
+}
+
+/** The one number a line states. */
+const numberOn = (lines: readonly string[], label: RegExp): number =>
+  Number(lines.flatMap((line) => label.exec(line)?.[1] ?? [])[0] ?? NaN)
+
+/** The lines matching something, counted. */
+const rowsMatching = (lines: readonly string[], row: RegExp): number =>
+  lines.filter((line) => row.test(line)).length
+
+const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
+  {
+    lesson: 24,
+    file: "24-silence.md",
+    what: "the words the metrics band shows",
+    phrase: /is the (\w+) words the band shows/,
+    occurrences: 1,
+    fence: /^primitives registered:/,
+    count: (lines) => quotedAfter(lines, /^copyIn\(metrics band/),
+    matters:
+      "the sentence that says what the reading came back with on the day the library spoke — " +
+      "the fence whose numbers moved on 4 October with three paragraphs left asserting zero",
+  },
+  {
+    lesson: 29,
+    file: "29-readership.md",
+    what: "the control zeros above the census",
+    phrase: /The (\w+) zeros are the control/,
+    occurrences: 1,
+    fence: /^primitives with a declared prop nothing read:/,
+    count: (lines) => rowsMatching(lines, /: 0$/),
+    matters:
+      "the sentence the whole comparison rests on, and the one the mark on that fence " +
+      "explicitly declines to cover — a fourth control line is a change this prose is wrong about",
+  },
+  {
+    lesson: 32,
+    file: "32-layout.md",
+    what: "the functions the harness hands to a browser",
+    phrase: /are the (\w+) that say what each function handed to the page/,
+    occurrences: 1,
+    fence: /^top-level consts in playwright\.ts:/,
+    count: (lines) => numberOn(lines, /^of those, handed to the page: (\d+)/),
+    matters:
+      "the instruction telling a reader how many lines of exercise G to predict — a fifth " +
+      "function handed to the page makes it ask for four predictions out of five",
+  },
+  {
+    lesson: 32,
+    file: "32-layout.md",
+    what: "the faculties `capture.ts` names in prose rather than calling",
+    phrase: /The (\w+) `in prose` rows on `capture\.ts`/,
+    occurrences: 1,
+    fence: /^top-level consts in playwright\.ts:/,
+    count: (lines) => rowsMatching(lines, /capture\.ts in prose/),
+    matters:
+      "the one sentence in this lesson's account of that table that counts rather than " +
+      "classifies, in the fence whose rows moved on 2 October",
+  },
+  {
+    lesson: 33,
+    file: "33-shortfall.md",
+    what: "the starter primitives that read a binding",
+    phrase: /(\w+) primitives in the starter library read a binding/,
+    occurrences: 1,
+    fence: /^primitives that read a binding:/,
+    count: (lines) => namesOn(lines, /^primitives that read a binding: (.+)$/),
+    matters:
+      "the sentence under the last three lines of lesson 33, where the state of play is the " +
+      "point and a third primitive reading a binding would make it wrong",
+  },
+]
+
+/** The untagged fences of a lesson's Try it, as the comparison sees their lines. */
+const fencesIn = (file: string): readonly (readonly string[])[] =>
+  recordedIn(section(readLesson(file), TRY_IT)?.blocks ?? []).map(({ block }) => linesOf(block.code))
+
+describe("a sentence that counts what the transcript above it printed", () => {
+  it.each(TRANSCRIPT_CLAIMS)(
+    "holds lesson $lesson's sentence about $what to its fence",
+    ({ file, what, phrase, occurrences, fence, count, matters }) => {
+      const settling = fencesIn(file).filter((lines) => lines.some((line) => fence.test(line)))
+
+      expect(
+        settling.length,
+        `${file}: ${fence} should find exactly one untagged fence in ${TRY_IT} — if the ` +
+          `exercise was renumbered or its output reshaped, point this at a line the new one has`
+      ).toBe(1)
+
+      const printed = count(settling[0] ?? [])
+
+      expect(printed, `${file}: counting ${what} off its fence produced nothing usable`).toBeGreaterThan(0)
+
+      const found = sightings(phrase)
+
+      expect(
+        found.length,
+        `${phrase} should be counting in ${occurrences} places across lessons/ — if a lesson ` +
+          `reworded it, move the pin; if it stopped counting, lower it`
+      ).toBe(occurrences)
+
+      for (const { file: where, word } of found) {
+        expect(
+          word.toLowerCase(),
+          `${where} counts ${what} and the transcript above it now prints ${printed} ` +
+            `(${matters})`
+        ).toBe(wordFor(printed))
+      }
+    }
+  )
+
+  /**
+   * Every marked fence has at least one of these, and that is the point of the
+   * check rather than a happy accident.
+   *
+   * A mark says *the paragraphs under this are prose about these lines*. Where
+   * those paragraphs count something, this file holds them; where they do not,
+   * the mark is still only a sentence to a human. So the gap is worth a failure
+   * naming the fence.
+   *
+   * **It is a pin on the four that exist and not a law that a mark requires
+   * one.** A fence whose prose declines to count has nothing here to derive, and
+   * declining is the better fix wherever it reads naturally — lessons 22 and 23
+   * do it deliberately for the size of the primitive library. The way to say so
+   * is to name the fence here, with the reason, rather than to weaken this.
+   */
+  it("covers the prose under every fence that carries a mark", () => {
+    const uncovered = WRITTEN_LESSONS.flatMap((entry) => {
+      if (entry.file === undefined) return []
+
+      const file = entry.file
+
+      return recordedIn(section(readLesson(file), TRY_IT)?.blocks ?? [])
+        .filter(({ moves }) => moves !== undefined)
+        .map(({ block }) => linesOf(block.code))
+        .filter(
+          (lines) =>
+            !TRANSCRIPT_CLAIMS.some(
+              (claim) => claim.file === file && lines.some((line) => claim.fence.test(line))
+            )
+        )
+        .map((lines) => `${file}: ${lines[0] ?? "(empty fence)"}`)
+    })
+
+    expect(
+      uncovered,
+      "a fence carrying a moves: mark has no sentence held against it, so correcting its " +
+        "numbers from outside this lane would leave the paragraphs under it unread — register " +
+        "the sentence that counts, or say here why its prose declines to count.\n" +
+        JSON.stringify(uncovered, null, 2)
+    ).toEqual([])
   })
 })
