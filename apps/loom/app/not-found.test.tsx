@@ -1,9 +1,29 @@
 import { render, screen } from "@testing-library/react"
+import { isValidElement, type ReactNode } from "react"
 import { describe, expect, it } from "vitest"
 
 import { minimalPalette } from "@jam-overture/loom"
 
 import NotFound from "./not-found"
+
+/**
+ * Every intrinsic element in what a component returned, by tag.
+ *
+ * `isValidElement` rather than a DOM walk, so the answer is about the component
+ * and not about what a renderer did with it afterwards. A string `type` is an
+ * intrinsic element — `div`, `html` — and a function or object `type` is
+ * another component, which this does not descend into because this page has
+ * none.
+ */
+const elementTypesIn = (node: ReactNode): readonly string[] => {
+  if (Array.isArray(node)) return node.flatMap(elementTypesIn)
+  if (!isValidElement(node)) return []
+
+  const here = typeof node.type === "string" ? [node.type] : []
+  const { children } = node.props as { readonly children?: ReactNode }
+
+  return [...here, ...elementTypesIn(children)]
+}
 
 /**
  * The page a wrong address lands on.
@@ -75,14 +95,19 @@ describe("the page that belongs to no surface", () => {
    * `<html>`'s attributes onto the real element. jsdom cannot see that: React
    * hoists a rendered `<html>`'s attributes onto the real document element, so
    * every assertion about the outcome passed while the served markup was
-   * invalid. The shape of the markup is the only thing a test can hold here.
+   * invalid.
+   *
+   * **So this is asserted against what the component returns, not against a
+   * DOM.** The first version of this guard asked the render container whether
+   * it held an `<html>`, and a planted `<html>` left it green — React had
+   * hoisted the element out of the container before the query ran, which is the
+   * same hoist that hid the original defect. A rendered tree is the wrong
+   * instrument for a question about what was rendered.
    */
   it("renders no document of its own", () => {
-    const { container } = render(<NotFound />)
+    const tags = elementTypesIn(NotFound())
 
-    for (const tag of ["html", "head", "body"]) {
-      expect(container.querySelector(tag)).toBeNull()
-    }
+    expect(tags.filter((tag) => ["html", "head", "body"].includes(tag))).toEqual([])
   })
 
   /**
