@@ -315,3 +315,6 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0229](0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md) | A share of readers is estimated against the appearances and bounded against the openings | Accepted | §4c (reader signals) |
 | [0230](0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md) | A part was read when readers had time for its words, and only the skim is a safe claim | Accepted | §4c (reader signals) |
 | [0231](0231-a-funnel-is-three-shares-of-the-arrivals-and-the-straddle-is-the-one-error-here-that-leans-down.md) | A funnel is three shares of the arrivals, and the straddle is the one error here that leans down | Accepted | §4c (reader signals) |
+| 0232 | *No record on this branch* | — | — |
+| 0233 | *No record on this branch* | — | — |
+| [0234](0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md) | A primitive may name a control from the tree, and its declared string is the floor | Accepted | §4h — the behaviour seam |

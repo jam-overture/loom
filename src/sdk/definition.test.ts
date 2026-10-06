@@ -183,3 +183,59 @@ describe("the text a definition declares", () => {
     expect(entry.text["excluded"]).toBe("Not included")
   })
 })
+
+describe("the control names a definition declares", () => {
+  const dialogFor = (names: Record<"present", string> | undefined) =>
+    definePrimitive({
+      type: "loom.dialog",
+      description: "a panel opened by the page's own call to action",
+      props: z.object({ label: z.string() }),
+      text: { present: "Open" },
+      interactive: "always",
+      behaviours: ["present"] as const,
+      ...(names ? { names } : {}),
+      component: anyPrimitive,
+    })
+
+  it("carries which prop names which control onto the entry", () => {
+    expect(dialogFor({ present: "label" }).names).toEqual({ present: "label" })
+  })
+
+  it("defaults to none, because a control is normally named by its primitive", () => {
+    expect(dialogFor(undefined).names).toEqual({})
+  })
+
+  it("copies what it was given, so a later mutation cannot rename a rendered button", () => {
+    const declared: Record<"present", string> = { present: "label" }
+    const entry = dialogFor(declared)
+
+    declared.present = "heading"
+
+    expect(entry.names["present"]).toBe("label")
+  })
+
+  it("has no prototype, so a behaviour named after one of Object's is an ordinary key", () => {
+    expect(Object.getPrototypeOf(dialogFor({ present: "label" }).names)).toBeNull()
+  })
+
+  /**
+   * The type-level half: a primitive can only name a control it takes. A
+   * declaration about a behaviour it never declared is the registry's refusal as
+   * well, and this is the author finding out at the declaration instead.
+   */
+  it("types the declaration by the behaviours that were declared", () => {
+    definePrimitive({
+      type: "loom.dialog",
+      description: "a panel opened by the page's own call to action",
+      props: z.object({ label: z.string() }),
+      text: { present: "Open" },
+      interactive: "always",
+      behaviours: ["present"] as const,
+      // @ts-expect-error — `disclose` is not a behaviour this primitive takes
+      names: { disclose: "label" },
+      component: anyPrimitive,
+    })
+
+    expect(dialogFor({ present: "label" }).names["present"]).toBe("label")
+  })
+})

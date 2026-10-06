@@ -440,3 +440,69 @@ describe("registering a primitive that says which bindings it reads", () => {
     expect(built.ok).toBe(true)
   })
 })
+
+describe("registering a primitive that names a control from the tree", () => {
+  const dialog = (names: Readonly<Record<string, string>> | undefined) =>
+    definePrimitive({
+      type: "loom.dialog",
+      description: "A panel opened by the page's own call to action",
+      props: z.object({ label: z.string().optional() }).strict(),
+      text: { present: "Open", dismiss: "Close" },
+      interactive: "always",
+      behaviours: ["present", "dismiss"] as const,
+      ...(names ? { names: names as Record<"present" | "dismiss", string> } : {}),
+      component: () => null,
+    })
+
+  /**
+   * The same drift `frames` and `copy` are checked against, and the same silent
+   * direction: the prop can never arrive, so every one of these triggers falls
+   * back to the declared string and nothing anywhere says the author stopped
+   * getting what they asked for.
+   */
+  it("refuses a name taken from a prop the schema does not declare", () => {
+    expect(errorOf([dialog({ present: "heading" })])).toEqual({
+      code: "undeclared-control-name-prop",
+      type: "loom.dialog",
+      behaviour: "present",
+      prop: "heading",
+    })
+  })
+
+  it("refuses a name for a behaviour this primitive does not take", () => {
+    expect(errorOf([dialog({ disclose: "label" })])).toEqual({
+      code: "undeclared-named-behaviour",
+      type: "loom.dialog",
+      behaviour: "disclose",
+      prop: "label",
+    })
+  })
+
+  it("explains both refusals by naming the prop and the control", () => {
+    const first = describeRegistryError(errorOf([dialog({ present: "heading" })]))
+    const second = describeRegistryError(errorOf([dialog({ disclose: "label" })]))
+
+    expect(first).toContain("heading")
+    expect(first).toContain("present")
+    expect(second).toContain("disclose")
+  })
+
+  it("carries the declaration through, and answers nothing for a type nobody registered", () => {
+    const built = createPrimitiveRegistry([dialog({ present: "label" })])
+    if (!built.ok) throw new Error("expected a registry")
+
+    expect(built.value.controlNamePropsFor?.(type("loom.dialog"))).toEqual({ present: "label" })
+    expect(built.value.controlNamePropsFor?.(type("acme.nothing"))).toEqual({})
+  })
+
+  /**
+   * Declaring none is the ordinary case, and it has to be the same answer as a
+   * type nobody registered: in both, every control is named by its own primitive.
+   */
+  it("answers nothing for a primitive that named no control", () => {
+    const built = createPrimitiveRegistry([dialog(undefined)])
+    if (!built.ok) throw new Error("expected a registry")
+
+    expect(built.value.controlNamePropsFor?.(type("loom.dialog"))).toEqual({})
+  })
+})

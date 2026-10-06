@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4518,10 +4518,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 57,
+      "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -4718,7 +4718,7 @@
             {
               "name": "BehaviourResolver",
               "kind": "interface",
-              "signature": "interface BehaviourResolver {\n    readonly behavioursFor: (type: PrimitiveType) => readonly BehaviourName[];\n}",
+              "signature": "interface BehaviourResolver {\n    readonly behavioursFor: (type: PrimitiveType) => readonly BehaviourName[];\n    /**\n     * The prop each of this type's controls takes its name from, where its author\n     * said so.\n     *\n     * Optional on the interface, and that is the only concession this seam makes\n     * to compatibility: a resolver written before a control could be named from a\n     * tree answers nothing here and is read as a library whose primitives all name\n     * their controls themselves, which is what it is. A registry built by the SDK\n     * always answers.\n     */\n    readonly controlNamePropsFor?: (type: PrimitiveType) => ControlNameProps;\n}",
               "truncated": false,
               "summary": "The renderer's whole dependency on the seam: which behaviours a type declared."
             },
@@ -4753,7 +4753,7 @@
             {
               "name": "resolveBehaviours",
               "kind": "function",
-              "signature": "const resolveBehaviours: (names: readonly BehaviourName[], content: string, text: PrimitiveText<string>) => ResolvedBehaviours",
+              "signature": "const resolveBehaviours: (names: readonly BehaviourName[], content: string, text: PrimitiveText<string>, named?: ControlNames) => ResolvedBehaviours",
               "truncated": false,
               "summary": "Builds the controls for one node."
             }
@@ -4798,6 +4798,48 @@
               "signature": "const controlDisplay: (name: BehaviourName, resting: string) => string",
               "truncated": false,
               "summary": "The value a control writes for `display`: its own, behind the two properties a primitive may override it with."
+            }
+          ]
+        },
+        {
+          "module": "render/control-name",
+          "title": "Control name",
+          "summary": "Where a control's name comes from when the primitive's own vocabulary is the wrong place to keep it.",
+          "symbols": [
+            {
+              "name": "ControlNameProps",
+              "kind": "type",
+              "signature": "type ControlNameProps = Readonly<Partial<Record<BehaviourName, string>>>;",
+              "truncated": false,
+              "summary": "What a primitive declared: the prop each of its controls is named by."
+            },
+            {
+              "name": "NO_CONTROL_NAME_PROPS",
+              "kind": "value",
+              "signature": "const NO_CONTROL_NAME_PROPS: ControlNameProps",
+              "truncated": false,
+              "summary": "The answer for a primitive that named none, which is almost all of them."
+            },
+            {
+              "name": "ControlNames",
+              "kind": "type",
+              "signature": "type ControlNames = Readonly<Partial<Record<BehaviourName, string>>>;",
+              "truncated": false,
+              "summary": "What one node resolved to: the words each control is announced by here."
+            },
+            {
+              "name": "NO_CONTROL_NAMES",
+              "kind": "value",
+              "signature": "const NO_CONTROL_NAMES: ControlNames",
+              "truncated": false,
+              "summary": "The answer for a node whose primitive named none, or that filled none in."
+            },
+            {
+              "name": "resolveControlNames",
+              "kind": "function",
+              "signature": "const resolveControlNames: (props: JsonObject, declared: ControlNameProps) => ControlNames",
+              "truncated": false,
+              "summary": "Reads the named props off one node."
             }
           ]
         },
@@ -5431,10 +5473,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 195,
+      "files": 196,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5899,7 +5941,7 @@
       "files": 64,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6788,10 +6830,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 35,
+      "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7135,14 +7177,14 @@
             {
               "name": "PrimitiveDefinition",
               "kind": "type",
-              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    /**\n     * What part this primitive plays — `\"heading\"` on anything a reader takes as\n     * the title of what follows, whatever it is called. Optional, and absent on\n     * almost everything: most primitives are an arrangement or a surface and play\n     * no part a consumer asks about categorically.\n     *\n     * A role travels in the opposite direction from every other declaration here.\n     * `interactive` and `frames` are read by the runtime and constrain what a tree\n     * may do; a role is read by a *host* and constrains nothing. It is here rather\n     * than in a host's own table for the same reason `description` is: the author\n     * of the component is the one who knows, and a table maintained beside the\n     * registry goes stale the day somebody registers a second heading.\n     *\n     * Typed rather than free — see `role.ts` for why the vocabulary is closed and\n     * why it currently has one member. A host writing JavaScript can still hand\n     * over a string the runtime does not know, so the registry refuses one rather\n     * than letting a misspelling read as \"declares no role\".\n     */\n    readonly role?: PrimitiveRole;\n    /**\n     * The props whose values a reader reads as words — `[\"value\", \"label\",\n     * \"caption\"]` on a stat, `[]` on an arrangement that shows none of its own.\n     *\n     * Optional, and the distinction between `[]` and leaving it out is the whole\n     * of what it buys. `[]` says *this primitive shows no words of its\n     * own*; absence says *nobody has said*, and `copyIn` reports the second and\n     * trusts the first. A default would collapse them, which is why there is\n     * none.\n     *\n     * Read by nothing in the runtime, like `role` and `submits`: it changes no\n     * render and constrains no tree. The named props must be props the schema\n     * declares, and the registry refuses a declaration that names one it does\n     * not — the same drift `frames` and `interactive` are checked for, with less\n     * riding on it and the same silence when it happens.\n     */\n    readonly copy?: readonly string[];\n    /**\n     * The binding names this primitive reads an answer under — `[\"entries\"]` on a\n     * feed, `[]` on everything that draws only what the tree wrote.\n     *\n     * A tree's `loom:data` maps a *name* to a source, and the name is how the\n     * primitive reading the answer finds it. Until this existed, the name\n     * was the one thing in that declaration nothing could check: an unregistered\n     * source is refused and a param the source did not\n…",
+              "signature": "type PrimitiveDefinition<TProps extends JsonObjectView = JsonObject, TText extends string = never, TBehaviour extends BehaviourName = never> = {\n    readonly type: string;\n    readonly description: string;\n    readonly props: ZodType<TProps, ZodTypeDef, unknown>;\n    readonly slots?: readonly string[];\n    /**\n     * Declared strings, by key. The keys are inferred, so the component's\n     * `loom.text` is typed to exactly what was declared here — an author who\n     * reads a key they did not declare finds out at the declaration, which is the\n     * same bargain the props schema makes.\n     */\n    readonly text?: Readonly<Record<TText, string>>;\n    /**\n     * `\"always\"` for a primitive that is a target however it is configured, or\n     * `{ whenProps }` naming the props that make it one — `href` on a card, which\n     * is a plain surface without it. The named props must be props the schema\n     * declares; the registry refuses a declaration that names one it does not, so\n     * a renamed prop cannot leave this quietly pointing at nothing.\n     */\n    readonly interactive?: InteractiveWhen;\n    /**\n     * `true` for a primitive whose job includes sending what it collected. It\n     * takes no conditional form, unlike `interactive`: a card is a target only\n     * when the tree gives it an `href`, but a form is a form, and a primitive\n     * that posts under one prop value and not another is two primitives.\n     *\n     * Nothing reads it at render time and nothing needs it to render — a\n     * component is handed `loom.submit` whenever its node declared one, declared\n     * or not. What it buys is that the audit can tell the two silent failures\n     * apart: a primitive that says it posts and places no address, and one that\n     * places an address without ever having said it posts.\n     */\n    readonly submits?: boolean;\n    /**\n     * The props whose values this primitive puts in an `iframe` — `[\"src\"]` on an\n     * embed. Empty for everything else, which is every other primitive there is.\n     *\n     * A list of prop names rather than a `true`, because the runtime has to know\n     * *which* string to check and there is nothing it could infer that from: a\n     * `src` reaching an `iframe` and a `src` reaching an `img` are the same JSON.\n     * The named props must be props the schema declares; the registry refuses a\n     * declaration that names one it does not, the same way it refuses an\n     * `interactive` trigger that has been renamed out from under it — the drift\n     * that actually happens is a prop renamed and a declaration left pointing at\n     * nothing, which would silently stop checking the URL rather than fail.\n     */\n    readonly frames?: readonly string[];\n    /**\n     * The controls this primitive takes from the runtime's closed behaviour\n     * vocabulary — `[\"copy\"]` on a code panel. Optional, and empty for almost\n     * everything: a Loom page is data, and a behaviour is the exception that has\n     * to be asked for by name.\n     *\n     * Declaring one is a claim with two consequences the registry checks. The\n     * strings the control needs become strings this primitive must declare, so it\n     * has a name in every language the deployment serves; and a control is a\n     * target the reader aims at, so this primitive must also declare itself\n     * `interactive` or the Gate will let one sit inside an anchor.\n     */\n    readonly behaviours?: readonly TBehaviour[];\n    /**\n     * The prop each control takes its name from — `{ present: \"label\" }` on a\n     * dialog whose trigger carries the page's own call to action.\n     *\n     * Optional, and absent for almost every primitive that takes a control at all.\n     * A control's name is normally a string this primitive declares, which is what\n     * makes *Copy* the same word on every code panel in a deployment and lets one\n     * dictionary translate all of them. This is the exception for the control whose\n     * words are **content**: a trigger that opens a dialog says *Watch the demo*,\n     * the next one says *Book a call*, and neither is a fact about the primitive or\n     * a thing a translator should hold.\n     *\n     * Three checks follow, and the first two are the registry's. The behaviour must\n     * be one this primitive declared, and the prop must be one its schema declares\n     * — the same drift `frames` and `interactive` are checked against, failing the\n     * same silent way: a prop renamed and a declaration left pointing at nothing\n     * would quietly go back to the declared string for ever. The third is not a\n     * check but a property: the declared text is still required, so the control has\n     * a name in every language before any node is written, and a node that fills\n     * the prop with nothing gets it.\n     */\n    readonly names?: Readonly<Partial<Record<TBehaviour, string>>>;\n    /**\n     * What part this primitive plays — `\"heading\"` on anything a reader takes as\n     * the title of what follows, whatever it is called. Optional, and absent on\n     * almost everything: most primitives are an arrangement or a surface and play\n     * no part a consumer asks about categorically.\n     *\n     * A role travels in the opposite direction from every other declaration here.\n     * `interactive` and `frames` are read by the runtime and constrain what a tree\n     * may do; a role is read by a *host* and constrains nothing. It is here rather\n     * than in a host's own table for the same reason `description` is: the author\n     * of the component is the one who knows, and a table maintained beside the\n     * registry goes stale the day somebody registers a second heading.\n     *\n     * Typed rather than free — see `role.ts` for why the vocabulary is closed and\n     * why it currently has one member. A host writing JavaScript can still hand\n     * over a string the runtime does not know, so the registry refuses one rather\n     * than letting a misspelling read as \"declares no role\".\n     */\n    readonly role?: P\n…",
               "truncated": true,
               "summary": ""
             },
             {
               "name": "PrimitiveEntry",
               "kind": "type",
-              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type PrimitiveEntry = {\n    readonly type: string;\n    readonly description: string;\n    readonly slots: readonly string[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: readonly CataloguedProp[] | undefined;\n    /**\n     * The props whose accepted values can be listed, so the conformance probe can\n     * ask the primitive what it does under each one rather than under whichever\n     * shape it happens to take with no props at all. Empty for the\n     * primitive whose rendering does not turn on a closed choice, which is most.\n     */\n    readonly choices: readonly ClosedChoice[];\n    /** Declared strings, keys erased alongside the props type. Empty when none. */\n    readonly text: PrimitiveText<string>;\n    /** Absent for the ordinary primitive, which is not a target at all. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** `false` for the ordinary primitive, which sends nothing anywhere. */\n    readonly submits: boolean;\n    /** Declared framable prop names, still raw: the registry is what checks them. */\n    readonly frames: readonly string[];\n    /** Declared behaviour names, still raw: the registry is what checks them. */\n    readonly behaviours: readonly string[];\n    /**\n     * Which prop names which control, still raw: the registry is what checks that\n     * both halves of each pair exist. Empty for the primitive that named none,\n     * which is almost all of them.\n     */\n    readonly names: Readonly<Record<string, string>>;\n    /**\n     * The declared role, still raw: the registry is what checks it, for the same\n     * reason it checks a behaviour name. `undefined` for the primitive that plays\n     * no part a consumer asks about, which is most of them.\n     */\n    readonly role: string | undefined;\n    /**\n     * Declared copy prop names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to `copyIn`.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * Declared binding names, still raw: the registry is what checks them.\n     * `undefined` is carried through rather than defaulted to `[]`, because the\n     * two mean different things here and all the way out to the render walk.\n     */\n    readonly reads: readonly BindingDeclaration[] | undefined;\n    /**\n     * The declared reading of this node's answers, or `undefined` where the author\n     * has not said. Nothing to check at registration — there are no names in it\n     * and no props it could name — so it is carried straight through.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": "A definition with its prop type erased, which is what a heterogeneous registry can hold. `definePrimitive` is the only way to build one, so the erasure happens exactly once, in the one place that still has both the schema and the component type in hand and can prove they agree."
             },
@@ -7226,14 +7268,14 @@
             {
               "name": "RegisteredPrimitive",
               "kind": "type",
-              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
+              "signature": "type RegisteredPrimitive = {\n    readonly type: PrimitiveType;\n    readonly description: string;\n    readonly slots: readonly SlotName[];\n    readonly component: LoomPrimitive;\n    readonly declaredProps: PrimitiveEntry[\"declaredProps\"];\n    /** The props the conformance probe can vary, from the declared schema. */\n    readonly choices: PrimitiveEntry[\"choices\"];\n    /** Declared strings in the author's language, before any dictionary. */\n    readonly text: PrimitiveText<string>;\n    /** Whether it renders a target, and what makes it one. Absent for most. */\n    readonly interactive: InteractiveWhen | undefined;\n    /** Whether its author says it posts. `false` for most. */\n    readonly submits: boolean;\n    /** The props it puts in a frame. Empty for all but one primitive. */\n    readonly frames: readonly string[];\n    /** The controls it takes from the runtime's vocabulary. Empty for most. */\n    readonly behaviours: readonly BehaviourName[];\n    /**\n     * The prop each of those controls is named by, where its author said so\n     *. Empty for almost every primitive that takes a control at all: a\n     * control's name is normally a string the primitive declared, and this is the\n     * exception for the trigger whose words are the page's.\n     */\n    readonly names: ControlNameProps;\n    /** What part it plays. `undefined` for most, which play none. */\n    readonly role: PrimitiveRole | undefined;\n    /**\n     * The props a reader reads as words. `undefined` where the primitive\n     * has not said, which is not the same answer as `[]` and is not rounded to\n     * it.\n     */\n    readonly copy: readonly string[] | undefined;\n    /**\n     * The binding names it reads an answer under, each either a name or\n     * the prop that gives one. `undefined` where the primitive has not\n     * said, which is not the same answer as `[]` and is not rounded to it — the\n     * walk reports under the first and stays quiet under the second.\n     */\n    readonly reads: readonly BindingDeclaration<BindingName>[] | undefined;\n    /**\n     * Its own reading of the answers it was given. `undefined` where the\n     * author has not said, which here is the same answer as declaring one that\n     * reports nothing — unlike `copy` and `reads`, because there is no emptiness\n     * to distinguish: a reading is made per answer at render time, and a primitive\n     * that has said nothing about its answers is reported on by nothing.\n     */\n    readonly unshown: UnshownDeclaration | undefined;\n    readonly validate: (props: JsonObject) => PropsVerdict;\n};",
               "truncated": false,
               "summary": ""
             },
             {
               "name": "RegistryError",
               "kind": "type",
-              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
+              "signature": "type RegistryError = {\n    readonly code: \"invalid-primitive-type\";\n    readonly type: string;\n} | {\n    readonly code: \"invalid-slot-name\";\n    readonly type: string;\n    readonly slot: string;\n} | {\n    readonly code: \"invalid-text-key\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"blank-text\";\n    readonly type: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-frame-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-copy-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unnamed-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly key: string;\n} | {\n    readonly code: \"undeclared-interactive-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n} | {\n    readonly code: \"unpaired-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly requires: string;\n} | {\n    readonly code: \"undeclared-named-behaviour\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"undeclared-control-name-prop\";\n    readonly type: string;\n    readonly behaviour: string;\n    readonly prop: string;\n} | {\n    readonly code: \"unknown-role\";\n    readonly type: string;\n    readonly role: string;\n} | {\n    readonly code: \"invalid-binding-name\";\n    readonly type: string;\n    readonly name: string;\n} | {\n    readonly code: \"undeclared-reads-prop\";\n    readonly type: string;\n    readonly prop: string;\n} | {\n    readonly code: \"duplicate-primitive-type\";\n    readonly type: string;\n};",
               "truncated": false,
               "summary": ""
             },
@@ -7382,7 +7424,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7610,7 +7652,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8069,7 +8111,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8423,7 +8465,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8556,7 +8598,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9977,7 +10019,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10120,7 +10162,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10187,7 +10229,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10784,7 +10826,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10855,10 +10897,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 88,
+      "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11316,7 +11358,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1283,
+        "packageNames": 1288,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
