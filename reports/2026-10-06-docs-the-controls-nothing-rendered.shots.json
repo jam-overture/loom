@@ -1,0 +1,85 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/quickstart",
+      "out": "2026-10-06-docs-storage-blocked-fixed-phone",
+      "viewport": "phone",
+      "waitFor": "h1",
+      "start": {
+        "storageBlocked": true
+      },
+      "measure": [
+        "header",
+        "h1",
+        "text=Color theme: System. Switch to Light.",
+        "pre"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/quickstart",
+      "out": "2026-10-06-docs-storage-blocked-fixed-wide",
+      "viewport": "wide",
+      "waitFor": "h1",
+      "start": {
+        "storageBlocked": true
+      },
+      "measure": [
+        "nav[aria-label='Documentation']",
+        "text=Color theme: System. Switch to Light."
+      ]
+    },
+    {
+      "path": "/docs/getting-started/quickstart",
+      "out": "2026-10-06-docs-storage-blocked-shipped-phone",
+      "viewport": "phone",
+      "waitFor": "body",
+      "start": {
+        "storageBlocked": true
+      },
+      "measure": [
+        "header",
+        "h1",
+        "button[title]",
+        "pre"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/quickstart",
+      "out": "2026-10-06-docs-storage-blocked-shipped-wide",
+      "viewport": "wide",
+      "waitFor": "body",
+      "start": {
+        "storageBlocked": true
+      },
+      "measure": [
+        "nav[aria-label='Documentation']",
+        "button[title]",
+        "h1"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-06-docs-copy-button-phone",
+      "viewport": "phone",
+      "waitFor": "pre",
+      "clip": ".group:has(> pre) >> nth=0",
+      "measure": [
+        "pre",
+        "text=copy"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-06-docs-copy-button-wide",
+      "viewport": "wide",
+      "waitFor": "pre",
+      "clip": ".group:has(> pre) >> nth=0",
+      "measure": [
+        "pre",
+        "text=copy"
+      ]
+    }
+  ]
+}
