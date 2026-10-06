@@ -60,6 +60,7 @@ import { loomLogo } from "./loom.logo.js"
 import { loomLogoCloud } from "./loom.logo-cloud.js"
 import { loomMarquee } from "./loom.marquee.js"
 import { loomMedia } from "./loom.media.js"
+import { loomPlate } from "./loom.plate.js"
 import { loomMenu } from "./loom.menu.js"
 import { loomMessage } from "./loom.message.js"
 import { loomMessageList } from "./loom.message-list.js"
@@ -88,6 +89,7 @@ import { loomProductGrid } from "./loom.product-grid.js"
 import { loomProse } from "./loom.prose.js"
 import { loomReveal } from "./loom.reveal.js"
 import { loomQuote } from "./loom.quote.js"
+import { loomVoices } from "./loom.voices.js"
 import { loomRating } from "./loom.rating.js"
 import { loomRecording } from "./loom.recording.js"
 import { loomRecordingGrid } from "./loom.recording-grid.js"
@@ -98,6 +100,7 @@ import { loomSplit } from "./loom.split.js"
 import { loomStack } from "./loom.stack.js"
 import { loomStat } from "./loom.stat.js"
 import { loomTally } from "./loom.tally.js"
+import { loomTrend } from "./loom.trend.js"
 import { loomStatChart } from "./loom.stat-chart.js"
 import { loomStatGrid } from "./loom.stat-grid.js"
 import { loomTable } from "./loom.table.js"
@@ -416,6 +419,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomMilestone,
   loomStatGrid,
   loomStatChart,
+  loomTrend,
   loomStat,
   loomTally,
   loomMeter,
@@ -438,6 +442,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomSpec,
   loomQuoteGrid,
   loomQuote,
+  loomVoices,
   loomPersonGrid,
   loomPerson,
   loomAvatarRow,
@@ -484,6 +489,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomPerk,
   loomDivider,
   loomMedia,
+  loomPlate,
   loomEmbed,
   loomBeforeAfter,
   loomAction,

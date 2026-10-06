@@ -16,8 +16,10 @@ import { err, ok, type Result } from "../result.js"
 import {
   BEHAVIOURS,
   isBehaviourName,
+  NO_CONTROL_NAME_PROPS,
   type BehaviourName,
   type BehaviourResolver,
+  type ControlNameProps,
 } from "../render/behaviour.js"
 import type { FrameResolver } from "../render/frame.js"
 import type { BindingDeclaration, BindingReader } from "../render/reads.js"
@@ -72,6 +74,13 @@ export type RegisteredPrimitive = {
   readonly frames: readonly string[]
   /** The controls it takes from the runtime's vocabulary. Empty for most. */
   readonly behaviours: readonly BehaviourName[]
+  /**
+   * The prop each of those controls is named by, where its author said so
+   * (0234). Empty for almost every primitive that takes a control at all: a
+   * control's name is normally a string the primitive declared, and this is the
+   * exception for the trigger whose words are the page's.
+   */
+  readonly names: ControlNameProps
   /** What part it plays (0114). `undefined` for most, which play none. */
   readonly role: PrimitiveRole | undefined
   /**
@@ -129,6 +138,18 @@ export type RegistryError =
       readonly type: string
       readonly behaviour: string
       readonly requires: string
+    }
+  | {
+      readonly code: "undeclared-named-behaviour"
+      readonly type: string
+      readonly behaviour: string
+      readonly prop: string
+    }
+  | {
+      readonly code: "undeclared-control-name-prop"
+      readonly type: string
+      readonly behaviour: string
+      readonly prop: string
     }
   | { readonly code: "unknown-role"; readonly type: string; readonly role: string }
   | { readonly code: "invalid-binding-name"; readonly type: string; readonly name: string }
@@ -188,6 +209,10 @@ export const describeRegistryError = (error: RegistryError): string => {
       return `"${error.type}" takes the "${error.behaviour}" behaviour and not "${error.requires}", which it does nothing without; it would render a control that asks a region nothing opens to close`
     case "undeclared-reads-prop":
       return `"${error.type}" says it reads a binding under whichever name its "${error.prop}" prop gives, which its props schema does not declare; that prop can never arrive, so the primitive would read its default for ever and go on doing so after the prop it names was renamed`
+    case "undeclared-named-behaviour":
+      return `"${error.type}" says its "${error.behaviour}" control is named by "${error.prop}" and does not take that behaviour; there is no control for the prop to name, so the declaration would sit there reading as something this primitive does`
+    case "undeclared-control-name-prop":
+      return `"${error.type}" says its "${error.behaviour}" control is named by "${error.prop}", which its props schema does not declare; that prop can never arrive, so every one of these controls would quietly fall back to the declared string and go on doing so after the prop it names was renamed`
     case "unknown-role":
       return `"${error.type}" declares the role "${error.role}", which the runtime has none of; the vocabulary is closed and its members are ${PRIMITIVE_ROLES.map((role) => `"${role}"`).join(", ")} — and a misspelling accepted here would read to every consumer as a primitive that declares no role at all`
     case "duplicate-primitive-type":
@@ -312,6 +337,49 @@ const registeredBehaviours = (
 }
 
 /**
+ * Which prop names which control, checked against the two lists it refers to.
+ *
+ * Both halves fail the way `undeclaredFrameProp` fails and in the quieter
+ * direction. A behaviour this primitive does not take is a declaration about a
+ * control that is never built, which reads to anyone auditing the registry as
+ * something this primitive does. A prop its schema does not declare can never
+ * arrive, so every one of those controls falls back to the declared string — a
+ * page that is correct, announced by a word its author stopped intending, with
+ * nothing anywhere saying so.
+ *
+ * A schema whose fields cannot be enumerated answers nothing about its props and
+ * is left alone on that half, for the reason the other two prop checks give:
+ * "I cannot tell you" is not "there are none". The behaviour half is still
+ * checked, because the entry's own list is in hand either way.
+ */
+const registeredNames = (
+  entry: PrimitiveEntry
+): Result<ControlNameProps, RegistryError> => {
+  const pairs = Object.entries(entry.names)
+  if (pairs.length === 0) return ok(NO_CONTROL_NAME_PROPS)
+
+  const declaredProps = entry.declaredProps
+    ? new Set(entry.declaredProps.map((prop) => prop.name))
+    : undefined
+
+  const names: Record<string, string> = Object.create(null) as Record<string, string>
+
+  for (const [behaviour, prop] of pairs) {
+    if (!entry.behaviours.includes(behaviour)) {
+      return err({ code: "undeclared-named-behaviour", type: entry.type, behaviour, prop })
+    }
+
+    if (declaredProps && !declaredProps.has(prop)) {
+      return err({ code: "undeclared-control-name-prop", type: entry.type, behaviour, prop })
+    }
+
+    names[behaviour] = prop
+  }
+
+  return ok(Object.freeze(names) as ControlNameProps)
+}
+
+/**
  * The declared role, checked — `undefined` for the primitive that declared none,
  * which is most of them.
  *
@@ -429,6 +497,10 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
   const behaviours = registeredBehaviours(entry)
   if (!behaviours.ok) return behaviours
 
+  /** After the behaviours, so an unknown name is refused as one rather than as a pair. */
+  const names = registeredNames(entry)
+  if (!names.ok) return names
+
   const role = registeredRole(entry)
   if (!role.ok) return role
 
@@ -447,6 +519,7 @@ const registerEntry = (entry: PrimitiveEntry): Result<RegisteredPrimitive, Regis
     submits: entry.submits,
     frames: entry.frames,
     behaviours: behaviours.value,
+    names: names.value,
     role: role.value,
     copy: entry.copy ? Object.freeze([...entry.copy]) : undefined,
     reads: reads.value,
@@ -509,6 +582,8 @@ export const createPrimitiveRegistry = (
     textFor: (type: PrimitiveType): PrimitiveText<string> => byType.get(type)?.text ?? NO_TEXT,
     behavioursFor: (type: PrimitiveType): readonly BehaviourName[] =>
       byType.get(type)?.behaviours ?? NO_BEHAVIOUR_NAMES,
+    controlNamePropsFor: (type: PrimitiveType): ControlNameProps =>
+      byType.get(type)?.names ?? NO_CONTROL_NAME_PROPS,
     framePropsFor: (type: PrimitiveType): readonly string[] =>
       byType.get(type)?.frames ?? NO_FRAME_PROPS,
     /**

@@ -17,6 +17,25 @@ import { THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
  * effect rather than at render is what keeps the server and client markup
  * identical — a toggle that hydrated with the wrong label would flash the wrong
  * answer at exactly the reader who chose otherwise.
+ *
+ * Two things it has to do that are easy to leave out, and both were:
+ *
+ * **While `system` is the choice, the machine may change its mind.** Resolving
+ * the preference once at load is right for the inline script, which runs once;
+ * for a page the reader keeps open it means `system` is really "whatever the
+ * system was when I arrived", and a reader whose machine goes dark at sunset
+ * keeps a light page. So the query is subscribed to for as long as `system` is
+ * the choice, and only then — a reader who has chosen light is not asking to be
+ * overruled at sunset.
+ *
+ * **Storage is a thing a reader is allowed to turn off.** `window.localStorage`
+ * does not return `null` where site data is blocked, it *throws* on access. The
+ * inline script has always had a `try` around it. This did not, and the read sat
+ * in an effect, so the failure was not a toggle that did nothing: it was an
+ * exception on the way to the route's error boundary, and every page of this
+ * site became an error screen for that reader. The theme they asked for now
+ * works and simply is not remembered, which is the most any page can offer
+ * somewhere it may not write.
  */
 
 type Choice = "light" | "dark" | "system"
@@ -25,29 +44,58 @@ const NEXT: Record<Choice, Choice> = { system: "light", light: "dark", dark: "sy
 const LABEL: Record<Choice, string> = { system: "System", light: "Light", dark: "Dark" }
 const GLYPH: Record<Choice, string> = { system: "◐", light: "☀", dark: "☾" }
 
+const DARK_QUERY = "(prefers-color-scheme: dark)"
+
+/** What the reader chose last time, or `system` — including where asking throws. */
+const remembered = (): Choice => {
+  try {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+
+    return stored === "light" || stored === "dark" ? stored : "system"
+  } catch {
+    return "system"
+  }
+}
+
+/** Keep the choice if we are allowed to. A reader who blocked storage is not. */
+const remember = (choice: Choice): void => {
+  try {
+    if (choice === "system") window.localStorage.removeItem(THEME_STORAGE_KEY)
+    else window.localStorage.setItem(THEME_STORAGE_KEY, choice)
+  } catch {
+    return
+  }
+}
+
 const applied = (choice: Choice): "light" | "dark" =>
-  choice !== "system"
-    ? choice
-    : window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light"
+  choice !== "system" ? choice : window.matchMedia(DARK_QUERY).matches ? "dark" : "light"
+
+const paint = (choice: Choice): void => {
+  document.documentElement.dataset["theme"] = applied(choice)
+}
 
 export const ThemeToggle = () => {
   const [choice, setChoice] = useState<Choice>("system")
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
-
-    if (stored === "light" || stored === "dark") setChoice(stored)
+    setChoice(remembered())
   }, [])
+
+  useEffect(() => {
+    if (choice !== "system") return
+
+    const query = window.matchMedia(DARK_QUERY)
+    const follow = (): void => paint("system")
+
+    query.addEventListener("change", follow)
+
+    return () => query.removeEventListener("change", follow)
+  }, [choice])
 
   const choose = (next: Choice): void => {
     setChoice(next)
-
-    if (next === "system") window.localStorage.removeItem(THEME_STORAGE_KEY)
-    else window.localStorage.setItem(THEME_STORAGE_KEY, next)
-
-    document.documentElement.dataset["theme"] = applied(next)
+    remember(next)
+    paint(next)
   }
 
   return (

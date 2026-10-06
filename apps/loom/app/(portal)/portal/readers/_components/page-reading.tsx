@@ -16,10 +16,12 @@ import {
   type PageReading,
 } from "@/app/(portal)/_lib/reading-view"
 
+import type { PagePacing } from "@/app/(portal)/_lib/pacing"
 import type { PageSkipping } from "@/app/(portal)/_lib/skipped"
 import type { PageStopping } from "@/app/(portal)/_lib/stopping"
 
 import { CountedAgainst } from "./counted-against"
+import { HadTimeToRead } from "./had-time-to-read"
 import { PartCounters } from "./part-counters"
 import { SinceTheChange } from "./since-the-change"
 import { SkippingUnavailable, WhatWasSkipped } from "./what-was-skipped"
@@ -79,6 +81,7 @@ export const PageReadingCard = ({
   live,
   skipping,
   stopping,
+  pacing,
 }: {
   readonly reading: PageReading
   readonly page: PageNameValue
@@ -97,6 +100,11 @@ export const PageReadingCard = ({
    * covers both rather than two identical ones.
    */
   readonly stopping: PageStopping | undefined
+  /**
+   * Whether the people who got to each part had time to read it, or `undefined`
+   * in the same cases as the two above and from the same join.
+   */
+  readonly pacing: PagePacing | undefined
 }) => {
   const newest = reading.revisions[0]!
   const highlights = highlightsOf(newest)
@@ -228,6 +236,22 @@ export const PageReadingCard = ({
        * say so.
        */}
       {stopping !== undefined && <WhereTheyStop stopping={stopping} />}
+
+      {/*
+       * Last of the three, because it is the only one that can contradict the
+       * other two and it needs them in front of a reader first. *Every part was
+       * seen* and *nobody stopped anywhere* are both true of a page nobody had
+       * time to read, and a reader who meets this section cold has no way to
+       * tell it apart from a fourth way of saying the same thing. Met after
+       * those two, it is the sentence that tells them the page they just read as
+       * healthy is not.
+       *
+       * It is handed the drop-off reading as well as its own, for one sentence:
+       * when the part most words went past unread in is the same part people
+       * stop going at, two readings built on different arithmetic have agreed,
+       * and that is the strongest thing this card can say.
+       */}
+      {pacing !== undefined && <HadTimeToRead pacing={pacing} stopping={stopping} />}
 
       <SinceTheChange comparison={comparison} standing={standing} />
 

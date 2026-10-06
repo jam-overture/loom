@@ -1,12 +1,10 @@
-import { createElement, type CSSProperties } from "react"
+import { createElement } from "react"
 import { z } from "zod"
 
 import type { LoomPrimitiveProps } from "../render/primitive.js"
 import { definePrimitive } from "../sdk/definition.js"
 
-import { portrait } from "./portrait.js"
-import { colour, family, radius, size, space, weight } from "./tokens.js"
-import { mediaUrlSchema } from "./url.js"
+import { quoteFields, quoteInterior, quoteSurface } from "./quote-content.js"
 
 /**
  * Someone else saying it. The social-proof leaf every marketing page needs and
@@ -31,15 +29,31 @@ import { mediaUrlSchema } from "./url.js"
  * The quotation mark is drawn from the heading family at a size no ramp step
  * offers, and it is `aria-hidden`: it is punctuation a screen reader already
  * gets from `blockquote`, and reading it aloud is noise.
+ *
+ * ## The card moved to `quote-content.ts`, and nothing about it changed
+ *
+ * `loom.voices` reads a run of these from a registered source, and the two draw
+ * one card. The markup, the two surfaces, the portrait call and the quotation
+ * mark are now in a shared module for `perk-content.ts`'s reason — a surface
+ * added to one and forgotten in the other is the drift a shared module
+ * prevents — and here the stake is sharper than usual: the authored card is
+ * what the catalogue photographs and the bound card is what a deployment
+ * serves, so a disagreement between them is one nobody sees until it is live.
+ *
+ * What stayed is the `figure` and `loom.editable` on it. That is the one real
+ * difference between the two: this is a node a reviewer can address, and a row
+ * from a database is not.
  */
 
 const props = z
   .object({
-    quote: z.string().min(1).max(600),
-    author: z.string().min(1).max(120),
-    /** Title and company, as one line — "Head of Design, Acme". */
-    role: z.string().min(1).max(120).optional(),
-    avatar: mediaUrlSchema.optional(),
+    /**
+     * The four fields of a testimonial, from `quote-content.ts`, so this
+     * primitive and `loom.voices` cannot disagree about what one is. The two
+     * props below are this primitive's own and have no analogue in a row — see
+     * each one for why.
+     */
+    ...quoteFields,
     /**
      * **Whether `author` names a person**, which decides whether there is a
      * face to draw at all.
@@ -70,24 +84,6 @@ const props = z
 
 type Props = z.infer<typeof props>
 
-const SURFACES: Readonly<Record<"card" | "feature", CSSProperties>> = {
-  card: {
-    background: colour("bg-surface"),
-    border: `1px solid ${colour("border-subtle")}`,
-    borderRadius: radius("lg"),
-    padding: space(5),
-  },
-  feature: {
-    background: "transparent",
-    borderInlineStart: `2px solid ${colour("border-accent")}`,
-    borderRadius: "0",
-    paddingInlineStart: space(5),
-    paddingBlock: space(3),
-  },
-}
-
-const AVATAR_SIZE = "2.75rem"
-
 export const loomQuote = definePrimitive({
   type: "loom.quote",
   description:
@@ -95,104 +91,16 @@ export const loomQuote = definePrimitive({
   props,
   slots: [],
   copy: ["quote", "author", "role"],
-  component: ({ loom, props: given }: LoomPrimitiveProps<Props>) => {
-    const feature = given.emphasis === "feature"
-
-    const attribution = createElement(
-      "figcaption",
-      {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          gap: space(3),
-          fontFamily: family("body"),
-        },
-      },
-      /**
-       * **The face this band was always described as having.** `loom.avatar`
-       * and `loom.person` have fallen back to the initials since they shipped;
-       * this one drew a photograph or nothing, and the catalogue ships no
-       * photographs — so every quote in every band here was faceless, while
-       * `testimonials-band`'s own doc comment said *"`loom.quote` draws a
-       * monogram from the author when there is no avatar, so the band is
-       * complete without one rather than visibly missing something."* It did
-       * not. `portrait.ts` is why that sentence is now true and why the four
-       * faces in this library can no longer disagree.
-       */
-      portrait({
-        name: given.anonymous === true ? undefined : given.author,
-        image: given.avatar,
-        box: AVATAR_SIZE,
-        glyph: 2,
-        corners: "circle",
-        labelled: false,
-      }),
-      createElement(
-        "span",
-        { style: { display: "flex", flexDirection: "column", gap: space(1) } },
-        createElement(
-          "span",
-          { style: { fontSize: size(2), fontWeight: weight("heading"), color: colour("fg-default") } },
-          given.author
-        ),
-        given.role === undefined
-          ? null
-          : createElement(
-              "span",
-              { style: { fontSize: size(2), color: colour("fg-muted") } },
-              given.role
-            )
-      )
-    )
-
-    return createElement(
+  component: ({ loom, props: given }: LoomPrimitiveProps<Props>) =>
+    /**
+     * The card is `quote-content.ts`'s, and the `figure` carrying
+     * `loom.editable` is this primitive's — which is the whole of the
+     * difference between an authored quote and one of `loom.voices`' rows. A
+     * node is addressable; a row from a database is not.
+     */
+    createElement(
       "figure",
-      {
-        ...loom.editable,
-        style: {
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: space(4),
-          margin: "0",
-          /** No stylesheet resets this, so the size below is the border box rather than the content box. */
-          boxSizing: "border-box",
-          height: "100%",
-          ...SURFACES[given.emphasis ?? "card"],
-        },
-      },
-      createElement(
-        "blockquote",
-        {
-          style: {
-            display: "flex",
-            gap: space(2),
-            margin: "0",
-            fontFamily: family(feature ? "heading" : "body"),
-            fontSize: size(feature ? 5 : 3),
-            lineHeight: feature ? 1.35 : 1.6,
-            color: colour("fg-default"),
-            textWrap: "pretty",
-          },
-        },
-        createElement(
-          "span",
-          {
-            "aria-hidden": true,
-            style: {
-              fontFamily: family("heading"),
-              fontSize: size(feature ? 8 : 6),
-              lineHeight: 0.9,
-              color: colour("accent"),
-              /** Optical alignment: the glyph's own sidebearing reads as a gap. */
-              marginInlineStart: "-0.08em",
-            },
-          },
-          "“"
-        ),
-        createElement("p", { style: { margin: "0" } }, given.quote)
-      ),
-      attribution
-    )
-  },
+      { ...loom.editable, style: quoteSurface(given.emphasis ?? "card") },
+      ...quoteInterior(given, given.emphasis ?? "card")
+    ),
 })

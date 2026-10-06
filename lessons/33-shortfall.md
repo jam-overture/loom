@@ -1051,7 +1051,7 @@ describe("G", () => {
 
     console.log(`  primitives that read a binding: ${reading.map((entry) => entry.type).join(", ")}`)
     console.log(`  primitives that declare what they could not show: ${declaringUnshown.map((entry) => entry.type).join(", ") || "(none)"}`)
-    console.log(`  what the registry answers for loom.feed: ${String(starter.value.unshownBy("loom.feed" as never))}`)
+    console.log(`  what the registry answers for loom.feed: ${typeof starter.value.unshownBy("loom.feed" as never)}`)
   })
 })
 ```
@@ -1075,9 +1075,9 @@ describe("G", () => {
      mark. -->
 
 ```
-  primitives that read a binding: loom.tally, loom.feed
-  primitives that declare what they could not show: (none)
-  what the registry answers for loom.feed: undefined
+  primitives that read a binding: loom.trend, loom.tally, loom.voices, loom.feed, loom.plate
+  primitives that declare what they could not show: loom.trend, loom.tally, loom.voices, loom.feed, loom.plate
+  what the registry answers for loom.feed: function
 ```
 
 Two components that draw the identical page. One of them tells the walk `11 of
@@ -1091,12 +1091,33 @@ The only difference between the two is which function the declaration is. That i
 the whole of the defence, it cannot be enforced, and saying so is better than
 implying a guarantee that is not there.
 
-Then the last three lines, which are the state of play rather than a conclusion.
-Two primitives in the starter library read a binding, and only one of them *can*
-have a shortfall — a tally reads a figure, and a figure is either read or it is
-not, so there is no partial. The one that can has not declared one. `undefined`
-is the registry being exactly honest: not *this primitive shows everything it is
-given*, which would be a claim, but *nobody has said*.
+Then the last three lines, which are the state of play rather than a conclusion —
+and the state of play has moved since this lesson was written, which is what the
+mark above the fence was for.
+
+On the day it was written, two primitives in the starter library read a binding
+and neither had declared a shortfall, so the third line printed `undefined`: the
+registry being exactly honest — not *this primitive shows everything it is
+given*, which would be a claim, but **nobody has said**. That distinction is the
+point of the line and it survives the change; what it now answers is the other
+state.
+
+Today five primitives read a binding and all five declare. `loom.feed` was given
+the declaration 0206 named, and the four twins 0233 added arrived with one, so
+the registry answers `function` where it answered `undefined`. Note what the
+third line prints and what it does not: `typeof`, because the thing behind that
+name is the primitive's own reading function and printing it would put a copy of
+`loom.feed`'s bookkeeping in this transcript — a second copy of exactly the kind
+lesson 28 costs, and one that would go red on any edit to a primitive this lesson
+is not about.
+
+The reading in the second line is worth one more sentence, because the five are
+not alike. A tally and a plate read **one** thing — a figure is read or it is
+not, a picture is drawn or it is not, so there is no partial and their
+declarations report `1` of `1` or `1` of `0`. A feed, a trend and a wall of
+voices read a **list**, and a list is where *eleven of twelve* lives. Both are
+legitimate readings of `UnshownReading`, and that they are the same shape is why
+one diagnostic covers both.
 
 ---
 
