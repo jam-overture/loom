@@ -8,6 +8,53 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/globals.css`, `app/(demo)/demo/_components/page-band.tsx`) ·
+**Status:** open — **nothing is broken today and the fourth band is fixed**;
+this is here because the reason it was not a problem is a fact about the
+clinic's page rather than about the rule.
+
+This surface renders a part of its own page a second time in four places now:
+the band a question is about, the band an ask would touch, the band a landed
+change took off the page, and — as of
+`demo-40-the-page-on-the-first-screen` — the top of the page itself on the
+arrival screen. All four go through `PageBand`, and what stops a visitor
+operating a control inside one is the window's `pointer-events: none`.
+
+**That keeps a mouse out and nothing else.** Every control inside such a band
+is still in the tab order, still reachable by a screen reader, and still
+announced — so a band carrying a link is a second copy of that link, pointing
+at a page the visitor is not looking at, with nothing to say which of the two
+they have landed on.
+
+**The fourth band is where it stopped being theoretical.** The top of the
+clinic's page is its hero: an `h1` and two calls to action, 250 pixels above
+the same hero in the document. Drawn like the other three it would have put a
+second *Book an assessment* in the tab order and a whole duplicate hero into a
+screen reader's reading of a rail whose sentences are the only ones that
+explain anything. `PageBand` takes an `inert` flag for it, and the flag is the
+caller's answer because it is a claim about the document — only that band is a
+second view of content the page below carries in full.
+
+**Why the other three were left as they are, and why that is a judgement
+rather than a finish.** A question's band and a landed change's band are the
+only place their content exists on the screen, so `inert` would hide from a
+screen reader the one rendering of the thing a visitor is being asked to
+decide about. An ask's band duplicates a band that is on the stage, and today
+it is `loom.stat-grid` — three figures, no controls — so there is nothing to
+duplicate into the tab order. **That is a fact about which preset leads**,
+not about the rule: a lead ask whose subject contained an action would bring
+the defect back with every test in this lane green, which is the half of this
+worth writing down.
+
+What it probably wants is the distinction said once, in `PageBand`, in terms
+of the *document* rather than per caller: a band is inert when the page below
+carries the same nodes. Not taken here because this unit had one screen to fix
+and the right shape for it is a reading over the tree rather than a flag.
+
+---
 ## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -164,9 +211,29 @@ still pass.
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
 (`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
-`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
-remaining instance of this lane's brief's own *nothing to react to on
-arrival***.
+`ask-panel.tsx`) · **Status:** **closed by
+`demo-40-the-page-on-the-first-screen`**, by the shape this entry recommended.
+
+*(Closed 6 October by `Loom demo`, the lane that owns it. The entry is left
+whole below because the three shapes and the reason two of them were refused
+are the argument for the one that was built — and because the objection
+recorded against (1) turned out to be answered by the surface itself: this
+lane renders a part of the tree a second time in three places already, and
+`page-band.tsx` is now the one file that decides what such a band is.)*
+
+**What was built.** The root's first element child — the clinic's hero — is
+drawn in the rail between the header and the controls, clipped to a 15rem
+window with the shared 44px fade at the cut, on narrow screens only, and only
+while the visitor has asked for nothing. Measured on production builds of
+`main` at `41c65e9` and of the branch, 390 × 844: the page's own heading is on
+the first screen at `y 471` where there was no page on it at all, and the
+stage's own first pixel moved from `y 1,094` to `y 1,380`. The cost is stated
+in the report and in `globals.css`: the green button lands at `y 611` with its
+promise and the Gate's verdict under it, and the four secondary asks go under
+the fold.
+
+**(3) is still true and was not attempted.** Nothing was taken out of the phone
+rail.
 
 Measured on a production build of `main` at `6686895`, 390 × 844, with
 `pnpm shoot`'s `measure`:
