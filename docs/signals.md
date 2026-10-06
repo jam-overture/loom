@@ -37,6 +37,7 @@ the portal every day.
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
+| Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0236](../decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
@@ -692,6 +693,58 @@ were published once.
 shares side by side as the sentence a reader screen can lead with, and the
 passages nobody saw as the one list on it a person can act on without reading
 anything else.
+
+### 15. The pair the change dissolved · `Loom signals` · **done, 6 October**
+
+§13 read a revision's funnels against the readers that revision had, and §6 made
+the tree the universe a window is read against. Nothing held the two facts
+against each other, so a pair whose end a change moved out, renamed or removed
+answered `reached 0, converted 0` — which §13 turned into *every reader who
+arrived failed to reach the start of this funnel*. **That is byte-identical to a
+pricing band nobody scrolls to, and the two remedies are opposite:** one is a
+page to fix, the other is a question to re-point.
+
+**Done.** `funnelReachOf` now takes a `PageReading` where it took a tree id and
+a revision number, looks each end up in it, and gives it an `EndStanding`. It is
+the **eighth** thing taken out of the server-side join rather than collected
+(§6, §8, §9, §10, §11, §12, §13 and §14 being the others): **nothing was added
+to a payload, a browser, a column, a store or the vocabulary**, and the
+broadcaster was not touched, so its weight is unchanged.
+
+Four things decide the shape ([0236](../decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)):
+
+- **The reading *is* the revision.** Handing in a `PageReading` keeps 0231's
+  property — the revision is handed in rather than inferred, both row sets
+  filtered to it, the drops reported — and closes the gap it left: a caller can
+  no longer name one revision while holding another revision's tree. 0231 is
+  extended rather than superseded.
+- **What is withheld is per figure, not per pair.** An absent `to` leaves
+  `reached` a fact about readers, so `entry` and `lostBefore` still stand; an
+  absent `from` withholds all of them, `lostBefore` included, because its nought
+  reads as *every reader failed to reach it*. The counts are always published,
+  because *this question is stale and here is what it last counted* is the
+  useful sentence.
+- **`rate` is withheld on a stale end although it needs no denominator.** A
+  silence is *no denominator* and a stale end is *no question*, and only the
+  first is a thing to publish a ratio under.
+- **A pair is never reported as out of order.** The tree makes *the `to` now
+  precedes the `from`* available and tempting, and it is refused: a pair has no
+  path and no ordering beyond its two ends (0146), so a reader who scrolls back
+  up satisfies it honestly and document order is not a fault.
+
+Two more settled in the building. The standing has **two members and not three**
+— *the node is there and cannot satisfy this kind*, which is what a pair asking
+for `activated` on a band falls into, is the case nothing in the tree can speak
+to, because `role` declares one member today and it is not *a control*; so
+`present` means the question still names something and no more. And an absent
+end **with a count against it** is `orphaned`, the alarm `PageReading.orphaned`
+raises for the node counters raised for the pairs — a tree and a window that do
+not belong together, independent of `unreconciled` and both able to be set at
+once.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed:
+`stalePairs` as the figure a reader screen leads with after a change lands, and
+each stale pair drawn as a question to re-point rather than a funnel to fix.
 
 ## Still not in scope
 
