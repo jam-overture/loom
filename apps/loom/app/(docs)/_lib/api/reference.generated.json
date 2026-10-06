@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 57,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5431,10 +5431,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 195,
+      "files": 202,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5896,10 +5896,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 64,
+      "files": 67,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6425,6 +6425,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/hero-shot-band",
+          "title": "Hero shot band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "heroShotBand",
+              "kind": "value",
+              "signature": "const heroShotBand: Composition",
+              "truncated": false,
+              "summary": "The hero with the product shot in it, which this catalogue has never had."
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/hero-split-band",
           "title": "Hero split band",
           "summary": "",
@@ -6519,6 +6533,20 @@
               "signature": "const metricsLiveBand: Composition",
               "truncated": false,
               "summary": ""
+            }
+          ]
+        },
+        {
+          "module": "primitives/compositions/metrics-trend-band",
+          "title": "Metrics trend band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "metricsTrendBand",
+              "kind": "value",
+              "signature": "const metricsTrendBand: Composition",
+              "truncated": false,
+              "summary": "The shape of a number over time, read rather than written."
             }
           ]
         },
@@ -6747,6 +6775,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/testimonials-collected-band",
+          "title": "Testimonials collected band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "testimonialsCollectedBand",
+              "kind": "value",
+              "signature": "const testimonialsCollectedBand: Composition",
+              "truncated": false,
+              "summary": "The wall of testimonials, read from wherever they were collected — and the one band in this catalogue whose authored designs were always placeholders."
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/testimonials-wall-band",
           "title": "Testimonials wall band",
           "summary": "",
@@ -6791,7 +6833,7 @@
       "files": 35,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7382,7 +7424,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7610,7 +7652,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8069,7 +8111,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8423,7 +8465,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8556,7 +8598,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9893,7 +9935,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10036,7 +10078,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10103,7 +10145,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10700,7 +10742,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10774,7 +10816,7 @@
       "files": 88,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11232,7 +11274,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1272,
+        "packageNames": 1275,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

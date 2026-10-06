@@ -943,13 +943,13 @@ describe("G", () => {
 ```
 
 ```
-  primitives registered:     103
-  declaring what they read:  2 — loom.tally, loom.feed
+  primitives registered:     106
+  declaring what they read:  5 — loom.trend, loom.tally, loom.voices, loom.feed, loom.plate
   declaring they read none:  0
   saying nothing either way: 101
 ```
 
-Two, out of whatever the first line printed — and the two are the only
+Five, out of whatever the first line printed — and the five are the only
 primitives in the library that read a binding at all, so the seam covers
 everything it currently can.
 

@@ -221,6 +221,9 @@ const readAnswer = (outcome: DataOutcome | undefined): Reading => {
   return { kind: "entries", entries, skipped: rows.data.length - entries.length }
 }
 
+const bindingNameOf = (props_: Readonly<Record<string, unknown>>): string =>
+  typeof props_["binding"] === "string" ? props_["binding"] : DEFAULT_BINDING
+
 const GAPS: Readonly<Record<NonNullable<Props["density"]>, 4 | 6>> = { tight: 4, loose: 6 }
 
 const META: CSSProperties = {
@@ -398,6 +401,34 @@ export const loomFeed = definePrimitive({
    * rather than one that has not been asked. The rollout belongs to one pass
    * over the whole library, which is a run rather than a side effect.
    */
+  /**
+   * Eleven of twelve rows stopped reading, said to the one person who can act
+   * on it — [0206](../../decisions/0206-a-primitive-declares-what-it-could-not-show-and-the-runtime-decides-whether-to-say-so.md),
+   * and the half of that record this primitive owed since 30 September.
+   *
+   * The record was written against this primitive and its closing note named
+   * the shape: declare the function the component calls. That is what this is —
+   * `readAnswer`, handed the same two objects the component is handed — and it
+   * is the whole construction, because written this way the count in the log and
+   * the sentence on the page cannot disagree. A source that starts returning a
+   * column under a new name says so in both places at once.
+   *
+   * The reader's sentence does not change and should not: 0175 stands, *"Some
+   * entries could not be shown."* stays countless, and the count goes to the
+   * diagnostic. This adds an audience rather than moving one.
+   *
+   * **`mismatched` returns no reading, not a reading of zero.** An answer where
+   * nothing read is not a list with holes in it, which this module's own
+   * comment says, and the author is already told through another route.
+   */
+  unshown: (props_, data) => {
+    const name = bindingNameOf(props_)
+    const reading = readAnswer(data[name])
+
+    return reading.kind === "entries"
+      ? [{ name, given: reading.entries.length + reading.skipped, shown: reading.entries.length }]
+      : []
+  },
   component: ({ loom, props: given, children: _unused }: LoomPrimitiveProps<Props, "unavailable" | "mismatched" | "unreadable">) => {
     const reading = readAnswer(loom.data[given.binding ?? DEFAULT_BINDING])
 
