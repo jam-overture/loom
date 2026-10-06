@@ -284,6 +284,54 @@ describe("the part in question", () => {
   })
 
   /**
+   * The arrival window sits between the other two, and both ends are
+   * measured rather than chosen.
+   *
+   * **Taller than a question's**, because at rail width the hero's first
+   * 146px are a backdrop and an eyebrow and the clinic's own heading begins
+   * after them — a window that stops short of it is a dark box with a pill in
+   * it on a dark rail, which is a worse thing to put on a first screen than
+   * nothing. **Shorter than an ask's**, because every pixel of it pushes the
+   * green button down a screen that had no slack: at 390 × 844 the rail was
+   * already 1,013px and the fourth ask ended 33px past the fold.
+   */
+  it("sizes the arrival window between the other two, by the heading and by the press", () => {
+    const rem = (from: string): number =>
+      Number.parseFloat(/max-height:\s*([\d.]+)rem/.exec(from)?.[1] ?? "0")
+
+    const question = rem(block(".demo-part-stage"))
+    const ask = rem(/\.demo-part--ask \.demo-part-stage\s*\{([^}]*)\}/.exec(css)?.[1] ?? "")
+    const arrival = rem(
+      /\.demo-part--arrival \.demo-part-stage\s*\{([^}]*)\}/.exec(css)?.[1] ?? ""
+    )
+
+    expect(arrival).toBeGreaterThan(question)
+    expect(arrival).toBeLessThan(ask)
+  })
+
+  /**
+   * **And it is off at two sizes, for two different reasons.**
+   *
+   * Above 1024px the stage is 848px of page forty pixels from this rail, so the
+   * window would be the surface talking for its own sake — the question's
+   * exemption read forwards. Below 46rem of height it is the embed: a demo
+   * inside somebody else's page is 348 × 465, where the rail is 1,062px and the
+   * one thing that has to be on screen is the green button at `y 325`. The
+   * window would put the press at `y 493` of a 465px frame, which is the
+   * *nothing to press* defect caused by the fix for a different one.
+   *
+   * Asserted as one rule naming both, because the failure is a later run
+   * splitting it and keeping the width half: that leaves a correct-looking
+   * stylesheet and an embed with nothing to press, at the size this surface is
+   * least likely to be photographed at.
+   */
+  it("takes the arrival window off a wide screen and off a frame too short for it", () => {
+    expect(css).toMatch(
+      /@media \(min-width: 1024px\), \(max-height: 46rem\) \{\s*\.demo-part--arrival \{\s*display: none;/
+    )
+  })
+
+  /**
    * The layout has to be in the stylesheet rather than in utilities on the
    * element. Tailwind orders its layers `theme, base, components, utilities`,
    * so a `flex` utility would outrank the `display: none` above and the preview
