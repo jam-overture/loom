@@ -567,7 +567,9 @@ it that must never be drawn as engagement.
 - **Signal-to-intent derivation** — a signal automatically becoming a
   `system-signal` proposal. The runtime has gated `system-signal` since §2 and
   the wiring is deliberately still open. It is the next question after this
-  plan, not part of it.
+  plan, not part of it, and it is planned in
+  [`adaptation.md`](adaptation.md) — which is where that work goes, so this lane
+  does not start it.
 - **Anything in rule 1's list.** Identity is not a later phase; it is refused.
 - **A tracking primitive.** See rule 3.
 

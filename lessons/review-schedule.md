@@ -1718,6 +1718,50 @@ thing it returns actually is.
 
 ---
 
+## Set AM — two days after lesson 34
+
+Interleaved with 08, 09, 16, 17, 24 and 25. Heavy on 24, because the shape of this
+seam's answer is that lesson's rule applied to a record instead of a reading; and on
+09, because the partition cuts a list that lesson taught you to read as one thing.
+
+1. The Gate's stakes vocabulary has fourteen rules, cut into two kinds. Give the
+   question each kind answers, and then say which kind can be re-run from a journalled
+   record — making your answer about *what the rule reads* and not about what the
+   record holds. *(09, 34)*
+2. A telemetry record holds shape and not content. Name two things an analysis
+   carries that therefore never reach a record, and then say which of the Gate's
+   rules stop being answerable as a result. *(17, 34)*
+3. A caller rebuilds an analysis from a record, passes six empty lists for the
+   specifics it does not have, and re-runs `assessStakes`. Say what it gets right
+   and what it gets wrong, and then say why *which* of the two it gets wrong is the
+   whole objection. Your last sentence should be about populations. *(34)*
+4. A reading hands back three fields where one list would have fitted. State the
+   rule that decides how many fields an answer needs, and then apply it to a level
+   computed from a record with a field missing. *(24, 34)*
+5. `unreadable` is empty for one record and names a rule for another, and neither
+   record changed between the two calls. Explain, and then give the sentence a
+   screen has to put next to a level whose `unreadable` is not empty. *(34)*
+6. Two records are missing the count that `broad-change` reads, and one of them can
+   be asked about breadth anyway. Give the argument, say what makes it an argument
+   rather than a lookup, and name which of the three sources of a second copy it
+   is. *(28, 34)*
+7. Say why the answer to *what would these stakes have been* may not be a
+   `StakeAssessment`. Name the field that rules it out, and say what returning that
+   type with the field left empty would cost somebody who found such a record in a
+   log a year later. *(34)*
+8. Stakes and reversibility are two axes, and a stakes level is one word off a
+   four-rung scale. Say what that word cannot carry, and then say where the thing it
+   cannot carry had to go instead. *(08, 34)*
+9. Two lists in `src/` hold the two halves of the stakes vocabulary and neither is
+   written out by hand. Say how each is produced, and then say what would go wrong
+   the day a fifteenth rule is added if they had been written out. *(25, 34)*
+
+Question 3 is the point of the set. Question 1 is where a confident wrong answer is
+most likely: the cut is not about how severe a rule is or how often it fires, which
+is why two rules at different levels sit on the same side of it.
+
+---
+
 ## Tracking
 
 Keep it lightweight — a note per set with the date, and any question where you
@@ -1770,3 +1814,4 @@ renders this file rather than restating it.
 | AJ | 2 days after L31 | | |
 | AK | 2 days after L32 | | |
 | AL | 2 days after L33 | | |
+| AM | 2 days after L34 | | |

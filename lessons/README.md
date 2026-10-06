@@ -354,6 +354,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [31](31-behaviour.md) | Behaviour: the thing a page does | Why a copy button cannot be a prop, and why that is the thesis of this system in its smallest form; what a control is handed, who names it, and what the primitive is left to decide; why the four things a registry can check about a behaviour are all checked at registration; where a control that hands back a boolean writes it and why a control that hands back a number cannot write it in the same place — and what it means that a page with a copy button on it, rendered to static markup, contains no button. |
 | [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it; which of the functions this harness hands to a browser a test can run and what decides it, which is a signature and not anybody's diligence — and what it meant that the sentence this lesson used to draw under that transcript was left contradicting it on `main` for two days. |
 | [33](33-shortfall.md) | Shortfall: the fact whose only witness runs too late to report it | Why the ways a binding can be wrong divide into the ones a walk sees from outside the primitive and the one it cannot; who the sentence on the page is for and who the count is for; the three reasons a component may not raise a diagnostic and which of them would hold in a system with no component model at all; why one declaration on a primitive is a function where eight are data; what a guard around another author's code owes the page it is inside — and the one thing this seam cannot catch, with the construction that makes it unlikely and the reason that construction cannot be enforced. |
+| [34](34-hindsight.md) | Hindsight: the fact a witness saw and may not write down | Why *would this policy have changed anything* is a question only a record can answer, and why rebuilding the page from a record is wrong in the one direction that reassures; the partition the Gate's stakes rules are cut along, which question each side of it answers, and why only one of them can be asked again; why a narrowed input is a contract rather than an abridgement, and why the simulation runs the Gate's own rules rather than a copy; what a level means when something that fed it was never written down, and why a floor that happens to be right is still a floor; when a missing field is provably harmless and what it takes to show it — and why the answer to this question is not allowed to be the type the Gate returns. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -662,6 +663,35 @@ ownership: **when does the party that knows this run, relative to the moment
 somebody needs to be told?** A fact nobody owns needs an instrument. A fact one
 party owns and knows early needs a declaration. A fact one party owns and knows
 too late needs somebody in a position to come and ask for it.
+
+Lesson 34 answers that question with a fourth answer the list cannot hold, and it
+is why Part V has a seventeenth seam. The party that knows ran at **exactly** the
+right moment: `assessStakes` held the whole analysis, computed the right level, and
+wrote it down, and the answer is still there months later and still correct. What
+cannot be answered is the question somebody asks of it afterwards — *would this
+policy have changed anything* — because the level was recorded and **how it was
+arrived at** is a function of a page three months of revisions behind you. Six of
+the analysis's lists name parts of that page, which is content, which 0023 keeps
+out of a record. So the fact is not out of reach, not uninterpretable, not
+uncompared and not late. It is **forbidden**, by a rule the system wrote for
+itself and wants.
+
+That makes the remedy the eighth and the only one in Part V that is a decision about
+*questions* rather than about facts: partition the rules by which ones are a
+function of what you did keep, run the real rules over that half rather than a copy
+of them, and answer the rest by publishing the fact that you cannot. The half that
+reads a policy field can be re-run; the half fixed at its code does not need to be,
+because a code is the whole of its answer. And where even the first half is a field
+short, `unreadable` names the rule and the level becomes a **floor** — a word that
+may coincide with the truth and is still not a measurement, which is the sharpest
+form this course has found of the distinction lesson 24 is about.
+
+The question to carry into an eighteenth seam is therefore about neither reach nor
+ownership nor timing: **which questions did you decide you would never be able to
+ask, on the day you chose what to write down?** Every record is that decision,
+taken once, usually by somebody thinking about something else — and the bill does
+not arrive until the morning a question comes back and gets a plausible number
+instead of a refusal.
 
 ## Pacing
 

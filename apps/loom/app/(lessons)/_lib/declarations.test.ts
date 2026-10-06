@@ -45,7 +45,9 @@ type Held = {
 }
 
 /**
- * The twenty fences this check reaches, and what each claims.
+ * The fences this check reaches, and what each claims. Deliberately uncounted in
+ * this sentence: the list below is its own second copy, and a number beside it
+ * would be a third that nothing compares.
  *
  * `members` is the non-vacuity pin. A parser that stopped splitting members
  * would take every row to `0` and compare nothing while passing; a fence that
@@ -82,6 +84,9 @@ const HELD: readonly Held[] = [
   { lesson: "31-behaviour.md", name: "Behaviour", members: 5, whole: true },
   { lesson: "33-shortfall.md", name: "UnshownDeclaration", members: 0, whole: true },
   { lesson: "33-shortfall.md", name: "UnshownReading", members: 3, whole: true },
+  { lesson: "34-hindsight.md", name: "StakeMeasurement", members: 9, whole: true },
+  { lesson: "34-hindsight.md", name: "RemeasuredStakes", members: 3, whole: true },
+  { lesson: "34-hindsight.md", name: "RemeasuredFactor", members: 3, whole: true },
 ]
 
 /**
