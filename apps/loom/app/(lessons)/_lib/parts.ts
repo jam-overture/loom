@@ -21,7 +21,15 @@ import {
 } from "./held"
 import { buildFragment, heading, prose, renderFragment } from "./loom"
 import { checkPointers, lessonPointer } from "./links"
-import { promptSet, readLesson, section, splitAnswers, type LessonDocument, type Prompt } from "./lesson"
+import {
+  promptSet,
+  readLesson,
+  section,
+  splitAnswers,
+  TRY_IT,
+  type LessonDocument,
+  type Prompt,
+} from "./lesson"
 import type { Block } from "./markdown"
 import { ELABORATION_PART, lessonSlug } from "./slugs"
 import { lesson as syllabusLesson } from "./syllabus"
@@ -88,7 +96,7 @@ const questionsOf = (
  */
 const WARM_UP = "Warm-up"
 const PREDICT = "Predict"
-export const TRY_IT = "Try it"
+export { TRY_IT }
 const EXPLAIN_IT_BACK = "Explain it back"
 const SELF_CHECK = "Self-check"
 const REFLECT = "Reflect"

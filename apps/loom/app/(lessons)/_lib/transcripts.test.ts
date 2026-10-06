@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import { transcriptText } from "./exercises"
-import { readLesson, section } from "./lesson"
+import { readLesson, section, TRY_IT } from "./lesson"
 import type { Block } from "./markdown"
+import { linesOf, MOVES, printable, recordedIn } from "./marks"
 import { runExercises } from "./run"
 import { WRITTEN_LESSONS } from "./syllabus"
 
@@ -46,8 +47,6 @@ import { WRITTEN_LESSONS } from "./syllabus"
  * the NUL is, which is the honest rendering rather than a drifted one. Comparing
  * raw bytes would demand a transcript no text file can contain.
  */
-
-const TRY_IT = "Try it"
 
 /**
  * The other place a lesson prints what its code did.
@@ -258,17 +257,8 @@ const ANNOTATED: Readonly<Record<string, number>> = {
  * red, and the message was a bare array of strings.
  *
  * So the declaration moves onto the block, as an HTML comment on the line above
- * the fence:
- *
- * ```
- * <!-- moves: when `Loom primitives` gives loom.feed an `unshown` declaration (0206) -->
- * ```
- *
- * It is invisible in both renderings of the course — GitHub does not draw an HTML
- * comment and neither does `/lessons` — so it is a message between maintainers
- * that costs the reader nothing. It travels with the block: moving the fence to
- * another lesson or deleting it takes the mark too, which is the thing a record
- * in this file keyed by filename could not have done.
+ * the fence. What a mark looks like and which fence it governs is `marks.ts`;
+ * what this file does with one is below.
  *
  * **It never makes anything pass.** A marked fence that has drifted still fails;
  * what changes is that the failure leads with the author's own sentence about
@@ -297,19 +287,9 @@ const ANNOTATED: Readonly<Record<string, number>> = {
  * mark are precisely the ones whose whole content can turn over at once. So a
  * marked fence that matches nothing is a failure naming the lesson, instead of a
  * decrement nobody can read.
+ *
+ * One marked fence, below, is whichever of its lines the run did not produce.
  */
-const MOVES = /^moves:\s*(\S.*)$/
-
-const printable = (line: string): string =>
-  line.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/ {2,}/g, " ").trim()
-
-const linesOf = (block: string): readonly string[] =>
-  block
-    .split("\n")
-    .map(printable)
-    .filter((line) => line !== "")
-
-/** One marked fence, and whichever of its lines the run did not produce. */
 type Movement = { readonly moves: string; readonly lines: readonly string[] }
 
 type Comparison = {
@@ -320,40 +300,6 @@ type Comparison = {
   readonly moved: readonly Movement[]
   /** Marked fences that matched nothing at all, which the heuristic would otherwise pass over. */
   readonly unmatched: readonly Movement[]
-}
-
-/** An untagged fence, and the mark governing it if it has one. */
-type Recorded = {
-  readonly block: Extract<Block, { kind: "code" }>
-  readonly moves: string | undefined
-}
-
-/**
- * The untagged fences of a section, each with the mark above it if it has one.
- *
- * A mark governs the fence **directly** under it and nothing else: any other
- * block between the two clears it, so a note left behind by an edit stops
- * applying to whatever moved up into its place rather than silently adopting
- * it. Where it governs nothing at all, the describe at the foot of this file
- * says so — a declaration that reaches nothing is this course's own lesson 23,
- * and leaving one unread here would be teaching it and not doing it.
- */
-const recordedIn = (blocks: readonly Block[]): readonly Recorded[] => {
-  const recorded: Recorded[] = []
-  let moves: string | undefined
-
-  for (const block of blocks) {
-    if (block.kind === "note") {
-      moves = MOVES.exec(block.text)?.[1]?.trim()
-      continue
-    }
-
-    if (block.kind === "code" && block.language === undefined) recorded.push({ block, moves })
-
-    moves = undefined
-  }
-
-  return recorded
 }
 
 const compare = (blocks: readonly Block[], printed: readonly string[]): Comparison => {
