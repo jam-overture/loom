@@ -44484,3 +44484,140 @@ plainly which version it is answering for and declines rather than laying one
 version's counters over another version's page. This is here so that the next
 routine to pick up the 4 October entry reads *blocked, and by this* rather than
 spending a run discovering it, which is the whole of what the ledger is for.
+
+---
+## 2026-10-06 — the remedy this lane recommended for the image blocker was already in this lane's gift, and it closes one of the seven rather than all seven
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**a correction to yesterday's entry**, filed against myself
+
+The 5 October entry — *seven of the eleven primitives no band can reach are
+blocked on one thing* — ends **"Recommended: the second"**, the second being a
+binding (0058), and files it as *"neither of them this lane's to take"*.
+
+Both halves of that need correcting and they fail in opposite directions.
+
+**It was this lane's to take.** The binding seam has been built and published
+since 15 August. Making a primitive read one is `reads:` on the definition, a
+`binding` prop, and `loom.data[name]` in the component — three things, all of
+them in `src/primitives/`, with `loom.feed` and `loom.tally` as worked
+precedents. Nothing was waiting on another lane. What was actually true is that
+option **one** (an asset the framework owns) is not this lane's, and option two
+got carried along with it in the same sentence.
+
+**And it closes one of the seven, not seven.** A binding is read by a primitive
+that *declares* `reads`, so reaching `loom.embed`, `loom.lightbox`,
+`loom.carousel`, `loom.overlay`, `loom.pin` and `loom.before-after` this way
+means six more bound twins. None of the six passes
+[0233](decisions/0233-a-bound-twin-is-earned-by-a-system-of-record-and-a-row-shape-the-primitive-can-declare.md)'s
+first clause: an embedded document, a tile that opens and a draggable wipe are
+*arrangements of* a picture, not records a deployment holds. Six near-duplicate
+primitives for one missing placeholder is 0052's shades-of-one at scale and
+would not survive the grammar budget.
+
+So `loom.plate` ships and **reach moves by one of the seven**. The other six are
+still waiting on option one, which is still the framework's, and the entry's
+numbers on it still stand.
+
+**Why this is worth a filing rather than a quiet edit.** The recommendation was
+read and acted on by the lane that wrote it, one day later, and it was wrong in
+a way that only showed up when somebody tried to carry it out — which is the
+same shape as the two stale docstrings this run also found. A recommendation
+that names a remedy should name who can perform it, and this one named the wrong
+answer to that question about itself.
+
+---
+## 2026-10-06 — two palette assertions in this lane's own test file have been comparing one character to itself since they were written
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives`
+(`src/primitives/bound.test.ts`) · **Status:** **fixed on this branch**, filed
+because the failure mode is reusable and the fix is not the interesting part
+
+`bound.test.ts` held this, twice:
+
+```ts
+const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
+```
+
+**`loom.page` renders a `div`.** There is no `<main>` anywhere in that output,
+`indexOf` returns `-1`, and `slice(-1)` is the last character of the document —
+`">"`. So *renders every state identically under both starter palettes, with no
+colour of its own* was asserting that `">"` equals `">"` and that `">"` contains
+no hexadecimal colour, for every state of `loom.feed` and `loom.tally`, since the
+day it was written. Both were green throughout.
+
+It was found by writing a third copy of it for three new primitives and then
+asking it to assert something *positive* — `toContain("loom-scroll-x")` — which
+is the only kind of assertion that could have failed.
+
+**The general shape, which is why this is filed rather than just fixed:** a
+helper that narrows a subject before asserting on it is a silent `true` whenever
+the narrowing finds nothing, and every assertion of the form *X is absent from
+the narrowed thing* then passes. The library's negative assertions are mostly of
+exactly that form, because *no literal colour below the root* and *no inline
+style* are the two standing rules. `grep -n 'indexOf(' src/primitives/*.test.ts`
+is a five-second audit and I have not run it over the other files; this entry is
+the note that it is worth running.
+
+The replacement strips the hoisted `<style>` and then the root element's own
+opening tag, which is what the two removals are actually for: the stylesheet
+carries every class name in the library, and the root carries the theme's
+seventeen hexes.
+
+---
+## 2026-10-06 — a bound chart cannot know how many columns it will have, and the shared rule assumes somebody chose
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` ·
+**Status:** **fixed on this branch for `loom.trend`**; the note about
+`loom.stat-chart` is deliberately left open
+
+`.loom-stat-chart` sets `grid-auto-columns: minmax(0, 1fr)`, which lets a column
+shrink to nothing. That is correct for the primitive it was written for: an
+author writes four or six `loom.stat` children and looks at the result.
+
+`loom.trend` reads its points from an answer, so its column count is the
+*database's*. A twelve-month series on a 390-pixel page came out nineteen pixels
+a column, the printed figures overlapped each other, and the last one hung off
+the right of the document — `scrollWidth 401 / innerWidth 390`, caught by the
+specimen harness's own overflow check rather than by any test.
+
+Fixed by a floor (`loom-trend-plot`) and the library's existing `loom-scroll-x`
+region, which is what `loom.table` and `loom.comparison-table` already do with a
+band too wide for the screen. It is the one rule `loom.trend` adds; everything
+that decides a bar's *height* is still the authored chart's, so the two cannot
+come to disagree about what a height means.
+
+**What is left open, and it is a judgement rather than a defect.**
+`loom.stat-chart` has the same latent behaviour: twelve authored `loom.stat`
+children in a chart would do the same thing. It is left alone because nobody
+writes twelve, because changing a shared rule changes every chart in every lane's
+committed screenshots, and because the honest statement of the problem is *a
+column count nobody chose* rather than *a column count that is large*. If a
+second taker turns up, the floor should move to the shared rule and this entry is
+the argument for it.
+
+---
+## 2026-10-06 — 0231 is claimed by two open pull requests, and this run took 0233 to avoid widening it
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom merge` · **Status:** open —
+**nothing is broken**, and it needs a person rather than a rule
+
+`#527` (`signals-10`) and `#528` (`framework-55`) both add a record numbered
+**0231**:
+
+| PR | record |
+| --- | --- |
+| #527 | `0231-a-funnel-is-three-shares-of-the-arrivals-and-the-straddle-is-the-one-error-here-that-leans-down.md` |
+| #528 | `0231-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md` |
+
+Whichever is renumbered wants **0232**, on the precedent the 0205 collision set.
+So this run's record is **0233** rather than 0232, which leaves a gap if only one
+of the two moves — and a gap is cheaper than a third claim on a number two
+branches are already arguing over. `pnpm decisions:index` prints
+`0231 has no record here` and `0232 has no record here` on this branch, which is
+the index being exactly honest about both.
+
+**Worth noting for whoever resolves it:** #528's record is about *a primitive
+naming a control from the tree*, which is the filing `loom.menu` has been
+unreachable behind since 2 October. That one lands in this lane's territory, and
+this entry is also the note that this lane is watching for it.

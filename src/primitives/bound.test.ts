@@ -389,11 +389,9 @@ describe("what a bound region looks like under a second palette", () => {
       const editorial = await renderWith(boundTree("loom.feed", {}, ASKING, EDITORIAL), entry)
       const bold = await renderWith(boundTree("loom.feed", {}, ASKING, BOLD), entry)
 
-      const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
-
-      expect(bodyOf(bold.markup), name).toBe(bodyOf(editorial.markup))
-      expect(bodyOf(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-      expect(bodyOf(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
+      expect(bodyOnly(bold.markup), name).toBe(bodyOnly(editorial.markup))
+      expect(bodyOnly(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(bodyOnly(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
     }
   })
 
@@ -405,10 +403,8 @@ describe("what a bound region looks like under a second palette", () => {
       const editorial = await renderWith(tally(EDITORIAL), entry)
       const bold = await renderWith(tally(BOLD), entry)
 
-      const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
-
-      expect(bodyOf(bold.markup)).toBe(bodyOf(editorial.markup))
-      expect(bodyOf(bold.markup)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+      expect(bodyOnly(bold.markup)).toBe(bodyOnly(editorial.markup))
+      expect(bodyOnly(bold.markup)).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     }
   })
 })
@@ -452,12 +448,29 @@ const PICTURE = {
 } as const
 
 /**
- * The page without the hoisted stylesheet, which every negative assertion over
- * markup has to use: the library's whole CSS is in the output on every page, so
- * a test asserting a class or a custom property is *absent* finds it in the
- * rules rather than on an element and passes or fails for the wrong reason.
+ * The page below its own root, with the hoisted stylesheet taken out.
+ *
+ * Both removals are load-bearing and each one was found by this helper being
+ * wrong. The **stylesheet** has to go because the library's whole CSS is in the
+ * output of every page, so a test asserting that a class or a custom property is
+ * *absent* finds it in the rules rather than on an element. The **root element's
+ * own style attribute** has to go because that is where the theme's palette is
+ * written as seventeen literal hexes — which is the point of a theme and is
+ * exactly what an assertion about literal colour must not read.
+ *
+ * It replaces `markup.slice(markup.indexOf("<main"))`, which this file used in
+ * two palette assertions and which **never matched anything**: `loom.page`
+ * renders a `div`, there is no `main` in this output, `indexOf` returned `-1`,
+ * and `slice(-1)` is the last character of the document. Both assertions were
+ * comparing `">"` to `">"` and finding no hex in `">"`. They were green for as
+ * long as they have existed and were proving nothing, which is the shape lesson
+ * 28 costs: a check nobody had reason to doubt.
  */
-const bodyOnly = (markup: string): string => markup.slice(markup.indexOf("<main"))
+const bodyOnly = (markup: string): string => {
+  const withoutStylesheet = markup.replace(/<style[^>]*>[\s\S]*?<\/style>/g, "")
+
+  return withoutStylesheet.slice(withoutStylesheet.indexOf(">") + 1)
+}
 
 describe("loom.trend — a series plotted from a source", () => {
   const ASKING_SERIES = { series: { source: "catalogue.posts" } }
@@ -492,6 +505,28 @@ describe("loom.trend — a series plotted from a source", () => {
     expect(markup).toContain("--loom-chart-plot")
     expect(markup).toContain("--loom-stat-magnitude:99.9")
     expect(markup).toContain("loom-stat-plotted")
+  })
+
+  /**
+   * The one way this primitive's situation differs from its twin's, asserted so
+   * that a future simplification that drops the wrapper fails here rather than
+   * in a photograph. An author picks four columns; an answer carried twelve, and
+   * twelve columns under the shared rule are nineteen pixels wide with their
+   * figures hanging off the page.
+   */
+  it("puts a plot it did not choose the width of inside a named, focusable scroll region", async () => {
+    const { markup } = await renderWith(
+      boundTree("loom.trend", {}, ASKING_SERIES),
+      sourceAnswering([...SERIES])
+    )
+
+    const body = bodyOnly(markup)
+
+    expect(body).toContain("loom-scroll-x")
+    expect(body).toContain("loom-trend-plot")
+    expect(body).toMatch(/tabindex="0"[^>]*role="group"|role="group"[^>]*tabindex="0"/)
+    /** A focus stop with no name is a focus stop a screen reader arrives at and cannot describe. */
+    expect(body).toContain('aria-label="Chart"')
   })
 
   it("puts the page's own mark against each figure rather than asking the row for it", async () => {
@@ -861,8 +896,6 @@ describe("what a bound primitive says it could not show", () => {
  * literal hex in a failure branch is a literal hex nobody photographs.
  */
 describe("what the three new twins look like under a second palette", () => {
-  const bodyOf = (markup: string): string => markup.slice(markup.indexOf("<main"))
-
   const cases: readonly (readonly [string, string, JsonObject, unknown, readonly SourceEntry[]])[] = [
     [
       "loom.trend",
@@ -912,9 +945,9 @@ describe("what the three new twins look like under a second palette", () => {
 
         const name = `${type} state ${index}`
 
-        expect(bodyOf(bold.markup), name).toBe(bodyOf(editorial.markup))
-        expect(bodyOf(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
-        expect(bodyOf(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
+        expect(bodyOnly(bold.markup), name).toBe(bodyOnly(editorial.markup))
+        expect(bodyOnly(bold.markup), name).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+        expect(bodyOnly(bold.markup), name).not.toMatch(/\b(rgba?|hsla?)\(/)
       }
     })
   }

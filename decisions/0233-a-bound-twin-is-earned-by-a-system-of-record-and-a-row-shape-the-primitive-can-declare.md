@@ -155,9 +155,17 @@ load-bearing:
 ### And emit the authored twin's markup
 
 Where the twin has a stylesheet, the bound one uses it rather than growing a
-second. `loom.trend` adds nothing to `stylesheet.ts` and changes nothing in it:
-a bound chart and an authored one are the same picture by construction rather
-than by two sets of rules somebody keeps in step. Where the markup is inline
+second. `loom.trend` changes nothing in `stylesheet.ts`, so a bound chart and an
+authored one cannot come to disagree about what a bar's height means.
+
+It does **add** one rule, and the exception is worth stating because it
+generalises: a bound twin may add what its own situation requires and the
+authored one's never does. Here that is the column count. An author chose four
+figures; an answer carried twelve, and under the shared rule twelve columns on a
+phone came out nineteen pixels wide with their figures overlapping. The twin
+gives a column a floor and scrolls, which is what this library already does with
+a table too wide for the screen. **The rule to apply is: share what decides the
+meaning, add only what the difference in situation forces.** Where the markup is inline
 styles, it moves to a shared module — `quote-content.ts`, on
 `perk-content.ts`'s precedent — and both primitives call it.
 

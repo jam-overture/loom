@@ -46,10 +46,22 @@ import { colour, family, size, space, type RampStep } from "./tokens.js"
  *
  * ## It emits `loom.stat-chart`'s own markup, and that is load-bearing
  *
- * Every class and every custom property below is the authored chart's. Nothing
- * in `stylesheet.ts` was added for this primitive and nothing in it was
- * changed, so a bound chart and an authored one are the same picture by
- * construction rather than by two sets of rules somebody keeps in step.
+ * Every class and every custom property that decides a bar's geometry below is
+ * the authored chart's, and nothing in `stylesheet.ts` was changed — so a bound
+ * chart and an authored one cannot come to disagree about what a bar's height
+ * means, which is the thing worth protecting.
+ *
+ * **One rule was added, and it is the one way the two primitives' situations
+ * differ.** An authored chart's column count is a thing its author chose; a
+ * bound chart's is whatever the answer carried, so it has to be right for three
+ * points and for forty without being told which it is getting. Under the shared
+ * `grid-auto-columns: minmax(0, 1fr)` a twelve-month series on a 390-pixel page
+ * came out nineteen pixels a column, with the printed figures overlapping each
+ * other and the last one hanging off the side of the document — photographed,
+ * which is how it was found. `loom-trend-plot` gives a column a floor and the
+ * primitive puts the plot in the library's own `loom-scroll-x` region, which is
+ * what `loom.table` and `loom.comparison-table` already do with a band too wide
+ * for the screen. A year of months is a chart you swipe.
  *
  * It also means this primitive inherits the ceiling trick whole: a render is a
  * total pure projection of one node
@@ -286,6 +298,14 @@ export const loomTrend = definePrimitive({
     mismatched: "This chart could not be shown.",
     /** Without a count, for `loom.feed`'s reason: the figure goes to the author, in a diagnostic. */
     unreadable: "Some points could not be plotted.",
+    /**
+     * The name on the scrollable region, declared (0060) for `loom.table`'s
+     * reason: a focus stop with no name is a focus stop a screen-reader user
+     * arrives at and is told nothing about. There is nothing a model could put
+     * here that the heading above the band does not already say, and a
+     * deployment in French has one string to replace.
+     */
+    band: "Chart",
   },
   /**
    * What it was given and what it plotted, per answer it read
@@ -313,7 +333,7 @@ export const loomTrend = definePrimitive({
     loom,
     props: given,
     children: _unused,
-  }: LoomPrimitiveProps<Props, "unavailable" | "mismatched" | "unreadable">) => {
+  }: LoomPrimitiveProps<Props, "unavailable" | "mismatched" | "unreadable" | "band">) => {
     const reading = readAnswer(loom.data[given.binding ?? DEFAULT_BINDING])
 
     const body =
@@ -326,7 +346,23 @@ export const loomTrend = definePrimitive({
             : createElement(
                 "div",
                 {
-                  className: LIBRARY_CLASS.statChart,
+                  /**
+                   * The region a plot too wide for the screen scrolls inside,
+                   * which is `loom.table`'s and `loom.comparison-table`'s — the
+                   * focus stop, the snap, the contained overscroll and the thin
+                   * scrollbar are all theirs and none of it is new here. What is
+                   * new is *why* a chart needs one: see `trendPlot` in
+                   * `stylesheet.ts`.
+                   */
+                  className: LIBRARY_CLASS.scrollX,
+                  tabIndex: 0,
+                  role: "group",
+                  "aria-label": loom.text.band,
+                },
+                createElement(
+                "div",
+                {
+                  className: `${LIBRARY_CLASS.statChart} ${LIBRARY_CLASS.trendPlot}`,
                   /**
                    * Both inherited rather than passed, which is the twin's
                    * bargain: every column below reads them from here, and that
@@ -347,7 +383,8 @@ export const loomTrend = definePrimitive({
                     "--loom-chart-plot": plotHeight(given.plot ?? "standard"),
                   } as Record<string, unknown>,
                 },
-                ...reading.points.map((point, index) => columnOf(point, index, given))
+                  ...reading.points.map((point, index) => columnOf(point, index, given))
+                )
               )
 
     return createElement(
