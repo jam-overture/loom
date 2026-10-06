@@ -296,3 +296,57 @@ export const code = (ids: IdFactory, text: string, props: JsonObject = {}): Loom
     props: { wrap: true, ...props },
     children: [buildText(ids, text)],
   })
+
+/**
+ * A phrase inside a sentence that goes somewhere.
+ *
+ * `loom.link` is the menu item, `loom.action` is the button, and until #517
+ * this was the one kind of link the library could not draw. This lane filed
+ * that on 4 October after building the inline link out of `loom.link` and
+ * taking it out again: no underline until it is hovered, so inside a sentence
+ * nothing says the words can be pressed, and on `minimal` its accent is the
+ * same black as the body text it sits in. `loom.inline-link` is the answer —
+ * underlined at rest, in the colour of the paragraph around it.
+ *
+ * It takes `href` and `external` and nothing else, so there is no `TERTIARY`
+ * of it to get wrong.
+ */
+export const inlineLink = (
+  ids: IdFactory,
+  label: string,
+  href: string,
+  props: JsonObject = {}
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.inline-link",
+    props: { href, ...props },
+    children: [buildText(ids, label)],
+  })
+
+/**
+ * A paragraph whose sentence is not one piece, which is what an inline link
+ * makes of it.
+ *
+ * `prose` above takes a string and builds the one text node every paragraph on
+ * this site was until today. A paragraph with a link in the middle of it is
+ * three children — the words before, the phrase that goes somewhere, the words
+ * after — so it needs a constructor that takes the parts rather than the
+ * string.
+ *
+ * **The spacing is the caller's and deliberately not this function's.** A
+ * joiner here would have to guess whether the space belongs before the link,
+ * after it, or neither, and it guesses wrong at a comma — *the ready-made
+ * changes, which…* has no space after the phrase. So the parts are written with
+ * their own spaces, and `prerender:check` is what says if two of them run
+ * together.
+ */
+export const proseParts = (
+  ids: IdFactory,
+  parts: readonly (string | LoomNode)[],
+  props: JsonObject = {}
+): LoomNode =>
+  buildElement(ids, {
+    type: "loom.prose",
+    props,
+    children: parts.map((part) => (typeof part === "string" ? buildText(ids, part) : part)),
+  })

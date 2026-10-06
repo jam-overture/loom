@@ -14,7 +14,9 @@ import { siteFooter, siteHeader, siteReadingBand, type ChromeContext } from "../
 import {
   action,
   heading,
+  inlineLink,
   prose,
+  proseParts,
   section,
   splitSection,
   stack,
@@ -121,34 +123,40 @@ const whatLeaves = (ids: IdFactory, context: PageContext): LoomNode =>
         ids,
         "When a person asks for a change in their own words, your server sends the model you chose an outline of the page. It also sends the list of pieces that model may use. It does not send your code, your data, or anything about who is reading."
       ),
-      prose(
-        ids,
-        "The ready-made changes on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
-        { tone: "muted" }
-      ),
       /**
-       * The only sentence on this site that names another page of it, and
-       * until now the only one that made the reader go and find it.
+       * The only sentence on this site that names another page of it, and the
+       * first one anywhere on this site that carries its own link.
        *
        * It named the front door for a day after the band it is about had moved
        * to `/how-it-works`, which is the failure `naming.ts` exists to catch.
-       * The control carries that band's own anchor rather than the page's
-       * address, so the paragraph goes red the day the band moves again
-       * instead of going quietly wrong.
+       * The link carries that band's own anchor rather than the page's address,
+       * so the paragraph goes red the day the band moves again instead of going
+       * quietly wrong.
        *
-       * It is a control under the paragraph rather than a link inside it, and
-       * that is not the first choice. A link on the words *the ready-made
-       * changes* is what the sentence wants and `loom.link` cannot be one: it
-       * draws no underline until it is hovered, so inside a sentence there is
-       * nothing to say it can be pressed, and on `minimal` its accent is the
-       * same black as the body text. Filed for `Loom primitives` on 4 October
-       * rather than worked around here.
+       * **It was a control under the paragraph until today**, and the comment
+       * standing here said why: a link on the words *the ready-made changes* is
+       * what the sentence wants, `loom.link` could not be one, and it was filed
+       * for `Loom primitives` on 4 October rather than worked around. #517
+       * answered it with `loom.inline-link`, so the sentence gets the link and
+       * the band loses the button that was standing in for it.
+       *
+       * The words the link is on are the words a reader would press. *See the
+       * ready-made changes* was a label for a button and is not a phrase this
+       * sentence contains, so no copy moved into the link: the four words of
+       * that label are simply gone.
        */
-      action(
+      proseParts(
         ids,
-        "See the ready-made changes",
-        `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`,
-        TERTIARY_CONTROL
+        [
+          "The ",
+          inlineLink(
+            ids,
+            "ready-made changes",
+            `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`
+          ),
+          " on the How it works page do not send anything at all. They are worked out on your own server, which is why they still work on a deployment with no model configured.",
+        ],
+        { tone: "muted" }
       ),
     ]
   )
