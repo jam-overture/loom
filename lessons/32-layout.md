@@ -171,7 +171,7 @@ one harness that takes one ([0116](../decisions/0116-a-screenshot-is-taken-by-th
 Beside every shot it prints one measurement:
 
 ```
-example-editorial-phone  390x844@2x  scrollWidth 390 / innerWidth 390
+example-editorial-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390
 ```
 
 The document against the viewport. *The page is wider than the phone* is the
@@ -844,12 +844,12 @@ describe("F", () => {
 ```
 
 ```
-  a-clip-hides-an-overflow-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
+  a-clip-hides-an-overflow-bold-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
     div > div > div  "ReferencethemeSelectionSchemaThe heading above …"  content reaches 370 in 346
     exit code would be: 0
-  a-page-with-nothing-wrong-with-it  390x844@2x  scrollWidth 390 / innerWidth 390
+  a-page-with-nothing-wrong-with-it  390x844@2x touch  scrollWidth 390 / innerWidth 390
     exit code would be: 0
-  seven-boxes  390x844@2x  scrollWidth 390 / innerWidth 390  ← 7 clipping boxes hide content
+  seven-boxes  390x844@2x touch  scrollWidth 390 / innerWidth 390  ← 7 clipping boxes hide content
     box 1  content reaches 500 in 346
     box 2  content reaches 490 in 346
     box 3  content reaches 480 in 346

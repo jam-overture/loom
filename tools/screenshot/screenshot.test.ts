@@ -102,7 +102,36 @@ describe("planning a shot list", () => {
       height: 1024,
       label: "custom",
       deviceScaleFactor: 2,
+      touch: false,
     })
+  })
+
+  /**
+   * A size on its own is a window, and a window has a mouse. The lane that
+   * wants a finger asks for `"phone"`, or says so.
+   */
+  it("takes an explicit size as a hovering window unless it says otherwise", () => {
+    const [hovering] = planShots(
+      listOf({ shots: [{ path: "/x", out: "x", viewport: { width: 414, height: 896 } }] })
+    )
+    const [touching] = planShots(
+      listOf({
+        shots: [{ path: "/x", out: "x", viewport: { width: 414, height: 896, touch: true } }],
+      })
+    )
+
+    expect(hovering?.viewport.touch).toBe(false)
+    expect(touching?.viewport.touch).toBe(true)
+  })
+
+  /**
+   * The whole of the 6 October finding, as one assertion: a named viewport
+   * called `phone` that reports a mouse is a trap, and the measurement every
+   * report quotes beside a phone shot reads as *what a phone gets*.
+   */
+  it("names a phone that is a phone, and a wide that is a window", () => {
+    expect(VIEWPORTS.phone.touch).toBe(true)
+    expect(VIEWPORTS.wide.touch).toBe(false)
   })
 
   it("defaults to the wide viewport and a viewport-sized shot", () => {

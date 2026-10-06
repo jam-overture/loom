@@ -14,7 +14,7 @@ LOOM_PLAYWRIGHT=/tmp/shot/node_modules \
 ```
 
 ```
-example-editorial-phone  390x844@2x  scrollWidth 390 / innerWidth 390
+example-editorial-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390
 example-editorial-wide   1280x900@2x  scrollWidth 1280 / innerWidth 1280
 …
 ```
@@ -35,7 +35,7 @@ A `loom.backdrop` sets `overflow: hidden` and has to, so a band that overflows
 inside one measures `390 / 390` while a word sits off the edge of the page:
 
 ```
-a-clip-hides-an-overflow-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
+a-clip-hides-an-overflow-bold-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
     div > div > div  "ReferencethemeSelectionSchemaThe heading above …"  content reaches 370 in 346
 ```
 
@@ -111,6 +111,13 @@ export default defineSpecimen({
   // viewports defaults to [PHONE, WIDE] — 390×844 and 1280×900, both at 2×
 })
 ```
+
+A viewport is a device, not only a size: `PHONE` reports a **coarse, hovering-less
+pointer** and `WIDE` reports a mouse, so a primitive that reveals something on
+hover is photographed on the phone sheet the way a reader with a finger gets it
+([0236](../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)).
+`touch` is a required field, so a sheet writing its own viewports out says which
+it means; the `touch` in the line above is how a shot reports it.
 
 ### Photographing a form
 

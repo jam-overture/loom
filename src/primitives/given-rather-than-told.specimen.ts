@@ -448,8 +448,8 @@ export default defineSpecimen({
    * horizontal scroll.
    */
   viewports: [
-    { label: "wide", width: 1280, height: 4600, deviceScaleFactor: 2 },
-    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "wide", width: 1280, height: 4600, deviceScaleFactor: 2, touch: false },
+    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2, touch: true },
   ],
   themes: [
     {

@@ -675,8 +675,20 @@ const describeSelector = (
 }
 
 export const describeShot = (result: DescribableShot): string => {
+  /**
+   * The pointer is in the line a lane copies into its report, and only when it
+   * is a finger.
+   *
+   * The reading beside it — `scrollWidth` against `innerWidth` — is quoted in
+   * every report in this repository as *what a phone gets*, and for seven weeks
+   * it was taken by a browser with a mouse. A reader cannot tell the two apart
+   * from a number, so the line says which device took it. Printed only when
+   * true, so every `wide` line this harness has ever written is unchanged.
+   */
+  const pointer = result.viewport.touch ? " touch" : ""
+
   const head =
-    `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x  ` +
+    `${result.name}  ${result.viewport.width}x${result.viewport.height}@${result.viewport.deviceScaleFactor}x${pointer}  ` +
     `scrollWidth ${result.overflow.scrollWidth} / innerWidth ${result.overflow.innerWidth}` +
     (result.overflowed ? "  ← overflows" : "")
 

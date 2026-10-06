@@ -44935,7 +44935,44 @@ worse bug, because it takes the server render with it.
 ## 2026-10-06 — the screenshot harness's `phone` is a width and not a device, so every phone shot in this repository was taken by a browser with a mouse
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/screenshot/`, `tools/specimen/`) · **Status:** open — **not urgent and
+(`tools/screenshot/`, `tools/specimen/`) · **Status:** **closed by
+`framework-57-a-phone-shot-taken-with-a-mouse`.** A `SpecimenViewport` carries a
+required `touch`, `PHONE` sets it, and `contextOptionsFor` emulates it — so a
+shot named `phone` is now taken by a device with a finger, and the line a report
+pastes says so (`390x844@2x touch`). Both halves of what would close it were
+taken: the field exists *and* it is the default for the `phone` viewport, which
+the filing asked to be a judgement rather than an addition. Three answers the
+filing left open, all measured and written into
+[0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md):
+
+1. **It is the viewport's, not the shot's.** A pointer on a shot would let one
+   lane photograph `phone` with a finger and another with a mouse, both calling
+   the result *the phone* — the drift 0117 exists to prevent, one field lower.
+2. **`hasTouch` only; `isMobile` is not set**, and the filing's "maps to
+   `hasTouch` and `isMobile`" is half wrong. Measured at 390×844 in this
+   container: `hasTouch` moves the pointer to `coarse`/`hover: none` and leaves
+   `innerWidth` at 390; `isMobile` moves the pointer not at all and, on a
+   document with no `<meta name="viewport">`, moves the layout width to **980**
+   — a desktop page scaled down, which is the failure `PHONE`'s own comment
+   warns about. It buys nothing and can cost the whole picture.
+3. **How many existing phone shots move: one, and it is yours.** The mechanism
+   is that a rule inside `@media (hover: hover)` still needs `:hover` to match
+   and a screenshot never hovers, so every ordinary `hover:` utility is inert
+   either way. Swept: the library stylesheet carries **0** pointer-gated
+   at-rules, so no specimen sheet in this repository can move; the application's
+   compiled CSS carries **1** at-rest pointer-gated rule, your
+   `[@media(hover:hover)]:opacity-0`. Photographed: six whole-page phone shots
+   across all five surfaces, both ways — five byte-identical, the documentation
+   page the sixth.
+
+**And the picture you said could not be taken, is taken.**
+`reports/2026-10-06-framework-copy-button-phone-touch.png` is the copy button
+visible on a phone. Its control,
+`reports/2026-10-06-framework-copy-button-phone-mouse.png`, came back **byte-identical
+to your own committed `2026-10-06-docs-copy-button-phone.png`**, so the only
+variable between the pair is the pointer. Original status below.
+
+**Status:** open — **not urgent and
 not nothing**; what it cost this run is one visual, and what it costs generally
 is that a class of defect is invisible to the instrument this repository
 photographs phones with
@@ -45578,3 +45615,120 @@ Recorded because the next consumer is predictable: the same pairing is owed by
 anything that reads `readingChangeOf` across two versions, which is the entry
 from 4 October that is still waiting on a store that can answer for an older
 version.
+
+---
+## 2026-10-06 — twelve one-word edits in six of your specimen sheets, forced by a required field, and none of them changes a picture
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/*.specimen.ts`) · **Status:** open — **nothing to fix and
+nothing is broken**; recorded so the lane that owns the files knows why they
+were opened, and because there is one tidy-up in them that is yours to take or
+to leave
+
+`SpecimenViewport` now carries a required `touch: boolean`
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)),
+because a named viewport called `phone` that reports a mouse is a trap and an
+optional field with a `false` default would have left six sheets in it silently.
+The compiler asked those six, and the answer was one word each:
+
+| file | lines |
+| --- | --- |
+| `every-part-offers-a-choice.specimen.ts` | 110, 111 |
+| `given-rather-than-told.specimen.ts` | 451, 452 |
+| `the-behaviours-nothing-declared.specimen.ts` | 378, 379 |
+| `the-link-inside-a-sentence.specimen.ts` | 271, 272 |
+| `the-parts-that-offered-no-choice.specimen.ts` | 144, 145 |
+| `the-words-nothing-declared.specimen.ts` | 242, 243 |
+
+`touch: true` on each `phone`, `touch: false` on each `wide`. **No picture any
+of them takes is changed by it**, and that is measured rather than assumed: the
+library stylesheet carries zero pointer-gated at-rules, and
+`the-link-inside-a-sentence` was run both ways — all three themes' phone shots
+came back byte-identical.
+
+**The tidy-up, offered and not taken.** These six are the only sheets in the
+repository that write their viewports out as literals, and the `phone` literal
+in every one of them is a byte-for-byte copy of the harness's own `PHONE` — the
+same 390×844 at 2×. Only `wide` differs, and only in `height`, because each
+sheet is long enough to need a taller full-page window. That duplication is the
+reason the compiler had to ask six files instead of none, and it is the reason
+the next field added to a viewport will ask again. `import { PHONE }` in each
+would end it. Left alone here because it is a change inside your directory that
+nothing forces, and the brief puts refinement inside finished sections as
+reactive.
+---
+## 2026-10-06 — a phone shot is now honest in CSS and still dishonest in a script, because `hasTouch` does not define `ontouchstart`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/specimen/playwright.ts`) · **Status:** open — **a stated limit of the
+instrument, not a gap waiting on a fix**, written down because the half that was
+fixed today is the half that will make people trust the other half
+
+`contextOptionsFor` now sets `hasTouch` from the viewport, so `@media (hover:
+hover)` and `@media (pointer: fine)` are false in a phone shot and the CSS half
+of pointer detection is photographed truthfully. Measured in the same run, in
+the same page:
+
+| read in the page | baseline | under `hasTouch` |
+| --- | --- | --- |
+| `matchMedia("(hover: hover)")` | true | **false** |
+| `matchMedia("(pointer: coarse)")` | false | **true** |
+| `navigator.maxTouchPoints` | 0 | **1** |
+| `"ontouchstart" in window` | false | **false** |
+
+The last row is the limit. Chromium defines `window.TouchEvent` and
+`window.Touch` in both modes and `ontouchstart` in neither, so the oldest and
+still-common sniff — `"ontouchstart" in window` — answers *no touch* in a shot
+this harness now calls a phone. A component that branches on it gets its desktop
+branch photographed and labelled `touch`, which is a **worse** failure than the
+one closed today: before, the label and the picture were both wrong together,
+and now the label is right and that one picture is not.
+
+Nothing in this repository sniffs it — swept, zero occurrences in `src/`,
+`apps/` and `tools/` — which is why this is recorded rather than fixed. What
+would close it is a line in an init script defining `ontouchstart` on `window`
+beside the context option, which is `addInitScript` territory and so is
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)'s
+`start` rather than the viewport's. It should not be built until something needs
+it: a harness that fakes a signal nothing reads is a harness telling a story
+about a browser rather than photographing one.
+
+The sweep is the thing to repeat before trusting a phone shot of any new
+component: `maxTouchPoints` is the modern read and is correct here;
+`ontouchstart` is not.
+
+---
+## 2026-10-06 — four sample output lines in lesson 32 were updated from outside the lane, and the exercise that prints three of them is runnable
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/32-layout.md`) · **Status:** open — **nothing to fix**; recorded so
+the lane that owns the file knows why it was opened, and because one of the four
+is a sentence about the harness rather than a number
+
+`describeShot` now prints the pointer in the line a report pastes, so a phone
+shot reads `390x844@2x touch`
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)).
+Four lines in lesson 32 print it the old way and were corrected: **174** (the
+one-line example under *The one check that catches this without a person*), and
+**847, 850, 852** inside Exercise F's output block.
+
+**Exercise F is the one that mattered.** Its helper at line 525 builds its shots
+with `viewport: PHONE` and the block below it is captured `console.log` output,
+so a learner who runs the exercise today gets three lines the transcript says
+they will not. That is the failure mode this repository keeps meeting from the
+other direction — a transcript that is a little wrong is believed, because
+nobody re-runs the block to check a line they can read.
+
+**No prose was touched and no number changed.** The word `touch` is appended to
+four lines, nothing is removed, and the surrounding argument — the document
+against the viewport, *the page is wider than the phone* — is unaffected by it.
+
+**The sentence worth your eye, and it is yours to write or to leave.** Lesson 32
+teaches the overflow reading as *the one check that catches this without a
+person*, and the pointer is now a second thing that line asserts: what device
+took the picture. The lesson has a natural place for it — the paragraph under
+line 176 already explains why eyeballing a screenshot misses a page wider than
+the phone, and *eyeballing a screenshot taken with the wrong pointer* is the
+same lesson with a sharper example attached. The evidence is in
+`reports/2026-10-06-framework-a-phone-shot-taken-with-a-mouse.md`: one control
+that was invisible on every phone in the repository, and two pictures of it.

@@ -44,6 +44,24 @@ export type SpecimenViewport = {
    * these are ever looked at.
    */
   readonly deviceScaleFactor: number
+  /**
+   * Whether the pointer on this device is a finger.
+   *
+   * A size on its own is not a device, and that is the whole of why this field
+   * exists. Chromium in a 390-pixel window reports a **fine, hovering**
+   * pointer, so `@media (hover: hover)` and `@media (pointer: fine)` are true
+   * in it — and Tailwind compiles every `hover:` utility inside the first of
+   * those. A control that is hidden until hover is therefore photographed in
+   * its hidden state at phone width *and* at desktop width, the two pictures
+   * agree, and the real phone is in a third state the instrument could not
+   * produce: the reveal never comes.
+   *
+   * Required rather than optional, and that is the point. A viewport that says
+   * nothing about its pointer is a viewport whose author did not think about
+   * it, which is how a named `phone` came to be a desktop window for seven
+   * weeks.
+   */
+  readonly touch: boolean
 }
 
 export type Specimen = {
@@ -205,12 +223,19 @@ export type SpecimenAnswer =
  * distinction matters because a media query reads the viewport and a scaled
  * window is still 1280 wide to CSS, so the wrong one photographs the desktop
  * layout at phone size and hides exactly the defect it was taken to find.
+ *
+ * That argument has a second half, and for seven weeks this file only made the
+ * first. A media query reads the **pointer** as well as the viewport, and a
+ * desktop window narrowed to 390 pixels still reports a mouse — so the wrong
+ * one photographs the hovering layout at phone size and hides exactly the
+ * defect it was taken to find. `touch` is that half.
  */
 export const PHONE: SpecimenViewport = {
   label: "phone",
   width: 390,
   height: 844,
   deviceScaleFactor: 2,
+  touch: true,
 }
 
 export const WIDE: SpecimenViewport = {
@@ -218,6 +243,7 @@ export const WIDE: SpecimenViewport = {
   width: 1280,
   height: 900,
   deviceScaleFactor: 2,
+  touch: false,
 }
 
 export const DEFAULT_VIEWPORTS: readonly SpecimenViewport[] = [PHONE, WIDE]
