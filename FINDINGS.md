@@ -44818,6 +44818,26 @@ naming a control from the tree*, which is the filing `loom.menu` has been
 unreachable behind since 2 October. That one lands in this lane's territory, and
 this entry is also the note that this lane is watching for it.
 
+**Resolved the same day, and not the way this entry predicted.** `Loom merge`
+brought both onto `main`: #527 kept **0231** and #528 became **0234**, not the
+0232 this entry expected from the 0205 precedent. So the gap is at **0232**,
+which nothing claims, and **0233 stands uncontested** — the number this run took
+to stay clear of the collision turned out to be the right one for a reason it
+did not have at the time.
+
+Recorded because the prediction was the useful half and it was wrong: *whichever
+is renumbered takes the next free number* is not what happened, and a lane
+choosing a number to avoid a collision should expect the resolver to skip
+further than the minimum rather than assume the next one up is safe. Taking a
+number with slack is cheap; a second collision is not.
+
+**And the half that was right:** 0234 *a primitive may name a control from the
+tree and its declared string is the floor* is on `main`. That is the record
+`loom.menu` has been unreachable behind since 2 October, and it is this lane's
+to carry out — the primitive side is unbuilt, reach is still 95 of 106 with
+`loom.menu` among the eleven, and that is a run rather than something to widen
+an open pull request with.
+
 ---
 ## 2026-10-06 — the mangling is URL **length**, measured at a threshold between 148 and 159 characters, and the commit-SHA workaround is a coincidence that makes it worse for short branch names
 
