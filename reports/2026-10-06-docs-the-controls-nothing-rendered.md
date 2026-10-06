@@ -152,8 +152,8 @@ who chose something.
 **The callout's half that a render test cannot reach is read off the pages.**
 `TONE` is a lookup, so `kind="danger"` on a page does not fail to compile and
 does not fail to render: it renders an aside with no label and no colour. MDX
-props are not typechecked, so the seventeen page sources are the only place the
-answer is. They ask for `note` and `warning` and nothing else, across
+props are not typechecked, so the twenty-eight page sources are the only place
+the answer is. They ask for `note` and `warning` and nothing else, across
 seventy-nine callouts.
 
 ## Decisions taken that were not specified
@@ -197,8 +197,15 @@ thing on its own line and read in a separate command.
 
 **+57 tests, +4 files. Nothing weakened, skipped or deleted**, and no existing
 assertion was changed: the diff adds four test files and rewrites two components.
-Both columns are real runs — `main`'s app figures are a full
-`pnpm --filter @loom/app test` on a stashed tree, not arithmetic.
+
+**Which figures in the `main` column were measured, because the distinction
+matters.** The app row is a real run: a full `pnpm --filter @loom/app test` on a
+stashed tree, 384 files and 6,917 tests, not arithmetic. The findings row is the
+ledger's own count before and after. The library row and the prerender row are
+**carried from this branch's run and asserted to be `main`'s on the grounds that
+the diff cannot move them** — `git diff origin/main -- src/ tools/` is empty, and
+no page, no prose and no MDX file is touched. That is a strong argument and it is
+still an argument; a second full build of `main` was not run for them.
 
 **The junction count did not move**, which is right: both components are client
 controls and the prerendered HTML is the same markup either way.
