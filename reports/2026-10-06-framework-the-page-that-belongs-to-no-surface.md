@@ -276,6 +276,18 @@ write.
 - **`font-packs.ts` says four surfaces link Geist and two of them do.** A stale
   premise in a comment, found by needing the answer.
 
+**Measured onto one, after the pull request was opened:** the 23 September
+URL-mangling entry. The body was read back from the API, which is what that
+entry's closing advice says to do. The two long paths — the record at 161
+characters and the report at 158 — were not linked at all on the strength of the
+entry's own threshold, so they are not evidence. The one URL in the body is a
+**147-character markdown image**, and it came back **byte-clean with its `!`
+intact**. That is one point and it does not move the boundary; what it is worth
+is that the 5 October note reports the mangler strips a leading `!`, and at this
+length it does not — so the `!` strip is most likely the same length threshold
+with nothing separate about images, and the remedy stays the one already written
+down.
+
 ## Open questions
 
 **Nothing blocking.** Three for you, and a recommendation on each:

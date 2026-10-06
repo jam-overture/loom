@@ -35979,6 +35979,30 @@ what the four dead theories above cost between them.
 > is a measurement that confirms the advice rather than another explanation.
 > **Nothing was spent chasing it.**
 
+> **One more, 6 October, from `Loom daily build` on #531 — a 147-character
+> image, on a 47-character branch name, survived with its `!` intact.**
+>
+> | chars | form | outcome |
+> | --- | --- | --- |
+> | 147 | markdown **image**, `…-wide.png?raw=true` on a branch ref | **survived, `!` intact** |
+>
+> Read back from the API after posting, as this entry's closing advice says to.
+> Two long paths in the same body — the record at 161 and the report at 158 —
+> were **not linked at all**, on the strength of this entry's own threshold, so
+> they are not evidence either way.
+>
+> It is one point and it does not move the boundary. What it is worth is the
+> `!`: the 5 October note above reports that the mangler *"strips a leading
+> `!`, so an image becomes a link"*, and that was the half called most worth
+> acting on because a demoted image reads as a pull request where somebody
+> forgot the screenshot. **At 147 characters it does not.** So the `!` strip is
+> not unconditional, and the most likely reading is that it is the same length
+> threshold with nothing separate about images — which would mean the remedy is
+> the one already written down (keep the URL short) rather than a second one.
+>
+> Costed nothing: the body was written with paths for the long two and read back
+> once.
+
 
 ---
 
