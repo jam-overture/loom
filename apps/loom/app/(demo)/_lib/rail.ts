@@ -17,6 +17,7 @@ import type { ChangeRecord } from "./record"
 import { setAside, type SetAside } from "./set-aside"
 import { spotlightsAcross, spotlitChanges, type Spotlight, type SpotlitChange } from "./spotlight"
 import { putsSomethingBack } from "./undo"
+import { whatElseToAsk, type WhatElse } from "./what-else"
 
 /**
  * Everything the rail says about the page beside it, worked out in one place a
@@ -129,6 +130,18 @@ export type RailView<TPart> = {
   }
   /** Per record, the readings a card cannot work out for itself. */
   readonly readings: ReadonlyMap<string, RailReading<TPart>>
+  /**
+   * What the rail has left to say once a change the visitor pressed for is on
+   * the page — **the end of the sixty seconds**, and absent every other time.
+   *
+   * It is here rather than in the markup for the reason the other three
+   * readings are: the condition is three answers this file has already worked
+   * out (`landing`, `waiting`, `available`), and a condition written at the
+   * call site is a condition nothing can check, because `page.tsx` is an
+   * `async` Server Component no `vitest` run can mount. `what-else.ts` has the
+   * measurement of the screen it exists for.
+   */
+  readonly whatElse?: WhatElse
   /** The one change the page is currently about — the marks, the legend and the way back are all about this one. */
   readonly about?: SpotlitChange
   /** What makes the stage scroll again: a new revision, or a newer question at the same one. */
@@ -383,6 +396,17 @@ export const whatTheRailShows = <TPart>({
   const nominated = waiting === undefined ? leadingAsk(available) : undefined
   const askPart = nominated === undefined ? undefined : partTheAskWouldTouch(tree, ids, nominated)
 
+  /**
+   * And the ending, from the three readings above rather than from the records
+   * a fourth time. `what-else.ts` argues each of its three silences and
+   * carries the measurement of the rail at the moment it speaks.
+   */
+  const whatElse = whatElseToAsk({
+    available,
+    ...(landing === undefined ? {} : { landing: landing.recordId }),
+    ...(waiting === undefined ? {} : { waiting }),
+  })
+
   return {
     available,
     spots: drawn.flat(),
@@ -398,6 +422,7 @@ export const whatTheRailShows = <TPart>({
           },
         }),
     readings,
+    ...(whatElse === undefined ? {} : { whatElse }),
     ...(about === undefined ? {} : { about }),
     /**
      * The newest marked change, which is the one the visitor has just asked

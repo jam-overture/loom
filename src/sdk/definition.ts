@@ -128,6 +128,28 @@ export type PrimitiveDefinition<
    */
   readonly behaviours?: readonly TBehaviour[]
   /**
+   * The prop each control takes its name from — `{ present: "label" }` on a
+   * dialog whose trigger carries the page's own call to action.
+   *
+   * Optional, and absent for almost every primitive that takes a control at all.
+   * A control's name is normally a string this primitive declares, which is what
+   * makes *Copy* the same word on every code panel in a deployment and lets one
+   * dictionary translate all of them. This is the exception for the control whose
+   * words are **content**: a trigger that opens a dialog says *Watch the demo*,
+   * the next one says *Book a call*, and neither is a fact about the primitive or
+   * a thing a translator should hold.
+   *
+   * Three checks follow, and the first two are the registry's. The behaviour must
+   * be one this primitive declared, and the prop must be one its schema declares
+   * — the same drift `frames` and `interactive` are checked against, failing the
+   * same silent way: a prop renamed and a declaration left pointing at nothing
+   * would quietly go back to the declared string for ever. The third is not a
+   * check but a property: the declared text is still required, so the control has
+   * a name in every language before any node is written, and a node that fills
+   * the prop with nothing gets it.
+   */
+  readonly names?: Readonly<Partial<Record<TBehaviour, string>>>
+  /**
    * What part this primitive plays — `"heading"` on anything a reader takes as
    * the title of what follows, whatever it is called. Optional, and absent on
    * almost everything: most primitives are an arrangement or a surface and play
@@ -252,6 +274,12 @@ export type PrimitiveEntry = {
   /** Declared behaviour names, still raw: the registry is what checks them. */
   readonly behaviours: readonly string[]
   /**
+   * Which prop names which control, still raw: the registry is what checks that
+   * both halves of each pair exist. Empty for the primitive that named none,
+   * which is almost all of them.
+   */
+  readonly names: Readonly<Record<string, string>>
+  /**
    * The declared role, still raw: the registry is what checks it, for the same
    * reason it checks a behaviour name. `undefined` for the primitive that plays
    * no part a consumer asks about, which is most of them.
@@ -291,6 +319,33 @@ const freezeText = (text: Readonly<Record<string, string>> | undefined): Primiti
   const copy: Record<string, string> = Object.create(null) as Record<string, string>
 
   for (const [key, value] of Object.entries(text)) copy[key] = value
+
+  return Object.freeze(copy)
+}
+
+/**
+ * The raw declaration for a primitive that named no control. Null-prototype for
+ * the reason `NO_TEXT` gives: a lookup under `constructor` must answer nothing.
+ */
+const NO_NAMES: Readonly<Record<string, string>> = Object.freeze(
+  Object.create(null) as Record<string, string>
+)
+
+/**
+ * Declared control names, copied and frozen for `freezeText`'s reason: the
+ * caller keeps the literal it passed, and an entry sharing it is one mutation
+ * away from a rendered page's buttons changing under it.
+ */
+const freezeNames = (
+  names: Readonly<Record<string, string | undefined>> | undefined
+): Readonly<Record<string, string>> => {
+  if (!names) return NO_NAMES
+
+  const copy: Record<string, string> = Object.create(null) as Record<string, string>
+
+  for (const [behaviour, prop] of Object.entries(names)) {
+    if (prop !== undefined) copy[behaviour] = prop
+  }
 
   return Object.freeze(copy)
 }
@@ -337,6 +392,7 @@ export const definePrimitive = <
   submits: definition.submits ?? false,
   frames: definition.frames ?? [],
   behaviours: definition.behaviours ?? [],
+  names: freezeNames(definition.names),
   role: definition.role,
   copy: definition.copy,
   reads: definition.reads,

@@ -3,7 +3,7 @@ import type { NodeId, TreeId } from "../ids.js"
 import type { PrimitiveType } from "../primitive-type.js"
 import type { PrimitiveRole } from "../role.js"
 
-import { pageViewReadingOf, type StoredPageViews } from "./page-views.js"
+import { pageViewsFor, type StoredPageViews } from "./page-views.js"
 import type { PageReading, PartStanding } from "./parts.js"
 
 /**
@@ -347,23 +347,19 @@ export const pageReachOf = (
   reading: PageReading,
   rows: readonly StoredPageViews[]
 ): PageReach => {
-  const matching = rows.filter(
-    (row) => row.treeId === reading.treeId && row.revision === reading.revision
-  )
-
   /**
-   * The row's two numbers, read through the page-view reading rather than
-   * subtracted again here. One definition of drift, pending and inflation is
-   * the point: a second one would be a second place for them to disagree with
-   * the counter they describe.
+   * The row this revision's counters are divided by, picked by the one rule
+   * that knows which row belongs to which reading (`pageViewsFor`). The rule is
+   * shared rather than written here because it is also what a consumer of the
+   * pace reading needs, and the matching is the part of this join that fails
+   * quietly when it is got wrong.
    */
-  const measured = matching[0] === undefined ? undefined : pageViewReadingOf([matching[0]])
+  const { measured, foreign, duplicated } = pageViewsFor(reading, rows)
 
-  const { opened, appearances, drift, pending, inflation, updatedAt } =
-    measured?.revisions[0] ?? NOTHING_MEASURED
+  const { opened, appearances, drift, pending, inflation, updatedAt } = measured ?? NOTHING_MEASURED
 
   const silence: ReachSilence | null =
-    measured === undefined ? "unmeasured" : silenceOf(opened, appearances)
+    measured === null ? "unmeasured" : silenceOf(opened, appearances)
 
   const exact = silence === null && appearances === opened
 
@@ -404,7 +400,7 @@ export const pageReachOf = (
     exact,
     parts,
     unreconciled: parts.filter((part) => part.unreconciled).map((part) => part.nodeId),
-    foreign: rows.length - matching.length,
-    duplicated: Math.max(0, matching.length - 1),
+    foreign,
+    duplicated,
   }
 }

@@ -420,7 +420,11 @@ type Behaviour = {
   readonly text: readonly string[]
   readonly rendersControl: boolean
   readonly requires?: BehaviourName
-  readonly build: (content: string, text: PrimitiveText<string>) => ReactNode
+  readonly build: (
+    content: string,
+    text: PrimitiveText<string>,
+    name: string | undefined
+  ) => ReactNode
 }
 ```
 
@@ -428,10 +432,14 @@ type Behaviour = {
 this puts a target on the page, which is what drives the `interactive` check —
 and it is a field rather than a constant because the first behaviour that renders
 nothing is a question of *when*, not *if*. `requires` is the pair. `build` is the
-whole of the implementation seam, and its two arguments are the two things a
-control may be given: the node's own text, and the primitive's resolved strings.
-There is no third argument, and the absence is the design — a control cannot be
-handed the node's props, the tree, or the page.
+whole of the implementation seam, and its three arguments are the three things a
+control may be given: the node's own text, the primitive's resolved strings, and
+the word this node named its control with — `undefined` wherever the primitive
+named no prop for it, which is almost everywhere. There is no fourth argument,
+and the absence is the design — a control cannot be handed the node's props, the
+tree, or the page. The third one is a *string the runtime resolved*, read off the
+one prop the primitive declared as its control's name, and keeping it a string is
+what keeps that true.
 
 ---
 
