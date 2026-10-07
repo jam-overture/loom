@@ -319,3 +319,5 @@ Everything above this line is prose a person wrote, and stays that way.
 | [0233](0233-a-bound-twin-is-earned-by-a-system-of-record-and-a-row-shape-the-primitive-can-declare.md) | A bound twin is earned by a system of record and a row shape the primitive can declare | Accepted | §4b |
 | [0234](0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md) | A primitive may name a control from the tree, and its declared string is the floor | Accepted | §4h — the behaviour seam |
 | [0235](0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md) | How much of a page gets read is a share of words that partition it, and the typical reader's figure is a ceiling | Accepted | §4c (reader signals) |
+| 0236 | *No record on this branch* | — | — |
+| [0237](0237-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md) | A change is read against the words both revisions say, and a floor costs the page total and not the passage | Accepted | §4c (reader signals) |

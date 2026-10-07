@@ -34,6 +34,7 @@ the portal every day.
 | Default | off; an unaddressed render is byte-identical |
 | Browser cost | **4.8 KB**, guarded by `src/signals/browser-weight.test.ts` |
 | How much of what it says gets read | words readers reached against the words the page says ([0235](../decisions/0235-how-much-of-a-page-gets-read-is-a-share-of-words-that-partition-it-and-the-typical-reader-is-a-ceiling.md)), with the passages nobody saw |
+| What a change did to what gets read | the words both revisions say, read before against read now ([0237](../decisions/0237-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
@@ -692,6 +693,70 @@ were published once.
 shares side by side as the sentence a reader screen can lead with, and the
 passages nobody saw as the one list on it a person can act on without reading
 anything else.
+
+### 16. The words a change put in front of readers · `Loom signals` · **done, 7 October**
+
+> §15 is the stale funnel pair, written on the branch of #539 and not yet on
+> `main` when this was built. The number is left for it rather than taken, since
+> that pull request was opened first and nothing here depends on it.
+
+§14 counts how much of what a page says gets read, of **one window of one
+revision**. The sentence a change is judged by is the next one, and it is the
+sentence this whole plan is pointed at: *the words nobody read last week are
+read now*, or the worse one, *the three hundred words this change wrote are
+words nobody has reached.* §10 asks that of where reading stops. Nothing asked
+it of text.
+
+**Done.** `copyChangeOf(was, now)` in
+[`src/signals/copy-change.ts`](../src/signals/copy-change.ts) answers it. It is
+the **ninth** thing taken out of the server-side join rather than collected (§6,
+§8, §9, §10, §11, §12, §13 and §14 being the others): **nothing was added to a
+payload, a browser, a column, a store or the vocabulary**, and the broadcaster
+was not touched, so its weight is unchanged.
+
+Two things decide the shape, and the first is a subtraction that reads backwards
+([0237](../decisions/0237-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)):
+
+- **The unit is the words both revisions say, word for word.** The figure
+  anybody would write first — the later reading's read words minus the earlier
+  one's — answers two questions at once: a change that adds four hundred words
+  readers all reach raises it by four hundred while making the page *less* read
+  as a share of itself. The page got longer and the reading got worse, and one
+  number says *better*. Identical text on both sides is the only condition under
+  which the difference is about reading, so every reader figure here is of the
+  carried words and what the change **wrote** is a census beside them — exact,
+  because no reader is in it, and therefore the half that answers in a window
+  with no page views at all. *The change took two hundred words away and readers
+  had never got to a hundred and eighty of them* is one row.
+- **A floor costs the page total and not the passage, which narrows §14's
+  refusal rather than excepting it.** A passage's `gain` is `words × (now.reach −
+  was.reach)` over the same words on both sides, so a type declaring no `copy`
+  (0122) scales it toward zero and **cannot flip its sign** — *at least this many
+  words moved* is safe, which is more than 0235 could say of one window. The
+  page total adds signed terms that floors scale by *different* factors, so a
+  floored passage that gained and an exact one that lost can sum to a regression
+  where the truth is an improvement; it is withheld, as 0235 withholds `typical`.
+  `passagesByMovement` is published beside the word totals because a count of
+  passages survives a floor outright.
+
+Four more settled in the building. A **standing is not comparable and a share of
+a side's own views is** — `read` means *at least one* reader (0212), so a
+movement from `skipped` to `gained` moves with traffic, and it is reported as a
+movement rather than as a verdict and never divided by anything. A passage the
+change **moved is compared like any other**, which is the one place this reading
+is more forgiving than §10's, where a moved sibling dissolves the pair it was
+half of — a pair is a position by construction and a passage is not. There is
+**no fate vocabulary** here as §10 and §15 have one: added, removed and reworded
+are structurally exclusive and carry different payloads, so they are three typed
+lists rather than a union of three shapes. And a part that **said nothing before
+and says something now is a word the change wrote**, not a part the change
+added — which is why `passageOf` is now published from `copy.ts` and the
+comparison is built over every part rather than over a copy reading's passages.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the one
+sentence a reader screen can lead with after a change lands, the list of
+passages a change did not fix, and the two figures on it that must never be
+added together.
 
 ## Still not in scope
 
