@@ -53,6 +53,51 @@ obvious cheaper answer and it is worse here — every sheet in `reports/` is
 already a dated artefact nobody updates, so a baseline would be a second copy of
 every picture, going stale silently, and the first lane to change a palette would
 be asked to re-bless forty files.
+## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/globals.css`, `app/(demo)/demo/_components/page-band.tsx`) ·
+**Status:** open — **nothing is broken today and the fourth band is fixed**;
+this is here because the reason it was not a problem is a fact about the
+clinic's page rather than about the rule.
+
+This surface renders a part of its own page a second time in four places now:
+the band a question is about, the band an ask would touch, the band a landed
+change took off the page, and — as of
+`demo-40-the-page-on-the-first-screen` — the top of the page itself on the
+arrival screen. All four go through `PageBand`, and what stops a visitor
+operating a control inside one is the window's `pointer-events: none`.
+
+**That keeps a mouse out and nothing else.** Every control inside such a band
+is still in the tab order, still reachable by a screen reader, and still
+announced — so a band carrying a link is a second copy of that link, pointing
+at a page the visitor is not looking at, with nothing to say which of the two
+they have landed on.
+
+**The fourth band is where it stopped being theoretical.** The top of the
+clinic's page is its hero: an `h1` and two calls to action, 250 pixels above
+the same hero in the document. Drawn like the other three it would have put a
+second *Book an assessment* in the tab order and a whole duplicate hero into a
+screen reader's reading of a rail whose sentences are the only ones that
+explain anything. `PageBand` takes an `inert` flag for it, and the flag is the
+caller's answer because it is a claim about the document — only that band is a
+second view of content the page below carries in full.
+
+**Why the other three were left as they are, and why that is a judgement
+rather than a finish.** A question's band and a landed change's band are the
+only place their content exists on the screen, so `inert` would hide from a
+screen reader the one rendering of the thing a visitor is being asked to
+decide about. An ask's band duplicates a band that is on the stage, and today
+it is `loom.stat-grid` — three figures, no controls — so there is nothing to
+duplicate into the tab order. **That is a fact about which preset leads**,
+not about the rule: a lead ask whose subject contained an action would bring
+the defect back with every test in this lane green, which is the half of this
+worth writing down.
+
+What it probably wants is the distinction said once, in `PageBand`, in terms
+of the *document* rather than per caller: a band is inert when the page below
+carries the same nodes. Not taken here because this unit had one screen to fix
+and the right shape for it is a reading over the tree rather than a flag.
 
 ---
 ## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
@@ -211,9 +256,29 @@ still pass.
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
 (`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
-`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
-remaining instance of this lane's brief's own *nothing to react to on
-arrival***.
+`ask-panel.tsx`) · **Status:** **closed by
+`demo-40-the-page-on-the-first-screen`**, by the shape this entry recommended.
+
+*(Closed 6 October by `Loom demo`, the lane that owns it. The entry is left
+whole below because the three shapes and the reason two of them were refused
+are the argument for the one that was built — and because the objection
+recorded against (1) turned out to be answered by the surface itself: this
+lane renders a part of the tree a second time in three places already, and
+`page-band.tsx` is now the one file that decides what such a band is.)*
+
+**What was built.** The root's first element child — the clinic's hero — is
+drawn in the rail between the header and the controls, clipped to a 15rem
+window with the shared 44px fade at the cut, on narrow screens only, and only
+while the visitor has asked for nothing. Measured on production builds of
+`main` at `41c65e9` and of the branch, 390 × 844: the page's own heading is on
+the first screen at `y 471` where there was no page on it at all, and the
+stage's own first pixel moved from `y 1,094` to `y 1,380`. The cost is stated
+in the report and in `globals.css`: the green button lands at `y 611` with its
+promise and the Gate's verdict under it, and the four secondary asks go under
+the fold.
+
+**(3) is still true and was not attempted.** Nothing was taken out of the phone
+rail.
 
 Measured on a production build of `main` at `6686895`, 390 × 844, with
 `pnpm shoot`'s `measure`:
@@ -45889,3 +45954,81 @@ the phone, and *eyeballing a screenshot taken with the wrong pointer* is the
 same lesson with a sharper example attached. The evidence is in
 `reports/2026-10-06-framework-a-phone-shot-taken-with-a-mouse.md`: one control
 that was invisible on every phone in the repository, and two pictures of it.
+## 2026-10-06 — a telemetry journal can be read by position and never by time, so "has it got better" can compare two pages and never two weeks
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/journal.ts` and both implementations) · **Status:** open —
+**nothing is blocked**; the comparison this branch ships is correct and is not
+the comparison a person would ask for in words
+
+`/portal/trust` can now say whether the AI is getting better at judging itself.
+It does it by folding the newest page of the journal and the page before it, and
+setting the two gaps side by side. That is a true statement and it is a statement
+about **two hundred entries**, because a page is all a journal can be asked for:
+
+```ts
+type TelemetryReadRequest = { treeId?, cursor?, direction?, limit? }
+```
+
+There is no `since`, no `until`, and no way to ask what a window of time holds.
+So the section is written to say *the stretch of the record before this one* and
+to print the dates each stretch covers, and it deliberately never says *last
+week* — which is the thing a person would actually have asked.
+
+**Why that gap is not cosmetic.** Two pages are two stretches of unequal
+wall-clock time, and how unequal depends on how busy the deployment was. A
+deployment that got busier covers less time per page as it grows, so the same
+section compares a shorter and shorter window against a longer one, and the
+comparison silently changes meaning while every number on it stays right. The
+screen says so in a sentence and a date range; it cannot fix it.
+
+**What would close it**, smallest first:
+
+1. **`recordedAt` bounds on the read** — `since` and `until` beside `cursor`,
+   answered the same paged way. Both implementations index on `seq`, and the
+   memory one already filters a predicate; a Postgres one is a `where` on a
+   column that is written on every insert.
+2. **A page's own ends on `TelemetryPage`** — `from` and `to`, so a consumer
+   does not take them off the first and last record and get them wrong on an
+   empty page. The portal does this in four lines (`_lib/trust-trend.ts`,
+   `spanOf`) and the next consumer will write them again.
+
+Neither is urgent and the second is nearly free. Filed as a framework gap rather
+than taken, per 0018: the portal consumes through published entry points, and a
+read shape is not something a consumer may widen.
+
+**One thing worth knowing before (1) is built.** The span must come off
+`recordedAt` and not `occurredAt`, for the reason `journal.ts` already gives
+about retention: `occurredAt` is what a host said, and a host with a skewed
+serverless clock or a replayed batch is describing its own timeline. A time
+bound on the dodgeable field would let a reader ask for a window and be handed
+records from outside it, in page order, with nothing saying so.
+
+---
+## 2026-10-06 — the screen `screen-source.ts` names as the one nobody wrote a guard for still had no guard, five weeks later
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/trust/`) · **Status:** **closed** by
+`portal-53-has-it-got-better`
+
+`_lib/screen-source.ts` makes this argument in its own header, as the reason the
+portal-wide guard enumerates the filesystem rather than a list:
+
+> *"a per-screen guard only guards the screens somebody remembered to write one
+> for, and **the screen that ships a defect is by definition the one nobody
+> thought about**. `/portal/trust` had no guard, and it is where the two defects
+> this module's first run found were sitting."*
+
+Thirteen screens in this group have a `reading-order.test.ts`. `/portal/trust`
+did not — the screen the sentence is about, named in the file that exists
+because of it, still uncovered when this branch opened it. The portal-wide guard
+did its job and that is the whole point of it; what it cannot hold is the rules
+that are only true of one screen, which on this one are all the same rule: a
+comparison must refuse to be drawn over things that are not comparable.
+
+Closed rather than filed, because it is this lane's own screen and the fix is
+the file. It is recorded at all because the *shape* is not this screen's: a
+sentence in a header naming a known gap is not a guard, and nothing in the
+repository would have said so. The 1 October entry on a finding that said a
+remedy was already built is the same class — a true sentence written in the
+right place, which nobody had a reason to go and check.
