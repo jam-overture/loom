@@ -93,6 +93,93 @@ small change to `_lib/arrivals.ts` and a branch on the card, and it wants its
 own tests.
 
 ---
+## 2026-10-07 — the sentence a reader screen can lead with after a change lands, and the two figures on it that must never be added
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is blocked**; `copyChangeOf` is on this run's branch and the call is
+two lines
+
+§16 of [`docs/signals.md`](docs/signals.md) landed `copyChangeOf(was, now)` in
+`src/signals/copy-change.ts`, published from `@jam-overture/loom/signals`. It
+takes the two `PageReading`s a portal already builds for §10's comparison — the
+same two, so there is no second join and no second window to fetch — and answers
+what the change did to what the page says and to how much of it gets read.
+
+```ts
+const change = copyChangeOf(
+  pageReadingOf(wasTree, wasRows, declarations),
+  pageReadingOf(nowTree, nowRows, declarations)
+)
+```
+
+**The sentence.** `change.typical` is the words the average reader got to before
+and after, over the words both revisions say; `change.stillUnseen` is the
+passages nobody reached on either side, longest first, with their text;
+`change.mostGained` is the passage the change put most words in front of a
+reader. *Three hundred words nobody reached are read now, and these four
+passages still nobody sees* is three fields.
+
+**The census, which answers when the readers do not.**
+`change.wrote.removedByStanding` is the row worth leading with on a change that
+deleted something: *the change took two hundred words away and readers had never
+got to a hundred and eighty of them* says the change was right, and the opposite
+reading of the same row is the one to stop for. It is exact — no reader is in it
+— and it is reported under four of the six silences, including
+`nothing-measured`. A card that drew nothing because the window was quiet would
+be blank where the most certain thing on the screen was available.
+
+**The two figures that must never be added, and the one that must never be
+drawn.** `change.words.change` is the page getting longer or shorter;
+`change.typical.change` is readers getting further through what stayed. They are
+different quantities and a card that subtracted read-word counts would have
+silently mixed them — the defect
+[0239](decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)
+exists to refuse. And `change.readings.was.typical` beside
+`change.readings.now.typical` is the pair to refuse outright: each is true of its
+own window and the difference is not a measurement, because a change that cut
+four hundred words lowers the second with nobody having read less. The field
+documentation says so; a screen is where it would be got wrong.
+
+**One state to draw differently rather than refuse.** Under `floored` the page
+total is `null` and every passage's own `gain` is still there and still correctly
+signed, so the card has rows and no headline. `change.passagesByMovement` is the
+row that survives a floor outright and is what a figure should fall back to:
+*four passages nobody reached now have readers* rather than a word count that is
+a floor of unknown depth.
+
+---
+## 2026-10-07 — two names for one silence, now in three modules, and the next reading will have to pick one
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
+**Status:** open — **a wart rather than a defect**; every module is internally
+consistent and a surface drawing two of them side by side meets two spellings of
+one state
+
+`ChangeSilence` (0224) calls a window with no page views `nothing-measured`.
+`CopySilence` (0235) calls it `unmeasured`. `ReachSilence` (0229, reused by 0231)
+calls it `unopened` for a related but distinct state. They are three closed sets
+over overlapping conditions, and this run had to choose between them:
+`CopyChangeSilence` takes `different-trees` and `nothing-measured` from the
+change side and `wordless` and `inconsistent` from the copy side, on the ground
+that a surface drawing both comparisons of one change should not meet two names
+for one thing.
+
+That is the right local answer and it is the second time the choice has been
+made by whoever was writing the module. A third comparison — two windows' pace
+readings is the obvious next one — will make it a third time, and by then the
+mapping between the sets is something a portal keeps rather than something the
+framework publishes.
+
+**What would settle it** is one exported mapping rather than a renaming:
+nothing should be superseded, because each set's names are right in its own
+sentence and 0218's argument applies — a surface should be able to quote the
+framework's answer rather than keep a table. A `describe*` that already exists
+per set is most of it; what is missing is the statement that these two names are
+the same state.
+
+Not built, and deliberately: it is a decision about the vocabulary of four
+accepted records and it is worth one run of its own rather than a paragraph
+inside one about words.
 ## 2026-10-07 — the front door could not reach the one band that is the product working, and no check could have said so
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**

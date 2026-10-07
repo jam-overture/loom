@@ -271,8 +271,18 @@ const ZERO_BY_STANDING: Readonly<Record<PartStanding, number>> = Object.freeze({
   unknown: 0,
 })
 
-/** The words a part says on its own, and whether it is short of some it cannot see. */
-const passageOf = (part: PartReading): Passage => ({
+/**
+ * The words a part says on its own, and whether it is short of some it cannot see.
+ *
+ * Published rather than kept private, because the comparison of two windows
+ * ([`copy-change.ts`](copy-change.ts)) needs a passage for **every** part and
+ * not only for the parts {@link copyReadingOf} kept — a part that said nothing
+ * before and says something now is a word the change wrote, and reading that
+ * off a filtered list would call the part itself new. Two spellings of this
+ * projection that agree today are what the counter keys were before they were
+ * published once.
+ */
+export const passageOf = (part: PartReading): Passage => ({
   nodeId: part.nodeId,
   type: part.type,
   role: part.role,
