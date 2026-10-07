@@ -90,6 +90,17 @@ export const parseLesson = (markdown: string): LessonDocument => {
   return { number: Number(title[1]), title: plainText(title[2]), front, sections }
 }
 
+/**
+ * The section every check in this course is pointed at.
+ *
+ * It was a local `const` in three test files and an export of `parts.ts`, which
+ * pulls in React and so cannot be imported by a node test. Four copies of one
+ * string is this course's own lesson 28 in its own machinery, so it lives here,
+ * next to the function that looks a section up, and `parts.ts` re-exports it for
+ * the two routes that already import it from there.
+ */
+export const TRY_IT = "Try it"
+
 export const section = (lesson: LessonDocument, title: string): LessonSection | undefined =>
   lesson.sections.find((each) => each.title === title)
 

@@ -131,6 +131,52 @@ prose leans on them** — lessons 22 and 23 pin the size of the library as well 
 have none, because their prose declines to lean on the number, deliberately and in
 as many words.
 
+**And since 6 October the paragraphs under a marked fence are held to the numbers
+in it.** The sentence above is the limit those marks were written with: a lane
+that pastes in a corrected line and says nothing leaves the paragraph as stale as
+it was, and twice that is exactly what happened. Where such a paragraph **counts**
+something the fence prints, a program can do the noticing instead — the number is
+read off the transcript above the sentence, and the transcript is already held
+against a real run. Nothing new is derived and no second copy is manufactured:
+two checks compose, and correcting a fence without reading the paragraph under it
+now fails, naming the sentence and the file. All four marked fences carry at least
+one such sentence, which is the point and not a coincidence — lesson 29's *three
+zeros are the control*, lesson 33's sentence counting the primitives that read a
+binding — the one beginning *Today*, not the historical one above it — lesson 24's
+*the eight words the band shows*, and the line in lesson 32 telling you which four
+of exercise G's outputs to predict hardest.
+
+**Two things that one does not reach either.** A sentence about what a number
+*used to be* looks exactly like a claim about now: lesson 24 says *both of those
+counts were zero when this lesson was written*, which is true, historical, and
+indistinguishable to a regular expression from the stale sentence it replaced. So
+each of these is registered by somebody who has read it and never found by
+pattern. And a classification is not a count — lesson 32's account of the table
+that drifted on 2 October sorts three files into *in code* and *in prose*, and
+only one sentence of it counts anything at all.
+
+**The first of those two limits got an instance the same afternoon, which is why
+lesson 33's entry above names a sentence beginning *Today*.** Three more
+primitives gained a binding hours after this was written, so lesson 33 now keeps
+its original sentence as history — *on the day it was written, two primitives…* —
+and states the count in a *Today five…* sentence below it. The pin had been
+written against the first one, so it held a deliberate statement about the past to
+a count of the present and went red. **The remedy is to move the pin, never to
+edit the sentence**, because the historical sentence is true and correcting it to
+*five* would make the lesson false. That is what the failure message says to do,
+and it is the one repair on this check that a lane which has not read the lesson
+should not attempt.
+
+**And the list above names that sentence rather than quoting it, for a reason this
+file should state once.** The registry counts *every* occurrence of a claim's
+phrase across these files, and it cannot tell a claim from a quotation of one — so
+writing the sentence out here verbatim made this README a second place the course
+states the count, and the check failed on the occurrence pin. That is the same
+trap lesson 09's account of its own drift fell into, where a quoted stale number
+was counted as a third place the course had it wrong, and the remedy is the one
+that lesson took: paraphrase. The four entries above have always been clipped or
+reworded; it is deliberate, and it is not a stylistic preference.
+
 Two things it still does not reach, said here rather than discovered later. A
 count is the cheapest second copy a sentence can carry and **most of what a
 lesson says carries none** — rungs numbered one too low, and an argument about
