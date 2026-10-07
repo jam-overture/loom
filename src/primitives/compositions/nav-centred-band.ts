@@ -46,17 +46,24 @@ import type { Composition } from "./composition.js"
  * other three combinations still renders, and that is the point of their being
  * props.
  *
- * ## Why there is no drop-down in it, which is the honest version
+ * ## Why there is no drop-down in *this* band, which is now a choice
  *
- * `loom.menu` shipped on 1 October — *"a run of links behind one button"* — and
- * is the obvious thing to reach for here: a bar whose destinations fold away is
- * the second nav design anybody would name first. **It cannot be built today**
- * and the reason is not this band's to fix. `loom.nav` already declares
- * `disclose` and names its own control `Menu`, and `loom.menu`'s control is
- * also named `Menu`, because a control's word is the primitive's and is
- * resolved per type (0055, 0063). A bar holding both has two buttons reading
- * *Menu* at 390px, one inside the other. Filed, with the measurement, rather
- * than shipped with a defect a photograph would have caught anyway.
+ * This section used to say a drop-down **could not be built**: `loom.nav`
+ * declares `disclose` and names its own control *Menu*, `loom.menu`'s control
+ * was also named *Menu* because a control's word was the primitive's and
+ * resolved per type, and a bar holding both had two buttons reading *Menu* at
+ * 390px, one inside the other. It was filed with the measurement rather than
+ * shipped.
+ *
+ * [0234](../../../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+ * took that finding on 5 October, `loom.menu` names its `label` prop, and the
+ * bar is `navMenusBand` — so the sentence is retracted here rather than left
+ * standing in a file somebody would read as current.
+ *
+ * What is left is an ordinary design decision rather than a wall. **Five
+ * destinations centred in a pill is this band's whole idea**, and folding four
+ * of them behind a button is the other band's. A drop-down added here would not
+ * be a different design, it would be `navMenusBand` with a pill around it.
  */
 const MENU = [
   { text: "What it does", href: "#what-it-does" },

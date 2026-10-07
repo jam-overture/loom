@@ -1,0 +1,93 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "out": "2026-10-06-portal-has-it-got-better-wide.png",
+      "path": "/portal/trust",
+      "viewport": {
+        "width": 1680,
+        "height": 1000,
+        "label": "wide"
+      },
+      "fullPage": true,
+      "waitFor": "[data-trust-trend]",
+      "measure": [
+        "[data-trust-trend]",
+        "section"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-06-portal-has-it-got-better-phone.png",
+      "path": "/portal/trust",
+      "viewport": "phone",
+      "fullPage": true,
+      "waitFor": "[data-trust-trend]",
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    },
+    {
+      "out": "2026-10-06-portal-has-it-got-better-open.png",
+      "path": "/portal/trust",
+      "viewport": {
+        "width": 1680,
+        "height": 1000,
+        "label": "wide"
+      },
+      "waitFor": "[data-trust-trend]",
+      "do": [
+        {
+          "click": "[data-trust-trend] summary"
+        },
+        {
+          "waitFor": "text=the one before"
+        }
+      ],
+      "measure": [
+        "[data-trust-trend]"
+      ],
+      "before": {
+        "path": "/portal/sign-in",
+        "do": [
+          {
+            "fill": "input[name=key]",
+            "text": "portal-photograph-key-0123456789"
+          },
+          {
+            "click": "button[type=submit]"
+          },
+          {
+            "waitFor": "text=What Loom has been doing"
+          }
+        ]
+      }
+    }
+  ]
+}

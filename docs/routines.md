@@ -296,6 +296,27 @@ on scroll is otherwise photographed blank below the fold, and every shot prints
 `scrollWidth` against `innerWidth` so a page wider than the phone says so
 instead of being eyeballed.
 
+**`phone` is a phone and not a narrow window**, which is a size *and* a pointer
+([0236](../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)).
+It reports `hover: none` and `pointer: coarse`, so a control a page reveals on
+hover is photographed the way a reader with a finger gets it — and its line says
+which device took it:
+
+```
+a-page  390x844@2x touch  scrollWidth 390 / innerWidth 390
+```
+
+Until 6 October it did not, and every phone shot in this repository was taken by
+a browser with a mouse. Two consequences worth carrying:
+
+- **An explicit `{ width, height }` is a window with a mouse**, because a size
+  written into a shot list is a lane reaching past the two named viewports.
+  Write `"touch": true` beside it for a hand-sized device, or ask for `"phone"`.
+- **CSS is now honest and a script is not.** `navigator.maxTouchPoints` is 1 in
+  a phone shot; `"ontouchstart" in window` is still `false`. A component that
+  sniffs the second gets its desktop branch photographed under a picture
+  labelled `touch`. Nothing in this repository sniffs it today.
+
 **`measure` reads boxes off the page you are photographing**, which is the
 option most likely to be rewritten by hand before it is found
 ([0213](../decisions/0213-the-harness-reads-a-box-it-prints-the-number-and-the-judgement-stays-in-the-report.md)).
@@ -396,6 +417,17 @@ That is the whole of how a signed-in screen gets photographed — there is no
 | `{ "waitFor": "<selector>" }` | wait for it to appear. The **first** match; several is fine |
 | `{ "wait": <ms> }` | let it settle. 30 seconds is the ceiling and there is no way past it |
 | `{ "scrollTo": "<selector>" }` | bring it into view without pressing it. **One** element, like `click` |
+| `{ "key": "<key>" }` | press a key at whatever holds focus. **No selector**, because a keypress has none |
+
+`key` is the step to reach anything whose subject is **focus**, and it is not
+interchangeable with `click` even where both produce the same state: a browser
+grants a visible focus ring on the strength of the **last input having been a
+keyboard**, so a mouse photographing a focus state photographs no focus state.
+A keyboard journey is written as one — `{ "key": "Tab" }` to arrive,
+`{ "key": "Enter" }` to press, `{ "key": "Escape" }` to leave — and the key names
+are the driver's (`Tab`, `Enter`, `Escape`, `ArrowDown`, `Shift+Tab`). One it does
+not know fails the shot rather than typing the letters
+([0237](../decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)).
 
 `before` is one approach — a `path`, an optional `waitFor`, an optional `frame`,
 and a `do` list — made in the shot's own browser context before its own address

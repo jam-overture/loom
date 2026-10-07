@@ -76,7 +76,7 @@ reading of the same row is the one worth stopping for.
 
 ## Decisions I took that the step did not specify
 
-**A floor costs the page total and not the passage.** This is the half of 0237
+**A floor costs the page total and not the passage.** This is the half of 0239
 I did not expect to be writing, and it narrows 0235 rather than excepting it. A
 single passage's `gain` is taken over the *same words on both sides*, so a type
 declaring no `copy` scales it toward zero and **cannot flip its sign** — *at
@@ -123,7 +123,7 @@ order to be in. Tested.
 
 ## Records
 
-**[0237](../decisions/0237-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)
+**[0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)
 — A change is read against the words both revisions say, and a floor costs the
 page total and not the passage.** Accepted. Nothing is superseded: 0235 is
 **narrowed**, and the narrowing is written as a narrowing — its refusal of a

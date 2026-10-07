@@ -48,7 +48,7 @@ drawn.** `change.words.change` is the page getting longer or shorter;
 `change.typical.change` is readers getting further through what stayed. They are
 different quantities and a card that subtracted read-word counts would have
 silently mixed them — the defect
-[0237](decisions/0237-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)
+[0239](decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)
 exists to refuse. And `change.readings.was.typical` beside
 `change.readings.now.typical` is the pair to refuse outright: each is true of its
 own window and the difference is not a measurement, because a change that cut
@@ -95,6 +95,96 @@ the same state.
 Not built, and deliberately: it is a decision about the vocabulary of four
 accepted records and it is worth one run of its own rather than a paragraph
 inside one about words.
+## 2026-10-07 — proving a picture moved means building the tree twice by hand, and two runs in a row have done it with `cmp`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/specimen/`) · **Status:** open — **nothing is broken and no picture in
+any report is wrong**; this is a cost that has now been paid twice in two days
+with the same six shell commands, written down before it is paid a third time
+
+A screenshot proves a change only against a photograph of the tree **without**
+it. Nothing in either harness takes that pair, so a run that wants one does this:
+copy the changed source aside, `git show origin/main:<file> >` over it, re-run
+`pnpm specimen` into a scratch directory, copy the good file back, and `cmp` the
+two sets.
+
+**Two consecutive framework runs have written exactly that.** #538 did it to
+prove a phone shot taken with a mouse was the old behaviour rather than a
+reconstruction of it — and its strongest sentence is that the control came back
+*byte-identical to another lane's committed shot*. This run did it to prove a
+focus ring arrives on a trigger, and the result is the same shape: three states
+photographed both ways, **two byte-identical and the third the whole claim.**
+
+**The byte-identical half is the part that is easy to miss and is what makes the
+third picture evidence.** A lone "after" picture of a focus ring says nothing —
+the ring is also where it was before anything opened. What makes it proof is
+that the two shots either side of the change came back *the same file*, so the
+only variable between the pair is the thing being argued about. That comparison
+is currently a `cmp` in a scratch directory and appears in a report as a
+sentence a reader has to take on trust.
+
+**What would close it.** A flag naming a git ref to photograph the same specimen
+against — `--against origin/main` — which builds the sheet twice and prints, per
+shot, `identical` or `differs`. It is on [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)'s
+near side only if it **prints and never fails**: a harness that went red on a
+moved picture would make every deliberate visual change a build failure, which
+is the opposite of what it is for.
+
+**Why it is not taken here.** It builds the tree from another ref, which means
+checking out, installing and bundling a second worktree inside a harness that
+today only ever runs the code it is in. That is a bigger change than the fix it
+would have illustrated, and it belongs in a run that has nothing else in it.
+
+**Deliberately not proposed: a committed baseline image per specimen.** It is the
+obvious cheaper answer and it is worse here — every sheet in `reports/` is
+already a dated artefact nobody updates, so a baseline would be a second copy of
+every picture, going stale silently, and the first lane to change a palette would
+be asked to re-bless forty files.
+## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/globals.css`, `app/(demo)/demo/_components/page-band.tsx`) ·
+**Status:** open — **nothing is broken today and the fourth band is fixed**;
+this is here because the reason it was not a problem is a fact about the
+clinic's page rather than about the rule.
+
+This surface renders a part of its own page a second time in four places now:
+the band a question is about, the band an ask would touch, the band a landed
+change took off the page, and — as of
+`demo-40-the-page-on-the-first-screen` — the top of the page itself on the
+arrival screen. All four go through `PageBand`, and what stops a visitor
+operating a control inside one is the window's `pointer-events: none`.
+
+**That keeps a mouse out and nothing else.** Every control inside such a band
+is still in the tab order, still reachable by a screen reader, and still
+announced — so a band carrying a link is a second copy of that link, pointing
+at a page the visitor is not looking at, with nothing to say which of the two
+they have landed on.
+
+**The fourth band is where it stopped being theoretical.** The top of the
+clinic's page is its hero: an `h1` and two calls to action, 250 pixels above
+the same hero in the document. Drawn like the other three it would have put a
+second *Book an assessment* in the tab order and a whole duplicate hero into a
+screen reader's reading of a rail whose sentences are the only ones that
+explain anything. `PageBand` takes an `inert` flag for it, and the flag is the
+caller's answer because it is a claim about the document — only that band is a
+second view of content the page below carries in full.
+
+**Why the other three were left as they are, and why that is a judgement
+rather than a finish.** A question's band and a landed change's band are the
+only place their content exists on the screen, so `inert` would hide from a
+screen reader the one rendering of the thing a visitor is being asked to
+decide about. An ask's band duplicates a band that is on the stage, and today
+it is `loom.stat-grid` — three figures, no controls — so there is nothing to
+duplicate into the tab order. **That is a fact about which preset leads**,
+not about the rule: a lead ask whose subject contained an action would bring
+the defect back with every test in this lane green, which is the half of this
+worth writing down.
+
+What it probably wants is the distinction said once, in `PageBand`, in terms
+of the *document* rather than per caller: a band is inert when the page below
+carries the same nodes. Not taken here because this unit had one screen to fix
+and the right shape for it is a reading over the tree rather than a flag.
 
 ---
 ## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
@@ -253,9 +343,29 @@ still pass.
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
 (`app/(demo)/demo/page.tsx`, `app/(demo)/demo/_components/rail-header.tsx`,
-`ask-panel.tsx`) · **Status:** open — **measured, structural, and the largest
-remaining instance of this lane's brief's own *nothing to react to on
-arrival***.
+`ask-panel.tsx`) · **Status:** **closed by
+`demo-40-the-page-on-the-first-screen`**, by the shape this entry recommended.
+
+*(Closed 6 October by `Loom demo`, the lane that owns it. The entry is left
+whole below because the three shapes and the reason two of them were refused
+are the argument for the one that was built — and because the objection
+recorded against (1) turned out to be answered by the surface itself: this
+lane renders a part of the tree a second time in three places already, and
+`page-band.tsx` is now the one file that decides what such a band is.)*
+
+**What was built.** The root's first element child — the clinic's hero — is
+drawn in the rail between the header and the controls, clipped to a 15rem
+window with the shared 44px fade at the cut, on narrow screens only, and only
+while the visitor has asked for nothing. Measured on production builds of
+`main` at `41c65e9` and of the branch, 390 × 844: the page's own heading is on
+the first screen at `y 471` where there was no page on it at all, and the
+stage's own first pixel moved from `y 1,094` to `y 1,380`. The cost is stated
+in the report and in `globals.css`: the green button lands at `y 611` with its
+promise and the Gate's verdict under it, and the four secondary asks go under
+the fold.
+
+**(3) is still true and was not attempted.** Nothing was taken out of the phone
+rail.
 
 Measured on a production build of `main` at `6686895`, 390 × 844, with
 `pnpm shoot`'s `measure`:
@@ -1483,6 +1593,41 @@ it — so the frame's layer stopped being a page layer and the bands *after* the
 tile in the document painted straight over the scrim. The photograph is what
 found it. A region drawn over the page has to be allowed to be over the page.
 
+### 7 October, `Loom daily build` — **a fourth thing was unowned, and it is the one that shipped**
+
+Taking this entry's framework half found something neither of us had named, and
+it is worth separating from the two that are still here: **where a reader is
+left standing when the region closes.**
+
+A browser does not leave focus on an element inside a subtree a stylesheet has
+just hidden. It blurs it, and focus falls to `<body>`. So a keyboard reader who
+opened the lightbox, tabbed to its cross and pressed it lost their place in the
+document entirely — the next Tab started again from the top of the page. Same on
+Escape. All three primitives on this seam did it.
+
+That is **not** one of clause 6's three. It is a fact about the trigger's own
+button, which has been this control's since the first one shipped, and it had no
+owner only because the question does not arise until something other than the
+trigger can close the region — which is what 0176 added. Shipped on
+`framework-57-a-phone-shot-taken-with-a-mouse` and recorded as
+[0237](decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md),
+with no primitive prop, stylesheet rule or registration touched.
+
+**The two this entry names are untouched and this is not a claim on them.** A
+reader can still tab out of an open region into the page behind it; nothing is
+`inert`. What has changed is the shape of the gap: it is one thing now rather
+than three, and it is **more urgent than it was**, because a control that returns
+focus correctly reads from the outside like a control that manages focus. The
+next author will assume the trap is there.
+
+**It is not taken here because it reverses clause 6 of an Accepted record**,
+which the framework brief calls `ARCHITECTURAL — needs review`. Writing it as a
+`Proposed` record would also hold this fix behind that review, which is the
+opposite of what three keyboard-inaccessible primitives need. The recommendation
+went to the maintainer on the pull request instead: a `modal: true` on `present`,
+the shape 0176 itself names in the sentence *"if the seam ever grows a sixth
+member or a `modal: true`"*. **This entry stays open on exactly that.**
+
 ---
 ## 2026-10-01 — two cross-lane edits forced by a hundred-and-second primitive: one assertion in `src/sdk/`, and five lesson transcripts of which one is a teaching section
 
@@ -2387,6 +2532,48 @@ inline-code span and do not make it a link — works for `reports/` as well as
 `decisions/`, and is what #434's body was corrected to use before it merged. It
 costs a reader nothing: the path is as useful to somebody who can open the
 repository, and there is nothing in a code span for anything to inject into.
+
+### Ninth data point, 7 October, `Loom daily build` on #538 — **the threshold is between 147 and 148 characters, and four URLs in one body put it there**
+
+One body, four markdown images, every one of them `![alt](url)` on the same host
+and the same branch ref, read back through the API immediately after the write.
+The **only** variable is the length of the filename at the end:
+
+| chars | file | came back |
+| --- | --- | --- |
+| 139 | `2026-10-06-framework-copy-button-phone-mouse.png` | **clean** |
+| 139 | `2026-10-06-framework-copy-button-phone-touch.png` | **clean** |
+| 148 | `2026-10-07-framework-the-button-they-came-from-before.png` | **mangled** — backticks wrapped around the whole URL inside the parens |
+| 174 | `…-the-button-they-came-from-minimal-wide-back-on-the-trigger.png` | **mangled** — backticks, and the closing `)` swallowed inside them |
+
+Against #538's own 6 October measurement — *a 147-character markdown image came
+back byte-clean with its `!` intact* — this puts the boundary at **147 clean,
+148 mangled**, which is as tight as this entry has ever had it. Four of the nine
+data points above are now a length and nothing else.
+
+**It is a length and not a syntax, a host, a ref or a position.** All four images
+here share a host, a branch ref, the `![alt](url)` form and a table cell; two
+survived and two did not. That rules out the remaining syntax theories for this
+body, and it is consistent with every earlier point rather than replacing them.
+
+**And the remedy was checked in the same body, which is the half that makes this
+a measurement rather than an observation.** The two mangled files were
+re-committed under shorter names, the body was rewritten with nothing else
+changed, and it was read back again: **all four images came back clean**, at 133
+and 134 characters. Same body, same host, same ref, same syntax, same table
+cells — length down, mangling gone. Both directions of the theory are now tested
+on one pull request.
+
+**What it cost, which is the part worth having.** The remedy is to shorten the
+*filename*, and a report's naming convention — `YYYY-MM-DD-<lane>-<slug>` — plus a
+branch name plus `reports/` is already 92 characters before the slug starts. So a
+run with a descriptive slug has about **55 characters** of filename to spend, and
+#538 spent them. Both pictures were re-committed under short names, which cost a
+98 KB duplicate of a file the specimen harness had already written under its own
+longer name. **That is the first time this entry has been paid in bytes rather
+than in a broken link**, and it will recur every time a sheet is photographed by
+`pnpm specimen`, which names its output `<specimen>-<theme>-<viewport>-<state>`
+and routinely clears 160 characters on its own.
 
 ### Eighth data point, 29 September, `Loom demo` on #450 — **the SHA ref is not safe, and neither is the raw host; position inside one body may be**
 
@@ -45024,7 +45211,44 @@ worse bug, because it takes the server render with it.
 ## 2026-10-06 — the screenshot harness's `phone` is a width and not a device, so every phone shot in this repository was taken by a browser with a mouse
 
 **Filed by:** `Loom docs` · **Owned by:** `Loom daily build`
-(`tools/screenshot/`, `tools/specimen/`) · **Status:** open — **not urgent and
+(`tools/screenshot/`, `tools/specimen/`) · **Status:** **closed by
+`framework-57-a-phone-shot-taken-with-a-mouse`.** A `SpecimenViewport` carries a
+required `touch`, `PHONE` sets it, and `contextOptionsFor` emulates it — so a
+shot named `phone` is now taken by a device with a finger, and the line a report
+pastes says so (`390x844@2x touch`). Both halves of what would close it were
+taken: the field exists *and* it is the default for the `phone` viewport, which
+the filing asked to be a judgement rather than an addition. Three answers the
+filing left open, all measured and written into
+[0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md):
+
+1. **It is the viewport's, not the shot's.** A pointer on a shot would let one
+   lane photograph `phone` with a finger and another with a mouse, both calling
+   the result *the phone* — the drift 0117 exists to prevent, one field lower.
+2. **`hasTouch` only; `isMobile` is not set**, and the filing's "maps to
+   `hasTouch` and `isMobile`" is half wrong. Measured at 390×844 in this
+   container: `hasTouch` moves the pointer to `coarse`/`hover: none` and leaves
+   `innerWidth` at 390; `isMobile` moves the pointer not at all and, on a
+   document with no `<meta name="viewport">`, moves the layout width to **980**
+   — a desktop page scaled down, which is the failure `PHONE`'s own comment
+   warns about. It buys nothing and can cost the whole picture.
+3. **How many existing phone shots move: one, and it is yours.** The mechanism
+   is that a rule inside `@media (hover: hover)` still needs `:hover` to match
+   and a screenshot never hovers, so every ordinary `hover:` utility is inert
+   either way. Swept: the library stylesheet carries **0** pointer-gated
+   at-rules, so no specimen sheet in this repository can move; the application's
+   compiled CSS carries **1** at-rest pointer-gated rule, your
+   `[@media(hover:hover)]:opacity-0`. Photographed: six whole-page phone shots
+   across all five surfaces, both ways — five byte-identical, the documentation
+   page the sixth.
+
+**And the picture you said could not be taken, is taken.**
+`reports/2026-10-06-framework-copy-button-phone-touch.png` is the copy button
+visible on a phone. Its control,
+`reports/2026-10-06-framework-copy-button-phone-mouse.png`, came back **byte-identical
+to your own committed `2026-10-06-docs-copy-button-phone.png`**, so the only
+variable between the pair is the pointer. Original status below.
+
+**Status:** open — **not urgent and
 not nothing**; what it cost this run is one visual, and what it costs generally
 is that a class of defect is invisible to the instrument this repository
 photographs phones with
@@ -45251,7 +45475,13 @@ words below it that nobody has read.*
 ## 2026-10-06 — the stale funnel pair cannot be taken from `main`, and it is this lane's own branch in the way
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **extends the 5 October entry on a funnel pair naming a node
+**Status:** **closed by `signals-11-the-pair-the-change-dissolved`** — #527
+landed as #527's own merge, `funnelReachOf` was on `main` this evening, and the
+unit this entry held for the next run was taken by it. The hand-off worked
+exactly as written: the run that read this entry needed no re-derivation of why
+the unit was available, only a `git fetch`.
+
+Originally filed as: **extends the 5 October entry on a funnel pair naming a node
 its revision no longer has.** Nothing is wrong and nothing is needed from another
 lane; this says why the next run and not this one
 
@@ -45514,6 +45744,39 @@ times — so the candidates are the agent proxy named in this container's
 environment notes, or something between it and GitHub. That is a question about
 infrastructure rather than about this repository, which is why this is owned by
 a person rather than a lane.
+### Fourth measurement, 6 October, `Loom daily build` on #538 — 142 clean twice, 160 mangled, one body, one call
+
+Taken the way this entry's own advice says to take it: the body was read back
+from the API after posting. Three URLs went in together, all `github.com`, all
+inline, in one call.
+
+| URL | characters | came back |
+| --- | --- | --- |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-mouse.png` | **142** | **clean**, and `!` intact |
+| `…/raw/…/reports/2026-10-06-framework-copy-button-phone-touch.png` | **142** | **clean**, and `!` intact |
+| `…/blob/…/decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md` | **160** | mangled — ``` `` ``` injected, and the wrap swallowed the `**,` after it |
+
+It sits inside the 148–159 bracket this entry already measured rather than
+narrowing it. What it is worth is two things the deliberate experiments did not
+have in one body:
+
+- **Both images survived with the `!`.** That is the second measurement in two
+  days against the 5 October note that the mangler strips a leading `!`, and it
+  agrees with the 10-06 reading on #531 at 147 characters. Two images at 142 and
+  one at 147, all three clean — so the `!` strip is the same length threshold
+  and there is nothing separate about images. The 5 October `!` strip was on a
+  URL past the threshold.
+- **The mangled one is `decisions/` and the clean ones are `reports/`, which
+  this entry has already ruled out as a cause** — and the lengths explain the
+  pattern without it: a record's file name is the record's whole title, so
+  `decisions/` URLs are simply the longest thing anybody links. That is why the
+  correlation looked real for a fortnight.
+
+**Remedy used here, and it cost nothing:** the record was *named* rather than
+linked — `decisions/0236-….md` as a path in backticks — and the body re-read
+clean. For a body that must link a long path, the workaround in this entry is
+unchanged.
+
 ## 2026-10-05 — the four lines every consumer of the pace reading was writing are now one call, and the matching rule lives beside the counter
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom signals` (`src/signals/`) ·
@@ -45550,7 +45813,21 @@ straddled, and the two states are not that.
 ## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
-· **Status:** open — **named rather than built**, because it needs the tree and
+· **Status:** **closed by `signals-11-the-pair-the-change-dissolved`** — each end
+looked up in the reading and given an `EndStanding`, with
+[0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md).
+**Two corrections to this entry, both against its own proposal.** §10's five
+fates are *not* the vocabulary: four of them describe a pair compared across two
+readings and a funnel is asked of one revision at a time, so reusing the set
+would have meant three members that can never be returned — and `reordered` is
+refused outright, because a pair has no ordering beyond its two ends (0146) and
+reporting document order as a fault would invent a rule the counter does not
+apply. And the withholding is **per figure rather than per pair**: an absent `to`
+leaves `reached` a fact about readers, so `entry` and `lostBefore` still stand,
+where a blanket null would have thrown away the one figure a person re-pointing
+the question needs. Five planted defects, five caught.
+
+Originally filed as: **named rather than built**, because it needs the tree and
 this unit deliberately took only the counters
 
 A `FunnelPair` is two node ids a deployment wrote down in advance, and a
@@ -45667,3 +45944,422 @@ Recorded because the next consumer is predictable: the same pairing is owed by
 anything that reads `readingChangeOf` across two versions, which is the entry
 from 4 October that is still waiting on a store that can answer for an older
 version.
+
+---
+## 2026-10-07 — a slot handed to a primitive that declares none is dropped with its whole subtree, and nothing anywhere says so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/`) · **Status:** open — **not blocking**; `loom.dialog` ships and
+its own test characterises the loss
+
+A tree that puts a dialog's body in a slot instead of in children loses it:
+
+```ts
+buildElement(ids, {
+  type: "loom.dialog",
+  props: { label: "Book a call" },
+  children: [buildSlot(ids, "body", [buildText(ids, "A paragraph nobody will read")])],
+})
+```
+
+renders the dialog, renders the plate, renders the bar and the cross, and draws
+**nothing** where the paragraph was. `diagnostics` is `[]`.
+
+**Why this is worth a filing rather than a note.** Every other *something
+arrived and was not drawn* in the render seam has a code for exactly this shape
+— `data-unread`, `data-unshown`, `frame-refused`, `anchor-unusable`,
+`submit-unresolved`. A dropped slot has none, and `grep -rn "unhonoured" src/`
+finds nothing. So this is the one way to lose authored content in a Loom page
+that is invisible from both ends: the reader sees a page that looks finished,
+and the author sees no error.
+
+It is general rather than this primitive's. Any primitive declaring `slots: []`
+— `loom.popover`, `loom.menu`, `loom.stack` and most of the arrangements — will
+do the same. A primitive cannot see its own dropped slots, so this cannot be
+fixed in `src/primitives/`.
+
+`named-controls.test.ts` asserts only the measurable half — the words do not
+reach the page — and deliberately **not** that `diagnostics` is empty, so the
+day the seam starts reporting it that test still passes. The silence is the
+defect and the test does not assert it as correct.
+
+---
+## 2026-10-07 — the one string 0234 made content is the one string `copy` cannot describe, because a control renders nothing until it has hydrated
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` /
+`Loom marketing` · **Status:** open — **nothing is broken today**, and it will
+bite the first sweep that reads a page with a dialog in it
+
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)'s
+whole argument is that a dialog's trigger carries **content**: *Watch the demo*,
+*Book a call* — the page's own words, which a translator should never hold.
+`copy` is the library's declaration of which props are words a reader reads.
+
+They cannot be joined, and it is not an oversight in either. `copy.test.ts`
+holds two assertions that are each right on their own:
+
+- *draws every prop it declared as copy* — a declared prop must appear in the
+  static markup.
+- *draws no undeclared string prop as text* — anything that does appear must be
+  declared.
+
+A control renders `null` until an effect has proved scripting runs
+(`presentation.ts`), so a named control's word is in **neither** render. Adding
+`"label"` to `loom.dialog`'s `copy` fails the first assertion; leaving it out
+passes the second only because the word is invisible to it. Measured both ways
+on this branch.
+
+**What it costs, and it is not hypothetical.** `Loom marketing`'s word sweeps,
+the reading-time measurement and `textOf` all read a page's words. A band whose
+call to action is *Book a call* has that sentence counted nowhere — the closing
+control of the page is, to every instrument in the repository, not words at all.
+The 6 October entry about inline children is the same seam from the other side:
+that one was about which children join a sentence, this one is about a string
+that is in no child.
+
+Not fixed here because the remedy is a third state — *words a reader reads that
+the static render does not contain* — and inventing one in a primitive's
+declaration would put a convention in `src/primitives/` that the seam reading it
+has never agreed to.
+
+---
+## 2026-10-07 — four of 0234's five "said nothing" shapes cannot be reached through a primitive whose prop is `z.string().min(1)`, and the refusal is the better outcome
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**not a defect** — an observation worth having before the next named control is
+written
+
+0234's fifth clause enumerates five shapes of *this node said nothing* — absent,
+`null`, a number, an object, whitespace — and says each falls back to the
+declared string with no diagnostic.
+
+That is the runtime's contract. Through `loom.dialog` and `loom.menu` only
+**two** of the five are reachable, because `label` is declared
+`z.string().min(1).optional()`: a tree carrying `null`, a number, an object or a
+blank string is refused at the schema as `invalid-props`, the primitive draws
+nothing at all, and `resolveBehaviours` is never consulted.
+
+**The refusing half is the one to keep.** A dialog whose `label` arrived as an
+object is a tree something generated wrongly; drawing it with a button reading
+*More* would be a page that works and a defect nobody is ever told about. So
+this is not a request to loosen the schema — it is the note that the clause
+reads as a *runtime* guarantee and is mostly a *schema* outcome in practice, and
+that a future named control declaring `z.string().optional()` without the
+`min(1)` would quietly get the other behaviour.
+
+Both halves are asserted in `named-controls.test.ts`, which is where the measurement is.
+## 2026-10-06 — the funnel reading now takes the page reading the reader screen already builds, and `stalePairs` is the figure to lead with after a change lands
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/readers/`) · **Status:** open — **a signature
+change with no consumer to break, and a figure worth a sentence**
+
+`funnelReachOf(where, funnels, rows)` is now
+`funnelReachOf(reading, funnels, rows)`, where `reading` is the `PageReading`
+§6 already produces ([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+Nothing in the repository called it — it landed this morning on #527 and the
+reader screen has not drawn a funnel yet — so this breaks nothing today and is
+filed so the first screen to draw one is not written against the old shape.
+
+**Why the reading rather than the revision.** A reading carries `treeId` and
+`revision`, so nothing is inferred and 0231's property holds. What it closes is a
+caller naming one revision while holding another revision's tree, which is the
+one mistake here that nothing downstream could catch. `/portal/readers` already
+builds the reading for three other figures on the same screen, so the cost at
+the only call site that matters is passing an object it has.
+
+**The figure, and the sentence it is for.** `FunnelReach.stalePairs` is how many
+of a deployment's funnel questions name a part this revision no longer has, and
+`orphanedPairs` is how many of those have a count against the missing end. *Three
+of your five funnel questions are about parts this version of the page no longer
+has* is a sentence nothing could previously say, and after a Gate change lands it
+is the first thing on that screen worth reading.
+
+**What a stale pair must not be drawn as.** Its figures are withheld per end
+rather than per pair, so a pair with an absent `to` still has an honest `entry`
+and `lostBefore` — the traffic the stale question was about — and has `rate`,
+`conversion`, `lostBetween` and `worse` as `null`. Drawing a withheld figure as
+nought is the exact reading this unit exists to stop: it says *every reader who
+arrived failed to reach the start of this funnel* about a question that cannot be
+asked. `describeEndStanding` carries the line for a person.
+
+---
+## 2026-10-06 — nothing lets a primitive say what it can report, so a pair asking `activated` of a band is indistinguishable from a button nobody pressed
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`, `src/role.ts`) · **Status:** open — **the gap 0238 names and
+declines to guess at**; nothing is blocked and the standing says what it cannot
+say
+
+`rollup.ts` has warned since §3 that **an end is the node the signal names,
+never a region it was inside**: a pair asking for `activated` on a band answers
+nought, because a band is not pressed (0146). That is a mis-phrased question,
+and it reports `reached 0, converted 0` — the same two numbers as a stale pair
+and as a button nobody pressed.
+
+Looking the end up in the revision's tree separates the stale case out
+([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+It cannot separate the other two, and the reason is a declaration that does not
+exist. `EndStanding` therefore has **two members and not three**: `present` means
+the revision still has a node with that id and no more, and its doc comment says
+so rather than implying a guarantee it cannot keep.
+
+**What would close it.** A declaration on a primitive definition naming the
+reader-signal kinds its render can produce — a control can be `activated`, a
+disclosure `disclosed`, a form `completed`, and every element can be `viewed` and
+`dwelled`. It is the same shape as `copy` (0122) and `role` (0114): a fact about
+the library that a registry answers, joined on the server at read time, with no
+byte on the wire and nothing in the browser.
+
+**Why it is not `role`.** `role` has one member, `heading`, and it describes what
+a part *means to a reader* rather than what it can report. Adding `control` to it
+to get this would conflate the two and make the role rows of a `PageReading`
+answer a question they were not built for. A second declaration is the honest
+shape, and this lane would consume it the day it exists — `pageReadingOf` already
+holds the type of every part, so the join is written in one line.
+
+**What it is worth.** Today a deployment that writes `activated` against a band
+sees a funnel that converts nobody and has no way to learn the question was never
+answerable. With the declaration, that pair is the third standing and the screen
+says *this node cannot be pressed* instead of *nobody pressed it*.
+
+---
+## 2026-10-06 — the 148-character rule holds on a decision-record link, and the convention that generates breaking names is not only the screenshots
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit`
+(infrastructure) · **Status:** open — **evidence on the 5 October entry, not a
+new question.** That entry's rule is right and this is a fifth occurrence that
+confirms its threshold on a URL with no image in it
+
+#539's body carried two `github.com/.../blob/...` links. One was mangled and one
+was not, in the same body, which puts a bracket round the threshold that entry
+estimated:
+
+| | length | outcome |
+| --- | --- | --- |
+| `decisions/0238-a-funnel-end-…-per-figure.md` | **189** | wrapped in double backticks, link dead |
+| `reports/2026-10-06-signals-the-pair-the-change-dissolved.md` | **142** | clean |
+
+So **about 148 is right**, and it is not about images: this body had none. The
+mangling's signature on a markdown link is that the URL comes back enclosed in
+` `` ` and the closing `)` is pushed outside it, which renders as literal text
+rather than as a broken link — visible in the rendered body but not in anything
+that checks links.
+
+**What is new is which convention generates the breaking name.** That entry
+names the `reports/` screenshot convention. The same arithmetic catches
+**`decisions/NNNN-<sentence>.md`**, and worse: the record filenames in this
+repository are whole sentences by convention, so 0238's is **96 characters** on
+its own against a 93-character prefix. Every decision record this repository has
+written since the filenames became sentences is over the line on any branch with
+a descriptive name, and **this lane writes one of those on most runs** — so every
+record link in every pull request body from a lane that cites its own records has
+been breaking, in exactly the way the 5 October entry found the screenshots had
+been.
+
+**The remedy is already in the repository and needs no convention change.** A
+record and a report are both repository files, so a pull request body can name
+the *path* in backticks instead of linking the blob: it is shorter, it survives,
+and a reviewer reading the body is looking at the diff that contains the file.
+#539's body was edited to do that and came back clean on the first read. The
+long-slug filenames themselves are worth keeping — they are how the index reads
+— and nothing has to be renamed.
+
+**What this does not establish**, same as the entry it extends: which hop does
+it. One more data point for it, though — this body was posted through the GitHub
+MCP tool and the *edit* that fixed it went the same way, so the mangling is not
+in the create path only.
+
+## 2026-10-06 — twelve one-word edits in six of your specimen sheets, forced by a required field, and none of them changes a picture
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
+(`src/primitives/*.specimen.ts`) · **Status:** open — **nothing to fix and
+nothing is broken**; recorded so the lane that owns the files knows why they
+were opened, and because there is one tidy-up in them that is yours to take or
+to leave
+
+`SpecimenViewport` now carries a required `touch: boolean`
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)),
+because a named viewport called `phone` that reports a mouse is a trap and an
+optional field with a `false` default would have left six sheets in it silently.
+The compiler asked those six, and the answer was one word each:
+
+| file | lines |
+| --- | --- |
+| `every-part-offers-a-choice.specimen.ts` | 110, 111 |
+| `given-rather-than-told.specimen.ts` | 451, 452 |
+| `the-behaviours-nothing-declared.specimen.ts` | 378, 379 |
+| `the-link-inside-a-sentence.specimen.ts` | 271, 272 |
+| `the-parts-that-offered-no-choice.specimen.ts` | 144, 145 |
+| `the-words-nothing-declared.specimen.ts` | 242, 243 |
+
+`touch: true` on each `phone`, `touch: false` on each `wide`. **No picture any
+of them takes is changed by it**, and that is measured rather than assumed: the
+library stylesheet carries zero pointer-gated at-rules, and
+`the-link-inside-a-sentence` was run both ways — all three themes' phone shots
+came back byte-identical.
+
+**The tidy-up, offered and not taken.** These six are the only sheets in the
+repository that write their viewports out as literals, and the `phone` literal
+in every one of them is a byte-for-byte copy of the harness's own `PHONE` — the
+same 390×844 at 2×. Only `wide` differs, and only in `height`, because each
+sheet is long enough to need a taller full-page window. That duplication is the
+reason the compiler had to ask six files instead of none, and it is the reason
+the next field added to a viewport will ask again. `import { PHONE }` in each
+would end it. Left alone here because it is a change inside your directory that
+nothing forces, and the brief puts refinement inside finished sections as
+reactive.
+---
+## 2026-10-06 — a phone shot is now honest in CSS and still dishonest in a script, because `hasTouch` does not define `ontouchstart`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/specimen/playwright.ts`) · **Status:** open — **a stated limit of the
+instrument, not a gap waiting on a fix**, written down because the half that was
+fixed today is the half that will make people trust the other half
+
+`contextOptionsFor` now sets `hasTouch` from the viewport, so `@media (hover:
+hover)` and `@media (pointer: fine)` are false in a phone shot and the CSS half
+of pointer detection is photographed truthfully. Measured in the same run, in
+the same page:
+
+| read in the page | baseline | under `hasTouch` |
+| --- | --- | --- |
+| `matchMedia("(hover: hover)")` | true | **false** |
+| `matchMedia("(pointer: coarse)")` | false | **true** |
+| `navigator.maxTouchPoints` | 0 | **1** |
+| `"ontouchstart" in window` | false | **false** |
+
+The last row is the limit. Chromium defines `window.TouchEvent` and
+`window.Touch` in both modes and `ontouchstart` in neither, so the oldest and
+still-common sniff — `"ontouchstart" in window` — answers *no touch* in a shot
+this harness now calls a phone. A component that branches on it gets its desktop
+branch photographed and labelled `touch`, which is a **worse** failure than the
+one closed today: before, the label and the picture were both wrong together,
+and now the label is right and that one picture is not.
+
+Nothing in this repository sniffs it — swept, zero occurrences in `src/`,
+`apps/` and `tools/` — which is why this is recorded rather than fixed. What
+would close it is a line in an init script defining `ontouchstart` on `window`
+beside the context option, which is `addInitScript` territory and so is
+[0195](decisions/0195-a-shot-may-say-what-the-browser-started-with-and-it-says-it-as-data.md)'s
+`start` rather than the viewport's. It should not be built until something needs
+it: a harness that fakes a signal nothing reads is a harness telling a story
+about a browser rather than photographing one.
+
+The sweep is the thing to repeat before trusting a phone shot of any new
+component: `maxTouchPoints` is the modern read and is correct here;
+`ontouchstart` is not.
+
+---
+## 2026-10-06 — four sample output lines in lesson 32 were updated from outside the lane, and the exercise that prints three of them is runnable
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
+(`lessons/32-layout.md`) · **Status:** open — **nothing to fix**; recorded so
+the lane that owns the file knows why it was opened, and because one of the four
+is a sentence about the harness rather than a number
+
+`describeShot` now prints the pointer in the line a report pastes, so a phone
+shot reads `390x844@2x touch`
+([0236](decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)).
+Four lines in lesson 32 print it the old way and were corrected: **174** (the
+one-line example under *The one check that catches this without a person*), and
+**847, 850, 852** inside Exercise F's output block.
+
+**Exercise F is the one that mattered.** Its helper at line 525 builds its shots
+with `viewport: PHONE` and the block below it is captured `console.log` output,
+so a learner who runs the exercise today gets three lines the transcript says
+they will not. That is the failure mode this repository keeps meeting from the
+other direction — a transcript that is a little wrong is believed, because
+nobody re-runs the block to check a line they can read.
+
+**No prose was touched and no number changed.** The word `touch` is appended to
+four lines, nothing is removed, and the surrounding argument — the document
+against the viewport, *the page is wider than the phone* — is unaffected by it.
+
+**The sentence worth your eye, and it is yours to write or to leave.** Lesson 32
+teaches the overflow reading as *the one check that catches this without a
+person*, and the pointer is now a second thing that line asserts: what device
+took the picture. The lesson has a natural place for it — the paragraph under
+line 176 already explains why eyeballing a screenshot misses a page wider than
+the phone, and *eyeballing a screenshot taken with the wrong pointer* is the
+same lesson with a sharper example attached. The evidence is in
+`reports/2026-10-06-framework-a-phone-shot-taken-with-a-mouse.md`: one control
+that was invisible on every phone in the repository, and two pictures of it.
+## 2026-10-06 — a telemetry journal can be read by position and never by time, so "has it got better" can compare two pages and never two weeks
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/journal.ts` and both implementations) · **Status:** open —
+**nothing is blocked**; the comparison this branch ships is correct and is not
+the comparison a person would ask for in words
+
+`/portal/trust` can now say whether the AI is getting better at judging itself.
+It does it by folding the newest page of the journal and the page before it, and
+setting the two gaps side by side. That is a true statement and it is a statement
+about **two hundred entries**, because a page is all a journal can be asked for:
+
+```ts
+type TelemetryReadRequest = { treeId?, cursor?, direction?, limit? }
+```
+
+There is no `since`, no `until`, and no way to ask what a window of time holds.
+So the section is written to say *the stretch of the record before this one* and
+to print the dates each stretch covers, and it deliberately never says *last
+week* — which is the thing a person would actually have asked.
+
+**Why that gap is not cosmetic.** Two pages are two stretches of unequal
+wall-clock time, and how unequal depends on how busy the deployment was. A
+deployment that got busier covers less time per page as it grows, so the same
+section compares a shorter and shorter window against a longer one, and the
+comparison silently changes meaning while every number on it stays right. The
+screen says so in a sentence and a date range; it cannot fix it.
+
+**What would close it**, smallest first:
+
+1. **`recordedAt` bounds on the read** — `since` and `until` beside `cursor`,
+   answered the same paged way. Both implementations index on `seq`, and the
+   memory one already filters a predicate; a Postgres one is a `where` on a
+   column that is written on every insert.
+2. **A page's own ends on `TelemetryPage`** — `from` and `to`, so a consumer
+   does not take them off the first and last record and get them wrong on an
+   empty page. The portal does this in four lines (`_lib/trust-trend.ts`,
+   `spanOf`) and the next consumer will write them again.
+
+Neither is urgent and the second is nearly free. Filed as a framework gap rather
+than taken, per 0018: the portal consumes through published entry points, and a
+read shape is not something a consumer may widen.
+
+**One thing worth knowing before (1) is built.** The span must come off
+`recordedAt` and not `occurredAt`, for the reason `journal.ts` already gives
+about retention: `occurredAt` is what a host said, and a host with a skewed
+serverless clock or a replayed batch is describing its own timeline. A time
+bound on the dodgeable field would let a reader ask for a window and be handed
+records from outside it, in page order, with nothing saying so.
+
+---
+## 2026-10-06 — the screen `screen-source.ts` names as the one nobody wrote a guard for still had no guard, five weeks later
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/trust/`) · **Status:** **closed** by
+`portal-53-has-it-got-better`
+
+`_lib/screen-source.ts` makes this argument in its own header, as the reason the
+portal-wide guard enumerates the filesystem rather than a list:
+
+> *"a per-screen guard only guards the screens somebody remembered to write one
+> for, and **the screen that ships a defect is by definition the one nobody
+> thought about**. `/portal/trust` had no guard, and it is where the two defects
+> this module's first run found were sitting."*
+
+Thirteen screens in this group have a `reading-order.test.ts`. `/portal/trust`
+did not — the screen the sentence is about, named in the file that exists
+because of it, still uncovered when this branch opened it. The portal-wide guard
+did its job and that is the whole point of it; what it cannot hold is the rules
+that are only true of one screen, which on this one are all the same rule: a
+comparison must refuse to be drawn over things that are not comparable.
+
+Closed rather than filed, because it is this lane's own screen and the fix is
+the file. It is recorded at all because the *shape* is not this screen's: a
+sentence in a header naming a known gap is not a guard, and nothing in the
+repository would have said so. The 1 October entry on a finding that said a
+remedy was already built is the same class — a true sentence written in the
+right place, which nobody had a reason to go and check.

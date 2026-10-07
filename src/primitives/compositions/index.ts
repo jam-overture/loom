@@ -19,6 +19,7 @@ import { contactDetailsBand } from "./contact-details-band.js"
 import { credentialsBand } from "./credentials-band.js"
 import { credentialsPostureBand } from "./credentials-posture-band.js"
 import { ctaBand } from "./cta-band.js"
+import { ctaBookingBand } from "./cta-booking-band.js"
 import { ctaSignupBand } from "./cta-signup-band.js"
 import { faqBand } from "./faq-band.js"
 import { episodesBand } from "./episodes-band.js"
@@ -40,6 +41,7 @@ import { metricsLiveBand } from "./metrics-live-band.js"
 import { metricsTrendBand } from "./metrics-trend-band.js"
 import { navBand } from "./nav-band.js"
 import { navCentredBand } from "./nav-centred-band.js"
+import { navMenusBand } from "./nav-menus-band.js"
 import { offeringsBand } from "./offerings-band.js"
 import { pricingBand } from "./pricing-band.js"
 import { pricingMatrixBand } from "./pricing-matrix-band.js"
@@ -86,6 +88,7 @@ export {
   credentialsBand,
   credentialsPostureBand,
   ctaBand,
+  ctaBookingBand,
   ctaSignupBand,
   episodesBand,
   faqBand,
@@ -107,6 +110,7 @@ export {
   metricsTrendBand,
   navBand,
   navCentredBand,
+  navMenusBand,
   offeringsBand,
   pricingBand,
   pricingMatrixBand,
@@ -174,6 +178,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   bannerInlineBand,
   navBand,
   navCentredBand,
+  navMenusBand,
   heroBand,
   heroSplitBand,
   heroShotBand,
@@ -225,6 +230,7 @@ export const STARTER_COMPOSITIONS: readonly Composition[] = [
   contactDetailsBand,
   ctaBand,
   ctaSignupBand,
+  ctaBookingBand,
   footerBand,
   footerSignupBand,
 ]

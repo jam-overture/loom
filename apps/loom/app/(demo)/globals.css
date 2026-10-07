@@ -374,6 +374,92 @@
     max-height: 21rem;
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     The arrival screen's window, and it is the only one of the four
+     whose height is a trade: the other three are sized by what is in
+     them, and this one is sized by what is in it **and** by what it
+     pushes down the screen.
+
+     Measured on a production build of `main` at `41c65e9`, 390 × 844:
+     the rail is 1,013px, the green button is at `y 325`, the four other
+     asks run `597 → 877`, and **the page begins at `y 1,094`** — 250px
+     past the fold. So a visitor on a phone arrives on a full screen of
+     instrument, is told *ask that page for a change* and *it's the page
+     below*, and neither sentence points at anything on the screen.
+     `_lib/the-page-itself.ts` has the whole table and the three shapes
+     that were refused.
+
+     There was no slack to spend: the fourth ask already ended 33px past
+     the fold. Every pixel of this window costs the asks below it, so
+     the two rules here are the two halves of one trade — how tall, and
+     where it is not worth taking at all.
+     ══════════════════════════════════════════════════════════════════ */
+
+  /*
+   * **Not where the page is already beside the rail, and not where the
+   * press would go under the fold.**
+   *
+   * The width is the question's exemption read forwards: above 1024px the
+   * stage is 848px of page forty pixels from this rail, and a window onto
+   * the top of it would be the surface talking for its own sake.
+   *
+   * The height is this window's own, and it is the embed. A demo inside
+   * somebody else's page is photographed at 348 × 465 (`framed.ts`), where
+   * the rail is already 1,062px and the one thing that has to be on screen
+   * is the green button at `y 325`. The window and its caption cost 286px,
+   * which would put that press at `y 611` of a 465px frame — the *nothing
+   * to press* defect of 19 September, caused by the fix for a different
+   * one. 46rem is where the press stops surviving the window rather than a
+   * device: at 736px the band, its caption, the button and its promise all
+   * stand above the fold; below that the button goes under, which is not a
+   * trade this unit is allowed to make.
+   *
+   * In CSS rather than a `matchMedia` read at mount, and rather than
+   * `use-framed.ts`, for the reason the record bar gives: a media query is
+   * right between a resize and a re-render and a mount-time read is not —
+   * and this is about the room a frame has, not about being in one.
+   */
+  @media (min-width: 1024px), (max-height: 46rem) {
+    .demo-part--arrival {
+      display: none;
+    }
+  }
+
+  /*
+   * 15rem, and both ends of it are measured rather than chosen.
+   *
+   * **The floor is the clinic's own heading.** At rail width the hero's
+   * first 146px are its backdrop and its eyebrow — `HARBOURLINE
+   * PHYSIOTHERAPY · SOUTHBANK` in a pill — and *Back to the things you had
+   * stopped doing* begins after them. Built first at 9rem, this window was
+   * a dark box with a pill in it on a dark rail: a stranger could not tell
+   * it from a rendering fault, which is a worse thing to put on the first
+   * screen than nothing. 15rem with no padding at its top clears 196px of
+   * band, which is the eyebrow, the whole of the heading's first line and
+   * the second running into the fade.
+   *
+   * **The ceiling is the press.** Every pixel here pushes the green button
+   * and the asks below it down a screen that had no slack — the fourth ask
+   * already ended 33px past the fold. At 15rem the button lands at `y 611`
+   * with its promise and the Gate's verdict under it and *you can ask for 5
+   * changes here* at the fold; the four secondary asks go under, and that
+   * is this unit's stated cost. The page itself is the thing the brief
+   * calls *something to react to on arrival*, and their verdicts are
+   * evidence for a sentence that is still above the fold without them.
+   *
+   * `padding-top: 0` rather than the shared 12px, and it buys a line of the
+   * heading. The band is a page, so the air at the top of the window is the
+   * hero's own; a second inset above it is a letterbox nothing can see on a
+   * dark ground and 12px this screen cannot spare. The 44px fade is the
+   * shared one and does exactly the work it was measured for: the cut falls
+   * through a line of the clinic's display face, which reads as a page
+   * going on past the window — and it does, for another 4,724px.
+   */
+  .demo-part--arrival .demo-part-stage {
+    max-height: 15rem;
+    padding-top: 0;
+  }
+
   /*
    * And the ask's is a `<details>`, which lays itself out.
    *

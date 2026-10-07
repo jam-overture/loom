@@ -1,8 +1,18 @@
-# 0237 — A change is read against the words both revisions say, and a floor costs the page total and not the passage
+# 0239 — A change is read against the words both revisions say, and a floor costs the page total and not the passage
 
 **Status:** Accepted
 **Date:** 2026-10-07
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-07**, from 0237, when `Loom merge` brought `main` into
+> the branch that carried it (#541). `main` had meanwhile accepted a different
+> 0237 — *a presentation returns the reader to its trigger, and only from inside
+> the region it closed* (#538) — and two records sharing a number is fatal
+> (0097), so the record already on `main` keeps the number. 0238 had gone the
+> same way an hour earlier, to #539's renumbered record. This record was written
+> on 7 October and nothing in it changed but its number; the citations on the
+> branch were updated with it, except the report paragraph explaining which
+> number the run chose and why, which is left as the account it was.
 
 ## Context
 

@@ -62,7 +62,14 @@ import {
 import { describeRenderError, renderSpecimen } from "./render.js"
 import { BLOCK_STORAGE_SCRIPT, seedStorageScript } from "./start-state.js"
 import { contentTypeFor, resolveServedPath, serveDirectory } from "./serve.js"
-import { defineSpecimen, PHONE, WIDE, type Specimen } from "./specimen.js"
+import {
+  defineSpecimen,
+  DEFAULT_VIEWPORTS,
+  PHONE,
+  WIDE,
+  type Specimen,
+  type SpecimenViewport,
+} from "./specimen.js"
 
 const selection = (palette: string): ThemeSelection =>
   themeSelectionSchema.parse({ palette, fontPack: "editorial-serif", stylePreset: "comfortable" })
@@ -319,6 +326,7 @@ const fakeBrowser = (
             else if ("fill" in step) journal.push(`fill ${step.fill}${where} "${step.text}"`)
             else if ("scrollTo" in step) journal.push(`scrollTo ${step.scrollTo}${where}`)
             else if ("waitFor" in step) journal.push(`waitFor ${step.waitFor}${where}`)
+            else if ("key" in step) journal.push(`key ${step.key}`)
             else journal.push(`wait ${step.wait}`)
           }
         },
@@ -666,6 +674,24 @@ describe("taking the shots", () => {
     expect(journal).toEqual(["scrollTo [data-controls]", "measure"])
   })
 
+  /**
+   * The journal is the assertion: a keypress goes in among the presses in the
+   * order written, and comes out with **no frame and no selector beside it**. It
+   * is the one step addressed to focus rather than to an element, and a frame
+   * suffix appearing here would mean the harness had quietly made it one.
+   */
+  it("drives a keypress among the steps, addressed to nothing, even inside a frame", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ frame: "iframe#demo", do: [{ click: "[data-open]" }, { key: "Escape" }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["click [data-open] in iframe#demo", "key Escape", "measure"])
+  })
+
   it("resolves a scroll against the frame a shot names, like every other selector", async () => {
     const { browser, journal } = fakeBrowser([])
 
@@ -697,7 +723,7 @@ describe("taking the shots", () => {
         clipped: false,
         measured: [],
       })
-    ).toBe("a-band-editorial-phone  390x844@2x  scrollWidth 1420 / innerWidth 390  ← overflows")
+    ).toBe("a-band-editorial-phone  390x844@2x touch  scrollWidth 1420 / innerWidth 390  ← overflows")
   })
 
   it("calls a page wider than its viewport an overflow and nothing narrower", () => {
@@ -803,6 +829,28 @@ describe("the boxes a page hides content inside", () => {
     expect(clips(measurement)).toBe(true)
   })
 
+  /**
+   * Only when it is a finger, which is what keeps every `wide` line this
+   * harness has ever printed byte-identical. The reading beside it is quoted in
+   * reports as *what a phone gets*, and a reader cannot tell a hovering 390
+   * from a touching one from a number.
+   */
+  it("says which device took the picture, and only when it is not a mouse", () => {
+    const of = (viewport: SpecimenViewport): string =>
+      describeShot({
+        name: "a-page",
+        file: "reports/a-page.png",
+        viewport,
+        overflow: { scrollWidth: viewport.width, innerWidth: viewport.width, clipped: [] },
+        overflowed: false,
+        clipped: false,
+        measured: [],
+      })
+
+    expect(of(PHONE)).toBe("a-page  390x844@2x touch  scrollWidth 390 / innerWidth 390")
+    expect(of(WIDE)).toBe("a-page  1280x900@2x  scrollWidth 1280 / innerWidth 1280")
+  })
+
   it("prints each box under the shot's own line, indented", () => {
     expect(
       describeShot({
@@ -819,7 +867,7 @@ describe("the boxes a page hides content inside", () => {
         measured: [],
       })
     ).toBe(
-      "a-band-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content\n" +
+      "a-band-bold-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content\n" +
         "    section > div.loom-backdrop  content reaches 401 in 390"
     )
   })
@@ -1085,7 +1133,7 @@ describe("the boxes a lane asked the size of", () => {
     })
 
     expect(handBuilt).toBe(
-      "a-page-with-nothing-wrong-with-it  390x844@2x  scrollWidth 390 / innerWidth 390"
+      "a-page-with-nothing-wrong-with-it  390x844@2x touch  scrollWidth 390 / innerWidth 390"
     )
     expect(handBuilt).toBe(
       describeShot({
@@ -1228,6 +1276,31 @@ describe("the boxes a lane asked the size of", () => {
   })
 })
 
+/**
+ * The two sizes every report quotes, and the devices they claim to be.
+ *
+ * A specimen that declares no viewports takes these, which is most of the
+ * thirty-four sheets in this repository — so what they say about the pointer is
+ * what almost every picture here was taken with.
+ */
+describe("the two named viewports", () => {
+  it("is a phone with a finger and a window with a mouse, in that order", () => {
+    expect(DEFAULT_VIEWPORTS).toEqual([PHONE, WIDE])
+    expect(PHONE.touch).toBe(true)
+    expect(WIDE.touch).toBe(false)
+  })
+
+  /**
+   * The size half of the same argument, and it is the half this file has always
+   * made. A phone is not a narrow window and a window is not a wide phone.
+   */
+  it("keeps the sizes every report in this repository has been quoting", () => {
+    expect([PHONE.width, PHONE.height]).toEqual([390, 844])
+    expect([WIDE.width, WIDE.height]).toEqual([1280, 900])
+    expect([PHONE.deviceScaleFactor, WIDE.deviceScaleFactor]).toEqual([2, 2])
+  })
+})
+
 describe("the browser adapter", () => {
   /**
    * One element as the only six numbers `readBoxes` reads off one.
@@ -1358,6 +1431,16 @@ describe("the browser adapter", () => {
                     waitForTimeout: async (ms: number) => {
                       journal.push(`wait ${ms}`)
                     },
+                    /**
+                     * Journalled with no selector beside it, which is the one
+                     * thing this member asserts about the driver: a keypress
+                     * reaches the page and never an element.
+                     */
+                    keyboard: {
+                      press: async (key: string) => {
+                        journal.push(`key ${key}`)
+                      },
+                    },
                     locator: (selector: string) => locatorAt(undefined, selector),
                     frameLocator: (frame: string) => ({
                       locator: (selector: string) => locatorAt(frame, selector),
@@ -1397,12 +1480,46 @@ describe("the browser adapter", () => {
     await browser.open(PHONE)
 
     expect(recorder.contexts).toEqual([
-      { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, reducedMotion: "reduce" },
+      {
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 2,
+        reducedMotion: "reduce",
+        hasTouch: true,
+      },
     ])
   })
 
   it("reduces motion for every viewport, because a revealing band photographs blank", () => {
     expect(contextOptionsFor(WIDE).reducedMotion).toBe("reduce")
+  })
+
+  /**
+   * The pointer is carried from the viewport and nowhere else: a context is not
+   * free to decide what device it is, which is the property that keeps the
+   * `phone` label and the picture it produces in agreement.
+   */
+  it("emulates a finger for a touch viewport and a mouse for a window", () => {
+    expect(contextOptionsFor(PHONE).hasTouch).toBe(true)
+    expect(contextOptionsFor(WIDE).hasTouch).toBe(false)
+    expect(contextOptionsFor({ ...WIDE, touch: true }).hasTouch).toBe(true)
+  })
+
+  /**
+   * `isMobile` is the field Playwright's own device descriptors pair with
+   * `hasTouch`, and it is left off deliberately. Measured in this container:
+   * it moves nothing about the pointer, and on a document with no
+   * `<meta name="viewport">` it moves the layout width to 980 — a desktop page
+   * scaled down, which is the failure `PHONE`'s comment has warned about since
+   * it was written. `contextOptionsFor` carries the table.
+   */
+  it("never asks for mobile emulation, which would change the layout width and not the pointer", () => {
+    expect(contextOptionsFor(PHONE)).not.toHaveProperty("isMobile")
+    expect(Object.keys(contextOptionsFor(PHONE)).sort()).toEqual([
+      "deviceScaleFactor",
+      "hasTouch",
+      "reducedMotion",
+      "viewport",
+    ])
   })
 
   it("waits for load and writes the page to the file it was given", async () => {
@@ -1497,6 +1614,23 @@ describe("the browser adapter", () => {
     await page.act([{ scrollTo: "[data-controls]" }])
 
     expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls]"])
+    expect(recorder.selectors).toEqual([])
+  })
+
+  /**
+   * Through the driver's own `keyboard`, which is why this is asserted here as
+   * well as against the fake: `selectors` staying empty is the proof that no
+   * locator was built, so there is no element for a frame to resolve it against
+   * and no first-of-several to take.
+   */
+  it("presses a key at the page rather than at any element", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ key: "Escape" }], "iframe#demo")
+
+    expect(recorder.journal.slice(1)).toEqual(["key Escape"])
     expect(recorder.selectors).toEqual([])
   })
 

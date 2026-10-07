@@ -202,6 +202,87 @@ for. It is pre-existing, it is a warning rather than an error, the build is gree
 and the file system access is the design (`source.ts` says why). It is this lane's
 own if it ever becomes anything, so it is not filed.
 
+## The limit got an instance the same afternoon
+
+Recorded as its own section because it is the best evidence this change has, and
+it arrived four hours after the pull request went up rather than in a month.
+
+`Loom merge` brought `main` in at `287cf2f`, eleven pull requests deep, and #529
+had landed **three more primitives that read a binding**. Lesson 33's prose was
+already right about it: that lane kept the original sentence as history — *on the
+day it was written, two primitives in the starter library read a binding* — and
+put the state of play in a *Today five primitives read a binding* sentence below
+it, above a transcript that now prints five names.
+
+**My pin was on the historical sentence**, because when I wrote it that sentence
+was the only one and was present-tense. So the check held a deliberate statement
+about the past to a count of the present, and went red. `Loom merge` moved the pin
+to the *Today…* sentence, said so in its commit message and in a dated note in
+this report, and changed nothing in the lesson. That is the right repair and the
+one the failure message names — *if a lesson reworded it, move the pin*.
+
+Three things follow, in the order they matter.
+
+**The limit I wrote into `lessons/README.md` this morning was not hypothetical,
+and I had already named the mechanism.** The paragraph says a sentence about what
+a number *used to be* is indistinguishable to a regular expression from a stale
+claim about now, and gives lesson 24's *both of those counts were zero when this
+lesson was written* as the example. Lesson 33 produced the same shape within
+hours. I would rather the course recorded that the limit bit immediately than
+that the paragraph sat there sounding careful.
+
+**The check still did its job, and the distinction is worth being precise
+about.** It went red on a real change and it named a real sentence; what it got
+wrong was *which* sentence it should have been reading. A silent pass was never
+available: the occurrences pin kept matching, the count moved, and the comparison
+failed. That is the difference between a check that is imprecise and a check that
+is vacuous, and only the second kind is worthless.
+
+**And the repair is the one edit on this check a lane that has not read the lesson
+must not make.** Every other remedy here is mechanical — a number in a sentence
+moves to agree with a fence, which is what `docs/routines.md` already expects.
+This one is not: correcting the historical sentence to *five* would get the suite
+green and make the lesson false, which is strictly worse than the red. The
+README now says so in as many words, under the limit it is an instance of, and
+`matters` on the lesson-33 entry says which of the two sentences the pin is
+for and that the one above it says *two* on purpose. Both were missing this
+morning, and a lane reading only the failure message could have taken the green
+route in good faith.
+
+**And fixing the README broke the gate, which is the fourth thing and the one I
+should have seen coming.** My first correction wrote the held sentence out
+verbatim — *Today five primitives read a binding* — into the README's list of the
+five. The registry counts every occurrence of a phrase across these files and
+cannot tell a claim from a quotation of one, so the README became a second place
+the course states that count and the occurrence pin failed: *expected 2 to be 1*.
+
+That is not a new hazard. `claims.test.ts` has a paragraph about it — the first
+draft of lesson 09's account of its own drift quoted the stale sentence and this
+file counted the quotation as a third place the course had the number wrong — and
+the remedy there was to paraphrase. Reading the list I had written this morning,
+all four entries were already clipped or reworded so as not to match their own
+phrases: *the eight words the band shows* without the *is* the regex needs,
+*three zeros are the control* without the *The*. That was deliberate when I wrote
+it and I did not carry it into the repair. The list now names lesson 33's sentence
+instead of quoting it, and the README says once, in its own paragraph, that the
+clipping is a requirement rather than a style.
+
+The gate caught it, and only because the status went to a file and was read in a
+separate command: **the harness notification for that run said exit code 0 and
+the file said `EXIT=1`.** The notification was reporting the status of the
+wrapper, not of `pnpm verify`. That is the 25 September incident in
+`docs/routines.md` arriving a third time, in a third spelling — a background
+command rather than a pipe into `tail` or `tee` — and had I trusted the
+notification this pull request would have been pushed on red with a report saying
+green, which is the one thing that section exists to prevent.
+
+So I have left the moved pin exactly as `Loom merge` wrote it. What I changed is
+`lessons/README.md`, which still named the old sentence in its list of the five —
+prose of mine carrying a count another lane's change had moved, left stale on a
+branch, which is the fault this entire pull request exists to catch and is not
+reached by it because the README is prose about the check rather than a paragraph
+under a transcript.
+
 ## What is next
 
 **A lesson, and the alternation now says so unambiguously.** Part V's eighteenth
