@@ -886,3 +886,78 @@ describe("what the rail has left to say", () => {
     expect(view.whatElse?.count).toBe(view.available.length)
   })
 })
+
+/**
+ * The window on the arrival screen, wired where the other six readings are.
+ *
+ * `the-page-itself.test.ts` holds which node it is of and that it goes quiet
+ * once something has been asked for. What is held here is that **this file
+ * answers the question**, over records the pipeline really produced — because
+ * the alternative was the condition living in `page.tsx`, which no `vitest` run
+ * can mount, and the five readings the 17 September finding counted were all
+ * unwired by deleting one argument with the whole suite green.
+ */
+describe("the page on the first screen", () => {
+  /**
+   * The screen it exists for. On a production build at 390 × 844 the rail is
+   * 1,013px and the stage begins at `y 1,094` — 250px past the fold — so a
+   * visitor on a phone arrives on a full screen of instrument and is told to
+   * ask *that page* for a change.
+   */
+  it("draws the top of the page for a visitor who has done nothing", async () => {
+    const { tree, view } = await railOf(await sessionFor("itself-arrival"))
+    const hero = tree.root.kind === "element" ? tree.root.children[0] : undefined
+
+    expect(view.pageItself?.tree.root.id).toBe(hero?.id)
+  })
+
+  /**
+   * And takes it away at the first press, which is the one silence this reading
+   * has. A held question renders the band it is about inside itself
+   * (`part-in-question.tsx`), so a window onto the top of the page above it
+   * would be a second rendering competing with the one the visitor was asked
+   * about.
+   */
+  it("says nothing once a question is open", async () => {
+    const session = await sessionFor("itself-while-waiting")
+    const asked = await ask(session, DEMO_LEADING_PRESET)
+
+    const { view } = await railOf(asked.session)
+
+    expect(view.waiting).toBeDefined()
+    expect(view.pageItself).toBeUndefined()
+  })
+
+  /**
+   * And after a change that went ahead on its own, where the page moving is its
+   * own announcement and the record card is at the top of the rail.
+   *
+   * The two cases are one condition — a record is what an ask produces — and
+   * they are asserted separately because the two outcomes reach it by different
+   * routes: this one has no hold anywhere, and the one above has nothing
+   * applied.
+   */
+  it("says nothing once a change has landed", async () => {
+    const session = await sessionFor("itself-after-landing")
+    const landed = await ask(session, "palette")
+
+    const { view } = await railOf(landed.session)
+
+    expect(landed.record.outcome).toBe("applied")
+    expect(view.landing).toBeDefined()
+    expect(view.pageItself).toBeUndefined()
+  })
+
+  /**
+   * **The window is of the page the visitor is looking at, at the revision they
+   * are looking at it.** A tree id or a revision of its own would be a second
+   * opinion about which page this is, which is the defect `ground.ts` was
+   * written about in colours.
+   */
+  it("is of this page, at this revision", async () => {
+    const { tree, view } = await railOf(await sessionFor("itself-this-page"))
+
+    expect(view.pageItself?.tree.treeId).toBe(tree.treeId)
+    expect(view.pageItself?.tree.revision).toBe(tree.revision)
+  })
+})

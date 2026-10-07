@@ -17,6 +17,7 @@ import { DemoBar } from "./_components/demo-bar"
 import { PartInQuestionView } from "./_components/part-in-question"
 import { RailHeader } from "./_components/rail-header"
 import { ReadTheDocs } from "./_components/read-the-docs"
+import { ThePageItselfView } from "./_components/the-page-itself"
 import { TheRecord } from "./_components/the-record"
 import { WhatElseToAsk } from "./_components/what-else"
 import { WhatHappens } from "./_components/what-happens"
@@ -209,6 +210,30 @@ const DemoPage = async () => {
             * them.
             */}
           <RailHeader />
+
+          {/*
+            * The page, on the first screen — and only on the screen that had no
+            * page on it.
+            *
+            * It sits between the claim and the controls because that is where
+            * the claim's own referent is: the header's last line on this width
+            * is *It's the page below*, and until this unit it was pointing at a
+            * stage that began 250 pixels past the fold of a 390 × 844 screen.
+            * Now the sentence is followed by the top of the page it names,
+            * rendered through the same registry the stage used and wearing the
+            * same theme, and the controls are under the thing they operate on.
+            *
+            * Drawn on one width and one screen: `globals.css` takes it off a
+            * layout that already has the page beside the rail and off a frame
+            * too short to afford it, and `rail.ts` takes it off every screen
+            * after the first press. `the-page-itself.ts` argues both.
+            */}
+          {rail.pageItself && (
+            <ThePageItselfView
+              page={rail.pageItself}
+              {...(rendered.theme ? { theme: rendered.theme } : {})}
+            />
+          )}
 
           <AskPanel
             revision={tree.revision}
