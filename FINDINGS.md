@@ -2404,6 +2404,14 @@ here share a host, a branch ref, the `![alt](url)` form and a table cell; two
 survived and two did not. That rules out the remaining syntax theories for this
 body, and it is consistent with every earlier point rather than replacing them.
 
+**And the remedy was checked in the same body, which is the half that makes this
+a measurement rather than an observation.** The two mangled files were
+re-committed under shorter names, the body was rewritten with nothing else
+changed, and it was read back again: **all four images came back clean**, at 133
+and 134 characters. Same body, same host, same ref, same syntax, same table
+cells — length down, mangling gone. Both directions of the theory are now tested
+on one pull request.
+
 **What it cost, which is the part worth having.** The remedy is to shorten the
 *filename*, and a report's naming convention — `YYYY-MM-DD-<lane>-<slug>` — plus a
 branch name plus `reports/` is already 92 characters before the slug starts. So a

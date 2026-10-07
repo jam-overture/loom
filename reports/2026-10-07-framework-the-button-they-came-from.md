@@ -157,7 +157,10 @@ through the API. Four markdown images, same host, same branch ref, same form,
 same kind of table cell; **the only variable is the filename's length**, and two
 survived while two did not. Against #538's own 6 October point (147 characters,
 clean) this puts the boundary at **147 clean, 148 mangled**, which is the
-tightest this entry has had it. The ninth data point is appended there.
+tightest this entry has had it. **Both directions were tested**: the two files
+were re-committed under shorter names, the body rewritten with nothing else
+changed and read back again, and all four images came back clean at 133 and 134
+characters. The ninth data point is appended there.
 
 **Closed, none.** The one this run is about is not closeable by it.
 
