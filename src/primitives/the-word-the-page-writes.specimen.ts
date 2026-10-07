@@ -320,7 +320,21 @@ const build = (theme: ThemeSelection) => {
 const triggerIn = (primitive: string): string => `.${primitive} > .loom-control-present`
 
 export default defineSpecimen({
-  name: "2026-10-07-primitives-the-word-the-page-writes",
+  /**
+   * **Short deliberately, and it is a rule rather than a taste.** This lane
+   * measured the pull-request URL mangler on 6 October: every URL in a body
+   * over roughly 148 characters comes back wrapped in injected backticks, and
+   * `https://raw.githubusercontent.com/jam-overture/loom/<branch>/reports/` is
+   * already 99 of them. The full slug of this sheet would put every picture at
+   * 181 and break all twenty-four.
+   *
+   * The finding's own remedy is this line: **let the specimen's name be a short
+   * slug and let the report keep the long one.** Nothing joins them but a
+   * relative link inside the report, which has no length problem at all. The
+   * theme and viewport labels are abbreviated for the same reason and for no
+   * other.
+   */
+  name: "2026-10-07-prim-named",
   title:
     "A bar with two named drop-downs, a closing band whose second control opens a form, the three measures a plate may take, and a dialog taller than the window",
   build,
@@ -331,12 +345,12 @@ export default defineSpecimen({
    * and a 3000px-tall phone has no viewport to be taller than.
    */
   viewports: [
-    { label: "wide", width: 1280, height: 2000, deviceScaleFactor: 2 },
-    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "w", width: 1280, height: 2000, deviceScaleFactor: 2 },
+    { label: "p", width: 390, height: 844, deviceScaleFactor: 2 },
   ],
   themes: [
     {
-      label: "editorial",
+      label: "ed",
       selection: themeSelectionSchema.parse({
         palette: "editorial",
         fontPack: "editorial-serif",
@@ -344,7 +358,7 @@ export default defineSpecimen({
       }),
     },
     {
-      label: "bold",
+      label: "bo",
       selection: themeSelectionSchema.parse({
         palette: "bold",
         fontPack: "bold-sans",
@@ -365,22 +379,22 @@ export default defineSpecimen({
          * what shows that *Account* stayed shut — the property 0176's rejected
          * alternative would have broken.
          */
-        label: "the product menu",
+        label: "product",
         do: [{ click: `${triggerIn("loom-menu")} >> nth=2` }, { wait: 400 }],
       },
       {
         /** The other one, where `align: "end"` hangs the panel leftwards. */
-        label: "the account menu",
+        label: "account",
         do: [{ click: `${triggerIn("loom-menu")} >> nth=3` }, { wait: 400 }],
       },
       {
         /** §2's dialog: the first of the five in document order. */
-        label: "the booking dialog",
+        label: "dialog",
         do: [{ click: `${triggerIn("loom-dialog")} >> nth=0` }, { wait: 400 }],
       },
       {
         /** §3's widest plate, which is the third of the three in that row. */
-        label: "the wide plate",
+        label: "plate",
         do: [{ click: `${triggerIn("loom-dialog")} >> nth=3` }, { wait: 400 }],
       },
       {
@@ -389,7 +403,7 @@ export default defineSpecimen({
          * and the one whose phone frame is the evidence that a plate taller than
          * the window starts at the top instead of being centred off it.
          */
-        label: "the long body",
+        label: "long",
         do: [{ click: `${triggerIn("loom-dialog")} >> nth=4` }, { wait: 400 }],
       },
     ],

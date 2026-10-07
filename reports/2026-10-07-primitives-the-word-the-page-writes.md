@@ -365,10 +365,10 @@ returns `null` until an effect has run.
 
 | | editorial | bold |
 | --- | --- | --- |
-| the bar, shut | ![](2026-10-07-primitives-the-word-the-page-writes-editorial-wide-shut.png) | ![](2026-10-07-primitives-the-word-the-page-writes-bold-wide-shut.png) |
-| the booking dialog | ![](2026-10-07-primitives-the-word-the-page-writes-editorial-wide-the-booking-dialog.png) | ![](2026-10-07-primitives-the-word-the-page-writes-bold-wide-the-booking-dialog.png) |
-| the product menu | ![](2026-10-07-primitives-the-word-the-page-writes-editorial-wide-the-product-menu.png) | ![](2026-10-07-primitives-the-word-the-page-writes-bold-wide-the-product-menu.png) |
-| §4 on a phone | ![](2026-10-07-primitives-the-word-the-page-writes-editorial-phone-the-long-body.png) | ![](2026-10-07-primitives-the-word-the-page-writes-bold-phone-the-long-body.png) |
+| the bar, shut | ![](2026-10-07-prim-named-ed-w-shut.png) | ![](2026-10-07-prim-named-bo-w-shut.png) |
+| the booking dialog | ![](2026-10-07-prim-named-ed-w-dialog.png) | ![](2026-10-07-prim-named-bo-w-dialog.png) |
+| the product menu | ![](2026-10-07-prim-named-ed-w-product.png) | ![](2026-10-07-prim-named-bo-w-product.png) |
+| §4 on a phone | ![](2026-10-07-prim-named-ed-p-long.png) | ![](2026-10-07-prim-named-bo-p-long.png) |
 
 **The two to read at size are the first and the last.** The bar is the whole
 retraction in one strip — *Product* and *Account* at opposite ends of it, at the
@@ -379,13 +379,24 @@ frame and its first field is reachable, which is what `align-items: start` bough
 and what `place-items: center` would have cost.
 
 ```
-…-editorial-wide-*    1280x2000@2x  scrollWidth 1280 / innerWidth 1280
-…-editorial-phone-*    390x844@2x   scrollWidth  390 / innerWidth  390
-…-bold-wide-*         1280x2000@2x  scrollWidth 1280 / innerWidth 1280
-…-bold-phone-*         390x844@2x   scrollWidth  390 / innerWidth  390
+2026-10-07-prim-named-{ed,bo}-w-*  1280x2000@2x  scrollWidth 1280 / innerWidth 1280
+2026-10-07-prim-named-{ed,bo}-p-*   390x844@2x   scrollWidth  390 / innerWidth  390
 ```
 
 No horizontal overflow in any of the twenty-four.
+
+**The filenames are abbreviated on purpose**, and it is this lane's own 6 October
+finding applied to itself. The mangler that wraps a pull-request URL in injected
+backticks is triggered by **length**, at a threshold between 148 and 159
+characters, and `https://raw.githubusercontent.com/jam-overture/loom/<branch>/reports/`
+is 99 of them before a filename starts. The full slug of this sheet would have
+put every picture at 181 and broken all twenty-four in the pull request body.
+
+That finding's remedy was *"one line in a specimen: let a specimen's `name` be a
+short slug and let the report keep the long one"*, and this is the first run to
+take it. The longest filename here is 38 characters, which posts at 137. The
+report keeps the long name because a report's own `![](…)` references are
+repository-relative and have no length problem at all.
 
 **One thing in the dialog shots is a camera artifact rather than a page defect**,
 and it is worth naming so nobody reads it as one: the scrim covers the viewport
