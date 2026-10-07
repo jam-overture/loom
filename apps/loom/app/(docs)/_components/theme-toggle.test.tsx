@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
+import { SITE_BAR, THEME_COLOR_NAME, THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
 
 import { ThemeToggle } from "./theme-toggle"
 
@@ -82,12 +82,32 @@ const name = (): string => toggle().getAttribute("aria-label") ?? ""
 
 const painted = (): string | undefined => document.documentElement.dataset["theme"]
 
+/**
+ * The browser's bar, as the layout serves it: a meta with the light color on
+ * it, because that is what the server renders.
+ *
+ * Stood in for here rather than imported, because the element belongs to the
+ * root layout and the toggle only ever finds it. A test that rendered the
+ * layout to get one would be testing the layout.
+ */
+const serveBar = (): void => {
+  const meta = document.createElement("meta")
+  meta.setAttribute("name", THEME_COLOR_NAME)
+  meta.setAttribute("content", SITE_BAR.light)
+  document.head.append(meta)
+}
+
+const bar = (): string | null =>
+  document.head.querySelector(`meta[name="${THEME_COLOR_NAME}"]`)?.getAttribute("content") ?? null
+
 const stored = (): string | null => window.localStorage.getItem(THEME_STORAGE_KEY)
 
 beforeEach(() => {
   restoreStorage()
   window.localStorage.clear()
   delete document.documentElement.dataset["theme"]
+  document.head.innerHTML = ""
+  serveBar()
   system.install()
   system.set(false)
 })
@@ -269,5 +289,106 @@ describe("a reader who has blocked storage", () => {
     expect(() => fireEvent.click(toggle())).not.toThrow()
     expect(painted()).toBe("light")
     expect(name()).toBe("Color theme: Light. Switch to Dark.")
+  })
+})
+
+/**
+ * **The third thing a press has to move, which it did not.**
+ *
+ * The strip of browser above the page is not styled by any stylesheet. It is
+ * told its color by a `<meta name="theme-color">`, and until this change
+ * nothing on this site wrote one — so a reader pressing Dark got a dark page
+ * under a white address bar, and the toggle worked everywhere except the one
+ * part of the screen that is not the page.
+ *
+ * *The bar above your page* on the theming page is the recipe. These are the
+ * assertions that this site follows it, and the reason they are here rather
+ * than only in `browser-bar-chrome.test.ts` is that the transcription being
+ * right and the control applying it are two different things.
+ */
+describe("the browser's bar, on a press", () => {
+  it("moves with the page on every state of the cycle", () => {
+    render(<ThemeToggle />)
+
+    fireEvent.click(toggle())
+    expect([painted(), bar()]).toEqual(["light", SITE_BAR.light])
+
+    fireEvent.click(toggle())
+    expect([painted(), bar()]).toEqual(["dark", SITE_BAR.dark])
+  })
+
+  /**
+   * `system` is resolved rather than passed through, which is the case a
+   * component writing the choice straight into the meta would get wrong: there
+   * is no bar color for "system", only for what system currently means.
+   */
+  it("resolves system to what the machine says rather than to a third color", () => {
+    system.set(true)
+    render(<ThemeToggle />)
+
+    fireEvent.click(toggle())
+    fireEvent.click(toggle())
+    fireEvent.click(toggle())
+
+    expect(painted()).toBe("dark")
+    expect(bar()).toBe(SITE_BAR.dark)
+  })
+
+  /**
+   * The sunset case, for the bar. `paint` is one function for both, so this
+   * holds that the machine changing its mind under `system` repaints the bar as
+   * well — the defect a click-handler-only fix would have left behind.
+   */
+  it("follows the machine under system, which the page already does", () => {
+    render(<ThemeToggle />)
+
+    expect(bar()).toBe(SITE_BAR.light)
+
+    system.flipTo(true)
+
+    expect(painted()).toBe("dark")
+    expect(bar()).toBe(SITE_BAR.dark)
+  })
+
+  it("leaves the bar alone once the reader has chosen against the machine", () => {
+    render(<ThemeToggle />)
+
+    fireEvent.click(toggle())
+    expect(bar()).toBe(SITE_BAR.light)
+
+    system.flipTo(true)
+
+    expect(painted()).toBe("light")
+    expect(bar()).toBe(SITE_BAR.light)
+  })
+
+  /**
+   * A document with no meta in it. A press has to keep working: the bar is the
+   * least important thing this control does, and an exception here would come
+   * out of a click handler and take the page with it.
+   */
+  it("still paints the page when there is no meta to move", () => {
+    document.head.innerHTML = ""
+    render(<ThemeToggle />)
+
+    expect(() => fireEvent.click(toggle())).not.toThrow()
+    expect(painted()).toBe("light")
+    expect(bar()).toBe(null)
+  })
+
+  /**
+   * And a reader who blocked storage still gets the bar, for the same reason
+   * they still get the page: the meta is not storage and has nothing to do with
+   * whether the choice can be kept.
+   */
+  it("moves the bar for a reader whose choice cannot be remembered", () => {
+    blockStorage()
+    render(<ThemeToggle />)
+
+    fireEvent.click(toggle())
+    fireEvent.click(toggle())
+
+    expect(painted()).toBe("dark")
+    expect(bar()).toBe(SITE_BAR.dark)
   })
 })
