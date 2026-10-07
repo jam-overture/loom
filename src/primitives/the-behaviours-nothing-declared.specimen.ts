@@ -375,8 +375,8 @@ export default defineSpecimen({
    * mechanism.
    */
   viewports: [
-    { label: "wide", width: 1280, height: 1600, deviceScaleFactor: 2 },
-    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "wide", width: 1280, height: 1600, deviceScaleFactor: 2, touch: false },
+    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2, touch: true },
   ],
   themes: [
     {

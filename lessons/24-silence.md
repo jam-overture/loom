@@ -1066,8 +1066,8 @@ The output:
      saying "Zero and zero" under a transcript saying 102. -->
 
 ```
-  primitives registered:     106
-  declaring copy:            106
+  primitives registered:     107
+  declaring copy:            107
   declaring any role:        1
   typesWithRole("heading"):  ["loom.heading"]
   copyFor("loom.stat"):      ["value","label","caption"]

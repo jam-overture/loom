@@ -25,6 +25,7 @@ import { loomComparisonTable } from "./loom.comparison-table.js"
 import { loomCodeSpan } from "./loom.code-span.js"
 import { loomCredential } from "./loom.credential.js"
 import { loomCredentialGrid } from "./loom.credential-grid.js"
+import { loomDialog } from "./loom.dialog.js"
 import { loomDivider } from "./loom.divider.js"
 import { loomEmbed } from "./loom.embed.js"
 import { loomEmptyState } from "./loom.empty-state.js"
@@ -407,6 +408,7 @@ export const STARTER_PRIMITIVES: readonly PrimitiveEntry[] = [
   loomOverlay,
   loomLightbox,
   loomPopover,
+  loomDialog,
   loomHalo,
   loomCard,
   loomFrame,

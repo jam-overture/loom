@@ -1,0 +1,53 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/demo",
+      "out": "2026-10-06-demo-first-screen-arrival-phone",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "aside header",
+        "section.demo-part--arrival",
+        "section.demo-part--arrival .demo-part-stage",
+        "#ask",
+        "#ask form button.bg-affirm",
+        "#ask ul li",
+        "aside footer",
+        "div.order-2.loom-stage"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-06-demo-first-screen-arrival-wide-unchanged",
+      "viewport": "wide",
+      "waitFor": "#ask",
+      "measure": [
+        "aside",
+        "aside header",
+        "#ask",
+        "#ask ul li",
+        "aside footer",
+        "div.order-2.loom-stage",
+        "section.demo-part--arrival"
+      ]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-06-demo-first-screen-embed-unchanged",
+      "viewport": { "width": 348, "height": 465, "label": "embed" },
+      "waitFor": "#ask",
+      "measure": ["aside", "#ask form button.bg-affirm", "section.demo-part--arrival"]
+    },
+    {
+      "path": "/demo",
+      "out": "2026-10-06-demo-first-screen-held-phone-unchanged",
+      "viewport": "phone",
+      "waitFor": "#ask",
+      "do": [{ "click": "#ask form button.bg-affirm" }, { "waitFor": "li button.bg-refuse" }],
+      "measure": ["aside", "aside li[id]", "#ask"]
+    }
+  ]
+}

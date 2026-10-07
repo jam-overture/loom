@@ -22,11 +22,13 @@ import {
   pagesWithMisses,
 } from "@/app/(portal)/_lib/calibration-misses"
 import { isOnTheMark } from "@/app/(portal)/_lib/calibration-view"
+import { readTrend, spanOf, type Earlier } from "@/app/(portal)/_lib/trust-trend"
 
 import { BucketRow } from "./_components/bucket-row"
 import { MissedClaims } from "./_components/missed-claims"
 import { PolicyBreakdown } from "./_components/policy-breakdown"
 import { TrustSummary } from "./_components/trust-summary"
+import { TrustTrend } from "./_components/trust-trend"
 import { WrongPages } from "./_components/wrong-pages"
 
 /**
@@ -39,8 +41,10 @@ import { WrongPages } from "./_components/wrong-pages"
  * fold, `calibrationOf`, no second reading of the journal.
  *
  * The page's shape follows the portal's rule rather than the report's structure.
- * A verdict and a next move first, in a sentence; the misses after it, because a
- * class of change the model keeps being wrong about is the only thing here
+ * A verdict and a next move first, in a sentence; whether that verdict is moving
+ * after it, because *over-sure of itself* reads very differently beside *and
+ * getting better* than beside *and getting worse*; the misses after that, because
+ * a class of change the model keeps being wrong about is the only thing here
  * anybody can act on; then the bands, the gates and the caveats behind
  * disclosures. Nothing that was on the screen has left it — the confidence table
  * is one click down rather than gone, which is the distinction the whole
@@ -150,6 +154,50 @@ const TrustPage = async ({
     report.unjudged["awaiting-answer"] + report.unjudged.failed + report.unjudged.unsettled
   const nothingScored = report.overall.judged === 0
 
+  /**
+   * The stretch of the record before this one, so the page can say whether the
+   * verdict above is an improvement — the only thing on this screen that can be
+   * different tomorrow.
+   *
+   * **One more bounded read, of exactly the shape of the first**, taken at the
+   * cursor this page already came back with. Not a scan: the journal only grows,
+   * and a trend drawn over its whole history would be a read whose cost rises
+   * every day the deployment runs.
+   *
+   * Skipped entirely when nothing was scored, because the empty state is drawn
+   * instead and a comparison against a window with nothing in it is a read made
+   * and discarded.
+   *
+   * **A failed read costs the comparison and nothing else.** The verdict, the
+   * misses and the bands above it are all folded from the page already in hand,
+   * so the section says it could not look further back and the journal's own
+   * sentence goes behind a disclosure — the same split the name read and the
+   * buffer read on this surface have always been held to.
+   */
+  const previous =
+    nothingScored || page.value.older === null
+      ? undefined
+      : await portalTelemetry.read({
+          direction: "older",
+          cursor: page.value.older,
+          ...(scope?.success ? { treeId: scope.data } : {}),
+        })
+
+  /*
+   * `"unreadable"` covers the skipped read as well as the failed one, and the
+   * skipped case is unreachable: the only thing that skips it is `nothingScored`,
+   * which draws the empty state instead of this section. Written as one
+   * expression anyway rather than as a third state nothing renders.
+   */
+  const earlier: Earlier =
+    page.value.older === null
+      ? "none"
+      : previous === undefined || !previous.ok
+        ? "unreadable"
+        : spanOf(calibrationOf(episodesOf(previous.value.records)), previous.value.records)
+
+  const now = spanOf(report, page.value.records)
+
   return (
     <Screen>
       <Measured as="header" className="gap-2">
@@ -213,6 +261,15 @@ const TrustPage = async ({
       ) : (
         <>
           <TrustSummary report={report} />
+
+          <TrustTrend
+            trend={readTrend(now, earlier)}
+            now={now}
+            earlier={earlier}
+            {...(previous !== undefined && !previous.ok
+              ? { detail: describeTelemetryError(previous.error) }
+              : {})}
+          />
 
           {/*
            * Nothing missed is a real result and worth saying, rather than a

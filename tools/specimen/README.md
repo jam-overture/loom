@@ -14,7 +14,7 @@ LOOM_PLAYWRIGHT=/tmp/shot/node_modules \
 ```
 
 ```
-example-editorial-phone  390x844@2x  scrollWidth 390 / innerWidth 390
+example-editorial-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390
 example-editorial-wide   1280x900@2x  scrollWidth 1280 / innerWidth 1280
 …
 ```
@@ -35,7 +35,7 @@ A `loom.backdrop` sets `overflow: hidden` and has to, so a band that overflows
 inside one measures `390 / 390` while a word sits off the edge of the page:
 
 ```
-a-clip-hides-an-overflow-bold-phone  390x844@2x  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
+a-clip-hides-an-overflow-bold-phone  390x844@2x touch  scrollWidth 390 / innerWidth 390  ← 1 clipping box hides content
     div > div > div  "ReferencethemeSelectionSchemaThe heading above …"  content reaches 370 in 346
 ```
 
@@ -111,6 +111,13 @@ export default defineSpecimen({
   // viewports defaults to [PHONE, WIDE] — 390×844 and 1280×900, both at 2×
 })
 ```
+
+A viewport is a device, not only a size: `PHONE` reports a **coarse, hovering-less
+pointer** and `WIDE` reports a mouse, so a primitive that reveals something on
+hover is photographed on the phone sheet the way a reader with a finger gets it
+([0236](../../decisions/0236-a-viewport-names-a-device-and-the-pointer-is-part-of-it.md)).
+`touch` is a required field, so a sheet writing its own viewports out says which
+it means; the `touch` in the line above is how a shot reports it.
 
 ### Photographing a form
 
@@ -271,7 +278,7 @@ instead of the viewport:
 }
 ```
 
-Five steps and no more: `click`, `fill`, `wait`, `waitFor` and `scrollTo`. Every
+Six steps and no more: `click`, `fill`, `wait`, `waitFor`, `scrollTo` and `key`. Every
 one of them names a state to arrive at and none of them reports what is there —
 the moment this grows a way to assert or to branch, the harness has become a
 test runner with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
@@ -282,6 +289,15 @@ something to its scroller has frames no press lands on, because the driver
 scrolls only far enough to expose the thing it is about to click. It is strict
 like `click`, for the same reason — which of two matches is brought into view
 decides what the picture is of.
+
+`key` presses at whatever holds focus and is the one step that names **no
+element** — a keypress has none, and a step taking a selector would be a press on
+an element, which `click` already is. It is the only way to photograph anything
+whose subject is focus: a ring is painted on the strength of the last input
+having been a keyboard, so the same region closed by a mouse comes back as a
+picture of no focus state. Key names are the driver's — `Tab`, `Enter`, `Escape`,
+`ArrowDown`, `Shift+Tab` — and one it does not know fails the shot
+([0237](../../decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)).
 
 ### Reaching a state the load has already passed
 
