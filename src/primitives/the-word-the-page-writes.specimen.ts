@@ -345,8 +345,8 @@ export default defineSpecimen({
    * and a 3000px-tall phone has no viewport to be taller than.
    */
   viewports: [
-    { label: "w", width: 1280, height: 2000, deviceScaleFactor: 2 },
-    { label: "p", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "w", width: 1280, height: 2000, deviceScaleFactor: 2, touch: false },
+    { label: "p", width: 390, height: 844, deviceScaleFactor: 2, touch: true },
   ],
   themes: [
     {
