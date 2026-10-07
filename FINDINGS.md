@@ -8,6 +8,75 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-07 — the front door could not reach the one band that is the product working, and no check could have said so
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+**closed by `marketing-62-the-claim-links-to-the-proof`** — recorded because the
+*class* outlives the link, and the next lane to add a surface will meet it.
+
+This site's recorded position is that the marketing site is the demonstration
+rather than a brochure about it, and exactly one band is the product working:
+the five choices on `/how-it-works` with the record filling in beside them.
+**The page a stranger arrives at had no way to it.** Not a link, not a card in
+the band of ways in, not a control. `/what-you-run` has named it in a sentence
+since 6 October; the front door had nothing, and the two controls it does offer
+go to the *top* of `/how-it-works`, which is the journey band.
+
+Measured on a production build of `main` at 390x844, from the destination those
+controls land on, the demonstration starts **3,622px below the fold**.
+
+**The reason it survived a week of green runs is the part worth keeping.** Three
+checks in this route group are about links and all three are about a link that
+*exists*:
+
+| check | what it holds | why it was silent |
+| --- | --- | --- |
+| `naming.test.ts` | a sentence that names a page offers the way there | the front door names no page in that sentence |
+| `routes.test.ts` | every address this site points at is served | an address nobody points at is not an address |
+| `anchors.test.ts` | a fragment lands on a declared anchor | scoped within `/how-it-works`, and there was no link to check |
+
+**A missing link is not a broken one**, and the gap between those two sentences
+is where this sat. `reaching.test.ts` is that gap stated as a rule a test can
+read: from the page a stranger arrives at, the thing this site exists to show is
+one press away and the press lands on it.
+
+It is written with its own limit attached, because the obvious misreading is
+expensive: the band is `/how-it-works`'s and the maintainer put it there on
+1 October, so the file also asserts the front door does **not** declare that
+anchor. A later run reading *the front door should reach it* as *the front door
+should have one* would be this lane moving a band its owner placed.
+
+---
+## 2026-10-07 — the doc comment on `SITE_ROUTES` argues an order for seven pages this site does not have
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing` · **Status:**
+open — nothing is broken and nothing a reader sees is wrong; it is ~50 lines of
+false reasoning in the file that defines this site's navigation.
+
+`app/(marketing)/_lib/site.ts` holds `SITE_ROUTES`, which is three entries:
+`HOME`, `HOW_IT_WORKS`, `WHAT_YOU_RUN`. The comment above it explains the order
+of a **ten-page** site, in detail and at length, and names pages that were
+retired on 26 September when the maintainer cut this site for being too long:
+
+| the comment reasons about | in `SITE_ROUTES` today |
+| --- | --- |
+| `/who-can-ask` | no |
+| `/putting-it-back` | no |
+| `/what-readers-do` | no |
+| the rules page, the record page, the objection page | no — all are bands on `/how-it-works` |
+
+Each paragraph is a real argument about why one page sits after another, and
+every one of them is about an adjacency that no longer exists. It reads as
+current because nothing marks it otherwise.
+
+**Left for its own change rather than folded into the link above**, which is why
+this is filed rather than fixed: the two share a subject and nothing else, and a
+PR that both adds a link and rewrites fifty lines of reasoning in a second file
+is a PR that is harder to review than either half. The next run in this lane
+should take it, and should **rewrite rather than delete** — what the three
+surviving pages are in, and why they are in that order, is still worth saying.
+
+---
 ## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -2608,6 +2677,24 @@ padding is a fixed 220px against an 844px screen.
 Filed with the measurement rather than a proposal, because which of the two to
 move, and whether a primitive in this library should respond to viewport at all,
 is a question for the lane that owns the ramp.
+
+> **Re-measured 7 October by the filer, nine days on, and it has not moved.**
+> Same viewport, same palette, on a production build of `main` at `41c65e9`,
+> read with `pnpm shoot`'s `measure` rather than by eye:
+>
+> | | 28 September | 7 October |
+> | --- | --- | --- |
+> | the eyebrow | — | `y 268` |
+> | the headline | 5 lines | `y 330`, **247px tall** — still 5 lines |
+> | the first control | ~1114px, **270 past the fold** | `y 1040`, **286 past the fold** |
+> | the second control | — | `y 1142`, 364 past |
+>
+> `loom.hero` is unchanged on the two numbers this entry is about:
+> `paddingBlock: space(8)` is still a constant and `stature` is still the only
+> prop touching height, so the composition answer is still not there. Nothing is
+> being asked for twice — this is the same finding with a current number against
+> it, because it is the one screen the whole surface exists to win and it is now
+> the oldest open thing in front of this lane.
 
 ---
 ## 2026-09-27 — the demo shows a stranger the change and the record, and the inverse is the one third of the claim sixty seconds does not reach

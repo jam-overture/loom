@@ -11,7 +11,7 @@ import { THEME_PROP_KEY } from "@jam-overture/loom/react"
 
 import type { AskId } from "../adapt/asks"
 import type { ChangeRecord } from "../adapt/record"
-import { BAND } from "../bands"
+import { ANCHOR, BAND } from "../bands"
 import {
   siteFooter,
   siteHeader,
@@ -21,7 +21,16 @@ import {
 import { FACTS } from "../copy"
 import { PLAIN_WORDS_GLOSSED, PLAIN_WORDS_LABEL } from "../journey"
 import { siteQuestions } from "../questions"
-import { action, heading, prose, section, stack, TERTIARY_CONTROL } from "../nodes"
+import {
+  action,
+  heading,
+  inlineLink,
+  prose,
+  proseParts,
+  section,
+  stack,
+  TERTIARY_CONTROL,
+} from "../nodes"
 import {
   DECISIONS_URL,
   DEMO,
@@ -860,9 +869,41 @@ const waysIn = (ids: IdFactory, context: PageContext): LoomNode =>
  */
 const closing = (ids: IdFactory, context: PageContext): LoomNode =>
   section(ids, { tone: "accent", width: "full" }, "This page was built the way yours would be.", [
-    prose(
+    /**
+     * The one sentence on the front door that carries its own link, and the
+     * reason it is this sentence.
+     *
+     * The band it points at is the only thing on this site that is the product
+     * working rather than an argument for it, and until this run **the front
+     * door did not offer it at all.** `/what-you-run` has named it since
+     * 6 October; the page a stranger actually arrives on had no way to it. The
+     * two controls under this paragraph go to the top of `/how-it-works` and to
+     * the repository, and the top of that page is its first band — so a visitor
+     * who pressed the obvious thing landed 3,622px above the demonstration on a
+     * phone and found the journey instead.
+     *
+     * The words are unchanged and no copy moved into the link: the phrase this
+     * sentence already ended on is the phrase a reader would press. That is the
+     * property that made this worth doing rather than a fifth band — the claim
+     * *this sentence is a piece the AI could be asked to move* now reaches the
+     * place where a visitor can ask it to, which is the site making its own
+     * argument on itself.
+     *
+     * It carries the band's anchor rather than the page's address, following
+     * the sentence on `/what-you-run`, so the paragraph goes red the day the
+     * band moves again rather than going quietly wrong (`naming.ts`).
+     */
+    proseParts(
       ids,
-      "The menu, the questions, this sentence: every one of them is a piece the AI could be asked to move. None of it is code you would have to read afterwards.",
+      [
+        "The menu, the questions, this sentence: every one of them is a piece the AI could be ",
+        inlineLink(
+          ids,
+          "asked to move",
+          `${internalHref(context.origin, HOW_IT_WORKS.path, context.theme)}#${ANCHOR.seeItHappen}`
+        ),
+        ". None of it is code you would have to read afterwards.",
+      ],
       { tone: "muted", align: "center", measured: true }
     ),
     stack(ids, { direction: "row", gap: "snug", justify: "center", wrap: true }, [
