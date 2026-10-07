@@ -1423,10 +1423,12 @@ argued for.
    was a shape in prose, and say for each what the remedy closed and what it left
    open. *(25, 28)*
 6. A hold carries the revision it was judged against and a tree carries the
-   revision it is at; ten decision records name what supersedes them and are
-   named back. Both are one fact written twice. Say why the first got a function
-   and the second got nothing, and what that tells you about when a second copy
-   gets cashed in. *(26, 28)*
+   revision it is at; a decision record names what supersedes it and is named
+   back. Both are one fact written twice, and both are compared by something
+   now. For each, say what the comparison reads and what it declines to read.
+   Then say what the pair of them tells you about the distance between *having
+   a second copy* and *having a check* — the second one accepts two shapes any
+   reader would call wrong, and only one of those two is a mistake. *(26, 28)*
 7. A snapshot is a view you can rebuild from the log, and a self-graded
    confidence number is worth nothing until an outcome arrives. Say what each is
    a second copy **of**, place each in the three sources from question 2, and
@@ -1445,8 +1447,9 @@ argued for.
 
 Question 1 is the point of the set. Question 8 is where a confident half-answer
 is most likely: an answer that says *because the numbers change* has described
-the mechanism and stopped. Question 6 is the one where the tidy answer — *the
-second one is only prose* — is wrong, and noticing why is worth the whole set.
+the mechanism and stopped. Question 6 is the one where the tidy answer — *a
+comparison between two copies checks that they agree* — is wrong, and noticing
+what it checks instead is worth the whole set.
 
 ---
 

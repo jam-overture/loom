@@ -326,42 +326,40 @@ was true of the eight wrong ones.**
 
 ### What a convention looks like when nothing enforces it
 
-Exercise E is the cleanest specimen in this lesson, because it is a fact this
-repository has *almost* made checkable by accident.
+Exercise E is the cleanest specimen in this lesson, because it is the one fact
+this repository made checkable while the lesson was being written.
 
 When a record supersedes another, the older one's status says so. The convention
 here has been to say it at both ends — the new record's status carries
 `supersedes NNNN`, the old one's carries `superseded by NNNN` — and when both
-ends say it, the pair is two copies of one fact, which is checkable. Nothing
-checks it. What `checkNumbering` verifies is that a number named in a status
-belongs to a record that exists; whether the record named agrees that the
-relationship exists is not asked.
+ends say it, the pair is two copies of one fact, which is checkable.
 
-```text
-  statuses naming a record that does not exist: 0
-  supersessions whose other end says nothing back:
-```
-
-**That list was not empty when this lesson was written**, and the second heading
-is the reason it is empty now. On 25 September it held `0109 -> 0137`: ten of the
-eleven directions then written were answered at the other end and one was not.
-Nothing was broken — `decisions/README.md` required the *old* record to be marked
-and did not require the new one to say anything — but the shape was worth seeing
-clearly. A convention followed ten times out of eleven is not a check. It is a
-habit, and a habit's output is indistinguishable from a rule's right up until the
-first time somebody is in a hurry.
+For two months nothing checked it. On 25 September this exercise measured the
+convention instead of assuming it: eleven directions written, ten of them
+answered at the other end, one not. 0109 said it had been superseded by 0137, and
+0137 said `Accepted` and nothing else. **Nothing was broken**, and that is the
+part to sit with — `decisions/README.md` required the *old* record to be marked
+and said nothing about the replacement, so 0137 was fully compliant. But a
+convention followed ten times out of eleven is not a check. It is a habit, and a
+habit's output is indistinguishable from a rule's right up until the first time
+somebody is in a hurry.
 
 Somebody was, the next day. 0191 was written with 0117 marked
-`partially superseded by [0191]` and 0191 saying only `Accepted`, which made it
-twelve directions and two unanswered — and that measurement is what turned the
-habit into a rule
-([0193](../decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)).
-`checkNumbering` now compares the two ends and fails the build when one is
-silent, so this exercise prints nothing and cannot print anything again.
+`partially superseded by [0191]` and 0191 saying only `Accepted` — twelve
+directions, two of them unanswered, a convention that had held for two months
+broken inside twenty-four hours of being described. That measurement is what
+turned the habit into a rule
+([0193](../decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)):
+`checkNumbering` compares the two ends now and fails the build when one of them
+is silent.
 
-The rest of this section is what it looked like before that, left standing
-because the argument it makes is the reason the check exists. The tool's own test
-fixture for this case writes the pair both ways, by that same habit.
+So the exercise no longer finds anything, and the question worth asking moved
+along with it. **A second copy makes a comparison possible. It does not say which
+comparison.** Reciprocity, direction, agreement and the words themselves are four
+different things anything could hold such a pair to, and `oneWayIn` holds it to
+one of them — deliberately, with the reasoning in a comment beside the code.
+Exercise E is that question, and it is the only exercise here whose answer is
+about the check rather than about this repository.
 
 ### The section that is present and empty
 
@@ -450,7 +448,7 @@ writing lesson 27 did, and is the reason that finding exists at all.
 | Where | What |
 | --- | --- |
 | `tools/decisions/record.ts` | Parsing one record. The filename wins over the heading, and the reason is written where the comparison is. `Status` and `Section` are read as opaque strings. |
-| `tools/decisions/numbering.ts` | The invariants across the set: clashes are fatal, holes are reported, a status naming nothing fails. Read `gapsIn`'s comment for why the severities differ. |
+| `tools/decisions/numbering.ts` | The invariants across the set: clashes are fatal, holes are reported, a status naming nothing fails, and a supersession written at one end only fails. Read `gapsIn`'s comment for why the severities differ, and `oneWayIn`'s for what it deliberately declines to compare — it is exercise E's answer, argued before the exercise was written. |
 | `tools/decisions/shape.ts` | The four required sections, the one exemption, and the exemption checked in both directions. |
 | `tools/decisions/citations.ts` | The whole argument of this lesson, in a doc comment: *a bare number is one fact, one fact cannot disagree with itself.* Also `proseIn`, and why a check that failed on the tests proving it works is a check somebody deletes. |
 | `src/record-claims.test.ts` | The registry: a sentence, a pattern, a list. Its comment explains why it is a registry and not a sweep. |
@@ -755,50 +753,100 @@ Note also the exclusion in `under`: this file is skipped, because exercise C put
 a citation of `0300` into it on purpose. A check that reads the file it is
 written in is a check with a fixture in its population.
 
-### Exercise E — a convention followed ten times out of eleven
+### Exercise E — the pairs a reciprocity check is content with
 
 ```ts
 describe("E", () => {
-  it("asks whether a supersession is claimed at both ends", () => {
-    const oneWay = parsed
+  it("asks what a reciprocity check is content to call a pair", () => {
+    const directions = parsed
       .filter((record) => /supersed/i.test(record.status))
       .flatMap((record) => named(record.status).map((to) => [record.number, to] as const))
-      .filter(([from, to]) => !named(statusOf(to)).includes(from))
 
-    console.log(`  statuses naming a record that does not exist: ${
-      checkNumbering(parsed).filter((problem) => problem.code === "unknown-reference").length
-    }`)
-    console.log(`  supersessions whose other end says nothing back:`)
+    const oneWay = directions.filter(([from, to]) => !named(statusOf(to)).includes(from))
+
+    console.log(`  supersession directions written: ${directions.length > 10 ? "more than ten" : "ten or fewer"}`)
+    console.log(`  of those, whose other end says nothing back: ${oneWay.length}`)
     for (const [from, to] of oneWay) console.log(`    ${padded(from)} -> ${padded(to)}`)
+
+    /** A record that exists nowhere, so the check can be asked about a pair nobody wrote. */
+    const invented = (number: number, status: string) => {
+      const result = parseDecisionRecord(
+        `${padded(number)}-a-record.md`,
+        [`# ${padded(number)}. A record`, "", `**Status:** ${status}`, "**Date:** 2026-10-07", "**Section:** §1"].join("\n")
+      )
+
+      if (!result.ok) throw new Error(`loom: ${padded(number)} did not parse`)
+
+      return result.value
+    }
+
+    const refusals = (...statuses: readonly string[]): number =>
+      checkNumbering(statuses.map((status, at) => invented(at + 1, status))).filter(
+        (problem) => problem.code === "one-way-supersession"
+      ).length
+
+    console.log(`\n  0001 superseded by 0002, and 0002 supersedes 0001: ${refusals("Superseded by 0002", "Accepted — supersedes 0001")}`)
+    console.log(`  0001 superseded by 0002, and 0002 says only Accepted: ${refusals("Superseded by 0002", "Accepted")}`)
+    console.log(`  each of the two says the other one superseded it: ${refusals("Superseded by 0002", "Superseded by 0001")}`)
+    console.log(`  0001 says it was superseded by 0001: ${refusals("Superseded by 0001")}`)
   })
 })
 ```
 
-Predict the number of lines under the second heading. Most people predict zero,
-and the reason they predict zero is the interesting part — write down *why* you
-expect the number you expect, because that sentence is about what you think a
-convention is.
+Two halves. The first measures the repository and you have been told what it
+finds, so there is nothing to predict there. The second invents four pairs that
+exist in no file and puts each one to the check that now guards the pairs that do.
+
+**Predict a number: how many of the four does it refuse?** Write the number down,
+and then — this is the half that matters — write one line for each pair saying
+why you put it where you did. Three of the four are describable in a word
+(*reciprocal*, *silent*, *contradictory*, *circular*); the question is which of
+those words this check can read.
 
 The output:
 
 ```
-  statuses naming a record that does not exist: 0
-  supersessions whose other end says nothing back:
+  supersession directions written: more than ten
+  of those, whose other end says nothing back: 0
+
+  0001 superseded by 0002, and 0002 supersedes 0001: 0
+  0001 superseded by 0002, and 0002 says only Accepted: 1
+  each of the two says the other one superseded it: 0
+  0001 says it was superseded by 0001: 0
 ```
 
-**Empty, and it was not when the exercise was written.** The list held
-`0109 -> 0137` on 25 September. `decisions/README.md` required the superseded
-record to be marked and said nothing about the replacement, so 0137 was
-compliant — and look at what that meant: the repository had ten pairs where one
-fact was written twice and could be compared, one pair where it was not, and no
-code anywhere that knew the comparison was available. The convention produced
-checkable data as a by-product of being followed, and then nobody checked it.
+**One of four.** The repository's own pairs are all answered — that is the rule
+0193 added, working — and of the four invented ones only the silent end is
+refused. A pair in which each record claims the *other* one superseded it is
+nonsense that could not have happened by accident, and it passes. A record that
+says it was superseded by itself passes.
 
-Somebody read this exercise and checked it. Both ends are now required and
-compared, 0137 and 0191 were given the clause they were missing, and the list
-this prints is empty for good. **That is the exercise's real answer**: the
-measurement was worth taking because acting on it was cheap, and the printout
-going blank is what acting on it looks like.
+Neither of those is a bug report, and getting that distinction right is the
+exercise. **The first is deliberate and the reasoning is good.** `oneWayIn`'s
+comment makes the argument: it compares whether the record named names this one
+back, and declines to read `supersedes` against `superseded by`, because parsing
+the direction would make the check an opinion about English — and the fault it
+exists to catch, one end silent, is the same fault whichever end wrote first. A
+check that refused the contradictory pair would have to understand the two
+phrases, and understanding them is how you get a check that argues with authors
+about wording.
+
+**The second is a hole rather than a decision**, and it is the better half of this
+exercise because of *what kind* of hole it is. The check is satisfied when a
+second copy of the fact exists. A record naming itself is a second copy of the
+fact, in the sense the code means: `referencesIn(named.status).includes(record.number)`
+is true, because `named` *is* the record. One file corroborates itself and the
+build goes green. That is this lesson's own subject — the claim that exists only
+once — arriving inside the check built to catch it.
+
+So the generalisation, and it is the one to carry rather than the specimen:
+**a second copy makes a comparison possible, and the comparison that then gets
+written is almost always the cheapest one, which is existence.** Exercise D is
+the same sentence about prose: a bare citation carries one fact, so the only
+property anything can hold it to is that the record exists, and existence is
+precisely the property that was true of the eight wrong ones. Here the pair
+carries two facts and the property held is that the other end speaks. Both checks
+are real and worth having. Neither of them reads the claim.
 
 ### Exercise F — the heading that is checked and the section that is not
 
@@ -968,12 +1016,25 @@ to *find* a candidate, which is how the eight framing citations, lesson 05's
 inverted answer and lesson 27's `max?` were all found. It makes it a different
 instrument. It belongs where a finding belongs and not where a gate belongs.
 
-**Require a superseding record to name what it supersedes.** Not in any record,
-and exercise E is the argument for it: ten of eleven directions already comply, so
-the convention exists and only the enforcement is missing. The cost is a real one
-and is this repository's recurring shape — a new check turns a legitimate, README-
-compliant act into a red build on somebody else's branch, and that is a cost you
-may not impose on five other lanes by writing a lesson about it.
+**Require a superseding record to name what it supersedes.** This is the entry
+that stopped being an alternative. It was in no record when the lesson was
+written, and exercise E was the argument for it — ten of eleven directions
+already complied, so the convention existed and only the enforcement was
+missing. The objection raised here was the cost, and it is this repository's
+recurring shape: a new check turns a legitimate, README-compliant act into a red
+build on somebody else's branch, and that is a cost you may not impose on five
+other lanes by writing a lesson about it.
+
+It was taken the next day anyway ([0193](../decisions/0193-a-status-line-is-data-and-a-supersession-is-written-at-both-ends.md)),
+and what the predicted cost turned out to be is worth more than the prediction
+was. Nobody's branch went red. Two records were given the clause they were
+missing and the check went in green, because the convention had been followed
+every time but twice — which is the same number the objection was computed
+from, read the other way round. **A compliance rate is an argument for the
+check and an argument against it at the same time**, and which one it is
+depends entirely on whether the holdouts are two records or two hundred call
+sites. That is the question to ask of the bare citations in the first entry
+above, where the answer is three hundred and the entry is still deferred.
 
 ---
 
@@ -1016,7 +1077,7 @@ confidence number was about a future that had not happened yet.
 
 ## Self-check
 
-Seven questions. For each: **rate your confidence 1–5 before you write your
+Eight questions. For each: **rate your confidence 1–5 before you write your
 answer, then check.**
 
 1. Define a check in one sentence, in the form this lesson uses, and then use
@@ -1043,12 +1104,22 @@ answer, then check.**
    Give the reason, and then state the general rule about what you take on when
    you manufacture a second copy — including who pays, and why it is usually not
    the person who wrote it.
+8. `checkNumbering` compares the two ends of a supersession and fails the build
+   when one of them is silent. Name two pairs it accepts that a reader would call
+   wrong. Say which of the two is a deliberate decision and give the argument for
+   it — the argument is about what a check would have to become, not about
+   effort. Then say what the other one is, and what the pair of them shows about
+   the distance between a second copy existing and a claim being checked.
 
 Question 1 is this lesson's question. Question 7 is where a confident
 half-answer is most likely: an answer that says "because the numbers change" has
 described the mechanism and stopped. What transfers is that a second copy is a
 *coupling*, that a coupling has an owner, and that the owner is normally somebody
 who has never read the file the copy is in.
+
+Question 8 has its trap in the first half rather than the second. Both of the
+pairs it asks for pass, so an answer that explains why *one* of them is tolerable
+has answered half the question and will feel finished.
 
 ---
 
@@ -1073,6 +1144,12 @@ Write for two minutes, then move on.
 - Predict 4 asked who has to keep a pasted number true. Go and check whether your
   answer named a *person* or named a *role*. This course's answer turned out to
   be "whichever routine next adds a primitive", which is neither.
+- Exercise E asked how many of four invented pairs the check refuses. If you said
+  three or four, write down which of the two it waved through surprised you more.
+  Nearly everyone is surprised by the circular pair and not by the contradictory
+  one, and that order is worth a sentence: the contradictory pair is the one with
+  an argument behind it, so the surprise lands on the decision somebody made
+  carefully and skips the one nobody made at all.
 - Now go and look at your own work. Find a comment, a README line, or a variable
   name that makes a claim about behaviour elsewhere in the system. Work out three
   things and write them down: whether a second copy of that fact exists anywhere,
@@ -1121,10 +1198,20 @@ it catches more, but because it is the only one of the three whose obligation is
 discharged by a program rather than by a person remembering.
 
 And the question to carry into a twelfth seam comes from exercise E, which is the
-one in this lesson that is not about a limit at all. Ten pairs of records already
-write one fact twice. Nothing compares them. So: **how much of this repository is
-already corroborated by habit, and nowhere cashed in?** A convention that has
+one in this lesson that is not about a limit at all. **How much of this repository
+is already corroborated by habit, and nowhere cashed in?** A convention that has
 been followed for two months has been quietly producing checkable data the whole
 time. Finding one of those is cheaper than designing a check, and it is the only
 kind of check that costs its authors nothing, because they have been paying for
 it already.
+
+This lesson is the one place in the course where you can see what happens next,
+because the question got answered about its own specimen inside a day. The
+supersession pairs were cashed in, and then exercise E had to be rewritten — not
+because the answer changed, but because *the exercise had stopped asking
+anything.* It printed an empty list and invited you to predict that it would be
+empty. So carry the second half too: **cashing a habit in buys you a check and
+costs you the measurement.** Afterwards nobody can see the convention any more,
+only the rule, and what the rule compares is a decision somebody made in a
+function — which is where exercise E now points, and is a smaller and more
+answerable question than the one it used to ask.

@@ -37258,9 +37258,19 @@ are of; none before today could.
 ## 2026-09-26 — exercise E's list is now empty, which is the outcome the lesson asked for and the transcript beside it says otherwise
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom lessons`
-(`lessons/28-corroboration.md`) · **Status:** open — **the transcript itself is
-already corrected on #395, because leaving it would have opened a pull request on
-red.** What is open is the rewrite, which is yours.
+(`lessons/28-corroboration.md`) · **Status:** **closed 7 October** by
+`lessons-35-prose-held-to-its-transcript` — the rewrite is done, and it went
+further than this entry asked. Both sentences named below are gone; the exercise
+has a live question again rather than an empty list; and two more stale places
+nobody had named turned up on the way — the *It could have been otherwise* entry
+proposing the check that already exists, and Set AG's question 6, which asked the
+reader why this pair *got nothing*. The transcript itself is as `#395` left it
+plus the new verdicts, re-executed. **Your interim wording was right about where
+the better version was**: the measurement-became-a-check story is kept, and what
+the rewrite adds is the question that replaced it — not *is the convention
+followed* but *what does the check that enforces it actually compare*, which is
+one line of `oneWayIn` and turns out to accept two pairs a reader would call
+wrong. One of those two is a hole and is filed for you, dated today.
 
 Your 25 September entry offered three options for the one-way supersession and
 said of option 3 that *"a second one-way supersession will turn
@@ -45578,3 +45588,62 @@ Recorded because the next consumer is predictable: the same pairing is owed by
 anything that reads `readingChangeOf` across two versions, which is the entry
 from 4 October that is still waiting on a store that can answer for an older
 version.
+
+---
+## 2026-10-07 — a decision record can corroborate itself, and `oneWayIn` is satisfied
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom daily build`
+(`tools/decisions/numbering.ts`) · **Status:** open — **nothing is wrong on
+`main`**, no record in `decisions/` is in this shape, and the repair is one line
+whenever you next have that file open
+
+Turned up by rewriting lesson 28's exercise E, which now puts four invented pairs
+to the reciprocity check 0193 added rather than measuring a convention that is no
+longer a convention. Three of the four answers are the ones you would want. The
+fourth:
+
+```
+  0001 says it was superseded by 0001: 0
+```
+
+A record whose status names **its own number** passes `oneWayIn`.
+`byNumber.get(to)` returns the record itself, so
+`referencesIn(named.status).includes(record.number)` is trivially true, and
+`danglingIn` is satisfied too because the number does exist. One file is accepted
+as its own second copy.
+
+**The honest statement of how reachable this is**, because it is narrower than it
+first looks. The two-clause spelling is already caught: if 0213 says
+`Superseded by 0213` *and* 0214 says `supersedes 0213`, then 0214 → 0213 is
+reported, because 0213's status names 213 and not 214. What passes in silence is
+the **one-clause** spelling — 0213 says `Superseded by 0213` and the record that
+actually replaced it says only `Accepted`. That is a transposition typo in a
+status line, written once, on a record that is genuinely superseded, and the
+build goes green with the relationship recorded against the wrong record.
+
+**Why it is worth a line rather than a shrug**, and it is not the likelihood.
+`oneWayIn`'s own doc comment is careful about what it declines to compare and
+why — it will not read `supersedes` against `superseded by`, because parsing the
+direction would make the check an opinion about English, and that argument is
+right. **A self-reference is not that case.** It is not a direction the check
+declines to interpret; it is a pair that is not a pair, and refusing it costs no
+judgement about anybody's wording:
+
+```ts
+if (to === record.number) return [{ code: "one-way-supersession", from: record.number, to }]
+```
+
+Whether the code should be that one or a new `self-supersession` is yours — the
+existing one says *written at one end only*, which is arguably exactly what a
+record naming itself is.
+
+**Lesson 28 teaches this as it stands and does not need the fix**, which is why
+this is filed and not blocked on. The lesson's subject is the claim that exists
+only once, and a check built from a second copy that accepts a record as its own
+second copy is that subject arriving inside the remedy. The exercise says in as
+many words that this one is a hole rather than a decision, and distinguishing it
+from the contradictory pair beside it — which *is* a decision, with a good
+argument — is the exercise. If you close it, the transcript line moves from `0`
+to `1` and the three paragraphs under it change meaning, so it is pinned by
+`transcripts.test.ts` and will go red in this lane rather than quietly: that is
+the arrangement working, and the rewrite is one run's work.
