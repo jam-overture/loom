@@ -4,9 +4,10 @@ import { renderLoomTree } from "@jam-overture/loom/react"
 import { roomToLand } from "@/app/(demo)/_lib/arrival"
 import { isDemoModelConfigured } from "@/app/(demo)/_lib/interpreter"
 import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
-import { whatTheRailShows } from "@/app/(demo)/_lib/rail"
+import { whatTheRailShows, theEnding } from "@/app/(demo)/_lib/rail"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
+import { lastMovesIn } from "@/app/(demo)/_lib/record"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { whatEachWillSay } from "@/app/(demo)/_lib/what-it-will-say"
 
@@ -167,7 +168,36 @@ const DemoPage = async () => {
    * of these answers rather than a promise about them, and which no deployment
    * has to be configured to earn.
    */
-  const willSay = await whatEachWillSay(tree, rail.available, randomIdFactory, systemClock)
+  const willSay = await whatEachWillSay(
+    tree,
+    rail.available,
+    randomIdFactory,
+    systemClock,
+    /**
+     * And what the visitor's last change moved, which is what turns each of
+     * those verdicts into a *direction* as well.
+     *
+     * Both unattended presets are toggles, so an applied one is applicable
+     * again in the other direction and comes straight back onto the list
+     * wearing the promise it shipped with — a row offering the visitor their
+     * own undo as a new change, eleven pixels above a card that says *"Put it
+     * back" undoes it*. The same two functions a landed card reaches this by
+     * (`put-back.ts`) answer it one step earlier, off the delta the Gate has
+     * just assessed, so the row and the card cannot disagree.
+     *
+     * `lastMovesIn` is the record module's own reading of which history counts
+     * — the first record that reached the page, and what it moved — rather
+     * than a second walk of the log here.
+     */
+    lastMovesIn(records)
+  )
+
+  /**
+   * And the ending, which needs those verdicts: an ask that would only put the
+   * last change back is not one of the changes still to ask for, and it is
+   * already offered by name as **Put it back** on the card this row captions.
+   */
+  const ending = theEnding(rail, willSay)
 
   return (
     /* On a wide screen the demo is one viewport: the bar is fixed, and the
@@ -286,7 +316,7 @@ const DemoPage = async () => {
             * and the three silences; `rail.ts` decides whether there is
             * anything to say.
             */}
-          {rail.whatElse && <WhatElseToAsk end={rail.whatElse} />}
+          {ending && <WhatElseToAsk end={ending} />}
 
           {/*
             * The sequence stays whether or not there are records, because it is
