@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5476,7 +5476,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5941,7 +5941,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6903,7 +6903,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7494,7 +7494,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7722,7 +7722,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8181,7 +8181,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8535,7 +8535,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8655,7 +8655,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 41,
+      "files": 42,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8668,7 +8668,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -9007,11 +9007,116 @@
               "summary": "What one window of one revision says about how much of the page is read."
             },
             {
+              "name": "passageOf",
+              "kind": "function",
+              "signature": "const passageOf: (part: PartReading) => Passage",
+              "truncated": false,
+              "summary": "The words a part says on its own, and whether it is short of some it cannot see."
+            },
+            {
               "name": "copyReadingOf",
               "kind": "function",
               "signature": "const copyReadingOf: (reading: PageReading) => CopyReading",
               "truncated": false,
               "summary": "How much of what a page says is getting read."
+            }
+          ]
+        },
+        {
+          "module": "signals/copy-change",
+          "title": "Copy change",
+          "summary": "What a change did to what a page says, and to how much of it gets read.",
+          "symbols": [
+            {
+              "name": "CopyChangeSilence",
+              "kind": "type",
+              "signature": "type CopyChangeSilence =\n/**\n * The two readings are of different trees.\n *\n * Nothing is comparable and nothing is countable: two pages are two pages,\n * and the plausible-false-number failure here is a screen reporting that a\n * change deleted every word of a page it was never about. Spelled as\n * `ChangeSilence` spells it, because a surface drawing both comparisons of\n * one change should not meet two names for one state.\n */\n\"different-trees\"\n/** Neither revision says anything that could have been read. */\n | \"wordless\"\n/**\n * One of the two windows held no page views.\n *\n * Every standing on that side is `unknown` (`parts.ts`) and that side has no\n * `reach`, so there is nothing to compare a share against. **The census still\n * answers**, because what a change did to the words is a fact about the two\n * trees: *this change added three hundred words and took two hundred away,\n * and nothing has been measured since* is true and is worth saying.\n */\n | \"nothing-measured\"\n/**\n * A passage reports more readers than its side of the page has views.\n *\n * Carried through from whichever reading said it, where it is the\n * alarm for a reading assembled by hand or by a sender that is not one. The\n * per-passage figures are left in place rather than hidden, because a `reach`\n * above 1 is the visible evidence and withholding it would hide the fault\n * while leaving the screen drawable.\n */\n | \"inconsistent\"\n/**\n * The change left no word of the page as it was.\n *\n * Every word is added, removed or reworded, so there is no carried text for a\n * reader figure to be about. The census answers in full and is the whole of\n * what can be said: a page rewritten end to end has no before and after of\n * its own words, only a before and an after.\n */\n | \"dissolved\"\n/**\n * Some carried passage's words are a floor, so a page-wide mean of them is\n * neither a count nor a ceiling.\n *\n * The reason is in the module documentation, and it is not the reason one\n * window has for withholding the same figure: the floors scale the\n * signed terms of the sum unequally, so the total can read as a regression\n * where the truth is an improvement. Each passage's own\n * {@link ComparedPassage.gain} is unaffected in sign and stays published.\n */\n | \"floored\";",
+              "truncated": false,
+              "summary": "Why a comparison of two windows' words answered nothing."
+            },
+            {
+              "name": "COPY_CHANGE_SILENCES",
+              "kind": "value",
+              "signature": "const COPY_CHANGE_SILENCES: readonly CopyChangeSilence[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface that has to account for every reason a figure is absent."
+            },
+            {
+              "name": "describeCopyChangeSilence",
+              "kind": "function",
+              "signature": "const describeCopyChangeSilence: (silence: CopyChangeSilence) => string",
+              "truncated": false,
+              "summary": "One line per silence, for a surface saying why a figure is not there."
+            },
+            {
+              "name": "PassageMovement",
+              "kind": "type",
+              "signature": "type PassageMovement =\n/** Reached on both sides. */\n\"held\"\n/** Nobody reached it and now somebody does, which is the sentence a change is made for. */\n | \"gained\"\n/** Somebody reached it and now nobody does. */\n | \"lost\"\n/** Nobody reached it on either side — the words a change did not fix. */\n | \"unread\"\n/**\n * One side cannot be spoken for.\n *\n * Its window held no views at all, or the passage reported something other\n * than coming into view, so `skipped` would be a claim nobody made.\n */\n | \"unknown\";",
+              "truncated": false,
+              "summary": "What happened to the reading of one passage whose words did not change."
+            },
+            {
+              "name": "PASSAGE_MOVEMENTS",
+              "kind": "value",
+              "signature": "const PASSAGE_MOVEMENTS: readonly PassageMovement[]",
+              "truncated": false,
+              "summary": "The closed set, for a surface accounting for every passage it was handed."
+            },
+            {
+              "name": "describePassageMovement",
+              "kind": "function",
+              "signature": "const describePassageMovement: (movement: PassageMovement) => string",
+              "truncated": false,
+              "summary": "One line per movement, for a surface putting a passage in front of a person."
+            },
+            {
+              "name": "PassageSide",
+              "kind": "type",
+              "signature": "type PassageSide = {\n    readonly standing: PartStanding;\n    /** Distinct page views that reported the part coming into view; `0` where no row named it. */\n    readonly readers: number;\n    /** That side's page-view floor, carried through so the share below can be checked. */\n    readonly views: number;\n    /**\n     * {@link readers} over {@link views}, and `null` where the window held none.\n     *\n     * A ceiling on the share of that window's readers who reached the passage:\n     * `reached` is generous by the page views that straddled a rollup window\n     * and `views` is a floor on the page views there were, so the\n     * numerator leans up and the denominator leans down. It is the figure the two\n     * sides are compared on, because the same inflation is in both terms of each\n     * side and has very nearly divided out before the sides meet.\n     *\n     * Above 1 is the input `inconsistent` names. It is not clamped: a figure cut\n     * to fit its own ceiling is a fault made undrawable rather than visible.\n     */\n    readonly reach: number | null;\n};",
+              "truncated": false,
+              "summary": "What one window said about one passage."
+            },
+            {
+              "name": "ComparedPassage",
+              "kind": "type",
+              "signature": "type ComparedPassage = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    /** The words, the same number on both sides because they are the same words. */\n    readonly words: number;\n    /** The text itself, so a passage can be quoted back without a second join. */\n    readonly text: readonly string[];\n    /**\n     * Whether either side's part declares no `copy`, so {@link words} is a floor.\n     *\n     * The visible words are the same on both sides; what a floor withholds is\n     * whether there are more. A side may be floored where the other is not, when\n     * a prop a type does not declare holds something on one revision and nothing\n     * on the other — so this is either side, and the figures it qualifies are\n     * qualified for both.\n     */\n    readonly floored: boolean;\n    readonly was: PassageSide;\n    readonly now: PassageSide;\n    readonly movement: PassageMovement;\n    /**\n     * The words this passage newly put in front of the average reader:\n     * `words × (now.reach − was.reach)`.\n     *\n     * Negative where readers lost ground, and `null` where either side held no\n     * views. It adds across passages — a part's own words partition the page\n     * exactly once — and the sum is {@link CopyChange.typical}'s `change`.\n     *\n     * A floor on {@link words} scales it toward zero and cannot change its sign,\n     * which is why it is published where the page total is withheld.\n     */\n    readonly gain: number | null;\n};",
+              "truncated": false,
+              "summary": "One passage both revisions say, word for word, as two windows read it."
+            },
+            {
+              "name": "RewordedPassage",
+              "kind": "type",
+              "signature": "type RewordedPassage = {\n    readonly nodeId: NodeId;\n    readonly type: PrimitiveType;\n    readonly role: PrimitiveRole | null;\n    /** The two word counts, which is why there is no single one. */\n    readonly words: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** Whether either side declares no `copy`, so its word count is a floor. */\n    readonly floored: boolean;\n    readonly was: PassageSide;\n    readonly now: PassageSide;\n    readonly movement: PassageMovement;\n};",
+              "truncated": false,
+              "summary": "One passage the change rewrote, as two windows read it."
+            },
+            {
+              "name": "WordsWritten",
+              "kind": "type",
+              "signature": "type WordsWritten = {\n    /**\n     * Words both revisions say, word for word — the universe every reader figure\n     * here is about.\n     */\n    readonly carried: number;\n    /** Words only the later revision says. */\n    readonly added: number;\n    /**\n     * {@link added}, by what the later window said about reaching them. The three\n     * add to {@link added}.\n     *\n     * *Of the three hundred words this change wrote, forty have been reached.* It\n     * is the one figure here that is about words nobody could have read before,\n     * so it has no comparison and needs none.\n     */\n    readonly addedByStanding: Readonly<Record<PartStanding, number>>;\n    /** Words only the earlier revision says. */\n    readonly removed: number;\n    /**\n     * {@link removed}, by what the earlier window said about reaching them. The\n     * three add to {@link removed}.\n     *\n     * *The change took two hundred words away and nobody had reached a hundred and\n     * eighty of them* is a change that was right, and the opposite reading of the\n     * same row is the one worth stopping for.\n     */\n    readonly removedByStanding: Readonly<Record<PartStanding, number>>;\n    /** Words of passages both revisions have and neither says the same way. */\n    readonly reworded: {\n        readonly was: number;\n        readonly now: number;\n    };\n};",
+              "truncated": false,
+              "summary": "What the change did to the words themselves."
+            },
+            {
+              "name": "WordCount",
+              "kind": "type",
+              "signature": "type WordCount = {\n    readonly was: number;\n    readonly now: number;\n    readonly change: number;\n};",
+              "truncated": false,
+              "summary": "A word total, before and after, with the subtraction done once."
+            },
+            {
+              "name": "CopyChange",
+              "kind": "type",
+              "signature": "type CopyChange = {\n    /** The earlier reading's tree. The two agree unless `silence` is `different-trees`. */\n    readonly treeId: TreeId;\n    readonly revisions: {\n        readonly was: number;\n        readonly now: number;\n    };\n    /** The two copy readings this comparison is made of. */\n    readonly readings: {\n        readonly was: CopyReading;\n        readonly now: CopyReading;\n    };\n    /**\n     * Every word each revision says, counted once, and the difference.\n     *\n     * Exact on both sides and comparable without qualification, which no other\n     * pair of figures in this subsystem is: a page's words are a property of its\n     * tree and no reader is in them.\n     */\n    readonly words: WordCount;\n    /** The census of what the change wrote, with no reader in it. */\n    readonly wrote: WordsWritten;\n    /**\n     * Every passage both revisions say identically, in the **later** reading's\n     * reading order.\n     *\n     * The later order because that is the page somebody is looking at, and a\n     * passage's place in it is where they would find it. A before-and-after of\n     * where reading stops orders its pairs by the earlier reading instead,\n     * because a pair is a position by construction and cannot survive being moved;\n     * a passage can, so the two modules order their rows differently on purpose.\n     */\n    readonly compared: readonly ComparedPassage[];\n    /** Every passage both revisions have and neither says the same way, in the later order. */\n    readonly reworded: readonly RewordedPassage[];\n    /** Every passage only the later revision has, in its reading order. */\n    readonly added: readonly Passage[];\n    /** Every passage only the earlier revision had, in the earlier reading order. */\n    readonly removed: readonly Passage[];\n    /**\n     * Carried words by what happened to the reading of them. The five add to\n     * {@link WordsWritten.carried}.\n     */\n    readonly wordsByMovement: Readonly<Record<PassageMovement, number>>;\n    /**\n     * Carried passages by the same. The five add to {@link compared}'s length.\n     *\n     * Published beside the word totals because a count of passages **survives a\n     * floor** where a count of words does not: a part that declares no `copy` is\n     * one part whatever it is hiding. A surface that has to be right about\n     * direction under a floor reads this row.\n     */\n    readonly passagesByMovement: Readonly<Record<PassageMovement, number>>;\n    /** Carried passages whose words are a floor, which is what `floored` counts. */\n    readonly floored: number;\n    /**\n     * The carried passages nobody reached on either side, most words first and\n     * then in the later reading order.\n     *\n     * The words a change did not fix, which is the list a person can act on\n     * without reading anything else. Ranked by words for the reason one window's\n     * reading ranks them: the passage nobody saw that costs the page most is\n     * the long one, not the first one.\n     *\n     * `unread` only. A passage whose standing is `unknown` on either side is in\n     * {@link wordsByMovement} where it can be seen and not acted on, because\n     * putting it here would turn *nothing can be said* into *nobody read this*.\n     */\n    readonly stillUnseen: readonly ComparedPassage[];\n    /**\n     * The carried words the average reader got to, before and after. `null` where\n     * {@link silence} says why not.\n     *\n     * Each side is `Σ(readers × words) ÷ views` over the carried passages of that\n     * side — the same arithmetic as `CopyReading.typical` and a ceiling for the\n     * same two reasons, restricted to the words both revisions say so that the\n     * page having grown or shrunk is not in it. `change` is the sum of every\n     * {@link ComparedPassage.gain}.\n     *\n     * Each side's own whole-page figure is on `readings.was.typical` and\n     * `readings.now.typical`, and those two are **not** comparable: a page that\n     * lost four hundred words lowers the second without anybody having read less.\n     */\n    readonly typical: WordCount | null;\n    /**\n     * The carried passage the change put most words in front of the average\n     * reader, and `null` where none gained any.\n     *\n     * By {@link ComparedPassage.gain} — words weighted by readers — rather than by\n     * the change in `reach`, which is the ranking rule a fall between two siblings\n     * already uses: a long passage a tenth of readers newly reach is worth\n     * more than a three-word label all of them do.\n     */\n    readonly mostGained: ComparedPassage | null;\n    /** The carried passage it took most words away from, on the same terms. */\n    readonly mostLost: ComparedPassage | null;\n    /** Why there is no reader comparison, or `null` where there is one. */\n    readonly silence: CopyChangeSilence | null;\n};",
+              "truncated": false,
+              "summary": "What a change did to what a page says and to how much of it is read."
+            },
+            {
+              "name": "copyChangeOf",
+              "kind": "function",
+              "signature": "const copyChangeOf: (was: PageReading, now: PageReading) => CopyChange",
+              "truncated": false,
+              "summary": "What a change did to the words of a page and to the reading of them."
             }
           ]
         },
@@ -10173,7 +10278,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10316,7 +10421,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10383,7 +10488,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10980,7 +11085,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11054,7 +11159,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11512,7 +11617,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1304,
+        "packageNames": 1318,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
