@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { plainMoment } from "./when"
+import { plainDay, plainMoment } from "./when"
 
 describe("plainMoment", () => {
   it("reads an instant as a date and a time rather than as a machine field", () => {
@@ -48,5 +48,28 @@ describe("plainMoment", () => {
     expect(plainMoment("")).toBe("")
     expect(plainMoment("yesterday")).toBe("yesterday")
     expect(plainMoment("2026-13-01T00:00:00.000Z")).toBe("2026-13-01T00:00:00.000Z")
+  })
+})
+
+describe("plainDay", () => {
+  it("drops the time, because a stretch of days printed to the minute is four numbers to subtract", () => {
+    expect(plainDay("2026-10-05T09:04:00.000Z")).toBe("5 October 2026")
+  })
+
+  it("reads the same day whatever time of it the record arrived", () => {
+    expect(plainDay("2026-10-05T00:00:00.000Z")).toBe(plainDay("2026-10-05T23:59:00.000Z"))
+  })
+
+  it("names the same month as the fuller form, for every month", () => {
+    for (let month = 1; month <= 12; month += 1) {
+      const iso = `2026-${String(month).padStart(2, "0")}-01T00:00:00.000Z`
+
+      expect(plainMoment(iso), iso).toContain(plainDay(iso))
+    }
+  })
+
+  it("hands back anything it cannot read, rather than inventing a date", () => {
+    expect(plainDay("")).toBe("")
+    expect(plainDay("2026-13-01T00:00:00.000Z")).toBe("2026-13-01T00:00:00.000Z")
   })
 })

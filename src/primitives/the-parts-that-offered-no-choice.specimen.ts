@@ -141,8 +141,8 @@ export default defineSpecimen({
    * the one thing in the sheet that has to survive a 390px column.
    */
   viewports: [
-    { label: "wide", width: 1280, height: 1900, deviceScaleFactor: 2 },
-    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "wide", width: 1280, height: 1900, deviceScaleFactor: 2, touch: false },
+    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2, touch: true },
   ],
   themes: [
     {
