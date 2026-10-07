@@ -14,9 +14,19 @@ import {
  * **The plain version.** `themeGround` hands a host colors to paint with.
  * Sometimes the host does not want a color — it wants to *choose* between two
  * things of its own that are not made of Loom's colors at all: one of two logo
- * files, an embed whose options take the word `"light"`, a `theme-color` meta
- * the browser reads. For those, the only useful answer is the word, and
+ * files, an embed whose options take the word `"light"`, a class name outside
+ * the tree. For those, the only useful answer is the word, and
  * `paletteScheme(palette)` is where it comes from.
+ *
+ * **`<meta name="theme-color">` used to be the third item in that list and it
+ * was the wrong list.** Its `content` is a CSS color and there is nowhere in it
+ * to put a word, so it is a `themeGround` case and always was. `browser-bar.ts`
+ * is the module that works it, and the reason it is worth its own module rather
+ * than a corrected clause is that the meta has a second form — a pair of metas
+ * keyed on `prefers-color-scheme` — which reads the machine rather than the
+ * tree, and is therefore wrong for every host whose palette is named by the
+ * tree. A list of examples cannot carry that; a table of what each form answers
+ * can.
  *
  * `_lib/mounting.ts` is this module's sibling and does the same job for the
  * section above: every figure the prose states is computed here, from the

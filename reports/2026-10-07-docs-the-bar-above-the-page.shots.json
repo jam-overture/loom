@@ -1,0 +1,45 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-07-docs-bar-section-wide",
+      "viewport": "wide",
+      "waitFor": "[data-bar-picture]",
+      "do": [{ "scrollTo": "[data-bar-picture]" }],
+      "measure": [
+        "[data-bar-picture]",
+        "[data-stack-bar='pair']",
+        "[data-stack-page='pair']",
+        "[data-stack-bar='ground']",
+        "[data-bar-outcomes]"
+      ]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-07-docs-bar-section-phone",
+      "viewport": "phone",
+      "waitFor": "[data-bar-picture]",
+      "do": [{ "scrollTo": "[data-bar-picture]" }],
+      "measure": ["[data-bar-picture]", "[data-bar-outcomes]"]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-07-docs-bar-outcomes-wide",
+      "viewport": "wide",
+      "waitFor": "[data-bar-outcomes]",
+      "do": [{ "scrollTo": "[data-bar-outcomes]" }],
+      "measure": ["[data-outcome='exact']", "[data-outcome='off-by-a-shade']", "[data-outcome='inverted']"]
+    },
+    {
+      "path": "/docs/building-with-loom/theming",
+      "out": "2026-10-07-docs-bar-section-dark-wide",
+      "viewport": "wide",
+      "waitFor": "[data-bar-picture]",
+      "start": { "storage": { "loom-docs-theme": "dark" } },
+      "do": [{ "scrollTo": "[data-bar-picture]" }],
+      "measure": ["[data-bar-picture]"]
+    }
+  ]
+}
