@@ -473,12 +473,13 @@ a target and one you are unsure about.
 The output:
 
 ```
-  primitives registered: 106
-  of those, declaring a target: 17
+  primitives registered: 107
+  of those, declaring a target: 18
     loom.nav         "always"
     loom.menu        "always"
     loom.lightbox    "always"
     loom.popover     "always"
+    loom.dialog      "always"
     loom.card        {"whenProps":["href"]}
     loom.feature     {"whenProps":["href"]}
     loom.article     {"whenProps":["href"]}

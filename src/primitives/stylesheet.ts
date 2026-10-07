@@ -399,6 +399,19 @@ export const LIBRARY_CLASS = {
   lightboxFrame: "loom-lightbox-frame",
   lightboxPanel: "loom-lightbox-panel",
   /**
+   * A `loom.dialog`: the root, the region over the viewport, and the plate.
+   *
+   * It carries no class for its trigger, and that absence is the difference
+   * between this and the lightbox above. A lightbox's chip belongs over the
+   * corner of its tile, which is a `position` no control sets for itself. A
+   * dialog's trigger **is** the thing on the page — the band's call to action,
+   * sitting in the flow where the tree put it — so the control is left exactly
+   * where the runtime paints it and this primitive has nothing to say about it.
+   */
+  dialog: "loom-dialog",
+  dialogFrame: "loom-dialog-frame",
+  dialogPanel: "loom-dialog-panel",
+  /**
    * A `loom.before-after`, which carried no class at all until it took a
    * control. Same reason as the lightbox's root: the slider is the runtime's
    * element and where it sits over the band is this primitive's decision.
@@ -1643,6 +1656,40 @@ details[open] > summary .loom-marker {
  * and a stylesheet can actually hold.
  */
 html:has(.loom-lightbox[data-loom-presented="true"]) {
+  overflow: hidden;
+}
+/**
+ * A dialog's region, which is the lightbox's frame with one track and one
+ * difference that matters at a phone's width.
+ *
+ * \`place-items: center\` is what the lightbox centres its plate with, and a
+ * dialog cannot have it. A lightbox holds a picture, which has a height; a
+ * dialog holds whatever the tree gave it, and a form taller than the window
+ * centred in a grid is a plate whose **top** is above the viewport, with the
+ * first field and the heading unreachable — a centred overflow scrolls both
+ * ways from the middle and the region has only one scroll position. So the
+ * block axis starts rather than centres, and the plate's own \`margin-block:
+ * auto\` re-centres it **only while it fits**, which is the one arrangement
+ * that is centred when it can be and reachable when it cannot.
+ */
+.loom-dialog-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: start;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.loom-dialog[data-loom-presented="false"] > .loom-dialog-frame {
+  display: none;
+}
+/**
+ * The scroll lock, the second instance of 0210 and the reason that record is
+ * about a class of primitive rather than about the lightbox. Same shape, same
+ * scoping inside the \`:has()\`, so it holds while a dialog is open and at no
+ * other time.
+ */
+html:has(.loom-dialog[data-loom-presented="true"]) {
   overflow: hidden;
 }
 /**

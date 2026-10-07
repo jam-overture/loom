@@ -192,10 +192,29 @@ const lightboxBand = (ids: IdFactory): ElementNode =>
     ],
   })
 
+/**
+ * The fourth presentation, and the reason it belongs in this table rather than
+ * only in its own file: every assertion below is about a primitive placing the
+ * pair correctly, which is the thing 0176 says nothing in the repository can
+ * diagnose. `loom.dialog` is the newest place to get it wrong.
+ */
+const dialogBand = (ids: IdFactory): ElementNode =>
+  buildElement(ids, {
+    type: "loom.dialog",
+    props: { label: "Watch the demo", title: "Loom in four minutes", measure: "prose" },
+    children: [
+      buildElement(ids, {
+        type: "loom.prose",
+        children: [buildText(ids, "A proposal written, weighed, applied, and recorded.")],
+      }),
+    ],
+  })
+
 const BANDS = [
   ["loom.menu", menuBand, LIBRARY_CLASS.menu, LIBRARY_CLASS.menuPanel],
   ["loom.popover", popoverBand, LIBRARY_CLASS.popover, LIBRARY_CLASS.popoverPanel],
   ["loom.lightbox", lightboxBand, LIBRARY_CLASS.lightbox, LIBRARY_CLASS.lightboxFrame],
+  ["loom.dialog", dialogBand, LIBRARY_CLASS.dialog, LIBRARY_CLASS.dialogFrame],
 ] as const
 
 describe("a region a reader opens", () => {
