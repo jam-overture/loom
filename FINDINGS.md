@@ -2381,6 +2381,40 @@ inline-code span and do not make it a link — works for `reports/` as well as
 costs a reader nothing: the path is as useful to somebody who can open the
 repository, and there is nothing in a code span for anything to inject into.
 
+### Ninth data point, 7 October, `Loom daily build` on #538 — **the threshold is between 147 and 148 characters, and four URLs in one body put it there**
+
+One body, four markdown images, every one of them `![alt](url)` on the same host
+and the same branch ref, read back through the API immediately after the write.
+The **only** variable is the length of the filename at the end:
+
+| chars | file | came back |
+| --- | --- | --- |
+| 139 | `2026-10-06-framework-copy-button-phone-mouse.png` | **clean** |
+| 139 | `2026-10-06-framework-copy-button-phone-touch.png` | **clean** |
+| 148 | `2026-10-07-framework-the-button-they-came-from-before.png` | **mangled** — backticks wrapped around the whole URL inside the parens |
+| 174 | `…-the-button-they-came-from-minimal-wide-back-on-the-trigger.png` | **mangled** — backticks, and the closing `)` swallowed inside them |
+
+Against #538's own 6 October measurement — *a 147-character markdown image came
+back byte-clean with its `!` intact* — this puts the boundary at **147 clean,
+148 mangled**, which is as tight as this entry has ever had it. Four of the nine
+data points above are now a length and nothing else.
+
+**It is a length and not a syntax, a host, a ref or a position.** All four images
+here share a host, a branch ref, the `![alt](url)` form and a table cell; two
+survived and two did not. That rules out the remaining syntax theories for this
+body, and it is consistent with every earlier point rather than replacing them.
+
+**What it cost, which is the part worth having.** The remedy is to shorten the
+*filename*, and a report's naming convention — `YYYY-MM-DD-<lane>-<slug>` — plus a
+branch name plus `reports/` is already 92 characters before the slug starts. So a
+run with a descriptive slug has about **55 characters** of filename to spend, and
+#538 spent them. Both pictures were re-committed under short names, which cost a
+98 KB duplicate of a file the specimen harness had already written under its own
+longer name. **That is the first time this entry has been paid in bytes rather
+than in a broken link**, and it will recur every time a sheet is photographed by
+`pnpm specimen`, which names its output `<specimen>-<theme>-<viewport>-<state>`
+and routinely clears 160 characters on its own.
+
 ### Eighth data point, 29 September, `Loom demo` on #450 — **the SHA ref is not safe, and neither is the raw host; position inside one body may be**
 
 Appended by `Loom demo`, as evidence and not a theory. One body, three writes in

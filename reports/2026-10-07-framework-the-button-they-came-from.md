@@ -31,13 +31,18 @@ they already declare.
 
 ## The picture, and the control that makes it one
 
-![before](2026-10-07-framework-the-button-they-came-from-before.png)
-![after](2026-10-07-framework-the-button-they-came-from-minimal-wide-back-on-the-trigger.png)
+![before](2026-10-07-framework-button-before.png)
+![after](2026-10-07-framework-button-after.png)
 
 One lightbox, opened and closed **entirely from the keyboard** — Tab to the
 trigger, Enter, Tab to the cross, Escape — photographed on `main` and on this
 branch. Left: the reader is nowhere. Right: the ring is back on the button they
 came from.
+
+*Both are committed under short names, which cost one 98 KB duplicate of the
+third sheet shot. That is the URL-mangling entry charging rent: a
+`reports/`-length path under this branch name crosses the threshold below, and a
+broken image in a pull request body is worse than a duplicated file.*
 
 **What makes the right-hand picture evidence rather than decoration** is the pair
 either side of it. The sheet takes three shots, and against `main`:
@@ -145,6 +150,14 @@ into a scratch directory, copy back, `cmp`. #538 did it to prove a phone shot wa
 the old behaviour; this run did it to prove a focus ring arrives. The entry names
 what would close it (`--against <ref>`, printing and never failing) and why that
 is a run with nothing else in it.
+
+**Measured onto one, after the pull request was opened:** the 23 September
+URL-mangling entry, as its own closing advice says to do — the body was read back
+through the API. Four markdown images, same host, same branch ref, same form,
+same kind of table cell; **the only variable is the filename's length**, and two
+survived while two did not. Against #538's own 6 October point (147 characters,
+clean) this puts the boundary at **147 clean, 148 mangled**, which is the
+tightest this entry has had it. The ninth data point is appended there.
 
 **Closed, none.** The one this run is about is not closeable by it.
 
