@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 
-import { THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
+import { SITE_BAR, THEME_COLOR_NAME, THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
 
 /**
  * Light and dark, chosen or inherited.
@@ -36,6 +36,15 @@ import { THEME_STORAGE_KEY } from "@/app/(docs)/_lib/theme"
  * site became an error screen for that reader. The theme they asked for now
  * works and simply is not remembered, which is the most any page can offer
  * somewhere it may not write.
+ *
+ * **And the page is not the only thing a press repaints.** The strip of browser
+ * above the page is told its color by a `<meta name="theme-color">` the layout
+ * renders, which the inline script corrects before paint; a press has to move
+ * it too, or the bar keeps whatever the reader arrived with and the toggle
+ * works everywhere except the one part of the screen that is not the page.
+ * Both live in `paint` rather than in the click handler, which is what makes
+ * the sunset case right as well: a machine changing its mind under `system`
+ * goes through the same function.
  */
 
 type Choice = "light" | "dark" | "system"
@@ -70,8 +79,20 @@ const remember = (choice: Choice): void => {
 const applied = (choice: Choice): "light" | "dark" =>
   choice !== "system" ? choice : window.matchMedia(DARK_QUERY).matches ? "dark" : "light"
 
+/**
+ * The two things a theme is, applied together.
+ *
+ * The meta is looked up on every call rather than held, because this runs in a
+ * client component and the element belongs to the document the layout rendered.
+ * A missing one is left alone rather than created: the layout always emits it,
+ * so absent means something upstream changed, and a bar invented here would
+ * hide that instead of letting it show.
+ */
 const paint = (choice: Choice): void => {
-  document.documentElement.dataset["theme"] = applied(choice)
+  const resolved = applied(choice)
+
+  document.documentElement.dataset["theme"] = resolved
+  document.querySelector(`meta[name="${THEME_COLOR_NAME}"]`)?.setAttribute("content", SITE_BAR[resolved])
 }
 
 export const ThemeToggle = () => {

@@ -5,6 +5,7 @@ import { ContrastAudit } from "@/app/(docs)/_components/contrast-audit"
 import { PaletteSlots } from "@/app/(docs)/_components/palette-slots"
 import { ColourForms, PaletteSchemes, SchemeWorking } from "@/app/(docs)/_components/palette-scheme"
 import { MountedGround, ThemeMount } from "@/app/(docs)/_components/theme-mount"
+import { BarOutcomes, BarPicture } from "@/app/(docs)/_components/browser-bar"
 
 export const metadata = pageMetadata("building-with-loom", "theming")
 
@@ -309,8 +310,12 @@ same:
 - the logo, the illustration, the screenshot with a pale background baked into it
 - an embed you do not control — a map, a chart, somebody's code sample — whose
   options are `"light"` and `"dark"`
-- `<meta name="theme-color">`, and anything else the browser reads rather than a
-  primitive
+- a class name on something outside the tree, where the two choices are
+  `theme-light` and `theme-dark` and neither takes a value
+
+The test is whether the thing you are handing it has somewhere to put a color.
+If it does, it wants `themeGround`. The next section is one that looks like it
+belongs in the list above and does not.
 
 <Callout kind="note">
   You have met its answer already. The third declaration `themeGround` hands
@@ -367,6 +372,96 @@ const markFor = (resolved: ResolvedTheme): string | undefined => {
   reports them as `unmeasured` rather than as passing, and `paletteScrim` and
   `slotChroma` decline them too. If you write palettes by hand, hex is the form
   that keeps all of it working.
+</Callout>
+
+## The bar above your page
+
+Open your site on a phone, with a dark palette on it, and look at the strip
+above the page. On Android that is Chrome's address bar. On an iPhone it is the
+area around the page. It is almost certainly still white.
+
+That strip is not part of your page. No stylesheet reaches it and no primitive
+renders it. One thing changes it, and this is the whole of it:
+
+```tsx
+import { themeGround } from "@jam-overture/loom/react"
+
+const ThemeColor = ({ resolved }: { resolved: ResolvedTheme }) => {
+  const ground = themeGround(resolved)
+
+  return ground === undefined ? null : <meta name="theme-color" content={ground.backgroundColor} />
+}
+```
+
+**`content` is a color, and there is nowhere in it to put a word.** So this is
+a `themeGround` case, which is worth saying plainly because it looks like the
+other kind: it is a thing outside the tree, the browser reads it, and what it
+does is light or dark. All of that is true and none of it matters. You are
+painting something, so you need the hex.
+
+`backgroundColor` is `bg-canvas`, which is the slot the root primitive paints.
+The bar is meant to look like the page continuing upward, and the top of the
+page is that color.
+
+### The form you will find if you go looking, and why it is wrong here
+
+Search for this and every answer shows you a pair:
+
+```tsx
+const theFormEverybodyShows = (
+  <>
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827" />
+  </>
+)
+```
+
+The browser serves whichever one matches. It is two lines, it needs no
+JavaScript, and on an ordinary site it is the right answer.
+
+**It answers a different question from the one your page answered.**
+`prefers-color-scheme` is the reader's machine. Your palette is named by the
+tree. Those are two separate facts, and the pair is correct only where they
+happen to agree.
+
+Here is one reader. Their machine is set to light. The tree they were served
+names `midnight`:
+
+<BarPicture palette="midnight" machine="light" />
+
+Nobody did anything wrong to get the pair's version. It is correct markup,
+correctly served, answering the question it was asked.
+
+### How often the pair is right
+
+Every palette you start with, under both settings a machine can be in:
+
+<BarOutcomes />
+
+The middle row is the one to notice. A bar that is the right way round and the
+wrong color is not a bug anybody files. It reads as a seam across the top of the
+page, and the usual conclusion is that the phone does that.
+
+The reason the pair cannot do better is arithmetic rather than oversight. It is
+two colors written into a `<head>`, and the tree can name any palette in your
+registry. Two constants cannot cover a list, which is the same reason a
+stylesheet could not hold a ground (0197) and the same shape of mistake.
+
+### When there is no color to give
+
+`themeGround` returns `undefined` for a palette whose body-copy pair it cannot
+read, which is the same four spellings that cost you `paletteScheme` further up
+this page.
+
+**Emit no meta.** The recipe above returns `null`, and that is deliberate: a
+browser with no `theme-color` paints its own default bar, which is a bar that
+was never claiming to match your page. A guessed hex is a bar that is claiming
+to match and does not.
+
+<Callout kind="warning">
+  Do not reach for the media pair as the fallback either. It is available, it
+  needs no measurement, and it would hand the reader a confident wrong answer in
+  the one case where you already know you cannot measure the page.
 </Callout>
 
 ## What a model gets shown

@@ -45944,6 +45944,117 @@ from 4 October that is still waiting on a store that can answer for an older
 version.
 
 ---
+## 2026-10-07 — a worked example is the only thing that reads a list of examples, and one of three in a list on the theming page had the whole distinction backwards
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** **closed in
+the instance** by `docs-48-the-bar-above-the-page`, open as a **class** with
+nothing asked of anybody
+
+*Making it look like yours* draws a distinction this site cares about a great
+deal: `themeGround` hands a host **colors to paint with**, `paletteScheme` hands
+it **one word to choose with**. It then gave three examples of the second kind
+under a heading saying what they have in common — *"they take the word, and
+there is nowhere to put a hex."* The third was
+`` `<meta name="theme-color">` ``.
+
+Its `content` is a CSS color. **There is nowhere in it to put a word.** It is a
+`themeGround` case and always was, and the page had it under the heading that
+says the opposite of what is true about it. The same clause was in
+`_lib/scheme.ts`'s docblock, which is where the bullet came from.
+
+**Why nothing caught it, and this is the general half.** Three blocks on that
+page are produced from the registry and cannot drift. The prose around them is
+swept for numbers standing in front of counted nouns. A **list of examples**
+is neither: every item in it names something *outside* this system — a logo
+file, somebody else's embed, a browser's own metadata — so there is nothing in
+the repository for any check to hold it against, and no amount of rendering the
+page reveals it. The only thing that reads such a list is somebody working one
+of its items, and the items most likely to be wrong are exactly the ones nobody
+has worked, because working one is how you find out.
+
+So this is not a request for a sweep, and a sweep is not available: the claim
+*this thing takes a word rather than a color* is a fact about the web platform.
+What closed it was writing the worked case, which is the general remedy and the
+expensive one. Recorded because the shape recurs — the list it was in still has
+two items, and both are in the same position of being unholdable by anything
+here.
+
+---
+## 2026-10-07 — 46 of the 126 prerendered pages on this deployment tell the browser what color to paint its own bar, and all 46 are the documentation site's
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom marketing`, `Loom lessons`,
+`Loom demo`, `Loom portal` · **Status:** open — **one surface of five answered**;
+a real defect on any surface with a dark appearance, cosmetic on one without
+
+`<meta name="theme-color">` is the one thing that changes the strip of browser
+above a page — Chrome's address bar on Android, the area around the page on an
+iPhone. No stylesheet reaches it. A page that emits nothing gets the browser's
+default, which on most phones is light, over whatever the page happens to be.
+
+Measured off this branch's production build:
+
+```
+docs html files:                 46
+docs html with the meta:         46
+non-docs html with the meta:      0
+total prerendered html:         126
+```
+
+The documentation site now emits one, set before paint and moved by the theme
+toggle. The other four surfaces emit none.
+
+**What that costs depends on the surface, which is why this is four owners and
+not one instruction.** A surface that is light at every hour loses very little:
+the bar is light, the page is light, and the worst case is the
+*off-by-a-shade* seam the theming page counts nineteen of. A surface with a
+dark appearance loses the obvious thing — a white bar over a dark page, which
+is what this site shipped for as long as it has had a toggle.
+
+**The recipe is written and worked**, at
+`/docs/building-with-loom/theming#the-bar-above-your-page`, and this lane's
+`_lib/theme.ts`, `_components/theme-script.tsx` and `_components/theme-toggle.tsx`
+are a working copy of it for a surface whose appearance is chosen in the
+browser. A surface whose appearance is fixed needs one line in its layout and
+no script at all.
+
+**Do not reach for the `media="(prefers-color-scheme: …)"` pair**, which is what
+every article on the subject recommends. It reads the reader's machine, and a
+Loom page's appearance is named by the tree; the two agree only by coincidence.
+The page has the arithmetic.
+
+---
+## 2026-10-07 — the documentation site cannot follow the recipe it publishes, because its own chrome is not a tree
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs`, and worth a judgement
+from `Loom daily build` (`src/theme/`) · **Status:** open — **nothing is
+blocked and nothing is wrong today**; a stated asymmetry with a test holding it
+shut
+
+The recipe this lane just published reads the bar's color off a resolved theme:
+`themeGround(resolved).backgroundColor`. Any host rendering a Loom tree has one.
+
+**This site does not.** Site chrome is application furniture and has no theme
+mounted on it (0067), so there is no `ResolvedTheme` anywhere near the header,
+and `globals.css` is a hand transcription of `minimal` for exactly that reason.
+The two bar colors are therefore a *second* transcription of the same two
+decisions, in a third file, and `_lib/browser-bar-chrome.test.ts` reads the
+stylesheet back to hold them together — which is `house-theme.test.ts`'s method
+and works, and is still a test standing in for a thing the framework could have
+made impossible.
+
+That makes it 0197's own shape in a new place: one decision, two copies, nothing
+in the framework able to hold them. 0197's frame got a `themeGround` because a
+frame has a tree beside it. Chrome has no tree at all, and the open question is
+whether that is permanent or whether a host should be able to resolve a theme
+for furniture — which would turn every transcribed color in `globals.css` into a
+read.
+
+**Filed as a question rather than a request**, and it is a decision record's
+worth of argument rather than a fix: the answer may well be that chrome is
+deliberately outside the system and transcription is the honest cost of that,
+in which case this entry is the place that says so once. Three colors across two
+files is the current size of the problem, which is small; what makes it worth
+writing down is that it grows with every surface that converts.
 ## 2026-10-07 — a slot handed to a primitive that declares none is dropped with its whole subtree, and nothing anywhere says so
 
 **Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`

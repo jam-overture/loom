@@ -6,6 +6,7 @@ import { ThemeScript } from "@/app/(docs)/_components/theme-script"
 import { ThemeToggle } from "@/app/(docs)/_components/theme-toggle"
 import { Wordmark } from "@/app/(docs)/_components/wordmark"
 import { REPOSITORY_URL } from "@/app/(docs)/_lib/surfaces"
+import { SITE_BAR, THEME_COLOR_NAME } from "@/app/(docs)/_lib/theme"
 
 import "./globals.css"
 
@@ -23,6 +24,21 @@ export const viewport: Viewport = {
 const RootLayout = ({ children }: { readonly children: React.ReactNode }) => (
   <html lang="en" suppressHydrationWarning>
     <head>
+      {/*
+       * The browser's own bar, which no stylesheet reaches.
+       *
+       * Light rather than a media pair, deliberately, and the theming page's
+       * *The bar above your page* is the long version: the pair is keyed on the
+       * reader's machine, and this site's appearance is keyed on what the
+       * reader chose here. Those are different facts, so the pair would hand a
+       * dark bar to a reader on a dark machine who had pressed Light.
+       *
+       * It carries the light color because that is what the server renders, and
+       * `ThemeScript` overwrites it before paint for a reader whose stored
+       * choice says otherwise. A reader with no JavaScript keeps this one and is
+       * right, since the markup they have is the light page.
+       */}
+      <meta name={THEME_COLOR_NAME} content={SITE_BAR.light} />
       <ThemeScript />
     </head>
     <body className="min-h-screen">
