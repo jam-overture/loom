@@ -315,3 +315,124 @@ describe("the dismiss control", () => {
     expect(container.hasAttribute(PRESENTED_ATTRIBUTE)).toBe(false)
   })
 })
+
+/**
+ * Where a reader stands after the region they were standing in is closed.
+ *
+ * This is the half of 0176's keyboard story that is the *control's* and not the
+ * primitive's. Focus trapping and `inert` are the page around the region and are
+ * still not here (0176, clause 6, unchanged); **the trigger's own button is this
+ * control's**, and a region closed while a reader was inside it leaves them on
+ * nothing unless something puts them back on it.
+ *
+ * jsdom computes no styles, so it never blurs an element a stylesheet has just
+ * hidden — which is exactly why these assert that the control *moves* focus
+ * rather than that focus survived. A browser's blur is the failure; the move is
+ * the fix, and the move is the only half a test can see.
+ */
+describe("where the reader is left when the region closes", () => {
+  const focus = (element: Element | null): void => (element as HTMLElement | null)?.focus()
+
+  it("puts the reader back on the trigger when the cross inside the region is pressed", async () => {
+    await mountPair()
+    await press(trigger())
+    focus(closer())
+
+    await press(closer())
+
+    expect(document.activeElement).toBe(trigger())
+  })
+
+  /**
+   * A keyboard reader's press on the cross is the case that matters and the case
+   * a browser disagrees about: clicking a button focuses it everywhere except
+   * Safari, and Enter or Space on it focuses it everywhere. So the dismiss path
+   * does not read where focus *is* — the cross is inside the region by
+   * definition, and that is enough.
+   */
+  it("puts the reader back on the trigger even if the cross never took focus", async () => {
+    await mountPair()
+    await press(trigger())
+    document.body.focus()
+
+    await press(closer())
+
+    expect(document.activeElement).toBe(trigger())
+  })
+
+  it("puts the reader back on the trigger when Escape closes a region they were inside", async () => {
+    await mountPair()
+    await press(trigger())
+    focus(closer())
+
+    await escape()
+
+    expect(document.activeElement).toBe(trigger())
+  })
+
+  /**
+   * The guard, and the reason it is not an afterthought: there is **no focus
+   * trap** (0176, clause 6), so a reader really can tab out of an open region
+   * into the page behind it. Escape then closes a region they have already left,
+   * and pulling them backwards onto the trigger would lose the place they moved
+   * to. The limit and this rule are the same fact.
+   */
+  it("leaves a reader who has already tabbed out of the region where they are", async () => {
+    const outside = document.createElement("button")
+    document.body.appendChild(outside)
+
+    await mountPair()
+    await press(trigger())
+    outside.focus()
+
+    await escape()
+
+    expect(container.getAttribute(PRESENTED_ATTRIBUTE)).toBe("false")
+    expect(document.activeElement).toBe(outside)
+
+    outside.remove()
+  })
+
+  /**
+   * The press is itself a destination. A reader who clicks an input on the page
+   * behind an open panel is telling the control where they want to be, and a
+   * control that answered by moving them to its own button would make the panel
+   * impossible to dismiss by carrying on reading.
+   */
+  it("never takes focus off whatever a press outside the region moved it to", async () => {
+    const outside = document.createElement("button")
+    document.body.appendChild(outside)
+
+    await mountPair()
+    await press(trigger())
+    focus(closer())
+
+    await pointerDownOn(outside)
+
+    expect(container.getAttribute(PRESENTED_ATTRIBUTE)).toBe("false")
+    expect(document.activeElement).not.toBe(trigger())
+
+    outside.remove()
+  })
+
+  /**
+   * Opening is not this rule's business. The region a trigger opens is laid out
+   * by the primitive and the control has never been able to name it, so moving a
+   * reader *into* it is the thing 0176 leaves with the primitive; moving them
+   * back onto a button this control rendered is not.
+   */
+  it("does not move the reader anywhere when the region opens", async () => {
+    const elsewhere = document.createElement("button")
+    document.body.appendChild(elsewhere)
+
+    await mountPair()
+    elsewhere.focus()
+
+    await press(trigger())
+
+    expect(container.getAttribute(PRESENTED_ATTRIBUTE)).toBe("true")
+    expect(document.activeElement).toBe(elsewhere)
+
+    elsewhere.remove()
+  })
+})
