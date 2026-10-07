@@ -41,7 +41,13 @@ export type GapReading = {
  * points either way is noise, and a page that called it overconfidence would be
  * reporting the sample size rather than the model.
  */
-const GAP_TOLERANCE = 0.1
+/**
+ * Exported because a second reading is now drawn at the same band. `trust-trend.ts`
+ * asks whether the gap *moved*, and a movement smaller than the band the verdict
+ * itself is drawn at is not a movement — two tolerances would let the page call a
+ * window on the mark and its own change in that window significant.
+ */
+export const GAP_TOLERANCE = 0.1
 
 /**
  * Whether a score's own reading is "these agree".

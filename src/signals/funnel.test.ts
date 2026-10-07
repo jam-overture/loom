@@ -1,25 +1,75 @@
 import { describe, expect, it } from "vitest"
 
-import { nodeId, TREE } from "../testing/reader-signal-contract.js"
+import { nodeId, primitiveType, TREE } from "../testing/reader-signal-contract.js"
+import type { ElementNode, LoomNode } from "../tree/node.js"
+import { TREE_SCHEMA_VERSION } from "../tree/tree.js"
 
 import {
+  describeEndStanding,
   describeFunnelStage,
+  END_STANDINGS,
   FUNNEL_STAGES,
   funnelReachOf,
   inflationFor,
+  pageReadingOf,
   pageViewsFor,
   type FunnelPair,
+  type PageReading,
+  type PartDeclarations,
   type StoredFunnel,
   type StoredPageViews,
 } from "./index.js"
 
 /**
- * Built on stored rows, because those are what the function takes: a window's
- * funnel counters and the two numbers the door and the rollups wrote go in one
- * end, and a share of the readers who arrived comes out of the other.
+ * Built on stored rows and a tree, because those are what the function takes: a
+ * window's funnel counters, the two numbers the door and the rollups wrote, and
+ * the revision the pairs are being asked about. A share of the readers who
+ * arrived comes out of the other end, and so does whether the question still
+ * names anything.
  */
 
-const WHERE = { treeId: TREE, revision: 1 } as const
+const element = (name: string, type: string, children: readonly LoomNode[] = []): ElementNode => ({
+  kind: "element",
+  id: nodeId(name),
+  type: primitiveType(type),
+  props: {},
+  children,
+})
+
+const text = (name: string, value: string): LoomNode => ({
+  kind: "text",
+  id: nodeId(name),
+  value,
+})
+
+const NOTHING_DECLARED: PartDeclarations = {
+  copyFor: () => undefined,
+  typesWithRole: () => [],
+}
+
+/**
+ * The revision every pair below is asked of, holding each node the fixtures
+ * name. Built through `pageReadingOf` rather than written out, so what the
+ * reading says a revision contains is what §6 says it does and not a second
+ * spelling of it.
+ */
+const readingOf = (root: ElementNode, revision = 1): PageReading =>
+  pageReadingOf(
+    { treeId: TREE, schemaVersion: TREE_SCHEMA_VERSION, revision, root },
+    [],
+    NOTHING_DECLARED
+  )
+
+const PAGE = element("root", "loom.stack", [
+  element("a", "loom.section"),
+  element("b", "loom.section"),
+  element("c", "loom.section"),
+  element("z", "loom.section"),
+  element("band", "loom.section", [element("form", "loom.form")]),
+  element("deep", "loom.section"),
+])
+
+const WHERE = readingOf(PAGE)
 
 const AT = "2026-10-05T09:00:00.000Z"
 
@@ -115,6 +165,197 @@ describe("inflationFor", () => {
 
   it("is null where nothing opened, because the question has no answer", () => {
     expect(inflationFor(WHERE, [views(0, 30)])).toBeNull()
+  })
+})
+
+describe("END_STANDINGS", () => {
+  it("has a line for every standing", () => {
+    for (const standing of END_STANDINGS) expect(describeEndStanding(standing)).toBeTruthy()
+  })
+})
+
+describe("the pair the revision no longer has", () => {
+  /**
+   * The finding this closes, as the two readings it could not tell apart. Both
+   * rows say `reached 0, converted 0`; one is a band readers never scroll to
+   * and the other is a question about a part the page has not had since a
+   * change, and the remedies are opposite.
+   */
+  it("tells a stale question from a funnel nobody reached", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [funnel("band", "form", 0, 0), funnel("gone", "form", 0, 0)],
+      [views(100, 100)]
+    )
+    const unreached = reach.pairs.find((one) => one.pair.from.nodeId === nodeId("band"))
+    const stale = reach.pairs.find((one) => one.pair.from.nodeId === nodeId("gone"))
+
+    expect(unreached?.stale).toBe(false)
+    expect(unreached?.ends).toStrictEqual({ from: "present", to: "present" })
+    expect(unreached?.entry.share).toBe(0)
+    expect(unreached?.lostBefore).toBe(1)
+    expect(unreached?.worse).toBe("before")
+
+    expect(stale?.stale).toBe(true)
+    expect(stale?.ends).toStrictEqual({ from: "absent", to: "present" })
+    expect(stale?.entry.share).toBeNull()
+    expect(stale?.lostBefore).toBeNull()
+    expect(stale?.worse).toBeNull()
+  })
+
+  it("withholds every figure that needed the missing first end, and keeps the counts", () => {
+    const reach = funnelReachOf(WHERE, [funnel("gone", "form", 40, 10)], [views(100, 100)])
+    const [only] = reach.pairs
+
+    expect(only?.reached).toBe(40)
+    expect(only?.converted).toBe(10)
+    expect(only?.updatedAt).toBe(AT)
+
+    expect(only?.rate).toBeNull()
+    expect(only?.rateAtMost).toBeNull()
+    expect(only?.entry.share).toBeNull()
+    expect(only?.entry.atMost).toBeNull()
+    expect(only?.conversion.share).toBeNull()
+    expect(only?.lostBefore).toBeNull()
+    expect(only?.lostBetween).toBeNull()
+  })
+
+  /**
+   * The two ends fail differently, which is why the withholding is per figure.
+   * Readers who reached the first end reached it whatever became of the second.
+   */
+  it("keeps the entry share where only the second end is gone", () => {
+    const reach = funnelReachOf(WHERE, [funnel("band", "gone", 40, 0)], [views(100, 100)])
+    const [only] = reach.pairs
+
+    expect(only?.ends).toStrictEqual({ from: "present", to: "absent" })
+    expect(only?.stale).toBe(true)
+    expect(only?.entry.share).toBe(0.4)
+    expect(only?.entry.readers).toBe(40)
+    expect(only?.lostBefore).toBe(0.6)
+
+    expect(only?.conversion.share).toBeNull()
+    expect(only?.rate).toBeNull()
+    expect(only?.rateAtMost).toBeNull()
+    expect(only?.lostBetween).toBeNull()
+    expect(only?.worse).toBeNull()
+  })
+
+  it("withholds the rate on a stale pair even though it needs no denominator", () => {
+    /**
+     * `rate` survives a silence, because two counts off one row divide into
+     * each other without arrivals. It does not survive a missing end: there is
+     * no question, rather than a question with no denominator.
+     */
+    const silenced = funnelReachOf(WHERE, [funnel("band", "form", 60, 15)], [])
+    const gone = funnelReachOf(WHERE, [funnel("band", "gone", 60, 15)], [])
+
+    expect(silenced.pairs[0]?.rate).toBe(0.25)
+    expect(gone.pairs[0]?.rate).toBeNull()
+  })
+
+  it("reads an end against the revision it was handed, not the one the row names", () => {
+    /**
+     * The change that dissolves a pair: revision 2 of the same tree without the
+     * band. The counters are filed under the revision being asked about either
+     * way, which is what makes the tree the only thing that can say.
+     */
+    const without = readingOf(element("root", "loom.stack", [element("deep", "loom.section")]), 2)
+    const reach = funnelReachOf(
+      without,
+      [funnel("band", "form", 0, 0, { treeId: TREE, revision: 2 })],
+      [views(100, 100, { treeId: TREE, revision: 2 })]
+    )
+
+    expect(reach.pairs[0]?.ends).toStrictEqual({ from: "absent", to: "absent" })
+    expect(reach.stalePairs).toBe(1)
+  })
+
+  it("calls an end naming a text node absent, because no signal can ever name one", () => {
+    const withText = readingOf(element("root", "loom.stack", [text("legal", "All rights")]))
+    const reach = funnelReachOf(withText, [funnel("legal", "root", 0, 0)], [views(10, 10)])
+
+    expect(reach.pairs[0]?.ends.from).toBe("absent")
+  })
+
+  it("counts the stale pairs once for a window read twice", () => {
+    /** The double-count case every counter here is held to (0158). */
+    const once = funnelReachOf(WHERE, [funnel("gone", "form", 0, 0)], [views(100, 100)])
+    const twice = funnelReachOf(
+      WHERE,
+      [funnel("gone", "form", 0, 0), funnel("gone", "form", 0, 0)],
+      [views(100, 100)]
+    )
+
+    expect(once.stalePairs).toBe(1)
+    expect(twice.stalePairs).toBe(1)
+    expect(twice.duplicatedPairs).toBe(1)
+  })
+
+  it("is nought on a page whose every pair still names something", () => {
+    const reach = funnelReachOf(
+      WHERE,
+      [funnel("band", "form", 60, 15), funnel("root", "form", 100, 20)],
+      [views(100, 100)]
+    )
+
+    expect(reach.stalePairs).toBe(0)
+    expect(reach.orphanedPairs).toBe(0)
+    expect(reach.pairs.every((one) => !one.stale)).toBe(true)
+  })
+
+  describe("an end the tree has not got, with a count against it", () => {
+    it("raises the orphan alarm for a count on a missing first end", () => {
+      const reach = funnelReachOf(WHERE, [funnel("gone", "form", 40, 10)], [views(100, 100)])
+
+      expect(reach.pairs[0]?.orphaned).toBe(true)
+      expect(reach.orphanedPairs).toBe(1)
+    })
+
+    it("raises it for a conversion on a missing second end", () => {
+      const reach = funnelReachOf(WHERE, [funnel("band", "gone", 40, 10)], [views(100, 100)])
+
+      expect(reach.pairs[0]?.orphaned).toBe(true)
+    })
+
+    it("does not raise it where the missing end counted nothing", () => {
+      const reach = funnelReachOf(WHERE, [funnel("gone", "form", 0, 0)], [views(100, 100)])
+
+      expect(reach.pairs[0]?.stale).toBe(true)
+      expect(reach.pairs[0]?.orphaned).toBe(false)
+      expect(reach.orphanedPairs).toBe(0)
+    })
+
+    it("is independent of a reach above the page views there were", () => {
+      const both = funnelReachOf(WHERE, [funnel("gone", "form", 140, 90)], [views(100, 100)])
+
+      expect(both.pairs[0]?.orphaned).toBe(true)
+      expect(both.pairs[0]?.unreconciled).toBe(true)
+    })
+
+    it("counts an orphan once for a window read twice", () => {
+      const twice = funnelReachOf(
+        WHERE,
+        [funnel("gone", "form", 40, 10), funnel("gone", "form", 40, 10)],
+        [views(100, 100)]
+      )
+
+      expect(twice.orphanedPairs).toBe(1)
+    })
+  })
+
+  /**
+   * The tree says where the two ends sit, so the temptation is to call a pair
+   * whose second end comes first a fault. A pair has no ordering beyond its two
+   * ends (0146), and a reader who scrolls back up satisfies it honestly.
+   */
+  it("says nothing about a pair whose second end comes first in the page", () => {
+    const forwards = funnelReachOf(WHERE, [funnel("a", "z", 40, 10)], [views(100, 100)])
+    const backwards = funnelReachOf(WHERE, [funnel("z", "a", 40, 10)], [views(100, 100)])
+
+    expect(backwards.pairs[0]?.ends).toStrictEqual({ from: "present", to: "present" })
+    expect(backwards.pairs[0]?.stale).toBe(false)
+    expect(backwards.pairs[0]?.conversion).toStrictEqual(forwards.pairs[0]?.conversion)
   })
 })
 

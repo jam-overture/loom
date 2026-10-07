@@ -106,6 +106,12 @@ export type LaunchedPage = {
    */
   readonly addInitScript: (script: string) => Promise<unknown>
   readonly waitForTimeout: (ms: number) => Promise<unknown>
+  /**
+   * On the page and not on a locator, because that is where the driver puts it
+   * and the reason is the same one `ShotStep.key` gives: a keypress goes to
+   * whatever holds focus, so there is no element for it to be addressed to.
+   */
+  readonly keyboard: { readonly press: (key: string) => Promise<unknown> }
   readonly locator: (selector: string) => LaunchedLocator
   readonly frameLocator: (selector: string) => LaunchedFrame
   readonly screenshot: (options: {
@@ -123,6 +129,7 @@ export type ContextOptions = {
   readonly viewport: { readonly width: number; readonly height: number }
   readonly deviceScaleFactor: number
   readonly reducedMotion: "reduce"
+  readonly hasTouch: boolean
 }
 
 export type LaunchedBrowser = {
@@ -162,6 +169,38 @@ export const contextOptionsFor = (viewport: SpecimenViewport): ContextOptions =>
    * taken without it.
    */
   reducedMotion: "reduce",
+  /**
+   * The same kind of condition, for the pointer rather than for motion, and
+   * `SpecimenViewport.touch` says what it buys.
+   *
+   * **`hasTouch` alone, and `isMobile` deliberately not set.** That pair is how
+   * Playwright's own device descriptors are written, so the choice needs the
+   * measurement behind it. Taken in this container, at 390x844, reading
+   * `matchMedia` in the page:
+   *
+   * | context | `hover` | `pointer` | `innerWidth` |
+   * | --- | --- | --- | --- |
+   * | neither | `hover` | `fine` | 390 |
+   * | `hasTouch` | `none` | `coarse` | 390 |
+   * | `isMobile` | `hover` | `fine` | **980** |
+   * | both | `none` | `coarse` | 390 |
+   *
+   * `hasTouch` is what moves the pointer; `isMobile` moves nothing about it.
+   * What `isMobile` does move is the **meta viewport**, and the 980 above is
+   * that: on a document with no `<meta name="viewport">` Chromium falls back to
+   * a 980-pixel layout width and the picture is a desktop page scaled down —
+   * the exact failure the comment on `PHONE` has warned about since it was
+   * written. Every page the application serves declares the meta tag, so
+   * `isMobile` would be inert there; a specimen's rendered page and any
+   * hand-written fixture are the cases that would silently break. So it is left
+   * off: it buys nothing and it can cost the whole picture.
+   *
+   * **One residual limit, measured rather than assumed.** `"ontouchstart" in
+   * window` stays `false` under `hasTouch`, while `navigator.maxTouchPoints`
+   * becomes 1. A page that sniffs the pointer in CSS is now photographed
+   * truthfully; a page that sniffs `ontouchstart` in a script still is not.
+   */
+  hasTouch: viewport.touch,
 })
 
 /** Run in the page: the overflow check four reports quote, at the source. */
@@ -415,6 +454,7 @@ export const chromiumBrowser = async (
             else if ("fill" in step) await at(step.fill).fill(step.text)
             else if ("scrollTo" in step) await at(step.scrollTo).scrollIntoViewIfNeeded()
             else if ("waitFor" in step) await at(step.waitFor).first().waitFor()
+            else if ("key" in step) await page.keyboard.press(step.key)
             else await page.waitForTimeout(step.wait)
           }
         },

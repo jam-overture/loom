@@ -268,8 +268,8 @@ export default defineSpecimen({
    * and must not put the page into a horizontal scroll.
    */
   viewports: [
-    { label: "wide", width: 1280, height: 3400, deviceScaleFactor: 2 },
-    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2 },
+    { label: "wide", width: 1280, height: 3400, deviceScaleFactor: 2, touch: false },
+    { label: "phone", width: 390, height: 844, deviceScaleFactor: 2, touch: true },
   ],
   themes: [
     {
