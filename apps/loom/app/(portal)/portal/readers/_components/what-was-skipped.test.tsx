@@ -9,10 +9,18 @@ import {
   type LoomNode,
   type LoomTree,
 } from "@jam-overture/loom"
-import { PART_STANDINGS, type ReaderTally } from "@jam-overture/loom/signals"
+import {
+  PART_STANDINGS,
+  pageReachOf,
+  pageReadingOf,
+  type ReaderTally,
+  type StoredPageViews,
+} from "@jam-overture/loom/signals"
 
 import { runtimeWordsIn } from "@/app/(portal)/_test/plain-language"
 import { recordOf, surfaceOf } from "@/app/(portal)/_test/rendered"
+import { arrivalsOf, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
+import { namesInTree } from "@/app/(portal)/_lib/part-name"
 import { skippingOf, type PageSkipping } from "@/app/(portal)/_lib/skipped"
 import { plainStanding } from "@/app/(portal)/_lib/vocabulary"
 
@@ -68,8 +76,35 @@ const tally = (id: string, counters: Partial<ReaderTally> = {}): ReaderTally => 
 const reading = (tallies: readonly ReaderTally[]): PageSkipping =>
   skippingOf(PAGE, tallies, DECLARED)
 
-const drawn = (tallies: readonly ReaderTally[]) =>
-  render(<WhatWasSkipped skipping={reading(tallies)} />)
+const door = (row: Partial<StoredPageViews> = {}): StoredPageViews => ({
+  treeId: row.treeId ?? TREE,
+  revision: row.revision ?? 4,
+  opened: row.opened ?? 0,
+  appearances: row.appearances ?? 0,
+  updatedAt: row.updatedAt ?? "2026-10-07T09:00:00.000Z",
+})
+
+/**
+ * How many people there were, off the same join this list is.
+ *
+ * `undefined` is the state every test here was written in, and it stays the
+ * default: the rows fall back to the figure they have always carried when
+ * nothing has counted the arrivals, and that fallback is as much worth pinning
+ * as the honest figure is.
+ */
+const arrivals = (
+  tallies: readonly ReaderTally[],
+  rows: readonly StoredPageViews[]
+): PageArrivals =>
+  arrivalsOf(pageReachOf(pageReadingOf(PAGE, tallies, DECLARED), rows), namesInTree(PAGE))
+
+const drawn = (tallies: readonly ReaderTally[], rows?: readonly StoredPageViews[]) =>
+  render(
+    <WhatWasSkipped
+      skipping={reading(tallies)}
+      arrivals={rows === undefined ? undefined : arrivals(tallies, rows)}
+    />
+  )
 
 /** A page read to the hero and no further, which is the case worth drawing. */
 const DROPS_OFF: readonly ReaderTally[] = [
@@ -122,6 +157,32 @@ describe("the list a reader meets", () => {
    */
   it("gives a reached count its denominator", () => {
     expect(surfaceOf(drawn(DROPS_OFF).container)).toContain("27 of 30 visits")
+  })
+
+  /**
+   * **The denominator, when there is an honest one.**
+   *
+   * `27 of 30 visits` divides by the largest `views` any single row of the
+   * window reports — a floor, carrying the over-count of every visit still
+   * being read when a counting window closed. With the arrivals in hand the
+   * row divides by a count of people instead, and the raw reach stays in the
+   * table at the foot of the card.
+   */
+  it("measures a row against the readers who arrived when it can", () => {
+    const said = surfaceOf(drawn(READ_THROUGH, [door({ opened: 30, appearances: 40 })]).container)
+
+    expect(said).toContain("about 20 of the 30 readers")
+    expect(said).not.toContain("27 of 30 visits")
+  })
+
+  /**
+   * And falls back rather than going blank. A count against a floor is a true
+   * sentence about a denominator nobody can stand behind, which is worth more
+   * to a reader than nothing at all — the section above this one says which of
+   * the two they are looking at.
+   */
+  it("keeps the figure it has always drawn where there is no honest one", () => {
+    expect(surfaceOf(drawn(READ_THROUGH, []).container)).toContain("27 of 30 visits")
   })
 
   /** A part nobody got to has no count to give, and must not print a zero. */
@@ -177,14 +238,18 @@ describe("the counters that are not about this page", () => {
    * would win.
    */
   it("draws no list at all", () => {
-    const { container } = render(<WhatWasSkipped skipping={reading(MISMATCHED)} />)
+    const { container } = render(
+      <WhatWasSkipped skipping={reading(MISMATCHED)} arrivals={undefined} />
+    )
 
     expect(container.querySelectorAll("li")).toHaveLength(0)
     expect(surfaceOf(container)).toContain("aren’t about the page we have")
   })
 
   it("names the parts that prove the pair is wrong, one click down", () => {
-    const { container } = render(<WhatWasSkipped skipping={reading(MISMATCHED)} />)
+    const { container } = render(
+      <WhatWasSkipped skipping={reading(MISMATCHED)} arrivals={undefined} />
+    )
 
     expect(surfaceOf(container)).not.toContain("n_gone")
     expect(recordOf(container)).toContain("n_gone")
@@ -276,6 +341,7 @@ describe("the governing principle", () => {
           tally("n_page", { views: 8, reached: 8 }),
           tally("n_gone", { views: 8, reached: 8 }),
         ])}
+        arrivals={undefined}
       />
     )
 
@@ -297,6 +363,21 @@ describe("the governing principle", () => {
 
   it("explains what the visit figure is, because it is a floor and not a count", () => {
     expect(recordOf(drawn(DROPS_OFF).container)).toContain("a floor rather than a count")
+  })
+
+  /**
+   * And says which of the two the rows above are against, in both cases. Two
+   * sections of one card dividing by different numbers with nothing saying so
+   * is the failure this whole reading exists to end; it must not be reproduced
+   * inside one section.
+   */
+  it("says which denominator the rows above were measured against", () => {
+    expect(recordOf(drawn(READ_THROUGH, [door({ opened: 30, appearances: 40 })]).container)).toContain(
+      "measured against the 30 readers who arrived"
+    )
+    expect(recordOf(drawn(READ_THROUGH, []).container)).toContain(
+      "nothing has counted how many people arrived"
+    )
   })
 
   /**

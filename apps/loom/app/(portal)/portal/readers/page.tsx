@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { treeIdSchema, type LoomTree, type TreeId } from "@jam-overture/loom"
 import {
   describeReaderSignalStoreError,
+  pageReachOf,
   pageReadingOf,
   pageViewReadingOf,
   readingPaceOf,
@@ -16,6 +17,7 @@ import { ListOrder } from "@/app/(portal)/_components/list-order"
 import { Measured, Screen } from "@/app/(portal)/_components/screen"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { arrivalsOf, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
 import { requireActor } from "@/app/(portal)/_lib/auth/identity"
 import { pageNameOf, unnamed, type PageName } from "@/app/(portal)/_lib/page-name"
 import { namesInTree, type PartName } from "@/app/(portal)/_lib/part-name"
@@ -133,22 +135,30 @@ const ReadersPage = async ({
    * can see by how much: a page view is counted a second time at the door, as a
    * single event, so the difference between the two numbers *is* the straddle.
    *
-   * It matters here and nowhere else on the screen. A reader count that is too
-   * high makes the mean time per reader too short, and too short calls more
-   * parts hurried than should be — the one direction a verdict built to be safe
-   * cannot afford to be wrong in. The drop-off reading is a ratio between two
-   * parts of one page, so the same inflation is on both sides of it and very
-   * nearly divides out; the pace reading divides a time by a count and has
-   * nothing to cancel against.
+   * **These rows now serve two readings and they used to serve one.** The pace
+   * reading divides a time by a reader count, so a count that is too high makes
+   * the mean time per reader too short, and too short calls more parts hurried
+   * than should be — the one direction a verdict built to be safe cannot afford
+   * to be wrong in. The drop-off reading needs no correction at all: it is a
+   * ratio between two parts of one page, so the same inflation is on both sides
+   * of it and very nearly divides out.
    *
-   * **A failed read costs the correction and not the screen.** It is applied
-   * where it is available and the section says which figure it used, which is
-   * the honest version of a number nobody can check.
+   * The second reading is the whole of *how many people were there*. The same
+   * rows carry the **exact** count of visits that began on a version, counted
+   * once each at the door, which is the denominator every rate on this screen
+   * was missing — so the rows are handed over whole as well as being read for
+   * the correction. See `_lib/arrivals.ts`.
+   *
+   * **A failed read costs both and not the screen.** The correction is applied
+   * where it is available and the section says which figure it used; the
+   * arrival count is absent rather than guessed at, and its section says that
+   * out loud. Both are the honest version of a number nobody can check.
    */
   const doors = await portalReaderTallies.pageViews(
     scoped === undefined ? undefined : { treeId: scoped }
   )
-  const inflations = doors.ok ? pageViewReadingOf(doors.value).revisions : []
+  const openings = doors.ok ? doors.value : []
+  const inflations = pageViewReadingOf(openings).revisions
 
   /*
    * One read of each page the counters mention, serving three questions at
@@ -207,6 +217,19 @@ const ReadersPage = async ({
    */
   const paced = new Map<string, PagePacing>()
 
+  /*
+   * And how many people there were to have done any of it, which is the fourth
+   * reading off the same join and the denominator the other three were missing.
+   *
+   * It is the only one of the four that needs something the join does not
+   * carry: the exact count of visits that began on this version, which is in
+   * the door rows above. Every other figure on this card divides by the largest
+   * visit count any one row of the window reports, and that is a floor rather
+   * than a count — so this reading is what lets the card say *about 40 of the
+   * 320 readers who arrived* where it could only say *9 of the 36 visits*.
+   */
+  const arrived = new Map<string, PageArrivals>()
+
   for (const reading of readings) {
     const newest = reading.revisions[0]!.revision
     const tree = served.trees.get(reading.treeId)
@@ -252,6 +275,25 @@ const ReadersPage = async ({
     paced.set(
       reading.treeId,
       pacingOf(readingPaceOf(joined, { inflation: door?.inflation ?? 0 }), names)
+    )
+
+    /*
+     * Scoped to the page and not to the version, exactly as the counters above
+     * are: the join matches the one row belonging to this reading and reports
+     * how many of the rest it dropped, which is a sentence worth having in the
+     * record. Rows belonging to another page are filtered out rather than
+     * counted, because *every other page in the deployment was dropped* is a
+     * sentence with nothing in it.
+     */
+    arrived.set(
+      reading.treeId,
+      arrivalsOf(
+        pageReachOf(
+          joined,
+          openings.filter((row) => row.treeId === reading.treeId)
+        ),
+        names
+      )
     )
   }
 
@@ -376,6 +418,15 @@ const ReadersPage = async ({
                * Absent in the same cases as the two above, off the same join.
                */
               pacing={paced.get(reading.treeId)}
+              /*
+               * Absent in the same cases again. The arrival count itself does
+               * not need the page — it is a door row — but the parts it is
+               * divided into do, and a section that answered half of itself on
+               * a version gap would be a second shape of this reading and a
+               * second way for one card to disagree with itself. Filed rather
+               * than built.
+               */
+              arrivals={arrived.get(reading.treeId)}
             />
           ))}
         </>
