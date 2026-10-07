@@ -515,6 +515,51 @@ describe("reaching a state a press cannot produce", () => {
     expect(step({ scrollTo: 400 })).toBe(false)
     expect(step({ scrollTo: "[data-controls]", click: "[data-ask]" })).toBe(false)
   })
+
+  /**
+   * The third gap of this shape and the first that is about **focus**. A control
+   * whose whole contract is the keyboard — an overlay that closes on Escape and
+   * puts the reader back where they came from — has no state a press reaches,
+   * because a browser grants a visible focus ring on the strength of the last
+   * input being a keyboard. A mouse photographing a focus state photographs no
+   * focus state.
+   */
+  it("carries a keypress through beside the presses, in the order it was written", () => {
+    const planned = planShots(
+      listOf({
+        shots: [
+          {
+            path: "/docs",
+            out: "back-on-the-trigger",
+            do: [{ key: "Tab" }, { key: "Enter" }, { waitFor: "[data-loom-presented='true']" }, { key: "Escape" }],
+          },
+        ],
+      })
+    )
+
+    expect(planned[0]?.do).toEqual([
+      { key: "Tab" },
+      { key: "Enter" },
+      { waitFor: "[data-loom-presented='true']" },
+      { key: "Escape" },
+    ])
+  })
+
+  /**
+   * It is the one step with no selector in it, so the thing to refuse is a lane
+   * writing one anyway: `{ key: "Escape", click: "button" }` reads as *press
+   * Escape on that button*, which is not what either half means.
+   */
+  it("refuses a misspelled key, an empty key, and a key aimed at an element", () => {
+    const step = (value: unknown) =>
+      shotListSchema.safeParse({ shots: [{ path: "/x", out: "x", do: [value] }] }).success
+
+    expect(step({ key: "Escape" })).toBe(true)
+    expect(step({ keys: "Escape" })).toBe(false)
+    expect(step({ key: "" })).toBe(false)
+    expect(step({ key: 27 })).toBe(false)
+    expect(step({ key: "Escape", click: "button" })).toBe(false)
+  })
 })
 
 describe("what the browser started with", () => {

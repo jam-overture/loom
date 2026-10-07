@@ -278,7 +278,7 @@ instead of the viewport:
 }
 ```
 
-Five steps and no more: `click`, `fill`, `wait`, `waitFor` and `scrollTo`. Every
+Six steps and no more: `click`, `fill`, `wait`, `waitFor`, `scrollTo` and `key`. Every
 one of them names a state to arrive at and none of them reports what is there —
 the moment this grows a way to assert or to branch, the harness has become a
 test runner with a camera attached ([0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)).
@@ -289,6 +289,15 @@ something to its scroller has frames no press lands on, because the driver
 scrolls only far enough to expose the thing it is about to click. It is strict
 like `click`, for the same reason — which of two matches is brought into view
 decides what the picture is of.
+
+`key` presses at whatever holds focus and is the one step that names **no
+element** — a keypress has none, and a step taking a selector would be a press on
+an element, which `click` already is. It is the only way to photograph anything
+whose subject is focus: a ring is painted on the strength of the last input
+having been a keyboard, so the same region closed by a mouse comes back as a
+picture of no focus state. Key names are the driver's — `Tab`, `Enter`, `Escape`,
+`ArrowDown`, `Shift+Tab` — and one it does not know fails the shot
+([0237](../../decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)).
 
 ### Reaching a state the load has already passed
 

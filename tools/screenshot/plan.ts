@@ -76,6 +76,8 @@ const stepSchema = z.union([
   z.object({ waitFor: z.string().min(1) }).strict(),
   /** Bring an element into view without pressing it. `ShotStep.scrollTo`. */
   z.object({ scrollTo: z.string().min(1) }).strict(),
+  /** Press a key at whatever holds focus. `ShotStep.key` says why it takes no selector. */
+  z.object({ key: z.string().min(1) }).strict(),
 ])
 
 /**

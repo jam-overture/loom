@@ -229,7 +229,7 @@ export const pastTheFold = (box: ElementBox, viewport: SpecimenViewport): number
 /**
  * One thing to do to a page before the shutter.
  *
- * Four members, and the line they are all on one side of is
+ * Five members, and the line they are all on one side of is
  * [0159](../../decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)'s:
  * **an instrument may reach a state and may never assert one.** Each of these
  * names a state to arrive at; none of them observes what is there. The moment
@@ -273,6 +273,29 @@ export type ShotStep =
    * ended up.
    */
   | { readonly scrollTo: string }
+  /**
+   * Send a keypress to whatever currently holds focus.
+   *
+   * The fifth reach, and the first that names no element — which is the whole
+   * of it. Every other member addresses a selector; a keypress is addressed to
+   * **focus**, and a step that took a selector would be a press on an element
+   * rather than a key, which `click` already is. So a lane reaching a
+   * keyboard-only state writes the journey that gets focus where it wants it
+   * and then presses, exactly as a reader does.
+   *
+   * It is the reach a control whose entire contract is the keyboard needs, and
+   * without it such a control cannot be photographed at all: Escape closing an
+   * overlay, Tab arriving somewhere, Enter on a control a mouse would click.
+   * `click` is not a substitute even where both close the same region, because
+   * a browser grants a visible focus ring on the strength of the **last input
+   * being a keyboard** — so the picture a mouse takes of a focus state is a
+   * picture of no focus state.
+   *
+   * On 0159's near side with the other four: it presses and never says what
+   * happened. A key the driver does not recognise fails the shot, which is the
+   * loud end of a typo rather than a silent press of three literal letters.
+   */
+  | { readonly key: string }
 
 /**
  * The longest a single `wait` step may ask for.

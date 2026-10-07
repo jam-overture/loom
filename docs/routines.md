@@ -417,6 +417,17 @@ That is the whole of how a signed-in screen gets photographed — there is no
 | `{ "waitFor": "<selector>" }` | wait for it to appear. The **first** match; several is fine |
 | `{ "wait": <ms> }` | let it settle. 30 seconds is the ceiling and there is no way past it |
 | `{ "scrollTo": "<selector>" }` | bring it into view without pressing it. **One** element, like `click` |
+| `{ "key": "<key>" }` | press a key at whatever holds focus. **No selector**, because a keypress has none |
+
+`key` is the step to reach anything whose subject is **focus**, and it is not
+interchangeable with `click` even where both produce the same state: a browser
+grants a visible focus ring on the strength of the **last input having been a
+keyboard**, so a mouse photographing a focus state photographs no focus state.
+A keyboard journey is written as one — `{ "key": "Tab" }` to arrive,
+`{ "key": "Enter" }` to press, `{ "key": "Escape" }` to leave — and the key names
+are the driver's (`Tab`, `Enter`, `Escape`, `ArrowDown`, `Shift+Tab`). One it does
+not know fails the shot rather than typing the letters
+([0237](../decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)).
 
 `before` is one approach — a `path`, an optional `waitFor`, an optional `frame`,
 and a `do` list — made in the shot's own browser context before its own address

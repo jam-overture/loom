@@ -28,6 +28,14 @@ import { DISMISS_EVENT, PRESENTED_ATTRIBUTE } from "./presented.js"
  * facts about the region and the page around it, which is the half the primitive
  * owns. A primitive that presents a *modal* region has to arrange them and this
  * seam neither helps nor hinders it.
+ *
+ * **What is here, and is not any of those three.** The trigger's button is this
+ * control's, so where a reader is left when the region closes is this control's
+ * too ([0237](../../decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)).
+ * A region hidden while a reader stood inside it leaves them on nothing, and the
+ * fix is one `focus()` onto a button this file rendered — not a fact about any
+ * element the primitive laid out. The three a modal needs are unchanged and
+ * still absent.
  */
 
 export type PresentControlProps = {
@@ -125,6 +133,14 @@ export const PresentControl = ({ label }: PresentControlProps) => {
    */
   useEffect(() => setUsable(true), [])
 
+  /**
+   * Whether the close now in flight should put the reader back on the trigger.
+   * A ref rather than state because nothing renders from it: it is set by the
+   * handler that decided to close and read by the effect that runs after the
+   * attribute has been written, which is one render apart and never two.
+   */
+  const returning = useRef(false)
+
   const toggle = useCallback(() => setOpen((was) => !was), [])
 
   /**
@@ -157,27 +173,73 @@ export const PresentControl = ({ label }: PresentControlProps) => {
     const parent = trigger.current?.parentElement
     if (!parent) return
 
-    const close = () => setOpen(false)
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close()
+    const close = (returnFocus: boolean) => {
+      returning.current = returnFocus
+      setOpen(false)
     }
 
+    /**
+     * Escape is heard on the document, so the reader may be anywhere — including
+     * the page behind an open region, because nothing traps focus there at all
+     * (0176). Returning them only when they are still inside the box is the same
+     * fact as that limit rather than a separate rule.
+     */
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return
+      close(parent.contains(document.activeElement))
+    }
+
+    /**
+     * A press outside is itself a destination, so it never moves the reader. The
+     * ordering is the reason this cannot be settled by reading `activeElement`
+     * like Escape does: `pointerdown` fires *before* the browser moves focus to
+     * what was pressed, so at this instant focus is still inside the region the
+     * press is closing, and a control that read it here would pull the reader
+     * off the thing they had just clicked.
+     */
     const onPointerDown = (event: Event) => {
       const target = event.target
       if (target instanceof Node && parent.contains(target)) return
-      close()
+      close(false)
     }
+
+    /**
+     * Always, and without asking where focus is. The cross is inside the region
+     * by construction — it is the one control whose placement the seam refuses
+     * to register anywhere else — so pressing it is a reader asking to leave,
+     * whatever the browser did about focusing a button on click. That disagreement
+     * is real: Safari does not focus one, every other engine does, and a keyboard
+     * press focuses it everywhere. Reading focus here would make the keyboard
+     * case work and the Safari case silently not.
+     */
+    const onDismiss = () => close(true)
 
     document.addEventListener("keydown", onKeyDown)
     document.addEventListener("pointerdown", onPointerDown)
-    parent.addEventListener(DISMISS_EVENT, close)
+    parent.addEventListener(DISMISS_EVENT, onDismiss)
 
     return () => {
       document.removeEventListener("keydown", onKeyDown)
       document.removeEventListener("pointerdown", onPointerDown)
-      parent.removeEventListener(DISMISS_EVENT, close)
+      parent.removeEventListener(DISMISS_EVENT, onDismiss)
     }
+  }, [open])
+
+  /**
+   * The return itself, in its own effect and after the one that writes the
+   * attribute, so the region is already hidden when the reader arrives on the
+   * button. Declaration order is what guarantees that: React runs an element's
+   * effects in the order they were written.
+   *
+   * The trigger is never the element that gets hidden — it is a child of the box
+   * the attribute lands on and the region is another — so there is nothing here
+   * that depends on how the primitive wrote its rule.
+   */
+  useEffect(() => {
+    if (open || !returning.current) return
+
+    returning.current = false
+    trigger.current?.focus()
   }, [open])
 
   if (!usable) return null

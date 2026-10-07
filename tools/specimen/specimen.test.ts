@@ -326,6 +326,7 @@ const fakeBrowser = (
             else if ("fill" in step) journal.push(`fill ${step.fill}${where} "${step.text}"`)
             else if ("scrollTo" in step) journal.push(`scrollTo ${step.scrollTo}${where}`)
             else if ("waitFor" in step) journal.push(`waitFor ${step.waitFor}${where}`)
+            else if ("key" in step) journal.push(`key ${step.key}`)
             else journal.push(`wait ${step.wait}`)
           }
         },
@@ -671,6 +672,24 @@ describe("taking the shots", () => {
     })
 
     expect(journal).toEqual(["scrollTo [data-controls]", "measure"])
+  })
+
+  /**
+   * The journal is the assertion: a keypress goes in among the presses in the
+   * order written, and comes out with **no frame and no selector beside it**. It
+   * is the one step addressed to focus rather than to an element, and a frame
+   * suffix appearing here would mean the harness had quietly made it one.
+   */
+  it("drives a keypress among the steps, addressed to nothing, even inside a frame", async () => {
+    const { browser, journal } = fakeBrowser([])
+
+    await captureShots(
+      [shotAt({ frame: "iframe#demo", do: [{ click: "[data-open]" }, { key: "Escape" }] })],
+      browser,
+      { outDir: "reports" }
+    )
+
+    expect(journal).toEqual(["click [data-open] in iframe#demo", "key Escape", "measure"])
   })
 
   it("resolves a scroll against the frame a shot names, like every other selector", async () => {
@@ -1412,6 +1431,16 @@ describe("the browser adapter", () => {
                     waitForTimeout: async (ms: number) => {
                       journal.push(`wait ${ms}`)
                     },
+                    /**
+                     * Journalled with no selector beside it, which is the one
+                     * thing this member asserts about the driver: a keypress
+                     * reaches the page and never an element.
+                     */
+                    keyboard: {
+                      press: async (key: string) => {
+                        journal.push(`key ${key}`)
+                      },
+                    },
                     locator: (selector: string) => locatorAt(undefined, selector),
                     frameLocator: (frame: string) => ({
                       locator: (selector: string) => locatorAt(frame, selector),
@@ -1585,6 +1614,23 @@ describe("the browser adapter", () => {
     await page.act([{ scrollTo: "[data-controls]" }])
 
     expect(recorder.journal.slice(1)).toEqual(["scrollTo [data-controls]"])
+    expect(recorder.selectors).toEqual([])
+  })
+
+  /**
+   * Through the driver's own `keyboard`, which is why this is asserted here as
+   * well as against the fake: `selectors` staying empty is the proof that no
+   * locator was built, so there is no element for a frame to resolve it against
+   * and no first-of-several to take.
+   */
+  it("presses a key at the page rather than at any element", async () => {
+    const recorder = recordingLauncher()
+    const browser = await chromiumBrowser(recorder.launcher, "/browsers/chromium")
+    const page = await browser.open(WIDE)
+
+    await page.act([{ key: "Escape" }], "iframe#demo")
+
+    expect(recorder.journal.slice(1)).toEqual(["key Escape"])
     expect(recorder.selectors).toEqual([])
   })
 

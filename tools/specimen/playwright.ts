@@ -106,6 +106,12 @@ export type LaunchedPage = {
    */
   readonly addInitScript: (script: string) => Promise<unknown>
   readonly waitForTimeout: (ms: number) => Promise<unknown>
+  /**
+   * On the page and not on a locator, because that is where the driver puts it
+   * and the reason is the same one `ShotStep.key` gives: a keypress goes to
+   * whatever holds focus, so there is no element for it to be addressed to.
+   */
+  readonly keyboard: { readonly press: (key: string) => Promise<unknown> }
   readonly locator: (selector: string) => LaunchedLocator
   readonly frameLocator: (selector: string) => LaunchedFrame
   readonly screenshot: (options: {
@@ -448,6 +454,7 @@ export const chromiumBrowser = async (
             else if ("fill" in step) await at(step.fill).fill(step.text)
             else if ("scrollTo" in step) await at(step.scrollTo).scrollIntoViewIfNeeded()
             else if ("waitFor" in step) await at(step.waitFor).first().waitFor()
+            else if ("key" in step) await page.keyboard.press(step.key)
             else await page.waitForTimeout(step.wait)
           }
         },

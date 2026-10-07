@@ -8,6 +8,53 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-07 — proving a picture moved means building the tree twice by hand, and two runs in a row have done it with `cmp`
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/specimen/`) · **Status:** open — **nothing is broken and no picture in
+any report is wrong**; this is a cost that has now been paid twice in two days
+with the same six shell commands, written down before it is paid a third time
+
+A screenshot proves a change only against a photograph of the tree **without**
+it. Nothing in either harness takes that pair, so a run that wants one does this:
+copy the changed source aside, `git show origin/main:<file> >` over it, re-run
+`pnpm specimen` into a scratch directory, copy the good file back, and `cmp` the
+two sets.
+
+**Two consecutive framework runs have written exactly that.** #538 did it to
+prove a phone shot taken with a mouse was the old behaviour rather than a
+reconstruction of it — and its strongest sentence is that the control came back
+*byte-identical to another lane's committed shot*. This run did it to prove a
+focus ring arrives on a trigger, and the result is the same shape: three states
+photographed both ways, **two byte-identical and the third the whole claim.**
+
+**The byte-identical half is the part that is easy to miss and is what makes the
+third picture evidence.** A lone "after" picture of a focus ring says nothing —
+the ring is also where it was before anything opened. What makes it proof is
+that the two shots either side of the change came back *the same file*, so the
+only variable between the pair is the thing being argued about. That comparison
+is currently a `cmp` in a scratch directory and appears in a report as a
+sentence a reader has to take on trust.
+
+**What would close it.** A flag naming a git ref to photograph the same specimen
+against — `--against origin/main` — which builds the sheet twice and prints, per
+shot, `identical` or `differs`. It is on [0159](decisions/0159-an-instrument-may-reach-a-state-and-may-never-assert-one.md)'s
+near side only if it **prints and never fails**: a harness that went red on a
+moved picture would make every deliberate visual change a build failure, which
+is the opposite of what it is for.
+
+**Why it is not taken here.** It builds the tree from another ref, which means
+checking out, installing and bundling a second worktree inside a harness that
+today only ever runs the code it is in. That is a bigger change than the fix it
+would have illustrated, and it belongs in a run that has nothing else in it.
+
+**Deliberately not proposed: a committed baseline image per specimen.** It is the
+obvious cheaper answer and it is worse here — every sheet in `reports/` is
+already a dated artefact nobody updates, so a baseline would be a second copy of
+every picture, going stale silently, and the first lane to change a palette would
+be asked to re-bless forty files.
+
+---
 ## 2026-10-06 — nothing in the library says a primitive renders inside a sentence, so the first surface to compose one keeps a list of three type strings
 
 **Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
@@ -1393,6 +1440,41 @@ makes a stacking context, and a stacking context confines every `z-index` inside
 it — so the frame's layer stopped being a page layer and the bands *after* the
 tile in the document painted straight over the scrim. The photograph is what
 found it. A region drawn over the page has to be allowed to be over the page.
+
+### 7 October, `Loom daily build` — **a fourth thing was unowned, and it is the one that shipped**
+
+Taking this entry's framework half found something neither of us had named, and
+it is worth separating from the two that are still here: **where a reader is
+left standing when the region closes.**
+
+A browser does not leave focus on an element inside a subtree a stylesheet has
+just hidden. It blurs it, and focus falls to `<body>`. So a keyboard reader who
+opened the lightbox, tabbed to its cross and pressed it lost their place in the
+document entirely — the next Tab started again from the top of the page. Same on
+Escape. All three primitives on this seam did it.
+
+That is **not** one of clause 6's three. It is a fact about the trigger's own
+button, which has been this control's since the first one shipped, and it had no
+owner only because the question does not arise until something other than the
+trigger can close the region — which is what 0176 added. Shipped on
+`framework-57-a-phone-shot-taken-with-a-mouse` and recorded as
+[0237](decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md),
+with no primitive prop, stylesheet rule or registration touched.
+
+**The two this entry names are untouched and this is not a claim on them.** A
+reader can still tab out of an open region into the page behind it; nothing is
+`inert`. What has changed is the shape of the gap: it is one thing now rather
+than three, and it is **more urgent than it was**, because a control that returns
+focus correctly reads from the outside like a control that manages focus. The
+next author will assume the trap is there.
+
+**It is not taken here because it reverses clause 6 of an Accepted record**,
+which the framework brief calls `ARCHITECTURAL — needs review`. Writing it as a
+`Proposed` record would also hold this fix behind that review, which is the
+opposite of what three keyboard-inaccessible primitives need. The recommendation
+went to the maintainer on the pull request instead: a `modal: true` on `present`,
+the shape 0176 itself names in the sentence *"if the seam ever grows a sixth
+member or a `modal: true`"*. **This entry stays open on exactly that.**
 
 ---
 ## 2026-10-01 — two cross-lane edits forced by a hundred-and-second primitive: one assertion in `src/sdk/`, and five lesson transcripts of which one is a teaching section
