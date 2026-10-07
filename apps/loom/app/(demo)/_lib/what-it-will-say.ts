@@ -12,6 +12,7 @@ import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import { offeredPresets, presetById, presetInterpreter, type DemoPresetId } from "./presets"
 import { wouldPutTheLastChangeBack, type SettingMove } from "./put-back"
+import { lastMovesIn, type ChangeRecord } from "./record"
 import { demoPolicy } from "./session"
 import { DEMO_ACTOR } from "./visitor"
 
@@ -337,10 +338,29 @@ export const whatEachWillSay = async (
   available: readonly DemoPresetId[],
   ids: IdFactory,
   clock: Clock,
-  /** Handed through unchanged, so every row is measured against one history. */
-  lastMoves?: readonly SettingMove[]
+  /**
+   * The visitor's record, **required**, and that is this parameter's whole
+   * design.
+   *
+   * It was optional for one commit and the defect matrix caught what that
+   * costs: deleting the argument at the call site puts every row back on the
+   * promise it shipped with, and the entire suite stays green — because the
+   * call site is `page.tsx`, an `async` Server Component no `vitest` run can
+   * mount. This lane has counted that hole twice (14 and 18 September) and the
+   * answer that works is not another test, it is a signature a caller cannot
+   * silently stop answering. Required, the deletion is a **type error** and
+   * `pnpm verify` is what catches it.
+   *
+   * **The records rather than the moves**, so `lastMovesIn`'s rule — the first
+   * record that *reached the page*, and what it moved — is applied in one place
+   * by the module that depends on it, rather than at a call site then free to
+   * hand in a different history than the card below the row was measured
+   * against.
+   */
+  records: readonly ChangeRecord[]
 ): Promise<AskVerdicts> => {
   const says: Partial<Record<DemoPresetId, WillSay>> = {}
+  const lastMoves = lastMovesIn(records)
 
   for (const preset of offeredPresets(available)) {
     const said = await whatItWillSay(tree, preset.id, ids, clock, lastMoves)

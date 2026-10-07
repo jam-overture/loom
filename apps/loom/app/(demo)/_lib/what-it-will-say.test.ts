@@ -14,6 +14,7 @@ import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 import { demoPageTree } from "./page-tree"
 import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById } from "./presets"
 import { settingsMoved } from "./put-back"
+import type { ChangeRecord } from "./record"
 import {
   asksThatPutItBack,
   whatEachWillSay,
@@ -234,7 +235,7 @@ describe("whatEachWillSay", () => {
    * only demonstrates when a key is present is not a demo.
    */
   it("reaches a verdict on every ask the panel is offering", async () => {
-    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
 
     expect(Object.keys(says).sort()).toEqual([...ALL].sort())
     for (const id of ALL) expect(says[id]?.standing, id).toBeDefined()
@@ -246,7 +247,7 @@ describe("whatEachWillSay", () => {
    * button would be a claim again.
    */
   it("gives the starting page two answers it goes ahead with and three it stops for", async () => {
-    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
     const standings = Object.values(says).map((said) => said.standing)
 
     expect(standings.filter((standing) => standing === "on-its-own")).toHaveLength(2)
@@ -259,14 +260,15 @@ describe("whatEachWillSay", () => {
       demoPageTree(),
       ["palette", "trim"],
       randomIdFactory,
-      systemClock
+      systemClock,
+      []
     )
 
     expect(Object.keys(says).sort()).toEqual(["palette", "trim"])
   })
 
   it("says nothing at all when nothing is on offer", async () => {
-    expect(await whatEachWillSay(demoPageTree(), [], randomIdFactory, systemClock)).toEqual({})
+    expect(await whatEachWillSay(demoPageTree(), [], randomIdFactory, systemClock, [])).toEqual({})
   })
 
   /**
@@ -279,7 +281,7 @@ describe("whatEachWillSay", () => {
     const tree = demoPageTree()
     const before = JSON.stringify(tree)
 
-    await whatEachWillSay(tree, ALL, randomIdFactory, systemClock)
+    await whatEachWillSay(tree, ALL, randomIdFactory, systemClock, [])
 
     expect(JSON.stringify(tree)).toBe(before)
   })
@@ -304,13 +306,22 @@ describe("whether a press would put the last change back", () => {
     const operations = preset?.plan(tree, randomIdFactory)
     if (!operations) throw new Error(`preset ${id} planned nothing`)
 
-    return {
-      moves: settingsMoved(tree, {
+    const moved = settingsMoved(tree, {
         deltaId: randomIdFactory.deltaId(),
         treeId: tree.treeId,
         baseRevision: tree.revision,
         operations,
-      }),
+    })
+
+    return {
+      /**
+       * The record the press would have written, carrying the two fields
+       * `lastMovesIn` reads off it — what it moved, and the fact that it
+       * reached the page.
+       */
+      records: [
+        { revision: { produced: 1 }, settingsMoved: moved } as unknown as ChangeRecord,
+      ] as readonly ChangeRecord[],
       tree: operations.reduce((current, operation) => {
         const next = applyOperation(current.root, operation)
         if (!next.ok || next.value.kind !== "element") throw new Error("did not apply")
@@ -322,7 +333,7 @@ describe("whether a press would put the last change back", () => {
 
   /** Nothing has happened, so nothing can be put back. */
   it("says no of every ask on the arrival screen", async () => {
-    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
 
     expect(Object.values(says).every((said) => said.putsBack === false)).toBe(true)
   })
@@ -339,7 +350,7 @@ describe("whether a press would put the last change back", () => {
       ALL,
       randomIdFactory,
       systemClock,
-      after.moves
+      after.records
     )
 
     expect(says.palette?.putsBack).toBe(true)
@@ -359,7 +370,7 @@ describe("whether a press would put the last change back", () => {
       ALL,
       randomIdFactory,
       systemClock,
-      after.moves
+      after.records
     )
 
     expect(says.palette?.standing).toBe("on-its-own")
@@ -375,7 +386,7 @@ describe("whether a press would put the last change back", () => {
    */
   it("says no when the history is not handed in at all", async () => {
     const after = pressed("palette")
-    const says = await whatEachWillSay(after.tree, ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(after.tree, ALL, randomIdFactory, systemClock, [])
 
     expect(says.palette?.putsBack).toBe(false)
   })

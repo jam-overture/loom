@@ -14,7 +14,7 @@ import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"
 import { askedWith, DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
 import { theEnding, whatTheRailShows } from "./rail"
-import { lastMovesIn, recordFromEvents, type ChangeRecord } from "./record"
+import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, rememberRecord, type DemoSession } from "./session"
 import { whatEachWillSay } from "./what-it-will-say"
@@ -188,7 +188,7 @@ const endingOf = async (session: DemoSession) => {
     view.available,
     randomIdFactory,
     systemClock,
-    lastMovesIn(session.records)
+    session.records
   )
 
   return { view, says, ending: theEnding(view, says) }

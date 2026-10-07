@@ -7,7 +7,6 @@ import { demoPageTree } from "@/app/(demo)/_lib/page-tree"
 import { whatTheRailShows, theEnding } from "@/app/(demo)/_lib/rail"
 import { demoRegistry, demoThemes } from "@/app/(demo)/_lib/registry"
 import { demoPolicy, demoSession } from "@/app/(demo)/_lib/session"
-import { lastMovesIn } from "@/app/(demo)/_lib/record"
 import { readVisitorId } from "@/app/(demo)/_lib/visitor"
 import { whatEachWillSay } from "@/app/(demo)/_lib/what-it-will-say"
 
@@ -185,11 +184,14 @@ const DemoPage = async () => {
      * (`put-back.ts`) answer it one step earlier, off the delta the Gate has
      * just assessed, so the row and the card cannot disagree.
      *
-     * `lastMovesIn` is the record module's own reading of which history counts
-     * — the first record that reached the page, and what it moved — rather
-     * than a second walk of the log here.
+     * The **records**, not a reading of them: `what-it-will-say.ts` applies
+     * `lastMovesIn`'s own rule — the first record that reached the page, and
+     * what it moved — so this file decides nothing, and the argument is
+     * required so a later run cannot delete it with the suite green. It is the
+     * one defect in this unit no test could catch, because no `vitest` run can
+     * mount this file; `tsc` catches it instead.
      */
-    lastMovesIn(records)
+    records
   )
 
   /**
