@@ -45728,7 +45728,7 @@ straddled, and the two states are not that.
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
 · **Status:** **closed by `signals-11-the-pair-the-change-dissolved`** — each end
 looked up in the reading and given an `EndStanding`, with
-[0236](decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md).
+[0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md).
 **Two corrections to this entry, both against its own proposal.** §10's five
 fates are *not* the vocabulary: four of them describe a pair compared across two
 readings and a funnel is asked of one revision at a time, so reusing the set
@@ -45867,7 +45867,7 @@ change with no consumer to break, and a figure worth a sentence**
 
 `funnelReachOf(where, funnels, rows)` is now
 `funnelReachOf(reading, funnels, rows)`, where `reading` is the `PageReading`
-§6 already produces ([0236](decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+§6 already produces ([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
 Nothing in the repository called it — it landed this morning on #527 and the
 reader screen has not drawn a funnel yet — so this breaks nothing today and is
 filed so the first screen to draw one is not written against the old shape.
@@ -45898,7 +45898,7 @@ asked. `describeEndStanding` carries the line for a person.
 ## 2026-10-06 — nothing lets a primitive say what it can report, so a pair asking `activated` of a band is indistinguishable from a button nobody pressed
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
-(`src/primitives/`, `src/role.ts`) · **Status:** open — **the gap 0236 names and
+(`src/primitives/`, `src/role.ts`) · **Status:** open — **the gap 0238 names and
 declines to guess at**; nothing is blocked and the standing says what it cannot
 say
 
@@ -45909,7 +45909,7 @@ and it reports `reached 0, converted 0` — the same two numbers as a stale pair
 and as a button nobody pressed.
 
 Looking the end up in the revision's tree separates the stale case out
-([0236](decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
 It cannot separate the other two, and the reason is a declaration that does not
 exist. `EndStanding` therefore has **two members and not three**: `present` means
 the revision still has a node with that id and no more, and its doc comment says
@@ -45948,7 +45948,7 @@ estimated:
 
 | | length | outcome |
 | --- | --- | --- |
-| `decisions/0236-a-funnel-end-…-per-figure.md` | **189** | wrapped in double backticks, link dead |
+| `decisions/0238-a-funnel-end-…-per-figure.md` | **189** | wrapped in double backticks, link dead |
 | `reports/2026-10-06-signals-the-pair-the-change-dissolved.md` | **142** | clean |
 
 So **about 148 is right**, and it is not about images: this body had none. The
@@ -45960,7 +45960,7 @@ that checks links.
 **What is new is which convention generates the breaking name.** That entry
 names the `reports/` screenshot convention. The same arithmetic catches
 **`decisions/NNNN-<sentence>.md`**, and worse: the record filenames in this
-repository are whole sentences by convention, so 0236's is **96 characters** on
+repository are whole sentences by convention, so 0238's is **96 characters** on
 its own against a 93-character prefix. Every decision record this repository has
 written since the filenames became sentences is over the line on any branch with
 a descriptive name, and **this lane writes one of those on most runs** — so every

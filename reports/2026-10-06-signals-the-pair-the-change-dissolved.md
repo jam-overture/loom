@@ -78,7 +78,7 @@ keep. Filed for `Loom primitives`.
 
 ## Records
 
-**Added [0236](../decisions/0236-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)**
+**Added [0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)**
 — *A funnel end the revision no longer has is a standing, and what is withheld is
 per figure.* Nothing superseded.
 
@@ -159,14 +159,14 @@ branch changes.
 
 **The long-URL mangling hit the record link in this pull request's own body**,
 and it gave the 5 October finding the bracket it was missing. Two
-`github.com/.../blob/...` links were in one body: the 189-character one to 0236
+`github.com/.../blob/...` links were in one body: the 189-character one to 0238
 came back wrapped in double backticks with its closing paren pushed outside, and
 the 142-character one to this report came back clean. So that entry's estimate of
 about 148 is right, and it is not about images — there were none.
 
 What is new is that the convention generating the breaking name is not only the
 `reports/` screenshots that entry names. A record filename in this repository is
-a whole sentence, so 0236's is 96 characters against a 93-character prefix, and
+a whole sentence, so 0238's is 96 characters against a 93-character prefix, and
 **this lane writes one most runs**. The body was edited to name both paths in
 backticks rather than link the blobs, which is shorter, survives, and points a
 reviewer at the diff they are already reading. Appended as evidence rather than

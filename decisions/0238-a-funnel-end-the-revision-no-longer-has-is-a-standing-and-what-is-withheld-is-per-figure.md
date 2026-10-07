@@ -1,8 +1,15 @@
-# 0236 — A funnel end the revision no longer has is a standing, and what is withheld is per figure
+# 0238 — A funnel end the revision no longer has is a standing, and what is withheld is per figure
 
 **Status:** Accepted
 **Date:** 2026-10-06
 **Section:** §4c (reader signals)
+
+> **Renumbered on 2026-10-07**, from 0236, when `Loom merge` brought `main` into
+> the branch that carried it (#539). `main` had meanwhile accepted a different
+> 0236 — *a viewport names a device, and the pointer is part of it* (#538) — and
+> two records sharing a number is fatal (0097), so the record already on `main`
+> keeps the number. This record was written on 6 October and nothing in it
+> changed but its number; the citations on the branch were updated with it.
 
 ## Context
 
