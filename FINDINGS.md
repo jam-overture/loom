@@ -45645,3 +45645,83 @@ Recorded because the next consumer is predictable: the same pairing is owed by
 anything that reads `readingChangeOf` across two versions, which is the entry
 from 4 October that is still waiting on a store that can answer for an older
 version.
+
+---
+## 2026-10-06 — a telemetry journal can be read by position and never by time, so "has it got better" can compare two pages and never two weeks
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom daily build`
+(`src/telemetry/journal.ts` and both implementations) · **Status:** open —
+**nothing is blocked**; the comparison this branch ships is correct and is not
+the comparison a person would ask for in words
+
+`/portal/trust` can now say whether the AI is getting better at judging itself.
+It does it by folding the newest page of the journal and the page before it, and
+setting the two gaps side by side. That is a true statement and it is a statement
+about **two hundred entries**, because a page is all a journal can be asked for:
+
+```ts
+type TelemetryReadRequest = { treeId?, cursor?, direction?, limit? }
+```
+
+There is no `since`, no `until`, and no way to ask what a window of time holds.
+So the section is written to say *the stretch of the record before this one* and
+to print the dates each stretch covers, and it deliberately never says *last
+week* — which is the thing a person would actually have asked.
+
+**Why that gap is not cosmetic.** Two pages are two stretches of unequal
+wall-clock time, and how unequal depends on how busy the deployment was. A
+deployment that got busier covers less time per page as it grows, so the same
+section compares a shorter and shorter window against a longer one, and the
+comparison silently changes meaning while every number on it stays right. The
+screen says so in a sentence and a date range; it cannot fix it.
+
+**What would close it**, smallest first:
+
+1. **`recordedAt` bounds on the read** — `since` and `until` beside `cursor`,
+   answered the same paged way. Both implementations index on `seq`, and the
+   memory one already filters a predicate; a Postgres one is a `where` on a
+   column that is written on every insert.
+2. **A page's own ends on `TelemetryPage`** — `from` and `to`, so a consumer
+   does not take them off the first and last record and get them wrong on an
+   empty page. The portal does this in four lines (`_lib/trust-trend.ts`,
+   `spanOf`) and the next consumer will write them again.
+
+Neither is urgent and the second is nearly free. Filed as a framework gap rather
+than taken, per 0018: the portal consumes through published entry points, and a
+read shape is not something a consumer may widen.
+
+**One thing worth knowing before (1) is built.** The span must come off
+`recordedAt` and not `occurredAt`, for the reason `journal.ts` already gives
+about retention: `occurredAt` is what a host said, and a host with a skewed
+serverless clock or a replayed batch is describing its own timeline. A time
+bound on the dodgeable field would let a reader ask for a window and be handed
+records from outside it, in page order, with nothing saying so.
+
+---
+## 2026-10-06 — the screen `screen-source.ts` names as the one nobody wrote a guard for still had no guard, five weeks later
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/trust/`) · **Status:** **closed** by
+`portal-53-has-it-got-better`
+
+`_lib/screen-source.ts` makes this argument in its own header, as the reason the
+portal-wide guard enumerates the filesystem rather than a list:
+
+> *"a per-screen guard only guards the screens somebody remembered to write one
+> for, and **the screen that ships a defect is by definition the one nobody
+> thought about**. `/portal/trust` had no guard, and it is where the two defects
+> this module's first run found were sitting."*
+
+Thirteen screens in this group have a `reading-order.test.ts`. `/portal/trust`
+did not — the screen the sentence is about, named in the file that exists
+because of it, still uncovered when this branch opened it. The portal-wide guard
+did its job and that is the whole point of it; what it cannot hold is the rules
+that are only true of one screen, which on this one are all the same rule: a
+comparison must refuse to be drawn over things that are not comparable.
+
+Closed rather than filed, because it is this lane's own screen and the fix is
+the file. It is recorded at all because the *shape* is not this screen's: a
+sentence in a header naming a known gap is not a guard, and nothing in the
+repository would have said so. The 1 October entry on a finding that said a
+remedy was already built is the same class — a true sentence written in the
+right place, which nobody had a reason to go and check.
