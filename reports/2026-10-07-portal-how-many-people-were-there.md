@@ -260,6 +260,22 @@ its own line and read in a separate command, per `docs/routines.md`.
 | findings ledger | **1,056** entries, 0 malformed |
 | `prerender:check` | 126 pages, 1,584 text junctions, 0 run together |
 
+### Re-run after `main` came in
+
+`main` moved from `a972a26` to `bd0af3d` while this branch was being
+photographed — `Loom signals`' #541, which adds `src/signals/copy-change.ts`.
+GitHub reported the branch un-mergeable, so `main` was merged in (a merge
+commit, never a rebase) and the gate was run again on the merged head
+`69a8ab3`, from a deleted `dist` and `.next` and a fresh `pnpm install`.
+
+**Green, exit 0.** `@jam-overture/loom` 188 files / 4,112 tests — the move is
+#541's `copy-change.test.ts` and nothing of this branch's; `@loom/app`
+unchanged at **409 files / 7,297 tests**; findings ledger **1,058** entries, 0
+malformed, which is this branch's two plus #541's; `prerender:check` 126 pages,
+1,584 text junctions, 0 run together. `FINDINGS.md` was the only file both
+sides touched and it auto-merged — the two branches appended in different
+places.
+
 **No test weakened, skipped or deleted.** The five test files this branch
 touches hold **145 tests**, of which 74 existed before — `+71`: 42 in the new
 `_lib/arrivals.test.ts`, 21 in the new
