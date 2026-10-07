@@ -170,8 +170,8 @@ const intentOf = (tree: LoomTree, ids: IdFactory): EditIntent => ({
 })
 
 describe("the starter compositions", () => {
-  it("offers fifty-seven bands, each with a distinct id", () => {
-    expect(STARTER_COMPOSITIONS).toHaveLength(57)
+  it("offers fifty-nine bands, each with a distinct id", () => {
+    expect(STARTER_COMPOSITIONS).toHaveLength(59)
 
     const ids = STARTER_COMPOSITIONS.map((composition) => composition.id)
     expect(new Set(ids).size).toBe(ids.length)
@@ -1341,10 +1341,47 @@ describe("the parts that offered no choice", () => {
    * whether the bar still has an alternative.
    */
   it("gives the bar, the mosaic, the comparison and the footer a second design each", () => {
-    expect(designsOf("nav")).toEqual(["nav", "nav-centred"])
+    /**
+     * **The bar has three as of 7 October**, and it is the one part in this
+     * assertion where that is worth a sentence rather than a longer array.
+     * `nav-menus` is the design the band beside it documented as *impossible*
+     * until 0234 let a tree name a control — so the third entry is a retraction
+     * landing, not a fourth taste.
+     */
+    expect(designsOf("nav")).toEqual(["nav", "nav-centred", "nav-menus"])
     expect(designsOf("bento")).toEqual(["bento", "bento-mixed"])
     expect(designsOf("comparison")).toEqual(["comparison", "comparison-ways"])
     expect(designsOf("footer")).toEqual(["footer", "footer-signup"])
+  })
+
+  /**
+   * The closing band's three designs, and the third is the one that holds a
+   * region rather than a destination.
+   *
+   * Named rather than counted for the reason above it: `cta-booking` is the
+   * first band in the catalogue whose second control opens something instead of
+   * going somewhere, and a run that added a fourth design of `cta` should not
+   * be able to drop it silently.
+   */
+  it("gives the closing band a design whose second control opens a form over the page", () => {
+    expect(designsOf("cta")).toEqual(["cta", "cta-signup", "cta-booking"])
+
+    const band = bandOf("cta-booking")
+    const dialogs = (function find(node: LoomNode): readonly ElementNode[] {
+      if (node.kind === "text") return []
+      const here = node.kind === "element" && node.type === "loom.dialog" ? [node] : []
+
+      return [...here, ...node.children.flatMap(find)]
+    })(band)
+
+    expect(dialogs).toHaveLength(1)
+    /**
+     * The body is a node rather than a string, which is the claim the band's
+     * own rationale makes and the reason `loom.dialog` takes children at all.
+     */
+    expect(dialogs[0]?.children.some((child) => child.kind === "element" && child.type === "loom.form")).toBe(
+      true
+    )
   })
 
   /**

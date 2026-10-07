@@ -52,3 +52,22 @@ export const plainMoment = (iso: string): string => {
 
   return `${Number(day)} ${monthName} ${year} at ${hour}:${minute} UTC`
 }
+
+/**
+ * The same moment, to the day.
+ *
+ * A stretch of the record spans days, and a span printed to the minute at both
+ * ends is four numbers a reader has to subtract before they learn it covers
+ * about a week. The time is dropped rather than hidden: every caller that needs
+ * the instant keeps the ISO string, as above.
+ */
+export const plainDay = (iso: string): string => {
+  const parts = ISO_UTC.exec(iso)
+  if (parts === null) return iso
+
+  const [, year, month, day] = parts
+  const monthName = MONTHS[Number(month) - 1]
+  if (monthName === undefined) return iso
+
+  return `${Number(day)} ${monthName} ${year}`
+}

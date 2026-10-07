@@ -38,7 +38,7 @@ Nothing in Loom compares them.
 
 That sounds like an oversight, and the first half of this lesson is about why it
 is not one. The second half is about what happens when you write the comparison
-anyway — which this lesson did, and the answer it gave was sixteen rows, not one of
+anyway — which this lesson did, and the answer it gave was eighteen rows, not one of
 which was the thing it was looking for.
 
 ---
@@ -315,7 +315,9 @@ three things the audit already checks:
   declared slots no component placed:      0
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
-  primitives with a declared prop nothing read: 8
+  primitives with a declared prop nothing read: 10
+    loom.menu        label
+    loom.dialog      label
     loom.trend       max, plot, prefix, suffix
     loom.tally       prefix, suffix
     loom.voices      columns, density
@@ -327,15 +329,15 @@ three things the audit already checks:
 ```
 
 Every promise the audit can observe is kept, everywhere, by every primitive. The
-first promise it cannot observe has sixteen exceptions.
+first promise it cannot observe has eighteen exceptions.
 
 If you are holding a number from Predict 3, this is the moment to compare it. But
 the number is the least interesting thing here, and the rows are why. **Read them
-before reading on and decide, for each, what you would do.** Seven of these eight
+before reading on and decide, for each, what you would do.** Seven of these ten
 primitives are in the same situation as each other and it is not the situation the
 sweep was looking for.
 
-### Fifteen of the sixteen are the measurement, not the code
+### Seventeen of the eighteen are the measurement, not the code
 
 `loom.feed` draws a list of entries read from a data binding. Its component starts
 like this:
@@ -405,10 +407,10 @@ is the nearest thing to evidence available that the pattern is ordinary rather t
 a peculiarity of the three primitives that happened to be in the library on the day
 the sweep was written.
 
-So fifteen of the sixteen rows say nothing about the library and everything about
-the instrument. Which brings us to the sixteenth.
+So seventeen of the eighteen rows say nothing about the library and everything about
+the instrument. Which brings us to the eighteenth.
 
-### The sixteenth is real, and it is correct
+### The eighteenth is real, and it is correct
 
 `loom.embed` declares five props. Its component reads four of them. The one it
 does not read is `src` — the URL of the document being framed, which is to say the
@@ -804,21 +806,30 @@ describe("C", () => {
 })
 ```
 
-<!-- moves: when a primitive in src/primitives/ gains a prop that nothing reads
-     unless an answer arrives. This mark covers the fourth line and the rows
-     under it, which are what the lesson is about, so a new member of that set
-     is news rather than drift and the paragraph below the fence says so to the
-     reader. Loom primitives owns the change that would do it. The three zeros
-     above are the control and move for nobody: if one of those is what drifted,
-     this mark does not cover it and something is wrong. They are in the same
-     fence because they are one comparison and the prose names "the fourth
-     line". -->
+<!-- moves: when a primitive in src/primitives/ gains a declared prop its own
+     component does not read. Two ways that happens today, and the second was
+     added on 7 October: a prop nothing reads *unless an answer arrives* (a
+     bound primitive's, which is what this fence was written about), and a prop
+     the *runtime* reads off the node rather than the component — a control
+     named from the tree under 0234, where the primitive must declare the prop
+     and the component never touches it. loom.menu and loom.dialog are the
+     first two of the second kind. Both land in the "measurement, not the code"
+     group below, so the lesson's argument is unchanged and only its arithmetic
+     moves; a member of a *third* kind would be news the prose has to answer.
+     This mark covers the fourth line and the rows under it, which are what the
+     lesson is about. Loom primitives owns the change that would do it. The
+     three zeros above are the control and move for nobody: if one of those is
+     what drifted, this mark does not cover it and something is wrong. They are
+     in the same fence because they are one comparison and the prose names "the
+     fourth line". -->
 
 ```
   declared slots no component placed:      0
   declared behaviours no component placed: 0
   components that threw under their own schema: 0
-  primitives with a declared prop nothing read: 8
+  primitives with a declared prop nothing read: 10
+    loom.menu        label
+    loom.dialog      label
     loom.trend       max, plot, prefix, suffix
     loom.tally       prefix, suffix
     loom.voices      columns, density
@@ -876,7 +887,7 @@ describe("D", () => {
   loom.tally, answered           (nothing unread)
 ```
 
-Five of exercise C's sixteen rows, removed by one line of data each. Notice what had
+Five of exercise C's eighteen rows, removed by one line of data each. Notice what had
 to happen for that: somebody who knows what `loom.feed` reads had to write
 `{ entries: { status: "ready", value: [{ title: "A post" }] } }` — a binding name,
 an outcome shape, and a row shape that matches an internal schema. The probe could
@@ -1165,10 +1176,10 @@ Write for two minutes, then move on.
   about effort, difficulty, or nobody having got round to it, write down what you
   now think the answer is in six words.
 - Predict 3 and your confidence. Two separate things to mark. First the number —
-  most people write 0 or 1, and 16 is nearer. Then, more usefully, go back to what
+  most people write 0 or 1, and 18 is nearer. Then, more usefully, go back to what
   you said you would *do* about each primitive you named. If you wrote "fix it" for
-  any of them, that is the line to keep: fifteen of the sixteen needed nothing done,
-  and the sixteenth needed a security boundary left exactly as it was.
+  any of them, that is the line to keep: seventeen of the eighteen needed nothing done,
+  and the eighteenth needed a security boundary left exactly as it was.
 - Predict 4 asked what a red build from your assertion would mean. Compare it with
   the answer this lesson arrived at — *a candidate for a person to classify* — and
   write down whether your version would have been a gate. A gate on this would have
@@ -1192,7 +1203,7 @@ Write for two minutes, then move on.
 
 Set AH in [`review-schedule.md`](review-schedule.md), two days after this lesson.
 Interleaved with 12, 15, 20, 24, 25 and 28 — heavy on 25, because the population
-rule arrives here for the third time and is the reason fifteen of sixteen rows are
+rule arrives here for the third time and is the reason seventeen of eighteen rows are
 noise; and heavy on 12, because *what the model is told it may write* is what makes
 an unread declaration a fault rather than a tidiness problem.
 

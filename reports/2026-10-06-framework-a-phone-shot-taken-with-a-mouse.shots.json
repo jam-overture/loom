@@ -1,0 +1,29 @@
+{
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-06-framework-copy-button-phone-mouse.png",
+      "viewport": { "label": "phone", "width": 390, "height": 844, "touch": false },
+      "waitFor": "pre",
+      "clip": ".group:has(> pre) >> nth=0",
+      "measure": ["pre", "text=copy"]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-06-framework-copy-button-phone-touch.png",
+      "viewport": "phone",
+      "waitFor": "pre",
+      "clip": ".group:has(> pre) >> nth=0",
+      "measure": ["pre", "text=copy"]
+    },
+    {
+      "path": "/docs/getting-started/installation",
+      "out": "2026-10-06-framework-copy-button-wide.png",
+      "viewport": "wide",
+      "waitFor": "pre",
+      "clip": ".group:has(> pre) >> nth=0",
+      "measure": ["pre", "text=copy"]
+    }
+  ]
+}

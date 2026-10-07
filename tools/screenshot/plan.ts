@@ -46,6 +46,17 @@ const viewportSchema = z.union([
     /** Named for the file, like every other viewport in the harness. */
     label: z.string().min(1).default("custom"),
     deviceScaleFactor: z.number().positive().default(2),
+    /**
+     * Whether the pointer is a finger. `SpecimenViewport.touch` says what it
+     * buys and `contextOptionsFor` says how it is emulated.
+     *
+     * A default rather than required, which is the one place this schema and
+     * the type disagree, and on purpose: a size written into a shot list is a
+     * lane reaching for a window the two named viewports do not cover, and a
+     * window is what a desktop has. `"phone"` is how a lane asks for a phone,
+     * and it has carried the answer since this field existed.
+     */
+    touch: z.boolean().default(false),
   }),
 ])
 
@@ -65,6 +76,8 @@ const stepSchema = z.union([
   z.object({ waitFor: z.string().min(1) }).strict(),
   /** Bring an element into view without pressing it. `ShotStep.scrollTo`. */
   z.object({ scrollTo: z.string().min(1) }).strict(),
+  /** Press a key at whatever holds focus. `ShotStep.key` says why it takes no selector. */
+  z.object({ key: z.string().min(1) }).strict(),
 ])
 
 /**

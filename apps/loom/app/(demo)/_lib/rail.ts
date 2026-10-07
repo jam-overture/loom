@@ -16,6 +16,7 @@ import { availablePresets, leadingAsk, type DemoPresetId } from "./presets"
 import type { ChangeRecord } from "./record"
 import { setAside, type SetAside } from "./set-aside"
 import { spotlightsAcross, spotlitChanges, type Spotlight, type SpotlitChange } from "./spotlight"
+import { thePageItself, type PageItself } from "./the-page-itself"
 import { putsSomethingBack } from "./undo"
 import { whatElseToAsk, type WhatElse } from "./what-else"
 
@@ -144,6 +145,29 @@ export type RailView<TPart> = {
   readonly whatElse?: WhatElse
   /** The one change the page is currently about — the marks, the legend and the way back are all about this one. */
   readonly about?: SpotlitChange
+  /**
+   * The top of the page, drawn in the rail — **the arrival screen's window,
+   * and nothing else's.**
+   *
+   * Absent the moment anything has been asked for, which is the one silence
+   * `the-page-itself.ts` argues: from the first press onwards every screen on
+   * this surface already brings the page to the visitor, and the arrival screen
+   * was the one with no page on it. On a phone the stage begins 250px past the
+   * fold.
+   *
+   * Here rather than at the call site for the reason the other five readings
+   * are: `page.tsx` is an `async` Server Component no `vitest` run can mount,
+   * so a condition written there is a condition nothing can check.
+   *
+   * **The reading itself and not a rendered element**, which is the one place
+   * this differs from the three bands a change is about. Those cross into
+   * client components and need the registry to have been spent on the server
+   * already, so they arrive as callbacks' output; this one is drawn by
+   * `page.tsx` itself, beside the header, exactly as `whatElse` is. A callback
+   * would buy nothing and would cost the test the only interesting assertion
+   * about this reading, which is *which node* it is of.
+   */
+  readonly pageItself?: PageItself
   /** What makes the stage scroll again: a new revision, or a newer question at the same one. */
   readonly spotlightToken: string
 }
@@ -407,6 +431,18 @@ export const whatTheRailShows = <TPart>({
     ...(waiting === undefined ? {} : { waiting }),
   })
 
+  /**
+   * And the window on the arrival screen, which is the only reading here taken
+   * from the tree and the *absence* of everything else.
+   *
+   * `records` rather than a flag: a record is what an ask produces
+   * (`session.ts`), so *nothing has been asked for* and *there are no records*
+   * are one fact rather than two free to disagree. It is also what makes every
+   * screen after the first byte-identical, which is the property this lane
+   * checks.
+   */
+  const itself = thePageItself({ tree, asked: records.length > 0 })
+
   return {
     available,
     spots: drawn.flat(),
@@ -423,6 +459,7 @@ export const whatTheRailShows = <TPart>({
         }),
     readings,
     ...(whatElse === undefined ? {} : { whatElse }),
+    ...(itself === undefined ? {} : { pageItself: itself }),
     ...(about === undefined ? {} : { about }),
     /**
      * The newest marked change, which is the one the visitor has just asked
