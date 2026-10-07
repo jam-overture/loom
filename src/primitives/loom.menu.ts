@@ -69,16 +69,38 @@ const props = z
      * the window — which `presentation.ts` explains this library will not do.
      */
     align: z.enum(EDGE_NAMES).optional(),
+    /**
+     * The words on the button — *Product*, *Account*, *Legal* — written by the
+     * tree (0234).
+     *
+     * Omitted, blank, or anything that is not a string means *this node said
+     * nothing*, and the button reads the declared floor in the deployment's
+     * language. That is the state every menu in this library was in until
+     * today, and it is still a correct page: one menu on a bar called *Menu* is
+     * what a reader expects. What it could not be is **two**.
+     */
+    label: z.string().min(1).max(32).optional(),
   })
   .strict()
 
 type Props = z.infer<typeof props>
 
 /**
- * The button's name, which is this primitive's and not the tree's (0055). It is
- * the one real limit on this primitive and it is stated here rather than
- * discovered: a header with two of these has two buttons reading *Menu*, because
- * nothing in the behaviour seam lets a node name a control. A finding is filed.
+ * The floor under the button's name, and this comment used to say the opposite.
+ *
+ * Until 0234 it read: *"the one real limit on this primitive… a header with two
+ * of these has two buttons reading Menu, because nothing in the behaviour seam
+ * lets a node name a control. A finding is filed."* That finding was taken —
+ * [0234](../../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+ * — and the limit is gone, so the sentence asserting it had to go with it rather
+ * than be left for the next author to believe.
+ *
+ * What the string is **now** is the name a reader is announced for every node
+ * that wrote no `label`, in every language the deployment serves. It is required
+ * whether or not a prop is named (0234's third clause) and it is checked before
+ * the node's word rather than after (the fourth), so a dictionary that answered
+ * this key with whitespace is a control the registry drops — a tree cannot talk
+ * a nameless button onto a bar by filling a prop.
  */
 const MENU_TEXT = { present: "Menu" } as const
 
@@ -94,6 +116,14 @@ export const loomMenu = definePrimitive({
   text: MENU_TEXT,
   behaviours: ["present"],
   interactive: "always",
+  /**
+   * What makes the two-menu header buildable, and the reason this is a `label`
+   * on a menu rather than a reserved prop on everything: 0234's rejected first
+   * alternative would have let a model name the *Copy* button on a code panel
+   * too, and the per-type guarantee that lets one dictionary translate a library
+   * is worth more than the convenience.
+   */
+  names: { present: "label" },
   component: ({ loom, props: given, children }: LoomPrimitiveProps<Props, MenuTextKey, "present">) =>
     createElement(
       "div",

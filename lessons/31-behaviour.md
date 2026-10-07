@@ -1001,7 +1001,7 @@ describe("G", () => {
 ```
 
 ```
-  primitives in the starter library: 106
+  primitives in the starter library: 107
     loom.nav         ["disclose"]
     loom.menu        ["present"]
     loom.lightbox    ["present","dismiss"]

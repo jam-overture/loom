@@ -147,7 +147,7 @@ So, split the way 0176 splits them:
 
 | group | what it needs | state |
 | --- | --- | --- |
-| **dialog · dropdown · lightbox · tooltip** | a region that opens and can be closed by something other than the opener | **unblocked 20 Sep by `present`/`dismiss`.** Three of the four shipped 1 October — `loom.menu`, `loom.popover`, `loom.lightbox` |
+| **dialog · dropdown · lightbox · tooltip** | a region that opens and can be closed by something other than the opener | **closed 7 October.** Three shipped 1 October — `loom.menu`, `loom.popover`, `loom.lightbox` — and `loom.dialog` followed once 0234 let a trigger take its name from the tree |
 | **tabs · segmented control · pricing toggle · radio group** | one of *n* children chosen, where the labels are in the children | **blocked, and `ARCHITECTURAL`.** A container receives its children as one rendered node and cannot read a prop off one (0008), so a control that renders *n* labelled buttons cannot learn what to put on them. 0176 filed it and did not build it |
 | **toast** | a region that appears on an event nobody pressed | **blocked.** One primitive, one gap, and the only member of the vocabulary that would render no control the reader aims at |
 
@@ -158,15 +158,29 @@ So, split the way 0176 splits them:
 members of the pair, and the gallery row of Tier C — *gallery →
 `loom.mosaic`* — became true the day a tile existed that opens.
 
-**A dialog is the one the group did not deliver, and the reason is the trigger's
-word rather than its behaviour.** A control's name is declared by the primitive
-and resolved through the text seam, which is per *type* — so every
+**A dialog was the one the group did not deliver, and the reason was the
+trigger's word rather than its behaviour.** A control's name is declared by the
+primitive and resolved through the text seam, which is per *type* — so every
 `loom.lightbox` on every page says `Expand`, and a deployment may translate that
 but a tree may not write it. For an affordance that is the right answer, and for
 the three that shipped the generic word is the word a reader wants. A dialog's
-trigger is the page's call to action, which is content, and the seam has nowhere
-to put it. Filed on 1 October against the framework; until it moves, a dialog
-here would be a modal opened by a chip reading *Open*.
+trigger is the page's call to action, which is content, and the seam had nowhere
+to put it. This paragraph used to end *"until it moves, a dialog here would be a
+modal opened by a chip reading Open."*
+
+**It moved.**
+[0234](../decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)
+was accepted on 5 October: a primitive may name one of its own props as where a
+control takes its name from, and the declared string stays underneath as the
+floor. `loom.dialog` shipped on 7 October as that record's first consumer, and
+`loom.menu` took a `label` in the same run — which also closed the *header with
+two menus*, two buttons a screen reader had announced identically.
+
+So **the group is four of four**, and what the record leaves open is narrower
+than what it closed: a trigger that renders an icon rather than a word still has
+no accessible name, because a control renders its name as a child. That is a
+question about a control's markup rather than about its name, and the 1 October
+finding keeps it open.
 
 ## The reach of the catalogue over the vocabulary — measured 19 September
 

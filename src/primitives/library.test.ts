@@ -193,8 +193,8 @@ const render = (
 }
 
 describe("the starter library", () => {
-  it("registers as 106 primitives, structure first and the leaves that go anywhere last", () => {
-    expect(STARTER_PRIMITIVES).toHaveLength(106)
+  it("registers as 107 primitives, structure first and the leaves that go anywhere last", () => {
+    expect(STARTER_PRIMITIVES).toHaveLength(107)
     expect(registry.primitives.map((primitive) => primitive.type)).toEqual([
       "loom.page",
       "loom.nav",
@@ -213,6 +213,7 @@ describe("the starter library", () => {
       "loom.overlay",
       "loom.lightbox",
       "loom.popover",
+      "loom.dialog",
       "loom.halo",
       "loom.card",
       "loom.frame",
@@ -7704,14 +7705,43 @@ const presentedPage = (
       props: { src, alt, aspect: "wide", corners: "none" },
     })
 
+  /**
+   * Two menus on one bar, which is the arrangement 0234's consequences name and
+   * nothing in this library could build until `names` had a consumer. Each
+   * carries its own `label`, so the fixture is also the regression: before the
+   * seam moved, these were two buttons a screen reader announced identically.
+   */
   const menu = buildElement(idFactory, {
     type: "loom.menu",
-    props: { align: "end" },
+    props: { align: "end", label: "Product" },
     children: [
       link("Why Loom", "/why"),
       link("How it works", "/how"),
       link("The record", "/record"),
       link("Pricing", "/pricing"),
+    ],
+  })
+
+  const accountMenu = buildElement(idFactory, {
+    type: "loom.menu",
+    props: { align: "end", label: "Account" },
+    children: [link("Your deployments", "/deployments"), link("Sign out", "/sign-out")],
+  })
+
+  /**
+   * The trigger carries the band's own call to action rather than an
+   * affordance, which is the whole of why this primitive could not exist on
+   * 1 October. `measure: "media"` is the ceiling an embedded video wants.
+   */
+  const dialog = buildElement(idFactory, {
+    type: "loom.dialog",
+    props: { label: "Watch the demo", title: "Loom in four minutes", measure: "media" },
+    children: [
+      buildElement(idFactory, {
+        type: "loom.prose",
+        props: { tone: "muted" },
+        children: [text("A proposal written, weighed by the Gate, applied to the tree, and recorded.")],
+      }),
     ],
   })
 
@@ -7749,7 +7779,7 @@ const presentedPage = (
         buildElement(idFactory, {
           type: "loom.nav",
           props: { tone: "surface" },
-          children: [link("Product", "/product"), menu],
+          children: [link("Product", "/product"), menu, accountMenu],
         }),
         buildElement(idFactory, {
           type: "loom.section",
@@ -7759,11 +7789,12 @@ const presentedPage = (
               buildElement(idFactory, {
                 type: "loom.heading",
                 props: { level: 1 },
-                children: [text("Three regions a reader opens")],
+                children: [text("Four regions a reader opens")],
               }),
             ]),
             popover,
             lightbox,
+            dialog,
           ],
         }),
       ],
@@ -7773,13 +7804,14 @@ const presentedPage = (
 }
 
 describe("the regions a reader opens", () => {
-  it("renders all three with nothing left unhonoured", () => {
+  it("renders all four with nothing left unhonoured", () => {
     const { markup, diagnostics } = render(presentedPage(EDITORIAL))
 
     expect(diagnostics).toEqual([])
     expect(markup).toContain("Why Loom")
     expect(markup).toContain("What a gate is")
     expect(markup).toContain("The record, in full")
+    expect(markup).toContain("Loom in four minutes")
   })
 
   it("places no control on a page that was never told scripting runs, and hides nothing either", () => {

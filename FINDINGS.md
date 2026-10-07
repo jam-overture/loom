@@ -45578,3 +45578,107 @@ Recorded because the next consumer is predictable: the same pairing is owed by
 anything that reads `readingChangeOf` across two versions, which is the entry
 from 4 October that is still waiting on a store that can answer for an older
 version.
+
+---
+## 2026-10-07 — a slot handed to a primitive that declares none is dropped with its whole subtree, and nothing anywhere says so
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom daily build`
+(`src/render/`) · **Status:** open — **not blocking**; `loom.dialog` ships and
+its own test characterises the loss
+
+A tree that puts a dialog's body in a slot instead of in children loses it:
+
+```ts
+buildElement(ids, {
+  type: "loom.dialog",
+  props: { label: "Book a call" },
+  children: [buildSlot(ids, "body", [buildText(ids, "A paragraph nobody will read")])],
+})
+```
+
+renders the dialog, renders the plate, renders the bar and the cross, and draws
+**nothing** where the paragraph was. `diagnostics` is `[]`.
+
+**Why this is worth a filing rather than a note.** Every other *something
+arrived and was not drawn* in the render seam has a code for exactly this shape
+— `data-unread`, `data-unshown`, `frame-refused`, `anchor-unusable`,
+`submit-unresolved`. A dropped slot has none, and `grep -rn "unhonoured" src/`
+finds nothing. So this is the one way to lose authored content in a Loom page
+that is invisible from both ends: the reader sees a page that looks finished,
+and the author sees no error.
+
+It is general rather than this primitive's. Any primitive declaring `slots: []`
+— `loom.popover`, `loom.menu`, `loom.stack` and most of the arrangements — will
+do the same. A primitive cannot see its own dropped slots, so this cannot be
+fixed in `src/primitives/`.
+
+`named-controls.test.ts` asserts only the measurable half — the words do not
+reach the page — and deliberately **not** that `diagnostics` is empty, so the
+day the seam starts reporting it that test still passes. The silence is the
+defect and the test does not assert it as correct.
+
+---
+## 2026-10-07 — the one string 0234 made content is the one string `copy` cannot describe, because a control renders nothing until it has hydrated
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` /
+`Loom marketing` · **Status:** open — **nothing is broken today**, and it will
+bite the first sweep that reads a page with a dialog in it
+
+[0234](decisions/0234-a-primitive-may-name-a-control-from-the-tree-and-its-declared-string-is-the-floor.md)'s
+whole argument is that a dialog's trigger carries **content**: *Watch the demo*,
+*Book a call* — the page's own words, which a translator should never hold.
+`copy` is the library's declaration of which props are words a reader reads.
+
+They cannot be joined, and it is not an oversight in either. `copy.test.ts`
+holds two assertions that are each right on their own:
+
+- *draws every prop it declared as copy* — a declared prop must appear in the
+  static markup.
+- *draws no undeclared string prop as text* — anything that does appear must be
+  declared.
+
+A control renders `null` until an effect has proved scripting runs
+(`presentation.ts`), so a named control's word is in **neither** render. Adding
+`"label"` to `loom.dialog`'s `copy` fails the first assertion; leaving it out
+passes the second only because the word is invisible to it. Measured both ways
+on this branch.
+
+**What it costs, and it is not hypothetical.** `Loom marketing`'s word sweeps,
+the reading-time measurement and `textOf` all read a page's words. A band whose
+call to action is *Book a call* has that sentence counted nowhere — the closing
+control of the page is, to every instrument in the repository, not words at all.
+The 6 October entry about inline children is the same seam from the other side:
+that one was about which children join a sentence, this one is about a string
+that is in no child.
+
+Not fixed here because the remedy is a third state — *words a reader reads that
+the static render does not contain* — and inventing one in a primitive's
+declaration would put a convention in `src/primitives/` that the seam reading it
+has never agreed to.
+
+---
+## 2026-10-07 — four of 0234's five "said nothing" shapes cannot be reached through a primitive whose prop is `z.string().min(1)`, and the refusal is the better outcome
+
+**Filed by:** `Loom primitives` · **Owned by:** `Loom primitives` · **Status:**
+**not a defect** — an observation worth having before the next named control is
+written
+
+0234's fifth clause enumerates five shapes of *this node said nothing* — absent,
+`null`, a number, an object, whitespace — and says each falls back to the
+declared string with no diagnostic.
+
+That is the runtime's contract. Through `loom.dialog` and `loom.menu` only
+**two** of the five are reachable, because `label` is declared
+`z.string().min(1).optional()`: a tree carrying `null`, a number, an object or a
+blank string is refused at the schema as `invalid-props`, the primitive draws
+nothing at all, and `resolveBehaviours` is never consulted.
+
+**The refusing half is the one to keep.** A dialog whose `label` arrived as an
+object is a tree something generated wrongly; drawing it with a button reading
+*More* would be a page that works and a defect nobody is ever told about. So
+this is not a request to loosen the schema — it is the note that the clause
+reads as a *runtime* guarantee and is mostly a *schema* outcome in practice, and
+that a future named control declaring `z.string().optional()` without the
+`min(1)` would quietly get the other behaviour.
+
+Both halves are asserted in `named-controls.test.ts`, which is where the measurement is.

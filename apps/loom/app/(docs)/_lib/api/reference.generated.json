@@ -8,7 +8,7 @@
       "files": 93,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4475,7 +4475,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4521,7 +4521,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5473,10 +5473,10 @@
           "reach": "loaded"
         }
       ],
-      "files": 203,
+      "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5938,10 +5938,10 @@
       "slug": "primitives-compositions",
       "types": "./dist/primitives/compositions/index.d.ts",
       "requires": [],
-      "files": 67,
+      "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6327,6 +6327,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/cta-booking-band",
+          "title": "Cta booking band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "ctaBookingBand",
+              "kind": "value",
+              "signature": "const ctaBookingBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/cta-signup-band",
           "title": "Cta signup band",
           "summary": "",
@@ -6621,6 +6635,20 @@
           ]
         },
         {
+          "module": "primitives/compositions/nav-menus-band",
+          "title": "Nav menus band",
+          "summary": "",
+          "symbols": [
+            {
+              "name": "navMenusBand",
+              "kind": "value",
+              "signature": "const navMenusBand: Composition",
+              "truncated": false,
+              "summary": ""
+            }
+          ]
+        },
+        {
           "module": "primitives/compositions/offerings-band",
           "title": "Offerings band",
           "summary": "",
@@ -6875,7 +6903,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7466,7 +7494,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7694,7 +7722,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8153,7 +8181,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8507,7 +8535,7 @@
       "files": 28,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8640,7 +8668,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10117,7 +10145,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10260,7 +10288,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10327,7 +10355,7 @@
       "files": 60,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10924,7 +10952,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10998,7 +11026,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11456,7 +11484,7 @@
       "files": 73,
       "narrower": [],
       "standing": {
-        "packageNames": 1298,
+        "packageNames": 1300,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
