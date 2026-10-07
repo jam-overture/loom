@@ -1,7 +1,8 @@
 import { everyMemberOf } from "../closed-set.js"
-import type { TreeId } from "../ids.js"
+import type { NodeId, TreeId } from "../ids.js"
 
-import { pageViewsFor, type RevisionOf, type StoredPageViews } from "./page-views.js"
+import { pageViewsFor, type StoredPageViews } from "./page-views.js"
+import type { PageReading } from "./parts.js"
 import type { ReachSilence } from "./reach.js"
 import type { FunnelPair } from "./rollup.js"
 import type { StoredFunnel } from "./tally.js"
@@ -61,6 +62,40 @@ import type { StoredFunnel } from "./tally.js"
  * bounded rather than mentioned: {@link PairReach.rateAtMost} spends §8's drift
  * on the only error bar this subsystem can compute for a funnel.
  *
+ * ## A pair the revision no longer has is an answer, not a nought
+ *
+ * A pair is two node ids a deployment wrote down in advance, and a revision is
+ * a tree a proposal changed. So a pair whose end was moved out, renamed or
+ * removed answers `reached 0, converted 0` against every revision after it —
+ * and that is byte-identical to a band readers never scroll to, while the two
+ * remedies are opposite: one is a page to fix and the other is a question to
+ * re-point.
+ *
+ * Nothing on the wire can tell them apart and nothing needs to. §6's join
+ * already holds **every element node of the revision**
+ * ([0212](../../decisions/0212-what-a-reader-signal-means-is-joined-to-the-tree-when-it-is-read.md)),
+ * so an end is looked up in it and given a {@link EndStanding}. That is why
+ * this function takes a {@link PageReading} rather than the tree's id and a
+ * revision number: the reading *is* the revision, so the two can no longer
+ * disagree, and there is no way to ask a funnel question without holding the
+ * page it is about.
+ *
+ * **What is withheld is per figure rather than per pair**, because the two ends
+ * fail differently. An absent `to` leaves `reached` a fact about readers — they
+ * did get to the first end — so {@link PairReach.entry} and
+ * {@link PairReach.lostBefore} still stand and only the figures that need the
+ * second end are withheld. An absent `from` withholds all of them, including
+ * `lostBefore`, whose nought would otherwise read as *every reader failed to
+ * reach it*. {@link PairReach.reached} and {@link PairReach.converted} are
+ * always published: they are what is stored, and a surface saying *this
+ * question is stale and here is what it last counted* is the useful one.
+ *
+ * {@link PairReach.orphaned} is the sharper case and the rarer one: an end the
+ * tree does not have, with a non-zero count against it. Readers satisfied a
+ * question about a part this revision has no node for, which is the funnel's
+ * version of the alarm `PageReading.orphaned` raises — a tree and a window that
+ * do not belong together.
+ *
  * ## What it refuses to say
  *
  * **There is no ranking across pairs.** §9 ranks siblings of one page because
@@ -69,6 +104,14 @@ import type { StoredFunnel } from "./tally.js"
  * the most readers is reliably the one whose `from` is deepest in the page.
  * Ranking them would put a true number at the top of a screen as an answer to a
  * question nobody asked.
+ *
+ * **A pair is never reported as out of order.** The tree says where its two
+ * ends sit, so the temptation is to name a pair whose `to` now precedes its
+ * `from` in reading order. There is no such fate, because a pair has *no path
+ * and no ordering beyond the two ends* (0146): it asks which views did both
+ * things, not in which order, and a reader who scrolls back up satisfies it
+ * honestly. Reporting document order as a fault would invent a rule the counter
+ * does not apply.
  *
  * **There is no page-level total of readers converted.** One page view can
  * satisfy several pairs, so adding them counts it several times — the same
@@ -108,6 +151,57 @@ export const describeFunnelStage = (stage: FunnelStage): string => {
     case "between":
       return "most of the readers lost got to the start of this funnel and did not finish it"
   }
+}
+
+/** What the revision's tree says about one end of a pair. */
+export type EndStanding =
+  /**
+   * The revision has an element node with this id, so a count against the end
+   * is a fact about readers.
+   *
+   * It is not a promise that the node *can* satisfy the end's kind. A pair
+   * asking for `activated` on a band answers nought because a band is not
+   * pressed (0146), and nothing in the tree says which types are pressable —
+   * `role` declares one member today (0114) and none of them is *a control*.
+   * That gap is a declaration another lane owes, and until it exists this
+   * standing means the question still names something and no more.
+   */
+  | "present"
+  /**
+   * No element node of the revision has this id.
+   *
+   * The question was written about a part the page no longer has: removed by a
+   * change, renamed, or moved to another tree. Its count cannot move again, and
+   * the nought it reports is not a reader fact — which is the whole reason this
+   * standing exists, because the figures drawn off it are indistinguishable
+   * from a funnel readers abandon.
+   *
+   * A text node and a slot node carry no identity attributes, so no signal can
+   * ever name one (0212) and no end can honestly point at one. Every id a pair
+   * could legitimately hold is an element node, which is what makes the element
+   * nodes of the revision the right universe to look an end up in.
+   */
+  | "absent"
+
+export const END_STANDINGS: readonly EndStanding[] = everyMemberOf<EndStanding>()([
+  "present",
+  "absent",
+])
+
+/** One line per standing, for a surface putting the reading in front of a person. */
+export const describeEndStanding = (standing: EndStanding): string => {
+  switch (standing) {
+    case "present":
+      return "this revision still has the part the question names"
+    case "absent":
+      return "this revision has no part with that id, so the question is stale"
+  }
+}
+
+/** Where each end of a pair stands against the revision it is being asked of. */
+export type PairEnds = {
+  readonly from: EndStanding
+  readonly to: EndStanding
 }
 
 /**
@@ -186,6 +280,38 @@ export type PairReach = {
   /** When the funnel row last moved. */
   readonly updatedAt: string
   /**
+   * Where each end stands against the revision's tree.
+   *
+   * The pair as a deployment wrote it is on {@link PairReach.pair}; this is
+   * what the revision makes of it.
+   */
+  readonly ends: PairEnds
+  /**
+   * Either end is {@link EndStanding.absent}, so the question is about a part
+   * this revision does not have.
+   *
+   * The counts are still published and every figure that needed the missing end
+   * is withheld. A surface draws this pair as a question to re-point rather
+   * than as a funnel to fix — see the module note for which figures survive
+   * which end.
+   */
+  readonly stale: boolean
+  /**
+   * An end the tree does not have, with a count against it: `reached` on an
+   * absent `from`, or `converted` on an absent `to`.
+   *
+   * Readers satisfied a question about a part this revision has no node for,
+   * which rows written by the same deployment cannot produce. What can is a
+   * tree and a window that do not belong together — the alarm
+   * `PageReading.orphaned` raises for the node counters, raised here for the
+   * pairs. Every figure is withheld on the stale end either way; this says the
+   * staleness is not the ordinary one and the reading itself is suspect.
+   *
+   * It is not {@link PairReach.unreconciled}, which is a count above the page
+   * views there were to hold it. The two are independent and both can be set.
+   */
+  readonly orphaned: boolean
+  /**
    * `converted ÷ reached` — of the readers who got to the first end, the share
    * that finished.
    *
@@ -195,7 +321,9 @@ export type PairReach = {
    * rate wherever {@link FunnelReach.exact} is false.
    *
    * `null` where nothing reached the first end: the question has no answer
-   * rather than the answer nought.
+   * rather than the answer nought. `null` too where either end is absent, for
+   * the same reason one level up — there is no question, rather than a question
+   * nobody answered.
    */
   readonly rate: number | null
   /**
@@ -216,14 +344,21 @@ export type PairReach = {
    * and `null` wherever {@link PairReach.rate} is.
    */
   readonly rateAtMost: number | null
-  /** Of the readers who arrived, the share that got to the first end. */
+  /**
+   * Of the readers who arrived, the share that got to the first end.
+   *
+   * Withheld where `from` is absent, and **given where only `to` is** — the
+   * readers who reached the first end reached it whatever became of the second.
+   */
   readonly entry: FunnelShare
-  /** Of the readers who arrived, the share that got to both. */
+  /** Of the readers who arrived, the share that got to both. Withheld where either end is absent. */
   readonly conversion: FunnelShare
   /**
    * The share of arrivals that never reached the first end.
    *
-   * `null` under a silence or where {@link PairReach.unreconciled}. Where it is
+   * `null` under a silence, where {@link PairReach.unreconciled}, or where
+   * `from` is absent — a nought there would read as *every reader failed to
+   * reach it*, which is the inversion this standing exists to stop. Where it is
    * given it is one of three shares that sum to 1.
    */
   readonly lostBefore: number | null
@@ -318,6 +453,16 @@ export type FunnelReach = {
    * one.
    */
   readonly duplicatedPairs: number
+  /**
+   * Pairs with an end this revision does not have, counted off
+   * {@link FunnelReach.pairs} and therefore once each.
+   *
+   * The figure a screen leads with when it is not nought: *three of your five
+   * funnel questions are about parts this version of the page no longer has.*
+   */
+  readonly stalePairs: number
+  /** Of those, the ones with a count against the missing end. Counted off the same list. */
+  readonly orphanedPairs: number
 }
 
 const NOTHING_MEASURED = {
@@ -378,10 +523,27 @@ const shareOf = (count: number, of: Measured, drawable: boolean): FunnelShare =>
 const rateCeilingOf = (reached: number, converted: number, drift: number): number =>
   Math.min(1, (converted + drift) / Math.max(1, reached - drift))
 
-const reachOf = (row: StoredFunnel, of: Measured, silenced: boolean): PairReach => {
+const standingIn = (parts: ReadonlySet<NodeId>, end: FunnelPair["from"]): EndStanding =>
+  parts.has(end.nodeId) ? "present" : "absent"
+
+const reachOf = (
+  row: StoredFunnel,
+  of: Measured,
+  silenced: boolean,
+  ends: PairEnds
+): PairReach => {
   const { reached, converted } = row
   const unreconciled = !silenced && reached > of.appearances
   const drawable = !silenced && !unreconciled
+
+  /**
+   * The two gates are separate because they withhold for different reasons: a
+   * silence means there is no denominator, and an absent end means there is no
+   * question. `rate` needs only the second, which is why it survives a silence
+   * and not a stale end.
+   */
+  const fromAsked = ends.from === "present"
+  const bothAsked = fromAsked && ends.to === "present"
 
   const lost = of.appearances - reached
   const between = reached - converted
@@ -391,33 +553,44 @@ const reachOf = (row: StoredFunnel, of: Measured, silenced: boolean): PairReach 
     reached,
     converted,
     updatedAt: row.updatedAt,
-    rate: reached === 0 ? null : converted / reached,
-    rateAtMost: silenced || reached === 0 ? null : rateCeilingOf(reached, converted, of.drift),
-    entry: shareOf(reached, of, drawable),
-    conversion: shareOf(converted, of, drawable),
-    lostBefore: drawable ? lost / of.appearances : null,
-    lostBetween: drawable ? between / of.appearances : null,
-    worse: drawable && lost !== between ? (lost > between ? "before" : "between") : null,
+    ends,
+    stale: !bothAsked,
+    orphaned: (!fromAsked && reached > 0) || (ends.to === "absent" && converted > 0),
+    rate: bothAsked && reached > 0 ? converted / reached : null,
+    rateAtMost:
+      bothAsked && !silenced && reached > 0 ? rateCeilingOf(reached, converted, of.drift) : null,
+    entry: shareOf(reached, of, drawable && fromAsked),
+    conversion: shareOf(converted, of, drawable && bothAsked),
+    lostBefore: drawable && fromAsked ? lost / of.appearances : null,
+    lostBetween: drawable && bothAsked ? between / of.appearances : null,
+    worse:
+      drawable && bothAsked && lost !== between ? (lost > between ? "before" : "between") : null,
     unreconciled,
   }
 }
 
 /**
- * Read a revision's funnels against the readers that revision had.
+ * Read a revision's funnels against the readers that revision had, and against
+ * the tree that revision is.
  *
- * The revision is handed in rather than inferred, so there is no way to ask
- * this question without holding the revision it is about — and both sets of
- * rows are filtered to it here rather than trusted, because the two mistakes
- * that would make every figure quietly wrong are a row from the wrong revision
- * and a row counted twice.
+ * **The reading is the revision.** Handing in a `PageReading` rather than a
+ * tree id and a number keeps the property 0231 recorded — the revision is
+ * handed in rather than inferred, and both sets of rows are filtered to it here
+ * rather than trusted — and closes the gap it left: a caller can no longer name
+ * one revision and hold another revision's tree, because there is only the one
+ * object. The two mistakes that would make every figure quietly wrong are a row
+ * from the wrong revision and a row counted twice, and the third is a question
+ * asked of a page that has not had those nodes since March.
  *
- * Linear in the pairs and in the page-view rows, with one pass over each.
+ * Linear in the pairs, the page-view rows and the reading's parts, with one
+ * pass over each.
  */
 export const funnelReachOf = (
-  where: RevisionOf,
+  reading: PageReading,
   funnels: readonly StoredFunnel[],
   rows: readonly StoredPageViews[]
 ): FunnelReach => {
+  const where = { treeId: reading.treeId, revision: reading.revision }
   const { measured, foreign, duplicated } = pageViewsFor(where, rows)
 
   const { opened, appearances, drift, pending, inflation, updatedAt } = measured ?? NOTHING_MEASURED
@@ -431,6 +604,8 @@ export const funnelReachOf = (
     (row) => row.treeId === where.treeId && row.revision === where.revision
   )
 
+  const present = new Set<NodeId>(reading.parts.map((part) => part.nodeId))
+
   const seen = new Set<string>()
   const pairs = matching
     .filter((row) => {
@@ -441,7 +616,12 @@ export const funnelReachOf = (
       return true
     })
     .sort((one, other) => pairKey(one.pair).localeCompare(pairKey(other.pair)))
-    .map((row) => reachOf(row, of, silence !== null))
+    .map((row) =>
+      reachOf(row, of, silence !== null, {
+        from: standingIn(present, row.pair.from),
+        to: standingIn(present, row.pair.to),
+      })
+    )
 
   return {
     treeId: where.treeId,
@@ -459,5 +639,7 @@ export const funnelReachOf = (
     duplicated,
     foreignPairs: funnels.length - matching.length,
     duplicatedPairs: matching.length - pairs.length,
+    stalePairs: pairs.filter((pair) => pair.stale).length,
+    orphanedPairs: pairs.filter((pair) => pair.orphaned).length,
   }
 }

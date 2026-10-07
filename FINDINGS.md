@@ -45388,7 +45388,13 @@ words below it that nobody has read.*
 ## 2026-10-06 — the stale funnel pair cannot be taken from `main`, and it is this lane's own branch in the way
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
-**Status:** open — **extends the 5 October entry on a funnel pair naming a node
+**Status:** **closed by `signals-11-the-pair-the-change-dissolved`** — #527
+landed as #527's own merge, `funnelReachOf` was on `main` this evening, and the
+unit this entry held for the next run was taken by it. The hand-off worked
+exactly as written: the run that read this entry needed no re-derivation of why
+the unit was available, only a `git fetch`.
+
+Originally filed as: **extends the 5 October entry on a funnel pair naming a node
 its revision no longer has.** Nothing is wrong and nothing is needed from another
 lane; this says why the next run and not this one
 
@@ -45720,7 +45726,21 @@ straddled, and the two states are not that.
 ## 2026-10-05 — a funnel pair can name a node its revision no longer has, and the answer is indistinguishable from nobody converting
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/funnel.ts`)
-· **Status:** open — **named rather than built**, because it needs the tree and
+· **Status:** **closed by `signals-11-the-pair-the-change-dissolved`** — each end
+looked up in the reading and given an `EndStanding`, with
+[0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md).
+**Two corrections to this entry, both against its own proposal.** §10's five
+fates are *not* the vocabulary: four of them describe a pair compared across two
+readings and a funnel is asked of one revision at a time, so reusing the set
+would have meant three members that can never be returned — and `reordered` is
+refused outright, because a pair has no ordering beyond its two ends (0146) and
+reporting document order as a fault would invent a rule the counter does not
+apply. And the withholding is **per figure rather than per pair**: an absent `to`
+leaves `reached` a fact about readers, so `entry` and `lostBefore` still stand,
+where a blanket null would have thrown away the one figure a person re-pointing
+the question needs. Five planted defects, five caught.
+
+Originally filed as: **named rather than built**, because it needs the tree and
 this unit deliberately took only the counters
 
 A `FunnelPair` is two node ids a deployment wrote down in advance, and a
@@ -45839,6 +45859,128 @@ from 4 October that is still waiting on a store that can answer for an older
 version.
 
 ---
+## 2026-10-06 — the funnel reading now takes the page reading the reader screen already builds, and `stalePairs` is the figure to lead with after a change lands
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal`
+(`apps/loom/app/(portal)/portal/readers/`) · **Status:** open — **a signature
+change with no consumer to break, and a figure worth a sentence**
+
+`funnelReachOf(where, funnels, rows)` is now
+`funnelReachOf(reading, funnels, rows)`, where `reading` is the `PageReading`
+§6 already produces ([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+Nothing in the repository called it — it landed this morning on #527 and the
+reader screen has not drawn a funnel yet — so this breaks nothing today and is
+filed so the first screen to draw one is not written against the old shape.
+
+**Why the reading rather than the revision.** A reading carries `treeId` and
+`revision`, so nothing is inferred and 0231's property holds. What it closes is a
+caller naming one revision while holding another revision's tree, which is the
+one mistake here that nothing downstream could catch. `/portal/readers` already
+builds the reading for three other figures on the same screen, so the cost at
+the only call site that matters is passing an object it has.
+
+**The figure, and the sentence it is for.** `FunnelReach.stalePairs` is how many
+of a deployment's funnel questions name a part this revision no longer has, and
+`orphanedPairs` is how many of those have a count against the missing end. *Three
+of your five funnel questions are about parts this version of the page no longer
+has* is a sentence nothing could previously say, and after a Gate change lands it
+is the first thing on that screen worth reading.
+
+**What a stale pair must not be drawn as.** Its figures are withheld per end
+rather than per pair, so a pair with an absent `to` still has an honest `entry`
+and `lostBefore` — the traffic the stale question was about — and has `rate`,
+`conversion`, `lostBetween` and `worse` as `null`. Drawing a withheld figure as
+nought is the exact reading this unit exists to stop: it says *every reader who
+arrived failed to reach the start of this funnel* about a question that cannot be
+asked. `describeEndStanding` carries the line for a person.
+
+---
+## 2026-10-06 — nothing lets a primitive say what it can report, so a pair asking `activated` of a band is indistinguishable from a button nobody pressed
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives`
+(`src/primitives/`, `src/role.ts`) · **Status:** open — **the gap 0238 names and
+declines to guess at**; nothing is blocked and the standing says what it cannot
+say
+
+`rollup.ts` has warned since §3 that **an end is the node the signal names,
+never a region it was inside**: a pair asking for `activated` on a band answers
+nought, because a band is not pressed (0146). That is a mis-phrased question,
+and it reports `reached 0, converted 0` — the same two numbers as a stale pair
+and as a button nobody pressed.
+
+Looking the end up in the revision's tree separates the stale case out
+([0238](decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)).
+It cannot separate the other two, and the reason is a declaration that does not
+exist. `EndStanding` therefore has **two members and not three**: `present` means
+the revision still has a node with that id and no more, and its doc comment says
+so rather than implying a guarantee it cannot keep.
+
+**What would close it.** A declaration on a primitive definition naming the
+reader-signal kinds its render can produce — a control can be `activated`, a
+disclosure `disclosed`, a form `completed`, and every element can be `viewed` and
+`dwelled`. It is the same shape as `copy` (0122) and `role` (0114): a fact about
+the library that a registry answers, joined on the server at read time, with no
+byte on the wire and nothing in the browser.
+
+**Why it is not `role`.** `role` has one member, `heading`, and it describes what
+a part *means to a reader* rather than what it can report. Adding `control` to it
+to get this would conflate the two and make the role rows of a `PageReading`
+answer a question they were not built for. A second declaration is the honest
+shape, and this lane would consume it the day it exists — `pageReadingOf` already
+holds the type of every part, so the join is written in one line.
+
+**What it is worth.** Today a deployment that writes `activated` against a band
+sees a funnel that converts nobody and has no way to learn the question was never
+answerable. With the declaration, that pair is the third standing and the screen
+says *this node cannot be pressed* instead of *nobody pressed it*.
+
+---
+## 2026-10-06 — the 148-character rule holds on a decision-record link, and the convention that generates breaking names is not only the screenshots
+
+**Filed by:** `Loom signals` · **Owned by:** `@jonathanbravecredit`
+(infrastructure) · **Status:** open — **evidence on the 5 October entry, not a
+new question.** That entry's rule is right and this is a fifth occurrence that
+confirms its threshold on a URL with no image in it
+
+#539's body carried two `github.com/.../blob/...` links. One was mangled and one
+was not, in the same body, which puts a bracket round the threshold that entry
+estimated:
+
+| | length | outcome |
+| --- | --- | --- |
+| `decisions/0238-a-funnel-end-…-per-figure.md` | **189** | wrapped in double backticks, link dead |
+| `reports/2026-10-06-signals-the-pair-the-change-dissolved.md` | **142** | clean |
+
+So **about 148 is right**, and it is not about images: this body had none. The
+mangling's signature on a markdown link is that the URL comes back enclosed in
+` `` ` and the closing `)` is pushed outside it, which renders as literal text
+rather than as a broken link — visible in the rendered body but not in anything
+that checks links.
+
+**What is new is which convention generates the breaking name.** That entry
+names the `reports/` screenshot convention. The same arithmetic catches
+**`decisions/NNNN-<sentence>.md`**, and worse: the record filenames in this
+repository are whole sentences by convention, so 0238's is **96 characters** on
+its own against a 93-character prefix. Every decision record this repository has
+written since the filenames became sentences is over the line on any branch with
+a descriptive name, and **this lane writes one of those on most runs** — so every
+record link in every pull request body from a lane that cites its own records has
+been breaking, in exactly the way the 5 October entry found the screenshots had
+been.
+
+**The remedy is already in the repository and needs no convention change.** A
+record and a report are both repository files, so a pull request body can name
+the *path* in backticks instead of linking the blob: it is shorter, it survives,
+and a reviewer reading the body is looking at the diff that contains the file.
+#539's body was edited to do that and came back clean on the first read. The
+long-slug filenames themselves are worth keeping — they are how the index reads
+— and nothing has to be renamed.
+
+**What this does not establish**, same as the entry it extends: which hop does
+it. One more data point for it, though — this body was posted through the GitHub
+MCP tool and the *edit* that fixed it went the same way, so the mangling is not
+in the create path only.
+
 ## 2026-10-06 — twelve one-word edits in six of your specimen sheets, forced by a required field, and none of them changes a picture
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom primitives`
