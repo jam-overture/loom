@@ -22,6 +22,61 @@ example-editorial-wide   1280x900@2x  scrollWidth 1280 / innerWidth 1280
 One `.png` per theme per viewport, named `<specimen>-<theme>-<viewport>.png`.
 The exit code is non-zero if any shot overflowed its viewport.
 
+## The other half of the pair
+
+A picture proves a change only against a picture of the tree **without** it, and
+`--against` takes both ([0240](../../decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules \
+  pnpm specimen src/render/the-button-they-came-from.specimen.ts --against origin/main
+```
+
+```
+3 shots against origin/main: 2 identical, 1 differs
+  …-wide-arrived.png              identical
+  …-wide-inside.png               identical
+  …-wide-back-on-the-trigger.png  differs
+  the pictures taken at origin/main are in reports/against
+```
+
+**The two `identical` lines are the point.** A lone "after" picture of a focus
+ring says nothing — the ring is also where it was before anything opened. What
+makes the third shot evidence is that the two either side of it came back the
+same file, so the only variable between the pair is the thing being argued about.
+
+**What comes from where.** `src/` is extracted from the revision; the harness and
+your specimen module are copied in from the working tree. So it is not *"what did
+`main` look like"* — it is **your sheet, pointed at an older library**, which is
+what a report means when it says a picture moved. A sheet written in the same run
+as the change it photographs can therefore still ask the question, and the
+`{ key }` step that only exists on your branch is still available to reach the
+state.
+
+**It prints and never fails.** A moved picture is why you ran the harness; the
+exit code is still the overflow measurement alone.
+
+Three things it says rather than hiding:
+
+- **`the sheet does not build there`**, with the sentence the failure announced
+  itself on. This is the ordinary outcome for a sheet standing on an API the
+  revision does not have, and your own pictures are still good.
+- **`new — no shot of this name there`**, when a theme or viewport your sheet
+  names comes out of `src/` and the revision has no such thing.
+- **`the harness at <ref> stopped early`**, when the second run crashed part way
+  through — without which a half-photographed sheet reads as a sheet of new
+  shots.
+
+A revision `git rev-parse` cannot resolve is the one thing here that *does* fail,
+because it is a question that could not be asked. **A session clone is fifty
+commits deep**, so a ref older than that reads as unresolvable.
+
+The pictures taken at the ref are left in `<out>/against/` under the same names,
+which is where a report's *before* comes from. `reports/against/` is ignored by
+git: copy out the one you want under a short name, because a
+`<specimen>-<theme>-<viewport>-<state>` path clears 160 characters and GitHub
+mangles an image URL past 147.
+
 ## The measurements a shot takes
 
 The line above is the first one: the **document** against the viewport, which is

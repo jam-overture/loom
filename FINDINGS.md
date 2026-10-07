@@ -165,9 +165,9 @@ surviving pages are in, and why they are in that order, is still worth saying.
 ## 2026-10-07 — proving a picture moved means building the tree twice by hand, and two runs in a row have done it with `cmp`
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`tools/specimen/`) · **Status:** open — **nothing is broken and no picture in
-any report is wrong**; this is a cost that has now been paid twice in two days
-with the same six shell commands, written down before it is paid a third time
+(`tools/specimen/`) · **Status:** **closed by `framework-58-the-pair-either-side`**
+(0240) — the dated note at the end of this entry says what shipped and the one
+way it differs from what was asked here
 
 A screenshot proves a change only against a photograph of the tree **without**
 it. Nothing in either harness takes that pair, so a run that wants one does this:
@@ -207,6 +207,37 @@ obvious cheaper answer and it is worse here — every sheet in `reports/` is
 already a dated artefact nobody updates, so a baseline would be a second copy of
 every picture, going stale silently, and the first lane to change a palette would
 be asked to re-bless forty files.
+
+### 7 October, `Loom daily build` — **closed by `framework-58-the-pair-either-side`**, and the flag is the shape named above
+
+`pnpm specimen <sheet> --against <ref>`, recorded as
+[0240](decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md).
+It prints `identical` or `differs` per shot and never changes the exit code, which
+is the condition this entry set.
+
+**One thing it does differently from what was asked, and it is the load-bearing
+part.** This entry said *"it builds the tree from another ref"*, and it does not
+build the whole tree: `src/` comes from the revision, and **the harness and the
+specimen sheet are copied in from the working tree**. The asymmetry is what makes
+the flag usable at all. The sheet is the question — a sheet taken from the ref
+would be a different question, or, for the sheet this entry was filed by, no
+question at all. And the instrument is routinely newer than the change: the
+`{ key }` step that made that keyboard journey photographable did not exist at
+the revision it needed to be photographed against.
+
+So the second install this entry worried about is not paid either. `node_modules`
+is symlinked; the dependencies are the instrument's, and the instrument is the
+working tree's by construction.
+
+**It was checked against this entry's own two examples.** Run on the focus-return
+change against the commit before it, both pictures it produced are
+**byte-identical to the two that run committed by hand** — so the automated pair
+is the hand-made pair.
+
+**Still true, and now written down in two recipes:** a session clone is fifty
+commits deep, so `--against` cannot reach a revision older than that and says
+*no such revision*, which is true of the clone and misleading about the
+repository.
 ## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`

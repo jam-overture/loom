@@ -268,6 +268,40 @@ LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm specimen <module>.specimen.ts --out 
 through the render seam, served over `http://127.0.0.1` on an ephemeral port,
 and photographed under every theme it declares.
 
+**A picture proves a change only against a picture of the tree without it**, and
+`--against` takes that pair for you
+([0240](../decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
+
+```bash
+LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm specimen <module>.specimen.ts --against origin/main
+```
+
+```
+3 shots against origin/main: 2 identical, 1 differs
+  …-arrived.png  identical
+  …-inside.png   identical
+  …-back.png     differs
+  the pictures taken at origin/main are in reports/against
+```
+
+It photographs **your sheet against the ref's library**: `src/` comes from the
+revision, the harness and the specimen module come from your working tree. So a
+sheet written in the same run as the change still asks the question, and a sheet
+that cannot build at the ref is told *that* rather than failing. The ref's
+pictures are left in `<out>/against/` under the same names, which is where a
+report's *before* comes from.
+
+**It prints and never fails.** A moved picture is why you ran the harness; the
+exit code is still the overflow measurement alone.
+
+The two sentences to take from the output are the pair either side of the one
+that moved: *"the shots before and after the change came back byte-identical, so
+the only variable in the third is the thing being argued about"* is what makes a
+screenshot evidence rather than decoration. Two framework runs wrote the same six
+shell commands by hand before this existed; a shallow clone is the one thing to
+watch, since a session clone holds fifty commits and `--against` cannot reach
+past them.
+
 **An address** — a page something else is already serving, which is the only way
 to photograph a screen needing a session, a database or a build behind it:
 
