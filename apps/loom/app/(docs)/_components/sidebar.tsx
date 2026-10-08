@@ -2,7 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useRef } from "react"
 
+import { showRailCurrent } from "@/app/(docs)/_lib/in-view"
 import {
   docsHref,
   docsLandingOf,
@@ -57,15 +59,35 @@ const SectionTitle = ({
  * The current page is marked with `aria-current` first and a tint second. A
  * rail that says "you are here" only in color says nothing to a screen reader
  * and nothing to anyone who cannot tell those two greys apart.
+ *
+ * **And it scrolls itself so that the mark is on screen.** The rail is longer
+ * than the box it sits in, so a page past the first third of the list was
+ * marked in a part of the rail nobody was looking at: correct, and invisible.
+ * `in-view.ts` is the judgement and why it is minimal movement rather than
+ * centring; the effect here is the two lookups and the assignment.
+ *
+ * It runs on the address rather than on mount alone, because the rail is
+ * mounted by a layout and survives every navigation inside the documentation —
+ * which is the same fact `mobile-nav.tsx` turns into its open state. A
+ * navigation this rail did not cause is exactly the case it has to answer.
  */
 export const Sidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) => {
   const pathname = usePathname()
+  const rail = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (rail.current !== null) showRailCurrent(rail.current)
+  }, [pathname])
 
   /** Absent rather than `undefined`: the prop is optional, not nullable. */
   const dismiss = onNavigate === undefined ? {} : { onClick: onNavigate }
 
   return (
-    <nav aria-label="Documentation" className="flex flex-col gap-7 py-8 pr-4 pl-6 text-sm">
+    <nav
+      ref={rail}
+      aria-label="Documentation"
+      className="flex flex-col gap-7 py-8 pr-4 pl-6 text-sm"
+    >
       {docsSections.map((section) => (
         <div key={section.slug} className="flex flex-col gap-1">
           {/*

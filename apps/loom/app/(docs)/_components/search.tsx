@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { ARTICLE_ID } from "@/app/(docs)/_lib/chrome"
+import { showInScroller } from "@/app/(docs)/_lib/in-view"
 import { searchDocs, type SearchHit } from "@/app/(docs)/_lib/search/match"
 import {
   parseSearchCode,
@@ -39,8 +41,13 @@ import { docsSectionOfPath, proseSectionsIn } from "@/app/(docs)/_lib/search/sha
  *   open and kept, so a reader who never searches never downloads it.
  * - **It is usable from the keyboard alone**, which is how the people most
  *   likely to search a reference actually search it: `⌘K` or `/` to open,
- *   arrows to move, `Enter` to go, `Escape` to leave — and focus returns to the
- *   button that opened it rather than to the top of the document.
+ *   arrows to move, `Enter` to go, `Escape` to leave.
+ * - **And the way out decides where the reader is left**, which is 0237 applied
+ *   to the one way out that record has no row for. Escape and a press on the
+ *   scrim are a reader leaving, so they get the button back. A press on a
+ *   result is a reader asking for a page, and 0237's own reason for never
+ *   returning focus on an outside press — the press is itself a destination —
+ *   is the reason this one does not either. It hands them the page instead.
  * - **It says what happened.** Loading, nothing found, and could-not-load are
  *   three different sentences, because a box that shows an empty list for all
  *   three teaches a reader that the site has nothing on the subject.
@@ -75,15 +82,48 @@ const readJson = (path: string): Promise<unknown> =>
 const Results = ({
   hits,
   active,
+  byKeyboard,
   onPick,
   onHover,
 }: {
   readonly hits: readonly SearchHit[]
   readonly active: number
+  /** Whether the last thing that moved the selection was a key. See below. */
+  readonly byKeyboard: boolean
   readonly onPick: (href: string) => void
   readonly onHover: (position: number) => void
-}) => (
-  <ul id="loom-search-results" role="listbox" aria-label="Results" className="max-h-96 overflow-y-auto py-2">
+}) => {
+  const list = useRef<HTMLUListElement>(null)
+
+  /**
+   * Keep the selected row on screen, which this list did not.
+   *
+   * Ten answers with their sentences under them are 536 pixels in a box that
+   * shows 384, so the ninth ArrowDown used to select a row 92 pixels below the
+   * bottom edge. Everything about that was right except the only part a
+   * sighted reader has: `aria-selected` moved, `aria-activedescendant` moved, a
+   * screen reader was told — and the highlight left the last visible row and
+   * nothing took its place. `in-view.ts` is the rule, and the rail is its other
+   * caller.
+   *
+   * **Only when a key moved it**, which is the condition this list needs and
+   * the rail does not. The selection also follows the mouse, and a list that
+   * scrolled on hover would pull a different row under a stationary cursor,
+   * which fires another hover, which scrolls it again. Typing counts as a key:
+   * a new query selects the first row, and the list has to come back to the
+   * top to show it.
+   *
+   * The same reasoning as the browser's own focus ring, which it paints on the
+   * strength of the last input having been a keyboard.
+   */
+  useEffect(() => {
+    const row = list.current?.children[active]
+
+    if (byKeyboard && list.current !== null && row !== undefined) showInScroller(list.current, row)
+  }, [active, byKeyboard, hits])
+
+  return (
+  <ul ref={list} id="loom-search-results" role="listbox" aria-label="Results" className="max-h-96 overflow-y-auto py-2">
     {hits.map((hit, position) => (
       <li
         key={hit.entry.href}
@@ -187,7 +227,8 @@ const Results = ({
       </li>
     ))}
   </ul>
-)
+  )
+}
 
 export const Search = () => {
   const router = useRouter()
@@ -196,6 +237,11 @@ export const Search = () => {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
+  /**
+   * Whether a key put the selection where it is, which the list below needs
+   * and nothing else does. See `Results` for why the mouse is excluded.
+   */
+  const [byKeyboard, setByKeyboard] = useState(false)
   const [index, setIndex] = useState<SearchIndex | undefined>(undefined)
   const [names, setNames] = useState<SearchNames | undefined>(undefined)
   const [prose, setProse] = useState<readonly SearchProse[]>([])
@@ -207,12 +253,19 @@ export const Search = () => {
   const trigger = useRef<HTMLButtonElement>(null)
   const field = useRef<HTMLInputElement>(null)
 
-  const close = useCallback((): void => {
+  /** Shut, with nothing said about the reader. Both ways out start here. */
+  const dismiss = useCallback((): void => {
     setOpen(false)
     setQuery("")
     setActive(0)
-    trigger.current?.focus()
+    setByKeyboard(false)
   }, [])
+
+  /** A reader leaving: Escape, and the scrim. They came from the button. */
+  const close = useCallback((): void => {
+    dismiss()
+    trigger.current?.focus()
+  }, [dismiss])
 
   /** `⌘K`, `Ctrl+K` and `/` — the three a reader tries without being told. */
   useEffect(() => {
@@ -391,9 +444,31 @@ export const Search = () => {
       ? (parts[0] ?? "")
       : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
 
+  /**
+   * A reader arriving, which is the other thing entirely.
+   *
+   * Three notes, because each of them was the obvious thing done differently.
+   *
+   * **`dismiss` and not `close`.** Returning the reader to the search button
+   * leaves them in the header of a page they have not seen, with the skip link
+   * behind them in the tab order and the rail's own mark unreachable without
+   * going backwards. They asked for a page.
+   *
+   * **The article is focused rather than scrolled to.** `preventScroll` is
+   * load-bearing: the router knows whether the destination is a page or a
+   * position on one, and a result can be either — a heading on the page the
+   * reader is already on is a result like any other. Moving focus and leaving
+   * every scroll to the router is the only way those two do not fight.
+   *
+   * **No waiting for the navigation to commit.** `#article` is rendered by the
+   * layout, so it is the same element before and after; focusing it now and
+   * letting the new page render inside it leaves the reader at the top of what
+   * they asked for, with no timer and nothing to clean up.
+   */
   const go = (href: string): void => {
-    close()
+    dismiss()
     router.push(href)
+    document.getElementById(ARTICLE_ID)?.focus({ preventScroll: true })
   }
 
   const onFieldKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -430,6 +505,8 @@ export const Search = () => {
     if (hits.length === 0) return
 
     event.preventDefault()
+
+    setByKeyboard(true)
 
     /** Wrapping, because a list of ten is short enough that stopping at the end feels broken. */
     setActive((was) =>
@@ -493,6 +570,7 @@ export const Search = () => {
                 onChange={(event) => {
                   setQuery(event.target.value)
                   setActive(0)
+                  setByKeyboard(true)
                 }}
                 onKeyDown={onFieldKeyDown}
                 className="text-ink placeholder:text-ink-faint h-12 w-full bg-transparent text-sm focus:outline-none"
@@ -543,7 +621,16 @@ export const Search = () => {
             )}
 
             {hits.length > 0 && (
-              <Results hits={hits} active={active} onPick={go} onHover={setActive} />
+              <Results
+                hits={hits}
+                active={active}
+                byKeyboard={byKeyboard}
+                onPick={go}
+                onHover={(position) => {
+                  setActive(position)
+                  setByKeyboard(false)
+                }}
+              />
             )}
 
             <p className="border-edge text-ink-faint flex gap-4 border-t px-4 py-2 text-[0.7rem]">

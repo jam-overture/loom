@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { ARTICLE_ID } from "@/app/(docs)/_lib/chrome"
 import {
   SEARCH_CODE_PATH,
   SEARCH_INDEX_PATH,
@@ -739,5 +740,329 @@ describe("a row that stands for a set of pages", () => {
     await waitFor(() => expect(screen.getByText("The two questions it asks")).toBeTruthy())
 
     expect(screen.queryByText(/the closest of/i)).toBeNull()
+  })
+})
+
+/**
+ * **Where the reader is standing afterwards**, which is the one thing this file
+ * did not cover and the box got wrong.
+ *
+ * The dialog has three ways out and had one answer for all of them: return the
+ * reader to the button they opened it with. That is right for two of the three.
+ * A reader who presses Escape or clicks the scrim is leaving, and the button is
+ * where they came from. A reader who presses a **result** is not leaving, they
+ * are arriving — and the old behaviour left them in the header of a page they
+ * had never seen, with the skip link behind them in the tab order and the
+ * rail's own mark unreachable without tabbing backwards.
+ *
+ * 0237 settles exactly this question for a presented region and has no row for
+ * this way out, because a region does not navigate. Its reason for the row it
+ * does have is the one that applies: *the press is itself a destination.*
+ *
+ * `#article` is where it leaves them, which is the site's own answer to where
+ * the page begins rather than a second one — the skip link has pointed at it
+ * since the site had a header. The layout is not rendered in this file, so the
+ * tests below put that one element beside the box and nothing else; what is
+ * being checked is that the box reaches for it, and `_lib/chrome.ts` is what
+ * holds the two spellings of its name together.
+ */
+const withArticle = () => {
+  const page = document.createElement("main")
+
+  page.id = ARTICLE_ID
+  page.tabIndex = -1
+  document.body.append(page)
+
+  render(<Search />)
+
+  return page
+}
+
+/**
+ * Testing Library takes its own container away and this element is not in it,
+ * so without this the second test in this block finds the first test's article
+ * by id — and `toBe` fails against a node that prints identically, which is a
+ * confusing half hour for whoever meets it next.
+ */
+afterEach(() => {
+  for (const stale of document.querySelectorAll(`main#${ARTICLE_ID}`)) stale.remove()
+})
+
+describe("a result, pressed", () => {
+  it("leaves the reader in the page they asked for", async () => {
+    const page = withArticle()
+
+    await open()
+    await type("gate")
+
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" })
+
+    expect(push).toHaveBeenCalledOnce()
+    expect(document.activeElement).toBe(page)
+  })
+
+  it("does the same for a result pressed with a mouse", async () => {
+    const page = withArticle()
+
+    await open()
+    await type("gate")
+
+    const link = screen.getAllByRole("option")[0]?.querySelector("a")
+
+    fireEvent.click(link as HTMLAnchorElement)
+
+    expect(push).toHaveBeenCalledOnce()
+    expect(document.activeElement).toBe(page)
+  })
+
+  /**
+   * Not the search button, stated as its own assertion rather than implied by
+   * the one above.
+   *
+   * The two differ in exactly one case and it is the one that would happen: a
+   * refactor that went back to calling `close` here would move focus to the
+   * button and then the test above would pass or fail depending on whether a
+   * `main` happened to be in the document, which is not what it is about.
+   */
+  it("does not hand the reader back to the search button, even in passing", async () => {
+    withArticle()
+
+    await open()
+    await type("gate")
+
+    const trigger = screen.getByRole("button", { name: /search the documentation/i })
+    const passing = vi.fn()
+
+    trigger.addEventListener("focus", passing)
+
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" })
+
+    expect(document.activeElement).not.toBe(trigger)
+    /*
+     * And never on the way: a result press that closed the dialog the leaving
+     * way and then corrected itself would end in the right place and is a
+     * different thing. The end state alone cannot tell the two apart, which is
+     * how the mutation that calls `close` here survived the first pass.
+     */
+    expect(passing).not.toHaveBeenCalled()
+  })
+
+  /**
+   * And the two ways out that *are* a reader leaving still hand them back,
+   * which is the other half of the same rule. Escape has had a test since the
+   * dialog shipped; the scrim never did, and it is the path that goes through
+   * the same function.
+   */
+  it("still returns the reader to the button when they press the scrim", async () => {
+    withArticle()
+
+    await open()
+    fireEvent.click(screen.getByRole("button", { name: "Close search" }))
+
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /search the documentation/i })
+    )
+  })
+
+  /**
+   * A page with no article in it — a 404 under this header, or the box rendered
+   * anywhere the documentation layout is not.
+   *
+   * It must navigate anyway. A box that threw here would take the navigation
+   * with it, which would turn a missing element into a search box that does
+   * nothing when you press a result.
+   */
+  it("navigates on a page that has no article to hand them", async () => {
+    render(<Search />)
+
+    await open()
+    await type("gate")
+
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" })
+
+    expect(push).toHaveBeenCalledOnce()
+    expect(screen.queryByRole("combobox")).toBeNull()
+  })
+})
+
+
+/**
+ * **The selection, when the list is longer than the box it is in.**
+ *
+ * Ten answers with their sentences under them are 536 pixels in a list that
+ * shows 384, measured on the deployment. So the ninth press of ArrowDown
+ * selected a row **92 pixels below the bottom edge**: `aria-selected` moved,
+ * `aria-activedescendant` moved, a screen reader was told, and the only reader
+ * who was not is the one watching the screen — the highlight left the last
+ * visible row and nothing took its place.
+ *
+ * It is the rail's defect in the same component's other list, which is why
+ * `_lib/in-view.ts` is one function with two callers and why the arithmetic is
+ * tested there rather than here.
+ *
+ * jsdom lays nothing out, so the list is laid out below: rows of 52 in a box
+ * showing two of them. The real box shows seven and this fixture answers with
+ * five, so the proportions are a smaller version of the real ones — what is
+ * being checked is which rows reach the rule and when it is allowed to run.
+ */
+const ROW = 52
+const SHOWS = 2
+
+const unlaidOut = {
+  row: HTMLLIElement.prototype.getBoundingClientRect,
+  list: HTMLUListElement.prototype.getBoundingClientRect,
+}
+
+const rowsIn = (list: Element): readonly Element[] => [...list.querySelectorAll("li")]
+
+const layOutTheList = (): void => {
+  HTMLUListElement.prototype.getBoundingClientRect = function (this: HTMLUListElement) {
+    return { top: 0, height: ROW * SHOWS } as DOMRect
+  }
+
+  HTMLLIElement.prototype.getBoundingClientRect = function (this: HTMLLIElement) {
+    const list = this.closest("ul")
+    const at = list === null ? -1 : rowsIn(list).indexOf(this)
+
+    return { top: at * ROW - (list?.scrollTop ?? 0), height: ROW } as DOMRect
+  }
+
+  Object.defineProperty(HTMLUListElement.prototype, "clientHeight", {
+    get: () => ROW * SHOWS,
+    configurable: true,
+  })
+
+  Object.defineProperty(HTMLUListElement.prototype, "scrollHeight", {
+    get(this: HTMLUListElement) {
+      return rowsIn(this).length * ROW
+    },
+    configurable: true,
+  })
+}
+
+/**
+ * Put the prototypes back, the two getters included. They are defined on
+ * `HTMLUListElement` rather than on an instance because the list is rendered
+ * by the component rather than by this file, and a prototype left changed
+ * would hand every later test in it a box 104 pixels tall.
+ */
+afterEach(() => {
+  HTMLLIElement.prototype.getBoundingClientRect = unlaidOut.row
+  HTMLUListElement.prototype.getBoundingClientRect = unlaidOut.list
+  Reflect.deleteProperty(HTMLUListElement.prototype, "clientHeight")
+  Reflect.deleteProperty(HTMLUListElement.prototype, "scrollHeight")
+})
+
+const listbox = (): HTMLElement => screen.getByRole("listbox")
+
+const down = (times: number): void => {
+  for (let at = 0; at < times; at += 1) {
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" })
+  }
+}
+
+describe("a selection the reader cannot see", () => {
+  it("brings a row below the fold into the list", async () => {
+    layOutTheList()
+    render(<Search />)
+
+    await open()
+    await type("a")
+
+    const rows = rowsIn(listbox()).length
+
+    expect(rows).toBeGreaterThan(SHOWS)
+    expect(listbox().scrollTop).toBe(0)
+
+    down(rows - 1)
+
+    expect(screen.getAllByRole("option")[rows - 1]?.ariaSelected).toBe("true")
+    expect(listbox().scrollTop).toBe((rows - 1) * ROW + ROW - ROW * SHOWS)
+  })
+
+  it("leaves it alone while the selection is still on screen", async () => {
+    layOutTheList()
+    render(<Search />)
+
+    await open()
+    await type("a")
+    down(1)
+
+    expect(screen.getAllByRole("option")[1]?.ariaSelected).toBe("true")
+    expect(listbox().scrollTop).toBe(0)
+  })
+
+  /** Wrapping past the last row is how a reader gets back to the first one. */
+  it("comes back to the top when the selection wraps round", async () => {
+    layOutTheList()
+    render(<Search />)
+
+    await open()
+    await type("a")
+
+    const rows = rowsIn(listbox()).length
+
+    down(rows)
+
+    expect(screen.getAllByRole("option")[0]?.ariaSelected).toBe("true")
+    expect(listbox().scrollTop).toBe(0)
+  })
+
+  /**
+   * **Not on a hover**, which is the one condition this list needs and the rail
+   * does not.
+   *
+   * The selection follows the mouse as well as the keys, and a list that
+   * scrolled on hover would pull a different row under a cursor that had not
+   * moved — which fires another hover, which scrolls it again. The rule is the
+   * browser's own for a focus ring: the last input decides.
+   */
+  it("does not scroll under a cursor that moved onto a row", async () => {
+    layOutTheList()
+    render(<Search />)
+
+    await open()
+    await type("a")
+
+    const rows = rowsIn(listbox())
+
+    fireEvent.mouseMove(rows[rows.length - 1] as HTMLElement)
+
+    expect(screen.getAllByRole("option")[rows.length - 1]?.ariaSelected).toBe("true")
+    expect(listbox().scrollTop).toBe(0)
+  })
+
+  /**
+   * And a new query is a keyboard, so the first row of a new answer is shown.
+   *
+   * Without it a reader who had arrowed to the bottom and then typed would get
+   * a correct new list, scrolled to the middle of itself, with the selected
+   * first row above the top edge.
+   */
+  it("returns to the top of a new answer", async () => {
+    layOutTheList()
+    render(<Search />)
+
+    await open()
+    await type("a")
+
+    const rows = rowsIn(listbox())
+
+    down(rows.length - 1)
+    expect(listbox().scrollTop).toBeGreaterThan(0)
+
+    /*
+     * A hover in between, which is what makes this a test of typing rather
+     * than of the arrow presses before it: without it the list is already
+     * following the keyboard and would come back to the top whatever a
+     * keystroke in the field did or did not say.
+     */
+    fireEvent.mouseMove(rows[rows.length - 1] as HTMLElement)
+    expect(listbox().scrollTop).toBeGreaterThan(0)
+
+    await type("gate")
+
+    expect(screen.getAllByRole("option")[0]?.ariaSelected).toBe("true")
+    expect(listbox().scrollTop).toBe(0)
   })
 })
