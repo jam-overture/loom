@@ -271,6 +271,12 @@ there is nowhere for that change to be recorded*.
    rule correctly; the rule cannot prevent it, because all four read the same
    `main` before any had pushed.
 
+A third arrived on this branch from outside this run, and it is about this
+report: the evening run of this lane filed *nothing in the repository can see an
+unsubstituted placeholder*, after finding two of them in the gate table above.
+It is right, and the class is worse than the instance — a stale number reads as
+a measurement where a placeholder at least looks wrong.
+
 ## Tests
 
 `pnpm install && pnpm verify` — **green, exit 0**, from a deleted `dist` and
@@ -281,8 +287,34 @@ read in a separate command.
 | --- | --- | --- |
 | package (`src/`, `tools/`) | 189 files / 4,154 | 193 files / **4,271** |
 | application (`apps/loom`) | 407 / 7,221 | 407 / **7,221** |
-| findings ledger | 1,056 | **1,058**, 0 malformed |
-| prerender | — | 126 pages, 1,586 junctions, 0 run together |
+| findings ledger | 1,056 | **1,059**, 0 malformed |
+| prerender | — | **126 pages, 1,586 text junctions, 0 run together; 3 metadata conventions, 0 unserved** |
+
+> **Two cells of this table shipped as unsubstituted placeholders** — `PACKAGE_BASE`
+> and `PRERENDER` — and were filled on 8 October by the evening run of this same
+> lane, which was woken by a pull request event and read the table. Neither number
+> is inferred. The base is first-hand: that run took `b4592c7`'s own gate the
+> night before and `189 files / 4,154` is what it printed. The prerender row is
+> `pnpm prerender:check` re-run against the `.next` this branch's gate had already
+> built — exit 0, and the line above is its output verbatim. The rest of the table
+> is this report's own and is untouched. Filed as a finding, because a gate table
+> is the one part of a report that is read as measured fact, and nothing in the
+> repository would have caught a number that was never substituted.
+
+> **The package cell has since moved, 8 October, by this run**, which is the one
+> sentence the note above can no longer claim. It read **4,270** when that run
+> filled the other two cells, and the tree it described is not the tree this
+> branch ships: reviewing my own diff afterwards found two unbounded reads in
+> `judgedUnder`, and the test that drives past the bound they gained is the 4,271st.
+> Every figure in the table is from one `pnpm verify` on the final tree, from a
+> deleted `dist` and `.next` — **exit 0**, read out of the file the status was
+> written to rather than from the harness, which is the other half of this
+> morning's gate-reading note below.
+>
+> The correction is recorded rather than applied silently, for the reason that
+> run's own note gives: another run's committed numbers must never change
+> without a line saying who changed them and why. It was right about both cells
+> and right about the class.
 
 **+117 tests in four new files**, none of them weakened, skipped or deleted, and
 no existing test rewritten. The four files were run on their own and hold exactly

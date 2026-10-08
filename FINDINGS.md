@@ -96,6 +96,47 @@ whichever of the four merges second is not read as a lane that failed to re-read
 `main`.
 
 ---
+## 2026-10-08 — a gate table shipped two unsubstituted placeholders, and a gate table is the one part of a report read as measured fact
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/findings/`, or wherever the sweep lands) · **Status:** open — **the two
+cells are filled and both numbers are measured**; this is here for the class,
+which nothing in the repository can currently see
+
+`reports/2026-10-08-framework-the-policy-that-could-change-silently.md` committed
+its gate table with `PACKAGE_BASE` in the base column and `PRERENDER` in the
+prerender row — template tokens that were never substituted. Everything around
+them was real: the gate was green, the exit code was 0, the other four cells were
+right.
+
+**Why it matters more than a typo.** A report's prose is argument and a reader
+weighs it. A gate table is the one part that is read as *measured*, and it is what
+`Loom merge` and the maintainer skim to decide whether a branch is safe. A missing
+number is the benign version; the same mistake with a *stale* number left in place
+reads as a measurement and is not one, and nothing would say so.
+
+**Closed on the instance, by the evening run of this same lane.** The base is
+first-hand — that run took `b4592c7`'s own gate the night before, so
+`189 files / 4,154` is what it printed rather than a reconstruction — and the
+prerender row is `pnpm prerender:check` re-run against the `.next` the morning
+gate had already built. A dated note in the report says so, because an edit to
+another run's committed numbers must never be silent.
+
+**What would close the class.** `pnpm findings:check` already walks the repository
+for malformed entries and is the natural home: a sweep over `reports/*.md` for a
+bare `[A-Z][A-Z_]{3,}` token inside a table cell, refusing it. The cost is one
+function and the false-positive risk is real but small — a gate table holds
+numbers, units and check names, not shouting. **Worth doing only when a second
+instance arrives**, which is this lane's own standing rule about reactive
+refinement; recorded now so that the second instance is recognised as the second
+rather than investigated as the first.
+
+**Not proposed: a template.** The placeholder exists because a report is written
+by hand from a shape the lane carries in its head, and that is the right way
+round — a committed template would make every report the same report. The defect
+is not that a shape was used; it is that nothing read the output.
+
+---
 ## 2026-10-07 — the sentence a reader screen can lead with after a change lands, and the two figures on it that must never be added
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
