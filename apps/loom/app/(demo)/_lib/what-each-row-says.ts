@@ -47,3 +47,56 @@ export const STANDING_ROW: Readonly<Record<AskStanding, string>> = {
   "asks-you": "Asks you first",
   refuses: "Won’t do it",
 }
+
+/**
+ * What a press promises the page, when the preset's own promise has stopped
+ * being true.
+ *
+ * ## The sentence this replaces, and why it is the only false one on the screen
+ *
+ * A preset's `promise` is written against the page as it shipped — *"Every
+ * colour and typeface on the page changes at once"* — and both unattended
+ * presets are toggles, so the second press of one moves the page back rather
+ * than on. `availablePresets` plans against the tree as it stands and finds the
+ * toggle applicable again, so the row returns to the list wearing the sentence
+ * it wore on arrival, eleven pixels above a card reading *"Put it back" undoes
+ * it*. `put-back.ts` has the measurement and the argument; what is needed here
+ * is the sentence.
+ *
+ * **Only the promise moves.** The label is the ask and is still the ask. The
+ * chip is the Gate's own verdict, reached by running this press against this
+ * tree under this policy, and it is as true of a press that puts something back
+ * as of any other — a change is still weighed, still allowed or held, still
+ * written down. Swapping it for a direction word would trade a fact the Gate
+ * produced for one the history did, and leave the count above the list
+ * describing rows that no longer carry what it counted. The false sentence was
+ * the one about the *page*, and it is the one that changes.
+ *
+ * ## The words
+ *
+ * The demo already says this about a change that has landed — *"The whole page
+ * went back to how it looked"* on the card, *"Changed back"* on the mark — and
+ * this is the same fact in the forward tense every string on this panel is
+ * written in. No runtime vocabulary in it, no level, no rule: a row says what
+ * the press does to the page, and *back where it was* is as plain as that gets.
+ *
+ * It names **your last change** rather than *the original page*, which is the
+ * narrower claim and the only one that is checked: `reversesTheLastChange`
+ * compares against the change immediately before, so a page carrying two
+ * changes and a press reversing one of them has not come back to how it
+ * started, and a sentence saying so would be visibly false on the stage beside
+ * it.
+ */
+export const PUTS_IT_BACK = "Puts the page back to how it looked before your last change."
+
+/**
+ * The promise a row and the lead button print, which is the preset's own unless
+ * the history has made it untrue.
+ *
+ * One function for both because they are one sentence in two sizes: the lead
+ * carries it at `text-xs` under a green button and a row at `text-2xs` under a
+ * label, and a surface where the big one told the truth and the small one did
+ * not would be the same defect with a harder-to-find instance of it.
+ */
+export const promiseOf = (promise: string, putsBack: boolean | undefined): string =>
+  putsBack === true ? PUTS_IT_BACK : promise

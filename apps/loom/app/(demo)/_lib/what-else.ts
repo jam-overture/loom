@@ -110,8 +110,25 @@ export const WHAT_ELSE_SENTENCE =
  * What the way back is called.
  *
  * *more* rather than *other*, because the asks it points at are the ones left
- * after the spent one was withdrawn — a visitor who has made one change has
+ * after the spent one was taken out — a visitor who has made one change has
  * four more available, not five others.
+ *
+ * **And "taken out" meant one thing when this was written and means two now.**
+ * A removal spends its preset: the numbers are off the page, so
+ * `availablePresets` can find nothing for that ask to do and it does not come
+ * back. A **toggle** spends nothing — `palette` and `backdrop` are applicable
+ * again the moment they are applied, in the other direction — so the list after
+ * a one-press change was the same five it was on arrival, and this row said
+ * *five more changes to ask for* to a visitor who had just made one of them.
+ * Literally true of the list, and read by a stranger as *nothing I did counted*.
+ *
+ * So what is counted is the asks that would move the page **on**, and an ask
+ * that would only put the last change back is not one of them. It is not being
+ * hidden: the row is still in the panel, now saying what it does
+ * (`what-each-row-says.ts`), and the same press is already offered by name as
+ * **Put it back** on the card this row is a caption for. Counting it here would
+ * be offering the way back as a way on, which is the one direction this row
+ * exists to point.
  */
 const labelFor = (count: number): string =>
   count === 1 ? "1 more change to ask for" : `${count} more changes to ask for`
@@ -128,18 +145,26 @@ export const whatElseToAsk = ({
   available,
   landing,
   waiting,
+  putsBack,
 }: {
   readonly available: readonly DemoPresetId[]
   readonly landing?: unknown
   readonly waiting?: unknown
+  /**
+   * The asks whose press would only put the visitor's last change back
+   * (`what-it-will-say.ts`), which are the ones this row must not count.
+   */
+  readonly putsBack?: ReadonlySet<DemoPresetId>
 }): WhatElse | undefined => {
   if (landing === undefined) return undefined
   if (waiting !== undefined) return undefined
-  if (available.length === 0) return undefined
+
+  const forward = available.filter((id) => putsBack?.has(id) !== true)
+  if (forward.length === 0) return undefined
 
   return {
-    count: available.length,
+    count: forward.length,
     sentence: WHAT_ELSE_SENTENCE,
-    label: labelFor(available.length),
+    label: labelFor(forward.length),
   }
 }
