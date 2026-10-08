@@ -12,6 +12,7 @@ import {
   ASKS_HEADING_WHILE_WAITING,
   type SetAside,
 } from "@/app/(demo)/_lib/set-aside"
+import { PUTS_IT_BACK, STANDING_ROW } from "@/app/(demo)/_lib/what-each-row-says"
 
 import { AskPanel } from "./ask-panel"
 
@@ -452,6 +453,8 @@ describe("the ask panel, telling a stranger what Loom will do about each ask", (
           detail: "…",
           moves: standing === "on-its-own",
           standing,
+          /** The direction is a separate fact and has its own suite below. */
+          putsBack: false,
         },
       ])
     )
@@ -757,5 +760,142 @@ describe("the ask panel, while a question is waiting", () => {
     for (const form of forms) {
       expect(form.querySelector('input[name="baseRevision"]')?.getAttribute("value")).toBe("3")
     }
+  })
+})
+
+/**
+ * The row that stopped being true, and the one sentence on it that changes.
+ *
+ * A toggle is applicable again the moment it has been applied, so it comes
+ * straight back onto this list — and the promise it shipped with then describes
+ * a change the page is about to be moved *away* from. Measured on a production
+ * build at 1280 × 900, that row sat eleven pixels above a card reading *"Put it
+ * back" undoes it*: two controls, the same effect, and only one of them said so.
+ *
+ * `what-it-will-say.test.ts` holds that the reading is right. What is held here
+ * is that the **panel prints it**, in both sizes the sentence has, and that
+ * nothing else on the row moves with it.
+ */
+describe("the ask panel, saying which way a press would go", () => {
+  const goesAhead = (putsBack: boolean) => ({
+    lead: "Pressing this changes the page straight away.",
+    detail: "Low risk — so Loom does it without stopping to ask, and writes down what it did.",
+    moves: true,
+    standing: "on-its-own" as const,
+    putsBack,
+  })
+
+  const promiseOfPreset = (id: DemoPresetId): string =>
+    DEMO_PRESETS.find((preset) => preset.id === id)!.promise
+
+  /** The shipped table, every row going on rather than back. */
+  const NOTHING_GOES_BACK = Object.fromEntries(
+    DEMO_PRESETS.map((preset) => [preset.id, goesAhead(false)])
+  )
+
+  it("replaces a row's promise once the press would only put the last change back", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={{ palette: goesAhead(true) }}
+      />
+    )
+
+    expect(screen.getByText(PUTS_IT_BACK)).toBeTruthy()
+    expect(screen.queryByText(promiseOfPreset("palette"))).toBeNull()
+  })
+
+  /**
+   * And the verdict beside it is untouched, which is the whole restraint: the
+   * Gate weighs a press that puts something back exactly as it weighs any
+   * other, so the chip keeps saying what the Gate said. Swapping it for a
+   * direction word would trade a fact the Gate produced for one the history
+   * did, and leave the count above the list describing rows that no longer
+   * carry what it counted.
+   */
+  it("leaves the row's label and the Gate's own word exactly as they were", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={{ palette: goesAhead(true) }}
+      />
+    )
+
+    expect(screen.getByText(labelOf("palette"))).toBeTruthy()
+    expect(screen.getAllByText(STANDING_ROW["on-its-own"]).length).toBe(1)
+  })
+
+  /**
+   * The same substitution on the green button, and it is never hypothetical:
+   * the lead is whichever ask is left after the spent ones are withdrawn, so
+   * once *Take the numbers off* has been answered the primary control is a
+   * toggle — and its second press puts the page back at the loudest size this
+   * panel has.
+   */
+  it("replaces the lead's promise too, at the size the lead carries it", () => {
+    const left: readonly DemoPresetId[] = ["palette", "backdrop"]
+    const lead = leadingAsk(left)!
+
+    render(
+      <AskPanel
+        revision={0}
+        available={left}
+        modelConfigured={false}
+        {...led(left)}
+        willSay={{ [lead.id]: goesAhead(true) }}
+      />
+    )
+
+    const promise = screen.getByText(PUTS_IT_BACK)
+    const primary = screen.getAllByRole("button")[0]
+
+    expect(promise.closest("form")).toBe(primary!.closest("form"))
+    expect(screen.queryByText(lead.promise)).toBeNull()
+  })
+
+  /**
+   * And every row the history has not falsified keeps the sentence it shipped
+   * with — which is the assertion that stops this becoming a surface that
+   * describes every press the same way.
+   */
+  it("keeps the shipped promise on every other row", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={{ palette: goesAhead(true), backdrop: goesAhead(false) }}
+      />
+    )
+
+    expect(screen.getByText(promiseOfPreset("backdrop"))).toBeTruthy()
+    expect(screen.getAllByText(PUTS_IT_BACK).length).toBe(1)
+  })
+
+  /**
+   * The arrival screen is untouched, and it is asserted rather than left to a
+   * screenshot: nothing has happened, so no press can put anything back, and
+   * all five rows read exactly as they were written.
+   */
+  it("says nothing about direction on the screen a stranger arrives at", () => {
+    render(
+      <AskPanel
+        revision={0}
+        available={ALL}
+        modelConfigured={false}
+        {...led(ALL)}
+        willSay={NOTHING_GOES_BACK}
+      />
+    )
+
+    expect(screen.queryByText(PUTS_IT_BACK)).toBeNull()
+    for (const preset of DEMO_PRESETS) expect(screen.getByText(preset.promise)).toBeTruthy()
   })
 })

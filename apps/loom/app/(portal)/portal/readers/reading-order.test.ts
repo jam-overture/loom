@@ -155,25 +155,56 @@ describe("the reader screen's reading order", () => {
   })
 
   /**
-   * **One join, three readings.**
+   * **One join, four readings.**
    *
    * Every section is a window laid over the page it was filed against. Joining
    * twice is two chances to hand one of them a different window or a different
    * set of pieces, and a card whose sections disagreed about how many visits
    * there were would be wrong in the way nobody checks — so the join happens
-   * once and `skippingFrom`, `stoppingOf` and `readingPaceOf` are all handed
-   * its result.
+   * once and `skippingFrom`, `stoppingOf`, `readingPaceOf` and `pageReachOf`
+   * are all handed its result.
    *
-   * It was two readings until 5 October. The count in the assertion is the
-   * point rather than the names: a fourth reading taken off a second join would
-   * pass every other test on this screen.
+   * It was two readings until 5 October and three until today. The count in the
+   * assertion is the point rather than the names: a fifth reading taken off a
+   * second join would pass every other test on this screen — and the fourth is
+   * the one that would make that failure visible, because it is the section
+   * whose whole subject is *which denominator these figures are against*.
    */
-  it("joins the counters to the page once and takes all three readings off it", () => {
+  it("joins the counters to the page once and takes all four readings off it", () => {
     expect(source.match(/pageReadingOf\(/gu)).toHaveLength(1)
     expect(source).toContain("skippingFrom(joined")
     expect(source).toContain("readingProgressOf(joined)")
     expect(source).toContain("readingPaceOf(joined")
+    expect(source).toContain("pageReachOf(")
+    expect(source).toContain("joined,")
     expect(source).not.toContain("skippingOf(")
+  })
+
+  /**
+   * **The denominator, and the one filter that keeps it honest.**
+   *
+   * The exact count of people who were here is the only figure on this screen
+   * that does not come off the counters, and dividing one version's reach by
+   * another version's readers is the mistake that would make every rate on the
+   * card quietly wrong. The join filters to its own page and version and
+   * reports what it dropped — but it is handed one page's rows rather than the
+   * deployment's, for the reason the counters are: *every other page in the
+   * deployment was dropped* is a sentence with nothing in it.
+   */
+  it("divides each page's reach by that page's own readers and nobody else's", () => {
+    expect(source).toContain("openings.filter((row) => row.treeId === reading.treeId)")
+    expect(source).toContain("arrivalsOf(")
+  })
+
+  /**
+   * And that the card is told, rather than left to assume. The arrival count is
+   * absent on a page whose counted version is not the one being served — along
+   * with the other three readings, off the same join — and a card handed a zero
+   * instead would report *nobody was here* about a page with readers on it.
+   */
+  it("hands the card the arrival count rather than defaulting it", () => {
+    expect(source).toContain("arrivals={arrived.get(")
+    expect(source).not.toContain("arrived.get(reading.treeId) ??")
   })
 
   /**

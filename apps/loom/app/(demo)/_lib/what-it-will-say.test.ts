@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  applyOperation,
   randomIdFactory,
   systemClock,
+  withRoot,
   type CompositionOutcome,
   type StakeLevel,
 } from "@jam-overture/loom"
@@ -11,7 +13,14 @@ import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import { demoPageTree } from "./page-tree"
 import { DEMO_LEADING_PRESET, DEMO_PRESETS, presetById } from "./presets"
-import { whatEachWillSay, whatItWillSay, willSayOf } from "./what-it-will-say"
+import { settingsMoved } from "./put-back"
+import type { ChangeRecord } from "./record"
+import {
+  asksThatPutItBack,
+  whatEachWillSay,
+  whatItWillSay,
+  willSayOf,
+} from "./what-it-will-say"
 
 /**
  * What the first screen says will happen, and whether it can be wrong.
@@ -226,7 +235,7 @@ describe("whatEachWillSay", () => {
    * only demonstrates when a key is present is not a demo.
    */
   it("reaches a verdict on every ask the panel is offering", async () => {
-    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
 
     expect(Object.keys(says).sort()).toEqual([...ALL].sort())
     for (const id of ALL) expect(says[id]?.standing, id).toBeDefined()
@@ -238,7 +247,7 @@ describe("whatEachWillSay", () => {
    * button would be a claim again.
    */
   it("gives the starting page two answers it goes ahead with and three it stops for", async () => {
-    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
     const standings = Object.values(says).map((said) => said.standing)
 
     expect(standings.filter((standing) => standing === "on-its-own")).toHaveLength(2)
@@ -251,14 +260,15 @@ describe("whatEachWillSay", () => {
       demoPageTree(),
       ["palette", "trim"],
       randomIdFactory,
-      systemClock
+      systemClock,
+      []
     )
 
     expect(Object.keys(says).sort()).toEqual(["palette", "trim"])
   })
 
   it("says nothing at all when nothing is on offer", async () => {
-    expect(await whatEachWillSay(demoPageTree(), [], randomIdFactory, systemClock)).toEqual({})
+    expect(await whatEachWillSay(demoPageTree(), [], randomIdFactory, systemClock, [])).toEqual({})
   })
 
   /**
@@ -271,8 +281,113 @@ describe("whatEachWillSay", () => {
     const tree = demoPageTree()
     const before = JSON.stringify(tree)
 
-    await whatEachWillSay(tree, ALL, randomIdFactory, systemClock)
+    await whatEachWillSay(tree, ALL, randomIdFactory, systemClock, [])
 
     expect(JSON.stringify(tree)).toBe(before)
+  })
+})
+
+/**
+ * The direction, which is the one thing about an offered ask that the preset
+ * table cannot know — it is a fact about what the visitor has already done.
+ *
+ * Driven through `whatEachWillSay` against a tree a press has really moved,
+ * because the claim is about the **panel after a press**, which is the screen
+ * the defect lives on: both unattended presets are toggles, so an applied one
+ * is applicable again in the other direction and returns to the list wearing
+ * the promise it shipped with.
+ */
+describe("whether a press would put the last change back", () => {
+  const ALL = DEMO_PRESETS.map((preset) => preset.id)
+
+  const pressed = (id: "palette" | "backdrop" | "band") => {
+    const tree = demoPageTree()
+    const preset = presetById(id)
+    const operations = preset?.plan(tree, randomIdFactory)
+    if (!operations) throw new Error(`preset ${id} planned nothing`)
+
+    const moved = settingsMoved(tree, {
+        deltaId: randomIdFactory.deltaId(),
+        treeId: tree.treeId,
+        baseRevision: tree.revision,
+        operations,
+    })
+
+    return {
+      /**
+       * The record the press would have written, carrying the two fields
+       * `lastMovesIn` reads off it — what it moved, and the fact that it
+       * reached the page.
+       */
+      records: [
+        { revision: { produced: 1 }, settingsMoved: moved } as unknown as ChangeRecord,
+      ] as readonly ChangeRecord[],
+      tree: operations.reduce((current, operation) => {
+        const next = applyOperation(current.root, operation)
+        if (!next.ok || next.value.kind !== "element") throw new Error("did not apply")
+
+        return withRoot(current, next.value)
+      }, tree),
+    }
+  }
+
+  /** Nothing has happened, so nothing can be put back. */
+  it("says no of every ask on the arrival screen", async () => {
+    const says = await whatEachWillSay(demoPageTree(), ALL, randomIdFactory, systemClock, [])
+
+    expect(Object.values(says).every((said) => said.putsBack === false)).toBe(true)
+  })
+
+  /**
+   * The screen the defect is on: one press of the palette, and the panel
+   * offering the same row again. Exactly one of the five is the way back, and
+   * it is the one that was just pressed.
+   */
+  it("marks the toggle that was just pressed, and only it", async () => {
+    const after = pressed("palette")
+    const says = await whatEachWillSay(
+      after.tree,
+      ALL,
+      randomIdFactory,
+      systemClock,
+      after.records
+    )
+
+    expect(says.palette?.putsBack).toBe(true)
+    expect(asksThatPutItBack(says)).toEqual(new Set(["palette"]))
+  })
+
+  /**
+   * And the verdict beside it is untouched, which is the restraint the row
+   * depends on: the Gate weighs a press that puts something back exactly as it
+   * weighs any other, so the chip keeps saying what the Gate said and only the
+   * promise moves.
+   */
+  it("leaves the Gate's own answer exactly as it was", async () => {
+    const after = pressed("palette")
+    const says = await whatEachWillSay(
+      after.tree,
+      ALL,
+      randomIdFactory,
+      systemClock,
+      after.records
+    )
+
+    expect(says.palette?.standing).toBe("on-its-own")
+    expect(says.palette?.moves).toBe(true)
+    expect(says.palette?.lead).toBe("Pressing this changes the page straight away.")
+  })
+
+  /**
+   * A history nobody handed in is the arrival screen's answer rather than a
+   * missing check — which is what keeps `page.tsx` honest: the records are the
+   * only source of it, and forgetting to pass them reads as *nothing happened*
+   * rather than as *everything is new*.
+   */
+  it("says no when the history is not handed in at all", async () => {
+    const after = pressed("palette")
+    const says = await whatEachWillSay(after.tree, ALL, randomIdFactory, systemClock, [])
+
+    expect(says.palette?.putsBack).toBe(false)
   })
 })

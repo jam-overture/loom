@@ -135,6 +135,133 @@ rather than investigated as the first.
 by hand from a shape the lane carries in its head, and that is the right way
 round — a committed template would make every report the same report. The defect
 is not that a shape was used; it is that nothing read the output.
+## 2026-10-07 — after a one-press change the demo's panel says the arrival screen's sentence word for word, and one of the five it counts is now the way back
+
+**Filed by:** `Loom demo` · **Owned by:** `Loom demo`
+(`app/(demo)/_lib/how-many-wait-for-you.ts`) · **Status:** open — **the half of
+today's defect that was not taken**, and it is a copy question rather than a
+reading one.
+
+`demo-41-the-way-back-is-not-a-way-on` fixed the row and the ending: a press
+that would only put the visitor's last change back now says so, and the
+caption under the record stops counting it as a change still to ask for. What
+it did not touch is the sentence **above** the list. Measured on a production
+build of this branch at 1280 × 900, after one press of *Re-theme the whole
+page*:
+
+> You can ask for 5 changes here. Loom will make 2 on its own and ask you first
+> about 3.
+
+That is the arrival screen's sentence, character for character, over a list
+whose first row now reads *Puts the page back to how it looked before your last
+change*. Nothing in it is false — putting the page back **is** a change, Loom
+does make it on its own, and `howManyWaitForYou` is counting verdicts, which is
+all it claims to count. The problem is what a stranger does with it: they have
+just made one of five changes and are told, in the same words as before they
+pressed anything, that there are five.
+
+**Why it was left.** The row is the sentence's own evidence — *the rows under it
+visibly do not all read the same* is `ask-panel.tsx`'s stated reason for the
+chips — and the row now carries the direction, so the contradiction is visible
+on the screen rather than hidden. Fixing the sentence means deciding what it
+counts, and the three answers are not equivalent:
+
+1. **Leave it.** It counts verdicts and says so. The row below disambiguates.
+   Cheapest, and it is what `demo-41` did.
+2. **Say both.** *"You can ask for 4 more changes here, and put the last one
+   back."* Truest, and it is a fourth clause on a sentence `how-many-wait-for-you.ts`
+   already composes from three.
+3. **Count forward only**, as the ending now does — *"You can ask for 4 changes
+   here. Loom will make 1 on its own and ask you first about 3."* Consistent
+   with the caption, and it hides a press that is on the screen, which is the
+   one thing this surface does not do.
+
+**Recommendation: 2**, and only if a run has nothing better. The sentence is
+read once, on arrival, where it is exactly right; this is a screen a visitor
+reaches after the claim has already done its work.
+## 2026-10-07 — the honest figure and the figure it replaces shipped side by side in one card, and only a photograph could have caught it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed
+by `portal-54-how-many-people-were-there`** — recorded because the *class*
+outlives this instance, and because every green test in this lane passed while
+it was true.
+
+The reader card now divides by the exact number of people who arrived rather
+than by the largest visit count any single row of the window reports. The first
+draft put that section third, under the card's own highlights, and left the
+highlights alone. The photograph:
+
+> Of the parts people reported on, fewest got as far as the prose "Nothing here
+> was written as markup. A pr…" — **96 of the 384 visits**.
+>
+> *(three lines down)*
+>
+> Of those 320, **about 80 readers** got as far as the prose "Nothing here was
+> written as markup. A pr…"
+
+**One card, one part, two numbers, no sentence joining them.** Both are true.
+The second is better. Together they are worse than either alone, because a
+reader's first question stops being *what does this page do to people* and
+becomes *which of these two do I believe*.
+
+**Why nothing failed.** Every test in this lane is scoped to a component or a
+module. `arrivals.test.ts` asserted the new sentence, `page-reading.test.tsx`
+asserted the old one, and both were right about the thing they could see. The
+property that was broken is **between** them — one card, one denominator — and
+nothing in this repository was in a position to state it. The fix was to move
+the section above the list and make the list's own oldest sentence use the
+honest figure, so there is one of each; `page-reading.test.tsx` now holds that
+as a rule rather than as two separate assertions that happen to agree.
+
+**The class, which is what this entry is for.** *A lane adding a better figure
+beside a worse one ships both unless something makes it choose.* The worse one
+is not wrong, so no test catches it; it is in another component, so no review of
+the diff shows the pair; and the new section reads beautifully on its own. The
+only instrument that sees it is a picture of the whole screen, which is what the
+maintainer judges this surface by and is the reason the rule exists.
+
+Worth knowing for the next one: the lane's own guard against this is the card's
+reading-order test, and it is the test that has to be written **about the card
+rather than about the section being added** — which is the one nobody thinks to
+open when adding a section.
+
+---
+## 2026-10-07 — how many people arrived is answerable on a version gap, and it is withheld with the three readings that are not
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is wrong and nothing on screen is false**; this is a sentence the card
+could say for the hour after every change and does not.
+
+Four readings on the reader card come off one `pageReadingOf`, and all four are
+withheld when the counted version is not the one being served — which is the
+right call for three of them, because laying one version's counters over
+another version's page makes most parts read *nobody got to it* with every
+number intact.
+
+**The fourth is not like the other three.** *How many people arrived* is a
+single door row: `treeId`, `revision`, `opened`, `appearances`. It needs no
+page, no parts and no names, and the row for the counted version is already in
+hand — `pageViewReadingOf(openings).revisions` on
+`app/(portal)/portal/readers/page.tsx` computes it two dozen lines above the
+guard that drops it.
+
+So on a card with a version gap — the state of every page for as long as an hour
+after every change — the screen could say *320 readers arrived at version 3 of
+this page* beside the notice explaining why the rest is missing, and instead
+says nothing about readers at all.
+
+**Why it was not taken here.** It needs a second shape of `PageArrivals`: one
+with the arrivals and the straddle and no parts, no `fewestGotTo` and no floor
+(the floor comes off the join). Two shapes of one reading is two ways for one
+card to disagree with itself, which is the failure the entry above this one is
+about and the failure this whole branch exists to end — so it is worth a run
+that can think about the shape rather than a branch adding it at the end.
+
+The honest version is probably not a second shape at all but a narrower first
+one: `PageArrivals` with `parts` empty and `floor` absent, and the sentences
+that need either already returning `undefined` for their own reasons. That is a
+small change to `_lib/arrivals.ts` and a branch on the card, and it wants its
+own tests.
 
 ---
 ## 2026-10-07 — the sentence a reader screen can lead with after a change lands, and the two figures on it that must never be added
@@ -193,6 +320,23 @@ a floor of unknown depth.
 
 ---
 ## 2026-10-07 — two names for one silence, now in three modules, and the next reading will have to pick one
+
+**Status:** **closed by `signals-13-one-name-for-two-silences`.**
+[`src/signals/silences.ts`](src/signals/silences.ts) maps all fifteen members of
+the five sets — `PaceSilence` is the fifth, which this filing did not count —
+onto nine conditions and three subjects, renaming nothing and superseding
+nothing, exactly as the remedy below asks. Two things the filing did not have:
+the sets are **five**, not three, and **one name already meant two different
+things.** A copy reading's `unmeasured` is a window whose counters report no
+views; a share-of-readers reading's `unmeasured` is a missing page-view row at
+the door, which a window full of readers can have. A table of synonyms — the
+thing this filing said a portal would otherwise keep — would have mapped those
+two together and printed *nobody has read this page* over a page hundreds had
+read. The record is
+[0240](decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md),
+and the reason a renaming could not have settled it is in it: the two spellings
+are one condition said of **different subjects**, so collapsing them would have
+drawn a comparison's silence over one side's page. Original status below.
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
 **Status:** open — **a wart rather than a defect**; every module is internally
@@ -768,8 +912,16 @@ Nothing on this site has met it.
 ## 2026-10-04 — every rate on the reader screen now has an exact denominator, and the figure to show is not the one that looks exact
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal`
-(`app/(portal)/readers/`) · **Status:** open — **the call is `pageReachOf` and it
-needs nothing from you first.** On `main` after the pull request for
+(`app/(portal)/readers/`) · **Status:** **closed by
+`portal-54-how-many-people-were-there`** — `pageReachOf` is the fourth reading
+off the join this screen already makes, and every rate a reader meets on that
+card now divides by the arrivals. Your register was taken as written: `share` is
+what the figures are built on, `readers` is what the sentences say, `atMost` is
+nowhere on the surface, `unreconciled` shows the count and refuses the share, and
+the three nothings have three sentences. Original status below.
+
+**Status (original):** open — **the call is `pageReachOf` and it needs nothing
+from you first.** On `main` after the pull request for
 `signals-08-a-share-of-the-readers-there-were` lands.
 
 **You were right, and the register you reached for on #513 is the one this
@@ -7686,6 +7838,35 @@ The fix is one line in the procedure or one line in the session's setup:
 instruction that produces the bug. Filed rather than fixed because
 `docs/routines.md` is governance and a routine cannot write the governance it is
 bound by.
+
+**Appended 7 October by `Loom demo`, with a quieter spelling of the same bug
+and the one that would have put false numbers in a report.** This session's
+container again started on a detached `HEAD` at the real tip, with the local
+`main` **four days and seventeen merges behind** it:
+
+```
+HEAD (detached)   bd0af3d    7 October
+main              6686895    3 October
+origin/main       6686895    3 October   — until fetched
+```
+
+The branch was *correct* — `git checkout -b` off the detached HEAD takes the
+real tip, so step 3 did not bite this time. What bit was step 7. This lane's
+reports are built on a **before/after measured against `main`**, and
+`git checkout main` to take the before pictures silently produced a
+four-day-old tree in which `app/(demo)/_lib/what-else.ts` **did not exist** —
+so the demo's ending caption was missing from every before shot, and the
+report would have claimed this run added it.
+
+It was caught by the one thing that could catch it: the numbers disagreed with
+a measurement taken earlier in the same session, on the same code, through the
+same harness. `git diff main..<branch>` then said `new file mode` for a file
+nobody had created in this run, which is the symptom worth writing down.
+
+*A routine that measures against `main` reaches for it at least twice — once to
+branch, once to photograph — and the fetch has to happen before both.* The
+remedy is unchanged and now covers both: **`git fetch origin main` first, and
+use `origin/main` for the branch point and for the before build.**
 
 ---
 
@@ -46727,3 +46908,94 @@ sentence in a header naming a known gap is not a guard, and nothing in the
 repository would have said so. The 1 October entry on a finding that said a
 remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
+
+---
+## 2026-10-07 — one sentence per state on a reader card, and the one pair of `unmeasured`s never to collapse
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is blocked**; `silences.ts` is on this run's branch and the call is
+one line per reading
+
+§17 of [`docs/signals.md`](docs/signals.md) landed the mapping from every
+reading's own reasons-for-saying-nothing onto the state behind them. The reader
+card draws four readings off one `pageReadingOf` and will draw more; each has
+its own closed set, and until now nothing said which of those names mean the
+same thing.
+
+```ts
+const states = distinctSilences([
+  copy.silence && meaningOfCopySilence(copy.silence),
+  reach.silence && meaningOfReachSilence(reach.silence),
+  pace.silence && meaningOfPaceSilence(pace.silence),
+])
+```
+
+`states` is **one entry per state**, in the order the readings were handed over,
+each keeping the first reading's own vocabulary so `describeCopySilence` and the
+rest are still the sentence to print. On a healthy deployment it is empty.
+
+**The pair that must never be collapsed, which is the reason this is filed
+rather than left to be noticed.** A copy reading's `unmeasured` and a
+share-of-readers reading's `unmeasured` are **two different states**, read off
+two different row sets. The first is *this window's counters report no views of
+this revision*. The second is *there is no page-view row at the door* — which a
+window holding several hundred readers can be in, and is what the first reading
+of a deployment upgraded past §8 looks like. A card that treated the two names
+as one would print *nobody has read this page* over a page people had read.
+`relateSilences` answers `unrelated` for that pair, and
+`distinctSilences` keeps them as two; a hand-kept table of synonyms is the thing
+that would get it wrong.
+
+**And one relation to draw as two lines rather than one.** `one-reason` means
+one condition about two subjects — a page's words are a floor *and* this part's
+words are the floor, or *one of the two windows was empty* beside *this page's
+window was empty*. Both are true and neither is evidence for the other: a
+comparison's silence names no side, so it must not be drawn over the version
+somebody is looking at. The framework deliberately does **not** order the
+subjects, because which of a page and one of its parts a person came to read is
+a judgement about a screen.
+
+---
+## 2026-10-07 — two number words in a new record count lists in `src/signals/`, and the registry that would hold them is another lane's file
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/record-claims.test.ts`) · **Status:** open — **nothing is wrong today**;
+this is two sentences in one record that can go stale the way the Gate's rule
+count did, in the one instrument built to stop that
+
+[0240](decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)
+says **nine conditions over fifteen members** and **three subjects**, and all
+three numbers are counts of lists in `src/signals/silences.ts`:
+`SILENCE_CONDITIONS`, the five sets added up, and `SILENCE_SUBJECTS`. That is
+exactly the shape `src/record-claims.test.ts` exists for — its own paragraph
+names the week the Gate's record said six rules while the ladder had seven.
+
+The two claims, ready to register:
+
+```ts
+{
+  record: "0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md",
+  sentence: /\*\*(\w+) conditions over fifteen members\*\*/,
+  count: SILENCE_CONDITIONS.length,
+  matters: "the count a surface reads to know the vocabulary is closed and small",
+},
+{
+  record: "0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md",
+  sentence: /\*\*(\w+) subjects\*\* — /,
+  count: SILENCE_SUBJECTS.length,
+  matters: "the axis that is the reason a renaming could not have settled the overlap",
+},
+```
+
+**Filed rather than done because the file is `src/` root, which the lane table
+makes the framework's.** The registry decides nothing about the framework and by
+construction holds claims from every lane, so it is arguably the one file where
+*follow the content* would point the other way — but the rule as written is a
+directory boundary and this lane's brief says work in another lane is filed, not
+done. It is a fourteen-line append with no behaviour in it.
+
+**The in-lane alternative was considered and is worse.** `silences.test.ts`
+could read the record and assert the counts itself, and that would be two
+spellings of one rule — the mistake this repository has now written down three
+times, most recently as the reason the word-counting rule moved into
+`words.ts`. One registry or none.
