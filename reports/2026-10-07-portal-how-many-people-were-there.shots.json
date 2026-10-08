@@ -1,0 +1,91 @@
+{
+"outDir": "reports",
+"shots": [
+{
+"out": "2026-10-07-portal-how-many-people-wide.png",
+"path": "/portal/readers",
+"viewport": {
+"width": 1680,
+"height": 1000,
+"label": "wide"
+},
+"fullPage": true,
+"waitFor": "text=How many people were there?",
+"measure": [
+"text=How many people were there?",
+"h3"
+],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{
+"fill": "input[name=key]",
+"text": "portal-photograph-key-0123456789"
+},
+{
+"click": "button[type=submit]"
+},
+{
+"waitFor": "text=What Loom has been doing"
+}
+]
+}
+},
+{
+"out": "2026-10-07-portal-how-many-people-phone.png",
+"path": "/portal/readers",
+"viewport": "phone",
+"fullPage": true,
+"waitFor": "text=How many people were there?",
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{
+"fill": "input[name=key]",
+"text": "portal-photograph-key-0123456789"
+},
+{
+"click": "button[type=submit]"
+},
+{
+"waitFor": "text=What Loom has been doing"
+}
+]
+}
+},
+{
+"out": "2026-10-07-portal-how-many-people-open.png",
+"path": "/portal/readers",
+"viewport": {
+"width": 1680,
+"height": 1000,
+"label": "wide"
+},
+"fullPage": true,
+"waitFor": "text=How many people were there?",
+"do": [
+{
+"click": "text=The two denominators, and the straddle between them"
+},
+{
+"waitFor": "text=appearances"
+}
+],
+"before": {
+"path": "/portal/sign-in",
+"do": [
+{
+"fill": "input[name=key]",
+"text": "portal-photograph-key-0123456789"
+},
+{
+"click": "button[type=submit]"
+},
+{
+"waitFor": "text=What Loom has been doing"
+}
+]
+}
+}
+]
+}

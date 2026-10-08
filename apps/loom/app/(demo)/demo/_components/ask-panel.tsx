@@ -11,7 +11,7 @@ import {
   type SetAside,
 } from "@/app/(demo)/_lib/set-aside"
 import { howManyWaitForYou } from "@/app/(demo)/_lib/how-many-wait-for-you"
-import { STANDING_ROW } from "@/app/(demo)/_lib/what-each-row-says"
+import { promiseOf, STANDING_ROW } from "@/app/(demo)/_lib/what-each-row-says"
 import type { AskVerdicts } from "@/app/(demo)/_lib/what-it-will-say"
 
 import { askForChange } from "../actions"
@@ -312,7 +312,18 @@ export const AskPanel = ({
               * above honest: the promise is a fact about this button and it
               * stays welded to it rather than being reordered away from it.
               */}
-            <p className="text-ink-muted text-xs">{lead.promise}</p>
+            {/*
+              * `promiseOf` rather than `lead.promise`, and the substitution is
+              * never nothing: the lead is whichever ask `leadingAsk` nominates
+              * out of what is left, so once *Take the numbers off* has been
+              * spent the green button is a toggle — and the second press of a
+              * toggle puts the page back. A green button promising *every
+              * colour and typeface on the page changes at once* while it undoes
+              * the visitor's last change is the same defect as the row's, at
+              * the loudest size this panel has. `what-each-row-says.ts` says
+              * why the promise is the sentence that moves and the chip is not.
+              */}
+            <p className="text-ink-muted text-xs">{promiseOf(lead.promise, said?.putsBack)}</p>
 
             {/*
               * And what Loom will say about it, which is the other half of
@@ -538,7 +549,18 @@ export const AskPanel = ({
                           </span>
                         )}
                       </span>
-                      <span className="text-ink-muted text-2xs">{preset.promise}</span>
+                      {/*
+                        * The promise, which is the preset's own until the
+                        * history makes it false. A toggle comes back onto this
+                        * list after it has been applied — `availablePresets`
+                        * plans against the tree as it stands and finds it
+                        * applicable in the other direction — and the sentence it
+                        * shipped with then describes a change the page is about
+                        * to be moved away from.
+                        */}
+                      <span className="text-ink-muted text-2xs">
+                        {promiseOf(preset.promise, answer?.putsBack)}
+                      </span>
                     </button>
                   </form>
                 </li>

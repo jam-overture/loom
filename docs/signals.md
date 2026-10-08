@@ -37,11 +37,13 @@ the portal every day.
 | What a change did to what gets read | the words both revisions say, read before against read now ([0239](../decisions/0239-a-change-is-read-against-the-words-both-revisions-say-and-a-floor-costs-the-page-total-and-not-the-passage.md)), with what the change wrote counted apart |
 | Whether readers had time to read it | time on screen against the time its words take ([0230](../decisions/0230-a-part-was-read-when-readers-had-time-for-its-words-and-only-the-skim-is-a-safe-claim.md)), where only the skim is a claim |
 | What a page's own shape says | where reading stops, as falls between siblings ([0221](../decisions/0221-where-reading-stops-is-a-fall-between-two-siblings-and-a-ratio-of-two-counts-off-one-row-set.md)), derived from counters that already existed |
+| Whether readers did anything, rather than saw it | `engaged` against `reached` off one row ([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)), withheld on a leaf because a leaf has no inside |
 | Arrivals | one batch of a page view says it opened one, which is how a region is counted once per reader, and how page views are counted exactly |
 | Whether a funnel question still names anything | each end looked up in the revision, with what is withheld decided per figure ([0238](../decisions/0238-a-funnel-end-the-revision-no-longer-has-is-a-standing-and-what-is-withheld-is-per-figure.md)) |
 | What a change did | two readings compared, pair by pair, as shares and never counts ([0224](../decisions/0224-a-before-and-after-reading-compares-two-shares-and-a-pair-the-change-dissolved-is-an-answer.md)) — which is also *this week against last week* |
 | How far readers got, as a share of the readers there were | estimated against the appearances and bounded against the openings ([0229](../decisions/0229-a-share-of-readers-is-estimated-against-the-appearances-and-bounded-against-the-openings.md)), so a rate can be stated with its own error beside it |
 | What *on screen* means | published as `READABLE_VISIBLE_FRACTION` and `READABLE_VIEWPORT_FRACTION` ([0218](../decisions/0218-what-a-counter-means-is-published-and-the-browser-pays-for-the-number-and-not-its-name.md)), so a page quotes the rule instead of typing it |
+| What a reading means when it says nothing | the condition and the subject behind all fifteen names ([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)), so one state is one sentence and the two `unmeasured`s are two |
 
 Decision [0136](../decisions/0136-a-published-page-broadcasts-reader-signals-when-its-host-asks.md).
 The guide is */docs/the-runtime/what-your-readers-do*.
@@ -810,6 +812,169 @@ comparison is built over every part rather than over a copy reading's passages.
 sentence a reader screen can lead with after a change lands, the list of
 passages a change did not fix, and the two figures on it that must never be
 added together.
+
+### 17. What a reading means when it says nothing · `Loom signals` · **done, 7 October**
+
+Nine readings built over twelve days, and each of them publishes a closed set of
+reasons a figure is absent. By §16 there were five such sets, each written by
+whoever was writing its module, and a window that held no page views was
+`nothing-measured` to one and `unmeasured` to another. The lane filed that the
+same morning as a wart rather than a defect — every set is right in its own
+sentence, and the cost falls entirely on a surface drawing two readings on one
+card, which meets two spellings of one thing and has nothing to tell it they are
+one thing. The finding's remedy was **one exported mapping rather than a
+renaming**, because four accepted records would have to be amended to rename and
+each set's names are right where they are.
+
+**Done**, and the building found the half the finding had not seen, which is the
+half that matters
+([0240](../decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)).
+
+- **One name already meant two different things.** A copy reading's
+  `unmeasured` is *the window's counters report no views of this revision*. A
+  share-of-readers reading's `unmeasured` is *there is no page-view row at the
+  door for this revision*. They are read off different rows and a deployment can
+  be in either without being in the other — the node counters hold a window of
+  readers while the door row is missing, which is what the first reading of a
+  deployment upgraded past §8 looks like. **A surface keeping its own table of
+  synonyms would have mapped those two together**, and would have been wrong in
+  the direction that hides a fault: *nobody has read this page*, printed over a
+  page several hundred people had read. So the overlap runs both ways, and a
+  vocabulary recording only *these two names are one state* would have been as
+  misleading as none.
+- **A silence has two parts, and the second is why renaming could not have
+  worked.** The condition it reports, and the subject that condition is true of.
+  The two spellings the finding named are *the same condition said of different
+  things*: a comparison names no side, so *one of the two windows held no page
+  views* is a fact about the pair, while a copy reading's is a fact about the
+  page on the screen. Collapsing them to one name would have licensed a card
+  drawing *nothing has been measured* over a page whose own window was busy.
+  Two names are not synonyms when one of them is about twice as much.
+
+`src/signals/silences.ts` maps all fifteen members of the five sets onto **nine
+conditions** and **three subjects**, renames nothing and supersedes nothing.
+The subject turned out to be a property of the **reading** rather than of the
+silence — every reason a copy reading gives is about its page, every reason a
+pace reading gives is about one part, every reason either comparison gives is
+about the pair — so it is published as one table over the five vocabularies
+rather than as a field repeated nine times.
+
+`relateSilences` answers in three: `one-state` (one sentence serves both),
+`one-reason` (one condition about two subjects, worth two sentences and never
+one), `unrelated`. It ignores which reading published either silence, which is
+the whole of what the module is for. `distinctSilences` is the one operation
+built on it: the silences as a surface holds them, most of them `null`, in and
+the distinct states out, in order, keeping the first reading's vocabulary so
+that reading's own sentence can still be printed.
+
+Three more settled in the building. **The mapping cannot drift, and that is a
+compile-time property**: each `meaningOf*` is an exhaustive `switch`, so a sixth
+member added to any of the five sets stops `pnpm typecheck` until it is mapped —
+measured, not assumed, at exactly one new error. A test holds the other side,
+that no condition is published which no silence reports, so a rename cannot
+leave an unreachable condition behind. And **the subjects are not ordered**: a
+surface holding a `one-reason` pair is told they are two sentences and not which
+to lead with, because which of a page and its part a person came to read is a
+judgement about a screen.
+
+It is the **tenth** thing taken out of what this subsystem already knows rather
+than collected: **nothing was added to a payload, a browser, a column, a store or
+the vocabulary of kinds**, and the imports in the module are types only, so it
+does not survive into any bundle at all. The broadcaster was not touched.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: one
+sentence per state on a card drawing several readings, rather than one per
+reading — and the one pair of `unmeasured`s never to collapse.
+
+### 18. Readers who did something, rather than readers who saw it · `Loom signals` · **done, 8 October**
+
+> §17 is the silence vocabulary, written on the branch of #546 and not yet on
+> `main` when this was built. The number is left for it rather than taken, since
+> that pull request was opened first and nothing here depends on it.
+
+Every reading above is about **attention**: which parts came into view (§6),
+where the reading stops (§9), whether there was time to take a part in (§12),
+how many of the page's words got reached (§14). A tally has carried `engaged`,
+`activations`, `opens`, `closes` and `completions` since the counters existed,
+and **nothing interpreted any of them.** §6 summed four of them into a role row
+and said why the fifth could not be summed, and that was the whole of it: a
+deployment could see that a band was read and had no way to ask whether anybody
+*did* anything in it.
+
+The one question of that shape that was answerable was a named `FunnelPair`
+(§13), which a deployment has to write node by node — so the unnamed question,
+*of the readers who got to this ask, how many opened it*, had no answer for any
+part of any page. §4 names what the portal view is for and two of its five
+clauses are exactly this: *which asks they open, which they complete.*
+
+**Done.** `pageActionOf(reading)` in
+[`src/signals/action.ts`](../src/signals/action.ts) answers *four in ten readers
+who got to the pricing band did something in it, and nobody touched the one
+below it*. It is the **tenth** thing taken out of the server-side join rather
+than collected (§6, §8, §9, §10, §11, §12, §13, §14 and §16 being the others):
+**nothing was added to a payload, a browser, a column, a store or the
+vocabulary**, and the broadcaster was not touched, so its weight is unchanged.
+It is also the second thing here that tells a **model** something to act on
+rather than telling a person something true — §9 was the first, and *readers
+reach this band and touch nothing* is a sentence a proposal can be written
+from.
+
+One fact decides the whole shape, and it is a filing rule misread as a
+measurement
+([0242](../decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)):
+
+- **`engaged` is structurally zero on a part with no element children, so a
+  share built from it is withheld on a leaf rather than reported as a nought.**
+  A press is filed against the control and credited to the addressed ancestors
+  it happened inside (0167), and a leaf has no inside. So a heading, a paragraph
+  **and a button** alike report `engaged: 0` for ever — the button because the
+  press is its own `activations`, the heading because there was never anything
+  to press. A page-wide `engaged ÷ reached` would therefore print *no reader
+  acted here* against every text node and every control on the page, and a
+  screen built on it would rank a page's parts by how little each one is a
+  container. The one part of a page the figure means anything about is the
+  **band**, which is the honest statement of what this vocabulary can support:
+  *what share of the readers who saw this button pressed it* is unanswerable
+  from any counter Loom keeps, and the nearest question is the band the button
+  is inside. A deployment wanting the narrower figure names a pair, which is
+  what pairs are for.
+- **Where it is defined it is sound**, because `engaged` and `reached` are two
+  distinct view counts written by the same rollups against the same node — so
+  0147's straddle is common to the numerator and the denominator and very nearly
+  divides out. That is §9's cancellation at one part rather than between two
+  siblings, and it is again deliberately **not** divided by the exact openings
+  §8 added: `opened` and `engaged` are written in different places and their
+  ratio can honestly exceed 1.
+
+Five more settled in the building. An **occurrence is never a reader**:
+`usesPerReader` is published with the word *rate* deliberately absent and may
+exceed 1, because the mistake was never the arithmetic but the sentence somebody
+would write under it. `shutAgain` — *readers open this ask and shut it again
+nine times in ten* — is two occurrence counts off one row and is **uncapped**,
+since above 1 it diagnoses a disclosure a revision renders already open and a
+clause nothing can falsify is not a safeguard (§13). **The root is the one
+page-wide headcount and it is a row rather than an addition**: every action is
+strictly inside the root, so its `engaged` is the page views in which a reader
+did anything at all, where summing across parts would charge one reader once per
+level they acted inside (0147, 0167). **`unwalked` names a sender that does not
+walk** — occurrences on the page and no reader credited anywhere, which is what
+a batch with no `within` looks like and otherwise presents as a page readers act
+on with every share a nought and the counters looking healthy; §11's `unopened`
+one counter across. And **no new silence vocabulary**: the three standings carry
+every reason a figure is missing, which is the shape §6 chose and is why §17 has
+five sets to map rather than six.
+
+**The thinness is §6's, in a second place.** A leaf readers reached with nothing
+against it is a button nobody pressed or a heading nobody could press, and
+nothing in the tree says which — `role` declares one member and it is not *a
+control*. That is this lane's own finding of 6 October, now with a second
+consumer, and the day a primitive can declare what it can report, every counter
+already stored reinterprets.
+
+**What it leaves for the portal**, which is `Loom portal`'s and filed: the
+share that is a band's and never a control's, the figure that must never be
+drawn as a rate, and `unwalked` as the one state to refuse to draw a card
+under.
 
 ## Still not in scope
 

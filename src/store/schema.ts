@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { integer, jsonb, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
+import { index, integer, jsonb, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core"
 
 /**
  * Two tables: the log, and the snapshot it produces.
@@ -83,3 +83,59 @@ export const loomHolds = pgTable("loom_holds", {
   disposition: jsonb("disposition").notNull(),
   heldAt: text("held_at").notNull(),
 })
+
+/**
+ * The policy's own log.
+ *
+ * A fourth table rather than a column anywhere, because a policy revision is not
+ * a tree revision: it is not keyed by a tree, it does not advance one, and the
+ * same revision of one policy judges changes to every tree a deployment holds.
+ * `policy-log.ts` says the same thing from the other side.
+ *
+ * `policy` is the whole `GatePolicy` as JSON, for the reason
+ * `loom_revisions.delta` is: it is a Zod-validated shape owned by §2, and
+ * columns would duplicate that definition and drift from it. A knob added to the
+ * policy would otherwise be a migration away from a log that quietly stops
+ * recording it.
+ *
+ * `fingerprint` is the one denormalised value in this schema, and it is a column
+ * rather than a JSON path because of the query it exists for: a `Disposition`
+ * carries a fingerprint, and finding the revision it names has to be a seek. The
+ * runtime computes it from the policy beside it on the way in and never accepts
+ * one from a caller, so the two cannot disagree.
+ *
+ * The composite primary key is load-bearing exactly as `loom_revisions`' is: it
+ * makes the database enforce the revision sequence, so two writers racing at the
+ * same head cannot both commit even if both read the head before either wrote.
+ *
+ * `recorded_at` is text rather than a timestamp to match
+ * `loom_revisions.applied_at` and `loom_holds.held_at` — an ISO-8601 UTC instant
+ * orders lexicographically exactly as it orders in time, and what the runtime
+ * holds above this boundary is a string.
+ */
+export const loomPolicyRevisions = pgTable(
+  "loom_policy_revisions",
+  {
+    policyId: text("policy_id").notNull(),
+    revision: integer("revision").notNull(),
+    fingerprint: text("fingerprint").notNull(),
+    policy: jsonb("policy").notNull(),
+    /**
+     * Who made this the policy (0200). Never null: a revision nobody can be named
+     * for is not a record of a decision.
+     */
+    actor: text("actor").notNull(),
+    recordedAt: text("recorded_at").notNull(),
+    note: text("note"),
+  },
+  (table) => [
+    primaryKey({ columns: [table.policyId, table.revision] }),
+    /**
+     * The join `judgedUnder` is. Without it, resolving the fingerprint on a
+     * disposition is a scan of every policy revision the deployment has ever
+     * recorded — which is small today and is on the path of a screen that reads
+     * it once per record on the page.
+     */
+    index("loom_policy_revisions_fingerprint_idx").on(table.policyId, table.fingerprint),
+  ]
+)
