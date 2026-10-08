@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 
+import { railScrollerAttr } from "@/app/(docs)/_lib/chrome"
+
 import { Sidebar } from "./sidebar"
 
 /**
@@ -30,6 +32,20 @@ import { Sidebar } from "./sidebar"
  * `onNavigate` is still wired, and both halves are load-bearing: a route pushed
  * from inside the panel takes a moment to commit, so without it the menu is
  * still over the page for as long as the navigation is pending.
+ *
+ * **The panel has a height, and that is what lets the rail find the reader in
+ * it.** Opened on the last page of the site it used to lay 1,712 pixels of
+ * links into the document, with the mark saying *you are here* 938 past the
+ * bottom of a 844-pixel screen — so a reader on a phone pressed *Browse the
+ * documentation*, saw *Getting started*, and had to scroll past 45 links to
+ * find out they were on the last one. Everything on the page they had been
+ * reading was that far down too.
+ *
+ * Bounded at 70% of the screen, it is a scroller rather than a stretch of
+ * document, so `in-view.ts` has something to move and moves the panel and
+ * not the page. The alternative was scrolling the document to the mark, which
+ * answers the same question by dumping a reader who had just pressed a button
+ * into the middle of a list with the button off-screen.
  */
 export const MobileNav = () => {
   const pathname = usePathname()
@@ -50,7 +66,7 @@ export const MobileNav = () => {
       </button>
 
       {open && (
-        <div className="border-edge border-t">
+        <div {...railScrollerAttr} className="border-edge max-h-[70vh] overflow-y-auto border-t">
           <Sidebar onNavigate={() => setOpenAt(undefined)} />
         </div>
       )}

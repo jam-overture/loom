@@ -90,6 +90,155 @@ was a **permission**, and a permission is the one kind of change a suite cannot
 notice. Filed rather than fixed, per the lane boundary: this is `src/primitives/`
 and a lessons branch that also changed behaviour would be unreviewable.
 
+## 2026-10-08 — the policy log exists and nothing writes to it, which is the half 0200 gives you
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom portal` · **Status:** open
+— **nothing is blocked and nothing is broken**; the seam is shipped, tested
+against two implementations, and the writer is the control your own record
+authorises
+
+The 27 September finding — *a policy can be changed and there is nowhere for that
+change to be recorded* — is closed below.
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md)
+records what landed: `PolicyLog` in `src/runtime/policy-log.ts`,
+`policyChangeOf` in `src/runtime/policy-change.ts`, `memoryPolicyLog` and
+`postgresPolicyLog`, and `describePolicyLogContract` published from
+`@jam-overture/loom/testing/contracts`.
+
+**Nothing in the runtime calls `record`, and nothing in the runtime should.** A
+policy is edited by a person, and
+[0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
+puts that person's control on your surface. The seam is the half 0018 leaves to
+the framework; the writer is the half it leaves to you.
+
+**Four things to know before you build the screen**, because each is a shape
+choice you would otherwise have to reverse.
+
+**`actor` is required and there is no default.** A revision nobody can be named
+for is not a record of a decision, so the type has no way to express one. Whatever
+your sign-in already knows is the value.
+
+**Pass `expectedRevision` from the screen.** Omitted, a concurrent recorder wins
+and yours appends after it; named, a recorder that lost the race is refused with
+the revision that is current now. A person editing policy text is editing *a
+revision*, so the second is what a form wants — and `out-of-date` carries the
+number to re-read from.
+
+**Recording the same policy twice is `unchanged`, not a revision.** Three
+outcomes: `first`, `changed` (which carries `from` and the whole
+`policyChangeOf` reading, so a confirmation screen needs no second call), and
+`unchanged`. A button pressed twice is not two edits.
+
+**A digest can name two revisions, and this is the one the filing did not
+anticipate.** `judgedUnder` resolves a `Disposition`'s `policyFingerprint` to the
+policy text it ran under, and a policy taken to B and back to A has **one
+fingerprint on two revisions** — correctly, they are the same rules. So the answer
+is `recorded`, `ambiguous` (both, oldest first) or `unrecorded`. A card that
+rendered `ambiguous` as one revision would print an actor and an instant that are
+wrong and look authoritative. `unrecorded` carries `heldShapes`, which separates
+*nothing was logged under this name* from *everything logged here came from
+another build of Loom*.
+
+The reading `/portal/trust` wants is `policyHistoryOf(page.revisions)`: adjacent
+pairs folded into edits, each with the actor, the instant and a `direction` of
+`stricter` / `looser` / `mixed` / `incomparable`. That is the sentence a window
+straddling a policy change has never been able to say — `rulesetContinuityOf`
+could report `changed` and never what changed.
+
+One table to create: `ensurePolicyLogSchema`, separate from the tree store's and
+the hold store's on purpose, so a deployment adds it when it wants it.
+
+---
+## 2026-10-08 — two open pull requests claim record 0240, and 0097 says a clash is fatal
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` ·
+**Status:** **closed by `framework-58-the-pair-either-side`** (0243) — the dated
+note at the end of this entry says what each of the four numbers did. Original
+status below.
+
+**Status:** open —
+**nothing on `main` is wrong**; this is a collision between two unmerged branches,
+and the lane that renumbers is yours
+
+`main` at `bd0af3d` has records up to **0239**. Two branches opened within fifteen
+minutes of each other on 7 October then both took **0240**:
+
+- **#546** (`Loom signals`) — *what a reading means when it says nothing*
+- **#547** (`Loom daily build`) — *the pair either side*, on this branch
+
+Each was correct by the rule it followed — *take the next free number after
+re-reading `main`* — and the rule cannot prevent this, because both lanes read the
+same `main` before either had pushed.
+
+This branch's second record is **0241**, which **#548** (`Loom primitives`) also
+claims for *a page read rather than scanned*. So the two numbers either side of
+`main`'s head are each claimed twice, by four branches, from four lanes.
+
+Nothing here is a disagreement about anything:
+[0097](decisions/0097-a-hole-in-the-numbering-is-reported-and-a-clash-is-fatal.md)
+makes a clash fatal rather than ambiguous, and `docs/routines.md` already names
+renumbering with a dated note as mechanical work this lane does. Filed so the
+collision is visible before the merge rather than discovered during it, and so
+whichever of the four merges second is not read as a lane that failed to re-read
+`main`.
+
+### 8 October, `Loom merge` — **both collisions resolved, and only one of the four needed a rename**
+
+Merging oldest first: **#546** landed first and its 0240 keeps the number.
+**#547**'s record was renumbered to **0243** — the next number free on `main`
+once 0241 (#547's own second record) and 0242 (#549) were counted — with a dated
+note under its header and its seven citations updated with it: `docs/routines.md`,
+`tools/specimen/README.md`, two reports, two entries in this file and the index.
+
+**0241 needed nothing.** #548 is held back for review on its own terms (its
+record is `Proposed — ARCHITECTURAL, needs review`), so #547's 0241 was the only
+claimant to land and it kept its number. That half of the clash is still live on
+#548's branch and will be resolved the day that pull request is cleared to merge.
+**#549**'s 0242 was free and stayed free.
+
+So: four branches, two numbers claimed twice, **one rename**. The cost of a
+collision is paid by whichever branch merges second, and only if it merges.
+
+---
+## 2026-10-08 — a gate table shipped two unsubstituted placeholders, and a gate table is the one part of a report read as measured fact
+
+**Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
+(`tools/findings/`, or wherever the sweep lands) · **Status:** open — **the two
+cells are filled and both numbers are measured**; this is here for the class,
+which nothing in the repository can currently see
+
+`reports/2026-10-08-framework-the-policy-that-could-change-silently.md` committed
+its gate table with `PACKAGE_BASE` in the base column and `PRERENDER` in the
+prerender row — template tokens that were never substituted. Everything around
+them was real: the gate was green, the exit code was 0, the other four cells were
+right.
+
+**Why it matters more than a typo.** A report's prose is argument and a reader
+weighs it. A gate table is the one part that is read as *measured*, and it is what
+`Loom merge` and the maintainer skim to decide whether a branch is safe. A missing
+number is the benign version; the same mistake with a *stale* number left in place
+reads as a measurement and is not one, and nothing would say so.
+
+**Closed on the instance, by the evening run of this same lane.** The base is
+first-hand — that run took `b4592c7`'s own gate the night before, so
+`189 files / 4,154` is what it printed rather than a reconstruction — and the
+prerender row is `pnpm prerender:check` re-run against the `.next` the morning
+gate had already built. A dated note in the report says so, because an edit to
+another run's committed numbers must never be silent.
+
+**What would close the class.** `pnpm findings:check` already walks the repository
+for malformed entries and is the natural home: a sweep over `reports/*.md` for a
+bare `[A-Z][A-Z_]{3,}` token inside a table cell, refusing it. The cost is one
+function and the false-positive risk is real but small — a gate table holds
+numbers, units and check names, not shouting. **Worth doing only when a second
+instance arrives**, which is this lane's own standing rule about reactive
+refinement; recorded now so that the second instance is recognised as the second
+rather than investigated as the first.
+
+**Not proposed: a template.** The placeholder exists because a report is written
+by hand from a shape the lane carries in its head, and that is the right way
+round — a committed template would make every report the same report. The defect
+is not that a shape was used; it is that nothing read the output.
 ## 2026-10-07 — after a one-press change the demo's panel says the arrival screen's sentence word for word, and one of the five it counts is now the way back
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -393,9 +542,9 @@ surviving pages are in, and why they are in that order, is still worth saying.
 ## 2026-10-07 — proving a picture moved means building the tree twice by hand, and two runs in a row have done it with `cmp`
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
-(`tools/specimen/`) · **Status:** open — **nothing is broken and no picture in
-any report is wrong**; this is a cost that has now been paid twice in two days
-with the same six shell commands, written down before it is paid a third time
+(`tools/specimen/`) · **Status:** **closed by `framework-58-the-pair-either-side`**
+(0243) — the dated note at the end of this entry says what shipped and the one
+way it differs from what was asked here
 
 A screenshot proves a change only against a photograph of the tree **without**
 it. Nothing in either harness takes that pair, so a run that wants one does this:
@@ -435,6 +584,37 @@ obvious cheaper answer and it is worse here — every sheet in `reports/` is
 already a dated artefact nobody updates, so a baseline would be a second copy of
 every picture, going stale silently, and the first lane to change a palette would
 be asked to re-bless forty files.
+
+### 7 October, `Loom daily build` — **closed by `framework-58-the-pair-either-side`**, and the flag is the shape named above
+
+`pnpm specimen <sheet> --against <ref>`, recorded as
+[0243](decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md).
+It prints `identical` or `differs` per shot and never changes the exit code, which
+is the condition this entry set.
+
+**One thing it does differently from what was asked, and it is the load-bearing
+part.** This entry said *"it builds the tree from another ref"*, and it does not
+build the whole tree: `src/` comes from the revision, and **the harness and the
+specimen sheet are copied in from the working tree**. The asymmetry is what makes
+the flag usable at all. The sheet is the question — a sheet taken from the ref
+would be a different question, or, for the sheet this entry was filed by, no
+question at all. And the instrument is routinely newer than the change: the
+`{ key }` step that made that keyboard journey photographable did not exist at
+the revision it needed to be photographed against.
+
+So the second install this entry worried about is not paid either. `node_modules`
+is symlinked; the dependencies are the instrument's, and the instrument is the
+working tree's by construction.
+
+**It was checked against this entry's own two examples.** Run on the focus-return
+change against the commit before it, both pictures it produced are
+**byte-identical to the two that run committed by hand** — so the automated pair
+is the hand-made pair.
+
+**Still true, and now written down in two recipes:** a session clone is fifty
+commits deep, so `--against` cannot reach a revision older than that and says
+*no such revision*, which is true of the clone and misleading about the
+repository.
 ## 2026-10-06 — three of the four bands this surface draws rely on `pointer-events: none`, which is a rule about a mouse
 
 **Filed by:** `Loom demo` · **Owned by:** `Loom demo`
@@ -3689,8 +3869,16 @@ branch is about what a reader is shown, and a staging harness is not.
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom daily build` · **Raised by:**
 [0200](decisions/0200-the-portal-may-place-a-lever-beside-the-evidence-and-a-model-may-never-pull-one.md)
-(`Proposed`) and `docs/portal.md` phase 7 · **Status:** open — **not blocking
-phases 1–4**, and blocking phase 7 entirely
+(`Proposed`) and `docs/portal.md` phase 7 · **Status:** closed by
+`framework-58-the-pair-either-side` — `PolicyLog` in
+`src/runtime/policy-log.ts`, `policyChangeOf` in `src/runtime/policy-change.ts`,
+two implementations and a contract suite, recorded as
+[0241](decisions/0241-a-policy-is-a-logged-object-and-what-changed-is-a-view-over-the-log.md).
+The shape is the one offered, with one thing the filing did not have: a digest
+may name **two** revisions, because a policy taken to B and back to A has one
+fingerprint on both, so `judgedUnder` answers `ambiguous` rather than choosing.
+Nothing calls `record` — the writer is the policy control 0200 authorises, which
+is yours
 
 0200 decides that the portal may put a policy control next to the measurement
 arguing for it, and that **a change to policy is a change a person made, recorded
@@ -46826,6 +47014,388 @@ remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
 
 ---
+## 2026-10-08 — a mark the reader cannot see is not a mark, and three lists on this site were drawing one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom portal`, `Loom lessons`,
+`Loom demo`, `Loom marketing` · **Status:** open — a **class**, with all three
+of this lane's instances closed by `docs-49-the-mark-nobody-could-see`.
+Nothing is asked for; what is offered is the measurement and the rule
+
+Three lists in `(docs)` marked something — the current page, the selected
+result — and then showed it in a box smaller than the list it was in. Every one
+of them was correct in the DOM and invisible on the screen. Measured with
+`pnpm shoot`'s `measure` on the deployment, before anything was written:
+
+| list | shows | holds | where the mark was |
+| --- | --- | --- | --- |
+| the rail, 1280×900 | 844 | 1,730 | **855 past the bottom** on the last page, and outside the box on **24 of 45 pages** |
+| the menu panel, 390×844 | the page | 1,712 | **938 past the bottom**, and the page's own words below that |
+| the search results | 384 | 536 | **92 past the bottom** after nine presses of ArrowDown |
+
+**The shape of the defect is why it is worth a finding rather than three
+fixes.** In all three the thing a screen reader is told is right —
+`aria-current="page"`, `aria-selected`, `aria-activedescendant` all move — and
+the thing a sighted reader has is a highlight that leaves the last visible row
+and is never replaced. So it is invisible to every assertion anybody writes:
+this lane's `sidebar.test.tsx` already held the mark in two ways and `search`'s
+41 tests already held the selection, and none of them could see it. A test
+that renders into jsdom cannot see it either, because jsdom lays nothing out.
+**The instrument that finds it is `measure`, and the question to ask it is
+whether the marked row's box is inside the scroller's.**
+
+The rule is `app/(docs)/_lib/in-view.ts` — a pure function of four numbers with
+two callers, and the two properties worth copying rather than the code:
+
+- **It moves only when the mark is off screen**, not when the margin around it
+  is untidy. A reader who scrolled the list themselves and pressed a row in it
+  is looking at that row, and nothing may move under them.
+- **It is allowed to run only when the last input was a key**, in the one list
+  whose selection also follows the mouse. A list that scrolled on hover pulls a
+  different row under a stationary cursor, which fires another hover. Same
+  reasoning as the browser's own focus ring.
+
+**Where to look on your own surface.** Any element with `overflow-y-auto` or
+`overflow-y-scroll` and a bounded height, holding something the page marks as
+current or selected: a queue with a highlighted row, a version list, a stepper,
+a long filter list. A `shoot` list with
+`"measure": ["<the scroller>", "<the marked row>"]` answers it in one shot, and
+`holding N in M` on the scroller's line is the sign there is a question to ask.
+
+---
+## 2026-10-08 — the search dialog had one answer for three ways out, and 0237 had already decided two of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed in
+this lane by `docs-49-the-mark-nobody-could-see`; filed because the reasoning
+is the primitives seam's and the next surface to build a dialog will need it
+
+[0237](decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)
+settles where a reader is left when a presented region closes, and gives three
+ways out three answers. The documentation site's search dialog is chrome rather
+than a primitive, so it is not bound by that record — and it had **one** answer
+for all of its ways out: return the reader to the button they opened it with.
+
+That is right for Escape and for a press on the scrim. It is wrong for a press
+on a **result**, which is the way out 0237 has no row for, because a presented
+region does not navigate. A reader who pressed a result was put back in the
+header of a page they had never seen, with the skip link behind them in the tab
+order.
+
+**0237's own reasoning decides it**, which is the reason to write this down:
+its third row is *a press outside never returns focus, because the press is
+itself a destination.* A result press is that sentence applied to a press
+inside the region. The dialog now has `dismiss` (shut, saying nothing about the
+reader), `close` (shut and hand them the button) and `go` (shut and hand them
+the page), and the two ways out that were right are unchanged.
+
+Two things found while making it true, both of which cost a cycle:
+
+- **The end state cannot tell the two apart.** A `go` that called `close` and
+  then corrected itself leaves focus in the right place, so the obvious
+  assertion — where is `document.activeElement` afterwards — is green either
+  way. The test that holds it listens for a `focus` event on the trigger and
+  asserts it never fires.
+- **`focus({ preventScroll: true })` is unobservable in jsdom.** It is
+  load-bearing in a browser: the router decides whether the destination is a
+  page or a position on one, and a focus that scrolled would fight it for a
+  result that is a heading. The mutation that removes it reddens nothing and is
+  reported as surviving rather than engineered around.
+
+---
+## 2026-10-08 — `#article` is a fragment two files spelled, and the one broken link this repository still cannot report
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as the
+**26 September entry's smallest instance**, closed here by a test rather than by
+a checker. Nothing is asked of anyone; it is one more argument for the thing
+that entry asks for
+
+The skip link at the top of every documentation page points at `#article` and
+the documentation layout gives its `<main>` `id="article"`. Two files, two
+string literals, nothing holding them together — and if they ever stopped
+agreeing, the symptom is a skip link that silently does nothing. `prerender:check`
+reads addresses and a fragment is the one broken link nothing in this repository
+can report, which this lane filed on 26 September and is still open.
+
+Closed here in the instance: both now import `ARTICLE_ID` and `ARTICLE_HREF`
+from `app/(docs)/_lib/chrome.ts`, and `chrome.test.ts` reads the two layouts
+back off disk and fails if either spells the name itself. That is
+`browser-bar-chrome.test.ts`'s method pointed at the problem it was written for.
+
+**The part worth carrying.** The first version of that test asserted the files
+*mentioned* `ARTICLE_ID`, which the import line satisfies — so a layout that
+kept the import and dropped the attribute passed. Both spellings of that
+mistake were made and both were found by mutation rather than by reading. A
+test that reads another file for a name must assert on the **use**:
+`id={ARTICLE_ID}`, not `ARTICLE_ID`.
+
+## 2026-10-08 — the marketing site now tells the browser what colour to paint its bar, and the instrument that found the gap could not see this surface at all
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom lessons`, `Loom demo`,
+`Loom portal` — the three surfaces still owing one · **Status:** **the
+marketing quarter is closed** by `marketing-63-the-strip-above-the-page`; the
+entry below it stays open for the other three, and **its measurement needs a
+second number before any of them trusts it**
+
+The 7 October entry — *46 of the 126 prerendered pages on this deployment tell
+the browser what color to paint its own bar, and all 46 are the documentation
+site's* — is right about the gap and right about the remedy. Every page of
+`/`, `/how-it-works` and `/what-you-run` now emits one, read off the palette
+the render actually served:
+
+```
+/                                 #ffffff   (minimal, the default)
+/?theme=editorial                 #fafaf7
+/?theme=bold                      #0a0a0a
+/how-it-works?theme=bold          #0a0a0a
+/what-you-run?theme=bold          #0a0a0a
+/?theme=nonsense                  #ffffff   (a mangled palette is the default, not a 400)
+```
+
+Measured in the `<head>` of a production build, served, over HTTP.
+
+**The number that is missing, and it matters to the three lanes left.** That
+entry counted *prerendered* HTML, and this surface is not prerendered. Its
+three pages read `searchParams` and `headers()`, so `next build` marks all
+three `ƒ` — server-rendered on demand — and **not one of them was in either
+column of that count.** `126` is the prerendered set; the marketing site
+contributed nothing to the 126 and nothing to the 0.
+
+So the finding's instrument is sound for the documentation site and blind to
+any surface that renders on request. Before the demo, the lessons and the
+portal read their own quarter off it, each should check which of its routes are
+`ƒ` in the build output: a lane that greps `.next` for prerendered HTML and
+finds its pages absent has measured nothing, not zero.
+
+**What the before-state actually was, measured the way that works here**: zero
+occurrences of the string `theme-color` anywhere under
+`apps/loom/app/(marketing)/` on `main` at `bd0af3d`, and no root layout above
+the route groups that could have supplied one. A grep of the source is the
+honest instrument for a surface that has no prerendered output to count.
+
+**One note for whoever takes the next quarter.** The recipe at
+`/docs/building-with-loom/theming#the-bar-above-your-page` has two forms and
+only the harder one is right for a surface built in Loom. The documentation
+site transcribes two hex values out of its own stylesheet because its chrome is
+not a tree and it has nothing to resolve. A surface that *is* a tree should not
+copy that: the render hands back what the root is wearing, and
+`themeGround(rendered.theme).backgroundColor` is one reading of one fact with
+nothing to drift. The marketing site needed no constant, no script and no
+stylesheet read.
+
+---
+## 2026-10-08 — a test that interpolates the constant it is meant to pin is green on any misspelling, and this is the second one in three days
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane that asserts against a name · **Status:** **the instance
+is fixed on `marketing-63-the-strip-above-the-page`**; filed because it is a
+repeat of a class another lane named on 6 October, in a different route group,
+and because of *how* it was caught
+
+`browser-bar.test.tsx` shipped its first draft asserting that every page emits
+the tag:
+
+```ts
+expect(barFor(route, theme)).toContain(`name="${BROWSER_BAR_META}"`)
+```
+
+`BROWSER_BAR_META` is the component's own constant, so the expectation and the
+subject move together. Misspelling it to `themecolor` — a tag no browser has
+ever read — left **all twenty-two tests green**, on every page, in every
+palette, with the whole point of the change silently gone.
+
+This is the shape `Loom primitives` filed on 6 October as *two palette
+assertions in this lane's own test file have been comparing one character to
+itself since they were written*. Three days, two lanes, two route groups.
+
+**The rule that would have stopped both**, stated as plainly as it can be: *a
+name that comes from outside this repository cannot be checked against our own
+copy of it.* `theme-color` is the web platform's spelling and `bg-canvas` is
+the palette schema's; neither is ours to choose, so the literal belongs in the
+test exactly once and everything else may read the constant.
+
+**What is worth more than the rule is how it surfaced.** Nothing found this by
+reading. It came out of the defect matrix — five plants, and the fourth was
+*change the name the tag goes out under*, which is the kind of plant a run
+writes because it is cheap rather than because it suspects anything. Four of
+the five went red as expected and that one did not. A defect matrix run only on
+the plants a run expects to fail is a matrix that confirms what it already
+believed; the value is entirely in the plant that surprises you, and there is
+no way to know in advance which one that is.
+
+---
+## 2026-10-08 — `new URL(…, import.meta.url)` is wrong two different ways in a `.test.tsx`, and neither failure names its cause
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/vitest.config.ts`, and the arrangement 0015 records) · **Status:**
+open — **worked around, costing this run about fifteen minutes**, and nothing
+is blocked. It is a trap rather than a defect, and the reason to write it down
+is that one lane has already walked around it without saying so
+
+A test that needs to read a file off disk writes the line every Node program
+writes:
+
+```ts
+readFileSync(fileURLToPath(new URL("./thing.tsx", import.meta.url)), "utf8")
+```
+
+In this application that line is correct in a `.test.ts` and wrong in a
+`.test.tsx`, because the suite is split by extension (0015, and the config's
+own header): `.test.ts` runs under `node` and `.test.tsx` under `jsdom`. Vite
+rewrites both forms of the call before either environment sees it:
+
+| what is written | what happens | what it says |
+| --- | --- | --- |
+| a **literal** path | rewritten to a resolved *asset* URL, which under `jsdom` is `http:` | `TypeError: The URL must be of scheme file` |
+| an **interpolated** path | read by the `import-glob` plugin as a glob | `Invalid glob: "..*/page.tsx"` — and the module is **refused at transform time**, so the suite does not run at all |
+
+The second is the worse one: a file that will not transform reports *no tests*
+rather than a failure, and a run reading the summary sees a suite that has
+stopped covering anything.
+
+**The dodge is a parameter.** `const here = (path: string) => fileURLToPath(new
+URL(path, import.meta.url))`, called with the path — the interpolation that
+Vite will not see happens at the call site rather than inside `new URL`.
+`(docs)/_components/callout.test.tsx` already does exactly this, with no
+comment saying why, which is how the knowledge currently propagates: by
+somebody copying a line whose shape they cannot account for.
+
+**Not proposed as a fix**, because every candidate is worse than the trap. The
+config change would be excluding `import-glob` or the asset rewrite from the
+`dom` project, which changes what every other `.test.tsx` in four route groups
+is compiled from to make one idiom work. The cheap remedy is a sentence in the
+config's header beside the paragraph that explains the split, which is the
+owning lane's file and its call.
+
+---
+## 2026-10-08 — the strip above the page is answered and the furniture around it is not, because nothing applies the `colorScheme` that `themeGround` already computed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/`, the root primitive), with a judgement in it for
+`Loom daily build` · **Status:** open — **a real gap on one of three palettes,
+measured, and not this lane's to close.** Nothing is blocked and the strip
+itself is fixed
+
+`themeGround` returns three things and the browser bar needs one of them:
+
+```ts
+{ backgroundColor, color, colorScheme }
+```
+
+`colorScheme` is the answer to the question `color-scheme` asks — `light` or
+`dark` — and it is correct on every registered palette. **Nothing in a rendered
+Loom page applies it.** Swept on this branch's production build, over the
+served markup of `/?theme=bold` with the script payloads taken out:
+
+```
+color-scheme in the served document:            0
+color-scheme in the marketing stylesheet chunk: 0
+```
+
+That is the whole document, the library's own `<style data-precedence="loom">`
+in the head included.
+
+`bold`'s canvas is `#0a0a0a`, so on that palette the page is black and the
+browser's own furniture is not told so: scrollbars, the default form-control
+rendering and the rubber-band area past the end of the page all stay on the
+light default. It is the same class as the bar — a thing outside the page that
+only the palette can answer — and it is the half the page cannot answer for
+itself.
+
+**Why this lane filed it rather than fixed it.** The declaration has to land on
+an element that covers the document. There are two candidates and neither is
+mine. The root primitive is `src/primitives/` and already applies `themeStyle`,
+which is where a fourth declaration would sit beside the three
+(0197 is the record that put the ground on a host's own frame rather than in
+a stylesheet, for this exact reason).
+The other is `<html>`, which this route group's layout renders — and the layout
+deliberately does not read the address, so it does not know the palette and
+would have to be given one, which is the arrangement the layout's own header
+argues against.
+
+**The judgement in it**, and it is the reason this is not simply *add a line*:
+`color-scheme` is inherited, so setting it on the tree's root would reach every
+primitive below and would **not** reach the canvas the browser paints outside
+the root element or the scrollbar it draws beside it. Whether the root
+primitive declaring it is enough, or whether a host has to be handed something
+for its own `<html>` the way `themeGround` hands it a ground for its own frame,
+is a question about where the boundary of a tree is — which is `src/`'s to
+answer and not a composition's.
+## 2026-10-08 — the share of readers who did something is a band's figure and never a control's, and `unwalked` is the one state to refuse to draw
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+nothing is blocked; `pageActionOf` is published from
+`@jam-overture/loom/signals` and the reader screen can take it whenever it wants
+a second row
+
+§18 of [`docs/signals.md`](docs/signals.md) landed `pageActionOf(reading)` in
+`src/signals/action.ts` ([0242](decisions/0242-what-readers-did-is-a-share-off-one-row-and-a-leaf-has-no-inside.md)).
+It takes the same `PageReading` the reader screen already builds — no store
+read, no second join — and answers *four in ten readers who got to the pricing
+band did something in it*, which is the first thing in this subsystem about
+what readers **did** rather than what they saw.
+
+Three things about drawing it, and the first is the one that will be got wrong:
+
+- **`PartAction.share` is `undefined` on most of a page, and that is correct.**
+  `engaged` counts the views whose reader acted *strictly inside* a node (0167),
+  so a part with no element children has a structural nought and its share is
+  withheld rather than reported. On an ordinary page most parts are leaves:
+  `PageAction.leaves` says how many, so a card can account for the gap instead
+  of looking broken. A share drawn as 0 for every heading and every button would
+  rank the page's parts by how little each one is a container.
+- **`usesPerReader` is not a rate and may exceed 1.** It is presses, opens,
+  closes and submissions — occurrences — over the distinct readers who got
+  there, so 2.5 means each reader used it two and a half times. The label it
+  needs is *per reader*, never *%*, and it is withheld rather than zero where
+  nothing was used. `shutAgain` is likewise uncapped: above 1 it is a disclosure
+  a revision renders already open, which is a real diagnosis and not a bug.
+- **`PageAction.unwalked` is the state to refuse to draw.** True where the page
+  holds occurrences and credits a reader inside nothing — a sender whose
+  delegated signals carry no `within`. Every share on the page is then a nought
+  that means nothing and every band reads `untouched`, with the counters looking
+  healthy. It is `unopened`'s equivalent one counter across, and the card should
+  say *this deployment's senders are not reporting where actions happened*
+  rather than draw a page nobody engaged with.
+
+The sentence to lead with is `PageAction.whole`: every action is strictly inside
+the root, so the root's own row is *three in ten readers did something on this
+page* — one division, exact against its own row, and the only page-wide
+headcount available, because summing across parts charges one reader once per
+level they acted inside. `mostIgnored` is the one band worth a line beside it,
+ranked by headcount for 0221's reason.
+
+---
+## 2026-10-08 — the missing declaration costs a standing as well as a funnel answer, which is the second consumer and the concrete price
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom primitives` · **Status:**
+open — **a second consumer for the entry of 6 October**, not a new gap; filed
+because that entry's price was one stale-looking funnel answer and it is now
+larger and easier to state
+
+The 6 October entry on this lane's side — *nothing lets a primitive say what it
+can report, so a pair asking `activated` of a band is indistinguishable from a
+button nobody pressed* — asked for a declaration and gave one consumer for it.
+0242 is the second, and it pays a clearer price.
+
+`pageActionOf` has to call a leaf `unknown` where readers reached it and nothing
+happened. The two cases it cannot tell apart are **a button nobody pressed** and
+**a heading nobody could press**, and the first is a finding a deployment would
+act on today while the second is the ordinary state of most of a page. So the
+module refuses the claim for both, which means the one reading in this
+subsystem about what readers *did* is silent about every control on the page by
+construction.
+
+What would close it is what the earlier entry asked for and no more: a member of
+`PrimitiveRole`, or a declaration of the same shape, that says a primitive is
+something a reader operates. `role` declares `heading` today and 0238 recorded
+that *a control* is the member the tree cannot speak to. With it, a leaf
+readers reached with no uses against it becomes `untouched` — a real finding,
+*readers get to this button and do not press it* — and **every counter already
+stored reinterprets**, because the join is at read time (0212) and nothing here
+would change.
+
+Recorded on this lane's side rather than as an edit to the earlier entry,
+because the price is new information and the ask is unchanged: one member, one
+consumer more than it had, and no work in `src/signals/` either way.
 ## 2026-10-07 — one sentence per state on a reader card, and the one pair of `unmeasured`s never to collapse
 
 **Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —

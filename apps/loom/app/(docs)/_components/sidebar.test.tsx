@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { railScrollerAttr, RAIL_SCROLLER_SELECTOR } from "@/app/(docs)/_lib/chrome"
 import {
   docsHref,
   docsLandingOf,
@@ -287,5 +288,149 @@ describe("a link in the rail, pressed", () => {
     for (const link of linksOf(container)) press(link)
 
     expect(hrefsOf(container)).toHaveLength(docsOrder.length)
+  })
+})
+
+/**
+ * Whether the mark is anywhere a reader can see it.
+ *
+ * Everything above this point is about the rail being *right*, and it was: the
+ * current page has carried `aria-current` and a mint edge since the rail
+ * shipped. It was also, for two thirds of the site, drawn below the bottom of
+ * its own scroller — the rail holds 1,730 pixels of links in the 844 it shows
+ * on a 1280×900 screen, so a reader arriving at *Decision records* from the
+ * search box, the pager or a bookmark got a rail showing *Getting started*
+ * with nothing highlighted on it. Measured with `pnpm shoot`'s `measure`
+ * before any of this was written, and quoted in the report.
+ *
+ * **The arithmetic is not here.** `_lib/in-view.test.ts` holds it, in a
+ * `.test.ts` that gets no document, because in this suite the extension
+ * decides the environment. What is left for this file is the half that needs
+ * one: the rail finding its own scroller, the row's top being measured from
+ * the list rather than from the screen, and the effect running on the address
+ * and not just on mount.
+ *
+ * jsdom lays nothing out, so the rail is laid out here: every row 32 tall in
+ * document order, in a scroller showing 844 of them. The shape is the real
+ * rail's and the numbers are a round version of the real ones — what is being
+ * checked is which numbers reach the judgement, not what it does with them.
+ */
+const ROW = 32
+const SHOWN = 844
+
+const unlaidOut = HTMLAnchorElement.prototype.getBoundingClientRect
+
+afterEach(() => {
+  HTMLAnchorElement.prototype.getBoundingClientRect = unlaidOut
+})
+
+const railInside = (
+  href: string,
+  { scrollTop = 0, scroller = true }: { readonly scrollTop?: number; readonly scroller?: boolean } = {}
+) => {
+  const box = document.createElement("div")
+
+  if (scroller) {
+    for (const [name, value] of Object.entries(railScrollerAttr)) box.setAttribute(name, value)
+  }
+
+  document.body.append(box)
+  box.scrollTop = scrollTop
+
+  Object.defineProperty(box, "clientHeight", { value: SHOWN, configurable: true })
+  Object.defineProperty(box, "scrollHeight", { value: docsOrder.length * ROW, configurable: true })
+  box.getBoundingClientRect = () => ({ top: 0, height: SHOWN }) as DOMRect
+
+  /* Viewport-relative, the way a browser reports it: the list's own offset, less the scroll. */
+  HTMLAnchorElement.prototype.getBoundingClientRect = function (this: HTMLAnchorElement) {
+    const rows = [...(this.closest("nav")?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? [])]
+    const seen = this.closest(RAIL_SCROLLER_SELECTOR)?.scrollTop ?? 0
+
+    return { top: rows.indexOf(this) * ROW - seen, height: ROW } as DOMRect
+  }
+
+  pathname.current = href
+
+  return { box, ...render(<Sidebar />, { container: box }) }
+}
+
+/** Where the list can go no further, which is where the last pages of the site end up. */
+const BOTTOM = docsOrder.length * ROW - SHOWN
+
+describe("the mark a reader cannot see", () => {
+  it("brings the last page of the site into its scroller", () => {
+    const { box } = railInside(docsOrder[docsOrder.length - 1]?.href ?? "")
+
+    expect(BOTTOM).toBeGreaterThan(0)
+    expect(box.scrollTop).toBe(BOTTOM)
+  })
+
+  it("leaves a rail alone when the page is already on screen", () => {
+    const { box } = railInside(docsOrder[3]?.href ?? "")
+
+    expect(box.scrollTop).toBe(0)
+  })
+
+  /**
+   * The case the whole thing is in service of, and the one a reader would
+   * notice: a reader who pressed a link *in* the rail is looking at the row
+   * they pressed, and nothing may move under them.
+   */
+  it("does not move under a reader who scrolled it there", () => {
+    const at = Math.floor(docsOrder.length / 2)
+    const { box } = railInside(docsOrder[at]?.href ?? "", { scrollTop: at * ROW })
+
+    expect(box.scrollTop).toBe(at * ROW)
+  })
+
+  /**
+   * The row's top read from the list rather than from the screen.
+   *
+   * A rail already scrolled is the only state where the two differ, and the
+   * number below is wrong by exactly the scroll if they are confused: the
+   * answer is the bottom of the list either way, so this is asserted from a
+   * row in the middle of it, where a correct reading and a viewport-relative
+   * one give different answers.
+   */
+  it("measures a row in a scrolled rail from the top of the list", () => {
+    const at = docsOrder.length - 4
+    const { box } = railInside(docsOrder[at]?.href ?? "", { scrollTop: 100 })
+
+    expect(box.scrollTop).toBe(Math.min(at * ROW + ROW + 48 - SHOWN, BOTTOM))
+  })
+
+  /**
+   * A rail with nothing above it saying it scrolls does nothing at all, which
+   * is the phone's panel before it was given a height — and the reason the
+   * remedy there was to bound the panel rather than to scroll the document.
+   */
+  it("moves nothing where nothing says it is a scroller", () => {
+    const { box } = railInside(docsOrder[docsOrder.length - 1]?.href ?? "", { scroller: false })
+
+    expect(box.scrollTop).toBe(0)
+  })
+
+  it("moves nothing on a path the documentation does not have", () => {
+    const { box } = railInside("/docs/getting-started/nowhere")
+
+    expect(box.scrollTop).toBe(0)
+  })
+
+  /**
+   * On the address and not on mount, because the rail is mounted by a layout
+   * and survives every navigation inside the documentation. A rail that only
+   * answered on mount would be right for a bookmark and wrong for every
+   * client-side navigation, which is every way a reader gets around once they
+   * are here.
+   */
+  it("answers a navigation, not only a first load", () => {
+    const { box, rerender } = railInside(docsOrder[0]?.href ?? "")
+
+    expect(box.scrollTop).toBe(0)
+
+    pathname.current = docsOrder[docsOrder.length - 1]?.href ?? ""
+    rerender(<Sidebar />)
+
+    expect(box.scrollTop).toBe(BOTTOM)
   })
 })
