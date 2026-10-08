@@ -2,6 +2,7 @@ import { renderSitePage } from "@/app/(marketing)/_lib/render"
 import { servedOrigin } from "@/app/(marketing)/_lib/serving"
 import { type PageSearchParams as SearchParams, routeMetadata } from "@/app/(marketing)/_lib/share"
 import { readThemeName, siteOrigin, WHAT_YOU_RUN } from "@/app/(marketing)/_lib/site"
+import { BrowserBar } from "@/app/(marketing)/_components/browser-bar"
 import { StructuredData } from "@/app/(marketing)/_components/structured-data"
 
 export const generateMetadata = routeMetadata(WHAT_YOU_RUN)
@@ -22,16 +23,20 @@ const WhatYouRunPage = async ({ searchParams }: { readonly searchParams: SearchP
   })
 
   /**
-   * The graph beside the tree, which is what a crawler and an assistant read.
+   * The two tags beside the tree: the graph a crawler and an assistant read,
+   * and the colour the strip of browser above the page is told to be.
    *
    * A fragment rather than a wrapper, so the page's own markup is unchanged and
-   * the tree is still the whole of what a visitor sees. See
-   * `_components/structured-data.tsx` for why this surface renders a tag of its
-   * own at all.
+   * the tree is still the whole of what a visitor *sees* — neither of these
+   * draws anything. See `_components/structured-data.tsx` for why this surface
+   * renders a tag of its own at all, and `_components/browser-bar.tsx` for the
+   * one thing on this site that is allowed to name a colour, and why the page
+   * rather than the layout is where it can be named.
    */
   return (
     <>
       <StructuredData route={WHAT_YOU_RUN} origin={siteOrigin()} />
+      <BrowserBar theme={rendered.theme} />
       {rendered.element}
     </>
   )

@@ -46559,3 +46559,197 @@ sentence in a header naming a known gap is not a guard, and nothing in the
 repository would have said so. The 1 October entry on a finding that said a
 remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
+
+---
+## 2026-10-08 — the marketing site now tells the browser what colour to paint its bar, and the instrument that found the gap could not see this surface at all
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom lessons`, `Loom demo`,
+`Loom portal` — the three surfaces still owing one · **Status:** **the
+marketing quarter is closed** by `marketing-63-the-strip-above-the-page`; the
+entry below it stays open for the other three, and **its measurement needs a
+second number before any of them trusts it**
+
+The 7 October entry — *46 of the 126 prerendered pages on this deployment tell
+the browser what color to paint its own bar, and all 46 are the documentation
+site's* — is right about the gap and right about the remedy. Every page of
+`/`, `/how-it-works` and `/what-you-run` now emits one, read off the palette
+the render actually served:
+
+```
+/                                 #ffffff   (minimal, the default)
+/?theme=editorial                 #fafaf7
+/?theme=bold                      #0a0a0a
+/how-it-works?theme=bold          #0a0a0a
+/what-you-run?theme=bold          #0a0a0a
+/?theme=nonsense                  #ffffff   (a mangled palette is the default, not a 400)
+```
+
+Measured in the `<head>` of a production build, served, over HTTP.
+
+**The number that is missing, and it matters to the three lanes left.** That
+entry counted *prerendered* HTML, and this surface is not prerendered. Its
+three pages read `searchParams` and `headers()`, so `next build` marks all
+three `ƒ` — server-rendered on demand — and **not one of them was in either
+column of that count.** `126` is the prerendered set; the marketing site
+contributed nothing to the 126 and nothing to the 0.
+
+So the finding's instrument is sound for the documentation site and blind to
+any surface that renders on request. Before the demo, the lessons and the
+portal read their own quarter off it, each should check which of its routes are
+`ƒ` in the build output: a lane that greps `.next` for prerendered HTML and
+finds its pages absent has measured nothing, not zero.
+
+**What the before-state actually was, measured the way that works here**: zero
+occurrences of the string `theme-color` anywhere under
+`apps/loom/app/(marketing)/` on `main` at `bd0af3d`, and no root layout above
+the route groups that could have supplied one. A grep of the source is the
+honest instrument for a surface that has no prerendered output to count.
+
+**One note for whoever takes the next quarter.** The recipe at
+`/docs/building-with-loom/theming#the-bar-above-your-page` has two forms and
+only the harder one is right for a surface built in Loom. The documentation
+site transcribes two hex values out of its own stylesheet because its chrome is
+not a tree and it has nothing to resolve. A surface that *is* a tree should not
+copy that: the render hands back what the root is wearing, and
+`themeGround(rendered.theme).backgroundColor` is one reading of one fact with
+nothing to drift. The marketing site needed no constant, no script and no
+stylesheet read.
+
+---
+## 2026-10-08 — a test that interpolates the constant it is meant to pin is green on any misspelling, and this is the second one in three days
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom marketing`, and worth a
+minute from every lane that asserts against a name · **Status:** **the instance
+is fixed on `marketing-63-the-strip-above-the-page`**; filed because it is a
+repeat of a class another lane named on 6 October, in a different route group,
+and because of *how* it was caught
+
+`browser-bar.test.tsx` shipped its first draft asserting that every page emits
+the tag:
+
+```ts
+expect(barFor(route, theme)).toContain(`name="${BROWSER_BAR_META}"`)
+```
+
+`BROWSER_BAR_META` is the component's own constant, so the expectation and the
+subject move together. Misspelling it to `themecolor` — a tag no browser has
+ever read — left **all twenty-two tests green**, on every page, in every
+palette, with the whole point of the change silently gone.
+
+This is the shape `Loom primitives` filed on 6 October as *two palette
+assertions in this lane's own test file have been comparing one character to
+itself since they were written*. Three days, two lanes, two route groups.
+
+**The rule that would have stopped both**, stated as plainly as it can be: *a
+name that comes from outside this repository cannot be checked against our own
+copy of it.* `theme-color` is the web platform's spelling and `bg-canvas` is
+the palette schema's; neither is ours to choose, so the literal belongs in the
+test exactly once and everything else may read the constant.
+
+**What is worth more than the rule is how it surfaced.** Nothing found this by
+reading. It came out of the defect matrix — five plants, and the fourth was
+*change the name the tag goes out under*, which is the kind of plant a run
+writes because it is cheap rather than because it suspects anything. Four of
+the five went red as expected and that one did not. A defect matrix run only on
+the plants a run expects to fail is a matrix that confirms what it already
+believed; the value is entirely in the plant that surprises you, and there is
+no way to know in advance which one that is.
+
+---
+## 2026-10-08 — `new URL(…, import.meta.url)` is wrong two different ways in a `.test.tsx`, and neither failure names its cause
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom daily build`
+(`apps/loom/vitest.config.ts`, and the arrangement 0015 records) · **Status:**
+open — **worked around, costing this run about fifteen minutes**, and nothing
+is blocked. It is a trap rather than a defect, and the reason to write it down
+is that one lane has already walked around it without saying so
+
+A test that needs to read a file off disk writes the line every Node program
+writes:
+
+```ts
+readFileSync(fileURLToPath(new URL("./thing.tsx", import.meta.url)), "utf8")
+```
+
+In this application that line is correct in a `.test.ts` and wrong in a
+`.test.tsx`, because the suite is split by extension (0015, and the config's
+own header): `.test.ts` runs under `node` and `.test.tsx` under `jsdom`. Vite
+rewrites both forms of the call before either environment sees it:
+
+| what is written | what happens | what it says |
+| --- | --- | --- |
+| a **literal** path | rewritten to a resolved *asset* URL, which under `jsdom` is `http:` | `TypeError: The URL must be of scheme file` |
+| an **interpolated** path | read by the `import-glob` plugin as a glob | `Invalid glob: "..*/page.tsx"` — and the module is **refused at transform time**, so the suite does not run at all |
+
+The second is the worse one: a file that will not transform reports *no tests*
+rather than a failure, and a run reading the summary sees a suite that has
+stopped covering anything.
+
+**The dodge is a parameter.** `const here = (path: string) => fileURLToPath(new
+URL(path, import.meta.url))`, called with the path — the interpolation that
+Vite will not see happens at the call site rather than inside `new URL`.
+`(docs)/_components/callout.test.tsx` already does exactly this, with no
+comment saying why, which is how the knowledge currently propagates: by
+somebody copying a line whose shape they cannot account for.
+
+**Not proposed as a fix**, because every candidate is worse than the trap. The
+config change would be excluding `import-glob` or the asset rewrite from the
+`dom` project, which changes what every other `.test.tsx` in four route groups
+is compiled from to make one idiom work. The cheap remedy is a sentence in the
+config's header beside the paragraph that explains the split, which is the
+owning lane's file and its call.
+
+---
+## 2026-10-08 — the strip above the page is answered and the furniture around it is not, because nothing applies the `colorScheme` that `themeGround` already computed
+
+**Filed by:** `Loom marketing` · **Owned by:** `Loom primitives`
+(`src/primitives/`, the root primitive), with a judgement in it for
+`Loom daily build` · **Status:** open — **a real gap on one of three palettes,
+measured, and not this lane's to close.** Nothing is blocked and the strip
+itself is fixed
+
+`themeGround` returns three things and the browser bar needs one of them:
+
+```ts
+{ backgroundColor, color, colorScheme }
+```
+
+`colorScheme` is the answer to the question `color-scheme` asks — `light` or
+`dark` — and it is correct on every registered palette. **Nothing in a rendered
+Loom page applies it.** Swept on this branch's production build, over the
+served markup of `/?theme=bold` with the script payloads taken out:
+
+```
+color-scheme in the served document:            0
+color-scheme in the marketing stylesheet chunk: 0
+```
+
+That is the whole document, the library's own `<style data-precedence="loom">`
+in the head included.
+
+`bold`'s canvas is `#0a0a0a`, so on that palette the page is black and the
+browser's own furniture is not told so: scrollbars, the default form-control
+rendering and the rubber-band area past the end of the page all stay on the
+light default. It is the same class as the bar — a thing outside the page that
+only the palette can answer — and it is the half the page cannot answer for
+itself.
+
+**Why this lane filed it rather than fixed it.** The declaration has to land on
+an element that covers the document. There are two candidates and neither is
+mine. The root primitive is `src/primitives/` and already applies `themeStyle`,
+which is where a fourth declaration would sit beside the three
+(0197 is the record that put the ground on a host's own frame rather than in
+a stylesheet, for this exact reason).
+The other is `<html>`, which this route group's layout renders — and the layout
+deliberately does not read the address, so it does not know the palette and
+would have to be given one, which is the arrangement the layout's own header
+argues against.
+
+**The judgement in it**, and it is the reason this is not simply *add a line*:
+`color-scheme` is inherited, so setting it on the tree's root would reach every
+primitive below and would **not** reach the canvas the browser paints outside
+the root element or the scrollbar it draws beside it. Whether the root
+primitive declaring it is enough, or whether a host has to be handed something
+for its own `<html>` the way `themeGround` hands it a ground for its own frame,
+is a question about where the boundary of a tree is — which is `src/`'s to
+answer and not a composition's.
