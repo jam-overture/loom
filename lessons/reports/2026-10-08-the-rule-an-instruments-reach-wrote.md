@@ -207,6 +207,16 @@ pins above.** One test added — the registered claim for exercise E. The marked
 fence census is now `[24, 29, 32, 33, 35]`; `RECOGNISED_TRANSCRIPTS` is the only
 other count in `transcripts.test.ts` that moved.
 
+**Preview**, Ready on the pull request:
+`https://loom-git-lessons-35-instruments-jpizzolato36-6341s-projects.vercel.app`
+— the lesson at `/lessons/35`, the new set at `/lessons/review/set-an`. I could
+not open either from this container: the environment's network policy denies
+`loom-git-lessons-35-instruments-jpizzolato36-6341s-projects.vercel.app`, so the
+evidence that it renders is Vercel's own **Ready** status plus
+`prerender:check`'s 128 pages locally, which include these routes. Worth
+knowing for whoever next wants to look at a page rather than a test: it is a
+setting on the environment rather than anything in this branch.
+
 No decision record: nothing about the runtime, the tree schema or an `Accepted`
 record is touched, and a lesson is not a decision.
 
