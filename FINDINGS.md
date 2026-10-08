@@ -194,6 +194,23 @@ a floor of unknown depth.
 ---
 ## 2026-10-07 — two names for one silence, now in three modules, and the next reading will have to pick one
 
+**Status:** **closed by `signals-13-one-name-for-two-silences`.**
+[`src/signals/silences.ts`](src/signals/silences.ts) maps all fifteen members of
+the five sets — `PaceSilence` is the fifth, which this filing did not count —
+onto nine conditions and three subjects, renaming nothing and superseding
+nothing, exactly as the remedy below asks. Two things the filing did not have:
+the sets are **five**, not three, and **one name already meant two different
+things.** A copy reading's `unmeasured` is a window whose counters report no
+views; a share-of-readers reading's `unmeasured` is a missing page-view row at
+the door, which a window full of readers can have. A table of synonyms — the
+thing this filing said a portal would otherwise keep — would have mapped those
+two together and printed *nobody has read this page* over a page hundreds had
+read. The record is
+[0240](decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md),
+and the reason a renaming could not have settled it is in it: the two spellings
+are one condition said of **different subjects**, so collapsing them would have
+drawn a comparison's silence over one side's page. Original status below.
+
 **Filed by:** `Loom signals` · **Owned by:** `Loom signals` (`src/signals/`) ·
 **Status:** open — **a wart rather than a defect**; every module is internally
 consistent and a surface drawing two of them side by side meets two spellings of
@@ -46725,3 +46742,94 @@ sentence in a header naming a known gap is not a guard, and nothing in the
 repository would have said so. The 1 October entry on a finding that said a
 remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
+
+---
+## 2026-10-07 — one sentence per state on a reader card, and the one pair of `unmeasured`s never to collapse
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is blocked**; `silences.ts` is on this run's branch and the call is
+one line per reading
+
+§17 of [`docs/signals.md`](docs/signals.md) landed the mapping from every
+reading's own reasons-for-saying-nothing onto the state behind them. The reader
+card draws four readings off one `pageReadingOf` and will draw more; each has
+its own closed set, and until now nothing said which of those names mean the
+same thing.
+
+```ts
+const states = distinctSilences([
+  copy.silence && meaningOfCopySilence(copy.silence),
+  reach.silence && meaningOfReachSilence(reach.silence),
+  pace.silence && meaningOfPaceSilence(pace.silence),
+])
+```
+
+`states` is **one entry per state**, in the order the readings were handed over,
+each keeping the first reading's own vocabulary so `describeCopySilence` and the
+rest are still the sentence to print. On a healthy deployment it is empty.
+
+**The pair that must never be collapsed, which is the reason this is filed
+rather than left to be noticed.** A copy reading's `unmeasured` and a
+share-of-readers reading's `unmeasured` are **two different states**, read off
+two different row sets. The first is *this window's counters report no views of
+this revision*. The second is *there is no page-view row at the door* — which a
+window holding several hundred readers can be in, and is what the first reading
+of a deployment upgraded past §8 looks like. A card that treated the two names
+as one would print *nobody has read this page* over a page people had read.
+`relateSilences` answers `unrelated` for that pair, and
+`distinctSilences` keeps them as two; a hand-kept table of synonyms is the thing
+that would get it wrong.
+
+**And one relation to draw as two lines rather than one.** `one-reason` means
+one condition about two subjects — a page's words are a floor *and* this part's
+words are the floor, or *one of the two windows was empty* beside *this page's
+window was empty*. Both are true and neither is evidence for the other: a
+comparison's silence names no side, so it must not be drawn over the version
+somebody is looking at. The framework deliberately does **not** order the
+subjects, because which of a page and one of its parts a person came to read is
+a judgement about a screen.
+
+---
+## 2026-10-07 — two number words in a new record count lists in `src/signals/`, and the registry that would hold them is another lane's file
+
+**Filed by:** `Loom signals` · **Owned by:** `Loom daily build`
+(`src/record-claims.test.ts`) · **Status:** open — **nothing is wrong today**;
+this is two sentences in one record that can go stale the way the Gate's rule
+count did, in the one instrument built to stop that
+
+[0240](decisions/0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md)
+says **nine conditions over fifteen members** and **three subjects**, and all
+three numbers are counts of lists in `src/signals/silences.ts`:
+`SILENCE_CONDITIONS`, the five sets added up, and `SILENCE_SUBJECTS`. That is
+exactly the shape `src/record-claims.test.ts` exists for — its own paragraph
+names the week the Gate's record said six rules while the ladder had seven.
+
+The two claims, ready to register:
+
+```ts
+{
+  record: "0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md",
+  sentence: /\*\*(\w+) conditions over fifteen members\*\*/,
+  count: SILENCE_CONDITIONS.length,
+  matters: "the count a surface reads to know the vocabulary is closed and small",
+},
+{
+  record: "0240-a-silence-is-a-condition-and-a-subject-and-the-two-names-for-one-state-were-not-synonyms.md",
+  sentence: /\*\*(\w+) subjects\*\* — /,
+  count: SILENCE_SUBJECTS.length,
+  matters: "the axis that is the reason a renaming could not have settled the overlap",
+},
+```
+
+**Filed rather than done because the file is `src/` root, which the lane table
+makes the framework's.** The registry decides nothing about the framework and by
+construction holds claims from every lane, so it is arguably the one file where
+*follow the content* would point the other way — but the rule as written is a
+directory boundary and this lane's brief says work in another lane is filed, not
+done. It is a fourteen-line append with no behaviour in it.
+
+**The in-lane alternative was considered and is worse.** `silences.test.ts`
+could read the record and assert the counts itself, and that would be two
+spellings of one rule — the mistake this repository has now written down three
+times, most recently as the reason the word-counting rule moved into
+`words.ts`. One registry or none.
