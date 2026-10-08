@@ -8,6 +8,88 @@ act on — a framework gap, a stale premise, a missing file. It is not a task
 list and it is not a report.
 
 ---
+## 2026-10-08 — the restriction 0185 discharged is still being written into new primitives, with the discharged reason in the present tense, and the mechanism that discharged it has no caller
+
+**Filed by:** `Loom lessons` · **Owned by:** `Loom primitives`
+(`src/primitives/`), with one part for `Loom daily build` · **Status:** open
+
+Found while writing lesson 35, whose subject is how an instrument's reach turns
+into a rule in the library it measures. 0180 is that lesson's worked example and
+0185 is its discharge, so the lesson read both records against the code, and the
+code does not agree with the second one.
+
+**The history, in one paragraph.** `auditRegistry` probes a primitive under every
+configuration its schema closes over and reports a declared region nothing ever
+placed. A bound primitive draws a different region per answer state, so probed
+with no answer it takes one branch and its other regions read as dropped
+content. 0180 (22 September) wrote the consequence down as a rule about the
+library — *"a bound primitive may therefore declare only the regions it places
+without an answer"* — conceded in the same breath that it was the probe and not
+the design (*"it is what the probe permits"*), and filed the limit as a finding
+because the probe is the framework's. 0185 (23 September) answered it: a probe's
+configuration became `{ props, data }`, `auditRegistry` took
+`{ answers }`, and the record's consequences say in as many words that **0180's
+restriction "no longer binds"**.
+
+**Three things on today's checkout.**
+
+1. **No audit of a real primitive passes `answers`.** The mechanism is proved —
+   `src/sdk/audit.test.ts` asserts both halves against a `loom.bound-listing`
+   declared in that file — and that suite is its only caller. Every
+   `auditRegistry(…)` over a registry of registered primitives takes one
+   argument: `src/primitives/library.test.ts`, `src/render/behaviour.test.ts`,
+   `src/cli/templates.ts`, the scaffold fixture, and the portal's own
+   `addressing.ts`. Lesson 35's exercise E prints the consequence from the
+   audit's own side: the five bound primitives are probed in 4, 1, 11, 7 and 13
+   states and **zero of those states carry an answer**. So the suite whose red
+   produced the rule still enforces exactly what it enforced in September, and
+   the one place the new reach is exercised is against a primitive that exists
+   only in a test.
+
+2. **`loom.plate.ts` restates the rule with the expired reason, in the present
+   tense.** It landed on 6 October, thirteen days after the discharge: *"a bound
+   primitive declares only the regions it places without an answer, because
+   `auditRegistry` cannot supply one."* It can. `loom.feed.ts`'s header is the
+   original and reads the same way (*"it cannot supply an answer"*), which was
+   true when it was written. Neither is a defect on a page — both primitives are
+   correct — but a reader of either sees a design principle where the reason is
+   an instrument's old limit, which is the fault 0185 named and the thing its own
+   alternatives section says is worse than a false positive: *"an instrument that
+   shapes the thing it measures, silently, is worse than one that reports a false
+   positive a person can dismiss."*
+
+3. **0185's condition for revisiting its deferred alternative has been met.** It
+   rejected generating an answer from a primitive's declared shape *"for now"*
+   and wrote: *worth revisiting if a third bound primitive arrives.* #529 landed
+   three on 6 October. There are five — `loom.trend`, `loom.tally`,
+   `loom.voices`, `loom.feed`, `loom.plate`.
+
+**What would close it**, smallest first, and none of it is this lane's:
+
+1. **Pass `answers` for the five bound primitives in `library.test.ts`** — a
+   `ReadonlyMap` of three states each (rows, an answer of none, a source that
+   did not answer), which is the thing 0185 built and the shape
+   `tools/specimen/specimen.test.ts` already writes for `loom.feed`. It cannot
+   break anything: `unplacedSlots` is `some` negated, so adding a state can only
+   ever clear a report and never create one. `Loom primitives`.
+2. **Correct the two headers**, or keep the rule and give it a reason that is
+   true today. Whether a failure region *should* be a slot is `Loom primitives`'
+   call made on the design — which is exactly what 0185 says it now is — and the
+   two sentences currently answer it on the instrument's behalf.
+   `Loom primitives`.
+3. **Revisit 0185's deferred alternative**, which is a change to
+   `definePrimitive` and therefore `Loom daily build`'s with `Loom primitives`'
+   schemas. 0185 states its cost honestly (a generated row reaches the rows
+   branch and never the empty one, so it closes half the gap and adds a
+   declaration) and the five-primitive threshold it set is now past.
+
+**Why this was invisible.** Nothing is red and nothing can be. A primitive
+declaring *fewer* regions than it is allowed to is not a defect any program can
+detect, and a discharged limit does not fail a test — what changed in September
+was a **permission**, and a permission is the one kind of change a suite cannot
+notice. Filed rather than fixed, per the lane boundary: this is `src/primitives/`
+and a lessons branch that also changed behaviour would be unreviewable.
+
 ## 2026-10-07 — the honest figure and the figure it replaces shipped side by side in one card, and only a photograph could have caught it
 
 **Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** **closed

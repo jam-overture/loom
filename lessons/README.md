@@ -100,13 +100,15 @@ The paragraph that used to sit here named exactly that fault as the kind nothing
 would reach.
 
 **And since 3 October a transcript may say, in a line you will never see, what
-moves it.** Four fences carry such a mark, for two different reasons. Two of them
-print a set that *is* the lesson's subject — lesson 29's exercise C prints the
-primitives with a prop nothing reads, lesson 33's exercise G prints which of them
-have declared what they could not show — so a new member of that set is news, and
-the mark is there to stop an expected red being read as drift: re-run the exercise
-and paste in what it prints now, rather than hunting for a mistake. The other two,
-on lessons 32 and 24, are there because **the paragraphs under them are a function
+moves it.** Five fences carry such a mark, for two different reasons. Three of
+them print a set that *is* the lesson's subject — lesson 29's exercise C prints
+the primitives with a prop nothing reads, lesson 33's exercise G prints which of
+them have declared what they could not show, and lesson 35's exercise E prints
+how many primitives the starter library registers and which of them bind
+anything — so a new member of that set is news, and the mark is there to stop an
+expected red being read as drift: re-run the exercise and paste in what it prints
+now, rather than hunting for a mistake. The other two, on lessons 32 and 24, are
+there because **the paragraphs under them are a function
 of the lines in them**, which is a thing the lane correcting a line has no other way
 to find out. That was written down in two places and neither was the one a lane
 tripping over it would read: a paragraph for the reader under one fence, and a
@@ -139,12 +141,13 @@ something the fence prints, a program can do the noticing instead — the number
 read off the transcript above the sentence, and the transcript is already held
 against a real run. Nothing new is derived and no second copy is manufactured:
 two checks compose, and correcting a fence without reading the paragraph under it
-now fails, naming the sentence and the file. All four marked fences carry at least
+now fails, naming the sentence and the file. All five marked fences carry at least
 one such sentence, which is the point and not a coincidence — lesson 29's *three
 zeros are the control*, lesson 33's sentence counting the primitives that read a
 binding — the one beginning *Today*, not the historical one above it — lesson 24's
-*the eight words the band shows*, and the line in lesson 32 telling you which four
-of exercise G's outputs to predict hardest.
+*the eight words the band shows*, the line in lesson 32 telling you which four
+of exercise G's outputs to predict hardest, and lesson 35's sentence saying how
+many of the library's primitives a binding is read by.
 
 **Two things that one does not reach either.** A sentence about what a number
 *used to be* looks exactly like a claim about now: lesson 24 says *both of those
@@ -401,6 +404,7 @@ tree. Everything else in the system follows from protecting that one property.
 | [32](32-layout.md) | Layout: the fault that exists only after a browser has made it | Why *does this page overflow* is not a question about the page, and which one of the five inputs it is a function of anybody here owns; why the one automated visual check in this repository is blind inside a `loom.backdrop` and both of them are right; where the line falls between the half of an instrument that needs a laid-out page and the half that is arithmetic, and which exclusions can live on each side of it; why a measurement that had never been taken was deliberately kept out of the exit code in the change that first took it; which of the functions this harness hands to a browser a test can run and what decides it, which is a signature and not anybody's diligence — and what it meant that the sentence this lesson used to draw under that transcript was left contradicting it on `main` for two days. |
 | [33](33-shortfall.md) | Shortfall: the fact whose only witness runs too late to report it | Why the ways a binding can be wrong divide into the ones a walk sees from outside the primitive and the one it cannot; who the sentence on the page is for and who the count is for; the three reasons a component may not raise a diagnostic and which of them would hold in a system with no component model at all; why one declaration on a primitive is a function where eight are data; what a guard around another author's code owes the page it is inside — and the one thing this seam cannot catch, with the construction that makes it unlikely and the reason that construction cannot be enforced. |
 | [34](34-hindsight.md) | Hindsight: the fact a witness saw and may not write down | Why *would this policy have changed anything* is a question only a record can answer, and why rebuilding the page from a record is wrong in the one direction that reassures; the partition the Gate's stakes rules are cut along, which question each side of it answers, and why only one of them can be asked again; why a narrowed input is a contract rather than an abridgement, and why the simulation runs the Gate's own rules rather than a copy; what a level means when something that fed it was never written down, and why a floor that happens to be right is still a floor; when a missing field is provably harmless and what it takes to show it — and why the answer to this question is not allowed to be the type the Gate returns. |
+| [35](35-instruments.md) | Instruments: the rule a probe's reach wrote in the library's hand | Why one claim about a primitive made from eight renders needs a quantifier, and why the two probes in one file choose opposite ones without either being careless; which direction a larger population can move each kind of verdict, and why that is what made extending the probe a cheap change to a library nobody re-read; what a closed choice is to an instrument and why an open prop contributes not one sample but none; what cannot be invented for a probe, and the two halves of why an invented one would be worthless; how a rule about what a bound primitive may declare turns out to be an instrument's reach written in somebody else's file — and what it means that the limit was discharged two weeks ago, the mechanism that discharged it has no caller, and a primitive shipped since then restating the rule with the expired reason. |
 
 Parts I to IV are the system, and the [review
 schedule](review-schedule.md) is where those seventeen ideas become one thing you
@@ -738,6 +742,44 @@ ask, on the day you chose what to write down?** Every record is that decision,
 taken once, usually by somebody thinking about something else — and the bill does
 not arrive until the morning a question comes back and gets a plausible number
 instead of a refusal.
+
+Lesson 35 answers that question in the one way lesson 34 could not have pointed
+at: **nobody decided.** The conformance probe calls every registered component,
+several times each, and owes the caller one claim per primitive — so
+somewhere between *the renders I tried* and *this primitive* there is a
+quantifier, and it is a different one in each of the two probes that do it.
+Neither is careless: a decoration is a property of every render and uses `every`,
+a placement is a property of the primitive and uses `some`. What follows from the
+pair is the technique rather than the taste — `every` can only tighten as the
+instrument's reach grows and `some` can only loosen, so you choose by which
+direction you can afford a verdict to move on the day the harness gets better.
+
+And what neither word can say is *I never tried the state your component cares
+about*. The population is what a schema **closes over**, so an open string prop
+contributes no samples rather than one, and an answer from a data source cannot
+be invented at all — whoever registered the primitive knows what it reads and the
+probe does not. So a correct bound primitive was reported as dropping content, and
+what changed was not the probe: 0180 gave the library a rule about what a bound
+primitive may declare, with the instrument's reach as the reason and a sentence
+conceding it. 0185 named the shape in one line — *that rule is the probe's limit
+wearing the library's clothes* — and discharged it.
+
+The eighteenth seam is therefore the first in Part V where **the fact is not
+missing at all**. The instrument answers correctly, every time, about exactly what
+it did. The fault is one layer up and it is about systems rather than trees: *a
+correct answer to a narrower question, with nothing in the answer saying it was
+narrower, is a force acting on whatever is cheapest to move* — and what is
+cheapest to move is never the instrument, because the instrument is in somebody
+else's directory and the red test is in yours. Two weeks after the discharge the
+mechanism has no caller, the library's own audit still runs unanswered, and a
+primitive that shipped since restates the rule with the expired reason. Nothing
+went red, because permission is the one kind of change a test cannot notice.
+
+The question to carry into a nineteenth seam is therefore about neither reach,
+ownership, timing nor what you kept: **what is this check's population, who chose
+it, and what has the system already changed about itself to stay inside it?** The
+last clause is the one with teeth, because the things that moved to fit a
+population will not be filed anywhere as having moved.
 
 ## Pacing
 
