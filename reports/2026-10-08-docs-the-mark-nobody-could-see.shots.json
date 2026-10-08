@@ -1,0 +1,90 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "reports",
+  "shots": [
+    {
+      "path": "/docs/architecture/decision-records",
+      "out": "2026-10-08-docs-after-rail-wide",
+      "viewport": "wide",
+      "waitFor": "aside nav",
+      "measure": [
+        "aside",
+        "aside a[aria-current=\"page\"]"
+      ]
+    },
+    {
+      "path": "/docs/architecture/decision-records",
+      "out": "2026-10-08-docs-after-menu-phone",
+      "viewport": "phone",
+      "waitFor": "button[aria-expanded]",
+      "do": [
+        {
+          "click": "button[aria-expanded]"
+        },
+        {
+          "waitFor": "nav[aria-label=\"Documentation\"]"
+        }
+      ],
+      "measure": [
+        "nav[aria-label=\"Documentation\"]",
+        "nav[aria-label=\"Documentation\"] a[aria-current=\"page\"]"
+      ]
+    },
+    {
+      "path": "/docs/getting-started/introduction",
+      "out": "2026-10-08-docs-after-results-wide",
+      "viewport": "wide",
+      "clip": "[role=dialog]",
+      "waitFor": "button:has(kbd)",
+      "do": [
+        {
+          "click": "button:has(kbd)"
+        },
+        {
+          "waitFor": "input[role=combobox]"
+        },
+        {
+          "fill": "input[role=combobox]",
+          "text": "change"
+        },
+        {
+          "waitFor": "#loom-search-results li"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        },
+        {
+          "key": "ArrowDown"
+        }
+      ],
+      "measure": [
+        "#loom-search-results",
+        "#loom-search-results li[aria-selected=\"true\"]"
+      ]
+    }
+  ]
+}

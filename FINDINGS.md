@@ -46559,3 +46559,118 @@ sentence in a header naming a known gap is not a guard, and nothing in the
 repository would have said so. The 1 October entry on a finding that said a
 remedy was already built is the same class — a true sentence written in the
 right place, which nobody had a reason to go and check.
+
+---
+## 2026-10-08 — a mark the reader cannot see is not a mark, and three lists on this site were drawing one
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom portal`, `Loom lessons`,
+`Loom demo`, `Loom marketing` · **Status:** open — a **class**, with all three
+of this lane's instances closed by `docs-49-the-mark-nobody-could-see`.
+Nothing is asked for; what is offered is the measurement and the rule
+
+Three lists in `(docs)` marked something — the current page, the selected
+result — and then showed it in a box smaller than the list it was in. Every one
+of them was correct in the DOM and invisible on the screen. Measured with
+`pnpm shoot`'s `measure` on the deployment, before anything was written:
+
+| list | shows | holds | where the mark was |
+| --- | --- | --- | --- |
+| the rail, 1280×900 | 844 | 1,730 | **855 past the bottom** on the last page, and outside the box on **24 of 45 pages** |
+| the menu panel, 390×844 | the page | 1,712 | **938 past the bottom**, and the page's own words below that |
+| the search results | 384 | 536 | **92 past the bottom** after nine presses of ArrowDown |
+
+**The shape of the defect is why it is worth a finding rather than three
+fixes.** In all three the thing a screen reader is told is right —
+`aria-current="page"`, `aria-selected`, `aria-activedescendant` all move — and
+the thing a sighted reader has is a highlight that leaves the last visible row
+and is never replaced. So it is invisible to every assertion anybody writes:
+this lane's `sidebar.test.tsx` already held the mark in two ways and `search`'s
+41 tests already held the selection, and none of them could see it. A test
+that renders into jsdom cannot see it either, because jsdom lays nothing out.
+**The instrument that finds it is `measure`, and the question to ask it is
+whether the marked row's box is inside the scroller's.**
+
+The rule is `app/(docs)/_lib/in-view.ts` — a pure function of four numbers with
+two callers, and the two properties worth copying rather than the code:
+
+- **It moves only when the mark is off screen**, not when the margin around it
+  is untidy. A reader who scrolled the list themselves and pressed a row in it
+  is looking at that row, and nothing may move under them.
+- **It is allowed to run only when the last input was a key**, in the one list
+  whose selection also follows the mouse. A list that scrolled on hover pulls a
+  different row under a stationary cursor, which fires another hover. Same
+  reasoning as the browser's own focus ring.
+
+**Where to look on your own surface.** Any element with `overflow-y-auto` or
+`overflow-y-scroll` and a bounded height, holding something the page marks as
+current or selected: a queue with a highlighted row, a version list, a stepper,
+a long filter list. A `shoot` list with
+`"measure": ["<the scroller>", "<the marked row>"]` answers it in one shot, and
+`holding N in M` on the scroller's line is the sign there is a question to ask.
+
+---
+## 2026-10-08 — the search dialog had one answer for three ways out, and 0237 had already decided two of them
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** closed in
+this lane by `docs-49-the-mark-nobody-could-see`; filed because the reasoning
+is the primitives seam's and the next surface to build a dialog will need it
+
+[0237](decisions/0237-a-presentation-returns-the-reader-to-its-trigger-and-only-from-inside-the-region-it-closed.md)
+settles where a reader is left when a presented region closes, and gives three
+ways out three answers. The documentation site's search dialog is chrome rather
+than a primitive, so it is not bound by that record — and it had **one** answer
+for all of its ways out: return the reader to the button they opened it with.
+
+That is right for Escape and for a press on the scrim. It is wrong for a press
+on a **result**, which is the way out 0237 has no row for, because a presented
+region does not navigate. A reader who pressed a result was put back in the
+header of a page they had never seen, with the skip link behind them in the tab
+order.
+
+**0237's own reasoning decides it**, which is the reason to write this down:
+its third row is *a press outside never returns focus, because the press is
+itself a destination.* A result press is that sentence applied to a press
+inside the region. The dialog now has `dismiss` (shut, saying nothing about the
+reader), `close` (shut and hand them the button) and `go` (shut and hand them
+the page), and the two ways out that were right are unchanged.
+
+Two things found while making it true, both of which cost a cycle:
+
+- **The end state cannot tell the two apart.** A `go` that called `close` and
+  then corrected itself leaves focus in the right place, so the obvious
+  assertion — where is `document.activeElement` afterwards — is green either
+  way. The test that holds it listens for a `focus` event on the trigger and
+  asserts it never fires.
+- **`focus({ preventScroll: true })` is unobservable in jsdom.** It is
+  load-bearing in a browser: the router decides whether the destination is a
+  page or a position on one, and a focus that scrolled would fight it for a
+  result that is a heading. The mutation that removes it reddens nothing and is
+  reported as surviving rather than engineered around.
+
+---
+## 2026-10-08 — `#article` is a fragment two files spelled, and the one broken link this repository still cannot report
+
+**Filed by:** `Loom docs` · **Owned by:** `Loom docs` · **Status:** open as the
+**26 September entry's smallest instance**, closed here by a test rather than by
+a checker. Nothing is asked of anyone; it is one more argument for the thing
+that entry asks for
+
+The skip link at the top of every documentation page points at `#article` and
+the documentation layout gives its `<main>` `id="article"`. Two files, two
+string literals, nothing holding them together — and if they ever stopped
+agreeing, the symptom is a skip link that silently does nothing. `prerender:check`
+reads addresses and a fragment is the one broken link nothing in this repository
+can report, which this lane filed on 26 September and is still open.
+
+Closed here in the instance: both now import `ARTICLE_ID` and `ARTICLE_HREF`
+from `app/(docs)/_lib/chrome.ts`, and `chrome.test.ts` reads the two layouts
+back off disk and fails if either spells the name itself. That is
+`browser-bar-chrome.test.ts`'s method pointed at the problem it was written for.
+
+**The part worth carrying.** The first version of that test asserted the files
+*mentioned* `ARTICLE_ID`, which the import line satisfies — so a layout that
+kept the import and dropped the attribute passed. Both spellings of that
+mistake were made and both were found by mutation rather than by reading. A
+test that reads another file for a name must assert on the **use**:
+`id={ARTICLE_ID}`, not `ARTICLE_ID`.
+
