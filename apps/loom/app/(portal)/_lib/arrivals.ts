@@ -412,6 +412,68 @@ export const cannotBeAShare = (arrivals: PageArrivals): string | undefined => {
  * before this reading existed.
  */
 export const readersAt = (part: ArrivingPart, arrivals: PageArrivals): string | undefined =>
-  part.readers === undefined
-    ? undefined
-    : `about ${Math.round(part.readers)} of the ${readersCount(arrivals.arrived)}`
+  part.readers === undefined ? undefined : readersOutOf(part.readers, arrivals)
+
+/**
+ * The same phrase for any share of this page's readers, whichever reading
+ * produced it.
+ *
+ * Written once because the form is the card's rather than one section's: *about
+ * 95 of the 320 readers*, rounded to a whole person and with *about* in front
+ * of it, because it is a share applied back to a count and not a census. A
+ * second reading spelling it its own way is a card where two sections say the
+ * same arithmetic in two voices, which reads as two different measurements.
+ */
+export const readersOutOf = (readers: number, arrivals: PageArrivals): string =>
+  `about ${Math.round(readers)} of the ${readersCount(arrivals.arrived)}`
+
+/**
+ * **The page-wide share of this page's readers, applied back to the exact
+ * arrivals** — and the one place that decides whether it may be said at all.
+ *
+ * ## What it is for, and the figure it must never be used for
+ *
+ * {@link PageArrivals.arrived} is the readers who arrived at the page, so a
+ * share may be applied to it only where the share is **of the whole page**. A
+ * reading taken over one part of the page is a share of the readers who got to
+ * *that part*, and multiplying it by the page's arrivals is an arithmetic that
+ * produces a larger number than the page-wide figure it sits under.
+ *
+ * That is not hypothetical: it shipped into the first photograph of the section
+ * about what readers did, which said *about 98 of the 320 readers did something
+ * on this page* and, one line below, *about 239 of the 320 readers used
+ * something in the card*. Both numbers came out of correct code; the second was
+ * 74% of the readers of one card multiplied by the readership of the page. No
+ * test could have caught it — each sentence is right about the division it
+ * made, and the property that broke is **between** them.
+ *
+ * So the parameter is named for what it has to be, the doc comment says what it
+ * is not, and a per-part figure in people comes from {@link readersAt}, which
+ * is the framework's own and is divided by that part's own reach.
+ *
+ * ## Why the gate is here rather than in the reading that needs it
+ *
+ * {@link ArrivingPart.readers} is the framework's answer for a reach, and the
+ * gate in front of it is not arithmetic: an arrival count under a silence is
+ * not a count, and an arrival whose reading has not been counted yet is a
+ * reader the share is not about. `pageReachOf` applies both and withholds.
+ *
+ * A second reading off the same join — what readers *did* (0242) — produces a
+ * page-wide share of its own, over the same window, divided the same way.
+ * Working the gate out again there would be two spellings of one rule, and the
+ * one that drifts is the one nobody is looking at.
+ *
+ * `undefined` where there is no share, where there are no arrivals, under any
+ * silence, and while an arrival is still waiting to be counted. Unrounded, like
+ * the framework's own.
+ */
+export const readersBehind = (
+  pageWideShare: number | undefined,
+  arrivals: PageArrivals | undefined
+): number | undefined => {
+  if (pageWideShare === undefined || arrivals === undefined) return undefined
+  if (arrivals.silence !== undefined) return undefined
+  if (arrivals.pending > 0) return undefined
+
+  return pageWideShare * arrivals.arrived
+}

@@ -47485,3 +47485,86 @@ could read the record and assert the counts itself, and that would be two
 spellings of one rule — the mistake this repository has now written down three
 times, most recently as the reason the word-counting rule moved into
 `words.ts`. One registry or none.
+
+---
+## 2026-10-08 — a share of one part of a page, multiplied by the page's readership, is a count of people larger than the page has, and only a photograph could have found it
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:**
+**closed in the instance** on `portal-55-what-readers-did`; recorded because it
+is the **second instance in two days** of a class this lane named on 7 October,
+and the second one found by looking at a picture rather than by a test
+
+`pageActionOf` publishes a `share` per part. `arrivals.ts` publishes the exact
+count of people who arrived. Applying one to the other is how every
+people-figure on the reader card is made, and the first draft of the section
+about what readers did made all of them that way. The photograph:
+
+> **About 98 of the 320 readers** who arrived did something on this page …
+>
+> *(two lines down)*
+>
+> The part of the page that saw the most of that was the card “Every change is
+> a delta” — **about 239 of the 320 readers** used something in it.
+
+Both numbers came out of correct code. The first is a share of the **page**
+applied to the page's readership. The second is a share of **one card's own
+readers** — 74% of the people who got to that card — applied to the same
+readership, which is a different denominator wearing the same words.
+
+**The rule, and it is one line:** a share may be applied to the arrivals only
+where the share is page-wide. Every action is strictly inside the root and the
+root is on screen in every visit that drew the page, so the root's share is a
+share of everybody; a part's is not. `readersBehind` names its parameter
+`pageWideShare` and its doc comment says what it is not, which is the most a
+helper can do about a caller holding the wrong share.
+
+**What is worth carrying beyond the instance.** Every test in this lane is
+scoped to a module or a component, and both sentences pass theirs: each is
+right about the division it made, and the property that broke is *between*
+them. This is the 7 October entry's shape exactly — *a lane adding a better
+figure beside a worse one ships both unless something makes it choose* — and
+the instrument that caught it both times was a full-page photograph with the
+figures legible in it.
+
+The guard written for it is the generalisation rather than the instance: over
+every sentence the section draws, **no figure under the page-wide headcount may
+exceed it**. A third spelling of this mistake has to beat an inequality rather
+than an expected string.
+
+**And the fix was to stop saying it in people, not to say it better.** The
+honest per-region figure would be its share applied to its own reach in people
+— *about 112 of the about 125 readers who got that far* — an estimate standing
+on an estimate, in a sentence with two `about`s in it. Two counts off one row,
+said as counts, carry the straddle on both sides of the division and say which
+population they are about. The section above them already says how generous the
+raw counts are.
+
+---
+## 2026-10-08 — `shutAgain` is the strongest sentence this subsystem can say and it is in a disclosure, because the card already has a sentence about the same part
+
+**Filed by:** `Loom portal` · **Owned by:** `Loom portal` · **Status:** open —
+**nothing is wrong and nothing is blocked**; it is a judgement this run made
+against itself, written down so the next run can overturn it on purpose rather
+than by forgetting
+
+`PartAction.shutAgain` is `closes ÷ opens` and it diagnoses something nothing
+else here can: above 1 it is closings a page's own openings cannot account for,
+which is a disclosure a revision renders already open. *Readers open this and
+shut it again nine times in ten* is a finding an author would act on this
+afternoon.
+
+It is not on the surface of `/portal/readers`. The reason is the card's own
+arithmetic of attention rather than anything about the figure: the section
+already names the part that was opened most — *the prose “Monthly or yearly…”
+was opened out 41 times* — and a second sentence about that same part, three
+lines down, in a different unit, is the two-figure failure this card has now
+made twice. One part, one line, is the rule the 7 October entry bought.
+
+What would earn it a line is a **ranking that is not the most-opened part**: the
+part with the *worst* ratio among those opened enough times for the ratio to
+mean anything. That is a different part on most pages and a different claim —
+*this one gets opened and closed again*, rather than *this one gets opened* —
+and it needs a floor under `opens` that nothing here has chosen yet. Until
+somebody chooses it, the figure is one click down for every part of the page,
+which is where the governing principle puts a technical record and not where it
+puts a finding.
