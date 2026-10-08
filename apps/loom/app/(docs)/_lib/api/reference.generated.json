@@ -8,7 +8,7 @@
       "files": 95,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": true,
@@ -4657,7 +4657,7 @@
       "files": 2,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -4703,7 +4703,7 @@
       "files": 58,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -5658,7 +5658,7 @@
       "files": 206,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -6123,7 +6123,7 @@
       "files": 69,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7085,7 +7085,7 @@
       "files": 36,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -7676,7 +7676,7 @@
       "files": 11,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -7904,7 +7904,7 @@
       "files": 26,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8363,7 +8363,7 @@
       "files": 54,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8717,7 +8717,7 @@
       "files": 34,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -8872,7 +8872,7 @@
       "slug": "signals",
       "types": "./dist/signals/index.d.ts",
       "requires": [],
-      "files": 42,
+      "files": 43,
       "narrower": [
         {
           "specifier": "@jam-overture/loom/signals/broadcast",
@@ -8885,7 +8885,7 @@
         }
       ],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 14,
         "widest": false,
@@ -10402,6 +10402,146 @@
           ]
         },
         {
+          "module": "signals/silences",
+          "title": "Silences",
+          "summary": "What two readings mean when they both say nothing, and whether they mean the same thing.",
+          "symbols": [
+            {
+              "name": "SilenceSubject",
+              "kind": "type",
+              "signature": "type SilenceSubject = \n/** One revision of one page, and the window of counters read against it. */\n\"page\"\n/** One part of one revision. */\n | \"part\"\n/**\n * The two readings held against each other, naming neither side.\n *\n * The distinction that makes this worth having: *one of the two windows held\n * no page views* does not say which, so a card cannot draw it over the page\n * somebody is looking at. A reading of one page that says the same thing is\n * about the page on the screen.\n */\n | \"comparison\";",
+              "truncated": false,
+              "summary": "What a silence is a fact about."
+            },
+            {
+              "name": "SILENCE_SUBJECTS",
+              "kind": "value",
+              "signature": "const SILENCE_SUBJECTS: readonly SilenceSubject[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeSilenceSubject",
+              "kind": "function",
+              "signature": "const describeSilenceSubject: (subject: SilenceSubject) => string",
+              "truncated": false,
+              "summary": "One line per subject, for a surface naming what a reason is about."
+            },
+            {
+              "name": "SilenceVocabulary",
+              "kind": "type",
+              "signature": "type SilenceVocabulary = \"change\" | \"copy\" | \"copy-change\" | \"pace\" | \"reach\";",
+              "truncated": false,
+              "summary": "Which reading published a silence."
+            },
+            {
+              "name": "SILENCE_VOCABULARIES",
+              "kind": "value",
+              "signature": "const SILENCE_VOCABULARIES: readonly SilenceVocabulary[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "SUBJECT_OF_VOCABULARY",
+              "kind": "value",
+              "signature": "const SUBJECT_OF_VOCABULARY: Readonly<Record<SilenceVocabulary, SilenceSubject>>",
+              "truncated": false,
+              "summary": "What each reading's reasons are about."
+            },
+            {
+              "name": "SilenceCondition",
+              "kind": "type",
+              "signature": "type SilenceCondition =\n/** The two readings are of different trees, so nothing in either is comparable. */\n\"two-pages\"\n/**\n * Nothing reported a view of it.\n *\n * Of a page, the window's counters say no view of this revision happened. Of\n * a part, no view reported that part coming into view, which a window with\n * readers in it can say about any part they did not reach.\n */\n | \"no-view-reported\"\n/**\n * There is no page-view row at the door for this revision.\n *\n * Not the same state as nothing having been seen, and the pair is the reason\n * this mapping is published. The node counters can hold a window of readers\n * while this row is missing — a deployment whose intake predates the column,\n * one whose rows have expired, or a caller that fetched the rows for\n * something else — and the counters are then still a floor on how many\n * readers there were.\n */\n | \"no-arrivals-counted\"\n/**\n * The row is there and nothing in it says a page view ever began.\n *\n * Two deployments look like this, and which one it is turns on whether any\n * appearance has been counted: nobody has read this revision, or **the\n * senders are not marking their openings** and every rate on the screen has\n * no denominator while the counters look healthy. The reading publishes both\n * numbers, so the diagnosis is a subtraction a surface can make; the\n * condition is what the two have in common and no more.\n */\n | \"no-openings-marked\"\n/** Readers arrived and no rollup has folded a window of their reading yet. */\n | \"no-window-folded\"\n/** It says nothing that could have been read: no words, and nothing undeclared either. */\n | \"says-nothing\"\n/**\n * Some of its words are a floor, because a type in it declares no `copy`\n *.\n *\n * A count of words survives this and a mean of them does not, which is why\n * the readings that hit it withhold a figure rather than a row.\n */\n | \"words-a-floor\"\n/**\n * It reports more readers than it has views, which no rollup produces.\n *\n * A reading assembled by hand, or by a sender that is not one. It is the\n * alarm a reading raises where a figure would otherwise stay plausible while\n * being about nothing.\n */\n | \"readers-above-views\"\n/** The change left no word of the page as it was, so there is no carried text to read. */\n | \"nothing-carried\";",
+              "truncated": false,
+              "summary": "The state of the world a silence reports, named once for the whole subsystem."
+            },
+            {
+              "name": "SILENCE_CONDITIONS",
+              "kind": "value",
+              "signature": "const SILENCE_CONDITIONS: readonly SilenceCondition[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "describeSilenceCondition",
+              "kind": "function",
+              "signature": "const describeSilenceCondition: (condition: SilenceCondition) => string",
+              "truncated": false,
+              "summary": "One line per condition, written so that it reads after the subject it is about rather than naming one itself."
+            },
+            {
+              "name": "SilenceMeaning",
+              "kind": "type",
+              "signature": "type SilenceMeaning = {\n    readonly condition: SilenceCondition;\n    readonly subject: SilenceSubject;\n    /** The reading that published it, kept so that its own sentence can still be printed. */\n    readonly vocabulary: SilenceVocabulary;\n};",
+              "truncated": false,
+              "summary": "What one reading's silence reports, and what it reports it of."
+            },
+            {
+              "name": "meaningOfChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfChangeSilence: (silence: ChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a before-and-after reading's silence reports."
+            },
+            {
+              "name": "meaningOfCopySilence",
+              "kind": "function",
+              "signature": "const meaningOfCopySilence: (silence: CopySilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a copy reading's silence reports."
+            },
+            {
+              "name": "meaningOfCopyChangeSilence",
+              "kind": "function",
+              "signature": "const meaningOfCopyChangeSilence: (silence: CopyChangeSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a comparison of two windows' words reports."
+            },
+            {
+              "name": "meaningOfPaceSilence",
+              "kind": "function",
+              "signature": "const meaningOfPaceSilence: (silence: PaceSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a pace reading's silence reports, of one part."
+            },
+            {
+              "name": "meaningOfReachSilence",
+              "kind": "function",
+              "signature": "const meaningOfReachSilence: (silence: ReachSilence) => SilenceMeaning",
+              "truncated": false,
+              "summary": "What a share-of-readers silence reports, which is also a funnel's."
+            },
+            {
+              "name": "SilenceRelation",
+              "kind": "type",
+              "signature": "type SilenceRelation = \n/**\n * One condition about one subject: the two readings are silent for the same\n * reason about the same thing, and one sentence serves both.\n */\n\"one-state\"\n/**\n * One condition about two subjects.\n *\n * The same thing is true of a page and of one of its parts, or of a pair of\n * readings and of one side of it. Worth two sentences and never one: the\n * narrower is not evidence for the wider, and the wider does not say which\n * side it is about.\n */\n | \"one-reason\"\n/** Two conditions, which a surface has to print separately or choose between. */\n | \"unrelated\";",
+              "truncated": false,
+              "summary": "How two readings' reasons for saying nothing stand to each other."
+            },
+            {
+              "name": "SILENCE_RELATIONS",
+              "kind": "value",
+              "signature": "const SILENCE_RELATIONS: readonly SilenceRelation[]",
+              "truncated": false,
+              "summary": ""
+            },
+            {
+              "name": "relateSilences",
+              "kind": "function",
+              "signature": "const relateSilences: (one: SilenceMeaning, other: SilenceMeaning) => SilenceRelation",
+              "truncated": false,
+              "summary": "Hold two readings' reasons against each other."
+            },
+            {
+              "name": "distinctSilences",
+              "kind": "function",
+              "signature": "const distinctSilences: (meanings: readonly (SilenceMeaning | null)[]) => readonly SilenceMeaning[]",
+              "truncated": false,
+              "summary": "The states a card is actually in, out of the readings on it."
+            }
+          ]
+        },
+        {
           "module": "signals/tally",
           "title": "Tally",
           "summary": "Where the counters live once the batches they came from are gone.",
@@ -10495,7 +10635,7 @@
       "files": 10,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -10638,7 +10778,7 @@
       "files": 14,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -10705,7 +10845,7 @@
       "files": 62,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 15,
         "widest": false,
@@ -11302,7 +11442,7 @@
       "files": 38,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11376,7 +11516,7 @@
       "files": 89,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,
@@ -11834,7 +11974,7 @@
       "files": 76,
       "narrower": [],
       "standing": {
-        "packageNames": 1349,
+        "packageNames": 1368,
         "otherDoors": 16,
         "doorsSharingNothing": 16,
         "widest": false,

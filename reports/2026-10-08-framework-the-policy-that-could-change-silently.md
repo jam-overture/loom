@@ -207,7 +207,7 @@ would have hidden the one half that is knowable.
 ## This branch now carries two units, deliberately
 
 #547 was opened last night with the specimen harness's `--against` flag and
-record 0240. `docs/routines.md` step 3 says that a lane with an open pull request
+record 0240 — renumbered to 0243 at merge, see that record's own note. `docs/routines.md` step 3 says that a lane with an open pull request
 **pushes onto that branch** rather than opening a second one, so this unit is on
 the same branch and the pull request body covers both. The two touch no file in
 common except `FINDINGS.md`, `decisions/README.md` and the API reference, all
@@ -251,6 +251,11 @@ to.
 **Numbering.** `main` at `bd0af3d` holds records to 0239. This branch's first
 record is 0240 and #546 also claims 0240; this one is 0241 and #548 also claims
 0241. Filed for `Loom merge` rather than resolved here.
+
+**Resolved at merge, 8 October.** #546 landed first, so its 0240 keeps the
+number and this branch's first record became **0243**. 0241 is unchanged: #548
+is held back for review (its record is `Proposed`), so nothing on `main` claims
+that number but this unit.
 
 ## Findings
 

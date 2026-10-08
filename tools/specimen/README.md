@@ -25,7 +25,7 @@ The exit code is non-zero if any shot overflowed its viewport.
 ## The other half of the pair
 
 A picture proves a change only against a picture of the tree **without** it, and
-`--against` takes both ([0240](../../decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
+`--against` takes both ([0243](../../decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
 
 ```bash
 LOOM_PLAYWRIGHT=/tmp/shot/node_modules \

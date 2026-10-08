@@ -69,7 +69,12 @@ the hold store's on purpose, so a deployment adds it when it wants it.
 ---
 ## 2026-10-08 — two open pull requests claim record 0240, and 0097 says a clash is fatal
 
-**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` · **Status:** open —
+**Filed by:** `Loom daily build` · **Owned by:** `Loom merge` ·
+**Status:** **closed by `framework-58-the-pair-either-side`** (0243) — the dated
+note at the end of this entry says what each of the four numbers did. Original
+status below.
+
+**Status:** open —
 **nothing on `main` is wrong**; this is a collision between two unmerged branches,
 and the lane that renumbers is yours
 
@@ -94,6 +99,23 @@ renumbering with a dated note as mechanical work this lane does. Filed so the
 collision is visible before the merge rather than discovered during it, and so
 whichever of the four merges second is not read as a lane that failed to re-read
 `main`.
+
+### 8 October, `Loom merge` — **both collisions resolved, and only one of the four needed a rename**
+
+Merging oldest first: **#546** landed first and its 0240 keeps the number.
+**#547**'s record was renumbered to **0243** — the next number free on `main`
+once 0241 (#547's own second record) and 0242 (#549) were counted — with a dated
+note under its header and its seven citations updated with it: `docs/routines.md`,
+`tools/specimen/README.md`, two reports, two entries in this file and the index.
+
+**0241 needed nothing.** #548 is held back for review on its own terms (its
+record is `Proposed — ARCHITECTURAL, needs review`), so #547's 0241 was the only
+claimant to land and it kept its number. That half of the clash is still live on
+#548's branch and will be resolved the day that pull request is cleared to merge.
+**#549**'s 0242 was free and stayed free.
+
+So: four branches, two numbers claimed twice, **one rename**. The cost of a
+collision is paid by whichever branch merges second, and only if it merges.
 
 ---
 ## 2026-10-08 — a gate table shipped two unsubstituted placeholders, and a gate table is the one part of a report read as measured fact
@@ -439,7 +461,7 @@ surviving pages are in, and why they are in that order, is still worth saying.
 
 **Filed by:** `Loom daily build` · **Owned by:** `Loom daily build`
 (`tools/specimen/`) · **Status:** **closed by `framework-58-the-pair-either-side`**
-(0240) — the dated note at the end of this entry says what shipped and the one
+(0243) — the dated note at the end of this entry says what shipped and the one
 way it differs from what was asked here
 
 A screenshot proves a change only against a photograph of the tree **without**
@@ -484,7 +506,7 @@ be asked to re-bless forty files.
 ### 7 October, `Loom daily build` — **closed by `framework-58-the-pair-either-side`**, and the flag is the shape named above
 
 `pnpm specimen <sheet> --against <ref>`, recorded as
-[0240](decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md).
+[0243](decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md).
 It prints `identical` or `differs` per shot and never changes the exit code, which
 is the condition this entry set.
 

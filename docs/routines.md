@@ -270,7 +270,7 @@ and photographed under every theme it declares.
 
 **A picture proves a change only against a picture of the tree without it**, and
 `--against` takes that pair for you
-([0240](../decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
+([0243](../decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)):
 
 ```bash
 LOOM_PLAYWRIGHT=/tmp/shot/node_modules pnpm specimen <module>.specimen.ts --against origin/main

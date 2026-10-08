@@ -55,7 +55,7 @@ That is the strongest thing available to say for it, and it is why **no new
 picture is committed with this report.** The two above are already in `reports/`;
 a second copy of a 98 KB photograph, committed to illustrate a tool whose job is
 comparing photographs, is the per-specimen baseline image that
-[0240](../decisions/0240-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)
+[0243](../decisions/0243-a-picture-is-proved-against-an-older-library-photographed-with-this-harness.md)
 rejects, in miniature. `reports/against/` is in `.gitignore` for the same reason:
 a run commits the one picture it argues from, under a short name.
 
@@ -122,7 +122,7 @@ the URL-mangling entry measured yesterday.
 
 ## Records
 
-**Added, one:** `0240 — A picture is proved against an older library,
+**Added, one:** `0243 — A picture is proved against an older library,
 photographed with this harness`. Accepted. Index regenerated.
 
 **Superseded: none.** 0159 is untouched and is what this is built on: *an
@@ -131,9 +131,12 @@ runs is the furthest thing in this harness from that line, which is why the
 record argues the case explicitly and why two modules are held to it by a test
 that reads their source.
 
-**The number.** 0240 is the next free one after re-reading `main` (0239) and both
-open pull requests — #544's report states it adds no record, and #545 adds none.
-**No collision this time**, which is the first day in five without one.
+**The number.** 0240 was the next free one after re-reading `main` (0239) and
+both open pull requests — #544's report states it adds no record, and #545 adds
+none. **Renumbered to 0243 at merge**, by `Loom merge` on 8 October: #546 took
+0240 for a different record off the same reading of `main` and landed first, so
+the record on `main` keeps the number and this one moved to the next number free.
+The dated note under the record's header says so.
 
 ## Findings
 

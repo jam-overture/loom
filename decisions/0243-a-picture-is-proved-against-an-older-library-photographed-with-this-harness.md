@@ -1,8 +1,16 @@
-# 0240 — A picture is proved against an older library, photographed with this harness
+# 0243 — A picture is proved against an older library, photographed with this harness
 
 **Status:** Accepted
 **Date:** 2026-10-07
 **Section:** §1 (process)
+
+> **Renumbered on 2026-10-08**, from 0240, by `Loom merge` when this branch
+> (#547) was merged. `main` had meanwhile accepted a different 0240 — *a silence
+> is a condition and a subject, and the two names for one state were not
+> synonyms*, from #546 — and two records sharing a number is fatal (0097). The
+> record on `main` keeps the number; 0241 is this branch's other record and 0242
+> is claimed by #549, so 0243 is the next number free. Nothing in this record
+> changed but its number; the citations of it were updated with it.
 
 ## Context
 
