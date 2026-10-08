@@ -360,7 +360,7 @@ describe("a sentence that counts the list under it", () => {
  *
  * ## Why this exists, which is an incident rather than a tidiness
  *
- * Four fences in this course carry a `moves:` mark (`marks.ts`), and two of them
+ * Five fences in this course carry a `moves:` mark (`marks.ts`), and two of them
  * carry it for this reason in as many words: *the paragraphs under it are prose
  * about these lines and no check reads prose.*
  *
@@ -499,6 +499,19 @@ const TRANSCRIPT_CLAIMS: readonly TranscriptClaim[] = [
       "`Today …` sentence and not the `On the day it was written …` one above it, which is " +
       "history and says two on purpose",
   },
+  {
+    lesson: 35,
+    file: "35-instruments.md",
+    what: "the primitives in the library a binding is read by",
+    phrase: /A binding is read by (\w+) of them/,
+    occurrences: 1,
+    fence: /^primitives registered:/,
+    count: (lines) => namesOn(lines, /^primitives that read a binding: (.+)$/),
+    matters:
+      "the sentence under lesson 35's exercise E, whose subject is that the library's own " +
+      "audit never answers a bound primitive — so how many of them there are to answer is " +
+      "the figure the paragraph turns on. A sixth bound primitive makes it wrong",
+  },
 ]
 
 /** The untagged fences of a lesson's Try it, as the comparison sees their lines. */
@@ -548,7 +561,7 @@ describe("a sentence that counts what the transcript above it printed", () => {
    * the mark is still only a sentence to a human. So the gap is worth a failure
    * naming the fence.
    *
-   * **It is a pin on the four that exist and not a law that a mark requires
+   * **It is a pin on the five that exist and not a law that a mark requires
    * one.** A fence whose prose declines to count has nothing here to derive, and
    * declining is the better fix wherever it reads naturally — lessons 22 and 23
    * do it deliberately for the size of the primitive library. The way to say so
