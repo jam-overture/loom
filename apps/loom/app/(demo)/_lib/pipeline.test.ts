@@ -206,7 +206,7 @@ describe("a preset asked for through the demo's write path", () => {
       (preset) => preset.plan(tree, randomIdFactory) !== undefined
     ).map((preset) => preset.id)
 
-    const says = await whatEachWillSay(tree, available, randomIdFactory, systemClock)
+    const says = await whatEachWillSay(tree, available, randomIdFactory, systemClock, session.records)
     const split = howManyWaitForYou(Object.values(says))
 
     let wentAhead = 0

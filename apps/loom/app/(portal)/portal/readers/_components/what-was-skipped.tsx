@@ -4,6 +4,7 @@ import { PartName } from "@/app/(portal)/_components/part-name"
 import { PlainSentence } from "@/app/(portal)/_components/plain-sentence"
 import { StateNotice } from "@/app/(portal)/_components/state-notice"
 import { TechnicalDetail } from "@/app/(portal)/_components/technical-detail"
+import { readersAt, type PageArrivals } from "@/app/(portal)/_lib/arrivals"
 import {
   mismatchedReading,
   nothingSeen,
@@ -48,7 +49,27 @@ import { versionMention } from "@/app/(portal)/_lib/version"
  * would be offering a reader a reading and a reason not to believe it, at the
  * same altitude, and the reading would win.
  */
-export const WhatWasSkipped = ({ skipping }: { readonly skipping: PageSkipping }) => {
+export const WhatWasSkipped = ({
+  skipping,
+  arrivals,
+}: {
+  readonly skipping: PageSkipping
+  /**
+   * How many people there were to get anywhere, off the same join.
+   *
+   * What it changes is the figure at the end of a row. `9 of the 36 visits`
+   * divides by the largest visit count any single row of the window reports —
+   * a floor, carrying the over-count of every visit still being read when a
+   * counting window closed. With this in hand the row says *about 7 of the 320
+   * who arrived*, which is a share of people against an exact denominator.
+   *
+   * **Nothing is removed by that.** The raw reach is the `seen` column of
+   * `PartCounters` at the foot of the card, the floor keeps its own paragraph
+   * in the record below, and a row whose honest figure cannot be given falls
+   * back to the one the card drew before this reading existed.
+   */
+  readonly arrivals: PageArrivals | undefined
+}) => {
   const mismatched = mismatchedReading(skipping)
 
   if (mismatched !== undefined)
@@ -70,6 +91,23 @@ export const WhatWasSkipped = ({ skipping }: { readonly skipping: PageSkipping }
 
   const unseen = nothingSeen(skipping)
   const clean = nothingSkipped(skipping)
+
+  /*
+   * Built once for the whole list rather than looked up per row, which is the
+   * difference between one pass over the parts and one pass per part. The two
+   * lists are the same parts of the same page in the same order — both come off
+   * one `pageReadingOf` — so a miss here is impossible and is handled anyway,
+   * by falling back to the figure this list has always drawn.
+   */
+  const readers = new Map<string, string>(
+    arrivals === undefined
+      ? []
+      : arrivals.parts.flatMap((part) => {
+          const said = readersAt(part, arrivals)
+
+          return said === undefined ? [] : [[part.nodeId, said] as const]
+        })
+  )
 
   return (
     <section className="flex flex-col gap-3">
@@ -133,7 +171,16 @@ export const WhatWasSkipped = ({ skipping }: { readonly skipping: PageSkipping }
               </span>
               {part.standing === "read" && (
                 <span className="text-ink-muted">
-                  {part.reached} of {skipping.views} {skipping.views === 1 ? "visit" : "visits"}
+                  {/*
+                   * The honest figure where there is one, and the figure this
+                   * row has always carried where there is not. The fallback is
+                   * never a blank: a count against a floor is a true sentence
+                   * about a denominator nobody can stand behind, and that is
+                   * worth more to a reader than nothing at all — the section
+                   * above says which of the two they are looking at.
+                   */}
+                  {readers.get(part.nodeId) ??
+                    `${part.reached} of ${skipping.views} ${skipping.views === 1 ? "visit" : "visits"}`}
                 </span>
               )}
             </li>
@@ -170,11 +217,13 @@ export const WhatWasSkipped = ({ skipping }: { readonly skipping: PageSkipping }
         </p>
 
         <p>
-          The visit figure above is a floor rather than a count:{" "}
           <span className="font-mono">{skipping.views}</span> is the largest{" "}
           <span className="font-mono">views</span> any single row of{" "}
           {versionMention(skipping.revision)} reports, and distinct view counts cannot be added
-          across rows.
+          across rows — so it is a floor rather than a count.{" "}
+          {arrivals === undefined || arrivals.silence !== undefined
+            ? "It is what the rows above are measured against, because nothing has counted how many people arrived."
+            : `The rows above are measured against the ${arrivals.arrived} readers who arrived instead, which is counted once per visit at the door and cannot be inflated by a window boundary. The raw reach of every part is in the table at the foot of this card.`}
         </p>
 
         {skipping.foreign > 0 && (

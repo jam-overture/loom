@@ -24,6 +24,11 @@ packages/*/package.json
 packages/*/LICENSE
 packages/*/*.tgz
 
+# The second half of a `pnpm specimen --against <ref>` pair: pictures of an
+# older library, taken to be compared with this run's and then looked at. A
+# report commits the one it argues from, under a short name.
+reports/against/
+
 # Lesson exercises — scribble freely (see lessons/README.md)
 src/scratch.test.ts
 prototypes/ski-apparel/out/

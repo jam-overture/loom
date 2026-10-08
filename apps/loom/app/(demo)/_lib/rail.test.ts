@@ -13,10 +13,11 @@ import { roomToLand } from "./arrival"
 import { partInQuestion, type PartInQuestion } from "./in-question"
 import { settingsOf } from "./plain-change"
 import { askedWith, DEMO_LEADING_PRESET, presetById, presetInterpreter } from "./presets"
-import { whatTheRailShows } from "./rail"
+import { theEnding, whatTheRailShows } from "./rail"
 import { recordFromEvents, type ChangeRecord } from "./record"
 import { demoRegistry } from "./registry"
 import { beginDemoWrite, demoSession, rememberRecord, type DemoSession } from "./session"
+import { whatEachWillSay } from "./what-it-will-say"
 
 /**
  * The wiring, at last.
@@ -169,6 +170,28 @@ const railOf = async (session: DemoSession) => {
   })
 
   return { tree, view, shown }
+}
+
+/**
+ * The ending, reached the way `page.tsx` reaches it: the rail's readings first,
+ * then the Gate's answer to every ask they left on offer, then this.
+ *
+ * It runs the real `whatEachWillSay` rather than a stub, because the fact the
+ * ending now depends on is *which of those asks would only put the last change
+ * back* — and a stub would be this test asserting its own opinion of a toggle
+ * instead of the runtime's.
+ */
+const endingOf = async (session: DemoSession) => {
+  const { tree, view } = await railOf(session)
+  const says = await whatEachWillSay(
+    tree,
+    view.available,
+    randomIdFactory,
+    systemClock,
+    session.records
+  )
+
+  return { view, says, ending: theEnding(view, says) }
 }
 
 describe("the asks the panel is handed", () => {
@@ -806,11 +829,11 @@ describe("what the rail has left to say", () => {
     const asked = await ask(session, DEMO_LEADING_PRESET)
     const answered = await allow(asked.session, asked.record)
 
-    const { view } = await railOf(answered.session)
+    const { view, ending } = await endingOf(answered.session)
 
     expect(view.landing).toBe(answered.record.recordId)
-    expect(view.whatElse?.count).toBe(view.available.length)
-    expect(view.whatElse?.label).toContain(`${view.available.length} more changes`)
+    expect(ending?.count).toBe(view.available.length)
+    expect(ending?.label).toContain(`${view.available.length} more changes`)
   })
 
   /**
@@ -822,11 +845,11 @@ describe("what the rail has left to say", () => {
     const session = await sessionFor("end-after-one-press")
     const landed = await ask(session, "palette")
 
-    const { view } = await railOf(landed.session)
+    const { view, ending } = await endingOf(landed.session)
 
     expect(landed.record.outcome).toBe("applied")
     expect(view.waiting).toBeUndefined()
-    expect(view.whatElse).toBeDefined()
+    expect(ending).toBeDefined()
   })
 
   /**
@@ -835,10 +858,10 @@ describe("what the rail has left to say", () => {
    * closed and nothing to caption.
    */
   it("says nothing on the screen a stranger arrives at", async () => {
-    const { view } = await railOf(await sessionFor("end-arrival"))
+    const { view, ending } = await endingOf(await sessionFor("end-arrival"))
 
     expect(view.landing).toBeUndefined()
-    expect(view.whatElse).toBeUndefined()
+    expect(ending).toBeUndefined()
   })
 
   /**
@@ -851,10 +874,10 @@ describe("what the rail has left to say", () => {
     const session = await sessionFor("end-while-waiting")
     const asked = await ask(session, DEMO_LEADING_PRESET)
 
-    const { view } = await railOf(asked.session)
+    const { view, ending } = await endingOf(asked.session)
 
     expect(view.waiting).toBeDefined()
-    expect(view.whatElse).toBeUndefined()
+    expect(ending).toBeUndefined()
   })
 
   /**
@@ -878,12 +901,38 @@ describe("what the rail has left to say", () => {
 
     const asked = await ask(session, DEMO_LEADING_PRESET)
     const answered = await allow(asked.session, asked.record)
-    const { view } = await railOf(answered.session)
+    const { view, ending } = await endingOf(answered.session)
 
     expect(before.view.available).toContain(DEMO_LEADING_PRESET)
     expect(view.available).not.toContain(DEMO_LEADING_PRESET)
     expect(view.available.length).toBe(before.view.available.length - 1)
-    expect(view.whatElse?.count).toBe(view.available.length)
+    expect(ending?.count).toBe(view.available.length)
+  })
+
+  /**
+   * **And the other path, where the count was wrong and nothing could see it.**
+   *
+   * A toggle spends nothing: `palette` is applicable again the moment it has
+   * been applied, in the other direction, so after a one-press change the panel
+   * is the same five rows it was on arrival and this row said *5 more changes
+   * to ask for* to a visitor who had just made one of them. The press is still
+   * offered — it is the row that now says what it does — and it is not one of
+   * the changes still to ask for, because it is the **Put it back** on the card
+   * this row is a caption for.
+   *
+   * Asserted through the real `whatEachWillSay`, because the fact being read is
+   * the Gate's own answer to a press nobody has made.
+   */
+  it("stops counting the ask that would only put the last change back", async () => {
+    const session = await sessionFor("end-after-a-toggle")
+    const landed = await ask(session, "palette")
+
+    const { view, says, ending } = await endingOf(landed.session)
+
+    expect(view.available).toContain("palette")
+    expect(says.palette?.putsBack).toBe(true)
+    expect(ending?.count).toBe(view.available.length - 1)
+    expect(ending?.label).toBe(`${view.available.length - 1} more changes to ask for`)
   })
 })
 
