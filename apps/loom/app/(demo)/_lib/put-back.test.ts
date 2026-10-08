@@ -12,7 +12,12 @@ import {
 
 import { demoPageTree } from "./page-tree"
 import { presetById } from "./presets"
-import { reversesTheLastChange, settingsMoved, type SettingMove } from "./put-back"
+import {
+  reversesTheLastChange,
+  settingsMoved,
+  wouldPutTheLastChangeBack,
+  type SettingMove,
+} from "./put-back"
 
 /**
  * Whether a change put a setting back where the change before it moved it from.
@@ -286,5 +291,75 @@ describe("whether a change put the last one back", () => {
     const first = press(demoPageTree(), "palette")
 
     expect(reversesTheLastChange([], first.moves)).toBe(false)
+  })
+})
+
+/**
+ * The same question asked of a press nobody has made, which is what the ask
+ * list needs and what the card could never give it.
+ *
+ * Driven through the demo's own presets against the demo's own page, for the
+ * reason the suite above is: the claim is that **pressing the toggle a second
+ * time is read as going back before it is pressed**, and a fixture would pass
+ * while the panel went on offering the visitor their own undo as a new change.
+ */
+describe("whether a press would put the last change back", () => {
+  it("reads the second press of a toggle as going back, before it happens", () => {
+    const first = press(demoPageTree(), "palette")
+    const plan = planOf("palette", first.tree)
+
+    expect(wouldPutTheLastChangeBack(first.tree, deltaOf(first.tree, plan), first.moves)).toBe(true)
+  })
+
+  /**
+   * And the first press is not, which is the assertion that keeps the arrival
+   * screen's five promises exactly as they were written.
+   */
+  it("reads the first press of a toggle as going on", () => {
+    const tree = demoPageTree()
+
+    expect(
+      wouldPutTheLastChangeBack(tree, deltaOf(tree, planOf("palette", tree)), undefined)
+    ).toBe(false)
+  })
+
+  /**
+   * A different toggle is not the way back, and this is the case a reading
+   * written against *any* earlier change would get wrong: pressing the band
+   * after the palette reverses nothing, and the page is still carrying both.
+   */
+  it("is not going back when the press moves a different setting", () => {
+    const first = press(demoPageTree(), "palette")
+    const plan = planOf("backdrop", first.tree)
+
+    expect(wouldPutTheLastChangeBack(first.tree, deltaOf(first.tree, plan), first.moves)).toBe(
+      false
+    )
+  })
+
+  /**
+   * And the removal path is untouched, which is the half of this surface that
+   * never had the defect: *Take the numbers off* moves no setting, so nothing
+   * pressed after it has put it back — the record's own **Put it back** is the
+   * only thing that can, and it says so.
+   */
+  it("is not going back when the last change moved no setting", () => {
+    const first = press(demoPageTree(), "trim")
+    const plan = planOf("palette", first.tree)
+
+    expect(wouldPutTheLastChangeBack(first.tree, deltaOf(first.tree, plan), first.moves)).toBe(
+      false
+    )
+  })
+
+  /**
+   * No delta, no claim. An ask that reached no proposal has nothing to read a
+   * direction off, and the silence is the one `willSayOf` already keeps about
+   * the verdict itself.
+   */
+  it("claims nothing for an ask that reached no proposal", () => {
+    const first = press(demoPageTree(), "palette")
+
+    expect(wouldPutTheLastChangeBack(first.tree, undefined, first.moves)).toBe(false)
   })
 })

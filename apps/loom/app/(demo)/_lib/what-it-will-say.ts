@@ -5,11 +5,14 @@ import {
   type CompositionOutcome,
   type IdFactory,
   type LoomTree,
+  type TreeDelta,
 } from "@jam-overture/loom"
 
 import { STAKES } from "@/app/(portal)/_lib/vocabulary"
 
 import { offeredPresets, presetById, presetInterpreter, type DemoPresetId } from "./presets"
+import { wouldPutTheLastChangeBack, type SettingMove } from "./put-back"
+import { lastMovesIn, type ChangeRecord } from "./record"
 import { demoPolicy } from "./session"
 import { DEMO_ACTOR } from "./visitor"
 
@@ -98,6 +101,17 @@ export type WillSay = {
    * (`how-many-wait-for-you.ts`).
    */
   readonly standing: AskStanding
+  /**
+   * Whether this press would put the page back where the visitor's last change
+   * moved it from — the one thing about an offered ask that the preset table
+   * cannot know, because it is a fact about the history rather than about the
+   * ask.
+   *
+   * `false` on the arrival screen, always, because there is no last change to
+   * reverse. It stops being false the moment a toggle has been pressed once,
+   * which is the defect `put-back.ts` records the measurement for.
+   */
+  readonly putsBack: boolean
 }
 
 /**
@@ -150,7 +164,7 @@ const SAID = {
  * to the sentence it has always carried rather than claiming a verdict it has
  * not got.
  */
-export const willSayOf = (outcome: CompositionOutcome): WillSay | undefined => {
+export const willSayOf = (outcome: CompositionOutcome, putsBack = false): WillSay | undefined => {
   switch (outcome.kind) {
     case "awaiting-confirmation":
       return {
@@ -158,6 +172,7 @@ export const willSayOf = (outcome: CompositionOutcome): WillSay | undefined => {
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.held.tail}`,
         moves: false,
         standing: "asks-you",
+        putsBack,
       }
     case "applied":
       return {
@@ -165,6 +180,7 @@ export const willSayOf = (outcome: CompositionOutcome): WillSay | undefined => {
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.applied.tail}`,
         moves: true,
         standing: "on-its-own",
+        putsBack,
       }
     case "rejected":
       return {
@@ -172,12 +188,27 @@ export const willSayOf = (outcome: CompositionOutcome): WillSay | undefined => {
         detail: `${STAKES[outcome.assessment.stakes.level].label} — ${SAID.refused.tail}`,
         moves: false,
         standing: "refuses",
+        putsBack,
       }
     case "not-interpreted":
     case "not-applicable":
       return undefined
   }
 }
+
+/**
+ * The proposal's delta, where the outcome reached one.
+ *
+ * The three verdicts carry an assessment and an assessment carries the proposal
+ * it was made about; the two endings that never reached the Gate carry neither,
+ * and are the same two `willSayOf` already answers nothing for.
+ */
+const deltaOf = (outcome: CompositionOutcome): TreeDelta | undefined =>
+  outcome.kind === "applied" ||
+  outcome.kind === "awaiting-confirmation" ||
+  outcome.kind === "rejected"
+    ? outcome.assessment.proposal.delta
+    : undefined
 
 /**
  * Run the real thing against the real tree and read the verdict off it.
@@ -201,7 +232,17 @@ export const whatItWillSay = async (
   tree: LoomTree,
   presetId: DemoPresetId | undefined,
   ids: IdFactory,
-  clock: Clock
+  clock: Clock,
+  /**
+   * What the visitor's last change moved, which is the whole of the history
+   * this reading is allowed to look at (`record.ts`'s `lastMovesIn`).
+   *
+   * Optional, and absent means *there is nothing to put back* rather than
+   * *nobody checked* — on the arrival screen it genuinely is absent, and a
+   * caller that never passes it gets the arrival screen's answer, which is the
+   * honest one for a page nothing has happened to.
+   */
+  lastMoves?: readonly SettingMove[]
 ): Promise<WillSay | undefined> => {
   const preset = presetId === undefined ? undefined : presetById(presetId)
   if (preset === undefined) return undefined
@@ -233,7 +274,7 @@ export const whatItWillSay = async (
     }
   )
 
-  return willSayOf(outcome)
+  return willSayOf(outcome, wouldPutTheLastChangeBack(tree, deltaOf(outcome), lastMoves))
 }
 
 /** What the Gate answered about each ask on offer, by preset id. */
@@ -296,14 +337,43 @@ export const whatEachWillSay = async (
   tree: LoomTree,
   available: readonly DemoPresetId[],
   ids: IdFactory,
-  clock: Clock
+  clock: Clock,
+  /**
+   * The visitor's record, **required**, and that is this parameter's whole
+   * design.
+   *
+   * It was optional for one commit and the defect matrix caught what that
+   * costs: deleting the argument at the call site puts every row back on the
+   * promise it shipped with, and the entire suite stays green — because the
+   * call site is `page.tsx`, an `async` Server Component no `vitest` run can
+   * mount. This lane has counted that hole twice (14 and 18 September) and the
+   * answer that works is not another test, it is a signature a caller cannot
+   * silently stop answering. Required, the deletion is a **type error** and
+   * `pnpm verify` is what catches it.
+   *
+   * **The records rather than the moves**, so `lastMovesIn`'s rule — the first
+   * record that *reached the page*, and what it moved — is applied in one place
+   * by the module that depends on it, rather than at a call site then free to
+   * hand in a different history than the card below the row was measured
+   * against.
+   */
+  records: readonly ChangeRecord[]
 ): Promise<AskVerdicts> => {
   const says: Partial<Record<DemoPresetId, WillSay>> = {}
+  const lastMoves = lastMovesIn(records)
 
   for (const preset of offeredPresets(available)) {
-    const said = await whatItWillSay(tree, preset.id, ids, clock)
+    const said = await whatItWillSay(tree, preset.id, ids, clock, lastMoves)
     if (said !== undefined) says[preset.id] = said
   }
 
   return says
 }
+
+/** Which of the answered asks would only put the visitor's last change back. */
+export const asksThatPutItBack = (says: AskVerdicts): ReadonlySet<DemoPresetId> =>
+  new Set(
+    Object.entries(says).flatMap(([id, said]) =>
+      said?.putsBack === true ? [id as DemoPresetId] : []
+    )
+  )

@@ -18,6 +18,8 @@ const said = (standing: AskStanding): WillSay => ({
   detail: "…",
   moves: standing === "on-its-own",
   standing,
+  /** The split counts verdicts, and a direction is not one. */
+  putsBack: false,
 })
 
 const of = (...standings: readonly AskStanding[]) => howManyWaitForYou(standings.map(said))

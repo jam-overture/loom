@@ -200,3 +200,45 @@ export const reversesTheLastChange = (
 
     return before !== undefined && sameValue(before.from, move.to) && sameValue(before.to, move.from)
   })
+
+/**
+ * The same question, asked of a press nobody has made yet.
+ *
+ * **Why it has to be askable early.** Everything above is read off a record,
+ * after the fact, and that was enough while the only way back was the card's own
+ * **Put it back**. It stopped being enough the moment the ask list started
+ * re-offering a toggle. Both unattended presets are toggles — `palette` swaps
+ * the theme ids and back, `backdrop` swaps `aurora` for `panel` and back — and
+ * `availablePresets` plans against the tree as it stands, so a preset that has
+ * just been applied is applicable again *in the other direction* and comes
+ * straight back onto the list. Measured on a production build at 1280×900,
+ * pressing *Re-theme the whole page* once leaves the panel saying the same
+ * sentence it said on arrival, over a row reading **Re-theme the whole page ·
+ * Every colour and typeface on the page changes at once · GOES AHEAD**, eleven
+ * pixels above a card that says *"Put it back" undoes it*. Two controls, the
+ * same effect, and only one of them says so.
+ *
+ * That row is the only false sentence on this surface: the label is honest, the
+ * verdict is the Gate's own and is still right, and the promise describes a
+ * change the page is about to be moved *away* from. A stranger who takes the
+ * one-press path the arrival screen advertises is offered their own undo dressed
+ * as a new change — on the one surface whose entire argument is that the account
+ * beside a change tells you what it did.
+ *
+ * **Nothing new is computed and nothing new is said.** The reading is
+ * `settingsMoved` against `reversesTheLastChange`, exactly as a landed card
+ * reaches it; the only difference is which delta goes in. `whatItWillSay`
+ * already runs `composeChange` against this tree under this policy for every
+ * offered ask, and a proposal's delta is on the outcome it returns — so the
+ * question *would this put the page back* is answered by the same two functions
+ * one step earlier, with no second opinion to disagree with the card's.
+ *
+ * `undefined` in, `false` out: an ask that reached no proposal has no delta to
+ * read, and a surface claiming a direction for it would be inventing one. Same
+ * silence `willSayOf` keeps about the verdict itself.
+ */
+export const wouldPutTheLastChangeBack = (
+  before: LoomTree,
+  delta: TreeDelta | undefined,
+  last: readonly SettingMove[] | undefined
+): boolean => delta !== undefined && reversesTheLastChange(settingsMoved(before, delta), last)
